@@ -12,11 +12,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.test.TestUtils;
+import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 public class Arduino2Test {
 
+  transient public final static Logger log = LoggerFactory.getLogger(Arduino2Test.class);
+  
   private static final String V_PORT_1 = "test_port_1";
   private static final String V_PORT_2 = "test_port_2";
   
@@ -106,6 +111,11 @@ public class Arduino2Test {
   public void testArduinoPorts() {
     Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
     List<String> ports = ard.getPortNames();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < ports.size(); ++i) {
+      sb.append(ports.get(i));
+    }
+    log.info("testArduinoPorts.getPortNames %s", sb.toString());
     assertTrue(ports.contains(V_PORT_1));
     assertTrue(ports.contains(V_PORT_2));
   }
