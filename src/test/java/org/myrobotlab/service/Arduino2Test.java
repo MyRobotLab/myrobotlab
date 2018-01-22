@@ -113,7 +113,8 @@ public class Arduino2Test {
     List<String> ports = ard.getPortNames();
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < ports.size(); ++i) {
-      sb.append(ports.get(i));
+      sb.append("[" + ports.get(i) + "]");
+      sb.append(" ");
     }
     log.info("testArduinoPorts.getPortNames {}", sb.toString());
     assertTrue(ports.contains(V_PORT_1));
