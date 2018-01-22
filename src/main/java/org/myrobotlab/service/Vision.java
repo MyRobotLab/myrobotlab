@@ -272,26 +272,25 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Vision.class);
-    meta.addDescription("Vision (computer vision) service wrapping many of the functions and filters of Vision");
+    meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     meta.addCategory("video", "vision", "sensor");
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
-    // for
-    // webgui.");
-
-    meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
-    // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
+    meta.addDependency("org.bytedeco", "javacv-platform", "1.4");
+    meta.exclude("commons-codec", "commons-codec");
+    
+    meta.addDependency("commons-codec", "commons-codec", "1.10");
+    
     // sarxos webcam
     meta.addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
+    // meta.exclude("");
+    
     // FaceRecognizer no worky if missing it
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // for the mjpeg streamer support FIXME - this should only be in Video
     // Streamer !
-    meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
-    meta.setAvailable(false);
-    return meta;
+    meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");    return meta;
   }
 
   static public String[] getPossibleFilters() {
