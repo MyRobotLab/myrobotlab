@@ -115,7 +115,7 @@ public class Arduino2Test {
     for (int i = 0; i < ports.size(); ++i) {
       sb.append(ports.get(i));
     }
-    log.info("testArduinoPorts.getPortNames %s", sb.toString());
+    log.info("testArduinoPorts.getPortNames {}", sb.toString());
     assertTrue(ports.contains(V_PORT_1));
     assertTrue(ports.contains(V_PORT_2));
   }
