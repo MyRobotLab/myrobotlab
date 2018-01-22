@@ -237,7 +237,7 @@ public class IpCamera extends Service {
     // meta.addDependency("org.bytedeco.javacpp","1.1");
     
     // FIXME - should just add IpFrameGrabber and drop the dependency !!!
-    meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
+    // meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
     return meta;
   }
 

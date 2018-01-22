@@ -16,15 +16,16 @@ public class RuntimeTest {
   @Test
   public void testRuntime() throws Exception {
     System.out.println("This is a junit test... woot!");
-    Runtime testService = new Runtime("testruntime");
+    // no longer valid Runtime is a singleton with name "runtime"
+    // Runtime testService = new Runtime("testruntime");
     // try to start the service
-    testService.startService();
+    // testService.startService();
 
     // make sure the service knows it's name...
-    assertEquals("testruntime", testService.getIntanceName());
+    // assertEquals("testruntime", testService.getIntanceName());
 
     // try to stop the service.
-    testService.stopService();
+    // testService.stopService();
     // we assume we get here. if not runtime didn't start...
   }
 

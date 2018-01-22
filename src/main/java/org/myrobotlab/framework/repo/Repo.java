@@ -830,11 +830,12 @@ public class Repo implements Serializable {
       Repo repo = Repo.getLocalInstance();
      
       
-      repo.generatePomFromMetaData();
+      // repo.generatePomFromMetaData();
+      // repo.installServiceDirs();
       // repo.generatePomFromMetaData("OpenCV");
 
       // repo.installServiceDirs();
-      // repo.installServiceDir("OpenCV");
+      repo.installServiceDir("OpenCV");
 
       // repo.install("MimicSpeech");
 
@@ -845,7 +846,7 @@ public class Repo implements Serializable {
 
       repo.installServiceDir("InMoov");
       /*
-       * repo.installServiceDirs();
+       * 
        * 
        * 
        * repo.installServiceDir("Deeplearning4j");
