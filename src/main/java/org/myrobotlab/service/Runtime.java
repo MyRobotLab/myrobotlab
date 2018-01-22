@@ -307,7 +307,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     ServiceInterface sw = Runtime.getService(name);
     if (sw != null) {
-      log.debug("service {} already exists", name);
+      log.info("service {} already exists", name);
       return sw;
     }
 
