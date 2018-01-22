@@ -37,7 +37,7 @@ public class SerialTest {
   static Serial serial = null;
   static TestCatcher catcher = null;
 
-  static VirtualDevice virtual = null;
+  static VirtualDevice virtualDevice = null;
   static Serial uart = null;
   static Python logic = null;
   static String vport = "vport";
@@ -53,10 +53,10 @@ public class SerialTest {
     // Runtime.start("gui", "SwingGui");
     serial = (Serial) Runtime.start("serial", "Serial");
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-    virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-    virtual.createVirtualSerial(vport);
+    virtualDevice = (VirtualDevice) Runtime.start("virtualDevice", "VirtualDevice");
+    virtualDevice.createVirtualSerial(vport);
 
-    uart = (Serial)virtual.getUart(vport);
+    uart = (Serial)virtualDevice.getUart(vport);
     uart.setTimeout(300);
     Thread.sleep(100);
     serial.open(vport);
