@@ -110,6 +110,11 @@ public class Arduino2Test {
   @Test
   public void testArduinoPorts() {
     Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
+    ard.connect(V_PORT_1);
+    ard.disconnect();
+    ard.connect(V_PORT_2);
+    ard.disconnect();
+    
     List<String> ports = ard.getPortNames();
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < ports.size(); ++i) {
