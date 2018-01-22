@@ -1,12 +1,17 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.test.TestUtils;
 
@@ -33,6 +38,7 @@ public class Arduino2Test {
   public void testArduino() throws IOException {
     Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
     ard.connect(V_PORT_1);
+    Service.sleep(300);
     assertTrue(ard.isConnected());
     assertTrue(ard.getBoardInfo().getVersion() == Msg.MRLCOMM_VERSION);
     ard.disconnect();
@@ -98,7 +104,7 @@ public class Arduino2Test {
   
   @Test
   public void testArduinoPorts() {
-    Arduino ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
+    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
     List<String> ports = ard.getPortNames();
     assertTrue(ports.contains(V_PORT_1));
     assertTrue(ports.contains(V_PORT_2));
