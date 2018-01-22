@@ -370,8 +370,9 @@ public class Serial extends Service
 		// if (this.portName != null && this.portName.equals(portName) &&
 		// ports.containsKey(portName)) {
 		if (this.portName != null) {
+		  info("#1 already connected");
 			Port port = ports.get(portName);
-			if (port.isOpen() && port.isListening()) {
+			if (port.isOpen() && port.isListening() && !portName.equals(inPortName)) {
 				info("already connected to %s - disconnect first to reconnect", portName);
 				return;
 			}
@@ -379,6 +380,7 @@ public class Serial extends Service
 
 		// #2 connect to a pre-existing
 		if (ports.containsKey(inPortName)) {
+		  info("#2 connect to a pre-existing port");
 			connectPort(ports.get(inPortName), null);
 			lastPortName = portName;
 			return;
@@ -386,6 +388,7 @@ public class Serial extends Service
 
 		if (inPortName.toLowerCase().startsWith("tcp://")) {
 			try {
+			  info("connecting tcp");
 				connectTcp(inPortName);
 				return;
 			} catch (Exception e) {
@@ -398,6 +401,7 @@ public class Serial extends Service
 		// #3 we dont have an existing port - so we'll try a hardware port
 		// connect at default parameters - if you need custom parameters
 		// create the hardware port first
+		info("#3 we don't have an pre-existing port - so we'll try a hardware port");
 		Port port = createHardwarePort(inPortName, rate, dataBits, stopBits, parity);
 		if (port == null) {
 			return;
@@ -483,7 +487,7 @@ public class Serial extends Service
 	 */
 
 	public Port createHardwarePort(String name, int rate, int dataBits, int stopBits, int parity) {
-		log.info(String.format("creating %s port %s %d|%d|%d|%d", hardwareLibrary, name, rate, dataBits, stopBits,
+		log.info(String.format("createHardwarePort %s port %s %d|%d|%d|%d", hardwareLibrary, name, rate, dataBits, stopBits,
 				parity));
 		try {
 
@@ -500,7 +504,7 @@ public class Serial extends Service
 
 		} catch (Exception e) {
 			error(e);
-			Logging.logError(e);
+			log.error("connectPort threw", e);
 		}
 
 		return null;

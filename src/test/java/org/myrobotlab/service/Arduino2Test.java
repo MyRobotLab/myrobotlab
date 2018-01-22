@@ -31,7 +31,7 @@ public class Arduino2Test {
   
   @Test
   public void testArduino() throws IOException {
-    Arduino ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
+    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
     ard.connect(V_PORT_1);
     assertTrue(ard.isConnected());
     assertTrue(ard.getBoardInfo().getVersion() == Msg.MRLCOMM_VERSION);
@@ -81,7 +81,7 @@ public class Arduino2Test {
   // TODO: this is broken! but not in eclipse!
   //@Test
   public void testSketch() {
-    Arduino ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
+    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
     Sketch s = ard.getSketch();
     assertNotNull(s.name);
     assertNotNull(s.data);
