@@ -9,9 +9,16 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer, TextPublisher {
 
   private static final long serialVersionUID = 1L;
+  
+  String wakeWord = null;
 
   public AbstractSpeechRecognizer(String reservedKey) {
     super(reservedKey);
+  }
+  
+  public void setWakeWord(String word) {
+    // FIXME IMPLEMENT !
+    this.wakeWord = word;
   }
   
   /**
