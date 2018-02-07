@@ -59,7 +59,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Get;
 import org.myrobotlab.swagger.Parameter;
@@ -91,7 +90,7 @@ import com.sun.management.OperatingSystemMXBean;
  * check for 64 bit OS & 32 bit JVM -> is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, RepoInstallListener {
+public class Runtime extends Service implements MessageListener {
   final static private long serialVersionUID = 1L;
 
   static public boolean is64bit() {
@@ -147,7 +146,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    * the local repo of this machine - it should not be static as other foreign
    * repos will come in with other Runtimes from other machines.
    */
-  private Repo repo = Repo.getLocalInstance();
+  private Repo repo = Repo.getInstance();
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
@@ -508,7 +507,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
           // taking away capability of having a different runtime name
           runtimeName = "runtime";
           runtime = new Runtime(runtimeName);
-          Repo.getLocalInstance().addStatusListener(runtime);
+          Repo.getInstance().addLoggingSink(runtime);
           extract(); // FIXME - too overkill - do by checking version of re
         }
       }
@@ -932,18 +931,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
   }
 
   static public void install() throws ParseException, IOException {
-    // if a runtime exits we'll broadcast we are starting to install
-    ServiceData sd = ServiceData.getLocalInstance();
-    if (runtime != null) {
-      runtime.onInstallProgress(Repo.createStartStatus("starting installation of %s services", sd.getServiceTypeNames().length));
-    }
-
-    Repo.getLocalInstance().install();
-
-    // if a runtime exits we'll broadcast we are done installing
-    if (runtime != null) {
-      runtime.onInstallProgress(Repo.createFinishedStatus("finished installing %s", sd.getServiceTypeNames().length));
-    }
+    Repo.getInstance().install();
   }
 
   /*
@@ -954,18 +942,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
    *
    */
   static public void install(String serviceType) throws ParseException, IOException {
-
-    // if a runtime exits we'll broadcast we are starting to install
-    if (runtime != null) {
-      runtime.onInstallProgress(Repo.createStartStatus("starting installation of %s", serviceType));
-    }
-
-    Repo.getLocalInstance().install(serviceType);
-
-    // if a runtime exits we'll broadcast we are done installing
-    if (runtime != null) {
-      runtime.onInstallProgress(Repo.createFinishedStatus("finished installing %s", serviceType));
-    }
+    Repo.getInstance().install(serviceType);
   }
 
   /*
@@ -1091,6 +1068,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     try {
 
+      // TODO - replace with commons-cli -l
       logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
 
       Platform platform = Platform.getLocalInstance();
@@ -1117,7 +1095,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         return;
       }
 
-      if (cmdline.containsKey("-logToConsole")) {
+      if (cmdline.containsKey("--logToConsole")) {
         logging.addAppender(Appender.CONSOLE);
       } else {
         logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
@@ -1128,15 +1106,22 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         return;
       }
 
-      if (!cmdline.containsKey("-noCLI")) {
+      if (!cmdline.containsKey("--noCLI")) {
         Runtime.getInstance();
         startCli();
       }
 
-      if (cmdline.containsKey("-install")) {
+      // TODO replace with commons-cli
+      if (cmdline.containsKey("--install") || cmdline.containsKey("-i")) {
+        ArrayList<String> services = null;
         // force all updates
-        ArrayList<String> services = cmdline.getArgumentList("-install");
-        Repo repo = Repo.getLocalInstance();
+        if (cmdline.containsKey("--install")) {
+            services = cmdline.getArgumentList("--install");
+        } else {
+          services = cmdline.getArgumentList("-i");
+        }
+        
+        Repo repo = Repo.getInstance();
         if (services.size() == 0) {
           repo.install();
         } else {
@@ -1148,18 +1133,18 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
         return;
       }
 
-      if (cmdline.containsKey("-manifest")) {
+      if (cmdline.containsKey("--manifest") || cmdline.containsKey("-m")) {
         CodecJson.encode(Runtime.getManifest());
         shutdown();
         return;
       }
 
-      if (cmdline.containsKey("-extract")) {
+      if (cmdline.containsKey("--extract") || cmdline.containsKey("-e")) {
         // force all updates
         /*
          * FIXME - do " -extract {serviceType} in future ArrayList<String>
          * services = cmdline.getArgumentList("-extract"); Repo repo =
-         * Repo.getLocalInstance(); if (services.size() == 0) { repo.install();
+         * Repo.getInstance(); if (services.size() == 0) { repo.install();
          * } else { for (int i = 0; i < services.size(); ++i) {
          * repo.install(services.get(i)); } }
          */
@@ -1760,7 +1745,7 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     log.info("getting local repo");
 
-    Repo.getLocalInstance().addStatusListener(this);
+    Repo.getInstance().addLoggingSink(this);
 
     hideMethods.add("main");
     hideMethods.add("loadDefaultConfiguration");
@@ -2390,7 +2375,8 @@ public class Runtime extends Service implements MessageListener, RepoInstallList
 
     meta.includeServiceInOneJar(true);
     meta.addDependency("com.google.code.gson", "gson", "2.8.0");
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0");
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0"); // can be deprecated
+    meta.addDependency("org.apache.maven", "maven-embedder", "3.2.5");
     meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
 
     return meta;

@@ -72,24 +72,9 @@
 		</repository>
 
 	</repositories>
-	<!-- 
-	<pre>
-	===============Framework Begin ===============
-	<dependency>
-	  <groupId>org.apache.ivy</groupId>
-	  <artifactId>ivy</artifactId>
-	  <version>2.4.0</version>
-	</dependency>	
-	
-	<dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
-	</dependency>
-	===============Framework End ===============	
-	</pre>
-	 -->
-	 <dependencies>
+	<dependencies>
+	<!-- end of /resource/framework/buildPomHeader.xml -->
+	 
 
 <!-- AcapelaSpeech begin -->
 <dependency>
@@ -202,6 +187,12 @@
   <groupId>commons-lang</groupId>
   <artifactId>commons-lang</artifactId>
   <version>2.6</version>
+  <scope>provided</scope>
+</dependency>
+<dependency>
+  <groupId>com.twelvemonkeys.imageio</groupId>
+  <artifactId>imageio-core</artifactId>
+  <version>3.1.1</version>
   <scope>provided</scope>
 </dependency>
 <!-- Deeplearning4j end -->
@@ -333,15 +324,6 @@
 </dependency>
 <!-- IntegratedMovement end -->
 
-<!-- IpCamera begin -->
-<dependency>
-  <groupId>org.bytedeco</groupId>
-  <artifactId>javacv-platform</artifactId>
-  <version>1.3.3</version>
-  <scope>provided</scope>
-</dependency>
-<!-- IpCamera end -->
-
 <!-- JFugue begin -->
 <dependency>
   <groupId>jfugue</groupId>
@@ -403,6 +385,14 @@
   <version>2.0.7</version>
   <scope>provided</scope>
 </dependency>
+<!--  
+<dependency>
+  <groupId>net.java.jinput</groupId>
+  <artifactId>jinput-platform</artifactId>
+  <version>2.0.7</version>
+  <scope>provided</scope>
+</dependency>
+-->
 <!-- Joystick end -->
 
 <!-- Keyboard begin -->
@@ -567,18 +557,6 @@
   <artifactId>javacv-platform</artifactId>
   <version>1.3.3</version>
   <scope>provided</scope>
-    <exclusions>
-      <exclusion>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-      </exclusion>
-    </exclusions>
-</dependency>
-<dependency>
-  <groupId>commons-codec</groupId>
-  <artifactId>commons-codec</artifactId>
-  <version>1.10</version>
-  <scope>provided</scope>
 </dependency>
 <dependency>
   <groupId>com.github.sarxos</groupId>
@@ -703,6 +681,11 @@
   <groupId>org.apache.ivy</groupId>
   <artifactId>ivy</artifactId>
   <version>2.4.0</version>
+</dependency>
+<dependency>
+  <groupId>org.apache.maven</groupId>
+  <artifactId>maven-embedder</artifactId>
+  <version>3.2.5</version>
 </dependency>
 <dependency>
   <groupId>ch.qos.logback</groupId>
@@ -954,6 +937,8 @@
   <scope>provided</scope>
 </dependency>
 <!-- Xmpp end -->
+
+<!-- beginning of /resource/framework/buildPomFooter.xml -->
 
 </dependencies>
 	 

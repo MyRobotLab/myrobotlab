@@ -21,6 +21,7 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
   private boolean installed = false;
   
   private List<ServiceExclude> excludes = new ArrayList<ServiceExclude>();
+  private List<ServiceArtifact> artifacts = new ArrayList<ServiceArtifact>();
 
   public ServiceDependency() {
     this(null, null, null);
@@ -118,6 +119,10 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   public List<ServiceExclude> getExcludes() {
     return excludes;
+  }
+
+  public void add(ServiceArtifact serviceArtifact) {
+    artifacts.add(serviceArtifact);
   }
 
 }
