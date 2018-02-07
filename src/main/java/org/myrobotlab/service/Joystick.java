@@ -376,6 +376,10 @@ public class Joystick extends Service {
     meta.addDescription("service allows interfacing with a keyboard, joystick or gamepad");
     meta.addCategory("control");
     meta.addDependency("net.java.jinput", "jinput", "2.0.7");
+    // meta.addDependency("net.java.jinput", "jinput-platform", "2.0.7");
+    // meta.addArtifact("net.java.jinput", "natives-windows");
+    // meta.addArtifact("net.java.jinput", "natives-linux");
+    // meta.addArtifact("")
     return meta;
   }
 

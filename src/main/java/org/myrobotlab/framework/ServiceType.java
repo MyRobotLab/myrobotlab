@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import org.myrobotlab.framework.repo.ServiceExclude;
-
+import org.myrobotlab.framework.repo.ServiceArtifact;
 import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
@@ -247,6 +247,10 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
   public boolean includeServiceInOneJar() {
     return includeServiceInOneJar;
+  }
+  
+  public void addArtifact(String orgId, String classifierId) {
+    lastDependency.add(new ServiceArtifact(orgId, classifierId));
   }
   
 

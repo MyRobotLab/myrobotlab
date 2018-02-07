@@ -17,15 +17,15 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.LoggingSink;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.RepoInstallListener;
 import org.slf4j.Logger;
 
-public class RepoTest implements RepoInstallListener {
+public class RepoTest implements LoggingSink {
 
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();
@@ -40,7 +40,7 @@ public class RepoTest implements RepoInstallListener {
 
   @Before
   public void setUp() throws Exception {
-    Repo repo = Repo.getLocalInstance();
+    Repo repo = Repo.getInstance();
     repo.clear();
   }
 
@@ -50,7 +50,7 @@ public class RepoTest implements RepoInstallListener {
 
   @Test
   public void testGetLocalInstance() {
-    Repo repo = Repo.getLocalInstance();
+    Repo repo = Repo.getInstance();
     assertTrue(repo != null);
   }
 
@@ -63,14 +63,14 @@ public class RepoTest implements RepoInstallListener {
 
   @Test
   public void testAddStatusListener() throws ParseException, IOException {
-    Repo repo = Repo.getLocalInstance();
-    repo.addStatusListener(this);
+    Repo repo = Repo.getInstance();
+    repo.addLoggingSink(this);
     repo.install("Arduino");
   }
 
   /*
    * @Test public void testErrorException() { Repo repo =
-   * Repo.getLocalInstance(); repo.getErrors().clear(); repo.error(new
+   * Repo.getInstance(); repo.getErrors().clear(); repo.error(new
    * IOException("io exception test")); assertTrue(repo.getErrors().size() > 0);
    * }
    */
@@ -80,40 +80,13 @@ public class RepoTest implements RepoInstallListener {
    * }
    */
 
-  @Test
-  public void testErrorStringObjectArray() {
-    Repo repo = Repo.getLocalInstance();
-    repo.error("%s is a test of errors", "myError");
-    assertTrue(repo.getErrors().size() > 0);
-  }
-
-  @Test
-  public void testGetErrors() {
-    Repo repo = Repo.getLocalInstance();
-    repo.error("this is an error");
-    assertTrue(repo.getErrors().size() > 0);
-  }
-
-  @Test
-  public void testHasErrors() {
-    Repo repo = Repo.getLocalInstance();
-    repo.error("this is an error");
-    assertTrue(repo.hasErrors());
-  }
-
-  @Test
-  public void testInfo() {
-    Repo repo = Repo.getLocalInstance();
-    repo.info("this is an info status");
-    assertFalse(repo.hasErrors());
-  }
 
   /*
    * 
    * @Test public void testInstall() throws ParseException, IOException { Repo
-   * repo = Repo.getLocalInstance(); repo.install();
+   * repo = Repo.getInstance(); repo.install();
    * 
-   * ServiceData sd = ServiceData.getLocalInstance(); String[] typeNames =
+   * ServiceData sd = ServiceData.getInstance(); String[] typeNames =
    * sd.getServiceTypeNames(); for (int i = 0; i < typeNames.length; ++i) {
    * assertTrue(repo.isInstalled("Arduino")); }
    * 
@@ -123,31 +96,13 @@ public class RepoTest implements RepoInstallListener {
 
   @Test
   public void testClear() {
-    Repo repo = Repo.getLocalInstance();
+    Repo repo = Repo.getInstance();
     repo.clear();
     File check = new File("libraries");
     assertFalse(check.exists());
   }
 
-  @Test
-  public void testInstallString() throws ParseException, IOException {
-    // repo.clear() ??
-    Repo repo = Repo.getLocalInstance();
-    repo.addStatusListener(this);
-    repo.install("Arduino");
-    assertTrue(repo.isInstalled("Arduino"));
-  }
-
-  @Test
-  public void testIsServiceTypeInstalled() throws ParseException, IOException {
-
-    Repo repo = Repo.getLocalInstance();
-    assertFalse(repo.isInstalled("Arduino"));
-
-    repo.addStatusListener(this);
-    repo.install("Arduino");
-    assertTrue(repo.isInstalled("Arduino"));
-  }
+ 
 
   @Test
   public void testResolveArtifacts() {
@@ -156,10 +111,10 @@ public class RepoTest implements RepoInstallListener {
 
   @Test
   public void testSave() {
-    Repo repo = Repo.getLocalInstance();
+    Repo repo = Repo.getInstance();
     FileIO.rm(Repo.REPO_STATE_FILE_NAME);
     assertFalse(new File(Repo.REPO_STATE_FILE_NAME).exists());
-    // Repo repo = Repo.getLocalInstance();
+    // Repo repo = Repo.getInstance();
     repo.save();
     assertTrue(new File(Repo.REPO_STATE_FILE_NAME).exists());
   }
@@ -186,7 +141,7 @@ public class RepoTest implements RepoInstallListener {
 
   @Test
   public void testGetUnfulfilledDependencies() {
-    Repo repo = Repo.getLocalInstance();
+    Repo repo = Repo.getInstance();
     repo.clear();
     Set<ServiceDependency> deps = repo.getUnfulfilledDependencies("Serial");
     deps.size();
@@ -196,17 +151,12 @@ public class RepoTest implements RepoInstallListener {
 
   @Test
   public void testIsInstalled() throws ParseException, IOException {
-    Repo repo = Repo.getLocalInstance();
+    Repo repo = Repo.getInstance();
     repo.clear();
     repo.install("Arduino");
     assertTrue(repo.isInstalled("Arduino"));
   }
 
-  @Override
-  public void onInstallProgress(Status status) {
-    this.status.add(status);
-    log.info(status.toString());
-  }
 
   public static void main(String[] args) {
     try {
@@ -215,7 +165,7 @@ public class RepoTest implements RepoInstallListener {
 
       /*
        * 
-       * Repo repo = Repo.getLocalInstance(); repo.clear();
+       * Repo repo = Repo.getInstance(); repo.clear();
        * 
        * RepoTest.setUpBeforeClass(); RepoTest test = new RepoTest();
        * test.testGetUnfulfilledDependencies();
@@ -228,6 +178,36 @@ public class RepoTest implements RepoInstallListener {
     } catch (Exception e) {
       Logging.logError(e);
     }
+  }
+
+  @Override
+  public String getName() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Status error(String format, Object... args) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Status error(Exception e) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Status info(String format, Object... args) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Status warn(String format, Object... args) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
