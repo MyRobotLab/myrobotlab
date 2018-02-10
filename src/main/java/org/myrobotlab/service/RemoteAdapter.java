@@ -72,7 +72,7 @@ import org.slf4j.Logger;
  * communication listener is a UDP server listening on all addresses on port
  * 6767.
  * 
- * 
+ *  
  */
 public class RemoteAdapter extends Service implements Gateway {
 

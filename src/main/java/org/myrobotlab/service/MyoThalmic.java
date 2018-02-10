@@ -385,13 +385,14 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
   }
 
 
-
+/*
   @Override
   public void onArmSync(Myo myo, long arg1, Arm arm, XDirection direction, WarmupState warmUpState) {
     log.info("onArmSync {}", arm);
     whichArm = arm;
     invoke("publishArmSync", arm);
   }
+  */
 
   public Arm publishArmSync(Arm arm) {
     return arm;
@@ -468,5 +469,13 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
       Logging.logError(e);
     }
   }
+
+@Override
+public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection, float rotation,
+		WarmupState warmupState) {
+	log.info("onArmSync {}", arm);
+    whichArm = arm;
+    invoke("publishArmSync", arm);
+}
 
 }

@@ -671,6 +671,29 @@
 </dependency>
 <!-- RemoteAdapter end -->
 
+<!-- embedded maven begin -->
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-embedder</artifactId>
+            <version>3.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.aether</groupId>
+            <artifactId>aether-connector-wagon</artifactId>
+            <version>0.9.0.M2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-http-lightweight</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+  <!-- embedded maven end -->      
+
 <!-- Runtime begin -->
 <dependency>
   <groupId>com.google.code.gson</groupId>
@@ -681,11 +704,6 @@
   <groupId>org.apache.ivy</groupId>
   <artifactId>ivy</artifactId>
   <version>2.4.0</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.maven</groupId>
-  <artifactId>maven-embedder</artifactId>
-  <version>3.2.5</version>
 </dependency>
 <dependency>
   <groupId>ch.qos.logback</groupId>
