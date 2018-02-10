@@ -73,3 +73,6 @@ Thumbs.db
 /training/
 /dependencies.xml
 /install/
+/.gradle/
+/dependencies/
+/gradle/

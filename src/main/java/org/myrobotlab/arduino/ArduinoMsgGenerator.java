@@ -94,8 +94,8 @@ public class ArduinoMsgGenerator {
     String arduinoMsgCodeTemplateH = toString("src/main/resources/resource/Arduino/generate/ArduinoMsgCodec.template.h");
     String idlToHpp = toString("src/main/resources/resource/Arduino/generate/Msg.template.h");
     String idlToCpp = toString("src/main/resources/resource/Arduino/generate/Msg.template.cpp");
-    String idlToJava = toString("src/main/resources/resource/Arduino/generate/Msg.template.java");
-    String virtualJava = toString("src/main/resources/resource/Arduino/generate/Msg.template.java");
+    String idlToJava = toString("src/main/resources/resource/Arduino/generate/Msg.java.template");
+    String virtualJava = toString("src/main/resources/resource/Arduino/generate/Msg.java.template");
 
     // String idlToJava = toString("blah");
 
@@ -348,7 +348,7 @@ public class ArduinoMsgGenerator {
     // load templates
     String hMethod = toString("src/main/resources/resource/Arduino/generate/Msg.method.template.h");
     String cppMethod = toString("src/main/resources/resource/Arduino/generate/Msg.method.template.cpp");
-    String javaMethod = toString("src/main/resources/resource/Arduino/generate/Msg.method.template.java");
+    String javaMethod = toString("src/main/resources/resource/Arduino/generate/Msg.java.method.template");
 
     // load search and replace
     Map<String, String> snr = new TreeMap<String, String>();

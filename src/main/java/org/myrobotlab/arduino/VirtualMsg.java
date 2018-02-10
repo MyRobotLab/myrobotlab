@@ -17,7 +17,7 @@ import org.myrobotlab.arduino.virtual.MrlComm;
  Welcome to Msg.java
  Its created by running ArduinoMsgGenerator
  which combines the MrlComm message schema (src/main/resources/resource/Arduino/arduinoMsg.schema)
- with the cpp template (src/main/resources/resource/Arduino/generate/Msg.template.java)
+ with the cpp template (src/main/resources/resource/Arduino/generate/Msg.java.template)
 
  	Schema Type Conversions
 
