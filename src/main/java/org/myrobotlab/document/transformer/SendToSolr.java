@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
@@ -27,7 +27,7 @@ public class SendToSolr extends AbstractStage {
   private String idField = "id";
   private String fieldsField = "fields";
   private boolean addFieldsField = false;
-  private SolrServer solrServer = null;
+  private SolrClient solrClient = null;
   private String solrUrl = "http://localhost:8983/solr/collection1";
   private boolean issueCommit = true;
 
@@ -52,11 +52,10 @@ public class SendToSolr extends AbstractStage {
     // basicAuthPass = config.getStringParam("basicAuthPass", basicAuthPass);
 
     // Initialize a connection to the solr server on startup.
-    if (solrServer == null) {
+    if (solrClient == null) {
       // TODO: support an embeded solr instance
       log.info("Connecting to Solr at {}", solrUrl);
       // set credentials.
-
       // if (basicAuthUser != null) {
       // DefaultHttpClient httpClient = new DefaultHttpClient();
       // httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, new
@@ -64,7 +63,7 @@ public class SendToSolr extends AbstractStage {
       // create solr server with client.
       // solrServer = new HttpSolrServer( solrUrl , httpClient);
       // } else {
-      solrServer = new HttpSolrServer(solrUrl);
+      solrClient = new HttpSolrClient.Builder().withBaseSolrUrl(solrUrl).build();
       // }
     } else {
       log.info("Solr instance already created.");
@@ -100,7 +99,7 @@ public class SendToSolr extends AbstractStage {
         if (batch.size() >= batchSize) {
           // System.out.println("Solr Server Flush Batch...");
           // you are blocking?
-          solrServer.add(batch);
+          solrClient.add(batch);
           log.info("Sending Batch to Solr. Size: {}", batch.size());
           // System.out.println("Solr batch sent..");
           // batch.clear();
@@ -133,10 +132,10 @@ public class SendToSolr extends AbstractStage {
   public synchronized void flush() {
 
     // Is this where I should flush the last batch?
-    if (solrServer != null && batch.size() > 0) {
+    if (solrClient != null && batch.size() > 0) {
       try {
         log.info("flushing last batch. Size: {}", batch.size());
-        solrServer.add(batch);
+        solrClient.add(batch);
       } catch (SolrServerException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -152,7 +151,7 @@ public class SendToSolr extends AbstractStage {
     try {
       if (issueCommit) {
         log.info("Committing solr");
-        solrServer.commit();
+        solrClient.commit();
       }
     } catch (SolrServerException e) {
       // TODO Auto-generated catch block
