@@ -1,16 +1,21 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.core.CoreContainer;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
@@ -43,10 +48,42 @@ public class Solr extends Service implements DocumentListener {
 
   public String solrUrl = "http://localhost:8983/solr";
 
-  transient private HttpSolrServer solrServer;
+  transient private SolrClient solrServer;
 
   public boolean commitOnFlush = true;
 
+  EmbeddedSolrServer embeddedSolrServer = null;
+  
+  
+  private void startEmbedded() throws SolrServerException, IOException {
+
+
+    // create and load the cores
+    Path solrHome = Paths.get("src/main/resources/resource/Solr");
+    
+    System.out.println(solrHome.toFile().getAbsolutePath());
+    Path solrXml = solrHome.resolve("solr.xml");
+    CoreContainer cores = CoreContainer.createAndLoad(solrHome, solrXml);
+    for (String coreName : cores.getAllCoreNames()) {
+      System.out.println("Core " + coreName);
+    }
+    embeddedSolrServer = new EmbeddedSolrServer(cores, "core1");
+//    SolrInputDocument doc = new SolrInputDocument();
+//    doc.setField("id", "doc_1");
+//    embeddedSolrServer.add(doc);
+//    embeddedSolrServer.commit();
+//    SolrQuery q = new SolrQuery();
+//    QueryRequest r = new QueryRequest(q);
+//    q.setQuery("id:doc_2");
+//    QueryResponse qr = embeddedSolrServer.query(q);
+//    System.out.println(qr.getResults().getNumFound());
+//    // shutdown & cleanup
+//    embeddedSolrServer.getCoreContainer().shutdown();
+//    embeddedSolrServer.close();
+//    System.out.println("Done.");
+    
+  }
+  
   /*
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
@@ -56,6 +93,9 @@ public class Solr extends Service implements DocumentListener {
     LoggingFactory.init(Level.INFO);
     try {
       Solr solr = (Solr) Runtime.start("solr", "Solr");
+      
+      solr.startEmbedded();
+      
       Runtime.start("gui", "SwingGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
@@ -100,8 +140,11 @@ public class Solr extends Service implements DocumentListener {
 
   public void addDocument(SolrInputDocument doc) {
     try {
-
-      solrServer.add(doc);
+      if (embeddedSolrServer != null) {
+        embeddedSolrServer.add(doc);
+      } else {
+        solrServer.add(doc);
+      }
     } catch (SolrServerException e) {
       // TODO : retry?
       log.warn("An exception occurred when trying to add document to the index.", e);
@@ -117,7 +160,11 @@ public class Solr extends Service implements DocumentListener {
    */
   public void addDocuments(Collection<SolrInputDocument> docs) {
     try {
-      solrServer.add(docs);
+      if (embeddedSolrServer != null) {
+        embeddedSolrServer.add(docs);
+      } else {
+        solrServer.add(docs);
+      }
     } catch (SolrServerException e) {
       log.warn("An exception occurred when trying to add documents to the index.", e);
     } catch (IOException e) {
@@ -131,7 +178,11 @@ public class Solr extends Service implements DocumentListener {
    */
   public void commit() {
     try {
-      solrServer.commit();
+      if (embeddedSolrServer != null) {
+        embeddedSolrServer.commit();
+      } else {
+        solrServer.commit();
+      }
     } catch (SolrServerException e) {
       log.warn("An exception occurred when trying to commit the index.", e);
     } catch (IOException e) {
@@ -141,7 +192,11 @@ public class Solr extends Service implements DocumentListener {
 
   public void deleteDocument(String docId) {
     try {
-      solrServer.deleteById(docId);
+      if (embeddedSolrServer!= null) {
+        embeddedSolrServer.deleteById(docId);
+      } else {
+        solrServer.deleteById(docId);
+      }
     } catch (Exception e) {
       // TODO better error handling/reporting?
       log.warn("An exception occurred when deleting doc", e);
@@ -185,8 +240,12 @@ public class Solr extends Service implements DocumentListener {
   public QueryResponse search(SolrQuery query) {
     QueryResponse resp = null;
     try {
-      resp = solrServer.query(query);
-    } catch (SolrServerException e) {
+      if (embeddedSolrServer != null) {
+        resp = embeddedSolrServer.query(query);
+      } else {
+        resp = solrServer.query(query);
+      }
+    } catch (SolrServerException | IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -213,8 +272,12 @@ public class Solr extends Service implements DocumentListener {
     query.setStart(start);
     QueryResponse resp = null;
     try {
-      resp = solrServer.query(query);
-    } catch (SolrServerException e) {
+      if (embeddedSolrServer != null) {
+        resp = embeddedSolrServer.query(query);
+      } else {
+        resp = solrServer.query(query);
+      }
+    } catch (SolrServerException | IOException e) {
       log.warn("Search failed with exception", e);
     }
     invoke("publishResults", resp);
@@ -239,14 +302,14 @@ public class Solr extends Service implements DocumentListener {
     // if someone switches the url, we want to re-create the solr server.
     // this breaks the bean pattern a bit..
     if (solrServer != null) {
-      solrServer = new HttpSolrServer(solrUrl);
+      solrServer = new HttpSolrClient.Builder().withBaseSolrUrl(solrUrl).build();
     }
   }
 
   @Override
   public void startService() {
     super.startService();
-    solrServer = new HttpSolrServer(solrUrl);
+    solrServer = new HttpSolrClient.Builder().withBaseSolrUrl(solrUrl).build();
   }
 
   @Override
@@ -257,7 +320,11 @@ public class Solr extends Service implements DocumentListener {
       docsToSend.add(convertDocument(d));
     }
     try {
-      solrServer.add(docsToSend);
+      if (embeddedSolrServer != null) {
+        embeddedSolrServer.add(docsToSend);
+      } else {
+        solrServer.add(docsToSend);
+      }
       return ProcessingStatus.OK;
     } catch (SolrServerException | IOException e) {
       // TODO Auto-generated catch block
@@ -271,7 +338,8 @@ public class Solr extends Service implements DocumentListener {
     solrDoc.setField("id", doc.getId());
     for (String fieldName : doc.getFields()) {
       for (Object o : doc.getField(fieldName)) {
-        solrDoc.addField(fieldName, o);
+        if (o != null)
+          solrDoc.addField(fieldName, o);
       }
     }
     return solrDoc;
@@ -318,10 +386,14 @@ public class Solr extends Service implements DocumentListener {
     ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
     meta.addDescription("Solr Service - Open source search engine");
     meta.addCategory("data", "search");
-    meta.addDependency("org.apache.solr", "solr-solrj", "4.10.2");
+    meta.addDependency("org.apache.solr", "solr-core", "7.2.1");
+    meta.addDependency("org.apache.solr", "solr-solrj", "7.2.1");
+    meta.addDependency("commons-io", "commons-io", "2.5");
     // Dependencies issue
     meta.setAvailable(false);
     return meta;
   }
 
 }
+
+
