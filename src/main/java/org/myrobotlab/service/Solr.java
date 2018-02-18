@@ -1,11 +1,19 @@
 package org.myrobotlab.service;
 
+import static org.myrobotlab.service.OpenCV.FILTER_LK_OPTICAL_TRACK;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+
+import javax.imageio.ImageIO;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -16,6 +24,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.jboss.netty.handler.codec.base64.Base64Encoder;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
@@ -24,8 +34,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.slf4j.Logger;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
@@ -55,7 +67,7 @@ public class Solr extends Service implements DocumentListener {
   EmbeddedSolrServer embeddedSolrServer = null;
   
   
-  private void startEmbedded() throws SolrServerException, IOException {
+  public void startEmbedded() throws SolrServerException, IOException {
 
 
     // create and load the cores
@@ -394,6 +406,40 @@ public class Solr extends Service implements DocumentListener {
     return meta;
   }
 
+  // Attach Pattern stuff! 
+  public void attach(OpenCV opencv) {
+    opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
+  }
+  
+  public OpenCVData onOpenCVData(OpenCVData data) {
+	  // TODO: copy some useful metadata to the record being archived
+	  // TODO: convert this set of opencv data to a solr document...
+	  SolrInputDocument doc = new SolrInputDocument();
+	  // create a document id for this document 
+	  // TODO: make this something much more deterministic!! 
+	  String type = "opencvdata";	  
+	  String id = type + "_" + UUID.randomUUID().toString();
+	  doc.setField("id", id);
+	  doc.setField("type", "opencvdata");
+	  // TODO: enforce UTC, or move this to the solr schema to do.
+	  doc.setField("date", new Date());
+	  // for now.. let's just do this.
+	  for (String key : data.keySet()) {
+		IplImage img = data.get(key);
+		if (img == null) {
+			continue;
+		}
+		byte[] bytes = new byte[img.imageSize()];
+		// img.asByteBuffer().get(bytes);
+		
+		String encoded = Base64.encodeBase64String(bytes);
+		doc.addField("bytes", encoded);
+	  }
+	  // add the document we just built up to solr so we can remember it!	  
+	  addDocument(doc);
+	  //  TODO: kw, why return anything here at all?! who would ever call this method and depend on the response?
+	  return data;
+  }
 }
 
 
