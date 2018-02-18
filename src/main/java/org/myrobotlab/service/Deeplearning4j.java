@@ -460,7 +460,12 @@ public class Deeplearning4j extends Service {
             i++;
         }
     }
+    invoke("publishClassification", recognizedObjects);
     return recognizedObjects;
+  }
+  
+  public Map<String, Double> publishClassification(Map<String, Double> classifications) {
+	  return classifications;
   }
   
   static public ServiceType getMetaData() {

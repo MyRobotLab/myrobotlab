@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.bytedeco.javacpp.opencv_core.CvPoint;
@@ -714,6 +715,10 @@ public class OpenCV extends AbstractVideoSource {
 
   public void publishNoRecognizedFace() {
 
+  }
+
+  public Map<String, Double> publishClassification(Map<String, Double> classifications) {
+	    return classifications;
   }
 
   /**

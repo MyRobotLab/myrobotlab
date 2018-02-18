@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -410,7 +411,7 @@ public class Solr extends Service implements DocumentListener {
   public void attach(OpenCV opencv) {
     opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
   }
-  
+
   public OpenCVData onOpenCVData(OpenCVData data) {
 	  // TODO: copy some useful metadata to the record being archived
 	  // TODO: convert this set of opencv data to a solr document...
@@ -420,7 +421,7 @@ public class Solr extends Service implements DocumentListener {
 	  String type = "opencvdata";	  
 	  String id = type + "_" + UUID.randomUUID().toString();
 	  doc.setField("id", id);
-	  doc.setField("type", "opencvdata");
+	  doc.setField("type", type);
 	  // TODO: enforce UTC, or move this to the solr schema to do.
 	  doc.setField("date", new Date());
 	  // for now.. let's just do this.
@@ -440,6 +441,33 @@ public class Solr extends Service implements DocumentListener {
 	  //  TODO: kw, why return anything here at all?! who would ever call this method and depend on the response?
 	  return data;
   }
+  
+  //
+  public void attach(Deeplearning4j dl4j) {
+	  dl4j.addListener("publishClassification", getName(), "onClassification");
+  }
+  
+  // TODO: index the classifications with the cvdata. not separately.. 
+  // o/w we need a way to relate back to the frame that this is a classification of
+  public Map<String, Double> onClassification(Map<String, Double> data) {
+	  SolrInputDocument doc = new SolrInputDocument();
+	  // create a document id for this document 
+	  // TODO: make this something much more deterministic!! 
+	  String type = "dl4j";	  
+	  String id = type + "_" + UUID.randomUUID().toString();
+	  doc.setField("id", id);
+	  doc.setField("type", type);
+	  // TODO: enforce UTC, or move this to the solr schema to do.
+	  doc.setField("date", new Date());
+	  // for now.. let's just do this.
+	  for (String key : data.keySet()) {
+		double value = data.get(key);
+		doc.addField(key, value);
+		doc.addField("object", key);
+	  }
+	  return data;
+  }
+  
 }
 
 

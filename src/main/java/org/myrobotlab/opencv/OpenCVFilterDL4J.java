@@ -15,6 +15,7 @@ import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
 public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
@@ -113,6 +114,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       if (lastImage != null) {
         try {
           lastResult = dl4j.classifyImageVGG16(lastImage);
+          invoke("publishClassification", lastResult);
           log.info(formatResultString(lastResult));
         } catch (IOException e) {
           // TODO Auto-generated catch block
@@ -132,4 +134,15 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       }
     }
   }
+
+  public Map<String, Double> publishClassification(Map<String, Double> classification) {	
+	  return classification;
+  }
+  
+  public void attach(Solr solr) {
+	  
+	  // 
+	  
+  }
+  
 }
