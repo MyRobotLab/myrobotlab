@@ -449,23 +449,32 @@ public class Solr extends Service implements DocumentListener {
   
   // TODO: index the classifications with the cvdata. not separately.. 
   // o/w we need a way to relate back to the frame that this is a classification of
-  public Map<String, Double> onClassification(Map<String, Double> data) {
-	  SolrInputDocument doc = new SolrInputDocument();
-	  // create a document id for this document 
-	  // TODO: make this something much more deterministic!! 
-	  String type = "dl4j";	  
-	  String id = type + "_" + UUID.randomUUID().toString();
-	  doc.setField("id", id);
-	  doc.setField("type", type);
-	  // TODO: enforce UTC, or move this to the solr schema to do.
-	  doc.setField("date", new Date());
-	  // for now.. let's just do this.
-	  for (String key : data.keySet()) {
-		double value = data.get(key);
-		doc.addField(key, value);
-		doc.addField("object", key);
-	  }
-	  return data;
+  public Map<String, Double> onClassification(Map<String, Double> data) throws SolrServerException, IOException {
+    log.info("On Classification invoked!");
+    SolrInputDocument doc = new SolrInputDocument();
+    // create a document id for this document 
+    // TODO: make this something much more deterministic!! 
+    String type = "dl4j";	  
+    String id = type + "_" + UUID.randomUUID().toString();
+    doc.setField("id", id);
+    doc.setField("type", type);
+    // TODO: enforce UTC, or move this to the solr schema to do.
+    doc.setField("date", new Date());
+    // for now.. let's just do this.
+    for (String key : data.keySet()) {
+      double value = data.get(key);
+      doc.addField(key, value);
+      doc.addField("object", key);
+    }
+    
+    // now we need to add the doc!
+    if (embeddedSolrServer != null) {
+      embeddedSolrServer.add(doc);
+    } else {
+      solrServer.add(doc);
+    }
+    
+    return data;
   }
   
 }

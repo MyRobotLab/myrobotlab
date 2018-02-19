@@ -417,14 +417,17 @@
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
-  <field name="bytes" type="binary"/>
   <field name="content" type="text_general"/>
-  <field name="date" type="pdates"/>
-  <field name="index_date" type="pdates" default="NOW"/>
-  
+  <field name="date" type="pdates" indexed="true" stored="true" multiValued="false"/>
+  <field name="index_date" type="pdates" indexed="true" stored="true" multiValued="false" default="NOW"/>
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
   <field name="title" type="text_general"/>
   <field name="type" type="string" indexed="true" stored="true" multiValued="false" />
+  <!--  we'll add 1 field for storing binary data on this document.  use with caution
+        This field type contains base64 encoded binary data
+        multi valued, so we could store a bunch of frames together in this field. 
+        -->
+  <field name="bytes" type="binary" indexed="false" stored="true" multiValued="true"/>
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>

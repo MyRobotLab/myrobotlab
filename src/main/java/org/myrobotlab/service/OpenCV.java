@@ -718,7 +718,8 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public Map<String, Double> publishClassification(Map<String, Double> classifications) {
-	    return classifications;
+    // log.info("Publish Classification in opencv!");
+	  return classifications;
   }
 
   /**

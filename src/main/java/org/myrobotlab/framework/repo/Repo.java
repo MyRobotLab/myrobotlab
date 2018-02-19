@@ -54,7 +54,9 @@ public abstract class Repo {
   }
 
   public void install(String serviceType) {
-    install("../libraries/jar", serviceType);
+    System.out.println("Fix ME!");
+    return;
+    //install("../libraries/jar", serviceType);
   }
 
   abstract public void install(String location, String serviceType);
