@@ -1,9 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.myrobotlab.service.OpenCV.FILTER_LK_OPTICAL_TRACK;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,9 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.imageio.ImageIO;
-
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -26,7 +19,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.jboss.netty.handler.codec.base64.Base64Encoder;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
@@ -36,7 +28,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
+import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.interfaces.DocumentListener;
+import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 import org.apache.commons.codec.binary.Base64;
 
@@ -53,7 +47,7 @@ import org.apache.commons.codec.binary.Base64;
  * @author kwatters
  *
  */
-public class Solr extends Service implements DocumentListener {
+public class Solr extends Service implements DocumentListener, TextListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -413,35 +407,35 @@ public class Solr extends Service implements DocumentListener {
   }
 
   public OpenCVData onOpenCVData(OpenCVData data) {
-	  // TODO: copy some useful metadata to the record being archived
-	  // TODO: convert this set of opencv data to a solr document...
-	  SolrInputDocument doc = new SolrInputDocument();
-	  // create a document id for this document 
-	  // TODO: make this something much more deterministic!! 
-	  String type = "opencvdata";	  
-	  String id = type + "_" + UUID.randomUUID().toString();
-	  doc.setField("id", id);
-	  doc.setField("type", type);
-	  // TODO: enforce UTC, or move this to the solr schema to do.
-	  doc.setField("date", new Date());
-	  // for now.. let's just do this.
-	  for (String key : data.keySet()) {
-		IplImage img = data.get(key);
-		if (img == null) {
-			continue;
-		}
-		byte[] bytes = new byte[img.imageSize()];
-		// img.asByteBuffer().get(bytes);
-		
-		String encoded = Base64.encodeBase64String(bytes);
-		doc.addField("bytes", encoded);
-	  }
-	  // add the document we just built up to solr so we can remember it!	  
-	  addDocument(doc);
-	  //  TODO: kw, why return anything here at all?! who would ever call this method and depend on the response?
-	  return data;
+    // TODO: copy some useful metadata to the record being archived
+    // TODO: convert this set of opencv data to a solr document...
+    SolrInputDocument doc = new SolrInputDocument();
+    // create a document id for this document 
+    // TODO: make this something much more deterministic!! 
+    String type = "opencvdata";	  
+    String id = type + "_" + UUID.randomUUID().toString();
+    doc.setField("id", id);
+    doc.setField("type", type);
+    // TODO: enforce UTC, or move this to the solr schema to do.
+    doc.setField("date", new Date());
+    // for now.. let's just do this.
+    for (String key : data.keySet()) {
+      IplImage img = data.get(key);
+      if (img == null) {
+        continue;
+      }
+      byte[] bytes = new byte[img.imageSize()];
+      // img.asByteBuffer().get(bytes);
+
+      String encoded = Base64.encodeBase64String(bytes);
+      doc.addField("bytes", encoded);
+    }
+    // add the document we just built up to solr so we can remember it!	  
+    addDocument(doc);
+    //  TODO: kw, why return anything here at all?! who would ever call this method and depend on the response?
+    return data;
   }
-  
+
   //
   public void attach(Deeplearning4j dl4j) {
 	  dl4j.addListener("publishClassification", getName(), "onClassification");
@@ -466,15 +460,61 @@ public class Solr extends Service implements DocumentListener {
       doc.addField(key, value);
       doc.addField("object", key);
     }
-    
-    // now we need to add the doc!
-    if (embeddedSolrServer != null) {
-      embeddedSolrServer.add(doc);
-    } else {
-      solrServer.add(doc);
-    }
-    
+    addDocument(doc);
     return data;
+  }
+  
+  // TODO: pass the interface, not the specific service
+  // i need more on the interface if we pass the itnerfae
+  public void attach(WebkitSpeechRecognition recognizer) {
+    recognizer.addTextListener(this);
+  }
+  public void attach(Sphinx recognizer) {
+    recognizer.addTextListener(this);
+  }
+
+  @Override
+  public void onText(String text) {
+    // TODO Auto-generated method stub
+    log.info("On Text (presumably from speech recognition) invoked!");
+    SolrInputDocument doc = new SolrInputDocument();
+    // create a document id for this document 
+    // TODO: make this something much more deterministic!! 
+    String type = "ear";   
+    String id = type + "_" + UUID.randomUUID().toString();
+    doc.setField("id", id);
+    doc.setField("type", type);
+    // TODO: enforce UTC, or move this to the solr schema to do.
+    doc.setField("date", new Date());
+    // for now.. let's just do this.
+    doc.setField("text", text);
+    // now we need to add the doc!
+    addDocument(doc);
+    
+  }
+  
+  // TODO: align this with an interface, not an explicit service
+  public void attach(ProgramAB programab) {
+    programab.addResponseListener(this);
+  }
+  
+  public void onResponse(Response response) {
+    log.info("On Response invoked!");
+    SolrInputDocument doc = new SolrInputDocument();
+    // create a document id for this document 
+    // TODO: make this something much more deterministic!! 
+    String type = "programab";   
+    String id = type + "_" + UUID.randomUUID().toString();
+    doc.setField("id", id);
+    doc.setField("type", type);
+    // TODO: enforce UTC, or move this to the solr schema to do.
+    doc.setField("date", new Date());
+    // for now.. let's just do this.
+    doc.setField("username", response.session);
+    doc.setField("text", response.msg);
+    // now we need to add the doc!
+    addDocument(doc);
+    
   }
   
 }
