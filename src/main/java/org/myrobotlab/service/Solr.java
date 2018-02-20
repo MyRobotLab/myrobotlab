@@ -455,10 +455,15 @@ public class Solr extends Service implements DocumentListener, TextListener {
     // TODO: enforce UTC, or move this to the solr schema to do.
     doc.setField("date", new Date());
     // for now.. let's just do this.
+    
+    double threshold = 0.2;
+   
     for (String key : data.keySet()) {
       double value = data.get(key);
       doc.addField(key, value);
-      doc.addField("object", key);
+      if (value > threshold) 
+    	  doc.addField("object", key);
+    //  doc.addField("recognized_object", key);
     }
     addDocument(doc);
     return data;
