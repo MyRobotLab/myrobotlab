@@ -470,10 +470,19 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
     }
   }
 
-  @Override
+  // @Override
   public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection, WarmupState warmupState) {
 	  log.info("onArmSync {}", arm);
 	  whichArm = arm;
 	  invoke("publishArmSync", arm);
   }
+
+@Override
+public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection, float rotation,
+		WarmupState warmupState) {
+	log.info("onArmSync {}", arm);
+	  whichArm = arm;
+	  invoke("publishArmSync", arm);
+	
+}
 }
