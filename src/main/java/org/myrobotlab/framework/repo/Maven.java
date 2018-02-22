@@ -12,7 +12,6 @@ import java.util.Set;
 import org.apache.maven.cli.MavenCli;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -34,8 +33,10 @@ public class Maven extends Repo {
   static String repositories = null;
 
   static String installServicePomTemplate = null;
+  
+  static Maven localInstance = null;
 
-  static public Repo getInstance() {
+  static public Repo getTypeInstance() {
     if (localInstance == null) {
       init();
     }
@@ -58,26 +59,6 @@ public class Maven extends Repo {
     }
     
     //FIXME - deserialize the Libraries repo/cache
-    /*
-    try {
-      
-      // DID NOT WORK
-      // repoImplClass =  Class.forName(repoManagerClassName );
-      
-      String data = FileIO.toString(REPO_STATE_FILE_NAME);
-      // localInstance = (Repo)CodecUtils.fromJson(data, repoImplClass);
-      localInstance = (Repo)CodecUtils.fromJson(data, Maven.class);
-      if (localInstance == null) {
-        throw new IOException(String.format("%s empty", REPO_STATE_FILE_NAME));
-      }
-    } catch (Exception e) {
-      log.info("{} file not found", REPO_STATE_FILE_NAME);
-      // default we are using Maven now .. not Ivy
-      // localInstance = new Ivy();
-      localInstance = Maven.getLocalInstance();
-    } */
-    
-    
   }
 
   /*
@@ -186,7 +167,7 @@ public class Maven extends Repo {
   // TODO generate full pom - use header & footer templates
   // FIXME - generate Template which is build "runtime" and "real runtime" with
   // selected "provided" scopes
-  public String generateBuildPomFromMetaData() {
+  public String generatePom() {
     StringBuilder sb = new StringBuilder();
     sb.append(buildPomHeader);
     sb.append(repositories);
@@ -195,11 +176,11 @@ public class Maven extends Repo {
     return sb.toString();
   }
 
-  public void saveBuildPom() {
+  public void generateBuildFiles() {
     try {
       String filename = String.format("pom.%d.xml", System.currentTimeMillis());
       FileOutputStream fos = new FileOutputStream(filename);
-      fos.write(generateBuildPomFromMetaData().getBytes());
+      fos.write(generatePom().getBytes());
       fos.close();
     } catch (Exception e) {
       log.error("saveBuildPom threw", e);
@@ -279,9 +260,8 @@ public class Maven extends Repo {
 
     try {
 
-      Maven localInstance = (Maven)Maven.getInstance();
-      localInstance.saveBuildPom();
-      localInstance.generateBuildPomFromMetaData();
+      Maven localInstance = (Maven)Repo.getInstance("Maven");
+      localInstance.generateBuildFiles();
       localInstance.install("Joystick");
       // localInstance.installService("OpenCV", "OpenCV");
 
