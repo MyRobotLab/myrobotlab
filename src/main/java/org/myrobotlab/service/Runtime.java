@@ -1966,9 +1966,8 @@ public class Runtime extends Service implements MessageListener {
 
   // FIXME - this is important in the future
   @Override
-  public void receive(Message msg) {
-    // TODO Auto-generated method stub
-
+  public void onMessage(Message msg) {
+    // TODO: what do we do when we get a message?
   }
 
   // ---------------- callback events begin -------------

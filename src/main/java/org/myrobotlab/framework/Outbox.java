@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -64,6 +65,7 @@ public class Outbox implements Runnable, Serializable {
 
   public HashMap<String, ArrayList<MRLListener>> notifyList = new HashMap<String, ArrayList<MRLListener>>();
   CommunicationInterface comm = null;
+  List<MessageListener> listeners = new ArrayList<MessageListener>();
 
   public Outbox(NameProvider myService) {
     this.myService = myService;
@@ -102,6 +104,12 @@ public class Outbox implements Runnable, Serializable {
       }
       msgBox.notifyAll(); // must own the lock
     }
+    
+    // now that it's actually in the queue. let's notify the listeners
+    for (MessageListener ml : listeners) {
+      ml.onMessage(msg);
+    }
+    
   }
 
   public CommunicationInterface getCommunicationManager() {
@@ -228,4 +236,7 @@ public class Outbox implements Runnable, Serializable {
     return isRunning;
   }
 
+  public void addMessageListener(MessageListener ml) {
+    listeners .add(ml);
+  }
 }

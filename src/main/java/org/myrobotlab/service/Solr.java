@@ -21,6 +21,10 @@ import org.apache.solr.core.CoreContainer;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
+import org.myrobotlab.framework.Inbox;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MessageListener;
+import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -47,7 +51,7 @@ import org.apache.commons.codec.binary.Base64;
  * @author kwatters
  *
  */
-public class Solr extends Service implements DocumentListener, TextListener {
+public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -519,9 +523,43 @@ public class Solr extends Service implements DocumentListener, TextListener {
     doc.setField("text", response.msg);
     // now we need to add the doc!
     addDocument(doc);
-    
+  }
+ 
+  // TODO: attach a service inbox/outbox 
+  // TODO: what does this mean for solr to attach to a service?
+  public void attachInbox(Inbox inbox) {
+    // TODO: refactor this to just be attach(Service)  or maybe we pass the inbox / outbox?
+    inbox.addMessageListener(this);
   }
   
+
+  public void attachOutbox(Outbox outbox) {
+    // TODO: refactor this to just be attach(Service)  or maybe we pass the inbox / outbox?
+    outbox.addMessageListener(this);
+  }
+
+  // TODO: see if we can figure out if this is an inbox or an outbox.
+  // ok we want to do something like handle an onMessage method.
+  public void onMessage(Message message) {
+    // convert this message into a solr document
+    // TODO: make messages more unique. 
+    String docId = "message_" + UUID.randomUUID().toString() + "_" +  message.msgId;
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.setField("id", docId);
+    doc.setField("sender", message.sender);
+    doc.setField("method", message.method);
+    // TODO: this is actually the timestamp of the message.. not an id.
+    doc.setField("message_id", message.msgId);
+    doc.setField("message_type", message.msgType);
+    doc.setField("message_name", message.name);
+    doc.setField("sender_method", message.sendingMethod);
+    doc.setField("message_status", message.status);
+    // doc.setField("", message.);
+    // TODO: now we need to introspect the array of objects and figure out how to index them!! gah..
+    for (Object o : message.data) {
+      // TODO: this will probably blow up pretty bad for different object types
+      doc.addField("data", o);
+    }
+    addDocument(doc);
+  }
 }
-
-
