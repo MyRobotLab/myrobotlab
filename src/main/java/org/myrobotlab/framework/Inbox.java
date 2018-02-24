@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -49,6 +50,8 @@ public class Inbox implements Serializable {
 
   HashMap<Long, Object[]> blockingList = new HashMap<Long, Object[]>();
 
+  List<MessageListener> listeners = new ArrayList<MessageListener>();
+  
   public Inbox() {
     this("Inbox");
   }
@@ -87,6 +90,12 @@ public class Inbox implements Serializable {
         }
         msgBox.notifyAll(); // must own the lock
       }
+    }
+    
+    // TODO: move this to a base class Inbox/Outbox are very similar.
+    // now that it's actually in the queue. let's notify the listeners
+    for (MessageListener ml : listeners) {
+      ml.onMessage(msg);
     }
 
   }
@@ -183,4 +192,8 @@ public class Inbox implements Serializable {
     return msgBox.size();
   }
 
+  public void addMessageListener(MessageListener ml) {
+    listeners.add(ml);
+  }
+  
 }

@@ -28,6 +28,6 @@ package org.myrobotlab.framework;
 // FIXME - is this a good idea? or does it just add more clutter?
 public interface MessageListener {
 
-  public void receive(Message msg);
-
+  public void onMessage(Message msg);
+  
 }
