@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -11,15 +12,109 @@ import org.apache.solr.common.SolrDocument;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Solr;
+import org.myrobotlab.service.VirtualArduino;
 
-// @Ignore
+@Ignore
 public class VisionMemoryTest {
 
   @Test
+  public void inboxOutboxMemoryTest() throws Exception {
+    
+    // basic log level stuff
+    Runtime.setLogLevel("INFO");
+    // for debugging
+    Runtime.createAndStart("gui", "SwingGui");
+    // start up the embedded solr server
+    Solr solr = (Solr)Runtime.createAndStart("solr", "Solr");
+    solr.startEmbedded();
+
+    VirtualArduino va = (VirtualArduino)Runtime.createAndStart("va", "VirtualArduino");
+    va.connect("COM-1");
+    
+    Arduino ard = (Arduino)Runtime.createAndStart("ard", "Arduino");
+    
+    
+    solr.attachInbox(ard.getInbox());
+    solr.attachOutbox(ard.getOutbox());
+    
+    
+    
+    ard.connect("COM-1");
+    
+    
+    Servo s = (Servo)Runtime.createAndStart("s", "Servo");
+    
+    solr.attachInbox(s.getInbox());
+    solr.attachOutbox(s.getOutbox());
+    
+    
+    ard.attach(s,7);
+
+    
+    s.moveTo(90.0);
+    Thread.sleep(100);
+    s.moveTo(0.0);
+    Thread.sleep(100);
+    s.moveTo(180.0);
+    Thread.sleep(100);
+    
+    for (int i = 0 ; i < 10; i++) {
+      searchAndPrintResult(solr);
+      Thread.sleep(1000);
+      System.in.read();
+    }
+    
+    
+    
+  }
+  
+  
+  public void searchAndPrintResult(Solr solr) {
+    
+    SolrQuery query = new SolrQuery();
+    query.setQuery("*:*");
+    query.setSort("index_date", ORDER.desc);
+    //query.setFacet(true);
+    //query.addFacetField("object");
+    QueryResponse qr = solr.search(query);    
+
+    long numRows=  qr.getResults().getNumFound();
+    System.out.println("Rows : " + numRows);
+    if (numRows > 0) {
+      for (SolrDocument doc : qr.getResults()) {
+        printDoc(doc);
+      }
+
+//      for (FacetField ff : qr.getFacetFields()) {
+//        for (Count c : ff.getValues()) {
+//          System.out.println(c.getName() + " " + c.getCount());
+//        }
+//      }
+    }
+  }
+  
+  
+  public void printDoc(SolrDocument doc) {
+    System.out.println("---------------------------");
+    System.out.println("DocID: " + doc.getFieldValue("id"));
+    for (String field : doc.getFieldNames()) {
+      if (field.equalsIgnoreCase("id")) 
+        continue;
+      System.out.print(field + ": ");
+      for (Object value : doc.getFieldValues(field)) {
+        System.out.print(value + ",");
+      }
+      System.out.println("");      
+    }
+    
+  }
+  // @Test
   public void testVisionMemory() throws InterruptedException, SolrServerException, IOException {
     // basic log level stuff
     Runtime.setLogLevel("INFO");
@@ -72,6 +167,7 @@ public class VisionMemoryTest {
         System.out.println("Exiting");
         System.exit(0);
       }
+      System.in.read();
     }
 
 
