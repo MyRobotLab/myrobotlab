@@ -541,6 +541,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // TODO: see if we can figure out if this is an inbox or an outbox.
   // ok we want to do something like handle an onMessage method.
   public void onMessage(Message message) {
+    if (message == null) { 
+      log.warn("Null message in an inbox.. or maybe outbox?");
+      return;
+    }
+    
     // convert this message into a solr document
     // TODO: make messages more unique. 
     String docId = "message_" + UUID.randomUUID().toString() + "_" +  message.msgId;
@@ -556,9 +561,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     doc.setField("message_status", message.status);
     // doc.setField("", message.);
     // TODO: now we need to introspect the array of objects and figure out how to index them!! gah..
-    for (Object o : message.data) {
-      // TODO: this will probably blow up pretty bad for different object types
-      doc.addField("data", o);
+    if (message.data != null) {
+      for (Object o : message.data) {
+        // TODO: this will probably blow up pretty bad for different object types
+        doc.addField("data", o);
+      }
     }
     addDocument(doc);
   }
