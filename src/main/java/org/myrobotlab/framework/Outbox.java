@@ -237,6 +237,9 @@ public class Outbox implements Runnable, Serializable {
   }
 
   public void addMessageListener(MessageListener ml) {
-    listeners .add(ml);
+    // already attached.
+    if (listeners.contains(ml))
+      return;
+    listeners.add(ml);
   }
 }
