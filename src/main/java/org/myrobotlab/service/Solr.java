@@ -542,6 +542,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // ok we want to do something like handle an onMessage method.
   public void onMessage(Message message) {
     if (message == null) { 
+      // This shouldn't happen...
       log.warn("Null message in an inbox.. or maybe outbox?");
       return;
     }
@@ -551,6 +552,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     String docId = "message_" + UUID.randomUUID().toString() + "_" +  message.msgId;
     SolrInputDocument doc = new SolrInputDocument();
     doc.setField("id", docId);
+    // TODO: consider a cache of this to make this faster
+    doc.setField("sender_type", Runtime.getService(message.sender).getType());
     doc.setField("sender", message.sender);
     doc.setField("method", message.method);
     // TODO: this is actually the timestamp of the message.. not an id.
@@ -559,7 +562,12 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     doc.setField("message_name", message.name);
     doc.setField("sender_method", message.sendingMethod);
     doc.setField("message_status", message.status);
-    // doc.setField("", message.);
+    if (message.historyList != null) {
+      for (String history : message.historyList) {
+        doc.addField("history", message.historyList);
+      }
+    }
+    System.out.println("Data: " + message.data);
     // TODO: now we need to introspect the array of objects and figure out how to index them!! gah..
     if (message.data != null) {
       for (Object o : message.data) {
