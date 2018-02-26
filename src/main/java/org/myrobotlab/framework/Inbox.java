@@ -193,6 +193,9 @@ public class Inbox implements Serializable {
   }
 
   public void addMessageListener(MessageListener ml) {
+    // already attached.
+    if (listeners.contains(ml))
+      return;
     listeners.add(ml);
   }
   

@@ -27,6 +27,7 @@ import org.myrobotlab.framework.MessageListener;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -525,6 +526,29 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     addDocument(doc);
   }
  
+  
+  public void attachAllInboxes() {
+    // attach all outboxes (except for our own..)
+    for (ServiceInterface s : Runtime.getServices()) {
+      if (s.getName().equalsIgnoreCase(this.getName())) 
+        // attach all outboxes (except for our own..)
+        continue;
+      // TODO: avoid a double attach!  
+      s.getInbox().addMessageListener(this);
+    }
+  }
+
+  public void attachAllOutboxes() {
+    // attach all outboxes (except for our own..)
+    for (ServiceInterface s : Runtime.getServices()) {
+      if (s.getName().equalsIgnoreCase(this.getName())) 
+        // attach all outboxes (except for our own..)
+        continue;
+      // TODO: avoid a double attach!  
+      s.getOutbox().addMessageListener(this);
+    }
+  }
+  
   // TODO: attach a service inbox/outbox 
   // TODO: what does this mean for solr to attach to a service?
   public void attachInbox(Inbox inbox) {

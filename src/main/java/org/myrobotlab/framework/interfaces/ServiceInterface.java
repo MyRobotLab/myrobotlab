@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
@@ -42,6 +43,8 @@ public interface ServiceInterface
 
 	public ArrayList<String> getNotifyListKeySet();
 
+	public Inbox getInbox();
+	
 	public Outbox getOutbox();
 
 	// Deprecate - just use class
