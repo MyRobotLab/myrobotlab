@@ -1,6 +1,7 @@
 package org.myrobotlab.integration;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -9,6 +10,7 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.deeplearning4j.util.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;
@@ -78,7 +80,7 @@ public class VisionMemoryTest {
   public void searchAndPrintResult(Solr solr) {
     
     SolrQuery query = new SolrQuery();
-    query.setQuery("*:*");
+    query.setQuery("method:moveTo");
     query.setSort("index_date", ORDER.desc);
     //query.setFacet(true);
     //query.addFacetField("object");
@@ -107,10 +109,12 @@ public class VisionMemoryTest {
       if (field.equalsIgnoreCase("id")) 
         continue;
       System.out.print(field + ": ");
-      for (Object value : doc.getFieldValues(field)) {
-        System.out.print(value + ",");
+      ArrayList<String> strVals = new ArrayList<String>();
+      for (Object o : doc.getFieldValues(field)) {
+        strVals.add(o.toString());
       }
-      System.out.println("");      
+      String values = StringUtils.join(",", strVals );
+      System.out.println(values);      
     }
     
   }
