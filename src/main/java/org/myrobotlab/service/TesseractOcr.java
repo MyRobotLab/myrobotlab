@@ -122,7 +122,8 @@ public class TesseractOcr extends Service {
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
   
-    meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "3.04.01-1.3");
+    // TODO: update me to 1.4 
+    meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "3.05.01-1.4");
 
     // meta.addDependency("net.sourceforge.tess4j", "tess4j", "3.4.0");
     // meta.addDependency("com.sun.jna", "3.2.2");

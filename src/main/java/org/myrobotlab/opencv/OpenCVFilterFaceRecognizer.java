@@ -6,9 +6,9 @@ import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_face.createEigenFaceRecognizer;
-import static org.bytedeco.javacpp.opencv_face.createFisherFaceRecognizer;
-import static org.bytedeco.javacpp.opencv_face.createLBPHFaceRecognizer;
+import static org.bytedeco.javacpp.opencv_face.EigenFaceRecognizer;
+import static org.bytedeco.javacpp.opencv_face.FisherFaceRecognizer;
+import static org.bytedeco.javacpp.opencv_face.LBPHFaceRecognizer;
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imdecode;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
@@ -282,11 +282,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private void initRecognizer() {
     // Configure which type of recognizer to use
     if (RecognizerType.FISHER.equals(recognizerType)) {
-      faceRecognizer = createFisherFaceRecognizer();
+      faceRecognizer = FisherFaceRecognizer.create();
     } else if (RecognizerType.EIGEN.equals(recognizerType)) {
-      faceRecognizer = createEigenFaceRecognizer();
+      faceRecognizer = EigenFaceRecognizer.create();
     } else {
-      faceRecognizer = createLBPHFaceRecognizer();
+      faceRecognizer = LBPHFaceRecognizer.create();
     }
   }
 
@@ -316,7 +316,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
    * @param filename the filename that represents the saved model.
    */
   public void load(String filename) {
-    faceRecognizer.load(filename);
+    //faceRecognizer.load(new File(filename));
+    faceRecognizer.read(filename);
     //assume we're trained now..
     trained = true;
     // let's also flip it to recognize mode
