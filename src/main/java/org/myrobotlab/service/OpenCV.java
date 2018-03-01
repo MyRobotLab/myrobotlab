@@ -153,7 +153,7 @@ public class OpenCV extends AbstractVideoSource {
       "Dilate", "DL4J", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
       "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
       "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
-      "Split", "State", "Surf", "Tesseract", "Threshold", "Transpose" };
+      "Split", "State", "Surf", "Tesseract", "Threshold", "Transpose", "Yolo" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -752,6 +752,10 @@ public class OpenCV extends AbstractVideoSource {
     // for the mjpeg streamer support FIXME - this should only be in Video
     // Streamer !
     // meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
+    
+    // TODO: should be something about yolo here too..
+    // maybe make the yolo filter download the model and cache it?  
+    // or have it as a dependency
     return meta;
   }
 
