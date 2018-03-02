@@ -8,13 +8,21 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -25,32 +33,36 @@ import org.bytedeco.javacpp.opencv_dnn.Net;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
 public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class.getCanonicalName());
-  private OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-  
+
+  // zero offset to where the confidence level is in the output matrix of the darknet.
+  private static final int CONFIDENCE_INDEX = 4;
+  private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
   
   private float confidenceThreshold = 0.0F;
   // the column in the detection matrix that contains the confidence level.  (I think?)
-  int probability_index = 5;
+  // int probability_index = 5;
   // yolo file locations
   // private String darknetHome = "c:/dev/workspace/darknet/";
-  public String darknetHome = "./yolo";
-  private String modelConfiguration = darknetHome + "cfg/yolo.cfg";
-  private String modelBinary = darknetHome + "yolo.weights";
-  private String classNamesFile = darknetHome + "data/coco.names";
+  public String darknetHome = "yolo";
+  public String modelConfig = "yolo.cfg";
+  public String modelWeights = "yolo.weights";
+  public String modelNames = "coco.names";
+  
+  // TODO: store these somewhere as a resource / dependency ..
+  public String modelConfigUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolo.cfg";
+  public String modelWeightsUrl = "https://pjreddie.com/media/files/yolo.weights";
+  public String modelNamesUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names";
+
   
   private Net net;
-  //load the class names
   ArrayList<String> classNames;
-
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-
   public ArrayList<YoloDetectedObject> lastResult = null; 
   private volatile IplImage lastImage = null;
 
@@ -64,15 +76,84 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     loadYolo();
   }
 
+  private void downloadYoloModel() {
+    
+    File yoloHome = new File(darknetHome);
+    if (!yoloHome.exists()) {
+      yoloHome.mkdirs();
+    }
+    
+    // now we need to check the files in the directory exist.
+    // 3 files to check for
+    File modelConfigFile = new File(darknetHome +  File.separator + modelConfig);
+    File modelWeightsFile = new File(darknetHome +  File.separator + modelWeights);
+    // TODO: localize this? why not!
+    File modelNamesFile = new File(darknetHome +  File.separator + modelNames);
+    
+    if (!modelConfigFile.exists()) {
+      // download & cache!
+      downloadAndCache(modelConfigUrl, modelConfigFile, null);
+    }
+    if (!modelWeightsFile.exists()) {
+      // download & cache!
+      downloadAndCache(modelWeightsUrl, modelWeightsFile, "Large download 200mb +/-");
+    }
+    if (!modelNamesFile.exists()) {
+      // download & cache!
+      downloadAndCache(modelNamesUrl, modelNamesFile, null);
+    }
+        
+  }
+  
+  private void downloadAndCache(String uri, File location, String details) {
+    // TODO: clean up the error handling here.
+    
+    log.info("Downloading {} to file location {}) {}", uri, location.getAbsolutePath(), details);
+    URL url = null;
+    try {
+      url = new URL(uri);
+    } catch (MalformedURLException e) {
+      log.warn("Invalid url passed! {}", uri);
+      e.printStackTrace();
+      return;
+    }
+    InputStream in = null;
+    try {
+      in = url.openStream();
+    } catch (IOException e) {
+      log.warn("Error opening a connection to {} ", uri);
+      e.printStackTrace();
+      return;
+    }
+    DataInputStream dis = new DataInputStream(new BufferedInputStream(in));
+    try {
+      // open up the destination file for writing
+      FileOutputStream fos = new FileOutputStream(location);
+      IOUtils.copy(dis, fos);
+      fos.close();
+      dis.close();
+    } catch (IOException e) {
+      log.warn("Error downloading.");
+      e.printStackTrace();
+      // clean up a partially written file
+      if (location.exists()) {
+        log.warn("Partially downloaded file.. cleaning up");
+        location.delete();
+      }
+      return;
+    }
+  }
+  
   private void loadYolo() {
-    net = readNetFromDarknet(modelConfiguration, modelBinary);
+    // If the model isn't there, we should download it and cache it.
+    downloadYoloModel();
+    net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
     //load the class names
     try {
-      classNames = loadClassNames(classNamesFile);
+      classNames = loadClassNames(darknetHome +  File.separator +  modelNames);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      log.warn("Error unable to load class names");
+      //e.printStackTrace();
+      log.warn("Error unable to load class names from file {}", modelNames);
       return;
     }
     
@@ -153,10 +234,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     while (true) {
       if (lastImage != null) {
           // lastResult = dl4j.classifyImageVGG16(lastImage);
-          yoloFrame(lastImage);
-          // invoke("publishClassification", lastResult);
-          // log.info(formatResultString(lastResult));
-
+        lastResult = yoloFrame(lastImage);
+        invoke("publishYoloClassification", lastResult);
       } else {
         // log.info("No Image to classify...");
       }
@@ -171,32 +250,23 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     }
   }
 
-  private void yoloFrame(IplImage frame) {
-    
+  private ArrayList<YoloDetectedObject> yoloFrame(IplImage frame) {
+    // this is our list of objects that have been detected in a given frame.
     ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
-    // System.out.println("Image / Frame Size : " +frame.width() + " x " + frame.height() + " Channels: " + frame.nChannels());
     // convert that frame to a matrix (Mat) using the frame converters in javacv
+
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
-    //show(inputMat, "input image");
-    // System.out.println("Input Mat has " + inputMat.rows() + " rows and " + inputMat.cols() + " columns.");
-    // we probably need to do a cut color of the input frame to make sure it's suitable for input to the yolo network
-    //  cvtColor(frame, frame, COLOR_BGRA2BGR);
-    // convert the frame matrix to a blob... the resulting images should be 416 x 416 in resolution because this is what yolo expects.
+    // TODO: I think yolo expects RGB color (which is inverted in the next step)  so if the input image isn't in RGB color, we might need a cvCutColor
     Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false); //Convert Mat to batch of images
-    //System.out.println("Input blob has " + inputBlob.size().area() +  " area.");
     // put our frame/input blob into the model.
     net.setInput(inputBlob, "data");
-    // ask for the detection_out layer i guess?  not sure the details of the forward method.
+    // ask for the detection_out layer i guess?  not sure the details of the forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
-    // System.out.println("Matrix has " + detectionMat.rows() + " rows.");
-    // with any luck. our names line up.
-    //float maxConfidence = 0.0f;
-    //int maxIndex = 0;
-     
+    // iterate the rows of the detection matrix.
     for (int i = 0; i < detectionMat.rows(); i++) {
-      // int probability_index = 5;
       Mat currentRow = detectionMat.row(i);
-      float confidence = currentRow.getFloatBuffer().get(4);
+      
+      float confidence = currentRow.getFloatBuffer().get(CONFIDENCE_INDEX);
       if (confidence < confidenceThreshold) {
         // skip the noise
         continue;
@@ -209,12 +279,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
       //String className = getWithDefault(classNames, i); 
       // System.out.print("\nROW (" + className + "): " + currentRow.getFloatBuffer().get(4) + " -- \t\t");
-      for (int c = probability_index ; c < currentRow.size().get(); c++) {
+      for (int c = CONFIDENCE_INDEX+1 ; c < currentRow.size().get(); c++) {
         float val = currentRow.getFloatBuffer().get(c);
         // TODO: this filtering logic is probably wrong.
         if (val > 0.0) {
-          String label = classNames.get(c-probability_index);
-          System.out.println("Index : " + c + "->" + val + " label : " + classNames.get(c-probability_index) );
+          String label = classNames.get(c-CONFIDENCE_INDEX-1);
+          // System.out.println("Index : " + c + "->" + val + " label : " + classNames.get(c-probability_index) );
           // let's just say this is something we've detected..
           // ok. in theory this is something we think it might actually be.
           float x = currentRow.getFloatBuffer().get(0);
@@ -225,38 +295,20 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           int yLeftBottom = (int) ((y - height / 2) * inputMat.rows());
           int xRightTop = (int) ((x + width / 2) * inputMat.cols());
           int yRightTop = (int) ((y + height / 2) * inputMat.rows());
-          //          //Rect object(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-          //          //rectangle(frame, object, Scalar(0, 255, 0));
-          //          System.out.println("Class: " + objectClass );
-          System.out.println(classNames.get(c-probability_index)  + " Confidence: " + confidence + " " + xLeftBottom + " " + yLeftBottom + " " + xRightTop + " " + yRightTop);
-
+          log.info(label  + " (" + confidence + "%) [(" + xLeftBottom + "," + yLeftBottom + "),(" + xRightTop + "," + yRightTop + ")]");
           Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
           YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label);
           yoloObjects.add(obj);
-          // rectangle(inputMat, boundingBox, Scalar.CYAN);
-          // TODO: update the lastResult with the bounding box, confidence level, and label for all objects found.
-          // now we have a box !  let's set this as the last image?
-          // drawRect(frame, r, CvScalar.BLUE);
-          //cvDrawRect(frame, )
-          // todo draw the rectangle.
-          //show(inputMat, "detected?");
-
-
         }
       }
+      
     }
-    // TODO: does this need to be synchronized/volitile or anything?
-    this.lastResult = yoloObjects;
+    return yoloObjects;
   }
 
-  public Map<String, Double> publishClassification(Map<String, Double> classification) {	
-    return classification;
-  }
-
-  public void attach(Solr solr) {
-
-    // 
-
+  // TODO: does this need to be here or on the base OpenCV service?
+  public ArrayList<YoloDetectedObject> publishYoloClassification(ArrayList<YoloDetectedObject> yoloClassification) {	
+    return yoloClassification;
   }
 
 }

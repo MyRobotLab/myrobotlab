@@ -72,6 +72,7 @@ import org.myrobotlab.opencv.OpenCVFilterFaceDetect2;
 import org.myrobotlab.opencv.OpenCVFilterTesseract;
 import org.myrobotlab.opencv.OpenCVFilterOverlay;
 import org.myrobotlab.opencv.VideoProcessor;
+import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractVideoSource;
 import org.myrobotlab.service.data.Point2Df;
@@ -722,6 +723,11 @@ public class OpenCV extends AbstractVideoSource {
 	  return classifications;
   }
 
+  public ArrayList<YoloDetectedObject>  publishYoloClassification(ArrayList<YoloDetectedObject> yoloClassifications) {
+    // log.info("Publish Classification in opencv!");
+    return yoloClassifications;
+  }
+  
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
