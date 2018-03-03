@@ -33,6 +33,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
+import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -408,9 +409,30 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   // Attach Pattern stuff! 
   public void attach(OpenCV opencv) {
-    opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
+  //  opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
+    opencv.addListener("publishClassification", getName(), "onClassification");
+    opencv.addListener("publishYoloClassification", getName(), "onYoloClassification");
+      
   }
 
+  public ArrayList<YoloDetectedObject> onYoloClassification (ArrayList<YoloDetectedObject> yoloObjects) {
+    // for now.. let's just do this.
+    for (YoloDetectedObject yolo : yoloObjects) {
+      SolrInputDocument doc = new SolrInputDocument();
+      String type = "yolo";    
+      String id = type + "_" + UUID.randomUUID().toString();
+      doc.setField("id", id);
+      doc.setField("type", type);
+      // TODO: enforce UTC, or move this to the solr schema to do.
+      doc.setField("date", new Date());
+      doc.addField("label", yolo.label);
+      // TODO: more meta data
+      addDocument(doc);
+    }
+    // add the document we just built up to solr so we can remember it!   
+    return yoloObjects;
+  }
+  
   public OpenCVData onOpenCVData(OpenCVData data) {
     // TODO: copy some useful metadata to the record being archived
     // TODO: convert this set of opencv data to a solr document...
