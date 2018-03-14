@@ -138,6 +138,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
    * Here we want to set the language string and broadcast the update to the
    * web gui so that it knows to update the language on webkit speech
    */
+  @Override
   public void setLanguage(String language) {
     this.language = language;
     broadcastState();
