@@ -723,11 +723,6 @@ public class OpenCV extends AbstractVideoSource {
 	  return classifications;
   }
 
-  public ArrayList<YoloDetectedObject>  publishYoloClassification(ArrayList<YoloDetectedObject> yoloClassifications) {
-    // log.info("Publish Classification in opencv!");
-    return yoloClassifications;
-  }
-  
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -744,6 +739,7 @@ public class OpenCV extends AbstractVideoSource {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
+    meta.addDependency("org.bytedeco", "javacv", "1.4");
     meta.addDependency("org.bytedeco", "javacv-platform", "1.4");
     // meta.exclude("commons-codec", "commons-codec");
     
@@ -755,13 +751,13 @@ public class OpenCV extends AbstractVideoSource {
     
     // FaceRecognizer no worky if missing it
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
-    // for the mjpeg streamer support FIXME - this should only be in Video
-    // Streamer !
-    // meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
-    
+    // for the mjpeg streamer frame grabber
+    meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
+
     // TODO: should be something about yolo here too..
     // maybe make the yolo filter download the model and cache it?  
     // or have it as a dependency
+
     return meta;
   }
 

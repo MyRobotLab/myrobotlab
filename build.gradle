@@ -15,121 +15,193 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
-        
-     maven { url "http://repo.myrobotlab.org/artifactory/myrobotlab" }
-     maven { url "https://jcenter.bintray.com" }
-     maven { url "http://www.dcm4che.org/maven2/" }
-     maven { url "https://repo.eclipse.org/content/groups/releases/" }
-     maven { url "https://oss.sonatype.org/content/groups/public" }
-     maven { url "http://simulation.tudelft.nl/maven/" }
-     maven { url "https://jitpack.io" }
-     maven { url "https://artifacts.alfresco.com/nexus/content/repositories/public/" }
-     maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "https://jcenter.bintray.com" }
+    maven { url "http://repo.myrobotlab.org/artifactory/myrobotlab" }
+    maven { url "https://repo.eclipse.org/content/groups/releases" }
+    maven { url "https://oss.sonatype.org/content/groups/public" }
+    maven { url "http://simulation.tudelft.nl/maven" }
+    maven { url "https://jitpack.io" }
+    maven { url "https://artifacts.alfresco.com/nexus/content/repositories/public" }
+
 }
+
 dependencies {
-    compile group: 'org.python', name: 'jython', version:'2.7.0'
-    compile group: 'org.apache.maven', name: 'maven-embedder', version:'3.1.1'
-    compile group: 'org.eclipse.aether', name: 'aether-connector-wagon', version:'0.9.0.M2'
-    compile group: 'org.apache.maven.wagon', name: 'wagon-http-lightweight', version:'2.5'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3'
-    compile group: 'com.google.code.gson', name: 'gson', version:'2.8.0'
-    compile group: 'org.apache.ivy', name: 'ivy', version:'2.4.0'
-    compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version:'2.0.5.1'
-    compile group: 'com.fifesoft', name: 'autocomplete', version:'2.0.5.1'
-    compile group: 'com.jidesoft', name: 'jide-oss', version:'3.6.18'
-    compile group: 'com.mxgraph', name: 'jgraphx', version:'1.10.4.2'
-    compile group: 'org.atmosphere', name: 'nettosphere', version:'2.3.0'
-    compileOnly group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.5.2'
-    compileOnly group: 'org.apache.httpcomponents', name: 'httpcore', version:'4.4.6'
-    compileOnly group: 'javazoom', name: 'jlayer', version:'1.0.1'
-    compileOnly group: 'io.github.firemaples', name: 'microsoft-translator-java-api', version:'0.8.3'
-    compileOnly(group: 'org.boofcv', name: 'all', version:'0.26') {
-	exclude(module: 'javacv')
-	exclude(module: 'opencv')
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+
+    compile 'javazoom:jlayer:1.0.1'
+
+    compile 'io.github.firemaples:microsoft-translator-java-api:0.8.3'
+
+    compile ('org.boofcv:all:0.26') {
+      exclude (module: 'javacv')
+      exclude (module: 'opencv')
     }
-    compileOnly group: 'ChessBoard', name: 'ChessBoard', version:'1.0.0'
-    compileOnly group: 'ca.pjer', name: 'chatter-bot-api', version:'2.0.1'
-    compileOnly group: 'it.sauronsoftware.cron4j', name: 'cron4j', version:'2.2.5'
-    compileOnly group: 'net.sf.opencsv', name: 'opencsv', version:'2.3'
-    compileOnly group: 'org.deeplearning4j', name: 'deeplearning4j-core', version:'0.9.1'
-    compileOnly group: 'org.deeplearning4j', name: 'deeplearning4j-zoo', version:'0.9.1'
-    compileOnly group: 'org.nd4j', name: 'nd4j-native-platform', version:'0.9.1'
-    compileOnly group: 'commons-lang', name: 'commons-lang', version:'2.6'
-    compileOnly group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version:'3.1.1'
-    compileOnly group: 'org.apache.tika', name: 'tika-core', version:'1.14'
-    compileOnly group: 'org.apache.opennlp', name: 'opennlp-tools', version:'1.6.0'
-    compileOnly group: 'net.objecthunter', name: 'exp4j', version:'0.4.8'
-    compileOnly group: 'com.google.cloud', name: 'google-cloud-vision', version:'1.14.0'
-    compileOnly group: 'org.jsoup', name: 'jsoup', version:'1.8.3'
-    compileOnly group: 'javax.mail', name: 'mail', version:'1.4.7'
-    compileOnly 'inmoov.fr:inmoov:1.0.0@zip'
-    compileOnly 'inmoov.fr:jm3-model:1.0.0@zip'
-    compileOnly group: 'jfugue', name: 'jfugue', version:'5.0.7'
-    compileOnly group: 'org.jmonkeyengine', name: 'jme3-core', version:'3.2.0-stable'
-    compileOnly group: 'org.jmonkeyengine', name: 'jme3-desktop', version:'3.2.0-stable'
-    compileOnly group: 'org.jmonkeyengine', name: 'jme3-lwjgl', version:'3.2.0-stable'
-    compileOnly group: 'org.jmonkeyengine', name: 'jme3-jogg', version:'3.2.0-stable'
-    compileOnly group: 'org.jmonkeyengine', name: 'jme3-niftygui', version:'3.2.0-stable'
-    compileOnly group: 'org.jmonkeyengine', name: 'jme3-bullet', version:'3.2.0-stable'
-    compile group: 'net.java.jinput', name: 'jinput', version:'2.0.7'
-    compileOnly group: 'com.1stleg', name: 'jnativehook', version:'2.0.3'
-    compileOnly group: 'leapmotion', name: 'leap', version:'2.1.3'
-    compileOnly 'com.microsoft:tts:1.1@zip'
-    compileOnly group: 'de.dfki.mary', name: 'marytts', version:'5.2'
-    compileOnly(group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version:'5.2') {
-	exclude(module: 'slf4j-api')
-	exclude(module: 'commons-io')
-	exclude(module: 'log4j')
-	exclude(module: 'commons-lang')
-	exclude(module: 'guava')
-	exclude(module: 'opennlp-tools')
-	exclude(module: 'slf4j-log4j12')
-	exclude(module: 'httpcore')
+
+    compile 'ChessBoard:ChessBoard:1.0.0'
+
+    compile 'ca.pjer:chatter-bot-api:2.0.1'
+
+    compile 'it.sauronsoftware.cron4j:cron4j:2.2.5'
+
+    compile 'net.sf.opencsv:opencsv:2.3'
+
+    compile 'org.deeplearning4j:deeplearning4j-core:0.9.1'
+    compile 'org.deeplearning4j:deeplearning4j-zoo:0.9.1'
+    // compile 'org.nd4j:nd4j:0.9.1'
+    compile 'org.nd4j:nd4j-native-platform:0.9.1'
+    compile 'commons-lang:commons-lang:2.6'
+    compile 'com.twelvemonkeys.imageio:imageio-core:3.1.1'
+
+    compile 'org.apache.tika:tika-core:1.14'
+    compile 'org.apache.opennlp:opennlp-tools:1.6.0'
+    compile 'net.objecthunter:exp4j:0.4.8'
+
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+
+    compile 'com.google.cloud:google-cloud-vision:1.14.0'
+
+    compile 'org.jsoup:jsoup:1.8.3'
+
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+
+    compile 'javax.mail:mail:1.4.7'
+
+    compile 'inmoov.fr:inmoov:1.0.0@zip'
+    compile 'inmoov.fr:jm3-model:1.0.0@zip'
+
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+
+    compile 'inmoov.fr:inmoov:1.0.0@zip'
+    compile 'inmoov.fr:jm3-model:1.0.0@zip'
+
+    compile 'jfugue:jfugue:5.0.7'
+
+    compile 'org.jmonkeyengine:jme3-core:3.2.0-stable'
+    compile 'org.jmonkeyengine:jme3-desktop:3.2.0-stable'
+    compile 'org.jmonkeyengine:jme3-lwjgl:3.2.0-stable'
+    compile 'org.jmonkeyengine:jme3-jogg:3.2.0-stable'
+    compile 'org.jmonkeyengine:jme3-niftygui:3.2.0-stable'
+    compile 'org.jmonkeyengine:jme3-bullet:3.2.0-stable'
+    compile 'org.jmonkeyengine:jme3-niftygui:3.2.0-stable'
+
+    compile 'net.java.jinput:jinput:2.0.7'
+
+    compile 'com.1stleg:jnativehook:2.0.3'
+
+    compile 'leapmotion:leap:2.1.3'
+
+    compile 'com.microsoft:tts:1.1@zip'
+
+    compile 'de.dfki.mary:marytts:5.2@pom'
+    compile ('de.dfki.mary:voice-cmu-slt-hsmm:5.2') {
+      exclude (module: 'slf4j-api')
+      exclude (module: 'commons-io')
+      exclude (module: 'log4j')
+      exclude (module: 'commons-lang')
+      exclude (module: 'guava')
+      exclude (module: 'opennlp-tools')
+      exclude (module: 'slf4j-log4j12')
+      exclude (module: 'httpcore')
     }
-    compileOnly 'mycroftai.mimic:mimic_win64:1.0@zip'
-    compileOnly group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version:'1.2.0'
-    compileOnly group: 'com.github.nicholasastuart', name: 'myo-java', version:'0.9.1'
-    compileOnly group: 'slick-util', name: 'slick-util', version:'1.0.0'
-    compileOnly group: 'org.saintandreas', name: 'jovr', version:'0.7.0.0'
-    compileOnly(group: 'org.saintandreas', name: 'glamour-lwjgl', version:'1.0.8') {
-exclude(module: 'slf4j-api')
-exclude(module: 'lwjgl')
-exclude(module: 'guava')
+
+    compile 'mycroftai.mimic:mimic_win64:1.0@zip'
+
+    compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0'
+
+    compile 'com.github.nicholasastuart:myo-java:0.9.1'
+
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+
+    compile 'slick-util:slick-util:1.0.0'
+    compile 'org.saintandreas:jovr:0.7.0.0'
+    compile ('org.saintandreas:glamour-lwjgl:1.0.8') {
+      exclude (module: 'slf4j-api')
+      exclude (module: 'lwjgl')
+      exclude (module: 'guava')
     }
-    compileOnly group: 'org.bytedeco', name: 'javacv-platform', version:'1.3.3'
-    compileOnly group: 'com.github.sarxos', name: 'webcam-capture', version:'0.3.10'
-    compileOnly group: 'org.apache.commons', name: 'commons-lang3', version:'3.3.2'
-    compileOnly group: 'net.sf.jipcam', name: 'jipcam', version:'0.9.1'
-    compileOnly group: 'simpleopenni', name: 'openni', version:'1.96'
-    compileOnly group: 'com.illposed.osc', name: 'javaosc-core', version:'0.4'
-    compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-polly', version:'1.11.118'
-    compileOnly 'program-ab:program-ab-data:0.0.4.1@zip'
-    compileOnly group: 'program-ab', name: 'program-ab-kw', version:'0.0.4.1'
-    compileOnly group: 'org.json', name: 'json', version:'20090211'
-    compileOnly group: 'feed4j', name: 'feed4j', version:'1.0.0'
-    compileOnly group: 'com.pi4j', name: 'pi4j-core', version:'1.1'
-    compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-rekognition', version:'1.11.263'
-    compileOnly group: 'org.atmosphere', name: 'wasync', version:'2.1.3'
-    compileOnly group: 'org.scream3r', name: 'jssc', version:'2.8.0'
-    compileOnly group: 'java3d', name: 'j3dcore', version:'1.5.1'
-    compileOnly group: 'java3d', name: 'j3dutils', version:'1.5.1'
-    compileOnly group: 'java3d', name: 'vecmath', version:'1.5.1'
-    compileOnly group: 'org.apache.solr', name: 'solr-solrj', version:'7.2.1'
-    compileOnly group: 'org.apache.solr', name: 'solr-core', version:'7.2.1'
-    compileOnly group: 'edu.cmu.sphinx', name: 'sphinx4-core', version:'5prealpha-SNAPSHOT'
-    compileOnly group: 'edu.cmu.sphinx', name: 'sphinx4-data', version:'5prealpha-SNAPSHOT'
-    compileOnly group: 'org.bytedeco.javacpp-presets', name: 'tesseract-platform', version:'3.04.01-1.3'
-    compileOnly group: 'junit', name: 'junit', version:'4.12'
-    compileOnly group: 'topcodes', name: 'topcodes', version:'1.0.0'
-    compileOnly group: 'org.twitter4j', name: 'twitter4j-core', version:'3.0.5'
-    compileOnly group: 'com.voicerss', name: 'tts', version:'1.0'
-    compileOnly group: 'wiiusej', name: 'wiiusej', version:'wiiusej'
-    compileOnly group: 'org.wikidata.wdtk', name: 'wdtk-client', version:'0.8.0'
-    compileOnly group: 'WolframAlpha', name: 'WolframAlpha', version:'1.1'
-    compileOnly group: 'org.igniterealtime.smack', name: 'smack-java7', version:'4.1.6'
-    compileOnly group: 'org.igniterealtime.smack', name: 'smack-tcp', version:'4.1.6'
-    compileOnly group: 'org.igniterealtime.smack', name: 'smack-im', version:'4.1.6'
-    compileOnly group: 'org.igniterealtime.smack', name: 'smack-extensions', version:'4.1.6'
+
+    compile 'org.bytedeco:javacv:1.3'
+    compile 'org.bytedeco:javacv-platform:1.3.3'
+    compile 'com.github.sarxos:webcam-capture:0.3.10'
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+
+    compile 'simpleopenni:openni:1.96'
+
+    compile 'com.illposed.osc:javaosc-core:0.4'
+
+    compile 'com.amazonaws:aws-java-sdk-polly:1.11.118'
+
+    compile 'program-ab:program-ab-data:0.0.4.1@zip'
+    compile 'program-ab:program-ab-kw:0.0.4.1'
+    compile 'org.json:json:20090211'
+
+    compile 'org.python:jython:2.7.0'
+
+    compile 'feed4j:feed4j:1.0.0'
+
+    compile 'com.pi4j:pi4j-core:1.1'
+
+    compile 'com.amazonaws:aws-java-sdk-rekognition:1.11.263'
+
+    compile 'org.atmosphere:wasync:2.1.3'
+
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'org.apache.ivy:ivy:2.4.0'
+
+    compile 'org.scream3r:jssc:2.8.0'
+
+    compile 'java3d:j3dcore:1.5.1'
+    compile 'java3d:j3dutils:1.5.1'
+    compile 'java3d:vecmath:1.5.1'
+
+    compile 'org.apache.solr:solr-core:7.2.1'
+    compile 'org.apache.solr:solr-solrj:7.2.1'
+    compile 'commons-io:commons-io:2.5'
+
+    compile 'edu.cmu.sphinx:sphinx4-core:5prealpha-SNAPSHOT'
+    compile 'edu.cmu.sphinx:sphinx4-data:5prealpha-SNAPSHOT'
+
+    compile 'com.fifesoft:rsyntaxtextarea:2.0.5.1'
+    compile 'com.fifesoft:autocomplete:2.0.5.1'
+    compile 'com.jidesoft:jide-oss:3.6.18'
+    compile 'com.mxgraph:jgraphx:1.10.4.2'
+
+    compile 'org.bytedeco.javacpp-presets:tesseract:3.04.01-1.3'
+    compile 'org.bytedeco.javacpp-presets:tesseract-platform:3.04.01-1.3'
+
+    compile 'junit:junit:4.12'
+
+    compile 'topcodes:topcodes:1.0.0'
+
+    compile 'org.twitter4j:twitter4j-core:3.0.5'
+
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+    compile 'com.voicerss:tts:1.0'
+
+    compile 'org.atmosphere:nettosphere:2.3.0'
+
+    compile 'wiiusej:wiiusej:wiiusej'
+
+    compile 'wiiusej:wiiusej:wiiusej'
+
+    compile 'org.wikidata.wdtk:wdtk-client:0.8.0'
+
+    compile 'WolframAlpha:WolframAlpha:1.1'
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'org.apache.httpcomponents:httpcore:4.4.6'
+
+    compile 'org.igniterealtime.smack:smack-java7:4.1.6'
+    compile 'org.igniterealtime.smack:smack-tcp:4.1.6'
+    compile 'org.igniterealtime.smack:smack-im:4.1.6'
+    compile 'org.igniterealtime.smack:smack-extensions:4.1.6'
+
+
 }
 
 task copyDependencies(type: Copy) {
