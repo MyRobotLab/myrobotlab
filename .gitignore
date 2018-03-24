@@ -76,3 +76,32 @@ Thumbs.db
 /.gradle/
 /dependencies/
 /gradle/
+/pom/
+/install.ivy.2.5.0/
+/install.ivy/
+/install.maven/
+/install.opencv.ivy.2.5.0/
+/install.opencv.ivy/
+/install.opencv.maven/
+/libraries.gradle.2/
+/libraries.ivy.head.unpatched/
+/libraries.ivy.jinput/
+/libraries.ivy.noPatch/
+/libraries.ivy.test/
+/libraries.maven/
+/libraries.patch.ivy.deleted.javadocs.sources/
+/libraries.patch.ivy/
+/ivy-2.4.0-2.jar
+/ivy.head.unpatched.jar
+/ivy.noPatch.jar
+/ivy.old.xml
+/ivy.patched.jar
+/ivy.retrieve.cmd
+/ivy.test.cmd
+/maven.eclipse.project
+/pom - Copy (2).xml
+/pom - Copy.xml
+/pom.1.xml
+/pom.1519830369052.xml
+/pom.1519915826931.xml
+/pom.1519916875963.xml

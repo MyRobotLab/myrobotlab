@@ -1,0 +1,14 @@
+<ivysettings>
+   <settings defaultResolver="public"/>
+       <resolvers>
+         <chain name="public">
+            <!-- 
+              <url name="public-remote">
+                <ivy pattern="https://raw.githubusercontent.com/MyRobotLab/repo/develop/[organisation]/[revision]/ivy.xml"/>
+                <artifact pattern="https://raw.githubusercontent.com/MyRobotLab/repo/develop/[organisation]/[revision]/[artifact].[ext]"/>
+              </url>
+            -->
+{{repos}}        
+      </chain>
+    </resolvers>
+</ivysettings>    

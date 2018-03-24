@@ -1,0 +1,52 @@
+        <!-- /src/main/resources/resource/framework/repositores.xml -->
+	<!-- additional repositories for dependency resolution -->
+	<repositories>
+		<repository>
+			<id>myrobotlab</id>
+			<name>repo.myrobotlab.org</name>
+			<url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
+		</repository>
+		<repository>
+			<id>bintray</id>
+			<url>https://jcenter.bintray.com</url>
+		</repository>
+<!--  jai_imageio
+		<repository>
+			
+			<id>dcm4che</id>
+			<url>http://www.dcm4che.org/maven2/</url>
+		</repository>
+ -->
+		<repository>
+			<id>eclipse-release</id>
+			<name>Eclipse Release Repository</name>
+			<url>https://repo.eclipse.org/content/groups/releases/</url>
+		</repository>
+		<repository>
+			<id>oss-snapshots-repo</id>
+			<name>Sonatype OSS Maven Repository</name>
+			<url>https://oss.sonatype.org/content/groups/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<!-- for j3d core, utils & vector -->
+			<id>tudelft</id>
+			<name>tudelft</name>
+			<url>http://simulation.tudelft.nl/maven/</url>
+		</repository>
+		<!-- microsoft azure translate -->
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+
+		<repository>
+			<id>alfresco</id>
+			<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
+		</repository>
+	</repositories>	
+	<!-- additional repositories for dependency resolution -->
+        
