@@ -915,12 +915,15 @@ public class Agent extends Service {
     log.info("in args {}", Arrays.toString(in));
 
     // String jvmMemory = "-Xmx2048m -Xms256m";
+    /*<pre>
     long totalMemory = Runtime.getTotalPhysicalMemory();
     if (totalMemory == 0) {
       log.info("could not get total physical memory");
     } else {
       log.info("total physical memory returned is {} Mb", totalMemory / 1048576);
     }
+    </pre>
+    */
 
     // need to fill it out as best you can before submitting to spawn2
     return spawn2(pd);

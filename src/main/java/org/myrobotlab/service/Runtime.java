@@ -66,8 +66,6 @@ import org.myrobotlab.swagger.Path;
 import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
 
-import com.sun.management.OperatingSystemMXBean;
-
 /**
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
@@ -876,6 +874,10 @@ public class Runtime extends Service implements MessageListener {
   /*
    * attempt to get physical memory from the jvm not supported in all jvms..
    */
+  /*
+   * ERROR - Access restriction - The type OperatingSystemMXBean is not API (restriction on required library 1.8 jre/lib/rt.jar
+   * 
+   <pre>
   static public long getTotalPhysicalMemory() {
     try {
 
@@ -893,6 +895,9 @@ public class Runtime extends Service implements MessageListener {
     // What % CPU load this current JVM is taking, from 0.0-1.0
     return osBean.getProcessCpuLoad();
   }
+  
+  </pre>
+  */
 
   /**
    * unique id's are need for sendBlocking - to uniquely identify the message
@@ -1741,7 +1746,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("user.home [{}]", userHome);
     log.info("total mem [{}] Mb", Runtime.getTotalMemory() / 1048576);
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
-    log.info("total physical mem [{}] Mb", Runtime.getTotalPhysicalMemory() / 1048576);
+    // Access restriction - log.info("total physical mem [{}] Mb", Runtime.getTotalPhysicalMemory() / 1048576);
 
     log.info("getting local repo");
 
@@ -2374,7 +2379,7 @@ public class Runtime extends Service implements MessageListener {
 
     meta.includeServiceInOneJar(true);
     meta.addDependency("com.google.code.gson", "gson", "2.8.0");
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0"); 
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-2"); 
     
     
     // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");

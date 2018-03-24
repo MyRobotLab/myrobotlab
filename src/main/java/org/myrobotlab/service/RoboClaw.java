@@ -45,7 +45,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
 
   transient SerialDevice serial;
 
-  private Integer address = 128;
+  Integer address = 128;
 
   public static final int INPUT = 0x0;
 
@@ -235,7 +235,8 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
     // (2) RoboClaw takes about 200 ms after setting the baud rate to
     // respond to commands again (it restarts).
     // So, this 500 ms delay should deal with this.
-    sleep(500);
+    // - FIXME - this is proportional to the rate e.g. sleep(delay/baud)
+    sleep(500); 
   }
 
   // --- MotorController interface end ----
@@ -306,7 +307,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(RoboClaw.class.getCanonicalName());
+    ServiceType meta = new ServiceType(RoboClaw.class);
     meta.addDescription("interface for the powerful RoboClaw motor controller");
     meta.addCategory("motor", "control");
     meta.addPeer("serial", "Serial", "Serial Port");
@@ -486,11 +487,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
       }
       // start the services
       Runtime.start("gui", "SwingGui");
-      RoboClaw sabertooth = (RoboClaw) Runtime.start("sabertooth", "RoboClaw");
+      RoboClaw roboclaw = (RoboClaw) Runtime.start("sabertooth", "RoboClaw");
       MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
       MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
+      
+      roboclaw.setAddress(128);
 
       // configure services
       m1.setPort("m1");
@@ -498,8 +501,8 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
       joy.setController(5); // 0 on Linux
 
       // attach services
-      sabertooth.attach(m1);
-      sabertooth.attach(m2);
+      roboclaw.attach(m1);
+      roboclaw.attach(m2);
       m1.attach(joy.getAxis("y"));
       m2.attach(joy.getAxis("rz"));
       
@@ -509,12 +512,12 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
 
       // FIXME - sabertooth.attach(motor1) & sabertooth.attach(motor2)
       // FIXME - motor1.attach(joystick) !
-      sabertooth.connect(port);
+      roboclaw.connect(port);
 
       // m1.stop();
       // m2.stop();
 
-      boolean done = true;
+      boolean done = false;
       if (done) {
         return;
       }

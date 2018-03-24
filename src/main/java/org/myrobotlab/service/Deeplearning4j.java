@@ -479,6 +479,7 @@ public class Deeplearning4j extends Service {
     
     meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.9.1");
     meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", "0.9.1");
+    // meta.addDependency("org.nd4j", "nd4j", "0.9.1"); - no such thing
     meta.addDependency("org.nd4j", "nd4j-native-platform", "0.9.1");
     meta.addDependency("commons-lang", "commons-lang", "2.6");
     // due to this bug  https://github.com/haraldk/TwelveMonkeys/issues/167 seems we need to explicitly include imageio-core

@@ -348,6 +348,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
   
   public void attach(Component joystickComponent){
+	if (joystickComponent == null) {
+		error("cannot attach a null joystick component", getName());
+		return;
+	}
     send(joystickComponent.getName(), "addListener", getName(), joystickComponent.id);
   }
   

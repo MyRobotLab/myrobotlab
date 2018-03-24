@@ -4,7 +4,7 @@
 	<groupId>org.myrobotlab</groupId>
 	<artifactId>mrl</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>MyRobotLab</name>
+	<name>MyRobotLab</name> 
 	<description>Open Source Creative Machine Control</description>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -21,958 +21,927 @@
 		<jme3_v>3.1.0-stable</jme3_v>
 
 	</properties>
-
-	<!-- additional repositories for dependency resolution -->
-	<repositories>
-		<repository>
-			<id>myrobotlab</id>
-			<name>repo.myrobotlab.org</name>
-			<url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
-		</repository>
-		<repository>
-			<id>bintray</id>
-			<url>https://jcenter.bintray.com</url>
-		</repository>
-
-		<repository>
-			<!-- jai_imageio -->
-			<id>dcm4che</id>
-			<url>http://www.dcm4che.org/maven2/</url>
-		</repository>
-
-		<repository>
-			<id>eclipse-release</id>
-			<name>Eclipse Release Repository</name>
-			<url>https://repo.eclipse.org/content/groups/releases/</url>
-		</repository>
-		<repository>
-			<id>oss-snapshots-repo</id>
-			<name>Sonatype OSS Maven Repository</name>
-			<url>https://oss.sonatype.org/content/groups/public</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-		</repository>
-		<repository>
-			<!-- for j3d core, utils & vector -->
-			<id>tudelft</id>
-			<name>tudelft</name>
-			<url>http://simulation.tudelft.nl/maven/</url>
-		</repository>
-		<!-- microsoft azure translate -->
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-
-		<repository>
-			<id>alfresco</id>
-			<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
-		</repository>
-
-	</repositories>
-	<dependencies>
-	<!-- end of /resource/framework/buildPomHeader.xml -->
-	 
+	
+     <repositories>
+        <!-- the mother load  -->
+        <repository>
+          <id>central</id>
+          <name>central</name>
+          <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <!-- the big kahuna  -->
+        <repository>
+          <id>bintray</id>
+          <name>bintray</name>
+          <url>https://jcenter.bintray.com</url>
+        </repository>
+        <!-- all other mrl deps  -->
+        <repository>
+          <id>myrobotlab</id>
+          <name>myrobotlab</name>
+          <url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
+        </repository>
+        <!-- null  -->
+        <repository>
+          <id>eclipse-release</id>
+          <name>eclipse-release</name>
+          <url>https://repo.eclipse.org/content/groups/releases</url>
+        </repository>
+        <!-- jmonkey simulator  -->
+        <repository>
+          <id>jmonkey</id>
+          <name>jmonkey</name>
+          <url>https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine</url>
+        </repository>
+        <!-- sphinx  -->
+        <repository>
+          <id>oss-snapshots-repo</id>
+          <name>oss-snapshots-repo</name>
+          <url>https://oss.sonatype.org/content/groups/public</url>
+        </repository>
+        <!-- for j3d core, utils and vector  -->
+        <repository>
+          <id>tudelft</id>
+          <name>tudelft</name>
+          <url>http://simulation.tudelft.nl/maven</url>
+        </repository>
+        <!-- swinggui mxgraph  -->
+        <repository>
+          <id>alfresco</id>
+          <name>alfresco</name>
+          <url>https://artifacts.alfresco.com/nexus/content/repositories/public</url>
+        </repository>
+     </repositories>
+	
+	
+	
+<dependencies>
 
 <!-- AcapelaSpeech begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- AcapelaSpeech end -->
 
 <!-- AudioFile begin -->
-<dependency>
-  <groupId>javazoom</groupId>
-  <artifactId>jlayer</artifactId>
-  <version>1.0.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- AudioFile end -->
 
 <!-- AzureTranslator begin -->
-<dependency>
-  <groupId>io.github.firemaples</groupId>
-  <artifactId>microsoft-translator-java-api</artifactId>
-  <version>0.8.3</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>io.github.firemaples</groupId>
+    <artifactId>microsoft-translator-java-api</artifactId>
+    <version>0.8.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- AzureTranslator end -->
 
 <!-- BoofCv begin -->
-<dependency>
-  <groupId>org.boofcv</groupId>
-  <artifactId>all</artifactId>
-  <version>0.26</version>
-  <scope>provided</scope>
-  <exclusions>
-      <exclusion>
-        <groupId>org.bytedeco</groupId>
-        <artifactId>javacv</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>org.bytedeco.javacpp-presets</groupId>
-        <artifactId>opencv</artifactId>
-      </exclusion>
-  </exclusions>
-</dependency>
+  <dependency>
+    <groupId>org.boofcv</groupId>
+    <artifactId>all</artifactId>
+    <version>0.26</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>javacv</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bytedeco.javacpp-presets</groupId>
+          <artifactId>opencv</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
 <!-- BoofCv end -->
 
 <!-- ChessGame begin -->
-<dependency>
-  <groupId>ChessBoard</groupId>
-  <artifactId>ChessBoard</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>ChessBoard</groupId>
+    <artifactId>ChessBoard</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- ChessGame end -->
 
 <!-- CleverBot begin -->
-<dependency>
-  <groupId>ca.pjer</groupId>
-  <artifactId>chatter-bot-api</artifactId>
-  <version>2.0.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>ca.pjer</groupId>
+    <artifactId>chatter-bot-api</artifactId>
+    <version>2.0.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- CleverBot end -->
 
 <!-- Cron begin -->
-<dependency>
-  <groupId>it.sauronsoftware.cron4j</groupId>
-  <artifactId>cron4j</artifactId>
-  <version>2.2.5</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>it.sauronsoftware.cron4j</groupId>
+    <artifactId>cron4j</artifactId>
+    <version>2.2.5</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Cron end -->
 
 <!-- CsvConnector begin -->
-<dependency>
-  <groupId>net.sf.opencsv</groupId>
-  <artifactId>opencsv</artifactId>
-  <version>2.3</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>net.sf.opencsv</groupId>
+    <artifactId>opencsv</artifactId>
+    <version>2.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- CsvConnector end -->
 
 <!-- Deeplearning4j begin -->
-<dependency>
-  <groupId>org.deeplearning4j</groupId>
-  <artifactId>deeplearning4j-core</artifactId>
-  <version>0.9.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.deeplearning4j</groupId>
-  <artifactId>deeplearning4j-zoo</artifactId>
-  <version>0.9.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.nd4j</groupId>
-  <artifactId>nd4j-native-platform</artifactId>
-  <version>0.9.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>commons-lang</groupId>
-  <artifactId>commons-lang</artifactId>
-  <version>2.6</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>com.twelvemonkeys.imageio</groupId>
-  <artifactId>imageio-core</artifactId>
-  <version>3.1.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-core</artifactId>
+    <version>0.9.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-zoo</artifactId>
+    <version>0.9.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.nd4j</groupId>
+    <artifactId>nd4j-native-platform</artifactId>
+    <version>0.9.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>commons-lang</groupId>
+    <artifactId>commons-lang</artifactId>
+    <version>2.6</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.twelvemonkeys.imageio</groupId>
+    <artifactId>imageio-core</artifactId>
+    <version>3.1.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Deeplearning4j end -->
 
 <!-- DocumentPipeline begin -->
-<dependency>
-  <groupId>org.apache.tika</groupId>
-  <artifactId>tika-core</artifactId>
-  <version>1.14</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.opennlp</groupId>
-  <artifactId>opennlp-tools</artifactId>
-  <version>1.6.0</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>net.objecthunter</groupId>
-  <artifactId>exp4j</artifactId>
-  <version>0.4.8</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.apache.tika</groupId>
+    <artifactId>tika-core</artifactId>
+    <version>1.14</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.opennlp</groupId>
+    <artifactId>opennlp-tools</artifactId>
+    <version>1.6.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>net.objecthunter</groupId>
+    <artifactId>exp4j</artifactId>
+    <version>0.4.8</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- DocumentPipeline end -->
 
 <!-- Esp8266_01 begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Esp8266_01 end -->
 
 <!-- GoogleCloud begin -->
-<dependency>
-  <groupId>com.google.cloud</groupId>
-  <artifactId>google-cloud-vision</artifactId>
-  <version>1.14.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>com.google.cloud</groupId>
+    <artifactId>google-cloud-vision</artifactId>
+    <version>1.14.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- GoogleCloud end -->
 
 <!-- HtmlParser begin -->
-<dependency>
-  <groupId>org.jsoup</groupId>
-  <artifactId>jsoup</artifactId>
-  <version>1.8.3</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.jsoup</groupId>
+    <artifactId>jsoup</artifactId>
+    <version>1.8.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- HtmlParser end -->
 
 <!-- HttpClient begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- HttpClient end -->
 
 <!-- ImapEmailConnector begin -->
-<dependency>
-  <groupId>javax.mail</groupId>
-  <artifactId>mail</artifactId>
-  <version>1.4.7</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>javax.mail</groupId>
+    <artifactId>mail</artifactId>
+    <version>1.4.7</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- ImapEmailConnector end -->
 
 <!-- InMoov begin -->
-<dependency>
-  <groupId>inmoov.fr</groupId>
-  <artifactId>inmoov</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-  <type>zip</type>
-</dependency>
-<dependency>
-  <groupId>inmoov.fr</groupId>
-  <artifactId>jm3-model</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-  <type>zip</type>
-</dependency>
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>inmoov</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>jm3-model</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- InMoov end -->
 
 <!-- IndianTts begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<dependency>
-  <groupId>inmoov.fr</groupId>
-  <artifactId>inmoov</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-  <type>zip</type>
-</dependency>
-<dependency>
-  <groupId>inmoov.fr</groupId>
-  <artifactId>jm3-model</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-  <type>zip</type>
-</dependency>
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>inmoov</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>jm3-model</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
-<dependency>
-  <groupId>jfugue</groupId>
-  <artifactId>jfugue</artifactId>
-  <version>5.0.7</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>jfugue</groupId>
+    <artifactId>jfugue</artifactId>
+    <version>5.0.7</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- JFugue end -->
 
 <!-- JMonkeyEngine begin -->
-<dependency>
-  <groupId>org.jmonkeyengine</groupId>
-  <artifactId>jme3-core</artifactId>
-  <version>3.2.0-stable</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.jmonkeyengine</groupId>
-  <artifactId>jme3-desktop</artifactId>
-  <version>3.2.0-stable</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.jmonkeyengine</groupId>
-  <artifactId>jme3-lwjgl</artifactId>
-  <version>3.2.0-stable</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.jmonkeyengine</groupId>
-  <artifactId>jme3-jogg</artifactId>
-  <version>3.2.0-stable</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.jmonkeyengine</groupId>
-  <artifactId>jme3-niftygui</artifactId>
-  <version>3.2.0-stable</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.jmonkeyengine</groupId>
-  <artifactId>jme3-bullet</artifactId>
-  <version>3.2.0-stable</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.jmonkeyengine</groupId>
-  <artifactId>jme3-niftygui</artifactId>
-  <version>3.2.0-stable</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-core</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-desktop</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-lwjgl</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-jogg</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-niftygui</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-bullet</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-niftygui</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- JMonkeyEngine end -->
 
 <!-- Joystick begin -->
-<dependency>
-  <groupId>net.java.jinput</groupId>
-  <artifactId>jinput</artifactId>
-  <version>2.0.7</version>
-  <scope>provided</scope>
-</dependency>
-<!--  
-<dependency>
-  <groupId>net.java.jinput</groupId>
-  <artifactId>jinput-platform</artifactId>
-  <version>2.0.7</version>
-  <scope>provided</scope>
-</dependency>
--->
+  <dependency>
+    <groupId>net.java.jinput</groupId>
+    <artifactId>jinput</artifactId>
+    <version>2.0.7</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Joystick end -->
 
 <!-- Keyboard begin -->
-<dependency>
-  <groupId>com.1stleg</groupId>
-  <artifactId>jnativehook</artifactId>
-  <version>2.0.3</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>com.1stleg</groupId>
+    <artifactId>jnativehook</artifactId>
+    <version>2.0.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Keyboard end -->
 
 <!-- LeapMotion begin -->
-<dependency>
-  <groupId>leapmotion</groupId>
-  <artifactId>leap</artifactId>
-  <version>2.1.3</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>leapmotion</groupId>
+    <artifactId>leap</artifactId>
+    <version>2.1.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- LeapMotion end -->
 
 <!-- LocalSpeech begin -->
-<dependency>
-  <groupId>com.microsoft</groupId>
-  <artifactId>tts</artifactId>
-  <version>1.1</version>
-  <scope>provided</scope>
-  <type>zip</type>
-</dependency>
+  <dependency>
+    <groupId>com.microsoft</groupId>
+    <artifactId>tts</artifactId>
+    <version>1.1</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- LocalSpeech end -->
 
 <!-- MarySpeech begin -->
-<dependency>
-  <groupId>de.dfki.mary</groupId>
-  <artifactId>marytts</artifactId>
-  <version>5.2</version>
-  <scope>provided</scope>
-  <type>pom</type>
-</dependency>
-<dependency>
-  <groupId>de.dfki.mary</groupId>
-  <artifactId>voice-cmu-slt-hsmm</artifactId>
-  <version>5.2</version>
-  <scope>provided</scope>
-    <exclusions>
-      <exclusion>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>org.apache.opennlp</groupId>
-        <artifactId>opennlp-tools</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpcore</artifactId>
-      </exclusion>
-    </exclusions>
-</dependency>
+  <dependency>
+    <groupId>de.dfki.mary</groupId>
+    <artifactId>marytts</artifactId>
+    <version>5.2</version>
+    <scope>provided</scope>
+    <type>pom</type>
+  </dependency>
+  <dependency>
+    <groupId>de.dfki.mary</groupId>
+    <artifactId>voice-cmu-slt-hsmm</artifactId>
+    <version>5.2</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.opennlp</groupId>
+          <artifactId>opennlp-tools</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
 <!-- MarySpeech end -->
 
 <!-- MimicSpeech begin -->
-<dependency>
-  <groupId>mycroftai.mimic</groupId>
-  <artifactId>mimic_win64</artifactId>
-  <version>1.0</version>
-  <scope>provided</scope>
-  <type>zip</type>
-</dependency>
+  <dependency>
+    <groupId>mycroftai.mimic</groupId>
+    <artifactId>mimic_win64</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- MimicSpeech end -->
 
 <!-- Mqtt begin -->
-<dependency>
-  <groupId>org.eclipse.paho</groupId>
-  <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-  <version>1.2.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.eclipse.paho</groupId>
+    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+    <version>1.2.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Mqtt end -->
 
 <!-- MyoThalmic begin -->
-<dependency>
-  <groupId>com.github.nicholasastuart</groupId>
-  <artifactId>myo-java</artifactId>
-  <version>0.9.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>com.github.nicholasastuart</groupId>
+    <artifactId>myo-java</artifactId>
+    <version>0.9.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- MyoThalmic end -->
 
 <!-- NaturalReaderSpeech begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- NaturalReaderSpeech end -->
 
 <!-- OculusRift begin -->
-<dependency>
-  <groupId>slick-util</groupId>
-  <artifactId>slick-util</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.saintandreas</groupId>
-  <artifactId>jovr</artifactId>
-  <version>0.7.0.0</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.saintandreas</groupId>
-  <artifactId>glamour-lwjgl</artifactId>
-  <version>1.0.8</version>
-  <scope>provided</scope>
-    <exclusions>
-      <exclusion>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>org.lwjgl.lwjgl</groupId>
-        <artifactId>lwjgl</artifactId>
-      </exclusion>
-      <exclusion>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-      </exclusion>
-    </exclusions>
-</dependency>
+  <dependency>
+    <groupId>slick-util</groupId>
+    <artifactId>slick-util</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.saintandreas</groupId>
+    <artifactId>jovr</artifactId>
+    <version>0.7.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.saintandreas</groupId>
+    <artifactId>glamour-lwjgl</artifactId>
+    <version>1.0.8</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.lwjgl.lwjgl</groupId>
+          <artifactId>lwjgl</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
 <!-- OculusRift end -->
 
 <!-- OpenCV begin -->
-<dependency>
-  <groupId>org.bytedeco</groupId>
-  <artifactId>javacv-platform</artifactId>
-  <version>1.4</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>com.github.sarxos</groupId>
-  <artifactId>webcam-capture</artifactId>
-  <version>0.3.10</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.commons</groupId>
-  <artifactId>commons-lang3</artifactId>
-  <version>3.3.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>net.sf.jipcam</groupId>
-  <artifactId>jipcam</artifactId>
-  <version>0.9.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>javacv</artifactId>
+    <version>1.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>javacv-platform</artifactId>
+    <version>1.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.github.sarxos</groupId>
+    <artifactId>webcam-capture</artifactId>
+    <version>0.3.10</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.3.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>net.sf.jipcam</groupId>
+    <artifactId>jipcam</artifactId>
+    <version>0.9.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- OpenCV end -->
 
 <!-- OpenNi begin -->
-<dependency>
-  <groupId>simpleopenni</groupId>
-  <artifactId>openni</artifactId>
-  <version>1.96</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>simpleopenni</groupId>
+    <artifactId>openni</artifactId>
+    <version>1.96</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- OpenNi end -->
 
 <!-- Osc begin -->
-<dependency>
-  <groupId>com.illposed.osc</groupId>
-  <artifactId>javaosc-core</artifactId>
-  <version>0.4</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>com.illposed.osc</groupId>
+    <artifactId>javaosc-core</artifactId>
+    <version>0.4</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Osc end -->
 
 <!-- Polly begin -->
-<dependency>
-  <groupId>com.amazonaws</groupId>
-  <artifactId>aws-java-sdk-polly</artifactId>
-  <version>1.11.118</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-polly</artifactId>
+    <version>1.11.118</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Polly end -->
 
 <!-- ProgramAB begin -->
-<dependency>
-  <groupId>program-ab</groupId>
-  <artifactId>program-ab-data</artifactId>
-  <version>0.0.4.1</version>
-  <scope>provided</scope>
-  <type>zip</type>
-</dependency>
-<dependency>
-  <groupId>program-ab</groupId>
-  <artifactId>program-ab-kw</artifactId>
-  <version>0.0.4.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.json</groupId>
-  <artifactId>json</artifactId>
-  <version>20090211</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>program-ab</groupId>
+    <artifactId>program-ab-data</artifactId>
+    <version>0.0.4.1</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>program-ab</groupId>
+    <artifactId>program-ab-kw</artifactId>
+    <version>0.0.4.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20090211</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- ProgramAB end -->
 
 <!-- Python begin -->
-<dependency>
-  <groupId>org.python</groupId>
-  <artifactId>jython</artifactId>
-  <version>2.7.0</version>
-</dependency>
+  <dependency>
+    <groupId>org.python</groupId>
+    <artifactId>jython</artifactId>
+    <version>2.7.0</version>
+  </dependency>
 <!-- Python end -->
 
 <!-- RSSConnector begin -->
-<dependency>
-  <groupId>feed4j</groupId>
-  <artifactId>feed4j</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>feed4j</groupId>
+    <artifactId>feed4j</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- RSSConnector end -->
 
 <!-- RasPi begin -->
-<dependency>
-  <groupId>com.pi4j</groupId>
-  <artifactId>pi4j-core</artifactId>
-  <version>1.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>com.pi4j</groupId>
+    <artifactId>pi4j-core</artifactId>
+    <version>1.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- RasPi end -->
 
 <!-- Rekognition begin -->
-<dependency>
-  <groupId>com.amazonaws</groupId>
-  <artifactId>aws-java-sdk-rekognition</artifactId>
-  <version>1.11.263</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-rekognition</artifactId>
+    <version>1.11.263</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Rekognition end -->
 
 <!-- RemoteAdapter begin -->
-<dependency>
-  <groupId>org.atmosphere</groupId>
-  <artifactId>wasync</artifactId>
-  <version>2.1.3</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.atmosphere</groupId>
+    <artifactId>wasync</artifactId>
+    <version>2.1.3</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- RemoteAdapter end -->
 
-<!-- embedded maven begin -->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-embedder</artifactId>
-            <version>3.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-connector-wagon</artifactId>
-            <version>0.9.0.M2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.wagon</groupId>
-            <artifactId>wagon-http-lightweight</artifactId>
-            <version>2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.13</version>
-        </dependency>
-  <!-- embedded maven end -->      
-
 <!-- Runtime begin -->
-<dependency>
-  <groupId>com.google.code.gson</groupId>
-  <artifactId>gson</artifactId>
-  <version>2.8.0</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.ivy</groupId>
-  <artifactId>ivy</artifactId>
-  <version>2.4.0</version>
-</dependency>
-<dependency>
-  <groupId>ch.qos.logback</groupId>
-  <artifactId>logback-classic</artifactId>
-  <version>1.2.3</version>
-</dependency>
+  <dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.0</version>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.ivy</groupId>
+    <artifactId>ivy</artifactId>
+    <version>2.4.0-2</version>
+  </dependency>
 <!-- Runtime end -->
 
 <!-- Serial begin -->
-<dependency>
-  <groupId>org.scream3r</groupId>
-  <artifactId>jssc</artifactId>
-  <version>2.8.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.scream3r</groupId>
+    <artifactId>jssc</artifactId>
+    <version>2.8.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Serial end -->
 
 <!-- SlamBad begin -->
-<dependency>
-  <groupId>java3d</groupId>
-  <artifactId>j3dcore</artifactId>
-  <version>1.5.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>java3d</groupId>
-  <artifactId>j3dutils</artifactId>
-  <version>1.5.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>java3d</groupId>
-  <artifactId>vecmath</artifactId>
-  <version>1.5.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>java3d</groupId>
+    <artifactId>j3dcore</artifactId>
+    <version>1.5.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>java3d</groupId>
+    <artifactId>j3dutils</artifactId>
+    <version>1.5.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>java3d</groupId>
+    <artifactId>vecmath</artifactId>
+    <version>1.5.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- SlamBad end -->
 
 <!-- Solr begin -->
-<dependency>
-  <groupId>org.apache.solr</groupId>
-  <artifactId>solr-solrj</artifactId>
-  <version>7.2.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.solr</groupId>
-  <artifactId>solr-core</artifactId>
-  <version>7.2.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>commons-io</groupId>
-  <artifactId>commons-io</artifactId>
-  <version>2.5</version>
-</dependency>
-
-
+  <dependency>
+    <groupId>org.apache.solr</groupId>
+    <artifactId>solr-core</artifactId>
+    <version>7.2.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.solr</groupId>
+    <artifactId>solr-solrj</artifactId>
+    <version>7.2.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.5</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
-<dependency>
-  <groupId>edu.cmu.sphinx</groupId>
-  <artifactId>sphinx4-core</artifactId>
-  <version>5prealpha-SNAPSHOT</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>edu.cmu.sphinx</groupId>
-  <artifactId>sphinx4-data</artifactId>
-  <version>5prealpha-SNAPSHOT</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>edu.cmu.sphinx</groupId>
+    <artifactId>sphinx4-core</artifactId>
+    <version>5prealpha-SNAPSHOT</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>edu.cmu.sphinx</groupId>
+    <artifactId>sphinx4-data</artifactId>
+    <version>5prealpha-SNAPSHOT</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Sphinx end -->
 
 <!-- SwingGui begin -->
-<dependency>
-  <groupId>com.fifesoft</groupId>
-  <artifactId>rsyntaxtextarea</artifactId>
-  <version>2.0.5.1</version>
-</dependency>
-<dependency>
-  <groupId>com.fifesoft</groupId>
-  <artifactId>autocomplete</artifactId>
-  <version>2.0.5.1</version>
-</dependency>
-<dependency>
-  <groupId>com.jidesoft</groupId>
-  <artifactId>jide-oss</artifactId>
-  <version>3.6.18</version>
-</dependency>
-<dependency>
-  <groupId>com.mxgraph</groupId>
-  <artifactId>jgraphx</artifactId>
-  <version>1.10.4.2</version>
-</dependency>
+  <dependency>
+    <groupId>com.fifesoft</groupId>
+    <artifactId>rsyntaxtextarea</artifactId>
+    <version>2.0.5.1</version>
+  </dependency>
+  <dependency>
+    <groupId>com.fifesoft</groupId>
+    <artifactId>autocomplete</artifactId>
+    <version>2.0.5.1</version>
+  </dependency>
+  <dependency>
+    <groupId>com.jidesoft</groupId>
+    <artifactId>jide-oss</artifactId>
+    <version>3.6.18</version>
+  </dependency>
+  <dependency>
+    <groupId>com.mxgraph</groupId>
+    <artifactId>jgraphx</artifactId>
+    <version>1.10.4.2</version>
+  </dependency>
 <!-- SwingGui end -->
 
 <!-- TesseractOcr begin -->
-<dependency>
-  <groupId>org.bytedeco.javacpp-presets</groupId>
-  <artifactId>tesseract-platform</artifactId>
-  <version>3.05.01-1.4</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.bytedeco.javacpp-presets</groupId>
+    <artifactId>tesseract-platform</artifactId>
+    <version>3.05.01-1.4</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- TesseractOcr end -->
 
 <!-- Test begin -->
-<dependency>
-  <groupId>junit</groupId>
-  <artifactId>junit</artifactId>
-  <version>4.12</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Test end -->
 
 <!-- TopCodes begin -->
-<dependency>
-  <groupId>topcodes</groupId>
-  <artifactId>topcodes</artifactId>
-  <version>1.0.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>topcodes</groupId>
+    <artifactId>topcodes</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- TopCodes end -->
 
 <!-- Twitter begin -->
-<dependency>
-  <groupId>org.twitter4j</groupId>
-  <artifactId>twitter4j-core</artifactId>
-  <version>3.0.5</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.twitter4j</groupId>
+    <artifactId>twitter4j-core</artifactId>
+    <version>3.0.5</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Twitter end -->
 
 <!-- Vision begin -->
-<dependency>
-  <groupId>org.bytedeco</groupId>
-  <artifactId>javacv-platform</artifactId>
-  <version>1.4</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>com.github.sarxos</groupId>
-  <artifactId>webcam-capture</artifactId>
-  <version>0.3.10</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.commons</groupId>
-  <artifactId>commons-lang3</artifactId>
-  <version>3.3.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>net.sf.jipcam</groupId>
-  <artifactId>jipcam</artifactId>
-  <version>0.9.1</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>javacv-platform</artifactId>
+    <version>1.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.github.sarxos</groupId>
+    <artifactId>webcam-capture</artifactId>
+    <version>0.3.10</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.3.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>net.sf.jipcam</groupId>
+    <artifactId>jipcam</artifactId>
+    <version>0.9.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Vision end -->
 
 <!-- VoiceRss begin -->
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>com.voicerss</groupId>
-  <artifactId>tts</artifactId>
-  <version>1.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.voicerss</groupId>
+    <artifactId>tts</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- VoiceRss end -->
 
 <!-- WebGui begin -->
-<dependency>
-  <groupId>org.atmosphere</groupId>
-  <artifactId>nettosphere</artifactId>
-  <version>2.3.0</version>
-</dependency>
+  <dependency>
+    <groupId>org.atmosphere</groupId>
+    <artifactId>nettosphere</artifactId>
+    <version>2.3.0</version>
+  </dependency>
 <!-- WebGui end -->
 
 <!-- Wii begin -->
-<dependency>
-  <groupId>wiiusej</groupId>
-  <artifactId>wiiusej</artifactId>
-  <version>wiiusej</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>wiiusej</groupId>
+    <artifactId>wiiusej</artifactId>
+    <version>wiiusej</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Wii end -->
 
 <!-- WiiDar begin -->
-<dependency>
-  <groupId>wiiusej</groupId>
-  <artifactId>wiiusej</artifactId>
-  <version>wiiusej</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>wiiusej</groupId>
+    <artifactId>wiiusej</artifactId>
+    <version>wiiusej</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- WiiDar end -->
 
 <!-- WikiDataFetcher begin -->
-<dependency>
-  <groupId>org.wikidata.wdtk</groupId>
-  <artifactId>wdtk-client</artifactId>
-  <version>0.8.0</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.wikidata.wdtk</groupId>
+    <artifactId>wdtk-client</artifactId>
+    <version>0.8.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->
-<dependency>
-  <groupId>WolframAlpha</groupId>
-  <artifactId>WolframAlpha</artifactId>
-  <version>1.1</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.2</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpcore</artifactId>
-  <version>4.4.6</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>WolframAlpha</groupId>
+    <artifactId>WolframAlpha</artifactId>
+    <version>1.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- WolframAlpha end -->
 
 <!-- Xmpp begin -->
-<dependency>
-  <groupId>org.igniterealtime.smack</groupId>
-  <artifactId>smack-java7</artifactId>
-  <version>4.1.6</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.igniterealtime.smack</groupId>
-  <artifactId>smack-tcp</artifactId>
-  <version>4.1.6</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.igniterealtime.smack</groupId>
-  <artifactId>smack-im</artifactId>
-  <version>4.1.6</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.igniterealtime.smack</groupId>
-  <artifactId>smack-extensions</artifactId>
-  <version>4.1.6</version>
-  <scope>provided</scope>
-</dependency>
+  <dependency>
+    <groupId>org.igniterealtime.smack</groupId>
+    <artifactId>smack-java7</artifactId>
+    <version>4.1.6</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.igniterealtime.smack</groupId>
+    <artifactId>smack-tcp</artifactId>
+    <version>4.1.6</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.igniterealtime.smack</groupId>
+    <artifactId>smack-im</artifactId>
+    <version>4.1.6</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.igniterealtime.smack</groupId>
+    <artifactId>smack-extensions</artifactId>
+    <version>4.1.6</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Xmpp end -->
 
-<!-- beginning of /resource/framework/buildPomFooter.xml -->
+  </dependencies>
 
-</dependencies>
-	 
+	
 	<build>
 		<resources>
 			<resource>

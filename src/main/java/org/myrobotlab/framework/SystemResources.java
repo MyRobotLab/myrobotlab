@@ -12,6 +12,9 @@ public class SystemResources implements Serializable {
   long maxMemory;
 
   public SystemResources() {
+	  
+	  /* GETS - 
+	   <pre>
 
     try {
       com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
@@ -19,6 +22,8 @@ public class SystemResources implements Serializable {
 
     } catch (Exception e) {
     }
+    </pre>
+    */
 
     freeMemory = Runtime.getRuntime().freeMemory() / 1048576;
     totalMemory = Runtime.getRuntime().totalMemory() / 1048576;

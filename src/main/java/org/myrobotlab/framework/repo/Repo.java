@@ -1,6 +1,8 @@
 package org.myrobotlab.framework.repo;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,25 +24,272 @@ import org.slf4j.Logger;
 
 public abstract class Repo {
 
+	// Repo is an interface to a singleton of each "type" of repo
+	private static String defaultRepoManagerType = "IvyWrapper";
+
+	public static final String INSTALL_FINISHED = "installationStop";
+
+	public static final String INSTALL_START = "installationStart";
+
+	public static String DEFAULT_INSTALL_DIR = "libraries/jar";
+
+	static transient Set<LoggingSink> installLoggingSinks = new HashSet<LoggingSink>();
+	protected static transient Map<String, Repo> localInstances = new HashMap<String, Repo>();
+
 	public final static Logger log = LoggerFactory.getLogger(Repo.class);
 
-	TreeMap<String, ServiceDependency> libraries = new TreeMap<String, ServiceDependency>();
+	protected static List<RemoteRepo> remotes;
 
 	final static String REPO_STATE_FILE_NAME = "repo.json";
 
-	public static final String INSTALL_START = "installationStart";
-	public static final String INSTALL_FINISHED = "installationStop";
+	static {
+		try {
+			// FIXME reduce down to maven central bintray & repo.myrobotlab.org
+			remotes = new ArrayList<RemoteRepo>();
+			remotes.add(new RemoteRepo("central", "https://repo.maven.apache.org/maven2", "the mother load"));
+			remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com", "the big kahuna"));
+			remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab",
+					"all other mrl deps"));
 
-	protected static transient Map<String, Repo> localInstances = new HashMap<String, Repo>();
+			// DO NOT INCLUDE - messed up repo !
+			// remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2", "for
+			// jai_imageio")); - do not use
+			remotes.add(new RemoteRepo("eclipse-release", "https://repo.eclipse.org/content/groups/releases"));
 
-	// Repo is an interface to a singleton of each "type" of repo
-	private static String defaultRepoManagerType = "Ivy";
+			remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine",
+					"jmonkey simulator"));
+
+			remotes.add(
+					new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
+			remotes.add(
+					new RemoteRepo("tudelft", "http://simulation.tudelft.nl/maven", "for j3d core, utils and vector"));
+			// remotes.add(new RemoteRepo("jitpack", "https://jitpack.io", "microsoft azure
+			// translate"));
+			remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public",
+					"swinggui mxgraph"));
+
+		} catch (Exception e) {
+			log.error("initialization of Repo threw", e);
+		}
+	}
+
+	static public void error(String format, Object... args) {
+		if (installLoggingSinks.size() == 0) {
+			log.error(String.format(format, args));
+			return;
+		}
+		for (LoggingSink service : installLoggingSinks) {
+			service.error(format, args);
+		}
+	}
+
+	static public Repo getInstance() {
+		return getInstance(defaultRepoManagerType);
+	}
+
+	public static Repo getInstance(String simpleType) {
+
+		String type = makeFullTypeName(simpleType);
+
+		if (localInstances.containsKey(type)) {
+			return localInstances.get(type);
+		} else {
+			try {
+
+				// FIXME - string only specifier - no class import info in this file (or
+				// perhaps wrapper is ok?)
+				// Maven.getInstance();
+				Class<?> theClass = Class.forName(type);
+
+				// getPeers
+				Method method = theClass.getMethod("getTypeInstance");
+				Repo repo = (Repo) method.invoke(null);
+				localInstances.put(simpleType, repo);
+				return repo;
+			} catch (Exception e) {
+				log.error("instanciating {} failed", type, e);
+			}
+			return null;
+		}
+	}
+
+	public final static String makeFullTypeName(String type) {
+		if (type == null) {
+			return null;
+		}
+		if (!type.contains(".")) {
+			return String.format("org.myrobotlab.framework.repo.%s", type);
+		}
+		return type;
+	}
 
 	List<Status> errors = new ArrayList<Status>();
 
-	transient Set<LoggingSink> installLoggingSinks = new HashSet<LoggingSink>();
+	TreeMap<String, ServiceDependency> libraries = new TreeMap<String, ServiceDependency>();
+
+	public void addLoggingSink(LoggingSink service) {
+		installLoggingSinks.add(service);
+	}
+
+	public void clear() {
+		log.info("Repo.clear - clearing libraries");
+		FileIO.rm("libraries");
+		log.info("Repo.clear - clearing repo");
+		FileIO.rm("repo");
+		log.info("Repo.clear - {}", REPO_STATE_FILE_NAME);
+		FileIO.rm(REPO_STATE_FILE_NAME);
+		log.info("Repo.clear - clearing memory");
+		libraries.clear();
+		log.info("clearing errors");
+		clearErrors();
+	}
+
+	public void clearErrors() {
+		errors.clear();
+	}
+
+	public void createBuildFiles() {
+		ServiceData sd = ServiceData.getLocalInstance();
+		createBuildFiles(null, sd.getServiceTypeNames());
+	}
+
+	public void createBuildFiles(String serviceType) {
+		createBuildFiles(null, serviceType);
+	}
+
+	public void createBuildFiles(String location, String serviceType) {
+		String[] types = null;
+		if (serviceType == null) {
+			ServiceData sd = ServiceData.getLocalInstance();
+			types = sd.getServiceTypeNames();
+		} else {
+			types = new String[] { serviceType };
+		}
+		createBuildFiles(location, types);
+	}
+
+	public abstract void createBuildFiles(String location, String[] serviceType);
+
+	public void createBuildFilesTo(String dir) {
+		createBuildFiles(dir, (String) null);
+	}
+
+	public void createFilteredFile(Map<String, String> snr, String location, String filename, String ext)
+			throws IOException {
+		String ofn = getBuildFileName(location, filename, ext);
+		FileOutputStream out = new FileOutputStream(ofn);
+
+		String templateName = String.format("framework/%s.%s.template", filename, ext);
+		String filered = filterFile(snr, templateName);
+		log.info("writing file {}", ofn);
+		out.write(filered.getBytes());
+		out.close();
+	}
+
+	protected String createWorkDirectory(String location) {
+		if (location == null) {
+			location = ".";
+		}
+
+		log.info("creating work directory {}", location);
+		File f = new File(location);
+		f.mkdirs();
+
+		return location;
+	}
+
+	public String filterFile(Map<String, String> snr, String templateName) {
+		String settings = FileIO.resourceToString(templateName);
+		;
+		for (String search : snr.keySet()) {
+			settings = settings.replace(search, snr.get(search));
+		}
+
+		return settings;
+	}
+
+	public String getBuildFileName(String location, String filename, String ext) {
+		StringBuilder sb = new StringBuilder(location);
+		sb.append("/");
+		sb.append(filename);
+		/*
+		 * if (ts != null) { sb.append(String.format(".%d", ts)); }
+		 */
+		sb.append(".");
+		sb.append(ext);
+		return sb.toString();
+	}
+
+	public String getFullTypeName(String serviceType) {
+		if (serviceType == null) {
+			return null;
+		}
+
+		if (!serviceType.contains(".")) {
+			return String.format("org.myrobotlab.service.%s", serviceType);
+		}
+
+		return serviceType;
+	}
+
+	public Set<ServiceDependency> getUnfulfilledDependencies(String fullTypeName) {
+		return getUnfulfilledDependencies(new String[] { fullTypeName });
+	}
+
+	public Set<ServiceDependency> getUnfulfilledDependencies(String[] types) {
+
+		Set<ServiceDependency> ret = new LinkedHashSet<ServiceDependency>();
+
+		for (String type : types) {
+			if (!type.contains(".")) {
+				type = String.format("org.myrobotlab.service.%s", type);
+			}
+
+			// get the dependencies required by the type
+			ServiceData sd = ServiceData.getLocalInstance();
+			if (!sd.containsServiceType(type)) {
+				log.error(String.format("%s not found", type));
+				return ret;
+			}
+
+			ServiceType st = sd.getServiceType(type);
+
+			// look through our repo and resolve
+			// if we dont have it - we need it
+			List<ServiceDependency> metaDependencies = st.getDependencies();
+
+			if (metaDependencies != null && metaDependencies.size() > 0) {
+				for (ServiceDependency library : metaDependencies) {
+					String key = library.getKey();
+					if (!libraries.containsKey(key) || !libraries.get(key).isInstalled()) {
+						ret.add(library);
+					}
+				}
+			}
+
+			Map<String, ServiceReservation> peers = st.getPeers();
+			if (peers != null) {
+				for (String key : peers.keySet()) {
+					ServiceReservation sr = peers.get(key);
+					ret.addAll(getUnfulfilledDependencies(sr.fullTypeName));
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	/*
+	 * public void publishStatus(Status status) { for (LoggingSink service :
+	 * installLoggingSinks) { if (status.isInfo()) { service.info(format, args) }
+	 * service.publishStatus(status); } }
+	 */
 
 	public void info(String format, Object... args) {
+		if (installLoggingSinks.size() == 0) {
+			log.info(String.format(format, args));
+			return;
+		}
 		for (LoggingSink service : installLoggingSinks) {
 			service.info(format, args);
 		}
@@ -50,17 +299,55 @@ public abstract class Repo {
 		// if a runtime exits we'll broadcast we are starting to install
 		ServiceData sd = ServiceData.getLocalInstance();
 		info("starting installation of %s services", sd.getServiceTypeNames().length);
-		for (ServiceType service : sd.getServiceTypes()) {
-			install(service.getSimpleName());
-		}
-		info("finished installing %s", sd.getServiceTypeNames().length);
+		install(sd.getServiceTypeNames());
+		info("finished installing %s services", sd.getServiceTypeNames().length);
 	}
 
 	public void install(String serviceType) {
-		install("../libraries/jar", serviceType);
+		String[] types = null;
+		if (serviceType == null) {
+			ServiceData sd = ServiceData.getLocalInstance();
+			types = sd.getServiceTypeNames();
+		} else {
+			types = new String[] { serviceType };
+		}
+
+		install(DEFAULT_INSTALL_DIR, types);
 	}
 
-	abstract public void install(String location, String serviceType);
+	abstract public void install(String location, String[] serviceTypes);
+
+	public void install(String[] serviceTypes) {
+		install(DEFAULT_INSTALL_DIR, serviceTypes);
+	}
+
+	public void installEach() {
+		String workDir = String.format(String.format("libraries.ivy.services.%d", System.currentTimeMillis()));
+		installEachTo(workDir);
+	}
+
+	public void installEachTo(String location) {
+		// if a runtime exits we'll broadcast we are starting to install
+		ServiceData sd = ServiceData.getLocalInstance();
+		String[] serviceNames = sd.getServiceTypeNames();
+		info("starting installation of %d services", serviceNames.length);
+		install(location, serviceNames);
+		info("finished installing %s services", sd.getServiceTypeNames().length);
+	}
+
+	public void installTo(String location) {
+		// if a runtime exits we'll broadcast we are starting to install
+		ServiceData sd = ServiceData.getLocalInstance();
+		info("starting installation of %s services", sd.getServiceTypeNames().length);
+		install(location, sd.getServiceTypeNames());
+		info("finished installing %s", sd.getServiceTypeNames().length);
+	}
+
+	// FIXME !!!! IMPLEMENT :)
+	public boolean isInstalled(String string) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	/**
 	 * searches through dependencies directly defined by the service and all Peers -
@@ -89,113 +376,6 @@ public abstract class Repo {
 		return true;
 	}
 
-	public Set<ServiceDependency> getUnfulfilledDependencies(String type) {
-		if (!type.contains(".")) {
-			type = String.format("org.myrobotlab.service.%s", type);
-		}
-
-		Set<ServiceDependency> ret = new LinkedHashSet<ServiceDependency>();
-
-		// get the dependencies required by the type
-		ServiceData sd = ServiceData.getLocalInstance();
-		if (!sd.containsServiceType(type)) {
-			log.error(String.format("%s not found", type));
-			return ret;
-		}
-
-		ServiceType st = sd.getServiceType(type);
-
-		// look through our repo and resolve
-		// if we dont have it - we need it
-		List<ServiceDependency> metaDependencies = st.getDependencies();
-
-		if (metaDependencies != null && metaDependencies.size() > 0) {
-			for (ServiceDependency library : metaDependencies) {
-				String key = library.getKey();
-				if (!libraries.containsKey(key) || !libraries.get(key).isInstalled()) {
-					ret.add(library);
-				}
-			}
-		}
-
-		Map<String, ServiceReservation> peers = st.getPeers();
-		if (peers != null) {
-			for (String key : peers.keySet()) {
-				ServiceReservation sr = peers.get(key);
-				ret.addAll(getUnfulfilledDependencies(sr.fullTypeName));
-			}
-		}
-
-		return ret;
-	}
-
-	public void clear() {
-		log.info("Repo.clear - clearing libraries");
-		FileIO.rm("libraries");
-		log.info("Repo.clear - clearing repo");
-		FileIO.rm("repo");
-		log.info("Repo.clear - {}", REPO_STATE_FILE_NAME);
-		FileIO.rm(REPO_STATE_FILE_NAME);
-		log.info("Repo.clear - clearing memory");
-		libraries.clear();
-		log.info("clearing errors");
-		clearErrors();
-	}
-
-	public void clearErrors() {
-		errors.clear();
-	}
-
-	public final static String makeFullTypeName(String type) {
-		if (type == null) {
-			return null;
-		}
-		if (!type.contains(".")) {
-			return String.format("org.myrobotlab.framework.repo.%s", type);
-		}
-		return type;
-	}
-	
-	static public Repo getInstance() {
-		return getInstance(defaultRepoManagerType);
-	}
-
-	public static Repo getInstance(String type) {
-		
-		type = makeFullTypeName(type);
-
-		if (localInstances.containsKey(type)) {
-			return localInstances.get(type);
-		} else {
-			try {
-
-				// FIXME - string only specifier - no class import info in this file (or
-				// perhaps wrapper is ok?)
-				// Maven.getInstance();
-				Class<?> theClass = Class.forName(type);
-
-				// getPeers
-				Method method = theClass.getMethod("getTypeInstance");
-				Repo repo = (Repo) method.invoke(null);
-				return repo;
-			} catch (Exception e) {
-				log.error("instanciating {} failed", type, e);
-			}
-			return null;
-		}
-	}
-
-	
-	public void addLoggingSink(LoggingSink service) {
-		installLoggingSinks.add(service);
-	}
-
-	/*
-	 * public void publishStatus(Status status) { for (LoggingSink service :
-	 * installLoggingSinks) { if (status.isInfo()) { service.info(format, args) }
-	 * service.publishStatus(status); } }
-	 */
-
 	/**
 	 * saves repo to file
 	 */
@@ -209,9 +389,8 @@ public abstract class Repo {
 		}
 	}
 
-	public boolean isInstalled(String string) {
-		// TODO Auto-generated method stub
-		return false;
+	public void install(String location, String serviceType) {
+		install(location, new String[] {serviceType});
 	}
 
 }
