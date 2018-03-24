@@ -1,0 +1,16 @@
+<ivy-module version="2.0" xmlns:extra="http://ant.apache.org/ivy/extra">
+
+  <info organisation="org.myrobotlab" module="myrobotlab-core"/>
+
+  <!-- the following configuration is for "runtime" -  
+       if this section is taken out - javadocs & sources come down 
+       -->
+  <configurations defaultconfmapping="compile->default">
+    <conf name="compile" description="Required to compile application"/>
+    <conf name="runtime" description="Additional run-time dependencies" extends="compile"/>
+    <conf name="test"    description="Required for test only" extends="runtime"/>
+  </configurations>    
+
+{{dependencies}}
+
+</ivy-module>

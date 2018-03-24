@@ -1,0 +1,43 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'gradle-one-jar'
+
+
+group = 'org.myrobotlab'
+version = '0.0.1-SNAPSHOT'
+
+description = """MyRobotLab"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+{{repositories}}
+}
+
+dependencies {
+{{dependencies}}
+}
+
+task copyDependencies(type: Copy) {
+   from configurations.compile
+   // from configurations.runtime
+   into 'dependencies'
+}
+
+task onJar(type: OneJar) {
+    mainClass = 'org.myrobotlab.service.Runtime'
+    // archiveName = 'myrobotlab.jar'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+    }
+}
