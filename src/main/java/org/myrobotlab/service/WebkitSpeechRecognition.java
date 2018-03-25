@@ -60,12 +60,17 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   @Override
   public String publishText(String text) {
-    return recognized(text);
+		return text;
+		// GAP - we don't want to call publishText
+		// return recognized(text);
   }
   
   @Override
   public String recognized(String text) {
     log.info("Recognized : >{}<", text);
+		// invoke("publishText", text); - we don't even need to do this
+		// because the WebkitSpeechRecognition.js calls publishText 
+		
     String cleanedText = text.toLowerCase().trim();
     if (isStripAccents()) {
       cleanedText = StringUtil.removeAccents(cleanedText);
@@ -77,12 +82,10 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
     }
     lastThingRecognized = cleanedText;
     broadcastState();
-    if (!lockOutAllGrammar)
-    {
+		if (!lockOutAllGrammar) {			
     return cleanedText;
     }
-    if (text.equalsIgnoreCase(lockPhrase))
-    {
+		if (text.equalsIgnoreCase(lockPhrase)) {
       clearLock();
     }
     return "";
@@ -120,8 +123,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
       if (System.currentTimeMillis() - lastAutoListenEvent > 50) {
         startListening();
       } else {
-        if (listening)
-        {
+				if (listening) {
           error("WebkitSpeech : TOO MANY EVENTS, autoListen disabled now, please close zombie tabs !");
           setAutoListen(false);
         }
