@@ -300,7 +300,7 @@ public abstract class Repo {
 		ServiceData sd = ServiceData.getLocalInstance();
 		info("starting installation of %s services", sd.getServiceTypeNames().length);
 		install(sd.getServiceTypeNames());
-		info("finished installing %s services", sd.getServiceTypeNames().length);
+		info("finished installing %d services", sd.getServiceTypeNames().length);
 	}
 
 	public void install(String serviceType) {
@@ -332,7 +332,7 @@ public abstract class Repo {
 		String[] serviceNames = sd.getServiceTypeNames();
 		info("starting installation of %d services", serviceNames.length);
 		install(location, serviceNames);
-		info("finished installing %s services", sd.getServiceTypeNames().length);
+		info("finished installing %d services", sd.getServiceTypeNames().length);
 	}
 
 	public void installTo(String location) {
@@ -340,7 +340,7 @@ public abstract class Repo {
 		ServiceData sd = ServiceData.getLocalInstance();
 		info("starting installation of %s services", sd.getServiceTypeNames().length);
 		install(location, sd.getServiceTypeNames());
-		info("finished installing %s", sd.getServiceTypeNames().length);
+		info("finished installing %d services", sd.getServiceTypeNames().length);
 	}
 
 	// FIXME !!!! IMPLEMENT :)

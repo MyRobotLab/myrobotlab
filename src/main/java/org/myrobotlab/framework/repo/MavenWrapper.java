@@ -18,223 +18,231 @@ import org.myrobotlab.logging.LoggingFactory;
 // so these methods should be un-hindered by actual maven, gradle or ivy imports !
 public class MavenWrapper extends Repo {
 
-	// transient static Maven localInstance = null;
+  // transient static Maven localInstance = null;
 
-	String installDir = "install";
+  String installDir = "install";
 
-	// transient static MavenCli mavenCli = null;
+  // transient static MavenCli mavenCli = null;
 
-	static String pomXmlTemplate = null;
+  static String pomXmlTemplate = null;
 
-	static MavenWrapper localInstance = null;
+  static MavenWrapper localInstance = null;
 
-	static public Repo getTypeInstance() {
-		if (localInstance == null) {
-			init();
-		}
-		return localInstance;
-	}
+  static public Repo getTypeInstance() {
+    if (localInstance == null) {
+      init();
+    }
+    return localInstance;
+  }
 
-	static private synchronized void init() {
-		if (localInstance == null) {
-			/*
-			 * ClassWorld classWorld = new ClassWorld(); ClassRealm classRealm =
-			 * (ClassRealm) Thread.currentThread().getContextClassLoader(); mavenCli = new
-			 * MavenCli(classRealm.getWorld());
-			 */
-			// mavenCli = new MavenCli();
-			localInstance = new MavenWrapper();
-			pomXmlTemplate = FileIO.resourceToString("framework/pom.xml.template");
-		}
-	}
+  static private synchronized void init() {
+    if (localInstance == null) {
+      /*
+       * ClassWorld classWorld = new ClassWorld(); ClassRealm classRealm =
+       * (ClassRealm) Thread.currentThread().getContextClassLoader(); mavenCli =
+       * new MavenCli(classRealm.getWorld());
+       */
+      // mavenCli = new MavenCli();
+      localInstance = new MavenWrapper();
+      pomXmlTemplate = FileIO.resourceToString("framework/pom.xml.template");
+    }
+  }
 
-	// FIXME - fix do createBuildFiles
-	// FIXME - call external mvn since Embedded Maven is not documented and buggy
-	@Override
-	public void install(String location, String[] serviceTypes) {
+  // FIXME - fix do createBuildFiles
+  // FIXME - call external mvn since Embedded Maven is not documented and buggy
+  @Override
+  public void install(String location, String[] serviceTypes) {
 
-		info("===== starting installation of %d services =====", serviceTypes.length);
-		for (String serviceType : serviceTypes) {
-			try {
-				Set<ServiceDependency> unfulfilled = getUnfulfilledDependencies(serviceType);
-				// FIXME - callback logging
+    info("===== starting installation of %d services =====", serviceTypes.length);
+    for (String serviceType : serviceTypes) {
+      try {
+        Set<ServiceDependency> unfulfilled = getUnfulfilledDependencies(serviceType);
+        // FIXME - callback logging
 
-				// directory to run localInstance over a default pom
-				File f = new File(installDir);
-				f.mkdirs();
+        // directory to run localInstance over a default pom
+        File f = new File(installDir);
+        f.mkdirs();
 
-				for (ServiceDependency library : unfulfilled) {
-					// mavenGenerateServiceInstallPom();
-					log.info(String.format("===== installing dependency %s =====", library));
-					String installPom = null;//getArtifactInstallPom(library.getOrgId(), library.getArtifactId(),library.getVersion());
-					installPom = installPom.replace("{{location}}", location);
+        for (ServiceDependency library : unfulfilled) {
+          // mavenGenerateServiceInstallPom();
+          log.info(String.format("===== installing dependency %s =====", library));
+          String installPom = null;// getArtifactInstallPom(library.getOrgId(),
+                                   // library.getArtifactId(),library.getVersion());
+          installPom = installPom.replace("{{location}}", location);
 
-					// search and replace - add
-					File installPomDir = new File(location);
-					installPomDir.mkdirs();
+          // search and replace - add
+          File installPomDir = new File(location);
+          installPomDir.mkdirs();
 
-					FileOutputStream fos = new FileOutputStream(installDir + File.separator + "pom.xml");
-					fos.write(installPom.getBytes());
-					fos.close();
+          FileOutputStream fos = new FileOutputStream(installDir + File.separator + "pom.xml");
+          fos.write(installPom.getBytes());
+          fos.close();
 
-					// mavenCli.doMain(new String[] { "install" }, "install", System.out,
-					// System.out);
-				}
-			} catch (Exception e) {
-				// FIXME - add to errors !!!
-				info("===== ERROR in installation of %s =====", serviceType);
-				log.error("installServiceDir threw", e);
-				// FIXME - callback error
-			}
-			info("===== finished installation of %s =====", serviceType);
+          // mavenCli.doMain(new String[] { "install" }, "install", System.out,
+          // System.out);
+        }
+      } catch (Exception e) {
+        // FIXME - add to errors !!!
+        info("===== ERROR in installation of %s =====", serviceType);
+        log.error("installServiceDir threw", e);
+        // FIXME - callback error
+      }
+      info("===== finished installation of %s =====", serviceType);
 
-			// save updated repo/library state
-			save();
-		}
-	}
+      // save updated repo/library state
+      save();
+    }
+  }
 
-	public String getRepositories() {
+  public String getRepositories() {
 
-		StringBuilder ret = new StringBuilder("     <repositories>\n");
-		for (RemoteRepo repo : remotes) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("        <!-- " + repo.comment + "  -->\n");
-			sb.append("        <repository>\n");
-			sb.append("          <id>" + repo.id + "</id>\n");
-			sb.append("          <name>" + repo.id + "</name>\n");
-			sb.append("          <url>" + repo.url + "</url>\n");
-			sb.append("        </repository>\n");
-			ret.append(sb);
-		}
-		ret.append("     </repositories>\n");
-		return ret.toString();
-	}
+    StringBuilder ret = new StringBuilder("     <repositories>\n");
+    for (RemoteRepo repo : remotes) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("        <!-- " + repo.comment + "  -->\n");
+      sb.append("        <repository>\n");
+      sb.append("          <id>" + repo.id + "</id>\n");
+      sb.append("          <name>" + repo.id + "</name>\n");
+      sb.append("          <url>" + repo.url + "</url>\n");
+      sb.append("        </repository>\n");
+      ret.append(sb);
+    }
+    ret.append("     </repositories>\n");
+    return ret.toString();
+  }
 
-	public void createPom(String location, String[] serviceTypes) throws IOException {
+  public void createPom(String location, String[] serviceTypes) throws IOException {
 
-		Map<String, String> snr = new HashMap<String, String>();
+    Map<String, String> snr = new HashMap<String, String>();
 
-		StringBuilder deps = new StringBuilder();
+    StringBuilder deps = new StringBuilder();
 
-		ServiceData sd = ServiceData.getLocalInstance();
+    ServiceData sd = ServiceData.getLocalInstance();
 
-		snr.put("{{repositories}}", getRepositories());
+    snr.put("{{repositories}}", getRepositories());
 
-		deps.append("<dependencies>\n\n");
+    deps.append("<dependencies>\n\n");
 
-		for (String serviceType : serviceTypes) {
-			ServiceType service = sd.getServiceType(serviceType);
-			
-			// FIXME - getUnFufilledDependencies ???
-			List<ServiceDependency> dependencies = service.getDependencies();
+    for (String serviceType : serviceTypes) {
+      ServiceType service = sd.getServiceType(serviceType);
 
-			if (dependencies.size() == 0) {
-				continue;
-			}
+      // FIXME - getUnFufilledDependencies ???
+      List<ServiceDependency> dependencies = service.getDependencies();
 
-			StringBuilder dep = new StringBuilder();
-			dep.append(String.format("<!-- %s begin -->\n", service.getSimpleName()));
-			for (ServiceDependency dependency : dependencies) {
-				
-				dep.append("  <dependency>\n");
-				dep.append(String.format("    <groupId>%s</groupId>\n", dependency.getOrgId()));
-				dep.append(String.format("    <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
-				// optional - means latest ???
-				dep.append(String.format("    <version>%s</version>\n", dependency.getVersion()));
-				if (!service.includeServiceInOneJar()) {
-					dep.append("    <scope>provided</scope>\n");
-				}
-				if (dependency.getExt() != null) {
-					dep.append(String.format("    <type>%s</type>\n", dependency.getExt()));
-				}
-				List<ServiceExclude> excludes = dependency.getExcludes();
+      if (dependencies.size() == 0) {
+        continue;
+      }
 
-				// exclusions begin ---
-				if (excludes != null & excludes.size() > 0) {
-					StringBuilder ex = new StringBuilder();
-					ex.append("      <exclusions>\n");
-					for (ServiceExclude exclude : excludes) {
-						ex.append("        <exclusion>\n");
-						ex.append(String.format("          <groupId>%s</groupId>\n", exclude.getOrgId()));
-						ex.append(String.format("          <artifactId>%s</artifactId>\n", exclude.getArtifactId()));
-						if (exclude.getVersion() != null) {
-							ex.append(String.format("          <version>%s</version>\n", exclude.getVersion()));
-						}
-						if (exclude.getExt() != null) {
-							ex.append(String.format("          <type>%s</type>\n", exclude.getExt()));
-						}
-						ex.append("        </exclusion>\n");
-					}
-					ex.append("      </exclusions>\n");
-					dep.append(ex);
-				}
+      StringBuilder dep = new StringBuilder();
+      dep.append(String.format("<!-- %s begin -->\n", service.getSimpleName()));
+      for (ServiceDependency dependency : dependencies) {
 
-				dep.append("  </dependency>\n");
+        dep.append("  <dependency>\n");
+        dep.append(String.format("    <groupId>%s</groupId>\n", dependency.getOrgId()));
+        dep.append(String.format("    <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
+        // optional - means latest ???
+        dep.append(String.format("    <version>%s</version>\n", dependency.getVersion()));
+        if (!service.includeServiceInOneJar()) {
+          dep.append("    <scope>provided</scope>\n");
+        }
+        if (dependency.getExt() != null) {
+          dep.append(String.format("    <type>%s</type>\n", dependency.getExt()));
+        }
+        List<ServiceExclude> excludes = dependency.getExcludes();
 
-				// exclusions end ---
-			} // for each dependency
-			dep.append(String.format("<!-- %s end -->\n\n", service.getSimpleName()));
+        // exclusions begin ---
+        if (excludes != null & excludes.size() > 0) {
+          StringBuilder ex = new StringBuilder();
+          ex.append("      <exclusions>\n");
+          for (ServiceExclude exclude : excludes) {
+            ex.append("        <exclusion>\n");
+            ex.append(String.format("          <groupId>%s</groupId>\n", exclude.getOrgId()));
+            ex.append(String.format("          <artifactId>%s</artifactId>\n", exclude.getArtifactId()));
+            if (exclude.getVersion() != null) {
+              ex.append(String.format("          <version>%s</version>\n", exclude.getVersion()));
+            }
+            if (exclude.getExt() != null) {
+              ex.append(String.format("          <type>%s</type>\n", exclude.getExt()));
+            }
+            ex.append("        </exclusion>\n");
+          }
+          ex.append("      </exclusions>\n");
+          dep.append(ex);
+        }
 
-			if (dependencies.size() > 0) {
-				deps.append(dep);
-			}
+        dep.append("  </dependency>\n");
 
-		} // for each service
-		deps.append("  </dependencies>\n");
+        // exclusions end ---
+      } // for each dependency
+      dep.append(String.format("<!-- %s end -->\n\n", service.getSimpleName()));
 
-		snr.put("{{dependencies}}", deps.toString());
+      if (dependencies.size() > 0) {
+        deps.append(dep);
+      }
 
-		createFilteredFile(snr, location, "pom", "xml");
-	}
+    } // for each service
+    deps.append("  </dependencies>\n");
 
-	/**
-	 * <pre>
-	 * generates all ivy related build files based on Service.getMetaData
-	 * 
-	 * ivy.xml
-	 * ivysettings.xml 
-	 * build.xml
-	 * 
-	 * </pre>
-	 * 
-	 * @return
-	 */
-	public void createBuildFiles(String location, String[] serviceTypes) {
-		try {
+    snr.put("{{dependencies}}", deps.toString());
 
-			location = createWorkDirectory(location);
-			createPom(location, serviceTypes);
+    createFilteredFile(snr, location, "pom", "xml");
+  }
 
-		} catch (Exception e) {
-			log.error("could not generate build files", e);
-		}
-	}
+  /**
+   * <pre>
+   * generates all ivy related build files based on Service.getMetaData
+   * 
+   * ivy.xml
+   * ivysettings.xml 
+   * build.xml
+   * 
+   * </pre>
+   * 
+   * @return
+   */
+  public void createBuildFiles(String location, String[] serviceTypes) {
+    try {
 
-	public static void main(String[] args) {
-		try {
+      location = createWorkDirectory(location);
+      createPom(location, serviceTypes);
 
-			LoggingFactory.init(Level.INFO);
-			// use an anonymous subclass since ProjectComponent is abstract
-			Repo maven = Repo.getInstance("MavenWrapper");
+    } catch (Exception e) {
+      log.error("could not generate build files", e);
+    }
+  }
 
-			// String dir = String.format("pom", System.currentTimeMillis());
-			String dir = String.format("build.maven.%d", System.currentTimeMillis());
-			// String dir = String.format("install.%d", System.currentTimeMillis());
+  public static void main(String[] args) {
+    try {
 
-			maven.createBuildFiles("install.opencv.maven","OpenCV");
-			// maven.install("install.opencv.maven","OpenCV");
-			// ivy.createBuildFiles(dir, "Arm");
-			// maven.createBuildFilesTo(dir);
-			maven.installTo(dir);			
-			maven.install();
-			maven.installEach();
+      LoggingFactory.init(Level.INFO);
+      // use an anonymous subclass since ProjectComponent is abstract
+      Repo maven = Repo.getInstance("MavenWrapper");
 
-			log.info("here");
+      // String dir = String.format("pom", System.currentTimeMillis());
+      String dir = String.format("build.maven.%d", System.currentTimeMillis());
+      // String dir = String.format("install.%d", System.currentTimeMillis());
 
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
+      maven.createBuildFilesTo("install.maven");
+      // maven.createBuildFiles("install.opencv.maven", "OpenCV");
 
-	}
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      // maven.install("install.opencv.maven","OpenCV");
+      // ivy.createBuildFiles(dir, "Arm");
+      // maven.createBuildFilesTo(dir);
+      maven.installTo(dir);
+      maven.install();
+      maven.installEach();
+
+      log.info("here");
+
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+    }
+
+  }
 
 }
