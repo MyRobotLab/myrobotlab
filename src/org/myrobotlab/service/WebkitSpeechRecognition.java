@@ -67,7 +67,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
 	@Override
 	public String recognized(String text) {
-		log.info("Recognized : >{}<", text);
+		log.info("Recognized : >{}< ", text);
 		// invoke("publishText", text); - we don't even need to do this
 		// because the WebkitSpeechRecognition.js calls publishText 
 		
