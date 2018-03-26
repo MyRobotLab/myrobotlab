@@ -1104,4 +1104,8 @@
 		<name>myrobotlab</name>
 		<url>http://myrobotlab.org</url>
 	</organization>
+	<issueManagement>
+		<system>github</system>
+		<url>https://github.com/MyRobotLab/myrobotlab/issues</url>
+	</issueManagement>
 </project>

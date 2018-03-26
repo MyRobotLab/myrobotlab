@@ -347,6 +347,8 @@ public class ServiceData implements Serializable {
       String path = "";
       if (args.length > 0) {
         path = args[0];
+      } else {
+    	  path = ".";
       }
 
       String filename = FileIO.gluePaths(path, "serviceData.json");
@@ -361,8 +363,6 @@ public class ServiceData implements Serializable {
       fos.write(CodecUtils.toJson(sd).getBytes());
       fos.close();
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
-      
-      
       
 
     } catch (Exception e) {

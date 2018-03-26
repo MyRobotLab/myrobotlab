@@ -29,13 +29,10 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
  */
 public class InMoovV2 extends Service {
 
-	public InMoovV2(String n) {
-		super(n);
-	}
-
-	private static Runtime myRuntime = (Runtime) Runtime.getInstance();
-	private static ServiceData serviceData = myRuntime.getServiceData();
 	private static final long serialVersionUID = 1L;
+
+	transient private static Runtime myRuntime = null; //  
+	transient private static ServiceData serviceData = null; // = myRuntime.getServiceData();
 
 	// interfaces declaration needed by InMooov
 	transient public SpeechSynthesis mouth;
@@ -60,6 +57,19 @@ public class InMoovV2 extends Service {
 	// ---------------------------------------------------------------
 	// end of config
 	// ---------------------------------------------------------------
+	
+	
+	public InMoovV2(String n) {
+		super(n);
+		if (myRuntime == null) {
+			myRuntime = (Runtime) Runtime.getInstance();;
+		}
+		
+		if (serviceData == null) {
+			serviceData = myRuntime.getServiceData();
+		}
+	}
+
 
 	public static void main(String[] args) {
 		try {
