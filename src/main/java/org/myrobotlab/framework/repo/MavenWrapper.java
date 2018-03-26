@@ -222,7 +222,8 @@ public class MavenWrapper extends Repo {
       String dir = String.format("build.maven.%d", System.currentTimeMillis());
       // String dir = String.format("install.%d", System.currentTimeMillis());
 
-      maven.createBuildFilesTo("install.maven");
+      // maven.createBuildFilesTo("install.maven");
+      maven.install("install.artoolkitplus.maven", "_TemplateService");
       // maven.createBuildFiles("install.opencv.maven", "OpenCV");
 
       boolean done = true;
