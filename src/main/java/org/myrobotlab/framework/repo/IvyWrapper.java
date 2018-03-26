@@ -264,14 +264,16 @@ public class IvyWrapper extends Repo {
       // String dir = String.format("build.ivy.%d", System.currentTimeMillis());
       String dir = String.format("install.ivy.%d", System.currentTimeMillis());
 
-      ivy.installTo("install.ivy");
-
+      // ivy.installTo("install.ivy");
+      // ivy.install("install.opencv.ivy", "OpenCV");
+      ivy.install("install.artoolkitplus.ivy", "_TemplateService");
+      
       boolean done = true;
       if (done) {
         return;
       }
 
-      ivy.install("install.opencv.ivy", "OpenCV");
+      
 
       ivy.install(dir, "Joystick");
 
