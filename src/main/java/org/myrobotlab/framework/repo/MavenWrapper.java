@@ -52,6 +52,14 @@ public class MavenWrapper extends Repo {
   // FIXME - call external mvn since Embedded Maven is not documented and buggy
   @Override
   public void install(String location, String[] serviceTypes) {
+	
+	createBuildFiles(location, serviceTypes);
+	
+	log.error("TODO - implement dependency copy with ProcessBuilder & external mvn install");
+	boolean done = true;
+	if (done) {
+		return;
+	}
 
     info("===== starting installation of %d services =====", serviceTypes.length);
     for (String serviceType : serviceTypes) {
@@ -222,7 +230,7 @@ public class MavenWrapper extends Repo {
       String dir = String.format("build.maven.%d", System.currentTimeMillis());
       // String dir = String.format("install.%d", System.currentTimeMillis());
 
-      // maven.createBuildFilesTo("install.maven");
+      maven.createBuildFiles("install.maven", "_TemplateService");
       maven.install("install.artoolkitplus.maven", "_TemplateService");
       // maven.createBuildFiles("install.opencv.maven", "OpenCV");
 
