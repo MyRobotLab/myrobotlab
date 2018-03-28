@@ -44,18 +44,18 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   private static final int CONFIDENCE_INDEX = 4;
   private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
   
-  private float confidenceThreshold = 0.0F;
+  private float confidenceThreshold = 0.25F;
   // the column in the detection matrix that contains the confidence level.  (I think?)
   // int probability_index = 5;
   // yolo file locations
   // private String darknetHome = "c:/dev/workspace/darknet/";
   public String darknetHome = "yolo";
-  public String modelConfig = "yolo.cfg";
+  public String modelConfig = "yolov2.cfg";
   public String modelWeights = "yolo.weights";
   public String modelNames = "coco.names";
   
   // TODO: store these somewhere as a resource / dependency ..
-  public String modelConfigUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolo.cfg";
+  public String modelConfigUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov2.cfg";
   public String modelWeightsUrl = "https://pjreddie.com/media/files/yolo.weights";
   public String modelNamesUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names";
 
@@ -183,7 +183,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
-      // log.info("Display result " );
       displayResult(image, lastResult);
     }
     // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
@@ -211,16 +210,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
   }
 
-  private String formatResultString(Map<String, Double> result) {
-    DecimalFormat df2 = new DecimalFormat("#.###");
-    StringBuilder res = new StringBuilder();
-    for (String key : result.keySet()) {
-      res.append(key + " : ");
-      res.append(df2.format(result.get(key)*100) + "% , ");        
-    }
-    return res.toString();
-  }
-
   @Override
   public void imageChanged(IplImage image) {
     // TODO Auto-generated method stub
@@ -229,12 +218,19 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public void run() {
 
+    int count = 0;
+    long start = System.currentTimeMillis();
     log.info("Starting the Yolo classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
       if (lastImage != null) {
           // lastResult = dl4j.classifyImageVGG16(lastImage);
         lastResult = yoloFrame(lastImage);
+        count++;
+        if (count % 10 == 0) {
+          double rate = count / (float)(System.currentTimeMillis() - start);
+          log.info("Yolo Classification Rate : {}" , rate);
+        }
         invoke("publishYoloClassification", lastResult);
       } else {
         // log.info("No Image to classify...");
@@ -265,7 +261,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // iterate the rows of the detection matrix.
     for (int i = 0; i < detectionMat.rows(); i++) {
       Mat currentRow = detectionMat.row(i);
-      
       float confidence = currentRow.getFloatBuffer().get(CONFIDENCE_INDEX);
       if (confidence < confidenceThreshold) {
         // skip the noise
@@ -304,11 +299,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       
     }
     return yoloObjects;
-  }
-
-  // TODO: does this need to be here or on the base OpenCV service?
-  public ArrayList<YoloDetectedObject> publishYoloClassification(ArrayList<YoloDetectedObject> yoloClassification) {	
-    return yoloClassification;
   }
 
 }
