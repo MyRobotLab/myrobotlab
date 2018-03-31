@@ -35,7 +35,8 @@ public class _TemplateService extends Service {
     
     // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
     // meta.addDependency("orgId", "artifactId", "2.4.0");
-    meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus-platform", "2.3.1-1.3");
+    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus", "2.3.1-1.4");
+    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus-platform", "2.3.1-1.4");
     
     
     meta.setAvailable(false);
