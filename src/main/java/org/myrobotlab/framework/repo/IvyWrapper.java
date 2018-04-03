@@ -52,7 +52,12 @@ public class IvyWrapper extends Repo {
 
     try {
 
-      Set<ServiceDependency> libraries = getUnfulfilledDependencies(serviceTypes);
+      Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
+      
+      if (targetLibraries.size() == 0) {
+    	  log.info("{} already installed", (Object[])serviceTypes );
+    	  return;
+      }
 
       log.info("installing {} services into {}", serviceTypes.length, location);
 
@@ -66,7 +71,7 @@ public class IvyWrapper extends Repo {
 
       String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/[originalname].[ext]" };
 
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-2.jar");
+      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-3.jar");
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
@@ -88,10 +93,12 @@ public class IvyWrapper extends Repo {
         return;
       }
 
-      for (ServiceDependency library : libraries) {
+      // TODO - promote to Repo.setInstalled
+      for (ServiceDependency library : targetLibraries) {
         // set as installed & save state
+    	library.setInstalled(true);
+    	installedLibraries.put(library.toString(), library);
         info("installed %s platform %s", library, platform.getPlatformId());
-        library.setInstalled(true);
       }
       save();
 
@@ -264,8 +271,8 @@ public class IvyWrapper extends Repo {
       // String dir = String.format("build.ivy.%d", System.currentTimeMillis());
       String dir = String.format("install.ivy.%d", System.currentTimeMillis());
 
-      ivy.installTo("install.ivy");
-      // ivy.install("install.opencv.ivy", "OpenCV");
+      // ivy.installTo("install.ivy");
+      ivy.install("install.opencv.ivy", "OpenCV");
       // ivy.install("install.artoolkitplus.ivy", "_TemplateService");
       
       boolean done = true;
