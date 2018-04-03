@@ -272,7 +272,7 @@ public class IvyWrapper extends Repo {
       String dir = String.format("install.ivy.%d", System.currentTimeMillis());
 
       // ivy.installTo("install.ivy");
-      ivy.install("install.opencv.ivy", "OpenCV");
+      ivy.install("install.serial.ivy", "Serial");
       // ivy.install("install.artoolkitplus.ivy", "_TemplateService");
       
       boolean done = true;
