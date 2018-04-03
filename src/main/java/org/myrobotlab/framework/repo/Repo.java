@@ -1,9 +1,13 @@
 package org.myrobotlab.framework.repo;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.ServiceReservation;
@@ -24,6 +29,8 @@ import org.slf4j.Logger;
 
 public abstract class Repo {
 
+	public static final String DEFAULT_INSTALL_DIR = "libraries/jar";
+
 	// Repo is an interface to a singleton of each "type" of repo
 	private static String defaultRepoManagerType = "IvyWrapper";
 
@@ -31,49 +38,23 @@ public abstract class Repo {
 
 	public static final String INSTALL_START = "installationStart";
 
-	public static String DEFAULT_INSTALL_DIR = "libraries/jar";
+	protected transient Set<LoggingSink> installLoggingSinks = new HashSet<LoggingSink>();
 
-	static transient Set<LoggingSink> installLoggingSinks = new HashSet<LoggingSink>();
-	protected static transient Map<String, Repo> localInstances = new HashMap<String, Repo>();
+	static protected transient Map<String, Repo> localInstances = new HashMap<String, Repo>();
 
 	public final static Logger log = LoggerFactory.getLogger(Repo.class);
 
-	protected static List<RemoteRepo> remotes;
+	protected List<RemoteRepo> remotes;
 
-	final static String REPO_STATE_FILE_NAME = "repo.json";
+	public static final String REPO_STATE_FILE_NAME = "repo.json";
 
-	static {
-		try {
-			// FIXME reduce down to maven central bintray & repo.myrobotlab.org
-			remotes = new ArrayList<RemoteRepo>();
-			remotes.add(new RemoteRepo("central", "https://repo.maven.apache.org/maven2", "the mother load"));
-			remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com", "the big kahuna"));
-			remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab",
-					"all other mrl deps"));
+	List<Status> errors = new ArrayList<Status>();
 
-			// DO NOT INCLUDE - messed up repo !
-			// remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2", "for
-			// jai_imageio")); - do not use
-			remotes.add(new RemoteRepo("eclipse-release", "https://repo.eclipse.org/content/groups/releases"));
+	// Sets are implemented as Lists in gson :P
+	// Set<ServiceDependency> installedLibraries = new HashSet<ServiceDependency>();
+	Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
 
-			remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine",
-					"jmonkey simulator"));
-
-			remotes.add(
-					new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
-			remotes.add(
-					new RemoteRepo("tudelft", "http://simulation.tudelft.nl/maven", "for j3d core, utils and vector"));
-			// remotes.add(new RemoteRepo("jitpack", "https://jitpack.io", "microsoft azure
-			// translate"));
-			remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public",
-					"swinggui mxgraph"));
-
-		} catch (Exception e) {
-			log.error("initialization of Repo threw", e);
-		}
-	}
-
-	static public void error(String format, Object... args) {
+	public void error(String format, Object... args) {
 		if (installLoggingSinks.size() == 0) {
 			log.error(String.format(format, args));
 			return;
@@ -112,6 +93,7 @@ public abstract class Repo {
 			return null;
 		}
 	}
+	
 
 	public final static String makeFullTypeName(String type) {
 		if (type == null) {
@@ -123,9 +105,39 @@ public abstract class Repo {
 		return type;
 	}
 
-	List<Status> errors = new ArrayList<Status>();
+	protected Repo() {
 
-	TreeMap<String, ServiceDependency> libraries = new TreeMap<String, ServiceDependency>();
+		try {
+
+			// FIXME reduce down to maven central bintray & repo.myrobotlab.org
+			remotes = new ArrayList<RemoteRepo>();
+			remotes.add(new RemoteRepo("central", "https://repo.maven.apache.org/maven2", "the mother load"));
+			remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com", "the big kahuna"));
+			remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab",
+					"all other mrl deps"));
+
+			// DO NOT INCLUDE - messed up repo !
+			// remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2", "for
+			// jai_imageio")); - do not use
+			remotes.add(new RemoteRepo("eclipse-release", "https://repo.eclipse.org/content/groups/releases"));
+
+			remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine",
+					"jmonkey simulator"));
+
+			remotes.add(
+					new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
+			remotes.add(
+					new RemoteRepo("tudelft", "http://simulation.tudelft.nl/maven", "for j3d core, utils and vector"));
+			// remotes.add(new RemoteRepo("jitpack", "https://jitpack.io", "microsoft azure
+			// translate"));
+			remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public",
+					"swinggui mxgraph"));
+			
+			load();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+	}
 
 	public void addLoggingSink(LoggingSink service) {
 		installLoggingSinks.add(service);
@@ -139,7 +151,7 @@ public abstract class Repo {
 		log.info("Repo.clear - {}", REPO_STATE_FILE_NAME);
 		FileIO.rm(REPO_STATE_FILE_NAME);
 		log.info("Repo.clear - clearing memory");
-		libraries.clear();
+		installedLibraries.clear();
 		log.info("clearing errors");
 		clearErrors();
 	}
@@ -260,9 +272,10 @@ public abstract class Repo {
 
 			if (metaDependencies != null && metaDependencies.size() > 0) {
 				for (ServiceDependency library : metaDependencies) {
-					String key = library.getKey();
-					if (!libraries.containsKey(key) || !libraries.get(key).isInstalled()) {
+					if (!installedLibraries.containsKey(library.toString())) {
 						ret.add(library);
+					} else {
+						log.debug("previously installed - {}", library);
 					}
 				}
 			}
@@ -313,6 +326,10 @@ public abstract class Repo {
 		}
 
 		install(DEFAULT_INSTALL_DIR, types);
+	}
+
+	public void install(String location, String serviceType) {
+		install(location, new String[] { serviceType });
 	}
 
 	abstract public void install(String location, String[] serviceTypes);
@@ -377,20 +394,55 @@ public abstract class Repo {
 	}
 
 	/**
+	 * loads repo from a file
+	 */
+	public void load() {
+		try {
+			
+
+			File f = new File(REPO_STATE_FILE_NAME);
+			if (f.exists()) {
+				log.info("loading {}", REPO_STATE_FILE_NAME);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+				FileInputStream is = new FileInputStream(f);
+				int nRead;
+				byte[] data = new byte[16384];
+
+				while ((nRead = is.read(data, 0, data.length)) != -1) {
+					baos.write(data, 0, nRead);
+				}
+
+				baos.flush();
+				baos.close();
+				is.close();
+				byte[] z = baos.toByteArray();
+				if (z != null && z.length > 0) {
+					installedLibraries = CodecUtils.fromJson(new String(z), TreeMap.class, String.class, ServiceDependency.class);
+				}
+
+			} else {
+				log.info("{} not found", REPO_STATE_FILE_NAME);
+			}
+
+		} catch (Exception e) {
+			log.error("save threw", e);
+		}
+		
+		log.info("here");
+	}
+
+	/**
 	 * saves repo to file
 	 */
 	public void save() {
 		try {
 			FileOutputStream fos = new FileOutputStream(REPO_STATE_FILE_NAME);
-			fos.write(CodecUtils.toJson(this).getBytes());
+			fos.write(CodecUtils.toJson(installedLibraries).getBytes());
 			fos.close();
 		} catch (Exception e) {
 			log.error("save threw", e);
 		}
-	}
-
-	public void install(String location, String serviceType) {
-		install(location, new String[] {serviceType});
 	}
 
 }
