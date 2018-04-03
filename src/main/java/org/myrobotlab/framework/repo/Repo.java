@@ -6,8 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.ServiceReservation;
@@ -50,8 +47,6 @@ public abstract class Repo {
 
 	List<Status> errors = new ArrayList<Status>();
 
-	// Sets are implemented as Lists in gson :P
-	// Set<ServiceDependency> installedLibraries = new HashSet<ServiceDependency>();
 	Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
 
 	public void error(String format, Object... args) {
@@ -93,7 +88,6 @@ public abstract class Repo {
 			return null;
 		}
 	}
-	
 
 	public final static String makeFullTypeName(String type) {
 		if (type == null) {
@@ -132,7 +126,7 @@ public abstract class Repo {
 			// translate"));
 			remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public",
 					"swinggui mxgraph"));
-			
+
 			load();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -293,10 +287,17 @@ public abstract class Repo {
 	}
 
 	/*
-	 * public void publishStatus(Status status) { for (LoggingSink service :
-	 * installLoggingSinks) { if (status.isInfo()) { service.info(format, args) }
-	 * service.publishStatus(status); } }
-	 */
+	public void publishStatus(Status status) { 
+		for (LoggingSink service : installLoggingSinks) { 
+			if (status.isError()) { 
+					service.error(status.detail);
+			} else {
+				service.error(status.detail);
+			}
+			service.publishStatus(status); 
+	  } 
+	}
+	*/
 
 	public void info(String format, Object... args) {
 		if (installLoggingSinks.size() == 0) {
@@ -398,7 +399,6 @@ public abstract class Repo {
 	 */
 	public void load() {
 		try {
-			
 
 			File f = new File(REPO_STATE_FILE_NAME);
 			if (f.exists()) {
@@ -418,7 +418,8 @@ public abstract class Repo {
 				is.close();
 				byte[] z = baos.toByteArray();
 				if (z != null && z.length > 0) {
-					installedLibraries = CodecUtils.fromJson(new String(z), TreeMap.class, String.class, ServiceDependency.class);
+					installedLibraries = CodecUtils.fromJson(new String(z), TreeMap.class, String.class,
+							ServiceDependency.class);
 				}
 
 			} else {
@@ -426,9 +427,9 @@ public abstract class Repo {
 			}
 
 		} catch (Exception e) {
-			log.error("save threw", e);
+			log.error("loading threw", e);
 		}
-		
+
 		log.info("here");
 	}
 
