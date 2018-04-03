@@ -286,7 +286,7 @@ public abstract class Repo {
 		return ret;
 	}
 
-	/*
+	/*   
 	public void publishStatus(Status status) { 
 		for (LoggingSink service : installLoggingSinks) { 
 			if (status.isError()) { 
