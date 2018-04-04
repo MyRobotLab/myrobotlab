@@ -1017,6 +1017,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <finalName>myrobotlab</finalName>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>

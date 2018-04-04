@@ -1117,11 +1117,13 @@ public class Runtime extends Service implements MessageListener {
       }
 
       // TODO replace with commons-cli
-      if (cmdline.containsKey("--install") || cmdline.containsKey("-i")) {
+      if (cmdline.containsKey("-install") || cmdline.containsKey("--install") || cmdline.containsKey("-i")) {
         ArrayList<String> services = null;
         // force all updates
         if (cmdline.containsKey("--install")) {
-            services = cmdline.getArgumentList("--install");
+          services = cmdline.getArgumentList("--install");
+        } else if (cmdline.containsKey("-install")) {
+          services = cmdline.getArgumentList("-install");
         } else {
           services = cmdline.getArgumentList("-i");
         }
