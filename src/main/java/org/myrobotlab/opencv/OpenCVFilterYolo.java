@@ -56,7 +56,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   
   // TODO: store these somewhere as a resource / dependency ..
   public String modelConfigUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov2.cfg";
-  public String modelWeightsUrl = "https://pjreddie.com/media/files/yolo.weights";
+  public String modelWeightsUrl = "https://pjreddie.com/media/files/yolov2.weights";
   public String modelNamesUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names";
 
   
