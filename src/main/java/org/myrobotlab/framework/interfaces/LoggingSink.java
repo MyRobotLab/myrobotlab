@@ -2,9 +2,7 @@ package org.myrobotlab.framework.interfaces;
 
 import org.myrobotlab.framework.Status;
 
-public interface LoggingSink {
-
-  public String getName();
+public interface LoggingSink extends NameProvider {
 
   public Status error(String format, Object... args);
   

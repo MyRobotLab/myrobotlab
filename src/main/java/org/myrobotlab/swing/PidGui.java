@@ -77,17 +77,17 @@ public class PidGui extends ServiceGui implements ActionListener {
 		Object o = event.getSource();
 		if (o == direction) {
 			if (direction.getText().equals("invert")) {
-				myService.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_REVERSE));
+				swingGui.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_REVERSE));
 				direction.setText("direct");
 			} else {
-				myService.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_DIRECT));
+				swingGui.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_DIRECT));
 				direction.setText("invert");
 			}
 		} else if (o == setPID) {
 			Double Kp = Double.parseDouble(kp.getText());
 			Double Ki = Double.parseDouble(ki.getText());
 			Double Kd = Double.parseDouble(kd.getText());
-			myService.send(boundServiceName, "setPID", Kp, Ki, Kd);
+			swingGui.send(boundServiceName, "setPID", Kp, Ki, Kd);
 		}
 
 	}

@@ -57,8 +57,8 @@ public class TestCatcherGui extends ServiceGui {
   // directory
   // autoBind(ServiceName) would send all NotificationEntries to a service
   public void bindCatchInteger() {
-    MRLListener MRLListener = new MRLListener("catchInteger", myService.getName(), "catchInteger");
-    myService.send(boundServiceName, "addListener", MRLListener);
+    MRLListener MRLListener = new MRLListener("catchInteger", swingGui.getName(), "catchInteger");
+    swingGui.send(boundServiceName, "addListener", MRLListener);
   }
 
   public void catchInteger(Integer i) {
@@ -77,7 +77,7 @@ public class TestCatcherGui extends ServiceGui {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-          myService.send(boundServiceName, "catchNothing");
+          swingGui.send(boundServiceName, "catchNothing");
           /*
            * if (bindCatchIntegerButton.getText().compareTo("connect") == 0) {
            * bindCatchIntegerButton.setText("disconnect");

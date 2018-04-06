@@ -82,10 +82,10 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
           if (attachButton.getText().equals(attach)) {
             int index = controllerList.getSelectedIndex();
             if (index != -1) {
-              myService.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
+              swingGui.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
             }
           } else {
-            myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+            swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
           }
         }
         return;

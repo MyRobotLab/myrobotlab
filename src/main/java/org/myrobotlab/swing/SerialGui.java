@@ -86,8 +86,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	final SerialGui self;
 
 	// gui's formatters
-	Codec rxFormatter = new DecimalCodec(myService);
-	Codec txFormatter = new DecimalCodec(myService);
+	Codec rxFormatter = new DecimalCodec(swingGui);
+	Codec txFormatter = new DecimalCodec(swingGui);
 
 	PortGui portGui;
 
@@ -240,8 +240,8 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 			// changing our display and the Service's format
 			try {
 				clear();
-				rxFormatter = Codec.getDecoder(newFormat, myService);
-				txFormatter = Codec.getDecoder(newFormat, myService);
+				rxFormatter = Codec.getDecoder(newFormat, swingGui);
+				txFormatter = Codec.getDecoder(newFormat, swingGui);
 				send("setFormat", newFormat);
 			} catch (Exception e) {
 				Logging.logError(e);
@@ -261,7 +261,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 	 */
 	public final void onRX(final Integer data) throws BadLocationException {
 		++rxCount;
-		if (this.myService.getInbox().size() > 500) {
+		if (this.swingGui.getInbox().size() > 500) {
 			rx.append("...\n");
 			return;
 		}

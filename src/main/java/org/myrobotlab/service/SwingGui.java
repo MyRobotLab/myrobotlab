@@ -457,7 +457,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     return guiServiceGui.srcServiceName.getText();
   }
 
-  public void onStatus(Status inStatus) {
+  /**
+   * set the main status bar with Status information
+   * @param inStatus
+   */
+  public void setStatus(Status inStatus) {
 
     if (inStatus.isError()) {
       status.setOpaque(true);

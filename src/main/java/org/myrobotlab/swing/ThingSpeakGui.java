@@ -73,7 +73,7 @@ public class ThingSpeakGui extends ServiceGui implements ActionListener {
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
     if (o == save) {
-      myService.send(boundServiceName, "saveConfig");
+      swingGui.send(boundServiceName, "saveConfig");
     }
   }
 

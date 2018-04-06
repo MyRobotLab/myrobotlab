@@ -28,8 +28,9 @@ import org.slf4j.Logger;
 public class Status implements Serializable {// extends Exception {
 
   private static final long serialVersionUID = 1L;
-
+  
   public final static Logger log = LoggerFactory.getLogger(Status.class);
+  
   public String name; // service name ???
 
   public String level;
@@ -179,6 +180,11 @@ public class Status implements Serializable {// extends Exception {
     }
 
     return sb.toString();
+  }
+  
+  static public final Status newInstance(String name, String level, String key, String detail) {
+    Status s = new Status(name, level, key, detail);
+    return s;
   }
 
   public static void main(String[] args) throws IOException, InterruptedException {

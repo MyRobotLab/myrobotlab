@@ -73,7 +73,7 @@ public class VideoWidget extends ServiceGui {
     // gc.gridx = videoDisplayXPos;
     // gc.gridy = videoDisplayYPos;
 
-    VideoDisplayPanel vp = new VideoDisplayPanel(source, this, myService, boundServiceName);
+    VideoDisplayPanel vp = new VideoDisplayPanel(source, this, swingGui, boundServiceName);
 
     // add it to the map of displays
     displays.put(source, vp);
@@ -83,7 +83,7 @@ public class VideoWidget extends ServiceGui {
 
     ++videoDisplayXPos;
     display.invalidate();
-    myService.pack();
+    swingGui.pack();
 
     return vp;
   }
@@ -139,7 +139,7 @@ public class VideoWidget extends ServiceGui {
     VideoDisplayPanel vdp = displays.remove(source);
     display.remove(vdp.myDisplay);
     display.invalidate();
-    myService.pack();
+    swingGui.pack();
   }
 
   public void allowFork(boolean b) {

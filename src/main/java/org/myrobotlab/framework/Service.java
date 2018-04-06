@@ -922,9 +922,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
     allowDisplay = b;
   }
 
-  // new state functions begin --------------------------
   public void broadcastState() {
     invoke("publishState");
+  }
+  
+  public void broadcastStatus(Status status) {
+    invoke("publishStatus", status);
   }
 
   public String clearLastError() {

@@ -439,46 +439,46 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
 
     // Button - Events
     if (o == top_save_button) {
-      myService.send(boundServiceName, "top_save_button");
+      swingGui.send(boundServiceName, "top_save_button");
     } else if (o == top_load_button) {
-      myService.send(boundServiceName, "top_load_button");
+      swingGui.send(boundServiceName, "top_load_button");
     } else if (o == top_addservo_button) {
-      myService.send(boundServiceName, "top_addservo_button");
+      swingGui.send(boundServiceName, "top_addservo_button");
     } else if (o == middleright_update_button) {
-      myService.send(boundServiceName, "middleright_update_button");
+      swingGui.send(boundServiceName, "middleright_update_button");
     } else if (o == middleright_attach_button) {
-      myService.send(boundServiceName, "middleright_attach_button");
+      swingGui.send(boundServiceName, "middleright_attach_button");
     } else if (o == middleleft_timeunitadd_button) {
-      myService.send(boundServiceName, "middleleft_timeunitadd_button");
+      swingGui.send(boundServiceName, "middleleft_timeunitadd_button");
     } else if (o == middleleft_timeunitremove_button) {
-      myService.send(boundServiceName, "middleleft_timeunitremove_button");
+      swingGui.send(boundServiceName, "middleleft_timeunitremove_button");
     } else if (o == middleleft_channeladd_button) {
-      myService.send(boundServiceName, "middleleft_channeladd_button");
+      swingGui.send(boundServiceName, "middleleft_channeladd_button");
     } else if (o == middleleft_channelremove_button) {
-      myService.send(boundServiceName, "middleleft_channelremove_button");
+      swingGui.send(boundServiceName, "middleleft_channelremove_button");
     } else if (o == bottommiddleleft_update_button) {
       // TODO - add functionality
     } else if (o == bottommiddlerighttop_update_button) {
-      myService.send(boundServiceName, "bottommiddlerighttop_update_button");
+      swingGui.send(boundServiceName, "bottommiddlerighttop_update_button");
     } else if (o == bottommiddlerightbottom_button_1) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_1");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_1");
     } else if (o == bottommiddlerightbottom_button_2) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_2");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_2");
     } else if (o == bottommiddlerightbottom_button_3) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_3");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_3");
     } else if (o == bottommiddlerightbottom_button_4) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_4");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_4");
     } else if (o == bottommiddlerightbottom_button_5) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_5");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_5");
     } else if (o == bottommiddlerightbottom_button_6) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_6");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_6");
     } else if (o == bottommiddlerightbottom_button_7) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_7");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_7");
     } else if (o == bottommiddlerightbottom_button_8) {
-      myService.send(boundServiceName, "bottommiddlerightbottom_button_8");
+      swingGui.send(boundServiceName, "bottommiddlerightbottom_button_8");
     }
 
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   @Override
@@ -499,15 +499,15 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
   }
 
   public void externalcall_loadsettings(int pos) {
-    myService.send(boundServiceName, "externalcall_loadsettings", pos);
+    swingGui.send(boundServiceName, "externalcall_loadsettings", pos);
   }
 
   public void externalcall_servopanelchangeinfo(int x, int y) {
-    myService.send(boundServiceName, "externalcall_servopanelchangeinfo", x, y);
+    swingGui.send(boundServiceName, "externalcall_servopanelchangeinfo", x, y);
   }
 
   public void externalcall_servopanelsettostartpos(int x, int y, boolean withgoal) {
-    myService.send(boundServiceName, "externalcall_servopanelsettostartpos", x, y, withgoal);
+    swingGui.send(boundServiceName, "externalcall_servopanelsettostartpos", x, y, withgoal);
   }
 
   public void onState(_TemplateService template) {
@@ -526,7 +526,7 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
 
     // CheckBox - Events
     if (o == bottomright_click_checkbox) {
-      myService.send(boundServiceName, "bottomright_click_checkbox");
+      swingGui.send(boundServiceName, "bottomright_click_checkbox");
     }
   }
 
@@ -536,7 +536,7 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
 
     // List - Events
     if (o == middleright_arduino_list) {
-      myService.send(boundServiceName, "middleright_arduino_list");
+      swingGui.send(boundServiceName, "middleright_arduino_list");
     } else if (o == middleright_pin_list) {
       // TODO - add functionality - Do I have to do this?
     }

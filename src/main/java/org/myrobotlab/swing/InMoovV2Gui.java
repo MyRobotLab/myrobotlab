@@ -163,13 +163,13 @@ public class InMoovV2Gui extends ServiceGui implements ActionListener {
 					send("setSpeechEngine", speechCombo.getSelectedItem());
 				}
 				if (o == configureSpeech) {
-					myService.setActiveTab(boundServiceName + ".mouth");
+					swingGui.setActiveTab(boundServiceName + ".mouth");
 				}
 				if (o == earCombo) {
 					send("setEarEngine", earCombo.getSelectedItem());
 				}
 				if (o == configureEar) {
-					myService.setActiveTab(boundServiceName + ".ear");
+					swingGui.setActiveTab(boundServiceName + ".ear");
 				}
 				if (o == startEar) {
 					send("startEar");

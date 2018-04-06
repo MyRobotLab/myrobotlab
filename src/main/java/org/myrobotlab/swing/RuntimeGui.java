@@ -415,7 +415,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     Object o = event.getSource();
 
     if (releaseMenuItem == o) {
-      myService.send(boundServiceName, "releaseService", releasedTarget.getName());
+      swingGui.send(boundServiceName, "releaseService", releasedTarget.getName());
       return;
     }
 
@@ -431,13 +431,13 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
       if (!repo.isServiceTypeInstalled(n)) {
         // dependencies needed !!!
         String msg = "<html>This Service has dependencies which are not yet loaded,<br>" + "do you wish to download them now?";
-        JOptionPane.setRootFrame(myService.getFrame());
-        int result = JOptionPane.showConfirmDialog(myService.getFrame(), msg, "alert", JOptionPane.OK_CANCEL_OPTION);
+        JOptionPane.setRootFrame(swingGui.getFrame());
+        int result = JOptionPane.showConfirmDialog(swingGui.getFrame(), msg, "alert", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.CANCEL_OPTION) {
           return;
         }
         // you say "install", i say "update", repo says "resolve"
-        myService.send(boundServiceName, "install", n);
+        swingGui.send(boundServiceName, "install", n);
       } else {
         // no unfulfilled dependencies - good to go
         addNewService(n);
@@ -484,7 +484,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     String name = JOptionPane.showInputDialog(frame, "new service name");
 
     if (name != null && name.length() > 0) {
-      myService.send(boundServiceName, "createAndStart", name, newService);
+      swingGui.send(boundServiceName, "createAndStart", name, newService);
 
     }
   }
@@ -505,7 +505,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     subscribe("registered");
     subscribe("released");
     subscribe("getSystemResources");
-    subscribe("publishInstallProgress");
+    // subscribe("publishInstallProgress");
+    // subscribe("publishStatus"); not needed one of two - auto-subscribed
   }
 
   @Override
@@ -513,7 +514,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     unsubscribe("registered");
     unsubscribe("released");
     subscribe("getSystemResources");
-    unsubscribe("publishInstallProgress");
+    // unsubscribe("publishInstallProgress");
+    // subscribe("publishStatus");
   }
 
   /**
@@ -674,7 +676,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
         // FIXME - change to "all" or "" - null is sloppy - system has
         // to upcast
-        myService.pack();
+        swingGui.pack();
       }
     });
   }
@@ -702,7 +704,26 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     // send("restart"); TODO - change back to restart - when it works
     send("shutdown");
   }
+  
+  /**
+   * overridden - looking specifically for a key'd status to
+   * signal install progress dialog events
+   */
+  public void onStatus(Status status) {
+    super.onStatus(status);
+    
+    if (Repo.INSTALL_START.equals(status.key)) {
+      progressDialog.beginUpdates();
+    } else if (Repo.INSTALL_FINISHED.equals(status.key)) {
+      progressDialog.finished();
+    }
+    
+    if (progressDialog != null && Repo.class.getSimpleName().equals(status.source)) {
+      progressDialog.addStatus(status); // "all status info coming from repo must have a source or key
+    }
 
+  }
+/*
   public void onInstallProgress(Status status) {
 
     if (Repo.INSTALL_START.equals(status.key)) {
@@ -713,7 +734,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
     progressDialog.addStatus(status);
   }
-
+*/
+  
   /**
    * this is the beginning of the applyUpdates process
    */

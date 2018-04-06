@@ -26,6 +26,7 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -58,7 +59,7 @@ public abstract class ServiceGui implements WindowListener {
 
 	public final static Logger log = LoggerFactory.getLogger(ServiceGui.class);
 	public final String boundServiceName;
-	transient public final SwingGui myService; // FIXME - rename gui
+	transient public final SwingGui swingGui; // FIXME - rename gui
 
 	/**
 	 * display is the panel to be added to the JTabbedPane it has border layout
@@ -86,7 +87,7 @@ public abstract class ServiceGui implements WindowListener {
 	public ServiceGui(final String boundServiceName, final SwingGui myService) {
 		self = this;
 		this.boundServiceName = boundServiceName;
-		this.myService = myService;
+		this.swingGui = myService;
 
 		north = new JPanel(new GridBagLayout());
 
@@ -112,15 +113,15 @@ public abstract class ServiceGui implements WindowListener {
 	}
 	
 	public void info(String msg, Object...params){
-		myService.info(msg, params);
+		swingGui.info(msg, params);
 	}
 	
 	public void warn(String msg, Object...params){
-		myService.warn(msg, params);
+		swingGui.warn(msg, params);
 	}
 	
 	public void error(String msg, Object...params){
-		myService.error(msg, params);
+		swingGui.error(msg, params);
 	}
 
 	/**
@@ -165,7 +166,7 @@ public abstract class ServiceGui implements WindowListener {
 	}
 
 	public void send(String method, Object... params) {
-		myService.send(boundServiceName, method, params);
+		swingGui.send(boundServiceName, method, params);
 	}
 
 	public void subscribe(String method) {
@@ -175,14 +176,14 @@ public abstract class ServiceGui implements WindowListener {
 	public void subscribe(String method, String callback) {
 		
 		// send a message to the service - to subscribe to a method 
-		MRLListener listener = new MRLListener(method, myService.getName(), callback);
-		myService.send(boundServiceName, "addListener", listener);
+		MRLListener listener = new MRLListener(method, swingGui.getName(), callback);
+		swingGui.send(boundServiceName, "addListener", listener);
 		
 		// here is the new magic secret sauce !!!
 		// this is in mrl.js / panelSvc.js too
 		// add that method in SwingGui's message routing to get the callback to 'this' 
 		// tab panel, or widget - in mrl.js too along with other subscriptions to types
-		myService.subscribeToServiceMethod(String.format("%s.%s", boundServiceName, callback), this);
+		swingGui.subscribeToServiceMethod(String.format("%s.%s", boundServiceName, callback), this);
 	}
 
 	public void unsubscribe(String inOutMethod) {
@@ -190,12 +191,12 @@ public abstract class ServiceGui implements WindowListener {
 	}
 
 	public void unsubscribe(String inMethod, String outMethod) {
-		myService.unsubscribe(boundServiceName, inMethod, myService.getName(), outMethod);
+		swingGui.unsubscribe(boundServiceName, inMethod, swingGui.getName(), outMethod);
 	}
 
 	public void sendPeer(String peerKey, String method, Object... params){
 		String fullKey = String.format("%s.%s",  boundServiceName, peerKey);
-		myService.sendPeer(fullKey, method, params);
+		swingGui.sendPeer(fullKey, method, params);
 	}
 
 	public void addTopGroup(String title, Object... components) {
@@ -426,6 +427,10 @@ public abstract class ServiceGui implements WindowListener {
   public void windowDeactivated(WindowEvent e) {
     // TODO Auto-generated method stub
     
+  }
+  
+  public void onStatus(Status inStatus) {
+    swingGui.setStatus(inStatus);
   }
 
 }

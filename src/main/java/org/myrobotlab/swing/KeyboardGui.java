@@ -112,10 +112,10 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
     if (o == listen) {
       String text = listen.getText();
       if ("start listening".equals(text)){
-        myService.send(boundServiceName, "startListening");
+        swingGui.send(boundServiceName, "startListening");
         listen.setText("stop listening");
       } else {
-        myService.send(boundServiceName, "stopListening");
+        swingGui.send(boundServiceName, "stopListening");
         listen.setText("start listening");
       }
     }

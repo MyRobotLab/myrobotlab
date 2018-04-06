@@ -177,47 +177,47 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
     log.info("NeoPixelGUI actionPerformed");
     Object o = e.getSource();
     if (o == refresh) {
-      myService.send(boundServiceName, "refresh");
+      swingGui.send(boundServiceName, "refresh");
     }
     if (o == attachButton) {
       if (attachButton.getText().equals(attach)) {
         int index = controller.getSelectedIndex();
         if (index != -1) {
-          myService.send(boundServiceName, attach, 
+          swingGui.send(boundServiceName, attach, 
               controller.getSelectedItem(),
               pinList.getSelectedItem(),
               pixelList.getSelectedItem());
         }
       } else {
-        myService.send(boundServiceName, detach);
+        swingGui.send(boundServiceName, detach);
       }
     }
     if (o == sendPixelMatrix){
-      myService.send(boundServiceName, "writeMatrix");
+      swingGui.send(boundServiceName, "writeMatrix");
     }
     if (o == turnOnOff){
       if (turnOnOff.getText().equals("Turn On")){
-        myService.send(boundServiceName, "turnOn");
+        swingGui.send(boundServiceName, "turnOn");
         turnOnOff.setText("Turn Off");
       }
       else{
-        myService.send(boundServiceName, "turnOff");
+        swingGui.send(boundServiceName, "turnOff");
         turnOnOff.setText("Turn On");
       }
     }
     for (int i = 0; i < 25; i++) {
       if(o == setPixel[i]){
-        myService.send(boundServiceName, "setPixel", pixelAddress[i].getText(), pixelRed[i].getText(), pixelGreen[i].getText(), pixelBlue[i].getText());
+        swingGui.send(boundServiceName, "setPixel", pixelAddress[i].getText(), pixelRed[i].getText(), pixelGreen[i].getText(), pixelBlue[i].getText());
       }
       if(o == sendPixel[i]) {
-        myService.send(boundServiceName, "sendPixel", pixelAddress[i].getText(), pixelRed[i].getText(), pixelGreen[i].getText(), pixelBlue[i].getText());
+        swingGui.send(boundServiceName, "sendPixel", pixelAddress[i].getText(), pixelRed[i].getText(), pixelGreen[i].getText(), pixelBlue[i].getText());
       }
     }
     if(o == animationList) {
-      myService.send(boundServiceName, "setAnimationSetting", animationList.getSelectedItem());
+      swingGui.send(boundServiceName, "setAnimationSetting", animationList.getSelectedItem());
     }
     if(o == animStart) {
-      myService.send(boundServiceName, "setAnimation", animationList.getSelectedItem(), animRed.getText(), animGreen.getText(), animBlue.getText(), animSpeed.getText());
+      swingGui.send(boundServiceName, "setAnimation", animationList.getSelectedItem(), animRed.getText(), animGreen.getText(), animBlue.getText(), animSpeed.getText());
     }
   }
 

@@ -482,47 +482,47 @@ public class InMoovGestureCreatorGui extends ServiceGui implements ActionListene
 
     // Button - Events
     if (o == control_connect) {
-      myService.send(boundServiceName, "control_connect", control_connect);
+      swingGui.send(boundServiceName, "control_connect", control_connect);
     } else if (o == control_loadscri) {
-      myService.send(boundServiceName, "control_loadscri", control_list);
+      swingGui.send(boundServiceName, "control_loadscri", control_list);
     } else if (o == control_savescri) {
-      myService.send(boundServiceName, "control_savescri");
+      swingGui.send(boundServiceName, "control_savescri");
     } else if (o == control_loadgest) {
-      myService.send(boundServiceName, "control_loadgest", control_list, framelist, control_gestname, control_funcname);
+      swingGui.send(boundServiceName, "control_loadgest", control_list, framelist, control_gestname, control_funcname);
     } else if (o == control_addgest) {
-      myService.send(boundServiceName, "control_addgest", control_list, control_gestname, control_funcname);
+      swingGui.send(boundServiceName, "control_addgest", control_list, control_gestname, control_funcname);
     } else if (o == control_updategest) {
-      myService.send(boundServiceName, "control_updategest", control_list, control_gestname, control_funcname);
+      swingGui.send(boundServiceName, "control_updategest", control_list, control_gestname, control_funcname);
     } else if (o == control_removegest) {
-      myService.send(boundServiceName, "control_removegest", control_list);
+      swingGui.send(boundServiceName, "control_removegest", control_list);
     } else if (o == control_testgest) {
-      myService.send(boundServiceName, "control_testgest");
+      swingGui.send(boundServiceName, "control_testgest");
     } else if (o == frame_add) {
-      myService.send(boundServiceName, "frame_add", framelist, frame_add_textfield);
+      swingGui.send(boundServiceName, "frame_add", framelist, frame_add_textfield);
     } else if (o == frame_addspeed) {
-      myService.send(boundServiceName, "frame_addspeed", framelist);
+      swingGui.send(boundServiceName, "frame_addspeed", framelist);
     } else if (o == frame_addsleep) {
-      myService.send(boundServiceName, "frame_addsleep", framelist, frame_addsleep_textfield);
+      swingGui.send(boundServiceName, "frame_addsleep", framelist, frame_addsleep_textfield);
     } else if (o == frame_addspeech) {
-      myService.send(boundServiceName, "frame_addspeech", framelist, frame_addspeech_textfield);
+      swingGui.send(boundServiceName, "frame_addspeech", framelist, frame_addspeech_textfield);
     } else if (o == frame_importminresmax) {
-      myService.send(boundServiceName, "frame_importminresmax");
+      swingGui.send(boundServiceName, "frame_importminresmax");
     } else if (o == frame_remove) {
-      myService.send(boundServiceName, "frame_remove", framelist);
+      swingGui.send(boundServiceName, "frame_remove", framelist);
     } else if (o == frame_load) {
-      myService.send(boundServiceName, "frame_load", framelist, frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
+      swingGui.send(boundServiceName, "frame_load", framelist, frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
     } else if (o == frame_update) {
-      myService.send(boundServiceName, "frame_update", framelist, frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
+      swingGui.send(boundServiceName, "frame_update", framelist, frame_add_textfield, frame_addsleep_textfield, frame_addspeech_textfield);
     } else if (o == frame_copy) {
-      myService.send(boundServiceName, "frame_copy", framelist);
+      swingGui.send(boundServiceName, "frame_copy", framelist);
     } else if (o == frame_up) {
-      myService.send(boundServiceName, "frame_up", framelist);
+      swingGui.send(boundServiceName, "frame_up", framelist);
     } else if (o == frame_down) {
-      myService.send(boundServiceName, "frame_down", framelist);
+      swingGui.send(boundServiceName, "frame_down", framelist);
     } else if (o == frame_test) {
-      myService.send(boundServiceName, "frame_test", framelist);
+      swingGui.send(boundServiceName, "frame_test", framelist);
     }
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   @Override
@@ -550,7 +550,7 @@ public class InMoovGestureCreatorGui extends ServiceGui implements ActionListene
 
       @Override
       public void stateChanged(ChangeEvent ce) {
-        myService.send(boundServiceName, "servoitemholder_slider_changed", t1, t2);
+        swingGui.send(boundServiceName, "servoitemholder_slider_changed", t1, t2);
       }
     });
   }
@@ -594,7 +594,7 @@ public class InMoovGestureCreatorGui extends ServiceGui implements ActionListene
 
     // CheckBox - Events
     if (o == frame_moverealtime) {
-      myService.send(boundServiceName, "frame_moverealtime", frame_moverealtime);
+      swingGui.send(boundServiceName, "frame_moverealtime", frame_moverealtime);
     }
   }
 }

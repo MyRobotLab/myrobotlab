@@ -52,7 +52,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
   RuntimeGui parent;
 
   public ProgressDialog(RuntimeGui parent) {
-    super(parent.myService.getFrame(), "new components");
+    super(parent.swingGui.getFrame(), "new components");
     this.parent = parent;
     Container display = getContentPane();
 
@@ -99,7 +99,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
   public void actionPerformed(ActionEvent event) {
     Object source = event.getSource();
     if (source == noWorky) {
-      parent.myService.noWorky();
+      parent.swingGui.noWorky();
     } else if (source == restart) {
       parent.restart();
     } else if (source == cancel) {

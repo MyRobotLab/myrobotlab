@@ -19,7 +19,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.interfaces.LoggingSink;
+import org.myrobotlab.framework.interfaces.StatusPublisher;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public abstract class Repo {
 
 	public static final String INSTALL_START = "installationStart";
 
-	protected transient Set<LoggingSink> installLoggingSinks = new HashSet<LoggingSink>();
+	static protected transient Set<StatusPublisher> installStatusPublishers = new HashSet<StatusPublisher>();
 
 	static protected transient Map<String, Repo> localInstances = new HashMap<String, Repo>();
 
@@ -50,13 +50,7 @@ public abstract class Repo {
 	Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
 
 	public void error(String format, Object... args) {
-		if (installLoggingSinks.size() == 0) {
-			log.error(String.format(format, args));
-			return;
-		}
-		for (LoggingSink service : installLoggingSinks) {
-			service.error(format, args);
-		}
+	  publishStatus(Status.error(format, args));
 	}
 
 	static public Repo getInstance() {
@@ -133,8 +127,8 @@ public abstract class Repo {
 		}
 	}
 
-	public void addLoggingSink(LoggingSink service) {
-		installLoggingSinks.add(service);
+	public void addStatusPublisher(StatusPublisher service) {
+		installStatusPublishers.add(service);
 	}
 
 	public void clear() {
@@ -286,27 +280,15 @@ public abstract class Repo {
 		return ret;
 	}
 
-	/*   
-	public void publishStatus(Status status) { 
-		for (LoggingSink service : installLoggingSinks) { 
-			if (status.isError()) { 
-					service.error(status.detail);
-			} else {
-				service.error(status.detail);
-			}
-			service.publishStatus(status); 
+
+	static public void publishStatus(Status status) { 
+		for (StatusPublisher service : installStatusPublishers) { 		
+			service.broadcastStatus(status); 
 	  } 
 	}
-	*/
-
-	public void info(String format, Object... args) {
-		if (installLoggingSinks.size() == 0) {
-			log.info(String.format(format, args));
-			return;
-		}
-		for (LoggingSink service : installLoggingSinks) {
-			service.info(format, args);
-		}
+	
+	static public void info(String format, Object... args) {
+	  publishStatus(Status.info(format, args));
 	}
 
 	public void install() {
@@ -317,7 +299,8 @@ public abstract class Repo {
 		info("finished installing %d services", sd.getServiceTypeNames().length);
 	}
 
-	public void install(String serviceType) {
+	public void install(String serviceType) {	  
+	  
 		String[] types = null;
 		if (serviceType == null) {
 			ServiceData sd = ServiceData.getLocalInstance();

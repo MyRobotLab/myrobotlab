@@ -52,7 +52,7 @@ public class TesseractOcrGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   @Override

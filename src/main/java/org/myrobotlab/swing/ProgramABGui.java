@@ -140,7 +140,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       if (filter.isSelected()) {
         textFiltered = textFiltered.replace("'", " ").replace("-", " ");
       }
-      Response answer = (Response) myService.sendBlocking(boundServiceName, 10000, "getResponse", textFiltered);
+      Response answer = (Response) swingGui.sendBlocking(boundServiceName, 10000, "getResponse", textFiltered);
       // response.setText(response.getText() + "<br/>\n\r" + answer);
       if (answer != null) {
         response.append("\n" + answer.msg.trim());
@@ -154,22 +154,22 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       String path = progABPath.getText().trim();
       String user = userName.getText().trim();
       String bot = botName.getText().trim();
-      myService.send(boundServiceName, "setPath", path);
-      myService.send(boundServiceName, "reloadSession", path, user, bot);
+      swingGui.send(boundServiceName, "setPath", path);
+      swingGui.send(boundServiceName, "reloadSession", path, user, bot);
 
     } else if (o == killAiml) {
       String path = progABPath.getText().trim();
       String user = userName.getText().trim();
       String bot = botName.getText().trim();
-      myService.send(boundServiceName, "setPath", path);
-      myService.send(boundServiceName, "reloadSession", path, user, bot, true);
+      swingGui.send(boundServiceName, "setPath", path);
+      swingGui.send(boundServiceName, "reloadSession", path, user, bot, true);
     } else if (o == reloadSession) {
-      myService.send(boundServiceName, "setUsername", userName.getText().trim());
+      swingGui.send(boundServiceName, "setUsername", userName.getText().trim());
     } else if (o == saveAIML) {
-      myService.send(boundServiceName, "writeAIML");
-      myService.send(boundServiceName, "writeAIMLIF");
+      swingGui.send(boundServiceName, "writeAIML");
+      swingGui.send(boundServiceName, "writeAIMLIF");
     } else if (o == savePredicates) {
-      myService.send(boundServiceName, "savePredicates");
+      swingGui.send(boundServiceName, "savePredicates");
     } else {
       log.info(o.toString());
       log.info("Unknown action!");
