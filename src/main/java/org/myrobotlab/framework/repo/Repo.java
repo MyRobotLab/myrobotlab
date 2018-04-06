@@ -344,10 +344,9 @@ public abstract class Repo {
 		info("finished installing %d services", sd.getServiceTypeNames().length);
 	}
 
-	// FIXME !!!! IMPLEMENT :)
-	public boolean isInstalled(String string) {
-		// TODO Auto-generated method stub
-		return false;
+	// FIXME - implement String[] serviceTypes parameter
+	public boolean isInstalled(String serviceType) {
+	  return getUnfulfilledDependencies(serviceType).size() == 0;
 	}
 
 	/**
