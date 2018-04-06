@@ -51,7 +51,7 @@ public class PhotoReelWidget extends ServiceGui {
       Object[] d = new Object[2];
       d[0] = e.getX();
       d[0] = e.getY();
-      myService.send(boundServiceName, "invokeFilterMethod", boundFilterName, "samplePoint", d); // TODO
+      swingGui.send(boundServiceName, "invokeFilterMethod", boundFilterName, "samplePoint", d); // TODO
       // -
       // overload
       // and
@@ -154,7 +154,7 @@ public class PhotoReelWidget extends ServiceGui {
     // resize gui if necessary
     if (lastImageWidth != img.getWidth()) {
       screen.invalidate();
-      myService.pack();
+      swingGui.pack();
       lastImageWidth = img.getWidth();
     }
 
@@ -193,7 +193,7 @@ public class PhotoReelWidget extends ServiceGui {
     // resize gui if necessary
     if (lastImageWidth != img.getImage().getWidth()) {
       screen.invalidate();
-      myService.pack();
+      swingGui.pack();
       lastImageWidth = img.getImage().getWidth();
       resolutionInfo.setText(" " + lastImageWidth + " x " + img.getImage().getHeight());
     }

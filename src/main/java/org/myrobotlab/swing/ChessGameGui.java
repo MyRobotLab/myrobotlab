@@ -76,7 +76,7 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
       board.makeMove(best);
       searcher.board.makeMove(best);
       // showStatus("Computer move: " + best.toString());
-      gui.myService.send(boundServiceName, "computerMoved", best.toString());
+      gui.swingGui.send(boundServiceName, "computerMoved", best.toString());
 
       makeMove(best, true);
       chessView.switchMoveMarkers(board.side == LIGHT);
@@ -330,8 +330,8 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
     // log.info(testFrom);
     // log.info(m + " from " + testFrom + " to " + to);
     if (publishEvent) {
-      myService.send(boundServiceName, "makeMove", m, "n");
-      myService.send(boundServiceName, "makeHMove", m);
+      swingGui.send(boundServiceName, "makeMove", m, "n");
+      swingGui.send(boundServiceName, "makeHMove", m);
     }
 
     if (m.promote != 0) {
@@ -439,8 +439,8 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
       showStatus("Illegal move");
 
       HMove illegal = new HMove(move.getFrom(), move.getTo(), 0, 0, 'p');
-      myService.send(boundServiceName, "makeMove", illegal, "i");
-      myService.send(boundServiceName, "makeHMove", illegal);
+      swingGui.send(boundServiceName, "makeMove", illegal, "i");
+      swingGui.send(boundServiceName, "makeHMove", illegal);
 
       if (pce != null) {
         throw new PropertyVetoException("Illegal move", pce);

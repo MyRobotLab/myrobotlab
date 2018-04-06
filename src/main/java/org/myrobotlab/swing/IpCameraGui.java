@@ -55,40 +55,40 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     public void actionPerformed(ActionEvent ae) {
       log.info("{}", ae);
       if ("n".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
       } else if ("listener".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
       } else if ("e".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
       } else if ("se".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_LEFT);
       } else if ("s".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
       } else if ("sw".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_DOWN);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
       } else if ("w".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
       } else if ("nw".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_UP);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_RIGHT);
       } else if ("stop".equals(ae.getActionCommand())) {
-        myService.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_STOP_RIGHT);
+        swingGui.send(boundServiceName, "move", IpCamera.FOSCAM_MOVE_STOP_RIGHT);
         // myService.send(boundServiceName, "move",
         // IPCamera.FOSCAM_MOVE_CENTER);
       } else if ("connect".equals(ae.getActionCommand())) {
         // host.getText(), user.getText(), password.getText()
-        myService.send(boundServiceName, "connectVideoStream", videoURL.getText());
+        swingGui.send(boundServiceName, "connectVideoStream", videoURL.getText());
       } else if ("capture".equals(ae.getActionCommand())) {
         JButton b = (JButton) ae.getSource();
         if ("stop capture".equals(b.getText())) {
           b.setText("capture");
-          myService.send(boundServiceName, "stopCapture");
+          swingGui.send(boundServiceName, "stopCapture");
         } else {
           b.setText("stop capture");
-          myService.send(boundServiceName, "capture");
+          swingGui.send(boundServiceName, "capture");
         }
       }
     }
@@ -107,7 +107,7 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
 
     @Override
     public void keyPressed(KeyEvent keyEvent) {
-      myService.send(boundServiceName, "keyPressed", keyEvent.getKeyCode());
+      swingGui.send(boundServiceName, "keyPressed", keyEvent.getKeyCode());
     }
 
     @Override

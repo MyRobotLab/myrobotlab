@@ -505,7 +505,7 @@ public class Runtime extends Service implements MessageListener {
           // taking away capability of having a different runtime name
           runtimeName = "runtime";
           runtime = new Runtime(runtimeName);
-          Repo.getInstance().addLoggingSink(runtime);
+          Repo.getInstance().addStatusPublisher(runtime);
           extract(); // FIXME - too overkill - do by checking version of re
         }
       }
@@ -948,21 +948,6 @@ public class Runtime extends Service implements MessageListener {
    */
   static public void install(String serviceType) throws ParseException, IOException {
     Repo.getInstance().install(serviceType);
-  }
-
-  /*
-   * broadcast of Service install progress
-   */
-  public Status publishInstallProgress(Status status) {
-    return status;
-  }
-
-  /**
-   * direct callback from the Repo on installation progress we re-broadcast this
-   * on a topic
-   */
-  public void onInstallProgress(final Status status) {
-    invoke("publishInstallProgress", status);
   }
 
   static public void invokeCommands(CmdLine cmdline) {
@@ -1752,7 +1737,7 @@ public class Runtime extends Service implements MessageListener {
 
     log.info("getting local repo");
 
-    Repo.getInstance().addLoggingSink(this);
+    Repo.getInstance().addStatusPublisher(this);
 
     hideMethods.add("main");
     hideMethods.add("loadDefaultConfiguration");

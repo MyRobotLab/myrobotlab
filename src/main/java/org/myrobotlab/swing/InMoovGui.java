@@ -195,14 +195,14 @@ public class InMoovGui extends ServiceGui implements ActionListener {
 
       HashSet<String> template = templates.get(part);
       for (String s : template) {
-        myService.hideTab(String.format(s, boundServiceName, side));
+        swingGui.hideTab(String.format(s, boundServiceName, side));
       }
       button.setText(String.format("show %s %s", side, part));
 
     } else if (String.format("show %s %s", side, part).equals(button.getText())) {
       HashSet<String> template = templates.get(part);
       for (String s : template) {
-        myService.unhideTab(String.format(s, boundServiceName, side));
+        swingGui.unhideTab(String.format(s, boundServiceName, side));
       }
       button.setText(String.format("hide %s %s", side, part));
     } else {

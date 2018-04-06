@@ -162,7 +162,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
   public void buildGraph() {
     log.debug("buildGraph");
 
-    if (myService.getGraphXML() == null || myService.getGraphXML().length() == 0) {
+    if (swingGui.getGraphXML() == null || swingGui.getGraphXML().length() == 0) {
       if (graph == null) {
         graph = getNewMXGraph();
       }
@@ -188,7 +188,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       mxCodecRegistry.register(new mxCellCodec(Type.INPORT));
 
       // load
-      Document document = mxUtils.parseXml(myService.getGraphXML());
+      Document document = mxUtils.parseXml(swingGui.getGraphXML());
 
       mxCodec codec2 = new mxCodec(document);
       graph = getNewMXGraph();
@@ -281,9 +281,9 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
               // to process - (String) type
               SwingGraphVertex v = (SwingGraphVertex) m.getValue();
               if (v.displayName.equals("out")) {
-                new SwingOutMethodDialog(myService, "out method", v);
+                new SwingOutMethodDialog(swingGui, "out method", v);
               } else if (v.displayName.equals("in")) {
-                new SwingInMethodDialog(myService, "in method", v);
+                new SwingInMethodDialog(swingGui, "in method", v);
               }
             } else if (m.isEdge()) {
               log.error("isEdge");

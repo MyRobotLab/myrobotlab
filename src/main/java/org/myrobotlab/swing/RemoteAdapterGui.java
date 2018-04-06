@@ -87,7 +87,7 @@ public class RemoteAdapterGui extends ServiceGui implements ActionListener {
   public void actionPerformed(ActionEvent action) {
     Object o = action.getSource();
     if (o == connect) {
-      String newProtoKey = (String) JOptionPane.showInputDialog(myService.getFrame(), "<html>connect to a remote MyRobotLab</html>", "connect", JOptionPane.WARNING_MESSAGE,
+      String newProtoKey = (String) JOptionPane.showInputDialog(swingGui.getFrame(), "<html>connect to a remote MyRobotLab</html>", "connect", JOptionPane.WARNING_MESSAGE,
           Util.getResourceIcon("RemoteAdapter/connect.png"), null, lastProtoKey);
 
       if (newProtoKey == null || newProtoKey == "") {
@@ -164,7 +164,7 @@ public class RemoteAdapterGui extends ServiceGui implements ActionListener {
 
 
   public void onNewConnection(Connection conn) {
-    myService.info("new connection found %d %s", System.currentTimeMillis(), conn.toString());
+    swingGui.info("new connection found %d %s", System.currentTimeMillis(), conn.toString());
   }
 
 }

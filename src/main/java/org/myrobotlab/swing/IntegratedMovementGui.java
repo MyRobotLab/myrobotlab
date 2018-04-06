@@ -106,7 +106,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
         Double x = Double.valueOf(armText.get(armName+"-x").getText());
         Double y = Double.valueOf(armText.get(armName+"-y").getText());
         Double z = Double.valueOf(armText.get(armName+"-z").getText());
-        myService.send(boundService.getName(), "moveTo", armName, x, y, z);
+        swingGui.send(boundService.getName(), "moveTo", armName, x, y, z);
       }
       catch(NumberFormatException except) {
         log.info("Couln't parse coordinated for {}", armName);
@@ -145,17 +145,17 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
       JButton but = (JButton)o;
       ObjectPointLocation opl= (ObjectPointLocation) ((JComboBox<?>)components.get("itemLocation-"+but.getName())).getSelectedItem();
       String armName = armRadio.getSelection().getActionCommand().substring(6);
-      myService.send(boundServiceName, "moveTo", armName, but.getName(), opl);
+      swingGui.send(boundServiceName, "moveTo", armName, but.getName(), opl);
     }
 
     if (o == stop) {
-      myService.send(boundServiceName, "stopMoving");
+      swingGui.send(boundServiceName, "stopMoving");
     }
     if (o== process) {
-    	myService.send(boundServiceName, "processKinectData");
+    	swingGui.send(boundServiceName, "processKinectData");
     }
     if (o == startKinect) {
-      myService.send(boundServiceName, "startOpenNI");
+      swingGui.send(boundServiceName, "startOpenNI");
       startKinect.setVisible(false);
       process.setVisible(true);
     }
@@ -203,7 +203,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
           startKinect.setVisible(false);
           process.setVisible(true);
         }
-        myService.pack();
+        swingGui.pack();
       }
     });
   }
@@ -289,7 +289,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     armsCoordPane.revalidate();
     armPanels.put(engine.getName(), panel);
     display.validate();
-     myService.pack();
+     swingGui.pack();
   }
 
 
@@ -298,7 +298,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   }
 
   public void onPosition(final PositionData position) {
-    if (this.myService.getInbox().size()>512) {
+    if (this.swingGui.getInbox().size()>512) {
       return;
     }
     if (!armPanels.containsKey(position.armName)){

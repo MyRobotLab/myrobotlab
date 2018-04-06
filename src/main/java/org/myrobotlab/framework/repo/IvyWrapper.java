@@ -15,6 +15,8 @@ import org.apache.ivy.util.filter.Filter;
 import org.apache.ivy.util.filter.NoFilter;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.StatusLevel;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
@@ -52,6 +54,8 @@ public class IvyWrapper extends Repo {
 
     try {
 
+      publishStatus(Status.newInstance("repo", StatusLevel.INFO, Repo.INSTALL_START, String.format("starting install of %s", (Object[])serviceTypes)));
+      
       Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
       
       if (targetLibraries.size() == 0) {
@@ -124,6 +128,8 @@ public class IvyWrapper extends Repo {
         }
       }
 
+      publishStatus(Status.newInstance("repo", StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[])serviceTypes)));
+      
     } catch (Exception e) {
       error(e.getMessage());
       log.error(e.getMessage(), e);

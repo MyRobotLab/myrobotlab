@@ -62,17 +62,17 @@ public class ClockGui extends ServiceGui implements ActionListener {
 
     if (o == startClock) {
       if (startClock.getText().compareTo("start clock") == 0) {
-        myService.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
-        myService.send(boundServiceName, "startClock");
+        swingGui.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
+        swingGui.send(boundServiceName, "startClock");
       } else {
-        myService.send(boundServiceName, "stopClock");
+        swingGui.send(boundServiceName, "stopClock");
       }
     }
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   public void addClockEvent(Date time, String name, String method, Object... data) {
-    myService.send(boundServiceName, "addClockEvent", time, name, method, data);
+    swingGui.send(boundServiceName, "addClockEvent", time, name, method, data);
   }
 
   @Override

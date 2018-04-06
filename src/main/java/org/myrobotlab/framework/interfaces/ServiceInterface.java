@@ -12,7 +12,7 @@ import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
-		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, Attachable {
+		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, Attachable {
 
 	
 
@@ -83,7 +83,7 @@ public interface ServiceInterface
 
 	public Status getLastError();
 
-	public void broadcastState();
+	// public void broadcastState();
 
 	// public Object invoke(Message msg);
 

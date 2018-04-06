@@ -87,26 +87,26 @@ public class OpenNiGui extends ServiceGui implements ActionListener {
     Object o = e.getSource();
     if (o == captureButton) {
       if (captureButton.getText().equals("capture")) {
-        myService.send(boundServiceName, "capture");
+        swingGui.send(boundServiceName, "capture");
         captureButton.setText("stop capture");
       } else {
-        myService.send(boundServiceName, "stopCapture");
+        swingGui.send(boundServiceName, "stopCapture");
         captureButton.setText("capture");
       }
     } else if (o == recordButton) {
       if (recordButton.getText().equals("record")) {
-        myService.send(boundServiceName, "record");
+        swingGui.send(boundServiceName, "record");
         recordButton.setText("stop recording");
       } else {
-        myService.send(boundServiceName, "stopRecording");
+        swingGui.send(boundServiceName, "stopRecording");
         recordButton.setText("record");
       }
     } else if (o == playbackButton) {
       if (playbackButton.getText().equals("playback")) {
-        myService.send(boundServiceName, "playback");
+        swingGui.send(boundServiceName, "playback");
         playbackButton.setText("stop playback");
       } else {
-        myService.send(boundServiceName, "stopPlayback");
+        swingGui.send(boundServiceName, "stopPlayback");
         playbackButton.setText("playback");
       }
     }

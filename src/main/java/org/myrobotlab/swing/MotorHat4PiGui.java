@@ -147,8 +147,8 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
       
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
-        myService.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
-        myService.send(boundServiceName, attach, controllerList.getSelectedItem());
+        swingGui.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
+        swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
         myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.getSelectedItem().toString()));
         myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.getSelectedItem().toString()));
@@ -160,7 +160,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
         }
         */
       } else {
-        myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+        swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
     }
 
@@ -176,7 +176,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
   @Override
   public void subscribeGui() {
     subscribe("publishChangePos");
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   @Override
@@ -225,7 +225,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
     Object source = ce.getSource();
     if (power == source) {
       powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
-      myService.send(boundServiceName, "move", power.getScaledValue());
+      swingGui.send(boundServiceName, "move", power.getScaledValue());
       // log.info(String.format("send %s, move, %s", boundServiceName, power.getScaledValue()));
     }
   }

@@ -86,7 +86,7 @@ public class WolframAlphaGui extends ServiceGui implements ActionListener {
   @Override
   public void subscribeGui() {
     subscribe("publishState", "onState");
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   @Override

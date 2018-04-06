@@ -84,11 +84,11 @@ public class TwitterGui extends ServiceGui implements ActionListener {
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
     if (o == setKeys) {
-      myService.send(boundServiceName, "setSecurity", new String(consumerKey.getPassword()), new String(consumerSecret.getPassword()), new String(accessToken.getPassword()),
+      swingGui.send(boundServiceName, "setSecurity", new String(consumerKey.getPassword()), new String(consumerSecret.getPassword()), new String(accessToken.getPassword()),
           new String(accessTokenSecret.getPassword()));
     } else if (o == tweet) {
 
-      myService.send(boundServiceName, "tweet", new String(text.getText()));
+      swingGui.send(boundServiceName, "tweet", new String(text.getText()));
 
     }
 
@@ -112,7 +112,7 @@ public class TwitterGui extends ServiceGui implements ActionListener {
   }
   
   public void setState() {
-    myService.send(boundServiceName, "setState", twitter);
+    swingGui.send(boundServiceName, "setState", twitter);
   }
 
 }

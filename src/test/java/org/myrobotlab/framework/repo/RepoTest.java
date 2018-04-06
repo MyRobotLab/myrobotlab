@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.interfaces.LoggingSink;
+import org.myrobotlab.framework.interfaces.StatusPublisher;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -25,7 +25,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
-public class RepoTest implements LoggingSink {
+public class RepoTest implements StatusPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();
@@ -64,7 +64,7 @@ public class RepoTest implements LoggingSink {
   @Test
   public void testAddStatusListener() throws ParseException, IOException {
     Repo repo = Repo.getInstance();
-    repo.addLoggingSink(this);
+    repo.addStatusPublisher(this);
     repo.install("Arduino");
   }
 
@@ -181,33 +181,14 @@ public class RepoTest implements LoggingSink {
   }
 
   @Override
-  public String getName() {
-    // TODO Auto-generated method stub
-    return null;
+  public Status publishStatus(Status status) {
+    log.info(status.toString());
+    return status;
   }
 
   @Override
-  public Status error(String format, Object... args) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Status error(Exception e) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Status info(String format, Object... args) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Status warn(String format, Object... args) {
-    // TODO Auto-generated method stub
-    return null;
+  public void broadcastStatus(Status status) {
+    log.info(status.toString());
   }
 
 }

@@ -185,7 +185,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
         String attachGUIName = String.format("org.myrobotlab.swing.widget.Motor_%sGui", type);
 
         controllerPanel.remove(controllerTypePanel);
-        controllerTypePanel = Reflector.getNewInstance(attachGUIName, new Object[] { myService, boundServiceName, newController });
+        controllerTypePanel = Reflector.getNewInstance(attachGUIName, new Object[] { swingGui, boundServiceName, newController });
         controllerPanel.add(controllerTypePanel, BorderLayout.CENTER);
         // setEnabled(true);
 
@@ -207,7 +207,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
   @Override
   public void subscribeGui() {
     subscribe("publishChangePos");
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   @Override
@@ -258,7 +258,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
       // powerValue.setText(power.getValue() + "%");
       // powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calcOutput(power.getScaledValue())));
       powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
-      myService.send(boundServiceName, "move", power.getScaledValue());
+      swingGui.send(boundServiceName, "move", power.getScaledValue());
     }
   }
 

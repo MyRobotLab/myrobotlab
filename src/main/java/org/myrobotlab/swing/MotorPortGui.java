@@ -178,7 +178,7 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
           e1.printStackTrace();
         }
       } else {
-        myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+        swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
     }
 
@@ -261,7 +261,7 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
     Object source = ce.getSource();
     if (power == source) {
       powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
-      myService.send(boundServiceName, "move", power.getScaledValue());
+      swingGui.send(boundServiceName, "move", power.getScaledValue());
     }
   }
 

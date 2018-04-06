@@ -151,9 +151,9 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
       
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
-        myService.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
-        myService.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-        myService.send(boundServiceName, attach, controllerList.getSelectedItem());
+        swingGui.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
+        swingGui.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
+        swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
         myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.getSelectedItem().toString()));
         myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.getSelectedItem().toString()));
@@ -165,7 +165,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
         }
         */
       } else {
-        myService.send(boundServiceName, detach, controllerList.getSelectedItem());
+        swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
     }
 
@@ -188,7 +188,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   @Override
   public void subscribeGui() {
     subscribe("publishChangePos");
-    myService.send(boundServiceName, "publishState");
+    swingGui.send(boundServiceName, "publishState");
   }
 
   @Override
@@ -239,7 +239,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
     Object source = ce.getSource();
     if (power == source) {
       powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
-      myService.send(boundServiceName, "move", power.getScaledValue());
+      swingGui.send(boundServiceName, "move", power.getScaledValue());
     }
   }
 

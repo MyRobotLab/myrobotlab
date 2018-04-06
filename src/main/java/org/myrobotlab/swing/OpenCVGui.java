@@ -545,11 +545,11 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		OpenCVFilterGui filtergui = null;
 
 		// try creating one based on type
-		filtergui = (OpenCVFilterGui) Instantiator.getNewInstance(guiType, name, boundServiceName, myService);
+		filtergui = (OpenCVFilterGui) Instantiator.getNewInstance(guiType, name, boundServiceName, swingGui);
 		if (filtergui == null) {
 			log.info(String.format("filter %s does not have a gui defined", type));
 			filtergui = (OpenCVFilterGui) Instantiator.getNewInstance(FILTER_PACKAGE_NAME + "DefaultGui", name,
-					boundServiceName, myService);
+					boundServiceName, swingGui);
 			if (filtergui == null) {
 				log.error("could not create default filter gui");
 				return null;
@@ -688,7 +688,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 				// changing a filter "broadcastState()"
 				// which might change dimension of video feed
 				// which might need to re-pack & re-paint components ...
-				myService.pack();
+				swingGui.pack();
 			} // end run()
 		});
 

@@ -79,8 +79,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
       if (mousePressed) {
-        if (myService != null) {
-          myService.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
+        if (swingGui != null) {
+          swingGui.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
         } else {
           log.error("can not send message myService is null");
         }
@@ -152,7 +152,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-      if (myService != null) {
+      if (swingGui != null) {
         myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
             Double.parseDouble(maxOutput.getText()));
       } else {
@@ -201,7 +201,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-      if (myService != null) {
+      if (swingGui != null) {
         myServo.map(Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
             Double.parseDouble(maxOutput.getText()));
       } else {
