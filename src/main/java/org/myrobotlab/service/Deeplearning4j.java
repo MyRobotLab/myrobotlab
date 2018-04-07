@@ -483,10 +483,21 @@ public class Deeplearning4j extends Service {
     meta.addDependency("org.nd4j", "nd4j-native-platform", "0.9.1");
     meta.addDependency("commons-lang", "commons-lang", "2.6");
     // due to this bug  https://github.com/haraldk/TwelveMonkeys/issues/167 seems we need to explicitly include imageio-core
+    // https://mvnrepository.com/artifact/com.twelvemonkeys.imageio
+    // lots of plugins
     meta.addDependency("com.twelvemonkeys.imageio", "imageio-core", "3.1.1");
-    meta.addDependency("com.twelvemonkeys.imageio", "common-lang", "3.1.1");
-    meta.addDependency("com.twelvemonkeys.imageio", "common-io", "3.1.1");
-    meta.addDependency("com.twelvemonkeys.imageio", "common-image", "3.1.1");
+    meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
+
+    meta.addDependency("com.twelvemonkeys.imageio", "imageio-jpeg", "3.1.1");
+    meta.addDependency("com.twelvemonkeys.imageio", "imageio-tiff", "3.1.1");
+    meta.addDependency("com.twelvemonkeys.imageio", "imageio-bmp", "3.1.1");
+    // for svg
+    meta.addDependency("com.twelvemonkeys.imageio", "imageio-batik", "3.1.1");
+    meta.addDependency("com.twelvemonkeys.imageio", "imageio-pdf", "3.1.1");
+    meta.addDependency("com.twelvemonkeys.imageio", "imageio-thumbsdb", "3.1.1");
+    
+    // meta.addDependency("com.twelvemonkeys.common", "common-io", "3.1.1");
+    // meta.addDependency("com.twelvemonkeys.common", "common-image", "3.1.1");
     
     //   meta.addDependency("org.bytedeco.javacpp-presets", "openblas", "0.2.19-1.3");
     // org.bytedeco.javacpp-presets#openblas;0.2.19-1.3
