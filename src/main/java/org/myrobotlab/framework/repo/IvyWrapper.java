@@ -11,6 +11,7 @@ import org.apache.ivy.Main;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
+import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.filter.Filter;
 import org.apache.ivy.util.filter.NoFilter;
 import org.myrobotlab.framework.Platform;
@@ -33,6 +34,34 @@ public class IvyWrapper extends Repo {
 
   static String ivyXmlTemplate = null;
   static String ivysettingsXmlTemplate = null;
+  
+  class IvyWrapperLogger extends AbstractMessageLogger {
+
+    @Override
+    public void log(String arg0, int arg1) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void rawlog(String arg0, int arg1) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    protected void doEndProgress(String arg0) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    protected void doProgress() {
+      // TODO Auto-generated method stub
+      
+    }
+    
+  }
 
   static public Repo getTypeInstance() {
     if (localInstance == null) {
@@ -81,6 +110,7 @@ public class IvyWrapper extends Repo {
         sb.append(s);
       }
       log.info("cmd {}", sb);
+
       ResolveReport report = Main.run(cmd);
 
       // if no errors -
