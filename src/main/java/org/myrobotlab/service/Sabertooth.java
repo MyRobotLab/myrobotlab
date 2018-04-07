@@ -448,6 +448,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // configure services
       m1.setPort("m1");
       m2.setPort("m2");
+      
       joy.setController(5); // 0 on Linux
 
       // attach services
