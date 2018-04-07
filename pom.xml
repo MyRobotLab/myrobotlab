@@ -1103,7 +1103,7 @@
 						</configuration> </execution> -->
 				</executions>
 			</plugin>
-			
+			<!-- not needed as jenkins has a "latest successful artifacts link" - duh
 			<plugin>
 		        <groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-dependency-plugin</artifactId>
@@ -1129,7 +1129,7 @@
 		          </execution>
 		        </executions>
 		      </plugin>
-			
+			-->
 		</plugins>
 	</build>
 
