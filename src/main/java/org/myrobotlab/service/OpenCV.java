@@ -763,7 +763,7 @@ public class OpenCV extends AbstractVideoSource {
     // TODO: the yolo model files are too large for artifactory..  it's limited to 100mb currently
     
     // the haar / hog / lp classifier xml files for opencv from the MRL repo
-    meta.addDependency("opencv", "opencv_classifiers", "0.0.1");
+    meta.addDependency("opencv", "opencv_classifiers", "0.0.1", "zip");
 
     return meta;
   }
