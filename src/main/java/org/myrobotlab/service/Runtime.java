@@ -2372,7 +2372,7 @@ public class Runtime extends Service implements MessageListener {
 
     meta.includeServiceInOneJar(true);
     meta.addDependency("com.google.code.gson", "gson", "2.8.0");
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-3"); 
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); 
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2"); 
     
     // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");

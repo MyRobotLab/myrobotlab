@@ -45,6 +45,8 @@ public abstract class Repo {
 
 	public static final String REPO_STATE_FILE_NAME = "repo.json";
 
+  public static final String INSTALL_PROGRESS = "installProgress";
+
 	List<Status> errors = new ArrayList<Status>();
 
 	Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
@@ -279,7 +281,6 @@ public abstract class Repo {
 
 		return ret;
 	}
-
 
 	static public void publishStatus(Status status) { 
 		for (StatusPublisher service : installStatusPublishers) { 		
