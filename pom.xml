@@ -7,6 +7,9 @@
 	<name>MyRobotLab</name>
 	<description>Open Source Creative Machine Control</description>
 	<properties>
+	    <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
+	    
+	    
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -672,11 +675,13 @@
 
 <!-- Runtime begin -->
   <!-- https://mvnrepository.com/artifact/org.apache.ivy/ivy -->
+  
 <dependency>
     <groupId>org.apache.ivy</groupId>
     <artifactId>ivy</artifactId>
-    <version>2.4.0-3</version>
+    <version>2.4.0-4</version>
 </dependency>
+ 
 
   <dependency>
     <groupId>com.google.code.gson</groupId>

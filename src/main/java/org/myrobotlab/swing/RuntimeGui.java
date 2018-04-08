@@ -129,6 +129,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
   Runtime myRuntime = null;
   Repo myRepo = null;
+  // RuntimeGui myGui;
 
   ServiceData serviceData = null;
 
@@ -379,27 +380,25 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     menuBar.add(logging);
 
     /*
-    JMenuItem item = new JMenuItem("check for updates");
-    item.addActionListener(this);
-    system.add(item);
-    */
+     * JMenuItem item = new JMenuItem("check for updates");
+     * item.addActionListener(this); system.add(item);
+     */
 
     JMenuItem item = new JMenuItem("install all");
     item.addActionListener(this);
     system.add(item);
-    
+
     item = new JMenuItem("record");
     item.addActionListener(this);
     system.add(item);
-    
+
     item = new JMenuItem("restart");
     item.addActionListener(this);
     system.add(item);
-    
+
     item = new JMenuItem("exit");
     item.addActionListener(this);
     system.add(item);
-
 
     JMenu m1 = new JMenu("level");
     logging.add(m1);
@@ -451,26 +450,27 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     } else if ("install all".equals(cmd)) {
       send("install");
     } else if ("restart".equals(cmd)) {
-      Runtime.getInstance().restart();      
+      Runtime.getInstance().restart();
     } else if ("exit".equals(cmd)) {
       Runtime.shutdown();
     } else if ("check for updates".equals(cmd)) {
       send("checkForUpdates");
     } else if (cmd.equals(Level.DEBUG) || cmd.equals(Level.INFO) || cmd.equals(Level.WARN) || cmd.equals(Level.ERROR) || cmd.equals(Level.FATAL)) {
-      send("setLogLevel", cmd);/*
-      Logging logging = LoggingFactory.getInstance();
-      logging.setLevel(cmd);*/
-    } /*else if (cmd.equals(Appender.FILE)) {
-      Logging logging = LoggingFactory.getInstance();
-      logging.addAppender(Appender.FILE);
-    } else if (cmd.equals(Appender.CONSOLE)) {
-      Logging logging = LoggingFactory.getInstance();
-      logging.addAppender(Appender.CONSOLE);
-    } else if (cmd.equals(Appender.NONE)) {
-      Logging logging = LoggingFactory.getInstance();
-      logging.removeAllAppenders();
-
-    }*/ else {
+      send("setLogLevel",
+          cmd);/*
+                * Logging logging = LoggingFactory.getInstance();
+                * logging.setLevel(cmd);
+                */
+    } /*
+       * else if (cmd.equals(Appender.FILE)) { Logging logging =
+       * LoggingFactory.getInstance(); logging.addAppender(Appender.FILE); }
+       * else if (cmd.equals(Appender.CONSOLE)) { Logging logging =
+       * LoggingFactory.getInstance(); logging.addAppender(Appender.CONSOLE); }
+       * else if (cmd.equals(Appender.NONE)) { Logging logging =
+       * LoggingFactory.getInstance(); logging.removeAllAppenders();
+       * 
+       * }
+       */ else {
       log.error("unknown command " + cmd);
     }
 
@@ -704,38 +704,39 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     // send("restart"); TODO - change back to restart - when it works
     send("shutdown");
   }
-  
+
   /**
-   * overridden - looking specifically for a key'd status to
-   * signal install progress dialog events
+   * overridden - looking specifically for a key'd status to signal install
+   * progress dialog events
    */
   public void onStatus(Status status) {
-    super.onStatus(status);
-    
-    if (Repo.INSTALL_START.equals(status.key)) {
-      progressDialog.beginUpdates();
-    } else if (Repo.INSTALL_FINISHED.equals(status.key)) {
-      progressDialog.finished();
-    }
-    
-    if (progressDialog != null && Repo.class.getSimpleName().equals(status.source)) {
-      progressDialog.addStatus(status); // "all status info coming from repo must have a source or key
-    }
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        // FIXME - infinite loop - what a mess :P
+        // self.onStatus(status); // super.onStatus - if Swing threading wasn't so
+                               // silly
+        // inheritence is defeated by this anonymous runnable class :P
+        
+        swingGui.setStatus(status);
 
+        if (Repo.INSTALL_START.equals(status.key)) {
+          progressDialog.beginUpdates();
+        }
+
+        if (Repo.INSTALL_FINISHED.equals(status.key)) {
+          progressDialog.finished();
+        }
+
+        // if (Repo.class.getSimpleName().equals(status.source)) {
+        progressDialog.addStatus(status); // "all status info coming from repo
+                                          // must have a source or key
+        
+        // }
+      }
+    });
   }
-/*
-  public void onInstallProgress(Status status) {
 
-    if (Repo.INSTALL_START.equals(status.key)) {
-      progressDialog.beginUpdates();
-    } else if (Repo.INSTALL_FINISHED.equals(status.key)) {
-      progressDialog.finished();
-    }
-
-    progressDialog.addStatus(status);
-  }
-*/
-  
   /**
    * this is the beginning of the applyUpdates process
    */

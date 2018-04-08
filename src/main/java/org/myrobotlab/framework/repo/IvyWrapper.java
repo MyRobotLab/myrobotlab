@@ -12,6 +12,7 @@ import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.util.AbstractMessageLogger;
+import org.apache.ivy.util.Message;
 import org.apache.ivy.util.filter.Filter;
 import org.apache.ivy.util.filter.NoFilter;
 import org.myrobotlab.framework.Platform;
@@ -34,33 +35,42 @@ public class IvyWrapper extends Repo {
 
   static String ivyXmlTemplate = null;
   static String ivysettingsXmlTemplate = null;
-  
+
   class IvyWrapperLogger extends AbstractMessageLogger {
 
-    @Override
-    public void log(String arg0, int arg1) {
-      // TODO Auto-generated method stub
-      
+    private int level = Message.MSG_INFO;
+
+    /**
+     * @param level
+     */
+    public IvyWrapperLogger(int level) {
+      this.level = level;
     }
 
     @Override
-    public void rawlog(String arg0, int arg1) {
-      // TODO Auto-generated method stub
-      
+    public void log(String msg, int level) {
+        publishStatus(msg, level);
+    }
+
+
+    @Override
+    public void rawlog(String msg, int level) {
+      log(msg, level);
     }
 
     @Override
-    protected void doEndProgress(String arg0) {
-      // TODO Auto-generated method stub
-      
+    public void doProgress() {
+      log.info(".");
     }
 
     @Override
-    protected void doProgress() {
-      // TODO Auto-generated method stub
-      
+    public void doEndProgress(String msg) {
+      log.info(msg);
     }
-    
+
+    public int getLevel() {
+      return level;
+    }
   }
 
   static public Repo getTypeInstance() {
@@ -83,13 +93,13 @@ public class IvyWrapper extends Repo {
 
     try {
 
-      publishStatus(Status.newInstance("repo", StatusLevel.INFO, Repo.INSTALL_START, String.format("starting install of %s", (Object[])serviceTypes)));
-      
+      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_START, String.format("starting install of %s", (Object[]) serviceTypes)));
+
       Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
-      
+
       if (targetLibraries.size() == 0) {
-    	  log.info("{} already installed", (Object[])serviceTypes );
-    	  return;
+        log.info("{} already installed", (Object[]) serviceTypes);
+        return;
       }
 
       log.info("installing {} services into {}", serviceTypes.length, location);
@@ -111,6 +121,8 @@ public class IvyWrapper extends Repo {
       }
       log.info("cmd {}", sb);
 
+      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
+
       ResolveReport report = Main.run(cmd);
 
       // if no errors -
@@ -130,8 +142,8 @@ public class IvyWrapper extends Repo {
       // TODO - promote to Repo.setInstalled
       for (ServiceDependency library : targetLibraries) {
         // set as installed & save state
-    	library.setInstalled(true);
-    	installedLibraries.put(library.toString(), library);
+        library.setInstalled(true);
+        installedLibraries.put(library.toString(), library);
         info("installed %s platform %s", library, platform.getPlatformId());
       }
       save();
@@ -158,8 +170,8 @@ public class IvyWrapper extends Repo {
         }
       }
 
-      publishStatus(Status.newInstance("repo", StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[])serviceTypes)));
-      
+      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
+
     } catch (Exception e) {
       error(e.getMessage());
       log.error(e.getMessage(), e);
@@ -296,6 +308,21 @@ public class IvyWrapper extends Repo {
       log.error("could not generate build files", e);
     }
   }
+  
+  private void publishStatus(String msg, int level) {
+    // if (level <= this.level) {
+      Status status = Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_PROGRESS, msg);
+      // FIXME - set it to the instance of IvyWrapper - really this method should just call IvyWrapper.publishStatus(String msg, int level)
+      status.source = this;
+      if (level == Message.MSG_ERR) {
+        status.level = StatusLevel.ERROR;
+      } else if (level == Message.MSG_WARN) {
+        status.level = StatusLevel.WARN;
+      }
+      publishStatus(status);
+   //  }
+    
+  }
 
   public static void main(String[] args) {
     try {
@@ -310,13 +337,11 @@ public class IvyWrapper extends Repo {
       // ivy.installTo("install.ivy");
       ivy.install("install.serial.ivy", "Serial");
       // ivy.install("install.artoolkitplus.ivy", "_TemplateService");
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-
-      
 
       ivy.install(dir, "Joystick");
 
