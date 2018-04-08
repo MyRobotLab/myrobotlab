@@ -145,6 +145,8 @@ public class Platform implements Serializable {
       // logging !!
       // logging calls -> platform calls a util class -> calls logging --
       // infinite loop
+      
+      /*
 
       StringBuffer sb = new StringBuffer();
 
@@ -159,6 +161,7 @@ public class Platform implements Serializable {
       } catch (Exception e) {
         // no logging silently die
       }
+      */
 
       if (platform.mrlVersion == null) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
