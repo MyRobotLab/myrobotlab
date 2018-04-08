@@ -1032,12 +1032,12 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
-                                        <Main-Class>org.myrobotlab.service.Agent</Main-Class>
-                                         <Major-Version>1.1.${build.number}</Major-Version>
-									     <Build-Version>${build.number}</Build-Version>
-									     <Build-Time>${maven.build.timestamp}</Build-Time>
-									     <Build-Host>${agent.name}</Build-Host>
-									     <Build-User>${user.name}</Build-User>
+                                          <Main-Class>org.myrobotlab.service.Agent</Main-Class>
+                                          <Major-Version>1.1.${build.number}</Major-Version>
+									      <Build-Version>${build.number}</Build-Version>
+									      <Build-Time>${maven.build.timestamp}</Build-Time>
+									      <Build-Host>${agent.name}</Build-Host>
+									      <Build-User>${user.name}</Build-User>
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
