@@ -379,7 +379,28 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 		meta.addDescription("Speech synthesis based on MaryTTS");
 		meta.addCategory("speech", "sound");
 		meta.addDependency("de.dfki.mary", "marytts", "5.2", "pom");
-		meta.addDependency("de.dfki.mary", "voice-cmu-slt-hsmm", "5.2");
+		
+		// hmm..TODO: refactor this.
+		String[] voices = new String[]{"voice-bits1-hsmm",
+		                               "voice-bits3-hsmm",
+		                               "voice-cmu-bdl-hsmm",
+		                               "voice-cmu-nk-hsmm",
+		                               "voice-cmu-rms-hsmm",
+		                               "voice-cmu-slt-hsmm",
+		                               "voice-dfki-obadiah-hsmm",
+		                               "voice-dfki-ot-hsmm",
+		                               "voice-dfki-pavoque-neutral-hsmm",
+		                               "voice-dfki-poppy-hsmm",
+		                               "voice-dfki-prudence-hsmm",
+		                               "voice-dfki-spike-hsmm",
+		                               "voice-enst-camille-hsmm",
+		                               "voice-enst-dennys-hsmm",
+		                               "voice-istc-lucia-hsmm",
+		                               "voice-upmc-jessica-hsmm",
+		                               "voice-upmc-pierre-hsmm"};
+		for (String voice : voices) {
+		  meta.addDependency("de.dfki.mary", voice, "5.2");
+		}
 		
     meta.exclude("org.slf4j", "slf4j-api");
     meta.exclude("commons-io", "commons-io");

@@ -51,7 +51,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   // private String darknetHome = "c:/dev/workspace/darknet/";
   public String darknetHome = "yolo";
   public String modelConfig = "yolov2.cfg";
-  public String modelWeights = "yolo.weights";
+  public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
   
   // TODO: store these somewhere as a resource / dependency ..
@@ -65,6 +65,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   public ArrayList<YoloDetectedObject> lastResult = null; 
   private volatile IplImage lastImage = null;
+  private volatile boolean pending = false;
 
   public OpenCVFilterYolo() {
     super();
@@ -187,6 +188,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     }
     // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
     lastImage = image;
+    pending = true;
     return image;
   }
 
@@ -223,12 +225,26 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     log.info("Starting the Yolo classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
+      if (!pending) {
+        try {
+          // prevent thrashing of the cpu ...
+          Thread.sleep(10);
+        } catch (InterruptedException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+          break;
+        }
+        continue;
+      }
+      // only classify this if we haven't already classified it.
       if (lastImage != null) {
           // lastResult = dl4j.classifyImageVGG16(lastImage);
         lastResult = yoloFrame(lastImage);
+        // we processed, next object we'll pick up.
+        pending = false;
         count++;
         if (count % 10 == 0) {
-          double rate = count / (float)(System.currentTimeMillis() - start);
+          double rate = 1000.0 * count / (float)(System.currentTimeMillis() - start);
           log.info("Yolo Classification Rate : {}" , rate);
         }
         invoke("publishYoloClassification", lastResult);
@@ -250,7 +266,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // this is our list of objects that have been detected in a given frame.
     ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
-
+    
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
     // TODO: I think yolo expects RGB color (which is inverted in the next step)  so if the input image isn't in RGB color, we might need a cvCutColor
     Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false); //Convert Mat to batch of images
