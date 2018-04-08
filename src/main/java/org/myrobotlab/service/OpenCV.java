@@ -69,6 +69,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterOverlay;
+import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
@@ -759,6 +760,10 @@ public class OpenCV extends AbstractVideoSource {
     // TODO: should be something about yolo here too..
     // maybe make the yolo filter download the model and cache it?  
     // or have it as a dependency
+    // TODO: the yolo model files are too large for artifactory..  it's limited to 100mb currently
+    
+    // the haar / hog / lp classifier xml files for opencv from the MRL repo
+    meta.addDependency("opencv", "opencv_classifiers", "0.0.1");
 
     return meta;
   }
@@ -811,6 +816,9 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
     // opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
+    OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
+    opencv.addFilter(yolo);
+    
     opencv.setStreamerEnabled(false);
     // opencv.addFilter("facerec", "FaceRecognizer");
 
@@ -821,18 +829,18 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.addFilter(dilate);
     // OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
 
-    OpenCVFilterFaceDetect facedetect2 = new OpenCVFilterFaceDetect("facedetect");
-    opencv.addFilter(facedetect2);
+//    OpenCVFilterFaceDetect facedetect2 = new OpenCVFilterFaceDetect("facedetect");
+//    opencv.addFilter(facedetect2);
 
-    OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
+ //   OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
     // filter.addImage("overlay1.png", 0.3);
     // filter.addImage("red.png", 0.4);
-    filter.addImage("overlay_640x480.png", 1.0);
+   // filter.addImage("overlay_640x480.png", 1.0);
 
     // filter.addText("scanmode", 20, 40, 0.6, "SCAN MODE NONE");
     // filter.addText("assessment", 20, 50, 0.6, "ASSESSMENT COMPLETED");
 
-    opencv.addFilter(filter);
+//    opencv.addFilter(filter);
 
     // OpenCVFilterFaceDetect2 facedetect2 = new
     // OpenCVFilterFaceDetect2("facedetect2");
