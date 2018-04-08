@@ -1034,6 +1034,9 @@
                                         <manifestEntries>
                                           <Main-Class>org.myrobotlab.service.Agent</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
+                                          <Implementation-Version>1.1.${build.number}</Implementation-Version>
+									      <Commit>${GIT_COMMIT}</Commit>
+									      <Commit2>${git.commit}</Commit2>
 									      <Build-Version>${build.number}</Build-Version>
 									      <Build-Time>${maven.build.timestamp}</Build-Time>
 									      <Build-Host>${agent.name}</Build-Host>
