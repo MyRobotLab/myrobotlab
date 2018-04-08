@@ -926,6 +926,12 @@ public class Runtime extends Service implements MessageListener {
     return sb.toString();
   }
 
+  /**
+   * Get version returns the current version of mrl.
+   * It must be done this way, because the version may be queried on the command line
+   * without the desire to start a "Runtime"
+   * @return
+   */
   public static String getVersion() {
     return Platform.getLocalInstance().getVersion();
   }
