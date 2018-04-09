@@ -60,7 +60,7 @@ public class IvyWrapper extends Repo {
 
     @Override
     public void doProgress() {
-      log.info(".");
+      // log.info(".");
     }
 
     @Override
@@ -335,7 +335,7 @@ public class IvyWrapper extends Repo {
       String dir = String.format("install.ivy.%d", System.currentTimeMillis());
 
       // ivy.installTo("install.ivy");
-      ivy.install("install.serial.ivy", "Serial");
+      ivy.install("install.dl4j.ivy", "Deeplearning4j");
       // ivy.install("install.artoolkitplus.ivy", "_TemplateService");
 
       boolean done = true;

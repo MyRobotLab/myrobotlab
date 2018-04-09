@@ -114,3 +114,5 @@ Thumbs.db
 /build.1521782031951/
 /install.artoolkitplus.maven/
 /install.serial.ivy/
+/install.dl4j.ivy/
+/install.dl4j.maven/
