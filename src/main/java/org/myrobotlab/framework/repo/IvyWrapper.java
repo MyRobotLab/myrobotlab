@@ -49,7 +49,9 @@ public class IvyWrapper extends Repo {
 
     @Override
     public void log(String msg, int level) {
+      if (level <= this.level) {
         publishStatus(msg, level);
+      }
     }
 
 
@@ -328,30 +330,27 @@ public class IvyWrapper extends Repo {
     try {
 
       LoggingFactory.init(Level.INFO);
-      // use an anonymous subclass since ProjectComponent is abstract
-      Repo ivy = Repo.getInstance("IvyWrapper");
+      
+      Repo repo = Repo.getInstance("IvyWrapper");
 
-      // String dir = String.format("build.ivy.%d", System.currentTimeMillis());
-      String dir = String.format("install.ivy.%d", System.currentTimeMillis());
+      String serviceType = "all";
+      long ts = System.currentTimeMillis();      
+      String dir = String.format("install.ivy.%s.%d", serviceType, ts);
+      
+      
+      // repo.createBuildFiles(dir, serviceType);
+      repo.installTo("install.ivy");
+      // repo.install(dir, serviceType);
+      
+      // repo.install("install.dl4j.maven", "Deeplearning4j");
+      // repo.install("install.opencv.maven","OpenCV");
+      // repo.createBuildFiles(dir, "Arm");
+      // repo.createBuildFilesTo(dir);
+      // repo.installTo(dir);
+      // repo.install();
+      // repo.installEach(); <-- TODO - test
 
-      // ivy.installTo("install.ivy");
-      ivy.install("install.dl4j.ivy", "Deeplearning4j");
-      // ivy.install("install.artoolkitplus.ivy", "_TemplateService");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      ivy.install(dir, "Joystick");
-
-      // ivy.createBuildFiles(dir, "Arm");
-      // ivy.createBuildFilesTo(dir);
-      // ivy.install("Joystick");
-      // ivy.install();
-      // ivy.installEach();
-
-      log.info("here");
+      log.info("done");
 
     } catch (Exception e) {
       log.error(e.getMessage(), e);
