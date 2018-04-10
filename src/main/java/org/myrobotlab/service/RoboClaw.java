@@ -464,7 +464,6 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
 			
     	 */
       LoggingFactory.init("INFO");
-
       boolean virtual = true;
       //////////////////////////////////////////////////////////////////////////////////
       // RoboClaw.py
