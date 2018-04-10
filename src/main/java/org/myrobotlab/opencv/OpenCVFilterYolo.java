@@ -226,6 +226,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
       if (!pending) {
+        log.info("Skipping frame");
         try {
           // prevent thrashing of the cpu ...
           Thread.sleep(10);
@@ -239,7 +240,9 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // only classify this if we haven't already classified it.
       if (lastImage != null) {
           // lastResult = dl4j.classifyImageVGG16(lastImage);
+        log.info("Doing yolo...");
         lastResult = yoloFrame(lastImage);
+        log.info("Yolo done.");
         // we processed, next object we'll pick up.
         pending = false;
         count++;
@@ -249,7 +252,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         }
         invoke("publishYoloClassification", lastResult);
       } else {
-        // log.info("No Image to classify...");
+        log.info("No Image to classify...");
       }
       // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
       // maybe lastImage needs to be marked as volatile ?
@@ -259,6 +262,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
+      log.info("Exited the run loop for Yolo!!! you shouldn't see this I would think.");
     }
   }
 
