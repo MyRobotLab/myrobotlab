@@ -108,7 +108,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   }
 
   // helper function to strip html tags.
-  public String stripHtml(String text) {
+  public static String stripHtml(String text) {
     // TODO: something fancier but this works for now.
     String cleanText = text.replaceAll("\\<.*?\\>", " ");
     cleanText = cleanText.replaceAll("  ", " ");
