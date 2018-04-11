@@ -12,6 +12,7 @@
 	    <!-- begin env vars -->
 	    <build.number>${env.BUILD_NUMBER}</build.number>
 	    <commit>${git_commit}</commit>
+	    <branch>${git_branch}</branch>
 	    <!-- end env vars -->
 	    
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -1044,6 +1045,7 @@
 									      <Branch>${env.GIT_BRANCH}</Branch>
 									       -->
 									      <Commit>${commit}</Commit>
+									      <Branch>${branch}</Branch>
 									      <Build-Version>${build.number}</Build-Version>
 									      <Build-Time>${maven.build.timestamp}</Build-Time>
 									      <Build-Host>${agent.name}</Build-Host>
