@@ -226,7 +226,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
       if (!pending) {
-        log.info("Skipping frame");
+       // log.info("Skipping frame");
         try {
           // prevent thrashing of the cpu ...
           Thread.sleep(10);
@@ -240,9 +240,9 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // only classify this if we haven't already classified it.
       if (lastImage != null) {
           // lastResult = dl4j.classifyImageVGG16(lastImage);
-        log.info("Doing yolo...");
+        //log.info("Doing yolo...");
         lastResult = yoloFrame(lastImage);
-        log.info("Yolo done.");
+        //log.info("Yolo done.");
         // we processed, next object we'll pick up.
         pending = false;
         count++;
@@ -262,8 +262,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      log.info("Exited the run loop for Yolo!!! you shouldn't see this I would think.");
     }
+    log.info("Exited the run loop for Yolo!!! you shouldn't see this.");
   }
 
   private ArrayList<YoloDetectedObject> yoloFrame(IplImage frame) {
@@ -271,13 +271,18 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
     
+    //log.info("Yolo frame start");
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
+    //log.info("Input mat created");
     // TODO: I think yolo expects RGB color (which is inverted in the next step)  so if the input image isn't in RGB color, we might need a cvCutColor
     Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false); //Convert Mat to batch of images
     // put our frame/input blob into the model.
+   // log.info("input blob created");
     net.setInput(inputBlob, "data");
+   // log.info("Input blob set on network.");
     // ask for the detection_out layer i guess?  not sure the details of the forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
+   // log.info("output detection matrix produced");
     // iterate the rows of the detection matrix.
     for (int i = 0; i < detectionMat.rows(); i++) {
       Mat currentRow = detectionMat.row(i);
