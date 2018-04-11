@@ -9,6 +9,9 @@
 	<properties>
 	    <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
 	    
+	    <!-- begin env vars -->
+	    <build.number>${env.BUILD_NUMBER}</build.number>
+	    <!-- end env vars -->
 	    
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
