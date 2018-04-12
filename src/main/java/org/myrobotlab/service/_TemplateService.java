@@ -38,6 +38,8 @@ public class _TemplateService extends Service {
     // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus", "2.3.1-1.4");
     // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus-platform", "2.3.1-1.4");
     
+    // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
+    
     
     meta.setAvailable(false);
     meta.addCategory("general");

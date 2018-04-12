@@ -356,6 +356,9 @@ public class ServiceData implements Serializable {
       if (path.length() > 0) {
         new File(path).mkdirs();
       }
+      
+      File removeExisting = new File(filename);
+      removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
       ServiceData sd = generate();
