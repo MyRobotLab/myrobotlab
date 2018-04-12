@@ -223,31 +223,32 @@ public class MavenWrapper extends Repo {
     try {
 
       LoggingFactory.init(Level.INFO);
-      // use an anonymous subclass since ProjectComponent is abstract
-      Repo maven = Repo.getInstance("MavenWrapper");
+      
+      Repo repo = Repo.getInstance("MavenWrapper");
 
-      // String dir = String.format("pom", System.currentTimeMillis());
-      String dir = String.format("build.maven.%d", System.currentTimeMillis());
-      // String dir = String.format("install.%d", System.currentTimeMillis());
-      // maven.createBuildFiles();
-
-      maven.createBuildFiles("install.dl4j.maven", "Deeplearning4j");
-      maven.install("install.dl4j.maven", "Deeplearning4j");
-      // maven.createBuildFiles("install.opencv.maven", "OpenCV");
-
-      boolean done = true;
-      if (done) {
-        return;
+      String serviceType = "_TemplateService";
+      long ts = System.currentTimeMillis();      
+      String dir = null;
+      
+      if (serviceType == null) {
+        // all services
+        dir = String.format("install.maven.%d", ts);
+      } else {
+        // single service
+        dir = String.format("install.maven.%s.%d", serviceType, ts);
       }
 
-      // maven.install("install.opencv.maven","OpenCV");
-      // ivy.createBuildFiles(dir, "Arm");
-      // maven.createBuildFilesTo(dir);
-      maven.installTo(dir);
-      maven.install();
-      maven.installEach();
+      repo.createBuildFiles(dir, serviceType);
+      
+      // repo.install("install.dl4j.maven", "Deeplearning4j");
+      // repo.install("install.opencv.maven","OpenCV");
+      // repo.createBuildFiles(dir, "Arm");
+      // repo.createBuildFilesTo(dir);
+      // repo.installTo(dir);
+      // repo.install();
+      // repo.installEach(); <-- TODO - test
 
-      log.info("here");
+      log.info("done");
 
     } catch (Exception e) {
       log.error(e.getMessage(), e);
