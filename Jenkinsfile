@@ -11,7 +11,6 @@ pipeline {
       // git 'https://github.com/MyRobotLab/myrobotlab.git'
       git url: 'https://github.com/MyRobotLab/myrobotlab.git', branch: 'develop'
       
-      
       sh 'git rev-parse --abbrev-ref HEAD > GIT_BRANCH'
       git_branch = readFile('GIT_BRANCH').trim()
       echo git_branch
