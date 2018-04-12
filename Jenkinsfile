@@ -1,8 +1,10 @@
-pipeline {
+node {
    // for examples :
    // https://jenkins.io/doc/pipeline/examples/
    // https://github.com/jenkinsci/pipeline-examples/tree/master/pipeline-examples
-   agent any
+   
+   // for declaritive
+   // agent any
    
    def mvnHome
    stage('Preparation') { // for display purposes
