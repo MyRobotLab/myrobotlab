@@ -48,13 +48,12 @@ node {
    }
    stage('Publish') {
 
-    	def server = Artifactory.server('artifactory01')
-    	server username = 'gperry'
+    	def server = Artifactory.server 'artifactory01' 
     	def uploadSpec = """{
   								"files": [
 										    {
 										      "pattern": "target/myrobotlab.jar",
-										      "target": "org/myrobotlab/"
+										      "target": "org/"
 										    }
 										 ]
 										}"""
