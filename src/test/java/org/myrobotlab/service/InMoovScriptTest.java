@@ -23,7 +23,6 @@ public class InMoovScriptTest {
   
   private String scriptRoot = "src/test/resources/InMoov";
   
-  
   @Before
   public void setup() throws Exception {
     // setup the test environment ,and create an arduino with a virtual backend for it.
