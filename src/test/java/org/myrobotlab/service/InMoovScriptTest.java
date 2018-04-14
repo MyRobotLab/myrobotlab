@@ -1,16 +1,18 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.test.TestUtils;
 
-// Grr.. TODO: disable this until we can figure out why travis is dying on it.
-// @Ignore
+// Grr.. TODO: too hard a test for our weak jenkins oven in the cloud :(
+@Ignore
 public class InMoovScriptTest {
 
   private static final String V_PORT_1 = "COM99";
