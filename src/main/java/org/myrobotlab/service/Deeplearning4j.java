@@ -485,7 +485,7 @@ public class Deeplearning4j extends Service {
     // due to this bug  https://github.com/haraldk/TwelveMonkeys/issues/167 seems we need to explicitly include imageio-core
     // https://mvnrepository.com/artifact/com.twelvemonkeys.imageio
     // lots of plugins
-    // meta.addDependency("com.twelvemonkeys.imageio", "imageio-core", "3.1.1");
+    meta.addDependency("com.twelvemonkeys.imageio", "imageio-core", "3.1.1");
     // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
     
     // meta.addDependency("com.twelvemonkeys.common", "common-io", "3.1.1");
