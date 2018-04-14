@@ -6,6 +6,8 @@
 # do voice control of a right hand or finger box
 # It uses WebkitSpeechRecognition, so you need to use Chrome as your default browser for this script to work
 
+python = Runtime.create("python","Python")
+
 # Start the webgui service without starting the browser
 webgui = Runtime.create("WebGui","WebGui")
 webgui.autoStartBrowser(False)
@@ -23,11 +25,11 @@ Voice="cmu-slt-hsmm" # Default female for MarySpeech
 #Voice="cmu-bdl" #Male US voice.You need to add the necessary file.jar to myrobotlab.1.0.XXXX/library/jar
 #https://github.com/MyRobotLab/pyrobotlab/blob/ff6e2cef4d0642e47ee15e353ef934ac6701e713/home/hairygael/voice-cmu-bdl-5.2.jar
 voiceType = Voice
-mouth = Runtime.createAndStart("i01.mouth", "MarySpeech")
+mouth = Runtime.start("i01.mouth", "MarySpeech")
 mouth.setVoice(voiceType)
 ##############
 # starting parts
-i01 = Runtime.createAndStart("i01", "InMoov")
+i01 = Runtime.start("i01", "InMoov")
 # Turn off the spoken status updates from the inmoov starting. (you will want to comment this out when you use this script for real.)
 # The inmoov is set to be mute for the unit tests in MRL.
 i01.setMute(True)

@@ -7,6 +7,14 @@
 	<name>MyRobotLab</name>
 	<description>Open Source Creative Machine Control</description>
 	<properties>
+	    <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
+	    
+	    <!-- begin env vars -->
+	    <build.number>${env.BUILD_NUMBER}</build.number>
+	    <commit>${git_commit}</commit>
+	    <branch>${git_branch}</branch>
+	    <!-- end env vars -->
+	    
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -97,7 +105,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                        	<finalName>myrobotlab</finalName>
+                            <finalName>myrobotlab</finalName>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>
@@ -112,13 +120,21 @@
                                         <manifestEntries>
                                           <Main-Class>org.myrobotlab.service.Agent</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
+                                          <Implementation-Version>1.1.${env.BUILD_NUMBER}</Implementation-Version>
+                                          <!--  did not work in jenkins pipeline - no git references
+									      <Commit>${env.GIT_COMMIT}</Commit>
+									      <Branch>${env.GIT_BRANCH}</Branch>
+									       -->
+									      <Commit>${commit}</Commit>
+									      <Branch>${branch}</Branch>
 									      <Build-Version>${build.number}</Build-Version>
 									      <Build-Time>${maven.build.timestamp}</Build-Time>
 									      <Build-Host>${agent.name}</Build-Host>
 									      <Build-User>${user.name}</Build-User>
                                         </manifestEntries>                                    
                                 </transformer>
-                            </transformers><!--                             <filters>
+                            </transformers>
+<!--                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -212,8 +228,8 @@
 		            </configuration>
 		          </execution>
 		        </executions>
-		      </plugin>			
-				-->
+		      </plugin>
+			-->
 		</plugins>
 	</build>
 
