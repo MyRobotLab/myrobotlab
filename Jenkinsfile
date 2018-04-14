@@ -49,6 +49,7 @@ node {
    stage('Publish') {
 
     	def server = Artifactory.server('artifactory01')
+    	server username = 'gperry'
     	def uploadSpec = """{
   								"files": [
 										    {
