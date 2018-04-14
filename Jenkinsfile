@@ -46,4 +46,17 @@ node {
       junit '**/target/surefire-reports/TEST-*.xml'
       archive 'target/*.jar'
    }
+   stage('Publish') {
+    	def artifactory01 = Artifactory.server 'artifactory01'
+    	def uploadSpec = """{
+  								"files": [
+										    {
+										      "pattern": "target/*.jar",
+										      "target": "org/myrobotlab/"
+										    }
+										 ]
+										}"""
+		artifactory01.upload(uploadSpec)
+
+	}
 }
