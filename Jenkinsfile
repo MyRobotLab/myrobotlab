@@ -45,7 +45,7 @@ node {
    stage('Results') {
       junit '**/target/surefire-reports/TEST-*.xml'
       archive 'target/*.jar'
-   }
+   } 
    stage('Publish') {
 
     	def server = Artifactory.server 'artifactory01' 
