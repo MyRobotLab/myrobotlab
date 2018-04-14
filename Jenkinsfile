@@ -47,13 +47,14 @@ node {
       archive 'target/*.jar'
    } 
    stage('Publish') {
+   
 
     	def server = Artifactory.server 'artifactory01' 
     	def uploadSpec = """{
   								"files": [
 										    {
 										      "pattern": "target/myrobotlab.jar",
-										      "target": "org/"
+										      "target": "org/myrobotlab/"
 										    }
 										 ]
 										}"""
