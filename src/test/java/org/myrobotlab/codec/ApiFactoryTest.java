@@ -64,7 +64,7 @@ public class ApiFactoryTest {
       bos.reset();
       o = api.process(bos, "http://localhost:8888/api");
       retJson = new String(bos.toByteArray());
-      log.info("ret - {}", retJson);
+      // log.info("ret - {}", retJson);
       
       // encoded string parameter
       o = null;
@@ -72,7 +72,7 @@ public class ApiFactoryTest {
       o = api.process(bos, "http://localhost:8888/api/messages/runtime/getService/\"runtime\"");
       assertTrue(o == runtime);
       retJson = new String(bos.toByteArray());
-      log.info("ret - {}", retJson);
+      // log.info("ret - {}", retJson);
       
       // with user id
       o = null;
@@ -80,7 +80,7 @@ public class ApiFactoryTest {
       o = api.process(bos, "http://userid:passwd@localhost:8888/api/messages/runtime/getService/runtime");
       assertTrue(o == runtime);
       retJson = new String(bos.toByteArray());
-      log.info("ret - {}", retJson);
+      //log.info("ret - {}", retJson);
       Message m = CodecUtils.fromJson(retJson, Message.class);
       assertTrue(m.getClass() == Message.class);
       assertTrue(m.data.length == 1);
@@ -91,22 +91,22 @@ public class ApiFactoryTest {
       o = api.process(bos, "http://userid:passwd@localhost:8888/api/service/runtime/start/servo/Servo");
       assertTrue(Servo.class == o.getClass());
       retJson = new String(bos.toByteArray());
-      log.info("ret - {}", retJson);
+      // log.info("ret - {}", retJson);
 
 
       // messages with encoded data
       o = api.process(bos, "/api/messages", encoded.toByteArray());
       assertTrue(String.class == o.getClass());
       // CodecUtils.fromJson(retJson);
-      log.info("ret - {}", o);
+      // log.info("ret - {}", o);
      
       bos.reset();
       o = api.process(bos, "/api/messages/", encoded.toByteArray());
-      log.info("ret - {}", o);
+      // log.info("ret - {}", o);
       bos.reset();
       // uri always has precedence over data
       o = api.process(bos, "/api/messages/runtime/getService/runtime");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/messages/runtime/start/servo/Servo"); // FIXME
                                                                        // check
@@ -116,13 +116,13 @@ public class ApiFactoryTest {
                                                                        // values
                                                                        // for
                                                                        // params
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/messages/servo");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/messages/servo/");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       // =============== api messages end =========================
 
@@ -130,22 +130,22 @@ public class ApiFactoryTest {
       // FIXME - try both cases in each api
       // FIXME - try encoded json on the param lines
       o = api.process(bos, "mrl://localhost");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "mrl://localhost:8888");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       
       // wrongApi test
@@ -160,31 +160,31 @@ public class ApiFactoryTest {
       */
       
       o = api.process(bos, "/api/service");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/service/"); // FIXME -
                                               // list
                                               // service
                                               // names/types
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/service/runtime/getUptime");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/service/runtime/getService/runtime");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/service/runtime/getService/runtime");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/service/runtime/start/servo/Servo");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/service/servo");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       o = api.process(bos, "/api/service/servo/");
-      log.info("ret - {}", new String(bos.toByteArray()));
+      // log.info("ret - {}", new String(bos.toByteArray()));
       bos.reset();
       // o = api.process(bos,
       // "/api/service/runtime/noWorky/GroG");
