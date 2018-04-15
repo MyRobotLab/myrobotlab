@@ -632,8 +632,8 @@
 <!-- Python begin -->
   <dependency>
     <groupId>org.python</groupId>
-    <artifactId>jython</artifactId>
-    <version>2.7.0</version>
+    <artifactId>jython-standalone</artifactId>
+    <version>2.7.1</version>
   </dependency>
 <!-- Python end -->
 

@@ -243,7 +243,7 @@ public class Python extends Service {
     meta.addCategory("programming", "control");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("org.python", "jython", "2.7.0");
+    meta.addDependency("org.python", "jython-standalone", "2.7.1");
     return meta;
   }
 
