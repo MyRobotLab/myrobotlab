@@ -357,7 +357,12 @@ public class ServiceData implements Serializable {
         new File(path).mkdirs();
       }
       
+      // remove pre-existing filename
       File removeExisting = new File(filename);
+      removeExisting.delete();
+      
+      // remove .myrobotlab/serviceData.json
+      removeExisting = new File(System.getProperty("user.dir") + File.separatorChar +  ".myrobotlab" + File.separatorChar + "serviceData.json");
       removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
