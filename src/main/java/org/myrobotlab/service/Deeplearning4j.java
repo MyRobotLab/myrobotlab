@@ -24,7 +24,6 @@ import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
-import org.deeplearning4j.nn.conf.LearningRatePolicy;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
@@ -39,7 +38,7 @@ import org.deeplearning4j.nn.conf.layers.LocalResponseNormalization;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
-import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
+// import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -47,6 +46,7 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
 import org.deeplearning4j.zoo.model.VGG16;
+import org.deeplearning4j.zoo.util.imagenet.ImageNetLabels;
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -288,13 +288,11 @@ public class Deeplearning4j extends Service {
      **/
     MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
         .seed(seed)
-        .iterations(iterations)
-        .regularization(false).l2(0.005) // tried 0.0001, 0.0005
+        .l2(0.005) // tried 0.0001, 0.0005
         .activation(Activation.RELU)
-        .learningRate(0.0001) // tried 0.00001, 0.00005, 0.000001
         .weightInit(WeightInit.XAVIER)
         .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-        .updater(Updater.RMSPROP).momentum(0.9)
+        .updater(Updater.RMSPROP)
         .list()
         .layer(0, convInit("cnn1", channels, 50 ,  new int[]{5, 5}, new int[]{1, 1}, new int[]{0, 0}, 0))
         .layer(1, maxPool("maxpool1", new int[]{2,2}))
@@ -327,17 +325,12 @@ public class Deeplearning4j extends Service {
         .dist(new NormalDistribution(0.0, 0.01))
         .activation(Activation.RELU)
         .updater(Updater.NESTEROVS)
-        .iterations(iterations)
+        
         .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize to prevent vanishing or exploding gradients
         .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-        .learningRate(1e-2)
-        .biasLearningRate(1e-2*2)
-        .learningRateDecayPolicy(LearningRatePolicy.Step)
-        .lrPolicyDecayRate(0.1)
-        .lrPolicySteps(100000)
-        .regularization(true)
+      
+   
         .l2(5 * 1e-4)
-        .momentum(0.9)
         .miniBatch(false)
         .list()
         .layer(0, convInit("cnn1", channels, 96, new int[]{11, 11}, new int[]{4, 4}, new int[]{3, 3}, 0))
@@ -411,6 +404,7 @@ public class Deeplearning4j extends Service {
     DataNormalization scaler = new VGG16ImagePreProcessor();
     scaler.transform(image);
     INDArray[] output = vgg16.output(false,image);
+    
     // TODO: return a more native datastructure!
     //String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
     // log.info("Image Predictions: {}", predictions);
@@ -434,14 +428,14 @@ public class Deeplearning4j extends Service {
   
   
   // adapted from dl4j TrainedModels.VGG16 class.
-  public Map<String, Double> decodeVGG16Predictions(INDArray predictions) {
+  public Map<String, Double> decodeVGG16Predictions(INDArray predictions) throws IOException {
     
     LinkedHashMap<String, Double> recognizedObjects = new LinkedHashMap<String, Double>(); 
-    ArrayList<String> labels;
+    // ArrayList<String> labels;
     String predictionDescription = "";
     int[] top5 = new int[5];
     float[] top5Prob = new float[5];
-    labels = ImageNetLabels.getLabels();
+    ImageNetLabels labels = new ImageNetLabels();
     //brute force collect top 5
     int i = 0;
     for (int batch = 0; batch < predictions.size(0); batch++) {
@@ -454,9 +448,10 @@ public class Deeplearning4j extends Service {
             top5[i] = Nd4j.argMax(currentBatch, 1).getInt(0, 0);
             top5Prob[i] = currentBatch.getFloat(batch, top5[i]);
             // interesting, this cast looses precision.. float to double.
-            recognizedObjects.put(labels.get(top5[i]), (double)top5Prob[i]);
+     
+            recognizedObjects.put(labels.getLabel(top5[i]), (double)top5Prob[i]);
             currentBatch.putScalar(0, top5[i], 0);
-            predictionDescription += "\n\t" + String.format("%3f", top5Prob[i] * 100) + "%, " + labels.get(top5[i]);
+            predictionDescription += "\n\t" + String.format("%3f", top5Prob[i] * 100) + "%, " + labels.getLabel(top5[i]);
             i++;
         }
     }
@@ -477,15 +472,16 @@ public class Deeplearning4j extends Service {
     // kwatters: nd4j / nd4j-backend / dl4j
 
     
-    meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.9.1");
-    meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", "0.9.1");
+    String dl4jVersion = "1.0.0-alpha";
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", dl4jVersion);
     // meta.addDependency("org.nd4j", "nd4j", "0.9.1"); - no such thing
-    meta.addDependency("org.nd4j", "nd4j-native-platform", "0.9.1");
-    meta.addDependency("commons-lang", "commons-lang", "2.6");
+    meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
+  //  meta.addDependency("commons-lang", "commons-lang", "2.6");
     // due to this bug  https://github.com/haraldk/TwelveMonkeys/issues/167 seems we need to explicitly include imageio-core
     // https://mvnrepository.com/artifact/com.twelvemonkeys.imageio
     // lots of plugins
-    meta.addDependency("com.twelvemonkeys.imageio", "imageio-core", "3.1.1");
+  //  meta.addDependency("com.twelvemonkeys.imageio", "imageio-core", "3.1.1");
     // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
     
     // meta.addDependency("com.twelvemonkeys.common", "common-io", "3.1.1");

@@ -123,7 +123,7 @@ public class TesseractOcr extends Service {
     meta.addCategory("intelligence");
   
     // TODO: update me to 1.4 
-    meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "3.05.01-1.4");
+    meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "3.05.01-1.4.1");
 
     // meta.addDependency("net.sourceforge.tess4j", "tess4j", "3.4.0");
     // meta.addDependency("com.sun.jna", "3.2.2");

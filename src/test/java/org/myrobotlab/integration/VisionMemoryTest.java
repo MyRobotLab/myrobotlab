@@ -3,6 +3,7 @@ package org.myrobotlab.integration;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -10,7 +11,6 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.deeplearning4j.util.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;

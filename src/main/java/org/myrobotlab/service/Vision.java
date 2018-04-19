@@ -276,7 +276,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     meta.addCategory("video", "vision", "sensor");
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    meta.addDependency("org.bytedeco", "javacv-platform", "1.4");
+    meta.addDependency("org.bytedeco", "javacv-platform", "1.4.1");
     // meta.exclude("commons-codec", "commons-codec");
     
     // meta.addDependency("commons-codec", "commons-codec", "1.10");
