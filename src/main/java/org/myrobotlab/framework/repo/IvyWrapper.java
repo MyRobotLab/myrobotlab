@@ -116,14 +116,15 @@ public class IvyWrapper extends Repo {
 
       String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/[originalname].[ext]" };
 
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-3.jar");
+      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
       for (String s : cmd) {
         sb.append(" ");
         sb.append(s);
       }
       log.info("cmd {}", sb);
 
-      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
+      // TODO: this breaks for me!  please review why this needed to be commented out.
+      // Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
 
       ResolveReport report = Main.run(cmd);
 

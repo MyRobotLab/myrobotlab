@@ -742,8 +742,9 @@ public class OpenCV extends AbstractVideoSource {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    meta.addDependency("org.bytedeco", "javacv", "1.4");
-    meta.addDependency("org.bytedeco", "javacv-platform", "1.4");
+    String javaCvVersion = "1.4.1";  
+    meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
+    meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
     // meta.exclude("commons-codec", "commons-codec");
     
     // meta.addDependency("commons-codec", "commons-codec", "1.10");
@@ -816,8 +817,8 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
     // opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
-    OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
-    opencv.addFilter(yolo);
+   // OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
+   // opencv.addFilter(yolo);
     
     opencv.setStreamerEnabled(false);
     // opencv.addFilter("facerec", "FaceRecognizer");

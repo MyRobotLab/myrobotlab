@@ -177,19 +177,19 @@
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>0.9.1</version>
+    <version>1.0.0-alpha</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>0.9.1</version>
+    <version>1.0.0-alpha</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>0.9.1</version>
+    <version>1.0.0-alpha</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -551,13 +551,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv</artifactId>
-    <version>1.4</version>
+    <version>1.4.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.4</version>
+    <version>1.4.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -788,7 +788,7 @@
   <dependency>
     <groupId>org.bytedeco.javacpp-presets</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>3.05.01-1.4</version>
+    <version>3.05.01-1.4.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- TesseractOcr end -->
@@ -824,7 +824,7 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.4</version>
+    <version>1.4.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
