@@ -83,13 +83,13 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
    */
 
   double powerLevel = 0;
-  double maxPower = 1.0;
-  double minPower = -1.0;
+  double maxPower = 127;
+  double minPower = -127;
 
   // grog: THIS SHOULD ONLY BE USED FOR INVERTED AND INPUT LIMITS !!!!
   // SHOULD NOT BE USED FOR RANGE MAPPING - RANGE MAPPING SHOULD ONLY BE
   // IN MOTORCONTROLLER !!!
-  Mapper powerMap = new Mapper(-1.0, 1.0, -1.0, 1.0);
+  Mapper powerMap = new Mapper(-1.0, 1.0, -127, 127);
 
   // position
   double currentPos = 0;
