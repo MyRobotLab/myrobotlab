@@ -23,7 +23,6 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-@Ignore
 public class InMoovTest implements PinArrayListener {
 
 	public final static Logger log = LoggerFactory.getLogger(InMoovTest.class);
