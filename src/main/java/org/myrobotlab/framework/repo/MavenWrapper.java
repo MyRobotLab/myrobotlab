@@ -227,16 +227,12 @@ public class MavenWrapper extends Repo {
       Repo repo = Repo.getInstance("MavenWrapper");
 
       String serviceType = "_TemplateService";
-      long ts = System.currentTimeMillis();      
-      String dir = null;
       
-      if (serviceType == null) {
-        // all services
-        dir = String.format("install.maven.%d", ts);
-      } else {
-        // single service
-        dir = String.format("install.maven.%s.%d", serviceType, ts);
-      }
+      serviceType = null;
+      
+      long ts = System.currentTimeMillis();      
+
+      String dir = String.format("install.maven.%s.%d", serviceType, ts);
 
       repo.createBuildFiles(dir, serviceType);
       
