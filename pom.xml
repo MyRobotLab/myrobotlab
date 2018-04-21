@@ -1041,8 +1041,14 @@
     <version>4.1.6</version>
     <scope>provided</scope>
   </dependency>
-<!-- Xmpp end -->
+  <!-- Xmpp end -->
 
+  <!-- for the kafka connector -->
+  <dependency>
+    <groupId>org.apache.kafka</groupId>
+    <artifactId>kafka-clients</artifactId>
+    <version>1.0.1</version>
+  </dependency>
   </dependencies>
 
 	
