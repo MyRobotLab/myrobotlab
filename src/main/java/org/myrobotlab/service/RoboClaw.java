@@ -817,7 +817,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    * </pre>
    */
   void readLogicbatteryVoltageLevel(int address) {
-    sendPacket(address, 21);
+    sendPacket(address, 25);
   }
   
   /**
@@ -894,9 +894,24 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    * </pre>
    */
   void setMainBatteryVoltages(int min, int max) {
-    sendPacket(address, 57, min, max);
+    sendPacket(address, 57, byte1(min), byte0(min), max);
   }
 
+  private int byte3(int value) {
+    return value >> 24;
+  }
+
+  private int byte2(int value) {
+    return value >> 16;
+  }
+
+  private int byte1(int value) {
+    return value >> 8;
+  }
+
+  private int byte0(int value) {
+    return value;
+  }
 
   /**
    * <pre>
@@ -946,7 +961,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    * </pre>
    */
   void setM1DefaultDutyAcceleration(int accel) {
-    sendPacket(address, 68, accel);
+    sendPacket(address, 68, byte3(accel), byte2(accel), byte1(accel), byte0(accel));
   }
 
   /**
@@ -959,7 +974,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    * </pre>
    */
   void setM2DefaultDutyAcceleration(int accel) {
-    sendPacket(address, 69, accel);
+    sendPacket(address, 69, byte3(accel), byte2(accel), byte1(accel), byte0(accel));
   }
 
   /**
@@ -1337,7 +1352,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    * </pre>
    */
   void setM1MaxCurrentLimit(int maxCurrent) {
-    sendPacket(address, 133, maxCurrent, 0, 0, 0, 0);
+    sendPacket(address, 133, byte3(maxCurrent), byte2(maxCurrent), byte1(maxCurrent), byte0(maxCurrent), 0, 0, 0, 0);
     // TODO lock - timeout - return value & publish
   }
   /**
@@ -1350,7 +1365,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    * </pre>
    */
   void setM2MaxCurrentLimit(int maxCurrent) {
-    sendPacket(address, 134, maxCurrent, 0, 0, 0, 0);
+    sendPacket(address, 134, byte3(maxCurrent), byte2(maxCurrent), byte1(maxCurrent), byte0(maxCurrent), 0, 0, 0, 0);
     // TODO lock - timeout - return value & publish
   }
   
@@ -1505,7 +1520,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   </pre>
   */
   void setQuadratureEncoder1Value(int value) {
-    sendPacket(address, 22, value);
+    sendPacket(address, 22, byte3(value), byte2(value), byte1(value), byte0(value));
     // TODO lock - timeout - return value & publish
   }
   /**
@@ -1518,7 +1533,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   </pre>
   */
   void setQuadratureEncoder2Value(int value) {
-    sendPacket(address, 23, value);
+    sendPacket(address, 23, byte3(value), byte2(value), byte1(value), byte0(value));
     // TODO lock - timeout - return value & publish
   }
   /**
@@ -1597,7 +1612,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   </pre> 
   */
   void setVelocityPIDConstantsM1(int D, int P, int I, int QPPS) {
-    sendPacket(address, 28, D, P, I, QPPS);
+    sendPacket(address, 28, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
     // TODO lock - timeout - return value & publish
   }
   /**
@@ -1619,7 +1634,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   </pre>
   */
   void setVelocityPIDConstantsM2(int D, int P, int I, int QPPS) {
-    sendPacket(address, 28, D, P, I, QPPS);
+    sendPacket(address, 29, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
     // TODO lock - timeout - return value & publish
   }
   /**
@@ -1677,7 +1692,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   </pre>
   */
   void driveM1WithSignedSpeed(int speed) {
-    sendPacket(address, 35, speed);
+    sendPacket(address, 35, byte3(speed), byte2(speed), byte1(speed), byte0(speed));
     // TODO lock - timeout - return value & publish
   }
   /**
@@ -1693,7 +1708,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   </pre>
   */
   void driveM2WithSignedSpeed(int speed) {
-    sendPacket(address, 36, speed);
+    sendPacket(address, 36, byte3(speed), byte2(speed), byte1(speed), byte0(speed));
     // TODO lock - timeout - return value & publish
   }
   /**
@@ -1709,7 +1724,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   </pre>
   */
   void driveM1M2WithSignedSpeed(int speedM1, int speedM2) {
-    sendPacket(address, 37, speedM1, speedM2);
+    sendPacket(address, 37, byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(speedM2), byte2(speedM2), byte1(speedM2), byte0(speedM2));
     // TODO lock - timeout - return value & publish
   }
   /**
