@@ -40,7 +40,7 @@ public class OculusHeadTracking implements Runnable, Serializable {
 
     running = true;
     while (running) {
-      TrackingState trackingState = hmd.getTrackingState(0);
+      TrackingState trackingState = hmd.getTrackingState(0, false);
       // TODO: do we care about "w" ?
       // double w = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.w);
       // rotations about x axis (pitch)
