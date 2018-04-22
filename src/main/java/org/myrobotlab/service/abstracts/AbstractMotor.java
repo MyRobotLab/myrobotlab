@@ -35,7 +35,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.sensor.Encoder;
+import org.myrobotlab.sensor.EncoderPublisher;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.Joystick.Component;
 import org.myrobotlab.service.Runtime;
@@ -286,13 +287,13 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public void pulse() {
+  public void onPulse(EncoderData data) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void setEncoder(Encoder encoder) {
+  public void setEncoder(EncoderPublisher encoder) {
     // TODO Auto-generated method stub
 
   }

@@ -13,6 +13,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.serial.CRC;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -34,7 +36,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class RoboClaw extends AbstractMotorController implements PortConnector, MotorController, SerialDataListener {
+public class RoboClaw extends AbstractMotorController implements EncoderPublisher, PortConnector, MotorController, SerialDataListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -2222,6 +2224,12 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
     log.info(String.format("onByte %02X", b));
     // log.info("onByte {}", b);
     return b;
+  }
+
+  @Override
+  public EncoderData publishEncoderData(EncoderData Data) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
