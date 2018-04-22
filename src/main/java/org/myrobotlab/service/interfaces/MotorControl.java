@@ -27,7 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.sensor.Encoder;
+import org.myrobotlab.sensor.EncoderPublisher;
 
 public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
   
@@ -104,7 +104,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 	 */
 	void moveTo(double newPos, Double power);
 
-	void setEncoder(Encoder encoder);
+	void setEncoder(EncoderPublisher encoder);
 
 	/**
 	 * change the motors direction such that negative power levels become

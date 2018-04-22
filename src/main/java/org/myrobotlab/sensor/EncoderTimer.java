@@ -10,7 +10,7 @@ import org.myrobotlab.logging.Logging;
  *
  */
 
-public class EncoderTimer extends Thread implements Encoder {
+public class EncoderTimer extends Thread implements EncoderPublisher {
   boolean isRunning = false;
   EncoderListener listener;
 
@@ -25,7 +25,7 @@ public class EncoderTimer extends Thread implements Encoder {
       isRunning = true;
       while (isRunning) {
 
-        listener.pulse();
+        listener.onPulse(null);
         Thread.sleep(100);
 
       }
@@ -39,6 +39,12 @@ public class EncoderTimer extends Thread implements Encoder {
   public static void main(String[] args) {
     // TODO Auto-generated method stub
 
+  }
+
+  @Override
+  public EncoderData publishEncoderData(EncoderData Data) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
