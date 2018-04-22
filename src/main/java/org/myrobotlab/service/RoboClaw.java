@@ -1273,10 +1273,20 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Bit7 - Reserved
    * </pre>
    */
-  public void readEncoderM1() {
-    sendPacket(address, 16);
-    // TODO lock - timeout - return value & publish
-  }
+  public EncoderData readEncoderM1() {
+	    sendPacket(address, 16);
+	    
+	    // send packet
+	    
+	    // wait with timemout on request queue/lock ?
+	    
+	    // (sepereate thread decodes the response & notifies ? - or same thread ?)
+	    
+	    // TODO lock - timeout - return value & publish
+	    
+	    return null;
+	  }
+
 
   /**
    * <pre>
