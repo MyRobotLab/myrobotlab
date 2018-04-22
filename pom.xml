@@ -611,7 +611,7 @@
   <dependency>
     <groupId>org.saintandreas</groupId>
     <artifactId>jovr</artifactId>
-    <version>0.7.0.0</version>
+    <version>1.8.0.0</version>
     <scope>provided</scope>
   </dependency>
   <dependency>

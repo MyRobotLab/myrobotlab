@@ -37,6 +37,9 @@ import com.oculusvr.capi.TrackingState;
 // TODO: implement publishOculusRiftData ...
 public class OculusRift extends Service implements PointPublisher {
 
+  public static final int ABS_TIME_MS = 0;
+  public static final boolean LATENCY_MARKER = false;
+  
 	public static final String RIGHT_OPEN_CV = "rightOpenCV";
 	public static final String LEFT_OPEN_CV = "leftOpenCV";
 	private static final long serialVersionUID = 1L;
@@ -119,7 +122,10 @@ public class OculusRift extends Service implements PointPublisher {
 			throw new IllegalStateException("Unable to initialize HMD");
 		}
 		hmdDesc = hmd.getDesc();
-		hmd.configureTracking();
+		// hmd.configureTracking();
+		// TODO: ?? what happened to configure tracking call?
+		hmd.recenterPose();
+		//hmd.initialize();
 
 		log.info("Created HMD Oculus Rift Sensor and configured tracking.");
 	}
@@ -334,7 +340,7 @@ public class OculusRift extends Service implements PointPublisher {
 	 * Log the head tracking info to help with debugging.
 	 */
 	public void logOrientation() {
-		TrackingState trackingState = hmd.getTrackingState(0);
+		TrackingState trackingState = hmd.getTrackingState(ABS_TIME_MS, LATENCY_MARKER);
 		OvrVector3f position = trackingState.HeadPose.Pose.Position;
 		position.x *= 100.0f;
 		position.y *= 100.0f;
@@ -353,20 +359,20 @@ public class OculusRift extends Service implements PointPublisher {
 	}
 
 	public float getYaw() {
-		TrackingState trackingState = hmd.getTrackingState(0);
+		TrackingState trackingState = hmd.getTrackingState(ABS_TIME_MS, LATENCY_MARKER);
 		float y = trackingState.HeadPose.Pose.Orientation.y * RAD_TO_DEGREES;
 		;
 		return y;
 	}
 
 	public float getRoll() {
-		TrackingState trackingState = hmd.getTrackingState(0);
+		TrackingState trackingState = hmd.getTrackingState(ABS_TIME_MS, LATENCY_MARKER);
 		float z = trackingState.HeadPose.Pose.Orientation.z * RAD_TO_DEGREES;
 		return z;
 	}
 
 	public float getPitch() {
-		TrackingState trackingState = hmd.getTrackingState(0);
+		TrackingState trackingState = hmd.getTrackingState(ABS_TIME_MS, LATENCY_MARKER);
 		float x = trackingState.HeadPose.Pose.Orientation.x * RAD_TO_DEGREES;
 		return x;
 	}
@@ -439,8 +445,10 @@ public class OculusRift extends Service implements PointPublisher {
 		// compile(group: 'org.saintandreas', name: 'jovr', version: '0.7.0.0')
 		
     meta.addDependency("slick-util", "slick-util", "1.0.0");
-    meta.addDependency("org.saintandreas", "jovr", "0.7.0.0");
+    meta.addDependency("org.saintandreas", "jovr", "1.8.0.0");
     meta.addDependency("org.saintandreas", "glamour-lwjgl", "1.0.8");
+    meta.addDependency("org.saintandreas", "math", "1.0.4");
+    meta.addDependency("org.saintandreas", "oria-resources", "1.0.4");
     meta.exclude("org.slf4j", "slf4j-api");
     meta.exclude("org.lwjgl.lwjgl", "lwjgl");
     meta.exclude("com.google.guava", "guava");
@@ -449,7 +457,7 @@ public class OculusRift extends Service implements PointPublisher {
 
 	public static void main(String s[]) {
 		LoggingFactory.init("INFO");
-		// Runtime.createAndStart("gui", "SwingGui");
+		Runtime.createAndStart("gui", "SwingGui");
 		Runtime.createAndStart("python", "Python");
 		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
