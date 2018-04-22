@@ -18,12 +18,13 @@ import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
  * 
- * RoboClaw - RoboClaw service for the sabertooth motor controller command
+ * RoboClaw - RoboClaw service for the roboclaw motor controller command
  * 
  * More Info: http://downloads.ionmc.com/docs/roboclaw_user_manual.pdf
  * 
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class RoboClaw extends AbstractMotorController implements PortConnector, MotorController {
+public class RoboClaw extends AbstractMotorController implements PortConnector, MotorController, SerialDataListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -45,7 +46,8 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
 
   public final static Logger log = LoggerFactory.getLogger(RoboClaw.class);
 
-  transient SerialDevice serial;
+  // transient SerialDevice serial;
+  transient Serial serial;
 
   Integer address = 128;
 
@@ -62,21 +64,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
 
   List<String> ports = new ArrayList<String>();
 
-  public final static int MOTOR1_FORWARD = 0;
-
-  public final static int MOTOR1_BACKWARD = 1;
-
-  public final static int SET_MIN_VOLTAGE = 2;
-
-  public final static int SET_MAX_VOLTAGE = 3;
-
-  public final static int MOTOR2_FORWARD = 4;
-
-  public final static int MOTOR2_BACKWARD = 5;
 
   public RoboClaw(String n) {
     super(n);
-    // add motor ports the sabertooth supports
+    // add motor ports the roboclaw supports
     ports.add("m1");
     ports.add("m2");
     powerMapper = new Mapper(-1.0, 1.0, -127, 127);
@@ -90,38 +81,6 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
     if (serial != null) {
       serial.close();
     }
-  }
-
-  public void driveBackwardsMotor1(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed", speed);
-      return;
-    }
-    sendPacket(address, MOTOR1_BACKWARD, speed);
-  }
-
-  public void driveBackwardsMotor2(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed", speed);
-      return;
-    }
-    sendPacket(address, MOTOR2_BACKWARD, speed);
-  }
-
-  public void driveForwardMotor1(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed", speed);
-      return;
-    }
-    sendPacket(address, MOTOR1_FORWARD, speed);
-  }
-
-  public void driveForwardMotor2(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed %s", speed);
-      return;
-    }
-    sendPacket(address, MOTOR2_FORWARD, speed);
   }
 
   public boolean motorDetach(String name) {
@@ -141,13 +100,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   }
 
   // public void sendPacket(int command, int data) {
-  public void sendPacket(int ...  d) {
+  public void sendPacket(int... d) {
     try {
       if (serial == null || !serial.isConnected()) {
         error("serial device not connected");
         return;
       }
-      
+
       // packet[0] == address
       // packet[1] == command
       // packet[n] == data
@@ -155,13 +114,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
       // packet[n+2] == crc/2
 
       StringBuilder sb = new StringBuilder();
-      
-      byte [] packet = new byte[d.length + 2];
+
+      byte[] packet = new byte[d.length + 2];
       for (int i = 0; i < d.length; ++i) {
-        packet[i] = (byte)d[i];
-        sb.append(String.format("%02X ", i));
+        packet[i] = (byte) d[i];
+        sb.append(String.format("%02X ", d[i]));
       }
-      
+
       // 9600
       /*
        * if (!setRoboClawBaud) { serial.write(170); sleep(500); setRoboClawBaud
@@ -169,15 +128,12 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
        */
 
       long xmodemcrc16 = CRC.calculateCRC(CRC.Parameters.XMODEM, Arrays.copyOfRange(packet, 0, d.length));
-      packet[d.length] = (byte)((xmodemcrc16 >> 8) & 0xFF);
-      sb.append(String.format("%02X ", (byte)((xmodemcrc16 >> 8) & 0xFF)));
-      packet[d.length + 1] = (byte)(xmodemcrc16 & 0xFF);
-      sb.append(String.format("%02X ", (byte)(xmodemcrc16 & 0xFF)));
-      
-      
-      for (int i = 0; i < packet.length; )
+      packet[d.length] = (byte) ((xmodemcrc16 >> 8) & 0xFF);
+      sb.append(String.format("%02X ", (byte) ((xmodemcrc16 >> 8) & 0xFF)));
+      packet[d.length + 1] = (byte) (xmodemcrc16 & 0xFF);
+      sb.append(String.format("%02X ", (byte) (xmodemcrc16 & 0xFF)));
 
-      log.info(String.format("sendPacket {}", sb));
+      log.info("sendPacket {}", sb);
 
       /**
        * <pre>
@@ -195,12 +151,12 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
       aa 81 00 20 28 08 
       81 00 20 28 08 
       81 00 20 28 08
-  
+       * 
        * </pre>
        **/
-      
+
       serial.write(packet);
-  
+
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -210,23 +166,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
     this.address = address;
   }
 
-  public void setMaxVoltage(int maxVolts) {
-    int actualValue = (int) Math.round(maxVolts / 5.12);
-    info("setting max voltage to %d volts - actual value %f", actualValue);
-    sendPacket(address, SET_MAX_VOLTAGE, actualValue);
-  }
-
   // ----------MotorController Interface End --------------
-
-  public void setMinVoltage(int min) {
-    int actualValue = (min - 6) * 5;
-    info("setting max voltage to %d volts - actual value %d", actualValue);
-    if (actualValue < 0 || actualValue > 120) {
-      error("invalid value must be between 0 and 120 %d", actualValue);
-      return;
-    }
-    sendPacket(address, SET_MIN_VOLTAGE, actualValue);
-  }
 
   public SerialDevice getSerial() {
     return serial;
@@ -285,15 +225,15 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
 
     if (port.equals("m1")) {
       if (power >= 0) {
-        driveForwardMotor1(power);
+        driveForwardM1(power);
       } else {
-        driveBackwardsMotor1(Math.abs(power));
+        driveBackwardM1(Math.abs(power));
       }
     } else if (port.equals("m2")) {
       if (power >= 0) {
-        driveForwardMotor2(power);
+        driveForwardM2(power);
       } else {
-        driveBackwardsMotor2(Math.abs(power));
+        driveBackwardM1(Math.abs(power));
       }
     } else {
       error("invalid port number %d", port);
@@ -348,12 +288,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) throws Exception {
     if (serial == null) {
-      serial = (Serial) startPeer("serial");
+      Serial s = (Serial) startPeer("serial");
+      attach(s);
     }
     log.info("{} opening serial port {}|{}|{}|{}", port, rate, databits, stopbits, parity);
     serial.open(port, rate, databits, stopbits, parity);
     // not much choice here :(
-    // sabertooth is not 'readable' and connecting serial is almost always
+    // roboclaw is not 'readable' and connecting serial is almost always
     // an asynchronous process - since we have no way to verify the port is open
     // we sadly must
     sleep(3000);
@@ -403,27 +344,27 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
       return;
 
     } else if (SerialDevice.class.isAssignableFrom(service.getClass())) {
-
-      serial = (SerialDevice) service;
+      // FIXME - use SerialDevice
+      serial = (Serial) service;
 
       // here we check and warn regarding config - but
       // it "might" be right if the user has customized it
       // this works well - the user controls all config
       // but the attach can check and report on it
-      if (serial.getRate() != 9600) {
-        warn("default rate for RoboClaw is 9600 serial is currently at %s", serial.getRate());
-      }
+      /*
+       * if (serial.getRate() != 9600) {
+       * warn("default rate for RoboClaw is 9600 serial is currently at %s",
+       * serial.getRate()); }
+       */
 
-      // give serial an opportunity to attach to this service
-      serial.attach(this);
+      // serial.attach(this); - not needed since the serial service is very "low" level,
+      // it doesn't attach to anything - but "higher" level services attach to it.
+      serial.addByteListener(this);
 
-      if (serial.isConnected()) {
-        if (!setRoboClawBaud) {
-          serial.write(170);
-          sleep(500);
-          setRoboClawBaud = true;
-        }
-      }
+      /*
+       * if (serial.isConnected()) { if (!setRoboClawBaud) { serial.write(170);
+       * sleep(500); setRoboClawBaud = true; } }
+       */
 
       // made changes broadcast it
       broadcastState();
@@ -457,128 +398,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
     }
   }
 
-  public static void main(String[] args) {
-    try {
+  /**
+   * <pre>
+   * ////////////////////////////// RoboClaw Native Methods
+   * ////////////////////////////// //////////////////////////////
+   * </pre>
+   */
 
-      /*
-       * <pre>
-       * 
-       * RoboClaw - http://downloads.ionmc.com/docs/roboclaw_user_manual.pdf
-       * 
-       * The basic command structures consist of an address byte, command byte,
-       * data bytes and a CRC16 16bit checksum. The amount of data each command
-       * will send or receive can vary.
-       * 
-       * | --------ADDRESS------ |COMMAND|DATA |0x80 (128) - 0x87 (135)|
-       * 
-       * Big Endian -
-       * 
-       * BAUD OPTIONS 2400 9600 19200 38400 57600 115200 230400 460800
-       * 
-       * 
-       * PACKET ACK = 0xFF </pre>
-       * 
-       */
-      LoggingFactory.init("INFO");
-      boolean virtual = false;
-      //////////////////////////////////////////////////////////////////////////////////
-      // RoboClaw.py
-      // categories: motor
-      // more info @: http://myrobotlab.org/service/RoboClaw
-      //////////////////////////////////////////////////////////////////////////////////
-      // uncomment for virtual hardware
-      // virtual = True
-
-      // String port = "COM14";
-      String port = "/dev/ttyACM0";
-      // String port = "/dev/ttyS10";
-
-      // start optional virtual serial service, used for test
-      if (virtual) {
-        // use static method Serial.connectVirtualUart to create
-        // a virtual hardware uart for the serial service to
-        // connect to
-        Serial uart = Serial.connectVirtualUart(port);
-        uart.logRecv(true); // dump bytes sent from sabertooth
-      }
-      // start the services
-      // Runtime.start("gui", "SwingGui");
-      RoboClaw roboclaw = (RoboClaw) Runtime.start("sabertooth", "RoboClaw");
-      MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
-      MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
-      // Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-      // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
-
-      // roboclaw.setAddress(128);
-      roboclaw.setAddress(129);
-
-      // configure services
-      m1.setPort("m1");
-      m2.setPort("m2");
-      // joy.setController(5); // 0 on Linux
-
-      // attach services
-      roboclaw.attach(m1);
-      roboclaw.attach(m2);
-      // m1.attach(joy.getAxis("y"));
-      // m2.attach(joy.getAxis("rz"));
-
-      // m1.setInverted(true);
-      // m2.setInverted(true);
-      // m2.attach(arduino.getPin("A4"));
-
-      // FIXME - sabertooth.attach(motor1) & sabertooth.attach(motor2)
-      // FIXME - motor1.attach(joystick) !
-      roboclaw.connect(port);
-
-      // m1.stop();
-      // m2.stop();
-
-      // move 90% full forward
-      m1.move(0.90);
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      // speed up the motor
-      for (int i = 0; i < 100; ++i) {
-        double pwr = i * .01;
-        log.info("power {}", pwr);
-        m1.move(pwr);
-        sleep(100);
-      }
-
-      sleep(1000);
-
-      // slow down the motor
-      for (int i = 100; i > 0; --i) {
-        double pwr = i * .01;
-        log.info("power {}", pwr);
-        m1.move(pwr);
-        sleep(100);
-      }
-
-      // move motor clockwise
-      m1.move(0.3);
-      sleep(1000);
-      m1.stop();
-
-      // move motor counter-clockwise
-      m1.move(-0.3);
-      sleep(1);
-      m1.stop();
-
-      // TODO - stopAndLock
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
-  /////////////////////////////// robotclaw methods begin
-  /////////////////////////////// ///////////////////////////////////
   /**
    * <pre>
       0 - Drive Forward M1
@@ -601,7 +427,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
     Receive: [0xFF]
    * </pre>
    */
-  void driveBackwardM1(int value) {
+  public void driveBackwardM1(int value) {
     sendPacket(address, 1, value);
   }
 
@@ -620,7 +446,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   RoboClaw Series User Manual 65
    * </pre>
    */
-  void setMiniMainVoltage(int value) {
+  public void setMiniMainVoltage(int value) {
     sendPacket(address, 2, value);
   }
 
@@ -637,7 +463,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setMaxMainVoltage(int value) {
+  public void setMaxMainVoltage(int value) {
     sendPacket(address, 3, value);
   }
 
@@ -650,10 +476,9 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void driveForwardM2(int value) {
+  public void driveForwardM2(int value) {
     sendPacket(address, 4, value);
   }
-  
 
   /**
    * <pre>
@@ -664,7 +489,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void driveBackwardM2(int value) {
+  public void driveBackwardM2(int value) {
     sendPacket(address, 5, value);
   }
 
@@ -677,10 +502,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void driveM1(int value) {
+  public void driveM1(int value) {
     sendPacket(address, 6, value);
   }
-  
+
   /**
    * <pre>
   7 - Drive M2 (7 Bit)
@@ -697,7 +522,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Once RoboClaw begins to operate the motors turn and speed can be updated independently.
    * </pre>
    */
-  void driveM2(int value) {
+  public void driveM2(int value) {
     sendPacket(address, 7, value);
   }
 
@@ -710,7 +535,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void driveForward(int value) {
+  public void driveForward(int value) {
     sendPacket(address, 8, value);
   }
 
@@ -723,7 +548,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void driveBackward(int value) {
+  public void driveBackward(int value) {
     sendPacket(address, 9, value);
   }
 
@@ -736,7 +561,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void turnRight(int value) {
+  public void turnRight(int value) {
     sendPacket(address, 10, value);
   }
 
@@ -749,10 +574,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void turnLeft(int value) {
+  public void turnLeft(int value) {
     sendPacket(address, 11, value);
   }
-  
+
   /**
    * <pre>
   12 - Drive Forward or Backward (7 Bit)
@@ -762,10 +587,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void driveForwardOrBackward(int value) {
+  public void driveForwardOrBackward(int value) {
     sendPacket(address, 12, value);
   }
-  
+
   /**
    * <pre>
   13 - Turn Left or Right (7 Bit)
@@ -775,10 +600,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF
    * </pre>
    */
-  void turnLeftOrRight(int value) {
+  public void turnLeftOrRight(int value) {
     sendPacket(address, 13, value);
   }
-  
+
   /**
    * <pre>
   21 - Read Firmware Version
@@ -790,7 +615,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   firmware version. The return string is terminated with a line feed (10) and null (0) character.
    * </pre>
    */
-  void readFirmwareVersion(int address) {
+  public void readFirmwareVersion(int address) {
     sendPacket(address, 21);
   }
 
@@ -803,9 +628,9 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [Value(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readMainBatteryVoltageLevel(int address) {
+  public void readMainBatteryVoltageLevel(int address) {
     sendPacket(address, 24);
-  }  
+  }
 
   /**
    * <pre>
@@ -816,10 +641,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [Value.Byte1, Value.Byte0, CRC(2 bytes)]
    * </pre>
    */
-  void readLogicbatteryVoltageLevel(int address) {
+  public void readLogicbatteryVoltageLevel(int address) {
     sendPacket(address, 25);
   }
-  
+
   /**
    * <pre>
   26 - Set Minimum Logic Voltage Level
@@ -834,10 +659,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setMinLogicVoltageLevel(int value) {
+  public void setMinLogicVoltageLevel(int value) {
     sendPacket(address, 26, value);
   }
-  
+
   /**
    * <pre>
   27 - Set Maximum Logic Voltage Level
@@ -851,11 +676,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  
-  void setMaxLogicVoltageLevel(int value) {
+
+  public void setMaxLogicVoltageLevel(int value) {
     sendPacket(address, 27, value);
   }
-
 
   /**
    * <pre>
@@ -867,7 +691,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
    * </pre>
    */
 
-  void readMotorPwmValues() {
+  public void readMotorPwmValues() {
     sendPacket(address, 48);
   }
 
@@ -880,7 +704,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [M1 Current(2 bytes), M2 Currrent(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readMotorCurrents(int value) {
+  public void readMotorCurrents(int value) {
     sendPacket(address, 49);
   }
 
@@ -893,8 +717,8 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setMainBatteryVoltages(int min, int max) {
-    sendPacket(address, 57, byte1(min), byte0(min), max);
+  public void setMainBatteryVoltages(int min, int max) {
+    sendPacket(address, 57, byte1(min), byte0(min), byte1(max), byte0(max));
   }
 
   private int byte3(int value) {
@@ -922,10 +746,9 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setLogicBatteryVoltages(int min, int max) {
-    sendPacket(address, 58, min, max);
+  public void setLogicBatteryVoltages(int min, int max) {
+    sendPacket(address, 58, byte1(min), byte0(min), byte1(max), byte0(max));
   }
-
 
   /**
    * <pre>
@@ -935,7 +758,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [Min(2 bytes), Max(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readMainBatteryVoltageSettings(int address) {
+  public void readMainBatteryVoltageSettings(int address) {
     sendPacket(address, 59);
   }
 
@@ -947,7 +770,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [Min(2 bytes), Max(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readLogicBatteryVoltageSettings(int address) {
+  public void readLogicBatteryVoltageSettings(int address) {
     sendPacket(address, 60);
   }
 
@@ -960,7 +783,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setM1DefaultDutyAcceleration(int accel) {
+  public void setM1DefaultDutyAcceleration(int accel) {
     sendPacket(address, 68, byte3(accel), byte2(accel), byte1(accel), byte0(accel));
   }
 
@@ -973,7 +796,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setM2DefaultDutyAcceleration(int accel) {
+  public void setM2DefaultDutyAcceleration(int accel) {
     sendPacket(address, 69, byte3(accel), byte2(accel), byte1(accel), byte0(accel));
   }
 
@@ -989,7 +812,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   2 E-Stop E-Stop E-Stop
   3 Voltage Clamp Voltage Clamp Voltage Clamp
   4 M1 Home M2 Home
-
+  
   Mode Description
   Disabled: pin is inactive.
   Default: Flip switch if in RC/Analog mode or E-Stop(latching) in Serial modes.
@@ -999,7 +822,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Home(M1 & M2): will trigger the specific motor to stop and the encoder count to reset to 0.
    * </pre>
    */
-  void setModes(int s3, int s4, int s5) {
+  public void setModes(int s3, int s4, int s5) {
     sendPacket(address, 74, s3, s4, s5);
   }
 
@@ -1016,11 +839,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void getModes(int address) {
+  public void getModes(int address) {
     sendPacket(address, 76);
     // TODO implement lock & timeout...
   }
-  
+
   /**
    * <pre>
   77 - Read DeadBand for RC/Analog controls
@@ -1029,7 +852,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [Reverse, SForward, CRC(2 bytes)]
    * </pre>
    */
-  void readDeadBand(int address) {
+  public void readDeadBand(int address) {
     sendPacket(address, 77);
   }
 
@@ -1041,11 +864,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  
-  void restoreDefaults(int address) {
+
+  public void restoreDefaults(int address) {
     sendPacket(address, 80);
   }
-
 
   /**
    * <pre>
@@ -1055,10 +877,9 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [M1Accel(4 bytes), M2Accel(4 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readDefaultDutyAccelSettings(int address) {
+  public void readDefaultDutyAccelSettings(int address) {
     sendPacket(address, 81);
   }
-  
 
   /**
    * <pre>
@@ -1068,11 +889,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [Temperature(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readTemp(int address) {
+  public void readTemp(int address) {
     sendPacket(address, 82);
     // TODO - lock for callback and publish
   }
-  
 
   /**
    * <pre>
@@ -1086,7 +906,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   RoboClaw Series User Manual 74
    * </pre>
    */
-  void readTemp2(int address) {
+  public void readTemp2(int address) {
     sendPacket(address, 83);
   }
 
@@ -1116,7 +936,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   M2 Home 0x8000
    * </pre>
    */
-  void readStatus(int address) {
+  public void readStatus(int address) {
     sendPacket(address, 90);
     // TODO lock - timeout - return value & publish
   }
@@ -1133,10 +953,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Bit 0 Quadrature(0)/Absolute(1)
    * </pre>
    */
-  void readEncoderMode(int address) {
+  public void readEncoderMode(int address) {
     sendPacket(address, 91);
     // TODO lock - timeout - return value & publish
-  }  
+  }
 
   /**
    * <pre>
@@ -1146,10 +966,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setM1EncoderMode(int address) {
+  public void setM1EncoderMode(int address) {
     sendPacket(address, 92);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   93 - Set Motor 2 Encoder Mode
@@ -1161,10 +982,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   RoboClaw Series User Manual 75
    * </pre>
    */
-  void setM2EncoderMode(int address) {
+  public void setM2EncoderMode(int address) {
     sendPacket(address, 93);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   94 - Write Settings to EEPROM
@@ -1173,10 +995,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void writeSettingsToEeprom(int address) {
+  public void writeSettingsToEeprom(int address) {
     sendPacket(address, 94);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   95 - Read Settings from EEPROM
@@ -1188,10 +1011,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   RoboClaw Series User Manual 76
    * </pre>
    */
-  void readSettingsFromEeprom(int address) {
+  public void readSettingsFromEeprom(int address) {
     sendPacket(address, 95);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   98 - Set Standard Config Settings
@@ -1241,10 +1065,10 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   RoboClaw Series User Manual 77
    * </pre>
    */
-  void setStandardConfig(int config) {
-    sendPacket(address, 98, config);
+  public void setStandardConfig(int config) {
+    sendPacket(address, 98, byte1(config), byte0(config));
     // TODO lock - timeout - return value & publish
-  }  
+  }
 
   /**
    * <pre>
@@ -1254,11 +1078,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [Config(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readStandardConfig(int address) {
+  public void readStandardConfig(int address) {
     sendPacket(address, 99);
     // TODO lock - timeout - return value & publish
   }
-  
+
   /**
    * <pre>
   100 - Set CTRL Modes
@@ -1284,10 +1108,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   slow down before the brake is activated.
    * </pre>
    */
-  void setCtrlModes(int address) {
+  public void setCtrlModes(int address) {
     sendPacket(address, 20);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   101 - Read CTRL Modes
@@ -1297,11 +1122,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Reads CTRL1 and CTRL2 mode setting. See 100 - Set CTRL Modes for valid values.
    * </pre>
    */
-  void readCtrlModes(int address) {
+  public void readCtrlModes(int address) {
     sendPacket(address, 101);
     // TODO lock - timeout - return value & publish
   }
-  
+
   /**
    * <pre>
   102 - Set CTRL1
@@ -1311,10 +1136,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Set the output state value of CTRL1. See 100 - Set CTRL Modes for valid values.
    * </pre>
    */
-  void setCtrl1(int value) {
-    sendPacket(address, 102, value);
+  public void setCtrl1(int value) {
+    sendPacket(address, 102, byte1(value), byte0(value));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   103 - Set CTRL2
@@ -1324,10 +1150,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Set the output state value of CTRL2. See 100 - Set CTRL Modes for valid values.
    * </pre>
    */
-  void setCtrl2(int value) {
-    sendPacket(address, 103, value);
+  public void setCtrl2(int value) {
+    sendPacket(address, 103, byte1(value), byte0(value));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   104 - Read CTRL Settings
@@ -1337,7 +1164,7 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Reads currently set values for CTRL Settings. See 100 - Set CTRL Modes for valid values.
    * </pre>
    */
-  void readCtrl1(int address) {
+  public void readCtrl1(int address) {
     sendPacket(address, 104);
     // TODO lock - timeout - return value & publish
   }
@@ -1351,10 +1178,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setM1MaxCurrentLimit(int maxCurrent) {
+  public void setM1MaxCurrentLimit(int maxCurrent) {
     sendPacket(address, 133, byte3(maxCurrent), byte2(maxCurrent), byte1(maxCurrent), byte0(maxCurrent), 0, 0, 0, 0);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   134 - Set M2 Max Current Limit
@@ -1364,11 +1192,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setM2MaxCurrentLimit(int maxCurrent) {
+  public void setM2MaxCurrentLimit(int maxCurrent) {
     sendPacket(address, 134, byte3(maxCurrent), byte2(maxCurrent), byte1(maxCurrent), byte0(maxCurrent), 0, 0, 0, 0);
     // TODO lock - timeout - return value & publish
   }
-  
+
   /**
    * <pre>
   135 - Read M1 Max Current Limit
@@ -1378,11 +1206,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [MaxCurrent(4 bytes), MinCurrent(4 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readM1MaxCurrentLimit() {
+  public void readM1MaxCurrentLimit() {
     sendPacket(address, 135);
     // TODO lock - timeout - return value & publish
   }
-  
+
   /**
    * <pre>
   136 - Read M2 Max Current Limit
@@ -1392,10 +1220,11 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [MaxCurrent(4 bytes), MinCurrent(4 bytes), CRC(2 bytes)]
    * </pre>
    */
-  void readM2MaxCurrentLimit(int address) {
+  public void readM2MaxCurrentLimit(int address) {
     sendPacket(address, 136);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   148 - Set PWM Mode
@@ -1404,23 +1233,24 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
    * </pre>
    */
-  void setPwmMode(int mode) {
+  public void setPwmMode(int mode) {
     sendPacket(address, 148, mode);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   149 - Read PWM Mode
   Read PWM Drive mode. See Command 148.
   Send: [Address, 149]
-  Receive: [PWMMode, CRC(2 bytes)]  
+  Receive: [PWMMode, CRC(2 bytes)]
    * </pre>
    */
-  void readPwmMode(int address) {
+  public void readPwmMode(int address) {
     sendPacket(address, 149);
     // TODO lock - timeout - return value & publish
-  }  
-  
+  }
+
   /**
    * <pre>
   
@@ -1439,13 +1269,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Bit5 - Reserved
   Bit6 - Reserved
   Bit7 - Reserved
-  </pre>
-  */
-  void readEncoderCount() {
+   * </pre>
+   */
+  public void readEncoderM1() {
     sendPacket(address, 16);
     // TODO lock - timeout - return value & publish
   }
-  
+
   /**
    * <pre>
   17 - Read Quadrature Encoder Count/Value M2
@@ -1463,12 +1293,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Bit5 - Reserved
   Bit6 - Reserved
   Bit7 - Reserved
-  </pre>
-  */
-  void readEncoderM2() {
+   * </pre>
+   */
+  public void readEncoderM2() {
     sendPacket(address, 17);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   18 - Read Encoder Speed M1
@@ -1477,12 +1308,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 18]
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   Status indicates the direction (0 – forward, 1 - backward).
-  </pre>
-  */
-  void readEncoderSpeedM1() {
+   * </pre>
+   */
+  public void readEncoderSpeedM1() {
     sendPacket(address, 18, mode);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   19 - Read Encoder Speed M2
@@ -1491,12 +1323,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 19]
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   Status indicates the direction (0 – forward, 1 - backward).
-  </pre>
-  */
-  void readEncoderSpeedM2() {
+   * </pre>
+   */
+  public void readEncoderSpeedM2() {
     sendPacket(address, 17);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   20 - Reset Quadrature Encoder Counters
@@ -1504,12 +1337,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   encoders only.
   Send: [Address, 20, CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void resetQuadratureEncoderCounters() {
+   * </pre>
+   */
+  public void resetQuadratureEncoderCounters() {
     sendPacket(address, 20);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   22 - Set Quadrature Encoder 1 Value
@@ -1517,12 +1351,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   quadrature encoders only.
   Send: [Address, 22, Value(4 bytes), CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void setQuadratureEncoder1Value(int value) {
+   * </pre>
+   */
+  public void setQuadratureEncoder1Value(int value) {
     sendPacket(address, 22, byte3(value), byte2(value), byte1(value), byte0(value));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   23 - Set Quadrature Encoder 2 Value
@@ -1530,12 +1365,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   quadrature encoders only.
   Send: [Address, 23, Value(4 bytes), CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void setQuadratureEncoder2Value(int value) {
+   * </pre>
+   */
+  public void setQuadratureEncoder2Value(int value) {
     sendPacket(address, 23, byte3(value), byte2(value), byte1(value), byte0(value));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   30 - Read Raw Speed M1
@@ -1545,12 +1381,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 30]
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   The Status byte is direction (0 – forward, 1 - backward).
-  </pre>
-  */
-  void readRawSpeedM1() {
+   * </pre>
+   */
+  public void readRawSpeedM1() {
     sendPacket(address, 30);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   31 - Read Raw Speed M2
@@ -1560,12 +1397,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 31]
   Receive: [Speed(4 bytes), Status, CRC(2 bytes)]
   The Status byte is direction (0 – forward, 1 - backward).
-  </pre>
-  */
-  void readRawSpeedM2(int mode) {
+   * </pre>
+   */
+  public void readRawSpeedM2(int mode) {
     sendPacket(address, 32);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   78 - Read Encoder Counters
@@ -1574,12 +1412,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   the full 2V analog range.
   Send: [Address, 78]
   Receive: [Enc1(4 bytes), Enc2(4 bytes), CRC(2 bytes)]
-  </pre>
-  */
-  void readEncoderCounters() {
+   * </pre>
+   */
+  public void readEncoderCounters() {
     sendPacket(address, 78);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   79 - Read ISpeeds Counters
@@ -1587,12 +1426,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   last 300th of a second for both encoder channels.
   Send: [Address, 79]
   Receive: [ISpeed1(4 bytes), ISpeed2(4 bytes), CRC(2 bytes)]
-  </pre>
-  */
-  void readISpeedCounters() {
+   * </pre>
+   */
+  public void readISpeedCounters() {
     sendPacket(address, 79);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   28 - Set Velocity PID Constants M1
@@ -1609,12 +1449,14 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   values used after a reset. Command syntax:
   Send: [Address, 28, D(4 bytes), P(4 bytes), I(4 bytes), QPPS(4 byte), CRC(2 bytes)]
   Receive: [0xFF]
-  </pre> 
-  */
-  void setVelocityPIDConstantsM1(int D, int P, int I, int QPPS) {
-    sendPacket(address, 28, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
+   * </pre>
+   */
+  public void setVelocityPIDConstantsM1(int D, int P, int I, int QPPS) {
+    sendPacket(address, 28, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS),
+        byte1(QPPS), byte0(QPPS));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   29 - Set Velocity PID Constants M2
@@ -1629,14 +1471,16 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   D = 0x00004000
   QPPS is the speed of the encoder when the motor is at 100% power. P, I, D are the default
   values used after a reset. Command syntax:
-  Send: [Address, 29, D(4 bytes), P(4 bytes), I(4 bytes), QPPS(4 byte), CRC(2 bytes)]Receive:
-  [0xFF]
-  </pre>
-  */
-  void setVelocityPIDConstantsM2(int D, int P, int I, int QPPS) {
-    sendPacket(address, 29, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
+  Send: [Address, 29, D(4 bytes), P(4 bytes), I(4 bytes), QPPS(4 byte), CRC(2 bytes)]
+  Receive: [0xFF]
+   * </pre>
+   */
+  public void setVelocityPIDConstantsM2(int D, int P, int I, int QPPS) {
+    sendPacket(address, 29, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS),
+        byte1(QPPS), byte0(QPPS));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   32 - Drive M1 With Signed Duty Cycle
@@ -1644,12 +1488,14 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   without a quadrature encoder.
   Send: [Address, 32, Duty(2 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
-  The duty value is signed and the range is -32767 to +32767 (eg. +-100% duty).  </pre>
-  */
-  void driveM1WithSignedDutyCycle(int duty) {
-    sendPacket(address, 32, duty);
+  The duty value is signed and the range is -32767 to +32767 (eg. +-100% duty).
+   * </pre>
+   */
+  public void driveM1WithSignedDutyCycle(int duty) {
+    sendPacket(address, 32, byte1(duty), byte0(duty));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   33 - Drive M2 With Signed Duty Cycle
@@ -1658,13 +1504,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 33, Duty(2 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
   The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty).
-  </pre>
-  */
-  void driveM2WithSignedDutyCycle(int duty) {
-    sendPacket(address, 32, duty);
+   * </pre>
+   */
+  public void driveM2WithSignedDutyCycle(int duty) {
+    sendPacket(address, 32, byte1(duty), byte0(duty));
     // TODO lock - timeout - return value & publish
   }
- 
+
   /**
    * <pre>
   34 - Drive M1 / M2 With Signed Duty Cycle
@@ -1672,13 +1518,14 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   the motor without a quadrature encoder. The command syntax:
   Send: [Address, 34, DutyM1(2 Bytes), DutyM2(2 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
-  The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty). 
-  </pre>
-  */
-  void driveM1M2WithSignedDutyCycle(int duty) {
-    sendPacket(address, 34, duty);
+  The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty).
+   * </pre>
+   */
+  public void driveM1M2WithSignedDutyCycle(int duty1, int duty2) {
+    sendPacket(address, 34, byte1(duty1), byte0(duty1), byte1(duty2), byte0(duty2));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   35 - Drive M1 With Signed Speed
@@ -1689,12 +1536,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   possible until the defined rate is reached.
   Send: [Address, 35, Speed(4 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void driveM1WithSignedSpeed(int speed) {
+   * </pre>
+   */
+  public void driveM1WithSignedSpeed(int speed) {
     sendPacket(address, 35, byte3(speed), byte2(speed), byte1(speed), byte0(speed));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   36 - Drive M2 With Signed Speed
@@ -1705,12 +1553,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   possible until the rate defined is reached.
   Send: [Address, 36, Speed(4 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void driveM2WithSignedSpeed(int speed) {
+   * </pre>
+   */
+  public void driveM2WithSignedSpeed(int speed) {
     sendPacket(address, 36, byte3(speed), byte2(speed), byte1(speed), byte0(speed));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   37 - Drive M1 / M2 With Signed Speed
@@ -1721,12 +1570,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   the motor will begin to accelerate as fast as possible until the rate defined is reached.
   Send: [Address, 37, SpeedM1(4 Bytes), SpeedM2(4 Bytes), CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void driveM1M2WithSignedSpeed(int speedM1, int speedM2) {
+   * </pre>
+   */
+  public void driveM1M2WithSignedSpeed(int speedM1, int speedM2) {
     sendPacket(address, 37, byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(speedM2), byte2(speedM2), byte1(speedM2), byte0(speedM2));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   38 - Drive M1 With Signed Speed And Acceleration
@@ -1745,12 +1595,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   RoboClaw Series
   Brushed DC Motor Controllers
   RoboClaw Series User Manual 92
-  </pre>
-  */
-  void driveM1WithSignedSpeedAndAccel(int accel, int speed) {
+   * </pre>
+   */
+  public void driveM1WithSignedSpeedAndAccel(int accel, int speed) {
     sendPacket(address, 38, accel, speed);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   39 - Drive M2 With Signed Speed And Acceleration
@@ -1766,12 +1617,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   QPPS with a speed of 12,000 QPPS would accelerate a motor from 0 to 12,000 QPPS in 1 second.
   Another example would be an acceleration value of 24,000 QPPS and a speed value of 12,000
   QPPS would accelerate the motor to 12,000 QPPS in 0.5 seconds.
-  </pre>
-  */
-  void driveM2WithSignedSpeedAndAccel(int accel, int speed) {
+   * </pre>
+   */
+  public void driveM2WithSignedSpeedAndAccel(int accel, int speed) {
     sendPacket(address, 39, accel, speed);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   40 - Drive M1 / M2 With Signed Speed And Acceleration
@@ -1788,12 +1640,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   QPPS with a speed of 12,000 QPPS would accelerate a motor from 0 to 12,000 QPPS in 1 second.
   Another example would be an acceleration value of 24,000 QPPS and a speed value of 12,000
   QPPS would accelerate the motor to 12,000 QPPS in 0.5 seconds.
-  </pre>
-  */
-  void driveM1M2WithSignedSpeedAndAccel(int accel, int speedM1, int speedM2) {
+   * </pre>
+   */
+  public void driveM1M2WithSignedSpeedAndAccel(int accel, int speedM1, int speedM2) {
     sendPacket(address, 40, accel, speedM1, speedM2);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   41 - Buffered M1 Drive With Signed Speed And Distance
@@ -1809,12 +1662,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   The Buffer argument can be set to a 1 or 0. If a value of 0 is used the command will be buffered
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
-  </pre>
-  */
-  void bufferedM1DriveWithSignedSpeedAndDistance(int speed, int distance) {
+   * </pre>
+   */
+  public void bufferedM1DriveWithSignedSpeedAndDistance(int speed, int distance) {
     sendPacket(address, 41, speed, distance);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   42 - Buffered M2 Drive With Signed Speed And Distance
@@ -1829,12 +1683,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   The Buffer argument can be set to a 1 or 0. If a value of 0 is used the command will be buffered
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
-  </pre>
-  */
-  void bufferedM2DriveWithSignedSpeedAndDistance(int speed, int distance) {
+   * </pre>
+   */
+  public void bufferedM2DriveWithSignedSpeedAndDistance(int speed, int distance) {
     sendPacket(address, 42, speed, distance);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   43 - Buffered Drive M1 / M2 With Signed Speed And Distance
@@ -1850,12 +1705,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   The Buffer argument can be set to a 1 or 0. If a value of 0 is used the command will be buffered
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
-  </pre>
-  */
-  void bufferedM1M2DriveWithSignedSpeedAndDistance(int speedM1, int distanceM1, int speedM2, int distanceM2, int buffer) {
+   * </pre>
+   */
+  public void bufferedM1M2DriveWithSignedSpeedAndDistance(int speedM1, int distanceM1, int speedM2, int distanceM2, int buffer) {
     sendPacket(address, 43, speedM1, distanceM1, speedM2, distanceM2, buffer);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   44 - Buffered M1 Drive With Signed Speed, Accel And Distance
@@ -1876,12 +1732,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   RoboClaw Series
   Brushed DC Motor Controllers
   RoboClaw Series User Manual 94
-  </pre>
-  */
-  void bufferedM1DriveWithSignedSpeedAndDistance(int speed, int distance, int buffer) {
+   * </pre>
+   */
+  public void bufferedM1DriveWithSignedSpeedAndDistance(int speed, int distance, int buffer) {
     sendPacket(address, 44, speed, distance, buffer);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   45 - Buffered M2 Drive With Signed Speed, Accel And Distance
@@ -1899,12 +1756,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   The Buffer argument can be set to a 1 or 0. If a value of 0 is used the command will be buffered
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
-  </pre>
-  */
-  void bufferedM2DriveWithSignedSpeedAndDistance(int speed, int distance, int buffer) {
+   * </pre>
+   */
+  public void bufferedM2DriveWithSignedSpeedAndDistance(int speed, int distance, int buffer) {
     sendPacket(address, 45, speed, distance, buffer);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   46 - Buffered Drive M1 / M2 With Signed Speed, Accel And Distance
@@ -1922,12 +1780,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   The Buffer argument can be set to a 1 or 0. If a value of 0 is used the command will be buffered
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
-  </pre>
-  */
-  void bufferedDriveM1M2WithSignedSpeedAccelAndDistance(int accel, int speedM1, int distanceM1, int speedM2, int distanceM2, int buffer) {
+   * </pre>
+   */
+  public void bufferedDriveM1M2WithSignedSpeedAccelAndDistance(int accel, int speedM1, int distanceM1, int speedM2, int distanceM2, int buffer) {
     sendPacket(address, 46, speedM1, distanceM1, speedM2, distanceM2, buffer);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   47 - Read Buffer Length
@@ -1939,12 +1798,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   maximum buffer size per motor is 64 commands(0x3F). A return value of 0x80(128) indicates
   the buffer is empty. A return value of 0 indiciates the last command sent is executing. A value of
   0x80 indicates the last command buffered has finished.
-  </pre>
-  */
-  void readBufferLength() {
+   * </pre>
+   */
+  public void readBufferLength() {
     sendPacket(address, 47);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   50 - Drive M1 / M2 With Signed Speed And Individual Acceleration
@@ -1962,12 +1822,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   QPPS with a speed of 12,000 QPPS would accelerate a motor from 0 to 12,000 QPPS in 1 second.
   Another example would be an acceleration value of 24,000 QPPS and a speed value of 12,000
   QPPS would accelerate the motor to 12,000 QPPS in 0.5 seconds.
-  </pre>
-  */
-  void driveM1M2WithSignedSpeedAndIndividualAcceleration(int accelM1, int speedM1, int accelM2, int speedM2) {
+   * </pre>
+   */
+  public void driveM1M2WithSignedSpeedAndIndividualAcceleration(int accelM1, int speedM1, int accelM2, int speedM2) {
     sendPacket(address, 50, accelM1, speedM1, accelM2, speedM2);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   51 - Buffered Drive M1 / M2 With Signed Speed, Individual Accel And Distance
@@ -1985,12 +1846,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   The Buffer argument can be set to a 1 or 0. If a value of 0 is used the command will be buffered
   and executed in the order sent. If a value of 1 is used the current running command is stopped,
   any other commands in the buffer are deleted and the new command is executed.
-  </pre>
-  */
-  void bufferedDriveM1M2WithSignedSpeedAndIndividualAcceleration(int accelM1, int speedM1, int accelM2, int speedM2, int buffer) {
+   * </pre>
+   */
+  public void bufferedDriveM1M2WithSignedSpeedAndIndividualAcceleration(int accelM1, int speedM1, int accelM2, int speedM2, int buffer) {
     sendPacket(address, 50, accelM1, speedM1, accelM2, speedM2, buffer);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   52 - Drive M1 With Signed Duty And Acceleration
@@ -2002,12 +1864,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
   The duty value is signed and the range is -32768 to +32767(eg. +-100% duty). The accel value
   range is 0 to 655359(eg maximum acceleration rate is -100% to 100% in 100ms).
-  </pre>
-  */
-  void driveM1WithSignedDutyAndAccel(int duty, int accel) {
-    sendPacket(address, 52, duty, accel);
+   * </pre>
+   */
+  public void driveM1WithSignedDutyAndAccel(int duty, int accel) {
+    sendPacket(address, 52, byte1(duty), byte0(duty), byte1(accel), byte0(accel));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   53 - Drive M2 With Signed Duty And Acceleration
@@ -2019,12 +1882,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
   The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty). The accel value
   range is 0 to 655359 (eg maximum acceleration rate is -100% to 100% in 100ms).
-  </pre>
-  */
-  void driveM2WithSignedDutyAndAccel(int duty, int accel) {
-    sendPacket(address, 53, duty, accel);
+   * </pre>
+   */
+  public void driveM2WithSignedDutyAndAccel(int duty, int accel) {
+    sendPacket(address, 53, byte1(duty), byte0(duty), byte1(accel), byte0(accel));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   54 - Drive M1 / M2 With Signed Duty And Acceleration
@@ -2037,36 +1901,39 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
   The duty value is signed and the range is -32768 to +32767 (eg. +-100% duty). The accel value
   range is 0 to 655359 (eg maximum acceleration rate is -100% to 100% in 100ms).
-  </pre>
-  */
-  void driveM1M2WithSignedDutyAndAccel(int cmd, int dutyM1, int accelM1, int dutyM2, int accelM2) {
-    sendPacket(address, 54, cmd, dutyM1, accelM1, dutyM2, accelM2);
+   * </pre>
+   */
+  public void driveM1M2WithSignedDutyAndAccel(int cmd, int dutyM1, int accelM1, int dutyM2, int accelM2) {
+    sendPacket(address, 54, cmd, byte1(dutyM1), byte0(dutyM1), byte1(accelM1), byte0(accelM1), byte1(dutyM2), byte0(dutyM2), byte1(accelM2), byte0(accelM2));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   55 - Read Motor 1 Velocity PID and QPPS Settings
   Read the PID and QPPS Settings.
   Send: [Address, 55]
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), QPPS(4 byte), CRC(2 bytes)]
-  </pre>
-  */
-  void readM1VelocityPIDandQPPS() {
+   * </pre>
+   */
+  public void readM1VelocityPIDandQPPS() {
     sendPacket(address, 55);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   56 - Read Motor 2 Velocity PID and QPPS Settings
   Read the PID and QPPS Settings.
   Send: [Address, 56]
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), QPPS(4 byte), CRC(2 bytes)]
-  </pre>
-  */
-  void readM2VelocityPIDandQPPS() {
+   * </pre>
+   */
+  public void readM2VelocityPIDandQPPS() {
     sendPacket(address, 56);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   61 - Set Motor 1 Position PID Constants
@@ -2078,12 +1945,21 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
   Position constants are used only with the Position commands, 65,66 and 67 or when encoders
   are enabled in RC/Analog modes.
-  </pre>
-  */
-  void setM1PID(int  D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
-    sendPacket(address, 61, D, P, I, maxI, deadzone, minPos, maxPos);
+   * </pre>
+   */
+  public void setM1PID(int D, int P, int I, int maxI, int deadzone, int minPos, int c) {
+    sendPacket(address, 61, 
+        byte3(D), byte2(D), byte1(D), byte0(D), 
+        byte3(P), byte2(P), byte1(P), byte0(P), 
+        byte3(I), byte2(I), byte1(I), byte0(I), 
+        byte3(maxI), byte2(maxI), byte1(maxI), byte0(maxI), 
+        byte3(deadzone), byte2(deadzone), byte1(deadzone), byte0(deadzone), 
+        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos), 
+        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos));
+        
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   62 - Set Motor 2 Position PID Constants
@@ -2095,12 +1971,20 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Receive: [0xFF]
   Position constants are used only with the Position commands, 65,66 and 67 or when encoders
   are enabled in RC/Analog modes.
-  </pre>
-  */
-  void setM2PID(int  D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
-    sendPacket(address, 62, D, P, I, maxI, deadzone, minPos, maxPos);
+   * </pre>
+   */
+  public void setM2PID(int D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
+    sendPacket(address, 62, 
+        byte3(D), byte2(D), byte1(D), byte0(D), 
+        byte3(P), byte2(P), byte1(P), byte0(P), 
+        byte3(I), byte2(I), byte1(I), byte0(I), 
+        byte3(maxI), byte2(maxI), byte1(maxI), byte0(maxI), 
+        byte3(deadzone), byte2(deadzone), byte1(deadzone), byte0(deadzone), 
+        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos), 
+        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos));
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   63 - Read Motor 1 Position PID Constants
@@ -2108,12 +1992,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 63]
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), MaxI(4 byte), Deadzone(4 byte),
   MinPos(4 byte), MaxPos(4 byte), CRC(2 bytes)]
-  </pre>
-  */
-  void readM1PID() {
+   * </pre>
+   */
+  public void readM1PID() {
     sendPacket(address, 63);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   64 - Read Motor 2 Position PID Constants
@@ -2121,6 +2006,16 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 64]
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), MaxI(4 byte), Deadzone(4 byte),
   MinPos(4 byte), MaxPos(4 byte), CRC(2 bytes)]
+   * </pre>
+   */
+  public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer) {
+    sendPacket(address, 64, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
+        byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), speed, deccel, pos, buffer);
+    // TODO lock - timeout - return value & publish
+  }
+
+  /**
+   * <pre>
   65 - Buffered Drive M1 with signed Speed, Accel, Deccel and Position
   Move M1 position from the current position to the specified new position and hold the new
   position. Accel sets the acceleration value and deccel the decceleration value. QSpeed sets the
@@ -2128,12 +2023,13 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 65, Accel(4 bytes), Speed(4 Bytes), Deccel(4 bytes),
   Position(4 Bytes), Buffer, CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void readM2PID() {
+   * </pre>
+   */
+  public void readM2PID() {
     sendPacket(address, 64);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   66 - Buffered Drive M2 with signed Speed, Accel, Deccel and Position
@@ -2143,12 +2039,14 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   Send: [Address, 66, Accel(4 bytes), Speed(4 Bytes), Deccel(4 bytes),
   Position(4 Bytes), Buffer, CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void bufferedDriveM2WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer) {
-    sendPacket(address, 66, accel, speed, deccel, pos, buffer);
+   * </pre>
+   */
+  public void bufferedDriveM2WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer) {
+    sendPacket(address, 66, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
+        byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), speed, deccel, pos, buffer);
     // TODO lock - timeout - return value & publish
   }
+
   /**
    * <pre>
   67 - Buffered Drive M1 & M2 with signed Speed, Accel, Deccel and Position
@@ -2159,11 +2057,171 @@ public class RoboClaw extends AbstractMotorController implements PortConnector, 
   PositionM1(4 Bytes), AccelM2(4 bytes), SpeedM2(4 Bytes), DeccelM2(4 bytes),
   PositionM2(4 Bytes), Buffer, CRC(2 bytes)]
   Receive: [0xFF]
-  </pre>
-  */
-  void bufferedDriveM1M2WithSignedSpeedAccelDeccelPosition(int accelM1, int speedM1, int deccelM1, int posM1, int accelM2, int speedM2, int deccelM2, int posM2,int buffer) {
-    sendPacket(address, 66, accelM1, speedM1, deccelM1, posM1, accelM2, speedM2, deccelM2, posM2, buffer);
-    // TODO lock - timeout - return value & publish
+   * </pre>
+   */
+  public void bufferedDriveM1M2WithSignedSpeedAccelDeccelPosition(int accelM1, int speedM1, int deccelM1, int posM1, int accelM2, int speedM2, int deccelM2, int posM2,
+      int buffer) {
+
+    sendPacket(address, 67, byte3(accelM1), byte2(accelM1), byte1(accelM1), byte0(accelM1), byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1), byte3(deccelM1),
+        byte2(deccelM1), byte1(deccelM1), byte0(deccelM1), byte3(posM1), byte2(posM1), byte1(posM1), byte0(posM1),
+
+        byte3(accelM2), byte2(accelM2), byte1(accelM2), byte0(accelM2), byte3(speedM2), byte2(speedM2), byte1(speedM2), byte0(speedM2), byte3(deccelM2), byte2(deccelM2),
+        byte1(deccelM2), byte0(deccelM2), byte3(posM2), byte2(posM2), byte1(posM2), byte0(posM2),
+
+        buffer);
   }
-  
+
+  public static void main(String[] args) {
+    try {
+
+      /*
+       * <pre>
+       * 
+       * RoboClaw - http://downloads.ionmc.com/docs/roboclaw_user_manual.pdf
+       * 
+       * The basic command structures consist of an address byte, command byte,
+       * data bytes and a CRC16 16bit checksum. The amount of data each command
+       * will send or receive can vary.
+       * 
+       * | --------ADDRESS------ |COMMAND|DATA |0x80 (128) - 0x87 (135)|
+       * 
+       * Big Endian -
+       * 
+       * BAUD OPTIONS 2400 9600 19200 38400 57600 115200 230400 460800
+       * 
+       * 
+       * PACKET ACK = 0xFF </pre>
+       * 
+       */
+      LoggingFactory.init("INFO");
+      boolean virtual = false;
+      //////////////////////////////////////////////////////////////////////////////////
+      // RoboClaw.py
+      // categories: motor
+      // more info @: http://myrobotlab.org/service/RoboClaw
+      //////////////////////////////////////////////////////////////////////////////////
+      // uncomment for virtual hardware
+      // virtual = True
+
+      // String port = "COM14";
+      // String port = "/dev/ttyS10";
+      String port = "/dev/ttyACM0";
+      // String port = "vuart";
+
+      Serial uart = null;
+      // start optional virtual serial service, used for test
+      if (virtual) {
+        // use static method Serial.connectVirtualUart to create
+        // a virtual hardware uart for the serial service to
+        // connect to
+        uart = Serial.connectVirtualUart(port);
+        uart.logRecv(true); // dump bytes sent from roboclaw
+      }
+      // start the services
+      // Runtime.start("gui", "SwingGui");
+      RoboClaw roboclaw = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
+      MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
+      MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
+      // Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+      // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
+
+      // roboclaw.setAddress(128);
+      roboclaw.setAddress(129);
+
+      // configure services
+      m1.setPort("m1");
+      m2.setPort("m2");
+      // joy.setController(5); // 0 on Linux
+
+      // attach services
+      roboclaw.attach(m1);
+      roboclaw.attach(m2);
+      // m1.attach(joy.getAxis("y"));
+      // m2.attach(joy.getAxis("rz"));
+
+      // m1.setInverted(true);
+      // m2.setInverted(true);
+      // m2.attach(arduino.getPin("A4"));
+
+      // FIXME - roboclaw.attach(motor1) & roboclaw.attach(motor2)
+      // FIXME - motor1.attach(joystick) !
+      roboclaw.connect(port);
+
+      // m1.stop();
+      // m2.stop();
+      roboclaw.readEncoderM1();
+      
+      for (int i = 0; i < 10; ++i) {
+        m1.move(0.1 * i);
+      }
+      
+      m1.move(0);
+      
+      roboclaw.readEncoderM1();
+
+      // roboclaw.readEncoderCount();
+      // roboclaw.read
+      
+      uart.write(89);
+      uart.write(255);
+      uart.write(123);
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      // speed up the motor
+      for (int i = 0; i < 100; ++i) {
+        double pwr = i * .01;
+        log.info("power {}", pwr);
+        m1.move(pwr);
+        sleep(100);
+      }
+
+      sleep(1000);
+
+      
+      // slow down the motor
+      for (int i = 100; i > 0; --i) {
+        double pwr = i * .01;
+        log.info("power {}", pwr);
+        m1.move(pwr);
+        sleep(100);
+      }
+
+      // move motor clockwise
+      m1.move(0.3);
+      sleep(1000);
+      m1.stop();
+
+      // move motor counter-clockwise
+      m1.move(-0.3);
+      sleep(1);
+      m1.stop();
+
+      // TODO - stopAndLock
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
+  @Override
+  public void onConnect(String portName) {
+    log.info("onConnect from port {}", portName);
+  }
+
+  @Override
+  public void onDisconnect(String portName) {    
+    log.info("disconnected from port {}", portName);
+  }
+
+  @Override
+  public Integer onByte(Integer b) throws IOException {
+    log.info(String.format("onByte %02X", b));
+    // log.info("onByte {}", b);
+    return b;
+  }
+
 }
