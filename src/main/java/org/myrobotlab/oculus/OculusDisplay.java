@@ -1,12 +1,13 @@
 package org.myrobotlab.oculus;
 
-import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_EYE_HEIGHT;
 import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_IPD;
 import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_ClipRangeOpenGL;
+import static org.lwjgl.opengl.GL11.GL_BACK;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_FRONT;
 import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -16,8 +17,10 @@ import static org.lwjgl.opengl.GL11.GL_TRIANGLE_STRIP;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glCullFace;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glScissor;
 import static org.lwjgl.opengl.GL11.glViewport;
@@ -25,6 +28,12 @@ import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XPOS_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
 
 import java.io.IOException;
 
@@ -37,9 +46,8 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
-import org.lwjgl.util.vector.Vector3f;
+
 import org.myrobotlab.image.SerializableImage;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.oculus.lwjgl.entities.Camera;
 import org.myrobotlab.oculus.lwjgl.entities.Entity;
@@ -60,8 +68,11 @@ import org.saintandreas.gl.buffers.VertexArray;
 import org.saintandreas.gl.shaders.Program;
 import org.saintandreas.gl.textures.Texture;
 import org.saintandreas.math.Matrix4f;
+import org.saintandreas.math.Quaternion;
 import org.saintandreas.math.Vector2f;
-import org.saintandreas.vr.RiftUtils;
+import org.saintandreas.math.Vector3f;
+import org.saintandreas.resources.Resource;
+//import org.saintandreas.vr.RiftUtils;
 import org.slf4j.Logger;
 
 import com.google.common.base.Charsets;
@@ -75,13 +86,13 @@ import com.oculusvr.capi.MirrorTexture;
 import com.oculusvr.capi.MirrorTextureDesc;
 import com.oculusvr.capi.OvrLibrary;
 import com.oculusvr.capi.OvrMatrix4f;
+import com.oculusvr.capi.OvrQuaternionf;
 import com.oculusvr.capi.OvrRecti;
 import com.oculusvr.capi.OvrSizei;
 import com.oculusvr.capi.OvrVector2i;
 import com.oculusvr.capi.OvrVector3f;
 import com.oculusvr.capi.Posef;
 import com.oculusvr.capi.ViewScaleDesc;
-import com.sun.jna.platform.FileUtils;
 import com.oculusvr.capi.TextureSwapChain;
 import com.oculusvr.capi.TextureSwapChainDesc;
 
@@ -139,11 +150,18 @@ public class OculusDisplay implements Runnable {
   private static final String UNIT_QUAD_FS;
   private static final String SHADERS_TEXTURED_VS;
   private static final String SHADERS_TEXTURED_FS;
-  
+  private static final String SHADERS_CUBEMAP_VS;
+  private static final String SHADERS_CUBEMAP_FS;
   
   private static IndexedGeometry screenGeometry;
   private static Program screenProgram;
   private static Texture screenTexture;
+  
+  private static IndexedGeometry cubeGeometry;
+  private static Program skyboxProgram;
+  private static Texture skyboxTexture;
+
+
 
   static {
     try {
@@ -151,11 +169,31 @@ public class OculusDisplay implements Runnable {
       UNIT_QUAD_FS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.fs"), Charsets.UTF_8);
       SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource("resource/oculus/Textured.fs"), Charsets.UTF_8);
       SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource("resource/oculus/Textured.vs"), Charsets.UTF_8);
+      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.vs"), Charsets.UTF_8);
+      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.fs"), Charsets.UTF_8);
+//      IMAGES_SKY_CITY_XNEG_PNG = Resources.toString(Resources.getResource("resource/oculus/images/xneg.png"), Charsets.UTF_8);
+//      IMAGES_SKY_CITY_XPOS_PNG = Resources.toString(Resources.getResource("resource/oculus/images/xpos.png"), Charsets.UTF_8);
+//      IMAGES_SKY_CITY_YNEG_PNG = Resources.toString(Resources.getResource("resource/oculus/images/yneg.png"), Charsets.UTF_8);
+//      IMAGES_SKY_CITY_YPOS_PNG = Resources.toString(Resources.getResource("resource/oculus/images/ypos.png"), Charsets.UTF_8);
+//      IMAGES_SKY_CITY_ZNEG_PNG = Resources.toString(Resources.getResource("resource/oculus/images/zneg.png"), Charsets.UTF_8);
+//      IMAGES_SKY_CITY_ZPOS_PNG = Resources.toString(Resources.getResource("resource/oculus/images/zpos.png"), Charsets.UTF_8);
+
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
   }
 
+  
+  
+    private static final Resource SKYBOX[] = {
+        IMAGES_SKY_CITY_XPOS_PNG,
+        IMAGES_SKY_CITY_XNEG_PNG,
+        IMAGES_SKY_CITY_YPOS_PNG,
+        IMAGES_SKY_CITY_YNEG_PNG,
+        IMAGES_SKY_CITY_ZPOS_PNG,
+        IMAGES_SKY_CITY_ZNEG_PNG,
+      };
+//  
   private static TexturedModel texturedModel = null;
   private static Loader loader;
   private static Renderer renderer;
@@ -327,6 +365,13 @@ public class OculusDisplay implements Runnable {
   }
 
   public final void drawFrame() {
+    
+    
+    
+    // TODO: do i do it here. or earlier?
+    //OculusDisplay.renderSkybox();
+
+    
     // System.out.println("Draw Frame called.");
     // TODO: synchronize the current frame updating..
     if (currentFrame == null) {
@@ -336,6 +381,10 @@ public class OculusDisplay implements Runnable {
       return;
     }
 
+    // I think we need to do the render of the sky box here to prevent the trippiness!
+    
+    
+    
     width = hmdDesc.Resolution.w / 4;
     height = hmdDesc.Resolution.h / 4;
 
@@ -357,8 +406,8 @@ public class OculusDisplay implements Runnable {
       // FIXME there has to be a better way to do this
       poses[eye].Orientation = pose.Orientation;
       poses[eye].Position = pose.Position;
-      mv.push().preTranslate(RiftUtils.toVector3f(poses[eye].Position).mult(-1))
-          .preRotate(RiftUtils.toQuaternion(poses[eye].Orientation).inverse());
+      mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1))
+          .preRotate(toQuaternion(poses[eye].Orientation).inverse());
       
       // TODO: is there a way to render both of these are the same time?
       if (eye == 0 && currentFrame.left != null) {
@@ -465,14 +514,6 @@ public class OculusDisplay implements Runnable {
     this.currentFrame = currentFrame;
   }
 
-  // helper function from saintandreas !
-  public static Matrix4f toMatrix4f(OvrMatrix4f m) {
-    if (null == m) {
-      return new Matrix4f();
-    }
-    return new Matrix4f(m.M).transpose();
-  }
-
   public static void renderTexturedQuad(int texture) {
     if (null == unitQuadProgram) {
       unitQuadProgram = new Program(UNIT_QUAD_VS, UNIT_QUAD_FS);
@@ -511,10 +552,42 @@ public class OculusDisplay implements Runnable {
     VertexArray.unbind();
   }
 
+  
+  
+  public static void renderSkybox() {
+    if (null == cubeGeometry) {
+      cubeGeometry = OpenGL.makeColorCube();
+    }
+    if (null == skyboxProgram) {
+      skyboxProgram = new Program(SHADERS_CUBEMAP_VS, SHADERS_CUBEMAP_FS);
+      skyboxProgram.link();
+    }
+    if (null == skyboxTexture) {
+      skyboxTexture = OpenGL.getCubemapTextures(SKYBOX);
+    }
+    MatrixStack mv = MatrixStack.MODELVIEW;
+    cubeGeometry.bindVertexArray();
+    mv.push();
+    Quaternion q = mv.getRotation();
+    mv.identity().rotate(q);
+    skyboxProgram.use();
+    OpenGL.bindAll(skyboxProgram);
+    glCullFace(GL_FRONT);
+    skyboxTexture.bind();
+    glDisable(GL_DEPTH_TEST);
+    cubeGeometry.draw();
+    glEnable(GL_DEPTH_TEST);
+    skyboxTexture.unbind();
+    glCullFace(GL_BACK);
+    mv.pop();
+  }
+
+  
   /*
    * helper function to render an image on the current bound texture.
    */
   public void renderScreen(SerializableImage img, Orientation orientation) {
+
 
     // Ok.. let's see if we can just use the saint andreas stuff.
     if (null == screenGeometry) {
@@ -538,7 +611,7 @@ public class OculusDisplay implements Runnable {
       screenProgram = new Program(SHADERS_TEXTURED_VS, SHADERS_TEXTURED_FS);
       screenProgram.link();
     }
-
+    
     screenProgram.use();
     OpenGL.bindAll(screenProgram);
     screenTexture.bind();
@@ -558,7 +631,7 @@ public class OculusDisplay implements Runnable {
         ModelTexture texture = new ModelTexture(loader.loadTexture("lena"));
         //ModelTexture texture = new ModelTexture(loader.loadTexture(img.getImage()));
         texturedModel.setTexture(texture);
-        texturedEntity = new Entity(texturedModel, new Vector3f(0, 0, 0), 0, 0, 0, 1);
+        texturedEntity = new Entity(texturedModel, new org.lwjgl.util.vector.Vector3f(0, 0, 0), 0, 0, 0, 1);
 
       }
       // update the camera position i guess?
@@ -618,5 +691,23 @@ public class OculusDisplay implements Runnable {
     this.hmd = hmd;
   }
 
+  // The following methods are taken from the joculur-examples
+  public static Vector3f toVector3f(OvrVector3f v) {
+    return new Vector3f(v.x, v.y, v.z);
+  }
+  public static Quaternion toQuaternion(OvrQuaternionf q) {
+    return new Quaternion(q.x, q.y, q.z, q.w);
+  }
+  public static Matrix4f toMatrix4f(Posef p) {
+    return new Matrix4f().rotate(toQuaternion(p.Orientation)).mult(new Matrix4f().translate(toVector3f(p.Position)));
+  }
+  public static Matrix4f toMatrix4f(OvrMatrix4f m) {
+    if (null == m) {
+      return new Matrix4f();
+    }
+    return new Matrix4f(m.M).transpose();
+  }
+  // End methods from saintandreas
+  
 }
 
