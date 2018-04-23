@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGui.class);
+  public final static Logger log = LoggerFactory.getLogger(WebkitSpeechRecognitionGui.class);
 
   private JTextField onRecognized = new JTextField("Waiting orders...", 24);
   BufferedImage microOn = ImageIO.read(FileIO.class.getResource("/resource/InMoov/monitor/microOn.png"));
