@@ -162,15 +162,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
 
   }
 
-  @Override
-  public void onText(String text) {
-    log.info("ON Text Called: {}", text);
-    try {
-      speak(text);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
+
 
   @Override
   public AudioData speak(String toSpeak) throws SynthesisException, InterruptedException {
@@ -262,13 +254,6 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
   }
 
   @Override
-  public String publishEndSpeaking(String utterance) {
-    // framework stuff to publish the end speaking event.
-    log.info("End speaking: {}", utterance);
-    return utterance;
-  }
-
-  @Override
   public String getVoice() {
     return marytts.getVoice();
   }
@@ -278,13 +263,6 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener 
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
     return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
         + audioFileType;
-  }
-
-  @Override
-  public void addEar(SpeechRecognizer ear) {
-    // when we add the ear, we need to listen for request confirmation
-    addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
-    addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
   }
 
   @Override

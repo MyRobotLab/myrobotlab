@@ -277,15 +277,6 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     // TODO: Implement me!
   }
 
-  @Override
-  public void onText(String text) {
-    log.info("ON Text Called: {}", text);
-    try {
-      speak(text);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
 
   @Override
   public String getLanguage() {
@@ -394,18 +385,6 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
   // audioData to utterance map TODO: revisit the design of this
   HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
-
-  @Override
-  public String publishStartSpeaking(String utterance) {
-    log.info("publishStartSpeaking {}", utterance);
-    return utterance;
-  }
-
-  @Override
-  public String publishEndSpeaking(String utterance) {
-    log.info("publishEndSpeaking {}", utterance);
-    return utterance;
-  }
 
   @Override
   public void onAudioStart(AudioData data) {

@@ -356,16 +356,7 @@ private int rate=0;
     // TODO: Implement me!
   }
 
-  @Override
-  public void onText(String text) {
-    log.info("ON Text Called: {}", text);
-    try {
-      speak(text);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-    
+
   @Override
   public String getLanguage() {
     return null;
@@ -410,15 +401,6 @@ private int rate=0;
         + audioFileType;
   }
 
-  @Override
-  public void addEar(SpeechRecognizer ear) {
-    // TODO: move this to a base class. it's basically the same for all
-    // mouths/ speech synth stuff.
-    // when we add the ear, we need to listen for request confirmation
-    addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
-    addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
-  }
-
   public void onRequestConfirmation(String text) {
     try {
       speakBlocking(String.format("did you say. %s", text));
@@ -434,18 +416,6 @@ private int rate=0;
     // FIXME - add iso language codes currently supported e.g. en en_gb de
     // etc..
     return ret;
-  }
-  
-  @Override
-  public String publishStartSpeaking(String utterance) {
-    log.info("publishStartSpeaking {}", utterance);
-    return utterance;
-  }
-
-  @Override
-  public String publishEndSpeaking(String utterance) {
-    log.info("publishEndSpeaking {}", utterance);
-    return utterance;
   }
   
 
