@@ -17,6 +17,7 @@ import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
 import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
+import org.datavec.image.transform.ColorConversionTransform;
 import org.datavec.image.transform.FlipImageTransform;
 import org.datavec.image.transform.ImageTransform;
 import org.datavec.image.transform.WarpImageTransform;
@@ -38,6 +39,8 @@ import org.deeplearning4j.nn.conf.layers.LocalResponseNormalization;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.deeplearning4j.nn.layers.objdetect.DetectedObject;
+import org.deeplearning4j.nn.layers.objdetect.YoloUtils;
 // import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -45,7 +48,10 @@ import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
 import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
+import org.deeplearning4j.zoo.model.TinyYOLO;
 import org.deeplearning4j.zoo.model.VGG16;
+import org.deeplearning4j.zoo.util.ClassPrediction;
+import org.deeplearning4j.zoo.util.darknet.VOCLabels;
 import org.deeplearning4j.zoo.util.imagenet.ImageNetLabels;
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
@@ -59,6 +65,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2RGB;
 
 /**
  * Deeplearning4j wrapper service to expose the deep learning.  This is basically derived from the AnimialClassifier example in the dl4j examples.
@@ -101,6 +108,7 @@ public class Deeplearning4j extends Service {
   
   private ComputationGraph vgg16 = null;
   
+  private ComputationGraph tinyYolo = null;
   
   // constructor.
   public Deeplearning4j(String reservedKey) {
@@ -386,6 +394,19 @@ public class Deeplearning4j extends Service {
     return new DenseLayer.Builder().name(name).nOut(out).biasInit(bias).dropOut(dropOut).dist(dist).build();
   }
   
+  public void loadTinyYolo() throws IOException {
+    log.info("Loading the Yolo2 (coco) Model.  Download is large 200+ MB.. this will be cached after it downloads");
+    ZooModel zooModel = new TinyYOLO(1,123);
+    tinyYolo = (ComputationGraph) zooModel.initPretrained();
+
+    
+    
+    
+    
+    
+  }
+  
+
   // This is for the Model Zoo support to load in the VGG16 model.  
   public void loadVGG16() throws IOException {
     log.info("Loading the VGG16 Model.  Download is large 500+ MB.. this will be cached after it downloads");
@@ -393,7 +414,25 @@ public class Deeplearning4j extends Service {
     vgg16 = (ComputationGraph) zooModel.initPretrained(PretrainedType.IMAGENET);
     // TODO: return true/false if the model was loaded properly/successfully.
   }
-
+  
+  public List<ClassPrediction> classifyImageTinyYolo(IplImage iplImage) throws IOException {
+    log.info("Yolo image called");
+    NativeImageLoader loader = new NativeImageLoader(416, 416, 3, new ColorConversionTransform(COLOR_BGR2RGB));
+    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    INDArray image = loader.asMatrix(buffImg);
+    ImagePreProcessingScaler scaler = new ImagePreProcessingScaler(0, 1);
+    scaler.transform(image);
+    INDArray outputs = tinyYolo.outputSingle(image);
+    List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs, 0.6, 0.4);
+    VOCLabels labels = new VOCLabels();
+    ArrayList<ClassPrediction> detected = new ArrayList<ClassPrediction>();
+    for (DetectedObject obj : objs) {
+        ClassPrediction classPrediction = labels.decodePredictions(obj.getClassPredictions(), 1).get(0).get(0);
+        log.info(obj.toString() + " " + classPrediction);
+        detected.add(classPrediction);
+    }    
+    return detected;
+  }
   
   public Map<String, Double> classifyImageVGG16(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
@@ -516,21 +555,30 @@ public class Deeplearning4j extends Service {
   public static void main(String[] args) throws IOException {
     Deeplearning4j dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
     // this is how many generations to iterate on training the dataset. larger number means longer training time.
-    dl4j.epochs = 50;
-    dl4j.trainModel("test/resources/animals");
-    //dl4j.trainModel("training");
-    // save the model out
-    dl4j.saveModel();
-    dl4j.loadModel();
-    //File testIm = new File("test/resources/animals/turtle/Baby_sea_turtle.jpg");
-    // File testIm = new File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
-    File testIm = new File("test/resources/animals/turtle/Western_Painted_Turtle.jpg");
-    // BufferedImage img = ImageIO.read(testIm);
-    // Frame frame = grabberConverter.convert(img);
-    dl4j.evaluateModel(testIm);
-    // dl4j.evaluateModel(img);
-    System.out.println("Done evaluating the model.");
-    System.exit(0);
+
+    
+  
+    dl4j.loadTinyYolo();
+    
+    
+    
+//    dl4j.classifyImageTinyYolo(iplImage);
+    
+    //    dl4j.epochs = 50;
+//    dl4j.trainModel("test/resources/animals");
+//    //dl4j.trainModel("training");
+//    // save the model out
+//    dl4j.saveModel();
+//    dl4j.loadModel();
+//    //File testIm = new File("test/resources/animals/turtle/Baby_sea_turtle.jpg");
+//    // File testIm = new File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
+//    File testIm = new File("test/resources/animals/turtle/Western_Painted_Turtle.jpg");
+//    // BufferedImage img = ImageIO.read(testIm);
+//    // Frame frame = grabberConverter.convert(img);
+//    dl4j.evaluateModel(testIm);
+//    // dl4j.evaluateModel(img);
+//    System.out.println("Done evaluating the model.");
+//    System.exit(0);
   }
 
 }
