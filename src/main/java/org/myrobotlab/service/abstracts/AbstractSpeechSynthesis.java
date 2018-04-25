@@ -4,6 +4,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -73,6 +74,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 	  } catch (Exception e) {
 		  Logging.logError(e);
 	  }
+  }
+  
+  public void addEar(SpeechRecognizer ear) {
+    // when we add the ear, we need to listen for request confirmation
+    addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
+    addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
   }
 
 }

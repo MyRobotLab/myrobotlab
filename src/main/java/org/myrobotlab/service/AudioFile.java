@@ -494,6 +494,8 @@ public class AudioFile extends Service {
     meta.addCategory("sound");
     
     meta.addDependency("javazoom", "jlayer", "1.0.1");
+    meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
+    
     /*
     meta.addDependency("javazoom.spi", "1.9.5");
     meta.addDependency("javazoom.jl.player", "1.0.1");

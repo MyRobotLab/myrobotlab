@@ -117,29 +117,10 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 	}
 
 	@Override
-	public String publishStartSpeaking(String utterance) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String publishEndSpeaking(String utterance) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType)
 			throws UnsupportedEncodingException {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void addEar(SpeechRecognizer ear) {
-		// TODO Auto-generated method stub
-		addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
-		addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
 	}
 
 	@Override
@@ -151,16 +132,6 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
 		}
 	}
 
-	@Override
-	public void onText(String text) {
-		log.info("Mimic On Text Called: {}", text);
-		try {
-			speak(text);
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-
-	}
 
 	public String getMimicExecutable() {
 		return mimicExecutable;

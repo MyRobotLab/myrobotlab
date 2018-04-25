@@ -107,6 +107,13 @@
     <version>1.0.1</version>
     <scope>provided</scope>
   </dependency>
+  
+    <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- AudioFile end -->
 
 <!-- AzureTranslator begin -->
