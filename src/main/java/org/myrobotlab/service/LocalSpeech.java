@@ -169,18 +169,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   }
 
   @Override
-  public String publishStartSpeaking(String utterance) {
-    log.info("publishStartSpeaking {}", utterance);
-    return utterance;
-  }
-
-  @Override
-  public String publishEndSpeaking(String utterance) {
-    log.info("publishEndSpeaking {}", utterance);
-    return utterance;
-  }
-
-  @Override
   public void onAudioStart(AudioData data) {
     log.info("onAudioStart {} {}", getName(), data.toString());
     // filters on only our speech
@@ -241,13 +229,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
 
     return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
         + audioFileType;
-
-  }
-
-  // can this be defaulted ?
-  @Override
-  public void addEar(SpeechRecognizer ear) {
-    // TODO Auto-generated method stub
 
   }
 
