@@ -123,7 +123,7 @@ public class MarySpeechGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         removeListeners();
-        if (comboVoice.getItemCount() == 0) {
+        if (comboVoice.getItemCount() == 0 && !(mary.voices==null)) {
           mary.voices.forEach((v) -> comboVoice.addItem(v));
         }
         comboVoice.setSelectedItem((mary.getVoice()));

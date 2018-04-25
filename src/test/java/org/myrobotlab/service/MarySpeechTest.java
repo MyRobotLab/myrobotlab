@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.IOException;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -10,7 +12,7 @@ import marytts.exceptions.SynthesisException;
 public class MarySpeechTest {
 
   @Test
-  public void testMarySpeech() throws SynthesisException, InterruptedException {
+  public void testMarySpeech() throws IOException, SynthesisException, InterruptedException {
     MarySpeech speech = (MarySpeech)Runtime.createAndStart("speech", "MarySpeech");
     speech.speakBlocking("hello world");
     
