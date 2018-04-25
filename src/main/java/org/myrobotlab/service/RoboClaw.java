@@ -66,7 +66,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   List<String> ports = new ArrayList<String>();
 
-
   public RoboClaw(String n) {
     super(n);
     // add motor ports the roboclaw supports
@@ -348,7 +347,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     } else if (SerialDevice.class.isAssignableFrom(service.getClass())) {
       // FIXME - use SerialDevice
       serial = (Serial) service;
-
+      serial.setTimeout(40);
+      
       // here we check and warn regarding config - but
       // it "might" be right if the user has customized it
       // this works well - the user controls all config
@@ -359,8 +359,10 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
        * serial.getRate()); }
        */
 
-      // serial.attach(this); - not needed since the serial service is very "low" level,
-      // it doesn't attach to anything - but "higher" level services attach to it.
+      // serial.attach(this); - not needed since the serial service is very
+      // "low" level,
+      // it doesn't attach to anything - but "higher" level services attach to
+      // it.
       serial.addByteListener(this);
 
       /*
@@ -617,7 +619,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   firmware version. The return string is terminated with a line feed (10) and null (0) character.
    * </pre>
    */
-  public void readFirmwareVersion(int address) {
+  public void readFirmwareVersion() {
     sendPacket(address, 21);
   }
 
@@ -630,7 +632,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Value(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  public void readMainBatteryVoltageLevel(int address) {
+  public void readMainBatteryVoltageLevel() {
     sendPacket(address, 24);
   }
 
@@ -643,7 +645,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Value.Byte1, Value.Byte0, CRC(2 bytes)]
    * </pre>
    */
-  public void readLogicbatteryVoltageLevel(int address) {
+  public void readLogicbatteryVoltageLevel() {
     sendPacket(address, 25);
   }
 
@@ -760,7 +762,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Min(2 bytes), Max(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  public void readMainBatteryVoltageSettings(int address) {
+  public void readMainBatteryVoltageSettings() {
     sendPacket(address, 59);
   }
 
@@ -772,7 +774,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Min(2 bytes), Max(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  public void readLogicBatteryVoltageSettings(int address) {
+  public void readLogicBatteryVoltageSettings() {
     sendPacket(address, 60);
   }
 
@@ -841,7 +843,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
    * </pre>
    */
-  public void getModes(int address) {
+  public void getModes() {
     sendPacket(address, 76);
     // TODO implement lock & timeout...
   }
@@ -854,7 +856,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Reverse, SForward, CRC(2 bytes)]
    * </pre>
    */
-  public void readDeadBand(int address) {
+  public void readDeadBand() {
     sendPacket(address, 77);
   }
 
@@ -867,7 +869,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * </pre>
    */
 
-  public void restoreDefaults(int address) {
+  public void restoreDefaults() {
     sendPacket(address, 80);
   }
 
@@ -879,7 +881,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [M1Accel(4 bytes), M2Accel(4 bytes), CRC(2 bytes)]
    * </pre>
    */
-  public void readDefaultDutyAccelSettings(int address) {
+  public void readDefaultDutyAccelSettings() {
     sendPacket(address, 81);
   }
 
@@ -891,7 +893,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Temperature(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  public void readTemp(int address) {
+  public void readTemp() {
     sendPacket(address, 82);
     // TODO - lock for callback and publish
   }
@@ -908,7 +910,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   RoboClaw Series User Manual 74
    * </pre>
    */
-  public void readTemp2(int address) {
+  public void readTemp2() {
     sendPacket(address, 83);
   }
 
@@ -938,7 +940,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   M2 Home 0x8000
    * </pre>
    */
-  public void readStatus(int address) {
+  public void readStatus() {
     sendPacket(address, 90);
     // TODO lock - timeout - return value & publish
   }
@@ -955,7 +957,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Bit 0 Quadrature(0)/Absolute(1)
    * </pre>
    */
-  public void readEncoderMode(int address) {
+  public void readEncoderMode() {
     sendPacket(address, 91);
     // TODO lock - timeout - return value & publish
   }
@@ -968,7 +970,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
    * </pre>
    */
-  public void setM1EncoderMode(int address) {
+  public void setM1EncoderMode() {
     sendPacket(address, 92);
     // TODO lock - timeout - return value & publish
   }
@@ -984,7 +986,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   RoboClaw Series User Manual 75
    * </pre>
    */
-  public void setM2EncoderMode(int address) {
+  public void setM2EncoderMode() {
     sendPacket(address, 93);
     // TODO lock - timeout - return value & publish
   }
@@ -997,7 +999,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
    * </pre>
    */
-  public void writeSettingsToEeprom(int address) {
+  public void writeSettingsToEeprom() {
     sendPacket(address, 94);
     // TODO lock - timeout - return value & publish
   }
@@ -1013,7 +1015,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   RoboClaw Series User Manual 76
    * </pre>
    */
-  public void readSettingsFromEeprom(int address) {
+  public void readSettingsFromEeprom() {
     sendPacket(address, 95);
     // TODO lock - timeout - return value & publish
   }
@@ -1080,7 +1082,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [Config(2 bytes), CRC(2 bytes)]
    * </pre>
    */
-  public void readStandardConfig(int address) {
+  public void readStandardConfig() {
     sendPacket(address, 99);
     // TODO lock - timeout - return value & publish
   }
@@ -1110,7 +1112,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   slow down before the brake is activated.
    * </pre>
    */
-  public void setCtrlModes(int address) {
+  public void setCtrlModes() {
     sendPacket(address, 20);
     // TODO lock - timeout - return value & publish
   }
@@ -1124,7 +1126,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Reads CTRL1 and CTRL2 mode setting. See 100 - Set CTRL Modes for valid values.
    * </pre>
    */
-  public void readCtrlModes(int address) {
+  public void readCtrlModes() {
     sendPacket(address, 101);
     // TODO lock - timeout - return value & publish
   }
@@ -1166,7 +1168,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Reads currently set values for CTRL Settings. See 100 - Set CTRL Modes for valid values.
    * </pre>
    */
-  public void readCtrl1(int address) {
+  public void readCtrl1() {
     sendPacket(address, 104);
     // TODO lock - timeout - return value & publish
   }
@@ -1222,7 +1224,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [MaxCurrent(4 bytes), MinCurrent(4 bytes), CRC(2 bytes)]
    * </pre>
    */
-  public void readM2MaxCurrentLimit(int address) {
+  public void readM2MaxCurrentLimit() {
     sendPacket(address, 136);
     // TODO lock - timeout - return value & publish
   }
@@ -1248,7 +1250,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [PWMMode, CRC(2 bytes)]
    * </pre>
    */
-  public void readPwmMode(int address) {
+  public void readPwmMode() {
     sendPacket(address, 149);
     // TODO lock - timeout - return value & publish
   }
@@ -1274,19 +1276,42 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * </pre>
    */
   public EncoderData readEncoderM1() {
-	    sendPacket(address, 16);
-	    
-	    // send packet
-	    
-	    // wait with timemout on request queue/lock ?
-	    
-	    // (sepereate thread decodes the response & notifies ? - or same thread ?)
-	    
-	    // TODO lock - timeout - return value & publish
-	    
-	    return null;
-	  }
 
+    EncoderData ed  = null;
+    try {
+      // send packet
+      serial.clear();
+      sendPacket(address, 16);
+
+      byte[] data = new byte[6];
+      
+      // read uses timeout set globally
+      serial.read(data);
+      ed = new EncoderData(getName(),bytes4ToLong(data));
+      ed.value = bytes4ToLong(data);
+
+      log.info("ret {}", Serial.bytesToHex(data));
+      log.info("{} ", ed);
+      
+      // TODO publishEncoderM1 ?
+
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+    }
+    return ed;
+  }
+
+  public static long bytes4ToLong(byte[] data) {
+    return bytes4ToLong(data, 0);
+  }
+  
+  public static long bytes4ToLong(byte[] data, int start) {
+    return (data[start] & 0xFF) << 24 | (data[start + 1] & 0xFF) << 16 | (data[start + 2] & 0xFF) << 8 | (data[start + 3] & 0xFF);
+  }
+
+  public static int bytes2ToInt(byte[] data, int start) {
+    return data[start] << 8 | data[start + 1];
+  }
 
   /**
    * <pre>
@@ -1960,15 +1985,10 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * </pre>
    */
   public void setM1PID(int D, int P, int I, int maxI, int deadzone, int minPos, int c) {
-    sendPacket(address, 61, 
-        byte3(D), byte2(D), byte1(D), byte0(D), 
-        byte3(P), byte2(P), byte1(P), byte0(P), 
-        byte3(I), byte2(I), byte1(I), byte0(I), 
-        byte3(maxI), byte2(maxI), byte1(maxI), byte0(maxI), 
-        byte3(deadzone), byte2(deadzone), byte1(deadzone), byte0(deadzone), 
-        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos), 
-        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos));
-        
+    sendPacket(address, 61, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(maxI), byte2(maxI),
+        byte1(maxI), byte0(maxI), byte3(deadzone), byte2(deadzone), byte1(deadzone), byte0(deadzone), byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos), byte3(minPos),
+        byte2(minPos), byte1(minPos), byte0(minPos));
+
     // TODO lock - timeout - return value & publish
   }
 
@@ -1986,14 +2006,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * </pre>
    */
   public void setM2PID(int D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
-    sendPacket(address, 62, 
-        byte3(D), byte2(D), byte1(D), byte0(D), 
-        byte3(P), byte2(P), byte1(P), byte0(P), 
-        byte3(I), byte2(I), byte1(I), byte0(I), 
-        byte3(maxI), byte2(maxI), byte1(maxI), byte0(maxI), 
-        byte3(deadzone), byte2(deadzone), byte1(deadzone), byte0(deadzone), 
-        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos), 
-        byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos));
+    sendPacket(address, 62, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P), byte3(I), byte2(I), byte1(I), byte0(I), byte3(maxI), byte2(maxI),
+        byte1(maxI), byte0(maxI), byte3(deadzone), byte2(deadzone), byte1(deadzone), byte0(deadzone), byte3(minPos), byte2(minPos), byte1(minPos), byte0(minPos), byte3(minPos),
+        byte2(minPos), byte1(minPos), byte0(minPos));
     // TODO lock - timeout - return value & publish
   }
 
@@ -2137,9 +2152,10 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
 
+      // doesnt matter for usb connection
       // roboclaw.setAddress(128);
-      roboclaw.setAddress(129);
-
+      // roboclaw.setAddress(129);
+      
       // configure services
       m1.setPort("m1");
       m2.setPort("m2");
@@ -2159,21 +2175,25 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // FIXME - motor1.attach(joystick) !
       roboclaw.connect(port);
 
+      // roboclaw.resetQuadratureEncoderCounters();
+      roboclaw.restoreDefaults();
+
+      
       // m1.stop();
       // m2.stop();
       roboclaw.readEncoderM1();
-      
+
       for (int i = 0; i < 10; ++i) {
         m1.move(0.1 * i);
       }
-      
+
       m1.move(0);
-      
+
       roboclaw.readEncoderM1();
 
       // roboclaw.readEncoderCount();
       // roboclaw.read
-      
+
       uart.write(89);
       uart.write(255);
       uart.write(123);
@@ -2193,7 +2213,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       sleep(1000);
 
-      
       // slow down the motor
       for (int i = 100; i > 0; --i) {
         double pwr = i * .01;
@@ -2225,7 +2244,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   @Override
-  public void onDisconnect(String portName) {    
+  public void onDisconnect(String portName) {
     log.info("disconnected from port {}", portName);
   }
 
