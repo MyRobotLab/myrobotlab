@@ -107,15 +107,16 @@ public class JMonkeyEngine extends Service implements Simulator {
     ServiceType meta = new ServiceType(JMonkeyEngine.class.getCanonicalName());
     meta.addDescription("is a 3d game engine, used for simulators");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary   
-    meta.addDependency("org.jmonkeyengine", "jme3-core", "3.2.0-stable");
-    meta.addDependency("org.jmonkeyengine", "jme3-desktop", "3.2.0-stable");
-    meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", "3.2.0-stable");
-    meta.addDependency("org.jmonkeyengine", "jme3-jogg", "3.2.0-stable");
-    meta.addDependency("org.jmonkeyengine", "jme3-niftygui", "3.2.0-stable");
-    meta.addDependency("org.jmonkeyengine", "jme3-bullet", "3.2.0-stable");
-    
-    meta.addDependency("org.jmonkeyengine", "jme3-niftygui", "3.2.0-stable");
+    // TODO: extract version numbers like this into a constant/enum   
+    String jmeVersion = "3.2.0-stable";
+    meta.addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-niftygui", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-niftygui", jmeVersion);
     // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"
     meta.addCategory("simulator");
     return meta;
