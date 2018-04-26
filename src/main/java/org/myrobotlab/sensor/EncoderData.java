@@ -11,7 +11,7 @@ public class EncoderData {
   }
   
   public String toString() {
-    return String.format("%s %d9",  source, value);
+    return String.format("%s %d",  source, value);
   }
   
 }

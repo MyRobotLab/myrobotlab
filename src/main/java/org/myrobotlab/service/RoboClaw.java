@@ -134,7 +134,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       packet[d.length + 1] = (byte) (xmodemcrc16 & 0xFF);
       sb.append(String.format("%02X ", (byte) (xmodemcrc16 & 0xFF)));
 
-      log.info("sendPacket {}", sb);
+      log.info(" sendPacket {}", sb);
 
       /**
        * <pre>
@@ -726,19 +726,19 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   private int byte3(int value) {
-    return value >> 24;
+    return (value >> 24) & 0xFF;
   }
 
   private int byte2(int value) {
-    return value >> 16;
+    return (value >> 16) & 0xFF;
   }
 
   private int byte1(int value) {
-    return value >> 8;
+    return (value >> 8) & 0xFF;
   }
 
   private int byte0(int value) {
-    return value;
+    return value & 0xFF;
   }
 
   /**
@@ -1283,12 +1283,12 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       serial.clear();
       sendPacket(address, 16);
 
-      byte[] data = new byte[6];
+      byte[] data = new byte[7];
       
       // read uses timeout set globally
       serial.read(data);
       ed = new EncoderData(getName(),bytes4ToLong(data));
-      ed.value = bytes4ToLong(data);
+      // ed.value = bytes4ToLong(data);
 
       log.info("ret {}", Serial.bytesToHex(data));
       log.info("{} ", ed);
@@ -2035,12 +2035,12 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   MinPos(4 byte), MaxPos(4 byte), CRC(2 bytes)]
    * </pre>
    */
-  public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer) {
-    sendPacket(address, 64, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
-        byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), speed, deccel, pos, buffer);
+  public void readM2PID() {
+    sendPacket(address, 64);
     // TODO lock - timeout - return value & publish
   }
-
+  
+  
   /**
    * <pre>
   65 - Buffered Drive M1 with signed Speed, Accel, Deccel and Position
@@ -2052,10 +2052,12 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
    * </pre>
    */
-  public void readM2PID() {
-    sendPacket(address, 64);
+  public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer) {
+    sendPacket(address, 65, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
+        byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), buffer);
     // TODO lock - timeout - return value & publish
   }
+
 
   /**
    * <pre>
@@ -2132,7 +2134,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       // String port = "COM14";
       // String port = "/dev/ttyS10";
-      String port = "/dev/ttyACM0";
+      String port = "/dev/ttyACM1";
       // String port = "vuart";
 
       Serial uart = null;
@@ -2176,11 +2178,13 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       roboclaw.connect(port);
 
       // roboclaw.resetQuadratureEncoderCounters();
-      roboclaw.restoreDefaults();
+      // roboclaw.restoreDefaults();
 
+      // roboclaw.resetQuadratureEncoderCounters();
       
       // m1.stop();
       // m2.stop();
+      roboclaw.readEncoderM1();
       roboclaw.readEncoderM1();
 
       for (int i = 0; i < 10; ++i) {
@@ -2190,13 +2194,24 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       m1.move(0);
 
       roboclaw.readEncoderM1();
+      roboclaw.readEncoderM1();
+      
+      roboclaw.resetQuadratureEncoderCounters();
+
+      roboclaw.readEncoderM1();
+      roboclaw.readEncoderM1();
 
       // roboclaw.readEncoderCount();
       // roboclaw.read
+      roboclaw.bufferedDriveM1WithSignedSpeedAccelDeccelPosition(500,500,500,10000,1);
+      roboclaw.driveM1WithSignedDutyAndAccel(255, 255);
+      
+      roboclaw.readEncoderM1();
+      roboclaw.readEncoderM1();
 
-      uart.write(89);
-      uart.write(255);
-      uart.write(123);
+      m1.move(0);
+
+      // public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer)
 
       boolean done = true;
       if (done) {
