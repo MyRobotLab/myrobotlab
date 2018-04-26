@@ -53,7 +53,7 @@ public class AudioFile extends Service {
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
   static public final String DEFAULT_TRACK = "default";
-  
+
   // FIXME
   // skip(track)
   // pause(track)
@@ -61,7 +61,7 @@ public class AudioFile extends Service {
   // silence()
   // play("http://blah.com/some.mpe")
   // FIXME - change String or URI filename to InputStream ..
-  
+
   // FIXME -
   // http://www.javalobby.org/java/forums/t18465.html
   // http://sourcecodebrowser.com/libjlayer-java/1.0/classjavazoom_1_1jl_1_1player_1_1_audio_device_base__coll__graph.png
@@ -83,6 +83,7 @@ public class AudioFile extends Service {
   public static final String journalFilename = "journal.txt";
   String currentTrack = DEFAULT_TRACK;
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
+  float volume = 1.0f;
 
   public AudioFile(String n) {
     super(n);
@@ -131,10 +132,11 @@ public class AudioFile extends Service {
     // make sure we are on
     // the currentTrack and its
     // created if necessary
-    if (data.track == null){
+    if (data.track == null) {
       data.track = currentTrack;
     }
     track(data.track);
+    processors.get(data.track).setVolume(volume);
     if (AudioData.MODE_QUEUED.equals(data.mode)) {
       // stick it on top of queue and let our default player play it
       return processors.get(data.track).add(data);
@@ -157,7 +159,7 @@ public class AudioFile extends Service {
 
   public void resume() {
     log.error("implement processor track resume");
-    processors.get(currentTrack).pause(false);//.resume();
+    processors.get(currentTrack).pause(false);// .resume();
   }
 
   public void playFile(String filename) {
@@ -222,11 +224,11 @@ public class AudioFile extends Service {
    * 
    */
   public void setVolume(float volume) {
-    processors.get(currentTrack).setVolume(volume);
+    this.volume = volume;
   }
 
   public void setVolume(double volume) {
-    processors.get(currentTrack).setVolume((float) volume);
+    setVolume((float) volume);
   }
 
   public float getVolume() {
@@ -269,8 +271,8 @@ public class AudioFile extends Service {
     track(track);
     setVolume(volume);
   }
-  
-  public AudioData waitFor(String filename, Object waitForMe){
+
+  public AudioData waitFor(String filename, Object waitForMe) {
     AudioData data = new AudioData(filename);
     data.waitForLock = waitForMe;
     return data;
@@ -283,7 +285,6 @@ public class AudioFile extends Service {
     processors.get(currentTrack).pause(false);
   }
 
-  
   public List<Object> getLocksWaitingFor(String queueName) {
     // TODO Auto-generated method stub
     return null;
@@ -308,7 +309,7 @@ public class AudioFile extends Service {
 
       NaturalReaderSpeech robot1 = (NaturalReaderSpeech) Runtime.start("robot1", "NaturalReaderSpeech");
       AudioFile audio = robot1.getAudioFile();
-      
+
       AudioData data = AudioData.create("whatHowCanYouSitThere.mp3");
       data.repeat = 4;
       data.track = "new track";
@@ -319,9 +320,10 @@ public class AudioFile extends Service {
       audio.play("whatHowCanYouSitThere.mp3");
       audio.pause();
       audio.resume();
-      
-      // FIXME - audio.step() ???  .f() .ff() .b .bb() rewind(10) .fastForward(10)
-      
+
+      // FIXME - audio.step() ??? .f() .ff() .b .bb() rewind(10)
+      // .fastForward(10)
+
       log.info(audio.getTrack());
 
       audio.track("sound effects");
@@ -334,9 +336,7 @@ public class AudioFile extends Service {
       audio.play("sir.mp3");
       audio.play("bigdeal.mp3");
       audio.play("whatHowCanYouSitThere.mp3");
-      
-      
-      
+
       audio.play("calmDown.mp3");
       audio.play("fightOff.mp3");
       audio.play("startTheAlarm.mp3");
@@ -492,15 +492,16 @@ public class AudioFile extends Service {
     ServiceType meta = new ServiceType(AudioFile.class.getCanonicalName());
     meta.addDescription("can play audio files on multiple tracks");
     meta.addCategory("sound");
-    
+
     meta.addDependency("javazoom", "jlayer", "1.0.1");
     meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
-    
+
     /*
-    meta.addDependency("javazoom.spi", "1.9.5");
-    meta.addDependency("javazoom.jl.player", "1.0.1");
-    meta.addDependency("org.tritonus.share.sampled.floatsamplebuffer", "0.3.6");
-    */
+     * meta.addDependency("javazoom.spi", "1.9.5");
+     * meta.addDependency("javazoom.jl.player", "1.0.1");
+     * meta.addDependency("org.tritonus.share.sampled.floatsamplebuffer",
+     * "0.3.6");
+     */
     return meta;
   }
 
