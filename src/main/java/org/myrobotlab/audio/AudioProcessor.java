@@ -15,6 +15,7 @@ import javax.sound.sampled.SourceDataLine;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -142,7 +143,7 @@ public class AudioProcessor extends Thread {
               // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
               // * 20.0);
 
-              if (ctrl.getValue() != (float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume))) {
+              if (MathUtils.round(ctrl.getValue(),3) != MathUtils.round((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)),3)) {
                 if (data.volume <= 1.0f && data.volume >= 0) {
 
                   ctrl.setValue((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));

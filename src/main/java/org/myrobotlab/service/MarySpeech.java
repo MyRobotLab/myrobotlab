@@ -3,12 +3,8 @@ package org.myrobotlab.service;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,19 +12,15 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.maryspeech.tools.install.MaryInstaller;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
@@ -53,124 +45,17 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
   private static final long serialVersionUID = 1L;
 
   private transient MaryInterface marytts = null;
-  // TODO: this is completely ignored. TODO: use this to localize the
-  // confirmationString.
-  private String language;
+
   private String maryBase = "mary";
-  private String audioCacheExtension = "wav";
-  public String lastUtterance = "";
+
   String audioEffects;
   String voice;
   transient public Set<String> voices = null;
   public String maryComponentsUrl = "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml";
-  // This is the format string that will be used when asking for confirmation.
-  public String confirmationString = "did you say %s ?";
-  transient AudioFile audioFile = null;
-  transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
 
   public MarySpeech(String reservedKey) {
     super(reservedKey);
 
-    // TODO: this should all be in startService, no?
-    File file = new File(maryBase);
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "download");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "installed");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "lib");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "log");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-
-    // Set some envirionment variables so we can load Mary libraries.
-    System.setProperty("mary.base", maryBase);
-    System.setProperty("mary.downloadDir", new File(maryBase + "/download").getPath());
-    System.setProperty("mary.installedDir", new File(maryBase + "/installed").getPath());
-
-    try {
-      marytts = new LocalMaryInterface();
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-
-  }
-
-  @Override
-  public void onAudioStart(AudioData data) {
-    log.info("onAudioStart {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishStartSpeaking", utterance);
-    }
-  }
-
-  @Override
-  public void onAudioEnd(AudioData data) {
-    log.info("onAudioEnd {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishEndSpeaking", utterance);
-      utterances.remove(data);
-    }
-  }
-
-  @Override
-  public boolean speakBlocking(String toSpeak) throws IOException {
-    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
-    cacheFile(toSpeak);
-    invoke("publishStartSpeaking", toSpeak);
-    audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, audioCacheExtension));
-    invoke("publishEndSpeaking", toSpeak);
-    return false;
-  }
-
-  @Override
-  public AudioData speak(String toSpeak) throws IOException, SynthesisException, InterruptedException {
-    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
-    cacheFile(toSpeak);
-    AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, audioCacheExtension));
-    utterances.put(audioData, toSpeak);
-    return audioData;
-  }
-
-  public byte[] cacheFile(String toSpeak) throws IOException {
-    byte[] byteArrayOutputStream = null;
-    String localFileName = getLocalFileName(this, toSpeak, audioCacheExtension);
-
-    if (!audioFile.cacheContains(localFileName)) {
-      log.info("retrieving speech from locals - {}", localFileName, voice);
-      // generate mary to wav
-      AudioInputStream maryOutput = null;
-      try {
-        maryOutput = marytts.generateAudio(toSpeak);
-      } catch (SynthesisException e) {
-        error("MarySpeech cannot generate audiofile : %s,e");
-      }
-
-      DDSAudioInputStream outputAudio = new DDSAudioInputStream(new BufferedDoubleDataSource(MaryAudioUtils.getSamplesAsDoubleArray(maryOutput)), maryOutput.getFormat());
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      AudioSystem.write(outputAudio, AudioFileFormat.Type.WAVE, outputStream);
-      byteArrayOutputStream = outputStream.toByteArray();
-      audioFile.cache(localFileName, byteArrayOutputStream, toSpeak);
-    } else {
-      log.info("using local cached file");
-      byteArrayOutputStream = FileIO.toByteArray(new File(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, audioCacheExtension)));
-    }
-
-    return byteArrayOutputStream;
   }
 
   @Override
@@ -202,81 +87,14 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
   }
 
   @Override
-  public void setLanguage(String lang) {
-    // TODO: why not allow "en" ?!? remove this if check perhaps?
-    if (!lang.equalsIgnoreCase("en")) {
-      marytts.setLocale(Locale.forLanguageTag(lang));
-    }
-    this.language = lang;
-  }
-
-  @Override
-  public void onRequestConfirmation(String text) {
-    try {
-      // FIXME - not exactly language independent
-      speakBlocking(String.format(confirmationString, text));
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
-  @Override
-  public String getLanguage() {
-    return marytts.getLocale().getLanguage();
-  }
-
-  @Override
-  public void setVolume(float volume) {
-    // TODO implement me!
-    log.warn("Set volume not implemented in MarySpeech (yet)");
-  }
-
-  @Override
-  public float getVolume() {
-    // TODO implement me!
-    log.warn("Get volume not implemented in MarySpeech (yet)");
-    return 0;
-  }
-
-  @Override
-  public void interrupt() {
-    // TODO: interrupt the playback of mary speech
-    log.warn("Ignoring your interrupt request... (not implemented)");
-  }
-
-  @Override
-  public String publishStartSpeaking(String utterance) {
-    // framework method to publish the start speaking event.
-    log.info("Starting to speak: {}", utterance);
-    lastUtterance = utterance;
-    broadcastState();
-    return utterance;
-  }
-
-  @Override
   public String getVoice() {
     return marytts.getVoice();
-  }
-
-  // TODO: move this to a common base utility class for all speech synthesis.
-  @Override
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + URLEncoder.encode(audioEffects, "UTF-8") + File.separator
-        + DigestUtils.md5Hex(toSpeak) + "." + audioFileType;
-  }
-
-  @Override
-  public List<String> getLanguages() {
-    List<String> ret = new ArrayList<>();
-    for (Locale locale : marytts.getAvailableLocales()) {
-      ret.add(locale.getLanguage());
-    }
-    return ret;
   }
 
   public void setAudioEffects(String audioEffects) {
     marytts.setAudioEffects(audioEffects);
     this.audioEffects = audioEffects;
+    audioCacheParameters = audioEffects;
   }
 
   public String getAudioEffects() {
@@ -349,8 +167,12 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
       mary.getVoices();
       // mary.speak("world");
       mary.setAudioEffects("");
+      mary.setVolume(0.9f);
       mary.speakBlocking("Hello world");
-      mary.speakBlocking("unicode test, éléphant");
+      mary.setVolume(0.7f);
+      mary.speakBlocking("Hello world");
+      mary.setVolume(0.9f);
+      // mary.speakBlocking("unicode test, éléphant");
       // test audioeffect on cached text
       mary.setAudioEffects("FIRFilter+Robot(amount=50)");
       mary.speak("Hello world");
@@ -372,6 +194,40 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
   public void startService() {
 
     super.startService();
+    // TODO: this should all be in startService, no?
+    File file = new File(maryBase);
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+    file = new File(maryBase + File.separator + "download");
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+    file = new File(maryBase + File.separator + "installed");
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+    file = new File(maryBase + File.separator + "lib");
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+    file = new File(maryBase + File.separator + "log");
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+
+    // Set some envirionment variables so we can load Mary libraries.
+    System.setProperty("mary.base", maryBase);
+    System.setProperty("mary.downloadDir", new File(maryBase + "/download").getPath());
+    System.setProperty("mary.installedDir", new File(maryBase + "/installed").getPath());
+
+    try {
+      marytts = new LocalMaryInterface();
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+
+    audioCacheExtension = "wav";
     audioFile = (AudioFile) startPeer("audioFile");
     audioFile.startService();
     subscribe(audioFile.getName(), "publishAudioStart");
@@ -381,9 +237,9 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
 
     voices = marytts.getAvailableVoices();
     setVoice(this.voice);
-    if (audioEffects==null)
-    {
-      audioEffects="";
+    if (audioEffects == null) {
+      audioEffects = "";
+      audioCacheParameters = audioEffects;
     }
   }
 
@@ -421,6 +277,35 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
 
     // meta.addDependency("opennlp", "1.6");
     return meta;
+  }
+
+  public List<String> getLanguages() {
+    log.warn("not yet implemented");
+    return null;
+  }
+
+  @Override
+  public void setLanguage(String l) {
+    // todo : implement generic method & language code
+
+    log.warn("not yet implemented");
+  }
+
+  @Override
+  public byte[] generateByteAudio(String toSpeak) throws IOException {
+    // generate mary to wav
+    AudioInputStream maryOutput = null;
+    try {
+      maryOutput = marytts.generateAudio(toSpeak);
+    } catch (SynthesisException e) {
+      error("MarySpeech cannot generate audiofile : %s,e");
+    }
+
+    DDSAudioInputStream outputAudio = new DDSAudioInputStream(new BufferedDoubleDataSource(MaryAudioUtils.getSamplesAsDoubleArray(maryOutput)), maryOutput.getFormat());
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    AudioSystem.write(outputAudio, AudioFileFormat.Type.WAVE, outputStream);
+    return outputStream.toByteArray();
+
   }
 
 }

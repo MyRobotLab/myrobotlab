@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.ServiceType;
@@ -20,7 +19,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
@@ -39,6 +37,7 @@ import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
 import com.amazonaws.services.polly.model.Voice;
+
 /**
  * Amazon's cloud speech service
  * 
@@ -62,24 +61,13 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
   transient Voice awsVoice;
   transient List<Voice> awsVoices;
 
-  // this is a peer service.
-  transient AudioFile audioFile = null;
-
   transient Map<String, Voice> voiceMap = new HashMap<String, Voice>();
   transient Map<String, Voice> langMap = new HashMap<String, Voice>();
   String voice;
 
-  Stack<String> audioFiles = new Stack<String>();
-
   private String keyIdSecret;
   private String keyId;
   public boolean credentialsError = false;
-
-  transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
-
-  String lang;
-
-private String language;
 
   public Polly(String n) {
     super(n);
@@ -103,7 +91,7 @@ private String language;
       log.info("setting voice to {}", voice);
       awsVoice = voiceMap.get(voice);
       this.voice = voice;
-      this.lang = awsVoice.getLanguageCode();
+      this.language = awsVoice.getLanguageCode();
       return true;
     }
     log.info("could not set voice to {}", voice);
@@ -111,88 +99,13 @@ private String language;
   }
 
   @Override
-  public void setLanguage(String l) {
-    if (langMap.containsKey(l)) {
-      setVoice(langMap.get(l).getName());
-    }
-    this.language=l;
-  }
-
-  @Override
   public String getLanguage() {
-    return lang;
+    return language;
   }
 
   @Override
   public List<String> getLanguages() {
     return new ArrayList<String>(langMap.keySet());
-  }
-
-  /*
-   * Proxy works in 3 modes
-   *    client - consumer of mrl services
-   *    relay - proxy (running as cloud service)
-   *    direct - goes direct to service
-   * In Polly's case - 
-   *    client - would be an end user using a client key
-   *    relay - is the mrl proxy service
-   *    direct would be from a users, by-passing mrl and going directly to Amazon with amazon keys
-   * cache file - caches file locally (both client or relay) 
-   */
-  public byte[] cacheFile(String toSpeak, OutputFormat format) throws IOException {
-
-    byte[] mp3File = null;
-    // cache it begin -----
-    String localFileName = getLocalFileName(this, toSpeak, "mp3");
-    // String filename = AudioFile.globalFileCacheDir + File.separator +
-    // localFileName;
-    if (!audioFile.cacheContains(localFileName)) {
-      log.info("retrieving speech from Amazon - {}", localFileName);
-      AmazonPollyClient polly = getPolly();
-      SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(awsVoice.getId()).withOutputFormat(format);
-      SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
-      InputStream data = synthRes.getAudioStream();
-      mp3File = FileIO.toByteArray(data);
-      audioFile.cache(localFileName, mp3File, toSpeak);
-    } else {
-      log.info("using local cached file");
-      mp3File = FileIO.toByteArray(new File(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3")));
-    }
-
-    // invoke("publishStartSpeaking", toSpeak);
-    // audioFile.playBlocking(filename);
-    // invoke("publishEndSpeaking", toSpeak);
-    // log.info("Finished waiting for completion.");
-    return mp3File; 
-  }
-
-  @Override
-  public AudioData speak(String toSpeak) throws Exception {
-    if (!credentialsError)
-    {
-    cacheFile(toSpeak, OutputFormat.Mp3);
-    AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, "mp3"));
-    utterances.put(audioData, toSpeak);
-    return audioData;
-    /*
-     * InputStream speechStream = synthesize(toSpeak, OutputFormat.Mp3); //
-     * create an MP3 player AdvancedPlayer player = new
-     * AdvancedPlayer(speechStream,
-     * javazoom.jl.player.FactoryRegistry.systemRegistry().createAudioDevice());
-     * 
-     * player.setPlayBackListener(new PlaybackListener() {
-     * 
-     * @Override public void playbackStarted(PlaybackEvent evt) {
-     * System.out.println("Playback started"); System.out.println(toSpeak); }
-     * 
-     * @Override public void playbackFinished(PlaybackEvent evt) {
-     * System.out.println("Playback finished"); } });
-     * 
-     * // play it! player.play();
-     */
-    }
-    return null;
-
   }
 
   private void processVoicesRequest() {
@@ -214,7 +127,7 @@ private String language;
     if (voice == null) {
       voice = awsVoices.get(0).getName();
       awsVoice = awsVoices.get(0);
-      lang = awsVoice.getLanguageCode();
+      language = awsVoice.getLanguageCode();
       log.info("setting default voice to {}", voice);
     }
 
@@ -255,76 +168,17 @@ private String language;
   }
 
   @Override
-  public void onAudioStart(AudioData data) {
-    log.info("onAudioStart {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishStartSpeaking", utterance);
+  public void setLanguage(String l) {
+    if (langMap.containsKey(l)) {
+      setVoice(langMap.get(l).getName());
     }
-  }
-
-  @Override
-  public void onAudioEnd(AudioData data) {
-    log.info("onAudioEnd {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishEndSpeaking", utterance);
-      utterances.remove(data);
-    }
-  }
-
-  @Override
-  public boolean speakBlocking(String toSpeak) throws Exception {
-    if (!credentialsError)
-    {
-    cacheFile(toSpeak, OutputFormat.Mp3);
-    invoke("publishStartSpeaking", toSpeak);
-    audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, "mp3"));
-    invoke("publishEndSpeaking", toSpeak);
-    }
-    return false;    
-  }
-
-  @Override
-  public void setVolume(float volume) {
-    audioFile.setVolume(volume);
-  }
-
-  @Override
-  public float getVolume() {
-    return audioFile.getVolume();
-  }
-
-  @Override
-  public void interrupt() {
-    // TODO Auto-generated method stub
-
+    this.language = l;
   }
 
   @Override
   public String getVoice() {
     getPolly();
     return voice;
-  }
-
-  @Override
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
-    // TODO: make this a base class sort of thing.
-    getPolly();
-    // having - AudioFile.globalFileCacheDir exposed like this is a bad idea .. 
-    // AudioFile should just globallyCache - the details of that cache should not be exposed :(
-    
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
-        + audioFileType;
-   
-  }
-
-  @Override
-  public void onRequestConfirmation(String text) {
-    // TODO Auto-generated method stub
-
   }
 
   /**
@@ -344,14 +198,20 @@ private String language;
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     /*
-    meta.addDependency("org.joda", "2.9.4");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-    */
+     * meta.addDependency("org.joda", "2.9.4");
+     * meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+     */
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.9.5");
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.5");
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.5");
+
     meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.118");
-    
-    // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly -->
-    // <dependency org="com.amazonaws" name="aws-java-sdk-polly" rev="1.11.118"/>
-    
+
+    // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly
+    // -->
+    // <dependency org="com.amazonaws" name="aws-java-sdk-polly"
+    // rev="1.11.118"/>
+
     meta.addCategory("speech");
     meta.setCloudService(true);
     return meta;
@@ -375,7 +235,7 @@ private String language;
       Polly polly = (Polly) Runtime.start("polly", "Polly");
 
       // add your amazon access key & secret
-      polly.setKey("{AWS_ACCESS_KEY_ID}", "{AWS_SECRET_ACCESS_KEY}");
+      polly.setKey("xxx", "yyyyyyyyyyyyyyyyyyy");
 
       List<String> voices = polly.getVoices();
       for (String voice : voices) {
@@ -387,34 +247,34 @@ private String language;
         } else if (lang.startsWith("en")) {
           polly.speak(String.format("Hi my name is %s and I think myrobotlab is great!", voice));
         } else if (lang.startsWith("fr")) {
-          polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est gÃ©nial!!", voice));
+          polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!", voice));
         } else if (lang.startsWith("nl")) {
           polly.speak(String.format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!", voice));
         } else if (lang.startsWith("ru")) {
           polly.speak(String.format("ÐŸÑ€Ð¸Ð²ÐµÑ‚, Ð¼ÐµÐ½Ñ� Ð·Ð¾Ð²ÑƒÑ‚ %s, Ð¸ Ñ� Ð´ÑƒÐ¼Ð°ÑŽ, Ñ‡Ñ‚Ð¾ myrobotlab - Ñ�Ñ‚Ð¾ Ð·Ð´Ð¾Ñ€Ð¾Ð²Ð¾!", voice));
-        } else if (lang.startsWith("ro")){
+        } else if (lang.startsWith("ro")) {
           polly.speak(String.format("Buna ziua, numele meu este %s È™i cred cÄƒ myrobotlab este mare!", voice));
-        } else if (lang.startsWith("ro")){
+        } else if (lang.startsWith("ro")) {
           polly.speak(String.format("Witam, nazywam siÄ™ %s i myÅ›lÄ™, Å¼e myrobotlab jest Å›wietny!", voice));
-        } else if (lang.startsWith("it")){
+        } else if (lang.startsWith("it")) {
           polly.speak(String.format("Ciao, il mio nome Ã¨ %s e penso myrobotlab Ã¨ grande!", voice));
-        } else if (lang.startsWith("is")){
-          polly.speak(String.format("HallÃ³, Nafn mitt er %s og Ã©g held myrobotlab er frÃ¡bÃ¦rt!", voice));
-        } else if (lang.startsWith("cy")){
+        } else if (lang.startsWith("is")) {
+          polly.speak(String.format("HallÃ³, Nafn mitt er %s og ég held myrobotlab er frÃ¡bÃ¦rt!", voice));
+        } else if (lang.startsWith("cy")) {
           polly.speak(String.format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!", voice));
-        } else if (lang.startsWith("de")){
+        } else if (lang.startsWith("de")) {
           polly.speak(String.format("Hallo, mein Name ist %s und ich denke, myrobotlab ist toll!", voice));
-        } else if (lang.startsWith("da")){
+        } else if (lang.startsWith("da")) {
           polly.speak(String.format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!", voice));
-        } else if (lang.startsWith("sv")){
+        } else if (lang.startsWith("sv")) {
           polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin Ã¤r stor!", voice));
-        } else if (lang.startsWith("pl")){
+        } else if (lang.startsWith("pl")) {
           polly.speak(String.format("Witam, nazywam siÄ™ %s i myÅ›lÄ™, Å¼e myrobotlab jest Å›wietny!", voice));
-        } else if (lang.startsWith("tr")){
-          polly.speak(String.format("Merhaba, adÄ±m adÄ±m %s ve myrobotlab'Ä±n harika olduÄŸunu dÃ¼ÅŸÃ¼nÃ¼yorum!", voice));        
-        } else if (lang.startsWith("pt")){
-          polly.speak(String.format("OlÃ¡, meu nome Ã© %s e eu acho que myrobotlab Ã© Ã³timo!ï¼�", voice));
-        } else if (lang.startsWith("ja")){
+        } else if (lang.startsWith("tr")) {
+          polly.speak(String.format("Merhaba, adÄ±m adÄ±m %s ve myrobotlab'Ä±n harika olduÄŸunu dÃ¼ÅŸÃ¼nÃ¼yorum!", voice));
+        } else if (lang.startsWith("pt")) {
+          polly.speak(String.format("OlÃ¡, meu nome é %s e eu acho que myrobotlab é Ã³timo!ï¼�", voice));
+        } else if (lang.startsWith("ja")) {
           polly.speak(String.format("ã�“ã‚“ã�«ã�¡ã�¯ã€�ç§�ã�®å��å‰�ã�¯%sã�§ã€�ç§�ã�¯myrobotlabã�Œç´ æ™´ã‚‰ã�—ã�„ã�¨æ€�ã�„ã�¾ã�™ï¼�", voice));
         } else {
           log.info("dunno");
@@ -454,6 +314,28 @@ private String language;
 
     } catch (Exception e) {
       log.error("Polly main threw", e);
+    }
+  }
+
+  /*
+   * Proxy works in 3 modes client - consumer of mrl services relay - proxy
+   * (running as cloud service) direct - goes direct to service In Polly's case
+   * - client - would be an end user using a client key relay - is the mrl proxy
+   * service direct would be from a users, by-passing mrl and going directly to
+   * Amazon with amazon keys cache file - caches file locally (both client or
+   * relay)
+   */
+  @Override
+  public byte[] generateByteAudio(String toSpeak) {
+    try {
+      AmazonPollyClient polly = getPolly();
+      SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(awsVoice.getId()).withOutputFormat(audioCacheExtension);
+      SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
+      InputStream data = synthRes.getAudioStream();
+      return FileIO.toByteArray(data);
+    } catch (Exception e) {
+      log.error("Polly generateByteAudio threw, API error ? : ", e);
+      return null;
     }
   }
 
