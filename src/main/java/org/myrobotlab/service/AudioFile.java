@@ -291,7 +291,7 @@ public class AudioFile extends Service {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
+    LoggingFactory.init(Level.INFO);
 
     try {
 
@@ -307,7 +307,7 @@ public class AudioFile extends Service {
       // "AudioFile");
       // MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
 
-      NaturalReaderSpeech robot1 = (NaturalReaderSpeech) Runtime.start("robot1", "NaturalReaderSpeech");
+      MarySpeech robot1 = (MarySpeech) Runtime.start("robot1", "MarySpeech");
       AudioFile audio = robot1.getAudioFile();
 
       AudioData data = AudioData.create("whatHowCanYouSitThere.mp3");
@@ -330,7 +330,7 @@ public class AudioFile extends Service {
       log.info(audio.getTrack());
       audio.play("explosion.mp3");
 
-      audio.repeat("alert.mp3");
+     // audio.repeat("alert.mp3");
 
       audio.track();
       audio.play("sir.mp3");
@@ -346,37 +346,37 @@ public class AudioFile extends Service {
       // audio.waitForAll("alert");
       // audio.waitFor("alert", "default", waitToFinish);
       // audio.waitFor(waitingTrack, waitToFinish);
-      audio.repeat("alert.mp3");
+      //audio.repeat("alert.mp3");
 
       audio.track();
       // FIXME - implement audio.pause(1000); - also implement a "queued"
       // pause(1000);
 
-      robot1.speak("Klaus", "ah no, you didn't really need to do that did you. you know how the klaxons hurt my ears");
-      robot1.speak("Rachel", "get off your butt and doooo something");
-      robot1.speak("i am going aft get a battle axe in the weapons locker");
-      robot1.speak("by the time i get back, you had better be ready");
-      robot1.speak("Klaus", "first thing i'm going to do is turn this thing down");
+      robot1.speakBlocking("ah no, you didn't really need to do that did you. you know how the klaxons hurt my ears");
+      robot1.speakBlocking("get off your butt and doooo something");
+      robot1.speakBlocking("i am going aft get a battle axe in the weapons locker");
+      robot1.speakBlocking("by the time i get back, you had better be ready");
+      robot1.speakBlocking("first thing i'm going to do is turn this thing down");
       audio.setVolume(0.20f, "sound effects"); // <-- name the robot's audio
                                                // file
       audio.track();
-      robot1.speak("ahhh.. that's better - how can anyone think with that thing");
+      robot1.speakBlocking("ahhh.. that's better - how can anyone think with that thing");
 
-      audio.play("walking.mp3");
-      robot1.speak("Rachel", "i mean it. Klaus");
-      audio.play("door.mp3");
+      audio.playBlocking("walking.mp3");
+      robot1.speakBlocking("i mean it. Klaus");
+      audio.playBlocking("door.mp3");
 
-      robot1.speak("Klaus", "hello honey, what is your name");
+      robot1.speakBlocking("hello honey, what is your name");
       // mary.speak("hello my name is mary");
-      robot1.speak("hi i'm Klaus - i think you sound a little like a robot");
+      robot1.speakBlocking("hi i'm Klaus - i think you sound a little like a robot");
       // mary.speak("yes, but i am open source");
-      robot1.speak("can you dance like a robot too?");
+      robot1.speakBlocking("can you dance like a robot too?");
       // mary.speak("i will try");
 
       // audio.setVolume(0.50f);
-      robot1.speak("all right now she's gone its time to get funky");
-      audio.play("scruff.mp3");
-      robot1.speak("i need some snacks - i wonder if there is any left over chinese in the fridge");
+      robot1.speakBlocking("all right now she's gone its time to get funky");
+      audio.playBlocking("scruff.mp3");
+      robot1.speakBlocking("i need some snacks - i wonder if there is any left over chinese in the fridge");
 
       // turn the klaxons down - turn the music up
 

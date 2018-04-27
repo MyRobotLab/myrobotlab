@@ -27,6 +27,7 @@ package org.myrobotlab.service;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -202,31 +203,10 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
    * @param toSpeak
    *          - the string of text to speak.
    * @return TODO
+   * @throws IOException 
    */
-  @Override
-  public AudioData speak(String toSpeak) throws Exception {
 
-    // Check batch file
-    if (!batchFileIsOK()) {
-      createBatchFile();
-    }
-
-    // Text file created...
-    File f = new File(TextPath + "text.txt");
-    BufferedWriter bw = null;
-    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_16LE));
-
-    bw.write(toSpeak);
-    bw.close();
-
-    // Start speak event
-    invoke("publishStartSpeaking", toSpeak);
-
-    WaitThread proc = new WaitThread(toSpeak);
-    proc.start();
-
-    return null;
-  }
+  
 
   /**
    * Begin speaking and wait until all speech has been played back/
@@ -236,21 +216,41 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
    * @return
    */
   @Override
-  public boolean speakBlocking(String toSpeak) throws Exception {
+  public boolean speakBlocking(String toSpeak) {
 
     // Check batch file
     if (!batchFileIsOK()) {
-      createBatchFile();
+      try {
+        createBatchFile();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
 
     // Text file created...
     File f = new File(TextPath + "text.txt");
 
     BufferedWriter bw = null;
-    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_16LE));
+    try {
+      bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_16LE));
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
-    bw.write(toSpeak);
-    bw.close();
+    try {
+      bw.write(toSpeak);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    try {
+      bw.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
     // Start speak event
     invoke("publishStartSpeaking", toSpeak);
@@ -290,11 +290,7 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     return utterance;
   }
 
-  @Override
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
-    // TODO Auto-generated method stub
-    return null;
-  }
+
 
   @Override
   public void addEar(SpeechRecognizer ear) {
@@ -331,6 +327,12 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     //TODO : missing interface + dependencies, merge with LocalSpeech ?
     meta.setAvailable(false);
     return meta;
+  }
+
+  @Override
+  public byte[] generateByteAudio(String toSpeak) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   /*

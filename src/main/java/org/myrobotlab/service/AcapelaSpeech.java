@@ -78,7 +78,7 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
   transient AudioFile audioFile = null;
   // TODO: fix the volume control
   // private float volume = 1.0f;
-  
+
   transient CloseableHttpClient client;
 
   public AcapelaSpeech(String n) {
@@ -238,8 +238,8 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
   public void startService() {
     super.startService();
     if (client == null) {
-        // new MultiThreadedHttpConnectionManager()
-        client = HttpClients.createDefault();
+      // new MultiThreadedHttpConnectionManager()
+      client = HttpClients.createDefault();
     }
     audioFile = (AudioFile) startPeer("audioFile");
     audioFile.startService();
@@ -278,7 +278,7 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
   public String getMp3Url(String toSpeak) {
     HttpPost post = null;
     try {
-      
+
       // request form & send text
       String url = "http://www.acapela-group.com/demo-tts/DemoHTML5Form_V2.php?langdemo=Powered+by+%3Ca+href%3D%22http%3A%2F%2Fwww.acapela-vaas.com"
           + "%22%3EAcapela+Voice+as+a+Service%3C%2Fa%3E.+For+demo+and+evaluation+purpose+only%2C+for+commercial+use+of+generated+sound+files+please+go+to+"
@@ -352,27 +352,6 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
   }
 
   @Override
-  public boolean speakBlocking(String toSpeak) throws IOException {
-    log.info("speak blocking {}", toSpeak);
-
-    if (voice == null) {
-      log.warn("voice is null! setting to default: Ryan");
-      voice = "Ryan";
-    }
-    String localFileName = getLocalFileName(this, toSpeak, "mp3");
-    String filename = AudioFile.globalFileCacheDir + File.separator + localFileName;
-    if (!audioFile.cacheContains(localFileName)) {
-      byte[] b = getRemoteFile(toSpeak);
-      audioFile.cache(localFileName, b, toSpeak);
-    }
-    invoke("publishStartSpeaking", toSpeak);
-    audioFile.playBlocking(filename);
-    invoke("publishEndSpeaking", toSpeak);
-    log.info("Finished waiting for completion.");
-    return false;
-  }
-
-  @Override
   public void setVolume(float volume) {
     // TODO: fix the volume control
     log.warn("Volume control not implemented in AcapelaSpeech yet.");
@@ -406,45 +385,6 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
   // HashSet<String> audioFiles = new HashSet<String>();
   Stack<String> audioFiles = new Stack<String>();
 
-  public AudioData speak(String toSpeak) throws IOException {
-    // this will flip to true on the audio file end playing.
-    AudioData ret = null;
-    log.info("speak {}", toSpeak);
-    if (voice == null) {
-      log.warn("voice is null! setting to default: Ryan");
-      voice = "Ryan";
-    }
-    String filename = this.getLocalFileName(this, toSpeak, "mp3");
-    if (audioFile.cacheContains(filename)) {
-      ret = audioFile.playCachedFile(filename);
-      utterances.put(ret, toSpeak);
-      return ret;
-    }
-    audioFiles.push(filename);
-    byte[] b = getRemoteFile(toSpeak);
-    audioFile.cache(filename, b, toSpeak);
-    ret = audioFile.playCachedFile(filename);
-    utterances.put(ret, toSpeak);
-    return ret;
-
-  }
-
-  @Override
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
-    // TODO: make this a base class sort of thing.
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
-        + audioFileType;
-  }
-
-  @Override
-  public void addEar(SpeechRecognizer ear) {
-    // TODO: move this to a base class. it's basically the same for all
-    // mouths/ speech synth stuff.
-    // when we add the ear, we need to listen for request confirmation
-    addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
-    addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
-  }
-
   public void onRequestConfirmation(String text) {
     try {
       speakBlocking(String.format("did you say. %s", text));
@@ -464,7 +404,7 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
 
   // audioData to utterance map TODO: revisit the design of this
   HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
-private Object language;
+  private Object language;
 
   @Override
   public String publishStartSpeaking(String utterance) {
@@ -532,6 +472,7 @@ private Object language;
       Logging.logError(e);
     }
   }
+
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -542,24 +483,30 @@ private Object language;
    */
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
-    
+
     meta.addDescription("is a proprietary cloud service, currently returns speech and background music");
     meta.addCategory("speech");
-    
+
     meta.setLicenseProprietary();
     meta.setCloudService(true);
-    
+
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    
+
     // FIXME - add HttpClient service ....
     // meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
 
-    //End of support
+    // End of support
     meta.setAvailable(false);
     return meta;
+  }
+
+  @Override
+  public byte[] generateByteAudio(String toSpeak) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

@@ -1,5 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -54,10 +55,6 @@ public interface SpeechSynthesis extends NameProvider {
 
   public abstract float getVolume();
 
-  /**
-   * Interrupt the current speaking.
-   */
-  public abstract void interrupt();
 
   public String getVoice();
 
@@ -75,10 +72,12 @@ public interface SpeechSynthesis extends NameProvider {
    */
   public String publishEndSpeaking(String utterance);
 
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException;
+  public String getLocalFileName(SpeechSynthesis provider, String toSpeak) throws UnsupportedEncodingException;
 
   public void addEar(SpeechRecognizer ear);
 
   public void onRequestConfirmation(String text);
+  
+  public byte[] generateByteAudio(String toSpeak) throws IOException;
 
 }

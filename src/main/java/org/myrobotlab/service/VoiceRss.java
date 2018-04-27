@@ -70,13 +70,6 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
   public String key = "0000";
   public Integer rate = 0;
   public boolean credentialsError = false;
-  // this is a peer service.
-  transient AudioFile audioFile = null;
-  // TODO: fix the volume control
-  // private float volume = 1.0f;
-
-  transient CloseableHttpClient client;
-  private String language;
 
   public VoiceRss(String n) {
     super(n);
@@ -122,10 +115,6 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
   public void startService() {
     super.startService();
-    if (client == null) {
-      // new MultiThreadedHttpConnectionManager()
-      client = HttpClients.createDefault();
-    }
     audioFile = (AudioFile) startPeer("audioFile");
     audioFile.startService();
     subscribe(audioFile.getName(), "publishAudioStart");
@@ -177,169 +166,20 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     this.rate = rate;
   }
 
+  public List<String> getLanguages() {
+    log.warn("not yet implemented");
+    return null;
+  }
+
   @Override
   public void setLanguage(String l) {
-    // backward compatibility about simple language syntaxe
-    if (l.toLowerCase() == "fr") {
-      l = "fr-fr";
-    }
-    if (l.toLowerCase() == "en") {
-      l = "en-us";
-    }
-    if (l.toLowerCase() == "es") {
-      l = "es-es";
-    }
-    if (l.toLowerCase() == "cn") {
-      l = "zh-cn";
-    }
-    if (l.toLowerCase() == "de") {
-      l = "de-de";
-    }
-    if (l.toLowerCase() == "jp") {
-      l = "ja-jp";
-    }
-    voice = l;
-    // FIXME ! "MyLanguages", "sonid8" ???
-    // FIXME - implement !!!
-    this.language = l;
-  }
+    // todo : implement generic method & language code
 
-  @Override
-  public boolean speakBlocking(String toSpeak) throws Exception {
-
-    log.info("speak {}", toSpeak);
-    if (voice == null) {
-      log.warn("voice is null! setting to default: fr-fr");
-      voice = "fr-fr";
-    }
-    try {
-      String filename = this.getLocalFileName(this, toSpeak + rate.toString(), "mp3");
-      String filenametts = "audioFile" + File.separator + filename;
-      VoiceProvider tts = new VoiceProvider(getKey());
-
-      VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice()); // Languages.English_UnitedStates
-      params.setCodec(AudioCodec.WAV);
-      params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
-      params.setBase64(false);
-      params.setSSML(false);
-      params.setRate(rate);
-
-      if (audioFile.cacheContains(filename)) {
-        invoke("publishStartSpeaking", toSpeak);
-        audioFile.playBlocking(filenametts);
-        invoke("publishEndSpeaking", toSpeak);
-        log.info("Finished waiting for completion.");
-        return false;
-
-      }
-
-      byte[] voix = tts.speech(params);
-      String filenametts2 = "audioFile" + File.separator + filename;
-
-      String dossier = this.getLocalDirectory(this);
-      File f = new File(dossier);
-      if (f.exists()) {
-      } else {
-        File fb = new File(dossier);
-        fb.mkdirs();
-      }
-
-      FileOutputStream fos = new FileOutputStream(filenametts2);
-      fos.write(voix, 0, voix.length);
-      fos.flush();
-      fos.close();
-
-      invoke("publishStartSpeaking", toSpeak);
-      audioFile.playBlocking(filenametts2);
-      invoke("publishEndSpeaking", toSpeak);
-      log.info("Finished waiting for completion.");
-
-    } catch (Exception e) {
-      error("VoiceRss error ( api key ? ) :", e);
-      credentialsError = true;
-    }
-    return false;
-  }
-
-  @Override
-  public void setVolume(float volume) {
-    // TODO: fix the volume control
-    log.warn("Volume control not implemented in VoiceRss.");
-  }
-
-  @Override
-  public float getVolume() {
-    return 0;
-  }
-
-  @Override
-  public void interrupt() {
-    // TODO: Implement me!
-  }
-
-
-  @Override
-  public String getLanguage() {
-    return null;
+    log.warn("not yet implemented");
   }
 
   // HashSet<String> audioFiles = new HashSet<String>();
   Stack<String> audioFiles = new Stack<String>();
-
-  public AudioData speak(String toSpeak) throws Exception {
-    // this will flip to true on the audio file end playing.
-    AudioData ret = null;
-    log.info("speak {}", toSpeak);
-    if (voice == null) {
-      log.warn("voice is null! setting to default: fr-fr");
-      voice = "fr-fr";
-    }
-    try {
-      String filename = this.getLocalFileName(this, toSpeak, "mp3");
-
-      VoiceProvider tts = new VoiceProvider(getKey());
-
-      VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice()); // Languages.English_UnitedStates
-      params.setCodec(AudioCodec.WAV);
-      params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
-      params.setBase64(false);
-      params.setSSML(false);
-      params.setRate(rate);
-
-      if (audioFile.cacheContains(filename)) {
-        ret = audioFile.playCachedFile(filename);
-        utterances.put(ret, toSpeak);
-
-        return ret;
-
-      }
-
-      byte[] voix = tts.speech(params);
-      String filenametts = "audioFile" + File.separator + filename;
-
-      String dossier = this.getLocalDirectory(this);
-      File f = new File(dossier);
-      if (f.exists()) {
-      } else {
-        File fb = new File(dossier);
-        fb.mkdirs();
-      }
-
-      FileOutputStream fos = new FileOutputStream(filenametts);
-      fos.write(voix, 0, voix.length);
-      fos.flush();
-      fos.close();
-
-      ret = audioFile.playCachedFile(filename);
-      utterances.put(ret, toSpeak);
-
-    } catch (Exception e) {
-      error("VoiceRss error ( api key ? ) :", e);
-      credentialsError = true;
-    }
-    return ret;
-
-  }
 
   public String getLocalDirectory(SpeechSynthesis provider) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
@@ -348,101 +188,21 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
   }
 
-  @Override
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
-    // TODO: make this a base class sort of thing.
-
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
-        + audioFileType;
-
-  }
-
-  @Override
-  public void addEar(SpeechRecognizer ear) {
-    // TODO: move this to a base class. it's basically the same for all
-    // mouths/ speech synth stuff.
-    // when we add the ear, we need to listen for request confirmation
-    addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
-    addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
-  }
-
-  public void onRequestConfirmation(String text) {
-    try {
-      speakBlocking(String.format("did you say. %s", text));
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
-  @Override
-  public List<String> getLanguages() {
-    // TODO Auto-generated method stub
-    ArrayList<String> ret = new ArrayList<String>();
-    // FIXME - add iso language codes currently supported e.g. en en_gb de
-    // etc..
-    return ret;
-  }
-
-  // audioData to utterance map TODO: revisit the design of this
-  HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
-
-  @Override
-  public void onAudioStart(AudioData data) {
-    log.info("onAudioStart {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishStartSpeaking", utterance);
-    }
-  }
-
-  @Override
-  public void onAudioEnd(AudioData data) {
-    log.info("onAudioEnd {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishEndSpeaking", utterance);
-      utterances.remove(data);
-    }
-  }
-
-  // TODO Add a function to compare (is there the word "fruit" in the banana's
-  // document ? )
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
-    try {
 
-      VoiceRss speech = (VoiceRss) Runtime.start("speech", "VoiceRss");
-      speech.setKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-      speech.setLanguage("en-gb");
-      speech.setRate(0);
+    VoiceRss speech = (VoiceRss) Runtime.start("speech", "VoiceRss");
+    speech.setKey("your-api");
+    speech.setLanguage("en-gb");
+    speech.setRate(0);
 
-      // TODO: fix the volume control
-      // speech.setVolume(0);
-      speech.speakBlocking("it works, yes I believe it does");
-      speech.speakBlocking("yes yes. oh good. excellent!");
-      speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
-      speech.speak("I'm afraid I can't do that.");
+    // TODO: fix the volume control
+    // speech.setVolume(0);
+    speech.speakBlocking("it works, yes I believe it does");
+    speech.speakBlocking("yes yes. oh good. excellent!");
+    speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
+    speech.speak("I'm afraid I can't do that.");
 
-      // speech.speak("this is a test");
-      //
-      // speech.speak("i am saying something new once again again");
-      // speech.speak("one");
-      // speech.speak("two");
-      // speech.speak("three");
-      // speech.speak("four");
-      /*
-       * speech.speak("what is going on"); //speech.speakBlocking(
-       * speech.speak("hello world"); speech.speak("one two three four");
-       */
-      // arduino.setBoard(Arduino.BOARD_TYPE_ATMEGA2560);
-      // arduino.connect(port);
-      // arduino.broadcastState();
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
   }
 
   /**
@@ -465,6 +225,26 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
     meta.addDependency("com.voicerss", "tts", "1.0");
     return meta;
+  }
+
+  @Override
+  public byte[] generateByteAudio(String toSpeak) throws UnsupportedEncodingException {
+    VoiceProvider tts = new VoiceProvider(getKey());
+
+    VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice()); // Languages.English_UnitedStates
+    params.setCodec(AudioCodec.MP3);
+    params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
+    params.setBase64(false);
+    params.setSSML(false);
+    params.setRate(rate);
+
+    try {
+      return tts.speech(params);
+    } catch (Exception e) {
+      error("VoiceRSS crashed : %s : ", e);
+      return null;
+    }
+
   }
 
 }

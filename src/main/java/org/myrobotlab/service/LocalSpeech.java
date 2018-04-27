@@ -2,17 +2,13 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.UUID;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -20,10 +16,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListener {
@@ -34,10 +27,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
 
   transient Integer voice = 0;
   transient String voiceName = "0";
-  transient List<Integer> voices;
+
 
   private String ttsFolder = "tts";
-  private String audioCacheExtension = "mp3";  
+
 
   private String windowsTtsExecutable = ttsFolder + File.separator + "tts.exe";
   private String macOsTtsExecutable = "say";
@@ -46,16 +39,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   public String ttsExeOutputFilePath = System.getProperty("user.dir") + File.separator + ttsFolder + File.separator;
   boolean ttsExecutableExist;
 
-  // this is a peer service.
-  transient AudioFile audioFile = null;
-
   transient Map<Integer, String> voiceMap = new HashMap<Integer, String>();
-
-  Stack<String> audioFiles = new Stack<String>();
-
-  transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
-
-  String language = "en";
 
   public LocalSpeech(String n) {
     super(n);
@@ -102,140 +86,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   }
 
   @Override
-  public void setLanguage(String l) {
-    this.language = l;
-  }
-
-  @Override
-  public String getLanguage() {
-    return language;
-  }
-
-  public byte[] cacheFile(String toSpeak) throws IOException {
-    byte[] mp3File = null;
-    String localFileName = getLocalFileName(this, toSpeak, audioCacheExtension);
-    if (voiceName == null) {
-      setVoice(voice.toString());
-    }
-
-    String uuid = UUID.randomUUID().toString();
-    if (!audioFile.cacheContains(localFileName)) {
-      log.info("retrieving speech from locals - {}", localFileName, voiceName);
-      String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voice + " -t -o " + ttsExeOutputFilePath + uuid + " \"" + toSpeak
-          + " \"";
-      String cmd = "null";
-      File f = new File(ttsExeOutputFilePath + uuid + "0."+audioCacheExtension);
-      // windows os local tts
-      if (Platform.getLocalInstance().isWindows()) {
-        f=new File(ttsExeOutputFilePath + uuid + "0."+audioCacheExtension);
-        f.delete();
-        cmd = Runtime.execute("cmd.exe", "/c", command);
-      }
-      // macos local tts ( it is WAVE not mp3, but worky... )
-      // TODO : Convert to mp3
-      if (Platform.getLocalInstance().isMac()) {
-        f=new File(ttsExeOutputFilePath + uuid + "0.AIFF");
-        f.delete();
-        cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o", ttsExeOutputFilePath + uuid + "0.AIFF");
-      }
-      log.info(cmd);
-      if (!f.exists()) {
-        log.error("local tts caused an error : " + cmd);
-      } else {
-        if (f.length() == 0) {
-          log.error("local tts caused an error : empty file " + cmd);
-        } else {
-          mp3File = FileIO.toByteArray(f);
-          audioFile.cache(localFileName, mp3File, toSpeak);
-        }
-        f.delete();
-      }
-
-    } else {
-      log.info("using local cached file");
-      mp3File = FileIO.toByteArray(new File(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, audioCacheExtension)));
-    }
-
-    return mp3File;
-  }
-
-  @Override
-  public AudioData speak(String toSpeak) throws Exception {
-    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
-    cacheFile(toSpeak);
-    AudioData audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak, audioCacheExtension));
-    utterances.put(audioData, toSpeak);
-    return audioData;
-  }
-
-  @Override
-  public void onAudioStart(AudioData data) {
-    log.info("onAudioStart {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishStartSpeaking", utterance);
-    }
-  }
-
-  @Override
-  public void onAudioEnd(AudioData data) {
-    log.info("onAudioEnd {} {}", getName(), data.toString());
-    // filters on only our speech
-    if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
-      invoke("publishEndSpeaking", utterance);
-      utterances.remove(data);
-    }
-  }
-
-  @Override
-  public boolean speakBlocking(String toSpeak) throws Exception {
-    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
-    cacheFile(toSpeak);
-    invoke("publishStartSpeaking", toSpeak);
-    audioFile.playBlocking(AudioFile.globalFileCacheDir + File.separator + getLocalFileName(this, toSpeak, audioCacheExtension));
-    invoke("publishEndSpeaking", toSpeak);
-    return false;
-  }
-
-  @Override
-  public void setVolume(float volume) {
-    audioFile.setVolume(volume);
-  }
-
-  @Override
-  public float getVolume() {
-    return audioFile.getVolume();
-  }
-
-  @Override
-  public void interrupt() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public String getVoice() {
     return voice.toString();
-  }
-
-  @Override
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak, String audioFileType) throws UnsupportedEncodingException {
-    // TODO: make this a base class sort of thing.
-    // having - AudioFile.globalFileCacheDir exposed like this is a bad idea ..
-    // AudioFile should just globallyCache - the details of that cache should
-    // not be exposed :(
-
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "."
-        + audioFileType;
-
-  }
-
-  @Override
-  public void onRequestConfirmation(String text) {
-    // TODO Auto-generated method stub
-
   }
 
   /**
@@ -283,10 +135,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
       error("generic Linux local tts not yet implemented, want help ?");
     }
     if (Platform.getLocalInstance().isMac()) {
-      this.audioCacheExtension="AIFF";
+      this.audioCacheExtension = "AIFF";
     }
-    
-    
 
   }
 
@@ -303,9 +153,52 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
 
   }
 
-  @Override
   public List<String> getLanguages() {
-    // TODO Auto-generated method stub
+    log.warn("not yet implemented");
+    return null;
+  }
+
+  @Override
+  public void setLanguage(String l) {
+    // todo : implement generic method & language code
+
+    log.warn("not yet implemented");
+  }
+
+  @Override
+  public byte[] generateByteAudio(String toSpeak) throws IOException {
+
+    String uuid = UUID.randomUUID().toString();
+    String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voice + " -t -o " + ttsExeOutputFilePath + uuid + " \"" + toSpeak
+        + " \"";
+    String cmd = "null";
+    File f = new File(ttsExeOutputFilePath + uuid + "0." + audioCacheExtension);
+    // windows os local tts
+    if (Platform.getLocalInstance().isWindows()) {
+      f = new File(ttsExeOutputFilePath + uuid + "0." + audioCacheExtension);
+      f.delete();
+      cmd = Runtime.execute("cmd.exe", "/c", command);
+    }
+    // macos local tts ( it is WAVE not mp3, but worky... )
+    // TODO : Convert to mp3
+    if (Platform.getLocalInstance().isMac()) {
+      f = new File(ttsExeOutputFilePath + uuid + "0.AIFF");
+      f.delete();
+      cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o", ttsExeOutputFilePath + uuid + "0.AIFF");
+    }
+    log.info(cmd);
+    if (!f.exists()) {
+      log.error("local tts caused an error : " + cmd);
+    } else {
+      if (f.length() == 0) {
+        log.error("local tts caused an error : empty file " + cmd);
+      } else {
+        byte[] mp3File = FileIO.toByteArray(f);
+        f.delete();
+        return mp3File;
+      }
+
+    }
     return null;
   }
 
