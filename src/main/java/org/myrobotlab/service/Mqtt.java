@@ -334,9 +334,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     sb.append(" MessageId:").append(token.getMessageId());
     sb.append(" Response:").append(token.getResponse());
     sb.append(" UserContext:").append(token.getUserContext());
-    sb.append(" Qos:").append(token.getGrantedQos());
+    sb.append(" Qos:").append(Arrays.toString(token.getGrantedQos()));
     sb.append(" Sessionpresent:").append(token.getSessionPresent());
-    sb.append(" Topics:").append(token.getTopics());
+    sb.append(" Topics:").append(Arrays.toString(token.getTopics()));
     sb.append(" isComplete:").append(token.isComplete());
     return sb.toString();
   }
