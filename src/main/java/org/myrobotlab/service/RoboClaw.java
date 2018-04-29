@@ -1276,10 +1276,14 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * </pre>
    */
   public EncoderData readEncoderM1() {
-
+    // FIXME - not really thread safe !
+    // what pairs serial recv data with the calling thread
+    // or what prevents another thread from "clearing" the buffer !
     EncoderData ed  = null;
     try {
-      // send packet
+      // FIXME by making a blocking read sendPacket method
+      // sendPacket(data[], byte1...)
+      // you can't mess with serial outside the "sendPacket"/"readPacket"
       serial.clear();
       sendPacket(address, 16);
 
@@ -1288,17 +1292,24 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // read uses timeout set globally
       serial.read(data);
       ed = new EncoderData(getName(),bytes4ToLong(data));
-      // ed.value = bytes4ToLong(data);
 
       log.info("ret {}", Serial.bytesToHex(data));
       log.info("{} ", ed);
       
-      // TODO publishEncoderM1 ?
+      invoke("publishEncoderM1", ed);
 
     } catch (Exception e) {
       log.error(e.getMessage(), e);
     }
     return ed;
+  }
+  
+  public EncoderData publishEncoderM1(EncoderData data) {
+    return data;
+  }
+  
+  public EncoderData publishEncoderM2(EncoderData data) {
+    return data;
   }
 
   public static long bytes4ToLong(byte[] data) {
@@ -1332,9 +1343,33 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Bit7 - Reserved
    * </pre>
    */
-  public void readEncoderM2() {
-    sendPacket(address, 17);
-    // TODO lock - timeout - return value & publish
+  public EncoderData readEncoderM2() {
+    // FIXME - not really thread safe !
+    // what pairs serial recv data with the calling thread
+    // or what prevents another thread from "clearing" the buffer !
+    EncoderData ed  = null;
+    try {
+      // FIXME by making a blocking read sendPacket method
+      // sendPacket(data[], byte1...)
+      // you can't mess with serial outside the "sendPacket"/"readPacket"
+      serial.clear();
+      sendPacket(address, 17);
+
+      byte[] data = new byte[7];
+      
+      // read uses timeout set globally
+      serial.read(data);
+      ed = new EncoderData(getName(),bytes4ToLong(data));
+
+      log.info("ret {}", Serial.bytesToHex(data));
+      log.info("{} ", ed);
+      
+      invoke("publishEncoderM1", ed);
+
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+    }
+    return ed;
   }
 
   /**
