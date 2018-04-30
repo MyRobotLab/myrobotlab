@@ -286,6 +286,7 @@ public class Security extends Service implements AuthorizationProvider {
       store.store(out, null);
       String encrypted = Security.encrypt(new String(out.toByteArray()), new File(getKeyFileName()));
       FileIO.toFile(getStoreFileName(), encrypted);
+      log.info("New entry pushed inside aes safe");
     } catch (Exception e) {
       log.error("saveStore threw", e);
     }

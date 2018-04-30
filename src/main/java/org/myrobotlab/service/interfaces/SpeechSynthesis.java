@@ -15,8 +15,10 @@ import org.slf4j.Logger;
  * 
  */
 public interface SpeechSynthesis extends NameProvider {
-  
+
   public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
+
+  public abstract String getlastUtterance();
 
   public abstract List<String> getVoices();
 
@@ -37,37 +39,42 @@ public interface SpeechSynthesis extends NameProvider {
    * @param toSpeak
    *          - the string of text to speak.
    * @return TODO
-   * @throws Exception e
+   * @throws Exception
+   *           e
    */
   public abstract AudioData speak(String toSpeak) throws Exception;
-  
+
   /**
    * Begin speaking and wait until all speech has been played back/
    * 
    * @param toSpeak
    *          - the string of text to speak.
-   * @throws Exception e
+   * @throws Exception
+   *           e
    * @return true/false
    */
   public abstract boolean speakBlocking(String toSpeak) throws Exception;
-  
+
   public abstract void setVolume(float volume);
 
   public abstract float getVolume();
-
 
   public String getVoice();
 
   /**
    * start callback for speech synth. (Invoked when speaking starts)
-   * @param utterance text
+   * 
+   * @param utterance
+   *          text
    * @return the same text
    */
   public String publishStartSpeaking(String utterance);
 
   /**
    * stop callback for speech synth. (Invoked when speaking stops.)
-   * @param utterance text
+   * 
+   * @param utterance
+   *          text
    * @return text
    */
   public String publishEndSpeaking(String utterance);
@@ -77,7 +84,18 @@ public interface SpeechSynthesis extends NameProvider {
   public void addEar(SpeechRecognizer ear);
 
   public void onRequestConfirmation(String text);
-  
+
   public byte[] generateByteAudio(String toSpeak) throws IOException;
 
+  public abstract boolean getEngineStatus();
+
+  public abstract String getEngineError();
+
+  public abstract void setEngineStatus(boolean engineStatus);
+
+  public abstract void setEngineError(String engineError);
+
+  public abstract void setKeys(String keyId, String keyIdSecret);
+
+  public abstract String[] getKeys();
 }

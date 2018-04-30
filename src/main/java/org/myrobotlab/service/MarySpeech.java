@@ -48,9 +48,9 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
 
   private String maryBase = "mary";
 
+  // stored inside json
   String audioEffects;
-  String voice;
-  transient public Set<String> voices = null;
+  // end
   public String maryComponentsUrl = "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml";
 
   public MarySpeech(String reservedKey) {
@@ -60,35 +60,35 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
 
   @Override
   public List<String> getVoices() {
-    List<String> list = new ArrayList<>(marytts.getAvailableVoices());
+    List<String> list = null;
+    try {
+      list = new ArrayList<>(marytts.getAvailableVoices());
+      setEngineError("Ready");
+      setEngineStatus(true);
+
+    } catch (Exception e) {
+      return null;
+    }
     log.info("{} has {} voices", getName(), list.size());
     for (int i = 0; i < list.size(); ++i) {
       log.info(list.get(i));
     }
-    return list;
+    voiceList = list;
+    return voiceList;
   }
 
   @Override
   public boolean setVoice(String voice) {
-    if (voice == null || voice.isEmpty()) {
-      voice = "cmu-slt-hsmm";
-    }
-    try {
-      marytts.setVoice(voice);
+    if (subSetVoice(voice)) {
+      try {
+        marytts.setVoice(voice);
+        return true;
+      } catch (IllegalArgumentException e) {
+        error("Unknown MarySpeech Voice : " + voice);
 
-    } catch (IllegalArgumentException e) {
-      error("Unknown MarySpeech Voice : " + voice);
-      return false;
+      }
     }
-    this.voice = voice;
-    broadcastState();
-    info(this.getIntanceName() + " set voice to : " + voice);
-    return true;
-  }
-
-  @Override
-  public String getVoice() {
-    return marytts.getVoice();
+    return false;
   }
 
   public void setAudioEffects(String audioEffects) {
@@ -166,6 +166,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
       // mary.setVoice("cmu-slt-hsmm");
       mary.getVoices();
       // mary.speak("world");
+      mary.speak("");
       mary.setAudioEffects("");
       mary.setVolume(0.9f);
       mary.speakBlocking("Hello world");
@@ -176,6 +177,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
       // test audioeffect on cached text
       mary.setAudioEffects("FIRFilter+Robot(amount=50)");
       mary.speak("Hello world");
+
       // mary.speakBlocking("my name is worky");
       // mary.speakBlocking("I am Mary TTS and I am open source");
       // mary.speakBlocking("and I will evolve quicker than any closed source
@@ -221,22 +223,20 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
     System.setProperty("mary.downloadDir", new File(maryBase + "/download").getPath());
     System.setProperty("mary.installedDir", new File(maryBase + "/installed").getPath());
 
+    setEngineError("Starting...");
+    setEngineStatus(false);
+
     try {
       marytts = new LocalMaryInterface();
     } catch (Exception e) {
       Logging.logError(e);
+      setEngineError("LocalMaryInterface KO");
+      setEngineStatus(false);
     }
 
     audioCacheExtension = "wav";
-    audioFile = (AudioFile) startPeer("audioFile");
-    audioFile.startService();
-    subscribe(audioFile.getName(), "publishAudioStart");
-    subscribe(audioFile.getName(), "publishAudioEnd");
-    // attach a listener when the audio file ends playing.
-    audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
 
-    voices = marytts.getAvailableVoices();
-    setVoice(this.voice);
+    subSpeechStartService();
     if (audioEffects == null) {
       audioEffects = "";
       audioCacheParameters = audioEffects;
@@ -298,7 +298,9 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
     try {
       maryOutput = marytts.generateAudio(toSpeak);
     } catch (SynthesisException e) {
-      error("MarySpeech cannot generate audiofile : %s,e");
+      setEngineError("MarySpeech cannot generate audiofile");
+      setEngineStatus(false);
+      error(getEngineError() + " : %s,e");
     }
 
     DDSAudioInputStream outputAudio = new DDSAudioInputStream(new BufferedDoubleDataSource(MaryAudioUtils.getSamplesAsDoubleArray(maryOutput)), maryOutput.getFormat());
@@ -306,6 +308,18 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
     AudioSystem.write(outputAudio, AudioFileFormat.Type.WAVE, outputStream);
     return outputStream.toByteArray();
 
+  }
+
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public String[] getKeys() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

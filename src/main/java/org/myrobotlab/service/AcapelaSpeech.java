@@ -509,4 +509,16 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
     return null;
   }
 
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public String[] getKeys() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }

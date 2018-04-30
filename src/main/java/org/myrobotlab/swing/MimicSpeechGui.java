@@ -33,13 +33,13 @@ import org.myrobotlab.swing.abstracts.AbstractSpeechSynthesisGui;
 import org.slf4j.Logger;
 import java.io.IOException;
 
-public class MarySpeechGui extends AbstractSpeechSynthesisGui implements ActionListener {
+public class MimicSpeechGui extends AbstractSpeechSynthesisGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(MarySpeechGui.class);
+  public final static Logger log = LoggerFactory.getLogger(MimicSpeechGui.class);
 
 
-  public MarySpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
+  public MimicSpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
    
 

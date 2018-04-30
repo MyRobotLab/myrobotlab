@@ -1,25 +1,18 @@
 package org.myrobotlab.service;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioListener;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 import com.amazonaws.ClientConfiguration;
@@ -33,7 +26,6 @@ import com.amazonaws.services.polly.AmazonPollyClient;
 import com.amazonaws.services.polly.AmazonPollyClientBuilder;
 import com.amazonaws.services.polly.model.DescribeVoicesRequest;
 import com.amazonaws.services.polly.model.DescribeVoicesResult;
-import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
 import com.amazonaws.services.polly.model.Voice;
@@ -63,38 +55,53 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
 
   transient Map<String, Voice> voiceMap = new HashMap<String, Voice>();
   transient Map<String, Voice> langMap = new HashMap<String, Voice>();
-  String voice;
-
-  private String keyIdSecret;
-  private String keyId;
-  public boolean credentialsError = false;
 
   public Polly(String n) {
     super(n);
   }
 
-  public void setKey(String keyId, String keyIdSecret) {
-    this.keyId = keyId;
-    this.keyIdSecret = keyIdSecret;
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    security.addSecret("amazon.polly.user.key", keyId);
+    security.addSecret("amazon.polly.user.secret", keyIdSecret);
+    security.saveStore();
+    setVoice(getVoice());
+    setEngineError("Ready");
+    speak("ok");
+
+    ;
+    broadcastState();
+  }
+
+  @Override
+  public String[] getKeys() {
+    String[] Keys = new String[2];
+    security.loadStore();
+    Keys[0] = security.getSecret("amazon.polly.user.key");
+    Keys[1] = security.getSecret("amazon.polly.user.secret");
+    return Keys;
   }
 
   @Override
   public List<String> getVoices() {
     getPolly();
-    return new ArrayList<String>(voiceMap.keySet());
+    voiceList.clear();
+    voiceList.addAll(voiceMap.keySet());
+    return voiceList;
   }
 
   @Override
   public boolean setVoice(String voice) {
-    getPolly();
-    if (voiceMap.containsKey(voice)) {
-      log.info("setting voice to {}", voice);
-      awsVoice = voiceMap.get(voice);
-      this.voice = voice;
-      this.language = awsVoice.getLanguageCode();
-      return true;
+    if (subSetVoice(voice)) {
+      try {
+        awsVoice = voiceMap.get(voice);
+        // this.language = awsVoice.getLanguageCode();
+        return true;
+      } catch (IllegalArgumentException e) {
+        error("Unknown Polly Voice : " + voice);
+
+      }
     }
-    log.info("could not set voice to {}", voice);
     return false;
   }
 
@@ -123,24 +130,17 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
       log.info("{} {} - {}", i, voice.getName(), voice.getLanguageCode());
     }
 
-    // set default voice
-    if (voice == null) {
-      voice = awsVoices.get(0).getName();
-      awsVoice = awsVoices.get(0);
-      language = awsVoice.getLanguageCode();
-      log.info("setting default voice to {}", voice);
-    }
-
   }
 
   private AmazonPollyClient getPolly() {
-    if (polly == null) {
+    String key = getKeys()[0];
+    String secret = getKeys()[1];
+    if (polly == null && key != null && !key.isEmpty() && secret != null && !secret.isEmpty()) {
       try {
-        // AWSCredentials creds = new
-        // BasicAWSCredentials("AKIAJGL6AEN37LDO3N7A", "secret-access-key");
+
         if (credentials == null) {
           // try credential chain - in case they have set env vars
-          credentials = new BasicAWSCredentials(keyId, keyIdSecret);
+          credentials = new BasicAWSCredentials(key, secret);
         }
 
         // polly = (AmazonPollyClient)
@@ -148,6 +148,8 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
         // AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_EAST_1).build();
         polly = (AmazonPollyClient) AmazonPollyClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.US_WEST_2).build();
         processVoicesRequest();
+        setEngineError("Online");
+        setEngineStatus(true);
       } catch (Exception e) {
         try {
           log.error("could not get client with keys supplied - trying default chain", e);
@@ -155,16 +157,22 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
           // polly.setRegion(Region.getRegion(Regions.US_EAST_1));
           polly.setRegion(Region.getRegion(Regions.US_WEST_2));
           processVoicesRequest();
+          setEngineError("Online");
+          setEngineStatus(true);
         } catch (Exception e2) {
-          credentialsError = true;
+
           error("could not get Polly client - did you setKeys ?");
           error("Environment variables â€“ AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY or");
           error("check http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html");
           log.error("giving up", e2);
+
+          polly = null;
+          credentials = null;
         }
       }
     }
     return polly;
+
   }
 
   @Override
@@ -173,12 +181,6 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
       setVoice(langMap.get(l).getName());
     }
     this.language = l;
-  }
-
-  @Override
-  public String getVoice() {
-    getPolly();
-    return voice;
   }
 
   /**
@@ -197,6 +199,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
     // gui
     // add dependency if necessary
     meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addPeer("security", "Security", "security");
     /*
      * meta.addDependency("org.joda", "2.9.4");
      * meta.addDependency("org.apache.commons.httpclient", "4.5.2");
@@ -219,102 +222,95 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
 
   public void startService() {
     super.startService();
-    audioFile = (AudioFile) startPeer("audioFile");
-    audioFile.startService();
-    subscribe(audioFile.getName(), "publishAudioStart");
-    subscribe(audioFile.getName(), "publishAudioEnd");
-    // attach a listener when the audio file ends playing.
-    audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
+    security = (Security) startPeer("security");
+    security.startService();
+    subSpeechStartService();
+
   }
 
   public static void main(String[] args) {
-    try {
 
-      LoggingFactory.init(Level.INFO);
+    LoggingFactory.init(Level.WARN);
 
-      Polly polly = (Polly) Runtime.start("polly", "Polly");
+    Polly polly = (Polly) Runtime.start("polly", "Polly");
+    Runtime.start("gui", "SwingGui");
+    // add your amazon access key & secret
+    // use gui to do this, or force it here only ONCE :
+    // polly.setKeys("key","secret");
 
-      // add your amazon access key & secret
-      polly.setKey("xxx", "yyyyyyyyyyyyyyyyyyy");
+    List<String> voices = polly.getVoices();
+    /*
+     * for (String voice : voices) { polly.setVoice(voice); String lang =
+     * polly.getLanguage(); log.info("{} speaks {}", voice, lang);
+     * 
+     * if (lang.startsWith("es")) { polly.speak(String.
+     * format("Hola, mi nombre es %s y creo que myrobotlab es genial!", voice));
+     * } else if (lang.startsWith("en")) { polly.speak(String.
+     * format("Hi my name is %s and I think myrobotlab is great!", voice)); }
+     * else if (lang.startsWith("fr")) { polly.speak(String.
+     * format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!",
+     * voice)); } else if (lang.startsWith("nl")) { polly.speak(String.
+     * format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!",
+     * voice)); } else if (lang.startsWith("ru")) { polly.speak(String.
+     * format("Привет, меня зовут %s, и я думаю, что myrobotlab - это здорово!",
+     * voice)); } else if (lang.startsWith("ro")) { polly.speak(String.
+     * format("Buna ziua, numele meu este %s și cred că myrobotlab este mare!",
+     * voice)); } else if (lang.startsWith("ro")) { polly.speak(String.
+     * format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!",
+     * voice)); } else if (lang.startsWith("it")) { polly.speak(String.
+     * format("Ciao, il mio nome è %s e penso myrobotlab è grande!", voice)); }
+     * else if (lang.startsWith("is")) { polly.speak(String.
+     * format("Halló, Nafn mitt er %s og ég held myrobotlab er frábært!",
+     * voice)); } else if (lang.startsWith("cy")) { polly.speak(String.
+     * format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!",
+     * voice)); } else if (lang.startsWith("de")) { polly.speak(String.
+     * format("Hallo, mein Name ist %s und ich denke, myrobotlab ist toll!",
+     * voice)); } else if (lang.startsWith("da")) { polly.speak(String.
+     * format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!",
+     * voice)); } else if (lang.startsWith("sv")) { polly.speak(String.
+     * format("Hej, mitt namn %s och jag tror ElektronikWikin är stor!",
+     * voice)); } else if (lang.startsWith("pl")) { polly.speak(String.
+     * format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!",
+     * voice)); } else if (lang.startsWith("tr")) { polly.speak(String.
+     * format("Merhaba, adım adım %s ve myrobotlab'ın harika olduğunu düşünüyorum!"
+     * , voice)); } else if (lang.startsWith("pt")) { polly.speak(String.
+     * format("Olá, meu nome é %s e eu acho que myrobotlab é ótimo!！", voice));
+     * } else if (lang.startsWith("ja")) {
+     * polly.speak(String.format("こんにちは、私の名前は%sで、私はmyrobotlabが素晴らしいと思います！",
+     * voice)); } else { log.info("dunno"); } }
+     * 
+     * polly.setVoice("Russel"); polly.setVoice("Nicole");
+     * 
+     * polly.setVoice("Brian"); polly.setVoice("Amy"); polly.setVoice("Emma");
+     * 
+     * polly.setVoice("Brian"); polly.setVoice("Kimberly");
+     * 
+     * polly.setVoice("Justin"); polly.setVoice("Joey");
+     * polly.setVoice("Raveena"); polly.setVoice("Ivy");
+     * polly.setVoice("Kendra");
+     * 
+     * polly.speak("this is a new thing");
+     * 
+     * polly.
+     * speak("Hello there, i am a cloud service .. i probably sound like the echo"
+     * ); polly.speak("Here is another sentence");
+     * polly.speak("To be or not to be that is the question");
+     * polly.speakBlocking("now i am blocking my speech");
+     * polly.speakBlocking("put one foot in front of the other and"); // xxx
+     * polly.speakBlocking("soon you'll be walking out the door");
+     * polly.speak("this is a new sentence");
+     * polly.speak("to be or not to be that is the question");
+     * polly.speak("weather tis nobler in the mind to suffer");
+     * polly.speak("the slings and arrows of ourtrageous fortune");
+     * polly.speak("or to take arms against a see of troubles");
+     * 
+     * 
+     */
 
-      List<String> voices = polly.getVoices();
-      for (String voice : voices) {
-        polly.setVoice(voice);
-        String lang = polly.getLanguage();
-        log.info("{} speaks {}", voice, lang);
-        if (lang.startsWith("es")) {
-          polly.speak(String.format("Hola, mi nombre es %s y creo que myrobotlab es genial!", voice));
-        } else if (lang.startsWith("en")) {
-          polly.speak(String.format("Hi my name is %s and I think myrobotlab is great!", voice));
-        } else if (lang.startsWith("fr")) {
-          polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!", voice));
-        } else if (lang.startsWith("nl")) {
-          polly.speak(String.format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!", voice));
-        } else if (lang.startsWith("ru")) {
-          polly.speak(String.format("ÐŸÑ€Ð¸Ð²ÐµÑ‚, Ð¼ÐµÐ½Ñ� Ð·Ð¾Ð²ÑƒÑ‚ %s, Ð¸ Ñ� Ð´ÑƒÐ¼Ð°ÑŽ, Ñ‡Ñ‚Ð¾ myrobotlab - Ñ�Ñ‚Ð¾ Ð·Ð´Ð¾Ñ€Ð¾Ð²Ð¾!", voice));
-        } else if (lang.startsWith("ro")) {
-          polly.speak(String.format("Buna ziua, numele meu este %s È™i cred cÄƒ myrobotlab este mare!", voice));
-        } else if (lang.startsWith("ro")) {
-          polly.speak(String.format("Witam, nazywam siÄ™ %s i myÅ›lÄ™, Å¼e myrobotlab jest Å›wietny!", voice));
-        } else if (lang.startsWith("it")) {
-          polly.speak(String.format("Ciao, il mio nome Ã¨ %s e penso myrobotlab Ã¨ grande!", voice));
-        } else if (lang.startsWith("is")) {
-          polly.speak(String.format("HallÃ³, Nafn mitt er %s og ég held myrobotlab er frÃ¡bÃ¦rt!", voice));
-        } else if (lang.startsWith("cy")) {
-          polly.speak(String.format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!", voice));
-        } else if (lang.startsWith("de")) {
-          polly.speak(String.format("Hallo, mein Name ist %s und ich denke, myrobotlab ist toll!", voice));
-        } else if (lang.startsWith("da")) {
-          polly.speak(String.format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!", voice));
-        } else if (lang.startsWith("sv")) {
-          polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin Ã¤r stor!", voice));
-        } else if (lang.startsWith("pl")) {
-          polly.speak(String.format("Witam, nazywam siÄ™ %s i myÅ›lÄ™, Å¼e myrobotlab jest Å›wietny!", voice));
-        } else if (lang.startsWith("tr")) {
-          polly.speak(String.format("Merhaba, adÄ±m adÄ±m %s ve myrobotlab'Ä±n harika olduÄŸunu dÃ¼ÅŸÃ¼nÃ¼yorum!", voice));
-        } else if (lang.startsWith("pt")) {
-          polly.speak(String.format("OlÃ¡, meu nome é %s e eu acho que myrobotlab é Ã³timo!ï¼�", voice));
-        } else if (lang.startsWith("ja")) {
-          polly.speak(String.format("ã�“ã‚“ã�«ã�¡ã�¯ã€�ç§�ã�®å��å‰�ã�¯%sã�§ã€�ç§�ã�¯myrobotlabã�Œç´ æ™´ã‚‰ã�—ã�„ã�¨æ€�ã�„ã�¾ã�™ï¼�", voice));
-        } else {
-          log.info("dunno");
-        }
-      }
+    polly.speakBlocking("or to take arms against a see of troubles");
+    polly.speak("the slings and arrows of ourtrageous fortune");
 
-      polly.setVoice("Russel");
-      polly.setVoice("Nicole");
-
-      polly.setVoice("Brian");
-      polly.setVoice("Amy");
-      polly.setVoice("Emma");
-
-      polly.setVoice("Brian");
-      polly.setVoice("Kimberly");
-
-      polly.setVoice("Justin");
-      polly.setVoice("Joey");
-      polly.setVoice("Raveena");
-      polly.setVoice("Ivy");
-      polly.setVoice("Kendra");
-
-      polly.speak("this is a new thing");
-
-      polly.speak("Hello there, i am a cloud service .. i probably sound like the echo");
-      polly.speak("Here is another sentence");
-      polly.speak("To be or not to be that is the question");
-      polly.speakBlocking("now i am blocking my speech");
-      polly.speakBlocking("put one foot in front of the other and");
-      // xxx
-      polly.speakBlocking("soon you'll be walking out the door");
-      polly.speak("this is a new sentence");
-      polly.speak("to be or not to be that is the question");
-      polly.speak("weather tis nobler in the mind to suffer");
-      polly.speak("the slings and arrows of ourtrageous fortune");
-      polly.speak("or to take arms against a see of troubles");
-
-    } catch (Exception e) {
-      log.error("Polly main threw", e);
-    }
+    log.info("finished");
   }
 
   /*
@@ -329,12 +325,15 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
   public byte[] generateByteAudio(String toSpeak) {
     try {
       AmazonPollyClient polly = getPolly();
+      awsVoice = voiceMap.get(getVoice());
       SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(awsVoice.getId()).withOutputFormat(audioCacheExtension);
       SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
       InputStream data = synthRes.getAudioStream();
       return FileIO.toByteArray(data);
     } catch (Exception e) {
       log.error("Polly generateByteAudio threw, API error ? : ", e);
+      setEngineError("generateByteAudio failed");
+      setEngineStatus(false);
       return null;
     }
   }

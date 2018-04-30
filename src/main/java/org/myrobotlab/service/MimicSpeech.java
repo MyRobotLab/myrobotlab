@@ -1,53 +1,67 @@
 package org.myrobotlab.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
-import org.myrobotlab.arduino.ArduinoUtils;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.data.AudioData;
-import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.service.interfaces.AudioListener;
 import org.slf4j.Logger;
 
-public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener {
+public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListener {
   public final static Logger log = LoggerFactory.getLogger(MimicSpeech.class);
   private static final long serialVersionUID = 1L;
-  private String currentVoice = "slt";
+
+  // end
   // TODO: make this cross platform..
-  private String mimicExecutable = "mimic\\mimic.exe";
-  private HashSet<String> voices = new HashSet<String>();
+  private String mimicFolder = "mimic";
+
+  private String mimicExecutable = mimicFolder + File.separator + "mimic.exe";
+  public String mimicOutputFilePath = System.getProperty("user.dir") + File.separator + mimicFolder + File.separator;
 
   public MimicSpeech(String reservedKey) {
     super(reservedKey);
-    // bootstrap the voices
-    getVoices();
   }
 
   @Override
   public List<String> getVoices() {
-    ArrayList<String> args = new ArrayList<String>();
-    args.add("-lv");
-    // args.add(getVoice());
-    String res = ArduinoUtils.RunAndCatch(mimicExecutable, args);
-    System.out.println("Stdout: " + res);
-    for (String p : res.split(" ")) {
-      voices.add(p);
-    }
-    ArrayList<String> vs = new ArrayList<String>(voices);
-    return vs;
-  }
+    List<String> list = new ArrayList<String>();
+    if (Platform.getLocalInstance().isWindows()) {
 
-  @Override
-  public boolean setVoice(String voice) {
-    if (voices.contains(voice)) {
-      currentVoice = voice;
-      return true;
+      String cmd = Runtime.execute(System.getProperty("user.dir") + File.separator + mimicExecutable, "-lv");
+
+      try {
+
+        String voiceLine = cmd.substring(cmd.indexOf("Voices available: ") + 18, cmd.length()).replace("Exit Value : 0", "").replaceAll("\\s{2,}", " ");
+
+        log.info("voiceLine:" + voiceLine);
+        for (String p : voiceLine.split(" ")) {
+          if (p != " ") {
+            list.add(p);
+            log.info("voice added :" + p);
+          }
+        }
+        voiceList = list;
+      } catch (Exception e) {
+        log.debug(e.toString());
+      }
+
     } else {
-      return false;
+      voiceList.clear();
+      voiceList.add("Default");
+      error("Platform not yet supported");
+
+      list = null;
     }
+    return list;
   }
 
   public List<String> getLanguages() {
@@ -62,52 +76,11 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
     log.warn("not yet implemented");
   }
 
-
   @Override
-  public AudioData speak(String toSpeak) {
-    // TODO Auto-generated method stub
-    // TODO: what's up with the audio data return value?!
-    return null;
-  }
-
-  @Override
-  public boolean speakBlocking(String toSpeak) {
-    // TODO Auto-generated method stub
-    invoke("publishStartSpeaking");
-    // TODO: play the audio..
-    ArrayList<String> args = new ArrayList<String>();
-    args.add("-voice");
-    args.add(getVoice());
-    args.add(toSpeak);
-    String res = ArduinoUtils.RunAndCatch(mimicExecutable, args);
-    invoke("publishEndSpeaking");
-    return false;
-  }
-
-  @Override
-  public void setVolume(float volume) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public float getVolume() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public String getVoice() {
-    // TODO Auto-generated method stub
-    return currentVoice;
-  }
-
-
-  public String getMimicExecutable() {
-    return mimicExecutable;
-  }
-
-  public void setMimicExecutable(String mimicExecutable) {
-    this.mimicExecutable = mimicExecutable;
+  public void startService() {
+    super.startService();
+    audioCacheExtension = "wav";
+    subSpeechStartService();
   }
 
   static public ServiceType getMetaData() {
@@ -116,6 +89,8 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
     meta.addDescription("Speech synthesis based on Mimic from the MyCroft AI project.");
     meta.addCategory("speech", "sound");
     meta.addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.setSponsor("Kwatters");
     // meta.addDependency("marytts", "5.2");
     // meta.addDependency("com.sun.speech.freetts", "1.2");
     // meta.addDependency("opennlp", "1.6");
@@ -125,21 +100,53 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements TextListener
   }
 
   public static void main(String[] args) throws Exception {
+    Runtime.start("gui", "SwingGui");
     MimicSpeech mimic = (MimicSpeech) Runtime.createAndStart("mimic", "MimicSpeech");
-    List<String> voices = mimic.getVoices();
-    for (int i = 0; i < voices.size(); ++i) {
-      log.info("voice " + voices.get(i));
-    }
-    mimic.speakBlocking("hello hello, this is a test .. testing 1 2 3");
-    mimic.speakBlocking("test me");
-    mimic.speakBlocking("Hello world");
-    mimic.speakBlocking("i am mimic");
-    mimic.speakBlocking(
-        "to be or not to be that is the question weather tis nobler in the mind to suffer the slings and arrows of outrageous fortune or to take arms against a sea of troubles");
+    LoggingFactory.init(Level.INFO);
+
+    mimic.speakBlocking("hello \"world\", it's a  test .. testing 1 2 3 , unicode éléphant");
   }
 
   @Override
-  public byte[] generateByteAudio(String toSpeak) {
+  public byte[] generateByteAudio(String toSpeak) throws IOException {
+    toSpeak = toSpeak.replace("\"", "\"\"");
+    String fileName = mimicOutputFilePath + UUID.randomUUID().toString() + "." + audioCacheExtension;
+    String command = System.getProperty("user.dir") + File.separator + mimicExecutable + " -voice " + getVoice() + " -o \"" + fileName + "\" -t \"" + toSpeak + "\"";
+    String cmd = "null";
+    File f = new File(fileName);
+
+    if (Platform.getLocalInstance().isWindows()) {
+
+      f.delete();
+      cmd = Runtime.execute("cmd.exe", "/c", command);
+
+      log.info(cmd);
+      if (!f.exists()) {
+        log.error("mimic caused an error : " + cmd);
+      } else {
+        if (f.length() == 0) {
+          log.error("mimic caused an error : empty file " + cmd);
+        } else {
+          byte[] mp3File = FileIO.toByteArray(f);
+          f.delete();
+          return mp3File;
+        }
+
+      }
+    }
+    setEngineError("OS not supported");
+    setEngineStatus(false);
+    return null;
+  }
+
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public String[] getKeys() {
     // TODO Auto-generated method stub
     return null;
   }
