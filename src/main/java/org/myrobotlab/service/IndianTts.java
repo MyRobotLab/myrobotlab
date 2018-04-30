@@ -26,7 +26,7 @@ import org.slf4j.Logger;
  * Indian TTS speech to text service based on http://indiantts.com This code is
  * basically all the same as NaturalReaderSpeech by Kwatters...
  */
-public class IndianTts extends AbstractSpeechSynthesis implements TextListener, AudioListener {
+public class IndianTts extends AbstractSpeechSynthesis {
 
   private static final long serialVersionUID = 1L;
 
@@ -61,10 +61,10 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
   @Override
   public List<String> getVoices() {
 
-    voiceList.clear();
-    voiceList.add("Default");
+    getVoiceList().clear();
+    getVoiceList().add("Default");
 
-    return voiceList;
+    return getVoiceList();
   }
 
   public String getMp3Url(String toSpeak) {
@@ -168,7 +168,7 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
 
     indianTts.speakBlocking("नमस्ते भारत मित्र");
 
-    indianTts.speak("नमस्ते भारत मित्र");
+    indianTts.speak("नमस्ते नमस्ते भारत मित्र");
 
     // }
   }

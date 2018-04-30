@@ -14,10 +14,8 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.interfaces.AudioListener;
 import org.slf4j.Logger;
 
 /**
@@ -28,7 +26,7 @@ import org.slf4j.Logger;
  * @author moz4r
  *
  */
-public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListener {
+public class LocalSpeech extends AbstractSpeechSynthesis {
 
   private static final long serialVersionUID = 1L;
 
@@ -61,12 +59,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
       String cmd = Runtime.execute(System.getProperty("user.dir") + File.separator + windowsTtsExecutable, "-V");
 
       String[] lines = cmd.split(System.getProperty("line.separator"));
-      voiceList = (List<String>) Arrays.asList(lines);
+      setVoiceList((List<String>) Arrays.asList(lines));
 
-      for (int i = 0; i < voiceList.size() && i < 10; i++) {
+      for (int i = 0; i < getVoiceList().size() && i < 10; i++) {
         try {
-          int voiceNumber = Integer.parseInt((voiceList.get(i).substring(0, 2)).replace(" ", ""));
-          String voiceName = voiceList.get(i).substring(2, voiceList.get(i).length());
+          int voiceNumber = Integer.parseInt((getVoiceList().get(i).substring(0, 2)).replace(" ", ""));
+          String voiceName = getVoiceList().get(i).substring(2, getVoiceList().get(i).length());
           log.info("voice : " + voiceName + " index : " + i);
           list.add(voiceName);
           voiceMap.put(voiceName, voiceNumber + "");
@@ -78,12 +76,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
       }
 
     } else {
-      voiceList.clear();
-      voiceList.add("Default");
+      getVoiceList().clear();
+      getVoiceList().add("Default");
       voiceMap.clear();
       voiceMap.put("Default", "0");
     }
-    voiceList = list;
+    setVoiceList(list);
     return list;
   }
 
@@ -127,7 +125,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
       error("generic Linux local tts not yet implemented, want help ?");
     }
     if (Platform.getLocalInstance().isMac()) {
-      this.audioCacheExtension = "AIFF";
+      this.setAudioCacheExtension("AIFF");
     }
     subSpeechStartService();
   }
@@ -164,10 +162,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
     String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voiceMap.get(getVoice()) + " -t -o " + ttsExeOutputFilePath + uuid
         + " \"" + toSpeak + " \"";
     String cmd = "null";
-    File f = new File(ttsExeOutputFilePath + uuid + "0." + audioCacheExtension);
+    File f = new File(ttsExeOutputFilePath + uuid + "0." + getAudioCacheExtension());
     // windows os local tts
     if (Platform.getLocalInstance().isWindows()) {
-      f = new File(ttsExeOutputFilePath + uuid + "0." + audioCacheExtension);
+      f = new File(ttsExeOutputFilePath + uuid + "0." + getAudioCacheExtension());
       f.delete();
       cmd = Runtime.execute("cmd.exe", "/c", command);
     }

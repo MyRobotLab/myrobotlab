@@ -14,10 +14,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.interfaces.AudioListener;
 import org.slf4j.Logger;
 
-public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListener {
+public class MimicSpeech extends AbstractSpeechSynthesis {
   public final static Logger log = LoggerFactory.getLogger(MimicSpeech.class);
   private static final long serialVersionUID = 1L;
 
@@ -51,14 +50,14 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListene
             log.info("voice added :" + p);
           }
         }
-        voiceList = list;
+        setVoiceList(list);
       } catch (Exception e) {
         log.debug(e.toString());
       }
 
     } else {
-      voiceList.clear();
-      voiceList.add("Default");
+      getVoiceList().clear();
+      getVoiceList().add("Default");
       error("Platform not yet supported");
 
       list = null;
@@ -81,7 +80,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListene
   @Override
   public void startService() {
     super.startService();
-    audioCacheExtension = "wav";
+    setAudioCacheExtension("wav");
     subSpeechStartService();
 
   }
@@ -113,7 +112,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListene
   @Override
   public byte[] generateByteAudio(String toSpeak) throws IOException {
     toSpeak = toSpeak.replace("\"", "\"\"");
-    String fileName = mimicOutputFilePath + UUID.randomUUID().toString() + "." + audioCacheExtension;
+    String fileName = mimicOutputFilePath + UUID.randomUUID().toString() + "." + getAudioCacheExtension();
     String command = System.getProperty("user.dir") + File.separator + mimicExecutable + " -voice " + getVoice() + " -o \"" + fileName + "\" -t \"" + toSpeak + "\"";
     String cmd = "null";
     File f = new File(fileName);

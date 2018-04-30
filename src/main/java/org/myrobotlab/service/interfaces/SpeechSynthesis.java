@@ -59,7 +59,7 @@ public interface SpeechSynthesis extends NameProvider {
 
   public abstract float getVolume();
 
-  public String getVoice();
+  public abstract String getVoice();
 
   /**
    * start callback for speech synth. (Invoked when speaking starts)
@@ -68,7 +68,7 @@ public interface SpeechSynthesis extends NameProvider {
    *          text
    * @return the same text
    */
-  public String publishStartSpeaking(String utterance);
+  public abstract String publishStartSpeaking(String utterance);
 
   /**
    * stop callback for speech synth. (Invoked when speaking stops.)
@@ -77,13 +77,13 @@ public interface SpeechSynthesis extends NameProvider {
    *          text
    * @return text
    */
-  public String publishEndSpeaking(String utterance);
+  public abstract String publishEndSpeaking(String utterance);
 
-  public String getLocalFileName(SpeechSynthesis provider, String toSpeak) throws UnsupportedEncodingException;
+  public abstract String getLocalFileName(SpeechSynthesis provider, String toSpeak) throws UnsupportedEncodingException;
 
-  public void addEar(SpeechRecognizer ear);
+  public abstract void addEar(SpeechRecognizer ear);
 
-  public void onRequestConfirmation(String text);
+  public abstract void onRequestConfirmation(String text);
 
   public byte[] generateByteAudio(String toSpeak) throws IOException;
 
@@ -95,11 +95,19 @@ public interface SpeechSynthesis extends NameProvider {
 
   public abstract void setEngineError(String engineError);
 
-  public abstract void setKeys(String keyId, String keyIdSecret);
-  
-  
+  public void setKeys(String keyId, String keyIdSecret);
 
-  public abstract String[] getKeys();
+  public String[] getKeys();
+
   public String getVoiceInJsonConfig();
+
   public void setVoiceInJsonConfig(String voice);
+
+  public abstract String getAudioCacheExtension();
+
+  public abstract void setAudioCacheExtension(String audioCacheExtension);
+
+  public abstract List<String> getVoiceList();
+
+  public abstract void setVoiceList(List<String> voiceList);
 }

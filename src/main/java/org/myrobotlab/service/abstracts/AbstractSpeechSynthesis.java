@@ -31,12 +31,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   private String lastUtterance = "";
   private boolean engineStatus = false;
   private String engineError = "Not initialized";
-  protected transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
+  transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
   protected String language;
-  protected transient AudioFile audioFile = null;
+  transient AudioFile audioFile = null;
   protected transient Security security = null;
-  protected String audioCacheExtension = "mp3";
-  protected List<String> voiceList = new ArrayList<String>();
+  private String audioCacheExtension = "mp3";
+  private transient List<String> voiceList = new ArrayList<String>();
   // useful to store personal voice parameter inside json config
   // this var receive info from services
 
@@ -165,7 +165,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak) throws UnsupportedEncodingException {
     if (provider.getVoice() != null) {
       return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator
-          + URLEncoder.encode(audioCacheParameters, "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "." + audioCacheExtension;
+          + URLEncoder.encode(audioCacheParameters, "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "." + getAudioCacheExtension();
     } else {
       return null;
     }
@@ -296,9 +296,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   protected boolean subSetVoice(String voice) {
     getVoices();
     if (voice == null || voice.isEmpty()) {
-      voice = voiceList.get(0);
+      voice = getVoiceList().get(0);
     }
-    if (voiceList.contains(voice)) {
+    if (getVoiceList().contains(voice)) {
       setVoiceInJsonConfig(voice);
       broadcastState();
       info(this.getIntanceName() + " set voice to : " + voice);
@@ -314,5 +314,21 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public String getVoice() {
     return getVoiceInJsonConfig();
 
+  }
+
+  public List<String> getVoiceList() {
+    return voiceList;
+  }
+
+  public void setVoiceList(List<String> voiceList) {
+    this.voiceList = voiceList;
+  }
+
+  public String getAudioCacheExtension() {
+    return audioCacheExtension;
+  }
+
+  public void setAudioCacheExtension(String audioCacheExtension) {
+    this.audioCacheExtension = audioCacheExtension;
   }
 }
