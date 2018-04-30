@@ -1,6 +1,6 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author moz4r  (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
@@ -33,21 +33,19 @@ import org.myrobotlab.swing.abstracts.AbstractSpeechSynthesisGui;
 import org.slf4j.Logger;
 import java.io.IOException;
 
-public class MarySpeechGui extends AbstractSpeechSynthesisGui implements ActionListener {
+public class PollyGui extends AbstractSpeechSynthesisGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(MarySpeechGui.class);
+  public final static Logger log = LoggerFactory.getLogger(PollyGui.class);
 
 
-  public MarySpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
+  public PollyGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-   
 
+    // here we are inside abstracted speechGuiPanel, we add api section
+    speechGuiPanel.add(apiKeyLabel);
+    speechGuiPanel.add(apiKeylPanel);
+  
   }
-
-
-
-
-
 
 }

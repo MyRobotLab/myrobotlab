@@ -64,96 +64,70 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
   transient public final static Logger log = LoggerFactory.getLogger(VoiceRss.class);
   private static final long serialVersionUID = 1L;
-  // default voice
-  public String voice = "fr-fr";
-  public HashSet<String> voices = new HashSet<String>();
-  public String key = "0000";
+  // stored inside json, this must be UNIQUE identifiers
+  String voirssVoice;
+  // end
+
   public Integer rate = 0;
-  public boolean credentialsError = false;
 
   public VoiceRss(String n) {
     super(n);
 
-    // TODO: be country/language aware when asking for voices?
-    // maybe have a get voices by language/locale
-    // Arabic
-
-    voices.add("ca-es");// Catalan
-    voices.add("zh-cn");// Chinese (China)
-    voices.add("cn");// Chinese (China)
-    voices.add("zh-hk");// Chinese (Hong Kong)
-    voices.add("zh-tw");// Chinese (Taiwan)
-    voices.add("da-dk");// Danish
-    voices.add("nl-nl");// Dutch
-    voices.add("en-au");// English (Australia)
-    voices.add("en-ca");// English (Canada)
-    voices.add("en-gb");// English (Great Britain)
-    voices.add("en-in");// English (India)
-    voices.add("en-us");// English (United States)
-    voices.add("en");// English (United States)
-    voices.add("fi-fi");// Finnish
-    voices.add("fr-ca");// French (Canada)
-    voices.add("fr-fr");// French (France)
-    voices.add("fr");// French (France)
-    voices.add("de-de");// German
-    voices.add("de");// German
-    voices.add("it-it");// Italian
-    voices.add("ja-jp");// Japanese
-    voices.add("ja");// Japanese
-    voices.add("jp");// Japanese
-    voices.add("ko-kr");// Korean
-    voices.add("nb-no");// Norwegian
-    voices.add("pl-pl");// Polish
-    voices.add("pt-br");// Portuguese (Brazil)
-    voices.add("pt-pt");// Portuguese (Portugal)
-    voices.add("ru-ru");// Russian
-    voices.add("es-mx");// Spanish (Mexico)
-    voices.add("es-es");// Spanish (Spain)
-    voices.add("es");// Spanish (Spain)
-    voices.add("sv-se");// Swedish (Sweden)
   }
 
   public void startService() {
     super.startService();
-    audioFile = (AudioFile) startPeer("audioFile");
-    audioFile.startService();
-    subscribe(audioFile.getName(), "publishAudioStart");
-    subscribe(audioFile.getName(), "publishAudioEnd");
-    // attach a listener when the audio file ends playing.
-    audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
-  }
+    security = (Security) startPeer("security");
 
-  public AudioFile getAudioFile() {
-    return audioFile;
+    // TODO: be country/language aware when asking for voiceList?
+    // maybe have a get voiceList by language/locale
+    // Arabic
+
+    voiceList.add("ca-es");// Catalan
+    voiceList.add("zh-cn");// Chinese (China)
+    voiceList.add("cn");// Chinese (China)
+    voiceList.add("zh-hk");// Chinese (Hong Kong)
+    voiceList.add("zh-tw");// Chinese (Taiwan)
+    voiceList.add("da-dk");// Danish
+    voiceList.add("nl-nl");// Dutch
+    voiceList.add("en-au");// English (Australia)
+    voiceList.add("en-ca");// English (Canada)
+    voiceList.add("en-gb");// English (Great Britain)
+    voiceList.add("en-in");// English (India)
+    voiceList.add("en-us");// English (United States)
+    voiceList.add("en");// English (United States)
+    voiceList.add("fi-fi");// Finnish
+    voiceList.add("fr-ca");// French (Canada)
+    voiceList.add("fr-fr");// French (France)
+    voiceList.add("fr");// French (France)
+    voiceList.add("de-de");// German
+    voiceList.add("de");// German
+    voiceList.add("it-it");// Italian
+    voiceList.add("ja-jp");// Japanese
+    voiceList.add("ja");// Japanese
+    voiceList.add("jp");// Japanese
+    voiceList.add("ko-kr");// Korean
+    voiceList.add("nb-no");// Norwegian
+    voiceList.add("pl-pl");// Polish
+    voiceList.add("pt-br");// Portuguese (Brazil)
+    voiceList.add("pt-pt");// Portuguese (Portugal)
+    voiceList.add("ru-ru");// Russian
+    voiceList.add("es-mx");// Spanish (Mexico)
+    voiceList.add("es-es");// Spanish (Spain)
+    voiceList.add("es");// Spanish (Spain)
+    voiceList.add("sv-se");// Swedish (Sweden)
+    setEngineError("Online");
+    setEngineStatus(true);
+    subSpeechStartService();
   }
 
   @Override
-  public ArrayList<String> getVoices() {
-    return new ArrayList<String>(voices);
-  }
-
-  @Override
-  public String getVoice() {
-    return voice;
-  }
-
-  @Override
-  public boolean setVoice(String voice) {
-    // backward compatibility because voicerss doesnt support setvoice
-    // return true;
-    return voices.contains(voice);
-  }
-
-  public String getKey() {
-    return key;
+  public List<String> getVoices() {
+    return voiceList;
   }
 
   public Integer getRate() {
     return rate;
-  }
-
-  public void setKey(String key) {
-    this.key = key;
   }
 
   public void setRate(Integer rate) {
@@ -178,9 +152,6 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     log.warn("not yet implemented");
   }
 
-  // HashSet<String> audioFiles = new HashSet<String>();
-  Stack<String> audioFiles = new Stack<String>();
-
   public String getLocalDirectory(SpeechSynthesis provider) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.
 
@@ -190,10 +161,12 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
-
+    Runtime.start("gui", "SwingGui");
     VoiceRss speech = (VoiceRss) Runtime.start("speech", "VoiceRss");
-    speech.setKey("your-api");
-    speech.setLanguage("en-gb");
+    // add your api key
+    // use gui to do this, or force it here only ONCE :
+    // speech.setKeys("xxx");
+    // speech.setVoice("en-gb");
     speech.setRate(0);
 
     // TODO: fix the volume control
@@ -219,6 +192,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     meta.addCategory("speech");
     meta.setSponsor("moz4r");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addPeer("security", "Security", "security");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.setCloudService(true);
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
@@ -229,7 +203,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
   @Override
   public byte[] generateByteAudio(String toSpeak) throws UnsupportedEncodingException {
-    VoiceProvider tts = new VoiceProvider(getKey());
+    VoiceProvider tts = new VoiceProvider(getKeys()[0]);
 
     VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice()); // Languages.English_UnitedStates
     params.setCodec(AudioCodec.MP3);
@@ -242,9 +216,33 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
       return tts.speech(params);
     } catch (Exception e) {
       error("VoiceRSS crashed : %s : ", e);
+      setEngineError("API error ?");
+      setEngineStatus(false);
       return null;
     }
 
   }
 
+  public void setKeys(String keyId) {
+    setKeys(keyId, null);
+
+  }
+
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    security.addSecret("voicerss.user.api", keyId);
+    security.saveStore();
+    getVoices();
+    setVoice(this.voirssVoice);
+    broadcastState();
+
+  }
+
+  @Override
+  public String[] getKeys() {
+    String[] Keys = new String[2];
+    security.loadStore();
+    Keys[0] = security.getSecret("voicerss.user.api");
+    return Keys;
+  }
 }

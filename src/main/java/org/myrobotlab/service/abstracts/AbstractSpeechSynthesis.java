@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.Service;
@@ -13,6 +15,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.AudioFile;
+import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -25,11 +28,18 @@ import marytts.exceptions.SynthesisException;
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
-  public String lastUtterance = "";
+  private String lastUtterance = "";
+  private boolean engineStatus = false;
+  private String engineError = "Not initialized";
   protected transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
   protected String language;
   protected transient AudioFile audioFile = null;
+  protected transient Security security = null;
   protected String audioCacheExtension = "mp3";
+  protected List<String> voiceList = new ArrayList<String>();
+  // useful to store personnal voice parameter inside config
+  protected HashMap<String, String> voiceInJsonConfig = new HashMap<String, String>();
+
   // This is the format string that will be used when asking for confirmation.
   public String confirmationString = "did you say %s ?";
   /**
@@ -153,16 +163,13 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak) throws UnsupportedEncodingException {
-    if (provider.getVoice()!=null)
-    {
-    return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator
-        + URLEncoder.encode(audioCacheParameters, "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "." + audioCacheExtension;
-    }
-    else
-    {
+    if (provider.getVoice() != null) {
+      return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator
+          + URLEncoder.encode(audioCacheParameters, "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "." + audioCacheExtension;
+    } else {
       return null;
     }
-    }
+  }
 
   public byte[] cacheFile(String toSpeak) throws IOException {
 
@@ -194,7 +201,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public AudioData speak(String toSpeak) {
-    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
+
+    toSpeak = cleanUptext(toSpeak);
+
     AudioData audioData = null;
     try {
       cacheFile(toSpeak);
@@ -210,12 +219,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public boolean speakBlocking(String toSpeak) {
-    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
+    toSpeak = cleanUptext(toSpeak);
     try {
       cacheFile(toSpeak);
 
       invoke("publishStartSpeaking", toSpeak);
-      audioFile.playBlocking(AudioFile.getGlobalFileCacheDir() + File.separator + getLocalFileName(this, toSpeak));
+      audioFile.playBlocking(audioFile.getGlobalFileCacheDir() + File.separator + getLocalFileName(this, toSpeak));
       invoke("publishEndSpeaking", toSpeak);
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -224,12 +233,82 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return false;
   }
 
+  private String cleanUptext(String toSpeak) {
+
+    toSpeak = toSpeak.replaceAll("\\n", " ");
+    toSpeak = toSpeak.replaceAll("\\r", " ");
+    toSpeak = toSpeak.replaceAll("\\s{2,}", " ");
+    if (toSpeak.isEmpty() || toSpeak == " " || toSpeak == null) {
+      toSpeak = " , ";
+    }
+    return toSpeak;
+  }
+
   public AudioFile getAudioFile() {
     return audioFile;
+  }
+
+  public String getlastUtterance() {
+    return lastUtterance;
+  }
+
+  public boolean getEngineStatus() {
+    return engineStatus;
+  }
+
+  public String getEngineError() {
+    return engineError;
+  }
+
+  public void setEngineStatus(boolean engineStatus) {
+    this.engineStatus = engineStatus;
+    broadcastState();
+  }
+
+  public void setEngineError(String engineError) {
+    this.engineError = engineError;
+    broadcastState();
   }
 
   public void interrupt() {
     // never used
   }
 
+  protected void subSpeechStartService() {
+    audioFile = (AudioFile) startPeer("audioFile");
+    audioFile.startService();
+    subscribe(audioFile.getName(), "publishAudioStart");
+    subscribe(audioFile.getName(), "publishAudioEnd");
+    // attach a listener when the audio file ends playing.
+    audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
+    setVoice(voiceInJsonConfig.get(this.getClass().getSimpleName()));
+  }
+
+  public boolean setVoice(String voice) {
+    return subSetVoice(voice);
+
+  }
+
+  protected boolean subSetVoice(String voice) {
+    getVoices();
+    if (voice == null || voice.isEmpty()) {
+      voice = voiceList.get(0);
+    }
+    if (voiceList.contains(voice)) {
+      voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+      broadcastState();
+      info(this.getIntanceName() + " set voice to : " + voice);
+      setEngineError("Ready");
+      setEngineStatus(true);
+      return true;
+    } else {
+      error("Unknown " + this.getClass().getSimpleName() + " Voice : " + voice);
+      return false;
+    }
+  }
+
+  public String getVoice() {
+
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
 }

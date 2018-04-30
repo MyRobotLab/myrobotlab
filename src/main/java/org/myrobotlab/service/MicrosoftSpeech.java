@@ -335,6 +335,18 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     return null;
   }
 
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public String[] getKeys() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   /*
    * public static void main(String[] args) { try { LoggingFactory.init();
    * MicrosoftSpeech mspeech = (MicrosoftSpeech) Runtime.start("msspeech",

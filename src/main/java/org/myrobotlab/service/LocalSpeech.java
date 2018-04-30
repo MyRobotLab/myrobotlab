@@ -14,23 +14,28 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.slf4j.Logger;
 
+/**
+ * Local OS speech service
+ * 
+ * windows & macos compatible
+ *
+ * @author moz4r
+ *
+ */
 public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListener {
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
 
-  transient Integer voice = 0;
-  transient String voiceName = "0";
-
 
   private String ttsFolder = "tts";
-
 
   private String windowsTtsExecutable = ttsFolder + File.separator + "tts.exe";
   private String macOsTtsExecutable = "say";
@@ -39,56 +44,51 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   public String ttsExeOutputFilePath = System.getProperty("user.dir") + File.separator + ttsFolder + File.separator;
   boolean ttsExecutableExist;
 
-  transient Map<Integer, String> voiceMap = new HashMap<Integer, String>();
+  transient Map<String, String> voiceMap = new HashMap<String, String>();
+
 
   public LocalSpeech(String n) {
     super(n);
   }
 
-  @Override
   public List<String> getVoices() {
+    List<String> list = new ArrayList<String>();
     if (Platform.getLocalInstance().isWindows()) {
       ArrayList<String> args = new ArrayList<String>();
       args.add("-V");
       String cmd = Runtime.execute(System.getProperty("user.dir") + File.separator + windowsTtsExecutable, "-V");
+
       String[] lines = cmd.split(System.getProperty("line.separator"));
-      List<String> voiceList = (List<String>) Arrays.asList(lines);
+      voiceList = (List<String>) Arrays.asList(lines);
 
       for (int i = 0; i < voiceList.size() && i < 10; i++) {
-        // error(voiceList.get(i).substring(0,2));
-        if (voiceList.get(i).substring(0, 1).matches("\\d+")) {
-          voiceMap.put(i, voiceList.get(i).substring(2, voiceList.get(i).length()));
-          log.info("voice : " + voiceMap.get(i) + " index : " + i);
+        try {
+          int voiceNumber = Integer.parseInt((voiceList.get(i).substring(0, 2)).replace(" ", ""));
+          String voiceName = voiceList.get(i).substring(2, voiceList.get(i).length());
+          log.info("voice : " + voiceName + " index : " + i);
+          list.add(voiceName);
+          voiceMap.put(voiceName, voiceNumber + "");
+
+        } catch (Exception e) {
+          log.debug(e.toString());
         }
+
       }
-      return voiceList;
+
+    } else {
+      voiceList.clear();
+      voiceList.add("Default");
+      voiceMap.clear();
+      voiceMap.put("Default", "0");
     }
-    return null;
+    voiceList = list;
+    return list;
   }
 
-  @Override
-  public boolean setVoice(String voice) {
-    // macos get voices not necessaries
-    if (Platform.getLocalInstance().isWindows()) {
-      getVoices();
-      Integer voiceId = Integer.parseInt(voice);
-      if (voiceMap.containsKey(voiceId)) {
-        this.voiceName = voiceMap.get(voiceId);
-        this.voice = voiceId;
-        log.info("setting voice to {}", voice, "( ", voiceName, " ) ");
-        return true;
-      }
-      error("could not set voice to {}", voice);
-      return false;
-    }
-    info("could not set voice to {}", voice);
-    return false;
-  }
 
-  @Override
-  public String getVoice() {
-    return voice.toString();
-  }
+
+
+
 
   /**
    * This static method returns all the details of the class without it having
@@ -114,12 +114,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   @Override
   public void startService() {
     super.startService();
-    audioFile = (AudioFile) startPeer("audioFile");
-    audioFile.startService();
-    subscribe(audioFile.getName(), "publishAudioStart");
-    subscribe(audioFile.getName(), "publishAudioEnd");
-    // attach a listener when the audio file ends playing.
-    audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
+
     File f = new File(System.getProperty("user.dir") + File.separator + windowsTtsExecutable);
     ttsExecutableExist = true;
 
@@ -137,17 +132,17 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
     if (Platform.getLocalInstance().isMac()) {
       this.audioCacheExtension = "AIFF";
     }
-
+    subSpeechStartService();
   }
 
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-
+    Runtime.start("gui", "SwingGui");
     LocalSpeech localSpeech = (LocalSpeech) Runtime.start("localSpeech", "LocalSpeech");
     // microsoftLocalTTS.ttsExeOutputFilePath="c:\\tmp\\";
     localSpeech.getVoices();
-    localSpeech.setVoice("1");
+    // localSpeech.setVoice("1");
     localSpeech.speakBlocking("local tts");
     localSpeech.speak("unicode éléphant");
 
@@ -167,9 +162,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
 
   @Override
   public byte[] generateByteAudio(String toSpeak) throws IOException {
-
+    toSpeak=toSpeak.replace("\"", "\"\"");
     String uuid = UUID.randomUUID().toString();
-    String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voice + " -t -o " + ttsExeOutputFilePath + uuid + " \"" + toSpeak
+    String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voiceMap.get(voiceInJsonConfig.get(this.getClass().getSimpleName())) + " -t -o " + ttsExeOutputFilePath + uuid + " \"" + toSpeak
         + " \"";
     String cmd = "null";
     File f = new File(ttsExeOutputFilePath + uuid + "0." + audioCacheExtension);
@@ -199,6 +194,18 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
       }
 
     }
+    return null;
+  }
+
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public String[] getKeys() {
+    // TODO Auto-generated method stub
     return null;
   }
 

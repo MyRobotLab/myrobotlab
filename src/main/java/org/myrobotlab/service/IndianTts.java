@@ -33,11 +33,7 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
   transient public final static Logger log = LoggerFactory.getLogger(IndianTts.class);
   // default voice
 
-  public String voice = "Default";
-  public String api = "";
-  public String userid = "";
-  public boolean credentialsError = false;
-  public HashMap<String, Integer> voiceMap = new HashMap<String, Integer>();
+  private String voice = "Default";
 
   transient CloseableHttpClient client;
 
@@ -47,39 +43,30 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
 
   public void startService() {
     super.startService();
+    security = (Security) startPeer("security");
     if (client == null) {
       // new MultiThreadedHttpConnectionManager()
       client = HttpClients.createDefault();
     }
-    audioFile = (AudioFile) startPeer("audioFile");
-    audioFile.startService();
-    subscribe(audioFile.getName(), "publishAudioStart");
-    subscribe(audioFile.getName(), "publishAudioEnd");
-    // attach a listener when the audio file ends playing.
-    audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
+    subSpeechStartService();
 
-    voiceMap.put("Default", 1);
-
+    setEngineError("Online");
+    setEngineStatus(true);
   }
 
   @Override
-  public ArrayList<String> getVoices() {
-    // TODO:return the list of voices names for this.
+  public List<String> getVoices() {
 
-    ArrayList<String> voices = new ArrayList<String>();
-    voices.addAll(voices);
+    voiceList.clear();
+    voiceList.add("Default");
 
-    return null;
-  }
-
-  @Override
-  public String getVoice() {
-    return voice;
+    return voiceList;
   }
 
   public String getMp3Url(String toSpeak) {
 
-    // TODO: url encode this.
+    String userid = getKeys()[0];
+    String secret = getKeys()[1];
 
     String encoded = toSpeak;
     try {
@@ -89,11 +76,9 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
       e.printStackTrace();
     }
 
-    int voiceId = voiceMap.get(voice);
-
     // TOOD: also the speed setting is passed in as s=
 
-    String url = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + api + "&user_id=" + userid + "&action=play";
+    String url = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + secret + "&user_id=" + userid + "&action=play";
     log.info("URL FOR AUDIO:{}", url);
     return url;
   }
@@ -117,8 +102,9 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
 
       if (b == null || b.length == 0 || b.length == 81 || b.length == 47) {
         error("%s returned 0 byte file or API error !!! - it may block you", getName());
-        credentialsError = true;
         b = null;
+        setEngineError("API Error");
+        setEngineStatus(false);
       }
       EntityUtils.consume(entity);
     } catch (Exception e) {
@@ -134,15 +120,6 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
   @Override
   public String getLanguage() {
     return null;
-  }
-
-  @Override
-  public boolean setVoice(String voice) {
-    if (voiceMap.containsKey(voice)) {
-      this.voice = voice;
-      return true;
-    }
-    return false;
   }
 
   public List<String> getLanguages() {
@@ -163,6 +140,7 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     meta.addCategory("speech");
     meta.setSponsor("moz4r");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addPeer("security", "Security", "security");
     // meta.addTodo("test speak blocking - also what is the return type and
     // AudioFile audio track id ?");
     // FIXME - addPeer("httpClient","HttpClient") - to pull in dependencies -
@@ -179,15 +157,35 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     LoggingFactory.init(Level.INFO);
     // try {
     // Runtime.start("webgui", "WebGui");
-    IndianTts speech = (IndianTts) Runtime.start("speech", "IndianTts");
+    IndianTts indianTts = (IndianTts) Runtime.start("indianTts", "IndianTts");
+    Runtime.start("gui", "SwingGui");
     // demo api key
-    speech.api = "2d108780-0b86-11e6-b056-07d516fb06e1";
-    speech.userid = "80";
-    speech.speakBlocking("नमस्ते भारत मित्र");
+    // indianTts.setKeys("80", "2d108780-0b86-11e6-b056-07d516fb06e1");
 
-    speech.speak("नमस्ते भारत मित्र");
+    indianTts.speakBlocking("नमस्ते भारत मित्र");
+
+    indianTts.speak("नमस्ते भारत मित्र");
 
     // }
   }
 
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    security.addSecret("indiantts.user.userid", keyId);
+    security.addSecret("indiantts.user.api", keyIdSecret);
+    security.saveStore();
+    getVoices();
+    setVoice(this.voice);
+    broadcastState();
+
+  }
+
+  @Override
+  public String[] getKeys() {
+    String[] Keys = new String[2];
+    security.loadStore();
+    Keys[0] = security.getSecret("indiantts.user.userid");
+    Keys[1] = security.getSecret("indiantts.user.api");
+    return Keys;
+  }
 }

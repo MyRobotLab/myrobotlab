@@ -39,13 +39,9 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(NaturalReaderSpeech.class);
-  // default voice
-  // TODO: natural reader has this voice.. there are others
-  // but for now.. only US-English_Ronald is wired in.. it maps to voice id "33"
-  String voice = "US-English_Ronald";
+
   HashMap<String, String> voiceMap = new HashMap<String, String>();
   HashMap<String, String> voiceMapType = new HashMap<String, String>();
-  ArrayList<String> voices = new ArrayList<String>();
 
   transient CloseableHttpClient client;
   transient Stack<String> audioFiles = new Stack<String>();
@@ -64,12 +60,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
       // new MultiThreadedHttpConnectionManager()
       client = HttpClients.createDefault();
     }
-    audioFile = (AudioFile) startPeer("audioFile");
-    audioFile.startService();
-    subscribe(audioFile.getName(), "publishAudioStart");
-    subscribe(audioFile.getName(), "publishAudioEnd");
-    // attach a listener when the audio file ends playing.
-    audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
+
     // needed because of an ssl error on the natural reader site
     System.setProperty("jsse.enableSNIExtension", "false");
 
@@ -207,17 +198,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     voiceMapType.put("Welsh_Seren", "aws");
     voiceMapType.put("Welsh-English_Gareth", "aws");
 
-    voices.addAll(voiceMap.keySet());
-  }
-
-  @Override
-  public ArrayList<String> getVoices() {
-    return voices;
-  }
-
-  @Override
-  public String getVoice() {
-    return voice;
+    voiceList.addAll(voiceMap.keySet());
+    subSpeechStartService();
   }
 
   public String getMp3Url(String toSpeak) {
@@ -225,8 +207,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     // TODO: url encode this.
 
     String encoded = toSpeak;
-    String voiceId = voiceMap.get(voice);
-    String provider = voiceMapType.get(voice);
+    String voiceId = voiceMap.get(getVoice());
+    String provider = voiceMapType.get(getVoice());
     String url = "";
     if (provider == "ibm") {
       rate = IbmRate;
@@ -262,21 +244,11 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     return url;
   }
 
-  @Override
-  public void setVolume(float volume) {
-    // TODO: fix the volume control
-    log.warn("Volume control not implemented in Natural Reader Speech yet.");
-  }
-
   public void setRate(int rate) {
     // 0 is normal +x fast / -x slow
     this.IbmRate = rate;
     this.AwsRate = rate + 100;
-  }
-
-  @Override
-  public float getVolume() {
-    return 0;
+    audioCacheParameters = "rate-" + rate;
   }
 
   @Override
@@ -291,17 +263,6 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     // FIXME - add iso language codes currently supported e.g. en en_gb de
     // etc..
     return ret;
-  }
-
-  @Override
-  public boolean setVoice(String voice) {
-    if (voiceMap.containsKey(voice)) {
-      this.voice = voice;
-      return true;
-    }
-    error("Voice " + voice + " not exist");
-    this.voice = "US-English_Ronald";
-    return false;
   }
 
   @Override
@@ -330,6 +291,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     LoggingFactory.init(Level.INFO);
     // try {
     // Runtime.start("webgui", "WebGui");
+    Runtime.start("gui", "SwingGui");
     NaturalReaderSpeech speech = (NaturalReaderSpeech) Runtime.start("speech", "NaturalReaderSpeech");
     // speech.setVoice("US-English_Ronald");
     // TODO: fix the volume control
@@ -380,6 +342,23 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
       }
     }
     return b;
+  }
+
+  @Override
+  public void setKeys(String keyId, String keyIdSecret) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public String[] getKeys() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ArrayList<String> getVoices() {
+    return new ArrayList<String>(voiceList);
   }
 
 }

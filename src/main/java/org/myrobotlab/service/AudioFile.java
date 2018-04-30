@@ -105,8 +105,9 @@ public class AudioFile extends Service {
   // localfile
   //
   public AudioData play(String filename) {
-    if (filename == null) {
-      log.warn("asked to play a null filename!  error");
+
+    if (filename == null || filename.isEmpty() || filename.contentEquals(globalFileCacheDir + File.separator + "null")) {
+      error("asked to play a null filename!  error");
       return null;
     }
     File f = new File(filename);
@@ -132,6 +133,11 @@ public class AudioFile extends Service {
     // make sure we are on
     // the currentTrack and its
     // created if necessary
+
+    if (data == null || data.toString().startsWith("file : " + globalFileCacheDir + File.separator + "null")) {
+      log.warn("asked to play a null AudioData!  error");
+      return null;
+    }
     if (data.track == null) {
       data.track = currentTrack;
     }
@@ -330,7 +336,7 @@ public class AudioFile extends Service {
       log.info(audio.getTrack());
       audio.play("explosion.mp3");
 
-     // audio.repeat("alert.mp3");
+      // audio.repeat("alert.mp3");
 
       audio.track();
       audio.play("sir.mp3");
@@ -346,7 +352,7 @@ public class AudioFile extends Service {
       // audio.waitForAll("alert");
       // audio.waitFor("alert", "default", waitToFinish);
       // audio.waitFor(waitingTrack, waitToFinish);
-      //audio.repeat("alert.mp3");
+      // audio.repeat("alert.mp3");
 
       audio.track();
       // FIXME - implement audio.pause(1000); - also implement a "queued"
