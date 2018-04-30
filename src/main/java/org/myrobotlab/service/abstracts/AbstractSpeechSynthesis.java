@@ -23,7 +23,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-import marytts.exceptions.SynthesisException;
+
 
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener {
   private static final long serialVersionUID = 1L;
@@ -37,8 +37,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   protected transient Security security = null;
   protected String audioCacheExtension = "mp3";
   protected List<String> voiceList = new ArrayList<String>();
-  // useful to store personnal voice parameter inside config
-  protected HashMap<String, String> voiceInJsonConfig = new HashMap<String, String>();
+  // useful to store personal voice parameter inside json config
+  // this var receive info from services
 
   // This is the format string that will be used when asking for confirmation.
   public String confirmationString = "did you say %s ?";
@@ -281,7 +281,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     subscribe(audioFile.getName(), "publishAudioEnd");
     // attach a listener when the audio file ends playing.
     audioFile.addListener("finishedPlaying", this.getName(), "publishEndSpeaking");
-    setVoice(voiceInJsonConfig.get(this.getClass().getSimpleName()));
+
+    info("Voice in config : " + getVoice());
+
+    setVoice(getVoice());
+
   }
 
   public boolean setVoice(String voice) {
@@ -295,7 +299,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       voice = voiceList.get(0);
     }
     if (voiceList.contains(voice)) {
-      voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+      setVoiceInJsonConfig(voice);
       broadcastState();
       info(this.getIntanceName() + " set voice to : " + voice);
       setEngineError("Ready");
@@ -308,7 +312,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public String getVoice() {
+    return getVoiceInJsonConfig();
 
-    return voiceInJsonConfig.get(this.getClass().getSimpleName());
   }
 }

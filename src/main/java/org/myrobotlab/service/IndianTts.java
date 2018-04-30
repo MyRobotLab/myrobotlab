@@ -31,6 +31,10 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(IndianTts.class);
+  // stored inside json, this must be UNIQUE identifiers
+  HashMap<String, String> voiceInJsonConfig;
+  // end
+
   // default voice
 
   private String voice = "Default";
@@ -188,4 +192,20 @@ public class IndianTts extends AbstractSpeechSynthesis implements TextListener, 
     Keys[1] = security.getSecret("indiantts.user.api");
     return Keys;
   }
+
+  @Override
+  public String getVoiceInJsonConfig() {
+    if (voiceInJsonConfig == null) {
+      voiceInJsonConfig = new HashMap<String, String>();
+    }
+
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+
+  }
+
 }

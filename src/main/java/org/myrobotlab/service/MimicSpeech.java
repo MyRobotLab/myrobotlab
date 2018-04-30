@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,7 +24,9 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListene
   // end
   // TODO: make this cross platform..
   private String mimicFolder = "mimic";
-
+  // stored inside json
+  HashMap<String, String> voiceInJsonConfig;
+  // end
   private String mimicExecutable = mimicFolder + File.separator + "mimic.exe";
   public String mimicOutputFilePath = System.getProperty("user.dir") + File.separator + mimicFolder + File.separator;
 
@@ -31,7 +34,6 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListene
     super(reservedKey);
   }
 
-  @Override
   public List<String> getVoices() {
     List<String> list = new ArrayList<String>();
     if (Platform.getLocalInstance().isWindows()) {
@@ -81,6 +83,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListene
     super.startService();
     audioCacheExtension = "wav";
     subSpeechStartService();
+
   }
 
   static public ServiceType getMetaData() {
@@ -149,6 +152,21 @@ public class MimicSpeech extends AbstractSpeechSynthesis implements AudioListene
   public String[] getKeys() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public String getVoiceInJsonConfig() {
+    if (voiceInJsonConfig == null) {
+      voiceInJsonConfig = new HashMap<String, String>();
+    }
+
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+
   }
 
 }

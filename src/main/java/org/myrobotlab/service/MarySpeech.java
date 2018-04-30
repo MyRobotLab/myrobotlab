@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +51,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
 
   // stored inside json
   String audioEffects;
+  HashMap<String, String> voiceInJsonConfig;
   // end
   public String maryComponentsUrl = "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml";
 
@@ -79,12 +81,12 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
 
   @Override
   public boolean setVoice(String voice) {
-    if (subSetVoice(voice)) {
+    if (subSetVoice(voice) && voice != null) {
       try {
         marytts.setVoice(voice);
         return true;
       } catch (IllegalArgumentException e) {
-        error("Unknown MarySpeech Voice : " + voice);
+        error("marytts.setVoice error : " + voice);
 
       }
     }
@@ -320,6 +322,21 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
   public String[] getKeys() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public String getVoiceInJsonConfig() {
+    if (voiceInJsonConfig == null) {
+      voiceInJsonConfig = new HashMap<String, String>();
+    }
+
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+
   }
 
 }

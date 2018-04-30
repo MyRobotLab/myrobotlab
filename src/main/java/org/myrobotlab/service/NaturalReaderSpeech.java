@@ -42,7 +42,9 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
 
   HashMap<String, String> voiceMap = new HashMap<String, String>();
   HashMap<String, String> voiceMapType = new HashMap<String, String>();
-
+  // stored inside json
+  HashMap<String, String> voiceInJsonConfig;
+  // end
   transient CloseableHttpClient client;
   transient Stack<String> audioFiles = new Stack<String>();
 
@@ -359,6 +361,21 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
   @Override
   public ArrayList<String> getVoices() {
     return new ArrayList<String>(voiceList);
+  }
+
+  @Override
+  public String getVoiceInJsonConfig() {
+    if (voiceInJsonConfig == null) {
+      voiceInJsonConfig = new HashMap<String, String>();
+    }
+
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+
   }
 
 }

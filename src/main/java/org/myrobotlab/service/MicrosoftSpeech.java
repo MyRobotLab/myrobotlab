@@ -50,7 +50,7 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
-
+@Deprecated // need to merge with localSpeech, or implement speech interface
 public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextListener {
   static final Logger log = LoggerFactory.getLogger(MicrosoftSpeech.class);
 
@@ -345,6 +345,18 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
   public String[] getKeys() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public String getVoiceInJsonConfig() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    // TODO Auto-generated method stub
+    
   }
 
   /*

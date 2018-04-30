@@ -96,6 +96,10 @@ public interface SpeechSynthesis extends NameProvider {
   public abstract void setEngineError(String engineError);
 
   public abstract void setKeys(String keyId, String keyIdSecret);
+  
+  
 
   public abstract String[] getKeys();
+  public String getVoiceInJsonConfig();
+  public void setVoiceInJsonConfig(String voice);
 }
