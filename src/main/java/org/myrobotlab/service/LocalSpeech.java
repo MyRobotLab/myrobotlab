@@ -33,7 +33,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
+  // stored inside json
 
+  HashMap<String, String> voiceInJsonConfig = new HashMap<String, String>();
+  // end
 
   private String ttsFolder = "tts";
 
@@ -45,7 +48,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   boolean ttsExecutableExist;
 
   transient Map<String, String> voiceMap = new HashMap<String, String>();
-
 
   public LocalSpeech(String n) {
     super(n);
@@ -84,11 +86,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
     voiceList = list;
     return list;
   }
-
-
-
-
-
 
   /**
    * This static method returns all the details of the class without it having
@@ -162,10 +159,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
 
   @Override
   public byte[] generateByteAudio(String toSpeak) throws IOException {
-    toSpeak=toSpeak.replace("\"", "\"\"");
+    toSpeak = toSpeak.replace("\"", "\"\"");
     String uuid = UUID.randomUUID().toString();
-    String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voiceMap.get(voiceInJsonConfig.get(this.getClass().getSimpleName())) + " -t -o " + ttsExeOutputFilePath + uuid + " \"" + toSpeak
-        + " \"";
+    String command = System.getProperty("user.dir") + File.separator + windowsTtsExecutable + " -f 9 -v " + voiceMap.get(getVoice()) + " -t -o " + ttsExeOutputFilePath + uuid
+        + " \"" + toSpeak + " \"";
     String cmd = "null";
     File f = new File(ttsExeOutputFilePath + uuid + "0." + audioCacheExtension);
     // windows os local tts
@@ -207,6 +204,17 @@ public class LocalSpeech extends AbstractSpeechSynthesis implements AudioListene
   public String[] getKeys() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public String getVoiceInJsonConfig() {
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+
   }
 
 }

@@ -521,4 +521,16 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
     return null;
   }
 
+  @Override
+  public String getVoiceInJsonConfig() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

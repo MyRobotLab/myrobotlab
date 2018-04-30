@@ -47,7 +47,9 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Polly.class);
-
+  // stored inside json
+  HashMap<String, String> voiceInJsonConfig;
+  // end
   transient AWSCredentials credentials;
   transient AmazonPollyClient polly;
   transient Voice awsVoice;
@@ -338,4 +340,18 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
     }
   }
 
+  @Override
+  public String getVoiceInJsonConfig() {
+    if (voiceInJsonConfig == null) {
+      voiceInJsonConfig = new HashMap<String, String>();
+    }
+
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+
+  }
 }

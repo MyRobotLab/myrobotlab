@@ -65,7 +65,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
   transient public final static Logger log = LoggerFactory.getLogger(VoiceRss.class);
   private static final long serialVersionUID = 1L;
   // stored inside json, this must be UNIQUE identifiers
-  String voirssVoice;
+  HashMap<String, String> voiceInJsonConfig;
   // end
 
   public Integer rate = 0;
@@ -233,7 +233,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     security.addSecret("voicerss.user.api", keyId);
     security.saveStore();
     getVoices();
-    setVoice(this.voirssVoice);
+    setVoice(getVoice());
     broadcastState();
 
   }
@@ -244,5 +244,20 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     security.loadStore();
     Keys[0] = security.getSecret("voicerss.user.api");
     return Keys;
+  }
+
+  @Override
+  public String getVoiceInJsonConfig() {
+    if (voiceInJsonConfig == null) {
+      voiceInJsonConfig = new HashMap<String, String>();
+    }
+
+    return voiceInJsonConfig.get(this.getClass().getSimpleName());
+  }
+
+  @Override
+  public void setVoiceInJsonConfig(String voice) {
+    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+
   }
 }
