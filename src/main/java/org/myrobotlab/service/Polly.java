@@ -12,7 +12,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.interfaces.AudioListener;
 import org.slf4j.Logger;
 
 import com.amazonaws.ClientConfiguration;
@@ -42,7 +41,7 @@ import com.amazonaws.services.polly.model.Voice;
  * @author gperry
  *
  */
-public class Polly extends AbstractSpeechSynthesis implements AudioListener {
+public class Polly extends AbstractSpeechSynthesis {
 
   private static final long serialVersionUID = 1L;
 
@@ -87,9 +86,9 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
   @Override
   public List<String> getVoices() {
     getPolly();
-    voiceList.clear();
-    voiceList.addAll(voiceMap.keySet());
-    return voiceList;
+    getVoiceList().clear();
+    getVoiceList().addAll(voiceMap.keySet());
+    return getVoiceList();
   }
 
   @Override
@@ -328,7 +327,7 @@ public class Polly extends AbstractSpeechSynthesis implements AudioListener {
     try {
       AmazonPollyClient polly = getPolly();
       awsVoice = voiceMap.get(getVoice());
-      SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(awsVoice.getId()).withOutputFormat(audioCacheExtension);
+      SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(awsVoice.getId()).withOutputFormat(getAudioCacheExtension());
       SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
       InputStream data = synthRes.getAudioStream();
       return FileIO.toByteArray(data);

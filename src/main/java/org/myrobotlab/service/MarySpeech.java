@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -21,8 +19,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.maryspeech.tools.install.MaryInstaller;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.interfaces.AudioListener;
-import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 import marytts.LocalMaryInterface;
@@ -40,7 +36,7 @@ import marytts.util.data.audio.MaryAudioUtils;
  * More info at : http://mary.dfki.de/
  * 
  */
-public class MarySpeech extends AbstractSpeechSynthesis implements TextListener, AudioListener {
+public class MarySpeech extends AbstractSpeechSynthesis {
 
   public final static Logger log = LoggerFactory.getLogger(MarySpeech.class);
   private static final long serialVersionUID = 1L;
@@ -75,8 +71,8 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
     for (int i = 0; i < list.size(); ++i) {
       log.info(list.get(i));
     }
-    voiceList = list;
-    return voiceList;
+    setVoiceList(list);
+    return getVoiceList();
   }
 
   @Override
@@ -236,7 +232,7 @@ public class MarySpeech extends AbstractSpeechSynthesis implements TextListener,
       setEngineStatus(false);
     }
 
-    audioCacheExtension = "wav";
+    setAudioCacheExtension("wav");
 
     subSpeechStartService();
     if (audioEffects == null) {

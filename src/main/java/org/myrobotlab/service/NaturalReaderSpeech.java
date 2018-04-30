@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -9,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -23,18 +20,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.data.AudioData;
-import org.myrobotlab.service.interfaces.AudioListener;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
-import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 /**
  * Natural Reader speech to text service based on naturalreaders.com This code
  * is basically all the same as AcapelaSpeech...
  */
-public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements TextListener, AudioListener {
+public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
 
   private static final long serialVersionUID = 1L;
 
@@ -200,7 +192,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
     voiceMapType.put("Welsh_Seren", "aws");
     voiceMapType.put("Welsh-English_Gareth", "aws");
 
-    voiceList.addAll(voiceMap.keySet());
+    getVoiceList().addAll(voiceMap.keySet());
     subSpeechStartService();
   }
 
@@ -360,7 +352,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis implements Text
 
   @Override
   public ArrayList<String> getVoices() {
-    return new ArrayList<String>(voiceList);
+    return new ArrayList<String>(getVoiceList());
   }
 
   @Override

@@ -25,29 +25,16 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Stack;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.data.AudioData;
-import org.myrobotlab.service.interfaces.AudioListener;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
-import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 import com.voicerss.tts.AudioCodec;
@@ -60,7 +47,7 @@ import com.voicerss.tts.AudioFormat;
 import com.voicerss.tts.VoiceParameters;
 import com.voicerss.tts.VoiceProvider;
 
-public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, AudioListener {
+public class VoiceRss extends AbstractSpeechSynthesis {
 
   transient public final static Logger log = LoggerFactory.getLogger(VoiceRss.class);
   private static final long serialVersionUID = 1L;
@@ -83,39 +70,39 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
     // maybe have a get voiceList by language/locale
     // Arabic
 
-    voiceList.add("ca-es");// Catalan
-    voiceList.add("zh-cn");// Chinese (China)
-    voiceList.add("cn");// Chinese (China)
-    voiceList.add("zh-hk");// Chinese (Hong Kong)
-    voiceList.add("zh-tw");// Chinese (Taiwan)
-    voiceList.add("da-dk");// Danish
-    voiceList.add("nl-nl");// Dutch
-    voiceList.add("en-au");// English (Australia)
-    voiceList.add("en-ca");// English (Canada)
-    voiceList.add("en-gb");// English (Great Britain)
-    voiceList.add("en-in");// English (India)
-    voiceList.add("en-us");// English (United States)
-    voiceList.add("en");// English (United States)
-    voiceList.add("fi-fi");// Finnish
-    voiceList.add("fr-ca");// French (Canada)
-    voiceList.add("fr-fr");// French (France)
-    voiceList.add("fr");// French (France)
-    voiceList.add("de-de");// German
-    voiceList.add("de");// German
-    voiceList.add("it-it");// Italian
-    voiceList.add("ja-jp");// Japanese
-    voiceList.add("ja");// Japanese
-    voiceList.add("jp");// Japanese
-    voiceList.add("ko-kr");// Korean
-    voiceList.add("nb-no");// Norwegian
-    voiceList.add("pl-pl");// Polish
-    voiceList.add("pt-br");// Portuguese (Brazil)
-    voiceList.add("pt-pt");// Portuguese (Portugal)
-    voiceList.add("ru-ru");// Russian
-    voiceList.add("es-mx");// Spanish (Mexico)
-    voiceList.add("es-es");// Spanish (Spain)
-    voiceList.add("es");// Spanish (Spain)
-    voiceList.add("sv-se");// Swedish (Sweden)
+    getVoiceList().add("ca-es");// Catalan
+    getVoiceList().add("zh-cn");// Chinese (China)
+    getVoiceList().add("cn");// Chinese (China)
+    getVoiceList().add("zh-hk");// Chinese (Hong Kong)
+    getVoiceList().add("zh-tw");// Chinese (Taiwan)
+    getVoiceList().add("da-dk");// Danish
+    getVoiceList().add("nl-nl");// Dutch
+    getVoiceList().add("en-au");// English (Australia)
+    getVoiceList().add("en-ca");// English (Canada)
+    getVoiceList().add("en-gb");// English (Great Britain)
+    getVoiceList().add("en-in");// English (India)
+    getVoiceList().add("en-us");// English (United States)
+    getVoiceList().add("en");// English (United States)
+    getVoiceList().add("fi-fi");// Finnish
+    getVoiceList().add("fr-ca");// French (Canada)
+    getVoiceList().add("fr-fr");// French (France)
+    getVoiceList().add("fr");// French (France)
+    getVoiceList().add("de-de");// German
+    getVoiceList().add("de");// German
+    getVoiceList().add("it-it");// Italian
+    getVoiceList().add("ja-jp");// Japanese
+    getVoiceList().add("ja");// Japanese
+    getVoiceList().add("jp");// Japanese
+    getVoiceList().add("ko-kr");// Korean
+    getVoiceList().add("nb-no");// Norwegian
+    getVoiceList().add("pl-pl");// Polish
+    getVoiceList().add("pt-br");// Portuguese (Brazil)
+    getVoiceList().add("pt-pt");// Portuguese (Portugal)
+    getVoiceList().add("ru-ru");// Russian
+    getVoiceList().add("es-mx");// Spanish (Mexico)
+    getVoiceList().add("es-es");// Spanish (Spain)
+    getVoiceList().add("es");// Spanish (Spain)
+    getVoiceList().add("sv-se");// Swedish (Sweden)
     setEngineError("Online");
     setEngineStatus(true);
     subSpeechStartService();
@@ -123,7 +110,7 @@ public class VoiceRss extends AbstractSpeechSynthesis implements TextListener, A
 
   @Override
   public List<String> getVoices() {
-    return voiceList;
+    return getVoiceList();
   }
 
   public Integer getRate() {
