@@ -26,6 +26,8 @@ public class Sweety extends Service {
   public final static Logger log = LoggerFactory.getLogger(Sweety.class);
 
   transient public Arduino arduino;
+  transient public Adafruit16CServoDriver adaFruit16cRight;
+  transient public Adafruit16CServoDriver adaFruit16cLeft;
   transient public WebkitSpeechRecognition ear;
   transient public WebGui webGui;
   transient public MarySpeech mouth;
@@ -82,6 +84,11 @@ public class Sweety extends Service {
   boolean copyGesture = false;
   boolean firstSkeleton = true;
   boolean saveSkeletonFrame = false;
+  
+  // Adafruit16CServoDriver setup
+  String i2cBus = "0";
+  String i2cAdressRight = "0x40";
+  String i2cAdressLeft = "0x41";
 
   // arduino pins variables
   int rightMotorDirPin = 2;
@@ -112,33 +119,33 @@ public class Sweety extends Service {
   int max = 2;
   int rest = 3;
       
-//Right arm
+  //Right arm
   int rightShoulder[] = {34,0,180,0};
-  int rightArm[] = {35,45,155,140};
-  int rightBiceps[] = {36,12,90,12};
-  int rightElbow[] = {37,8,90,8};
-  int rightWrist[] = {38,0,140,140};
+  int rightArm[] = {1,45,155,140};
+  int rightBiceps[] = {2,12,90,12};
+  int rightElbow[] = {3,8,90,8};
+  int rightWrist[] = {4,0,140,140};
    
   // Left arm
-  int leftShoulder[] = {39,0,150,148};
-  int leftArm[] = {40,0,85,0};
-  int leftBiceps[] = {41,60,140,140};
-  int leftElbow[] = {42,0,75,0};
-  int leftWrist[] = {43,0,168,0};
+  int leftShoulder[] = {35,0,150,148};
+  int leftArm[] = {1,0,85,0};
+  int leftBiceps[] = {2,60,140,140};
+  int leftElbow[] = {3,0,75,0};
+  int leftWrist[] = {4,0,168,0};
  
  // Right hand
-  int rightThumb[] = {44,170,75,170};
-  int rightIndex[] = {45,70,180,180};
-  int rightMiddle[] = {46,1,2,3};
-  int rightRing[] = {47,15,130,15};
-  int rightPinky[] = {48,25,180,25};
+  int rightThumb[] = {5,170,75,170};
+  int rightIndex[] = {6,70,180,180};
+  int rightMiddle[] = {7,1,2,3};
+  int rightRing[] = {8,15,130,15};
+  int rightPinky[] = {9,25,180,25};
  
  // Left hand
-  int leftThumb[] = {8,40,105,40};
-  int leftIndex[] = {9,0,180,0};
-  int leftMiddle[] = {10,0,180,0};
-  int leftRing[] = {11,10,180,180};
-  int leftPinky[] = {12,65,180,180};
+  int leftThumb[] = {5,40,105,40};
+  int leftIndex[] = {6,0,180,0};
+  int leftMiddle[] = {7,0,180,0};
+  int leftRing[] = {8,10,180,180};
+  int leftPinky[] = {9,65,180,180};
  
  // Head
   int neckTilt[] = {6,0,75,30};
@@ -232,6 +239,13 @@ public class Sweety extends Service {
     neckPan = valuesArray[1];
   }
   
+  // set Adafruit16CServoDriver setup
+  public void setadafruitServoDriver(String i2cBusValue, String i2cAdressRightValue, String i2cAdressLeftValue) {
+    i2cBus = i2cBusValue;
+    i2cAdressRight = i2cAdressRightValue;
+    i2cAdressLeft = i2cAdressLeftValue;
+    
+  }
   // variables for speak / mouth sync
   public int delaytime = 3;
   public int delaytimestop = 5;
@@ -254,35 +268,35 @@ public class Sweety extends Service {
   }
 
   /**
-   * Attach the servos to arduino pins
+   * Attach the servos to arduino and adafruitServoDriver pins
    * @throws Exception e
    */
   public void attach() throws Exception {
-  
-    rightElbowServo.attach(arduino, rightElbow[pin]);
-    rightShoulderServo.attach(arduino, rightShoulder[pin]);
-    rightArmServo.attach(arduino, rightArm[pin]);
-    rightBicepsServo.attach(arduino, rightBiceps[pin]);
-    rightElbowServo.attach(arduino, rightElbow[pin]);
-    rightWristServo.attach(arduino, rightWrist[pin]);
-    leftShoulderServo.attach(arduino, leftShoulder[pin]);
-    leftArmServo.attach(arduino, leftArm[pin]);
-    leftBicepsServo.attach(arduino, leftBiceps[pin]);
-    leftElbowServo.attach(arduino, leftElbow[pin]);
-    leftWristServo.attach(arduino, leftWrist[pin]);
-    rightThumbServo.attach(arduino, rightThumb[pin]);
-    rightIndexServo.attach(arduino, rightIndex[pin]);
-    rightMiddleServo.attach(arduino, rightMiddle[pin]);
-    rightRingServo.attach(arduino, rightRing[pin]);
-    rightPinkyServo.attach(arduino, rightPinky[pin]);
-    leftThumbServo.attach(arduino, leftThumb[pin]);
-    leftIndexServo.attach(arduino, leftIndex[pin]);
-    leftMiddleServo.attach(arduino, leftMiddle[pin]);
-    leftRingServo.attach(arduino, leftRing[pin]);
-    leftPinkyServo.attach(arduino, leftPinky[pin]);
+    adaFruit16cLeft.attach("arduino",i2cBus,i2cAdressLeft);
+    adaFruit16cRight.attach("arduino",i2cBus,i2cAdressRight);
+    rightElbowServo.attach(adaFruit16cRight, rightElbow[pin]);
+    rightShoulderServo.attach(adaFruit16cRight, rightShoulder[pin]);
+    rightArmServo.attach(adaFruit16cRight, rightArm[pin]);
+    rightBicepsServo.attach(adaFruit16cRight, rightBiceps[pin]);
+    rightElbowServo.attach(adaFruit16cRight, rightElbow[pin]);
+    rightWristServo.attach(adaFruit16cRight, rightWrist[pin]);
+    leftShoulderServo.attach(adaFruit16cLeft, leftShoulder[pin]);
+    leftArmServo.attach(adaFruit16cLeft, leftArm[pin]);
+    leftBicepsServo.attach(adaFruit16cLeft, leftBiceps[pin]);
+    leftElbowServo.attach(adaFruit16cLeft, leftElbow[pin]);
+    leftWristServo.attach(adaFruit16cLeft, leftWrist[pin]);
+    rightThumbServo.attach(adaFruit16cRight, rightThumb[pin]);
+    rightIndexServo.attach(adaFruit16cRight, rightIndex[pin]);
+    rightMiddleServo.attach(adaFruit16cRight, rightMiddle[pin]);
+    rightRingServo.attach(adaFruit16cRight, rightRing[pin]);
+    rightPinkyServo.attach(adaFruit16cRight, rightPinky[pin]);
+    leftThumbServo.attach(adaFruit16cLeft, leftThumb[pin]);
+    leftIndexServo.attach(adaFruit16cLeft, leftIndex[pin]);
+    leftMiddleServo.attach(adaFruit16cLeft, leftMiddle[pin]);
+    leftRingServo.attach(adaFruit16cLeft, leftRing[pin]);
+    leftPinkyServo.attach(adaFruit16cLeft, leftPinky[pin]);
     neckTiltServo.attach(arduino, neckTilt[pin]);
     neckPanServo.attach(arduino, neckPan[pin]);
-    
     
   }
 
@@ -765,6 +779,8 @@ public class Sweety extends Service {
     
 
     arduino = (Arduino) Runtime.start("arduino","Arduino");
+    adaFruit16cLeft = (Adafruit16CServoDriver)  Runtime.start("adaFruit16C","Adafruit16CServoDriver");
+    adaFruit16cRight = (Adafruit16CServoDriver)  Runtime.start("adaFruit16C","Adafruit16CServoDriver");
     chatBot = (ProgramAB) Runtime.start("chatBot","ProgramAB");
     htmlFilter = (HtmlFilter) Runtime.start("htmlFilter","HtmlFilter");
     mouth = (MarySpeech) Runtime.start("mouth","MarySpeech");
