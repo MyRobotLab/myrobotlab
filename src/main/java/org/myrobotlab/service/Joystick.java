@@ -24,6 +24,7 @@
 
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -212,6 +213,11 @@ public class Joystick extends Service {
 
 	public Joystick(String n) {
 		super(n);
+		// we will force a system property here to specify the native location for the jinput libraries
+		// TODO: this is a hacky work around because for some reason, the jinput natives aren't found from the jinput-platform jar files!! 
+		String jinputNativePath = new java.io.File( "." ).getAbsolutePath() + File.separatorChar + "jinput-natives";
+		System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
+		
 	}
 
 	public Map<String, Component> getComponents() {
@@ -376,6 +382,7 @@ public class Joystick extends Service {
 		meta.addDescription("service allows interfacing with a keyboard, joystick or gamepad");
 		meta.addCategory("control");
 		meta.addDependency("net.java.jinput", "jinput", "2.0.7");
+		meta.addDependency("jinput-natives", "jinput-natives", "2.0.7","zip");
 		// meta.addDependency("net.java.jinput", "jinput-platform", "2.0.7");
 		// meta.addArtifact("net.java.jinput", "natives-windows");
 		// meta.addArtifact("net.java.jinput", "natives-linux");
@@ -415,6 +422,7 @@ public class Joystick extends Service {
 
 	public static void main(String args[]) {
 		LoggingFactory.init();
+		LoggingFactory.setLevel("INFO");
 		try {
 
 			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
