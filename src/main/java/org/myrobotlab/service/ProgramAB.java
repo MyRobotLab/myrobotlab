@@ -849,10 +849,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void attach(Attachable attachable) {
     if (attachable instanceof TextPublisher) {
       addTextPublisher((TextPublisher) attachable);
+    } else if (attachable instanceof TextListener){
+      addListener("publishText", attachable.getName(), "onText");
     } else {
       log.error("don't know how to attach a {}", attachable.getName());
     }
   }
+  
 
   @Override
   public void stopService() {
