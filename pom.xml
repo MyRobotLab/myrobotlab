@@ -1190,6 +1190,7 @@
 									       -->
 									      <Commit>${commit}</Commit>
 									      <Branch>${branch}</Branch>
+									      <Message>${git.commit.message.full}</Message>
 									      <Build-Version>${build.number}</Build-Version>
 									      <Build-Time>${maven.build.timestamp}</Build-Time>
 									      <Build-Host>${agent.name}</Build-Host>
