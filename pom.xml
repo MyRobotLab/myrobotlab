@@ -1098,7 +1098,6 @@
 
 	
 	<build>
-	 <finalName>myrobotlab</finalName>
 		<resources>
 			<resource>
 				<filtering>false</filtering>
