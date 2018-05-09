@@ -218,7 +218,6 @@
 			    </executions>
 			    <configuration>
 			        <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-			        <dateFormat>yyyy.MM.dd.HH.mm</dateFormat>
 			        <prefix>git</prefix>
 			        <verbose>false</verbose>
 			        <generateGitPropertiesFile>true</generateGitPropertiesFile>
