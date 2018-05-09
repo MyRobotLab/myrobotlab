@@ -107,8 +107,7 @@
     <version>1.0.1</version>
     <scope>provided</scope>
   </dependency>
-  
-    <dependency>
+  <dependency>
     <groupId>com.googlecode.soundlibs</groupId>
     <artifactId>mp3spi</artifactId>
     <version>1.9.5.4</version>
@@ -124,8 +123,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- AzureTranslator end -->
-
-
 
 <!-- BoofCv begin -->
   <dependency>
@@ -199,6 +196,12 @@
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
     <version>1.0.0-alpha</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.twelvemonkeys.imageio</groupId>
+    <artifactId>imageio-core</artifactId>
+    <version>3.1.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- Deeplearning4j end -->
@@ -378,7 +381,7 @@
   </dependency>
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-bullet</artifactId>
+    <artifactId>jme3-bullet-native</artifactId>
     <version>3.2.0-stable</version>
     <scope>provided</scope>
   </dependency>
@@ -397,7 +400,23 @@
     <version>2.0.7</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>jinput-natives</groupId>
+    <artifactId>jinput-natives</artifactId>
+    <version>2.0.7</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- Joystick end -->
+
+<!-- KafkaConnector begin -->
+  <dependency>
+    <groupId>org.apache.kafka</groupId>
+    <artifactId>kafka-clients</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- KafkaConnector end -->
 
 <!-- Keyboard begin -->
   <dependency>
@@ -634,6 +653,18 @@
     <artifactId>glamour-lwjgl</artifactId>
     <version>1.0.8</version>
     <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.saintandreas</groupId>
+    <artifactId>math</artifactId>
+    <version>1.0.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.saintandreas</groupId>
+    <artifactId>oria-resources</artifactId>
+    <version>1.0.4</version>
+    <scope>provided</scope>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
@@ -649,15 +680,7 @@
         </exclusion>
       </exclusions>
   </dependency>
-
-    <dependency>
-      <groupId>org.saintandreas</groupId>
-      <artifactId>oria-resources</artifactId>
-      <version>[1.0.4, 2)</version>
-    </dependency>
-
 <!-- OculusRift end -->
-
 
 <!-- OpenCV begin -->
   <dependency>
@@ -719,33 +742,29 @@
 
 <!-- Polly begin -->
   <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>com.amazonaws</groupId>
     <artifactId>aws-java-sdk-polly</artifactId>
     <version>1.11.118</version>
     <scope>provided</scope>
   </dependency>
-<!-- Polly end -->
-
-<!-- jackson begin -->
-
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.9.5</version>
-</dependency>
-
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.9.5</version>
-</dependency>
-
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-annotations</artifactId>
-    <version>2.9.5</version>
-</dependency>
-
 <!-- Polly end -->
 
 <!-- ProgramAB begin -->
@@ -1086,14 +1105,8 @@
     <version>4.1.6</version>
     <scope>provided</scope>
   </dependency>
-  <!-- Xmpp end -->
+<!-- Xmpp end -->
 
-  <!-- for the kafka connector -->
-  <dependency>
-    <groupId>org.apache.kafka</groupId>
-    <artifactId>kafka-clients</artifactId>
-    <version>1.0.1</version>
-  </dependency>
   </dependencies>
 
 	
@@ -1193,7 +1206,7 @@
 									      <Build-Time>${maven.build.timestamp}</Build-Time>
 									      <Build-Host>${agent.name}</Build-Host>
 									      <Build-User>${user.name}</Build-User>
-
+									      
 										<!-- maven git plugin id info -->
 										  <GitTags>${git.tags}</GitTags>
 										  <GitBranch>${git.branch}</GitBranch>
@@ -1215,7 +1228,7 @@
 										  <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
 										  <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
 										  <GitBuildTime>${git.build.time}</GitBuildTime>
-										  <GitBuildVersion>${git.build.version}</GitBuildVersion>
+										  <GitBuildVersion>${git.build.version}</GitBuildVersion>									      
 									      
                                         </manifestEntries>                                    
                                 </transformer>
@@ -1290,7 +1303,7 @@
 			            <dirty>-dirty</dirty>
 			        </gitDescribe>
 			    </configuration>
-			</plugin>			
+			</plugin>					
 
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -1341,46 +1354,46 @@
 		          </execution>
 		        </executions>
 		      </plugin>
-		-->
-	
-		<plugin>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>0.7.9</version>
-			<executions>
-				<execution>
-					<id>prepare-agent</id>
-					<goals>
-						<goal>prepare-agent</goal>
-					</goals>
-				</execution>
-				<execution>
-					<id>report</id>
-					<phase>prepare-package</phase>
-					<goals>
-						<goal>report</goal>
-					</goals>
-				</execution>
-				<execution>
-					<id>post-unit-test</id>
-					<phase>test</phase>
-					<goals>
-						<goal>report</goal>
-					</goals>
-					<configuration>
-						<!-- Sets the path to the file which contains the execution data. -->
-						<dataFile>target/jacoco.exec</dataFile>
-						<!-- Sets the output directory for the code coverage report. -->
-						<outputDirectory>target/jacoco-ut</outputDirectory>
-					</configuration>
-				</execution>
-			</executions>
-			<configuration>
-				<systemPropertyVariables>
-					<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-				</systemPropertyVariables>
-			</configuration>
-		</plugin>
+			-->
+			
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.9</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<!-- Sets the path to the file which contains the execution data. -->
+							<dataFile>target/jacoco.exec</dataFile>
+							<!-- Sets the output directory for the code coverage report. -->
+							<outputDirectory>target/jacoco-ut</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<systemPropertyVariables>
+						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
 			
 		</plugins>
 	</build>
