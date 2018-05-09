@@ -131,6 +131,30 @@
 									      <Build-Time>${maven.build.timestamp}</Build-Time>
 									      <Build-Host>${agent.name}</Build-Host>
 									      <Build-User>${user.name}</Build-User>
+									      
+										<!-- maven git plugin id info -->
+										  <GitTags>${git.tags}</GitTags>
+										  <GitBranch>${git.branch}</GitBranch>
+										  <GitDirty>${git.dirty}</GitDirty>
+										  <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
+										  <GitCommitId>${git.commit.id}</GitCommitId>
+										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
+										  <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
+										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
+										  <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
+										  <GitCommitIdDescribeShort>${git.commit.id.describe-short}</GitCommitIdDescribeShort>
+										  <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
+										  <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
+										  <GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull>
+										  <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
+										  <GitCommitTime>${git.commit.time}</GitCommitTime>
+										  <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
+										  <GitClosestTagCommitCount>${git.closest.tag.commit.count}</GitClosestTagCommitCount>
+										  <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
+										  <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
+										  <GitBuildTime>${git.build.time}</GitBuildTime>
+										  <GitBuildVersion>${git.build.version}</GitBuildVersion>									      
+									      
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
@@ -178,7 +202,33 @@
 				<version>2.4.3</version>
 			</plugin>
 
-			
+			<plugin>
+			    <groupId>pl.project13.maven</groupId>
+			    <artifactId>git-commit-id-plugin</artifactId>
+			    <version>2.2.4</version>
+			    <executions>
+			        <execution>
+			            <id>get-the-git-infos</id>
+			            <goals>
+			                <goal>revision</goal>
+			            </goals>
+			        </execution>
+			    </executions>
+			    <configuration>
+			        <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+			        <dateFormat>yyyy.MM.dd.HH.mm</dateFormat>
+			        <prefix>git</prefix>
+			        <verbose>false</verbose>
+			        <generateGitPropertiesFile>true</generateGitPropertiesFile>
+			        <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+			        <format>json</format>
+			        <gitDescribe>
+			            <skip>false</skip>
+			            <always>false</always>
+			            <dirty>-dirty</dirty>
+			        </gitDescribe>
+			    </configuration>
+			</plugin>					
 
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
