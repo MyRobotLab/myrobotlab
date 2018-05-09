@@ -1215,14 +1215,14 @@
 										  <GitCommitId>${git.commit.id}</GitCommitId>
 										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
 										  <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
-										  <!-- cannot use this as an attribute as multi-line value will bork the manifest
-										  GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull
-										  -->
+										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
 										  <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
 										  <GitCommitIdDescribeShort>${git.commit.id.describe-short}</GitCommitIdDescribeShort>
 										  <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
 										  <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
-										  <GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull>
+										  <!-- removed because multi-line value can break manifest
+										    GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull 
+										    -->
 										  <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
 										  <GitCommitTime>${git.commit.time}</GitCommitTime>
 										  <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
