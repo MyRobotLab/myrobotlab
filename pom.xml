@@ -1215,7 +1215,9 @@
 										  <GitCommitId>${git.commit.id}</GitCommitId>
 										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
 										  <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
-										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
+										  <!-- cannot use this as an attribute as multi-line value will bork the manifest
+										  GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull
+										  -->
 										  <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
 										  <GitCommitIdDescribeShort>${git.commit.id.describe-short}</GitCommitIdDescribeShort>
 										  <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
