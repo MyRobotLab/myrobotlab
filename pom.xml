@@ -204,6 +204,19 @@
     <version>3.1.1</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.nd4j</groupId>
+    <artifactId>nd4j-native-pi-mrl</artifactId>
+    <version>1.0.0-alpha</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.nd4j</groupId>
+    <artifactId>nd4j-native-platform-pi-mrl</artifactId>
+    <version>1.0.0-alpha</version>
+    <scope>provided</scope>
+  </dependency>
+  
 <!-- Deeplearning4j end -->
 
 <!-- DocumentPipeline begin -->

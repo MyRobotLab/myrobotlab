@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,15 +49,19 @@ import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
 import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
+import org.deeplearning4j.zoo.model.Darknet19;
 import org.deeplearning4j.zoo.model.TinyYOLO;
 import org.deeplearning4j.zoo.model.VGG16;
 import org.deeplearning4j.zoo.util.ClassPrediction;
+import org.deeplearning4j.zoo.util.Labels;
+import org.deeplearning4j.zoo.util.darknet.DarknetLabels;
 import org.deeplearning4j.zoo.util.darknet.VOCLabels;
 import org.deeplearning4j.zoo.util.imagenet.ImageNetLabels;
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.opencv.YoloDetectedObject;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -65,6 +70,8 @@ import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.bytedeco.javacpp.opencv_core.Rect;
+
 import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2RGB;
 
 /**
@@ -108,7 +115,8 @@ public class Deeplearning4j extends Service {
   
   private ComputationGraph vgg16 = null;
   
-  private ComputationGraph tinyYolo = null;
+  private ComputationGraph darknet = null;
+  private ComputationGraph tinyyolo = null;
   
   // constructor.
   public Deeplearning4j(String reservedKey) {
@@ -393,19 +401,6 @@ public class Deeplearning4j extends Service {
   private DenseLayer fullyConnected(String name, int out, double bias, double dropOut, Distribution dist) {
     return new DenseLayer.Builder().name(name).nOut(out).biasInit(bias).dropOut(dropOut).dist(dist).build();
   }
-  
-  public void loadTinyYolo() throws IOException {
-    log.info("Loading the Yolo2 (coco) Model.  Download is large 200+ MB.. this will be cached after it downloads");
-    ZooModel zooModel = new TinyYOLO(1,123);
-    tinyYolo = (ComputationGraph) zooModel.initPretrained();
-
-    
-    
-    
-    
-    
-  }
-  
 
   // This is for the Model Zoo support to load in the VGG16 model.  
   public void loadVGG16() throws IOException {
@@ -414,25 +409,141 @@ public class Deeplearning4j extends Service {
     vgg16 = (ComputationGraph) zooModel.initPretrained(PretrainedType.IMAGENET);
     // TODO: return true/false if the model was loaded properly/successfully.
   }
+
+  public List<List<ClassPrediction>> darknetFile(String filename) throws IOException {
+    NativeImageLoader loader = new NativeImageLoader(224, 224, 3, new ColorConversionTransform(COLOR_BGR2RGB));
+    FileInputStream fis = new FileInputStream(filename);
+    INDArray image = loader.asMatrix(fis);
+    // set up input and feedforward
+    DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
+    scaler.transform(image);
+    INDArray result = darknet.outputSingle(image);
+    Labels labels = new DarknetLabels();
+    List<List<ClassPrediction>> predictions = labels.decodePredictions(result, 10);
+    // check output labels of result
+    System.out.println(predictions.toString());
+    return predictions;
+  }
   
-  public List<ClassPrediction> classifyImageTinyYolo(IplImage iplImage) throws IOException {
-    log.info("Yolo image called");
+  public void loadDarknet() throws IOException {
+    ZooModel zooModel = new Darknet19(1,123);
+    darknet = (ComputationGraph) zooModel.initPretrained();
+  }
+  
+  public void loadTinyYOLO() throws IOException {
+    ZooModel model = new TinyYOLO(1, 123); //num labels doesn't matter since we're getting pretrained imagenet
+    tinyyolo = (ComputationGraph) model.initPretrained();
+  }
+
+  public List<List<ClassPrediction>> classifyImageDarknet(IplImage iplImage) throws IOException {
+    NativeImageLoader loader = new NativeImageLoader(224, 224, 3, new ColorConversionTransform(COLOR_BGR2RGB));
+    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    INDArray image = loader.asMatrix(buffImg);
+    DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
+    scaler.transform(image);
+    INDArray result = darknet.outputSingle(image);
+    Labels labels = new DarknetLabels();
+    List<List<ClassPrediction>> predictions = labels.decodePredictions(result, 10);
+    // check output labels of result
+    System.out.println(predictions.toString());
+    return predictions;
+  }
+  
+  public  ArrayList<YoloDetectedObject> classifyImageTinyYolo(IplImage iplImage) throws IOException {
+    // set up input and feed forward
+
+    // TODO: what the heck? how do we know what these are?!
+    int gridWidth = 13;
+    int gridHeight = 13;
+
     NativeImageLoader loader = new NativeImageLoader(416, 416, 3, new ColorConversionTransform(COLOR_BGR2RGB));
     BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
-    ImagePreProcessingScaler scaler = new ImagePreProcessingScaler(0, 1);
+    DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
-    INDArray outputs = tinyYolo.outputSingle(image);
+    INDArray outputs = tinyyolo.outputSingle(image);
     List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs, 0.6, 0.4);
-    VOCLabels labels = new VOCLabels();
-    ArrayList<ClassPrediction> detected = new ArrayList<ClassPrediction>();
+    // check output labels of result
+    Labels labels = new VOCLabels();
+    ArrayList<YoloDetectedObject> results = new ArrayList<YoloDetectedObject>();
+    double threshold = 0.5;
     for (DetectedObject obj : objs) {
-        ClassPrediction classPrediction = labels.decodePredictions(obj.getClassPredictions(), 1).get(0).get(0);
-        log.info(obj.toString() + " " + classPrediction);
-        detected.add(classPrediction);
-    }    
-    return detected;
+      INDArray preds = obj.getClassPredictions();
+      if (preds == null) {
+        log.info("null preds?!");
+        continue;
+      }
+      List<List<ClassPrediction>> fullDecode = decodePredictions(labels, preds, 1);
+      if (fullDecode == null) {
+        log.info("Full decode is null");
+        continue;
+      }
+      if (fullDecode.get(0) == null) {
+        log.info("Full decode first was null.");
+        continue;
+      }
+      ClassPrediction classPrediction = fullDecode.get(0).get(0);
+      if (classPrediction == null) {
+        log.info("Null decode...");
+        continue;
+      }
+      // System.out.println(obj.toString() + " " + classPrediction);
+      if (classPrediction.getProbability() > threshold) {
+        // this is a good one..
+        int w = iplImage.width();
+        int h = iplImage.height();
+        
+        double[] xy1 = obj.getTopLeftXY();
+        double[] xy2 = obj.getBottomRightXY();
+        int x1 = (int) Math.round(w * xy1[0] / gridWidth);
+        int y1 = (int) Math.round(h * xy1[1] / gridHeight);
+        int x2 = (int) Math.round(w * xy2[0] / gridWidth);
+        int y2 = (int) Math.round(h * xy2[1] / gridHeight);
+        
+        int xLeftBottom = x1;
+        int yLeftBottom = y1;
+        int yRightTop = x2;
+        int xRightTop = y2;
+        
+        Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
+        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel());
+        System.out.println("Yolo Object: " + yoloobj);
+        results.add(yoloobj);
+      }
+    }
+    return results;
   }
+  
+  
+  public List<List<ClassPrediction>> decodePredictions(Labels labels, INDArray predictions, int n) {
+    int rows = predictions.size(0);
+    int cols = predictions.size(1);
+    if (predictions.isColumnVector()) {
+        predictions = predictions.ravel();
+        rows = predictions.size(0);
+        cols = predictions.size(1);
+    }
+    List<List<ClassPrediction>> descriptions = new ArrayList<>();
+    for (int batch = 0; batch < rows; batch++) {
+        INDArray result = predictions.getRow(batch);
+        result = Nd4j.vstack(Nd4j.linspace(0, cols, cols), result);
+        result = Nd4j.sortColumns(result, 1, false);
+        List<ClassPrediction> current = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            int label = result.getInt(0, i);
+            if (label > 19) {
+              log.info("Uh oh.."); 
+              return null;
+            }
+            log.info("Label ID:"+ label);
+            double prob = result.getDouble(1, i);
+            current.add(new ClassPrediction(label, labels.getLabel(label), prob));
+        }
+        descriptions.add(current);
+    }
+    return descriptions;
+}
+
   
   public Map<String, Double> classifyImageVGG16(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
@@ -503,67 +614,40 @@ public class Deeplearning4j extends Service {
   }
   
   static public ServiceType getMetaData() {
+    
+    String dl4jVersion = "1.0.0-alpha";
+    boolean cudaEnabled = false;
+    boolean supportRasPi = true;
+    
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());
     meta.addDescription("A wrapper service for the Deeplearning4j framework.");
     meta.addCategory("ai");
-    
-    // (for gpu support you swap out the nd4j-backend dependency..
-    // kwatters: nd4j / nd4j-backend / dl4j
-
-    
-    String dl4jVersion = "1.0.0-alpha";
     meta.addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
     meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", dl4jVersion);
-    // meta.addDependency("org.nd4j", "nd4j", "0.9.1"); - no such thing
-    meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
-  //  meta.addDependency("commons-lang", "commons-lang", "2.6");
+    if (!cudaEnabled) {
+      // By default support native CPU execution.
+      meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
+    } else {
+      // Use this if you want cuda 9.1 NVidia GPU support 
+      meta.addDependency("org.nd4j", "nd4j-cuda-9.1-platform", dl4jVersion);
+    }
+    // The default build of 1.0.0-alpha does not support the raspi,  we built & host the following dependencies.
+    // to support native cpu execution on the raspi.
+    if (supportRasPi) {
+      meta.addDependency("org.nd4j", "nd4j-native-pi-mrl", dl4jVersion);
+      meta.addDependency("org.nd4j", "nd4j-native-platform-pi-mrl", dl4jVersion);
+    }
     // due to this bug  https://github.com/haraldk/TwelveMonkeys/issues/167 seems we need to explicitly include imageio-core
-    // https://mvnrepository.com/artifact/com.twelvemonkeys.imageio
-    // lots of plugins
     meta.addDependency("com.twelvemonkeys.imageio", "imageio-core", "3.1.1");
-    // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
-    
-    // meta.addDependency("com.twelvemonkeys.common", "common-io", "3.1.1");
-    // meta.addDependency("com.twelvemonkeys.common", "common-image", "3.1.1");
-    
-    //   meta.addDependency("org.bytedeco.javacpp-presets", "openblas", "0.2.19-1.3");
-    // org.bytedeco.javacpp-presets#openblas;0.2.19-1.3
-    
-    /*
-    meta.addDependency("com.twelvemonkeys.imageio", "imageio-jpeg", "3.1.1");
-    meta.addDependency("com.twelvemonkeys.imageio", "imageio-tiff", "3.1.1");
-    meta.addDependency("com.twelvemonkeys.imageio", "imageio-bmp", "3.1.1");
-    // for svg
-    meta.addDependency("com.twelvemonkeys.imageio", "imageio-batik", "3.1.1");
-    meta.addDependency("com.twelvemonkeys.imageio", "imageio-pdf", "3.1.1");
-    meta.addDependency("com.twelvemonkeys.imageio", "imageio-thumbsdb", "3.1.1");
-    */
-    
-    // cuda artifactId = nd4j-cuda-8.0-platform
-    // meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.8");
-    // meta.addDependency("org.deeplearning4j", "deeplearning4j-core", "0.91");
-    /*
-    // this also depends on opencv
-    meta.addDependency("org.bytedeco", "1.3.3");
-    // and this is just a good frame grabber.. might as well pull it in.
-    meta.addDependency("pl.sarxos.webcam", "0.3.10");
-    meta.addDependency("org.apache.commons.io", "2.3.0");
-    */
     return meta;
   }
 
   public static void main(String[] args) throws IOException {
     Deeplearning4j dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
     // this is how many generations to iterate on training the dataset. larger number means longer training time.
-
-    
-  
-    dl4j.loadTinyYolo();
-    
-    
-    
-//    dl4j.classifyImageTinyYolo(iplImage);
-    
+    // dl4j.loadDarknet();
+    dl4j.loadTinyYOLO();
+   // dl4j.classifyImageTinyYolo(iplImage);
     //    dl4j.epochs = 50;
 //    dl4j.trainModel("test/resources/animals");
 //    //dl4j.trainModel("training");
