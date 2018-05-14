@@ -7,12 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -37,7 +31,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   // stored inside json
   HashMap<String, String> voiceInJsonConfig;
   // end
-  transient CloseableHttpClient client;
+
   transient Stack<String> audioFiles = new Stack<String>();
 
   private int IbmRate = 0;
@@ -50,10 +44,6 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
 
   public void startService() {
     super.startService();
-    if (client == null) {
-      // new MultiThreadedHttpConnectionManager()
-      client = HttpClients.createDefault();
-    }
 
     // needed because of an ssl error on the natural reader site
     System.setProperty("jsse.enableSNIExtension", "false");
@@ -270,11 +260,9 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     meta.setCloudService(true);
     meta.addCategory("speech");
     meta.setSponsor("kwatters");
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
-    // meta.addTodo("test speak blocking - also what is the return type and
+    subGetMetaData(meta); // meta.addTodo("test speak blocking - also what is
+                          // the return type and
     // AudioFile audio track id ?");
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
     // end of support
     meta.setAvailable(false);
     return meta;
@@ -310,31 +298,23 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   @Override
   public byte[] generateByteAudio(String toSpeak) {
     String mp3Url = getMp3Url(toSpeak);
-    HttpGet get = null;
+
     byte[] b = null;
     try {
-      HttpResponse response = null;
-      // fetch file
-      get = new HttpGet(mp3Url);
+
       log.info("mp3Url {}", mp3Url);
       // get mp3 file & save to cache
-      response = client.execute(get);
-      log.info("got {}", response.getStatusLine());
-      HttpEntity entity = response.getEntity();
       // cache the mp3 content
-      b = FileIO.toByteArray(entity.getContent());
+      b = httpClient.getBytes(mp3Url);
       if (b == null || b.length == 0) {
         error("%s returned 0 byte file !!! - it may block you", getName());
         b = null;
       }
-      EntityUtils.consume(entity);
+
     } catch (Exception e) {
       Logging.logError(e);
-    } finally {
-      if (get != null) {
-        get.releaseConnection();
-      }
     }
+
     return b;
   }
 

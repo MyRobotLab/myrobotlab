@@ -12,6 +12,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.client.ClientProtocolException;
+
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -140,17 +142,20 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ClientProtocolException, IOException {
     LoggingFactory.init(Level.INFO);
+
     try {
       // Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
+      // mary.grabRemoteAudioEffect("LAUGH01_F");
       Runtime.start("python", "Python");
       Runtime.start("gui", "SwingGui");
       // examples are generously copied from
       // marytts.signalproc.effects.EffectsApplier.java L319-324
       // String strEffectsAndParams = "FIRFilter+Robot(amount=50)";
-      String strEffectsAndParams = "Robot(amount=100)+Chorus(delay1=866, amp1=0.24, delay2=300, amp2=-0.40,)";
+      //// String strEffectsAndParams = "Robot(amount=100)+Chorus(delay1=866,
+      // amp1=0.24, delay2=300, amp2=-0.40,)";
       // "Robot(amount=80)+Stadium(amount=50)";
       // String strEffectsAndParams = "FIRFilter(type=3,fc1=6000,
       // fc2=10000) + Robot";
@@ -161,27 +166,31 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
       // mary.setVoice("dfki-spike en_GB male unitselection general");
       // mary.setVoice("cmu-bdl-hsmm");
-      // mary.setVoice("cmu-slt-hsmm");
-      mary.getVoices();
+       mary.setVoice("cmu-slt-hsmm");
+      //// mary.getVoices();
       // mary.speak("world");
-      mary.speak("");
-      mary.setAudioEffects("");
-      mary.setVolume(0.9f);
-      mary.speakBlocking("Hello world");
-      mary.setVolume(0.7f);
-      mary.speakBlocking("Hello world");
-      mary.setVolume(0.9f);
+      //// mary.speak("");
+      //// mary.setAudioEffects("");
+      //// mary.setVolume(0.9f);
+      //// mary.speakBlocking("Hello world");
+      //// mary.setVolume(0.7f);
+      //// mary.speakBlocking("Hello world");
+      //// mary.setVolume(0.9f);
       // mary.speakBlocking("unicode test, éléphant");
       // test audioeffect on cached text
-      mary.setAudioEffects("FIRFilter+Robot(amount=50)");
-      mary.speak("Hello world");
+      //// mary.setAudioEffects("FIRFilter+Robot(amount=50)");
+      //// mary.speak("Hello world");
 
       // mary.speakBlocking("my name is worky");
       // mary.speakBlocking("I am Mary TTS and I am open source");
       // mary.speakBlocking("and I will evolve quicker than any closed source
       // application if not in a short window of time");
       // mary.speakBlocking("then in the long term evolution of software");
-      // mary.speak("Hello world");
+      mary.speakBlocking("#THROAT01_F# Hello world, it is so funny #LAUGH02_F#");
+      mary.setVoice("cmu-bdl-hsmm");
+      mary.speakBlocking("#THROAT01_M# hi! it works.");
+      mary.speakBlocking("#LAUGH01_M#");
+      mary.speakBlocking("I am your R 2 D 2 #R2D2#");
 
       // WOW - that is a big install !
       // mary.installComponentsAcceptLicense("bits1");
@@ -250,11 +259,12 @@ public class MarySpeech extends AbstractSpeechSynthesis {
    * 
    */
   static public ServiceType getMetaData() {
+
     ServiceType meta = new ServiceType(MarySpeech.class);
+    subGetMetaData(meta);
     meta.addDescription("Speech synthesis based on MaryTTS");
-    meta.addCategory("speech", "sound");
+
     meta.addDependency("de.dfki.mary", "marytts", "5.2", "pom");
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
 
     // hmm..TODO: refactor this.
     String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm",

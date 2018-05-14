@@ -96,11 +96,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(LocalSpeech.class.getCanonicalName());
+    subGetMetaData(meta);
     meta.addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui
     // add dependency if necessary
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech");
     meta.addDependency("com.microsoft", "tts", "1.1", "zip");
     return meta;
@@ -138,9 +138,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     // microsoftLocalTTS.ttsExeOutputFilePath="c:\\tmp\\";
     localSpeech.getVoices();
     // localSpeech.setVoice("1");
-    localSpeech.speakBlocking("local tts");
+    localSpeech.speakBlocking("I am your R 2 D 2 #R2D2#");
     localSpeech.speak("unicode éléphant");
-
+    localSpeech.getVoiceEffects();
   }
 
   public List<String> getLanguages() {

@@ -161,8 +161,8 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     speech.speakBlocking("it works, yes I believe it does");
     speech.speakBlocking("yes yes. oh good. excellent!");
     speech.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
-    speech.speak("I'm afraid I can't do that.");
-
+    speech.speakBlocking("I'm afraid I can't do that.");
+    speech.speak("I am your R 2 D 2 #R2D2#");
   }
 
   /**
@@ -178,7 +178,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     meta.addDescription("VoiceRss speech synthesis service.");
     meta.addCategory("speech");
     meta.setSponsor("moz4r");
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    subGetMetaData(meta);
     meta.addPeer("security", "Security", "security");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.setCloudService(true);

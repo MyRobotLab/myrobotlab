@@ -62,6 +62,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   JLabel statusIcon = new JLabel("Not initialized", statusImageNOK, JLabel.CENTER);
   protected JPanel speechGuiPanel = new JPanel();
   JComboBox<String> comboVoice = new JComboBox<String>();
+  JComboBox<String> comboVoiceEffects = new JComboBox<String>();
   JTextArea lastUtterance = new JTextArea();
   final JPanel panel = new JPanel();
 
@@ -73,10 +74,11 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   protected JPasswordField keyIdSecret = new JPasswordField();
   JButton save = new JButton("Save");
   protected JLabel apiKeyLabel = new JLabel("API Keys :");
+
   public AbstractSpeechSynthesisGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
 
-    speechGuiPanel.setLayout(new GridLayout(4, 2, 0, 0));
+    speechGuiPanel.setLayout(new GridLayout(5, 2, 0, 0));
     JLabel status = new JLabel("Status :");
     speechGuiPanel.add(status);
     speechGuiPanel.add(statusIcon);
@@ -86,6 +88,9 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     speechGuiPanel.add(comboVoice);
 
+    JLabel voiceEffects = new JLabel("Voice emotions :");
+    speechGuiPanel.add(voiceEffects);
+    speechGuiPanel.add(comboVoiceEffects);
     speechGuiPanel.add(panel);
     panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
@@ -102,10 +107,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     // used for api if needed by service
     apiKeylPanel.setLayout(new GridLayout(3, 2, 0, 0));
-  
 
-
-    
     apiKeylPanel.add(keyIdLabel);
     apiKeylPanel.add(keyIdSecretLabel);
     apiKeylPanel.add(keyId);
@@ -114,6 +116,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     // listeners
     comboVoice.addActionListener(this);
+    comboVoiceEffects.addActionListener(this);
     speakButton.addActionListener(this);
     save.addActionListener(this);
   }
@@ -134,6 +137,9 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
         if (o == save) {
           send("setKeys", keyId.getText(), keyIdSecret.getText());
         }
+        if (o == comboVoiceEffects) {
+          send("speak", comboVoiceEffects.getSelectedItem());
+        }
 
       }
     });
@@ -151,6 +157,17 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           statusIcon.setIcon(statusImageNOK);
         }
         statusIcon.setText(speech.getEngineError());
+
+        if (comboVoiceEffects.getItemCount() == 0 && !(speech.getVoiceEffects() == null)) {
+          comboVoiceEffects.removeAll();
+          speech.getVoiceEffects().forEach((v) -> comboVoiceEffects.addItem(v));
+          comboVoiceEffects.setEnabled(true);
+        }
+        if ((speech.getVoiceEffects() == null)) {
+
+          comboVoiceEffects.addItem("Offline");
+          comboVoiceEffects.setEnabled(false);
+        }
         if (comboVoice.getItemCount() == 0 && !(speech.getVoices() == null)) {
           speech.getVoices().forEach((v) -> comboVoice.addItem(v));
         }
@@ -183,12 +200,13 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     comboVoice.removeActionListener(this);
     speakButton.removeActionListener(this);
     save.removeActionListener(this);
+    comboVoiceEffects.removeActionListener(this);
   }
 
   public void restoreListeners() {
     comboVoice.addActionListener(this);
     speakButton.addActionListener(this);
     save.addActionListener(this);
-
+    comboVoiceEffects.addActionListener(this);
   }
 }

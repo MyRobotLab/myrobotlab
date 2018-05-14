@@ -199,7 +199,7 @@ public class Polly extends AbstractSpeechSynthesis {
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui
     // add dependency if necessary
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    subGetMetaData(meta);
     meta.addPeer("security", "Security", "security");
     /*
      * meta.addDependency("org.joda", "2.9.4");
@@ -310,7 +310,7 @@ public class Polly extends AbstractSpeechSynthesis {
 
     polly.speakBlocking("or to take arms against a see of troubles");
     polly.speak("the slings and arrows of ourtrageous fortune");
-
+    polly.speak("#THROAT01_M# hi! it works.");
     log.info("finished");
   }
 
