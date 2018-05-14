@@ -7,14 +7,21 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.AudioFile;
+import org.myrobotlab.service.HttpClient;
 import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -22,8 +29,6 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
-
-
 
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener {
   private static final long serialVersionUID = 1L;
@@ -35,8 +40,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   protected String language;
   transient AudioFile audioFile = null;
   protected transient Security security = null;
+  protected transient HttpClient httpClient = null;
   private String audioCacheExtension = "mp3";
   private transient List<String> voiceList = new ArrayList<String>();
+  private String mrlCloudUrl = "http://www.myai.cloud/mrl/audio/";
+
   // useful to store personal voice parameter inside json config
   // this var receive info from services
 
@@ -51,9 +59,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     super(reservedKey);
   }
 
-  /**
-   * start callback for speech synth. (Invoked when speaking starts)
-   */
+
   public String publishStartSpeaking(String utterance) {
     log.info("publishStartSpeaking - {}", utterance);
     lastUtterance = utterance;
@@ -61,9 +67,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return utterance;
   }
 
-  /**
-   * stop callback for speech synth. (Invoked when speaking stops.)
-   */
+
   public String publishEndSpeaking(String utterance) {
     log.info("publishEndSpeaking - {}", utterance);
     return utterance;
@@ -178,15 +182,19 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     String localFileName = getLocalFileName(this, toSpeak);
     File file = new File(AudioFile.getGlobalFileCacheDir() + File.separator + localFileName);
 
-    // just dust it ...
+    // just dust it off ...
     if (file.exists() && file.length() == 0) {
       file.delete();
-      log.info(localFileName + " deleted because size=0");
+      log.info(localFileName + " deleted, because empty...");
     }
 
     if (!audioFile.cacheContains(localFileName)) {
       log.info("retrieving speech from tts - {}", localFileName);
-      mp3File = generateByteAudio(toSpeak);
+      if (toSpeak.startsWith("#")) {
+        mp3File = grabRemoteAudioEffect(toSpeak.replace("#", ""));
+      } else {
+        mp3File = generateByteAudio(toSpeak);
+      }
       if (mp3File == null || mp3File.length == 0) {
         log.error("Tried to cache null data... check the speech engine");
         return null;
@@ -200,35 +208,46 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return mp3File;
   }
 
-  public AudioData speak(String toSpeak) {
+  public AudioData[] speak(String toSpeak) {
 
     toSpeak = cleanUptext(toSpeak);
+    int i = 0;
+    String splitedSpeak[] = splitAndConservSeparator(toSpeak, "#");
+    AudioData audioData[] = new AudioData[splitedSpeak.length];
+    for (String s : splitedSpeak) {
 
-    AudioData audioData = null;
-    try {
-      cacheFile(toSpeak);
+      try {
+        cacheFile(s);
 
-      audioData = audioFile.playCachedFile(getLocalFileName(this, toSpeak));
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+        audioData[i] = audioFile.playCachedFile(getLocalFileName(this, s));
+        utterances.put(audioData[i], s);
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      i += 1;
+
     }
-    utterances.put(audioData, toSpeak);
+
     return audioData;
   }
 
   @Override
   public boolean speakBlocking(String toSpeak) {
     toSpeak = cleanUptext(toSpeak);
-    try {
-      cacheFile(toSpeak);
+    int i = 0;
+    String splitedSpeak[] = splitAndConservSeparator(toSpeak, "#");
+    for (String s : splitedSpeak) {
+      try {
+        cacheFile(s);
 
-      invoke("publishStartSpeaking", toSpeak);
-      audioFile.playBlocking(audioFile.getGlobalFileCacheDir() + File.separator + getLocalFileName(this, toSpeak));
-      invoke("publishEndSpeaking", toSpeak);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+        invoke("publishStartSpeaking", s);
+        audioFile.playBlocking(audioFile.getGlobalFileCacheDir() + File.separator + getLocalFileName(this, s));
+        invoke("publishEndSpeaking", s);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
     return false;
   }
@@ -242,6 +261,46 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       toSpeak = " , ";
     }
     return toSpeak;
+  }
+
+  /**
+   * We need to extract voices effect tagged by #
+   */
+  private String[] splitAndConservSeparator(String input, String regex) {
+
+    Matcher m = Pattern.compile(regex).matcher(input);
+
+    List<String> matchList = new ArrayList<String>();
+
+    int start = 0;
+    int end = 0;
+
+    while (m.find()) {
+
+      if (start > 0 && !input.substring(start, m.start()).isEmpty() && (input.substring(start - 1, start).matches(regex)) && (!input.substring(start, start + 1).matches(" "))) {
+        log.info("dbg" + input.substring(start, m.start()) + "dbg");
+
+        matchList.add(regex + input.substring(start, m.start()) + regex);
+
+      } else if (!input.substring(start, m.start()).isEmpty()) {
+        matchList.add(input.substring(start, m.start()));
+      }
+      // log.info(start+"tata"+input.length());
+      start = m.end();
+      end = input.length();
+
+    }
+
+    if (start == 0) {
+
+      return new String[] { input };
+    }
+
+    if (start < end) {
+
+      matchList.add(input.substring(start, end));
+    }
+    return matchList.toArray(new String[matchList.size()]);
   }
 
   public AudioFile getAudioFile() {
@@ -274,9 +333,18 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // never used
   }
 
+  protected static void subGetMetaData(ServiceType meta) {
+    meta.addPeer("httpClient", "HttpClient", "httpClient");
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addCategory("speech", "sound");
+  }
+
   protected void subSpeechStartService() {
+
     audioFile = (AudioFile) startPeer("audioFile");
     audioFile.startService();
+    httpClient = (HttpClient) startPeer("httpClient");
+    httpClient.startService();
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
     // attach a listener when the audio file ends playing.
@@ -320,6 +388,36 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return voiceList;
   }
 
+  public List<String> getVoiceEffects() {
+    JSONArray json = null;
+    List<String> list = new ArrayList<String>();
+    if (httpClient == null) {
+      
+      return list;
+    }
+
+    try {
+      json = new JSONArray(httpClient.get(mrlCloudUrl));
+    } catch (Exception e) {
+      error("getVoiceEffects error : %s", e);
+      return null;
+    }
+    log.info("getVoiceEffects json : " + json);
+    for (int i = 0; i < json.length(); i++) {
+      try {
+        String content = json.getString(i);
+        if (content.contains(".mp3")) {
+          list.add("#" + content.replace(".mp3", "") + "#");
+        }
+      } catch (JSONException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    return list;
+ 
+  }
+
   public void setVoiceList(List<String> voiceList) {
     this.voiceList = voiceList;
   }
@@ -331,4 +429,19 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public void setAudioCacheExtension(String audioCacheExtension) {
     this.audioCacheExtension = audioCacheExtension;
   }
+
+  public byte[] grabRemoteAudioEffect(String effect) throws ClientProtocolException, IOException {
+
+    byte[] audioEffect = httpClient.getBytes(mrlCloudUrl + effect + ".mp3");
+    // error detection
+    if (audioEffect.length <= 225) {
+      log.error("grabRemoteAudioEffect can't grab " + mrlCloudUrl + effect + ".mp3");
+      return null;
+    }
+    log.info("grabRemoteAudioEffect length " + audioEffect.length);
+
+    return audioEffect;
+
+  }
+
 }

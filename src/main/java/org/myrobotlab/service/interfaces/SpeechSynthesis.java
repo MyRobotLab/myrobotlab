@@ -42,7 +42,7 @@ public interface SpeechSynthesis extends NameProvider {
    * @throws Exception
    *           e
    */
-  public abstract AudioData speak(String toSpeak) throws Exception;
+  public abstract AudioData[] speak(String toSpeak) throws Exception;
 
   /**
    * Begin speaking and wait until all speech has been played back/
@@ -55,11 +55,34 @@ public interface SpeechSynthesis extends NameProvider {
    */
   public abstract boolean speakBlocking(String toSpeak) throws Exception;
 
+  /**
+   * Change audioData volume
+   * 
+   * @param volume
+   *          - float between 0 & 1.
+   */
   public abstract void setVolume(float volume);
 
+  /**
+   * Get audioData volume
+   * 
+   * @return float
+   */
   public abstract float getVolume();
 
+  /**
+   * Get current voice
+   * 
+   * @return String
+   */
   public abstract String getVoice();
+
+  /**
+   * get voice effects on a remote server
+   * 
+   * @return list
+   */
+  public abstract List<String> getVoiceEffects();
 
   /**
    * start callback for speech synth. (Invoked when speaking starts)

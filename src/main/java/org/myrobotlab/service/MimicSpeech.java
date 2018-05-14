@@ -91,7 +91,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     meta.addDescription("Speech synthesis based on Mimic from the MyCroft AI project.");
     meta.addCategory("speech", "sound");
     meta.addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    subGetMetaData(meta);
     meta.setSponsor("Kwatters");
     // meta.addDependency("marytts", "5.2");
     // meta.addDependency("com.sun.speech.freetts", "1.2");
@@ -107,6 +107,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     LoggingFactory.init(Level.INFO);
 
     mimic.speakBlocking("hello \"world\", it's a  test .. testing 1 2 3 , unicode éléphant");
+    mimic.speakBlocking("#THROAT01_F# hi! it works.");
   }
 
   @Override
