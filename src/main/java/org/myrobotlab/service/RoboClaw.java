@@ -2167,9 +2167,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // uncomment for virtual hardware
       // virtual = True
 
-      // String port = "COM14";
+      String port = "COM4";
       // String port = "/dev/ttyS10";
-      String port = "/dev/ttyACM1";
+      // String port = "/dev/ttyACM1";
       // String port = "vuart";
 
       Serial uart = null;
