@@ -2235,6 +2235,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       roboclaw.readEncoderM1();
       roboclaw.readEncoderM1();
+      
 
       // roboclaw.readEncoderCount();
       // roboclaw.read
