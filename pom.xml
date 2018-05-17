@@ -10,6 +10,12 @@
 	    <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
 	    <dependency.locations.enabled>false</dependency.locations.enabled>
 	    <!-- begin env vars -->
+	    <!-- 
+	    	global build number comes either from a local build.properties file,
+	    	or the build.properties is replaced by a curl command
+	    	curl http://build.myrobotlab.org:8888/getBuildNumber?branch=develop > build.properties
+	    	maven or jenkins can do this
+	     -->
 	    <build.number>${global.build.number}</build.number>	    
 	    <username>${global.username}</username>	    
 	    <platform>${global.platform}</platform>	    
