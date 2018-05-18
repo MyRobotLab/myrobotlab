@@ -3,6 +3,7 @@ package org.myrobotlab.i2c;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Platform;
+
 import com.pi4j.io.i2c.I2CBus;
 
 public class I2CFactory {

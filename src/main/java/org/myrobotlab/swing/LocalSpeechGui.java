@@ -26,12 +26,12 @@
 package org.myrobotlab.swing;
 
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.abstracts.AbstractSpeechSynthesisGui;
 import org.slf4j.Logger;
-import java.io.IOException;
 
 public class LocalSpeechGui extends AbstractSpeechSynthesisGui implements ActionListener {
 

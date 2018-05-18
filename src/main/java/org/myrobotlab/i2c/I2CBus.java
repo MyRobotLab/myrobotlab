@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.python.jline.internal.Log;
 

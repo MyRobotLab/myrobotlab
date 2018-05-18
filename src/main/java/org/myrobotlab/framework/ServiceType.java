@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import org.myrobotlab.framework.repo.ServiceExclude;
+
 import org.myrobotlab.framework.repo.ServiceArtifact;
 import org.myrobotlab.framework.repo.ServiceDependency;
+import org.myrobotlab.framework.repo.ServiceExclude;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**

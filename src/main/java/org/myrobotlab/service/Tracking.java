@@ -30,11 +30,11 @@ import static org.myrobotlab.service.OpenCV.FILTER_DETECTOR;
 import static org.myrobotlab.service.OpenCV.FILTER_DILATE;
 import static org.myrobotlab.service.OpenCV.FILTER_ERODE;
 import static org.myrobotlab.service.OpenCV.FILTER_FACE_DETECT;
+import static org.myrobotlab.service.OpenCV.FILTER_FACE_RECOGNIZER;
 import static org.myrobotlab.service.OpenCV.FILTER_FIND_CONTOURS;
-import static org.myrobotlab.service.OpenCV.FILTER_FACE_RECOGNIZER; 
-import static org.myrobotlab.service.OpenCV.FILTER_GRAY; 
-import static org.myrobotlab.service.OpenCV.FILTER_PYRAMID_DOWN;
+import static org.myrobotlab.service.OpenCV.FILTER_GRAY;
 import static org.myrobotlab.service.OpenCV.FILTER_LK_OPTICAL_TRACK;
+import static org.myrobotlab.service.OpenCV.FILTER_PYRAMID_DOWN;
 import static org.myrobotlab.service.OpenCV.FOREGROUND;
 import static org.myrobotlab.service.OpenCV.PART;
 

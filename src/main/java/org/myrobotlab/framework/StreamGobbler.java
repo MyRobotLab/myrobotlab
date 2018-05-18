@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class StreamGobbler extends Thread {

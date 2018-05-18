@@ -2,7 +2,6 @@ package org.myrobotlab.vision;
 
 
 import java.lang.reflect.Constructor;
-import java.util.Queue;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.Frame;
@@ -13,8 +12,8 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.Vision;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Vision;
 import org.slf4j.Logger;
 
 /**

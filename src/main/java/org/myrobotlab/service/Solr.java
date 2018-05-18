@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -38,7 +40,6 @@ import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr

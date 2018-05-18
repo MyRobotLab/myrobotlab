@@ -8,7 +8,6 @@ import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;

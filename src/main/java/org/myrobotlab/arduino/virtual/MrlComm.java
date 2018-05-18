@@ -9,7 +9,6 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
-import org.python.jline.internal.Log;
 
   ///////////// MrlComm.h ///////////////
   // forward defines to break circular dependency

@@ -50,12 +50,12 @@ import org.myrobotlab.service.data.Rectangle;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.vision.VisionData;
 import org.myrobotlab.vision.OpenCVFilter;
 import org.myrobotlab.vision.OpenCVFilterDetector;
 import org.myrobotlab.vision.OpenCVFilterGray;
 import org.myrobotlab.vision.OpenCVFilterPyramidDown;
 import org.myrobotlab.vision.OpenCVFilterTranspose;
+import org.myrobotlab.vision.VisionData;
 import org.slf4j.Logger;
 
 // TODO - attach() ???  Static name peer key list ???
