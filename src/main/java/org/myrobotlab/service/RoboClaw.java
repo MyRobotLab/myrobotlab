@@ -2269,6 +2269,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
         double pwr = i * .01;
         log.info("power {}", pwr);
         m1.move(pwr);
+        
         sleep(100);
       }
 
