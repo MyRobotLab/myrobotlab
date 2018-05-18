@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.PinData;

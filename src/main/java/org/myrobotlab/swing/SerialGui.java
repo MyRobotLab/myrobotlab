@@ -50,7 +50,6 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.PortGui;
-import org.python.netty.handler.codec.CodecException;
 import org.slf4j.Logger;
 
 public class SerialGui extends ServiceGui implements ActionListener, ItemListener {
@@ -173,7 +172,7 @@ public class SerialGui extends ServiceGui implements ActionListener, ItemListene
 		if (o == send) {
 			String data = toSend.getText();
 			send("write", data.getBytes());
-			log.info("sent [%s]", data);
+			log.info("sent [{}]", data);
 		}
 	}
 

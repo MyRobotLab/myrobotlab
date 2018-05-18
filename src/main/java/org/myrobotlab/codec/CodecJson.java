@@ -3,7 +3,6 @@ package org.myrobotlab.codec;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

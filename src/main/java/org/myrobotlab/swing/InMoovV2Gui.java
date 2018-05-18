@@ -13,11 +13,19 @@ package org.myrobotlab.swing;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.util.Map.Entry;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
@@ -26,16 +34,6 @@ import org.myrobotlab.service.InMoovV2;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
-
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import java.awt.GridLayout;
-import javax.swing.JLabel;
-import javax.swing.JComboBox;
-import javax.swing.JCheckBox;
-import javax.swing.SwingConstants;
-import javax.swing.JButton;
 
 public class InMoovV2Gui extends ServiceGui implements ActionListener {
 

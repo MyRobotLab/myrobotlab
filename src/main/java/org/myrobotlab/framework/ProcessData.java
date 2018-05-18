@@ -10,7 +10,6 @@ import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Agent;
-import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 /**

@@ -1,6 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
+
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 
 public class PinDefinition extends SensorDefinition implements Serializable {

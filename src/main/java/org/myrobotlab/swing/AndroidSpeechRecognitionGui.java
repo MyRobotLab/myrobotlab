@@ -21,10 +21,7 @@ import javax.swing.SwingUtilities;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AndroidSpeechRecognition;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.WebkitSpeechRecognition;
-import org.myrobotlab.service.WebGui;
 import org.slf4j.Logger;
 
 public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionListener {

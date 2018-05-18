@@ -4,9 +4,9 @@ import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
 import static org.bytedeco.javacpp.opencv_dnn.readNetFromDarknet;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -20,7 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.opencv_core.CvScalar;

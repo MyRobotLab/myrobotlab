@@ -45,7 +45,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
@@ -81,9 +80,9 @@ import com.oculusvr.capi.OvrSizei;
 import com.oculusvr.capi.OvrVector2i;
 import com.oculusvr.capi.OvrVector3f;
 import com.oculusvr.capi.Posef;
-import com.oculusvr.capi.ViewScaleDesc;
 import com.oculusvr.capi.TextureSwapChain;
 import com.oculusvr.capi.TextureSwapChainDesc;
+import com.oculusvr.capi.ViewScaleDesc;
 
 /**
  * 

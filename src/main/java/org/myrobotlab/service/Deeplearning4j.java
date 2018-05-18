@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2RGB;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +16,7 @@ import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.Rect;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
 import org.datavec.image.loader.NativeImageLoader;
@@ -70,9 +73,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import org.bytedeco.javacpp.opencv_core.Rect;
-
-import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2RGB;
 
 /**
  * Deeplearning4j wrapper service to expose the deep learning.  This is basically derived from the AnimialClassifier example in the dl4j examples.

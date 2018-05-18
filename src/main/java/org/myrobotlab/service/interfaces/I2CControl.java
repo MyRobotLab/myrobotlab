@@ -25,8 +25,8 @@
 
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface I2CControl extends NameProvider, Attachable {
 	

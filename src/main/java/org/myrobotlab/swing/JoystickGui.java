@@ -45,9 +45,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Joystick;
 import org.myrobotlab.service.Joystick.Component;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.swing.widget.JoystickCompassPanel;

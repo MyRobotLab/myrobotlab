@@ -40,8 +40,6 @@ import com.google.cloud.vision.v1.WebDetection.WebPage;
 import com.google.cloud.vision.v1.Word;
 import com.google.protobuf.ByteString;
 
-import io.github.firemaples.detect.Detect;
-
 //[END import_libraries]
 
 public class GoogleCloud extends Service {

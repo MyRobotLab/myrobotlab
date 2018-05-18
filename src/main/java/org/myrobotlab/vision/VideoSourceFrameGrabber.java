@@ -6,7 +6,6 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Vision;
 import org.slf4j.Logger;
 
 public class VideoSourceFrameGrabber extends FrameGrabber {

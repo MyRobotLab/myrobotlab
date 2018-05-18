@@ -49,10 +49,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
-import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
-import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 import edu.cmu.sphinx.frontend.util.Microphone;

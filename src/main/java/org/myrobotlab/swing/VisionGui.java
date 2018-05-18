@@ -25,9 +25,6 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.DisplayMode;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -46,7 +43,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.CanvasFrame.Exception;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;

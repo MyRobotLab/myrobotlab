@@ -27,8 +27,6 @@ package org.myrobotlab.vision;
 
 import static org.bytedeco.javacpp.opencv_imgproc.cvDilate;
 
-import java.util.HashMap;
-
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.OpenCVFrameRecorder;

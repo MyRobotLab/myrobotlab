@@ -1,6 +1,7 @@
 package org.myrobotlab.arduino;
 
 import java.io.Serializable;
+
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
