@@ -4,10 +4,10 @@
 # make the s3 directory public in aws give access to the artifacts
 
 language: java
-sudo: false
-script: mvn clean install -DskipTests=true 
-jdk:
-- oraclejdk8
+jdk: oraclejdk8
+
+install: true
+script: ./mvnw clean install
 
 before_install:
  - chmod +x gradlew
