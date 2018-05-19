@@ -9,6 +9,9 @@ script: mvn install -DskipTests=true
 jdk:
 - oraclejdk8
 
+before_install:
+ - chmod +x gradlew
+
 deploy:
   provider: s3
   access_key_id: "AKIAJ6CQ5PPESWGSKNXA"
