@@ -103,6 +103,7 @@ public:
 	void publishServoEvent( byte deviceId,  byte eventType,  int currentPos,  int targetPos);
 	void publishSerialData( byte deviceId, const byte* data,  byte dataSize);
 	void publishUltrasonicSensorData( byte deviceId,  int echoTime);
+	void publishEncoderPosition( byte deviceId,  float position);
 
 	// handles all (PC --> MrlComm) methods
 	// void handle(int[] ioCmd); // send size too ?

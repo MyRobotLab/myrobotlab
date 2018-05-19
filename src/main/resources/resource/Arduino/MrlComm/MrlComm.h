@@ -148,6 +148,8 @@ public:
 	void motorMove( byte deviceId,  byte pwr);
 	// > motorMoveTo/deviceId/pos
 	void motorMoveTo( byte deviceId,  byte pos);
+	// > encoderAttach/deviceId/pin
+	void encoderAttach( byte deviceId,  byte pin);
     // </generatedCallBacks>
     // end
 

@@ -14,8 +14,8 @@ import org.myrobotlab.logging.Level;
  * 
  Welcome to Msg.java
  Its created by running ArduinoMsgGenerator
- which combines the MrlComm message schema (src/main/resources/resource/Arduino/arduinoMsg.schema)
- with the cpp template (src/main/resources/resource/Arduino/generate/Msg.java.template)
+ which combines the MrlComm message schema (src/resource/Arduino/arduinoMsg.schema)
+ with the cpp template (src/resource/Arduino/generate/Msg.java.template)
 
  	Schema Type Conversions
 
@@ -57,7 +57,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 57;
+	public static final int MRLCOMM_VERSION = 58;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -98,6 +98,7 @@ public class Msg {
 	public static final int DEVICE_TYPE_SERIAL	 = 		6;
 	public static final int DEVICE_TYPE_I2C	 = 		7;
 	public static final int DEVICE_TYPE_NEOPIXEL	 = 		8;
+	public static final int DEVICE_TYPE_ENCODER	 = 		9;
 		
 	// < publishMRLCommError/str errorMsg
 	public final static int PUBLISH_MRLCOMM_ERROR = 1;
@@ -201,6 +202,10 @@ public class Msg {
 	public final static int MOTOR_MOVE = 50;
 	// > motorMoveTo/deviceId/pos
 	public final static int MOTOR_MOVE_TO = 51;
+	// > encoderAttach/deviceId/pin
+	public final static int ENCODER_ATTACH = 52;
+	// < publishEncoderPosition/deviceId/f32 position
+	public final static int PUBLISH_ENCODER_POSITION = 53;
 
 
 /**
@@ -218,6 +223,7 @@ public class Msg {
 	// public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/){}
 	// public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/){}
 	// public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
+	// public void publishEncoderPosition(Integer deviceId/*byte*/, Float position/*f32*/){}
 	
 
 	
@@ -544,6 +550,31 @@ public class Msg {
 				rxBuffer.append(deviceId);
 				rxBuffer.append("/");
 				rxBuffer.append(echoTime);
+			rxBuffer.append("\n");
+			try{
+				record.write(rxBuffer.toString().getBytes());
+				rxBuffer.setLength(0);
+			}catch(IOException e){}
+			}
+
+			break;
+		}
+		case PUBLISH_ENCODER_POSITION: {
+			Integer deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			Float position = f32(ioCmd, startPos+1);
+			startPos += 4; //f32
+			if(invoke){
+				arduino.invoke("publishEncoderPosition",  deviceId,  position);
+			} else { 
+ 				arduino.publishEncoderPosition( deviceId,  position);
+			}
+			if(record != null){
+				rxBuffer.append("< publishEncoderPosition");
+				rxBuffer.append("/");
+				rxBuffer.append(deviceId);
+				rxBuffer.append("/");
+				rxBuffer.append(position);
 			rxBuffer.append("\n");
 			try{
 				record.write(rxBuffer.toString().getBytes());
@@ -1843,6 +1874,38 @@ public class Msg {
 	  }
 	}
 
+	public synchronized void encoderAttach(Integer deviceId/*byte*/, Integer pin/*byte*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+			write(ENCODER_ATTACH); // msgType = 52
+			write(deviceId);
+			write(pin);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> encoderAttach");
+				txBuffer.append("/");
+				txBuffer.append(deviceId);
+				txBuffer.append("/");
+				txBuffer.append(pin);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("encoderAttach threw",e);
+	  }
+	}
+
 
 	public static String methodToString(int method) {
 		switch (method) {
@@ -1998,6 +2061,12 @@ public class Msg {
 		}
 		case MOTOR_MOVE_TO:{
 			return "motorMoveTo";
+		}
+		case ENCODER_ATTACH:{
+			return "encoderAttach";
+		}
+		case PUBLISH_ENCODER_POSITION:{
+			return "publishEncoderPosition";
 		}
 
 		default: {
@@ -2236,6 +2305,10 @@ public class Msg {
 		}
 		case 8 :  {
 			return "NeoPixel";
+
+		}
+		case 9 :  {
+			return "Encoder";
 
 		}
 		

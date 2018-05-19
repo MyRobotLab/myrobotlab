@@ -792,5 +792,10 @@ public class MrlComm {
 	 // msg.setAref(aref);
   }
 
+  public void encoderAttach(Integer deviceId, Integer pin) {
+    MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
+    encoder.attach(pin);
+  }
+
 
 }
