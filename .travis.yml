@@ -10,8 +10,8 @@ install: true
 script: ./mvnw clean install
 
 before_install:
- - chmod +x gradlew
- - ./gradlew clean
+# - chmod +x gradlew
+# - ./gradlew clean
  
 deploy:
   provider: s3
