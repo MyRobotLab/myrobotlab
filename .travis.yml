@@ -5,15 +5,10 @@
 
 language: java
 sudo: false
-script: mvn install -DskipTests=true 
+script: mvn clean install -DskipTests=true 
 jdk:
 - oraclejdk8
 
-before_install:
- - chmod +x gradle/wrapper/gradle-wrapper.jar
- - git add -f gradle/wrapper/gradle-wrapper.jar
- - chmod +x gradlew
- 
 deploy:
   provider: s3
   access_key_id: "AKIAJ6CQ5PPESWGSKNXA"
