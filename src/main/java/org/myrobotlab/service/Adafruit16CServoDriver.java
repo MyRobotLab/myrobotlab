@@ -70,7 +70,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.info(String.format("Speed control started for %s", name));
       servoData = servoMap.get(name);
       log.debug(String.format("Moving from %s to %s at %s degrees/second", servoData.currentOutput, servoData.targetOutput, servoData.velocity));
-      publishServoEvent(servoData.servo,2, servoData.currentOutput);
+      publishServoEvent(servoData.servo, 2, servoData.currentOutput);
       try {
         lastExecution = System.currentTimeMillis();
         double _velocity;
@@ -114,14 +114,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
           }
           int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
           setServo(servoData.pin, pulseWidthOff);
-          publishServoEvent(servoData.servo,2, servoData.currentOutput);
+          publishServoEvent(servoData.servo, 2, servoData.currentOutput);
           // Sleep 100ms before sending next position
           lastExecution = now;
-          log.info(String.format("Sent %s using a %s tick at velocity %s", servoData.currentOutput, deltaTime, _velocity));
+          log.debug(String.format("Sent %s using a %s tick at velocity %s", servoData.currentOutput, deltaTime, _velocity));
           Thread.sleep(50);
         }
-        publishServoEvent(servoData.servo,1,servoData.currentOutput);
-        log.info(String.format("publishServoEvent :  %s , event %s, currentOutput %s",servoData.servo.getName(),1,servoData.currentOutput));
+        publishServoEvent(servoData.servo, 1, servoData.currentOutput);
+        log.info(String.format("publishServoEvent :  %s , event %s, currentOutput %s", servoData.servo.getName(), 1, servoData.currentOutput));
         log.info("Shuting down SpeedControl");
 
       } catch (Exception e) {
@@ -135,7 +135,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     }
 
   }
-  
+
   public double publishServoEvent(ServoControl servo, Integer eventType, double currentOutput) {
     // TODO Auto-generated method stub
     ((ServoControl) servo).onServoEvent(eventType, currentOutput);
@@ -310,7 +310,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
         (byte) (pulseWidthOff >> 8) };
-    log.info(String.format("Writing pin %s, pulesWidthOn %s, pulseWidthOff %s", pin, pulseWidthOn, pulseWidthOff));
+    log.debug(String.format("Writing pin %s, pulesWidthOn %s, pulseWidthOff %s", pin, pulseWidthOn, pulseWidthOff));
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
@@ -431,7 +431,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
         log.debug(String.format("servoWrite %s deviceAddress %s targetOutput %f", servo.getName(), deviceAddress, servo.getTargetOutput()));
         int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
         setServo(servo.getPin(), pulseWidthOff);
-        publishServoEvent(servoData.servo,1, servoData.targetOutput);
+        publishServoEvent(servoData.servo, 1, servoData.targetOutput);
       } else {
         log.debug(String.format("Ada move at velocity %s degrees/s", servoData.velocity));
         servoData.targetOutput = servo.getTargetOutput();
@@ -485,6 +485,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     ServoData servoData = servoMap.get(servo.getName());
     setPWM(servoData.pin, 4096, 0);
     servoData.isEnergized = false;
+    log.info("Pin : " + servoData.pin + " detached from " + servo.getName());
 
   }
 
@@ -501,7 +502,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     // FIXME - do not count on MotorControl's MotorControl's getPowerOutput
     // to produce the correct values for MotorController
     // double powerOutput = mc.getPowerOutput();
-    
+
     // this is guaranteed to be between -1.0 and 1.0
     double powerLevel = mc.getPowerLevel();
 
@@ -630,8 +631,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     pinIndex = new HashMap<Integer, PinDefinition>();
 
     for (int i = 0; i < 16; ++i) {
-      PinDefinition pindef = new PinDefinition(getName(), i, String.format("D%d", i));      
-      pindef.setDigital(true);    
+      PinDefinition pindef = new PinDefinition(getName(), i, String.format("D%d", i));
+      pindef.setDigital(true);
       pinIndex.put(i, pindef);
     }
     return pinMap;
@@ -679,8 +680,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     List<PinDefinition> pinList = new ArrayList<PinDefinition>();
 
     for (int i = 0; i < 15; ++i) {
-     
-      PinDefinition pindef = new PinDefinition(getName(), i, String.format("D%d", i));  
+
+      PinDefinition pindef = new PinDefinition(getName(), i, String.format("D%d", i));
       pindef.setRx(false);
       pindef.setDigital(true);
       pindef.setAnalog(true);
@@ -711,7 +712,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void stopService() {
-    if (!isAttached(controller)){
+    if (!isAttached(controller)) {
       detachI2CController(controller);
     }
     super.stopService(); // stop inbox and outbox
@@ -844,11 +845,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     }
     ServoData servoData = new ServoData();
     servoData.pin = servo.getPin();
-    servoData.targetOutput  = servo.getTargetOutput();
+    servoData.targetOutput = servo.getTargetOutput();
     servoData.currentOutput = servo.getCurrentPosOutput();
     servoData.velocity = servo.getVelocity();
     servoData.isEnergized = true;
-    servoData.servo=servo;
+    servoData.servo = servo;
     servoMap.put(servo.getName(), servoData);
     servo.attachServoController(this);
   }
@@ -870,8 +871,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       try {
-        servoDetachPin((ServoControl) service);
+        // detachServoControl already call servoDetachPin
+        // servoDetachPin((ServoControl) service);
+        if (service.isAttached(this))
+        {
         detachServoControl((ServoControl) service);
+        }
       } catch (Exception e) {
         // TODO Auto-generated catch block);
         log.error("setController / attach throw", e);
@@ -907,8 +912,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   /**
-   * Returns all the currently attached services 
-   * TODO Add the list of attached motors
+   * Returns all the currently attached services TODO Add the list of attached
+   * motors
    */
   @Override
   public Set<String> getAttached() {
@@ -930,29 +935,36 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return this.deviceAddress;
   }
 
-/* (non-Javadoc)
- * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.Integer, java.lang.Integer)
- */
-@Override
-public void enablePin(Integer sensorPin, Integer i) {
-  // TODO Auto-generated method stub
-  
-}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.
+   * Integer, java.lang.Integer)
+   */
+  @Override
+  public void enablePin(Integer sensorPin, Integer i) {
+    // TODO Auto-generated method stub
 
-/* (non-Javadoc)
- * @see org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.Integer)
- */
-@Override
-public void disablePin(Integer i) {
-  // TODO Auto-generated method stub
-  
-}
+  }
 
-@Override
-public List<String> getPorts() {
-  // we use pins not ports
-  List<String> ret = new ArrayList<String>();
-  return ret;
-}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.
+   * Integer)
+   */
+  @Override
+  public void disablePin(Integer i) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public List<String> getPorts() {
+    // we use pins not ports
+    List<String> ret = new ArrayList<String>();
+    return ret;
+  }
 
 }
