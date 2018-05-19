@@ -213,11 +213,13 @@ public class Joystick extends Service {
 
 	public Joystick(String n) {
 		super(n);
-		// we will force a system property here to specify the native location for the jinput libraries
-		// TODO: this is a hacky work around because for some reason, the jinput natives aren't found from the jinput-platform jar files!! 
-		String jinputNativePath = new java.io.File( "." ).getAbsolutePath() + File.separatorChar + "jinput-natives";
+		// we will force a system property here to specify the native location for the
+		// jinput libraries
+		// TODO: this is a hacky work around because for some reason, the jinput natives
+		// aren't found from the jinput-platform jar files!!
+		String jinputNativePath = new java.io.File(".").getAbsolutePath() + File.separatorChar + "jinput-natives";
 		System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
-		
+
 	}
 
 	public Map<String, Component> getComponents() {
@@ -233,7 +235,7 @@ public class Joystick extends Service {
 			return components;
 		}
 
-		info("Num. Components: " + hardwareComponents.length);
+		info("number of components: " + hardwareComponents.length);
 		for (int i = 0; i < hardwareComponents.length; i++) {
 			net.java.games.input.Component c = hardwareComponents[i];
 			String id = c.getIdentifier().toString();
@@ -255,6 +257,17 @@ public class Joystick extends Service {
 			controllerNames.put(String.format("%d - %s", i, hardwareControllers[i].getName()), i);
 		}
 		return controllerNames;
+	}
+
+	public String[] getControllerNames() {
+		Map<String, Integer> c = getControllers();
+		String[] ret = new String[c.size()];
+		int i = 0;
+		for (String name : c.keySet()) {
+			ret[i] = name;
+			++i;
+		}
+		return ret;
 	}
 
 	public boolean isPolling() {
@@ -382,7 +395,7 @@ public class Joystick extends Service {
 		meta.addDescription("service allows interfacing with a keyboard, joystick or gamepad");
 		meta.addCategory("control");
 		meta.addDependency("net.java.jinput", "jinput", "2.0.7");
-		meta.addDependency("jinput-natives", "jinput-natives", "2.0.7","zip");
+		meta.addDependency("jinput-natives", "jinput-natives", "2.0.7", "zip");
 		// meta.addDependency("net.java.jinput", "jinput-platform", "2.0.7");
 		// meta.addArtifact("net.java.jinput", "natives-windows");
 		// meta.addArtifact("net.java.jinput", "natives-linux");
