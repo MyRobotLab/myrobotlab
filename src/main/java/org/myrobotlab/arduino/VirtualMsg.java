@@ -14,8 +14,8 @@ import org.myrobotlab.logging.Level;
  * 
  Welcome to Msg.java
  Its created by running ArduinoMsgGenerator
- which combines the MrlComm message schema (src/main/resources/resource/Arduino/arduinoMsg.schema)
- with the cpp template (src/main/resources/resource/Arduino/generate/Msg.java.template)
+ which combines the MrlComm message schema (src/resource/Arduino/arduinoMsg.schema)
+ with the cpp template (src/resource/Arduino/generate/Msg.java.template)
 
  	Schema Type Conversions
 
@@ -56,7 +56,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 57;
+	public static final int MRLCOMM_VERSION = 58;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -97,6 +97,7 @@ public class VirtualMsg {
 	public static final int DEVICE_TYPE_SERIAL	 = 		6;
 	public static final int DEVICE_TYPE_I2C	 = 		7;
 	public static final int DEVICE_TYPE_NEOPIXEL	 = 		8;
+	public static final int DEVICE_TYPE_ENCODER	 = 		9;
 		
 	// < publishMRLCommError/str errorMsg
 	public final static int PUBLISH_MRLCOMM_ERROR = 1;
@@ -200,6 +201,10 @@ public class VirtualMsg {
 	public final static int MOTOR_MOVE = 50;
 	// > motorMoveTo/deviceId/pos
 	public final static int MOTOR_MOVE_TO = 51;
+	// > encoderAttach/deviceId/pin
+	public final static int ENCODER_ATTACH = 52;
+	// < publishEncoderPosition/deviceId/f32 position
+	public final static int PUBLISH_ENCODER_POSITION = 53;
 
 
 /**
@@ -246,6 +251,7 @@ public class VirtualMsg {
 	// public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/){}
 	// public void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/){}
 	// public void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/){}
+	// public void encoderAttach(Integer deviceId/*byte*/, Integer pin/*byte*/){}
 	
 
 	
@@ -780,6 +786,18 @@ public class VirtualMsg {
 			}
 			break;
 		}
+		case ENCODER_ATTACH: {
+			Integer deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			Integer pin = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			if(invoke){
+				arduino.invoke("encoderAttach",  deviceId,  pin);
+			} else { 
+ 				arduino.encoderAttach( deviceId,  pin);
+			}
+			break;
+		}
 		
 		}
 	}
@@ -1145,6 +1163,38 @@ public class VirtualMsg {
 	  }
 	}
 
+	public synchronized void publishEncoderPosition(Integer deviceId/*byte*/, Float position/*f32*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 4); // size
+			write(PUBLISH_ENCODER_POSITION); // msgType = 53
+			write(deviceId);
+			writef32(position);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> publishEncoderPosition");
+				txBuffer.append("/");
+				txBuffer.append(deviceId);
+				txBuffer.append("/");
+				txBuffer.append(position);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("publishEncoderPosition threw",e);
+	  }
+	}
+
 
 	public static String methodToString(int method) {
 		switch (method) {
@@ -1300,6 +1350,12 @@ public class VirtualMsg {
 		}
 		case MOTOR_MOVE_TO:{
 			return "motorMoveTo";
+		}
+		case ENCODER_ATTACH:{
+			return "encoderAttach";
+		}
+		case PUBLISH_ENCODER_POSITION:{
+			return "publishEncoderPosition";
 		}
 
 		default: {
@@ -1538,6 +1594,10 @@ public class VirtualMsg {
 		}
 		case 8 :  {
 			return "NeoPixel";
+
+		}
+		case 9 :  {
+			return "Encoder";
 
 		}
 		
