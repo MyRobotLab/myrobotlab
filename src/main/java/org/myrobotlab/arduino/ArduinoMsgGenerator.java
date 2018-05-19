@@ -248,8 +248,8 @@ public class ArduinoMsgGenerator {
     // write out to files ..
     FileOutputStream MsgH = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/Msg.h");
     FileOutputStream MsgCpp = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/Msg.cpp");
-    FileOutputStream MsgJava = new FileOutputStream("src/org/myrobotlab/arduino/Msg.java");
-    FileOutputStream VirtualMsg = new FileOutputStream("src/org/myrobotlab/arduino/VirtualMsg.java");
+    FileOutputStream MsgJava = new FileOutputStream("src/main/java/org/myrobotlab/arduino/Msg.java");
+    FileOutputStream VirtualMsg = new FileOutputStream("src/main/java/org/myrobotlab/arduino/VirtualMsg.java");
     FileOutputStream ArduinoMsgCodedH = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/ArduinoMsgCodec.h");
 
     ArduinoMsgCodedH.write(arduinoMsgCodeTemplateH.getBytes());
