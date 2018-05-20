@@ -7,6 +7,7 @@
 #include "MrlServo.h"
 #include "MrlI2cBus.h"
 #include "MrlUltrasonicSensor.h"
+#include "MrlAmt203Encoder.h"
 #include "LinkedList.h"
 #include "MrlComm.h"
 
@@ -550,4 +551,13 @@ unsigned int MrlComm::getCustomMsg() {
  void MrlComm::motorMoveTo(byte deviceId, byte pos) {
 	 // FIXME - implement
  }
+
+ // > encoderAttach/deviceId/pin
+void MrlComm::encoderAttach(byte deviceId, byte pin) {
+  msg->publishDebug("Encoder attach");
+  // create the encoder and add it to the device list.
+  MrlAmt203Encoder* encoder = (MrlAmt203Encoder*) addDevice(new MrlAmt203Encoder(deviceId));
+  // tell the encoder to attach to the pin.
+  encoder->attach(pin);
+}
 
