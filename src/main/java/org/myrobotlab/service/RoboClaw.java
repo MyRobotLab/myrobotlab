@@ -1337,7 +1337,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Bit7 - Reserved
    * </pre>
    */
-  public EncoderData readEncoderM2() {
+	public EncoderData readEncoderM2() {
     // FIXME - not really thread safe !
     // what pairs serial recv data with the calling thread
     // or what prevents another thread from "clearing" the buffer !
