@@ -36,6 +36,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
@@ -2299,15 +2300,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
     // send data to micro-controller
     msg.encoderAttach(deviceId, encoder.getPin());
+    
   }
 
   @Override
-  public Float publishEncoderPosition(Integer deviceId, Float position) {
-    // TODO: return a tuple of device name & position
-    // TODO Auto-generated method stub
-    // TODO: implement me!
-    log.info("Encoder position. {}" , position);
-    return position;
+  public EncoderData publishEncoderPosition(Integer deviceId, Integer position) {
+    EncoderData data = new EncoderData(getDeviceName(deviceId), position);
+    log.info("Encoder position. {}" , data);
+    ((Amt203Encoder) getDevice(deviceId)).onEncoderData(data);
+    return data;
   }
 
   @Override
