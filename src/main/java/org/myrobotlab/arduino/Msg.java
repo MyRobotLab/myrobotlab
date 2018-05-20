@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import org.myrobotlab.logging.Level;
 
+import org.myrobotlab.arduino.virtual.MrlComm;
+
 /**
  * <pre>
  * 
@@ -40,6 +42,10 @@ import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
+
+import java.io.FileOutputStream;
+import java.util.Arrays;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
@@ -204,7 +210,7 @@ public class Msg {
 	public final static int MOTOR_MOVE_TO = 51;
 	// > encoderAttach/deviceId/pin
 	public final static int ENCODER_ATTACH = 52;
-	// < publishEncoderPosition/deviceId/f32 position
+	// < publishEncoderPosition/deviceId/b16 position
 	public final static int PUBLISH_ENCODER_POSITION = 53;
 
 
@@ -223,7 +229,7 @@ public class Msg {
 	// public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/){}
 	// public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/){}
 	// public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
-	// public void publishEncoderPosition(Integer deviceId/*byte*/, Float position/*f32*/){}
+	// public void publishEncoderPosition(Integer deviceId/*byte*/, Integer position/*b16*/){}
 	
 
 	
@@ -562,8 +568,8 @@ public class Msg {
 		case PUBLISH_ENCODER_POSITION: {
 			Integer deviceId = ioCmd[startPos+1]; // bu8
 			startPos += 1;
-			Float position = f32(ioCmd, startPos+1);
-			startPos += 4; //f32
+			Integer position = b16(ioCmd, startPos+1);
+			startPos += 2; //b16
 			if(invoke){
 				arduino.invoke("publishEncoderPosition",  deviceId,  position);
 			} else { 

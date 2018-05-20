@@ -4,6 +4,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
@@ -27,6 +28,9 @@ public class Amt203Encoder extends Service implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
   public Integer pin;
+  // 12 bit encoder is 4096 steps of resolution
+  public Integer resolution = 4096; 
+  public Double currentPosition = 0.0;
 
   public Amt203Encoder(String reservedKey) {
     super(reservedKey);
@@ -38,13 +42,6 @@ public class Amt203Encoder extends Service implements EncoderControl {
     controller.attach(this, pin);
   }
 
-  @Override
-  public Float onEncoderData(Float position) {
-    // TODO: do something better here.
-    System.out.println("Encoder Data : "  +  position);
-    return position;
-  }
-  
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Amt203Encoder.class.getCanonicalName());
     meta.addDescription("AMT203 Encoder - Absolute position encoder");
@@ -56,12 +53,8 @@ public class Amt203Encoder extends Service implements EncoderControl {
 
     org.apache.log4j.BasicConfigurator.configure();
     LoggingFactory.getInstance().setLevel(Level.INFO);
-
     String port = "COM4";
-
-
     SwingGui gui = (SwingGui)Runtime.createAndStart("gui", "SwingGui");
-    
     Arduino ard = (Arduino)Runtime.createAndStart("ard", "Arduino");
     ard.connect(port);
     Amt203Encoder encoder = (Amt203Encoder)Runtime.createAndStart("encoder", "Amt203Encoder"); 
@@ -73,6 +66,20 @@ public class Amt203Encoder extends Service implements EncoderControl {
   public int getPin() {
     // 
     return pin;
+  }
+
+//  public Double publishEncoderAngle(Double angle) {
+//    return angle;    
+//  }
+  
+  @Override
+  public void onEncoderData(EncoderData data) {
+    // TODO Auto-generated method stub
+    Double angle = 360.0 * data.value / resolution;
+    this.currentPosition = angle;
+    //invoke("publishEncoderAngle", angle);
+    log.info("Encoder Data : {} Angle : {}" , data, angle);
+    
   }
 
 }

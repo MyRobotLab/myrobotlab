@@ -129,7 +129,7 @@
 #define MOTOR_MOVE_TO 51
 // > encoderAttach/deviceId/pin
 #define ENCODER_ATTACH 52
-// < publishEncoderPosition/deviceId/f32 position
+// < publishEncoderPosition/deviceId/b16 position
 #define PUBLISH_ENCODER_POSITION 53
 
 
