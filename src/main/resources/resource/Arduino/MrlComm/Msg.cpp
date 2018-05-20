@@ -250,12 +250,12 @@ void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   reset();
 }
 
-void Msg::publishEncoderPosition( byte deviceId,  float position) {
+void Msg::publishEncoderPosition( byte deviceId,  int position) {
   write(MAGIC_NUMBER);
-  write(1 + 1 + 4); // size
+  write(1 + 1 + 2); // size
   write(PUBLISH_ENCODER_POSITION); // msgType = 53
   write(deviceId);
-  writef32(position);
+  writeb16(position);
   flush();
   reset();
 }

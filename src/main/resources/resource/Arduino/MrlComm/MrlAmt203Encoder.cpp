@@ -9,7 +9,10 @@ MrlAmt203Encoder::MrlAmt203Encoder(int deviceId) : Device(deviceId, DEVICE_TYPE_
 	ABSposition = 0;
 	ABSposition_last = 0;
 	deg = 0.0;
-
+	lastUpdate = millis();
+	// 10 ms delay between reads of a given encoder
+	updateTimer = 10;
+	attached = false;
 }
 
 MrlAmt203Encoder::~MrlAmt203Encoder() {
@@ -26,9 +29,9 @@ uint8_t MrlAmt203Encoder::SPI_T(uint8_t msg) {
    return(msg_temp);      //return recieved byte
 }
 
-
 bool MrlAmt203Encoder::attach(byte pin){
-	// TODO: do i need to cast this to int from byte?!
+	// TODO: does it hurt to set up the bus each time a new encoder is added?
+  attached = true;
   this->csPin = pin;
   // set up the spi bus
   pinMode(pin,OUTPUT);//Slave Select
@@ -43,16 +46,26 @@ bool MrlAmt203Encoder::attach(byte pin){
 }
 
 void MrlAmt203Encoder::update() {
-	msg->publishDebug("Update encoder");
-
+  if (!attached) {
+    return;
+  }
+  // msg->publishDebug("Update encoder");
+  // Only update if at least 10 ms have passed since the last update.
+  // TODO: consider making this lower and see where it breaks.
+  long now = millis();
+  if (now - lastUpdate > updateTimer) {
+    lastUpdate = now;
+  } else {
+    return;
+  }
   uint8_t recieved = 0xA5;    //just a temp vairable
   SPI.begin();    //start transmition
   SPI_T(0x10);   //issue read command
-
   // TODO: maybe move this to the attach
   while (recieved != 0x10) {
+   // TODO: this could hang MrlComm if we don't get a response from an encoder.. and that'd be bad! mkay!
    //loop while encoder is not ready to send
-    recieved = SPI_T(0x00);    //cleck again if encoder is still working
+    recieved = SPI_T(0x00);    //check again if encoder is still working
   }
   temp[0] = SPI_T(0x00);    //Recieve MSB
   temp[1] = SPI_T(0x00);    //Recieve LSB
@@ -65,11 +78,9 @@ void MrlAmt203Encoder::update() {
    //if nothing has changed dont wast time sending position
     ABSposition_last = ABSposition;    //set last position to current position
     // deg = ABSposition;
-    float deg = ABSposition * 0.087890625;    // 360/4096  degrees to 12 bit resolution
-    this->publishEncoderPosition(deg);
+    //float deg = ABSposition * 0.087890625;    // 360/4096  degrees to 12 bit resolution
+    this->publishEncoderPosition(ABSposition);
   }
-  // TODO: remove this , if we don't have some delay between this update and the next, the encoder doesn't seem happy.
-  delay(10);
 }
 
 void MrlAmt203Encoder::publishEncoderPosition(float deg) {

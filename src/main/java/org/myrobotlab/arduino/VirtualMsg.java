@@ -2,12 +2,14 @@ package org.myrobotlab.arduino;
 
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.logging.Level;
+
+import org.myrobotlab.arduino.virtual.MrlComm;
 
 /**
  * <pre>
@@ -40,6 +42,11 @@ import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
+
+import java.io.FileOutputStream;
+import java.util.Arrays;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -203,7 +210,7 @@ public class VirtualMsg {
 	public final static int MOTOR_MOVE_TO = 51;
 	// > encoderAttach/deviceId/pin
 	public final static int ENCODER_ATTACH = 52;
-	// < publishEncoderPosition/deviceId/f32 position
+	// < publishEncoderPosition/deviceId/b16 position
 	public final static int PUBLISH_ENCODER_POSITION = 53;
 
 
@@ -1163,16 +1170,16 @@ public class VirtualMsg {
 	  }
 	}
 
-	public synchronized void publishEncoderPosition(Integer deviceId/*byte*/, Float position/*f32*/) {
+	public synchronized void publishEncoderPosition(Integer deviceId/*byte*/, Integer position/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
-			write(1 + 1 + 4); // size
+			write(1 + 1 + 2); // size
 			write(PUBLISH_ENCODER_POSITION); // msgType = 53
 			write(deviceId);
-			writef32(position);
+			writeb16(position);
  
      if (ackEnabled){
        // we just wrote - block threads sending

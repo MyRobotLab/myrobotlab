@@ -1,6 +1,7 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.sensor.EncoderData;
 
 public interface EncoderController extends Attachable {
 	
@@ -8,6 +9,6 @@ public interface EncoderController extends Attachable {
 	public void attach(EncoderControl control, Integer pin) throws Exception;
 
 	// TODO: publish EncoderData
-	public Float publishEncoderPosition(Integer deviceId, Float position);
+	public EncoderData publishEncoderPosition(Integer deviceId, Integer position);
 
 }
