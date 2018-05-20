@@ -53,12 +53,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   Integer address = 128;
 
-  public static final int INPUT = 0x0;
-
-  public static final int OUTPUT = 0x1;
-
-  boolean setRoboClawBaud = false;
-
   /**
    * attached motors <names, port>
    */
