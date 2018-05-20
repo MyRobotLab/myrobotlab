@@ -25,7 +25,7 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-	static final Integer MRLCOMM_VERSION = 57;
+	static final Integer MRLCOMM_VERSION = 58;
 
   public void generateDefinitions() throws IOException {
     generateDefinitions(new File("src/main/resources/resource/Arduino/generate/arduinoMsgs.schema"));
@@ -59,6 +59,7 @@ public class ArduinoMsgGenerator {
     deviceList.add("Serial");
     deviceList.add("I2c");
     deviceList.add("NeoPixel");
+    deviceList.add("Encoder");
   }
 
   static public final String toString(String filename) throws IOException {

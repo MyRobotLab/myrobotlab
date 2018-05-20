@@ -40,6 +40,8 @@ import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
+import org.myrobotlab.service.interfaces.EncoderControl;
+import org.myrobotlab.service.interfaces.EncoderController;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -64,7 +66,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
 public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController, SerialDataListener, ServoController, MotorController,
-    NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher {
+    NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher, EncoderController {
 
   private static final long serialVersionUID = 1L;
 
@@ -336,6 +338,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       return;
     } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
       attachMotorControl((MotorControl) service);
+      return;
+    } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
+      attachEncoderControl((EncoderControl)service);
       return;
     }
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
@@ -2290,4 +2295,27 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return null;
   }
 
+  public void attachEncoderControl(EncoderControl encoder) {
+    Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
+    // send data to micro-controller
+    msg.encoderAttach(deviceId, encoder.getPin());
+  }
+
+  @Override
+  public Float publishEncoderPosition(Integer deviceId, Float position) {
+    // TODO: return a tuple of device name & position
+    // TODO Auto-generated method stub
+    // TODO: implement me!
+    log.info("Encoder position. {}" , position);
+    return position;
+  }
+
+  @Override
+  public void attach(EncoderControl encoder, Integer pin) throws Exception {
+    attachEncoderControl(encoder);
+    // here we want to instruct the arduino via mrl comm to attach an MrlAmt203Encoder device.
+    // TODO: is this needed?
+    // encoder.attach(this, pin);
+  }
+  
 }

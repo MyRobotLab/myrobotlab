@@ -138,4 +138,7 @@
 > motorMove/deviceId/pwr
 > motorMoveTo/deviceId/pos
 
+# Amt203Encoder methods
+> encoderAttach/deviceId/pin
+< publishEncoderPosition/deviceId/f32 position
 
