@@ -15,7 +15,7 @@ public class EncoderTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init(Level.INFO);
+    // LoggingFactory.init(Level.INFO);
   }
 
   @Test

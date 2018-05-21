@@ -24,7 +24,7 @@ public class ApiFactoryTest {
   @Test
   public void testProcessString() {
     try {
-      LoggingFactory.init(Level.INFO);
+      // // LoggingFactory.init(Level.INFO);
 
       Runtime runtime = (Runtime) Runtime.getInstance();
       ApiFactory api = ApiFactory.getInstance(runtime);

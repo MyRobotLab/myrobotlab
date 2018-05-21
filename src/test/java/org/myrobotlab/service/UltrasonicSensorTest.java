@@ -42,7 +42,7 @@ public class UltrasonicSensorTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		LoggingFactory.init(Level.INFO);
+		// LoggingFactory.init(Level.INFO);
 
 		log.info("setUpBeforeClass");
 		sensor = (UltrasonicSensor) Runtime.start("arduino", "UltrasonicSensor");		
