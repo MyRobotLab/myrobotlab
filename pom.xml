@@ -1357,6 +1357,10 @@
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
+	                <systemPropertyVariables>
+	                    <org.slf4j.simpleLogger.defaultLogLevel>WARN</org.slf4j.simpleLogger.defaultLogLevel>
+	                    <org.slf4j.simpleLogger.showDateTime>true</org.slf4j.simpleLogger.showDateTime>
+	                </systemPropertyVariables>
 				</configuration>
 				<version>2.9</version>
 			</plugin>

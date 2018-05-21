@@ -1,9 +1,11 @@
 package org.myrobotlab.service;
 
+import org.junit.Ignore;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.service.interfaces.AbstractConnectorTest;
 import org.myrobotlab.service.interfaces.MockDocumentListener;
 
+@Ignore
 public class FileConnectorTest extends AbstractConnectorTest {
 
   @Override
