@@ -23,7 +23,7 @@ public class TaskTest {
   
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO");
   }
 
   @AfterClass
@@ -70,7 +70,7 @@ public class TaskTest {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init("INFO");
+      // LoggingFactory.init("INFO");
 
       TaskTest.setUpBeforeClass();
       TaskTest test = new TaskTest();
