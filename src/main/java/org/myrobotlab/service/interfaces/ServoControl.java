@@ -94,6 +94,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * attach with different parameters - it should set fields then call the "one
    * and only" single parameter attachServoController(controller)
    * 
+   * if no controller is provided, last used is set from json related.
+   * 
    * @param controller
    *          the controller
    * @param pin
@@ -101,7 +103,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * @throws Exception
    *           e
    */
-
   void attach(ServoController controller, int pin) throws Exception;
 
   void attach(ServoController controller, int pin, double pos) throws Exception;
@@ -109,11 +110,14 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
 
   /**
-   * attach "Pin" - simple command to energize the pin. Equivalent to Arduino
-   * library's servo.attach(pin) with pin number coming from the servo
+   * attach with different parameters - it should set fields then call the "one
+   * and only" single parameter attachServoController(controller)
+   * 
+   * if no controller is provided, last used is set from json related.
+   * @throws Exception
+   *           e
    */
-  public void attach();
-
+  void attach() throws Exception;
   /**
    * @param degreesPerSecond
    *          degrees per second rotational velocity cm per second linear
@@ -258,8 +262,11 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   boolean isInverted();
 
   /**
-   * invert the map so a servo will go in reverse direction 0 == 180, 90 == 90, 180 == 0
-   * @param invert - true is to invert
+   * invert the map so a servo will go in reverse direction 0 == 180, 90 == 90,
+   * 180 == 0
+   * 
+   * @param invert
+   *          - true is to invert
    */
   public void setInverted(boolean invert);
 
@@ -267,9 +274,10 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void addIKServoEventListener(NameProvider service);
 
   /**
-   * setAutoDisable tell the servo to disable when position reached
-   * this make sense only if velocity > 0
-   * if velocity == -1 : a timer is launched to delay disable
+   * setAutoDisable tell the servo to disable when position reached this make
+   * sense only if velocity > 0 if velocity == -1 : a timer is launched to delay
+   * disable
+   * 
    * @param autoDisable
    *          - boolean
    */
@@ -283,15 +291,15 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   boolean getAutoDisable();
 
   /**
-   * waitTargetPos is used by a global moveToBlocking command - pos usually is 0 - 180
-   * a global moveToBlocking is a method that use multiple servo at same time
-   * and wait every servo for last position arrived
+   * waitTargetPos is used by a global moveToBlocking command - pos usually is 0
+   * - 180 a global moveToBlocking is a method that use multiple servo at same
+   * time and wait every servo for last position arrived
    * 
    * @param pos
    *          - position to move to
    */
   void waitTargetPos();
-  
+
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
    * valid range but can be adjusted and / or re-mapped with min / max and map
@@ -307,11 +315,11 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   boolean moveToBlocking(double pos);
 
   /**
-   * Sometime we need to override autoDisable :
-   * servoGui slider / tracking / gestures  that leave your arms in the air ...
-   * so if overrideautoDisable(true) servo will never autoDisable
-   * until overrideautoDisable(false)
-   * ( we need to keep original autoDisable status, that is the reason ) 
+   * Sometime we need to override autoDisable : servoGui slider / tracking /
+   * gestures that leave your arms in the air ... so if
+   * overrideautoDisable(true) servo will never autoDisable until
+   * overrideautoDisable(false) ( we need to keep original autoDisable status,
+   * that is the reason )
    */
   void setOverrideAutoDisable(boolean overrideAutoDisable);
 
@@ -320,8 +328,10 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   double getCurrentPosOutput();
 
   void addServoEventListener(NameProvider service);
-  
+
   public void enable();
-  
+
   public void disable();
+
+  String getControllerName();
 }
