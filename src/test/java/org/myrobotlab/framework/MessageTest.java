@@ -27,7 +27,7 @@ public class MessageTest implements NameProvider {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init(Level.INFO);
+    // LoggingFactory.init(Level.INFO);
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     thrower = (TestThrower) Runtime.start("thrower", "TestThrower");
   }

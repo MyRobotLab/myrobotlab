@@ -161,7 +161,7 @@ public class RepoTest implements StatusPublisher {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
+      // LoggingFactory.init(Level.INFO);
 
       /*
        * 
