@@ -105,7 +105,7 @@ public class InMoovTest implements PinArrayListener {
       
       boolean runMainOnly = true;
       
-      LoggingFactory.init("INFO");
+      // LoggingFactory.init("INFO");
       InMoovTest.setUpBeforeClass();
       
      // Runtime.start("webgui", "WebGui");

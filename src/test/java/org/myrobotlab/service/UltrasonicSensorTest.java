@@ -203,7 +203,7 @@ public class UltrasonicSensorTest {
 	static public void main(String[] args) {
 
 		try {
-			LoggingFactory.init();
+			// LoggingFactory.init();
 			// FIXME - base class static method .webGui() & .gui()
 			// Runtime.start("webgui", "WebGui");
 			// Runtime.start("gui", "SwingGui");

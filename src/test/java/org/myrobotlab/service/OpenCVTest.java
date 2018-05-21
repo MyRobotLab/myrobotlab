@@ -70,7 +70,7 @@ public class OpenCVTest {
 
   public static void main(String[] args) {
     try {
-      LoggingFactory.init("INFO");
+      // LoggingFactory.init("INFO");
       boolean quitNow = false;
       
       if (quitNow){
