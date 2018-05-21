@@ -2131,7 +2131,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   public static void main(String[] args) {
     try {
-
       /*
        * <pre>
        * 
