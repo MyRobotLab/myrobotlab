@@ -46,7 +46,7 @@ public class SerialTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init(Level.INFO);
+    // LoggingFactory.init(Level.INFO);
 
     log.info("setUpBeforeClass");
 
@@ -755,7 +755,7 @@ public class SerialTest {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.DEBUG);
+      // LoggingFactory.init(Level.DEBUG);
 
       SerialTest.setUpBeforeClass();
       SerialTest test = new SerialTest();
