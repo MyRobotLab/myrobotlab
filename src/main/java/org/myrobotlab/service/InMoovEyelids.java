@@ -97,8 +97,7 @@ public class InMoovEyelids extends Service {
     eyelidright.setRest(0);
  
     setVelocity(50.0,50.0);
-    eyelidleft.disableDelayIfVelocity=100;
-    eyelidright.disableDelayIfVelocity=100;
+
     
   }
   

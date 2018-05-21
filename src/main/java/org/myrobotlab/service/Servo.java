@@ -25,9 +25,13 @@
 
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +45,9 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
@@ -175,14 +179,14 @@ public class Servo extends Service implements ServoControl {
 
   transient ServoController controller;
 
-  String controllerName = null;
+  String controllerName;
 
   Mapper mapper;
 
   /**
    * default rest is 90 default target position will be 90 if not specified
    */
-  double rest = 90.0;
+  Double rest;
 
   /**
    * last time the servo has moved
@@ -230,14 +234,14 @@ public class Servo extends Service implements ServoControl {
    * feedback of both incremental position and stops. would allow blocking
    * moveTo if desired
    */
-  boolean isEventsEnabled = false;
+  boolean isEventsEnabled = true;
   boolean isIKEventEnabled = false;
 
-  double maxVelocity = -1;
+  Double maxVelocity;
 
   boolean enabled = false;
 
-  double velocity = -1;
+  Double velocity;
 
   double acceleration = -1;
 
@@ -254,7 +258,7 @@ public class Servo extends Service implements ServoControl {
    *          - milliSeconds
    * @default - 10000
    */
-  public int defaultDisableDelayNoVelocity = 10000;
+  public Integer disableDelayNoVelocity;
 
   /**
    * disableDelayIfVelocity this make sense if velocity > 0 a timer is launched
@@ -264,10 +268,10 @@ public class Servo extends Service implements ServoControl {
    *          - milliSeconds
    * @default - 1000
    */
-  public int disableDelayIfVelocity = 1000;
+  public Integer disableDelay;
   private boolean moving;
   double currentPosInput;
-  private boolean autoDisable = false;
+  boolean autoDisable;
 
   private boolean overrideAutoDisable = false;
 
@@ -319,18 +323,6 @@ public class Servo extends Service implements ServoControl {
 
   public boolean isSweeping() {
     return isSweeping;
-  }
-
-  /**
-   * Re-attach to servo current conroller and pin. The pin must have be set
-   * previously. And the controller must have been set prior to calling this.
-   * Use enable()
-   * 
-   */
-  @Override
-  @Deprecated
-  public void attach() {
-    enable();
   }
 
   /**
@@ -499,12 +491,11 @@ public class Servo extends Service implements ServoControl {
 
     targetPos = pos;
 
-    if (!isEnabled())
-        {
-    if (pos != lastPos || overrideAutoDisable || !getAutoDisable()) {
-      enable();
+    if (!isEnabled()) {
+      if (pos != lastPos || overrideAutoDisable || !getAutoDisable()) {
+        enable();
+      }
     }
-        }
 
     if (intialTargetPosChange) {
       targetPosBeforeSensorFeebBackCorrection = targetPos;
@@ -567,11 +558,9 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
     if (!isMoving()) {
       if (autoDisable) {
-        int disableDelay = 10000;
+        int delayBeforeDisable = disableDelayNoVelocity;
         if (velocity > -1) {
-          disableDelay = disableDelayIfVelocity;
-        } else {
-          disableDelay = defaultDisableDelayNoVelocity;
+          delayBeforeDisable = disableDelay;
         }
         if (autoDisableTimer != null) {
           autoDisableTimer.cancel();
@@ -588,7 +577,7 @@ public class Servo extends Service implements ServoControl {
               moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
             }
           }
-        }, (long) disableDelay);
+        }, (long) delayBeforeDisable);
       } else {
         synchronized (moveToBlocked) {
           moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
@@ -617,9 +606,29 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void startService() {
     super.startService();
+    // here we define default values if not inside servo.json
     if (mapper == null) {
       mapper = new Mapper(0, 180, 0, 180);
     }
+    if (rest == null) {
+      rest = 90.0;
+    }
+    if (velocity == null) {
+      velocity = -1.0;
+    }
+    if (maxVelocity == null) {
+      maxVelocity = -1.0;
+    }
+    if (disableDelayNoVelocity == null) {
+      disableDelayNoVelocity = 10000;
+    }
+    if (disableDelay == null) {
+      disableDelay = 1000;
+    }
+    if (targetPos == null) {
+      targetPos = rest;
+    }
+    this.addServoEventListener(this);
   }
 
   public void rest() {
@@ -807,29 +816,38 @@ public class Servo extends Service implements ServoControl {
    * https://www.google.com/search?q=attach+myrobotlab&oq=attach+myrobotlab
    */
   public void attachServoController(ServoController controller) throws Exception {
-    if (isAttachedServoController(controller)) {
-      log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
-      return;
-    } else if (this.controller != null && this.controller != controller) {
-      // we're switching controllers - need to detach first
-      detach();
+    if (!(controller == null)) {
+      if (isAttachedServoController(controller)) {
+        log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
+        return;
+      } else if (this.controller != null && this.controller != controller) {
+        // we're switching controllers - need to detach first
+        detach();
+      }
+
+      targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
+
+      // now attach the controller the controller better have
+      // isAttach(ServoControl) to prevent an infinite loop
+      // if controller.attach(this) is not successful, this should throw
+      controller.attachServoControl(this);
+
+      // set the controller
+      this.controller = controller;
+      this.controllerName = controller.getName();
+
+      // the controller is attached now
+      // its time to attach the pin
+      enable(pin);
+      broadcastState();
+    } else {
+      error("Can't attach to null co controler !");
     }
+  }
 
-    targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
-
-    // now attach the controller the controller better have
-    // isAttach(ServoControl) to prevent an infinite loop
-    // if controller.attach(this) is not successful, this should throw
-    controller.attachServoControl(this);
-
-    // set the controller
-    this.controller = controller;
-    this.controllerName = controller.getName();
-
-    // the controller is attached now
-    // its time to attach the pin
-    enable(pin);
-    broadcastState();
+  public void attach() throws Exception {
+    if (this.getPin() != null && this.controllerName != null)
+      attach(this.controllerName, this.getPin());
   }
 
   /**
@@ -911,13 +929,13 @@ public class Servo extends Service implements ServoControl {
         // remove the this controller's reference
       }
       this.controller = null;
-      this.controllerName = null;
+      // this.controllerName = null;
       this.enabled = false;
       broadcastState();
     }
   }
 
-  public void setMaxVelocity(int velocity) {
+  public void setMaxVelocity(double velocity) {
     this.maxVelocity = velocity;
   }
 
@@ -1191,13 +1209,13 @@ public class Servo extends Service implements ServoControl {
     return this.autoDisable;
   }
 
-  public void setDisableDelayIfVelocity(int disableDelayIfVelocity) {
-    this.disableDelayIfVelocity = disableDelayIfVelocity;
+  public void setDisableDelayIfVelocity(int disableDelay) {
+    this.disableDelay = disableDelay;
     broadcastState();
   }
 
-  public void setDefaultDisableDelayNoVelocity(int defaultDisableDelayNoVelocity) {
-    this.defaultDisableDelayNoVelocity = defaultDisableDelayNoVelocity;
+  public void setDefaultDisableDelayNoVelocity(int disableDelayNoVelocity) {
+    this.disableDelayNoVelocity = disableDelayNoVelocity;
     broadcastState();
   }
 
@@ -1227,8 +1245,15 @@ public class Servo extends Service implements ServoControl {
     return targetOutput;
   }
 
+  @Override
+  public String getControllerName() {
+
+    return controllerName;
+  }
+
   public boolean isMoving() {
     return moving;
+
   }
 
   @Override
@@ -1294,8 +1319,18 @@ public class Servo extends Service implements ServoControl {
       LoggingFactory.init(Level.INFO);
       String arduinoPort = "COM5";
 
-      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      virtual.connect(arduinoPort);
+      VirtualArduino virtualArduino = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
+      virtualArduino.connect(arduinoPort);
+
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect(arduinoPort);
+
+      // virtual arduino can't drive velocity at this time
+      // i2c service connected onto virtual arduino will do the job
+      // https://github.com/MyRobotLab/myrobotlab/issues/99
+      Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
+      adafruit16CServoDriver.attach(arduino, "0", "0x40");
+
       Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
 
@@ -1341,56 +1376,116 @@ public class Servo extends Service implements ServoControl {
       // arduino.record();
       // arduino.getSerial().record();
 
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.connect(arduinoPort);
       log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
       log.info("ready here");
       // arduino.ackEnabled = true;
 
-      servo.attach(arduino, 7);
-      servo2.attach(arduino, 8);
-      servo.sync(servo2);
-      servo.moveTo(90);
-      servo.setRest(30);
+      servo.attach();
+      /// servo2.attach(adafruit16CServoDriver, 8);
+      // servo.sync(servo2);
+      // servo.moveTo(90);
+      // servo.setRest(30);
 
-      servo.enable(8);
-      servo.moveTo(90);
-      servo.moveTo(30);
+      /// servo.enable(8);
+      // servo.moveTo(90);
+      // servo.moveTo(30);
 
-      servo.enable(9);
-      servo.moveTo(90);
-      servo.setRest(30);
+      // servo.enable(9);
+      /// servo.moveTo(90);
+      // servo.setRest(30);
 
       // FIXME - JUNIT - test attach - detach - re-attach
       // servo.detach(arduino);
 
       log.info("servo attach {}", servo.isAttached());
 
-      arduino.disconnect();
-      arduino.connect(arduinoPort);
+      /// arduino.disconnect();
+      /// arduino.connect(arduinoPort);
 
       // arduino.reset();
 
       log.info("ready here 2");
       // servo.attach(arduino, 8);
       // servo.attach(
-      servo.attach(arduino, 7);
-      servo.moveTo(90);
-      servo.moveTo(30);
+      /// servo.attach(adafruit16CServoDriver, 7);
+      servo.moveToBlocking(90);
+      servo.moveToBlocking(30);
 
-      servo.enable(9);
-      servo.moveTo(90);
-      servo.setRest(30);
+      /// servo.enable(9);
+      /// servo.moveToBlocking(90);
+      // servo.setRest(30);
 
-      servo.moveTo(90);
-      servo.setRest(30);
-      servo.moveTo(10);
+      /// servo.moveTo(90);
+      // servo.setRest(30);
+      // servo.moveTo(10);
 
       // servo.test();
     } catch (Exception e) {
       Logging.logError(e);
     }
 
+  }
+
+  // pasted from inmoov1
+  /**
+   * Export servo configuration to a .py file
+   */
+  public void saveCalibration(String calibrationFilename) {
+    if (calibrationFilename == null) {
+      calibrationFilename = this.getName() + ".py";
+    }
+    File calibFile = new File(calibrationFilename);
+    FileWriter calibrationWriter = null;
+    try {
+      calibrationWriter = new FileWriter(calibFile);
+      calibrationWriter.write("##################################\n");
+      calibrationWriter.write("# " + this.getSimpleName() + " auto generated calibration \n");
+      calibrationWriter.write("# " + new Date() + "\n");
+      calibrationWriter.write("##################################\n");
+
+      calibrationWriter.write("\n");
+      calibrationWriter.write("# Servo Config : " + this.getName() + "\n");
+      calibrationWriter.write(this.getName() + ".detach()\n");
+      calibrationWriter.write(this.getName() + ".setVelocity(" + this.getVelocity() + ")\n");
+      calibrationWriter.write(this.getName() + ".setRest(" + this.getRest() + ")\n");
+      if (this.getPin() != null) {
+        calibrationWriter.write(this.getName() + ".setPin(" + this.getPin() + ")\n");
+      } else {
+        calibrationWriter.write("# " + this.getName() + ".setPin(" + this.getPin() + ")\n");
+      }
+
+      // save the servo map
+      calibrationWriter.write(this.getName() + ".map(" + this.getMinInput() + "," + this.getMaxInput() + "," + this.getMinOutput() + "," + this.getMaxOutput() + ")\n");
+      // if there's a controller reattach it at rest
+      if (this.getController() != null) {
+        String controller = this.getController().getName();
+        calibrationWriter.write(this.getName() + ".attach(\"" + controller + "\"," + this.getPin() + "," + this.getRest() + ")\n");
+      }
+      String pythonBool = "False";
+      if (getAutoDisable()) {
+        pythonBool = "True";
+      }
+      calibrationWriter.write(this.getName() + ".setAutoDisable(" + pythonBool + ")\n");
+
+      pythonBool = "False";
+      if (isInverted()) {
+        pythonBool = "True";
+      }
+      calibrationWriter.write(this.getName() + ".setInverted(" + pythonBool + ")\n");
+
+      calibrationWriter.write("\n");
+      calibrationWriter.close();
+      log.info("Exported calibration file {}", calibrationFilename);
+
+    } catch (IOException e) {
+      log.error("Error writing calibration file {}", calibrationFilename);
+      e.printStackTrace();
+      return;
+    }
+  }
+
+  public void saveCalibration() {
+    saveCalibration(null);
   }
 
   @Override
