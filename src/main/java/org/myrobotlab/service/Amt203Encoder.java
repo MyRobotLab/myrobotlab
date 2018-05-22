@@ -31,6 +31,7 @@ public class Amt203Encoder extends Service implements EncoderControl {
   // 12 bit encoder is 4096 steps of resolution
   public Integer resolution = 4096; 
   public Double currentPosition = 0.0;
+  public EncoderController controller = null;
 
   public Amt203Encoder(String reservedKey) {
     super(reservedKey);
@@ -38,8 +39,10 @@ public class Amt203Encoder extends Service implements EncoderControl {
 
   @Override
   public void attach(EncoderController controller, Integer pin) throws Exception {
+    this.controller = controller;
     this.pin = pin;
     controller.attach(this, pin);
+    
   }
 
   static public ServiceType getMetaData() {
@@ -49,18 +52,7 @@ public class Amt203Encoder extends Service implements EncoderControl {
     return meta;
   }
 
-  public static void main(String[] args) throws Exception {
 
-    LoggingFactory.init("INFO");
-    
-    String port = "COM4";
-    Runtime.start("gui", "SwingGui");
-    Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
-    ard.connect(port);
-    Amt203Encoder encoder = (Amt203Encoder)Runtime.start("encoder", "Amt203Encoder"); 
-    encoder.pin = 3;
-    ard.attach(encoder);
-  }
 
   @Override
   public int getPin() {
@@ -80,6 +72,35 @@ public class Amt203Encoder extends Service implements EncoderControl {
     //invoke("publishEncoderAngle", angle);
     log.info("Encoder Data : {} Angle : {}" , data, angle);
     
+  }
+  
+  public static void main(String[] args) throws Exception {
+
+    LoggingFactory.init("INFO");
+    
+    String port = "COM4";
+    Runtime.start("gui", "SwingGui");
+    Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
+    ard.connect(port);
+    ard.setDebug(true);
+    Amt203Encoder encoder = (Amt203Encoder)Runtime.start("encoder", "Amt203Encoder"); 
+    encoder.pin = 3;
+    ard.attach(encoder);
+    Thread.sleep(10000);
+    encoder.setZeroPoint();
+    System.out.println("Here we are..");
+  }
+
+  public void setZeroPoint() {
+    // TODO: this won't work with non arduino controllers at the moment.
+    // perhaps change the interface on controller to accept a string for the device name?
+    controller.setZeroPoint(((Arduino)controller).getDeviceId(getName()));
+  }
+
+  @Override
+  public void setController(EncoderController controller) {
+    // TODO Auto-generated method stub
+    this.controller = controller;
   }
 
 }

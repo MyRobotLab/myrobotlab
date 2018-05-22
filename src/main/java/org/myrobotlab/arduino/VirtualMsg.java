@@ -210,8 +210,10 @@ public class VirtualMsg {
 	public final static int MOTOR_MOVE_TO = 51;
 	// > encoderAttach/deviceId/pin
 	public final static int ENCODER_ATTACH = 52;
+	// > setZeroPoint/deviceId
+	public final static int SET_ZERO_POINT = 53;
 	// < publishEncoderPosition/deviceId/b16 position
-	public final static int PUBLISH_ENCODER_POSITION = 53;
+	public final static int PUBLISH_ENCODER_POSITION = 54;
 
 
 /**
@@ -259,6 +261,7 @@ public class VirtualMsg {
 	// public void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/){}
 	// public void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/){}
 	// public void encoderAttach(Integer deviceId/*byte*/, Integer pin/*byte*/){}
+	// public void setZeroPoint(Integer deviceId/*byte*/){}
 	
 
 	
@@ -805,6 +808,16 @@ public class VirtualMsg {
 			}
 			break;
 		}
+		case SET_ZERO_POINT: {
+			Integer deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			if(invoke){
+				arduino.invoke("setZeroPoint",  deviceId);
+			} else { 
+ 				arduino.setZeroPoint( deviceId);
+			}
+			break;
+		}
 		
 		}
 	}
@@ -1177,7 +1190,7 @@ public class VirtualMsg {
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 2); // size
-			write(PUBLISH_ENCODER_POSITION); // msgType = 53
+			write(PUBLISH_ENCODER_POSITION); // msgType = 54
 			write(deviceId);
 			writeb16(position);
  
@@ -1360,6 +1373,9 @@ public class VirtualMsg {
 		}
 		case ENCODER_ATTACH:{
 			return "encoderAttach";
+		}
+		case SET_ZERO_POINT:{
+			return "setZeroPoint";
 		}
 		case PUBLISH_ENCODER_POSITION:{
 			return "publishEncoderPosition";

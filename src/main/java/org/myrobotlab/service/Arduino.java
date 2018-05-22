@@ -2300,6 +2300,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
     // send data to micro-controller
     msg.encoderAttach(deviceId, encoder.getPin());
+    encoder.setController(this);
     
   }
 
@@ -2317,6 +2318,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // here we want to instruct the arduino via mrl comm to attach an MrlAmt203Encoder device.
     // TODO: is this needed?
     // encoder.attach(this, pin);
+  }
+
+  @Override
+  public void setZeroPoint(Integer deviceId) {
+    // send the set zero point command to the encoder
+    msg.setZeroPoint(deviceId);
   }
   
 }

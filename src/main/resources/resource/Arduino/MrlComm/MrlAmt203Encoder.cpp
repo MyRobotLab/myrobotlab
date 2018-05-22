@@ -20,11 +20,11 @@ MrlAmt203Encoder::~MrlAmt203Encoder() {
 }
 
 // helper function to transmit a message to the encoder
-uint8_t MrlAmt203Encoder::SPI_T(uint8_t msg) {
+uint8_t MrlAmt203Encoder::SPI_T(uint8_t data) {
   //Repetive SPI transmit sequence
    uint8_t msg_temp = 0;  //vairable to hold recieved data
    digitalWrite(csPin,LOW);     //select spi device
-   msg_temp = SPI.transfer(msg);    //send and recieve
+   msg_temp = SPI.transfer(data);    //send and recieve
    digitalWrite(csPin,HIGH);    //deselect spi device
    return(msg_temp);      //return recieved byte
 }
@@ -83,7 +83,27 @@ void MrlAmt203Encoder::update() {
   }
 }
 
+void MrlAmt203Encoder::setZeroPoint() {
+  // send the command 0x70 to calibrate the encoder.
+  //
+  //	To set the zero point this sequence should be followed:
+  //	1. Send set_zero_point command
+  //	2. Send nop_a5 command while response is not 0x80
+  //	3. A response of 0x80 means that the zero set was successful and the new position offset is stored in EEPROM.
+  //	4. The encoder must be power cycled. If the encoder is not power cycled, the position values will not be calculated off the latest
+  //	 zero position. When the encoder is powered on next the new offset will be used for the position calculation.
+  uint8_t recieved = 0xA5; // a temp variable to read the response
+  // This is step 1, send the set zero point command
+  SPI.begin();    //start transmition
+  SPI_T(0x70);    // send the set zero point calibration command
+  // now wait for it to be ready.
+  do {
+	  recieved = SPI_T(0x00); // poll until we're ready/done
+  } while (recieved != 0xA5);
+  SPI.end();    // stop the spi bus for now.
+}
+
 void MrlAmt203Encoder::publishEncoderPosition(float deg) {
-  // TODO: publish an mrl message with the current encoder position.
+  // publish an mrl message with the current encoder position.
   msg->publishEncoderPosition(id, deg);
 }

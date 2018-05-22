@@ -797,5 +797,12 @@ public class MrlComm {
     encoder.attach(pin);
   }
 
+  public void setZeroPoint(Integer deviceId) {
+    // TODO Auto-generated method stub
+    MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
+    encoder.setZeroPoint();
+    
+  }
+
 
 }
