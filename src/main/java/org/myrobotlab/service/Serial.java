@@ -791,7 +791,7 @@ public class Serial extends Service
 	 * @see org.myrobotlab.service.SerialDevice#read()
 	 */
 	@Override
-	public int read() throws IOException, InterruptedException {
+	synchronized public int read() throws IOException, InterruptedException {
 
 		if (timeoutMS == null) {
 			return blockingRX.take();
@@ -807,7 +807,7 @@ public class Serial extends Service
 		return newByte;
 	}
 
-	public int read(byte[] data) throws IOException, InterruptedException {
+	synchronized public int read(byte[] data) throws IOException, InterruptedException {
 		for (int i = 0; i < data.length; ++i) {
 			data[i] = (byte) read();
 		}
@@ -823,7 +823,7 @@ public class Serial extends Service
 	 * @throws InterruptedException e 
 	 * 
 	 */
-	public byte[] read(int length) throws InterruptedException {
+	synchronized public byte[] read(int length) throws InterruptedException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 		int count = 0;
 		Integer newByte = null;
