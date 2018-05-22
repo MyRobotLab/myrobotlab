@@ -554,10 +554,15 @@ unsigned int MrlComm::getCustomMsg() {
 
  // > encoderAttach/deviceId/pin
 void MrlComm::encoderAttach(byte deviceId, byte pin) {
-  msg->publishDebug("Encoder attach");
   // create the encoder and add it to the device list.
   MrlAmt203Encoder* encoder = (MrlAmt203Encoder*) addDevice(new MrlAmt203Encoder(deviceId));
   // tell the encoder to attach to the pin.
   encoder->attach(pin);
+}
+
+void MrlComm::setZeroPoint(byte deviceId) {
+	MrlAmt203Encoder* encoder = (MrlAmt203Encoder*)getDevice(deviceId);
+	encoder->setZeroPoint();
+
 }
 

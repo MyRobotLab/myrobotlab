@@ -140,5 +140,6 @@
 
 # Amt203Encoder methods
 > encoderAttach/deviceId/pin
+> setZeroPoint/deviceId
 < publishEncoderPosition/deviceId/b16 position
 

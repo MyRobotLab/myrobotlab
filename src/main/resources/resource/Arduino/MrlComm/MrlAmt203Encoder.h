@@ -26,6 +26,7 @@ class MrlAmt203Encoder : public Device {
     ~MrlAmt203Encoder();
     bool attach(byte pin);
     void update();
+    void setZeroPoint();
     void publishEncoderPosition(float deg);
 };
 

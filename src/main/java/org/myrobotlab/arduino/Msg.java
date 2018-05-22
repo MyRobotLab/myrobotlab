@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 import org.myrobotlab.logging.Level;
 
-import org.myrobotlab.arduino.virtual.MrlComm;
 
 /**
  * <pre>
@@ -210,8 +209,10 @@ public class Msg {
 	public final static int MOTOR_MOVE_TO = 51;
 	// > encoderAttach/deviceId/pin
 	public final static int ENCODER_ATTACH = 52;
+	// > setZeroPoint/deviceId
+	public final static int SET_ZERO_POINT = 53;
 	// < publishEncoderPosition/deviceId/b16 position
-	public final static int PUBLISH_ENCODER_POSITION = 53;
+	public final static int PUBLISH_ENCODER_POSITION = 54;
 
 
 /**
@@ -1912,6 +1913,35 @@ public class Msg {
 	  }
 	}
 
+	public synchronized void setZeroPoint(Integer deviceId/*byte*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+			write(SET_ZERO_POINT); // msgType = 53
+			write(deviceId);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+			if(record != null){
+				txBuffer.append("> setZeroPoint");
+				txBuffer.append("/");
+				txBuffer.append(deviceId);
+				txBuffer.append("\n");
+				record.write(txBuffer.toString().getBytes());
+				txBuffer.setLength(0);
+			}
+
+	  } catch (Exception e) {
+	  			log.error("setZeroPoint threw",e);
+	  }
+	}
+
 
 	public static String methodToString(int method) {
 		switch (method) {
@@ -2070,6 +2100,9 @@ public class Msg {
 		}
 		case ENCODER_ATTACH:{
 			return "encoderAttach";
+		}
+		case SET_ZERO_POINT:{
+			return "setZeroPoint";
 		}
 		case PUBLISH_ENCODER_POSITION:{
 			return "publishEncoderPosition";

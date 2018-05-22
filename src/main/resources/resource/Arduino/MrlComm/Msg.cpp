@@ -134,6 +134,8 @@ Msg* Msg::getInstance() {
 	void motorMoveTo( byte deviceId,  byte pos);
 	// > encoderAttach/deviceId/pin
 	void encoderAttach( byte deviceId,  byte pin);
+	// > setZeroPoint/deviceId
+	void setZeroPoint( byte deviceId);
 
  */
 
@@ -253,7 +255,7 @@ void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
 void Msg::publishEncoderPosition( byte deviceId,  int position) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ENCODER_POSITION); // msgType = 53
+  write(PUBLISH_ENCODER_POSITION); // msgType = 54
   write(deviceId);
   writeb16(position);
   flush();
@@ -601,6 +603,12 @@ void Msg::processCommand() {
 			byte pin = ioCmd[startPos+1]; // bu8
 			startPos += 1;
 			mrlComm->encoderAttach( deviceId,  pin);
+			break;
+	}
+	case SET_ZERO_POINT: { // setZeroPoint
+			byte deviceId = ioCmd[startPos+1]; // bu8
+			startPos += 1;
+			mrlComm->setZeroPoint( deviceId);
 			break;
 	}
 
