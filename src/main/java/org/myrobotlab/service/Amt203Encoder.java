@@ -1,8 +1,8 @@
 package org.myrobotlab.service;
 
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -30,8 +30,11 @@ public class Amt203Encoder extends Service implements EncoderControl {
   public Integer pin;
   // 12 bit encoder is 4096 steps of resolution
   public Integer resolution = 4096; 
-  public Double currentPosition = 0.0;
+  public Double lastPosition = 0.0;
   public EncoderController controller = null;
+  // we can track the last update that we've recieved and specify the direction even!
+  long lastUpdate = 0;
+  Double velocity = 0.0;
 
   public Amt203Encoder(String reservedKey) {
     super(reservedKey);
@@ -42,7 +45,7 @@ public class Amt203Encoder extends Service implements EncoderControl {
     this.controller = controller;
     this.pin = pin;
     controller.attach(this, pin);
-    
+    lastUpdate = System.currentTimeMillis();
   }
 
   static public ServiceType getMetaData() {
@@ -52,26 +55,37 @@ public class Amt203Encoder extends Service implements EncoderControl {
     return meta;
   }
 
-
-
   @Override
   public int getPin() {
     // 
     return pin;
   }
 
-//  public Double publishEncoderAngle(Double angle) {
-//    return angle;    
-//  }
+  public Double publishEncoderAngle(Double angle) {
+    return angle;    
+  }
   
   @Override
   public void onEncoderData(EncoderData data) {
-    // TODO Auto-generated method stub
+    // this is getting published from the arduino and updated here when it comes in..
+    // TODO: shoudl the messaging be setup differently? 
+    // TODO: compare with ultrasonic sensor and see that we're following the same pattern
+    // TODO: maybe use nanoTime? how accurate is this.
+    long now = System.currentTimeMillis();
+    long delta = now - lastUpdate;
     Double angle = 360.0 * data.value / resolution;
-    this.currentPosition = angle;
-    //invoke("publishEncoderAngle", angle);
-    log.info("Encoder Data : {} Angle : {}" , data, angle);
-    
+    if (delta > 0) {
+      // we can compute velocity since the last update
+      // This computes the change in degrees per second that the encoder is currently moving at. 
+      velocity = (angle - this.lastPosition) / delta * 1000.0;
+    } else {
+      // no position update since the last tick.
+      velocity = 0.0;
+    }
+    // update the previous values
+    this.lastPosition = angle;
+    this.lastUpdate = now;
+    log.info("Encoder Data : {} Angle : {}" , data, lastPosition);    
   }
   
   public static void main(String[] args) throws Exception {
