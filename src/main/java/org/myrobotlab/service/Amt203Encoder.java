@@ -51,13 +51,13 @@ public class Amt203Encoder extends Service implements EncoderControl {
 
   public static void main(String[] args) throws Exception {
 
-    org.apache.log4j.BasicConfigurator.configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init("INFO");
+    
     String port = "COM4";
-    SwingGui gui = (SwingGui)Runtime.createAndStart("gui", "SwingGui");
-    Arduino ard = (Arduino)Runtime.createAndStart("ard", "Arduino");
+    Runtime.start("gui", "SwingGui");
+    Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
     ard.connect(port);
-    Amt203Encoder encoder = (Amt203Encoder)Runtime.createAndStart("encoder", "Amt203Encoder"); 
+    Amt203Encoder encoder = (Amt203Encoder)Runtime.start("encoder", "Amt203Encoder"); 
     encoder.pin = 3;
     ard.attach(encoder);
   }
