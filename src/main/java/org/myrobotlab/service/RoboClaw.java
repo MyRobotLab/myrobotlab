@@ -2081,7 +2081,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
    * </pre>
    */
-  public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer) {
+  public void speedAccelDeccelPositionM1(int accel, int speed, int deccel, int pos, int buffer) {
     sendPacket(address, 65, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
         byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), buffer);
     // TODO lock - timeout - return value & publish
@@ -2099,9 +2099,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [0xFF]
    * </pre>
    */
-  public void bufferedDriveM2WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer) {
+  public void speedAccelDeccelPositionM2(int accel, int speed, int deccel, int pos, int buffer) {
     sendPacket(address, 66, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(deccel), byte2(deccel),
-        byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), speed, deccel, pos, buffer);
+        byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), buffer);
     // TODO lock - timeout - return value & publish
   }
 
@@ -2129,6 +2129,30 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
         buffer);
   }
 
+ 
+  @Override
+  public void onConnect(String portName) {
+    log.info("onConnect from port {}", portName);
+  }
+
+  @Override
+  public void onDisconnect(String portName) {
+    log.info("disconnected from port {}", portName);
+  }
+
+  @Override
+  public Integer onByte(Integer b) throws IOException {
+    log.info(String.format("onByte %02X", b));
+    // log.info("onByte {}", b);
+    return b;
+  }
+
+  @Override
+  public EncoderData publishEncoderData(EncoderData Data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
   public static void main(String[] args) {
     try {
       /*
@@ -2160,8 +2184,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // uncomment for virtual hardware
       // virtual = True
 
-      String port = "COM4";
-      // String port = "/dev/ttyS10";
+      // String port = "COM4";
+      String port = "/dev/ttyS10";
       // String port = "/dev/ttyACM1";
       // String port = "vuart";
 
@@ -2176,7 +2200,22 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       }
       // start the services
       // Runtime.start("gui", "SwingGui");
-      RoboClaw roboclaw = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
+      RoboClaw rc = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
+      
+      rc.connect(port);
+      
+      boolean done = false;
+      
+      while (!done) {
+        rc.speedAccelDeccelPositionM2(2000,4000,4000,7000,1);
+        sleep(1000);
+      }
+      
+     
+      if (done) {
+        return;
+      }      
+      
       MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
       MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
       // Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
@@ -2192,8 +2231,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // joy.setController(5); // 0 on Linux
 
       // attach services
-      roboclaw.attach(m1);
-      roboclaw.attach(m2);
+      rc.attach(m1);
+      rc.attach(m2);
       // m1.attach(joy.getAxis("y"));
       // m2.attach(joy.getAxis("rz"));
 
@@ -2203,7 +2242,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       // FIXME - roboclaw.attach(motor1) & roboclaw.attach(motor2)
       // FIXME - motor1.attach(joystick) !
-      roboclaw.connect(port);
+      rc.connect(port);
 
       // roboclaw.resetQuadratureEncoderCounters();
       // roboclaw.restoreDefaults();
@@ -2212,8 +2251,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       
       // m1.stop();
       // m2.stop();
-      roboclaw.readEncoderM1();
-      roboclaw.readEncoderM1();
+      rc.readEncoderM1();
+      rc.readEncoderM1();
 
       for (int i = 0; i < 10; ++i) {
         m1.move(0.1 * i);
@@ -2221,31 +2260,26 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       m1.move(0);
 
-      roboclaw.readEncoderM1();
-      roboclaw.readEncoderM1();
+      rc.readEncoderM1();
+      rc.readEncoderM1();
       
-      roboclaw.resetQuadratureEncoderCounters();
+      rc.resetQuadratureEncoderCounters();
 
-      roboclaw.readEncoderM1();
-      roboclaw.readEncoderM1();
+      rc.readEncoderM1();
+      rc.readEncoderM1();
       
 
       // roboclaw.readEncoderCount();
       // roboclaw.read
-      roboclaw.bufferedDriveM1WithSignedSpeedAccelDeccelPosition(500,500,500,10000,1);
-      roboclaw.driveM1WithSignedDutyAndAccel(255, 255);
+      rc.speedAccelDeccelPositionM1(500,500,500,10000,1);
+      rc.driveM1WithSignedDutyAndAccel(255, 255);
       
-      roboclaw.readEncoderM1();
-      roboclaw.readEncoderM1();
+      rc.readEncoderM1();
+      rc.readEncoderM1();
 
       m1.move(0);
 
       // public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer)
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // speed up the motor
       for (int i = 0; i < 100; ++i) {
@@ -2283,27 +2317,5 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     }
   }
 
-  @Override
-  public void onConnect(String portName) {
-    log.info("onConnect from port {}", portName);
-  }
-
-  @Override
-  public void onDisconnect(String portName) {
-    log.info("disconnected from port {}", portName);
-  }
-
-  @Override
-  public Integer onByte(Integer b) throws IOException {
-    log.info(String.format("onByte %02X", b));
-    // log.info("onByte {}", b);
-    return b;
-  }
-
-  @Override
-  public EncoderData publishEncoderData(EncoderData Data) {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
 }
