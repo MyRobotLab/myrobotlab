@@ -90,9 +90,8 @@ public class AbstractEncoder extends Service implements EncoderControl {
   
 
   public void setZeroPoint() {
-    // TODO: this won't work with non arduino controllers at the moment.
-    // perhaps change the interface on controller to accept a string for the device name?
-    controller.setZeroPoint((EncoderController)controller);//.getDeviceId(getName()));
+    // pass the set zero point command to the controller
+    controller.setZeroPoint(this);
   }
 
   @Override
