@@ -303,6 +303,29 @@ public class Servo extends Service implements ServoControl {
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
+    
+    // here we define default values if not inside servo.json
+    if (mapper == null) {
+      mapper = new Mapper(0, 180, 0, 180);
+    }
+    if (rest == null) {
+      rest = 90.0;
+    }
+    if (velocity == null) {
+      velocity = -1.0;
+    }
+    if (maxVelocity == null) {
+      maxVelocity = -1.0;
+    }
+    if (disableDelayNoVelocity == null) {
+      disableDelayNoVelocity = 10000;
+    }
+    if (disableDelay == null) {
+      disableDelay = 1000;
+    }
+    if (targetPos == null) {
+      targetPos = rest;
+    }
   }
 
   public void onRegistered(ServiceInterface s) {
@@ -606,28 +629,6 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void startService() {
     super.startService();
-    // here we define default values if not inside servo.json
-    if (mapper == null) {
-      mapper = new Mapper(0, 180, 0, 180);
-    }
-    if (rest == null) {
-      rest = 90.0;
-    }
-    if (velocity == null) {
-      velocity = -1.0;
-    }
-    if (maxVelocity == null) {
-      maxVelocity = -1.0;
-    }
-    if (disableDelayNoVelocity == null) {
-      disableDelayNoVelocity = 10000;
-    }
-    if (disableDelay == null) {
-      disableDelay = 1000;
-    }
-    if (targetPos == null) {
-      targetPos = rest;
-    }
     this.addServoEventListener(this);
   }
 
