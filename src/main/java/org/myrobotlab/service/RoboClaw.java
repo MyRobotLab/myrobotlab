@@ -40,9 +40,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   private static final long serialVersionUID = 1L;
 
-  public final static int PACKETIZED_SERIAL_MODE = 4;
-
-  int mode = PACKETIZED_SERIAL_MODE;
+  public final static int PACKETIZED_SERIAL_MODEx = 4;
 
   public static final int PINMODE = 4;
 
@@ -1392,7 +1390,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * </pre>
    */
   public void readEncoderSpeedM1() {
-    sendPacket(address, 18, mode);
+    sendPacket(address, 18);
     // TODO lock - timeout - return value & publish
   }
 
