@@ -29,7 +29,6 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -103,7 +102,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   public AbstractSpeechSynthesisGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
 
-    speechGuiPanel.setLayout(new GridLayout(5, 2, 0, 0));
+    speechGuiPanel.setLayout(new GridLayout(6, 2, 0, 0));
     JLabel status = new JLabel("Status :");
     speechGuiPanel.add(status);
     speechGuiPanel.add(statusIcon);

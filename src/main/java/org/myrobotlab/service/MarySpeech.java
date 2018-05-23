@@ -13,7 +13,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -142,7 +141,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     }
   }
 
-  public static void main(String[] args) throws ClientProtocolException, IOException {
+  public static void main(String[] args) throws IOException {
     LoggingFactory.init(Level.INFO);
 
     try {
