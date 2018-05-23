@@ -2328,9 +2328,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   @Override
-  public void setZeroPoint(EncoderController controller) {
+  public void setZeroPoint(EncoderControl encoder) {
     // send the set zero point command to the encoder
-    msg.setZeroPoint(getDeviceId(controller.getName()));
+    msg.setZeroPoint(getDeviceId(encoder.getName()));
   }
   
 }
