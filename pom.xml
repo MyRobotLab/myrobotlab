@@ -466,6 +466,15 @@
   </dependency>
 <!-- LocalSpeech end -->
 
+<!-- AbstractSpeech begin -->
+<dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <type>zip</type>
+</dependency>
+<!-- AbstractSpeech end -->
+
 <!-- MarySpeech begin -->
   <dependency>
     <groupId>de.dfki.mary</groupId>

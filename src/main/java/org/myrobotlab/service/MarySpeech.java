@@ -166,7 +166,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
       // mary.setVoice("dfki-spike en_GB male unitselection general");
       // mary.setVoice("cmu-bdl-hsmm");
-       mary.setVoice("cmu-slt-hsmm");
+      mary.setVoice("cmu-slt-hsmm");
       //// mary.getVoices();
       // mary.speak("world");
       //// mary.speak("");
@@ -186,12 +186,14 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       // mary.speakBlocking("and I will evolve quicker than any closed source
       // application if not in a short window of time");
       // mary.speakBlocking("then in the long term evolution of software");
+      
       mary.speakBlocking("#THROAT01_F# Hello world, it is so funny #LAUGH02_F#");
       mary.setVoice("cmu-bdl-hsmm");
       mary.speakBlocking("#THROAT01_M# hi! it works.");
       mary.speakBlocking("#LAUGH01_M#");
+      mary.setVolume(0.8);
       mary.speakBlocking("I am your R 2 D 2 #R2D2#");
-
+      mary.setVolume(1.0);
       // WOW - that is a big install !
       // mary.installComponentsAcceptLicense("bits1");
     } catch (Exception e) {
