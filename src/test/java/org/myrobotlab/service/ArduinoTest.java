@@ -41,7 +41,7 @@ public class ArduinoTest implements PinArrayListener {
 
   // TODO: read the value of this off a property off a config file (maybe a properties file for the mrl test framework.) 
   static boolean useVirtualHardware = true;
-  static String port = "COM5";
+  static String port = "COM25";
 
   // things to test
   static Arduino arduino = null;
