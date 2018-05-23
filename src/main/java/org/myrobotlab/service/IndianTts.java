@@ -29,6 +29,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
   // default voice
 
   private String voice = "Default";
+  transient HttpClient httpClient = null;
 
   public IndianTts(String reservedKey) {
     super(reservedKey);
@@ -36,6 +37,8 @@ public class IndianTts extends AbstractSpeechSynthesis {
 
   public void startService() {
     super.startService();
+    httpClient = (HttpClient) startPeer("httpClient");
+    httpClient.startService();
     security = (Security) startPeer("security");
 
     subSpeechStartService();
@@ -120,6 +123,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
     meta.setSponsor("moz4r");
     subGetMetaData(meta);
     meta.addPeer("security", "Security", "security");
+    meta.addPeer("httpClient", "HttpClient", "httpClient");
     // meta.addTodo("test speak blocking - also what is the return type and
     // AudioFile audio track id ?");
 

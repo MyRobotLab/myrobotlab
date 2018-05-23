@@ -142,7 +142,7 @@ public class AudioProcessor extends Thread {
               FloatControl ctrl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
               // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
               // * 20.0);
-
+ 
               if (MathUtils.round(ctrl.getValue(),3) != MathUtils.round((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)),3)) {
                 if (data.volume <= 1.0f && data.volume >= 0) {
 

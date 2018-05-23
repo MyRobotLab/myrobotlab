@@ -24,7 +24,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(NaturalReaderSpeech.class);
-
+  transient HttpClient httpClient = null;
   HashMap<String, String> voiceMap = new HashMap<String, String>();
   HashMap<String, String> voiceMapType = new HashMap<String, String>();
   // stored inside json
@@ -43,7 +43,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
 
   public void startService() {
     super.startService();
-
+    httpClient = (HttpClient) startPeer("httpClient");
+    httpClient.startService();
     // needed because of an ssl error on the natural reader site
     System.setProperty("jsse.enableSNIExtension", "false");
 
@@ -259,6 +260,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     meta.setCloudService(true);
     meta.addCategory("speech");
     meta.setSponsor("kwatters");
+    meta.addPeer("httpClient", "HttpClient", "httpClient");
+
     subGetMetaData(meta); // meta.addTodo("test speak blocking - also what is
                           // the return type and
     // AudioFile audio track id ?");

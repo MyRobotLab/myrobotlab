@@ -11,9 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.client.ClientProtocolException;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -21,7 +18,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.AudioFile;
-import org.myrobotlab.service.HttpClient;
 import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -40,10 +36,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   protected String language;
   transient AudioFile audioFile = null;
   protected transient Security security = null;
-  protected transient HttpClient httpClient = null;
   private String audioCacheExtension = "mp3";
   private transient List<String> voiceList = new ArrayList<String>();
-  private String mrlCloudUrl = "http://www.myai.cloud/mrl/audio/";
 
   // useful to store personal voice parameter inside json config
   // this var receive info from services
@@ -59,14 +53,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     super(reservedKey);
   }
 
-
   public String publishStartSpeaking(String utterance) {
     log.info("publishStartSpeaking - {}", utterance);
     lastUtterance = utterance;
     broadcastState();
     return utterance;
   }
-
 
   public String publishEndSpeaking(String utterance) {
     log.info("publishEndSpeaking - {}", utterance);
@@ -150,6 +142,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void setVolume(double volume) {
     audioFile.setVolume((float) volume);
+    info("Set volume to " + volume);
+    broadcastState();
   }
 
   @Override
@@ -168,6 +162,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public String getLocalFileName(SpeechSynthesis provider, String toSpeak) throws UnsupportedEncodingException {
     if (provider.getVoice() != null) {
+      // no need to cache it, already ondisk
+      if (toSpeak.startsWith("#") && toSpeak.endsWith("#")) {
+        return "voiceEffects" + File.separator + toSpeak.replace("#", "") + ".mp3";
+
+      }
       return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator
           + URLEncoder.encode(audioCacheParameters, "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "." + getAudioCacheExtension();
     } else {
@@ -185,21 +184,21 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // just dust it off ...
     if (file.exists() && file.length() == 0) {
       file.delete();
-      log.info(localFileName + " deleted, because empty...");
+      log.warn(localFileName + " deleted, because empty...");
     }
 
     if (!audioFile.cacheContains(localFileName)) {
       log.info("retrieving speech from tts - {}", localFileName);
-      if (toSpeak.startsWith("#")) {
-        mp3File = grabRemoteAudioEffect(toSpeak.replace("#", ""));
-      } else {
-        mp3File = generateByteAudio(toSpeak);
-      }
+
+      mp3File = generateByteAudio(toSpeak);
+
       if (mp3File == null || mp3File.length == 0) {
         log.error("Tried to cache null data... check the speech engine");
         return null;
       }
-      audioFile.cache(localFileName, mp3File, toSpeak);
+      if (!(toSpeak.startsWith("#") && toSpeak.endsWith("#"))) {
+        audioFile.cache(localFileName, mp3File, toSpeak);
+      }
     } else {
       log.info("using local cached file");
       mp3File = FileIO.toByteArray(file);
@@ -334,17 +333,16 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   protected static void subGetMetaData(ServiceType meta) {
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech", "sound");
+    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+
   }
 
   protected void subSpeechStartService() {
 
     audioFile = (AudioFile) startPeer("audioFile");
     audioFile.startService();
-    httpClient = (HttpClient) startPeer("httpClient");
-    httpClient.startService();
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
     // attach a listener when the audio file ends playing.
@@ -389,33 +387,19 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public List<String> getVoiceEffects() {
-    JSONArray json = null;
-    List<String> list = new ArrayList<String>();
-    if (httpClient == null) {
-      
-      return list;
-    }
 
-    try {
-      json = new JSONArray(httpClient.get(mrlCloudUrl));
-    } catch (Exception e) {
-      error("getVoiceEffects error : %s", e);
-      return null;
-    }
-    log.info("getVoiceEffects json : " + json);
-    for (int i = 0; i < json.length(); i++) {
-      try {
-        String content = json.getString(i);
-        if (content.contains(".mp3")) {
-          list.add("#" + content.replace(".mp3", "") + "#");
+    List<String> list = new ArrayList<String>();
+    File folder = new File(AudioFile.getGlobalFileCacheDir() + File.separator + "voiceEffects");
+    File[] listOfFiles = folder.listFiles();
+    if (folder.exists()) {
+      for (int i = 0; i < listOfFiles.length; i++) {
+        if (listOfFiles[i].isFile()) {
+          list.add("#" + listOfFiles[i].getName().replaceAll(".mp3", "") + "#");
         }
-      } catch (JSONException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
       }
     }
     return list;
- 
+
   }
 
   public void setVoiceList(List<String> voiceList) {
@@ -428,20 +412,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void setAudioCacheExtension(String audioCacheExtension) {
     this.audioCacheExtension = audioCacheExtension;
-  }
-
-  public byte[] grabRemoteAudioEffect(String effect) throws ClientProtocolException, IOException {
-
-    byte[] audioEffect = httpClient.getBytes(mrlCloudUrl + effect + ".mp3");
-    // error detection
-    if (audioEffect.length <= 225) {
-      log.error("grabRemoteAudioEffect can't grab " + mrlCloudUrl + effect + ".mp3");
-      return null;
-    }
-    log.info("grabRemoteAudioEffect length " + audioEffect.length);
-
-    return audioEffect;
-
   }
 
 }

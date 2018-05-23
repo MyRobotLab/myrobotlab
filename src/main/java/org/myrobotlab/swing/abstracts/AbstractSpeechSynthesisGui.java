@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -40,19 +41,24 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.swing.ServiceGui;
+
 import org.slf4j.Logger;
 
 public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements ActionListener {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesisGui.class);
+
   BufferedImage speakButtonPic = ImageIO.read(FileIO.class.getResource("/resource/Shoutbox.png"));
 
   JButton speakButton = new JButton(new ImageIcon(speakButtonPic));
@@ -74,6 +80,25 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   protected JPasswordField keyIdSecret = new JPasswordField();
   JButton save = new JButton("Save");
   protected JLabel apiKeyLabel = new JLabel("API Keys :");
+  protected JLabel volumeLabel = new JLabel("Volume :");
+  JSlider volume = new JSlider(JSlider.HORIZONTAL, 0, 100, 100);
+
+  private class SliderListener implements ChangeListener {
+
+    @Override
+    public void stateChanged(javax.swing.event.ChangeEvent e) {
+
+      if (swingGui != null) {
+
+        swingGui.send(boundServiceName, "setVolume", (double) Double.valueOf(volume.getValue()) / 100);
+      } else {
+        log.error("can not send message myService is null");
+
+      }
+    }
+  }
+
+  SliderListener volumeListener = new SliderListener();
 
   public AbstractSpeechSynthesisGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
@@ -91,6 +116,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     JLabel voiceEffects = new JLabel("Voice emotions :");
     speechGuiPanel.add(voiceEffects);
     speechGuiPanel.add(comboVoiceEffects);
+    speechGuiPanel.add(volumeLabel);
+    speechGuiPanel.add(volume);
     speechGuiPanel.add(panel);
     panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
@@ -106,7 +133,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     speechGuiPanel.add(lastUtterance);
 
     // used for api if needed by service
-    apiKeylPanel.setLayout(new GridLayout(3, 2, 0, 0));
+    apiKeylPanel.setLayout(new GridLayout(4, 2, 0, 0));
 
     apiKeylPanel.add(keyIdLabel);
     apiKeylPanel.add(keyIdSecretLabel);
@@ -119,6 +146,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     comboVoiceEffects.addActionListener(this);
     speakButton.addActionListener(this);
     save.addActionListener(this);
+
   }
 
   @Override
@@ -188,6 +216,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           keyIdSecret.setBackground(Color.green);
           keyIdSecret.setText(speech.getKeys()[1]);
         }
+
+        volume.setValue((int) MathUtils.round(speech.getVolume() * 100, 0));
         lastUtterance.setText(speech.getlastUtterance());
         restoreListeners();
 
@@ -201,6 +231,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     speakButton.removeActionListener(this);
     save.removeActionListener(this);
     comboVoiceEffects.removeActionListener(this);
+    volume.removeChangeListener(volumeListener);
+
   }
 
   public void restoreListeners() {
@@ -208,5 +240,6 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     speakButton.addActionListener(this);
     save.addActionListener(this);
     comboVoiceEffects.addActionListener(this);
+    volume.addChangeListener(volumeListener);
   }
 }

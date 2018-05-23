@@ -238,7 +238,7 @@ public class AudioFile extends Service {
   }
 
   public float getVolume() {
-    return processors.get(currentTrack).getVolume();
+    return this.volume;
   }
 
   public boolean cacheContains(String filename) {
