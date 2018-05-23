@@ -9,6 +9,6 @@ public interface EncoderController extends Attachable {
   // > setZeroPoint/deviceId
   public void setZeroPoint(Integer deviceId);
   // < publishEncoderPosition/deviceId/b16 position
-	public EncoderData publishEncoderPosition(Integer deviceId, Integer position);
+	public EncoderData publishEncoderPosition(EncoderData data);
 
 }

@@ -2304,11 +2304,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     
   }
 
-  @Override
+  // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderPosition(Integer deviceId, Integer position) {
     EncoderData data = new EncoderData(getDeviceName(deviceId), position);
     log.info("Encoder position. {}" , data);
-    ((Amt203Encoder) getDevice(deviceId)).onEncoderData(data);
+    // DO WE BOTH PUBLISH & CALLBACK ?
+    ((EncoderControl) getDevice(deviceId)).onEncoderData(data);
+    invoke("publishEncoderPosition", data);
+    return data;
+  }
+  
+  @Override
+  public EncoderData publishEncoderPosition(EncoderData data) {
     return data;
   }
 

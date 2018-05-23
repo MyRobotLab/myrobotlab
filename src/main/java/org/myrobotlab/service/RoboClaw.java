@@ -342,7 +342,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // FIXME - use SerialDevice
       serial = (Serial) service;
       serial.setTimeout(40);
-      
+
       // here we check and warn regarding config - but
       // it "might" be right if the user has customized it
       // this works well - the user controls all config
@@ -1273,7 +1273,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     // FIXME - not really thread safe !
     // what pairs serial recv data with the calling thread
     // or what prevents another thread from "clearing" the buffer !
-    EncoderData ed  = null;
+    EncoderData ed = null;
     try {
       // FIXME by making a blocking read sendPacket method
       // sendPacket(data[], byte1...)
@@ -1282,14 +1282,14 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       sendPacket(address, 16);
 
       byte[] data = new byte[7];
-      
+
       // read uses timeout set globally
       serial.read(data);
-      ed = new EncoderData(getName(),bytes4ToLong(data));
+      ed = new EncoderData(getName(), bytes4ToLong(data));
 
       log.info("ret {}", Serial.bytesToHex(data));
       log.info("{} ", ed);
-      
+
       invoke("publishEncoderM1", ed);
 
     } catch (Exception e) {
@@ -1297,11 +1297,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     }
     return ed;
   }
-  
+
   public EncoderData publishEncoderM1(EncoderData data) {
     return data;
   }
-  
+
   public EncoderData publishEncoderM2(EncoderData data) {
     return data;
   }
@@ -1309,7 +1309,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   public static long bytes4ToLong(byte[] data) {
     return bytes4ToLong(data, 0);
   }
-  
+
   public static long bytes4ToLong(byte[] data, int start) {
     return (data[start] & 0xFF) << 24 | (data[start + 1] & 0xFF) << 16 | (data[start + 2] & 0xFF) << 8 | (data[start + 3] & 0xFF);
   }
@@ -1337,33 +1337,48 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Bit7 - Reserved
    * </pre>
    */
-	public EncoderData readEncoderM2() {
-    // FIXME - not really thread safe !
-    // what pairs serial recv data with the calling thread
-    // or what prevents another thread from "clearing" the buffer !
-    EncoderData ed  = null;
-    try {
-      // FIXME by making a blocking read sendPacket method
-      // sendPacket(data[], byte1...)
-      // you can't mess with serial outside the "sendPacket"/"readPacket"
-      serial.clear();
-      sendPacket(address, 17);
+  public EncoderData readEncoderM2() {
+    
+    EncoderData ed = null;
 
-      byte[] data = new byte[7];
-      
-      // read uses timeout set globally
-      serial.read(data);
-      ed = new EncoderData(getName(),bytes4ToLong(data));
-
-      log.info("ret {}", Serial.bytesToHex(data));
-      log.info("{} ", ed);
-      
+    byte[] data = sendReadPacket(7, address, 17);
+    if (data != null) {
+      ed = new EncoderData(getName(), bytes4ToLong(data));
       invoke("publishEncoderM1", ed);
+    }
+
+    return ed;
+  }
+
+  /**
+   * synchronous send and receive - if not enough bytes, or a timeout is reached
+   * a null byte buffer will be returned. If the same number of bytes are
+   * returned as requested then the byte array is returned. Synchronized on the
+   * single serial resource.
+   * 
+   * @param readDataSize
+   * @param sendData
+   * @return
+   */
+  synchronized public byte[] sendReadPacket(int bytesRequested, int... sendData) {
+    try {
+
+      // clear buffer
+      serial.clear();
+
+      byte[] data = new byte[bytesRequested];
+      sendPacket(sendData);
+      // read uses timeout set globally
+      int bytesRead = serial.read(data);
+
+      if (bytesRead == bytesRequested) {
+        return data;
+      }
 
     } catch (Exception e) {
       log.error(e.getMessage(), e);
     }
-    return ed;
+    return null;
   }
 
   /**
@@ -2068,8 +2083,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     sendPacket(address, 64);
     // TODO lock - timeout - return value & publish
   }
-  
-  
+
   /**
    * <pre>
   65 - Buffered Drive M1 with signed Speed, Accel, Deccel and Position
@@ -2086,7 +2100,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
         byte1(deccel), byte0(deccel), byte3(pos), byte2(pos), byte1(pos), byte0(pos), buffer);
     // TODO lock - timeout - return value & publish
   }
-
 
   /**
    * <pre>
@@ -2129,7 +2142,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
         buffer);
   }
 
- 
   @Override
   public void onConnect(String portName) {
     log.info("onConnect from port {}", portName);
@@ -2152,7 +2164,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   public static void main(String[] args) {
     try {
       /*
@@ -2201,21 +2213,20 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // start the services
       // Runtime.start("gui", "SwingGui");
       RoboClaw rc = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
-      
+
       rc.connect(port);
-      
+
       boolean done = false;
-      
+
       while (!done) {
-        rc.speedAccelDeccelPositionM2(2000,4000,4000,7000,1);
+        rc.speedAccelDeccelPositionM2(2000, 4000, 4000, 7000, 1);
         sleep(1000);
       }
-      
-     
+
       if (done) {
         return;
-      }      
-      
+      }
+
       MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
       MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
       // Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
@@ -2224,7 +2235,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // doesnt matter for usb connection
       // roboclaw.setAddress(128);
       // roboclaw.setAddress(129);
-      
+
       // configure services
       m1.setPort("m1");
       m2.setPort("m2");
@@ -2248,7 +2259,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // roboclaw.restoreDefaults();
 
       // roboclaw.resetQuadratureEncoderCounters();
-      
+
       // m1.stop();
       // m2.stop();
       rc.readEncoderM1();
@@ -2262,24 +2273,24 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       rc.readEncoderM1();
       rc.readEncoderM1();
-      
+
       rc.resetQuadratureEncoderCounters();
 
       rc.readEncoderM1();
       rc.readEncoderM1();
-      
 
       // roboclaw.readEncoderCount();
       // roboclaw.read
-      rc.speedAccelDeccelPositionM1(500,500,500,10000,1);
+      rc.speedAccelDeccelPositionM1(500, 500, 500, 10000, 1);
       rc.driveM1WithSignedDutyAndAccel(255, 255);
-      
+
       rc.readEncoderM1();
       rc.readEncoderM1();
 
       m1.move(0);
 
-      // public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int accel, int speed, int deccel, int pos, int buffer)
+      // public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int
+      // accel, int speed, int deccel, int pos, int buffer)
 
       // speed up the motor
       for (int i = 0; i < 100; ++i) {
@@ -2296,7 +2307,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
         double pwr = i * .01;
         log.info("power {}", pwr);
         m1.move(pwr);
-        
+
         sleep(100);
       }
 
@@ -2316,6 +2327,5 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       Logging.logError(e);
     }
   }
-
 
 }
