@@ -65,7 +65,7 @@ public class ArduinoTest implements PinArrayListener {
     // setup the virtual port (if enabled)
     // FIXME - needs a seemless switch
     if (useVirtualHardware) {
-      virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      virtual = (VirtualArduino) Runtime.start("virtualTest", "VirtualArduino");
       uart = virtual.getSerial();
       uart.setTimeout(100); // don't want to hang when decoding results...
       virtual.connect(port);
@@ -73,7 +73,7 @@ public class ArduinoTest implements PinArrayListener {
 
     
     // TODO:  Initialize the arduino under test.  (potentially do this in each test method vs passing the same one around ..)
-    arduino = (Arduino) Runtime.start("arduino", "Arduino");
+    arduino = (Arduino) Runtime.start("arduinoTest", "Arduino");
     // TODO: have a separate unit test for testing serial.  we probably don't want to intermingle that testing here (if we can avoid it.)
     serial = arduino.getSerial();
     arduino.connect(port);
