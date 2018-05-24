@@ -9,14 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.codec.digest.DigestUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
@@ -168,11 +167,13 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       }
       return provider.getClass().getSimpleName() + File.separator + URLEncoder.encode(provider.getVoice(), "UTF-8") + File.separator
-          + URLEncoder.encode(audioCacheParameters, "UTF-8") + File.separator + DigestUtils.md5Hex(toSpeak) + "." + getAudioCacheExtension();
+          + URLEncoder.encode(audioCacheParameters, "UTF-8") + File.separator + MathUtils.md5(toSpeak) + "." + getAudioCacheExtension();
     } else {
       return null;
     }
   }
+  
+  
 
   public byte[] cacheFile(String toSpeak) throws IOException {
 
