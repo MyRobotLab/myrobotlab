@@ -262,7 +262,10 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(MarySpeech.class);
-    subGetMetaData(meta);
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addCategory("speech", "sound");
+    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+
     meta.addDescription("Speech synthesis based on MaryTTS");
 
     meta.addDependency("de.dfki.mary", "marytts", "5.2", "pom");

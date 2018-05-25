@@ -179,7 +179,10 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     meta.addDescription("VoiceRss speech synthesis service.");
     meta.addCategory("speech");
     meta.setSponsor("moz4r");
-    subGetMetaData(meta);
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addCategory("speech", "sound");
+    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+
     meta.addPeer("security", "Security", "security");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.setCloudService(true);
