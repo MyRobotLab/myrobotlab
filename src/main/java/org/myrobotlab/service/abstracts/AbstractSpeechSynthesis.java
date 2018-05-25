@@ -333,13 +333,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // never used
   }
 
-  protected static void subGetMetaData(ServiceType meta) {
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
-    meta.addCategory("speech", "sound");
-    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
-
-  }
-
   protected void subSpeechStartService() {
 
     audioFile = (AudioFile) startPeer("audioFile");

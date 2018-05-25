@@ -96,7 +96,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(LocalSpeech.class.getCanonicalName());
-    subGetMetaData(meta);
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addCategory("speech", "sound");
+    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+
     meta.addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui

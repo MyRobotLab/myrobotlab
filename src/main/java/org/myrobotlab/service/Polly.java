@@ -199,7 +199,10 @@ public class Polly extends AbstractSpeechSynthesis {
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui
     // add dependency if necessary
-    subGetMetaData(meta);
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addCategory("speech", "sound");
+    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+
     meta.addPeer("security", "Security", "security");
     /*
      * meta.addDependency("org.joda", "2.9.4");

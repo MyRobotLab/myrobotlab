@@ -262,10 +262,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     meta.setSponsor("kwatters");
     meta.addPeer("httpClient", "HttpClient", "httpClient");
 
-    subGetMetaData(meta); // meta.addTodo("test speak blocking - also what is
-                          // the return type and
-    // AudioFile audio track id ?");
-    // end of support
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addCategory("speech", "sound");
+    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+
     meta.setAvailable(false);
     return meta;
   }

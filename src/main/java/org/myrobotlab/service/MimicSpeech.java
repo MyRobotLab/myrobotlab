@@ -91,7 +91,10 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     meta.addDescription("Speech synthesis based on Mimic from the MyCroft AI project.");
     meta.addCategory("speech", "sound");
     meta.addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
-    subGetMetaData(meta);
+    meta.addPeer("audioFile", "AudioFile", "audioFile");
+    meta.addCategory("speech", "sound");
+    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+
     meta.setSponsor("Kwatters");
     // meta.addDependency("marytts", "5.2");
     // meta.addDependency("com.sun.speech.freetts", "1.2");
