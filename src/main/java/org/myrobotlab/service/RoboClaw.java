@@ -2195,8 +2195,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // virtual = True
 
       // String port = "COM4";
-      String port = "/dev/ttyS10";
-      // String port = "/dev/ttyACM1";
+      // String port = "/dev/ttyS10";
+      String port = "/dev/ttyACM0";
       // String port = "vuart";
 
       Serial uart = null;
@@ -2217,8 +2217,18 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       boolean done = false;
 
       while (!done) {
-        rc.speedAccelDeccelPositionM2(2000, 4000, 4000, 7000, 1);
+    	rc.driveForwardM1(90);
         sleep(1000);
+        // rc.speedAccelDeccelPositionM2(2000, 4000, 4000, 7000, 1);
+        rc.driveForwardM1(0);
+        log.info("encoder {}",rc.readEncoderM1());
+        sleep(1000);
+        rc.driveBackwardM1(90);
+        sleep(1000);
+        rc.driveForwardM1(0);
+        log.info("encoder {}",rc.readEncoderM1());
+        sleep(1000);
+
       }
 
       if (done) {
@@ -2227,6 +2237,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
       MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
+      
+      for (int i = 0; i < 10; ++i) {
+          m1.move(0.1 * i);
+        }
+
       // Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       // Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
 
@@ -2263,9 +2278,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       rc.readEncoderM1();
       rc.readEncoderM1();
 
-      for (int i = 0; i < 10; ++i) {
-        m1.move(0.1 * i);
-      }
 
       m1.move(0);
 
