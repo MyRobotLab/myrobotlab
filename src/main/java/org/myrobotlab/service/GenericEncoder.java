@@ -30,8 +30,6 @@ public class GenericEncoder extends AbstractEncoder implements EncoderControl {
   public void setMode(String mode) {
 	  // FIXME IMPLEMENT - (ABSOLUTE | ANALOG ?) | RELATIVE
   }
-
-  BORKED !
   
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(GenericEncoder.class.getCanonicalName());
