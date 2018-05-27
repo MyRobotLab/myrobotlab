@@ -2303,15 +2303,15 @@ public class RoboClaw extends AbstractMotorController
 			boolean done = false;
 
 			while (!done) {
-				// rc.driveForwardM1(90);
-				sleep(1000);
-				// rc.speedAccelDeccelPositionM2(2000, 4000, 4000, 7000, 1);
+				
 				rc.resetQuadratureEncoderCounters();
 				log.info("encoder m1 {}", rc.readEncoderM1());
 				rc.bufferedM1DriveWithSignedSpeedAndDistance(8000, 8000);
 				log.info("encoder m1 {}", rc.readEncoderM1());
 				
-				/*<pre>
+				rc.driveForwardM1(90);
+				sleep(1000);
+				// rc.speedAccelDeccelPositionM2(2000, 4000, 4000, 7000, 1);				
 				rc.driveForwardM1(0);
 				log.info("encoder {}", rc.readEncoderM1());
 				sleep(1000);
@@ -2320,7 +2320,7 @@ public class RoboClaw extends AbstractMotorController
 				rc.driveForwardM1(0);
 				log.info("encoder {}", rc.readEncoderM1());
 				sleep(1000);
-				</pre>*/
+				
 
 			}
 
