@@ -30,15 +30,15 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.InMoovV2;
+import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
-public class InMoovV2Gui extends ServiceGui implements ActionListener {
+public class InMoov2Gui extends ServiceGui implements ActionListener {
 
 	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(InMoovV2Gui.class);
+	public final static Logger log = LoggerFactory.getLogger(InMoov2Gui.class);
 	Runtime myRuntime = (Runtime) Runtime.getInstance();
 
 	private final JTabbedPane inmoovPane = new JTabbedPane(JTabbedPane.TOP);
@@ -51,10 +51,10 @@ public class InMoovV2Gui extends ServiceGui implements ActionListener {
 	JButton startEar = new JButton("Start Ear");
 	JButton configureEar = new JButton("Configure Ear");
 
-	public InMoovV2Gui(final String boundServiceName, final SwingGui myService) {
+	public InMoov2Gui(final String boundServiceName, final SwingGui myService) {
 		super(boundServiceName, myService);
 
-		InMoovV2 i02 = (InMoovV2) myRuntime.getService(boundServiceName);
+		InMoov2 i02 = (InMoov2) myRuntime.getService(boundServiceName);
 		log.info(Runtime.getInstance().getServiceTypeNames().toString());
 		Font f = new Font("SansSerif", Font.BOLD, 20);
 		// Create TABS and content
@@ -180,7 +180,7 @@ public class InMoovV2Gui extends ServiceGui implements ActionListener {
 		});
 	}
 
-	public void onState(final InMoovV2 i02) {
+	public void onState(final InMoov2 i02) {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override

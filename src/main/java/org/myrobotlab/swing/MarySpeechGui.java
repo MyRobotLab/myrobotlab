@@ -28,14 +28,7 @@ package org.myrobotlab.swing;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map.Entry;
-
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.InMoovV2;
 import org.myrobotlab.service.MarySpeech;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;

@@ -149,7 +149,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public float getVolume() {
+    if (audioFile!=null)
+    {
     return audioFile.getVolume();
+    }
+    else
+    {
+      return 1.0f;
+    }
   }
 
   public void onRequestConfirmation(String text) {
