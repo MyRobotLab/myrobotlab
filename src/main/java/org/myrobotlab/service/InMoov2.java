@@ -25,14 +25,14 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
  * initialization and control of these sub systems.
  *
  */
-public class InMoovV2 extends Service {
+public class InMoov2 extends Service {
 
 	private static final long serialVersionUID = 1L;
 
 	transient private static Runtime myRuntime = null; //  
 	transient private static ServiceData serviceData = null; // = myRuntime.getServiceData();
 
-	// interfaces declaration needed by InMooov
+	// interfaces declaration needed by InMoov
 	transient public SpeechSynthesis mouth;
 	transient public SpeechRecognizer ear;
 
@@ -57,7 +57,7 @@ public class InMoovV2 extends Service {
 	// ---------------------------------------------------------------
 	
 	
-	public InMoovV2(String n) {
+	public InMoov2(String n) {
 		super(n);
 		if (myRuntime == null) {
 			myRuntime = (Runtime) Runtime.getInstance();;
@@ -83,7 +83,7 @@ public class InMoovV2 extends Service {
 			vright.connect("COM4");
 			Runtime.start("gui", "SwingGui");
 
-			InMoovV2 inMoov = (InMoovV2) Runtime.start("inMoov", "InMoovV2");
+			InMoov2 inMoov = (InMoov2) Runtime.start("inMoov", "InMoov2");
 			inMoov.startMouth();
 
 		} catch (Exception e) {
@@ -103,8 +103,8 @@ public class InMoovV2 extends Service {
 		languages.put(5, new String[] { "ru", "Russian - Russia" });
 		languages.put(6, new String[] { "hi", "Hindi - India" });
 		languages.put(7, new String[] { "it", "Italian - Italy" });
-		InMoovV2.speechEngines = getServicesFromCategory("speech");
-		InMoovV2.earEngines = getServicesFromCategory("speech recognition");
+		InMoov2.speechEngines = getServicesFromCategory("speech");
+		InMoov2.earEngines = getServicesFromCategory("speech recognition");
 		this.language = getLanguage();
 		this.speechEngine = getSpeechEngine();
 		this.earEngine = getEarEngine();
@@ -112,7 +112,7 @@ public class InMoovV2 extends Service {
 
 	static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(InMoovV2.class);
+		ServiceType meta = new ServiceType(InMoov2.class);
 		meta.setAvailable(false);
 		return meta;
 	}
