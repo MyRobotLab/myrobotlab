@@ -2,6 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -108,8 +109,20 @@ public interface SpeechSynthesis extends NameProvider {
 
   public abstract void onRequestConfirmation(String text);
 
+  /**
+   * use tts engine to create an audiofile
+   * 
+   * @param toSpeak
+   *          text
+   * @return byte[]
+   */
   public byte[] generateByteAudio(String toSpeak) throws IOException;
 
+  /**
+   * check if all is OK, like api keys
+   * 
+   * @return boolean
+   */
   public abstract boolean getEngineStatus();
 
   public abstract String getEngineError();
@@ -118,6 +131,12 @@ public interface SpeechSynthesis extends NameProvider {
 
   public abstract void setEngineError(String engineError);
 
+  /**
+   * set api keys for online tts and store them inside an aes safe
+   * 
+   * @param keyId
+   *          ,keyIdSecret text,text
+   */
   public void setKeys(String keyId, String keyIdSecret);
 
   public String[] getKeys();
@@ -133,4 +152,23 @@ public interface SpeechSynthesis extends NameProvider {
   public abstract List<String> getVoiceList();
 
   public abstract void setVoiceList(List<String> voiceList);
+
+  public abstract void setSelectedEffect(String effect);
+
+  public abstract String getSelectedEffect();
+
+  /**
+   * Apply special audio effects Used for MarySpeech only for now
+   * 
+   * @param audioEffects
+   *          text
+   */
+  public void setAudioEffects(String audioEffects);
+
+  public String getAudioEffects();
+
+  public abstract void setEffectsList(String effect, String parameters);
+
+  public abstract HashMap<String, String> getEffectsList();
+
 }

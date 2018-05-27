@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -38,6 +37,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   private String audioCacheExtension = "mp3";
   private transient List<String> voiceList = new ArrayList<String>();
 
+  private transient HashMap<String, String> effectsList = new HashMap<String, String>();
+
   // useful to store personal voice parameter inside json config
   // this var receive info from services
 
@@ -47,6 +48,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * cache must be based on text + other parameters like filters
    */
   protected String audioCacheParameters = "";
+  private String selectedEffect;
 
   public AbstractSpeechSynthesis(String reservedKey) {
     super(reservedKey);
@@ -172,8 +174,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return null;
     }
   }
-  
-  
 
   public byte[] cacheFile(String toSpeak) throws IOException {
 
@@ -396,6 +396,15 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   }
 
+  public void setSelectedEffect(String effect) {
+    this.selectedEffect = effect;
+    broadcastState();
+  }
+
+  public String getSelectedEffect() {
+    return selectedEffect;
+  }
+
   public void setVoiceList(List<String> voiceList) {
     this.voiceList = voiceList;
   }
@@ -406,6 +415,24 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void setAudioCacheExtension(String audioCacheExtension) {
     this.audioCacheExtension = audioCacheExtension;
+  }
+
+  public HashMap<String, String> getEffectsList() {
+    return effectsList;
+  }
+
+  public void setEffectsList(String effect, String parameters) {
+    effectsList.put(effect, parameters);
+  }
+
+  public void setAudioEffects(String audioEffects) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public String getAudioEffects() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

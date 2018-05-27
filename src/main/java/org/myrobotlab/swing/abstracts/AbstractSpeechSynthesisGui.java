@@ -42,6 +42,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 
@@ -67,10 +68,23 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   JLabel statusIcon = new JLabel("Not initialized", statusImageNOK, JLabel.CENTER);
   protected JPanel speechGuiPanel = new JPanel();
   JComboBox<String> comboVoice = new JComboBox<String>();
-  JComboBox<String> comboVoiceEffects = new JComboBox<String>();
+  JComboBox<String> comboVoiceEmotions = new JComboBox<String>();
   JTextArea lastUtterance = new JTextArea();
   final JPanel panel = new JPanel();
 
+  // used for effects like in mary
+  protected final JPanel EffectpanelTLeft = new JPanel();
+  protected final JPanel EffectpanelTRight = new JPanel();
+  protected final JPanel EffectpanelBLeft = new JPanel();
+  protected final JPanel EffectpanelBRight = new JPanel();
+
+  protected JTextField effetsParameters = new JTextField();
+  protected JLabel ComboEffectLabel = new JLabel("Effect :");
+  protected JLabel ComboEffectLabel2 = new JLabel("Parameters :");
+  protected JComboBox<String> comboEffects = new JComboBox<String>();
+  protected JTextArea selectedEffects = new JTextArea();
+  protected JButton addEffect = new JButton("Add");
+  protected JButton updateEffect = new JButton("Update");
   // used for api if needed by service
   protected JLabel keyIdLabel = new JLabel("key Id :");
   protected JLabel keyIdSecretLabel = new JLabel("Secret :");
@@ -102,7 +116,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   public AbstractSpeechSynthesisGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
 
-    speechGuiPanel.setLayout(new GridLayout(6, 2, 0, 0));
+    speechGuiPanel.setLayout(new GridLayout(7, 2, 0, 0));
     JLabel status = new JLabel("Status :");
     speechGuiPanel.add(status);
     speechGuiPanel.add(statusIcon);
@@ -114,7 +128,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     JLabel voiceEffects = new JLabel("Voice emotions :");
     speechGuiPanel.add(voiceEffects);
-    speechGuiPanel.add(comboVoiceEffects);
+    speechGuiPanel.add(comboVoiceEmotions);
     speechGuiPanel.add(volumeLabel);
     speechGuiPanel.add(volume);
     speechGuiPanel.add(panel);
@@ -128,6 +142,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     add(speechGuiPanel);
     lastUtterance.setWrapStyleWord(true);
     lastUtterance.setLineWrap(true);
+    selectedEffects.setWrapStyleWord(true);
+    selectedEffects.setLineWrap(true);
 
     speechGuiPanel.add(lastUtterance);
 
@@ -142,9 +158,12 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     // listeners
     comboVoice.addActionListener(this);
-    comboVoiceEffects.addActionListener(this);
+    comboVoiceEmotions.addActionListener(this);
     speakButton.addActionListener(this);
     save.addActionListener(this);
+    comboEffects.addActionListener(this);
+    updateEffect.addActionListener(this);
+    addEffect.addActionListener(this);
 
   }
 
@@ -164,8 +183,25 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
         if (o == save) {
           send("setKeys", keyId.getText(), keyIdSecret.getText());
         }
-        if (o == comboVoiceEffects) {
-          send("speak", comboVoiceEffects.getSelectedItem());
+        if (o == comboVoiceEmotions) {
+          send("speak", comboVoiceEmotions.getSelectedItem());
+        }
+        if (o == comboEffects) {
+          send("setSelectedEffect", comboEffects.getSelectedItem());
+        }
+        if (o == updateEffect) {
+          send("setAudioEffects", selectedEffects.getText());
+        }
+        if (o == addEffect) {
+          String output = (String) comboEffects.getSelectedItem();
+          if (!effetsParameters.getText().isEmpty()) {
+            output += "(" + effetsParameters.getText() + ")";
+          }
+          if (!selectedEffects.getText().isEmpty()) {
+            output = "+" + output;
+          }
+
+          send("setAudioEffects", selectedEffects.getText() + output);
         }
 
       }
@@ -185,15 +221,15 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
         }
         statusIcon.setText(speech.getEngineError());
 
-        if (comboVoiceEffects.getItemCount() == 0 && !(speech.getVoiceEffects() == null)) {
-          comboVoiceEffects.removeAll();
-          speech.getVoiceEffects().forEach((v) -> comboVoiceEffects.addItem(v));
-          comboVoiceEffects.setEnabled(true);
+        if (comboVoiceEmotions.getItemCount() == 0 && !(speech.getVoiceEffects() == null)) {
+          comboVoiceEmotions.removeAll();
+          speech.getVoiceEffects().forEach((v) -> comboVoiceEmotions.addItem(v));
+          comboVoiceEmotions.setEnabled(true);
         }
         if ((speech.getVoiceEffects() == null)) {
 
-          comboVoiceEffects.addItem("Offline");
-          comboVoiceEffects.setEnabled(false);
+          comboVoiceEmotions.addItem("Offline");
+          comboVoiceEmotions.setEnabled(false);
         }
         if (comboVoice.getItemCount() == 0 && !(speech.getVoices() == null)) {
           speech.getVoices().forEach((v) -> comboVoice.addItem(v));
@@ -215,9 +251,14 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           keyIdSecret.setBackground(Color.green);
           keyIdSecret.setText(speech.getKeys()[1]);
         }
+        if (comboEffects.getItemCount() > 0 && speech.getSelectedEffect() != null) {
+          comboVoice.setSelectedItem((speech.getSelectedEffect()));
+          effetsParameters.setText(speech.getEffectsList().get(speech.getSelectedEffect()));
+        }
 
         volume.setValue((int) MathUtils.round(speech.getVolume() * 100, 0));
         lastUtterance.setText(speech.getlastUtterance());
+        selectedEffects.setText(speech.getAudioEffects());
         restoreListeners();
 
       }
@@ -229,8 +270,9 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     comboVoice.removeActionListener(this);
     speakButton.removeActionListener(this);
     save.removeActionListener(this);
-    comboVoiceEffects.removeActionListener(this);
+    comboVoiceEmotions.removeActionListener(this);
     volume.removeChangeListener(volumeListener);
+    comboEffects.removeActionListener(this);
 
   }
 
@@ -238,7 +280,9 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     comboVoice.addActionListener(this);
     speakButton.addActionListener(this);
     save.addActionListener(this);
-    comboVoiceEffects.addActionListener(this);
+    comboVoiceEmotions.addActionListener(this);
     volume.addChangeListener(volumeListener);
+    comboEffects.addActionListener(this);
+
   }
 }
