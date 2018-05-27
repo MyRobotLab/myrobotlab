@@ -50,10 +50,21 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   String audioEffects;
   HashMap<String, String> voiceInJsonConfig;
   // end
+
   public String maryComponentsUrl = "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml";
 
   public MarySpeech(String reservedKey) {
     super(reservedKey);
+    setEffectsList("TractScaler", "amount:1.5");
+    setEffectsList("F0Scale", "f0Scale:2.0");
+    setEffectsList("F0Add", "f0Add:50.0");
+    //setEffectsList("Rate", "durScale:1.5");
+    setEffectsList("Robot", "amount:100.0");
+    setEffectsList("Whisper", "amount:100.0");
+    setEffectsList("Stadium", "amount:100.0");
+    setEffectsList("Chorus", "delay1:466;amp1:0.54;delay2:600;amp2:-");
+    setEffectsList("FIRFilter", "type:3;fc1:500.0;fc2:2000.0");
+    setEffectsList("JetPilot", "");
 
   }
 
@@ -90,12 +101,15 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     return false;
   }
 
+  @Override
   public void setAudioEffects(String audioEffects) {
     marytts.setAudioEffects(audioEffects);
     this.audioEffects = audioEffects;
     audioCacheParameters = audioEffects;
+    broadcastState();
   }
 
+  @Override
   public String getAudioEffects() {
     return this.audioEffects;
   }
@@ -185,7 +199,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       // mary.speakBlocking("and I will evolve quicker than any closed source
       // application if not in a short window of time");
       // mary.speakBlocking("then in the long term evolution of software");
-      
+
       mary.speakBlocking("#THROAT01_F# Hello world, it is so funny #LAUGH02_F#");
       mary.setVoice("cmu-bdl-hsmm");
       mary.speakBlocking("#THROAT01_M# hi! it works.");
@@ -249,6 +263,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       audioEffects = "";
       audioCacheParameters = audioEffects;
     }
+    setAudioEffects(audioEffects);
   }
 
   /**
