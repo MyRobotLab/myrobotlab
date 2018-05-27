@@ -28,7 +28,23 @@ import org.slf4j.Logger;
  * 
  * RoboClaw - RoboClaw service for the roboclaw motor controller command
  * 
- * More Info: http://downloads.ionmc.com/docs/roboclaw_user_manual.pdf
+ * <pre>
+ * 
+ * RoboClaw - http://downloads.ionmc.com/docs/roboclaw_user_manual.pdf
+ * 
+ * The basic command structures consist of an address byte, command byte, data
+ * bytes and a CRC16 16bit checksum. The amount of data each command will send
+ * or receive can vary.
+ * 
+ * | --------ADDRESS------ |COMMAND|DATA |0x80 (128) - 0x87 (135)|
+ * 
+ * Big Endian -
+ * 
+ * BAUD OPTIONS 2400 9600 19200 38400 57600 115200 230400 460800
+ * 
+ * 
+ * PACKET ACK = 0xFF
+ * </pre>
  * 
  * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
  * speed) &amp; 0b01111111);
@@ -147,7 +163,7 @@ public class RoboClaw extends AbstractMotorController
 			packet[d.length + 1] = (byte) (xmodemcrc16 & 0xFF);
 			sb.append(String.format("%02X ", (byte) (xmodemcrc16 & 0xFF)));
 
-			log.info(" sendPacket {}", sb);
+			log.debug(" sendPacket {}", sb);
 
 			/**
 			 * <pre>
@@ -1820,8 +1836,8 @@ public class RoboClaw extends AbstractMotorController
 	 * </pre>
 	 */
 	public void bufferedM1DriveWithSignedSpeedAndDistance(int speed, int distance) {
-		sendPacket(address, 41, byte3(speed), byte2(speed), byte1(speed), byte0(speed), 
-				byte3(distance), byte2(distance), byte1(distance), byte0(distance)); 
+		sendPacket(address, 41, byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(distance),
+				byte2(distance), byte1(distance), byte0(distance), 1);
 	}
 
 	/**
@@ -2238,8 +2254,7 @@ public class RoboClaw extends AbstractMotorController
 
 	@Override
 	public Integer onByte(Integer b) throws IOException {
-		log.info(String.format("onByte %02X", b));
-		// log.info("onByte {}", b);
+		log.debug(String.format("onByte %02X", b));
 		return b;
 	}
 
@@ -2249,184 +2264,193 @@ public class RoboClaw extends AbstractMotorController
 		return null;
 	}
 
+	public static void standardMotorTests01(RoboClaw rc) throws Exception {
+
+		MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
+		MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
+
+		for (int i = 0; i < 10; ++i) {
+			m1.move(0.1 * i);
+		}
+
+		// Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+		// Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
+
+		// doesnt matter for usb connection
+		// roboclaw.setAddress(128);
+		// roboclaw.setAddress(129);
+
+		// configure services
+		m1.setPort("m1");
+		m2.setPort("m2");
+		// joy.setController(5); // 0 on Linux
+
+		// attach services
+		rc.attach(m1);
+		rc.attach(m2);
+		// m1.attach(joy.getAxis("y"));
+		// m2.attach(joy.getAxis("rz"));
+
+		// m1.setInverted(true);
+		// m2.setInverted(true);
+		// m2.attach(arduino.getPin("A4"));
+
+		// FIXME - roboclaw.attach(motor1) & roboclaw.attach(motor2)
+		// FIXME - motor1.attach(joystick) !
+
+		// roboclaw.resetQuadratureEncoderCounters();
+		// roboclaw.restoreDefaults();
+
+		// roboclaw.resetQuadratureEncoderCounters();
+
+		// m1.stop();
+		// m2.stop();
+		rc.readEncoderM1();
+		rc.readEncoderM1();
+
+		m1.move(0);
+
+		rc.readEncoderM1();
+		rc.readEncoderM1();
+
+		rc.resetQuadratureEncoderCounters();
+
+		rc.readEncoderM1();
+		rc.readEncoderM1();
+
+		// roboclaw.readEncoderCount();
+		// roboclaw.read
+		rc.speedAccelDeccelPositionM1(500, 500, 500, 10000, 1);
+		rc.driveM1WithSignedDutyAndAccel(255, 255);
+
+		rc.readEncoderM1();
+		rc.readEncoderM1();
+
+		m1.move(0);
+
+		// public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int
+		// accel, int speed, int deccel, int pos, int buffer)
+
+		// speed up the motor
+		for (int i = 0; i < 100; ++i) {
+			double pwr = i * .01;
+			log.info("power {}", pwr);
+			m1.move(pwr);
+			sleep(100);
+		}
+
+		sleep(1000);
+
+		// slow down the motor
+		for (int i = 100; i > 0; --i) {
+			double pwr = i * .01;
+			log.info("power {}", pwr);
+			m1.move(pwr);
+
+			sleep(100);
+		}
+
+		// move motor clockwise
+		m1.move(0.3);
+		sleep(1000);
+		m1.stop();
+
+		// move motor counter-clockwise
+		m1.move(-0.3);
+		sleep(1);
+		m1.stop();
+
+		// TODO - stopAndLock
+
+	}
+
+	public static void positionalTest01(RoboClaw rc) throws Exception {
+
+		boolean done = false;
+
+		while (!done) {
+
+			// stop and reset
+			log.info("stopping motors reseting encoders");
+			rc.driveForwardM1(0);
+			sleep(500);
+			rc.resetQuadratureEncoderCounters();
+			log.info("encoder {}", rc.readEncoderM1());
+			
+			log.info("running forward 90 duty for 1s");
+			rc.driveForwardM1(90);
+			sleep(500);
+			log.info("mid raw speed {}", rc.readRawSpeedM1());
+			sleep(500);
+			log.info("stopping motor waiting 0.5s");
+			rc.driveForwardM1(0);
+			sleep(500);
+			log.info("raw speed {} encoder {}", rc.readRawSpeedM1(), rc.readEncoderM1());
+			
+			// stop and reset
+/*			log.info("stopping motors reseting encoders");
+			rc.driveForwardM1(0);
+			sleep(500);
+			rc.resetQuadratureEncoderCounters();
+			log.info("encoder {}", rc.readEncoderM1());
+
+			log.info("encoder {}", rc.readEncoderM1());
+
+			// try drive command
+			rc.bufferedM1DriveWithSignedSpeedAndDistance(60900, 80000);
+			log.info("encoder m1 {}", rc.readEncoderM1());
+*/			
+
+			// stop and reset
+			log.info("stopping motors reseting encoders");
+			rc.driveBackwardM1(0);
+			sleep(500);
+//			rc.resetQuadratureEncoderCounters();
+			log.info("encoder {}", rc.readEncoderM1());
+			
+			log.info("running forward 90 duty for 1s");
+			rc.driveBackwardM1(90);
+			sleep(500);
+			log.info("mid raw speed {}", rc.readRawSpeedM1());
+			sleep(500);
+			log.info("stopping motor waiting 0.5s");
+			rc.driveBackwardM1(0);
+			sleep(500);
+			log.info("raw speed {} encoder {}", rc.readRawSpeedM1(), rc.readEncoderM1());
+			log.info("here");
+			
+
+		}
+
+	}
+
 	public static void main(String[] args) {
 		try {
-			/*
-			 * <pre>
-			 * 
-			 * RoboClaw - http://downloads.ionmc.com/docs/roboclaw_user_manual.pdf
-			 * 
-			 * The basic command structures consist of an address byte, command byte, data
-			 * bytes and a CRC16 16bit checksum. The amount of data each command will send
-			 * or receive can vary.
-			 * 
-			 * | --------ADDRESS------ |COMMAND|DATA |0x80 (128) - 0x87 (135)|
-			 * 
-			 * Big Endian -
-			 * 
-			 * BAUD OPTIONS 2400 9600 19200 38400 57600 115200 230400 460800
-			 * 
-			 * 
-			 * PACKET ACK = 0xFF </pre>
-			 * 
-			 */
 			LoggingFactory.init("INFO");
-			boolean virtual = false;
-			//////////////////////////////////////////////////////////////////////////////////
-			// RoboClaw.py
-			// categories: motor
-			// more info @: http://myrobotlab.org/service/RoboClaw
-			//////////////////////////////////////////////////////////////////////////////////
-			// uncomment for virtual hardware
-			// virtual = True
+			boolean virtual = false;			
 
-			// String port = "COM4";
+			String port = "COM6";
 			// String port = "/dev/ttyS10";
-			String port = "/dev/ttyACM0";
+			// String port = "/dev/ttyACM0";
 			// String port = "vuart";
 
 			Serial uart = null;
-			// start optional virtual serial service, used for test
+
 			if (virtual) {
-				// use static method Serial.connectVirtualUart to create
-				// a virtual hardware uart for the serial service to
-				// connect to
 				uart = Serial.connectVirtualUart(port);
 				uart.logRecv(true); // dump bytes sent from roboclaw
 			}
+
+			RoboClaw rc = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
+			rc.connect(port);
+			
+			positionalTest01(rc);
+
 			// start the services
 			// Runtime.start("gui", "SwingGui");
-			RoboClaw rc = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
-
-			rc.connect(port);
-
-			boolean done = false;
-
-			while (!done) {
-				
-				rc.resetQuadratureEncoderCounters();
-				log.info("encoder m1 {}", rc.readEncoderM1());
-				rc.bufferedM1DriveWithSignedSpeedAndDistance(8000, 8000);
-				log.info("encoder m1 {}", rc.readEncoderM1());
-				
-				rc.driveForwardM1(90);
-				sleep(1000);
-				// rc.speedAccelDeccelPositionM2(2000, 4000, 4000, 7000, 1);				
-				rc.driveForwardM1(0);
-				log.info("encoder {}", rc.readEncoderM1());
-				sleep(1000);
-				rc.driveBackwardM1(90);
-				sleep(1000);
-				rc.driveForwardM1(0);
-				log.info("encoder {}", rc.readEncoderM1());
-				sleep(1000);
-				
-
-			}
-
-			if (done) {
-				return;
-			}
-
-			MotorPort m1 = (MotorPort) Runtime.start("m1", "MotorPort");
-			MotorPort m2 = (MotorPort) Runtime.start("m2", "MotorPort");
-
-			for (int i = 0; i < 10; ++i) {
-				m1.move(0.1 * i);
-			}
-
-			// Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-			// Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
-
-			// doesnt matter for usb connection
-			// roboclaw.setAddress(128);
-			// roboclaw.setAddress(129);
-
-			// configure services
-			m1.setPort("m1");
-			m2.setPort("m2");
-			// joy.setController(5); // 0 on Linux
-
-			// attach services
-			rc.attach(m1);
-			rc.attach(m2);
-			// m1.attach(joy.getAxis("y"));
-			// m2.attach(joy.getAxis("rz"));
-
-			// m1.setInverted(true);
-			// m2.setInverted(true);
-			// m2.attach(arduino.getPin("A4"));
-
-			// FIXME - roboclaw.attach(motor1) & roboclaw.attach(motor2)
-			// FIXME - motor1.attach(joystick) !
-			rc.connect(port);
-
-			// roboclaw.resetQuadratureEncoderCounters();
-			// roboclaw.restoreDefaults();
-
-			// roboclaw.resetQuadratureEncoderCounters();
-
-			// m1.stop();
-			// m2.stop();
-			rc.readEncoderM1();
-			rc.readEncoderM1();
-
-			m1.move(0);
-
-			rc.readEncoderM1();
-			rc.readEncoderM1();
-
-			rc.resetQuadratureEncoderCounters();
-
-			rc.readEncoderM1();
-			rc.readEncoderM1();
-
-			// roboclaw.readEncoderCount();
-			// roboclaw.read
-			rc.speedAccelDeccelPositionM1(500, 500, 500, 10000, 1);
-			rc.driveM1WithSignedDutyAndAccel(255, 255);
-
-			rc.readEncoderM1();
-			rc.readEncoderM1();
-
-			m1.move(0);
-
-			// public void bufferedDriveM1WithSignedSpeedAccelDeccelPosition(int
-			// accel, int speed, int deccel, int pos, int buffer)
-
-			// speed up the motor
-			for (int i = 0; i < 100; ++i) {
-				double pwr = i * .01;
-				log.info("power {}", pwr);
-				m1.move(pwr);
-				sleep(100);
-			}
-
-			sleep(1000);
-
-			// slow down the motor
-			for (int i = 100; i > 0; --i) {
-				double pwr = i * .01;
-				log.info("power {}", pwr);
-				m1.move(pwr);
-
-				sleep(100);
-			}
-
-			// move motor clockwise
-			m1.move(0.3);
-			sleep(1000);
-			m1.stop();
-
-			// move motor counter-clockwise
-			m1.move(-0.3);
-			sleep(1);
-			m1.stop();
-
-			// TODO - stopAndLock
 
 		} catch (Exception e) {
-			Logging.logError(e);
+			Logging.logError(e); // FIXME - remove all these !!!
 		}
 	}
 
