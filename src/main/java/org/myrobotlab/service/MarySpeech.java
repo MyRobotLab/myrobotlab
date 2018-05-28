@@ -276,24 +276,28 @@ public class MarySpeech extends AbstractSpeechSynthesis {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(MarySpeech.class);
+    // ServiceType meta = new ServiceType(MarySpeech.class);
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData(MarySpeech.class.getCanonicalName());
+
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech", "sound");
-    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+    // meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip"); included in abstract speech synth
     // override audiofile peer ( because dependencies not parsed )
-    meta.addDependency("javazoom", "jlayer", "1.0.1");
-    meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
-
     meta.addDescription("Speech synthesis based on MaryTTS");
 
     meta.addDependency("de.dfki.mary", "marytts", "5.2", "pom");
+    
 
     // hmm..TODO: refactor this.
     String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm",
         "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
         "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm", "voice-upmc-pierre-hsmm" };
+    
     for (String voice : voices) {
       meta.addDependency("de.dfki.mary", voice, "5.2");
+      if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
+    	  meta.exclude("org.slf4j", "slf4j-log4j12");
+      }
     }
 
     meta.exclude("org.slf4j", "slf4j-api");

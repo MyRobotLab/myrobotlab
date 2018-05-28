@@ -755,6 +755,8 @@ public class OpenCV extends AbstractVideoSource {
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // for the mjpeg streamer frame grabber
     meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
+    meta.exclude("javax.servlet", "servlet-api");
+
 
     // TODO: should be something about yolo here too..
     // maybe make the yolo filter download the model and cache it?  

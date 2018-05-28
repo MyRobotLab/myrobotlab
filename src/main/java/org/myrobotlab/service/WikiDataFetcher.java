@@ -428,6 +428,7 @@ public class WikiDataFetcher extends Service {
     meta.addCategory("intelligence");
     meta.setSponsor("beetlejuice");
     meta.addDependency("org.wikidata.wdtk", "wdtk-client", "0.8.0");
+    meta.exclude("org.slf4j", "slf4j-log4j12");
     /*
     meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");
     meta.addDependency("org.apache.commons.httpclient", "4.5.2");

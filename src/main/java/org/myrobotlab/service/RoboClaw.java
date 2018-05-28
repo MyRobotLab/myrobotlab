@@ -94,6 +94,8 @@ public class RoboClaw extends AbstractMotorController
 	Long rawSpeedM2;
 
 	Integer boardTemp;
+	
+	int buffer = 1; // 1 == don't buffer 0 == buffer
 
 	public RoboClaw(String n) {
 		super(n);
@@ -1835,7 +1837,7 @@ public class RoboClaw extends AbstractMotorController
 	any other commands in the buffer are deleted and the new command is executed.
 	 * </pre>
 	 */
-	public void bufferedM1DriveWithSignedSpeedAndDistance(int speed, int distance) {
+	public void driveM1WithSignedSpeedAndDistance(int speed, int distance) {
 		sendPacket(address, 41, byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(distance),
 				byte2(distance), byte1(distance), byte0(distance), 1);
 	}
@@ -1856,9 +1858,9 @@ public class RoboClaw extends AbstractMotorController
 	any other commands in the buffer are deleted and the new command is executed.
 	 * </pre>
 	 */
-	public void bufferedM2DriveWithSignedSpeedAndDistance(int speed, int distance) {
-		sendPacket(address, 42, speed, distance);
-		// TODO lock - timeout - return value & publish
+	public void driveM2WithSignedSpeedAndDistance(int speed, int distance) {
+		sendPacket(address, 42, byte3(speed), byte2(speed), byte1(speed), byte0(speed), byte3(distance),
+				byte2(distance), byte1(distance), byte0(distance), 1);
 	}
 
 	/**
@@ -1878,10 +1880,16 @@ public class RoboClaw extends AbstractMotorController
 	any other commands in the buffer are deleted and the new command is executed.
 	 * </pre>
 	 */
-	public void bufferedM1M2DriveWithSignedSpeedAndDistance(int speedM1, int distanceM1, int speedM2, int distanceM2,
-			int buffer) {
-		sendPacket(address, 43, speedM1, distanceM1, speedM2, distanceM2, buffer);
-		// TODO lock - timeout - return value & publish
+	public void driveM1M2WithSignedSpeedAndDistance(int speedM1, int distanceM1, int speedM2, int distanceM2
+			) {
+		sendPacket(address, 43
+				, byte3(speedM1), byte2(speedM1), byte1(speedM1), byte0(speedM1)
+				, byte3(distanceM1), byte2(distanceM1), byte1(distanceM1), byte0(distanceM1)
+				, byte3(speedM2), byte2(speedM2), byte1(speedM2), byte0(speedM2)
+				, byte3(distanceM2), byte2(distanceM2), byte1(distanceM2), byte0(distanceM2), 
+				
+				buffer);
+		
 	}
 
 	/**
@@ -1906,9 +1914,12 @@ public class RoboClaw extends AbstractMotorController
 	RoboClaw Series User Manual 94
 	 * </pre>
 	 */
-	public void bufferedM1DriveWithSignedSpeedAndDistance(int speed, int distance, int buffer) {
-		sendPacket(address, 44, speed, distance, buffer);
-		// TODO lock - timeout - return value & publish
+	public void driveM1WithSignedSpeedAccelAndDistance(int accel, int speed, int distance) {
+		sendPacket(address, 44, 
+				byte3(accel), byte2(accel), byte1(accel), byte0(accel), 
+				byte3(speed), byte2(speed), byte1(speed), byte0(speed), 
+				byte3(distance),
+				byte2(distance), byte1(distance), byte0(distance), buffer);
 	}
 
 	/**
@@ -1954,8 +1965,8 @@ public class RoboClaw extends AbstractMotorController
 	any other commands in the buffer are deleted and the new command is executed.
 	 * </pre>
 	 */
-	public void bufferedDriveM1M2WithSignedSpeedAccelAndDistance(int accel, int speedM1, int distanceM1, int speedM2,
-			int distanceM2, int buffer) {
+	public void driveM1M2WithSignedSpeedAccelAndDistance(int accel, int speedM1, int distanceM1, int speedM2,
+			int distanceM2) {
 		sendPacket(address, 46, speedM1, distanceM1, speedM2, distanceM2, buffer);
 		// TODO lock - timeout - return value & publish
 	}
@@ -2423,23 +2434,41 @@ public class RoboClaw extends AbstractMotorController
 		}
 
 	}
+	
+	public static void scriptTest01() throws IOException {
+		Python python = (Python)Runtime.start("python", "Python");
+		
+		while(true) {
+			python.execFile("../pyrobotlab/home/GroG/RoboClaw.py");
+		}
+		
+	}
 
 	public static void main(String[] args) {
 		try {
 			LoggingFactory.init("INFO");
-			boolean virtual = false;			
+
 
 			String port = "COM6";
 			// String port = "/dev/ttyS10";
 			// String port = "/dev/ttyACM0";
 			// String port = "vuart";
 
+			boolean virtual = false;	
 			Serial uart = null;
-
 			if (virtual) {
 				uart = Serial.connectVirtualUart(port);
 				uart.logRecv(true); // dump bytes sent from roboclaw
 			}
+
+			
+			scriptTest01();
+			
+			boolean done = true;
+			if (done) {
+				return;
+			}
+			
 
 			RoboClaw rc = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
 			rc.connect(port);

@@ -475,7 +475,7 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
    * 
    */
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(AcapelaSpeech.class.getCanonicalName());
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData(AcapelaSpeech.class.getCanonicalName());
 
     meta.addDescription("is a proprietary cloud service, currently returns speech and background music");
     meta.addCategory("speech");
