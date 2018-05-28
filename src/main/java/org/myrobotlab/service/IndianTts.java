@@ -124,6 +124,9 @@ public class IndianTts extends AbstractSpeechSynthesis {
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech", "sound");
     meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
+    // override audiofile peer ( because dependencies not parsed )
+    meta.addDependency("javazoom", "jlayer", "1.0.1");
+    meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
 
     meta.addPeer("security", "Security", "security");
     meta.addPeer("httpClient", "HttpClient", "httpClient");
