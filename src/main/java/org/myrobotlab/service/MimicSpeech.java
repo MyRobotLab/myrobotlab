@@ -87,16 +87,14 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
 
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(MimicSpeech.class.getCanonicalName());
+    // ServiceType meta = new ServiceType(MimicSpeech.class.getCanonicalName());
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData(MimicSpeech.class.getCanonicalName());
+
     meta.addDescription("Speech synthesis based on Mimic from the MyCroft AI project.");
     meta.addCategory("speech", "sound");
     meta.addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech", "sound");
-    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
-    // override audiofile peer ( because dependencies not parsed )
-    meta.addDependency("javazoom", "jlayer", "1.0.1");
-    meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
 
     meta.setSponsor("Kwatters");
     // meta.addDependency("marytts", "5.2");

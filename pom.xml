@@ -94,6 +94,25 @@
 
 <!-- AcapelaSpeech begin -->
   <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>org.apache.httpcomponents</groupId>
     <artifactId>httpclient</artifactId>
     <version>4.5.2</version>
@@ -206,12 +225,6 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>com.twelvemonkeys.imageio</groupId>
-    <artifactId>imageio-core</artifactId>
-    <version>3.1.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-pi-mrl</artifactId>
     <version>1.0.0-alpha</version>
@@ -223,7 +236,12 @@
     <version>1.0.0-alpha</version>
     <scope>provided</scope>
   </dependency>
-  
+  <dependency>
+    <groupId>com.twelvemonkeys.imageio</groupId>
+    <artifactId>imageio-core</artifactId>
+    <version>3.1.1</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- Deeplearning4j end -->
 
 <!-- DocumentPipeline begin -->
@@ -323,15 +341,22 @@
 
 <!-- IndianTts begin -->
   <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
     <scope>provided</scope>
   </dependency>
 <!-- IndianTts end -->
@@ -458,6 +483,25 @@
 
 <!-- LocalSpeech begin -->
   <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>com.microsoft</groupId>
     <artifactId>tts</artifactId>
     <version>1.1</version>
@@ -466,16 +510,26 @@
   </dependency>
 <!-- LocalSpeech end -->
 
-<!-- AbstractSpeech begin -->
-<dependency>
+<!-- MarySpeech begin -->
+  <dependency>
     <groupId>org.myrobotlab.audio</groupId>
     <artifactId>voice-effects</artifactId>
     <version>1.0</version>
+    <scope>provided</scope>
     <type>zip</type>
-</dependency>
-<!-- AbstractSpeech end -->
-
-<!-- MarySpeech begin -->
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>marytts</artifactId>
@@ -489,11 +543,11 @@
     <version>5.2</version>
     <scope>provided</scope>
       <exclusions>
-            <exclusion>
+        <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
         </exclusion>
-    </exclusions>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
@@ -524,12 +578,12 @@
     <artifactId>voice-cmu-slt-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
-    <exclusions>
-            <exclusion>
+      <exclusions>
+        <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
         </exclusion>
-    </exclusions>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
@@ -633,7 +687,48 @@
   </dependency>
 <!-- MarySpeech end -->
 
+<!-- MicrosoftSpeech begin -->
+  <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- MicrosoftSpeech end -->
+
 <!-- MimicSpeech begin -->
+  <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>mycroftai.mimic</groupId>
     <artifactId>mimic_win64</artifactId>
@@ -663,15 +758,22 @@
 
 <!-- NaturalReaderSpeech begin -->
   <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
     <scope>provided</scope>
   </dependency>
 <!-- NaturalReaderSpeech end -->
@@ -753,6 +855,12 @@
     <artifactId>jipcam</artifactId>
     <version>0.9.1</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>opencv</groupId>
@@ -782,6 +890,25 @@
 <!-- Osc end -->
 
 <!-- Polly begin -->
+  <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-core</artifactId>
@@ -1041,10 +1168,35 @@
     <artifactId>jipcam</artifactId>
     <version>0.9.1</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
 <!-- Vision end -->
 
 <!-- VoiceRss begin -->
+  <dependency>
+    <groupId>org.myrobotlab.audio</groupId>
+    <artifactId>voice-effects</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>javazoom</groupId>
+    <artifactId>jlayer</artifactId>
+    <version>1.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>mp3spi</artifactId>
+    <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>org.apache.httpcomponents</groupId>
     <artifactId>httpclient</artifactId>
@@ -1097,12 +1249,12 @@
     <artifactId>wdtk-client</artifactId>
     <version>0.8.0</version>
     <scope>provided</scope>
-    <exclusions>
-           <exclusion>
+      <exclusions>
+        <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
         </exclusion>
-    </exclusions>
+      </exclusions>
   </dependency>
 <!-- WikiDataFetcher end -->
 
@@ -1191,37 +1343,37 @@
 			</testResource>
 		</testResources>
 
-   <!-- define the plugin -->
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>properties-maven-plugin</artifactId>
-          <version>1.0.0</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-        <!-- use plugin -->
-		<plugins>
-		
-		<plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>        
-        <executions>
-          <execution>
-            <phase>initialize</phase>
-            <goals>
-              <goal>read-project-properties</goal>
-            </goals>
-            <configuration>
-              <files>
-                <file>build.properties</file>
-              </files>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+		<!-- define the plugin -->
+	    <pluginManagement>
+	      <plugins>
+	        <plugin>
+	          <groupId>org.codehaus.mojo</groupId>
+	          <artifactId>properties-maven-plugin</artifactId>
+	          <version>1.0.0</version>
+	        </plugin>
+	      </plugins>
+	    </pluginManagement>
+	
+	        <!-- use plugin -->
+			<plugins>
+			
+			<plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>properties-maven-plugin</artifactId>        
+	        <executions>
+	          <execution>
+	            <phase>initialize</phase>
+	            <goals>
+	              <goal>read-project-properties</goal>
+	            </goals>
+	            <configuration>
+	              <files>
+	                <file>build.properties</file>
+	              </files>
+	            </configuration>
+	          </execution>
+	        </executions>
+	      </plugin>
 	
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -1306,6 +1458,7 @@
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
+
 <!--                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -1384,10 +1537,6 @@
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
-	                <systemPropertyVariables>
-	                    <org.slf4j.simpleLogger.defaultLogLevel>WARN</org.slf4j.simpleLogger.defaultLogLevel>
-	                    <org.slf4j.simpleLogger.showDateTime>true</org.slf4j.simpleLogger.showDateTime>
-	                </systemPropertyVariables>
 				</configuration>
 				<version>2.9</version>
 			</plugin>
@@ -1473,8 +1622,7 @@
 			
 		</plugins>
 	</build>
-    <reporting>
-    
+    <reporting>    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -1483,7 +1631,6 @@
       </plugin>
     </plugins>
     </reporting>
-
 	<organization>
 		<name>myrobotlab</name>
 		<url>http://myrobotlab.org</url>

@@ -95,13 +95,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(LocalSpeech.class.getCanonicalName());
+    // ServiceType meta = new ServiceType(LocalSpeech.class.getCanonicalName());
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData(LocalSpeech.class.getCanonicalName());
+
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech", "sound");
-    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
-    // override audiofile peer ( because dependencies not parsed )
-    meta.addDependency("javazoom", "jlayer", "1.0.1");
-    meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
 
     meta.addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     meta.setAvailable(true); // false if you do not want it viewable in a

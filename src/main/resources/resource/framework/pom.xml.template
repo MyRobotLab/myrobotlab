@@ -8,11 +8,18 @@
 	<description>Open Source Creative Machine Control</description>
 	<properties>
 	    <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
-	    
+	    <dependency.locations.enabled>false</dependency.locations.enabled>
 	    <!-- begin env vars -->
-	    <build.number>${env.BUILD_NUMBER}</build.number>
-	    <commit>${git_commit}</commit>
-	    <branch>${git_branch}</branch>
+	    <!-- 
+	    	global build number comes either from a local build.properties file,
+	    	or the build.properties is replaced by a curl command
+	    	curl http://build.myrobotlab.org:8888/getBuildNumber?branch=develop > build.properties
+	    	maven or jenkins can do this
+	    	
+	     -->
+	    <build.number>${global.build.number}</build.number>	    
+	    <username>${global.username}</username>	    
+	    <platform>${global.platform}</platform>	    
 	    <!-- end env vars -->
 	    
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -69,7 +76,37 @@
 			</testResource>
 		</testResources>
 
-		<plugins>
+		<!-- define the plugin -->
+	    <pluginManagement>
+	      <plugins>
+	        <plugin>
+	          <groupId>org.codehaus.mojo</groupId>
+	          <artifactId>properties-maven-plugin</artifactId>
+	          <version>1.0.0</version>
+	        </plugin>
+	      </plugins>
+	    </pluginManagement>
+	
+	        <!-- use plugin -->
+			<plugins>
+			
+			<plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>properties-maven-plugin</artifactId>        
+	        <executions>
+	          <execution>
+	            <phase>initialize</phase>
+	            <goals>
+	              <goal>read-project-properties</goal>
+	            </goals>
+	            <configuration>
+	              <files>
+	                <file>build.properties</file>
+	              </files>
+	            </configuration>
+	          </execution>
+	        </executions>
+	      </plugin>
 	
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -120,13 +157,8 @@
                                         <manifestEntries>
                                           <Main-Class>org.myrobotlab.service.Agent</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
-                                          <Implementation-Version>1.1.${env.BUILD_NUMBER}</Implementation-Version>
-                                          <!--  did not work in jenkins pipeline - no git references
-									      <Commit>${env.GIT_COMMIT}</Commit>
-									      <Branch>${env.GIT_BRANCH}</Branch>
-									       -->
-									      <Commit>${commit}</Commit>
-									      <Branch>${branch}</Branch>
+                                          <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
+							
 									      <Build-Version>${build.number}</Build-Version>
 									      <Build-Time>${maven.build.timestamp}</Build-Time>
 									      <Build-Host>${agent.name}</Build-Host>
@@ -138,7 +170,6 @@
 										  <GitDirty>${git.dirty}</GitDirty>
 										  <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
 										  <GitCommitId>${git.commit.id}</GitCommitId>
-										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
 										  <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
 										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
 										  <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
@@ -146,9 +177,9 @@
 										  <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
 										  <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
 										  <!-- removed because multi-line value can break manifest
-										    GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull 
-										    -->
+										    GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull 										    
 										  <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
+										  -->
 										  <GitCommitTime>${git.commit.time}</GitCommitTime>
 										  <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
 										  <GitClosestTagCommitCount>${git.closest.tag.commit.count}</GitClosestTagCommitCount>
@@ -160,6 +191,7 @@
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
+
 <!--                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -323,8 +355,15 @@
 			
 		</plugins>
 	</build>
-
-
+    <reporting>    
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.21.0</version>
+      </plugin>
+    </plugins>
+    </reporting>
 	<organization>
 		<name>myrobotlab</name>
 		<url>http://myrobotlab.org</url>

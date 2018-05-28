@@ -283,6 +283,7 @@ public class Vision extends AbstractVideoSource implements VideoProcessor {
     // for the mjpeg streamer support FIXME - this should only be in Video
     // Streamer !
     meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
+    meta.exclude("javax.servlet", "servlet-api");
     return meta;
   }
 

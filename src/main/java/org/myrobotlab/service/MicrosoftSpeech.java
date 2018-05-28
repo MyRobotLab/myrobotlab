@@ -316,7 +316,8 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
   }
 
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(MicrosoftSpeech.class.getCanonicalName());
+    // ServiceType meta = new ServiceType(MicrosoftSpeech.class.getCanonicalName());
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData(MicrosoftSpeech.class.getCanonicalName());
 
     meta.addDescription("Speech synthesis based on Microsoft speech with Jampal.");
     meta.addCategory("speech");
