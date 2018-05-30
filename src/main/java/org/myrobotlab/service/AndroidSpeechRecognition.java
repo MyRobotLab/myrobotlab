@@ -492,10 +492,6 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
     commands.put(actionPhrase, new Command(name, method, params));
   }
 
-@Override
-public void setLanguage(String language) {
-	// TODO Auto-generated method stub
-	
-}
+
 
 }

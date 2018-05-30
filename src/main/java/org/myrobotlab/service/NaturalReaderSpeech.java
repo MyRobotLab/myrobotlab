@@ -235,24 +235,6 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     audioCacheParameters = "rate-" + rate;
   }
 
-  @Override
-  public String getLanguage() {
-    return null;
-  }
-
-  @Override
-  public List<String> getLanguages() {
-    // TODO Auto-generated method stub
-    ArrayList<String> ret = new ArrayList<String>();
-    // FIXME - add iso language codes currently supported e.g. en en_gb de
-    // etc..
-    return ret;
-  }
-
-  @Override
-  public void setLanguage(String l) {
-    this.language = l;
-  }
 
   static public ServiceType getMetaData() {
     // ServiceType meta = new ServiceType(NaturalReaderSpeech.class.getCanonicalName());

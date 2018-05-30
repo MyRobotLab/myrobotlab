@@ -698,9 +698,5 @@ public class Sphinx extends AbstractSpeechRecognizer {
     return false;
   }
 
-@Override
-public void setLanguage(String language) {
-	// TODO Auto-generated method stub
-	
-}
+
 }

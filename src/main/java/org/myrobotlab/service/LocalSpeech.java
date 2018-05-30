@@ -147,17 +147,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     localSpeech.getVoiceEffects();
   }
 
-  public List<String> getLanguages() {
-    log.warn("not yet implemented");
-    return null;
-  }
-
-  @Override
-  public void setLanguage(String l) {
-    // todo : implement generic method & language code
-
-    log.warn("not yet implemented");
-  }
 
   @Override
   public byte[] generateByteAudio(String toSpeak) throws IOException {

@@ -25,14 +25,6 @@ public interface SpeechSynthesis extends NameProvider {
 
   public boolean setVoice(String voice);
 
-  public abstract void setLanguage(String l);
-
-  public abstract String getLanguage();
-
-  /**
-   * @return a list of current possible languages
-   */
-  public abstract List<String> getLanguages();
 
   /**
    * Begin speaking something and return immediately

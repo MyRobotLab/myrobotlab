@@ -128,17 +128,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     this.rate = rate;
   }
 
-  public List<String> getLanguages() {
-    log.warn("not yet implemented");
-    return null;
-  }
 
-  @Override
-  public void setLanguage(String l) {
-    // todo : implement generic method & language code
-
-    log.warn("not yet implemented");
-  }
 
   public String getLocalDirectory(SpeechSynthesis provider) throws UnsupportedEncodingException {
     // TODO: make this a base class sort of thing.

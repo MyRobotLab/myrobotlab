@@ -386,14 +386,6 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
     }
   }
 
-  @Override
-  public List<String> getLanguages() {
-    // TODO Auto-generated method stub
-    ArrayList<String> ret = new ArrayList<String>();
-    // FIXME - add iso language codes currently supported e.g. en en_gb de
-    // etc..
-    return ret;
-  }
 
   // audioData to utterance map TODO: revisit the design of this
   HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();

@@ -84,12 +84,6 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
 
   // For compabilities
   @Override
-  public List<String> getLanguages() {
-    return null;
-  }
-
-  // For compabilities
-  @Override
   public ArrayList<String> getVoices() {
     return new ArrayList<String>(voices);
   }

@@ -99,22 +99,6 @@ public class IndianTts extends AbstractSpeechSynthesis {
     return b;
   }
 
-  @Override
-  public String getLanguage() {
-    return null;
-  }
-
-  public List<String> getLanguages() {
-    log.warn("not yet implemented");
-    return null;
-  }
-
-  @Override
-  public void setLanguage(String l) {
-    // todo : implement generic method & language code
-
-    log.warn("not yet implemented");
-  }
 
   static public ServiceType getMetaData() {
     // ServiceType meta = new ServiceType(IndianTts.class.getCanonicalName());
