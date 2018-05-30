@@ -40,7 +40,9 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.abstracts.AbstractEncoder;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
@@ -209,6 +211,36 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     }
   }
 
+  public class EncoderUpdater extends Thread {
+    
+    
+    
+    public EncoderUpdater(String name) {
+      super(String.format("%s.encoderUpdater", name));
+    }
+    
+    // 
+    public void run() {
+      // here we want to poll the encoder control to keep our "currentPosition" value up to date..
+      // effectively this replaces onPin ...
+      while (true) {
+        currentPosInput = ((AbstractEncoder)encoderControl).lastPosition;
+        try {
+          // someting to keep the cpu from thrashing.
+          pid.setInput(pidKey, currentPosInput);
+          Thread.sleep(1);
+        } catch (InterruptedException e) {
+          // TODO: clean this up.
+          e.printStackTrace();
+          break;
+        }
+        
+      }
+      
+    }
+    
+  }
+
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(DiyServo.class);
@@ -228,6 +260,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    */
   transient PinArrayControl pinArrayControl;
   public String pinControlName;
+  
+  transient EncoderControl encoderControl;
 
   /**
    * List of available pins on the analog input service
@@ -334,6 +368,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   int sampleTime = 20;
 
   transient MotorUpdater motorUpdater = null;
+  transient EncoderUpdater encoderUpdater = null;
 
   double powerLevel = 0;
   double maxPower = 1.0;
@@ -536,6 +571,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
         motorUpdater.start();
         // log.info("MotorUpdater started");
       }
+      if (encoderUpdater == null) {
+        encoderUpdater = new EncoderUpdater(getName());
+        encoderUpdater.start();
+      }
     }
 
     targetPos = pos;
@@ -700,62 +739,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     return this.pin;
   }
 
-  public static void main(String[] args) throws InterruptedException {
-
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
-    try {
-      // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "SwingGui");
-      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      virtual.connect("COM3");
-      boolean done = false;
-      if (done) {
-        return;
-      }
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.setBoardUno();
-      arduino.connect("COM14");
-
-      // Adafruit16CServoDriver adafruit16CServoDriver =
-      // (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver",
-      // "Adafruit16CServoDriver");
-      // adafruit16CServoDriver.attach(arduino,"1","0x40");
-      // Ads1115 ads = (Ads1115) Runtime.start("ads", "Ads1115");
-      // ads.attach(arduino,"2","0x40");
-
-      MotorDualPwm motor = (MotorDualPwm) Runtime.start("dyiServo.motor", "MotorDualPwm");
-
-      motor.setPwmPins(3, 5);
-      motor.attach(arduino);
-
-      // Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
-      // ads.setController(arduino, "1", "0x48");
-
-      DiyServo dyiServo = (DiyServo) Runtime.create("dyiServo", "DiyServo");
-      Python python = (Python) Runtime.start("python", "Python");
-      // dyiServo.attachServoController((ServoController)arduino);
-      // dyiServo.attach((ServoController)arduino);
-      dyiServo.map(0, 180, 60, 175);
-      dyiServo = (DiyServo) Runtime.start("dyiServo", "DiyServo");
-      dyiServo.pid.setPID("dyiServo", 0.011, 0.0001, 0.0001);
-      dyiServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
-      dyiServo.setAutoDisable(true);
-      dyiServo.setMaxVelocity(10);
-      dyiServo.moveToBlocking(0);
-      dyiServo.moveToBlocking(180);
-      dyiServo.setMaxVelocity(-1);
-      dyiServo.moveTo(0);
-
-      // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
-
-      // servo.test();
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-
-  }
-
   @Override
   public double getMin() {
     return mapper.getMinX();
@@ -829,6 +812,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   }
 
+  public void attach(EncoderControl encoder) {
+    // TODO: do i need anything else?
+    this.encoderControl = encoder;
+  }
+  
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
     // myServo = (DiyServo) Runtime.getService(boundServiceName);
     attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
@@ -1161,5 +1149,87 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO Auto-generated method stub
     return null;
   }
+  
+  
+  public static void main(String[] args) throws InterruptedException {
+
+    LoggingFactory.getInstance().configure();
+    LoggingFactory.getInstance().setLevel(Level.INFO);
+    try {
+      // Runtime.start("webgui", "WebGui");
+      Runtime.start("gui", "SwingGui");
+//      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+//      virtual.connect("COM3");
+//      boolean done = false;
+//      if (done) {
+//        return;
+//      }
+      
+      String port = "COM4";
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      // arduino.setBoardUno();
+      arduino.connect(port);
+
+      // Adafruit16CServoDriver adafruit16CServoDriver =
+      // (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver",
+      // "Adafruit16CServoDriver");
+      // adafruit16CServoDriver.attach(arduino,"1","0x40");
+      // Ads1115 ads = (Ads1115) Runtime.start("ads", "Ads1115");
+      // ads.attach(arduino,"2","0x40");
+
+      MotorDualPwm motor = (MotorDualPwm) Runtime.start("diyServo.motor", "MotorDualPwm");
+
+      int leftPwmPin = 6;
+      int rightPwmPin = 7;
+      motor.setPwmPins(leftPwmPin, rightPwmPin);
+      
+      motor.attach(arduino);
+
+      Thread.sleep(1000);
+      // let's start the encoder!!
+      Amt203Encoder encoder = new Amt203Encoder("encoder");
+      encoder.pin = 3;
+
+      arduino.attach(encoder);
+      Thread.sleep(1000);
+      
+      
+      // Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
+      // ads.setController(arduino, "1", "0x48");
+
+      DiyServo diyServo = (DiyServo) Runtime.create("diyServo", "DiyServo");
+      Python python = (Python) Runtime.start("python", "Python");
+      // diyServo.attachServoController((ServoController)arduino);
+      // diyServo.attach((ServoController)arduino);
+
+      // diyServo.map(0, 180, 60, 175);
+      diyServo = (DiyServo) Runtime.start("diyServo", "DiyServo");
+      diyServo.pid.setPID("diyServo", 1.0, 0.2, 0.1);
+     // diyServo.pid.setOutputRange("diyServo", 1, -1);
+      // diyServo.pid.setOutput("diyS, Output);
+      // diyServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
+      // diyServo.setInverted(true);
+      diyServo.attach(encoder);
+      
+      diyServo.setMaxVelocity(-1);
+      
+      
+//      diyServo.setAutoDisable(true);
+//      diyServo.setMaxVelocity(10);
+//      diyServo.moveToBlocking(0);
+//      diyServo.moveToBlocking(180);
+//      diyServo.setMaxVelocity(-1);
+//      diyServo.moveTo(0);
+
+      // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
+
+      // servo.test();
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+
+  }
+
+
 
 }
