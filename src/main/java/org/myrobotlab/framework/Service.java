@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -1721,16 +1722,38 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // serializer.write(this, cfg);
       info("saving %s", cfg.getName());
 
+      // little hack to serialize only few reflected fields inside Runtime.serialisable list
+      String s = "{\n";
       if (this instanceof Runtime) {
+
         info("we cant serialize runtime yet");
-        return false;
+        for (Iterator<Object> iter = Runtime.serialisable.iterator(); iter.hasNext();) {
+          Object element = iter.next();
+
+          Field field = this.getClass().getDeclaredField(element.toString());
+          field.setAccessible(true);
+          if (field.get(this) != null) {
+            s += "\"" + element.toString() + "\": \"" + field.get(this) + "\"";
+            if (iter.hasNext()) {
+              s += ",\n";
+            }
+          }
+          if (!iter.hasNext()) {
+            s += "\n}";
+          }
+
+        }
+        //end runtime tip
+      } else {
+        s = CodecUtils.toJson(this);
       }
 
-      String s = CodecUtils.toJson(this);
       FileOutputStream out = new FileOutputStream(cfg);
       out.write(s.getBytes());
       out.close();
-    } catch (Exception e) {
+    } catch (
+
+    Exception e) {
       Logging.logError(e);
       return false;
     }

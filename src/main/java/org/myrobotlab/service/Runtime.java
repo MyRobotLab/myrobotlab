@@ -206,6 +206,15 @@ public class Runtime extends Service implements MessageListener {
 
   static private CmdLine cmdline = null;
 
+  /**
+   * Runtime not yet serialisable, just few things for now
+   * Those things declared inside this list from the constructor
+   */
+  public static List<Object> serialisable = new ArrayList<Object>();
+
+  String currentLanguage;
+
+
   /*
    * Returns the number of processors available to the Java virtual machine.
    *
@@ -880,7 +889,7 @@ public class Runtime extends Service implements MessageListener {
    <pre>
   static public long getTotalPhysicalMemory() {
     try {
-
+  
       com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
       long physicalMemorySize = os.getTotalPhysicalMemorySize();
       return physicalMemorySize;
@@ -889,7 +898,7 @@ public class Runtime extends Service implements MessageListener {
     }
     return 0;
   }
-
+  
   static public double getCpuLoad() {
     OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
     // What % CPU load this current JVM is taking, from 0.0-1.0
@@ -1118,7 +1127,7 @@ public class Runtime extends Service implements MessageListener {
         } else {
           services = cmdline.getArgumentList("-i");
         }
-        
+
         Repo repo = Repo.getInstance();
         if (services.size() == 0) {
           repo.install();
@@ -1605,6 +1614,10 @@ public class Runtime extends Service implements MessageListener {
       if (runtime.platform == null) {
         runtime.platform = Platform.getLocalInstance();
       }
+
+      serialisable.add("currentLanguage");
+      //serialisable.add("testjson");
+
     }
 
     // 3 states
@@ -2372,9 +2385,9 @@ public class Runtime extends Service implements MessageListener {
 
     meta.includeServiceInOneJar(true);
     meta.addDependency("com.google.code.gson", "gson", "2.8.0");
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); 
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2"); 
-    
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+
     // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");
     // meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
 
@@ -2392,6 +2405,14 @@ public class Runtime extends Service implements MessageListener {
   public static void enableFileMsgs(Boolean b) {
     Platform platform = Platform.getLocalInstance();
     FileMsgScanner.enableFileMsgs(b, platform.getId());
+  }
+  
+  public String getLanguage() {
+    return currentLanguage;
+  }
+  
+  public void setLanguage(String language) {
+    currentLanguage=language;
   }
 
 }
