@@ -71,9 +71,7 @@ public class HttpRequest {
 
   public static void main(String[] args) throws Exception {
 
-    Logging logging = LoggingFactory.getInstance();
-    logging.configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init();
 
     // HTTPRequest http;
     // http = new HTTPRequest("http://www.google.com");

@@ -38,7 +38,7 @@ public class Peers {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
+    LoggingFactory.init();
 
     // Peers dna = Peers.getPeers("InMoov");
     // Peers dna = Peers.getPeers("Plantoid");

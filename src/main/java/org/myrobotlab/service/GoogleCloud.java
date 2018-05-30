@@ -1087,8 +1087,8 @@ public class GoogleCloud extends Service {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.getInstance().configure();
-      // LoggingFactory.getInstance().setLevel(Level.INFO);
+      LoggingFactory.init("info");
+
 
       GoogleCloud google = (GoogleCloud) Runtime.start("google", "GoogleCloud");
       // Runtime.start("gui", "SwingGui");

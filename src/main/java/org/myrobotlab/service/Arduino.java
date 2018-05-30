@@ -133,9 +133,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
     // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT"); GroG-"This should not be here"
-
-    meta.setLicenseGplV3(); // via jssc
-
     return meta;
   }
 

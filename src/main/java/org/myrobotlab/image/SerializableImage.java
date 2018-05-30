@@ -79,7 +79,7 @@ public class SerializableImage implements Serializable {
 
   public static void main(String[] args) throws Exception {
     try {
-      LoggingFactory.getInstance().configure();
+      LoggingFactory.init();
       ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("object.data"));
 
       ImageIO.write(null, "jpg", new MemoryCacheImageOutputStream(out));

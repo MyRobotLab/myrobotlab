@@ -215,7 +215,7 @@ public class IvyWrapper extends Repo {
 
     for (String serviceType : serviceTypes) {
       ServiceType service = sd.getServiceType(serviceType);
-      List<ServiceDependency> dependencies = service.getDependencies();
+      Set<ServiceDependency> dependencies = getUnfulfilledDependencies(serviceType);
 
       if (dependencies.size() == 0) {
         continue;

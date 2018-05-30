@@ -793,8 +793,8 @@ public class OpenCV extends AbstractVideoSource {
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
 
-    org.apache.log4j.BasicConfigurator.configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+          LoggingFactory.init("info");
+
 
     // OpenCV opencvLeft = (OpenCV) Runtime.start("left", "OpenCV");
     // Runtime.start("right", "OpenCV");

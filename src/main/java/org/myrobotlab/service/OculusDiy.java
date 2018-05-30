@@ -147,8 +147,8 @@ public class OculusDiy extends Service implements OrientationListener {
 	}
 
 	public static void main(String[] args) {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.INFO);
+		      LoggingFactory.init("info");
+
 		try {
 			OculusDiy oculus = (OculusDiy) Runtime.start("oculus","OculusDiy");
 			Runtime.start("python", "Python");

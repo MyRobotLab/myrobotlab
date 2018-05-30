@@ -1147,6 +1147,7 @@ public class Serial extends Service
 		meta.addDescription("reads and writes data to a serial port");
 		meta.addCategory("sensor", "control");		
 		meta.addDependency("org.scream3r", "jssc", "2.8.0-1");
+	    meta.setLicenseGplV3(); // via jssc
 		return meta;
 	}
 

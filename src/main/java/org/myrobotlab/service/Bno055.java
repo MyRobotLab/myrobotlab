@@ -442,7 +442,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
+    LoggingFactory.init();
 
     try {
 

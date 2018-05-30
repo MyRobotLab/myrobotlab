@@ -2202,10 +2202,13 @@ public class RoboClaw extends AbstractMotorController
 	Receive: [0xFF]
 	 * </pre>
 	 */
-	public void speedAccelDeccelPositionM1(int accel, int speed, int deccel, int pos, int buffer) {
-		sendPacket(address, 65, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed),
-				byte1(speed), byte0(speed), byte3(deccel), byte2(deccel), byte1(deccel), byte0(deccel), byte3(pos),
-				byte2(pos), byte1(pos), byte0(pos), buffer);
+	public void driveWithSpeedAccelDeccelPositionM1(int accel, int speed, int deccel, int pos) {
+		sendPacket(address, 65, 
+				byte3(accel), byte2(accel), byte1(accel), byte0(accel), 
+				byte3(speed), byte2(speed), byte1(speed), byte0(speed), 
+				byte3(deccel), byte2(deccel), byte1(deccel), byte0(deccel), 
+				byte3(pos), byte2(pos), byte1(pos), byte0(pos),
+				buffer);
 		// TODO lock - timeout - return value & publish
 	}
 
@@ -2220,11 +2223,10 @@ public class RoboClaw extends AbstractMotorController
 	Receive: [0xFF]
 	 * </pre>
 	 */
-	public void speedAccelDeccelPositionM2(int accel, int speed, int deccel, int pos, int buffer) {
+	public void driveWithSpeedAccelDeccelPositionM2(int accel, int speed, int deccel, int pos) {
 		sendPacket(address, 66, byte3(accel), byte2(accel), byte1(accel), byte0(accel), byte3(speed), byte2(speed),
 				byte1(speed), byte0(speed), byte3(deccel), byte2(deccel), byte1(deccel), byte0(deccel), byte3(pos),
 				byte2(pos), byte1(pos), byte0(pos), buffer);
-		// TODO lock - timeout - return value & publish
 	}
 
 	/**
@@ -2331,7 +2333,7 @@ public class RoboClaw extends AbstractMotorController
 
 		// roboclaw.readEncoderCount();
 		// roboclaw.read
-		rc.speedAccelDeccelPositionM1(500, 500, 500, 10000, 1);
+		rc.driveWithSpeedAccelDeccelPositionM1(500, 500, 500, 10000);
 		rc.driveM1WithSignedDutyAndAccel(255, 255);
 
 		rc.readEncoderM1();
@@ -2380,9 +2382,12 @@ public class RoboClaw extends AbstractMotorController
 		boolean done = false;
 
 		while (!done) {
+			
+			// TOO - set pid & qpps - "auto-tune"
+			rc.driveWithSpeedAccelDeccelPositionM1(42000, 44000, 44000, 820000);
 
 			// stop and reset
-			log.info("stopping motors reseting encoders");
+			log.info("stopping motorsx reseting encoders");
 			rc.driveForwardM1(0);
 			sleep(500);
 			rc.resetQuadratureEncoderCounters();
@@ -2448,8 +2453,10 @@ public class RoboClaw extends AbstractMotorController
 		try {
 			LoggingFactory.init("INFO");
 
+			// FIXME !!!
+			// Serial.getPortNames();  !!!!
 
-			String port = "COM6";
+			String port = "COM4";
 			// String port = "/dev/ttyS10";
 			// String port = "/dev/ttyACM0";
 			// String port = "vuart";
@@ -2462,18 +2469,19 @@ public class RoboClaw extends AbstractMotorController
 			}
 
 			
-			scriptTest01();
-			
-			boolean done = true;
-			if (done) {
-				return;
-			}
+			// scriptTest01();
 			
 
 			RoboClaw rc = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
 			rc.connect(port);
 			
 			positionalTest01(rc);
+			
+			boolean done = true;
+			if (done) {
+				return;
+			}
+			
 
 			// start the services
 			// Runtime.start("gui", "SwingGui");

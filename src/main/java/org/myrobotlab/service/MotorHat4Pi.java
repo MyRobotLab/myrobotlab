@@ -98,8 +98,7 @@ public class MotorHat4Pi extends AbstractMotor {
   
   public static void main(String[] args) {
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+          LoggingFactory.init();
 
     SwingGui swing = (SwingGui) Runtime.start("gui", "SwingGui");
     RasPi raspi = (RasPi) Runtime.start("raspi", "RasPi");

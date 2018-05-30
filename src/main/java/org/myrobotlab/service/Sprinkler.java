@@ -31,8 +31,8 @@ public class Sprinkler extends Service {
 	ArrayList<String> history = new ArrayList<String>();
 
 	public static void main(String args[]) throws InterruptedException, IOException {
-		LoggingFactory.getInstance().configure();
-		LoggingFactory.getInstance().setLevel(Level.DEBUG);
+		      LoggingFactory.init("info");
+
 		Runtime.start("sprinkler", "Sprinkler");
 	}
 

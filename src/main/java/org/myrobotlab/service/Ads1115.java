@@ -402,8 +402,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
                          // default // hZ.
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    LoggingFactory.init("INFO");
 
     try {
       Ads1115 ads1115 = (Ads1115) Runtime.start("Ads1115", "Ads1115");
