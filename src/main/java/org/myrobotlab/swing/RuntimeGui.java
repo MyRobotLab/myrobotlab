@@ -86,6 +86,7 @@ import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.ImageNameRenderer;
 import org.myrobotlab.swing.widget.PossibleServicesRenderer;
 import org.myrobotlab.swing.widget.ProgressDialog;
+import org.myrobotlab.swing.widget.StackTraceDialog;
 import org.slf4j.Logger;
 
 public class RuntimeGui extends ServiceGui implements ActionListener, ListSelectionListener, KeyListener {
@@ -396,6 +397,11 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     item.addActionListener(this);
     system.add(item);
 
+    item = new JMenuItem("stack traces");
+    item.addActionListener(this);
+    system.add(item);
+
+    
     item = new JMenuItem("exit");
     item.addActionListener(this);
     system.add(item);
@@ -451,6 +457,10 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
       send("install");
     } else if ("restart".equals(cmd)) {
       Runtime.getInstance().restart();
+    } else if ("stack traces".equals(cmd)) {
+      // TODO: render a dialog box with stack traces
+      new StackTraceDialog(this);
+      
     } else if ("exit".equals(cmd)) {
       Runtime.shutdown();
     } else if ("check for updates".equals(cmd)) {
