@@ -57,8 +57,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init("info");
+
     try {
       I2cMux i2cMux = (I2cMux) Runtime.start("i2cMux", "I2CMux");
       Runtime.start("gui", "SwingGui");

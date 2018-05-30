@@ -80,8 +80,7 @@ public class Database extends Service {
 
   public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
+			LoggingFactory.init("INFO");
 
 			//connect();
 			//ResultSet rs = executeQuery("SELECT * FROM uptime");

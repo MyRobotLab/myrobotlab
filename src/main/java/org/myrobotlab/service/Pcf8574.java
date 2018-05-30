@@ -183,8 +183,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   // assignment
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+          LoggingFactory.init("info");
+
 
     try {
       Pcf8574 pcf8574t = (Pcf8574) Runtime.start("Pcf8574t", "Pcf8574t");

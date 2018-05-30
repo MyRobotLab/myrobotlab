@@ -274,8 +274,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public static void main(String[] args) {
 
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+    LoggingFactory.init();
 
     Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
     log.info("Driver {}", driver);

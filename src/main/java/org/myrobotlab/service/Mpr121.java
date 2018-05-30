@@ -295,8 +295,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
                          // default // hZ.
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+          LoggingFactory.init("info");
+
 
     try {
       Mpr121 mpr121 = (Mpr121) Runtime.start("mpr121", "Mpr121");

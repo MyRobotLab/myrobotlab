@@ -10,9 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
@@ -27,7 +25,6 @@ public class MessageTest implements NameProvider {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    // LoggingFactory.init(Level.INFO);
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     thrower = (TestThrower) Runtime.start("thrower", "TestThrower");
   }
@@ -178,19 +175,5 @@ public class MessageTest implements NameProvider {
     return "tester";
   }
 
-  /*
-   * public static void main(String[] args) { try {
-   * 
-   * LoggingFactory.getInstance().configure();
-   * LoggingFactory.getInstance().setLevel(Level.DEBUG); Logging logging =
-   * LoggingFactory.getInstance(); logging.addAppender(Appender.FILE);
-   * 
-   * setUpBeforeClass(); //clearRoutes(); // badNameTest(); //
-   * invokeStringNotation();
-   * 
-   * 
-   * } catch(Exception e){ Logging.logError(e); }
-   * 
-   * System.exit(0); }
-   */
+  
 }

@@ -150,8 +150,8 @@ public class OledSsd1306 extends Service implements I2CControl {
   public boolean isAttached = false;
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+          LoggingFactory.init("info");
+
     try {
       OledSsd1306 oledSsd1306 = (OledSsd1306) Runtime.start("OledSsd1306", "OledSsd1306");
       Runtime.start("gui", "SwingGui");

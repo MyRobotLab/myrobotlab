@@ -117,54 +117,6 @@ public class Memory {
     return ret;
   }
 
-  /*
-   * public static void main(String[] args) {
-   * LoggingFactory.getInstance().configure();
-   * LoggingFactory.getInstance().setLevel(Level.INFO);
-   * 
-   * Memory memory = new Memory(); // name root ? // memory.put(null, new
-   * Node("k1")); test case - delemiter in name // memory.put(new Node("k1"))
-   * simplified root case memory.put("", new Node("k1")); memory.put("/k1", new
-   * Node("k2")); memory.put("/k1/k2", new Node("k3")); Node node =
-   * memory.getNode("/k1/k2/k3"); log.info("{}", node.getName());
-   * 
-   * memory.putNode("/k1/k2/k3", "k4"); log.info("{}",
-   * memory.getNode("/k1/k2/k3/k4").getName()); // is this // object of // node?
-   * // memory.get log.info("{}", node.getName());
-   * 
-   * memory.put("/k1/k2/k3", "k5", new Integer(5)); log.info("{}",
-   * memory.get("/k1/k2/k3/k5"));
-   * 
-   * memory.toXMLFile("m1.xml");
-   * 
-   * memory.putNode("/k1/k2/k3/k4", "v4"); // bad test cases
-   * 
-   * memory.put(null, new Node(null)); memory.put(null, new Node("/"));
-   * memory.put(null, new Node("/k1/k2")); memory.put("/k1/k2/", new
-   * Node("k4")); memory.toXMLFile("m1.xml");
-   * 
-   * // memory.put("k1.k2.k3.k4", new Node("k5"));
-   * 
-   * }
-   */
-
-  public Object put(String path, String key, Object value) {
-    Object o = root.get(path);
-    Class<?> c = o.getClass();
-    if (c == Node.class) {
-      Node node = (Node) o;
-      return node.put(key, value);
-    } else {
-      log.error("path {} is not to a Node", path);
-      return null;
-    }
-  }
-
-  /*
-   * put gets the last node in path - and adds a key to the node's data with a
-   * node with Node named with the second parameter
-   * 
-   */
   public Object putNode(String path, String nodeName) {
     Object o = root.get(path);
     Class<?> c = o.getClass();

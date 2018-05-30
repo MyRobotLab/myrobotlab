@@ -224,8 +224,8 @@ public class MotorTest2 {
 	public static void main(String[] args) {
 		try {
 
-			LoggingFactory.getInstance().configure();
-			LoggingFactory.getInstance().setLevel(Level.INFO);
+			      LoggingFactory.init("info");
+
 
 			MotorTest2.setUpBeforeClass();
 			MotorTest2 test = new MotorTest2();

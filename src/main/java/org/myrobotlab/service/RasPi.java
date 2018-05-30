@@ -110,8 +110,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   public static void main(String[] args) {
-    LoggingFactory.getInstance().configure();
-    LoggingFactory.getInstance().setLevel(Level.DEBUG);
+          LoggingFactory.init("info");
+
 
     /*
      * RasPi.displayString(1, 70, "1");

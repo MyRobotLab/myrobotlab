@@ -342,8 +342,6 @@ public class ServiceData implements Serializable {
     try {
 
       LoggingFactory.init();
-      // LoggingFactory.getInstance().setLevel("INFO");
-      // LoggingFactory.getInstance().addAppender(Appender.FILE);
       String path = "";
       if (args.length > 0) {
         path = args[0];
