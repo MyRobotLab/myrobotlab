@@ -65,17 +65,6 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     return list;
   }
 
-  public List<String> getLanguages() {
-    log.warn("not yet implemented");
-    return null;
-  }
-
-  @Override
-  public void setLanguage(String l) {
-    // todo : implement generic method & language code
-
-    log.warn("not yet implemented");
-  }
 
   @Override
   public void startService() {

@@ -9,32 +9,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.AcapelaSpeech;
 import org.myrobotlab.service.AudioFile;
-import org.myrobotlab.service.Polly;
 import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.interfaces.Language;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener {
+public abstract class AbstractSpeechSynthesis extends AbstractLanguage implements SpeechSynthesis, TextListener, Language {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
 	private String lastUtterance = "";
 	private boolean engineStatus = false;
 	private String engineError = "Not initialized";
 	transient HashMap<AudioData, String> utterances = new HashMap<AudioData, String>();
-	protected String language;
+
 	transient AudioFile audioFile = null;
 	protected transient Security security = null;
 	private String audioCacheExtension = "mp3";
@@ -119,9 +117,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 		}
 	}
 
-	public String getLanguage() {
-		return language;
-	}
+
 
 	public void onAudioEnd(AudioData data) {
 		log.info("onAudioEnd {} {}", getName(), data.toString());

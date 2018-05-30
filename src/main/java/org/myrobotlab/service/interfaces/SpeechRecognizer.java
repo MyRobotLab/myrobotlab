@@ -26,7 +26,6 @@ public interface SpeechRecognizer extends NameProvider {
 
   public void stopListening();
   
-  public void setLanguage(String language);
 
   /**
    *  This method should listen for 

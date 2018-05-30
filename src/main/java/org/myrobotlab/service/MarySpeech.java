@@ -124,7 +124,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     }
     log.info("Installing components from {}", maryComponentsUrl);
     org.myrobotlab.maryspeech.tools.install.MaryInstaller installer = new MaryInstaller(maryComponentsUrl);
-    Map<String, org.myrobotlab.maryspeech.tools.install.LanguageComponentDescription> languages = installer.getLanguages();
+    Map<String, org.myrobotlab.maryspeech.tools.install.LanguageComponentDescription> maryLanguages = installer.getLanguages();
     Map<String, org.myrobotlab.maryspeech.tools.install.VoiceComponentDescription> voices = installer.getVoices();
 
     List<org.myrobotlab.maryspeech.tools.install.ComponentDescription> toInstall = new ArrayList<>();
@@ -132,8 +132,8 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       if (component == null || component.isEmpty() || component.trim().isEmpty()) {
         continue;
       }
-      if (languages.containsKey(component)) {
-        toInstall.add(languages.get(component));
+      if (maryLanguages.containsKey(component)) {
+        toInstall.add(maryLanguages.get(component));
       } else if (voices.containsKey(component)) {
         toInstall.add(voices.get(component));
       } else {
@@ -313,17 +313,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     return meta;
   }
 
-  public List<String> getLanguages() {
-    log.warn("not yet implemented");
-    return null;
-  }
 
-  @Override
-  public void setLanguage(String l) {
-    // todo : implement generic method & language code
-
-    log.warn("not yet implemented");
-  }
 
   @Override
   public byte[] generateByteAudio(String toSpeak) throws IOException {

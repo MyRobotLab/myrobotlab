@@ -106,15 +106,8 @@ public class Polly extends AbstractSpeechSynthesis {
     return false;
   }
 
-  @Override
-  public String getLanguage() {
-    return language;
-  }
 
-  @Override
-  public List<String> getLanguages() {
-    return new ArrayList<String>(langMap.keySet());
-  }
+
 
   private void processVoicesRequest() {
     // Create describe voices request.
@@ -178,10 +171,10 @@ public class Polly extends AbstractSpeechSynthesis {
 
   @Override
   public void setLanguage(String l) {
+    super.setLanguage(l);
     if (langMap.containsKey(l)) {
       setVoice(langMap.get(l).getName());
     }
-    this.language = l;
   }
 
   /**
