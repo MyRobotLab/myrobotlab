@@ -194,7 +194,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   protected static AuthorizationProvider security = null;
 
   private Status lastError = null;
-  
+
   /**
    * variable for services to virtualize some of their dependencies
    */
@@ -925,7 +925,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void broadcastState() {
     invoke("publishState");
   }
-  
+
   public void broadcastStatus(Status status) {
     invoke("publishStatus", status);
   }
@@ -1351,7 +1351,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // on parameter types - the thing is we may have a typed signature
       // which will allow execution - but
       // if so we need to search
-      
+
       // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
 
       // SECURITY - ??? can't be implemented here - need a full message
@@ -1497,7 +1497,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     Message m = Message.createMessage(this, null, method, o); // create a
                                                               // un-named
                                                               // message
-    // as output
+                                                              // as output
 
     if (m.sender.length() == 0) {
       m.sender = this.getName();
@@ -1505,7 +1505,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     if (m.sendingMethod.length() == 0) {
       m.sendingMethod = method;
     }
-    if (outbox == null){
+    if (outbox == null) {
       log.info("******************OUTBOX IS NULL*************************");
       return;
     }
@@ -1573,19 +1573,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   @Override
   public void releaseService() {
-    
+
     // recently added - preference over detach(Runtime.getService(getName()));
     // since this service is releasing - it should be detached from all existing services
     detach();
-    
+
     // note - if stopService is overwritten with extra
     // threads - releaseService will need to be overwritten too
     stopService();
-    
+
     // TODO ? detach all other services currently attached
     // detach();
     // @grog is it ok for now ?
-    
+
     // GroG says, I don't think so - this is releasing itself from itself 
     // detach(Runtime.getService(getName()));
 
@@ -1780,8 +1780,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
     msg.sendingMethod = "send";
     send(msg);
   }
-  
-  public void send(Message msg){
+
+  public void send(Message msg) {
     if (recorder != null) {
       try {
         recorder.write(msg);
@@ -1810,10 +1810,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     msg.sender = this.getName();
     msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
-    
+
     return sendBlocking(msg, timeout);
   }
-  
+
   public Object sendBlocking(Message msg, Integer timeout) {
     Object[] returnContainer = new Object[1];
     /*
@@ -1833,7 +1833,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     return returnContainer[0];
   }
-  
 
   // BOXING - End --------------------------------------
   public Object sendBlocking(String name, String method) {
@@ -1842,7 +1841,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public Object sendBlocking(String name, String method, Object... data) {
     // default 1 second timeout - FIXME CONFIGURABLE
-    return sendBlocking(name, 1000, method, data); 
+    return sendBlocking(name, 1000, method, data);
   }
 
   @Override
@@ -2008,17 +2007,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return ret;
   }
 
-  public Status error(String msg) {    
-    return error(msg, (Object[])null);
+  public Status error(String msg) {
+    return error(msg, (Object[]) null);
   }
 
-  public Status warn(String msg) {        
-    return warn(msg, (Object[])null);
+  public Status warn(String msg) {
+    return warn(msg, (Object[]) null);
   }
 
   @Override
   public Status warn(String format, Object... args) {
-    Status status =  Status.warn(format, args);
+    Status status = Status.warn(format, args);
     invoke("publishStatus", status);
     return status;
   }
@@ -2151,11 +2150,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void detach(String serviceName) {
     detach(Runtime.getService(serviceName));
   }
-  
+
   /**
    * detaches ALL other services from this service
    */
-  public void detach(){
+  public void detach() {
     log.info("detach was called but I'm a NOOP in Service.java - probably not what you wanted - override me !");
     // FIXME - attach should probably have a Service.java level of understanding where a Service understands
     // that another service is attached
@@ -2168,8 +2167,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void attach(String serviceName) throws Exception {
     attach(Runtime.getService(serviceName));
   }
-  
-  public boolean isAttached(String serviceName){
+
+  public boolean isAttached(String serviceName) {
     return isAttached(Runtime.getService(serviceName));
   }
 
@@ -2283,15 +2282,15 @@ public abstract class Service extends MessageService implements Runnable, Serial
    *          - the service to attach from this service
    */
   @Override
-  public void attach(Attachable service) throws Exception { 
+  public void attach(Attachable service) throws Exception {
     log.info("Service.attach does not know how to attach {} to a {}", service.getClass().getSimpleName(), this.getClass().getSimpleName());
   }
-  
+
   public void setVirtual(boolean b) {
     this.isVirtual = b;
   }
-  
-  public boolean isVirtual(){
+
+  public boolean isVirtual() {
     return isVirtual;
   }
 }
