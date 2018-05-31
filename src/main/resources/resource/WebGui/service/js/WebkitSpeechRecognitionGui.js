@@ -22,8 +22,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         for (var key in getLanguage) {
         $scope.lang.availableOptions.push({id: key, name: getLanguage[key]});  
         }
-        $scope.lang.selectedOption.id = service.currentLanguage;
-        $scope.current_language = service.currentLanguage;
+        $scope.lang.selectedOption.id = service.currentWebkitLanguage;
+        $scope.current_language = service.currentWebkitLanguage;
         continuous = service.continuous;
         
         if ($scope.service.listening != $scope.recognizing) {
@@ -176,7 +176,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
         $log.info('WEBKIT Update Language');
         // Here we need to update the language that we're recognizing.. and probably 
         // publish it back down to the java service.
-        mrl.sendTo($scope.service.name, "setLanguage", $scope.lang.selectedOption.id);
+        mrl.sendTo($scope.service.name, "setcurrentWebkitLanguage", $scope.lang.selectedOption.id);
     }
     
     // toggle type of button for starting/stopping speech $scope.recognition.

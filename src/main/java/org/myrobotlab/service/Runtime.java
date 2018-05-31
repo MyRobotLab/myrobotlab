@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -213,7 +214,6 @@ public class Runtime extends Service implements MessageListener {
   public static List<Object> serialisable = new ArrayList<Object>();
 
   String currentLanguage;
-
 
   /*
    * Returns the number of processors available to the Java virtual machine.
@@ -1741,6 +1741,9 @@ public class Runtime extends Service implements MessageListener {
     // System.setProperty("file.encoding","UTF-8" );
     log.info("file.encoding [{}]", System.getProperty("file.encoding"));
     log.info("Charset.defaultCharset() [{}]", Charset.defaultCharset());
+    log.info("user.language [{}]", System.getProperty("user.language"));
+    log.info("user.country [{}]", System.getProperty("user.country"));
+    log.info("user.variant [{}]", System.getProperty("user.variant"));
 
     // System.getProperty("pi4j.armhf")
 
@@ -2340,21 +2343,45 @@ public class Runtime extends Service implements MessageListener {
     return r;
   }
 
-  // TODO: a better way to code these variants?
-  public static void setLocale(String country, String language, String variant) {
-    Locale runtimeLocale = new Locale(country, language, variant);
-    Locale.setDefault(runtimeLocale);
+  public static void setLocale(String country) {
+    setLocale(country, null, null);
   }
 
-  public static void setLocale(String language, String country) {
-    Locale runtimeLocale = new Locale(language, country);
-    Locale.setDefault(runtimeLocale);
+  public static void setLocale(String country, String language) {
+    setLocale(country, language, null);
   }
 
-  public static void setLocale(String language) {
+  public static void setLocale(String language, String country, String variant) {
+
+    Locale runtimeLocale = Locale.forLanguageTag(language);
+    checkLocale(runtimeLocale);
+
+    language = runtimeLocale.getLanguage();
+
+    if (country == null) {
+      country = runtimeLocale.getCountry();
+    }
+    if (variant == null) {
+      variant = runtimeLocale.getVariant();
+    }
     System.setProperty("user.language", language);
-    Locale runtimeLocale = new Locale(language);
+    System.setProperty("user.country", country);
+    System.setProperty("user.variant", variant);
     Locale.setDefault(runtimeLocale);
+  }
+
+  private static void checkLocale(Locale locale) {
+    try {
+      if (locale.getISO3Language() != null && locale.getISO3Country() != null && !locale.getISO3Language().isEmpty() && !locale.getISO3Country().isEmpty()) {
+        log.info("New locale set to " + locale.toLanguageTag() + " : " + locale.getDisplayName());
+        log.info(locale.getLanguage() + " : " + locale.getCountry() + locale.getVariant());
+
+      } else {
+        log.warn("New locale set to " + locale + " but it is unknown language");
+      }
+    } catch (MissingResourceException e) {
+      log.warn("New locale set to " + locale + "but it is unknown language" + e);
+    }
   }
 
   public Platform login(Platform platform) {
@@ -2406,13 +2433,34 @@ public class Runtime extends Service implements MessageListener {
     Platform platform = Platform.getLocalInstance();
     FileMsgScanner.enableFileMsgs(b, platform.getId());
   }
-  
+
+  /**
+   * Return last Locale used
+   * Set current system locale if null
+   *
+   * @return currentLanguage
+   *
+   */
   public String getLanguage() {
+    if (currentLanguage == null) {
+      currentLanguage = Locale.getDefault().toLanguageTag();
+    }
     return currentLanguage;
   }
-  
-  public void setLanguage(String language) {
-    currentLanguage=language;
+
+  /**
+   * Return supported system languages
+   */
+  public HashMap<String, String> getLanguages() {
+
+    Locale[] locales = Locale.getAvailableLocales();
+
+    HashMap<String, String> languagesList = new HashMap<String, String>();
+    for (int i = 0; i < locales.length; i++) {
+      log.info(locales[i].toLanguageTag());
+      languagesList.put(locales[i].toLanguageTag(), locales[i].getDisplayLanguage());
+    }
+    return languagesList;
   }
 
 }

@@ -162,5 +162,7 @@ public interface SpeechSynthesis extends NameProvider {
   public abstract void setEffectsList(String effect, String parameters);
 
   public abstract HashMap<String, String> getEffectsList();
-
+  
+  //TODO filter based on current system language
+  public void setLanguage(String l);
 }

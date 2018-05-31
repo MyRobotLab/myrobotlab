@@ -171,7 +171,6 @@ public class Polly extends AbstractSpeechSynthesis {
 
   @Override
   public void setLanguage(String l) {
-    super.setLanguage(l);
     if (langMap.containsKey(l)) {
       setVoice(langMap.get(l).getName());
     }

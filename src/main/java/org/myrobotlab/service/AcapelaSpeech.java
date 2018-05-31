@@ -262,12 +262,6 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
     return voices.contains(voice);
   }
 
-  @Override
-  public void setLanguage(String l) {
-    // FIXME ! "MyLanguages", "sonid8" ???
-    // FIXME - implement !!!
-  }
-
   public String getMp3Url(String toSpeak) {
     HttpPost post = null;
     try {
@@ -370,10 +364,7 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
     }
   }
 
-  @Override
-  public String getLanguage() {
-    return null;
-  }
+
 
   // HashSet<String> audioFiles = new HashSet<String>();
   Stack<String> audioFiles = new Stack<String>();
@@ -514,6 +505,12 @@ public class AcapelaSpeech extends AbstractSpeechSynthesis implements TextListen
 
   @Override
   public void setVoiceInJsonConfig(String voice) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setLanguage(String l) {
     // TODO Auto-generated method stub
     
   }

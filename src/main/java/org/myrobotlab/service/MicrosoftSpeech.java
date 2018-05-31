@@ -76,11 +76,6 @@ public class MicrosoftSpeech extends AbstractSpeechSynthesis implements TextList
     this.language = l;
   }
 
-  // Use for read text path file
-  @Override
-  public String getLanguage() {
-    return TextPath;
-  }
 
   // For compabilities
   @Override
