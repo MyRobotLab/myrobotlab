@@ -241,4 +241,10 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
 
   }
+
+  @Override
+  public void setLanguage(String l) {
+    // TODO Auto-generated method stub
+    
+  }
 }

@@ -1,12 +1,12 @@
 package org.myrobotlab.service.abstracts;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.service.interfaces.Language;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextPublisher;
 
-public abstract class AbstractSpeechRecognizer extends AbstractLanguage implements SpeechRecognizer, TextPublisher, Language {
+public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer, TextPublisher {
 
   private static final long serialVersionUID = 1L;
   

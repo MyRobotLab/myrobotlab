@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
@@ -18,14 +20,13 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
-import org.myrobotlab.service.interfaces.Language;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public abstract class AbstractSpeechSynthesis extends AbstractLanguage implements SpeechSynthesis, TextListener, Language {
+public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener {
 	private static final long serialVersionUID = 1L;
 	public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesis.class);
 	private String lastUtterance = "";

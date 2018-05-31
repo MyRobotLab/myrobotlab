@@ -361,4 +361,10 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
   }
 
+  @Override
+  public void setLanguage(String l) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

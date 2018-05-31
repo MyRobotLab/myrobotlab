@@ -124,7 +124,7 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
           return;
         }
         if (o == comboLanguage) {
-          send("setLanguage", comboLanguage.getSelectedItem());
+          send("setcurrentWebkitLanguage", comboLanguage.getSelectedItem());
         }
       }
     });
@@ -181,10 +181,10 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
           micro.setIcon(new ImageIcon(microOff));
           listeningStatus = false;
         }
-        for (Entry<String, String> e : WebkitSpeechRecognition.getLanguages().entrySet()) {
+        for (Entry<String, String> e : WebkitSpeechRecognition.languagesList.entrySet()) {
           comboLanguage.addItem(e.getKey());
         }
-        comboLanguage.setSelectedItem(WebkitSpeechRecognition.getLanguage());
+        comboLanguage.setSelectedItem(WebkitSpeechRecognition.currentWebkitLanguage);
         restoreListeners();
       }
     });
