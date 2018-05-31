@@ -165,7 +165,8 @@ public class InMoov2 extends Service {
 	 */
 	public SpeechRecognizer startEar() throws Exception {
 		ear = (SpeechRecognizer) Runtime.create(this.getIntanceName() + ".ear", earEngine);
-		ear.setLanguage(languages.get(language)[0]);
+		// GroG says .. this broke the build ..
+		// ear.setLanguage(languages.get(language)[0]);
 		ear = (SpeechRecognizer) Runtime.start(this.getIntanceName() + ".ear", earEngine);
 		broadcastState();
 		// speakBlocking("starting mouth");
