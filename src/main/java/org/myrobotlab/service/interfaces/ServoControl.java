@@ -334,4 +334,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public void disable();
 
   String getControllerName();
+
+  boolean isAttached();
 }
