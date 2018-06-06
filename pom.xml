@@ -1311,17 +1311,20 @@
     <groupId>org.tensorflow</groupId>
     <artifactId>tensorflow</artifactId>
     <version>1.8.0</version>
+    <scope>provided</scope>
   </dependency>
   <!--  the following are for GPU support on linux only.
   <dependency>
     <groupId>org.tensorflow</groupId>
     <artifactId>libtensorflow</artifactId>
     <version>1.8.0</version>
+    <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.tensorflow</groupId>
     <artifactId>libtensorflow_jni_gpu</artifactId>
     <version>1.8.0</version>
+    <scope>provided</scope>
   </dependency>  -->
 <!-- Tensorflow end -->
 
