@@ -9,21 +9,21 @@ script: mvn install -DskipTests=true
 jdk:
 - oraclejdk8
 
-deploy:
-  provider: s3
-  access_key_id: "AKIAJ6CQ5PPESWGSKNXA"
-  secret_access_key: $AWS_SECRET_KEY
-  bucket: "mrl-bucket-02"
-  skip_cleanup: true
-  local_dir: "dist/current"
-  region: "us-east-1"
-  on:
-    all_branches: true  
+# deploy:
+#   provider: s3
+#   access_key_id: "AKIAJ6CQ5PPESWGSKNXA"
+#   secret_access_key: $AWS_SECRET_KEY
+#   bucket: "mrl-bucket-02"
+#   skip_cleanup: true
+#   local_dir: "dist/current"
+#   region: "us-east-1"
+#   on:
+#     all_branches: true  
     
-after_deploy:
-  - pwd
-  - ls
-  - if [ ! -f "fail.txt" ]; then travis_terminate 1; fi         
+# after_deploy:
+#   - pwd
+#   - ls
+#   - if [ ! -f "fail.txt" ]; then travis_terminate 1; fi         
     
 env:
   global:
