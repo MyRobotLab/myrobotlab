@@ -148,7 +148,7 @@ public class Python extends Service {
       super(name);
       this.code = code;
     }
-
+    
     @Override
     public void run() {
       try {
@@ -259,7 +259,8 @@ public class Python extends Service {
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
   transient InputQueueThread inputQueueThread;
   transient PythonInterpreter interp = null;
-  transient PIThread interpThread = null;
+  //transient PIThread interpThread = null;
+  transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
   int interpreterThreadCount = 0;
 
@@ -426,9 +427,11 @@ public class Python extends Service {
     }
 
     try {
-      interpThread = new PIThread(String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount), code);
+      String name = String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount);
+      PIThread interpThread = new PIThread(name, code);
       interpThread.start();
-
+      interpThreads.put(name, interpThread);
+      
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -472,8 +475,10 @@ public class Python extends Service {
     }
     try {
       if (!blocking) {
-        interpThread = new PIThread(String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount), code);
+    	String name = String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount);
+    	PIThread interpThread = new PIThread(name , code);
         interpThread.start();
+        interpThreads.put(name, interpThread);        
       } else {
         interp.exec(code);
       }
@@ -672,30 +677,43 @@ public class Python extends Service {
     }
     log.info(String.format("started python %s", getName()));
   }
+  
+  @Override
+  public void releaseService() {
+	  super.releaseService();
+	  stop();
+	  if (interp != null) {
+	      // PySystemState.exit(); // the big hammar' throws like Thor
+	      interp.cleanup();
+	      interp = null;
+	    }
+
+	    
+	    if (inputQueueThread != null) {
+	      inputQueueThread.interrupt();
+	      inputQueueThread = null;
+	    }
+
+	    thread.interruptAllThreads();
+	    Py.getSystemState()._systemRestart = true;
+  }
 
   /**
-   * Get rid of the interpreter.
+   * stop all scripts
+   * @return
    */
-  public void stop() {
-    if (interp != null) {
-      // PySystemState.exit(); // the big hammar' throws like Thor
-      interp.cleanup();
-      interp = null;
-    }
-
-    if (interpThread != null) {
-      interpThread.interrupt();
-      interpThread = null;
-    }
-
-    if (inputQueueThread != null) {
-      inputQueueThread.interrupt();
-      inputQueueThread = null;
-    }
-
-    thread.interruptAllThreads();
-    Py.getSystemState()._systemRestart = true;
+  public boolean stop() {
+	  log.info("stopping all scripts");
+	  for (PIThread pt : interpThreads.values()) {		  
+		  if (pt.isAlive()) {
+			  pt.interrupt();
+		  }
+	  }
+	  interpThreads.clear();
+	  return false;
   }
+  
+ 
 
   /**
    * stops threads releases interpreter
@@ -716,6 +734,8 @@ public class Python extends Service {
 
       log.info("{}", test.toURI().toURL());
       log.info("{}", example.toURI().toURL());
+      
+      
 
       // Runtime.start("gui", "SwingGui");
       // String f = "C:\\Program Files\\blah.1.py";
@@ -723,6 +743,7 @@ public class Python extends Service {
       Runtime.start("python", "Python");
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
+      Runtime.start("cli", "Cli");
 
       // python.error("this is an error");
       // python.loadScriptFromResource("VirtualDevice/Arduino.py");
