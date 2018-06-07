@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -24,14 +23,14 @@ public class Skeleton extends Service {
   public final static Logger log = LoggerFactory.getLogger(Skeleton.class);
 
   /**
-   * Servos current collection for InMoovHand
+   * Servos collection
    */
-  transient ArrayList<ServoControl> servos = new ArrayList<ServoControl>();
+  private transient ArrayList<ServoControl> servos = new ArrayList<ServoControl>();
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     Skeleton inMoovTorso = (Skeleton) Runtime.start("inMoovTorso", "Skeleton");
-
+    Runtime.start("gui", "SwingGui");
     VirtualArduino virtualArduino = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
     try {
       virtualArduino.connect("COM42");
@@ -52,6 +51,7 @@ public class Skeleton extends Service {
     Servo servo = (Servo) Runtime.start("servo", "Servo");
 
     try {
+      servo.attach(adafruit16CServoDriver, 1);
       inMoovTorso.attach(servo);
     } catch (Exception e) {
       // TODO Auto-generated catch block
@@ -66,21 +66,17 @@ public class Skeleton extends Service {
     super(n);
   }
 
-  public void attach(Attachable... attachable) {
-
-    for (int i = 0; i < attachable.length; i++) {
-      if (attachable[i] instanceof ServoControl) {
-        if (!servos.contains((ServoControl) attachable[i])) {
-          servos.add((ServoControl) attachable[i]);
-          //if (servosConventionalNames.size() >= servos.size() - 1) {
-          //  info(attachable.getClass().getSimpleName() + " " + attachable[i].getName() + " attached as : " + servosConventionalNames.get(servos.size() - 1));
-          //}
-        }
-      } else {
-        error("don't know how to attach a {}", attachable[i].getName());
-      }
+  public void attach(ServoControl attachable) {
+    if (!servos.contains(attachable)) {
+      servos.add(attachable);
+      broadcastState();
     }
+  }
 
+  public void attach(ServoControl... attachable) {
+    for (int i = 0; i < attachable.length; i++) {
+      attach(attachable[i]);
+    }
   }
 
   /** 
@@ -189,6 +185,13 @@ public class Skeleton extends Service {
     meta.addDescription("An easier way to control multiple servos");
     meta.addCategory("robot");
     return meta;
+  }
+
+  /**
+   * @return the servos
+   */
+  public ArrayList<ServoControl> getServos() {
+    return servos;
   }
 
 }
