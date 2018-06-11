@@ -85,7 +85,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   transient Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
   // a guaranteed bot we have
-  private String currentBotName = "alice2";
+  private String currentBotName = "en-US";
   // this is the username that is chatting with the bot.
   private String currentUserName = "default";
   public boolean loading = false;
@@ -882,9 +882,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
-    meta.addDependency("program-ab", "program-ab-data", "0.0.4.1", "zip");
+    meta.addDependency("program-ab", "program-ab-data", "1.0", "zip");
     meta.addDependency("program-ab", "program-ab-kw", "0.0.4.1");
     meta.addDependency("org.json", "json", "20090211");
+    //used by FileIO
+    meta.addDependency("commons-io", "commons-io", "2.5");
     return meta;
   }
 
@@ -906,7 +908,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       brain.attach(ear);
       mouth.attach(brain);
 
-      brain.startSession("default", "Alice2");
+      brain.startSession("default", "en-US");
       // ear.startListening();
 
       // FIXME - make this work
