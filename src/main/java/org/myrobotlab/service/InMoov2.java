@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.WebGui;
@@ -14,11 +15,14 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.slf4j.Logger;
+import org.myrobotlab.inmoov.LanguagePack;
+import org.myrobotlab.inmoov.Utils;
 
 /**
  * InMoov2 - The InMoov Service ( very WIP ).
@@ -34,10 +38,9 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 public class InMoov2 extends Service {
 
   private static final long serialVersionUID = 1L;
-
+  public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
   transient private static Runtime myRuntime = null; //
   transient private static ServiceData serviceData = null; // =
-                                                           // myRuntime.getServiceData();
 
   // interfaces declaration needed by InMoov
   transient public SpeechSynthesis mouth;
@@ -82,7 +85,7 @@ public class InMoov2 extends Service {
       serviceData = myRuntime.getServiceData();
     }
     // TODO : use locale
-    languages.put("en-EN", "English - United States");
+    languages.put("en-US", "English - United States");
     languages.put("fr-FR", "French - France");
     languagesIndex = new ArrayList<String>(languages.keySet());
 
@@ -91,7 +94,7 @@ public class InMoov2 extends Service {
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
-
+      Runtime.start("gui", "SwingGui");
       String leftPort = "COM3";
       String rightPort = "COM4";
 
@@ -106,8 +109,6 @@ public class InMoov2 extends Service {
       arduinoLeft.connect(leftPort);
       arduinoRight.connect(rightPort);
 
-      Runtime.start("gui", "SwingGui");
-
       // virtual arduino can't simulate velocity at this time
       // i2c service connected onto virtual arduino will do the job
       // https://github.com/MyRobotLab/myrobotlab/issues/99
@@ -118,6 +119,7 @@ public class InMoov2 extends Service {
       adafruit16CServoDriverRight.attach(arduinoRight, "0", "0x40");
 
       InMoov2 inMoov = (InMoov2) Runtime.start("inMoov", "InMoov2");
+
       WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
 
       Skeleton lHand = (Skeleton) Runtime.start("lHand", "Skeleton");
@@ -165,8 +167,7 @@ public class InMoov2 extends Service {
       inMoov.attach(head, "head");
       //inMoov.attach(ear);
       inMoov.startMouth();
-
-      inMoov.loadGestures();
+      //inMoov.loadGestures();
 
       LoggingFactory.init(Level.WARN);
 
@@ -184,6 +185,7 @@ public class InMoov2 extends Service {
     this.language = getLanguage();
     this.speechEngine = getSpeechEngine();
     this.earEngine = getEarEngine();
+    loadLanguagePack();
   }
 
   static public ServiceType getMetaData() {
@@ -235,10 +237,21 @@ public class InMoov2 extends Service {
     if (attachable instanceof SpeechSynthesis) {
 
       mouth = (SpeechSynthesis) attachable;
+      try {
+        mouth.speakBlocking(LanguagePack.get("STARTINGMOUTH"));
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       broadcastState();
 
     } else if (attachable instanceof SpeechRecognizer) {
-
+      try {
+        mouth.speakBlocking(LanguagePack.get("STARTINGEAR"));
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       if (attachable.getClass().getSimpleName().equals("WebkitSpeechRecognition")) {
 
         WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -272,12 +285,11 @@ public class InMoov2 extends Service {
    * 
    * @return started SpeechSynthesis service
    */
-  public SpeechSynthesis startMouth() throws Exception {
+  public SpeechSynthesis startMouth() {
     SpeechSynthesis mouth = (SpeechSynthesis) Runtime.start(this.getIntanceName() + ".mouth", getSpeechEngine());
 
     this.attach((Attachable) mouth);
     broadcastState();
-    mouth.speakBlocking("starting mouth");
     //return mouth;
     return mouth;
   }
@@ -287,10 +299,9 @@ public class InMoov2 extends Service {
    * 
    * @return started SpeechRecognizer service
    */
-  public SpeechRecognizer startEar() throws Exception {
+  public SpeechRecognizer startEar() {
     ear = (SpeechRecognizer) Runtime.start(this.getIntanceName() + ".ear", getEarEngine());
     broadcastState();
-    mouth.speakBlocking("starting ear");
     return ear;
   }
   // ---------------------------------------------------------------
@@ -416,7 +427,7 @@ public class InMoov2 extends Service {
   }
 
   public void loadGestures() {
-    loadGestures("InMoov" + File.separator + "gestures");
+    loadGestures("InMoov2" + File.separator + "gestures");
   }
 
   /**
@@ -428,50 +439,29 @@ public class InMoov2 extends Service {
    *          - the directory that contains the gesture python files.
    */
   public boolean loadGestures(String directory) {
-    // backward compatibility inmoov name
-    Python p = (Python) Runtime.getService("python");
-    p.exec("i01=" + this.getIntanceName(), true, true);
-    p.exec("inMoov=" + this.getIntanceName(), true, true);
 
-    // TODO: iterate over each of the python files in the directory
+    // iterate over each of the python files in the directory
     // and load them into the python interpreter.
-    File dir = makeGesturesDirectory(directory);
+    File dir = new File(directory);
+    boolean loaded = true;
     for (File f : dir.listFiles()) {
-      if (f.getName().toLowerCase().endsWith(".py")) {
-        log.info("Loading Gesture Python file {}", f.getAbsolutePath());
-        String script = null;
-        try {
-          script = FileIO.toString(f.getAbsolutePath());
-        } catch (IOException e) {
-          error("IO Error loading gesture file {} -- {}", f.getAbsolutePath(), e);
-          return false;
-        }
-        // evaluate the gestures scripts in a blocking way.
-        boolean result = p.exec(script, true, true);
-        if (!result) {
-          error("Error while loading gesture file: {}", f.getAbsolutePath());
-        } else {
-          log.info("Successfully loaded gesture {}", f.getAbsolutePath());
-        }
-      }
+      loaded = Utils.loadPythonFile(f.getAbsolutePath(), this.getIntanceName());
     }
     return true;
+  }
+
+  public void loadLanguagePack() {
+    try {
+      LanguagePack.load(getLanguage(), this.getIntanceName());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   public void stopGesture() {
     Python p = (Python) Runtime.getService("python");
     p.stop();
-  }
-
-  private File makeGesturesDirectory(String directory) {
-    File dir = new File(directory);
-    dir.mkdirs();
-    if (!dir.isDirectory()) {
-      // TODO: maybe create the directory ?
-      log.warn("Gestures directory {} doest not exist.", directory);
-      return null;
-    }
-    return dir;
   }
 
   public void startedGesture() {
@@ -564,24 +554,38 @@ public class InMoov2 extends Service {
   }
 
   /**
-   * set language for InMoov service used by chatbot + ear + mouth TODO : choose
-   * a language code format instead of index
+   * TODO : use system locale
+   * set language for InMoov service used by chatbot + ear + mouth
    * 
    * @param i
-   *          - format : en / fr etc ...
+   *          - format : java Locale
    */
   public void setLanguage(String l) {
-    this.language = l;
-    info("Set InMoov language to %s", languages.get(l));
-    broadcastState();
+    if (languages.containsKey(Locale.getDefault().toLanguageTag())) {
+      this.language = l;
+      info("Set Runtime language to %s", languages.get(l));
+      Runtime.setLocale(l);
+      broadcastState();
+    } else {
+      error("InMoov not yet support {}", l);
+    }
   }
 
   /**
-   * get current language used by InMoov service
+   * get current language
    */
   public String getLanguage() {
     if (this.language == null) {
-      setLanguage("en-EN");
+      //check if default locale supported by inmoov
+      if (languages.containsKey(Locale.getDefault().toLanguageTag())) {
+        this.language = Locale.getDefault().toLanguageTag();
+      } else {
+        this.language = "en-US";
+      }
+    }
+    // to be sure runtime == inmoov language
+    if (!Locale.getDefault().toLanguageTag().equals(this.language)) {
+      setLanguage(this.language);
     }
     return this.language;
   }
