@@ -170,6 +170,8 @@ public class Runtime extends Service implements MessageListener {
    */
   transient private static Runtime runtime = null;
 
+  transient private static Security security = null;
+
   private List<String> jvmArgs;
 
   private List<String> args;
@@ -493,21 +495,13 @@ public class Runtime extends Service implements MessageListener {
     if (runtime == null) {
       synchronized (instanceLockObject) {
         if (runtime == null) {
-          /*
-           * Well that didn't work the way I wanted it to... :P
-           * Thread.setDefaultUncaughtExceptionHandler(new
-           * Thread.UncaughtExceptionHandler() {
-           *
-           * @Override public void uncaughtException(Thread t, Throwable e) {
-           * //log.info(t.getName() + ": " + e); log.error(String.format(
-           * "============ WHOOP WHOOP WHOOP WHOOP WHOOP WHOOP Thread %s threw %s ============"
-           * , t.getName(), e.getMessage())); // MyWorker worker = new
-           * MyWorker(); // worker.start(); } });
-           */
 
           // taking away capability of having a different runtime name
           runtimeName = "runtime";
           runtime = new Runtime(runtimeName);
+          
+          // setting the singleton security
+          security = Security.getInstance();
           Repo.getInstance().addStatusPublisher(runtime);
           extract(); // FIXME - too overkill - do by checking version of re
         }
@@ -2366,5 +2360,14 @@ public class Runtime extends Service implements MessageListener {
     }
     return languagesList;
   }
-
+  
+  /**
+   * get the Security singleton
+   * @return
+   */
+  static public Security getSecurity() {
+	  Runtime.getInstance();
+	  return security;
+  }
+ 
 }
