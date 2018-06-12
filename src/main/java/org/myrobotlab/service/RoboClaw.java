@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,7 +68,6 @@ public class RoboClaw extends AbstractMotorController
 
 	public final static Logger log = LoggerFactory.getLogger(RoboClaw.class);
 
-	// transient SerialDevice serial;
 	transient Serial serial;
 
 	Integer address = 128;
@@ -82,16 +82,19 @@ public class RoboClaw extends AbstractMotorController
 	String firmwareVersion;
 
 	Integer logicBatteryVoltageLevel;
+	
 	Integer mainBatteryVoltage;
 
 	Integer boardTemp;
 
 	int buffer = 1;
 
-	MotorData m1 = new MotorData();
-	MotorData m2 = new MotorData();
+	final MotorData m1 = new MotorData();
+	final MotorData m2 = new MotorData();
 
 	Integer pwmMode;
+	
+	final Poller poller = new Poller();
 
 	public RoboClaw(String n) {
 		super(n);
@@ -101,7 +104,10 @@ public class RoboClaw extends AbstractMotorController
 		powerMapper = new Mapper(-1.0, 1.0, -127, 127);
 	}
 
-	public static class MotorData {
+	public static class MotorData implements Serializable {
+		
+		private static final long serialVersionUID = 1L;
+		
 		PidData pid;
 		Long qpps;
 		Long rawSpeed;
@@ -148,8 +154,8 @@ public class RoboClaw extends AbstractMotorController
 			// packet[0] == address
 			// packet[1] == command
 			// packet[n] == data
-			// packet[n+1] == crc/2
-			// packet[n+2] == crc/2
+			// packet[n+1] == crc-1
+			// packet[n+2] == crc-2
 
 			StringBuilder sb = new StringBuilder();
 
@@ -300,6 +306,82 @@ public class RoboClaw extends AbstractMotorController
 	public void motorReset(MotorControl motor) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	public class Poller implements Runnable {
+
+		transient Thread worker;
+		
+		boolean isRunning = false;
+		
+		public boolean readM1Encoder = false;
+		public boolean readM2Encoder = false;
+		public boolean readM1Motor = false;
+		public boolean readM2Motor = false;
+		
+		@Override
+		public void run() {
+			try {
+				isRunning = true;
+				while(isRunning) {
+					
+					if (readM1Encoder) {
+						readEncoderM1();
+					}
+					
+					if (readM2Encoder) {
+						readEncoderM2();
+					}
+					
+					if (readM1Motor) {
+						// readEncoderM1();
+					}
+					
+					if (readM2Motor) {
+						// readEncoderM2();
+					}
+
+					sleep(100);					
+				}
+			} catch(Exception e) {
+				log.info("stop reading data");
+				isRunning = false;
+				worker = null;
+			} 
+		}
+
+		public void start() {
+			if (worker == null) {
+				worker = new Thread(this, String.format("%s.poller", getName()));
+				worker.start();
+			}
+		}
+
+		public void stop() {
+			 if (worker != null) {
+				 isRunning = false; 
+				 worker = null;
+			}
+		}
+		
+	}
+	
+	public void startPolling() {
+		poller.start();
+	}
+	
+	public void startEncoderM1() {
+		poller.readM1Encoder = true;
+		poller.start();
+	}
+	
+	public void startEncoderM2() {
+		poller.readM2Encoder = true;
+		poller.start();
+	}
+	
+	public void stopPolling() {
+		poller.stop();
 	}
 
 	/**
@@ -2335,6 +2417,14 @@ public class RoboClaw extends AbstractMotorController
 	public EncoderData publishEncoderData(EncoderData data) {
 		return data;
 	}
+	
+	public void setBuffer(boolean b) {
+		if (b) {
+			buffer = 0;
+		} else {
+			buffer = 1;
+		}
+	}
 
 	public static void standardMotorTests01(RoboClaw rc) throws Exception {
 
@@ -2451,7 +2541,7 @@ public class RoboClaw extends AbstractMotorController
 			// rc.setM1PID(D, P, I, maxI, deadzone, minPos, maxPos);
 			// rc.setPidQppsM1(0, 15001, 46, 56000);
 			// rc.setPidM1(0, 15001, 46, 0, 501, 0, 4000001);
-			
+
 			rc.setPidQppsDeadzoneMinMaxM1(0, 15002, 46, 56000, 502, 0, 4000001);
 
 			rc.readPidM1();
@@ -2551,23 +2641,29 @@ public class RoboClaw extends AbstractMotorController
 			}
 
 			// scriptTest01();
+			
+			Runtime.start("gui", "SwingGui");
+			Runtime.start("python", "Python");
 
 			RoboClaw rc = (RoboClaw) Runtime.start("roboclaw", "RoboClaw");
 			rc.connect(port);
-
-			positionalTest01(rc);
+			
 
 			boolean done = true;
 			if (done) {
 				return;
 			}
 
+			positionalTest01(rc);
 			// start the services
 			// Runtime.start("gui", "SwingGui");
 
 		} catch (Exception e) {
 			log.error("main threw {}", e); // FIXME - remove all these !!!
 		}
+		
 	}
+	
+	
 
 }
