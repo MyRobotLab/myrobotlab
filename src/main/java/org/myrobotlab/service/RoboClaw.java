@@ -1716,7 +1716,7 @@ public class RoboClaw extends AbstractMotorController
 	Receive: [0xFF]
 	 * </pre>
 	 */
-	public void setPidQppsM1(int D, int P, int I, int QPPS) {
+	public void setPidQppsM1(int P, int I, int D, int QPPS) {
 		sendPacket(address, 28, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P),
 				byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
 		// TODO lock - timeout - return value & publish
@@ -1740,20 +1740,20 @@ public class RoboClaw extends AbstractMotorController
 	Receive: [0xFF]
 	 * </pre>
 	 */
-	public void setPidQppsM2(int D, int P, int I, int QPPS) {
+	public void setPidQppsM2(int P, int I, int D, int QPPS) {
 		sendPacket(address, 29, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P),
 				byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
 		// TODO lock - timeout - return value & publish
 	}
 	
-	public void setPidQppsDeadzoneMinMaxM1(int D, int P, int I, int QPPS, int deadzone, int minPos, int maxPos) {
-		setPidQppsM1(D, P, I, QPPS);
-		setPidM1(D, P, I, 0, deadzone, minPos, maxPos);
+	public void setPidQppsDeadzoneMinMaxM1(int P, int I, int D, int QPPS, int deadzone, int minPos, int maxPos) {
+		setPidQppsM1(P, I, D, QPPS);
+		setPidM1(P, I, D, 0, deadzone, minPos, maxPos);
 	}
 	
-	public void setPidQppsDeadzoneMinMaxM2(int D, int P, int I, int QPPS, int deadzone, int minPos, int maxPos) {
-		setPidQppsM2(D, P, I, QPPS);
-		setPidM2(D, P, I, 0, deadzone, minPos, maxPos);
+	public void setPidQppsDeadzoneMinMaxM2(int P, int I, int D, int QPPS, int deadzone, int minPos, int maxPos) {
+		setPidQppsM2(P, I, D, QPPS);
+		setPidM2(P, I, D, 0, deadzone, minPos, maxPos);
 	}
 
 	/**
@@ -2249,7 +2249,7 @@ public class RoboClaw extends AbstractMotorController
 	are enabled in RC/Analog modes.
 	 * </pre>
 	 */
-	public void setPidM1(int D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
+	public void setPidM1(int P, int I, int D, int maxI, int deadzone, int minPos, int maxPos) {
 		sendPacket(address, 61, 
 				byte3(D), byte2(D), byte1(D), byte0(D), 
 				byte3(P), byte2(P), byte1(P), byte0(P),
@@ -2275,7 +2275,7 @@ public class RoboClaw extends AbstractMotorController
 	are enabled in RC/Analog modes.
 	 * </pre>
 	 */
-	public void setPidM2(int D, int P, int I, int maxI, int deadzone, int minPos, int maxPos) {
+	public void setPidM2(int P, int I, int D, int maxI, int deadzone, int minPos, int maxPos) {
 		sendPacket(address, 62, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P),
 				byte3(I), byte2(I), byte1(I), byte0(I), byte3(maxI), byte2(maxI), byte1(maxI), byte0(maxI),
 				byte3(deadzone), byte2(deadzone), byte1(deadzone), byte0(deadzone), byte3(minPos), byte2(minPos),
@@ -2539,10 +2539,10 @@ public class RoboClaw extends AbstractMotorController
 
 			// rc.setM1PID(0, 15000, 45, 1000000, 500, 0, c);
 			// rc.setM1PID(D, P, I, maxI, deadzone, minPos, maxPos);
-			// rc.setPidQppsM1(0, 15001, 46, 56000);
-			// rc.setPidM1(0, 15001, 46, 0, 501, 0, 4000001);
+			// rc.setPidQppsM1(15001, 46, 0, 56000);
+			// rc.setPidM1(15001, 46, 0, 0, 501, 0, 4000001);
 
-			rc.setPidQppsDeadzoneMinMaxM1(0, 15002, 46, 56000, 502, 0, 4000001);
+			rc.setPidQppsDeadzoneMinMaxM1(15002, 46, 0, 56000, 502, 0, 4000001);
 
 			rc.readPidM1();
 			rc.readPidM1();
