@@ -9,10 +9,9 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
-		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, Attachable {
+		extends ServiceQueue, ServiceStatus, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, Attachable {
 
 	
 
@@ -76,16 +75,6 @@ public interface ServiceInterface
 	public void startService();
 
 	public void stopService();
-
-	public String clearLastError();
-
-	public boolean hasError();
-
-	public Status getLastError();
-
-	// public void broadcastState();
-
-	// public Object invoke(Message msg);
 
 	public void out(String method, Object retobj);
 
