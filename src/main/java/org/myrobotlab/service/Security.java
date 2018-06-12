@@ -697,17 +697,17 @@ public class Security extends Service implements AuthorizationProvider {
 		
 		Security security = Runtime.getSecurity();
 		
-		security.addSecret("amazon.polly.user.key", "FIE38343873349852");
-		security.addSecret("amazon.polly.user.secret", "323Ujfkis838234jfkDk3k4dlskjlfkj");
-		security.addSecret("xmpp.user", "user@gmail.com");
-		security.addSecret("xmpp.pwd", "xxxxxxxx");
+		security.setKey("amazon.polly.user.key", "FIE38343873349852");
+		security.setKey("amazon.polly.user.secret", "323Ujfkis838234jfkDk3k4dlskjlfkj");
+		security.setKey("xmpp.user", "user@gmail.com");
+		security.setKey("xmpp.pwd", "xxxxxxxx");
 		security.saveStore();
-		security.getSecret("amazon.polly.user.key");
+		security.getKey("amazon.polly.user.key");
 		security.loadStore();
-		log.info(security.getSecret("xmpp.user")); // FIXME - report stor is has not
+		log.info(security.getKey("xmpp.user")); // FIXME - report stor is has not
 													// be loaded !!!
-		log.info(security.getSecret("amazon.polly.user.key"));
-		log.info(security.getSecret("amazon.polly.user.secret"));
+		log.info(security.getKey("amazon.polly.user.key"));
+		log.info(security.getKey("amazon.polly.user.secret"));
 
 		/*
 		 * String clearPwd = "mrlRocks!";
