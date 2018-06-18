@@ -6,7 +6,6 @@ import org.myrobotlab.framework.Message;
 
 public interface AuthorizationProvider {
 
-  // FIXME - 
   boolean allowExport(String serviceName);
 
   // from remote not all inbound
