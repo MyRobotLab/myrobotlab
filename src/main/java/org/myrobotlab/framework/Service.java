@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -86,7 +87,27 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
-  
+  /*
+   * protected class Task extends TimerTask { String taskName; Message msg; long
+   * interval = 0;
+   * 
+   * public Task(String taskName, long interval, Message msg) { this.msg = msg;
+   * this.interval = interval; this.taskName = taskName; }
+   * 
+   * public Task(Task s) { this.msg = s.msg; this.interval = s.interval;
+   * this.taskName = s.taskName; }
+   * 
+   * @Override public void run() { // info("task %s running - next run %s",
+   * taskName, // MathUtils.msToString(interval)); getInbox().add(msg);
+   * 
+   * if (interval > 0) { Task t = new Task(this); // clear history list -
+   * becomes "new" message t.msg.historyList.clear(); Timer timer =
+   * tasks.get(taskName); if (timer != null) { // timer = new
+   * Timer(String.format("%s.timer", getName())); try { timer.schedule(t,
+   * interval); } catch (IllegalStateException e) { } } } }
+   * 
+   * }
+   */
   /**
    * contains all the meta data about the service - pulled from the static
    * method getMetaData() each instance will call the method and populate the
@@ -147,6 +168,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   transient HashMap<String, Timer> tasks = new HashMap<String, Timer>();
 
+  protected boolean allowDisplay = true;
+
   public final static String cfgDir = FileIO.getCfgDir();
 
   // no longer transient - getMethodMap is not really needed
@@ -169,7 +192,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   transient public final String MESSAGE_RECORDING_FORMAT_BINARY = "MESSAGE_RECORDING_FORMAT_BINARY";
 
   // FIXME SecurityProvider
-  protected AuthorizationProvider security = null;
+  protected static AuthorizationProvider security = null;
 
   private Status lastError = null;
 
@@ -681,7 +704,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return true;
   }
 
-  public boolean setSecurityProvider(AuthorizationProvider provider) {
+  public static boolean setSecurityProvider(AuthorizationProvider provider) {
     if (security != null) {
       log.error("security provider is already set - it can not be unset .. THAT IS THE LAW !!!");
       return false;
@@ -892,17 +915,22 @@ public abstract class Service extends MessageService implements Runnable, Serial
     tasks.clear();
   }
 
-  @Override
+  public boolean allowDisplay() {
+    return allowDisplay;
+  }
+
+  public void allowDisplay(Boolean b) {
+    allowDisplay = b;
+  }
+
   public void broadcastState() {
     invoke("publishState");
   }
 
-  @Override
   public void broadcastStatus(Status status) {
     invoke("publishStatus", status);
   }
 
-  @Override
   public String clearLastError() {
     String le = lastError.toString();
     lastError = null;
@@ -1015,7 +1043,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return name;
   }
 
-  @Override
   public Status getLastError() {
     return lastError;
   }
@@ -1149,7 +1176,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return getClass().getCanonicalName();
   }
 
-  @Override
   public boolean hasError() {
     return lastError != null;
   }
@@ -1415,12 +1441,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return Runtime.class == this.getClass();
   }
 
-  @Override
   public boolean isReady() {
     return true;
   }
 
-  @Override
   public boolean isRunning() {
     return isRunning;
   }
@@ -1698,16 +1722,38 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // serializer.write(this, cfg);
       info("saving %s", cfg.getName());
 
+      // little hack to serialize only few reflected fields inside Runtime.serialisable list
+      String s = "{\n";
       if (this instanceof Runtime) {
+
         info("we cant serialize runtime yet");
-        return false;
+        for (Iterator<Object> iter = Runtime.serialisable.iterator(); iter.hasNext();) {
+          Object element = iter.next();
+
+          Field field = this.getClass().getDeclaredField(element.toString());
+          field.setAccessible(true);
+          if (field.get(this) != null) {
+            s += "\"" + element.toString() + "\": \"" + field.get(this) + "\"";
+            if (iter.hasNext()) {
+              s += ",\n";
+            }
+          }
+          if (!iter.hasNext()) {
+            s += "\n}";
+          }
+
+        }
+        //end runtime tip
+      } else {
+        s = CodecUtils.toJson(this);
       }
 
-      String s = CodecUtils.toJson(this);
       FileOutputStream out = new FileOutputStream(cfg);
       out.write(s.getBytes());
       out.close();
-    } catch (Exception e) {
+    } catch (
+
+    Exception e) {
       Logging.logError(e);
       return false;
     }
