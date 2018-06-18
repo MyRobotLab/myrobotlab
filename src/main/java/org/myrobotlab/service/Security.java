@@ -123,12 +123,12 @@ public class Security extends Service implements AuthorizationProvider {
 		return (Security) Runtime.start("security", "Security");
 	}
 
-	public void addSecret(String name, String secret) {
+	public static void addSecret(String name, String secret) {
 		store.put(name, secret);
 		saveStore();
 	}
 
-	private String byteArrayToHexString(byte[] b) {
+	private static String byteArrayToHexString(byte[] b) {
 		StringBuffer sb = new StringBuffer(b.length * 2);
 		for (int i = 0; i < b.length; i++) {
 			int v = b[i] & 0xff;
@@ -159,7 +159,7 @@ public class Security extends Service implements AuthorizationProvider {
 	 * @throws IOException
 	 *             e
 	 */
-	public String decrypt(String message, File keyFile) throws GeneralSecurityException, IOException {
+	public static String decrypt(String message, File keyFile) throws GeneralSecurityException, IOException {
 		SecretKeySpec sks = getSecretKeySpec(keyFile);
 		Cipher cipher = Cipher.getInstance(Security.AES);
 		cipher.init(Cipher.DECRYPT_MODE, sks);
@@ -182,7 +182,7 @@ public class Security extends Service implements AuthorizationProvider {
 	 *             e
 	 * 
 	 */
-	public String encrypt(String passphrase, File keyFile) throws GeneralSecurityException, IOException {
+	public static String encrypt(String passphrase, File keyFile) throws GeneralSecurityException, IOException {
 		if (!keyFile.exists()) {
 
 			new File(keyFile.getParent()).mkdirs();
@@ -203,7 +203,7 @@ public class Security extends Service implements AuthorizationProvider {
 		return byteArrayToHexString(encrypted);
 	}
 
-	public String getKeyFileName() {
+	public static String getKeyFileName() {
 		return String.format("%s%s%s", storeDirPath, File.separator, keyFileName);
 	}
 	
@@ -227,7 +227,7 @@ public class Security extends Service implements AuthorizationProvider {
 		addSecret(keyName, keyValue);
 	}
 
-	public String getSecret(String name) {
+	public static String getSecret(String name) {
 		if (!isLoaded) {
 			loadStore();
 		}
@@ -240,13 +240,13 @@ public class Security extends Service implements AuthorizationProvider {
 		return null;
 	}
 
-	private SecretKeySpec getSecretKeySpec(File keyFile) throws NoSuchAlgorithmException, IOException {
+	private static SecretKeySpec getSecretKeySpec(File keyFile) throws NoSuchAlgorithmException, IOException {
 		byte[] key = readKeyFile(keyFile);
 		SecretKeySpec sks = new SecretKeySpec(key, Security.AES);
 		return sks;
 	}
 
-	public String getStoreFileName() {
+	public static String getStoreFileName() {
 		return String.format("%s%s%s", storeDirPath, File.separator, storeFileName);
 	}
 
@@ -254,7 +254,7 @@ public class Security extends Service implements AuthorizationProvider {
 	// anonymous
 	// authenticated
 
-	private byte[] hexStringToByteArray(String s) {
+	private static byte[] hexStringToByteArray(String s) {
 		byte[] b = new byte[s.length() / 2];
 		for (int i = 0; i < b.length; i++) {
 			int index = i * 2;
@@ -276,7 +276,7 @@ public class Security extends Service implements AuthorizationProvider {
 		}
 	}
 
-	synchronized public void loadStore() {
+	synchronized static public void loadStore() {
 		try {
 
 			Properties fileStore = new Properties();
@@ -297,7 +297,7 @@ public class Security extends Service implements AuthorizationProvider {
 		}
 	}
 
-	private byte[] readKeyFile(File keyFile) throws FileNotFoundException {
+	private static byte[] readKeyFile(File keyFile) throws FileNotFoundException {
 		Scanner scanner = new Scanner(keyFile);
 		scanner.useDelimiter("\\Z");
 		String keyValue = scanner.next();
@@ -305,7 +305,7 @@ public class Security extends Service implements AuthorizationProvider {
 		return hexStringToByteArray(keyValue);
 	}
 
-	public void saveStore() {
+	public static void saveStore() {
 		try {
 			if (!isLoaded) {
 				loadStore();
