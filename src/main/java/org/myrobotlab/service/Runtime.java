@@ -2266,20 +2266,20 @@ public class Runtime extends Service implements MessageListener {
 	  runtime.setLocale(new Locale(language));
   }
 
-  public void setLocale(String language) {
+  public static void setLocale(String language) {
 	  setLocale(new Locale(language));
   }
 
-  public void setLocale(String language, String country) {
+  public static void setLocale(String language, String country) {
 	  setLocale(new Locale(language, country));
   }
 
-  public void setLocale(String language, String country, String variant) {
+  public static void setLocale(String language, String country, String variant) {
 	setLocale(new Locale(language, country, variant));
   }
   
-  public void setLocale(Locale locale) {
-	  this.locale = locale;
+  public static void setLocale(Locale locale) {
+	  locale = locale;
 	  Locale.setDefault(locale);
 	   /* I don't believe these are necessary 
 	    System.setProperty("user.language", language);
