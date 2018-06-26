@@ -8,9 +8,12 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
+import org.myrobotlab.framework.Index;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.WebGui;
+import org.myrobotlab.service.abstracts.AbstractBodyPart;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.repo.Category;
@@ -33,34 +36,35 @@ import org.myrobotlab.inmoov.Utils;
  * composite of servos, Arduinos, microphone, camera, kinect and computer. The
  * InMoov service is composed of many other services, and allows easy
  * initialization and control of these sub systems.
+ * Generic bodyPart service is used for skeleton control.
  *
  */
-public class InMoov2 extends Service {
+public class InMoov2 extends AbstractBodyPart {
+  
+  //TODO : check if skeleton tree is serialized
+  //TODO : migrate most of py code from inmoov repo
+  //TODO : check all gestures
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
   transient private static Runtime myRuntime = null; //
   transient private static ServiceData serviceData = null; // =
 
-  // interfaces declaration needed by InMoov
+  // interfaces reservation needed by InMoov
   transient public SpeechSynthesis mouth;
   transient public SpeechRecognizer ear;
+  transient public ProgramAB brain;
 
   //
-  // this is for gui combo content
+  // this is for GUI combo contents
   //
   public static LinkedHashMap<String, String> languages = new LinkedHashMap<String, String>();
   public static List<String> languagesIndex = new ArrayList<String>();
   public static List<String> speechEngines = new ArrayList<String>();
   public static List<String> earEngines = new ArrayList<String>();
 
-  //
-  // Multidimensional hashmap for unlimited attached skeleton members, main key is free skeleton type ( hand, arm ... )
-  //
-  private HashMap<String, HashMap<String, Skeleton>> inMoovSkeleton = new HashMap<String, HashMap<String, Skeleton>>();
-
   // ---------------------------------------------------------------
-  // Store parameters inside json related service
+  // Store some parameters inside json related service
   // ---------------------------------------------------------------
 
   String language;
@@ -120,28 +124,26 @@ public class InMoov2 extends Service {
 
       InMoov2 inMoov = (InMoov2) Runtime.start("inMoov", "InMoov2");
 
-      WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
+      BodyPart leftHand = (BodyPart) Runtime.start("leftHand", "BodyPart");
+      BodyPart rightHand = (BodyPart) Runtime.start("rightHand", "BodyPart");
+      BodyPart leftArm = (BodyPart) Runtime.start("leftArm", "BodyPart");
+      BodyPart rightArm = (BodyPart) Runtime.start("rightArm", "BodyPart");
+      BodyPart torso = (BodyPart) Runtime.start("torso", "BodyPart");
+      BodyPart head = (BodyPart) Runtime.start("head", "BodyPart");
 
-      Skeleton lHand = (Skeleton) Runtime.start("lHand", "Skeleton");
-      Skeleton rHand = (Skeleton) Runtime.start("rHand", "Skeleton");
-      Skeleton lArm = (Skeleton) Runtime.start("lArm", "Skeleton");
-      Skeleton rArm = (Skeleton) Runtime.start("rArm", "Skeleton");
-      Skeleton torso = (Skeleton) Runtime.start("torso", "Skeleton");
-      Skeleton head = (Skeleton) Runtime.start("head", "Skeleton");
+      Servo lthumb = (Servo) Runtime.start("leftHand.thumb", "Servo");
+      Servo lindex = (Servo) Runtime.start("leftHand.index", "Servo");
+      Servo lmajeure = (Servo) Runtime.start("leftHand.majeure", "Servo");
+      Servo lringfinger = (Servo) Runtime.start("leftHand.ringfinger", "Servo");
+      Servo lpinky = (Servo) Runtime.start("leftHand.pinky", "Servo");
+      Servo lwrist = (Servo) Runtime.start("leftHand.wrist", "Servo");
 
-      Servo lthumb = (Servo) Runtime.start("lthumb", "Servo");
-      Servo lindex = (Servo) Runtime.start("lindex", "Servo");
-      Servo lmajeure = (Servo) Runtime.start("lmajeure", "Servo");
-      Servo lringfinger = (Servo) Runtime.start("lringfinger", "Servo");
-      Servo lpinky = (Servo) Runtime.start("lpinky", "Servo");
-      Servo lwrist = (Servo) Runtime.start("lwrist", "Servo");
-
-      Servo rthumb = (Servo) Runtime.start("rthumb", "Servo");
-      Servo rindex = (Servo) Runtime.start("rindex", "Servo");
-      Servo rmajeure = (Servo) Runtime.start("rmajeure", "Servo");
-      Servo rringfinger = (Servo) Runtime.start("rringfinger", "Servo");
-      Servo rpinky = (Servo) Runtime.start("rpinky", "Servo");
-      Servo rwrist = (Servo) Runtime.start("rwrist", "Servo");
+      Servo rthumb = (Servo) Runtime.start("rightHand.thumb", "Servo");
+      Servo rindex = (Servo) Runtime.start("rightHand.index", "Servo");
+      Servo rmajeure = (Servo) Runtime.start("rightHand.majeure", "Servo");
+      Servo rringfinger = (Servo) Runtime.start("rightHand.ringfinger", "Servo");
+      Servo rpinky = (Servo) Runtime.start("rightHand.pinky", "Servo");
+      Servo rwrist = (Servo) Runtime.start("rightHand.wrist", "Servo");
 
       lthumb.attach(adafruit16CServoDriverLeft, 1);
       lindex.attach(adafruit16CServoDriverLeft, 2);
@@ -156,20 +158,27 @@ public class InMoov2 extends Service {
       rpinky.attach(adafruit16CServoDriverRight, 5);
       rwrist.attach(adafruit16CServoDriverRight, 6);
 
-      lHand.attach(lthumb, lindex, lmajeure, lringfinger, lpinky, lwrist);
-      rHand.attach(rthumb, rindex, rmajeure, rringfinger, rpinky, rwrist);
+      leftHand.attach(lpinky, lthumb, lindex, lmajeure, lringfinger, lwrist);
+      rightHand.attach(rthumb, rindex, rwrist, rmajeure, rringfinger, rpinky);
+      rightArm.attach(rightHand);
+      leftArm.attach(leftHand);
+      inMoov.attach(leftArm);
+      inMoov.attach(rightArm);
 
-      inMoov.attach(lHand, "hand", "left");
-      inMoov.attach(rHand, "hand", "right");
-      inMoov.attach(lArm, "arm", "left");
-      inMoov.attach(rArm, "arm", "right");
-      inMoov.attach(torso, "torso");
-      inMoov.attach(head, "head");
+      //inMoov.attach(lHand, "hand", "left");
+      //inMoov.attach(rightHand, "hand", "right");
+      //inMoov.attach(leftArm, "arm", "left");
+      //inMoov.attach(rArm, "arm", "right");
+      //inMoov.attach(torso, "torso");
+      //inMoov.attach(head, "head");
       //inMoov.attach(ear);
       inMoov.startMouth();
-      //inMoov.loadGestures();
+      inMoov.startEar();
+      inMoov.loadGestures();
+      ProgramAB bot = (ProgramAB) Runtime.start("bot", "ProgramAB");
+      inMoov.attach(bot);
 
-      LoggingFactory.init(Level.WARN);
+      //LoggingFactory.init(Level.WARN);
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -185,13 +194,19 @@ public class InMoov2 extends Service {
     this.language = getLanguage();
     this.speechEngine = getSpeechEngine();
     this.earEngine = getEarEngine();
-    loadLanguagePack();
+    try {
+      LanguagePack.load(getLanguage(), this.getIntanceName());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(InMoov2.class);
     meta.setAvailable(false);
+    meta.addDependency("inmoov.fr", "inmoov", "1.0.1", "zip");
     return meta;
   }
 
@@ -224,15 +239,8 @@ public class InMoov2 extends Service {
   // ---------------------------------------------------------------
   // attach interfaces
   // ---------------------------------------------------------------
-  public void attach(Attachable attachable) {
-    attach(attachable, null, null);
-  }
 
-  public void attach(Attachable attachable, String type) {
-    attach(attachable, type, null);
-  }
-
-  public void attach(Attachable attachable, String type, String side) {
+  public void attach(Attachable attachable) throws Exception {
     // todo : detach
     if (attachable instanceof SpeechSynthesis) {
 
@@ -246,30 +254,74 @@ public class InMoov2 extends Service {
       broadcastState();
 
     } else if (attachable instanceof SpeechRecognizer) {
-      try {
-        mouth.speakBlocking(LanguagePack.get("STARTINGEAR"));
-      } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      if (attachable.getClass().getSimpleName().equals("WebkitSpeechRecognition")) {
 
+      mouth.speakBlocking(LanguagePack.get("STARTINGEAR"));
+
+      if (attachable.getClass().getSimpleName().equals("WebkitSpeechRecognition")) {
+        ear = (SpeechRecognizer) attachable;
         WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
         webgui.autoStartBrowser(false);
         webgui.startService();
-        webgui.startBrowser("http://localhost:8888/#/service/ear");
-
+        webgui.startBrowser("http://localhost:8888/#/service/" + attachable.getName());
       }
-      ear = (SpeechRecognizer) attachable;
+
+      // attach ear to mouth
+      if (!(mouth == null)) {
+        ear.addMouth(mouth);
+      }
       broadcastState();
 
-    } else if (attachable instanceof Skeleton) {
-      if (!inMoovSkeleton.containsKey(type)) {
-        inMoovSkeleton.put(type, new HashMap<String, Skeleton>());
+    } else if (attachable instanceof ProgramAB) {
+
+      brain = (ProgramAB) attachable;
+      brain.repetition_count(10);
+      brain.setPath("InMoov2/chatBot");
+      // check aiml / aimlif is synced
+      if (!(brain.wasCleanyShutdowned == null) && brain.wasCleanyShutdowned.equals("nok")) {
+        mouth.speakBlocking(LanguagePack.get("BADSHUTDOWN"));
+      } else {
+        mouth.speakBlocking(LanguagePack.get("CHATBOTLOADING"));
       }
-      inMoovSkeleton.get(type).put(side, (Skeleton) attachable);
+      brain.startSession("default", "fi-FI");
+      brain.setPredicate("default", "topic", "default");
+      brain.setPredicate("default", "questionfirstinit", "");
+      brain.setPredicate("default", "tmpname", "");
+      brain.setPredicate("default", "null", "");
+      //brain.setPredicate("default","MagicCommandToWakeUp",MagicCommandToWakeUp)
+      if (!brain.getPredicate("default", "name").isEmpty()) {
+        if (brain.getPredicate("default", "lastUsername").isEmpty() || brain.getPredicate("default", "lastUsername").equals("unknown")) {
+          brain.setPredicate("default", "lastUsername", brain.getPredicate("default", "name"));
+        }
+      }
+      brain.savePredicates();
+      //start session based on last recognized person
+      if (!brain.getPredicate("default", "lastUsername").isEmpty() && !brain.getPredicate("default", "lastUsername").equals("unknown")) {
+        brain.setUsername(brain.getPredicate("default", "lastUsername"));
+
+      }
+
+      mouth.speakBlocking(LanguagePack.get("CHATBOTACTIVATED"));
+      if (mouth == null || ear == null) {
+        warn("Chatbot warning : it is better if InMoov have ear and mouth...");
+      }
+      brain.attach((Attachable) mouth);
+      brain.attach((Attachable) ear);
       broadcastState();
 
+    }
+
+    else if (attachable instanceof BodyPart) {
+      // attach the child to this node
+      if (attachable instanceof BodyPart) {
+        // store bodypart service inside the tree
+        thisNode.put(this.getName() + "." + attachable.getName(), attachable);
+        // store bodypart nodes
+        ArrayList<Attachable> nodes = ((BodyPart) attachable).thisNode.flatten();
+        for (Attachable service : nodes) {
+          thisNode.put(this.getName() + "." + service.getName(), service);
+        }
+      }
+      broadcastState();
     } else
 
     {
@@ -278,14 +330,15 @@ public class InMoov2 extends Service {
   }
 
   // ---------------------------------------------------------------
-  // start core interfaces, used by GUI
+  // start core interfaces, this is used by GUI
   // ---------------------------------------------------------------
   /**
    * Start InMoov speech engine also called "mouth"
    * 
    * @return started SpeechSynthesis service
+   * @throws Exception 
    */
-  public SpeechSynthesis startMouth() {
+  public SpeechSynthesis startMouth() throws Exception {
     SpeechSynthesis mouth = (SpeechSynthesis) Runtime.start(this.getIntanceName() + ".mouth", getSpeechEngine());
 
     this.attach((Attachable) mouth);
@@ -298,124 +351,90 @@ public class InMoov2 extends Service {
    * Start InMoov ear engine
    * 
    * @return started SpeechRecognizer service
+   * @throws Exception 
    */
-  public SpeechRecognizer startEar() {
+  public SpeechRecognizer startEar() throws Exception {
     ear = (SpeechRecognizer) Runtime.start(this.getIntanceName() + ".ear", getEarEngine());
+    this.attach((Attachable) ear);
     broadcastState();
     return ear;
+  }
+
+  /**
+   * Start InMoov brain engine
+   * 
+   * @return started SpeechRecognizer service
+   * @throws Exception 
+   */
+  public ProgramAB startBrain() throws Exception {
+    brain = (ProgramAB) Runtime.start(this.getIntanceName() + ".brain", "ProgramAB");
+    this.attach(brain);
+    broadcastState();
+    return brain;
   }
   // ---------------------------------------------------------------
   // END core interfaces
   // ---------------------------------------------------------------
 
   // ---------------------------------------------------------------
-  // Common gestures methods
+  // Common gestures methods for bodypart control
   // ---------------------------------------------------------------
 
   public void setHandVelocity(String side, Double... velocity) {
-
-    setSkeletonVelocity("hand", side, velocity);
-
+    setVelocity(side + "Hand", velocity);
   }
 
   public void setArmVelocity(String side, Double... velocity) {
-
-    setSkeletonVelocity("arm", side, velocity);
+    setVelocity(side + "Arm", velocity);
   }
 
   public void setHeadVelocity(Double... velocity) {
-
-    setSkeletonVelocity("head", null, velocity);
+    setVelocity("head", velocity);
   }
 
   public void moveHead(Double... servoPos) {
-
-    moveSkeleton("head", null, servoPos);
-
+    moveTo("head", servoPos);
   }
 
   public void moveHeadBlocking(Double... servoPos) {
-
-    moveSkeletonBlocking("hand", null, servoPos);
-
+    moveToBlocking("head", servoPos);
   }
 
   public void moveHand(String side, Double... servoPos) {
-
-    moveSkeleton("hand", side, servoPos);
-
+    moveTo(side + "Hand", servoPos);
   }
 
   public void moveHandBlocking(String side, Double... servoPos) {
-
-    moveSkeletonBlocking("hand", side, servoPos);
-
+    moveToBlocking(side + "Hand", servoPos);
   }
 
   public void moveArm(String side, Double... servoPos) {
-
-    moveSkeleton("arm", side, servoPos);
-
+    moveTo(side + "Arm", servoPos);
   }
 
   public void moveArmBlocking(String side, Double... servoPos) {
-
-    moveSkeletonBlocking("arm", side, servoPos);
-
+    moveToBlocking(side + "Arm", servoPos);
   }
 
-  public void setSkeletonVelocity(String type, String side, Double... velocity) {
+  public void setVelocity(String bodypart, Double... velocity) {
 
-    Skeleton member = getSkeletonPart(type, side);
-    if (member != null) {
-      member.checkParameters(velocity.length);
-      for (int i = 0; i < velocity.length && i < member.getServos().size(); i++) {
-        member.getServos().get(i).setVelocity(velocity[i]);
-      }
+    BodyPart part = getBodyPart(bodypart);
+    if (part != null) {
+      part.setVelocity(velocity);
     } else {
-      error("Seem the hand : " + side + " is unknown...");
-    }
-
-  }
-
-  /** 
-   * Generic move a group of Inmoov servo
-   * moveTo order is based on attach order, very important !
-   * TODO Universal main nervous system service
-   */
-  public void moveSkeleton(String type, String side, Double... servoPos) {
-    Skeleton member = getSkeletonPart(type, side);
-
-    if (member != null) {
-      member.moveTo(servoPos);
-    } else {
-      error("Seem the member  : " + side + " " + type + " is unknown...");
-    }
-
-  }
-
-  /** 
-   * Generic block move a group of Inmoov servo
-   * moveTo order is based on attach order, very important !
-   * TODO Universal main nervous system service
-   */
-  public void moveSkeletonBlocking(String type, String side, Double... servoPos) {
-    Skeleton member = getSkeletonPart(type, side);
-
-    if (member != null) {
-      member.moveToBlocking(servoPos);
-    } else {
-      error("Seem the member  : " + side + " " + type + " is unknown...");
+      error("Seem the bodypart : " + bodypart + " is unknown...");
     }
 
   }
 
   /**
-   *  over every skeleton members for setOverrideAutoDisable
+   *  Iterate over every skeleton members for setOverrideAutoDisable
    * 
    */
   private void setOverrideAutoDisable(Boolean param) {
-    inMoovSkeleton.forEach((skeletonType, skeletonHash) -> skeletonHash.forEach((side, skeleton) -> skeleton.setOverrideAutoDisable(param)));
+    for (BodyPart service : getBodyParts()) {
+      service.setOverrideAutoDisable(param);
+    }
   }
 
   /**
@@ -423,7 +442,9 @@ public class InMoov2 extends Service {
    * 
    */
   private void waitTargetPos() {
-    inMoovSkeleton.forEach((skeletonType, skeletonHash) -> skeletonHash.forEach((side, skeleton) -> skeleton.waitTargetPos()));
+    for (BodyPart service : getBodyParts()) {
+      service.waitTargetPos();
+    }
   }
 
   public void loadGestures() {
@@ -448,15 +469,6 @@ public class InMoov2 extends Service {
       loaded = Utils.loadPythonFile(f.getAbsolutePath(), this.getIntanceName());
     }
     return true;
-  }
-
-  public void loadLanguagePack() {
-    try {
-      LanguagePack.load(getLanguage(), this.getIntanceName());
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
   }
 
   public void stopGesture() {
@@ -498,17 +510,6 @@ public class InMoov2 extends Service {
   // ---------------------------------------------------------------
   // setters & getters
   // ---------------------------------------------------------------
-
-  public Skeleton getSkeletonPart(String type, String side) {
-    try {
-      return inMoovSkeleton.get(type).get(side);
-    } catch (
-
-    Exception e) {
-
-      return null;
-    }
-  }
 
   public String getSpeechEngine() {
     if (this.speechEngine == null) {
@@ -588,10 +589,6 @@ public class InMoov2 extends Service {
       setLanguage(this.language);
     }
     return this.language;
-  }
-
-  public HashMap<String, HashMap<String, Skeleton>> getSkeleton() {
-    return this.inMoovSkeleton;
   }
 
   // ---------------------------------------------------------------
