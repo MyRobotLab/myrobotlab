@@ -216,6 +216,7 @@ public class BodyPart extends AbstractBodyPart {
     meta.addDescription("An easier way to control a body ...");
     meta.addCategory("robot");
     meta.setAvailable(true);
+    meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     return meta;
   }
 }
