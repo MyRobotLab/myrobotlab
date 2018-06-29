@@ -2,16 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
 import org.apache.commons.lang3.StringUtils;
-import org.myrobotlab.framework.Index;
-import org.myrobotlab.framework.IndexNode;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
@@ -224,6 +215,7 @@ public class BodyPart extends AbstractBodyPart {
     ServiceType meta = new ServiceType(BodyPart.class.getCanonicalName());
     meta.addDescription("An easier way to control a body ...");
     meta.addCategory("robot");
+    meta.setAvailable(true);
     return meta;
   }
 }
