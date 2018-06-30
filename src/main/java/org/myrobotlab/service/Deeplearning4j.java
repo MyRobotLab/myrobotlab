@@ -117,7 +117,7 @@ public class Deeplearning4j extends Service {
   
   private ComputationGraph darknet = null;
   private ComputationGraph tinyyolo = null;
-  
+  private TinyYOLO tinyYOLOModel = null;
   // constructor.
   public Deeplearning4j(String reservedKey) {
     super(reservedKey);
@@ -405,7 +405,8 @@ public class Deeplearning4j extends Service {
   // This is for the Model Zoo support to load in the VGG16 model.  
   public void loadVGG16() throws IOException {
     log.info("Loading the VGG16 Model.  Download is large 500+ MB.. this will be cached after it downloads");
-    ZooModel zooModel = new VGG16();
+    //ZooModel zooModel = new VGG16();
+    ZooModel zooModel = VGG16.builder().build();
     vgg16 = (ComputationGraph) zooModel.initPretrained(PretrainedType.IMAGENET);
     // TODO: return true/false if the model was loaded properly/successfully.
   }
@@ -426,13 +427,13 @@ public class Deeplearning4j extends Service {
   }
   
   public void loadDarknet() throws IOException {
-    ZooModel zooModel = new Darknet19(1,123);
+    ZooModel zooModel = Darknet19.builder().build();
     darknet = (ComputationGraph) zooModel.initPretrained();
   }
   
   public void loadTinyYOLO() throws IOException {
-    ZooModel model = new TinyYOLO(1, 123); //num labels doesn't matter since we're getting pretrained imagenet
-    tinyyolo = (ComputationGraph) model.initPretrained();
+    tinyYOLOModel = TinyYOLO.builder().build(); //num labels doesn't matter since we're getting pretrained imagenet
+    tinyyolo = (ComputationGraph) tinyYOLOModel.initPretrained();
   }
 
   public List<List<ClassPrediction>> classifyImageDarknet(IplImage iplImage) throws IOException {
@@ -462,7 +463,9 @@ public class Deeplearning4j extends Service {
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
     INDArray outputs = tinyyolo.outputSingle(image);
-    List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs, 0.6, 0.4);
+    
+    List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(((TinyYOLO) tinyYOLOModel).getPriorBoxes()), outputs, 0.6, 0.4);
+   // List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs, 0.6, 0.4);
     // check output labels of result
     Labels labels = new VOCLabels();
     ArrayList<YoloDetectedObject> results = new ArrayList<YoloDetectedObject>();
@@ -615,7 +618,7 @@ public class Deeplearning4j extends Service {
   
   static public ServiceType getMetaData() {
     
-    String dl4jVersion = "1.0.0-alpha";
+    String dl4jVersion = "1.0.0-beta";
     boolean cudaEnabled = false;
     boolean supportRasPi = true;
     
