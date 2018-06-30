@@ -41,6 +41,8 @@ import java.awt.Rectangle;
 //import static org.bytedeco.javacpp.opencv_ts.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,12 +57,12 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.BlockingQueueGrabber;
@@ -156,7 +158,7 @@ public class OpenCV extends AbstractVideoSource {
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
 
-  transient public VideoProcessor videoProcessor = new VideoProcessor();
+  transient public VideoProcessor videoProcessor;
 
   // mask for each named filter
   transient public HashMap<String, IplImage> masks = new HashMap<String, IplImage>();
@@ -168,24 +170,33 @@ public class OpenCV extends AbstractVideoSource {
   // interface !
   // additionally this should not be public but package scope protected (ie no
   // declaration)
-  public boolean capturing = false;
+  public volatile boolean capturing = false;
 
   // TODO: a peer, but in the future , we should use WebGui and it's http
-  // container for this
-  // if possible.
+  // container for this if possible.
   // GROG : .. perhaps just a filter in the pipeline could stream it via http
   transient public VideoStreamer streamer;
-  public boolean streamerEnabled = true;
-
+  // Changed default to false.  Otherwise multiple opencv instances will get a port in use bind exception.
+  // TODO: fix how the opencv service can stream video to the webgui.  
+  public boolean streamerEnabled = false;
+  public String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
+  public Integer cameraIndex = 0;
+  public String inputFile = "http://localhost/videostream.cgi";
+  public String pipelineSelected = "";
+  public String grabberType = getDefaultFrameGrabberType();
+  public String format = null;
+  
   public OpenCV(String n) {
     super(n);
-    videoProcessor.setOpencv(this);
+    // initialize the video processor with a handle to this opencv service
+    videoProcessor = new VideoProcessor(this);
   }
 
   @Override
   public void stopService() {
     if (videoProcessor != null) {
       videoProcessor.stop();
+      capturing = false;
     }
     super.stopService();
   }
@@ -232,7 +243,7 @@ public class OpenCV extends AbstractVideoSource {
     return img;
   }
 
-  /*
+  /**
    * the publishing point of all OpenCV goodies ! type conversion is held off
    * until asked for - then its cached SMART ! :)
    * 
@@ -247,22 +258,22 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public Integer setCameraIndex(Integer index) {
-    videoProcessor.cameraIndex = index;
+    this.cameraIndex  = index;
     return index;
   }
 
   public String setInputFileName(String inputFile) {
-    videoProcessor.inputFile = inputFile;
+    this.inputFile = inputFile;
     return inputFile;
   }
 
   public String setInputSource(String inputSource) {
-    videoProcessor.inputSource = inputSource;
+    this.inputSource = inputSource;
     return inputSource;
   }
 
   public String setFrameGrabberType(String grabberType) {
-    videoProcessor.grabberType = grabberType;
+    this.grabberType = grabberType;
     return grabberType;
   }
 
@@ -274,13 +285,10 @@ public class OpenCV extends AbstractVideoSource {
 
   public OpenCVData add(SerializableImage image) {
     Frame src = BufferedImageToFrame(image.getImage());
-    // IplImage src = IplImage.createFrom(image.getImage());
-    // return new SerializableImage(dst.getBufferedImage(),
-    // image.getSource());
     return add(src);
   }
 
-  /*
+  /**
    * blocking safe exchange of data between different threads external thread
    * adds image data which can be retrieved from the blockingData queue
    * 
@@ -303,7 +311,7 @@ public class OpenCV extends AbstractVideoSource {
     }
   }
 
-  /*
+  /**
    * when the video image changes size this function will be called with the new
    * dimension
    */
@@ -356,11 +364,17 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   // publish functions end ---------------------------
-
+  
   public void stopCapture() {
     log.info("opencv - stop capture");
-    videoProcessor.stop();
+   // videoProcessor.stop();
+    
+    log.debug("stopping capture");
+    capturing = false;
+    videoProcessor.videoThread = null;
+    
     broadcastState(); // let everyone know
+    // TODO: do we need this?
     sleep(500);
     capturing = false;
   }
@@ -373,18 +387,84 @@ public class OpenCV extends AbstractVideoSource {
         streamer = (VideoStreamer) startPeer("streamer");
         streamer.attach(this);
       }
-      // stopCapture(); // restart?
-      videoProcessor.start();
+      
+      // TODO: The elusive API preference for the VideoCapture api! where you can specify plugins!
+      
+      FrameGrabber grabber = createFrameGrabber(inputSource, cameraIndex, inputFile, pipelineSelected, grabberType, format);
+      videoProcessor.start(grabber);
       // there's a nasty race condition,
       // so we sleep here for 500 milliseconds to make sure
       // the video stream is up and running before we publish our state.
-      sleep(500);
+      // sleep(500);
       broadcastState(); // let everyone know
     } catch (Exception e) {
       error(e);
     }
   }
 
+  
+
+  public static String getDefaultFrameGrabberType() {
+    Platform platform = Runtime.getInstance().getPlatform();
+    if (platform.isWindows()) {
+      return "org.bytedeco.javacv.VideoInputFrameGrabber";
+    } else {
+      return "org.bytedeco.javacv.OpenCVFrameGrabber";
+    }
+  }
+  
+
+  
+  private FrameGrabber createFrameGrabber(String inputSource, Integer cameraIndex, String inputFile, String pipelineSelected, String grabberType, String format) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    // inputSource = INPUT_SOURCE_IMAGE_FILE;
+    log.info(String.format("video source is %s", inputSource));
+    Class<?>[] paramTypes = new Class[1];
+    Object[] params = new Object[1];
+    // TODO - determine by file type - what input it is
+    if (OpenCV.INPUT_SOURCE_CAMERA.equals(inputSource)) {
+      paramTypes[0] = Integer.TYPE;
+      params[0] = cameraIndex;
+    } else if (OpenCV.INPUT_SOURCE_MOVIE_FILE.equals(inputSource)) {
+      paramTypes[0] = String.class;
+      params[0] = inputFile;
+    } else if (OpenCV.INPUT_SOURCE_IMAGE_FILE.equals(inputSource)) {
+      paramTypes[0] = String.class;
+      params[0] = inputFile;
+    } else if (OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY.equals(inputSource)) {
+      paramTypes[0] = String.class;
+      params[0] = inputFile;
+    } else if (OpenCV.INPUT_SOURCE_PIPELINE.equals(inputSource)) {
+      paramTypes[0] = String.class;
+      params[0] = pipelineSelected;
+    } else if (OpenCV.INPUT_SOURCE_NETWORK.equals(inputSource)) {
+      paramTypes[0] = String.class;
+      params[0] = inputFile;
+    }
+
+    log.info(String.format("attempting to get frame grabber %s format %s", grabberType, format));
+    Class<?> nfg = Class.forName(grabberType);
+    // TODO - get correct constructor for Capture Configuration..
+    Constructor<?> c = nfg.getConstructor(paramTypes);
+
+    FrameGrabber grabber = (FrameGrabber) c.newInstance(params);
+    
+    
+    if (format != null) {
+      grabber.setFormat(format);
+    }
+
+    
+    log.info(String.format("using %s", grabber.getClass().getCanonicalName()));
+
+    if (grabber == null) {
+      log.error("no viable capture or frame grabber with input {}", grabberType);
+      videoProcessor.stop();
+      capturing = false;
+    }
+    
+    return grabber;
+  }
+  
   public void stopRecording(String filename) {
     // cvReleaseVideoWriter(outputFileStreams.get(filename).pointerByReference());
   }
@@ -654,13 +734,13 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public int getCameraIndex() {
-    return videoProcessor.cameraIndex;
+    return this.cameraIndex;
   }
 
   public void setPipeline(String pipeline) {
-    videoProcessor.pipelineSelected = pipeline;
-    videoProcessor.inputSource = "pipeline";
-    videoProcessor.grabberType = "org.myrobotlab.opencv.PipelineFrameGrabber";
+    this.pipelineSelected = pipeline;
+    this.inputSource = "pipeline";
+    this.grabberType = "org.myrobotlab.opencv.PipelineFrameGrabber";
   }
 
   /*
@@ -857,8 +937,8 @@ public class OpenCV extends AbstractVideoSource {
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs",
     // "VideoStreamer");
     // vs.attach(opencv);
-    opencv.capture();
-    // opencvLeft.capture();
+   // opencv.capture();
+    // opencvLeft.capture(); 
     // opencvRight.capture();
 
     /*

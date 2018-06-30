@@ -167,11 +167,11 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 				prefixPath = "org.bytedeco.javacv.";
 			}
 
-			vp.grabberType = prefixPath + (String) grabberTypeSelect.getSelectedItem() + "FrameGrabber";
+			myOpenCV.grabberType = prefixPath + (String) grabberTypeSelect.getSelectedItem() + "FrameGrabber";
 
 			if (fileRadio.isSelected()) {
 				String fileName = inputFile.getText();
-				vp.inputFile = fileName;
+				myOpenCV.inputFile = fileName;
 				String extension = "";
 
 				int i = fileName.lastIndexOf('.');
@@ -182,8 +182,8 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 				File inputFile = new File(fileName);
 
 				if (("jpg").equals(extension) || ("png").equals(extension)) {
-					vp.inputSource = OpenCV.INPUT_SOURCE_IMAGE_FILE;
-					vp.grabberType = "org.myrobotlab.opencv.ImageFileFrameGrabber";
+				  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_IMAGE_FILE;
+				  myOpenCV.grabberType = "org.myrobotlab.opencv.ImageFileFrameGrabber";
 
 				} else if (inputFile.isDirectory()) {
 					// this
@@ -191,27 +191,27 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 					// a
 					// slide
 					// show.
-					vp.inputSource = OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY;
-					vp.grabberType = "org.myrobotlab.opencv.SlideShowFrameGrabber";
+				  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY;
+				  myOpenCV.grabberType = "org.myrobotlab.opencv.SlideShowFrameGrabber";
 					send("setDirectory", inputFile);
 				} else {
-					vp.inputSource = OpenCV.INPUT_SOURCE_MOVIE_FILE;
+				  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_MOVIE_FILE;
 				}
 
 			} else if (cameraRadio.isSelected()) {
-				vp.inputSource = OpenCV.INPUT_SOURCE_CAMERA;
-				vp.cameraIndex = (Integer) cameraIndex.getSelectedItem();
+			  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_CAMERA;
+			  myOpenCV.cameraIndex = (Integer) cameraIndex.getSelectedItem();
 			} else {
-				log.error("input source is " + vp.inputSource);
+				log.error("input source is " + myOpenCV.inputSource);
 			}
 
 			if ("IPCamera".equals(selected) || "MJpeg".equals(selected)) {
-				vp.inputSource = OpenCV.INPUT_SOURCE_NETWORK;
+			  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_NETWORK;
 			}
 
 			if ("Pipeline".equals(selected)) {
-				vp.inputSource = OpenCV.INPUT_SOURCE_PIPELINE;
-				vp.pipelineSelected = (String) pipelineHook.getSelectedItem();
+			  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_PIPELINE;
+			  myOpenCV.pipelineSelected = (String) pipelineHook.getSelectedItem();
 			}
 
 			send("setState", myOpenCV);
@@ -641,7 +641,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
 				for (int i = 0; i < grabberTypeSelect.getItemCount(); ++i) {
 					String currentObject = prefixPath + grabberTypeSelect.getItemAt(i) + "FrameGrabber";
-					if (currentObject.equals(vp.grabberType)) {
+					if (currentObject.equals(myOpenCV.grabberType)) {
 						grabberTypeSelect.setSelectedIndex(i);
 						break;
 					}
@@ -653,9 +653,9 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 					capture.setText("capture");
 				}
 
-				inputFile.setText(vp.inputFile);
-				cameraIndex.setSelectedIndex(vp.cameraIndex);
-				String inputSource = opencv.videoProcessor.inputSource;
+				inputFile.setText(myOpenCV.inputFile);
+				cameraIndex.setSelectedIndex(myOpenCV.cameraIndex);
+				String inputSource = opencv.inputSource;
 				if (OpenCV.INPUT_SOURCE_CAMERA.equals(inputSource)) {
 					cameraRadio.setSelected(true);
 				} else if (OpenCV.INPUT_SOURCE_CAMERA.equals(inputSource)) {
@@ -664,7 +664,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 					// grabberTypeSelect.removeActionListener(grabberTypeListener);
 					grabberTypeSelect.setSelectedItem("Pipeline");
 					// grabberTypeSelect.addActionListener(grabberTypeListener);
-					pipelineHook.setSelectedItem(vp.pipelineSelected);
+					pipelineHook.setSelectedItem(myOpenCV.pipelineSelected);
 				} else if (OpenCV.INPUT_SOURCE_IMAGE_FILE.equals(inputSource)
 						|| OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY.equals(inputSource)) {
 					// the file input should be enabled if we are file or

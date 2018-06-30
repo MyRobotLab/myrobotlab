@@ -48,8 +48,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       // TODO Auto-generated catch block
       e.printStackTrace();
       log.warn("Error loading vgg16 model!");
-      return;
-      
+      return;      
     }
     log.info("Done loading model..");
     // start classifier thread
