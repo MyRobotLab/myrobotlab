@@ -7,7 +7,6 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,97 +30,56 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
 import org.myrobotlab.framework.Instantiator;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
+/**
+ * This is the main video processing pipeline for the OpenCV service.
+ * It grabs a frame from the frame grabber and passes it though all opencv filters
+ */
 public class VideoProcessor implements Runnable, Serializable {
 
 	private static final long serialVersionUID = 1L;
-
 	public final static Logger log = LoggerFactory.getLogger(VideoProcessor.class);
 
-	int frameIndex = 0;
-	//public boolean capturing = false;
-
-	// GRABBER BEGIN --------------------------
-
-	public String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
-
-	public String grabberType = getDefaultFrameGrabberType();
-
-	transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
-
-	HashMap<String, Overlay> overlays = new HashMap<String, Overlay>();
-
-	// grabber cfg
-	public String format = null;
-
-	public boolean getDepth = false;
-
-	public int cameraIndex = 0;
-
-	public String inputFile = "http://localhost/videostream.cgi";
-	public String pipelineSelected = "";
-
+	public int frameIndex = 0;
+	private final transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();	
+	public HashMap<String, Overlay> overlays = new HashMap<String, Overlay>();
 	public boolean publishOpenCVData = true;
-	// GRABBER END --------------------------
-	// DEPRECATED - always use blocking queue
-	// public boolean useBlockingData = false;
-	// transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN, 1, 1);
-	// TODO: JavaCV upgrade, this changed?
-	transient CvFont font = new CvFont();
-
-	// DEPRECATED deemed a bad idea - non blocking
-	// use getOpenCVData
-	// OpenCVData lastData = null;
-
-	StringBuffer frameTitle = new StringBuffer();
-
-	OpenCVData data;
-
+	private transient CvFont font = new CvFont();
+	public StringBuffer frameTitle = new StringBuffer();
+	public OpenCVData data;
+  private final transient OpenCV opencv;
 	// FIXME - more than 1 type is being used on this in more than one context
 	// BEWARE !!!!
 	// FIXME - use for RECORDING & another one for Blocking for data !!!
+	// TODO: understand what these comments above mean...
+
 	transient public BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
-
-	private transient OpenCV opencv;
 	private transient FrameGrabber grabber = null;
-	transient Thread videoThread = null;
-
-	transient private Map<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
-
-	transient private List<OpenCVFilter> addFilterQueue = new ArrayList<OpenCVFilter>();
-	transient private List<String> removeFilterQueue = new ArrayList<String>();
-
-	transient SimpleDateFormat sdf = new SimpleDateFormat();
-
-	transient HashMap<String, FrameRecorder> outputFileStreams = new HashMap<String, FrameRecorder>();
-
+	public transient Thread videoThread = null;
+	private transient Map<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
+	private transient List<OpenCVFilter> addFilterQueue = new ArrayList<OpenCVFilter>();
+	private transient List<String> removeFilterQueue = new ArrayList<String>();
+	private transient SimpleDateFormat sdf = new SimpleDateFormat();
+	private transient HashMap<String, FrameRecorder> outputFileStreams = new HashMap<String, FrameRecorder>();
 	public static final String INPUT_KEY = "input";
-
 	public String boundServiceName;
 
 	/**
 	 * selected display filter unselected defaults to input
 	 */
 	public String displayFilterName = INPUT_KEY;
-
-	transient Frame frame;
-
+	public transient Frame frame;
 	private int minDelay = 0;
-
 	private boolean recordOutput = false;
 	private boolean closeOutputs = false;
 	public String recordingSource = INPUT_KEY;
-
 	private boolean showFrameNumbers = true;
-
 	private boolean showTimestamp = true;
 
 	/**
@@ -135,26 +93,18 @@ public class VideoProcessor implements Runnable, Serializable {
 	 * the last source key - used to set the next filter's
 	 * default source
 	 */
-	String lastSourceKey;
-	
+	public String lastSourceKey;
 
-	public static String getDefaultFrameGrabberType() {
-		Platform platform = Runtime.getInstance().getPlatform();
-		if (platform.isWindows()) {
-			return "org.bytedeco.javacv.VideoInputFrameGrabber";
-		} else {
-			return "org.bytedeco.javacv.OpenCVFrameGrabber";
-		}
-	}
-
-	public VideoProcessor() {
-		cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1, 1);
+	public VideoProcessor(OpenCV opencv) {
+	  this.opencv = opencv;
+	  this.boundServiceName = opencv.getName();
+	  cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1, 1);
 		OpenCVData data = new OpenCVData(boundServiceName, 0);
 		lastSourceKey = INPUT_KEY;
 		data.put(INPUT_KEY);
 	}
 	
-	/*
+	/**
 	 * to reply to the request of getting all
 	 * source keys - pending or current
 	 */
@@ -176,7 +126,7 @@ public class VideoProcessor implements Runnable, Serializable {
 		return ret;
 	}
 
-	/*
+	/**
 	 * add filter to the addFilterQueue so the video processor thread will pick
 	 * it up - this is always doen by an 'external' thread
 	 */
@@ -186,8 +136,8 @@ public class VideoProcessor implements Runnable, Serializable {
 		return filter;
 	}
 
-	/*
-	 * add filter with a string interface
+	/**
+	 * add filter with a string name and a filter type
 	 */
 	public OpenCVFilter addFilter(String name, String filterType) {
 		if (!filters.containsKey(name)) {
@@ -201,6 +151,11 @@ public class VideoProcessor implements Runnable, Serializable {
 		}
 	}
 
+	/**
+	 * return a particular filter that is in the video processor by it's name
+	 * @param name
+	 * @return
+	 */
 	public OpenCVFilter getFilter(String name) {
 		if (filters.containsKey(name)) {
 			return filters.get(name);
@@ -208,6 +163,7 @@ public class VideoProcessor implements Runnable, Serializable {
 		return null;
 	}
 
+	
 	public List<OpenCVFilter> getFiltersCopy() {
 		return new ArrayList<OpenCVFilter>(filters.values());
 	}
@@ -286,7 +242,6 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	private void warn(String msg, Object... params) {
 		try {
-			Thread.sleep(300);
 			opencv.warn(msg, params);
 		} catch (Exception e) {
 		}
@@ -304,101 +259,29 @@ public class VideoProcessor implements Runnable, Serializable {
 	@Override
 	public void run() {
 
-		opencv.capturing = true;
-
-		/*
-		 * TODO - check out opengl stuff if (useCanvasFrame) { cf = new
-		 * CanvasFrame("CanvasFrame"); }
-		 */
-
 		try {
-
-			// inputSource = INPUT_SOURCE_IMAGE_FILE;
-			log.info(String.format("video source is %s", inputSource));
-
-			Class<?>[] paramTypes = new Class[1];
-			Object[] params = new Object[1];
-
-			// TODO - determine by file type - what input it is
-
-			if (OpenCV.INPUT_SOURCE_CAMERA.equals(inputSource)) {
-				paramTypes[0] = Integer.TYPE;
-				params[0] = cameraIndex;
-			} else if (OpenCV.INPUT_SOURCE_MOVIE_FILE.equals(inputSource)) {
-				paramTypes[0] = String.class;
-				params[0] = inputFile;
-			} else if (OpenCV.INPUT_SOURCE_IMAGE_FILE.equals(inputSource)) {
-				paramTypes[0] = String.class;
-				params[0] = inputFile;
-			} else if (OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY.equals(inputSource)) {
-				paramTypes[0] = String.class;
-				params[0] = inputFile;
-			} else if (OpenCV.INPUT_SOURCE_PIPELINE.equals(inputSource)) {
-				paramTypes[0] = String.class;
-				params[0] = pipelineSelected;
-			} else if (OpenCV.INPUT_SOURCE_NETWORK.equals(inputSource)) {
-				paramTypes[0] = String.class;
-				params[0] = inputFile;
-			}
-
-			log.info(String.format("attempting to get frame grabber %s format %s", grabberType, format));
-			Class<?> nfg = Class.forName(grabberType);
-			// TODO - get correct constructor for Capture Configuration..
-			Constructor<?> c = nfg.getConstructor(paramTypes);
-
-			grabber = (FrameGrabber) c.newInstance(params);
-
-			if (format != null) {
-				grabber.setFormat(format);
-			}
-
-			log.info(String.format("using %s", grabber.getClass().getCanonicalName()));
-
-			if (grabber == null) {
-				log.error(String.format("no viable capture or frame grabber with input %s", grabberType));
-				stop();
-			}
-
-			if (grabber != null) {
-				grabber.start();
-			}
-
-			log.info("wating 300 ms for camera to warm up");
-			Service.sleep(300);
-
+		  // start the current grabber
+		  grabber.start();
 		} catch (Exception e) {
+		  opencv.capturing = false;
 			Logging.logError(e);
 			stop();
 		}
-		// TODO - utilize the size changing capabilites of the different
-		// grabbers
-		// grabbler.setImageWidth()
-		// grabber.setImageHeight(320);
-		// grabber.setImageHeight(240);
-
+		
 		log.info("beginning capture");
-
-		// keys
-		// String inputKey = String.format("%s.%s", boundServiceName,
-		// INPUT_KEY);
-		// String displayKey = String.format("%s.%s.%s", boundServiceName,
-		// INPUT_KEY, OpenCVData.KEY_DISPLAY);
-
-		// String inputFilterName = INPUT_KEY;
-
+    opencv.capturing = true;
+		
 		while (opencv.capturing) {
 			try {
-
 				++frameIndex;
 				if (Logging.performanceTiming)
 					Logging.logTime("start");
 
+				// Grab an actual frame!
 				frame = grabber.grab();				
 
 				if (Logging.performanceTiming)
 					Logging.logTime(String.format("post-grab %d", frameIndex));
-
-				// log.info(String.format("frame %d", frameIndex));
 
 				if (minDelay > 0) {
 					Service.sleep(minDelay);
@@ -415,14 +298,6 @@ public class VideoProcessor implements Runnable, Serializable {
 				// set the source key of the big map of all sources to
 				// reference our new frame - the key is {serviceName}.input
 				data.put(INPUT_KEY, converter.convert(frame));
-
-				/*
-				 * if (getDepth && grabber.getClass() ==
-				 * OpenKinectFrameGrabber.class) { sources.put(boundServiceName,
-				 * OpenCV.SOURCE_KINECT_DEPTH, ((OpenKinectFrameGrabber)
-				 * grabber).grabDepth()); }
-				 */
-				
 				
 				if (grabber.getClass() == OpenKinectFrameGrabber.class) {
           OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber)grabber;
@@ -613,13 +488,6 @@ public class VideoProcessor implements Runnable, Serializable {
 		this.minDelay = minDelay;
 	}
 
-	// FIXME - cheesy initialization - put it all in the constructor or before
-	// I assume this was done because the load() is difficult to manage !!
-	public void setOpencv(OpenCV opencv) {
-		this.opencv = opencv;
-		this.boundServiceName = opencv.getName();
-	}
-
 	public void putText(int x, int y, String text, int r, int g, int b) {
 		CvScalar color = cvScalar(r, g, b, 0);
 		CvPoint pos = cvPoint(x, y);
@@ -639,11 +507,11 @@ public class VideoProcessor implements Runnable, Serializable {
 		showTimestamp = b;
 	}
 
-	public void start() {
+	public void start(FrameGrabber grabber) {
+	  this.grabber = grabber;
 		log.info("starting capture");
 		sdf.setTimeZone(new SimpleTimeZone(0, "GMT"));
 		sdf.applyPattern("dd MMM yyyy HH:mm:ss z");
-
 		if (videoThread != null) {
 			log.info("video processor already started");
 			return;
@@ -654,7 +522,6 @@ public class VideoProcessor implements Runnable, Serializable {
 
 	public void stop() {
 		log.debug("stopping capture");
-		opencv.capturing = false;
 		videoThread = null;
 	}
 }
