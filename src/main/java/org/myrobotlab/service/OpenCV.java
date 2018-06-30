@@ -379,18 +379,14 @@ public class OpenCV extends AbstractVideoSource {
     capturing = false;
   }
 
-  public void capture() {
+  public void capture(FrameGrabber grabber) {
     try {
       save();
-
       if (streamerEnabled) {
         streamer = (VideoStreamer) startPeer("streamer");
         streamer.attach(this);
       }
-      
       // TODO: The elusive API preference for the VideoCapture api! where you can specify plugins!
-      
-      FrameGrabber grabber = createFrameGrabber(inputSource, cameraIndex, inputFile, pipelineSelected, grabberType, format);
       videoProcessor.start(grabber);
       // there's a nasty race condition,
       // so we sleep here for 500 milliseconds to make sure
@@ -400,6 +396,17 @@ public class OpenCV extends AbstractVideoSource {
     } catch (Exception e) {
       error(e);
     }
+  }
+  public void capture() {
+      FrameGrabber grabber = null;
+      try {
+        grabber = createFrameGrabber(inputSource, cameraIndex, inputFile, pipelineSelected, grabberType, format);
+      } catch (Exception e) {
+        error(e);
+        this.capturing = false;
+        return;
+      }
+      capture(grabber);
   }
 
   
