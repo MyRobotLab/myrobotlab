@@ -43,29 +43,31 @@ public class OpenCVTest {
   }
 
   @Test
-  public final void testFileCapture() {
+  public final void testFileCapture() throws InterruptedException {
     opencv.captureFromImageFile("src/test/resources/OpenCV/multipleFaces.jpg");
     
     opencv.setCameraIndex(3);
     assertEquals(3, opencv.getCameraIndex());
-    
-    OpenCVData data = opencv.getOpenCVData();
+    // TODO: sorry for changing the unit test.  this thread sleep is needed now!
+    // TODO: remove this thread.sleep call.. 
+    long now = System.currentTimeMillis();
+    long delta = System.currentTimeMillis() - now;
+    int threshold = 1000;
+    OpenCVData data = null;
+     while (delta <  threshold) {
+       delta = System.currentTimeMillis() - now;
+        data = opencv.getOpenCVData();
+        if (data != null) 
+          break;
+     }
     assertNotNull(data);
-
     // adding filter when running - TODO - test addFilter when not running
     // opencv.addFilter("FaceDetect");
-    
     // no guarantee filter is applied before retrieval
     // data = opencv.getOpenCVData();
     data = opencv.getFaceDetect();
     
-    int expected = 3;
-    int actual = 7;
    
-    //assertEquals(expected, actual);
-    // data.get
-    
-    
   }
 
   public static void main(String[] args) {
