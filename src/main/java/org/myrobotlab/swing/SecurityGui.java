@@ -28,9 +28,11 @@ package org.myrobotlab.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Security;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
@@ -38,26 +40,62 @@ public class SecurityGui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(SecurityGui.class);
+  
+  JLabel var1 = new JLabel("0.0");
+  JLabel var2 = new JLabel("1.0");
 
   public SecurityGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
+    
+    setTitle("status");
+    addLine("name ", boundServiceName);
+    addLine("var1 ", var1);
+    addLine("var2 ", var2);
+    
+    setTitle("input");
+    addLine("service ", boundServiceName);
+    
+    setTitle("output");
+    
+    /*
+    JPanel panel = createPanel("panel1");
+    panel.add(createLine("service ", boundServiceName));
+    panel.add(createLine("gui service ", myService.getName()));
+    panel.add(createLine(boundServiceName, " begining service"));
+    
+    display.add(panel, BorderLayout.EAST);
+    */
   }
 
   @Override
   public void actionPerformed(ActionEvent arg0) {
-    // TODO Auto-generated method stub
 
   }
 
   @Override
   public void subscribeGui() {
+    // un-defined gui's
+
+    // subscribe("someMethod");
+    // send("someMethod");
   }
 
   @Override
   public void unsubscribeGui() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
+
+    // unsubscribe("someMethod");
   }
 
-  public void onState(org.myrobotlab.service.Security security) {
+  /**
+   * Service State change - this method will be called when a "broadcastState"
+   * method is called which triggers a publishState.  This event handler is typically
+   * used when data or state information in the service has changed, and the UI should
+   * update to reflect this changed state.
+   * @param security the security service
+   */
+  public void onState(Security security) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -65,6 +103,5 @@ public class SecurityGui extends ServiceGui implements ActionListener {
       }
     });
   }
-
 
 }

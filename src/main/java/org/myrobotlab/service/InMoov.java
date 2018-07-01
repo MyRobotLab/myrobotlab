@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -21,6 +22,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.Servo.IKData;
+import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -1102,14 +1104,14 @@ public class InMoov extends Service {
     }
   }
 
-  public boolean speakBlocking(Status test) {
+  public List<AudioData> speakBlocking(Status test) {
     if (test != null && !mute) {
       return speakBlocking(test.toString());
     }
-    return false;
+    return null;
   }
 
-  public boolean speakBlocking(String toSpeak) {
+  public List<AudioData> speakBlocking(String toSpeak) {
     if (mouth != null && !mute) {
       try {
         return mouth.speakBlocking(toSpeak);
@@ -1117,7 +1119,7 @@ public class InMoov extends Service {
         Logging.logError(e);
       }
     }
-    return false;
+    return null;
   }
 
   public boolean speakErrors(boolean b) {

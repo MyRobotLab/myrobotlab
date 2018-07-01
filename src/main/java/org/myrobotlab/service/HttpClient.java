@@ -204,6 +204,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
         ((HttpPost) request).setEntity(new UrlEncodedFormEntity(nameValuePairs));
       }
     }
+    
+    log.info("uri [{}]", request.getURI());
+    
     HttpResponse response = client.execute(request);
     StatusLine statusLine = response.getStatusLine();
     data.responseCode = statusLine.getStatusCode();

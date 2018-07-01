@@ -13,6 +13,7 @@ import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
 import org.myrobotlab.framework.interfaces.Invoker;
+import org.myrobotlab.framework.interfaces.LoggingSink;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
@@ -36,7 +37,7 @@ public class AudioProcessor extends Thread {
   int currentTrackCount = 0;
   int samplesAdded = 0;
 
-  float volume = 1.0f;
+  double volume = 1.0f;
 
   float balance = 0.0f;
 
@@ -87,13 +88,20 @@ public class AudioProcessor extends Thread {
     AudioInputStream din = null;
     try {
 
-      File file = new File(data.uri);
-      if (file.length() == 0) {
-        // bail ?
-        log.error(String.format("audio file %s 0 byte length", file.getName()));
-        return data;
+      AudioInputStream in = null;
+
+      if (data.filename != null) {
+        File file = new File(data.filename);
+        if (file.length() == 0) {
+          // bail ?
+          log.error(String.format("audio file %s 0 byte length", file.getName()));
+          return data;
+        }
+        in = AudioSystem.getAudioInputStream(file);
+      } else if (data.inputStream != null) {
+        in =  AudioSystem.getAudioInputStream(data.inputStream);
       }
-      AudioInputStream in = AudioSystem.getAudioInputStream(file);
+
       AudioFormat baseFormat = in.getFormat();
       AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16, baseFormat.getChannels(), baseFormat.getChannels() * 2,
           baseFormat.getSampleRate(), false);
@@ -142,15 +150,15 @@ public class AudioProcessor extends Thread {
               FloatControl ctrl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
               // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
               // * 20.0);
- 
-              if (MathUtils.round(ctrl.getValue(),3) != MathUtils.round((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)),3)) {
+
+              if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)), 3)) {
                 if (data.volume <= 1.0f && data.volume >= 0) {
 
                   ctrl.setValue((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
                   log.info("Audioprocessor set volume to : " + ctrl.getValue());
                 } else {
                   log.error("Requested volume value " + data.volume.toString() + " not allowed");
-                  data.volume = 1.0f;
+                  data.volume = 1.0;
                 }
               }
               // volume.setValue(scaled);
@@ -198,6 +206,9 @@ public class AudioProcessor extends Thread {
 
     } catch (Exception e) {
       e.printStackTrace();
+      if (audioFile != null) {
+        ((LoggingSink)audioFile).error("%s - %s", e.getMessage(), data.filename);
+      }
     } finally {
       if (din != null) {
         try {
@@ -262,7 +273,7 @@ public class AudioProcessor extends Thread {
 
   }
 
-  public void setVolume(float volume) {
+  public void setVolume(double volume) {
     this.volume = volume;
   }
 
@@ -278,7 +289,7 @@ public class AudioProcessor extends Thread {
      */
   }
 
-  public float getVolume() {
+  public double getVolume() {
     return volume;
   }
 

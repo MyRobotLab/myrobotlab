@@ -700,6 +700,7 @@ public class Python extends Service {
 
   /**
    * stop all scripts
+   * (not sure the pros/cons of this management vs thread.interruptAllThreads())
    * @return
    */
   public boolean stop() {

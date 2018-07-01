@@ -37,17 +37,9 @@ public class IndianTtsGui extends AbstractSpeechSynthesisGui implements ActionLi
 
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(IndianTtsGui.class);
-
-
+  
   public IndianTtsGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-
-    // here we are inside abstracted speechGuiPanel, we add api section
-    keyIdLabel.setText("User Id :");
-    keyIdSecretLabel.setText("Api Key :");
-    speechGuiPanel.add(apiKeyLabel);
-    speechGuiPanel.add(apiKeylPanel);
-  
   }
 
 }

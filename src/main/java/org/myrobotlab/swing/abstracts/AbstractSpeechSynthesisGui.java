@@ -25,15 +25,16 @@
 
 package org.myrobotlab.swing.abstracts;
 
-import java.awt.Color;
-import java.awt.GridLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -42,7 +43,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 
@@ -50,239 +50,222 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
+import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.swing.ServiceGui;
-
 import org.slf4j.Logger;
 
-public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements ActionListener {
-  private static final long serialVersionUID = 1L;
+public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements ActionListener, ChangeListener {
+
+  // FIXME - SSML - adding combo box effects adds tags
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesisGui.class);
 
-  BufferedImage speakButtonPic = ImageIO.read(FileIO.class.getResource("/resource/Shoutbox.png"));
-
-  JButton speakButton = new JButton(new ImageIcon(speakButtonPic));
+  JButton speakButton = new JButton(new ImageIcon(ImageIO.read(FileIO.class.getResource("/resource/Speech.png"))));
   ImageIcon statusImageOK = new ImageIcon((BufferedImage) ImageIO.read(FileIO.class.getResource("/resource/green.png")));
   ImageIcon statusImageNOK = new ImageIcon((BufferedImage) ImageIO.read(FileIO.class.getResource("/resource/red.png")));
+  
+  JLabel speakingState = new JLabel("                  ");
+  JLabel cacheFile = new JLabel("                         ");
 
+  // FIXME - if cloud provider with keys - "not initialized" statusImage not oke
   JLabel statusIcon = new JLabel("Not initialized", statusImageNOK, JLabel.CENTER);
-  protected JPanel speechGuiPanel = new JPanel();
-  JComboBox<String> comboVoice = new JComboBox<String>();
-  JComboBox<String> comboVoiceEmotions = new JComboBox<String>();
+
+  JComboBox<String> voices = new JComboBox<String>();
   JTextArea lastUtterance = new JTextArea();
   final JPanel panel = new JPanel();
 
-  // used for effects like in mary
-  protected final JPanel EffectpanelTLeft = new JPanel();
-  protected final JPanel EffectpanelTRight = new JPanel();
-  protected final JPanel EffectpanelBLeft = new JPanel();
-  protected final JPanel EffectpanelBRight = new JPanel();
+  // FIXME - if is cloudservice - isReady - hasKeys ?
+  // FIXME - make KeyPanel class with label
+  Map<String, JPasswordField> keys = new HashMap<String, JPasswordField>();
 
-  protected JTextField effetsParameters = new JTextField();
-  protected JLabel ComboEffectLabel = new JLabel("Effect :");
-  protected JLabel ComboEffectLabel2 = new JLabel("Parameters :");
-  protected JComboBox<String> comboEffects = new JComboBox<String>();
-  protected JTextArea selectedEffects = new JTextArea();
-  protected JButton addEffect = new JButton("Add");
-  protected JButton updateEffect = new JButton("Update");
-  // used for api if needed by service
-  protected JLabel keyIdLabel = new JLabel("key Id :");
-  protected JLabel keyIdSecretLabel = new JLabel("Secret :");
-  protected JPanel apiKeylPanel = new JPanel();
-  JPasswordField keyId = new JPasswordField();
-  protected JPasswordField keyIdSecret = new JPasswordField();
-  JButton save = new JButton("Save");
-  protected JLabel apiKeyLabel = new JLabel("API Keys :");
-  protected JLabel volumeLabel = new JLabel("Volume :");
+  // TODO - add volume jlabel for volume value
+  JButton save = new JButton("save");
   JSlider volume = new JSlider(JSlider.HORIZONTAL, 0, 100, 100);
-
-  private class SliderListener implements ChangeListener {
-
-    @Override
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
-
-      if (swingGui != null) {
-
-        swingGui.send(boundServiceName, "setVolume", (double) Double.valueOf(volume.getValue()) / 100);
-      } else {
-        log.error("can not send message myService is null");
-
-      }
-    }
-  }
-
-  SliderListener volumeListener = new SliderListener();
 
   public AbstractSpeechSynthesisGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-
-    speechGuiPanel.setLayout(new GridLayout(7, 2, 0, 0));
-    JLabel status = new JLabel("Status :");
-    speechGuiPanel.add(status);
-    speechGuiPanel.add(statusIcon);
-
-    JLabel voice = new JLabel("Voice :");
-    speechGuiPanel.add(voice);
-
-    speechGuiPanel.add(comboVoice);
-
-    JLabel voiceEffects = new JLabel("Voice emotions :");
-    speechGuiPanel.add(voiceEffects);
-    speechGuiPanel.add(comboVoiceEmotions);
-    speechGuiPanel.add(volumeLabel);
-    speechGuiPanel.add(volume);
-    speechGuiPanel.add(panel);
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-
-    JLabel test = new JLabel("Test :");
-    panel.add(test);
     speakButton.setSelectedIcon(null);
-    panel.add(speakButton);
-
-    add(speechGuiPanel);
     lastUtterance.setWrapStyleWord(true);
     lastUtterance.setLineWrap(true);
-    selectedEffects.setWrapStyleWord(true);
-    selectedEffects.setLineWrap(true);
 
-    speechGuiPanel.add(lastUtterance);
+    // addTop(statusIcon, statusIcon);
+    addTop(" ");
+    addTop(speakingState);
+    addTop(cacheFile);
+    addTop(" ");
+    addLeftLine("voices:", voices);
+    addLeftLine("volume:", volume);
+    save.setPreferredSize(new Dimension(85, 45));
+    addBottom(save, speakButton);
+    addLine(lastUtterance);
 
-    // used for api if needed by service
-    apiKeylPanel.setLayout(new GridLayout(4, 2, 0, 0));
-
-    apiKeylPanel.add(keyIdLabel);
-    apiKeylPanel.add(keyIdSecretLabel);
-    apiKeylPanel.add(keyId);
-    apiKeylPanel.add(keyIdSecret);
-    apiKeylPanel.add(save);
-
-    // listeners
-    comboVoice.addActionListener(this);
-    comboVoiceEmotions.addActionListener(this);
+    // FIXME - hide status - unless cloud provider
+    // FIXME - hide save buttons unless a cloud provider with keys
     speakButton.addActionListener(this);
     save.addActionListener(this);
-    comboEffects.addActionListener(this);
-    updateEffect.addActionListener(this);
-    addEffect.addActionListener(this);
-
+    voices.addActionListener(this);
+  }
+  
+  @Override
+  public void subscribeGui() {
+    
+    subscribe("publishStartSpeaking");
+    subscribe("publishEndSpeaking");
+    
+    subscribe("publishAudioStart");
+    subscribe("publishAudioEnd");
   }
 
+  @Override
+  public void unsubscribeGui() {
+    
+    unsubscribe("publishStartSpeaking");
+    unsubscribe("publishEndSpeaking");
+    
+    unsubscribe("publishAudioStart");
+    unsubscribe("publishAudioEnd");
+  }
+  
+  public void onAudioStart(AudioData data) {
+    cacheFile.setText("playing : " + data.filename);
+    log.debug("gui onAudioStart {}", data.toString());
+  }
+  
+  public void onAudioEnd(AudioData data) {
+    cacheFile.setText("finished : " + data.filename);
+    log.debug("gui onAudioEnd {}", data.toString());
+  }
+  
+  public String onStartSpeaking(String utterance) {
+    log.debug("publishStartSpeaking - {}", utterance);
+    speakingState.setText("speaking started " + utterance);
+    lastUtterance.setText(utterance);
+    return utterance;
+  }
+
+  public String onEndSpeaking(String utterance) {
+    log.debug("publishEndSpeaking - {}", utterance);
+    speakingState.setText("speaking finished");
+    return utterance;
+  }
+  
   @Override
   public void actionPerformed(ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         Object o = event.getSource();
-        if (o == comboVoice) {
-          send("setVoice", comboVoice.getSelectedItem());
+        if (o == voices) {
+          String v = (String) voices.getSelectedItem();
+          if (v.length() > 0) {
+            String[] vparts = v.split(" ");
+            send("setVoice", vparts[0]);
+          }
         }
         if (o == speakButton) {
           send("speak", lastUtterance.getText());
         }
 
         if (o == save) {
-          send("setKeys", keyId.getText(), keyIdSecret.getText());
-        }
-        if (o == comboVoiceEmotions) {
-          send("speak", comboVoiceEmotions.getSelectedItem());
-        }
-        if (o == comboEffects) {
-          send("setSelectedEffect", comboEffects.getSelectedItem());
-        }
-        if (o == updateEffect) {
-          send("setAudioEffects", selectedEffects.getText());
-        }
-        if (o == addEffect) {
-          String output = (String) comboEffects.getSelectedItem();
-          if (!effetsParameters.getText().isEmpty()) {
-            output += "(" + effetsParameters.getText() + ")";
+          // save keys if any
+          for (String keyName : keys.keySet()) {
+            if (keys.get(keyName).getPassword() != null) {
+              send("setKey", keyName, new String(keys.get(keyName).getPassword()));
+            }
           }
-          if (!selectedEffects.getText().isEmpty()) {
-            output = "+" + output;
-          }
-
-          send("setAudioEffects", selectedEffects.getText() + output);
+          // save json
+          send("save");
         }
-
       }
     });
   }
 
-  public void onState(SpeechSynthesis speech) {
+  // TODO - add country flag instead of code - could add language name (it comes
+  // from locale)
+  String display(Voice voice) {
+    StringBuilder display = new StringBuilder();
+    display.append(voice.getName());
+    display.append((voice.getLanguageCode() == null) ? "" : " " + voice.getLanguageCode());
+    display.append((voice.getGender() == null) ? "" : " " + voice.getGender());
+    return display.toString();
+  }
+
+  // FIXME - CERTAINLY SHOULDN"T BE PROCESSED EVERY TIME IT SPEAKS !!!
+  public void onState(AbstractSpeechSynthesis speech) {
     SwingUtilities.invokeLater(new Runnable() {
+
       @Override
       public void run() {
         removeListeners();
-        if (speech.getEngineStatus()) {
-          statusIcon.setIcon(statusImageOK);
 
+        // voice list
+        List<Voice> vs = speech.getVoices();
+
+        if (vs.size() != voices.getItemCount()) {
+          voices.removeAllItems();
+          for (Voice voice : vs) {
+            // formatting display
+            // TODO add flags for language
+            voices.addItem(display(voice));
+            if (speech.getVoice() != null) {
+              if (voice.getName().equals(speech.getVoice().getName())) {
+                voices.setSelectedItem(display(voice));
+              }
+            }
+          }
+        }
+
+        // keys
+        if (speech.getKeyNames().length != keys.size()) {
+          String[] keyNames = speech.getKeyNames();
+          for (int i = 0; i < keyNames.length; ++i) {
+            String keyName = keyNames[i];
+            JPasswordField p = new JPasswordField();
+            if (speech.getKey(keyName) != null) {
+              p.setText(speech.getKey(keyName));
+            } else {
+              error("%s required", keyName);
+            }
+            keys.put(keyName, p);
+            addLeftLine(keyName, p);
+          }
+
+        }
+
+        // FIXME - is it necessary ???
+        if (speech.isReady()) {
+          statusIcon.setIcon(statusImageOK);
         } else {
           statusIcon.setIcon(statusImageNOK);
-        }
-        statusIcon.setText(speech.getEngineError());
-
-        if (comboVoiceEmotions.getItemCount() == 0 && !(speech.getVoiceEffects() == null)) {
-          comboVoiceEmotions.removeAll();
-          speech.getVoiceEffects().forEach((v) -> comboVoiceEmotions.addItem(v));
-          comboVoiceEmotions.setEnabled(true);
-        }
-        if ((speech.getVoiceEffects() == null)) {
-
-          comboVoiceEmotions.addItem("Offline");
-          comboVoiceEmotions.setEnabled(false);
-        }
-        if (comboVoice.getItemCount() == 0 && !(speech.getVoices() == null)) {
-          speech.getVoices().forEach((v) -> comboVoice.addItem(v));
-        }
-        if (comboVoice.getItemCount() > 0) {
-          comboVoice.setSelectedItem((speech.getVoice()));
-        }
-        if (speech.getKeys() == null || speech.getKeys()[0] == null || speech.getKeys()[0].isEmpty()) {
-          keyId.setBackground(Color.red);
-
-        } else {
-          keyId.setBackground(Color.green);
-          keyId.setText(speech.getKeys()[0]);
-        }
-        if (speech.getKeys() == null || speech.getKeys()[1] == null || speech.getKeys()[1].isEmpty()) {
-          keyIdSecret.setBackground(Color.red);
-
-        } else {
-          keyIdSecret.setBackground(Color.green);
-          keyIdSecret.setText(speech.getKeys()[1]);
-        }
-        if (comboEffects.getItemCount() > 0 && speech.getSelectedEffect() != null) {
-          comboVoice.setSelectedItem((speech.getSelectedEffect()));
-          effetsParameters.setText(speech.getEffectsList().get(speech.getSelectedEffect()));
         }
 
         volume.setValue((int) MathUtils.round(speech.getVolume() * 100, 0));
         lastUtterance.setText(speech.getlastUtterance());
-        selectedEffects.setText(speech.getAudioEffects());
         restoreListeners();
-
       }
     });
 
   }
 
+  @Override
+  public void stateChanged(javax.swing.event.ChangeEvent e) {
+    if (swingGui != null) {
+      swingGui.send(boundServiceName, "setVolume", (double) Double.valueOf(volume.getValue()) / 100);
+    }
+  }
+
   public void removeListeners() {
-    comboVoice.removeActionListener(this);
+    voices.removeActionListener(this);
     speakButton.removeActionListener(this);
     save.removeActionListener(this);
-    comboVoiceEmotions.removeActionListener(this);
-    volume.removeChangeListener(volumeListener);
-    comboEffects.removeActionListener(this);
-
+    volume.removeChangeListener(this);
   }
 
   public void restoreListeners() {
-    comboVoice.addActionListener(this);
+    voices.addActionListener(this);
     speakButton.addActionListener(this);
     save.addActionListener(this);
-    comboVoiceEmotions.addActionListener(this);
-    volume.addChangeListener(volumeListener);
-    comboEffects.addActionListener(this);
-
+    volume.addChangeListener(this);
   }
 }

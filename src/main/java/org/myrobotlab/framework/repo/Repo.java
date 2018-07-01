@@ -122,6 +122,9 @@ public abstract class Repo {
 			// translate"));
 			remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public",
 					"swinggui mxgraph"));
+			
+	     remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo",
+	          "some marytts voices"));
 
 			load();
 		} catch (Exception e) {

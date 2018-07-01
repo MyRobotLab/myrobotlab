@@ -251,6 +251,8 @@ public class Sweety extends Service {
   public int delaytimestop = 5;
   public int delaytimeletter = 1;
 
+  String lang;
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -767,7 +769,7 @@ public class Sweety extends Service {
   }
   
   public void setLanguage(String lang){
-    mouth.setLanguage(lang);
+    this.lang = lang;
   }
   public void setVoice(String voice){
     mouth.setVoice(voice);

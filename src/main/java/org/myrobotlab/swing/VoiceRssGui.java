@@ -38,17 +38,8 @@ public class VoiceRssGui extends AbstractSpeechSynthesisGui implements ActionLis
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(VoiceRssGui.class);
 
-
   public VoiceRssGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-
-    // here we are inside abstracted speechGuiPanel, we add api section
-    keyIdLabel.setText("Api key : ");
-    keyIdSecretLabel.setVisible(false);
-    keyIdSecret.setVisible(false);
-    speechGuiPanel.add(apiKeyLabel);
-    speechGuiPanel.add(apiKeylPanel);
-  
   }
 
 }
