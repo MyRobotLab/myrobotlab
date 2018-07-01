@@ -530,11 +530,12 @@ public class Security extends Service implements AuthorizationProvider {
 	 * @return ServiceType - returns all the data
 	 * 
 	 */
-	public ServiceType getMetaData() {
+	static public ServiceType getMetaData() {
 
 		ServiceType meta = new ServiceType(Security.class.getCanonicalName());
 		meta.addDescription("provides security");
 		meta.addCategory("framework", "security");
+    meta.includeServiceInOneJar(true);
 
 		return meta;
 	}

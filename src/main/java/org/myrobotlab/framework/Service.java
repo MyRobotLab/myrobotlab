@@ -169,7 +169,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   transient public final String MESSAGE_RECORDING_FORMAT_BINARY = "MESSAGE_RECORDING_FORMAT_BINARY";
 
   // FIXME SecurityProvider
-  protected AuthorizationProvider security = null;
+  protected AuthorizationProvider authProvider = null;
 
   private Status lastError = null;
 
@@ -383,9 +383,23 @@ public abstract class Service extends MessageService implements Runnable, Serial
     if (target == source) { // data is myself - operating on local copy
       return target;
     }
-
-    Class<?> sourceClass = source.getClass();
-    Class<?> targetClass = target.getClass();
+    Set<Class<?>> ancestry = new HashSet<Class<?>>();
+    Class<?> targetClass = source.getClass();
+    
+    ancestry.add(targetClass);
+    
+    // if we are a org.myrobotlab object climb up the ancestry to
+    // copy all super-type fields ... 
+    // GroG says: I wasn't comfortable copying of "Service" - because its never been tested before - so we copy all definitions from
+    // other superclasses e.g. - org.myrobotlab.service.abstracts
+    // it might be safe in the future to copy all the way up without stopping...
+   while(targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")){
+     ancestry.add(targetClass);
+     targetClass = targetClass.getSuperclass();
+   }
+   
+   for(Class<?> sourceClass : ancestry) {
+    
     Field fields[] = sourceClass.getDeclaredFields();
     for (int j = 0, m = fields.length; j < m; j++) {
       try {
@@ -408,8 +422,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
          */
 
         if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-          log.debug(String.format("skipping %s", f.getName()));
+          log.debug("skipping {}", f.getName());
           continue;
+        } else {
+          log.debug("copying {}", f.getName());
         }
         Type t = f.getType();
 
@@ -422,7 +438,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         // GroG - this is new 1/26/2017 - needed to get webgui data to
         // load
         f.setAccessible(true);
-        Field targetField = targetClass.getDeclaredField(f.getName());
+        Field targetField = sourceClass.getDeclaredField(f.getName());
         targetField.setAccessible(true);
 
         if (t.equals(java.lang.Boolean.TYPE)) {
@@ -449,7 +465,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       } catch (Exception e) {
         log.error("copy failed", e);
       }
-    }
+    } // for each field in class
+   } // for each in ancestry
     return target;
   }
 
@@ -682,12 +699,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public boolean setSecurityProvider(AuthorizationProvider provider) {
-    if (security != null) {
+    if (authProvider != null) {
       log.error("security provider is already set - it can not be unset .. THAT IS THE LAW !!!");
       return false;
     }
 
-    security = provider;
+    authProvider = provider;
     return true;
   }
 
@@ -1449,7 +1466,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       if (cfg.exists()) {
         // serializer.read(o, cfg);
         String json = FileIO.toString(filename);
-        Object saved = CodecUtils.fromJson(json, o.getClass());
+        Object saved = CodecUtils.fromJson(json, o.getClass()); 
+        
         copyShallowFrom(o, saved);
         return true;
       }
@@ -1601,7 +1619,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   @Override
   public boolean requiresSecurity() {
-    return security != null;
+    return authProvider != null;
   }
 
   /**
@@ -2116,7 +2134,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public String getDescription() {
     String description = getMetaData(getClass().getSimpleName()).getDescription();
-    //return getMetaData("Arduino").getDescription();
     return description;
   }
 

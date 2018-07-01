@@ -41,11 +41,6 @@ public class PollyGui extends AbstractSpeechSynthesisGui implements ActionListen
 
   public PollyGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-
-    // here we are inside abstracted speechGuiPanel, we add api section
-    speechGuiPanel.add(apiKeyLabel);
-    speechGuiPanel.add(apiKeylPanel);
-  
   }
 
 }

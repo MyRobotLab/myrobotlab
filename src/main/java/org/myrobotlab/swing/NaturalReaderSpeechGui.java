@@ -38,16 +38,8 @@ public class NaturalReaderSpeechGui extends AbstractSpeechSynthesisGui implement
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(NaturalReaderSpeechGui.class);
 
-
   public NaturalReaderSpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-   
 
   }
-
-
-
-
-
-
 }

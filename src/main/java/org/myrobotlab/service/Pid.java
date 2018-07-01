@@ -54,6 +54,8 @@ import org.slf4j.Logger;
  * http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-
  * introduction/ This will likely get merged/replaced with Pid service.
  * 
+ * TODO - handle integral windup - https://en.wikipedia.org/wiki/PID_controller#Integral_windup
+ * 
  */
 public class Pid extends Service {
 

@@ -48,12 +48,12 @@ import java.util.TreeMap;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -143,7 +143,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   transient Map<String, List<ServiceGui>> nameMethodCallbackMap;
 
-  transient JLabel status = new JLabel("status:");
+  transient JTextField status = new JTextField("status:");
   transient JButton statusClear = new JButton("clear");
 
   boolean active = false;
@@ -217,6 +217,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public SwingGui(String n) {
     super(n);
     this.self = this;
+    status.setEditable(false);
     if (tabs == null) {
       tabs = new DockableTabPane(this);
     } else {

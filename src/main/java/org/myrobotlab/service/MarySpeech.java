@@ -1,12 +1,14 @@
 package org.myrobotlab.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -19,11 +21,14 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.maryspeech.tools.install.MaryInstaller;
+import org.myrobotlab.maryspeech.tools.install.VoiceComponentDescription;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 import marytts.LocalMaryInterface;
 import marytts.MaryInterface;
+import marytts.exceptions.MaryConfigurationException;
 import marytts.exceptions.SynthesisException;
 import marytts.util.data.BufferedDoubleDataSource;
 import marytts.util.data.audio.DDSAudioInputStream;
@@ -46,72 +51,49 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
   private String maryBase = "mary";
 
-  // stored inside json
-  String audioEffects;
-  HashMap<String, String> voiceInJsonConfig;
-  // end
-
-  public String maryComponentsUrl = "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml";
-
-  public MarySpeech(String reservedKey) {
+  public MarySpeech(String reservedKey) throws MaryConfigurationException {
     super(reservedKey);
-    setEffectsList("TractScaler", "amount:1.5");
-    setEffectsList("F0Scale", "f0Scale:2.0");
-    setEffectsList("F0Add", "f0Add:50.0");
-    //setEffectsList("Rate", "durScale:1.5");
-    setEffectsList("Robot", "amount:100.0");
-    setEffectsList("Whisper", "amount:100.0");
-    setEffectsList("Stadium", "amount:100.0");
-    setEffectsList("Chorus", "delay1:466;amp1:0.54;delay2:600;amp2:-");
-    setEffectsList("FIRFilter", "type:3;fc1:500.0;fc2:2000.0");
-    setEffectsList("JetPilot", "");
 
-  }
+    // Set some envirionment variables so we can load Mary libraries.
+    System.setProperty("mary.base", maryBase);
+    System.setProperty("mary.downloadDir", new File(maryBase + "/download").getPath());
+    System.setProperty("mary.installedDir", new File(maryBase + "/installed").getPath());
 
-  @Override
-  public List<String> getVoices() {
-    List<String> list = null;
-    try {
-      list = new ArrayList<>(marytts.getAvailableVoices());
-      setEngineError("Ready");
-      setEngineStatus(true);
+    /*
+     * FIXME - standardize with SSML input <pre>
+     *
+     * setEffectsList("TractScaler", "amount:1.5"); setEffectsList("F0Scale",
+     * "f0Scale:2.0"); setEffectsList("F0Add", "f0Add:50.0"); //
+     * setEffectsList("Rate", "durScale:1.5"); setEffectsList("Robot",
+     * "amount:100.0"); setEffectsList("Whisper", "amount:100.0");
+     * setEffectsList("Stadium", "amount:100.0"); setEffectsList("Chorus",
+     * "delay1:466;amp1:0.54;delay2:600;amp2:-"); setEffectsList("FIRFilter",
+     * "type:3;fc1:500.0;fc2:2000.0"); setEffectsList("JetPilot", ""); </pre>
+     */
 
-    } catch (Exception e) {
-      return null;
+    File file = new File(maryBase);
+    if (!file.exists()) {
+      file.mkdirs();
     }
-    log.info("{} has {} voices", getName(), list.size());
-    for (int i = 0; i < list.size(); ++i) {
-      log.info(list.get(i));
+    file = new File(maryBase + File.separator + "download");
+    if (!file.exists()) {
+      file.mkdirs();
     }
-    setVoiceList(list);
-    return getVoiceList();
-  }
-
-  @Override
-  public boolean setVoice(String voice) {
-    if (subSetVoice(voice) && voice != null) {
-      try {
-        marytts.setVoice(voice);
-        return true;
-      } catch (IllegalArgumentException e) {
-        error("marytts.setVoice error : " + voice);
-
-      }
+    file = new File(maryBase + File.separator + "installed");
+    if (!file.exists()) {
+      file.mkdirs();
     }
-    return false;
-  }
+    file = new File(maryBase + File.separator + "lib");
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+    file = new File(maryBase + File.separator + "log");
+    if (!file.exists()) {
+      file.mkdirs();
+    }
 
-  @Override
-  public void setAudioEffects(String audioEffects) {
-    marytts.setAudioEffects(audioEffects);
-    this.audioEffects = audioEffects;
-    audioCacheParameters = audioEffects;
-    broadcastState();
-  }
+    marytts = new LocalMaryInterface();
 
-  @Override
-  public String getAudioEffects() {
-    return this.audioEffects;
   }
 
   public void installComponentsAcceptLicense(String component) {
@@ -122,8 +104,9 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     if (components == null) {
       return;
     }
-    log.info("Installing components from {}", maryComponentsUrl);
-    org.myrobotlab.maryspeech.tools.install.MaryInstaller installer = new MaryInstaller(maryComponentsUrl);
+    // log.info("Installing components from {}", maryComponentsUrl);
+    org.myrobotlab.maryspeech.tools.install.MaryInstaller installer = new MaryInstaller("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml");
+
     Map<String, org.myrobotlab.maryspeech.tools.install.LanguageComponentDescription> maryLanguages = installer.getLanguages();
     Map<String, org.myrobotlab.maryspeech.tools.install.VoiceComponentDescription> voices = installer.getVoices();
 
@@ -141,7 +124,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       }
     }
 
-    log.info("starting marytts component installation:" + toInstall);
+    log.info("starting marytts component installation: " + toInstall);
     installer.installSelectedLanguagesAndVoices(toInstall);
     log.info("moving files to correct places ...");
     File srcDir = new File(maryBase + File.separator + "lib");
@@ -179,7 +162,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
       // mary.setVoice("dfki-spike en_GB male unitselection general");
       // mary.setVoice("cmu-bdl-hsmm");
-      mary.setVoice("cmu-slt-hsmm");
+      // mary.setVoice("cmu-slt-hsmm");
       //// mary.getVoices();
       // mary.speak("world");
       //// mary.speak("");
@@ -201,7 +184,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       // mary.speakBlocking("then in the long term evolution of software");
 
       mary.speakBlocking("#THROAT01_F# Hello world, it is so funny #LAUGH02_F#");
-      mary.setVoice("cmu-bdl-hsmm");
+      // mary.setVoice("cmu-bdl-hsmm");
       mary.speakBlocking("#THROAT01_M# hi! it works.");
       mary.speakBlocking("#LAUGH01_M#");
       mary.setVolume(0.8);
@@ -214,56 +197,11 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     }
   }
 
-  @Override
-  public void startService() {
-
-    super.startService();
-    // TODO: this should all be in startService, no?
-    File file = new File(maryBase);
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "download");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "installed");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "lib");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-    file = new File(maryBase + File.separator + "log");
-    if (!file.exists()) {
-      file.mkdirs();
-    }
-
-    // Set some envirionment variables so we can load Mary libraries.
-    System.setProperty("mary.base", maryBase);
-    System.setProperty("mary.downloadDir", new File(maryBase + "/download").getPath());
-    System.setProperty("mary.installedDir", new File(maryBase + "/installed").getPath());
-
-    setEngineError("Starting...");
-    setEngineStatus(false);
-
-    try {
-      marytts = new LocalMaryInterface();
-    } catch (Exception e) {
-      Logging.logError(e);
-      setEngineError("LocalMaryInterface KO");
-      setEngineStatus(false);
-    }
-
-    setAudioCacheExtension("wav");
-
-    subSpeechStartService();
-    if (audioEffects == null) {
-      audioEffects = "";
-      audioCacheParameters = audioEffects;
-    }
-    setAudioEffects(audioEffects);
+  /**
+   * default cache file type for Mary
+   */
+  public String getAudioCacheExtension() {
+    return ".wav";
   }
 
   /**
@@ -276,27 +214,47 @@ public class MarySpeech extends AbstractSpeechSynthesis {
    */
   static public ServiceType getMetaData() {
 
-    // ServiceType meta = new ServiceType(MarySpeech.class);
     ServiceType meta = AbstractSpeechSynthesis.getMetaData(MarySpeech.class.getCanonicalName());
 
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech", "sound");
-    // meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip"); included in abstract speech synth
-    // override audiofile peer ( because dependencies not parsed )
     meta.addDescription("Speech synthesis based on MaryTTS");
 
     meta.addDependency("de.dfki.mary", "marytts", "5.2", "pom");
-    
+    // FIXME - use the following config file to generate the needed data for
+    // loadVoice()
+    // main config for voices
+    // https://github.com/marytts/marytts-installer/blob/master/components.json
 
-    // hmm..TODO: refactor this.
-    String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm",
-        "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
-        "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm", "voice-upmc-pierre-hsmm" };
-    
+    /*
+     * String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm",
+     * "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm",
+     * "voice-cmu-slt-hsmm", "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm",
+     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm",
+     * "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
+     * "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm",
+     * "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm",
+     * "voice-upmc-pierre-hsmm", "voice-bits2", "voice-dfki-obadiah-hsmm",
+     * "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm",
+     * "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm",
+     * "voice-cmu-slt-hsmm", "voice-enst-camille-hsmm",
+     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm",
+     * "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
+     * "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"
+     * };
+     */
+    Set<String> voices = new HashSet<>(Arrays.asList("voice-bits1", "voice-bits1-hsmm", "voice-bits2", "voice-bits3", "voice-bits3-hsmm", "voice-bits4", "voice-cmu-bdl",
+        "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms", "voice-cmu-rms-hsmm", "voice-cmu-slt", "voice-dfki-obadiah", "voice-dfki-obadiah-hsmm", "voice-dfki-ot",
+        "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-pavoque-styles", "voice-dfki-poppy", "voice-dfki-poppy-hsmm",
+        "voice-dfki-prudence", "voice-dfki-prudence-hsmm", "voice-dfki-spike", "voice-dfki-spike-hsmm", "voice-enst-camille", "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm",
+        "voice-istc-lucia-hsmm", "voice-marylux", "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre", "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
+        "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm", "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm", "voice-cmu-slt-hsmm",
+        "voice-enst-camille-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
+        "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"));
     for (String voice : voices) {
       meta.addDependency("de.dfki.mary", voice, "5.2");
       if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
-    	  meta.exclude("org.slf4j", "slf4j-log4j12");
+        meta.exclude("org.slf4j", "slf4j-log4j12");
       }
     }
 
@@ -309,62 +267,67 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     meta.exclude("org.slf4j", "slf4j-log4j12");
     meta.exclude("org.apache.httpcomponents", "httpcore");
 
-    // meta.addDependency("opennlp", "1.6");
     return meta;
   }
 
-
-
   @Override
-  public byte[] generateByteAudio(String toSpeak) throws IOException {
+  public AudioData generateAudioData(String toSpeak) throws IOException, SynthesisException {
     // generate mary to wav
-    AudioInputStream maryOutput = null;
-    try {
-      maryOutput = marytts.generateAudio(toSpeak);
-    } catch (SynthesisException e) {
-      setEngineError("MarySpeech cannot generate audiofile");
-      setEngineStatus(false);
-      error(getEngineError() + " : %s,e");
-    }
+    String filename = getLocalFileName(toSpeak);
+    Voice voice = getVoice();
+    marytts.setVoice(voice.getVoiceProvider().toString());
+    // marytts.setInputType("SSML"); FIXME - MUST BE VALID XML WITH HEADER !!!
+    // marytts.setOutputType("TARGETFEATURES");
+    // marytts.setLocale(Locale.SWEDISH);
+
+    AudioInputStream maryOutput = marytts.generateAudio(toSpeak);
 
     DDSAudioInputStream outputAudio = new DDSAudioInputStream(new BufferedDoubleDataSource(MaryAudioUtils.getSamplesAsDoubleArray(maryOutput)), maryOutput.getFormat());
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    AudioSystem.write(outputAudio, AudioFileFormat.Type.WAVE, outputStream);
-    return outputStream.toByteArray();
-
+    FileOutputStream fos = new FileOutputStream(filename);
+    AudioSystem.write(outputAudio, AudioFileFormat.Type.WAVE, fos);
+    fos.close();
+    return new AudioData(filename);
   }
 
   @Override
-  public void setKeys(String keyId, String keyIdSecret) {
-    // TODO Auto-generated method stub
+  protected void loadVoices() {
+    // It is great that we can query to get voices - but regrettably they are
+    // lacking a lot of useful meta-data
+    // such as locale and gender. So, we will "hardcode" the meta information..
+    Set<String> list = marytts.getAvailableVoices();
+    list.size();
 
-  }
-
-  @Override
-  public String[] getKeys() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getVoiceInJsonConfig() {
-    if (voiceInJsonConfig == null) {
-      voiceInJsonConfig = new HashMap<String, String>();
+    for (String k : list) {
+      System.out.println("voice-" + k);
     }
 
-    return voiceInJsonConfig.get(this.getClass().getSimpleName());
-  }
+    org.myrobotlab.maryspeech.tools.install.MaryInstaller installer = new MaryInstaller("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml");
+    Map<String, VoiceComponentDescription> moreVoices = installer.getVoices();
+    for (String k : moreVoices.keySet()) {
+      System.out.println("voice-" + k);
+    }
+    moreVoices.size();
 
-  @Override
-  public void setVoiceInJsonConfig(String voice) {
-    voiceInJsonConfig.put(this.getClass().getSimpleName(), voice);
+    // installComponentsAcceptLicense("bits2");
 
-  }
-
-  @Override
-  public void setLanguage(String l) {
-    // TODO Auto-generated method stub
-    
+    addVoice("Obadiah", "male", "en", "dfki-obadiah-hsmm");
+    addVoice("Lucia", "female", "it", "istc-lucia-hsmm");
+    addVoice("Emma", "female", "de", "bits1-hsmm");
+    addVoice("Henry", "male", "en", "cmu-rms-hsmm");
+    addVoice("Alim", "male", "tr", "dfki-ot-hsmm");
+    addVoice("Jessica", "female", "fr", "upmc-jessica-hsmm");
+    addVoice("Spike", "male", "en-GB", "dfki-spike-hsmm");
+    addVoice("Sally", "female", "en-US", "cmu-slt-hsmm");
+    addVoice("Camille", "female", "fr", "enst-camille-hsmm");
+    addVoice("Hans", "male", "de", "dfki-pavoque-neutral-hsmm");
+    addVoice("Poppy", "female", "en-GB", "dfki-poppy-hsmm");
+    addVoice("Mark", "male", "en-US", "cmu-bdl-hsmm");
+    addVoice("Pierre", "male", "fr", "upmc-pierre-hsmm");
+    addVoice("Mahi", "female", "te", "cmu-nk-hsmm");
+    addVoice("Dennys", "male", "fr-CA", "enst-dennys-hsmm");
+    addVoice("Conrad", "male", "de", "bits3-hsmm");
+    addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
+    // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
 
 }

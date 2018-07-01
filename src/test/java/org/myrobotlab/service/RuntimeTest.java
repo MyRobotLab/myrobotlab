@@ -75,8 +75,8 @@ public class RuntimeTest {
     long curr = 1479044758691L;
     Date d = new Date(curr);
 
-    
-    Runtime.setLocale("fr", "FR");
+    Runtime runtime = Runtime.getInstance();
+    runtime.setLocale("fr", "FR");
     // TODO: how do i test this?
     
     // you can't test default reliably
@@ -86,7 +86,7 @@ public class RuntimeTest {
     // you cant test default reliably
     // assertEquals("13 novembre 2016", today);
 
-    Runtime.setLocale("en");
+    runtime.setLocale("en");
     formatter = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
     today = formatter.format(d);
 

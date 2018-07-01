@@ -564,7 +564,8 @@ public class InMoov2 extends Service {
     if (languages.containsKey(Locale.getDefault().toLanguageTag())) {
       this.language = l;
       info("Set Runtime language to %s", languages.get(l));
-      Runtime.setLocale(l);
+      Runtime runtime = Runtime.getInstance();
+      runtime.setLocale(l);
       broadcastState();
     } else {
       error("InMoov not yet support {}", l);

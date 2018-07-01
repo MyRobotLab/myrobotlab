@@ -1,14 +1,19 @@
 package org.myrobotlab.service.data;
 
+import java.io.InputStream;
+
 /**
  * AudioData - represents all of the meta data concerning a sample and the playing of that sample.
- * Items not set (ie null) will be filled by a default in the AuidoProcessor.  Items which are
+ * Items not set (ie null) will be filled by a default in the AudioProcessor.  Items which are
  * set here will always take precedence over the AudioProcessor
  * 
  * @author GroG
  *
  */
 public class AudioData {
+  
+  // FIXME STREAM (InputStream) & AND ENCODING TYPE mp3 wav aiff etc...
+  // FIXME USE INPUTSTREAM - filename is just a reference & byte[] can be put in an InputStream 
   
   public transient static final String MODE_BLOCKING = "blocking";
   public transient static final String MODE_QUEUED = "queued";
@@ -28,8 +33,11 @@ public class AudioData {
   
   /**
    * String uri reference of audio stream
+   * FIXME - nice idea it was uri .. but its not :P
    */
-  public String uri = null;
+  public String filename = null;
+  
+  transient public InputStream inputStream = null;
   
   /**
    * repeat : null == never | count == # of times | -1 infinite
@@ -52,13 +60,17 @@ public class AudioData {
   
   // public String state = 
 
-  public Float volume = null; // null == take processor volume | != null == specify own volume
-  
+  public Double volume = null; // null == take processor volume | != null == specify own volume
+   
   // public float volume = 1.0f; DONE ON TRACK
   // public float balance = 0.0f; SHOULD BE DONE ON TRACK
   // public String track = DEFAULT_TRACK; // default track
   public AudioData(String fileName) {
-    this.uri = fileName;
+    this.filename = fileName;
+  }
+  
+  public AudioData(InputStream inputStream) {
+    this.inputStream = inputStream;
   }
 
   public String toString() {
@@ -72,10 +84,7 @@ public class AudioData {
       }
     }
     
-    return String.format("file : %s  mode : %s trackId : %d %s", uri, mode, trackId, r);
+    return String.format("file : %s  mode : %s trackId : %d %s", filename, mode, trackId, r);
   }
 
-  public static AudioData create(String uri) {
-    return new AudioData(uri);
-  }
 }

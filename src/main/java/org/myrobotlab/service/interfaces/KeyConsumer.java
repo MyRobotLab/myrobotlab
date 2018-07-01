@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 public interface KeyConsumer {
 	
-	public String[] getRequiredKeyNames();
+	public String[] getKeyNames();
 	
 	public void setKey(String keyName, String keyValue);
 	

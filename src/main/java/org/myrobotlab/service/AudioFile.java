@@ -26,9 +26,6 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,11 +76,10 @@ public class AudioFile extends Service {
   // TODO - utilize
   // http://docs.oracle.com/javase/7/docs/api/javax/sound/sampled/Clip.html
 
-  static String globalFileCacheDir = "audioFile";
-  public static final String journalFilename = "journal.txt";
+
   String currentTrack = DEFAULT_TRACK;
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
-  float volume = 1.0f;
+  double volume = 1.0f;
 
   public AudioFile(String n) {
     super(n);
@@ -106,7 +102,7 @@ public class AudioFile extends Service {
   //
   public AudioData play(String filename) {
 
-    if (filename == null || filename.isEmpty() || filename.contentEquals(globalFileCacheDir + File.separator + "null")) {
+    if (filename == null || filename.isEmpty()) {
       error("asked to play a null filename!  error");
       return null;
     }
@@ -134,7 +130,7 @@ public class AudioFile extends Service {
     // the currentTrack and its
     // created if necessary
 
-    if (data == null || data.toString().startsWith("file : " + globalFileCacheDir + File.separator + "null")) {
+    if (data == null) {
       log.warn("asked to play a null AudioData!  error");
       return null;
     }
@@ -154,8 +150,8 @@ public class AudioFile extends Service {
     return data;
   }
 
-  public void playBlocking(String filename) {
-    playFile(filename, true);
+  public AudioData playBlocking(String filename) {
+    return playFile(filename, true);
   }
 
   public void pause() {
@@ -172,18 +168,18 @@ public class AudioFile extends Service {
     playFile(filename, false);
   }
 
-  public void playFile(String filename, Boolean isBlocking) {
+  public AudioData playFile(String filename, Boolean isBlocking) {
 
     if (filename == null) {
       log.warn("Asked to play a null file, sorry can't do that");
-      return;
+      return null;
     }
 
     File f = new File(filename);
     if (!f.exists()) {
       error("File not found to play back " + f.getAbsolutePath());
       log.warn("File not found to play back " + f.getAbsolutePath());
-      return;
+      return null;
     }
 
     AudioData data = new AudioData(filename);
@@ -193,6 +189,7 @@ public class AudioFile extends Service {
       data.mode = AudioData.MODE_QUEUED;
     }
     play(data);
+    return data;
   }
 
   public void playFileBlocking(String filename) {
@@ -237,36 +234,8 @@ public class AudioFile extends Service {
     setVolume((float) volume);
   }
 
-  public float getVolume() {
+  public double getVolume() {
     return this.volume;
-  }
-
-  public boolean cacheContains(String filename) {
-    File file = new File(globalFileCacheDir + File.separator + filename);
-    return file.exists();
-  }
-
-  public AudioData playCachedFile(String filename) {
-    return play(globalFileCacheDir + File.separator + filename);
-  }
-
-  public void cache(String filename, byte[] data, String toSpeak) throws IOException {
-    File file = new File(globalFileCacheDir + File.separator + filename);
-    File parentDir = new File(file.getParent());
-    if (!parentDir.exists()) {
-      parentDir.mkdirs();
-    }
-    FileOutputStream fos = new FileOutputStream(globalFileCacheDir + File.separator + filename);
-    fos.write(data);
-    fos.close();
-    // Now append the journal entry to the journal.txt file
-    FileWriter journal = new FileWriter(globalFileCacheDir + File.separator + journalFilename, true);
-    journal.append(filename + "," + toSpeak + "\r\n");
-    journal.close();
-  }
-
-  public static String getGlobalFileCacheDir() {
-    return globalFileCacheDir;
   }
 
   public String getTrack() {
@@ -313,14 +282,17 @@ public class AudioFile extends Service {
       // "AudioFile");
       // MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
 
-      MarySpeech robot1 = (MarySpeech) Runtime.start("robot1", "MarySpeech");
-      AudioFile audio = robot1.getAudioFile();
+      AudioFile audio = (AudioFile)Runtime.start("audio", "AudioFile");//robot1.getAudioFile();
+      audio.play(new AudioData("https://ia802508.us.archive.org/5/items/testmp3testfile/mpthreetest.mp3"));
 
-      AudioData data = AudioData.create("whatHowCanYouSitThere.mp3");
+      
+      MarySpeech robot1 = (MarySpeech) Runtime.start("robot1", "MarySpeech");
+  
+      AudioData data = new AudioData("whatHowCanYouSitThere.mp3");
       data.repeat = 4;
       data.track = "new track";
       // FIXME - need to compared scaled with range !!!! - inform others
-      data.volume = 0.5f;
+      data.volume = 0.5;
       audio.play(data);
 
       audio.play("whatHowCanYouSitThere.mp3");
@@ -468,12 +440,6 @@ public class AudioFile extends Service {
 
   public void track() {
     track(DEFAULT_TRACK);
-  }
-
-  public String finishedPlaying(String utterance) {
-    // TODO: maybe wire though the utterance?
-    log.info("Finished playing called");
-    return utterance;
   }
 
   public AudioData publishAudioStart(AudioData data) {

@@ -28,6 +28,9 @@ package org.myrobotlab.swing;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+
+import javax.swing.JPanel;
+
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.MarySpeech;
 import org.myrobotlab.service.Runtime;
@@ -40,8 +43,15 @@ public class MarySpeechGui extends AbstractSpeechSynthesisGui implements ActionL
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MarySpeechGui.class);
 
+  // used for effects like in mary
+  protected final JPanel EffectpanelTLeft = new JPanel();
+  protected final JPanel EffectpanelTRight = new JPanel();
+  protected final JPanel EffectpanelBLeft = new JPanel();
+  protected final JPanel EffectpanelBRight = new JPanel();
+
   public MarySpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
+    /*
     Runtime.getInstance();
     MarySpeech mary = (MarySpeech) Runtime.getService(boundServiceName);
     EffectpanelTLeft.setLayout(new GridLayout(1, 1, 0, 0));
@@ -63,6 +73,7 @@ public class MarySpeechGui extends AbstractSpeechSynthesisGui implements ActionL
     speechGuiPanel.add(EffectpanelTRight);
     speechGuiPanel.add(EffectpanelBLeft);
     speechGuiPanel.add(EffectpanelBRight);
+    */
 
   }
 
