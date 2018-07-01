@@ -209,31 +209,31 @@
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.0-beta</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.0-beta</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.0-beta</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
+ <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-pi-mrl</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.0-beta</version>
     <scope>provided</scope>
-  </dependency>
-  <dependency>
+  </dependency>   
+ <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform-pi-mrl</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.0-beta</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -327,6 +327,13 @@
     <groupId>inmoov.fr</groupId>
     <artifactId>inmoov</artifactId>
     <version>1.0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>inmoov</artifactId>
+    <version>1.0.1</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
