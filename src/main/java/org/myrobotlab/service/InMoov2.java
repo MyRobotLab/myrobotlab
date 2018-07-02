@@ -206,9 +206,8 @@ public class InMoov2 extends AbstractBodyPart {
 
     ServiceType meta = new ServiceType(InMoov2.class);
     meta.setAvailable(false);
-    //seem maven downloader need it, not sure
-    meta.setAvailable(true);
-    meta.addDependency("inmoov.fr", "inmoov", "1.0.1", "zip");
+    // seem maven downloader need it, not sure
+    // meta.addDependency("inmoov.fr", "inmoov", "1.0.1", "zip");
     return meta;
   }
 
