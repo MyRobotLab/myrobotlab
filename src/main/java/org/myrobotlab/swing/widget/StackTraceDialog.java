@@ -9,8 +9,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Set;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -27,6 +27,8 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
 
   RuntimeGui parent;
   private JTextArea traceArea = null;
+  private JButton refresh = null;
+  
   JScrollPane scrollPane = null;
   
   public StackTraceDialog(RuntimeGui parent) {
@@ -45,6 +47,23 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
     DefaultCaret caret = (DefaultCaret) traceArea.getCaret();
     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
     // build our report to and add it to the text area
+    refreshStackTraces();
+    display.add(scrollPane, BorderLayout.CENTER);
+    // south
+    JPanel south = new JPanel();
+    
+    
+    refresh = new JButton("Refresh");
+    south.add(refresh);
+    refresh.addActionListener(this);
+    
+    display.add(south, BorderLayout.SOUTH);
+    // TODO: add a button to refresh..
+    setSize(600, 600);
+    setVisible(true);
+  }
+
+  private void refreshStackTraces() {
     Set<Thread> threads = Thread.getAllStackTraces().keySet();
     StringBuilder traceBuilder = new StringBuilder();
     for (Thread t : threads) {
@@ -54,14 +73,7 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
       }
       traceBuilder.append("\n");
     }
-    traceArea.append(traceBuilder.toString());
-    display.add(scrollPane, BorderLayout.CENTER);
-    // south
-    JPanel south = new JPanel();
-    display.add(south, BorderLayout.SOUTH);
-    // TODO: add a button to refresh..
-    setSize(320, 600);
-    setVisible(true);
+    traceArea.setText(traceBuilder.toString());
   }
 
   @Override
@@ -97,6 +109,12 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
   @Override
   public void actionPerformed(ActionEvent e) {
     // TODO Auto-generated method stub
+    Object source = e.getSource();
+
+    if (source == refresh) {
+      refreshStackTraces();
+    } 
+
     
   }
 
