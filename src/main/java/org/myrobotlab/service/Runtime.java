@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -38,11 +37,9 @@ import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.FileMsgScanner;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MessageListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -50,6 +47,7 @@ import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
+import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -96,6 +94,8 @@ public class Runtime extends Service implements MessageListener {
     return Platform.getLocalInstance().getBitness() == 64;
   }
 
+  // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
+  
   /**
    * instances of MRL - keyed with an instance key URI format is
    * mrl://gateway/(protocol key)
@@ -170,6 +170,8 @@ public class Runtime extends Service implements MessageListener {
    */
   transient private static Runtime runtime = null;
 
+  transient private static Security security = null;
+
   private List<String> jvmArgs;
 
   private List<String> args;
@@ -207,13 +209,7 @@ public class Runtime extends Service implements MessageListener {
 
   static private CmdLine cmdline = null;
 
-  /**
-   * Runtime not yet serialisable, just few things for now
-   * Those things declared inside this list from the constructor
-   */
-  public static List<Object> serialisable = new ArrayList<Object>();
-
-  String currentLanguage;
+  Locale locale;
 
   /*
    * Returns the number of processors available to the Java virtual machine.
@@ -499,21 +495,13 @@ public class Runtime extends Service implements MessageListener {
     if (runtime == null) {
       synchronized (instanceLockObject) {
         if (runtime == null) {
-          /*
-           * Well that didn't work the way I wanted it to... :P
-           * Thread.setDefaultUncaughtExceptionHandler(new
-           * Thread.UncaughtExceptionHandler() {
-           *
-           * @Override public void uncaughtException(Thread t, Throwable e) {
-           * //log.info(t.getName() + ": " + e); log.error(String.format(
-           * "============ WHOOP WHOOP WHOOP WHOOP WHOOP WHOOP Thread %s threw %s ============"
-           * , t.getName(), e.getMessage())); // MyWorker worker = new
-           * MyWorker(); // worker.start(); } });
-           */
 
           // taking away capability of having a different runtime name
           runtimeName = "runtime";
           runtime = new Runtime(runtimeName);
+          
+          // setting the singleton security
+          security = Security.getInstance();
           Repo.getInstance().addStatusPublisher(runtime);
           extract(); // FIXME - too overkill - do by checking version of re
         }
@@ -880,34 +868,7 @@ public class Runtime extends Service implements MessageListener {
     return java.lang.Runtime.getRuntime().totalMemory();
   }
 
-  /*
-   * attempt to get physical memory from the jvm not supported in all jvms..
-   */
-  /*
-   * ERROR - Access restriction - The type OperatingSystemMXBean is not API (restriction on required library 1.8 jre/lib/rt.jar
-   * 
-   <pre>
-  static public long getTotalPhysicalMemory() {
-    try {
   
-      com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-      long physicalMemorySize = os.getTotalPhysicalMemorySize();
-      return physicalMemorySize;
-    } catch (Exception e) {
-      log.error("getTotalPhysicalMemory - threw");
-    }
-    return 0;
-  }
-  
-  static public double getCpuLoad() {
-    OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
-    // What % CPU load this current JVM is taking, from 0.0-1.0
-    return osBean.getProcessCpuLoad();
-  }
-  
-  </pre>
-  */
-
   /**
    * unique id's are need for sendBlocking - to uniquely identify the message
    * this is a method to support that - it is unique within a process, but not
@@ -1048,9 +1009,6 @@ public class Runtime extends Service implements MessageListener {
     return ret;
   }
 
-  public static final void loadLibrary(String filename) {
-    java.lang.Runtime.getRuntime().loadLibrary(filename);
-  }
 
   /*
    * Main starting method of MyRobotLab Parses command line options
@@ -1530,43 +1488,6 @@ public class Runtime extends Service implements MessageListener {
     Runtime.release(name);
   }
 
-  // ============== update events begin ==============
-  /*
-   *
-   * should probably be deprecated - currently not used
-   *
-   * runBeforeRestart will this work on a file lock update?
-   */
-  /*
-   * static public void restart(Runnable runBeforeRestart) { final
-   * java.lang.Runtime r = java.lang.Runtime.getRuntime();
-   * log.info("restart - restart?"); Runtime.releaseAll(); try { // java binary
-   * String java = System.getProperty("java.home") + "/bin/java";
-   * 
-   * // init the command to execute, add the vm args final StringBuffer cmd =
-   * new StringBuffer("\"" + java + "\" ");
-   * 
-   * // program main and program arguments String[] mainCommand = globalArgs; //
-   * program main is a jar if (mainCommand[0].endsWith(".jar")) { // if it's a
-   * jar, add -jar mainJar cmd.append("-jar " + new
-   * File(mainCommand[0]).getPath()); } else { // else it's a .class, add the
-   * classpath and mainClass cmd.append("-cp \"" +
-   * System.getProperty("java.class.path") + "\" " + mainCommand[0]); } //
-   * finally add program arguments for (int i = 1; i < mainCommand.length; i++)
-   * { cmd.append(" "); cmd.append(mainCommand[i]); } // execute the command in
-   * a shutdown hook, to be sure that all the // resources have been disposed
-   * before restarting the application
-   * 
-   * r.addShutdownHook(new Thread() {
-   * 
-   * @Override public void run() { try { r.exec(cmd.toString()); } catch
-   * (IOException e) { e.printStackTrace(); } } }); // execute some custom code
-   * before restarting if (runBeforeRestart != null) { runBeforeRestart.run(); }
-   * // exit } catch (Exception ex) { Logging.logError(ex); } System.exit(0);
-   * 
-   * }
-   */
-
   /*
    * save all configuration from all local services
    */
@@ -1614,12 +1535,10 @@ public class Runtime extends Service implements MessageListener {
       if (runtime.platform == null) {
         runtime.platform = Platform.getLocalInstance();
       }
-
-      serialisable.add("currentLanguage");
-      //serialisable.add("testjson");
-
     }
 
+    locale = Locale.getDefault();
+    
     // 3 states
     // isAgent == make default directory (with pid) if custom not supplied
     // fromAgent == needs agentId
@@ -1658,11 +1577,6 @@ public class Runtime extends Service implements MessageListener {
 
     // setting the id and the platform
     platform = Platform.getLocalInstance();
-
-    // FIXME - command line option to disable
-    if (cmdline == null || !cmdline.containsKey("-disableFileMsgs")) {
-      enableFileMsgs(true);
-    }
 
     String libararyPath = System.getProperty("java.library.path");
     String userDir = System.getProperty("user.dir");
@@ -1786,6 +1700,10 @@ public class Runtime extends Service implements MessageListener {
    */
   public void checkingForUpdates() {
     log.info("checking for updates");
+  }
+  
+  public Locale getLocale() {
+	  return locale;
   }
 
   static public String getInputAsString(InputStream is) {
@@ -2342,47 +2260,42 @@ public class Runtime extends Service implements MessageListener {
     }
     return r;
   }
-
-  public static void setLocale(String country) {
-    setLocale(country, null, null);
+  
+  public static void setLanguage(String language) {
+	  Runtime runtime = Runtime.getInstance();
+	  runtime.setLocale(new Locale(language));
   }
 
-  public static void setLocale(String country, String language) {
-    setLocale(country, language, null);
+  public void setLocale(String language) {
+	  setLocale(new Locale(language));
   }
 
-  public static void setLocale(String language, String country, String variant) {
-
-    Locale runtimeLocale = Locale.forLanguageTag(language);
-    checkLocale(runtimeLocale);
-
-    language = runtimeLocale.getLanguage();
-
-    if (country == null) {
-      country = runtimeLocale.getCountry();
-    }
-    if (variant == null) {
-      variant = runtimeLocale.getVariant();
-    }
-    System.setProperty("user.language", language);
-    System.setProperty("user.country", country);
-    System.setProperty("user.variant", variant);
-    Locale.setDefault(runtimeLocale);
+  public void setLocale(String language, String country) {
+	  setLocale(new Locale(language, country));
   }
 
-  private static void checkLocale(Locale locale) {
-    try {
-      if (locale.getISO3Language() != null && locale.getISO3Country() != null && !locale.getISO3Language().isEmpty() && !locale.getISO3Country().isEmpty()) {
-        log.info("New locale set to " + locale.toLanguageTag() + " : " + locale.getDisplayName());
-        log.info(locale.getLanguage() + " : " + locale.getCountry() + locale.getVariant());
-
-      } else {
-        log.warn("New locale set to " + locale + " but it is unknown language");
-      }
-    } catch (MissingResourceException e) {
-      log.warn("New locale set to " + locale + "but it is unknown language" + e);
-    }
+  public void setLocale(String language, String country, String variant) {
+	setLocale(new Locale(language, country, variant));
   }
+  
+  public void setLocale(Locale locale) {
+	  this.locale = locale;
+	  Locale.setDefault(locale);
+	   /* I don't believe these are necessary 
+	    System.setProperty("user.language", language);
+	    System.setProperty("user.country", country);
+	    System.setProperty("user.variant", variant);
+	    */	    
+  }
+  
+  public String getLanguage() {
+	  return locale.getLanguage();
+  }
+  
+  public String getCountry() {
+	  return locale.getCountry();
+  }
+
 
   public Platform login(Platform platform) {
     info("runtime %s says \"hello\" %s", platform.getId(), platform);
@@ -2429,24 +2342,9 @@ public class Runtime extends Service implements MessageListener {
     return new SystemResources();
   }
 
-  public static void enableFileMsgs(Boolean b) {
-    Platform platform = Platform.getLocalInstance();
-    FileMsgScanner.enableFileMsgs(b, platform.getId());
-  }
-
-  /**
-   * Return last Locale used
-   * Set current system locale if null
-   *
-   * @return currentLanguage
-   *
-   */
-  public String getLanguage() {
-    if (currentLanguage == null) {
-      currentLanguage = Locale.getDefault().toLanguageTag();
-    }
-    return currentLanguage;
-  }
+  public String getDisplayLanguage() {
+	    return locale.getDisplayLanguage();
+   }
 
   /**
    * Return supported system languages
@@ -2462,5 +2360,13 @@ public class Runtime extends Service implements MessageListener {
     }
     return languagesList;
   }
-
+  
+  /**
+   * get the Security singleton
+   * @return
+   */
+  static public Security getSecurity() {
+	  return Runtime.getInstance().security;
+  }
+ 
 }

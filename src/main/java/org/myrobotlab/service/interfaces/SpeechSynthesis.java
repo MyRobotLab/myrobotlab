@@ -1,10 +1,8 @@
 package org.myrobotlab.service.interfaces;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.framework.interfaces.ServiceStatus;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.data.AudioData;
@@ -15,7 +13,7 @@ import org.slf4j.Logger;
  * speech should implement.
  * 
  */
-public interface SpeechSynthesis extends NameProvider, ServiceStatus {
+public interface SpeechSynthesis extends NameProvider {
 
   public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
 
@@ -109,24 +107,5 @@ public interface SpeechSynthesis extends NameProvider, ServiceStatus {
   public void onRequestConfirmation(String text);
 
   public List<Voice> getVoices();
-
-  // public void setSelectedEffect(String effect);
-
-  // public String getSelectedEffect();
-
-  // FIXME - need a plan for standardization ...
-  /**
-   * Apply special audio effects Used for MarySpeech only for now
-   * 
-   * @param audioEffects
-   *          text
-   */
-  // public void setAudioEffects(String audioEffects);
-
-  // public String getAudioEffects();
-
-  // public void setEffectsList(String effect, String parameters);
-
-  // public HashMap<String, String> getEffectsList();
 
 }

@@ -12,88 +12,89 @@ import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
-		extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, Attachable {
-
-	
+    extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
 
   /**
-	 * this is a local method which adds a request from some foreign service
-	 * with address information (otherService/callback) for a topic callback
-	 * Adds an entry on the notify list
-   * @param localTopic l
-   * @param otherService o 
-   * @param callback c
-	 * 
-	 */
-	public void addListener(String localTopic, String otherService, String callback);
+   * this is a local method which adds a request from some foreign service with
+   * address information (otherService/callback) for a topic callback Adds an
+   * entry on the notify list
+   * 
+   * @param localTopic
+   *          l
+   * @param otherService
+   *          o
+   * @param callback
+   *          c
+   * 
+   */
+  public void addListener(String localTopic, String otherService, String callback);
 
-	public void removeListener(String localTopic, String otherService, String callback);
+  public void removeListener(String localTopic, String otherService, String callback);
 
-	public String[] getDeclaredMethodNames();
+  public String[] getDeclaredMethodNames();
 
-	public Method[] getDeclaredMethods();
+  public Method[] getDeclaredMethods();
 
-	public URI getInstanceId();
+  public URI getInstanceId();
 
-	public String[] getMethodNames();
+  public String[] getMethodNames();
 
-	public Method[] getMethods();
+  public Method[] getMethods();
 
-	public ArrayList<MRLListener> getNotifyList(String key);
+  public ArrayList<MRLListener> getNotifyList(String key);
 
-	public ArrayList<String> getNotifyListKeySet();
+  public ArrayList<String> getNotifyListKeySet();
 
-	public Inbox getInbox();
-	
-	public Outbox getOutbox();
+  public Inbox getInbox();
 
-	// Deprecate - just use class
-	public String getSimpleName();
-	
-	// Deprecate ?? What is this??
-	public String getType();
+  public Outbox getOutbox();
 
-	public boolean hasPeers();
-	
-	/**
-	 * recursive release - releases all peers and their peers etc. then releases
-	 * this service
-	 */
-	public void releasePeers();
+  // Deprecate - just use class
+  public String getSimpleName();
 
-	public void releaseService();
+  // Deprecate ?? What is this??
+  public String getType();
 
-	/**
-	 * asked by the framework - to determine if the service needs to be secure
-	 * @return true/false
-	 */
-	public boolean requiresSecurity();
+  public boolean hasPeers();
 
-	public void setInstanceId(URI uri);
+  /**
+   * recursive release - releases all peers and their peers etc. then releases
+   * this service
+   */
+  public void releasePeers();
 
-	public void setName(String prefix);
+  public void releaseService();
 
-	public void startService();
+  /**
+   * asked by the framework - to determine if the service needs to be secure
+   * 
+   * @return true/false
+   */
+  public boolean requiresSecurity();
 
-	public void stopService();
+  public void setInstanceId(URI uri);
 
-	public String clearLastError();
+  public void setName(String prefix);
 
-	public boolean hasError();
+  public void startService();
 
-	public Status getLastError();
+  public void stopService();
 
-	// public void broadcastState();
+  public String clearLastError();
 
-	// public Object invoke(Message msg);
+  public boolean hasError();
 
-	public void out(String method, Object retobj);
+  public void out(String method, Object retobj);
 
-	public boolean isRuntime();
+  public boolean isRuntime();
 
-	// FIXME - meta data needs to be infused into instance
-	public String getDescription();
+  // FIXME - meta data needs to be infused into instance
+  public String getDescription();
 
-	public Map<String, MethodEntry> getMethodMap();
-  
+  public Map<String, MethodEntry> getMethodMap();
+
+  public boolean isReady();
+
+  public boolean isRunning();
+
 }

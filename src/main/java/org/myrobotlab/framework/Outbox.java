@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
