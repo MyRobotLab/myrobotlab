@@ -332,6 +332,13 @@
   </dependency>
   <dependency>
     <groupId>inmoov.fr</groupId>
+    <artifactId>inmoov2</artifactId>
+    <version>0.1</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>inmoov.fr</groupId>
     <artifactId>jm3-model</artifactId>
     <version>1.0.0</version>
     <scope>provided</scope>
