@@ -247,7 +247,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
         "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms", "voice-cmu-rms-hsmm", "voice-cmu-slt", "voice-dfki-obadiah", "voice-dfki-obadiah-hsmm", "voice-dfki-ot",
         "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-pavoque-styles", "voice-dfki-poppy", "voice-dfki-poppy-hsmm",
         "voice-dfki-prudence", "voice-dfki-prudence-hsmm", "voice-dfki-spike", "voice-dfki-spike-hsmm", "voice-enst-camille", "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm",
-        "voice-istc-lucia-hsmm", "voice-marylux", "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre", "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
+        "voice-istc-lucia-hsmm", /*"voice-marylux",*/ "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre", "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
         "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm", "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm", "voice-cmu-slt-hsmm",
         "voice-enst-camille-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
         "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"));
