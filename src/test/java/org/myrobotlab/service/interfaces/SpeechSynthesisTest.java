@@ -1,5 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -27,11 +28,10 @@ public class SpeechSynthesisTest {
 		// FIXME - just query from runtime - do not filter here ..
 		// FIXME - Runtime should have filtering abilities
 		
+		Runtime.start("gui", "SwingGui");
+		
 		for (String service : services) {
-			if (service.equals("org.myrobotlab.service.AcapelaSpeech")) {
-				log.info("skipping");
-				// continue;
-			}
+			
 			try {
 				Class<?> clazz = Class.forName(service);
 				AbstractSpeechSynthesis speech = null;
@@ -40,30 +40,56 @@ public class SpeechSynthesisTest {
 				// REQUIREMENTS SHOULD BE ALWAYS ATTEMPT CACHE FIRST e.g. POLLY SHOULD WORK AFTER CACHE AND NO INTERNET !!!
 				// FIXME - CACHE VOICES TO FILESYSTEM TOO !
 				
+				// FIXME - test multi-platform
+				
+				// FIXME - test publish speaking & publish audio
+				
+				
 				if (AbstractSpeechSynthesis.class.isAssignableFrom(clazz)) {
 					log.info("testing {}", clazz.getSimpleName());
 					try {
 					// use AbstractSpeechSynthesis
-					speech = (AbstractSpeechSynthesis) Runtime.start("speech", clazz.getSimpleName());
-					String toSpeak = String.format("hello, I will be testing speech synthesis service called %s", clazz.getSimpleName());
+					speech = (AbstractSpeechSynthesis) Runtime.start(clazz.getSimpleName().toLowerCase(), clazz.getSimpleName());
+					String toSpeak = String.format("hello my friend, I will be testing speech synthesis service called %s", clazz.getSimpleName());
 					speech.speak(toSpeak);
+					// FIXME - test begin middle and end files - multiple files too in same text
+					speech.speak("I can sound like a robot #R2D2# that is soooo cool");
+					Voice voice = speech.getVoice();
+					if (voice != null) {
+					  speech.speak(String.format("my default voice is %s, my default language is %s, my gender is %s", voice.getName(), voice.getLanguage(), voice.getGender()));
+					} else {
+					  speech.speak("WARNING !!!  I DO NOT HAVE A VOICE");
+					}
+					
+					Date now = new Date();
+					// guaranteed to be unique - therefore not cached
+					speech.speak(String.format("the date and time is %s", now.toString()));
 					
 					List<Voice> voices = speech.getVoices();
-					speech.speak(String.format("it has %d voices", voices.size()));
+					speech.speak(String.format("this speech service has %d voices", voices.size()));
 					
+					// FIXME - speakBlocking
+					
+					// FIXME - test sound files  #LAUGH# - really a AudioFile detail - getFileList
+					
+		      // FIXME - shouldn't this be done in abstract base class ?????
+		      // String encoded = URLEncoder.encode(toSpeak, "UTF-8");
+					// एक ट्वीट मे उन्होने यह भी कहा था कि उन्हे सनी के साथ काम करने मे कोई परेशानी नही है
+
+					// FIXME - look at "main()" tests
+					
+					// FIXME - !!! UTF-8 tests !!
+					
+					// FIXME - gui tests ...
+					
+					// FIXME - after release -> Exception in thread "AWT-EventQueue-0" java.lang.IndexOutOfBoundsException: Index: 9, Size: 8
+					// Runtime.release(clazz.getSimpleName().toLowerCase());
+					// FIXME test - restarting same name service
 					
 					} catch(Exception e) {
 						speech.speak(String.format("oh my ! there was an error %s", e.getMessage()));
 						log.info(e.getMessage(), e);
-					}
-					
-					
-					
-					
-					
-					
-					
-					
+					}					
 				}
 			} catch (ClassNotFoundException e) {
 			}

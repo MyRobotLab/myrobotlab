@@ -1,5 +1,6 @@
 package org.myrobotlab.service.data;
 
+import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -35,7 +36,7 @@ public class AudioData {
    * String uri reference of audio stream
    * FIXME - nice idea it was uri .. but its not :P
    */
-  public String filename = null;
+  String filename = null;
   
   transient public InputStream inputStream = null;
   
@@ -72,6 +73,33 @@ public class AudioData {
   public AudioData(InputStream inputStream) {
     this.inputStream = inputStream;
   }
+  
+  public boolean isValid() {
+    if (inputStream != null) {
+      return true;
+    }
+    
+    if (filename != null) {
+      File file = new File(filename);
+      if (file.exists() && !file.isDirectory() && file.length() != 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * returns the length of the file in milliseconds
+   * currently only works "AFTER" its been played
+   * 
+   * @return
+   */
+  public Long getLength() {
+    if (startTs == null || stopTs == null) {
+      return null;
+    }
+    return stopTs - startTs;
+  }
 
   public String toString() {
     String r = "";
@@ -85,6 +113,10 @@ public class AudioData {
     }
     
     return String.format("file : %s  mode : %s trackId : %d %s", filename, mode, trackId, r);
+  }
+
+  public String getFileName() {
+    return filename;
   }
 
 }

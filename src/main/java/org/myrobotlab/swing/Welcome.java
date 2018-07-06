@@ -38,20 +38,7 @@ public class Welcome extends ServiceGui {
     super(boundServiceName, myService);
     JLabel image = new JLabel();
     image.setIcon(Util.getResourceIcon("mrl_logo.gif"));
-    addTop(image);
-    addTop("<html><b><i>I for one, welcome our new robot overlords ...</i></b></html>");   
+    addCenter(image);
+    addCenter("<html><b><i>I for one, welcome our new robot overlords ...</i></b></html>");   
   }
-
-  @Override
-  public void subscribeGui() {
-  }
-
-  @Override
-  public void unsubscribeGui() {
-  }
-
-  public String setRemoteConnectionStatus(String state) {
-    return state;
-  }
-
 }

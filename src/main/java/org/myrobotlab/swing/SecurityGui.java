@@ -25,10 +25,17 @@
 
 package org.myrobotlab.swing;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
-import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -41,51 +48,44 @@ public class SecurityGui extends ServiceGui implements ActionListener {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(SecurityGui.class);
   
-  JLabel var1 = new JLabel("0.0");
-  JLabel var2 = new JLabel("1.0");
+  Map<String, JPasswordField> keyNames = new HashMap<String, JPasswordField>();
+  Map<String, JPasswordField> keyValues = new HashMap<String, JPasswordField>();
+  
+  JTextField newKeyName = new JTextField();
+  JPasswordField newKeyValue = new JPasswordField();
+  JButton set = new JButton("set");
 
   public SecurityGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
+        
+    newKeyName.setPreferredSize(new Dimension(200, 20));
+    newKeyValue.setPreferredSize(new Dimension(200, 20));
     
-    setTitle("status");
-    addLine("name ", boundServiceName);
-    addLine("var1 ", var1);
-    addLine("var2 ", var2);
-    
-    setTitle("input");
-    addLine("service ", boundServiceName);
-    
-    setTitle("output");
-    
-    /*
-    JPanel panel = createPanel("panel1");
-    panel.add(createLine("service ", boundServiceName));
-    panel.add(createLine("gui service ", myService.getName()));
-    panel.add(createLine(boundServiceName, " begining service"));
-    
-    display.add(panel, BorderLayout.EAST);
-    */
+    setTitle("keys");
+    add("key name ", "key value");
+    setBottomTitle("add keys");
+    addBottom("key name", "key value", " ");
+    addBottom(newKeyName, newKeyValue, set);
+    set.addActionListener(this);
   }
 
   @Override
-  public void actionPerformed(ActionEvent arg0) {
-
+  public void actionPerformed(ActionEvent event) {
+    Object o = event.getSource();
+    if (o == set) {
+      send("setKey", newKeyName.getText().trim(), new String(newKeyValue.getPassword()).trim());
+      send("save");
+      send("broadcastState");
+    }
   }
 
   @Override
   public void subscribeGui() {
-    // un-defined gui's
-
-    // subscribe("someMethod");
-    // send("someMethod");
+    send("broadcastState");
   }
 
   @Override
   public void unsubscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
-
-    // unsubscribe("someMethod");
   }
 
   /**
@@ -99,7 +99,17 @@ public class SecurityGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-
+          Set<Object> names = security.getKeyNames();
+          // sort them
+          Set<Object> sorted = new TreeSet<Object>(names);
+          center.removeAll();
+          for (Object name : sorted) {
+            add(name.toString(), "*********");
+          }
+          // center.invalidate();
+          //display.invalidate();
+          //display.validate();
+          center.validate();
       }
     });
   }

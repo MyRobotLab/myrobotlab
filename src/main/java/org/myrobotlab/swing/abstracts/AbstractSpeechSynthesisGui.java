@@ -28,7 +28,7 @@ package org.myrobotlab.swing.abstracts;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -62,14 +62,11 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesisGui.class);
 
   JButton speakButton = new JButton(new ImageIcon(ImageIO.read(FileIO.class.getResource("/resource/Speech.png"))));
-  ImageIcon statusImageOK = new ImageIcon((BufferedImage) ImageIO.read(FileIO.class.getResource("/resource/green.png")));
-  ImageIcon statusImageNOK = new ImageIcon((BufferedImage) ImageIO.read(FileIO.class.getResource("/resource/red.png")));
-  
-  JLabel speakingState = new JLabel("                  ");
-  JLabel cacheFile = new JLabel("                         ");
 
-  // FIXME - if cloud provider with keys - "not initialized" statusImage not oke
-  JLabel statusIcon = new JLabel("Not initialized", statusImageNOK, JLabel.CENTER);
+  JLabel speakingState = new JLabel("not speaking");
+  JLabel cacheFile = new JLabel("no file");
+  JLabel audioState = new JLabel("not playing");
+  JLabel generationTime = new JLabel("generation time : 0 ms");
 
   JComboBox<String> voices = new JComboBox<String>();
   JTextArea lastUtterance = new JTextArea();
@@ -81,75 +78,169 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
   // TODO - add volume jlabel for volume value
   JButton save = new JButton("save");
+  // FIXME - doesnt work because AudioProcessor won't close file :(
+  // JButton purgeFile = new JButton("purge file");
+  // JButton purgeCache = new JButton("purge cache");
+  JButton pause = new JButton("pause");
+  JButton resume = new JButton("resume");
+  JButton stop = new JButton("stop");
   JSlider volume = new JSlider(JSlider.HORIZONTAL, 0, 100, 100);
+
+  JComboBox<String> voiceEffectFiles = new JComboBox<String>();
+  
+  final AbstractSpeechSynthesisGui self;
+
+  AudioData lastAudioData;
 
   public AbstractSpeechSynthesisGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
+    self = this;
     speakButton.setSelectedIcon(null);
     lastUtterance.setWrapStyleWord(true);
     lastUtterance.setLineWrap(true);
+    
+    addTop("speaking state : ", speakingState);
+    addTop("generation time : ", generationTime);
+    addTop("audio state : ", audioState);
+    // generationTime, audioState
+    //addTop("cache file : ", purgeFile);
+    addTop(2, cacheFile);
 
-    // addTop(statusIcon, statusIcon);
-    addTop(" ");
-    addTop(speakingState);
-    addTop(cacheFile);
-    addTop(" ");
     addLeftLine("voices:", voices);
+    addLeftLine("effects", voiceEffectFiles);
     addLeftLine("volume:", volume);
     save.setPreferredSize(new Dimension(85, 45));
-    addBottom(save, speakButton);
+    pause.setPreferredSize(new Dimension(85, 45));
+    resume.setPreferredSize(new Dimension(85, 45));
+    stop.setPreferredSize(new Dimension(85, 45));
+    // purgeCache.setPreferredSize(new Dimension(170, 45));
+    addBottom(save, /*purgeCache, */ pause, resume, stop, speakButton);
     addLine(lastUtterance);
 
     // FIXME - hide status - unless cloud provider
     // FIXME - hide save buttons unless a cloud provider with keys
-    speakButton.addActionListener(this);
-    save.addActionListener(this);
+    
     voices.addActionListener(this);
+    voiceEffectFiles.addActionListener(this);
+    
+    speakButton.addActionListener(this);
+    pause.addActionListener(this);
+    resume.addActionListener(this);
+    stop.addActionListener(this);
+    save.addActionListener(this);
+    // purgeCache.addActionListener(this);
+    // purgeFile.addActionListener(this);
   }
-  
+
   @Override
   public void subscribeGui() {
-    
+
+    subscribe("getVoiceEffectFiles");
+
+    subscribe("publishSpeechRequested");
+    subscribe("publishGenerationTime");
+
     subscribe("publishStartSpeaking");
     subscribe("publishEndSpeaking");
-    
+
     subscribe("publishAudioStart");
     subscribe("publishAudioEnd");
+    
+    send("getVoiceEffectFiles");
   }
 
   @Override
   public void unsubscribeGui() {
-    
+
+    unsubscribe("getVoiceEffectFiles");
+
+    unsubscribe("publishSpeechRequested");
+    unsubscribe("publishGenerationTime");
+
     unsubscribe("publishStartSpeaking");
     unsubscribe("publishEndSpeaking");
-    
+
     unsubscribe("publishAudioStart");
     unsubscribe("publishAudioEnd");
   }
-  
-  public void onAudioStart(AudioData data) {
-    cacheFile.setText("playing : " + data.filename);
-    log.debug("gui onAudioStart {}", data.toString());
-  }
-  
-  public void onAudioEnd(AudioData data) {
-    cacheFile.setText("finished : " + data.filename);
-    log.debug("gui onAudioEnd {}", data.toString());
-  }
-  
-  public String onStartSpeaking(String utterance) {
-    log.debug("publishStartSpeaking - {}", utterance);
-    speakingState.setText("speaking started " + utterance);
-    lastUtterance.setText(utterance);
-    return utterance;
+
+  public void onVoiceEffectFiles(List<File> files) {
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        voiceEffectFiles.removeActionListener(self);
+        voiceEffectFiles.removeAllItems();
+        voiceEffectFiles.addItem("");
+        
+        for (File file : files) {
+          log.info("adding voice effect file {}", file.getName());
+          voiceEffectFiles.addItem(displayEffectFile(file));
+        }
+        
+        voiceEffectFiles.addActionListener(self);
+      }
+    });
   }
 
-  public String onEndSpeaking(String utterance) {
+  public void onAudioStart(AudioData data) {
+    audioState.setText("audio start");
+    // File f = new File(data.filename);
+    cacheFile.setText(data.getFileName());
+    lastAudioData = data;
+    log.debug("gui onAudioStart {}", data.toString());
+  }
+
+  public void onAudioEnd(AudioData data) {
+    audioState.setText(String.format("audio end %d ms", data.getLength()));
+    // cacheFile.setText("audio end : " + data.filename);
+    log.debug("gui onAudioEnd {} {} ms", data.toString(), data.getLength());
+  }
+
+  public void onStartSpeaking(String utterance) {
+    log.debug("publishStartSpeaking - {}", utterance);
+    String display = utterance;
+    if (display.length() > 50) {
+      display = String.format("%s ...", display.substring(0, 50));
+    }
+    speakingState.setText(String.format("started speaking : \"%s\"", display));
+  }
+
+  public void onEndSpeaking(String utterance) {
     log.debug("publishEndSpeaking - {}", utterance);
-    speakingState.setText("speaking finished");
-    return utterance;
+    String display = utterance;
+    if (display.length() > 50) {
+      display = String.format("%s ...", display.substring(0, 50));
+    }
+    speakingState.setText(String.format("end speaking     : \"%s\"", display));
+  }
+
+  public void onGenerationTime(Long time) {
+    generationTime.setText(String.format("generation time %d ms", time));
+    // generationTime.setText(String.format("%d", time));
+  }
+
+  /**
+   * original text requested to speak - not necessarily the same as
+   * publishStartSpeaking text since publishStartSpeaking is after a
+   * pre-processor/parser
+   * 
+   * @param toSpeak
+   */
+  public void onSpeechRequested(String toSpeak) {
+    lastUtterance.setText(toSpeak);
   }
   
+  protected String displayEffectFile(File file){
+    String ret = "";
+    String filename = file.getName();
+    int pos = filename.indexOf(".");
+    if (pos > 0) {
+      return String.format("#%s#", filename.substring(0, pos));
+    }
+    return ret;
+  }
+
   @Override
   public void actionPerformed(ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {
@@ -163,9 +254,38 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
             send("setVoice", vparts[0]);
           }
         }
+        
+        if (o == voiceEffectFiles) {
+          lastUtterance.setText(lastUtterance.getText() + " " + (String)voiceEffectFiles.getSelectedItem());
+        }
+        
         if (o == speakButton) {
           send("speak", lastUtterance.getText());
         }
+
+        if (o == pause) {
+          send("pause");
+        }
+
+        if (o == resume) {
+          send("resume");
+        }
+
+        if (o == stop) {
+          send("stop");
+        }
+
+        /* wont work because AudioProcessor wont close file :(
+        <pre>
+        if (o == purgeCache) {
+          send("purgeCache");
+        }
+
+        if (o == purgeFile) {
+          send("purgeFile", lastAudioData.getFileName());
+        }
+        </pre>
+        */
 
         if (o == save) {
           // save keys if any
@@ -176,6 +296,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           }
           // save json
           send("save");
+          send("getVoices");
+          send("broadcastState");
         }
       }
     });
@@ -231,13 +353,6 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
             addLeftLine(keyName, p);
           }
 
-        }
-
-        // FIXME - is it necessary ???
-        if (speech.isReady()) {
-          statusIcon.setIcon(statusImageOK);
-        } else {
-          statusIcon.setIcon(statusImageNOK);
         }
 
         volume.setValue((int) MathUtils.round(speech.getVolume() * 100, 0));

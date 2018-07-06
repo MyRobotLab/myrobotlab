@@ -21,6 +21,7 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -101,7 +102,7 @@ public class Security extends Service implements AuthorizationProvider {
 
 	static private String storeFileName = "store";
 
-	private static boolean isLoaded = false;
+	// private static boolean isLoaded = false;
 
 	transient private boolean defaultAllowExport = true;
 
@@ -122,10 +123,14 @@ public class Security extends Service implements AuthorizationProvider {
 	public static Security getInstance() {
 		return (Security) Runtime.start("security", "Security");
 	}
-
-	public void addSecret(String name, String secret) {
-		store.put(name, secret);
-		saveStore();
+	
+	public Set<Object> getKeyNames(){
+	  return store.keySet();
+	}
+	
+	@Deprecated // use setKey - name seems more appropriate
+	public void addSecret(String name, String keyValue) {
+		setKey(name, keyValue);
 	}
 
 	private String byteArrayToHexString(byte[] b) {
@@ -139,12 +144,6 @@ public class Security extends Service implements AuthorizationProvider {
 		}
 		return sb.toString().toUpperCase();
 	}
-
-	/*
-	 * public boolean loadKeyStore(String location) {
-	 * 
-	 * }
-	 */
 
 	/**
 	 * decrypt a value
@@ -212,8 +211,19 @@ public class Security extends Service implements AuthorizationProvider {
 	 * @param keyName
 	 * @return
 	 */
-	public String getKey(String keyName) {
-		return getSecret(keyName);
+	public String getKey(String name) {
+	  /* loading in constructor now
+    if (!isLoaded) {
+      loadStore();
+    }
+    */
+
+    if (store.containsKey(name)) {
+      return store.getProperty(name);
+    }
+
+    log.error(String.format("could not find %s in security store", name));
+    return null;
 	}
 	
 	/**
@@ -224,20 +234,13 @@ public class Security extends Service implements AuthorizationProvider {
 	 * @param keyValue
 	 */
 	public void setKey(String keyName, String keyValue) {
-		addSecret(keyName, keyValue);
+	  store.put(keyName, keyValue);
+    saveStore();
 	}
 
+	@Deprecated // use getKey
 	public String getSecret(String name) {
-		if (!isLoaded) {
-			loadStore();
-		}
-
-		if (store.containsKey(name)) {
-			return store.getProperty(name);
-		}
-
-		log.error(String.format("could not find %s in security store", name));
-		return null;
+	  return getKey(name);
 	}
 
 	private SecretKeySpec getSecretKeySpec(File keyFile) throws NoSuchAlgorithmException, IOException {
@@ -288,7 +291,7 @@ public class Security extends Service implements AuthorizationProvider {
 				// memory has precedence over file
 				fileStore.putAll(store);
 				store = fileStore;
-				isLoaded = true;
+				// isLoaded = true;
 			}
 		} catch (FileNotFoundException e) {
 			log.info("Security.loadStore file not found {}", getStoreFileName());
@@ -307,9 +310,11 @@ public class Security extends Service implements AuthorizationProvider {
 
 	public void saveStore() {
 		try {
+		  /* - loading in constructor now
 			if (!isLoaded) {
 				loadStore();
 			}
+			*/
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			store.store(out, null);
 			String encrypted = encrypt(new String(out.toByteArray()), new File(getKeyFileName()));
@@ -322,6 +327,7 @@ public class Security extends Service implements AuthorizationProvider {
 
 	public Security(String n) {
 		super(n);
+		loadStore();
 		createDefaultGroups();
 
 		/*
@@ -690,6 +696,7 @@ public class Security extends Service implements AuthorizationProvider {
 		final String KEY_FILE = "howto.key";
 		final String PWD_FILE = "howto.properties";
 
+		Runtime.start("gui", "SwingGui");
 		// Security security = Security.getInstance();
 		// initializeStore("im a rockin rocker");
 		Runtime.getSecurity().setKey("myKeyName", "XXDDLKERIOEJKLJ##$KJKJ#LJ@@");

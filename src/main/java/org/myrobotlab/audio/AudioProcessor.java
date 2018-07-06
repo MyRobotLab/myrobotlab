@@ -1,6 +1,8 @@
 package org.myrobotlab.audio;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -12,11 +14,10 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
-import org.myrobotlab.framework.interfaces.Invoker;
-import org.myrobotlab.framework.interfaces.LoggingSink;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -43,7 +44,7 @@ public class AudioProcessor extends Thread {
 
   float targetBalance = balance;
 
-  Invoker audioFile = null;
+  AudioFile audioFile = null;
 
   public boolean isPlaying = false;
 
@@ -57,9 +58,9 @@ public class AudioProcessor extends Thread {
 
   private int repeatCount;
 
-  public AudioProcessor(Invoker invoker, String track) {
+  public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
-    this.audioFile = invoker;
+    this.audioFile = audioFile;
     this.track = track;
   }
 
@@ -84,20 +85,28 @@ public class AudioProcessor extends Thread {
   public AudioData play(AudioData data) {
 
     log.info(String.format("playing %s", data.toString()));
-
+    // FIXME - won't close filehandles :( .. dunno why
+    // FileInputStream fis = null;
+    // BufferedInputStream bis = null;
     AudioInputStream din = null;
     try {
 
       AudioInputStream in = null;
 
-      if (data.filename != null) {
-        File file = new File(data.filename);
+      if (data.getFileName() != null) {
+        File file = new File(data.getFileName());
         if (file.length() == 0) {
-          // bail ?
-          log.error(String.format("audio file %s 0 byte length", file.getName()));
+          audioFile.error(String.format("audio file %s 0 byte length", file.getName()));
           return data;
         }
+        /*
+        fis = new FileInputStream(file);
+        bis = new BufferedInputStream(fis);
+        in = AudioSystem.getAudioInputStream(bis);
+        */
+        
         in = AudioSystem.getAudioInputStream(file);
+        
       } else if (data.inputStream != null) {
         in =  AudioSystem.getAudioInputStream(data.inputStream);
       }
@@ -188,10 +197,20 @@ public class AudioProcessor extends Thread {
 
         }
         // Stop
+        
         line.drain();
         line.stop();
         line.close();
         din.close();
+        in.close();
+        /*
+        if (bis != null)
+        bis.close();
+        if (fis != null)
+        fis.close();
+        */
+        
+        // System.gc();
 
         audioFile.invoke("publishAudioEnd", data);
 
@@ -205,9 +224,9 @@ public class AudioProcessor extends Thread {
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error(e.getMessage(), e);
       if (audioFile != null) {
-        ((LoggingSink)audioFile).error("%s - %s", e.getMessage(), data.filename);
+        audioFile.error("%s - %s", e.getMessage(), data.getFileName());
       }
     } finally {
       if (din != null) {
@@ -277,17 +296,21 @@ public class AudioProcessor extends Thread {
     this.volume = volume;
   }
 
+  /*
+   * <pre>
   public static void main(String[] args) {
-    /*
-     * AudioPlayer player = new AudioPlayer();
-     * 
-     * // jlp.play("NeroSoundTrax_test1_PCM_Stereo_CBR_16SS_6000Hz.wav");
-     * AudioData data = new AudioData("aaa.mp3"); // data.volume = 120.0f;
-     * data.balance = -1;
-     * 
-     * player.play(data);
-     */
+    
+   AudioPlayer player = new AudioPlayer();
+   
+   // jlp.play("NeroSoundTrax_test1_PCM_Stereo_CBR_16SS_6000Hz.wav");
+   AudioData data = new AudioData("aaa.mp3"); // data.volume = 120.0f;
+   data.balance = -1;
+   
+   player.play(data);
+   
   }
+  </pre>
+*/
 
   public double getVolume() {
     return volume;

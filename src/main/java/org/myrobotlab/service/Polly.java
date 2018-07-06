@@ -161,7 +161,7 @@ public class Polly extends AbstractSpeechSynthesis {
    * relay)
    */
   @Override
-  public AudioData generateAudioData(String toSpeak) throws IOException {
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
       getPolly();
       Voice voice = getVoice();
       // com.amazonaws.services.polly.model.Voice awsVoice = ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
@@ -171,9 +171,8 @@ public class Polly extends AbstractSpeechSynthesis {
       byte[] d = FileIO.toByteArray(data);
       // could just save it to file ...
       // return new AudioData(data);
-      String filename = getLocalFileName(toSpeak);
-      FileIO.toFile(filename, d);     
-      return new AudioData(filename);
+      FileIO.toFile(audioData.getFileName(), d);     
+      return audioData;
   }
 
   /**

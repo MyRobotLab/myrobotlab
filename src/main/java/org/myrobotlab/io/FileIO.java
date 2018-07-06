@@ -609,12 +609,12 @@ public class FileIO {
 			String rootPath = gluePaths(root, src);
 			File srcFile = new File(rootPath);
 			if (!srcFile.exists()) {
-				log.error("{} does not exist");
+				log.error("{} does not exist", srcFile);
 				return classes;
 			}
 			// MUST BE DIRECTORY !
 			if (!srcFile.isDirectory()) {
-				log.error("{} is not a directory");
+				log.error("{} is not a directory", srcFile);
 				return classes;
 			}
 
@@ -701,11 +701,109 @@ public class FileIO {
 			}
 			jar.close();
 		}
-
 		return classes;
-
 	}
+	
+	static public final List<File> getFileList(String directory) throws IOException{
+	  return getFileList(directory, false, null, null);
+	}
+	
+	static public final List<File> getFileList(String directory, boolean recurse) throws IOException{
+	  return getFileList(directory, recurse, null, null);
+	}
+	
+	// TODO - include empty directories ?
+	// TODO - include directories ?
+	static public final List<File> getFileList(String directory, boolean recurse, String[] include,
+      String[] exclude) throws IOException{
+	  List<File> list = new ArrayList<File>();
+	  
+	  // FIXME - security - filter out ../../.. prevent scanning of directories not 
+	  // sub to user.dir ?
+    // String directory = gluePaths(System.getProperty("user.dir"), directory);
+    
+    File srcFile = new File(directory);
+    if (!srcFile.exists()) {
+      log.error("{} does not exist", directory);
+      return list;
+    }
+    
+    // MUST BE DIRECTORY !
+    if (!srcFile.isDirectory()) {
+      log.debug("{} is not a directory", directory);
+      return list;
+    }
+    
+    File[] files = srcFile.listFiles();
+    for (File file : files) {
+      if (file.isDirectory() && recurse) {
+        // TODO - add if include empty directores ....        
+        List<File> subList = getFileList(file.getAbsolutePath(), recurse, include, exclude);  
+        list.addAll(subList);
+      } else {
+        boolean add = false;
+        String filename = file.getName();
+        if (include != null) {
+          for (int i = 0; i < include.length; ++i) {
+            if (filename.matches(include[i])) {
+              add = true;
+              break;
+            }
+          }
+        }
 
+        if (exclude != null) {
+          for (int i = 0; i < exclude.length; ++i) {
+            if (filename.matches(exclude[i])) {
+              add = false;
+              break;
+            }
+          }
+        }
+
+        if (include == null && exclude == null) {
+          add = true;
+        }
+
+        if (add) {         
+          list.add(file);
+        }
+       
+      }
+    }
+	  
+	  return list;
+	}
+	/*
+	 static public final void addFiles(List<File> allFiles, String directory, boolean recurse, String[] include,
+	      String[] exclude) throws IOException {
+	   
+	    File srcFile = new File(directory);
+	    if (!srcFile.exists()) {
+	      log.error("{} does not exist");
+	    }
+	    
+	    // MUST BE DIRECTORY !
+	    if (!srcFile.isDirectory()) {
+	      log.error("{} is not a directory");
+	    }
+	    
+	    File[] files = srcFile.listFiles();
+	    for (File file : files) {
+	      if (file.isDirectory() && recurse) {
+	        // TODO - add if include empty directores ....
+	        List<File> subFiles = listFiles(directory, recurse, include, exclude)
+	        if (subFiles.size() > 0) {
+	          allFiles.addAll(c)
+	        }
+	        list.addAll();
+	      }
+	    }
+	   
+	 }
+	 
+*/
+	
 	static public final List<File> listResourceContents(String path) throws IOException {
 		List<URL> urls = null;
 		String root = (path.startsWith("/")) ? "resource" : "resource/";
@@ -755,6 +853,9 @@ public class FileIO {
 		// File f = new File(uri.getPath()); - handle depending on scheme?
 
 		LoggingFactory.init(Level.INFO);
+		
+		List<File> fileList = getFileList("InMoov",true);
+		log.info("found {} files", fileList.size());
 
 		FileIO.extract("/C:/mrl.test/current/myrobotlab.jar", "/resource/framework/serviceData.json",
 				"C:\\mrl.test\\current\\.myrobotlab\\serviceData.json");

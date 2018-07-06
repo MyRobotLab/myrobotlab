@@ -26,6 +26,7 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import java.util.Map;
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -75,7 +77,11 @@ public class AudioFile extends Service {
   // http://stackoverflow.com/questions/198679/convert-audio-stream-to-wav-byte-array-in-java-without-temp-file
   // TODO - utilize
   // http://docs.oracle.com/javase/7/docs/api/javax/sound/sampled/Clip.html
-
+  
+  // FIXME - AudioProcessor is a bit weird looking not sure if the decodedFormat stream is needed
+  // FIXME - https://stackoverflow.com/questions/12863081/how-do-i-get-mixer-channels-layout-in-java support multiple mixers
+  // FIXME - review - https://stackoverflow.com/questions/25798200/java-record-mic-to-byte-array-and-play-sound
+  // 
 
   String currentTrack = DEFAULT_TRACK;
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
@@ -260,9 +266,24 @@ public class AudioFile extends Service {
     processors.get(currentTrack).pause(false);
   }
 
+  // FIXME - implement ???
   public List<Object> getLocksWaitingFor(String queueName) {
     // TODO Auto-generated method stub
     return null;
+  }
+  
+  public List<File> getFiles(){
+    return getFiles(null, true);
+  }
+
+  public List<File> getFiles(String subDir, boolean recurse) {
+    try {
+      String dir = FileIO.gluePaths("audioFile", subDir);
+      return FileIO.getFileList(dir, true);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+    }
+    return new ArrayList<File>();
   }
 
   public static void main(String[] args) {
@@ -282,12 +303,11 @@ public class AudioFile extends Service {
       // "AudioFile");
       // MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
 
-      AudioFile audio = (AudioFile)Runtime.start("audio", "AudioFile");//robot1.getAudioFile();
+      AudioFile audio = (AudioFile) Runtime.start("audio", "AudioFile");// robot1.getAudioFile();
       audio.play(new AudioData("https://ia802508.us.archive.org/5/items/testmp3testfile/mpthreetest.mp3"));
 
-      
       MarySpeech robot1 = (MarySpeech) Runtime.start("robot1", "MarySpeech");
-  
+
       AudioData data = new AudioData("whatHowCanYouSitThere.mp3");
       data.repeat = 4;
       data.track = "new track";
@@ -450,6 +470,24 @@ public class AudioFile extends Service {
     log.info("Audio File publishAudioEnd");
     return data;
   }
+
+  public void deleteFiles(String subDir) {
+    // TODO Auto-generated method stub
+    List<File> list = getFiles(subDir, true);
+    for (File file: list) {
+      try {
+      file.delete();
+      } catch(Exception e) {
+        
+      }
+    }
+  }
+
+  public void deleteFile(String filename) {
+    File file = new File(filename);
+    file.delete();
+  }
+  
 
   /**
    * This static method returns all the details of the class without it having

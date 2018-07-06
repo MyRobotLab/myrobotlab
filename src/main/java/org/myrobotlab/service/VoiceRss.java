@@ -21,6 +21,8 @@
  * 
  * Enjoy !
  * 
+ * http://www.voicerss.org/api/documentation.aspx
+ * 
  * */
 package org.myrobotlab.service;
 
@@ -51,13 +53,13 @@ public class VoiceRss extends AbstractSpeechSynthesis {
 
   public VoiceRss(String n) {
     super(n);
-
   }
 
   public Integer getRate() {
     return rate;
   }
 
+  // FIXME - this needs to be universal e.g. -1.0 <=> 0 <=> 1.0
   public void setRate(Integer rate) {
     if (rate < -10) {
       rate = -10;
@@ -111,7 +113,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
   }
 
   @Override
-  public AudioData generateAudioData(String toSpeak) throws Exception {
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception {
     VoiceProvider tts = new VoiceProvider(getKey(VOICERSS_API_KEY));
     String fileName = getLocalFileName(toSpeak);
     VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice().getVoiceProvider().toString()); // Languages.English_UnitedStates

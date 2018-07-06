@@ -42,8 +42,7 @@ public class VideoStreamer extends AbstractVideoSink /*extends Service implement
     try {
 
       VideoStreamer streamer = (VideoStreamer) Runtime.createAndStart("streamer", "VideoStreamer");
-      Vision opencv = (Vision) Runtime.createAndStart("opencv", "OpenCV");
-
+       OpenCV opencv = (OpenCV)Runtime.start("opencv", "OpenCV");
       // streamer.start();
       streamer.attach(opencv);
 

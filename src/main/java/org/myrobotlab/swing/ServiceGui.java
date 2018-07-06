@@ -90,9 +90,9 @@ public abstract class ServiceGui implements WindowListener {
 
 		north = new JPanel(new GridBagLayout());
 
-		west = new JPanel(new GridLayout(0, 2));
+		west = new JPanel(new GridBagLayout());
 		center = new JPanel(new GridBagLayout());
-		east = new JPanel(new GridLayout(0, 2));
+		east = new JPanel(new GridBagLayout());
 		south = new JPanel(new GridBagLayout()); // flow
 
 		display.add(north, BorderLayout.NORTH);
@@ -237,8 +237,10 @@ public abstract class ServiceGui implements WindowListener {
 	}
 
 	public JComponent addComponents(JPanel panel, Object... components) {
-		panel.setLayout(new GridLayout(0, components.length));
-		
+    panel.setLayout(new GridLayout(0, components.length));
+    // panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+		// panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
 		GridBagConstraints gc = new GridBagConstraints();
 		for (int i = 0; i < components.length; ++i) {
 			Object o = components[i];
@@ -249,6 +251,7 @@ public abstract class ServiceGui implements WindowListener {
 			}
 			if (o.getClass().equals(String.class)) {
 				JLabel label = new JLabel((String) o);
+				// label.setHorizontalAlignment(SwingConstants.LEFT);
 				j = label;
 			} else {
 				j = (JComponent) o;
@@ -260,6 +263,7 @@ public abstract class ServiceGui implements WindowListener {
 			// j.setAlignmentY(Component.TOP_ALIGNMENT);
 			// j.setAlignmentX(Component.LEFT_ALIGNMENT);
 			// panel.add(j, gc.gridx++);
+			// j.setHorizontalAlignment()
 			panel.add(j);
 		}
 
@@ -341,23 +345,35 @@ public abstract class ServiceGui implements WindowListener {
 	}
 	
 	public void addTop(Object... components) {
-		addLinex(north, gcNorth, components);
+		addLinex(null, north, gcNorth, components);
 	}
 	
 	public void addBottom(Object... components) {
-		addLinex(south, gcSouth, components);
+		addLinex(null, south, gcSouth, components);
 	}
 
+	public void addCenter(Object... components) {
+    addLinex("center", center, gcCenter, components);
+  }
+	
 	public void add(Object... components) {
-		addLinex(center, gcCenter, components);
+		addLinex(null, center, gcCenter, components);
 	}
 
-	public void addLinex(JPanel panel, GridBagConstraints gc, Object... components) {
+	public void addLinex(String alignment, JPanel panel, GridBagConstraints gc, Object... components) {
 
 		// reset - line
 		gc.gridwidth = 1;
 		gc.gridheight = 1;
+		if ("center".equals(alignment)) {
+		  gc.anchor = GridBagConstraints.CENTER;
+		} else {
+		  gc.anchor = GridBagConstraints.NORTHWEST;
+		}
 		gc.gridx = 0;
+		gc.weightx = 1.0;
+		// gc.weighty = 0.5;
+		// gc.insets = new Insets(0, 0, 0, 0);
 
 		for (int i = 0; i < components.length; ++i) {
 			Object o = components[i];

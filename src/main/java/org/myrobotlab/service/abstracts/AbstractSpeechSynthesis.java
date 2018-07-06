@@ -2,7 +2,6 @@ package org.myrobotlab.service.abstracts;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,19 +44,19 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
      * gender of the voice either male or female
      */
     String gender;
-    
+
     /**
      * description
      */
     String description;
-    
+
     // TODO - age ? child youth adult senior
 
     /**
      * Locale of the voice, if it has one
      */
     Locale locale;
-    
+
     /**
      * Installed means the voice is ready without any additional components
      */
@@ -93,11 +92,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     public String toString() {
       return String.format("%s %s %s %s", name, gender, locale, voiceProvider);
     }
-    
+
     public void setInstalled(boolean b) {
       installed = b;
     }
-    
+
     public boolean isInstalled() {
       return installed;
     }
@@ -181,17 +180,19 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   // specific effects and effect notation needs to be isolated to the
   // implementing service
 
-
   /**
-   * NOT NEEDED AS KEY PROBLEMS ARE AUTO-HANDLED
-   * Is the SpeechSynthesis service ready .. ? Several speech synthesis services
-   * require cloud api keys or in some cases, only certain operating systems are
-   * supported. We are going to be pessimistic - MarySpeech is "always" ready :)
+   * NOT NEEDED AS KEY PROBLEMS ARE AUTO-HANDLED Is the SpeechSynthesis service
+   * ready .. ? Several speech synthesis services require cloud api keys or in
+   * some cases, only certain operating systems are supported. We are going to
+   * be pessimistic - MarySpeech is "always" ready :)
    */
   // protected boolean isReady = false;
 
   public AbstractSpeechSynthesis(String reservedKey) {
     super(reservedKey);
+    
+    audioFile = (AudioFile) createPeer("audioFile");
+    
     // for json loading
     if (voices == null) {
       voices = new TreeMap<String, Voice>();
@@ -223,19 +224,47 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     security.addSecret(keyName, keyValue);
   }
 
+  /**
+   * this event occurs when the first audio starts for an utterance
+   */
   @Override
   public String publishStartSpeaking(String utterance) {
-    log.info("publishStartSpeaking - {}", utterance);
+    log.debug("publishStartSpeaking - {}", utterance);
     lastUtterance = utterance;
-    // broadcastState(); - not necessary to broadcast state for regular operation
     return utterance;
   }
 
+  /**
+   * this event occurs when the last audio stops playing for this utterance
+   */
   @Override
   public String publishEndSpeaking(String utterance) {
-    log.info("publishEndSpeaking - {}", utterance);
+    log.debug("publishEndSpeaking - {}", utterance);
     return utterance;
   }
+  
+  /**
+   * Because all AbstractSpeechSynthesis derived classes use audioFile it is
+   * also an AudioData publisher.
+   * 
+   * @param data
+   * @return
+   */
+  public AudioData publishAudioStart(AudioData data) {
+    return data;
+  }
+
+  /**
+   * Because all AbstractSpeechSynthesis derived classes use audioFile it is
+   * also an AudioData publisher.
+   * 
+   * @param data
+   * @return
+   */
+  public AudioData publishAudioEnd(AudioData data) {
+    return data;
+  }
+
 
   /**
    * attach method responsible for routing to type-mangled attach FIXME - add
@@ -245,6 +274,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public void attach(Attachable attachable) {
     if (attachable instanceof TextPublisher) {
       attachTextPublisher((TextPublisher) attachable);
+    } else if (attachable instanceof TextPublisher) {
+      attachSpeechRecognizer((SpeechRecognizer) attachable);
+    } else if (attachable instanceof AudioFile) {
+      audioFile = (AudioFile) attachable;
     } else {
       log.error("don't know how to attach a %s", attachable.getName());
     }
@@ -275,55 +308,43 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     log.info("onText({})", text);
     speak(text);
   }
-  
-  /**
-   * Because all AbstractSpeechSynthesis derived classes use audioFile it is also
-   * an AudioData publisher. 
-   * @param data
-   * @return
-   */
-  public AudioData publishAudioStart(AudioData data) {
-    return data;
-  }
-  
-  public AudioData publishAudioEnd(AudioData data) {
-    return data;
-  }
-  
 
   /**
    * These methods are callback events from the AudioFile service which is a
-   * peer of this service. The speech service sends its own event based on textual data, in addition it
-   * re-broadcasts the events from audiofile which were used with this text to speak, including the 
-   * sound file info
+   * peer of this service. The speech service sends its own event based on
+   * textual data, in addition it re-broadcasts the events from audiofile which
+   * were used with this text to speak, including the sound file info
    */
   public void onAudioStart(AudioData data) {
-    log.info("onAudioStart {} {}", getName(), data.toString());    
+    log.info("onAudioStart {} {}", getName(), data.toString());
+    
     // filters on only our speech
     if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
       invoke("publishAudioStart", data);
-      invoke("publishStartSpeaking", utterance);
+      invoke("publishStartSpeaking", utterances.get(data));
     }
   }
 
   public void onAudioEnd(AudioData data) {
     log.info("onAudioEnd {} {}", getName(), data.toString());
-    
+
     // filters on only our speech
     if (utterances.containsKey(data)) {
-      String utterance = utterances.get(data);
       invoke("publishAudioEnd", data);
-      invoke("publishEndSpeaking", utterance);
+      invoke("publishEndSpeaking", utterances.get(data));
       utterances.remove(data);
     }
   }
-
-  // FIXME - too athropomorphic should just be addSpeechRecognizer
+ 
+  // FIXME - too anthropomorphic should just be more descriptive e.g. addSpeechRecognizer or simply use attach(ear) !!!
+  @Deprecated
   public void addEar(SpeechRecognizer ear) {
-    // when we add the ear, we need to listen for request confirmation
-    addListener("publishStartSpeaking", ear.getName(), "onStartSpeaking");
-    addListener("publishEndSpeaking", ear.getName(), "onEndSpeaking");
+    attachSpeechRecognizer(ear);
+  }
+  
+  public void attachSpeechRecognizer(SpeechRecognizer recognizer) {
+    addListener("publishStartSpeaking", recognizer.getName(), "onStartSpeaking");
+    addListener("publishEndSpeaking", recognizer.getName(), "onEndSpeaking");
   }
 
   /**
@@ -358,7 +379,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   // FIXME gluePath .. I saw //
-  public String getLocalFileName(String toSpeak) throws UnsupportedEncodingException {
+  public String getLocalFileName(String toSpeak){
     if (getVoice() != null) {
       // no need to cache it, already ondisk
       if (toSpeak.startsWith("#") && toSpeak.endsWith("#")) {
@@ -367,7 +388,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       String filename = System.getProperty("user.dir") + File.separator + globalFileCacheDir + File.separator;
 
-      filename += getClass().getSimpleName() + File.separator + URLEncoder.encode(getVoice().getName(), "UTF-8") + File.separator + MathUtils.md5(toSpeak)
+      // FIXME - I don't under why URLEncoder is here ... URLEncoder.encode(getVoice().getName(), "UTF-8")
+      filename += getClass().getSimpleName() + File.separator + getVoice().getName() + File.separator + MathUtils.md5(toSpeak)
           + getAudioCacheExtension();
 
       // create subdirectories if necessary
@@ -391,16 +413,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     subscribe(audioFile.getName(), "publishAudioEnd");
     getVoices();
   }
-  
+
   public void stopService() {
     super.stopService();
-
     unsubscribe(audioFile.getName(), "publishAudioStart");
     unsubscribe(audioFile.getName(), "publishAudioEnd");
-    
   }
-  
-  // FIXME - corresponding stopService() :P - with appropriate unsubscribes
 
   AudioData play(String filename, boolean block) {
     return play(new AudioData(filename), block);
@@ -412,84 +430,116 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
     return audioFile.play(data);
   }
-
-  public List<AudioData> process(String toSpeak, boolean block) {
-
-    toSpeak = filterText(toSpeak);
-
+  
+  /**
+   * the textual info originally requested - this may not be the same as
+   * publishStartSpeaking text because the pre-processor/parser may need to break
+   * it up into pieces to handle effects and other details
+   * 
+   * @param toSpeak
+   * @return
+   */
+  public String publishSpeechRequested(String toSpeak) {
+    return toSpeak;
+  }
+  
+  /**
+   * responsible for all parsing and pre-processing for the audio.  Sound effect, sound files,
+   * SSML, TarsosDsp would all be prepared here before the audio data is generated
+   * 
+   * @param toSpeak
+   * @param block
+   * @return
+   */
+  public List<AudioData> parse(String toSpeak, boolean block){
+    
+    // TODO - not sure if we want to support this notation
+    // but at the moment it seems useful 
     // splitting on sound effects ...
     // TODO - use SSML speech synthesis markup language
+    
+    // broadcast the original text to be processed/parsed
+    invoke("publishSpeechRequested", toSpeak);
 
     List<String> spokenParts = parseEffects(toSpeak);
-    List<AudioData> audioData = new ArrayList<AudioData>();
-
-    invoke("publishStartSpeaking", toSpeak);
-
+    
+    toSpeak = filterText(toSpeak);
+    
+    // we generate a list of audio data to play to support
+    // synthesizing this speech
+    List<AudioData> playList = new ArrayList<AudioData>();
+   
     for (String speak : spokenParts) {
-      try {
-
-        speak = speak.trim();
-        if (speak.length() == 0) {
-          continue;
-        }
-
-        // get a file reference
-        File cacheFile = new File(getLocalFileName(speak));
-
-        // just dust it off ... excellent idea moz4r !
-        if (cacheFile.exists() && cacheFile.length() == 0) {
-          cacheFile.delete();
-          log.warn(cacheFile.getName() + " deleted, because empty...");
-        }
-
-        // if the cache file exists and is valid
-        if (cacheFile.exists()) {
-          // play it
-          AudioData d = play(cacheFile.getAbsolutePath(), block);
-          utterances.put(d, speak);
-          audioData.add(d);
-          continue;
-        }
-
-        // check to see if its a sound effect file
-        if (speak.startsWith("#") && speak.endsWith("#")) {
-          audioData.add(play(
-              System.getProperty("user.dir") + File.separator + "audioFile" + File.separator + "voiceEffects" + File.separator + speak.substring(1, speak.length() - 1) + ".mp3",
-              block));
-          continue;
-        }
-
-        // else generate AudioData :)
-        AudioData d = generateAudioData(speak);
-        if (d == null) {
-          error("could not generate audio data");
-        } else {
-          play(d, block);
-          audioData.add(d);
-          utterances.put(d, speak);
-        }
-      } catch (Exception e) {
-        log.error("could not generate audio",  e);
-        error("%s %s", e.getClass().getSimpleName(), e.getMessage());
-        // error(e);
+  
+      AudioData audioData = null;
+      if (speak.startsWith("#") && speak.endsWith("#")) {
+        audioData = new AudioData(System.getProperty("user.dir") + File.separator + "audioFile" + File.separator + "voiceEffects" + File.separator + speak.substring(1, speak.length() - 1) + ".mp3");
+      } else {
+        audioData = new AudioData(getLocalFileName(speak));
       }
-    } // end for speak in each spoken part
-
-    invoke("publishStopSpeaking", toSpeak);
-
-    return audioData;
-
+      
+      if (speak.trim().length() == 0) {
+        continue;
+      }
+      
+      process(audioData, speak, block);
+      
+      // effect files are handled differently from generated audio
+      playList.add(audioData);
+    }
+    // FIXME - in theory "speaking" means generating audio from some text
+    // so starting speaking event is when the first audio is "started"
+    // and finished speaking is when the last audio is finished
+  
+    return playList;
+  }
+  
+  public Long publishGenerationTime(Long timeMs) {
+    return timeMs;
   }
 
-  // FIXME - change to synthesize with blocking parameter
-  // FIXME - use SSML speech synthesis markup language
+  /**
+   * process speaking - generate the text to be spoken or play a cache file if appropriate
+   * @param toSpeak
+   * @param block
+   * @return
+   * @throws UnsupportedEncodingException 
+   */
+  public AudioData process(AudioData audioData, String speak, boolean block) {
+ 
+      try {
+
+        long generateStartTs = System.currentTimeMillis();
+        utterances.put(audioData, speak);
+        
+        if (!audioData.isValid()) {
+          log.info("try generating audio data [{}] from [{}]", audioData, speak);          
+          generateAudioData(audioData, speak);          
+        }
+        
+        invoke("publishGenerationTime", System.currentTimeMillis() - generateStartTs);
+
+        if (!audioData.isValid()) {
+          log.error("speech service could not generate audio data [{}]", audioData);
+          return audioData;
+        }
+                
+        play(audioData, block);
+      } catch (Exception e) {
+        log.error("could not generate audio", e);
+        error("%s %s", e.getClass().getSimpleName(), e.getMessage());
+      }
+
+      return audioData;
+  }
+
   public List<AudioData> speak(String toSpeak) {
-    return process(toSpeak, false);
+    return parse(toSpeak, false);
   }
 
   @Override
   public List<AudioData> speakBlocking(String toSpeak) {
-    return process(toSpeak, true);
+    return parse(toSpeak, true);
   }
 
   private String filterText(String toSpeak) {
@@ -513,7 +563,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     String[] parts = toSpeak.split("#");
     for (int i = 0; i < parts.length; ++i) {
       if (i % 2 == 0) {
-        ret.add(parts[i]);
+        if (parts[i].length() > 0)
+          ret.add(parts[i].trim());
       } else {
         ret.add(String.format("#%s#", parts[i]));
       }
@@ -532,17 +583,30 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   /**
    * use tts engine to create an audiofile
    * 
+   * @param audioData
+   *          TODO
    * @param toSpeak
    *          text
+   * 
    * @return byte[]
    */
-  abstract public AudioData generateAudioData(String toSpeak) throws Exception;
+  abstract public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception;
 
-  // FIXME - could be useful ! ???? is there another comparable methods ?
-  // should interrupt audio stream
-  public void interrupt() {
-    // TODO - implement - "pause on file play"
-    // never used
+  public void pause() {
+    audioFile.pause();
+  }
+  
+  public void resume() {
+    audioFile.resume();
+  }
+  
+  public void purgeFile(String filename) {
+    audioFile.deleteFile(filename);
+  }
+  
+  public void purgeCache() {
+    // audioFile.deleteFiles(String.format("%s%s, args)globalFileCacheDir);
+    audioFile.deleteFiles(this.getClass().getSimpleName());
   }
 
   public Voice getVoice() {
@@ -555,27 +619,32 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public List<Voice> getVoices() {
+    try {
 
-    // load the voices from the service implementation
-    // expectation is voices should be loaded & voice & defaultvoice set
-    if (voices == null || voices.size() == 0) {
-      log.info("loading voices begin");
-      loadVoices();
-      log.info("loading voices end");
+      // load the voices from the service implementation
+      // expectation is voices should be loaded & voice & defaultvoice set
+      if (voices == null || voices.size() == 0) {
+        log.info("loading voices begin");
+        loadVoices();
+        log.info("loading voices end");
+      }
+
+      // attempt to set a default voice if not set
+      setDefaultVoice();
+
+      List<Voice> vs = new ArrayList<Voice>(voices.size());
+      for (Voice v : voices.values()) {
+        vs.add(v);
+      }
+
+      invoke("publishVoices", vs);
+
+      save();
+      return vs;
+    } catch (Exception e) {
+      error("%s", e.getMessage());
     }
-
-    // attempt to set a default voice if not set
-    setDefaultVoice();
-
-    List<Voice> vs = new ArrayList<Voice>(voices.size());
-    for (Voice v : voices.values()) {
-      vs.add(v);
-    }
-
-    invoke("publishVoices", vs);
-
-    save();
-    return vs;
+    return new ArrayList<Voice>();
   }
 
   public void setDefaultVoice() {
@@ -624,7 +693,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * no voices. Its the responsibility of the subclass to addVoice("name",
    * "gender", "lang", impl) all the voices it provides
    */
-  abstract protected void loadVoices();
+  abstract protected void loadVoices() throws Exception;
 
   public List<Voice> publishVoices(List<Voice> voices) {
     return voices;
@@ -647,31 +716,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return security.getKey(keyName);
   }
 
-  public List<String> getVoiceEffectFiles() {
-
-    List<String> list = new ArrayList<String>();
-    File folder = new File(globalFileCacheDir + File.separator + "voiceEffects");
-    File[] listOfFiles = folder.listFiles();
-    if (folder.exists()) {
-      for (int i = 0; i < listOfFiles.length; i++) {
-        if (listOfFiles[i].isFile()) {
-          list.add("#" + listOfFiles[i].getName().replaceAll(".mp3", "") + "#");
-        }
-      }
-    }
-    return list;
+  public List<File> getVoiceEffectFiles() {
+    return audioFile.getFiles("voiceEffects", true);    
   }
-
-  /*
-  public void setSelectedEffect(String effect) {
-    this.selectedEffect = effect;
-    broadcastState();
-  }
-
-  public String getSelectedEffect() {
-    return selectedEffect;
-  }
-  */
+  
   /**
    * default cache file type
    */
@@ -708,7 +756,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public boolean setLanguage(String lang) {
 
     if (voices.size() == 0) {
-      loadVoices();
+      try {
+        loadVoices();
+      } catch (Exception e) {
+        error("could not set language could not load voices");
+      }
     }
 
     // set through tag or name (first match)
@@ -735,6 +787,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return false;
   }
 
+  /**
+   * addVoice adds a voice to the voices and all the voice/gender/lang indexes
+   * 
+   * @param name
+   * @param gender
+   * @param lang
+   * @param voiceProvider
+   */
   protected void addVoice(String name, String gender, String lang, Object voiceProvider) {
     Voice v = new Voice(name, gender, lang, voiceProvider);
     log.info("adding voice {}", v);
@@ -769,8 +829,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       group.add(v);
       genderIndex.put(gender, group);
     }
-
   }
+  
+  public void stop() {
+    audioFile.stop();
+  }
+
 
   /*
    * public boolean cacheContains(String filename) { File file = new

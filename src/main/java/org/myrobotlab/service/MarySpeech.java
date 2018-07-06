@@ -3,28 +3,24 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import org.apache.commons.io.FileUtils;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.maryspeech.tools.install.MaryInstaller;
-import org.myrobotlab.maryspeech.tools.install.VoiceComponentDescription;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
+import org.xml.sax.SAXException;
 
 import marytts.LocalMaryInterface;
 import marytts.MaryInterface;
@@ -96,21 +92,24 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
   }
 
+  /*
   public void installComponentsAcceptLicense(String component) {
     installComponentsAcceptLicense(new String[] { component });
   }
+  */
 
+  /* INSTALL NOW USES MAVEN
   public void installComponentsAcceptLicense(String[] components) {
     if (components == null) {
       return;
     }
     // log.info("Installing components from {}", maryComponentsUrl);
-    org.myrobotlab.maryspeech.tools.install.MaryInstaller installer = new MaryInstaller("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml");
+    InstallFileParser installer = new InstallFileParser(new URL("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"));
 
-    Map<String, org.myrobotlab.maryspeech.tools.install.LanguageComponentDescription> maryLanguages = installer.getLanguages();
-    Map<String, org.myrobotlab.maryspeech.tools.install.VoiceComponentDescription> voices = installer.getVoices();
+    Map<String, LanguageComponentDescription> maryLanguages = installer.getLanguages();
+    List<VoiceComponentDescription>voices = installer.getVoiceDescriptions();
 
-    List<org.myrobotlab.maryspeech.tools.install.ComponentDescription> toInstall = new ArrayList<>();
+    List<ComponentDescription> toInstall = new ArrayList<>();
     for (String component : components) {
       if (component == null || component.isEmpty() || component.trim().isEmpty()) {
         continue;
@@ -123,6 +122,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
         log.warn("can't find component for installation");
       }
     }
+    
 
     log.info("starting marytts component installation: " + toInstall);
     installer.installSelectedLanguagesAndVoices(toInstall);
@@ -137,65 +137,8 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       log.error("moving files FAILED!");
     }
   }
+  */
 
-  public static void main(String[] args) throws IOException {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-      // Runtime.start("webgui", "WebGui");
-      MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
-      // mary.grabRemoteAudioEffect("LAUGH01_F");
-      Runtime.start("python", "Python");
-      Runtime.start("gui", "SwingGui");
-      // examples are generously copied from
-      // marytts.signalproc.effects.EffectsApplier.java L319-324
-      // String strEffectsAndParams = "FIRFilter+Robot(amount=50)";
-      //// String strEffectsAndParams = "Robot(amount=100)+Chorus(delay1=866,
-      // amp1=0.24, delay2=300, amp2=-0.40,)";
-      // "Robot(amount=80)+Stadium(amount=50)";
-      // String strEffectsAndParams = "FIRFilter(type=3,fc1=6000,
-      // fc2=10000) + Robot";
-      // String strEffectsAndParams = "Stadium(amount=40) +
-      // Robot(amount=87) +
-      // Whisper(amount=65)+FIRFilter(type=1,fc1=1540;)++";
-      // mary.setAudioEffects(strEffectsAndParams);
-
-      // mary.setVoice("dfki-spike en_GB male unitselection general");
-      // mary.setVoice("cmu-bdl-hsmm");
-      // mary.setVoice("cmu-slt-hsmm");
-      //// mary.getVoices();
-      // mary.speak("world");
-      //// mary.speak("");
-      //// mary.setAudioEffects("");
-      //// mary.setVolume(0.9f);
-      //// mary.speakBlocking("Hello world");
-      //// mary.setVolume(0.7f);
-      //// mary.speakBlocking("Hello world");
-      //// mary.setVolume(0.9f);
-      // mary.speakBlocking("unicode test, éléphant");
-      // test audioeffect on cached text
-      //// mary.setAudioEffects("FIRFilter+Robot(amount=50)");
-      //// mary.speak("Hello world");
-
-      // mary.speakBlocking("my name is worky");
-      // mary.speakBlocking("I am Mary TTS and I am open source");
-      // mary.speakBlocking("and I will evolve quicker than any closed source
-      // application if not in a short window of time");
-      // mary.speakBlocking("then in the long term evolution of software");
-
-      mary.speakBlocking("#THROAT01_F# Hello world, it is so funny #LAUGH02_F#");
-      // mary.setVoice("cmu-bdl-hsmm");
-      mary.speakBlocking("#THROAT01_M# hi! it works.");
-      mary.speakBlocking("#LAUGH01_M#");
-      mary.setVolume(0.8);
-      mary.speakBlocking("I am your R 2 D 2 #R2D2#");
-      mary.setVolume(1.0);
-      // WOW - that is a big install !
-      // mary.installComponentsAcceptLicense("bits1");
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
 
   /**
    * default cache file type for Mary
@@ -271,9 +214,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  public AudioData generateAudioData(String toSpeak) throws IOException, SynthesisException {
-    // generate mary to wav
-    String filename = getLocalFileName(toSpeak);
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, SynthesisException {
     Voice voice = getVoice();
     marytts.setVoice(voice.getVoiceProvider().toString());
     // marytts.setInputType("SSML"); FIXME - MUST BE VALID XML WITH HEADER !!!
@@ -283,14 +224,14 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     AudioInputStream maryOutput = marytts.generateAudio(toSpeak);
 
     DDSAudioInputStream outputAudio = new DDSAudioInputStream(new BufferedDoubleDataSource(MaryAudioUtils.getSamplesAsDoubleArray(maryOutput)), maryOutput.getFormat());
-    FileOutputStream fos = new FileOutputStream(filename);
+    FileOutputStream fos = new FileOutputStream(audioData.getFileName());
     AudioSystem.write(outputAudio, AudioFileFormat.Type.WAVE, fos);
     fos.close();
-    return new AudioData(filename);
+    return audioData;
   }
 
   @Override
-  protected void loadVoices() {
+  protected void loadVoices() throws MalformedURLException, IOException, SAXException {
     // It is great that we can query to get voices - but regrettably they are
     // lacking a lot of useful meta-data
     // such as locale and gender. So, we will "hardcode" the meta information..
@@ -301,12 +242,16 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       System.out.println("voice-" + k);
     }
 
-    org.myrobotlab.maryspeech.tools.install.MaryInstaller installer = new MaryInstaller("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml");
-    Map<String, VoiceComponentDescription> moreVoices = installer.getVoices();
-    for (String k : moreVoices.keySet()) {
-      System.out.println("voice-" + k);
+    // compare against installer and config files to find more voices
+    /* <pre>
+    InstallFileParser installer = new InstallFileParser(new URL("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"));
+    List<VoiceComponentDescription> moreVoices = installer.getVoiceDescriptions();
+    for (VoiceComponentDescription k : moreVoices) {
+      System.out.println("voice-" + k.getName());
     }
     moreVoices.size();
+    </pre>
+    */
 
     // installComponentsAcceptLicense("bits2");
 
@@ -329,5 +274,68 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
     // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
+  
+  public static void main(String[] args) throws IOException {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+      
+      Runtime.start("gui", "SwingGui");
+      // Runtime.start("webgui", "WebGui");
+      MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
+      // mary.grabRemoteAudioEffect("LAUGH01_F");
+      Runtime.start("python", "Python");
+      
+      // examples are generously copied from
+      // marytts.signalproc.effects.EffectsApplier.java L319-324
+      // String strEffectsAndParams = "FIRFilter+Robot(amount=50)";
+      //// String strEffectsAndParams = "Robot(amount=100)+Chorus(delay1=866,
+      // amp1=0.24, delay2=300, amp2=-0.40,)";
+      // "Robot(amount=80)+Stadium(amount=50)";
+      // String strEffectsAndParams = "FIRFilter(type=3,fc1=6000,
+      // fc2=10000) + Robot";
+      // String strEffectsAndParams = "Stadium(amount=40) +
+      // Robot(amount=87) +
+      // Whisper(amount=65)+FIRFilter(type=1,fc1=1540;)++";
+      // mary.setAudioEffects(strEffectsAndParams);
+
+      // mary.setVoice("dfki-spike en_GB male unitselection general");
+      // mary.setVoice("cmu-bdl-hsmm");
+      // mary.setVoice("cmu-slt-hsmm");
+      //// mary.getVoices();
+      // mary.speak("world");
+      //// mary.speak("");
+      //// mary.setAudioEffects("");
+      //// mary.setVolume(0.9f);
+      //// mary.speakBlocking("Hello world");
+      //// mary.setVolume(0.7f);
+      //// mary.speakBlocking("Hello world");
+      //// mary.setVolume(0.9f);
+      // mary.speakBlocking("unicode test, éléphant");
+      // test audioeffect on cached text
+      //// mary.setAudioEffects("FIRFilter+Robot(amount=50)");
+      //// mary.speak("Hello world");
+
+      // mary.speakBlocking("my name is worky");
+      // mary.speakBlocking("I am Mary TTS and I am open source");
+      // mary.speakBlocking("and I will evolve quicker than any closed source
+      // application if not in a short window of time");
+      // mary.speakBlocking("then in the long term evolution of software");
+
+      mary.speak("to be or not to be that is the question");
+      // mary.speak("#THROAT01_F# Hello world, it is so funny #LAUGH02_F#");
+      // mary.setVoice("cmu-bdl-hsmm");
+      // mary.speak("#THROAT01_M# hi! it works.");
+      // mary.speak("#LAUGH01_M#");
+      // mary.setVolume(0.8);
+      // mary.speak("I am your R 2 D 2 #R2D2# ,how was that");
+      // mary.setVolume(1.0);
+      // WOW - that is a big install !
+      // mary.installComponentsAcceptLicense("bits1");
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
 
 }
