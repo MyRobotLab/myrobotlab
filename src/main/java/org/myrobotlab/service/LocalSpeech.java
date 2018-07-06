@@ -22,6 +22,10 @@ import org.slf4j.Logger;
  *
  *         FIXME - use sapi/creatObject if necessary Say -
  *         https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
+ *         
+ *         Linux possibilities
+ *          https://launchpad.net/ubuntu/precise/+source/svox/
+ *           
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
 
@@ -83,7 +87,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  public AudioData generateAudioData(String toSpeak) throws IOException {
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
 
     String localFileName = getLocalFileName(toSpeak);
 

@@ -1,15 +1,16 @@
 package org.myrobotlab.service;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.URLEncoder;
 
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.data.HttpData;
 import org.slf4j.Logger;
 
 /**
@@ -39,62 +40,49 @@ public class IndianTts extends AbstractSpeechSynthesis {
     httpClient.startService();
   }
 
-  public String getMp3Url(String toSpeak) {
-    Security security = Runtime.getSecurity();
+  @Override
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
+    
+    String userid = getKey(INDIANTTS_USER_USERID);
+    String secret = getKey(INDIANTTS_USER_API);
 
-    String userid = security.getKey(INDIANTTS_USER_USERID);
-    String secret = security.getKey(INDIANTTS_USER_API);
-
-    String encoded = toSpeak;
-    try {
-      encoded = URLEncoder.encode(toSpeak, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      log.error(e.getMessage(), e);
+    // check keys
+    if (userid == null) {
+      error("%s needs to be set - http://ivr.indiantts.co.in", INDIANTTS_USER_USERID);
+      return null;
     }
 
-    // TOOD: also the speed setting is passed in as s=
+    if (secret == null) {
+      error("%s needs to be set - http://ivr.indiantts.co.in", INDIANTTS_USER_API);
+      return null;
+    }
 
-    String url = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + secret + "&user_id=" + userid + "&action=play";
-    log.info("URL FOR AUDIO:{}", url);
-    return url;
-  }
+    String encoded = URLEncoder.encode(toSpeak, "UTF-8");
 
-  @Override
-  public AudioData generateAudioData(String toSpeak) {
-   
-    AudioData audioData = null;
-    
-    try {
-      String cache = getLocalFileName(toSpeak);
-      audioData = new AudioData(cache);
+    // TODO: also the speed setting is passed in as s=
+    String uri = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + secret + "&user_id=" + userid + "&action=play";
 
-      String userid = getKey(INDIANTTS_USER_USERID);
-      String secret = getKey(INDIANTTS_USER_API);
+    HttpData data = httpClient.getResponse(uri);
+    // check response
+    if (!"audio/x-wav".equals(data.contentType)) {
+      String ret = new String(data.data);
+      error("non-audio data returned - %s", ret);
+      return null;
+    }
 
-      String encoded = URLEncoder.encode(toSpeak, "UTF-8");
-      
-      // TOOD: also the speed setting is passed in as s=
-
-      String mp3Url = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + secret + "&user_id=" + userid + "&action=play";
-
-      byte[] b = null;
-      // get mp3 file & save to cache
-      // cache the mp3 content
-      b = httpClient.getBytes(mp3Url);
-      if (b == null || b.length == 0) {
-        error("%s returned 0 byte file !!! - it may block you", getName());
-        return null;
-      }
-
-    } catch (Exception e) {
-      log.error("generateAudioData threw",e);
+    // save data to cache file if valid
+    if (data.data == null || data.data.length == 0) {
+      error("%s returned 0 byte file !!! - it may block you", getName());
+      return null;
+    } else {
+      FileIO.toFile(audioData.getFileName(), data.data);
     }
 
     return audioData;
   }
 
   static public ServiceType getMetaData() {
-    
+
     ServiceType meta = AbstractSpeechSynthesis.getMetaData(IndianTts.class.getCanonicalName());
     meta.addDescription("Hindi tts support");
     meta.setCloudService(true);
@@ -102,7 +90,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
     meta.setSponsor("moz4r");
     meta.addCategory("speech", "sound");
     meta.addPeer("httpClient", "HttpClient", "httpClient");
- 
+
     return meta;
   }
 
@@ -122,12 +110,13 @@ public class IndianTts extends AbstractSpeechSynthesis {
   protected void loadVoices() {
     addVoice("Sri", "female", "hi", null);
   }
-  
+
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
     // try {
     // Runtime.start("webgui", "WebGui");
+    Runtime.start("gui", "SwingGui");
     IndianTts indianTts = (IndianTts) Runtime.start("indianTts", "IndianTts");
     // Runtime.start("gui", "SwingGui");
     // demo api key
@@ -137,6 +126,5 @@ public class IndianTts extends AbstractSpeechSynthesis {
 
     // }
   }
-
 
 }

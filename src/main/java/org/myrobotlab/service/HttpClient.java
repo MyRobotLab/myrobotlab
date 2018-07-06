@@ -42,6 +42,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.framework.Service;
@@ -69,6 +70,8 @@ import org.slf4j.Logger;
  *         if a callback method is supplied or Non-Blocking method is called
  *         
  *         Check out - Fluent interface - https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
+ *         
+ *         - Proxies proxies proxies ! - https://memorynotfound.com/configure-http-proxy-settings-java/
  */
 public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
 
@@ -187,6 +190,11 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   public byte[] postBytes(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
     return processResponse((HttpUriRequest) new HttpPost(uri), fields).data;
   }
+  
+  public HttpData getResponse(String uri) throws IOException {
+    HttpData response = processResponse((HttpUriRequest) new HttpGet(uri), null);
+    return response;
+  }
 
   public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws IOException {
     HttpData data = new HttpData(request.getURI().toString());
@@ -258,7 +266,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     super.startService();
     if (client == null) {
       // new MultiThreadedHttpConnectionManager()
-      client = HttpClients.createDefault();
+      client = HttpClients.createSystem(); // modded by GroG to support system proxies
+      // client = HttpClientBuilder.create().useSystemProperties();
+      // client = HttpClients.createDefault();
     }
   }
 

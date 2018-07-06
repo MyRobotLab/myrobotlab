@@ -87,9 +87,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  public AudioData generateAudioData(String toSpeak) throws IOException {
-
-      String filename = getLocalFileName(toSpeak);
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
 
       // other examples :
       // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=de-DE_BirgitVoice&rate=100&text=test&outputFormat=mp3
@@ -114,9 +112,9 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
         error("%s returned 0 byte file !!! - it may block you", getName());
         b = null;
       } else {
-        FileIO.toFile(filename, b);
+        FileIO.toFile(audioData.getFileName(), b);
       }
-      return new AudioData(filename);
+      return audioData;
   }
 
   @Override

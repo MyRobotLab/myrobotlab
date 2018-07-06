@@ -1719,7 +1719,6 @@ public class RoboClaw extends AbstractMotorController
 	public void setPidQppsM1(int D, int P, int I, int QPPS) {
 		sendPacket(address, 28, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P),
 				byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
-		// TODO lock - timeout - return value & publish
 	}
 
 	/**
@@ -1743,7 +1742,6 @@ public class RoboClaw extends AbstractMotorController
 	public void setPidQppsM2(int D, int P, int I, int QPPS) {
 		sendPacket(address, 29, byte3(D), byte2(D), byte1(D), byte0(D), byte3(P), byte2(P), byte1(P), byte0(P),
 				byte3(I), byte2(I), byte1(I), byte0(I), byte3(QPPS), byte2(QPPS), byte1(QPPS), byte0(QPPS));
-		// TODO lock - timeout - return value & publish
 	}
 	
 	public void setPidQppsDeadzoneMinMaxM1(int D, int P, int I, int QPPS, int deadzone, int minPos, int maxPos) {
@@ -2330,7 +2328,7 @@ public class RoboClaw extends AbstractMotorController
 			m2.pid.deadband = bytes4ToLong(data, 16);
 			m2.pid.outMin = bytes4ToLong(data, 20);
 			m2.pid.outMax = bytes4ToLong(data, 24);
-			log.info("m2.pid {}", m1.pid.toString());
+			log.info("m2.pid {}", m2.pid.toString());
 		}
 
 		return m2.pid;
@@ -2534,18 +2532,20 @@ public class RoboClaw extends AbstractMotorController
 
 			// rc.readM1VelocityPIDandQPPS();
 
-			rc.readPidM1();
-			rc.readPidM1();
+			rc.readPidM2();
+			rc.readPidM2();
 
 			// rc.setM1PID(0, 15000, 45, 1000000, 500, 0, c);
 			// rc.setM1PID(D, P, I, maxI, deadzone, minPos, maxPos);
 			// rc.setPidQppsM1(0, 15001, 46, 56000);
 			// rc.setPidM1(0, 15001, 46, 0, 501, 0, 4000001);
 
-			rc.setPidQppsDeadzoneMinMaxM1(0, 15002, 46, 56000, 502, 0, 4000001);
+			rc.setPidQppsDeadzoneMinMaxM2(0, 15011, 50, 56011, 510, 0, 4000011);
 
-			rc.readPidM1();
-			rc.readPidM1();
+			rc.readPidM2();
+			rc.readPidM2();
+			
+			rc.resetEncoders();
 
 			// rc.setM1PID(D, P, I, maxI, deadzone, minPos, c);
 
@@ -2558,7 +2558,8 @@ public class RoboClaw extends AbstractMotorController
 			// max pos 4000000
 			int pos = 3000000;
 			// int pos = 0;
-			rc.driveSpeedAccelDeccelPosM1(speed, accel, deccel, pos);
+      rc.driveSpeedAccelDeccelPosM1(speed, accel, deccel, pos);
+      rc.driveSpeedAccelDeccelPosM1(speed, accel, deccel, 1000000);
 
 			log.info("encoder 1 {}", rc.readEncoderM1());
 
@@ -2649,7 +2650,7 @@ public class RoboClaw extends AbstractMotorController
 			rc.connect(port);
 			
 
-			boolean done = true;
+			boolean done = false;
 			if (done) {
 				return;
 			}

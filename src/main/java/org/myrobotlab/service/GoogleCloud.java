@@ -52,7 +52,6 @@ public class GoogleCloud extends Service {
    * is "MyCompany-ProductName/1.0".
    */
   private static final String APPLICATION_NAME = "Google-VisionFaceDetectSample/1.0";
-  transient Vision vision;
   int maxResults = 32;
   boolean connected = false;
   

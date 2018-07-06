@@ -43,7 +43,6 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Vision;
 import org.slf4j.Logger;
 
 /**
@@ -56,7 +55,7 @@ import org.slf4j.Logger;
  */
 public class SerializableImage implements Serializable {
 
-  public final static Logger log = LoggerFactory.getLogger(Vision.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(SerializableImage.class.getCanonicalName());
 
   private static final long serialVersionUID = 1L;
 

@@ -63,7 +63,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
 	}
 
 	@Override
-	public AudioData generateAudioData(String toSpeak) throws IOException {
+	public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
 		toSpeak = toSpeak.replace("\"", "\"\""); 
 		String fileName = getLocalFileName(toSpeak);
 		

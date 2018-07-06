@@ -52,7 +52,7 @@ import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.myrobotlab.maryspeech.util.io.FileUtils;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.OpenCV;
 
 /**
@@ -224,7 +224,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       
       // we know that imread doesn't work with non-ascii file paths.. so we want to use a different
       // so, load the image into memory, warp it in a byte pointer and pass it to imdecode to load the image from memory, instead of from disk
-      byte[] tmpImg = FileUtils.getFileAsBytes(image);
+      byte[] tmpImg = FileIO.toByteArray(image);
       Mat img = imdecode(new Mat(new BytePointer(tmpImg)),CV_LOAD_IMAGE_GRAYSCALE);
 
       // The directory name is the label.
