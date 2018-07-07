@@ -49,6 +49,7 @@ import org.myrobotlab.swing.widget.ImageButton;
 
 public class MotorPortGui extends ServiceGui implements ActionListener, ChangeListener {
 
+  // FIXME - make AbstractMotorGui !!!
   public class FloatJSlider extends JSlider {
 
     private static final long serialVersionUID = 1L;

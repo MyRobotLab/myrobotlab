@@ -25,8 +25,8 @@ import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.ServoOrchestrator;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service._TemplateService;
 import org.myrobotlab.swing.widget.ServoOrchestratorGUI_middlemiddle_main;
 import org.slf4j.Logger;
 
@@ -510,7 +510,7 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
     swingGui.send(boundServiceName, "externalcall_servopanelsettostartpos", x, y, withgoal);
   }
 
-  public void onState(_TemplateService template) {
+  public void onState(ServoOrchestrator template) {
     // I think I should do something with this ...
     SwingUtilities.invokeLater(new Runnable() {
       @Override

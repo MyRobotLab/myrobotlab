@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -67,6 +68,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   JLabel cacheFile = new JLabel("no file");
   JLabel audioState = new JLabel("not playing");
   JLabel generationTime = new JLabel("generation time : 0 ms");
+  
+  JCheckBox useSSML = new JCheckBox();
 
   JComboBox<String> voices = new JComboBox<String>();
   JTextArea lastUtterance = new JTextArea();
@@ -109,6 +112,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     addLeftLine("voices:", voices);
     addLeftLine("effects", voiceEffectFiles);
     addLeftLine("volume:", volume);
+    addLeftLine("use SSML:", useSSML);
     save.setPreferredSize(new Dimension(85, 45));
     pause.setPreferredSize(new Dimension(85, 45));
     resume.setPreferredSize(new Dimension(85, 45));
@@ -128,6 +132,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     resume.addActionListener(this);
     stop.addActionListener(this);
     save.addActionListener(this);
+    useSSML.addActionListener(this);
     // purgeCache.addActionListener(this);
     // purgeFile.addActionListener(this);
   }
