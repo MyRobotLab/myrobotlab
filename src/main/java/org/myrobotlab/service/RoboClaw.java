@@ -2416,7 +2416,7 @@ public class RoboClaw extends AbstractMotorController
 		return data;
 	}
 	
-	public void setBuffer(boolean b) {
+	public void s(boolean b) {
 		if (b) {
 			buffer = 0;
 		} else {
@@ -2532,18 +2532,18 @@ public class RoboClaw extends AbstractMotorController
 
 			// rc.readM1VelocityPIDandQPPS();
 
-			rc.readPidM2();
-			rc.readPidM2();
+			rc.readPidM1();
+			rc.readPidM1();
 
 			// rc.setM1PID(0, 15000, 45, 1000000, 500, 0, c);
 			// rc.setM1PID(D, P, I, maxI, deadzone, minPos, maxPos);
 			// rc.setPidQppsM1(0, 15001, 46, 56000);
 			// rc.setPidM1(0, 15001, 46, 0, 501, 0, 4000001);
 
-			rc.setPidQppsDeadzoneMinMaxM2(0, 15011, 50, 56011, 510, 0, 4000011);
+			rc.setPidQppsDeadzoneMinMaxM1(0, 15000, 50, 56000, 500, 0, 4000000);
 
-			rc.readPidM2();
-			rc.readPidM2();
+			rc.readPidM1();
+			rc.readPidM1();
 			
 			rc.resetEncoders();
 
@@ -2560,6 +2560,7 @@ public class RoboClaw extends AbstractMotorController
 			// int pos = 0;
       rc.driveSpeedAccelDeccelPosM1(speed, accel, deccel, pos);
       rc.driveSpeedAccelDeccelPosM1(speed, accel, deccel, 1000000);
+      rc.readEncoderM1();
 
 			log.info("encoder 1 {}", rc.readEncoderM1());
 

@@ -88,57 +88,50 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       file.mkdirs();
     }
 
-    marytts = new LocalMaryInterface();
+    try {
+      marytts = new LocalMaryInterface();
+    } catch (Exception e) {
+      error(e);
+    }
 
   }
 
   /*
-  public void installComponentsAcceptLicense(String component) {
-    installComponentsAcceptLicense(new String[] { component });
-  }
-  */
+   * public void installComponentsAcceptLicense(String component) {
+   * installComponentsAcceptLicense(new String[] { component }); }
+   */
 
-  /* INSTALL NOW USES MAVEN
-  public void installComponentsAcceptLicense(String[] components) {
-    if (components == null) {
-      return;
-    }
-    // log.info("Installing components from {}", maryComponentsUrl);
-    InstallFileParser installer = new InstallFileParser(new URL("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"));
-
-    Map<String, LanguageComponentDescription> maryLanguages = installer.getLanguages();
-    List<VoiceComponentDescription>voices = installer.getVoiceDescriptions();
-
-    List<ComponentDescription> toInstall = new ArrayList<>();
-    for (String component : components) {
-      if (component == null || component.isEmpty() || component.trim().isEmpty()) {
-        continue;
-      }
-      if (maryLanguages.containsKey(component)) {
-        toInstall.add(maryLanguages.get(component));
-      } else if (voices.containsKey(component)) {
-        toInstall.add(voices.get(component));
-      } else {
-        log.warn("can't find component for installation");
-      }
-    }
-    
-
-    log.info("starting marytts component installation: " + toInstall);
-    installer.installSelectedLanguagesAndVoices(toInstall);
-    log.info("moving files to correct places ...");
-    File srcDir = new File(maryBase + File.separator + "lib");
-    File destDir = new File("libraries" + File.separator + "jar");
-    try {
-      FileUtils.copyDirectory(srcDir, destDir);
-      log.info("finished marytts component installation");
-      log.info("PLEASE RESTART TO APPLY CHANGES !!!");
-    } catch (IOException e) {
-      log.error("moving files FAILED!");
-    }
-  }
-  */
-
+  /*
+   * INSTALL NOW USES MAVEN public void installComponentsAcceptLicense(String[]
+   * components) { if (components == null) { return; } //
+   * log.info("Installing components from {}", maryComponentsUrl);
+   * InstallFileParser installer = new InstallFileParser(new URL(
+   * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"
+   * ));
+   * 
+   * Map<String, LanguageComponentDescription> maryLanguages =
+   * installer.getLanguages(); List<VoiceComponentDescription>voices =
+   * installer.getVoiceDescriptions();
+   * 
+   * List<ComponentDescription> toInstall = new ArrayList<>(); for (String
+   * component : components) { if (component == null || component.isEmpty() ||
+   * component.trim().isEmpty()) { continue; } if
+   * (maryLanguages.containsKey(component)) {
+   * toInstall.add(maryLanguages.get(component)); } else if
+   * (voices.containsKey(component)) { toInstall.add(voices.get(component)); }
+   * else { log.warn("can't find component for installation"); } }
+   * 
+   * 
+   * log.info("starting marytts component installation: " + toInstall);
+   * installer.installSelectedLanguagesAndVoices(toInstall);
+   * log.info("moving files to correct places ..."); File srcDir = new
+   * File(maryBase + File.separator + "lib"); File destDir = new
+   * File("libraries" + File.separator + "jar"); try {
+   * FileUtils.copyDirectory(srcDir, destDir);
+   * log.info("finished marytts component installation");
+   * log.info("PLEASE RESTART TO APPLY CHANGES !!!"); } catch (IOException e) {
+   * log.error("moving files FAILED!"); } }
+   */
 
   /**
    * default cache file type for Mary
@@ -186,14 +179,21 @@ public class MarySpeech extends AbstractSpeechSynthesis {
      * "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"
      * };
      */
+    /*
     Set<String> voices = new HashSet<>(Arrays.asList("voice-bits1", "voice-bits1-hsmm", "voice-bits2", "voice-bits3", "voice-bits3-hsmm", "voice-bits4", "voice-cmu-bdl",
         "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms", "voice-cmu-rms-hsmm", "voice-cmu-slt", "voice-dfki-obadiah", "voice-dfki-obadiah-hsmm", "voice-dfki-ot",
         "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-pavoque-styles", "voice-dfki-poppy", "voice-dfki-poppy-hsmm",
         "voice-dfki-prudence", "voice-dfki-prudence-hsmm", "voice-dfki-spike", "voice-dfki-spike-hsmm", "voice-enst-camille", "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm",
-        "voice-istc-lucia-hsmm", /*"voice-marylux",*/ "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre", "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
+        "voice-istc-lucia-hsmm", /* "voice-marylux", *//* "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre", "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
         "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm", "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm", "voice-cmu-slt-hsmm",
         "voice-enst-camille-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
-        "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"));
+        "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"));*/
+    
+    String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm",
+        "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
+        "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm", "voice-upmc-pierre-hsmm" };
+
+    
     for (String voice : voices) {
       meta.addDependency("de.dfki.mary", voice, "5.2");
       if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
@@ -243,15 +243,14 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     }
 
     // compare against installer and config files to find more voices
-    /* <pre>
-    InstallFileParser installer = new InstallFileParser(new URL("https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"));
-    List<VoiceComponentDescription> moreVoices = installer.getVoiceDescriptions();
-    for (VoiceComponentDescription k : moreVoices) {
-      System.out.println("voice-" + k.getName());
-    }
-    moreVoices.size();
-    </pre>
-    */
+    /*
+     * <pre> InstallFileParser installer = new InstallFileParser(new URL(
+     * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"
+     * )); List<VoiceComponentDescription> moreVoices =
+     * installer.getVoiceDescriptions(); for (VoiceComponentDescription k :
+     * moreVoices) { System.out.println("voice-" + k.getName()); }
+     * moreVoices.size(); </pre>
+     */
 
     // installComponentsAcceptLicense("bits2");
 
@@ -274,18 +273,18 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
     // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
-  
+
   public static void main(String[] args) throws IOException {
     LoggingFactory.init(Level.INFO);
 
     try {
-      
+
       Runtime.start("gui", "SwingGui");
       // Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
       // mary.grabRemoteAudioEffect("LAUGH01_F");
       Runtime.start("python", "Python");
-      
+
       // examples are generously copied from
       // marytts.signalproc.effects.EffectsApplier.java L319-324
       // String strEffectsAndParams = "FIRFilter+Robot(amount=50)";
@@ -336,6 +335,5 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       Logging.logError(e);
     }
   }
-
 
 }

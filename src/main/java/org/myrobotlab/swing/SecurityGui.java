@@ -106,9 +106,6 @@ public class SecurityGui extends ServiceGui implements ActionListener {
           for (Object name : sorted) {
             add(name.toString(), "*********");
           }
-          // center.invalidate();
-          //display.invalidate();
-          //display.validate();
           center.validate();
       }
     });
