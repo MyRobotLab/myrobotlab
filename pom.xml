@@ -86,45 +86,17 @@
           <name>alfresco</name>
           <url>https://artifacts.alfresco.com/nexus/content/repositories/public</url>
         </repository>
+        <!-- some marytts voices  -->
+        <repository>
+          <id>marytts</id>
+          <name>marytts</name>
+          <url>http://mary.dfki.de/repo</url>
+        </repository>
      </repositories>
 	
 	
 	
 <dependencies>
-
-<!-- AcapelaSpeech begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- AcapelaSpeech end -->
 
 <!-- AudioFile begin -->
   <dependency>
@@ -149,6 +121,15 @@
     <scope>provided</scope>
   </dependency>
 <!-- AzureTranslator end -->
+
+<!-- BodyPart begin -->
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.3.2</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- BodyPart end -->
 
 <!-- BoofCv begin -->
   <dependency>
@@ -224,13 +205,13 @@
     <version>1.0.0-beta</version>
     <scope>provided</scope>
   </dependency>
- <dependency>
+  <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-pi-mrl</artifactId>
     <version>1.0.0-beta</version>
     <scope>provided</scope>
-  </dependency>   
- <dependency>
+  </dependency>
+  <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform-pi-mrl</artifactId>
     <version>1.0.0-beta</version>
@@ -332,19 +313,22 @@
   </dependency>
   <dependency>
     <groupId>inmoov.fr</groupId>
-    <artifactId>inmoov2</artifactId>
-    <version>0.1</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>inmoov.fr</groupId>
     <artifactId>jm3-model</artifactId>
     <version>1.0.0</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
 <!-- InMoov end -->
+
+<!-- InMoov2 begin -->
+  <dependency>
+    <groupId>inmoov.fr</groupId>
+    <artifactId>inmoov2</artifactId>
+    <version>0.1</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+<!-- InMoov2 end -->
 
 <!-- IndianTts begin -->
   <dependency>
@@ -694,28 +678,6 @@
   </dependency>
 <!-- MarySpeech end -->
 
-<!-- MicrosoftSpeech begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- MicrosoftSpeech end -->
-
 <!-- MimicSpeech begin -->
   <dependency>
     <groupId>org.myrobotlab.audio</groupId>
@@ -962,6 +924,12 @@
     <version>20090211</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.5</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- ProgramAB end -->
 
 <!-- Python begin -->
@@ -1151,39 +1119,6 @@
   </dependency>
 <!-- Twitter end -->
 
-<!-- Vision begin -->
-  <dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>javacv-platform</artifactId>
-    <version>1.4.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture</artifactId>
-    <version>0.3.10</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-lang3</artifactId>
-    <version>3.3.2</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>net.sf.jipcam</groupId>
-    <artifactId>jipcam</artifactId>
-    <version>0.9.1</version>
-    <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
-  </dependency>
-<!-- Vision end -->
-
 <!-- VoiceRss begin -->
   <dependency>
     <groupId>org.myrobotlab.audio</groupId>
@@ -1202,18 +1137,6 @@
     <groupId>com.googlecode.soundlibs</groupId>
     <artifactId>mp3spi</artifactId>
     <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
