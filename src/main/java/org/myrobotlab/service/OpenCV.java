@@ -36,6 +36,7 @@ package org.myrobotlab.service;
 //import static org.bytedeco.javacpp.opencv_core.*;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+
 //import static org.bytedeco.javacpp.opencv_gpu.*;
 //import static org.bytedeco.javacpp.opencv_superres.*;
 //import static org.bytedeco.javacpp.opencv_ts.*;
@@ -48,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvRect;
@@ -70,6 +70,7 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFrameGrabber;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
@@ -830,8 +831,31 @@ public class OpenCV extends AbstractVideoSource {
     String javaCvVersion = "1.4.1";  
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
-    // meta.exclude("commons-codec", "commons-codec");
     
+    boolean gpu = false;
+    if (gpu) {
+      // TODO: integrate in the following dependencies for GPU support in OpenCV.
+      // add additional metadata dependencies.
+      //      <dependency>
+      //      <groupId>org.bytedeco.javacpp-presets</groupId>
+      //      <artifactId>opencv</artifactId>
+      //      <version>3.4.1-1.4.1</version>
+      //      <classifier>linux-x86_64-gpu</classifier>
+      //    </dependency>
+      //    <dependency>
+      //      <groupId>org.bytedeco.javacpp-presets</groupId>
+      //      <artifactId>opencv</artifactId>
+      //      <version>3.4.1-1.4.1</version>
+      //      <classifier>macosx-x86_64-gpu</classifier>
+      //    </dependency>
+      //    <dependency>
+      //      <groupId>org.bytedeco.javacpp-presets</groupId>
+      //      <artifactId>opencv</artifactId>
+      //      <version>3.4.1-1.4.1</version>
+      //      <classifier>windows-x86_64-gpu</classifier>
+      //    </dependency>
+    }
+    // meta.exclude("commons-codec", "commons-codec");
     // meta.addDependency("commons-codec", "commons-codec", "1.10");
     
     // sarxos webcam
@@ -893,7 +917,15 @@ public class OpenCV extends AbstractVideoSource {
     // OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
     // opencv.addFilter(tr);
 
+    //System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
+          
+    //System.loadLibrary("opencv_java");      
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+    
+    OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
+    opencv.capture(grabber);
+    
+    
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
@@ -907,7 +939,7 @@ public class OpenCV extends AbstractVideoSource {
    // OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
    // opencv.addFilter(yolo);
     
-    opencv.setStreamerEnabled(false);
+   // opencv.setStreamerEnabled(false);
     // opencv.addFilter("facerec", "FaceRecognizer");
 
     // OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
