@@ -619,7 +619,8 @@ public class Deeplearning4j extends Service {
   static public ServiceType getMetaData() {
     
     String dl4jVersion = "1.0.0-beta";
-    boolean cudaEnabled = false;
+    
+    boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "true"));
     boolean supportRasPi = true;
     
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());
@@ -631,6 +632,9 @@ public class Deeplearning4j extends Service {
       // By default support native CPU execution.
       meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
     } else {
+      System.out.println("-------------------------------");
+      System.out.println("-----DL4J CUDA!          ------");
+      System.out.println("-------------------------------");
       // Use this if you want cuda 9.1 NVidia GPU support 
       meta.addDependency("org.nd4j", "nd4j-cuda-9.1-platform", dl4jVersion);
     }
