@@ -32,7 +32,10 @@ public class SolrGui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService);
     // search box.
     this.boundServiceName = boundServiceName;
-    queryStringBox.setFont(new Font("Arial", Font.BOLD, 14));
+    //int fontSize =  14;
+    int fontSize =  20;
+    
+    queryStringBox.setFont(new Font("Arial", Font.BOLD, fontSize));
     queryStringBox.setPreferredSize(new Dimension(40, 35));
     //
     scrollResponse.setAutoscrolls(true);
@@ -66,12 +69,16 @@ public class SolrGui extends ServiceGui implements ActionListener {
     }
   }
 
-
   private void runSearchAndRender() {
-    SolrQuery query = new SolrQuery(queryStringBox.getText());
-    query.setSort("index_date", ORDER.desc);
+    SolrQuery query = createSearchRequest();
+    // 10 second timeout!
     QueryResponse answer = (QueryResponse) swingGui.sendBlocking(boundServiceName, 10000, "search", query);
     // TODO: build up a search result page.
+    renderSearchResult(answer);
+  }
+
+
+  private void renderSearchResult(QueryResponse answer) {
     results.setText("");
     for (SolrDocument d : answer.getResults()) {  
       results.append("################################\n");
@@ -89,5 +96,12 @@ public class SolrGui extends ServiceGui implements ActionListener {
       }
     }
     results.setCaretPosition(0);
+  }
+
+
+  private SolrQuery createSearchRequest() {
+    SolrQuery query = new SolrQuery(queryStringBox.getText());
+    query.setSort("index_date", ORDER.desc);
+    return query;
   }
 }
