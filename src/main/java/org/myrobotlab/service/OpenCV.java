@@ -69,6 +69,7 @@ import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterDL4J;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFrameGrabber;
 import org.myrobotlab.opencv.VideoProcessor;
@@ -177,6 +178,7 @@ public class OpenCV extends AbstractVideoSource {
   // container for this if possible.
   // GROG : .. perhaps just a filter in the pipeline could stream it via http
   transient public VideoStreamer streamer;
+
   // Changed default to false.  Otherwise multiple opencv instances will get a port in use bind exception.
   // TODO: fix how the opencv service can stream video to the webgui.  
   public boolean streamerEnabled = false;
@@ -187,6 +189,7 @@ public class OpenCV extends AbstractVideoSource {
   public String grabberType = getDefaultFrameGrabberType();
   public String format = null;
   
+
   public OpenCV(String n) {
     super(n);
     // initialize the video processor with a handle to this opencv service
@@ -876,6 +879,9 @@ public class OpenCV extends AbstractVideoSource {
     
     // the haar / hog / lp classifier xml files for opencv from the MRL repo
     meta.addDependency("opencv", "opencv_classifiers", "0.0.1", "zip");
+    
+    // yolo models
+    meta.addDependency("yolo", "yolov2", "v2", "zip");
 
     return meta;
   }
@@ -933,11 +939,14 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.setInputSource(INPUT_SOURCE_IMAGE_DIRECTORY);
     // opencv.setInputSource(INPUT_SOURCE_CAMERA);
     // opencv.setInputSource(INPUT_SOURCE_NETWORK);
-    // opencv.setInputFileName("http://192.168.4.117:8080/?action=stream");
+    // opencv.setInputFileName("http://192.168.4.125:8080/?action=stream");
     // opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
    // OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
-   // opencv.addFilter(yolo);
+// opencv.addFilter(yolo);
+    
+    OpenCVFilterDL4J dl4j = new OpenCVFilterDL4J("dl4j");
+    opencv.addFilter(dl4j);
     
    // opencv.setStreamerEnabled(false);
     // opencv.addFilter("facerec", "FaceRecognizer");
