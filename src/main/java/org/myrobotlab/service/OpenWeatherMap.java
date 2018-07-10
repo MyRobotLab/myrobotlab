@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.net.URLEncoder;
 
-import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +33,7 @@ public class OpenWeatherMap extends HttpClient {
   /**
    * Return a array describing the forecast weather
    */
-  private JSONObject fetch(String location, int hourPeriod) throws ClientProtocolException, IOException, JSONException {
+  private JSONObject fetch(String location, int hourPeriod) throws IOException, JSONException {
     String apiUrl = apiForecast + URLEncoder.encode(location, "utf-8") + "&appid=" + apiKey + "&mode=json&units=" + units + "&lang=" + lang + "&cnt=" + hourPeriod;
     String response = this.get(apiUrl);
     log.info("apiUrl: {}", apiUrl);
@@ -69,12 +68,12 @@ public class OpenWeatherMap extends HttpClient {
    * @throws IOException 
    * @throws ClientProtocolException 
    */
-  public String[] fetchForecast(String location) throws ClientProtocolException, IOException, JSONException {
+  public String[] fetchForecast(String location) throws IOException, JSONException {
     return fetchForecast(location, 0);
   }
   
   
-  public String[] fetchForecast(String location, int hourPeriod) throws ClientProtocolException, IOException, JSONException {
+  public String[] fetchForecast(String location, int hourPeriod) throws IOException, JSONException {
     String[] result = new String[11];
     String localUnits = "fahrenheit";
     if (units.equals("metric")) {
@@ -121,7 +120,7 @@ public class OpenWeatherMap extends HttpClient {
   }
   
   @Deprecated
-  public String fetchWeather(String location) throws ClientProtocolException, IOException, JSONException {
+  public String fetchWeather(String location) throws IOException, JSONException {
     return fetchForecast(location,0)[0];
   }
 
@@ -179,6 +178,8 @@ public class OpenWeatherMap extends HttpClient {
     meta.addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
     meta.addCategory("data", "weather");
     meta.setCloudService(true);
+    meta.addDependency("org.json", "json", "20090211");
+    meta.addPeer("httpClient", "HttpClient", "httpClient");
     return meta;
   }
 
@@ -191,9 +192,6 @@ public class OpenWeatherMap extends HttpClient {
       String[] fetchForecast = owm.fetchForecast("Boston,US", 2);
       String sentence = "("+fetchForecast[3]+") In " + fetchForecast[2] + " the weather is " + fetchForecast[0] + ".  " + fetchForecast[1] + " degrees " + fetchForecast[10];
       log.info(sentence);
-    } catch (ClientProtocolException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

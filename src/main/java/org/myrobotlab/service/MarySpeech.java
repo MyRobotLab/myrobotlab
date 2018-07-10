@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -200,7 +198,6 @@ public class MarySpeech extends AbstractSpeechSynthesis {
         meta.exclude("org.slf4j", "slf4j-log4j12");
       }
     }
-
     meta.exclude("org.slf4j", "slf4j-api");
     meta.exclude("commons-io", "commons-io");
     meta.exclude("log4j", "log4j");
@@ -209,7 +206,11 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     meta.exclude("org.apache.opennlp", "opennlp-tools");
     meta.exclude("org.slf4j", "slf4j-log4j12");
     meta.exclude("org.apache.httpcomponents", "httpcore");
-
+    meta.exclude("org.apache.httpcomponents", "httpclients");
+    // try to fix httpcore override issue
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
+    
     return meta;
   }
 
