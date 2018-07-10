@@ -883,10 +883,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     meta.addDependency("program-ab", "program-ab-data", "1.0", "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.4.1");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.6-SNAPSHOT");
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
+    //needed if we dont "install all" > HttpClient used by sraix
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");        
     return meta;
   }
 
