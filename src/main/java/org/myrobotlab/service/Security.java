@@ -222,7 +222,7 @@ public class Security extends Service implements AuthorizationProvider {
       return store.getProperty(name);
     }
 
-    log.error(String.format("could not find %s in security store", name));
+    log.error("could not find {} in security store", name);
     return null;
 	}
 	
@@ -272,7 +272,7 @@ public class Security extends Service implements AuthorizationProvider {
 	public void initializeStore(String passphrase) {
 		try {
 			String keyfile = getKeyFileName();
-			log.info(String.format("initializing key file %s", keyfile));
+			log.info("initializing key file {}", keyfile);
 			encrypt(passphrase, new File(keyfile));
 		} catch (Exception e) {
 			log.error("initializeStore threw", e);
@@ -356,7 +356,7 @@ public class Security extends Service implements AuthorizationProvider {
 		g.defaultAccess = defaultAccess;
 
 		if (groups.containsKey(groupId)) {
-			log.warn(String.format("group %s already exists", groupId));
+			log.warn("group {} already exists", groupId);
 			return false;
 		}
 
@@ -371,7 +371,7 @@ public class Security extends Service implements AuthorizationProvider {
 	public boolean addUser(String userId, String password, String groupId) {
 
 		if (users.containsKey(userId)) {
-			log.warn(String.format("user %s already exists", userId));
+			log.warn("user {} already exists", userId);
 			return false;
 		}
 		User u = new User();

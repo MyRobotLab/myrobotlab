@@ -101,7 +101,7 @@ public class ThingSpeak extends Service {
     try {
 
       if (System.currentTimeMillis() - lastUpdate < intervalSeconds * 1000) {
-        log.debug(String.format("not ready for posting - must be >= %d seconds", intervalSeconds));
+        log.debug("not ready for posting - must be >= {} seconds", intervalSeconds);
         return 0;
       }
 
@@ -119,7 +119,7 @@ public class ThingSpeak extends Service {
 
       HttpRequest request = new HttpRequest(url.toString());
       result = request.getString();
-      log.info(String.format("ThingSpeak returned %s", result));
+      log.info("ThingSpeak returned {}", result);
 
     } catch (IOException e) {
       Logging.logError(e);

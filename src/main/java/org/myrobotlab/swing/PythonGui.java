@@ -177,7 +177,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 				EditorPanel p = scripts.get(currentScriptName);
 				send("exec", p.getText());
 			} else {
-				log.error(String.format("cant exec %s", currentScriptName));
+				log.error("can't exec {}", currentScriptName);
 			}
 			return;
 		} else if (o == save) {
@@ -271,7 +271,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 			editorTabs.removeTab(currentScriptName);
 
 		} else {
-			log.error(String.format("can't closeFile %s", currentScriptName));
+			log.error("can't closeFile {}", currentScriptName);
 		}
 	}
 
@@ -403,10 +403,10 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 			Map.Entry pairs = it.next();
 
 			TextEditorPane e = ((EditorPanel) pairs.getValue()).getEditor();
-			log.info(String.format("checking script %s", e.getFileFullPath()));
+			log.info("checking script {}", e.getFileFullPath());
 			if (e.isDirty()) {
 				try {
-					log.info(String.format("saving script / file %s", e.getFileFullPath()));
+					log.info("saving script / file {}", e.getFileFullPath());
 					e.save();
 				} catch (Exception ex) {
 					Logging.logError(ex);
@@ -486,7 +486,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 				editorTabs.setSelectedComponent(np.getDisplay());
 			}
 		} else {
-			log.error(String.format("cant saveAsFile %s", currentScriptName));
+			log.error("cant saveAsFile {}", currentScriptName);
 		}
 		// TODO do we need to handle errors with permissions?
 	}

@@ -462,7 +462,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
   public boolean createModule(int bus, int address) {
     String key = makeKey(address);
-    log.info(String.format("create module key %s (bus %d address %d)", key, bus, address));
+    log.info("create module key {} (bus {} address {})", key, bus, address);
     Module box = new Module(bus, address);
     modules.put(key, box);
     return true;
@@ -475,7 +475,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     // rather heavy handed no?
     modules.clear();
 
-    log.info(String.format("found %d devices", devices.length));
+    log.info("found {} devices", devices.length);
 
     for (int i = 0; i < devices.length; ++i) {
       int deviceAddress = devices[i];
@@ -661,16 +661,16 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
   public String getServerTime() {
     String soapAction = "http://tempuri.org/SoapService/GetServerTime";
     String soapEnv = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tem=\"http://tempuri.org/\">   <soapenv:Header/>   <soapenv:Body>      <tem:GetServerTime/>   </soapenv:Body></soapenv:Envelope>";
-    log.info(String.format("sendSoap - action %s [%s]", soapAction, soapEnv));
+    log.info("sendSoap - action {} [{}]", soapAction, soapEnv);
     String mesEndpoint = properties.getProperty("mes.endpoint");
     String mesUser = properties.getProperty("mes.user");
     String mesDomain = properties.getProperty("mes.domain");
     String mesPassword = properties.getProperty("mes.password");
 
-    log.info(String.format("mesEndpoint %s", mesEndpoint));
-    log.info(String.format("mesUser %s", mesUser));
-    log.info(String.format("mesDomain %s", mesDomain));
-    log.info(String.format("mesPassword %s", mesPassword));
+    log.info("mesEndpoint {}", mesEndpoint);
+    log.info("mesUser {}", mesUser);
+    log.info("mesDomain {}", mesDomain);
+    log.info("mesPassword {}", mesPassword);
 
     String ret = "";
 
@@ -706,7 +706,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       ret = e.getMessage();
     }
 
-    log.info(String.format("soap response [%s]", ret));
+    log.info("soap response [{}]", ret);
     return ret;
 
   }
@@ -778,7 +778,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
   }
 
   public void learn(String presentationId) {
-    log.info(String.format("learn %s", presentationId));
+    log.info("learn {}", presentationId);
     stopPolling();
 
     pollingWorker = new Worker("learn");
@@ -856,7 +856,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     }
 
     plant = properties.getProperty("mes.plant");
-    log.info(String.format("operating in plant [%s]", plant));
+    log.info("operating in plant [{}]", plant);
     if (plant == null) {
       log.error("invalid plant");
     }
@@ -965,16 +965,16 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
   }
 
   public String sendSoap(String soapAction, String soapEnv) {
-    log.info(String.format("sendSoap - action %s [%s]", soapAction, soapEnv));
+    log.info("sendSoap - action {} [{}]", soapAction, soapEnv);
     String mesEndpoint = properties.getProperty("mes.endpoint");
     String mesUser = properties.getProperty("mes.user");
     String mesDomain = properties.getProperty("mes.domain");
     String mesPassword = properties.getProperty("mes.password");
 
-    log.info(String.format("mesEndpoint %s", mesEndpoint));
-    log.info(String.format("mesUser %s", mesUser));
-    log.info(String.format("mesDomain %s", mesDomain));
-    log.info(String.format("mesPassword %s", mesPassword));
+    log.info("mesEndpoint {}", mesEndpoint);
+    log.info("mesUser {}", mesUser);
+    log.info("mesDomain {}", mesDomain);
+    log.info("mesPassword {}", mesPassword);
 
     String ret = "";
 
@@ -1008,7 +1008,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       ret = e.getMessage();
     }
 
-    log.info(String.format("soap response [%s]", ret));
+    log.info("soap response [{}]", ret);
     return ret;
 
   }

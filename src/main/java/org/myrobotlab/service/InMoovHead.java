@@ -204,7 +204,7 @@ public class InMoovHead extends Service {
     System.out.println(distance);
     System.out.println(rotation);
     System.out.println(colatitude);
-    log.info(String.format("object distance is %f,rothead servo %f,neck servo %f ", distance, rotation, colatitude));
+    log.info("object distance is {},rothead servo {},neck servo {} ", distance, rotation, colatitude);
   }
 
   public void moveTo(double neck, double rothead) {
@@ -226,7 +226,7 @@ public class InMoovHead extends Service {
 
   public void moveTo(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("head.moveTo %d %d %d %d %d %d", neck, rothead, eyeX, eyeY, jaw, rollNeck));
+      log.debug("head.moveTo {} {} {} {} {} {}", neck, rothead, eyeX, eyeY, jaw, rollNeck);
     }
       if (rothead != null)
     this.rothead.moveTo(rothead);
@@ -259,11 +259,11 @@ public class InMoovHead extends Service {
     }
   
   public void moveToBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
-    log.info(String.format("init " + getName() + "moveToBlocking "));
+    log.info("init {} moveToBlocking "), getName();
     moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
     waitTargetPos();
-    log.info(String.format("end " + getName() + "moveToBlocking "));
-    }
+    log.info("end {} moveToBlocking "), getName();
+  }
 
   public void waitTargetPos() {
     neck.waitTargetPos();
@@ -379,7 +379,7 @@ public class InMoovHead extends Service {
   // ----- movements begin -----------
 
   public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin, int rollNeckPin) {
-    log.info(String.format("setPins %d %d %d %d %d %d", headXPin, headYPin, eyeXPin, eyeYPin, jawPin, rollNeckPin));
+    log.info("setPins {} {} {} {} {} {}", headXPin, headYPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
 
     /*
     rothead.setPin(headXPin);

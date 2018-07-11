@@ -59,9 +59,9 @@ public class Blender extends Service {
 
           // JSONObject json = new JSONObject(in.readLine());
           String json = in.readLine();
-          log.info(String.format("%s", json));
+          log.info("{}", json);
           Message msg = gson.fromJson(json, Message.class);
-          log.info(String.format("msg %s", msg));
+          log.info("msg {}", msg);
           invoke(msg);
 
         }

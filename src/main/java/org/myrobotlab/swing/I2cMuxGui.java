@@ -80,7 +80,7 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
           swingGui.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
         }
       } else {
-        log.info(String.format("detach %s", controllerList.getSelectedItem()));
+        log.info("detach {}", controllerList.getSelectedItem());
         swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
     }

@@ -274,7 +274,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       new AboutDialog(this);
       // display();
     } else {
-      log.info(String.format("unknown command %s", cmd));
+      log.info("unknown command {}", cmd);
     }
   }
 
@@ -306,7 +306,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         newGui = (ServiceGui) Instantiator.getNewInstance(guiClass, name, self);
 
         if (newGui == null) {
-          log.info(String.format("could not construct a %s object - creating generic template", guiClass));
+          log.info("could not construct a {} object - creating generic template", guiClass);
           newGui = (ServiceGui) Instantiator.getNewInstance("org.myrobotlab.swing.NoGui", name, self);
         }
 

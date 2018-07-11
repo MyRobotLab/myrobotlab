@@ -182,10 +182,10 @@ public class InMoovGui extends ServiceGui implements ActionListener {
   }
 
   public void processAction(JButton button, String side, String part) {
-    log.info(String.format("processAction [%s], %s %s", button.getText(), side, part));
+    log.info("processAction [{}], {} {}", button.getText(), side, part);
     if (String.format("start %s %s", side, part).equals(button.getText())) {
       String port = getPort(side);
-      log.info(String.format("starting %s %s with port %s", side, part, port));
+      log.info("starting {} {} with port {}", side, part, port);
       String upperPart = Character.toUpperCase(part.charAt(0)) + part.substring(1);
       String upperSide = Character.toUpperCase(side.charAt(0)) + side.substring(1);
       send(String.format("start%s%s", upperSide, upperPart), port);

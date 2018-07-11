@@ -64,6 +64,7 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
   }
 
   private void refreshStackTraces() {
+    // TODO: skip some of the stack traces.. for example the one that is generating this result.
     Set<Thread> threads = Thread.getAllStackTraces().keySet();
     StringBuilder traceBuilder = new StringBuilder();
     for (Thread t : threads) {
@@ -74,6 +75,7 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
       traceBuilder.append("\n");
     }
     traceArea.setText(traceBuilder.toString());
+    traceArea.setCaretPosition(0);
   }
 
   @Override

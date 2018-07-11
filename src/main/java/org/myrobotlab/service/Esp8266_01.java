@@ -249,7 +249,7 @@ public class Esp8266_01 extends Service implements I2CController {
       // log.info(resultGson.fromJson(result.toString(),
       // i2cParms.class).toString());
 
-      log.info(String.format("bus %s, device %s, size %s, buffer %s",returndata.bus, returndata.device, returndata.readSize, returndata.buffer));
+      log.info("bus {}, device {}, size {}, buffer {}",returndata.bus, returndata.device, returndata.readSize, returndata.buffer);
     }
 
     hexStringToArray(returndata.buffer, buffer);
@@ -349,7 +349,7 @@ public class Esp8266_01 extends Service implements I2CController {
       // log.info(resultGson.fromJson(result.toString(),
       // i2cParms.class).toString());
 
-      log.info(String.format("bus %s, device %s, readSize %s, buffer %s",returndata.bus, returndata.device, returndata.readSize, returndata.buffer));
+      log.info("bus {}, device {}, readSize {}, buffer {}",returndata.bus, returndata.device, returndata.readSize, returndata.buffer);
     }
     
     hexStringToArray(returndata.buffer, readBuffer);
@@ -371,7 +371,7 @@ public class Esp8266_01 extends Service implements I2CController {
     if (i2cDevices.containsKey(key)) {
       devicedata = i2cDevices.get(key);
       if (control.getName() != devicedata.serviceName){
-        log.error(String.format("Attach of %s failed: %s already exists on bus %s address %s", control.getName(), devicedata.serviceName, control.getDeviceBus(), control.getDeviceAddress()));
+        log.error("Attach of {} failed: {} already exists on bus %s address {}", control.getName(), devicedata.serviceName, control.getDeviceBus(), control.getDeviceAddress());
       }
     } else {
       devicedata.serviceName = control.getName();

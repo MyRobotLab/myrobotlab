@@ -452,7 +452,7 @@ public class Pid extends Service {
 				pid.setInput(key, i);
 				Service.sleep(30);
 				if (pid.compute(key)) {
-					log.info(String.format("%d %f", i, pid.getOutput(key)));
+					log.info("{} {}", i, pid.getOutput(key));
 				}
 			}
 

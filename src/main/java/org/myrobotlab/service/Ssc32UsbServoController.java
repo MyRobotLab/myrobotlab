@@ -143,7 +143,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     }
     try {
       String c = String.format("%s\r", String.format(cmd, params));
-      log.info(String.format("cmd [%s]", c));
+      log.info("cmd [{}]", c);
       serial.write(c.getBytes());
     } catch (Exception e) {
       log.error("serial threw", e);
@@ -165,7 +165,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   @Override
   public void servoMoveTo(ServoControl servo) {
     // # <ch> P <pw> ​S​​<spd>​​T​<time> <cr>
-    log.info(String.format("servoMove %f", servo.getTargetOutput()));
+    log.info("servoMove {}", servo.getTargetOutput());
     StringBuilder sb = new StringBuilder();
     sb.append("#").append(servo.getPin());
     sb.append("P").append((int) toUs(servo.getTargetOutput()));

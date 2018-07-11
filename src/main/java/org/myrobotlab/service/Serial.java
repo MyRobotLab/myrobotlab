@@ -498,8 +498,7 @@ public class Serial extends Service
 	 */
 
 	public Port createHardwarePort(String name, int rate, int dataBits, int stopBits, int parity) {
-		log.info(String.format("createHardwarePort %s port %s %d|%d|%d|%d", hardwareLibrary, name, rate, dataBits, stopBits,
-				parity));
+		log.info("createHardwarePort {} port {} {}|{}|{}|{}", hardwareLibrary, name, rate, dataBits, stopBits, parity);
 		try {
 
 			hardwareLibrary = getHardwareLibrary();
@@ -574,7 +573,7 @@ public class Serial extends Service
 		
 		uart.connectPort(uPort, uart);
 
-		log.info(String.format("connectToVirtualUart - creating uart %s <--> %s", myPort, uartPort));
+		log.info("connectToVirtualUart - creating uart {} <--> {}", myPort, uartPort);
 		return uart;
 	}
 
@@ -678,7 +677,7 @@ public class Serial extends Service
 	SerialControl getPortSource() {
 		try {
 			hardwareLibrary = getHardwareLibrary();
-			log.info(String.format("loading class: %s", hardwareLibrary));
+			log.info("loading class: {}", hardwareLibrary);
 			Class<?> c = Class.forName(getHardwareLibrary());
 			return (SerialControl) c.newInstance();
 		} catch (Exception e) {
@@ -994,7 +993,7 @@ public class Serial extends Service
 	public void setDTR(boolean state) {
 		port.setDTR(state);
 	}
-
+	
 	public String setHardwareLibrary(String clazz) {
 		hardwareLibrary = clazz;
 		return hardwareLibrary;
@@ -1294,7 +1293,7 @@ public class Serial extends Service
 			for (int i = 255; i > -1; --i) {
 				serial.write(i);
 				int readBack = uart.read();
-				log.info(String.format("written %d read back %d", i, readBack));
+				log.info("written {} read back {}", i, readBack);
 				if (i < 256 && i > -1) {
 					if (readBack != i) {
 						throw new IOException(

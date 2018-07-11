@@ -325,7 +325,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     controller.neoPixelAttach(this, pin, numPixel);
     
-    log.info(String.format("%s setController %s", getName(), controller.getName()));
+    log.info("{} setController {}", getName(), controller.getName());
     this.controller = controller;
     controllerName = this.controller.getName();
     isAttached = true;

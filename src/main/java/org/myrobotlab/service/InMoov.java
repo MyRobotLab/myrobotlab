@@ -1451,7 +1451,7 @@ public class InMoov extends Service {
     } else {
       // FIXME - SHOULD ALLOW STARTUP AND LATER ACCESS VIA PORT ONCE OTHER
       // STARTS CHECK MAP FIRST
-      log.error(String.format("%s arduino not found - start some other system first (head, arm, hand)", port));
+      log.error("{} arduino not found - start some other system first (head, arm, hand)", port);
     }
 
   }
@@ -1790,6 +1790,12 @@ public class InMoov extends Service {
     }
   }
 
+  public void savePose(String poseName) {
+    // TODO: consider a prefix for the pose name? 
+    String script = captureGesture(poseName);
+    
+  }
+  
   private File makeGesturesDirectory(String directory) {
     File dir = new File(directory);
     dir.mkdirs();
@@ -1843,10 +1849,8 @@ public class InMoov extends Service {
   }
 
   public void saveGesture(String gestureName) {
-
     // TODO: allow a user to save a gesture to the gestures directory
     saveGesture(gestureName, GESTURES_DIRECTORY);
-
   }
 
   // waiting controable threaded gestures we warn user

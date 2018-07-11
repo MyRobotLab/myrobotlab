@@ -357,7 +357,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       } // for each peer
 
     } catch (Exception e) {
-      log.error(String.format("%s does not have a getMetaData ", fullClassName));
+      log.error("{} does not have a getMetaData ", fullClassName);
     }
 
     return dna;

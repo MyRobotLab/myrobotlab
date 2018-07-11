@@ -291,7 +291,7 @@ public class Shoutbox extends Service {
   // FIXME FIXME FIXME - not normalized with publishShout(WebSocket) :PPPP
   // FIXME - must fill in your name - "Greg Perry" somewhere..
   public void onXMPPMsg(XmppMsg xmppMsg) {
-    log.info(String.format("Xmpp - %s %s", xmppMsg.from, xmppMsg.msg));
+    log.info("Xmpp - {} {}", xmppMsg.from, xmppMsg.msg);
 
     // not exactly the same model as onConnect - so we try to add each time
     String user = "me";// FIXME
@@ -331,7 +331,7 @@ public class Shoutbox extends Service {
   // FIXME NOT NORMALIZED with onXMPPMsg() !!!!
   // public void publishShout(WSMsg wsmsg) { is Message necessary here?
   public Shout publishShout(Shout shout) throws NotConnectedException, XMPPException {
-    log.info(String.format("publishShout %s %s", shout.from, shout.msg));
+    log.info("publishShout {} {}", shout.from, shout.msg);
 
     String foundName = findChatBotName(shout.msg);
     if (foundName != null) {
@@ -352,8 +352,7 @@ public class Shoutbox extends Service {
         // don't echo to self
         // if (!key.startsWith(jabberID)) { filter took out mrt and
         // other activity !
-        log.info(String.format("sending from %s %s -> to xmpp client - relayName [%s] jabberID [%s] shout.msg [%s]", Thread.currentThread().getId(), shout.from, relayName,
-            jabberID, shout.msg));
+        log.info("sending from {} {} to xmpp client - relayName [{}] jabberID [{}] shout.msg [{}]", Thread.currentThread().getId(), shout.from, relayName, jabberID, shout.msg);
         xmpp.sendMessage(String.format("%s: %s", shout.from, shout.msg), jabberID);
         // }
       }
@@ -453,7 +452,7 @@ public class Shoutbox extends Service {
     try {
       // TODO FIGURE THIS OUT :P OATH ?
       String provider = "org.myrobotlab.client.DrupalNameProvider";
-      log.info(String.format("attempting to set name provider - %s", provider));
+      log.info("attempting to set name provider - {}", provider);
       setNameProvider(provider);
     } catch (Exception e) {
       error(e);

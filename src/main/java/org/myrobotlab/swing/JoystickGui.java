@@ -206,7 +206,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
 
   public void onJoystickInput(final JoystickData input) {
     String id = input.id;
-    log.info(String.format("onButton %s", input));
+    log.info("onButton {}", input);
     if (input.value == null) {
       outputValues.get(id).setText("null");
       return;
@@ -246,7 +246,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
           if (selected == null || "".equals(selected)) {
             send("stopPolling");
           } else {
-            log.info(String.format("changed to %s ", selected));
+            log.info("changed to {}", selected));
             send("setController", selected); // setController sets controller
                                              // AND starts polling
           }

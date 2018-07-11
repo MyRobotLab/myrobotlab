@@ -313,7 +313,7 @@ public class Python extends Service {
     exec(initScript.toString(), false); // FIXME - shouldn't be done in the
 
     subscribe(Runtime.getInstance().getName(), "registered");
-    log.info(String.format("created python %s", getName()));
+    log.info("created python {}", getName());
 
     log.info("creating module directory pythonModules");
     new File("pythonModules").mkdir();
@@ -421,7 +421,7 @@ public class Python extends Service {
   }
 
   public void exec(PyObject code) {
-    log.info(String.format("exec \n%s\n", code));
+    log.info("exec \n{}\n", code);
     if (interp == null) {
       createPythonInterpreter();
     }
@@ -670,12 +670,12 @@ public class Python extends Service {
   @Override
   public void startService() {
     super.startService();
-    log.info(String.format("starting python %s", getName()));
+    log.info("starting python {}", getName());
     if (inputQueueThread == null) {
       inputQueueThread = new InputQueueThread(this);
       inputQueueThread.start();
     }
-    log.info(String.format("started python %s", getName()));
+    log.info("started python {}", getName());
   }
   
   @Override

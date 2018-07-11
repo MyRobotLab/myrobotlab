@@ -62,7 +62,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     @Override
     public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
       // display pin state on console
-      log.info(String.format(" --> GPIO PIN STATE CHANGE: %s = %s", event.getPin(), event.getState()));
+      log.info(" --> GPIO PIN STATE CHANGE: {} = {}", event.getPin(), event.getState());
     }
 
   }
@@ -144,8 +144,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     super(n);
 
     Platform platform = Platform.getLocalInstance();
-    log.info(String.format("platform is %s", platform));
-    log.info(String.format("architecture is %s", platform.getArch()));
+    log.info("platform is {}", platform);
+    log.info("architecture is {}", platform.getArch());
 
     if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
       log.info("Executing on Raspberry PI");
@@ -209,9 +209,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
             /*
              * sb.append(i); sb.append(" ");
              */
-            log.info(String.format("found device on address %d", i));
+            log.info("found device on address {}", i);
           } catch (Exception e) {
-            log.warn(String.format("bad read on address %d", i));
+            log.warn("bad read on address {}", i);
           }
 
         }
@@ -370,7 +370,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
 
     if (i2cDevices.containsKey(key)) {
-      log.error(String.format("Device %s %s %s already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName()));
+      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
     } else {
       createI2cDevice(Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()), control.getName());
       control.attachI2CController(this);
@@ -398,7 +398,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
           devicedata.deviceHandle = -1;
         }
         i2cDevices.put(key, devicedata);
-        log.info(String.format("Created device for %s key %s", serviceName, key));
+        log.info("Created device for %s key %s", serviceName, key);
       } catch (NumberFormatException | IOException e) {
         Logging.logError(e);
       }
@@ -482,7 +482,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
           pinList.add(pindef);
         }
       } else {
-        log.error(String.format("Unknown boardtype %s", SystemInfo.getBoardType()));
+        log.error("Unknown boardtype {}", SystemInfo.getBoardType());
       }
     } catch (UnsupportedOperationException | IOException | InterruptedException e) {
       // TODO Auto-generated catch block

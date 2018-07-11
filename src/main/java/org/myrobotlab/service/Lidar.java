@@ -116,7 +116,7 @@ public class Lidar extends Service implements SerialDataListener {
     }
     if (MODEL_SICK_LMS200.equals(model) && STATE_SINGLE_SCAN.equals(state) && index == dataMessageSize) {
       if (log.isDebugEnabled()) {
-        log.debug(String.format("Buffer size =  %s  Buffer =  %s", +buffer.size(), buffer.toString()));
+        log.debug("Buffer size =  {}  Buffer =  {}", buffer.size(), buffer);
       }
       // WTF do I do with this data now?
       buffer.flush(); // flush entire buffer so I can convert it to a byte

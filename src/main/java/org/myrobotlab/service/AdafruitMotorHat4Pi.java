@@ -195,11 +195,11 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     float prescale_value;
 
     if (hz < minPwmFreq) {
-      log.error(String.format("Minimum PWMFreq is %s Hz, requested freqency is %s Hz, clamping to minimum", minPwmFreq, hz));
+      log.error("Minimum PWMFreq is {} Hz, requested freqency is {} Hz, clamping to minimum", minPwmFreq, hz);
       hz = minPwmFreq;
       prescale_value = 255;
     } else if (hz > maxPwmFreq) {
-      log.error(String.format("Maximum PWMFreq is %s Hz, requested frequency is %s Hz, clamping to maximum", maxPwmFreq, hz));
+      log.error("Maximum PWMFreq is {} Hz, requested frequency is {} Hz, clamping to maximum", maxPwmFreq, hz);
       hz = maxPwmFreq;
       prescale_value = 3;
     } else {
@@ -301,10 +301,10 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   public void setPinValue(int pin, double powerOutput) {
     // log.info(String.format("setPinValue, pin = %s, powerOutput = %s", pin, powerOutput));
     if (powerOutput < 0) {
-      log.error(String.format("setPinValue. Value below zero (%s). Defaulting to 0.", powerOutput));
+      log.error("setPinValue. Value below zero ({}). Defaulting to 0.", powerOutput);
       powerOutput = 0;
     } else if (powerOutput > 1) {
-      log.error(String.format("setPinValue. Value > 1 (%s). Defaulting to 1", powerOutput));
+      log.error("setPinValue. Value > 1 ({}). Defaulting to 1", powerOutput);
       powerOutput = 1;
     }
 
@@ -405,7 +405,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   @Override
   public void setDeviceBus(String deviceBus) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceBus = deviceBus;
@@ -415,7 +415,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   @Override
   public void setDeviceAddress(String deviceAddress) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceAddress = deviceAddress;
@@ -449,7 +449,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
     }
 
     controllerName = controller.getName();
@@ -469,14 +469,14 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
       return;
 
     if (this.controllerName != controller.getName()) {
-      log.error(String.format("Trying to attached to %s, but already attached to (%s)", controller.getName(), this.controllerName));
+      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }
 
     this.controller = controller;
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info(String.format("Attached %s device on bus: %s address %s", controllerName, deviceBus, deviceAddress));
+    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
     broadcastState();
   }
 

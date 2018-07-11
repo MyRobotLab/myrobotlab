@@ -88,7 +88,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   @Override
   public void setDeviceBus(String deviceBus) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceBus = deviceBus;
@@ -98,7 +98,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   @Override
   public void setDeviceAddress(String deviceAddress) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceAddress = deviceAddress;
@@ -113,7 +113,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     if (busAddress != lastBusAddress) {
       byte bus[] = new byte[1];
       bus[0] = (byte) (1 << busAddress);
-      log.debug(String.format("setMux this.deviceBus %s this.deviceAddress %s bus[0] %s", this.deviceBus, this.deviceAddress, bus[0]));
+      log.debug("setMux this.deviceBus {} this.deviceAddress {} bus[0] {}", this.deviceBus, this.deviceAddress, bus[0]);
       controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
       lastBusAddress = busAddress;
     }
@@ -135,7 +135,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     setMuxBus(busAddress);
     int bytesRead = controller.i2cRead(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
-    log.info(String.format("i2cRead. Requested %s bytes, received %s byte", size, bytesRead));
+    log.info("i2cRead. Requested {} bytes, received {} byte", size, bytesRead);
     return bytesRead;
   }
 
@@ -176,7 +176,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
-      log.error(String.format("Device %s %s %s already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName()));
+      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
     } else {
       devicedata.busAddress = control.getDeviceBus();
       devicedata.deviceAddress = control.getDeviceAddress();
@@ -226,7 +226,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
     }
 
     controllerName = controller.getName();
@@ -246,14 +246,14 @@ public class I2cMux extends Service implements I2CControl, I2CController {
       return;
 
     if (this.controllerName != controller.getName()) {
-      log.error(String.format("Trying to attached to %s, but already attached to (%s)", controller.getName(), this.controllerName));
+      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }
 
     this.controller = controller;
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info(String.format("Attached %s device on bus: %s address %s", controllerName, deviceBus, deviceAddress));
+    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
     broadcastState();
   }
 

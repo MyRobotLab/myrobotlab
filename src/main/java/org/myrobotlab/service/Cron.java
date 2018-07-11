@@ -48,7 +48,7 @@ public class Cron extends Service {
 
     @Override
     public void run() {
-      log.info(String.format("%s Cron firing message %s->%s.%s", myService.getName(), name, method, data));
+      log.info("{} Cron firing message {}->{}.{}", myService.getName(), name, method, data);
       myService.send(name, method, data);
     }
   }

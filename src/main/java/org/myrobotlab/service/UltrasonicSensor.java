@@ -135,7 +135,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   @Override
   public void onRange(Double range) {
-    log.info(String.format("RANGE: %d", range));
+    log.info("RANGE: {}", range);
   }
 
   public Double publishRange(Double range) {

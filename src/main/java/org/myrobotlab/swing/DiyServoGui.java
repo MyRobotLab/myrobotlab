@@ -456,7 +456,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           String pinControlName = (String) pinArrayControlList.getSelectedItem();
           myServo.pinControlName = pinControlName;
           refreshAnalogPinList();
-          log.debug(String.format("pinArrayControList event %s", pinControlName));
+          log.debug("pinArrayControList event {}", pinControlName);
         }
 
         if (o == attachListenerButton) {
