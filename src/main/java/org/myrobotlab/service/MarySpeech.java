@@ -194,6 +194,9 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     
     for (String voice : voices) {
       meta.addDependency("de.dfki.mary", voice, "5.2");
+      meta.exclude("org.apache.httpcomponents", "httpcore");
+      meta.exclude("org.apache.httpcomponents", "httpclient");
+      
       if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
         meta.exclude("org.slf4j", "slf4j-log4j12");
       }
@@ -205,8 +208,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     meta.exclude("com.google.guava", "guava");
     meta.exclude("org.apache.opennlp", "opennlp-tools");
     meta.exclude("org.slf4j", "slf4j-log4j12");
-    meta.exclude("org.apache.httpcomponents", "httpcore");
-    meta.exclude("org.apache.httpcomponents", "httpclients");
+    
     // try to fix httpcore override issue
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
