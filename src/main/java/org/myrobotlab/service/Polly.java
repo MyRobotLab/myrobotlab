@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -196,8 +195,11 @@ public class Polly extends AbstractSpeechSynthesis {
     meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.9.5");
     meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.5");
     meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.5");
-
     meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.118");
+    // force using httpClient service httpcomponents version
+    meta.exclude("org.apache.httpcomponents", "httpcore");
+    meta.exclude("org.apache.httpcomponents", "httpclient");
+    meta.addPeer("httpClient", "HttpClient", "httpClient");
 
     // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly
     // -->
