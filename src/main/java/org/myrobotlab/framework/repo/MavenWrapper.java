@@ -73,7 +73,7 @@ public class MavenWrapper extends Repo {
 
         for (ServiceDependency library : unfulfilled) {
           // mavenGenerateServiceInstallPom();
-          log.info(String.format("===== installing dependency %s =====", library));
+          log.info("===== installing dependency {} =====", library);
           String installPom = null;// getArtifactInstallPom(library.getOrgId(),
                                    // library.getArtifactId(),library.getVersion());
           installPom = installPom.replace("{{location}}", location);

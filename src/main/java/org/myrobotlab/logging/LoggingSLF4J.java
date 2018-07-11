@@ -124,7 +124,7 @@ public class LoggingSLF4J extends Logging {
 			logger.addAppender(console);
 
 		} else {
-			log.error(String.format("attempting to add unkown type of Appender %1$s", type));
+			log.error("attempting to add unkown type of Appender {}", type);
 			return;
 		}
 

@@ -199,8 +199,7 @@ public class CodecUtils {
 
 		String ordinalKey = makeMethodOrdinalKey(serviceType, methodName, paramCount);
 		if (!methodOrdinal.containsKey(ordinalKey)) {
-			log.error(String.format("cant find matching method candidate for %s.%s %d params", serviceType, methodName,
-					paramCount));
+			log.error("cant find matching method candidate for {}.{} {} params", serviceType, methodName, paramCount);
 			return null;
 		}
 		return methodOrdinal.get(ordinalKey);
@@ -310,7 +309,7 @@ public class CodecUtils {
 				}
 
 				if (log.isDebugEnabled()) {
-					log.debug(String.format("loading %s into method cache", methodKey));
+					log.debug("loading {} into method cache", methodKey);
 				}
 				methodCache.put(methodKey, m);
 			}
@@ -351,7 +350,7 @@ public class CodecUtils {
 					new String(Base64.encodeBase64(dataStream.toByteArray())));
 			return base64;
 		} catch (Exception e) {
-			log.error(String.format("couldnt seralize %s", msg));
+			log.error("couldnt seralize {}", msg);
 			Logging.logError(e);
 			return null;
 		}
@@ -467,7 +466,7 @@ public class CodecUtils {
 			out.write(gson.toJson(toEncode).getBytes());
 			// out.flush();
 		} else {
-			log.error(String.format("write mimeType %s not supported", mimeType));
+			log.error("write mimeType {} not supported", mimeType);
 		}
 	}
 

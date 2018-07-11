@@ -233,7 +233,7 @@ public class Util {
       icon = new ImageIcon(imgURL);
       return icon;
     } else {
-      log.error(String.format("Couldn't find file: %s", resourcePath));
+      log.error("Couldn't find file: {}", resourcePath);
       return null;
     }
   }

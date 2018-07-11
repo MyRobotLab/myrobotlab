@@ -325,7 +325,7 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
       // } else
       if (depthDataIndex == 153920) // 640 * 240 + 320 == midpoint index
       {
-        log.warn(String.format("midpoint ijr (%d,%d,%d) => xyz (%f,%f,%f)  (%f,%f,%f) ", i, j, r, x, y, z, 39.3701 * x, 39.3701 * y, 39.3701 * z));
+        log.warn("midpoint ijr ({},{},{}) => xyz ({},{},{})  ({},{},{}) ", i, j, r, x, y, z, 39.3701 * x, 39.3701 * y, 39.3701 * z);
       }
       /*
        * if (depthDataIndex == 306081) { log.warn(String.format(
@@ -336,7 +336,7 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
     }
 
     out.close();
-    log.warn(String.format("min %d max %d", min, max));
+    log.warn("min {} max {}", min, max);
     /*
      * for (int i = 0; i < data.length; ++i) { float zCoord = ((float) data[i])
      * * zScale; // convert to 3D scene //float zCoord = zScale * (float) (1.0 /

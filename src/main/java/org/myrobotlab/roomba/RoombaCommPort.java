@@ -367,12 +367,12 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
 
   @Override
   public void onConnect(String portName) {
-    log.info(String.format("%s connected to %s", getName(), portName));
+    log.info("{} connected to {}", getName(), portName);
   }
 
   @Override
   public void onDisconnect(String portName) {
-    log.info(String.format("%s disconnected from %s", getName(), portName));
+    log.info("{} disconnected from {}", getName(), portName);
   }
 
   @Override

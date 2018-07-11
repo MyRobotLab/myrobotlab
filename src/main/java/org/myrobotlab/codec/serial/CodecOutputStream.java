@@ -96,7 +96,7 @@ public class CodecOutputStream extends OutputStream implements Serializable {
   }
 
   public void record(String filename) throws FileNotFoundException {
-    log.info(String.format("record RX %s", filename));
+    log.info("record RX {}", filename);
 
     if (isRecording()) {
       log.info("already recording");

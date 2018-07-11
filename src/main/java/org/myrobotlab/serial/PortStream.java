@@ -76,7 +76,7 @@ public class PortStream extends Port {
   }
 
   public boolean setParams(int rate, int databits, int stopbits, int parity) {
-    log.debug(String.format("setSerialPortParams %d %d %d %d", rate, databits, stopbits, parity));
+    log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
     return true;
   }
 

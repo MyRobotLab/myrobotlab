@@ -66,7 +66,7 @@ public class TypeConverter {
             Class<?> pType = types[j];
             String param = stringParams[j];
 
-            log.debug(String.format("attempting conversion into %s from inbound data %s", pType.getSimpleName(), stringParams[j]));
+            log.debug("attempting conversion into {} from inbound data {}", pType.getSimpleName(), stringParams[j]);
             if (pType == String.class) {
               // escape quotes
               param = param.replaceAll("\"", "\\\"");

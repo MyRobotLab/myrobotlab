@@ -15,13 +15,13 @@ public class CodecUri {
   public final static Logger log = LoggerFactory.getLogger(CodecUri.class);
 
   public static Message decodeURI(URI uri) throws IOException {
-    log.info(String.format("authority %s", uri.getAuthority())); // gperry:blahblah@localhost:7777
-    log.info(String.format("     host %s", uri.getHost())); // localhost
-    log.info(String.format("     port %d", uri.getPort())); // 7777
-    log.info(String.format("     path %s", uri.getPath()));
-    log.info(String.format("    query %s", uri.getQuery())); // /api/string/gson/runtime/getUptime
-    log.info(String.format("   scheme %s", uri.getScheme())); // http
-    log.info(String.format(" userInfo %s", uri.getUserInfo())); // gperry:blahblah
+    log.info("authority {}", uri.getAuthority()); // gperry:blahblah@localhost:7777
+    log.info("     host {}", uri.getHost()); // localhost
+    log.info("     port {}", uri.getPort()); // 7777
+    log.info("     path {}", uri.getPath());
+    log.info("    query {}", uri.getQuery()); // /api/string/gson/runtime/getUptime
+    log.info("   scheme {}", uri.getScheme()); // http
+    log.info(" userInfo {}", uri.getUserInfo()); // gperry:blahblah
 
     Message msg = decodePathInfo(uri.getPath());
 

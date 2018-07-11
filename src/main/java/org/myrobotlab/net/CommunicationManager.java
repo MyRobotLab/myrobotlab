@@ -57,7 +57,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
       Gateway gateway = (Gateway) Runtime.getService(uri.getHost());
       return gateway;
     } else {
-      log.error(String.format("%s not SCHEME_MRL", uri));
+      log.error("{} not SCHEME_MRL", uri);
       return null;
     }
   }
@@ -67,7 +67,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 
     ServiceInterface sw = Runtime.getService(msg.getName());
     if (sw == null) {
-      log.error(String.format("could not find service %s to process %s from sender %s - tearing down route", msg.name, msg.method, msg.sender));
+      log.error("could not find service {} to process {} from sender {} - tearing down route", msg.name, msg.method, msg.sender);
       ServiceInterface sender = Runtime.getService(msg.sender);
       if (sender != null) {
         sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);

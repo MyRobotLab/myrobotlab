@@ -51,7 +51,7 @@ public class Zip {
 
     }
 
-    log.debug(String.format("extract (%s, %s, %s, %s, %b)", resourcePath, targetDirectory, filter, resourceType, overwrite));
+    log.debug("extract ({}, {}, {}, {}, {})", resourcePath, targetDirectory, filter, resourceType, overwrite);
 
     // String filter = "resource/";
     InputStream source = null;
@@ -152,7 +152,7 @@ public class Zip {
     if (dir.charAt(dir.length() - 1) != '/') {
       dir = dir + "/";
     }
-    log.info(String.format("listing %s directory %s", zipFile, dir));
+    log.info("listing {} directory {}", zipFile, dir);
     // int BUFFER = 2048;
     File file = new File(zipFile);
     ArrayList<String> children = new ArrayList<String>();
@@ -161,14 +161,14 @@ public class Zip {
     // String newPath = zipFile.substring(0, zipFile.length() - 4);
     ZipEntry zipDir = zip.getEntry(dir);
     if (zipDir == null) {
-      log.error(String.format("%s not found", dir));
+      log.error("{} not found", dir);
       // don't leak file handles.
       zip.close();
       return children;
     }
 
     if (!zipDir.isDirectory()) {
-      log.error(String.format("%s not a directory", dir));
+      log.error("{} not a directory", dir);
       // don't leak file handles.
       zip.close();
       return children;
@@ -215,7 +215,7 @@ public class Zip {
   }
 
   static public void unzip(String zipFile, String newPath) throws ZipException, IOException {
-    log.info(String.format("unzipping %s to %s", zipFile, newPath));
+    log.info("unzipping {} to {}", zipFile, newPath);
     int BUFFER = 2048;
     File file = new File(zipFile);
 

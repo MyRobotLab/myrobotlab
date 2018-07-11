@@ -65,7 +65,7 @@ public class UdpServer implements Runnable {
 		isRunning = true;
 		try {
 			serverSocket = new DatagramSocket(serverPort);
-			log.info(String.format("%s UdpServer listening on %s:%d", myService.getName(), serverSocket.getLocalAddress(), serverSocket.getLocalPort()));
+			log.info("{} UdpServer listening on {}:{}", myService.getName(), serverSocket.getLocalAddress(), serverSocket.getLocalPort());
 
 			byte[] b = new byte[65507]; // max udp size 65507 + 8 byte
 			// header = 65535

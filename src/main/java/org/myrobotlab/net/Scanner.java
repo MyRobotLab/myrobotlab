@@ -62,10 +62,10 @@ public class Scanner extends Thread {
             NetworkInterface ni = interfaces.nextElement();
             // myService.info("examining interface %s %s",
             // ni.getName(), ni.getInetAddresses().toString());
-            log.info(String.format("examining interface %s %s", ni.getName(), ni.getDisplayName()));
+            log.info("examining interface {} {}", ni.getName(), ni.getDisplayName());
             // if (ni.isLoopback() || !ni.isUp()) {
             if (!ni.isUp()) {
-              log.info(String.format("skipping %s", ni.getDisplayName()));
+              log.info("skipping {}", ni.getDisplayName());
               continue; // Don't want tobroadcast to the loopback
               // // interface
             }
@@ -83,7 +83,7 @@ public class Scanner extends Thread {
 
               // Send the broadcast package!
               try {
-                log.info(String.format("sending to %s %s %s", ni.getName(), broadcast.getHostAddress(), ni.getDisplayName()));
+                log.info("sending to {} {} {}", ni.getName(), broadcast.getHostAddress(), ni.getDisplayName());
 
                 if (interfaceAddress.getNetworkPrefixLength() == -1) {
                   log.warn("jdk bug for interface %s network prefix length == -1", interfaceAddress.getAddress().getHostAddress());
