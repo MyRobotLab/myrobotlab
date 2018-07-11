@@ -282,7 +282,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
         int index = source.locationToIndex(e.getPoint());
         if (index >= 0) {
           releasedTarget = (ServiceInterface) source.getModel().getElementAt(index);
-          log.info(String.format("right click on running service %s", releasedTarget.getName()));
+          log.info("right click on running service {}", releasedTarget.getName());
           releaseMenuItem.setVisible(true);
           upgradeMenuItem.setVisible(false);
           installMenuItem.setVisible(false);

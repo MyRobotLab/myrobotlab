@@ -88,12 +88,12 @@ public abstract class AbstractBodyPart extends Service {
   */
   public void moveToBlocking(String node, Double... servoPos) {
     checkParameters(node, servoPos.length);
-    log.info(String.format("init " + node + "moveToBlocking "));
+    log.info("init {} moveToBlocking ", node);
     for (int i = 0; i < servoPos.length && i < getAcuators(node).size(); i++) {
       getAcuators(node).get(i).moveTo(servoPos[i]);
     }
     waitTargetPos(node);
-    log.info(String.format("end " + node + "moveToBlocking "));
+    log.info("end {} moveToBlocking ", node);
   }
 
   public void waitTargetPos(String node) {

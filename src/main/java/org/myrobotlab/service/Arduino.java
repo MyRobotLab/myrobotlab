@@ -291,7 +291,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   // > analogWrite/pin/value
   public void analogWrite(int pin, int value) {
-    log.info(String.format("analogWrite(%d,%d)", pin, value));
+    log.info("analogWrite({},{})", pin, value);
     msg.analogWrite(pin, value);
   }
 
@@ -896,7 +896,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
-      log.error(String.format("Device %s %s %s already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName()));
+      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
     } else {
       devicedata.busAddress = control.getDeviceBus();
       devicedata.deviceAddress = control.getDeviceAddress();
@@ -940,7 +940,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // Get the device index to the MRL i2c bus
     String i2cBus = String.format("I2CBus%s", busAddress);
     int deviceId = getDeviceId(i2cBus);
-    log.info(String.format("i2cRead requesting %s bytes", size));
+    log.info("i2cRead requesting {} bytes", size);
     msg.i2cRead(deviceId, deviceAddress, size);
 
     int retry = 0;
@@ -960,10 +960,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       Logging.logError(e);
     }
     if (i2cDataReturned) {
-      log.debug(String.format("i2cReturnData returned %s bytes to caller %s.", i2cDataSize, control.getName()));
+      log.debug("i2cReturnData returned {} bytes to caller {}.", i2cDataSize, control.getName());
       for (int i = 0; i < i2cDataSize; i++) {
         buffer[i] = i2cData[i];
-        log.debug(String.format("i2cReturnData returned ix %s value %s", i, buffer[i]));
+        log.debug("i2cReturnData returned ix {} value {}", i, buffer[i]);
       }
       return i2cDataSize;
     }
@@ -983,7 +983,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     for (int i = 0; i < i2cDataSize; i++) {
       i2cData[i] = (byte) (rawData[i] & 0xff);
     }
-    log.debug(String.format("i2cReturnData invoked. i2cDataSize = %s", i2cDataSize));
+    log.debug("i2cReturnData invoked. i2cDataSize = {}", i2cDataSize);
     i2cDataReturned = true;
   }
 
@@ -1037,10 +1037,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         Logging.logError(e);
       }
       if (i2cDataReturned) {
-        log.debug(String.format("i2cReturnData returned %s bytes to caller %s.", i2cDataSize, control.getName()));
+        log.debug("i2cReturnData returned %s bytes to caller {}.", i2cDataSize, control.getName());
         for (int i = 0; i < i2cDataSize; i++) {
           readBuffer[i] = i2cData[i];
-          log.debug(String.format("i2cReturnData returned ix %s value %s", i, readBuffer[i]));
+          log.debug("i2cReturnData returned ix {} value {}", i, readBuffer[i]);
         }
         return i2cDataSize;
       }
@@ -1726,7 +1726,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > servoSweepStart/deviceId/min/max/step
   public void servoSweepStart(ServoControl servo) {
     int deviceId = getDeviceId(servo);
-    log.info(String.format("servoSweep %s id %d min %d max %d step %d", servo.getName(), deviceId, servo.getMin(), servo.getMax(), servo.getVelocity()));
+    log.info("servoSweep {} id {} min {} max {} step {}", servo.getName(), deviceId, servo.getMin(), servo.getMax(), servo.getVelocity());
     msg.servoSweepStart(deviceId, (int) servo.getMin(), (int) servo.getMax(), (int) servo.getVelocity());
   }
 
@@ -1761,7 +1761,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > servoWriteMicroseconds/deviceId/b16 ms
   public void servoWriteMicroseconds(ServoControl servo, int uS) {
     int deviceId = getDeviceId(servo);
-    log.info(String.format("writeMicroseconds %s %d id %d", servo.getName(), uS, deviceId));
+    log.info("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
     // msg.servoWriteMicroseconds(deviceId, uS);
     // lets use speed control
     msg.servoMoveToMicroseconds(deviceId, uS);
@@ -1973,9 +1973,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       type = BOARD_TYPE_UNO;
     }
 
-    log.info(String.format("arduino IDE Path=%s", arduinoIdePath));
-    log.info(String.format("Port=%s", port));
-    log.info(String.format("type=%s", type));
+    log.info("arduino IDE Path={}", arduinoIdePath);
+    log.info("Port={}", port);
+    log.info("type={}", type);
     /*
      * not needed if (arduinoIdePath != null &&
      * !arduinoIdePath.equals(ArduinoUtils.arduinoPath)) { this.arduinoPath =

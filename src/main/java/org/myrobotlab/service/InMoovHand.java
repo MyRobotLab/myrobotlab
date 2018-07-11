@@ -316,7 +316,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void moveTo(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("%s.moveTo %d %d %d %d %d %d", getName(), thumb, index, majeure, ringFinger, pinky, wrist));
+      log.debug("{}.moveTo {} {} {} {} {} {}", getName(), thumb, index, majeure, ringFinger, pinky, wrist);
     }
     this.thumb.moveTo(thumb);
     this.index.moveTo(index);
@@ -332,10 +332,10 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
   
   public void moveToBlocking(double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
-    log.info(String.format("init " + getName() + "moveToBlocking "));
+    log.info("init {} moveToBlocking ", getName());
     moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
     waitTargetPos();
-    log.info(String.format("end " + getName() + "moveToBlocking "));
+    log.info("end {} moveToBlocking ", getName());
     }
 
   public void waitTargetPos() {
@@ -473,7 +473,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void setPins(int thumbPin, int indexPin, int majeurePin, int ringFingerPin, int pinkyPin, int wristPin) {
-    log.info(String.format("setPins %d %d %d %d %d %d", thumbPin, indexPin, majeurePin, ringFingerPin, pinkyPin, wristPin));
+    log.info("setPins {} {} {} {} {} {}", thumbPin, indexPin, majeurePin, ringFingerPin, pinkyPin, wristPin);
     /* OLD WAY
     this.thumb.setPin(thumb);
     this.index.setPin(index);
@@ -497,7 +497,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
-    log.info(String.format("setRest %d %d %d %d %d %d", thumb, index, majeure, ringFinger, pinky, wrist));
+    log.info("setRest {} {} {} {} {} {}", thumb, index, majeure, ringFinger, pinky, wrist);
     this.thumb.setRest(thumb);
     this.index.setRest(index);
     this.majeure.setRest(majeure);

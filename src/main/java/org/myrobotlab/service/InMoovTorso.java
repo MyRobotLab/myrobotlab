@@ -190,7 +190,7 @@ public class InMoovTorso extends Service {
 
   public void moveTo(double topStom, double midStom, double lowStom) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("%s moveTo %d %d %d", getName(), topStom, midStom, lowStom));
+      log.debug("{} moveTo {} {} {}", getName(), topStom, midStom, lowStom);
     }
     this.topStom.moveTo(topStom);
     this.midStom.moveTo(midStom);
@@ -199,10 +199,10 @@ public class InMoovTorso extends Service {
   }
   
   public void moveToBlocking(Double topStom, Double midStom, Double lowStom) {
-    log.info(String.format("init " + getName() + "moveToBlocking "));
+    log.info("init {} moveToBlocking ", getName());
     moveTo(topStom, midStom, lowStom);
     waitTargetPos();
-    log.info(String.format("end " + getName() + "moveToBlocking "));
+    log.info("end {} moveToBlocking", getName());
     }
 
   public void waitTargetPos() {

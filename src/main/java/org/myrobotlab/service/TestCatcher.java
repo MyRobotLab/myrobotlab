@@ -106,7 +106,7 @@ public class TestCatcher extends Service implements SerialDataListener {
     try {
       msgs.put(msg);
       if (log.isDebugEnabled()) {
-        log.debug(String.format("%d msg %s ", msgs.size(), msg));
+        log.debug("{} msg {}", msgs.size(), msg);
       }
     } catch (Exception e) {
       Logging.logError(e);
@@ -147,7 +147,7 @@ public class TestCatcher extends Service implements SerialDataListener {
       sleep(10);
     }
 
-    log.warn(String.format("returned %d msgs in %s ms", interCount, System.currentTimeMillis() - start));
+    log.warn("returned {} msgs in {} ms", interCount, System.currentTimeMillis() - start);
     return msgs;
   }
 
@@ -207,26 +207,26 @@ public class TestCatcher extends Service implements SerialDataListener {
   public void checkMsg(long timeout, String method, Object... checkParms) throws InterruptedException, IOException {
     Message msg = getMsg(timeout);
     if (msg == null) {
-      log.error(String.format("%s", msg));
+      log.error("{}", msg);
       throw new IOException(String.format("reached timeout of %d waiting for message", timeout));
     }
     if (checkParms != null && checkParms.length != msg.data.length) {
-      log.error(String.format("%s", msg));
+      log.error("{}", msg);
       throw new IOException(String.format("incorrect number of expected parameters - expected %d got %d", checkParms.length, msg.data.length));
     }
 
     if (checkParms == null && msg.data != null) {
-      log.error(String.format("%s", msg));
+      log.error("{}", msg);
       throw new IOException(String.format("expected null parameters - got non-null"));
     }
 
     if (checkParms != null && msg.data == null) {
-      log.error(String.format("%s", msg));
+      log.error("{}", msg);
       throw new IOException(String.format("expected non null parameters - got null"));
     }
 
     if (!method.equals(msg.method)) {
-      log.error(String.format("%s", msg));
+      log.error("{}", msg);
       throw new IOException(String.format("unlike methods - expected %s got %s", method, msg.method));
     }
 

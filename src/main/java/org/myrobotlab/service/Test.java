@@ -715,7 +715,7 @@ public class Test extends Service implements StatusListener {
       
       if (test.branch == null){
         test.branch = Platform.getLocalInstance().getBranch();
-        log.info(String.format("Testing on branch ", test.branch));
+        log.info("Testing on branch {}", test.branch);
       }
 
       String activity = String.format("test %s on %s", testName, serviceName);
@@ -819,7 +819,7 @@ public class Test extends Service implements StatusListener {
 
   public Object subscribe(Object inData) {
     log.info("subscribe has received data");
-    log.info(String.format("Test.subscribed received %s", inData));
+    log.info("Test.subscribed received {}", inData);
     data.add(inData);
     return inData;
   }
@@ -1015,7 +1015,7 @@ public class Test extends Service implements StatusListener {
     // tear down and release all newly created services
     for (String cs : currentServices) {
       if (!preServices.contains(cs)) {
-        log.info(String.format("service %s created for testing %s - test finished attempting to release", cs, test.serviceName));
+        log.info("service {} created for testing {} - test finished attempting to release", cs, test.serviceName);
         ServiceInterface si = Runtime.getService(cs);
         if (si != null){
         	si.releaseService();

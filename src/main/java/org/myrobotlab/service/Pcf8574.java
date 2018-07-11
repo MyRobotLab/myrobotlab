@@ -51,7 +51,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     @Override
     public void run() {
 
-      log.info(String.format("New publisher instance started at a sample frequency of %s Hz", sampleFreq));
+      log.info("New publisher instance started at a sample frequency of {} Hz", sampleFreq);
       long sleepTime = 1000 / (long) sampleFreq;
       isPublishing = true;
       try {
@@ -216,7 +216,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   @Override
   public void setDeviceBus(String deviceBus) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceBus = deviceBus;
@@ -226,7 +226,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   @Override
   public void setDeviceAddress(String deviceAddress) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceAddress = deviceAddress;
@@ -309,7 +309,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
         writeRegister = directionRegister |= (1 << address);
       }
     } else {
-      log.error(String.format("Can't write to a pin in input mode. Change direction to OUTPUT (%s) with pinMode first.", OUTPUT));
+      log.error("Can't write to a pin in input mode. Change direction to OUTPUT ({}) with pinMode first.", OUTPUT);
     }
     writeRegister(writeRegister);
     pinDef.setValue(value);
@@ -372,13 +372,13 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
       return;
     }
 
-    log.info(String.format("enablePin %s", address));
+    log.info("enablePin {}", address);
     PinDefinition pin = pinIndex.get(address);
     pin.setEnabled(true);
     invoke("publishPinDefinition", pin);
 
     if (!isPublishing) {
-      log.info(String.format("Starting a new publisher instance"));
+      log.info("Starting a new publisher instance");
       publisher = new Publisher(getName());
       publisher.start();
     }
@@ -442,7 +442,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
    */
   public double setSampleRate(double rate) {
     if (rate < 0) {
-      log.error(String.format("setSampleRate. Rate must be > 0. Ignored %s, returning to %s", rate, this.sampleFreq));
+      log.error("setSampleRate. Rate must be > 0. Ignored {}, returning to {}", rate, this.sampleFreq);
       return this.sampleFreq;
     }
     this.sampleFreq = rate;
@@ -508,11 +508,11 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
     }
 
     controllerName = controller.getName();
-    log.info(String.format("%s attach %s", getName(), controllerName));
+    log.info("{} attach {}", getName(), controllerName);
 
     this.deviceBus = deviceBus;
     this.deviceAddress = deviceAddress;
@@ -528,14 +528,14 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
       return;
 
     if (this.controllerName != controller.getName()) {
-      log.error(String.format("Trying to attached to %s, but already attached to (%s)", controller.getName(), this.controllerName));
+      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }
 
     this.controller = controller;
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info(String.format("Attached %s device on bus: %s address %s", controllerName, deviceBus, deviceAddress));
+    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
     broadcastState();
   }
 

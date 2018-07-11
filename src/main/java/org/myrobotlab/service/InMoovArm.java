@@ -227,7 +227,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public void moveTo(double bicep, double rotate, double shoulder, double omoplate) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("%s moveTo %d %d %d %d", getName(), bicep, rotate, shoulder, omoplate));
+      log.debug("{} moveTo {} {} {} {}", getName(), bicep, rotate, shoulder, omoplate);
     }
     this.bicep.moveTo(bicep);
     this.rotate.moveTo(rotate);
@@ -236,10 +236,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public void moveToBlocking(double bicep, double rotate, double shoulder, double omoplate) {
-    log.info(String.format("init " + getName() + "moveToBlocking "));
+    log.info("init {} moveToBlocking", getName());
     moveTo(bicep, rotate, shoulder, omoplate);
     waitTargetPos();
-    log.info(String.format("end " + getName() + "moveToBlocking "));
+    log.info("end {} moveToBlocking", getName());
     }
 
   public void waitTargetPos() {

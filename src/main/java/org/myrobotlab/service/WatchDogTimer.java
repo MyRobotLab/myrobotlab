@@ -65,7 +65,7 @@ public class WatchDogTimer extends Service {
       this.lastCheckPointTs = this.futureTimeToAlertTs;
       long currentTs = System.currentTimeMillis();
       this.futureTimeToAlertTs = currentTs + interval;
-      log.debug(String.format("reset checkpoint %s.%s to +%d ms %d ms remaining", getName(), name, interval, lastCheckPointTs - currentTs));
+      log.debug("reset checkpoint {}.{} to +{} ms {} ms remaining", getName(), name, interval, lastCheckPointTs - currentTs);
     }
 
     @Override

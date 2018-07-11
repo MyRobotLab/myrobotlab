@@ -185,7 +185,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   @Override
   public void setDeviceBus(String deviceBus) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceBus = deviceBus;
@@ -195,7 +195,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   @Override
   public void setDeviceAddress(String deviceAddress) {
     if (isAttached) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
       return;
     }
     this.deviceAddress = deviceAddress;
@@ -887,11 +887,11 @@ public class OledSsd1306 extends Service implements I2CControl {
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
-      log.error(String.format("Already attached to %s, use detach(%s) first", this.controllerName));
+      log.error("Already attached to {}, use detach({}) first", this.controllerName);
     }
 
     controllerName = controller.getName();
-    log.info(String.format("%s attach %s", getName(), controllerName));
+    log.info("{} attach {}", getName(), controllerName);
 
     this.deviceBus = deviceBus;
     this.deviceAddress = deviceAddress;
@@ -907,14 +907,14 @@ public class OledSsd1306 extends Service implements I2CControl {
       return;
 
     if (this.controllerName != controller.getName()) {
-      log.error(String.format("Trying to attached to %s, but already attached to (%s)", controller.getName(), this.controllerName));
+      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }
 
     this.controller = controller;
     isAttached = true;
     controller.attachI2CControl(this);
-    log.info(String.format("Attached %s device on bus: %s address %s", controllerName, deviceBus, deviceAddress));
+    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
     broadcastState();
   }
 

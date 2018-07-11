@@ -31,7 +31,7 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
 
     synchronized (imgq) {
       if (imgq.size() > maxQueue) {
-        log.warn(String.format("Image Source BUFFER OVERRUN size %d dropping frames", imgq.size()));
+        log.warn("Image Source BUFFER OVERRUN size {} dropping frames", imgq.size());
         try {
           // FIXME ??? it's not nice to keep the inbound thread
           // waiting No ???

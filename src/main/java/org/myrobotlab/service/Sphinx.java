@@ -151,7 +151,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
             log.info("recognized: " + resultText + '\n');
             if (resultText.length() > 0 && isListening) {
               if (lockPhrases.size() > 0 && !lockPhrases.contains(resultText) && !confirmations.containsKey(resultText)) {
-                log.info(String.format("but locked on %s", resultText));
+                log.info("but locked on {}", resultText);
                 continue;
               }
 

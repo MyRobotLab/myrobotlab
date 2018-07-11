@@ -54,7 +54,7 @@ public class TopCodes extends Service {
       }
       for (int i = 0; i < codes.size(); ++i) {
         TopCode code = codes.get(i);
-        log.info(String.format("number %d code %d x %f y %f diameter %f", i, code.getCode(), code.getCenterX(), code.getCenterY(), code.getDiameter()));
+        log.info("number {} code {} x {} y {} diameter {}", i, code.getCode(), code.getCenterX(), code.getCenterY(), code.getDiameter());
       }
 
     } catch (Exception e) {

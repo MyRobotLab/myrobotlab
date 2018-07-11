@@ -301,7 +301,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   static public synchronized ServiceInterface createService(String name, String fullTypeName) {
-    log.info(String.format("Runtime.createService %s", name));
+    log.info("Runtime.createService {}", name);
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
       return null;
@@ -331,7 +331,7 @@ public class Runtime extends Service implements MessageListener {
 
       Repo repo = Runtime.getInstance().getRepo();
       if (!repo.isServiceTypeInstalled(fullTypeName)) {
-        log.error(String.format("%s is not installed", fullTypeName));
+        log.error("{} is not installed", fullTypeName);
         if (autoAcceptLicense) {
           repo.install(fullTypeName);
         }
@@ -592,7 +592,7 @@ public class Runtime extends Service implements MessageListener {
         }
 
         String m = StringUtil.bytesToHex(mac);
-        log.info(String.format("mac address : %s", m));
+        log.info("mac address : {}", m);
 
         /*
          * StringBuilder sb = new StringBuilder(); for (int i = 0; i <
@@ -660,7 +660,7 @@ public class Runtime extends Service implements MessageListener {
         // they have to reset
         // this !!
       } else {
-        log.info(String.format("security prevents export of %s", name));
+        log.info("security prevents export of {}", name);
         continue;
       }
     }
@@ -942,7 +942,7 @@ public class Runtime extends Service implements MessageListener {
       String name = cmdline.getArgument("-invoke", 0);
       String method = cmdline.getArgument("-invoke", 1);
 
-      log.info(String.format("attempting to invoke : %s.%s(%s)\n", name, method, params.toString()));
+      log.info("attempting to invoke : {}.{}({})\n", name, method, params.toString());
       getInstance().send(name, method, data);
 
     }
@@ -1227,7 +1227,7 @@ public class Runtime extends Service implements MessageListener {
         // originated
         // from - send it....
         if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getInstanceId())) {
-          log.info(String.format("gateway %s sending registration of %s remote to %s", gateway.getName(), name, uri));
+          log.info("gateway {} sending registration of {} remote to {}", gateway.getName(), name, uri);
           // FIXME - Security determines what to export
           Message msg = Message.createMessage(runtime, null, "register", s);
           // ((Communicator) gateway).sendRemote(uri, msg);
@@ -1369,7 +1369,7 @@ public class Runtime extends Service implements MessageListener {
         continue;
       }
 
-      log.info(String.format("stopping service %s", serviceName));
+      log.info("stopping service {}", serviceName);
 
       if (sw == null) {
         log.warn("unknown type and/or remote service");
@@ -1601,10 +1601,10 @@ public class Runtime extends Service implements MessageListener {
       }
     }
     if (jvmArgs != null) {
-      log.info(String.format("jvmArgs %s", Arrays.toString(jvmArgs.toArray())));
+      log.info("jvmArgs {}", Arrays.toString(jvmArgs.toArray()));
     }
     log.info("file.encoding {}", System.getProperty("file.encoding"));
-    log.info(String.format("args %s", Arrays.toString(args.toArray())));
+    log.info("args {}", Arrays.toString(args.toArray()));
 
     log.info("============== args end ==============");
     if (cmdline != null && !cmdline.containsKey("-noEnv")) {
@@ -1617,12 +1617,12 @@ public class Runtime extends Service implements MessageListener {
        * entry.getValue(); log.info(String.format("%s=%s", key, value)); }
        */
       if (env.containsKey("PATH")) {
-        log.info(String.format("PATH=%s", env.get("PATH")));
+        log.info("PATH={}", env.get("PATH"));
       } else {
         log.info("PATH not defined");
       }
       if (env.containsKey("JAVA_HOME")) {
-        log.info(String.format("JAVA_HOME=%s", env.get("JAVA_HOME")));
+        log.info("JAVA_HOME={}", env.get("JAVA_HOME"));
       } else {
         log.info("JAVA_HOME not defined");
       }

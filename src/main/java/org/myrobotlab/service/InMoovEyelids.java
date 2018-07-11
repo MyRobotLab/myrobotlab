@@ -188,7 +188,7 @@ public class InMoovEyelids extends Service {
 
   public void moveTo(double eyelidleftPos, double eyelidrightPos) {
     if (log.isDebugEnabled()) {
-      log.debug(String.format("%s moveTo %d %d", getName(), eyelidleftPos, eyelidrightPos));
+      log.debug("{} moveTo {} {}", getName(), eyelidleftPos, eyelidrightPos);
     }
     if (eyelidleft != null) {
     eyelidleft.moveTo(eyelidleftPos);
@@ -199,10 +199,10 @@ public class InMoovEyelids extends Service {
   }
   
   public void moveToBlocking(double eyelidleftPos, double eyelidrightPos) {
-    log.info(String.format("init " + getName() + "moveToBlocking "));
+    log.info("init {} moveToBlocking ", getName() );
     moveTo(eyelidleftPos,eyelidrightPos);
     waitTargetPos();
-    log.info(String.format("end " + getName() + "moveToBlocking "));
+    log.info("end {} moveToBlocking ", getName());
     }
 
   public void waitTargetPos() {

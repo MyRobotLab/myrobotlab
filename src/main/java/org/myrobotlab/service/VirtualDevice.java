@@ -121,7 +121,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     // add the uart connected to my port
     uarts.put(myPort, uart);
 
-    log.info(String.format("connectToVirtualUart - creating uart %s <--> %s", myPort, uartPort));
+    log.info("connectToVirtualUart - creating uart {} <--> {}", myPort, uartPort);
     return uart;
   }
 
@@ -205,7 +205,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
       }
     }
 
-    log.info(String.format("returned %d msgs in %s ms", ret.size(), now - start));
+    log.info("returned {} msgs in {} ms", ret.size(), now - start);
     return ret;
   }
 

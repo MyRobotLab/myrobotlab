@@ -414,8 +414,7 @@ public class Gps extends Service implements SerialDataListener {
   }
 
   public void onGPS(GpsData gps) {
-    log.info(String.format("lat: %f", gps.latitude));
-    log.info(String.format("long: %f", gps.longitude));
+    log.info("lat: {} long: {}", gps.latitude, gps.longitude);
   }
 
   /**

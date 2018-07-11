@@ -248,12 +248,12 @@ public class Joystick extends Service {
 
 	public Map<String, Integer> getControllers() {
 
-		log.info(String.format("%s getting controllers", getName()));
+		log.info("{} getting controllers", getName());
 		hardwareControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 		info(String.format("found %d controllers", hardwareControllers.length));
 		controllerNames.clear();
 		for (int i = 0; i < hardwareControllers.length; i++) {
-			log.info(String.format("Found input device: %d %s", i, hardwareControllers[i].getName()));
+			log.info("Found input device: {} {}", i, hardwareControllers[i].getName());
 			controllerNames.put(String.format("%d - %s", i, hardwareControllers[i].getName()), i);
 		}
 		return controllerNames;
@@ -305,12 +305,12 @@ public class Joystick extends Service {
 	}
 
 	public JoystickData publishJoystickInput(final JoystickData input) {
-		log.debug(String.format("publishJoystickInput %s", input));
+		log.debug("publishJoystickInput {}", input);
 		return input;
 	}
 
 	public boolean setController(int index) {
-		log.info(String.format("attaching controller %d", index));
+		log.info("attaching controller %d", index);
 
 		if (index > -1 && index < hardwareControllers.length) {
 			hardwareController = hardwareControllers[index];
@@ -349,7 +349,7 @@ public class Joystick extends Service {
 	} // end of setRumbler()
 
 	synchronized public void startPolling() {
-		log.info(String.format("startPolling - starting new polling thread %s_polling", getName()));
+		log.info("startPolling - starting new polling thread {}_polling", getName());
 		if (pollingThread != null && isPolling == true) {
 			log.warn("already polling, stop polling first");
 			return;

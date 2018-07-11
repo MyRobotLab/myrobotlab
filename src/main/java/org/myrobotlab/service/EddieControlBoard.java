@@ -187,7 +187,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   public void go(float left, float right) throws Exception {
-    log.info(String.format("go %f %f", left, right));
+    log.info("go {} {}", left, right);
     int l = mapper.calcOutputInt(left);
     if (l > 127) {
       l = 128 - l;
@@ -343,7 +343,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   public String sendCmd(String cmd, int expectedResponseLength) throws Exception {
-    log.info(String.format("sendCommand %s", cmd));
+    log.info("sendCommand {}", cmd);
     String ret = null;
 
     serial.write(String.format("%s\r", cmd));
@@ -360,7 +360,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
    * @throws Exception e
    */
   public String sendCommand(String cmd) throws Exception {
-    log.info(String.format("sendCommand %s", cmd));
+    log.info("sendCommand {}", cmd);
     String ret = null;
 
     // serial.setBlocking(true);

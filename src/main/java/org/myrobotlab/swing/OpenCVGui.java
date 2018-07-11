@@ -547,7 +547,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		// try creating one based on type
 		filtergui = (OpenCVFilterGui) Instantiator.getNewInstance(guiType, name, boundServiceName, swingGui);
 		if (filtergui == null) {
-			log.info(String.format("filter %s does not have a gui defined", type));
+			log.info("filter {} does not have a gui defined", type);
 			filtergui = (OpenCVFilterGui) Instantiator.getNewInstance(FILTER_PACKAGE_NAME + "DefaultGui", name,
 					boundServiceName, swingGui);
 			if (filtergui == null) {

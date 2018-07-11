@@ -101,19 +101,19 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
 				for (int i = 0; i < nes.size(); ++i) {
 					MRLListener entry = nes.get(i);
 					if (entry.equals(listener)) {
-						log.warn(String.format("attempting to add duplicate MRLListener %s", listener));
+						log.warn("attempting to add duplicate MRLListener {}", listener);
 						found = true;
 						break;
 					}
 				}
 				if (!found) {
-					log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+					log.info("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
 					nes.add(listener);
 				}
 			} else {
 				ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
 				notifyList.add(listener);
-				log.info(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+				log.info("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
 				publishLogEventNotifyList.put(listener.topicMethod.toString(), notifyList);
 			}
 		} else {
