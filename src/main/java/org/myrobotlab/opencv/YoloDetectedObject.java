@@ -14,5 +14,10 @@ public class YoloDetectedObject {
   public Rect boundingBox;
   public float confidence;
   public String label;
+  @Override
+  public String toString() {
+    String box = "X:" + boundingBox.x() + ",Y:" + boundingBox.y() + " W:" + boundingBox.width() + " H:"+ boundingBox.height();
+    return "YoloDetectedObject [boundingBox=" + box + ", confidence=" + confidence + ", label=" + label + "]";
+  }
   
 }
