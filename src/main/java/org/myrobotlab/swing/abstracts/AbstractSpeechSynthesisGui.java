@@ -335,13 +335,12 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
             // formatting display
             // TODO add flags for language
             voices.addItem(display(voice));
-            if (speech.getVoice() != null) {
-              if (voice.getName().equals(speech.getVoice().getName())) {
-                voices.setSelectedItem(display(voice));
-              }
-            }
           }
         }
+        
+        if (voices.getItemCount() > 0 && speech.getVoice() != null && !speech.getVoice().getName().equals(voices.getSelectedItem())) {
+          voices.setSelectedItem(display(speech.getVoice()));
+      }
 
         // keys
         if (speech.getKeyNames().length != keys.size()) {
