@@ -16,7 +16,7 @@ public class DrupalNameProvider implements NameProvider {
 
   @Override
   public String getName(String ip) {
-    log.info(String.format("==DrupalNameProvider.getName(%s)==", ip));
+    log.info("==DrupalNameProvider.getName({})==", ip);
     try {
       if (this.conn == null) {
         Class.forName("com.mysql.jdbc.Driver");
@@ -37,16 +37,16 @@ public class DrupalNameProvider implements NameProvider {
       String user = null;
       while (records.next()) {
         user = records.getString("name");
-        log.info(String.format("found [%s] for ip %s", user, ip));
+        log.info("found [{}] for ip {}", user, ip);
         if ((user == null) || (user.trim().length() == 0 || user.trim().equals(""))) {
           log.info("user null or blank skipping");
           continue;
         } else {
-          log.info(String.format("found user [%s]", user));
+          log.info("found user [{}]", user);
           return user;
         }
       }
-      log.info(String.format("no not blank records found returning ip [%s]", ip));
+      log.info("no not blank records found returning ip [{}]", ip);
       return ip;
     } catch (Exception e) {
       Logging.logError(e);

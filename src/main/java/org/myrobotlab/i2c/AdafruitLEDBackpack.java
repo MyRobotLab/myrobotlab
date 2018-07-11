@@ -193,7 +193,7 @@ public class AdafruitLEDBackpack implements I2CDevice {
 
   public AdafruitLEDBackpack(int bus, int address) throws IOException, UnsupportedBusNumberException {
 
-    log.info(String.format("AdafruitLEDBackpack on %d %d", bus, address));
+    log.info("AdafruitLEDBackpack on {} {}", bus, address);
 
     // create I2C communications bus instance
     i2cbus = I2CFactory.getInstance(bus);
@@ -242,7 +242,7 @@ public class AdafruitLEDBackpack implements I2CDevice {
   }
 
   public String display(String data) {
-    log.info(String.format("displayString %s", data));
+    log.info("displayString {}", data);
     lastValue = data;
     if (translationInitialized) {
       initTranslation();

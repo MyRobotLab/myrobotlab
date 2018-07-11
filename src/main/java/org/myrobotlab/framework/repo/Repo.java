@@ -253,7 +253,7 @@ public abstract class Repo {
 			// get the dependencies required by the type
 			ServiceData sd = ServiceData.getLocalInstance();
 			if (!sd.containsServiceType(type)) {
-				log.error(String.format("%s not found", type));
+				log.error("{} not found", type);
 				return ret;
 			}
 

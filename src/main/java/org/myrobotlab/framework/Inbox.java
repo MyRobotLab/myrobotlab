@@ -63,7 +63,7 @@ public class Inbox implements Serializable {
 
   public void add(Message msg) {
     if ((msg.historyList.contains(name))) {
-      log.error(String.format("* %s dumping duplicate message %s.%s msgid - %d %s", name, msg.name, msg.method, msg.msgId, msg.historyList));
+      log.error("* {} dumping duplicate message {}.{} msgid - {} {}", name, msg.name, msg.method, msg.msgId, msg.historyList);
       return;
     }
 
@@ -81,13 +81,13 @@ public class Inbox implements Serializable {
 
       if (msgBox.size() > maxQueue) {
         bufferOverrun = true;
-        log.warn(String.format("%s inbox BUFFER OVERRUN dumping msg size %d - %s", name, msgBox.size(), msg.method));
+        log.warn("{} inbox BUFFER OVERRUN dumping msg size {} - {}", name, msgBox.size(), msg.method);
       } else {
         msgBox.addFirst(msg);
         // Logging.logTime(String.format("inbox - %s size %d", name,
         // msgBox.size()));
         if (log.isDebugEnabled()) {
-          log.debug(String.format("%s.msgBox + 1 = %d", name, msgBox.size()));
+          log.debug("{}.msgBox + 1 = {}", name, msgBox.size());
         }
         msgBox.notifyAll(); // must own the lock
       }
@@ -149,7 +149,7 @@ public class Inbox implements Serializable {
           msgBox.wait(); // must own the lock
         } else {
           msg = msgBox.removeLast();
-          log.debug(String.format("%s.msgBox -1 %d", name, msgBox.size()));
+          log.debug("{}.msgBox -1 {}", name, msgBox.size());
 
           // --- sendBlocking support begin --------------------
           // TODO - possible safety check msg.status == Message.RETURN

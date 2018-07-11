@@ -198,7 +198,7 @@ public class HttpRequest {
       }
 
       data = bos.toByteArray();
-      log.info(String.format("read %d bytes", data.length));
+      log.info("read {} bytes", data.length);
 
       String s = new String(data);
       log.info(s);
@@ -273,7 +273,7 @@ public class HttpRequest {
     contentType = connection.getContentType();
     contentLength = connection.getContentLength();
 
-    log.info(String.format("contentType %s contentLength %d", contentType, contentLength));
+    log.info("contentType {} contentLength {}", contentType, contentLength);
 
     InputStream raw;
     byte[] data = null;
@@ -287,7 +287,7 @@ public class HttpRequest {
     byte[] tmp = new byte[initSize];
     int ret;
     while ((ret = in.read(tmp)) > 0) {
-      log.debug(String.format("read %d bytes", ret));
+      log.debug("read {} bytes", ret);
       bos.write(tmp, 0, ret);
     }
     /*
@@ -295,7 +295,7 @@ public class HttpRequest {
      */
 
     data = bos.toByteArray();
-    log.info(String.format("read %d bytes", data.length));
+    log.info("read {} bytes", data.length);
 
     try {
       if (in != null) {

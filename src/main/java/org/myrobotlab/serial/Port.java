@@ -85,7 +85,7 @@ public abstract class Port implements Runnable, SerialControl {
      */
 
     // TODO - suppose to remove listeners ???
-    log.info(String.format("closed port %s", portName));
+    log.info("closed port {}", portName);
 
   }
 
@@ -121,7 +121,7 @@ public abstract class Port implements Runnable, SerialControl {
        * lock.wait(); }
        */
     } else {
-      log.info(String.format("%s already listening", portName));
+      log.info("{} already listening", portName);
     }
     // Thread.sleep(100); - added connect retry logic in Arduino
     // taking out arbitrary sleeps
@@ -130,7 +130,7 @@ public abstract class Port implements Runnable, SerialControl {
   }
 
   public void open() throws IOException {
-    log.info(String.format("opening port %s", portName));
+    log.info("opening port {}", portName);
     isOpen = true;
   }
 
@@ -149,7 +149,7 @@ public abstract class Port implements Runnable, SerialControl {
      * lock.notifyAll(); }
      */
 
-    log.info(String.format("listening on port %s", portName));
+    log.info("listening on port {}", portName);
     listening = true;
     Integer newByte = -1;
     try {
@@ -178,11 +178,11 @@ public abstract class Port implements Runnable, SerialControl {
         }
         // log.info(String.format("%d",newByte));
       }
-      log.info(String.format("%s no longer listening - last byte %d ", portName, newByte));
+      log.info("{} no longer listening - last byte {} ", portName, newByte);
     } catch (InterruptedException x) {
-      log.info(String.format("InterruptedException %s stopping ", portName));
+      log.info("InterruptedException {} stopping ", portName);
     } catch (InterruptedIOException c) {
-      log.info(String.format("InterruptedIOException %s stopping ", portName));
+      log.info("InterruptedIOException {} stopping ", portName);
     } catch (Exception e) {
       Logging.logError(e);
     } finally {
@@ -191,7 +191,7 @@ public abstract class Port implements Runnable, SerialControl {
       /*
        * if (closed != null){ closed.countDown(); }
        */
-      log.info(String.format("stopped listening on %s", portName));
+      log.info("stopped listening on {}", portName);
     }
   }
 

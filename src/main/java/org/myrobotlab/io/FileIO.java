@@ -1114,7 +1114,7 @@ public class FileIO {
 
 		String filename = String.format(gluePaths("/resource/", src));
 
-		log.info(String.format("looking for %s", filename));
+		log.info("looking for {}", filename);
 		InputStream isr = null;
 		if (isJar()) {
 			isr = FileIO.class.getResourceAsStream(filename);
@@ -1129,7 +1129,7 @@ public class FileIO {
 		byte[] data = null;
 		try {
 			if (isr == null) {
-				log.error(String.format("can not find resource [%s]", filename));
+				log.error("can not find resource [{}]", filename);
 				return null;
 			}
 			data = toByteArray(isr);

@@ -35,12 +35,12 @@ public class ApiMessages extends Api {
       Message msg = CodecUtils.fromJson(json, Message.class);
 
       if (msg == null) {
-        log.error(String.format("msg is null %s", json));
+        log.error("msg is null {}", json);
         return null;
       }
 
       if (sender == null) {
-        log.error(String.format("sender cannot be null for %s", ApiMessages.class.getSimpleName()));
+        log.error("sender cannot be null for {}", ApiMessages.class.getSimpleName());
         return null;
       }
 

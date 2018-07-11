@@ -31,7 +31,7 @@ public class IndexNode<T> {
       // build branches of tree
       String branch = key.substring(0, key.indexOf("."));
       String theRest = key.substring(key.indexOf(".") + 1);
-      log.info(String.format("adding branch %s", branch));
+      log.info("adding branch {}", branch);
       if (!node.branches.containsKey(branch)) {
         // log.debug(String.format("adding branch %s", branch));
         IndexNode<T> twig = new IndexNode<T>();
@@ -40,7 +40,7 @@ public class IndexNode<T> {
       buildTree(node.getNode(branch), theRest, value);
     } else {
       // add a leaf
-      log.debug(String.format("adding leaf %s=%s", key, value));
+      log.debug("adding leaf {}={}", key, value);
       node.branches.put(key, new IndexNode<T>(value));
     }
   }

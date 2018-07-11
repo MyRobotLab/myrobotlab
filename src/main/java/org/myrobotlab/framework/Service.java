@@ -300,7 +300,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       ServiceType st = (ServiceType) method.invoke(null);
       Map<String, ServiceReservation> peers = st.getPeers();
 
-      log.info(String.format("processing %s.getPeers(%s) will process %d peers", serviceClass, myKey, peers.size()));
+      log.info("processing {}.getPeers({}) will process {} peers", serviceClass, myKey, peers.size());
 
       // Breadth first recursion
       // Two loops are necessary - because recursion should not start
@@ -318,7 +318,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         String fullKey = String.format("%s.%s", myKey, peerKey);
         ServiceReservation rna = dnaPool.get(fullKey);
 
-        log.info(String.format("(%s) - [%s]", fullKey, templatePeer.actualName));
+        log.info("({}) - [{}]", fullKey, templatePeer.actualName);
 
         if (rna == null) {
           // there is no reservation for this in the dnaPool (no
@@ -328,10 +328,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
           if (!templatePeer.isRoot) {
             templatePeer.actualName = String.format("%s.%s", myKey, templatePeer.actualName);
           }
-          log.info(String.format("dna adding new key %s %s %s %s", fullKey, templatePeer.actualName, templatePeer.fullTypeName, comment));
+          log.info("dna adding new key {} {} {} {}", fullKey, templatePeer.actualName, templatePeer.fullTypeName, comment);
           dna.put(fullKey, templatePeer);
         } else {
-          log.info(String.format("dna collision - replacing null values !!! %s", fullKey));
+          log.info("dna collision - replacing null values !!! {}", fullKey);
           StringBuffer sb = new StringBuffer();
           if (rna.actualName == null) {
             sb.append(String.format(" updating actualName to %s ", templatePeer.actualName));
@@ -478,14 +478,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @return true if successfully created
    */
   static public ServiceInterface createRootReserved(String key) {
-    log.info(String.format("createReserved %s ", key));
+    log.info("createReserved {}", key);
     ServiceReservation node = dnaPool.get(key);
     if (node != null) {
       ServiceReservation r = dnaPool.get(key);
       return Runtime.create(r.actualName, r.fullTypeName);
     }
 
-    log.error(String.format("createRootReserved can not create %s", key));
+    log.error("createRootReserved can not create %s", key);
     return null;
   }
 
@@ -657,7 +657,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   static public void reserveRoot(String key, String actualName, String simpleTypeName, String comment) {
-    log.info(String.format("reserved key %s -> %s %s %s", key, actualName, simpleTypeName, comment));
+    log.info("reserved key {} -> {} {} {}", key, actualName, simpleTypeName, comment);
     dnaPool.put(key, new ServiceReservation(key, actualName, simpleTypeName, comment));
   }
 
@@ -771,7 +771,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // see if incoming key is my "actual" name
     ServiceReservation sr = dnaPool.get(reservedKey);
     if (sr != null) {
-      log.info(String.format("found reservation exchanging reservedKey %s for actual name %s", reservedKey, sr.actualName));
+      log.info("found reservation exchanging reservedKey {} for actual name {}", reservedKey, sr.actualName);
       name = sr.actualName;
     } else {
       name = reservedKey;
@@ -816,19 +816,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
       for (int i = 0; i < nes.size(); ++i) {
         MRLListener entry = nes.get(i);
         if (entry.equals(listener)) {
-          log.debug(String.format("attempting to add duplicate MRLListener %s", listener));
+          log.debug("attempting to add duplicate MRLListener {}", listener);
           found = true;
           break;
         }
       }
       if (!found) {
-        log.debug(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+        log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
         nes.add(listener);
       }
     } else {
       ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
       notifyList.add(listener);
-      log.debug(String.format("adding addListener from %s.%s to %s.%s", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod));
+      log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
       outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
     }
   }
@@ -855,7 +855,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   public void addTask(String taskName, int intervalMs, int delay, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
-      log.warn(String.format("already have active task \"%s\"", taskName));
+      log.warn("already have active task \"{}\"", taskName);
       return;
     }
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
@@ -1006,7 +1006,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     Method[] methods = getDeclaredMethods();
     String[] ret = new String[methods.length];
 
-    log.info(String.format("getDeclaredMethodNames loading %d non-sub-routable methods", methods.length));
+    log.info("getDeclaredMethodNames loading {} non-sub-routable methods", methods.length);
     for (int i = 0; i < methods.length; ++i) {
       ret[i] = methods[i].getName();
     }
@@ -1041,7 +1041,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public Set<String> getMessageSet() {
     Set<String> ret = new TreeSet<String>();
     Method[] methods = getMethods();
-    log.info(String.format("getMessageSet loading %d non-sub-routable methods", methods.length));
+    log.info("getMessageSet loading {} non-sub-routable methods", methods.length);
     for (int i = 0; i < methods.length; ++i) {
       ret.add(methods[i].getName());
     }
@@ -1057,7 +1057,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
      */
     String[] ret = new String[methods.length];
 
-    log.info(String.format("getMethodNames loading %d non-sub-routable methods", methods.length));
+    log.info("getMethodNames loading {} non-sub-routable methods", methods.length);
     for (int i = 0; i < methods.length; ++i) {
       ret[i] = methods[i].getName();
     }
@@ -1201,7 +1201,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Class<?> theClass = Class.forName(serviceClass);
       Method method = theClass.getMethod("getPeers", String.class);
     } catch (Exception e) {
-      log.debug(String.format("%s does not have a getPeers", serviceClass));
+      log.debug("{} does not have a getPeers", serviceClass);
       return false;
     }
     return true;
@@ -1252,7 +1252,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     Object retobj = null;
 
     if (log.isDebugEnabled()) {
-      log.debug(String.format("--invoking %s.%s(%s) %s --", name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId));
+      log.debug("--invoking {}.{}({}) {} --", name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     }
 
     // recently added - to support "nameless" messages - concept you may get
@@ -1374,19 +1374,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
           // return
           return retobj;
         } catch (Exception e1) {
-          log.error(String.format("boom goes method %s", mC.getName()));
+          log.error("boom goes method {}", mC.getName());
           Logging.logError(e1);
         }
 
       }
 
       // TODO - build method cache map from errors
-      log.info(String.format("no such method %s.%s - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null)));
+      log.info("no such method {}.{} - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null));
 
       // TODO - optimize with a paramter TypeConverter & Map
       // c.getMethod - returns on EXACT match - not "Working" match
       Method[] allMethods = c.getMethods(); // ouch
-      log.info(String.format("searching through %d methods", allMethods.length));
+      log.info("searching through {} methods", allMethods.length);
 
       for (Method m : allMethods) {
         String mname = m.getName();
@@ -1409,14 +1409,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
           LRUMethodCache.getInstance().addCacheEntry(obj, method, paramTypes, m);
           return retobj;
         } catch (Exception e1) {
-          log.error(String.format("boom goes method %s", m.getName()));
+          log.error("boom goes method {}", m.getName());
           Logging.logError(e1);
         }
       }
 
-      log.error(String.format("did not find method - %s(%s)", method, CodecUtils.getParameterSignature(params)));
+      log.error("did not find method - {}({})", method, CodecUtils.getParameterSignature(params));
     } catch (Exception e) {
-      log.error(String.format("%s", e.getClass().getSimpleName()), e);
+      log.error("{}", e.getClass().getSimpleName(), e);
     }
 
     return retobj;
@@ -1471,7 +1471,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         copyShallowFrom(o, saved);
         return true;
       }
-      log.info(String.format("cfg file %s does not exist", filename));
+      log.info("cfg file {} does not exist", filename);
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -1547,9 +1547,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   @Override
   public void releasePeers() {
-    log.info(String.format("dna - %s", dnaPool.toString()));
+    log.info("dna - {}", dnaPool.toString());
     String myKey = getName();
-    log.info(String.format("releasePeers (%s, %s)", myKey, serviceClass));
+    log.info("releasePeers ({}, {})", myKey, serviceClass);
     try {
       // TODO: what the heck does this thing do?
       Class<?> theClass = Class.forName(serviceClass);
@@ -1559,7 +1559,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // FIXME - recursively release peers
 
     } catch (Exception e) {
-      log.debug(String.format("%s does not have a getPeers", serviceClass));
+      log.debug("{} does not have a getPeers", serviceClass);
     }
   }
 
@@ -1607,11 +1607,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
         MRLListener target = nel.get(i);
         if (target.callbackName.compareTo(serviceName) == 0) {
           nel.remove(i);
-          log.info(String.format("removeListener requested %s.%s to be removed", serviceName, outMethod));
+          log.info("removeListener requested {}.{} to be removed", serviceName, outMethod);
         }
       }
     } else {
-      log.error(String.format("removeListener requested %s.%s to be removed - but does not exist", serviceName, outMethod));
+      log.error("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
     }
   }
 
@@ -1961,7 +1961,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
-    log.info(String.format("subscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
+    log.info("subscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
     cm.send(Message.createMessage(this, topicName, "addListener", listener));
   }
@@ -1981,7 +1981,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
-    log.info(String.format("unsubscribe [%s/%s ---> %s/%s]", topicName, topicMethod, callbackName, callbackMethod));
+    log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
     cm.send(Message.createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
 

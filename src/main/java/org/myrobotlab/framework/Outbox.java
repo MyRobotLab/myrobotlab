@@ -93,7 +93,7 @@ public class Outbox implements Runnable, Serializable {
       // we warn if over 10 messages are in the queue - but we will still
       // process them
       if (msgBox.size() > maxQueue) {
-        log.warn(String.format("%s outbox BUFFER OVERRUN size %d", myService.getName(), msgBox.size()));
+        log.warn("{} outbox BUFFER OVERRUN size {}", myService.getName(), msgBox.size());
       }
       msgBox.addFirst(msg);
 
@@ -101,7 +101,7 @@ public class Outbox implements Runnable, Serializable {
       // msgBox.size()));
 
       if (log.isDebugEnabled()) {
-        log.debug(String.format("msg [%s]", msg.toString()));
+        log.debug("msg [{}]", msg.toString());
       }
       msgBox.notifyAll(); // must own the lock
     }
@@ -165,7 +165,7 @@ public class Outbox implements Runnable, Serializable {
         // get the value for the source method
         ArrayList<MRLListener> subList = notifyList.get(msg.sendingMethod);
         if (subList == null) {
-          log.debug(String.format("no static route for %s.%s ", msg.sender, msg.sendingMethod));
+          log.debug("no static route for {}.{} ", msg.sender, msg.sendingMethod);
           // This will cause issues in broadcasts
           continue;
         }
@@ -183,7 +183,7 @@ public class Outbox implements Runnable, Serializable {
         }
       } else {
         if (log.isDebugEnabled()) {
-          log.debug(String.format("%s/%s(%s)", msg.getName(), msg.method, CodecUtils.getParameterSignature(msg.data) + " notifyList is empty"));
+          log.debug("{}/{}({}) notifyList is empty", msg.getName(), msg.method, CodecUtils.getParameterSignature(msg.data));
         }
         continue;
       }

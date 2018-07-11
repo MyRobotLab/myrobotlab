@@ -134,7 +134,7 @@ public class Peers {
 
     type = CodecUtils.getServiceType(type);
     String fullkey = getPeerKey(key);
-    log.info(String.format("suggesting %s now as %s", fullkey, actualName));
+    log.info("suggesting {} now as {}", fullkey, actualName);
     put(key, getPeerKey(actualName), type, comment);
 
     return true;
@@ -143,7 +143,7 @@ public class Peers {
   public boolean suggestRootAs(String key, String actualName, String type, String comment) {
     type = CodecUtils.getServiceType(type);
     String fullkey = getPeerKey(key);
-    log.info(String.format("suggesting %s now as root %s", fullkey, actualName));
+    log.info("suggesting {} now as root {}", fullkey, actualName);
     put(key, actualName, type, comment);
 
     return true;

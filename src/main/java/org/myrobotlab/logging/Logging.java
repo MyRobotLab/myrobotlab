@@ -28,7 +28,7 @@ public abstract class Logging {
       startTimeMilliseconds = System.currentTimeMillis();
     }
 
-    log.info(String.format("performance clock :%d ms %s", System.currentTimeMillis() - startTimeMilliseconds, tag));
+    log.info("performance clock :{} ms {}", System.currentTimeMillis() - startTimeMilliseconds, tag);
 
   }
 

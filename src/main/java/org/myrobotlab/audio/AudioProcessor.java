@@ -84,7 +84,7 @@ public class AudioProcessor extends Thread {
   // FIXME - AudioData should have InputStream not File !
   public AudioData play(AudioData data) {
 
-    log.info(String.format("playing %s", data.toString()));
+    log.info("playing {}", data.toString());
     // FIXME - won't close filehandles :( .. dunno why
     // FileInputStream fis = null;
     // BufferedInputStream bis = null;

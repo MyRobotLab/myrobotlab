@@ -159,7 +159,7 @@ public class ServiceData implements Serializable {
         ServiceType serviceType = (ServiceType) method.invoke(null);
 
         if (!fullClassName.equals(serviceType.getName())) {
-          log.error(String.format("Class name %s not equal to the ServiceType's name %s", fullClassName, serviceType.getName()));
+          log.error("Class name {} not equal to the ServiceType's name {}", fullClassName, serviceType.getName());
         }
 
         sd.add(serviceType);
@@ -179,7 +179,7 @@ public class ServiceData implements Serializable {
         }
 
       } catch (Exception e) {
-        log.error(String.format("%s does not have a static getMetaData method", fullClassName));
+        log.error("{} does not have a static getMetaData method", fullClassName);
       }
     }
     log.info("================ generating serviceData.json end ================");

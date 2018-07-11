@@ -175,7 +175,7 @@ public class Module {
     if (translation.containsKey(s)) {
       b = translation.get(s);
     } else {
-      log.info(String.format("character %s not translated", c));
+      log.info("character {} not translated", c);
     }
     return b;
   }
@@ -207,7 +207,7 @@ public class Module {
   }
 
   public void blinkOff(String msg, int blinkNumber, int blinkDelay) {
-    log.info(String.format("blinkOff %s", msg));
+    log.info("blinkOff {}", msg);
     BlinkThread b = new BlinkThread();
     b.blinkNumber = blinkNumber;
     b.blinkDelay = blinkDelay;
@@ -294,7 +294,7 @@ public class Module {
       log.info("ledOff {}", Integer.toHexString(selector));
       device.write((byte) selector);
     } catch (Exception e) {
-      log.error(String.format("ledOff device %d error in writing", address.controller));
+      log.error("ledOff device {} error in writing", address.controller);
       Logging.logError(e);
     }
 
@@ -310,7 +310,7 @@ public class Module {
       log.info("ledOn {}", Integer.toHexString(selector));
       device.write((byte) selector);
     } catch (Exception e) {
-      log.error(String.format("ledOn device %d error in writing", address.controller));
+      log.error("ledOn device {} error in writing", address.controller);
       Logging.logError(e);
     }
     return selector;
@@ -330,7 +330,7 @@ public class Module {
       }
     }
 
-    log.info(String.format("%s %s", prefix, sb.toString()));
+    log.info("{} {}", prefix, sb.toString());
   }
 
   public int readSensor() {
@@ -375,7 +375,7 @@ public class Module {
       // ! for LED
 
     } catch (Exception e) {
-      log.error(String.format("writeDisplay device %d error in writing", address.controller));
+      log.error("writeDisplay device {} error in writing", address.controller);
       Logging.logError(e);
     }
 

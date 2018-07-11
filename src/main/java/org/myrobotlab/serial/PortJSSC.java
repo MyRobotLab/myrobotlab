@@ -152,7 +152,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
 
 	@Override
 	public boolean setParams(int rate, int dataBits, int stopBits, int parity) throws Exception {
-		log.debug(String.format("setSerialPortParams %d %d %d %d", rate, dataBits, stopBits, parity));
+		log.debug("setSerialPortParams {} {} {} {}", rate, dataBits, stopBits, parity);
 		try {
 			if (port == null || !port.isOpened()) {
 				log.error("port not opened or is null");
@@ -206,7 +206,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
 	 */
 	@Override
 	public void serialEvent(SerialPortEvent event) {
-		log.info(String.format("rxtx event on port %s", portName));
+		log.info("rxtx event on port {}", portName);
 
 		Integer newByte = -1;
 
@@ -219,8 +219,8 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
 				++stats.total;
 				if (stats.total % stats.interval == 0) {
 					stats.ts = System.currentTimeMillis();
-					log.error(String.format("===stats - dequeued total %d - %d bytes in %d ms %d Kbps", stats.total, stats.interval, stats.ts - stats.lastTS,
-							8 * stats.interval / (stats.ts - stats.lastTS)));
+					log.error("===stats - dequeued total {} - {} bytes in {} ms {} Kbps", stats.total, stats.interval, stats.ts - stats.lastTS,
+							8 * stats.interval / (stats.ts - stats.lastTS));
 					// publishQueueStats(stats);
 					stats.lastTS = stats.ts;
 				}
@@ -229,7 +229,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
 				// which is not what an Java InputStream is supposed to do..
 			}
 
-			log.info(String.format("%d", newByte));
+			log.info("{}", newByte);
 		} catch (Exception e) {
 			++rxErrors;
 			Logging.logError(e);
