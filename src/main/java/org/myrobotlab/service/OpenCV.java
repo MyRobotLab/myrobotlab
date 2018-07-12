@@ -870,6 +870,9 @@ public class OpenCV extends AbstractVideoSource {
     // for the mjpeg streamer frame grabber
     meta.addDependency("net.sf.jipcam", "jipcam", "0.9.1");
     meta.exclude("javax.servlet", "servlet-api");
+    // jipcam use commons-lang-1.0 it break marySpeech
+    meta.exclude("commons-lang", "commons-lang");
+    meta.addDependency("commons-lang", "commons-lang", "2.6");
 
 
     // TODO: should be something about yolo here too..
