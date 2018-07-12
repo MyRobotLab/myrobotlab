@@ -20,7 +20,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.Mat;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Inbox;
@@ -107,10 +107,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     LoggingFactory.init(Level.INFO);
     try {
       Solr solr = (Solr) Runtime.start("solr", "Solr");
-      
       solr.startEmbedded();
+      SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
       
-      Runtime.start("gui", "SwingGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
       doc.setField("id", "Doc1");
@@ -410,7 +409,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   // Attach Pattern stuff! 
   public void attach(OpenCV opencv) {
-  //  opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
+    opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
     opencv.addListener("publishClassification", getName(), "onClassification");
     opencv.addListener("publishYoloClassification", getName(), "onYoloClassification");
       
@@ -427,6 +426,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // TODO: enforce UTC, or move this to the solr schema to do.
       doc.setField("date", new Date());
       doc.addField("label", yolo.label);
+      doc.addField("frame_index", yolo.frameIndex);
       doc.addField("confidence", yolo.confidence);
       // TODO something better.. also include the ROI from the original image.
       doc.addField("boundingbox", yolo.toString());
@@ -449,18 +449,47 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     doc.setField("type", type);
     // TODO: enforce UTC, or move this to the solr schema to do.
     doc.setField("date", new Date());
+    doc.setField("frame_index", data.getFrameIndex());
+    doc.setField("selected_filter_name", data.getSelectedFilterName());
+    doc.setField("name", data.getName());
     // for now.. let's just do this.
-    for (String key : data.keySet()) {
-      IplImage img = data.get(key);
-      if (img == null) {
-        continue;
-      }
-      byte[] bytes = new byte[img.imageSize()];
-      // img.asByteBuffer().get(bytes);
-
-      String encoded = Base64.encodeBase64String(bytes);
-      doc.addField("bytes", encoded);
-    }
+    
+    //ByteBuffer jpg = data.getJPGByteBuffer(data.getSelectedFilter());
+    
+//    byte[] bytes = jpg.array();
+//    String encoded = Base64.encodeBase64String(bytes);
+//    doc.addField("bytes", encoded);
+    
+    
+//    for (String key : data.keySet()) {
+//      IplImage img = data.get(key);
+//      if (img == null) {
+//        continue;
+//      }
+//     // byte[] bytes = new byte[img.imageSize()];
+//      // img.asByteBuffer().get(bytes);
+//      
+//      //ByteBuffer buffer = img.asByteBuffer();
+//      if (false) {
+    
+        // TODO: I might need to downsample this.. TODO: better downsampling.
+        // assume frames per second is 30, sample once per second.
+        if (data.getFrameIndex() % 30 == 0) {
+          log.info("Saving snapshot..");
+          Mat m = new Mat(data.getImage());
+          long sz = (m.total() * m.channels());
+          byte[] bytes = new byte[(int) sz];
+          m.data().get(bytes);
+          String encoded = Base64.encodeBase64String(bytes);
+          doc.addField("bytes", encoded);
+          // bytes field isn't searchaable
+          doc.addField("has_bytes", true);
+          log.warn("Image Size:" + encoded.length());
+          m.close();
+          
+        }
+//      }
+//    }
     // add the document we just built up to solr so we can remember it!	  
     addDocument(doc);
     //  TODO: kw, why return anything here at all?! who would ever call this method and depend on the response?

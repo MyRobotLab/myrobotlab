@@ -450,7 +450,7 @@ public class Deeplearning4j extends Service {
     return predictions;
   }
   
-  public  ArrayList<YoloDetectedObject> classifyImageTinyYolo(IplImage iplImage) throws IOException {
+  public  ArrayList<YoloDetectedObject> classifyImageTinyYolo(IplImage iplImage, int frameIndex) throws IOException {
     // set up input and feed forward
 
     // TODO: what the heck? how do we know what these are?!
@@ -509,7 +509,7 @@ public class Deeplearning4j extends Service {
         int xRightTop = y2;
         
         Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel());
+        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel(), frameIndex);
         System.out.println("Yolo Object: " + yoloobj);
         results.add(yoloobj);
       }
