@@ -1453,7 +1453,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean load(Object o, String inCfgFileName) {
     String filename = null;
     if (inCfgFileName == null) {
-      filename = String.format("%s%s%s.json", cfgDir, File.separator, this.getName());
+      filename = String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
     } else {
       filename = inCfgFileName;
     }
@@ -1712,7 +1712,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean save() {
 
     try {
-      File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, getName()));
+      File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName())));
       // serializer.write(this, cfg);
       info("saving %s", cfg.getName());
 
