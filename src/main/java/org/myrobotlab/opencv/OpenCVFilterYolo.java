@@ -68,12 +68,18 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   public OpenCVFilterYolo() {
     super();
-    loadYolo();
+    // start classifier thread
+    Thread classifier = new Thread(this, "YoloClassifierThread");
+    classifier.start();
+    log.info("Yolo Classifier thread started : {}", this.name);
   }
 
   public OpenCVFilterYolo(String name) {
     super(name);
-    loadYolo();
+    // start classifier thread
+    Thread classifier = new Thread(this, "YoloClassifierThread");
+    classifier.start();
+    log.info("Yolo Classifier thread started : {}", this.name);
   }
 
   private void downloadYoloModel() {
@@ -146,8 +152,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   
   private void loadYolo() {
     // If the model isn't there, we should download it and cache it.
+    log.info("Staritng yolo download verification");
     downloadYoloModel();
+    log.info("Completed downloading yolo model");
     net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
+    log.info("Loaded yolo darknet model to opencv");
     //load the class names
     try {
       classNames = loadClassNames(darknetHome +  File.separator +  modelNames);
@@ -156,12 +165,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       log.warn("Error unable to load class names from file {}", modelNames);
       return;
     }
-    
     log.info("Done loading model..");
-    // start classifier thread
-    Thread classifier = new Thread(this, "YoloClassifierThread");
-    classifier.start();
-    log.info("Yolo Classifier thread started : {}", this.name);
+
   }
 
   
@@ -219,13 +224,17 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public void run() {
 
+
+    
+    loadYolo();
+    
     int count = 0;
     long start = System.currentTimeMillis();
     log.info("Starting the Yolo classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
       if (!pending) {
-       // log.info("Skipping frame");
+        log.debug("Skipping frame");
         try {
           // prevent thrashing of the cpu ...
           Thread.sleep(10);
@@ -239,7 +248,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // only classify this if we haven't already classified it.
       if (lastImage != null) {
           // lastResult = dl4j.classifyImageVGG16(lastImage);
-        //log.info("Doing yolo...");
+        log.debug("Doing yolo...");
         lastResult = yoloFrame(lastImage);
         //log.info("Yolo done.");
         // we processed, next object we'll pick up.
@@ -266,6 +275,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   private ArrayList<YoloDetectedObject> yoloFrame(IplImage frame) {
+    log.info("Starting yolo on frame...");
     // this is our list of objects that have been detected in a given frame.
     ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
@@ -278,10 +288,13 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // put our frame/input blob into the model.
    // log.info("input blob created");
     net.setInput(inputBlob, "data");
+    
+    log.info("Feed forward!");
    // log.info("Input blob set on network.");
     // ask for the detection_out layer i guess?  not sure the details of the forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
    // log.info("output detection matrix produced");
+    log.info("detection matrix computed");
     // iterate the rows of the detection matrix.
     for (int i = 0; i < detectionMat.rows(); i++) {
       Mat currentRow = detectionMat.row(i);
@@ -316,7 +329,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           int yRightTop = (int) ((y + height / 2) * inputMat.rows());
           log.info(label  + " (" + confidence + "%) [(" + xLeftBottom + "," + yLeftBottom + "),(" + xRightTop + "," + yRightTop + ")]");
           Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label);
+          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().frameIndex);
           yoloObjects.add(obj);
         }
       }
