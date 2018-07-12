@@ -165,5 +165,11 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Elsa","female","sv-se","sv-se"); // Swedish (Sweden)
     
   }
+  
+  @Override
+  public boolean isReady() {
+    // minimal check...
+    return getKey(VOICERSS_API_KEY) !=null && !getKey(VOICERSS_API_KEY).isEmpty() ? true : false;
+  }
 
 }
