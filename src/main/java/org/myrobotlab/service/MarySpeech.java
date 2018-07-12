@@ -257,7 +257,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
     // installComponentsAcceptLicense("bits2");
 
-    addVoice("Obadiah", "male", "en", "dfki-obadiah-hsmm");
+    addVoice("Obadiah", "male", "en-GB", "dfki-obadiah-hsmm");
     addVoice("Lucia", "female", "it", "istc-lucia-hsmm");
     addVoice("Emma", "female", "de", "bits1-hsmm");
     addVoice("Henry", "male", "en", "cmu-rms-hsmm");
