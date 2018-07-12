@@ -90,7 +90,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
 
     public String toString() {
-      return String.format("%s %s %s %s", name, gender, locale, voiceProvider);
+      // return String.format("%s %s %s %s", name, gender, locale, voiceProvider);
+      return String.format("%s %s %s", name, gender, locale);
     }
 
     public void setInstalled(boolean b) {
@@ -114,6 +115,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
         return null;
       }
       return locale.getDisplayLanguage();
+    }
+    
+    public Locale getLocal() {
+      return locale;
     }
 
     public String getLanguageCode() {
