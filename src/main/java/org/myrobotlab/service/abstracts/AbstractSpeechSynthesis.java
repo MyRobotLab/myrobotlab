@@ -787,6 +787,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public boolean setVoice(String name) {
     if (voices.containsKey(name)) {
       voice = voices.get(name);
+      broadcastState();
       return true;
     }
     return false;
