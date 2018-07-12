@@ -263,14 +263,14 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       data.set(pointsToPublish);
     }
 
-    log.debug(String.format("MAX_POINT_COUNT %d", maxPointCount));
-    log.debug(String.format("count %d", count.get()));
-    log.debug(String.format("features_found %s", ff.toString()));
-    log.debug(String.format("feature_errors %s", fe.toString()));
-    log.debug(String.format("cA %s", cA.toString()));
-    log.debug(String.format("cB %s", cB.toString()));
+    log.debug("MAX_POINT_COUNT {}", maxPointCount);
+    log.debug("count {}", count.get());
+    log.debug("features_found {}", ff.toString());
+    log.debug("feature_errors {}", fe.toString());
+    log.debug("cA {}", cA.toString());
+    log.debug("cB {}", cB.toString());
 
-    log.debug(String.format("valid coners %d", validCorners));
+    log.debug("valid coners {}", validCorners);
 
     // swap
     // TODO - release what imgA pointed to?

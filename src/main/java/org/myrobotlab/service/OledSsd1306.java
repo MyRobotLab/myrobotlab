@@ -223,7 +223,7 @@ public class OledSsd1306 extends Service implements I2CControl {
       buffer = new int[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8];
       buffer = SSD1306_96_16Data.clone();
     } else {
-      log.error(String.format("DisplayType %s not implemented.", displayType));
+      log.error("DisplayType {} not implemented.", displayType);
     }
   }
 
