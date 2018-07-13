@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -22,6 +23,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.polly.AmazonPolly;
 import com.amazonaws.services.polly.AmazonPollyClient;
 import com.amazonaws.services.polly.AmazonPollyClientBuilder;
+import com.amazonaws.services.polly.model.AmazonPollyException;
 import com.amazonaws.services.polly.model.DescribeVoicesRequest;
 import com.amazonaws.services.polly.model.DescribeVoicesResult;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
@@ -89,7 +91,8 @@ public class Polly extends AbstractSpeechSynthesis {
     for (int i = 0; i < awsVoices.size(); ++i) {
       com.amazonaws.services.polly.model.Voice awsImpl = awsVoices.get(i);
       log.info("{} voice {}", i, awsImpl);
-      addVoice(awsImpl.getName(), awsImpl.getGender(), awsImpl.getLanguageCode(), awsImpl);
+      // stripAccents : Voices with accent seem no worky ( anymore )
+      addVoice(StringUtils.stripAccents(awsImpl.getName()), awsImpl.getGender(), awsImpl.getLanguageCode(), awsImpl);
     }
   }
 
@@ -110,7 +113,7 @@ public class Polly extends AbstractSpeechSynthesis {
    * @return polly client
    */
   private AmazonPolly getPolly() {
-    
+
     String key = getKey(AMAZON_POLLY_USER_KEY);
     String secret = getKey(AMAZON_POLLY_USER_SECRET);
 
@@ -128,6 +131,7 @@ public class Polly extends AbstractSpeechSynthesis {
         }
 
         polly = AmazonPollyClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(defaultRegion).build();
+
       } catch (Exception e) {
         try {
           log.error("could not get client with keys supplied - trying default chain", e);
@@ -135,12 +139,23 @@ public class Polly extends AbstractSpeechSynthesis {
               .build();
         } catch (Exception e2) {
 
-          error("could not get Polly client - did you setKeys ? polly.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");         
+          error("could not get Polly client - did you setKeys ? polly.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");
           log.error("giving up", e2);
 
           polly = null;
           credentials = null;
         }
+      }
+    }
+    if (polly != null) {
+      // check for credentials OK, because this is not catch upper
+      try {
+        DescribeVoicesRequest describeVoicesRequest = new DescribeVoicesRequest();
+        polly.describeVoices(describeVoicesRequest);
+      } catch (AmazonPollyException e3) {
+        error("The keys are invalid");
+        polly = null;
+        credentials = null;
       }
     }
     return polly;
@@ -161,17 +176,17 @@ public class Polly extends AbstractSpeechSynthesis {
    */
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
-      getPolly();
-      Voice voice = getVoice();
-      // com.amazonaws.services.polly.model.Voice awsVoice = ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
-      SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName()).withOutputFormat("mp3");
-      SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
-      InputStream data = synthRes.getAudioStream();
-      byte[] d = FileIO.toByteArray(data);
-      // could just save it to file ...
-      // return new AudioData(data);
-      FileIO.toFile(audioData.getFileName(), d);     
-      return audioData;
+    getPolly();
+    Voice voice = getVoice();
+    // com.amazonaws.services.polly.model.Voice awsVoice = ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
+    SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName()).withOutputFormat("mp3");
+    SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
+    InputStream data = synthRes.getAudioStream();
+    byte[] d = FileIO.toByteArray(data);
+    // could just save it to file ...
+    // return new AudioData(data);
+    FileIO.toFile(audioData.getFileName(), d);
+    return audioData;
   }
 
   /**
@@ -196,6 +211,7 @@ public class Polly extends AbstractSpeechSynthesis {
     meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.5");
     meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.5");
     meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.118");
+    meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // force using httpClient service httpcomponents version
     meta.exclude("org.apache.httpcomponents", "httpcore");
     meta.exclude("org.apache.httpcomponents", "httpclient");
@@ -210,7 +226,6 @@ public class Polly extends AbstractSpeechSynthesis {
     meta.setCloudService(true);
     return meta;
   }
-  
 
   public static void main(String[] args) {
 
@@ -240,7 +255,7 @@ public class Polly extends AbstractSpeechSynthesis {
 
     // polly.setLanguage("de");
     log.info("polly voice is {}", polly.getVoice());
-    
+
     boolean b = true;
     if (b) {
       return;
@@ -263,7 +278,7 @@ public class Polly extends AbstractSpeechSynthesis {
     polly.speak("#THROAT01_M# hi! it works.");
 
     for (Voice voice : voices) {
-      polly.setVoice((String)voice.getVoiceProvider());
+      polly.setVoice((String) voice.getVoiceProvider());
       String lang = voice.getLanguage();
       log.info("{} speaks {}", voice, lang);
 
@@ -339,5 +354,9 @@ public class Polly extends AbstractSpeechSynthesis {
     log.info("finished");
   }
 
+  @Override
+  public boolean isReady() {
+    return polly != null ? true : false;
+  }
 
 }
