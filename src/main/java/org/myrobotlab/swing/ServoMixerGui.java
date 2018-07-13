@@ -1,6 +1,7 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,12 +10,10 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -27,6 +26,8 @@ import org.myrobotlab.service.ServoMixer;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
+
+import com.jidesoft.swing.JideLabel;
 
 public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeListener, MouseListener {
   
@@ -57,14 +58,16 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       // TODO: create a better single servo control panel here.
       
       JPanel servoMiniControl = new JPanel();
-      servoMiniControl.setLayout(new BoxLayout(servoMiniControl, BoxLayout.Y_AXIS));
-      JLabel servoLabel = new JLabel(sc.getName());
+      // servoMiniControl.setLayout(new BoxLayout(servoMiniControl, BoxLayout.Y_AXIS));
+      servoMiniControl.setLayout(new BorderLayout());
+      // TODO: make this lable render vertically
+      JideLabel servoLabel = new JideLabel(sc.getName());
+      servoLabel.setOrientation(JideLabel.VERTICAL);
       JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, (int)(sc.getPos()));
       servoSlider.setName(sc.getName());
       servoSlider.addChangeListener(this);
-
-      servoMiniControl.add(servoLabel);
-      servoMiniControl.add(servoSlider);
+      servoMiniControl.add(servoSlider, BorderLayout.PAGE_START);
+      servoMiniControl.add(servoLabel, BorderLayout.PAGE_END);
       
       servoControlPanel.add(servoMiniControl);
       
