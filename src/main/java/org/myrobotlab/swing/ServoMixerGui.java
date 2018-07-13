@@ -1,0 +1,107 @@
+package org.myrobotlab.swing;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.List;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.ServoMixer;
+import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.interfaces.ServoControl;
+import org.slf4j.Logger;
+
+public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeListener, MouseListener {
+
+  private String boundServiceName;
+  
+  ServoMixer servoMixer;
+  
+  public ServoMixerGui(String boundServiceName, SwingGui myService) {
+    super(boundServiceName, myService);
+    this.boundServiceName = boundServiceName;
+    servoMixer = (ServoMixer) Runtime.getService(boundServiceName);
+    display.setLayout(new BorderLayout());
+    createServoGuiLayout();
+  }
+  
+  private void createServoGuiLayout() {
+    JPanel servoControlPanel = new JPanel();
+    servoControlPanel.setLayout(new FlowLayout());
+    List<ServoControl> servos = servoMixer.listAllServos();
+    for (ServoControl sc : servos) {
+      // TODO: create a better single servo control panel here.
+      JLabel servoLabel = new JLabel(sc.getName());
+      servoControlPanel.add(servoLabel);
+      JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, (int)(sc.getPos()));
+      servoSlider.setName(sc.getName());
+      servoControlPanel.add(servoSlider);
+      servoSlider.addChangeListener(this);
+    }
+    display.add(servoControlPanel);
+  }
+  
+  public final static Logger log = LoggerFactory.getLogger(ServoMixerGui.class.toString());
+  static final long serialVersionUID = 1L;
+  
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    // Object o = event.getSource();
+  }
+
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void mouseReleased(MouseEvent e) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void mouseEntered(MouseEvent e) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void mouseExited(MouseEvent e) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void stateChanged(ChangeEvent e) {
+    // update the position of a servo based on the update from the gui.
+    if (e.getSource() instanceof JSlider) {
+      JSlider slider = (JSlider)e.getSource();
+      // this is an update to the position of the slider.
+      log.info("{} moveTo {}", slider.getName(), slider.getValue());
+      // At this point we need to get the servo and move it to the new value
+      Servo s = (Servo)Runtime.getService(slider.getName());
+      if (s.isAttached() && s.isEnabled()) {
+        // TODO: how to handle the autoenable/disable mojo..
+        s.moveTo(slider.getValue());
+      } else {
+        // servo isn't attached don't bother
+        log.info("Servo not attached or enabled.");
+      }
+    }
+  }
+
+}
