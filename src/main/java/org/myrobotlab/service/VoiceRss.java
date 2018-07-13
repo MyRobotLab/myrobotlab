@@ -27,7 +27,6 @@
 package org.myrobotlab.service;
 
 import java.net.URLEncoder;
-import java.util.Locale;
 
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
