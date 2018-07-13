@@ -53,7 +53,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   public void startTracking() {
-    log.info(String.format("startTracking - starting new joystick input tracking thread %s_tracking", getName()));
+    log.info("startTracking - starting new joystick input tracking thread {}_tracking", getName());
     if (trackingThread != null) {
       stopTracking();
     }

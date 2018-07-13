@@ -453,7 +453,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     }
 
     controllerName = controller.getName();
-    log.info(String.format("%s attach %s", getName(), controllerName));
+    log.info("{} attach {}", getName(), controllerName);
 
     this.deviceBus = deviceBus;
     this.deviceAddress = deviceAddress;

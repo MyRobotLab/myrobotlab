@@ -567,4 +567,16 @@ public class OpenCVData implements Serializable {
 	public void put(String key) {
 		sources.put(key, null);
 	}
+
+  public String getName() {
+    return name;
+  }
+
+  public String getSelectedFilter() {
+    return selectedFilter;
+  }
+
+  public int getFrameIndex() {
+    return frameIndex;
+  }
 }

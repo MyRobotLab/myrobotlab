@@ -73,7 +73,7 @@ public class OpenCVFilterFfmpeg extends OpenCVFilter {
   void initRecorder(String filename) {
 
     try {
-      log.info(String.format("initRecorder %s", filename));
+      log.info("initRecorder {}", filename);
 
       // filename = "rtp"
       // filename = "rtmp://0.0.0.0:1888/video/test.flv";

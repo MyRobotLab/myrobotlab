@@ -230,7 +230,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     }
 
     controllerName = controller.getName();
-    log.info(String.format("%s attach %s", getName(), controllerName));
+    log.info("{} attach {}", getName(), controllerName);
 
     this.deviceBus = deviceBus;
     this.deviceAddress = deviceAddress;
