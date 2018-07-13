@@ -6,14 +6,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.myrobotlab.kinematics.Pose;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
@@ -23,10 +28,17 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeListener, MouseListener {
-
-  private String boundServiceName;
   
-  ServoMixer servoMixer;
+  public final static Logger log = LoggerFactory.getLogger(ServoMixerGui.class.toString());
+  static final long serialVersionUID = 1L;  
+  private final String boundServiceName;
+  private final ServoMixer servoMixer;
+  
+  JButton savePoseButton = new JButton("Save Pose");
+  JButton loadPoseButton = new JButton("Load Pose");
+  JTextField poseName = new JTextField("defaultPose", 16);
+  JPanel servoControlPanel = new JPanel();
+  JPanel poseControls = new JPanel();
   
   public ServoMixerGui(String boundServiceName, SwingGui myService) {
     super(boundServiceName, myService);
@@ -37,7 +49,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
   }
   
   private void createServoGuiLayout() {
-    JPanel servoControlPanel = new JPanel();
+    
     servoControlPanel.setLayout(new FlowLayout());
     List<ServoControl> servos = servoMixer.listAllServos();
     for (ServoControl sc : servos) {
@@ -49,15 +61,67 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       servoControlPanel.add(servoSlider);
       servoSlider.addChangeListener(this);
     }
-    display.add(servoControlPanel);
+    // add a control bar to the bottom
+    
+    poseControls.setLayout(new FlowLayout());
+    JLabel saveLabel = new JLabel("Save Pose");
+   
+
+    // 
+    poseControls.add(saveLabel);
+    poseControls.add(poseName);
+    poseControls.add(savePoseButton);
+    poseControls.add(loadPoseButton);
+    
+    // add callbacks
+    savePoseButton.addActionListener(this);
+    loadPoseButton.addActionListener(this);
+    
+    display.add(servoControlPanel, BorderLayout.PAGE_START);
+    display.add(poseControls, BorderLayout.PAGE_END);
   }
   
-  public final static Logger log = LoggerFactory.getLogger(ServoMixerGui.class.toString());
-  static final long serialVersionUID = 1L;
+  public void refreshPanel() {
+    
+    // first clear the dispaly?
+    display.remove(servoControlPanel);
+    display.remove(poseControls);
+    servoControlPanel.removeAll();
+    poseControls.removeAll();
+    // rebuild the gui.
+    createServoGuiLayout();
+    
+  }
   
   @Override
   public void actionPerformed(ActionEvent event) {
-    // Object o = event.getSource();
+    Object o = event.getSource();
+    if (o == savePoseButton) {
+      //
+      // TODO: get the list of selected servos to save
+      // for now. just all servos in the system
+      String name = poseName.getText();
+      List<ServoControl> scs = servoMixer.listAllServos();
+      try {
+        servoMixer.savePose(name, scs);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    } else if (o == loadPoseButton) {
+      //
+      String name = poseName.getText();
+      try {
+        Pose p = servoMixer.loadPose(name);
+        
+        servoMixer.moveToPose(p);
+        refreshPanel();
+        
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
@@ -100,6 +164,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       } else {
         // servo isn't attached don't bother
         log.info("Servo not attached or enabled.");
+        s.moveTo(slider.getValue());
       }
     }
   }
