@@ -148,7 +148,7 @@ public class Python extends Service {
       super(name);
       this.code = code;
     }
-    
+
     @Override
     public void run() {
       try {
@@ -160,22 +160,26 @@ public class Python extends Service {
         }
       } catch (Exception e) {
         String error = Logging.stackToString(e);
+        if (error.contains("KeyboardInterrupt")) {
+          warn("Python process killed !");
+          log.warn("Python process killed : {}", error);
+        } else {
+          invoke("publishStatus", Status.error(e));
 
-        invoke("publishStatus", Status.error(e));
-
-        String filtered = error;
-        filtered = filtered.replace("'", "");
-        filtered = filtered.replace("\"", "");
-        filtered = filtered.replace("\n", "");
-        filtered = filtered.replace("\r", "");
-        filtered = filtered.replace("<", "");
-        filtered = filtered.replace(">", "");
-        if (interp != null) {
-          interp.exec(String.format("print '%s'", filtered));
-        }
-        Logging.logError(e);
-        if (filtered.length() > 40) {
-          filtered = filtered.substring(0, 40);
+          String filtered = error;
+          filtered = filtered.replace("'", "");
+          filtered = filtered.replace("\"", "");
+          filtered = filtered.replace("\n", "");
+          filtered = filtered.replace("\r", "");
+          filtered = filtered.replace("<", "");
+          filtered = filtered.replace(">", "");
+          if (interp != null) {
+            interp.exec(String.format("print '%s'", filtered));
+          }
+          Logging.logError(e);
+          if (filtered.length() > 40) {
+            filtered = filtered.substring(0, 40);
+          }
         }
 
       } finally {
@@ -431,7 +435,7 @@ public class Python extends Service {
       PIThread interpThread = new PIThread(name, code);
       interpThread.start();
       interpThreads.put(name, interpThread);
-      
+
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -475,10 +479,10 @@ public class Python extends Service {
     }
     try {
       if (!blocking) {
-    	String name = String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount);
-    	PIThread interpThread = new PIThread(name , code);
+        String name = String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount);
+        PIThread interpThread = new PIThread(name, code);
         interpThread.start();
-        interpThreads.put(name, interpThread);        
+        interpThreads.put(name, interpThread);
       } else {
         interp.exec(code);
       }
@@ -677,25 +681,24 @@ public class Python extends Service {
     }
     log.info("started python {}", getName());
   }
-  
+
   @Override
   public void releaseService() {
-	  super.releaseService();
-	  stop();
-	  if (interp != null) {
-	      // PySystemState.exit(); // the big hammar' throws like Thor
-	      interp.cleanup();
-	      interp = null;
-	    }
+    super.releaseService();
+    stop();
+    if (interp != null) {
+      // PySystemState.exit(); // the big hammar' throws like Thor
+      interp.cleanup();
+      interp = null;
+    }
 
-	    
-	    if (inputQueueThread != null) {
-	      inputQueueThread.interrupt();
-	      inputQueueThread = null;
-	    }
+    if (inputQueueThread != null) {
+      inputQueueThread.interrupt();
+      inputQueueThread = null;
+    }
 
-	    thread.interruptAllThreads();
-	    Py.getSystemState()._systemRestart = true;
+    thread.interruptAllThreads();
+    Py.getSystemState()._systemRestart = true;
   }
 
   /**
@@ -704,17 +707,15 @@ public class Python extends Service {
    * @return
    */
   public boolean stop() {
-	  log.info("stopping all scripts");
-	  for (PIThread pt : interpThreads.values()) {		  
-		  if (pt.isAlive()) {
-			  pt.interrupt();
-		  }
-	  }
-	  interpThreads.clear();
-	  return false;
+    log.info("stopping all scripts");
+    for (PIThread pt : interpThreads.values()) {
+      if (pt.isAlive()) {
+        pt.interrupt();
+      }
+    }
+    interpThreads.clear();
+    return false;
   }
-  
- 
 
   /**
    * stops threads releases interpreter
@@ -735,8 +736,6 @@ public class Python extends Service {
 
       log.info("{}", test.toURI().toURL());
       log.info("{}", example.toURI().toURL());
-      
-      
 
       // Runtime.start("gui", "SwingGui");
       // String f = "C:\\Program Files\\blah.1.py";
