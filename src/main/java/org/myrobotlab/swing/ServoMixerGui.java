@@ -9,6 +9,7 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -54,12 +55,19 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
     List<ServoControl> servos = servoMixer.listAllServos();
     for (ServoControl sc : servos) {
       // TODO: create a better single servo control panel here.
+      
+      JPanel servoMiniControl = new JPanel();
+      servoMiniControl.setLayout(new BoxLayout(servoMiniControl, BoxLayout.Y_AXIS));
       JLabel servoLabel = new JLabel(sc.getName());
-      servoControlPanel.add(servoLabel);
       JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, (int)(sc.getPos()));
       servoSlider.setName(sc.getName());
-      servoControlPanel.add(servoSlider);
       servoSlider.addChangeListener(this);
+
+      servoMiniControl.add(servoLabel);
+      servoMiniControl.add(servoSlider);
+      
+      servoControlPanel.add(servoMiniControl);
+      
     }
     // add a control bar to the bottom
     
