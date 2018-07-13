@@ -199,12 +199,12 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   public void stopListening() {
     log.debug("Stop listening event seen.");
     if (this.autoListen && !this.speaking) {
-      // bug if there is multiple chrome tabs OR no internet..., we disbale autolisten
+      // bug if there is multiple chrome tabs OR no internet..., we disable autolisten
       if (System.currentTimeMillis() - lastAutoListenEvent > 300) {
         startListening();
       } else {
         if (listening) {
-          error("WebkitSpeech : autoListen disabled, please close zombie tabs and Internet connection");
+          error("autoListen disabled, please close zombie tabs and check Internet connection");
           setAutoListen(false);
         }
       }
