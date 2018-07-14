@@ -190,27 +190,27 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   @Override
   public void startListening() {
-    log.info("Start listening event seen.");
+    log.debug("Start listening event seen.");
     this.listening = true;
     broadcastState();
   }
 
   @Override
   public void stopListening() {
-    log.info("Stop listening event seen.");
+    log.debug("Stop listening event seen.");
     if (this.autoListen && !this.speaking) {
-      // bug if there is multiple chrome tabs, we disbale autolisten
-      if (System.currentTimeMillis() - lastAutoListenEvent > 50) {
+      // bug if there is multiple chrome tabs OR no internet..., we disable autolisten
+      if (System.currentTimeMillis() - lastAutoListenEvent > 300) {
         startListening();
       } else {
         if (listening) {
-          error("WebkitSpeech : TOO MANY EVENTS, autoListen disabled now, please close zombie tabs !");
+          error("autoListen disabled, please close zombie tabs and check Internet connection");
           setAutoListen(false);
         }
       }
       lastAutoListenEvent = System.currentTimeMillis();
     } else {
-      log.info("micNotListening");
+      log.debug("micNotListening");
       listening = false;
     }
     broadcastState();
