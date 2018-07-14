@@ -351,8 +351,12 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     solrDoc.setField("id", doc.getId());
     for (String fieldName : doc.getFields()) {
       for (Object o : doc.getField(fieldName)) {
-        if (o != null)
+        if (o != null) {
           solrDoc.addField(fieldName, o);
+          // let's implicitly add a text_en version of the field.
+          // TODO: understand language detection on the field and dynamically specficy which field type to use.
+          solrDoc.addField(fieldName + "_txt_en", o);
+        }
       }
     }
     return solrDoc;
