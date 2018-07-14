@@ -492,7 +492,7 @@
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
   
   <!-- the catch all field.. -->
-    <dynamicField name="*" type="strings" indexed="true" stored="true"/>
+  <dynamicField name="*" type="strings" indexed="true" stored="true"/>
   <copyField source="title" dest="title_str" maxChars="256"/>
   <copyField source="content" dest="content_str" maxChars="256"/>
 </schema>
