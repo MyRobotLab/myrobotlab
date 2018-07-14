@@ -307,7 +307,7 @@
   <dependency>
     <groupId>inmoov.fr</groupId>
     <artifactId>inmoov</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
@@ -928,7 +928,7 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-data</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
