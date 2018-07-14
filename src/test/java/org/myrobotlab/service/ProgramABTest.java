@@ -106,7 +106,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // Response resp1 = testService.getResponse(session, "SET FOO BAR");
     // System.out.println(resp1.msg);
     Response resp = testService.getResponse(username, "LEARN AAA IS BBB");
-    System.out.println(resp.msg);
+    //System.out.println(resp.msg);
     resp = testService.getResponse(username, "WHAT IS AAA");
     assertEquals("BBB", resp.msg);
   }
@@ -117,7 +117,7 @@ public class ProgramABTest extends AbstractServiceTest {
     resp = testService.getResponse(username, "SETTEST MOUSE");
     assertEquals("An Animal.", resp.msg);
     resp = testService.getResponse(username, "SETTEST DOG");
-    System.out.println(resp.msg);
+    //System.out.println(resp.msg);
     assertEquals("An Animal.", resp.msg);
   }
 
@@ -170,13 +170,20 @@ public class ProgramABTest extends AbstractServiceTest {
     ArrayList<String> res = testService.listPatterns(botname);
     assertTrue(res.size() > 0);
   }
+
+  
+  public void addCategoryTest() {
+    testService.addCategory("BOOG", "HOWDY");
+    Response resp = testService.getResponse(username, "BOOG");
+    assertTrue(resp.msg.equals("HOWDY"));
+  }
   
   // the pannous service seems borked at the moment due to bad ssl, and maybe
   // other stuff..  kwatters: I recommend we build our own service that does this stuff
   // @Test
   public void pannousTest() {
     Response resp = testService.getResponse(username, "SHOW ME INMOOV");
-    System.out.println(resp);
+    // System.out.println(resp);
     boolean contains = resp.msg.contains("http");
     assertTrue(contains);
   }
@@ -197,6 +204,7 @@ public class ProgramABTest extends AbstractServiceTest {
     listPatternsTest();
     // This following test is known to be busted..
     // pannousTest();
+    addCategoryTest();
   }
 
 
