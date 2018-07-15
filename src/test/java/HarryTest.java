@@ -1,57 +1,140 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 
+import org.alicebot.ab.Category;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.service.Solr;
+import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.WebkitSpeechRecognition;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
+import org.myrobotlab.service.HtmlFilter;
+import org.myrobotlab.service.InMoov;
+import org.myrobotlab.service.MarySpeech;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.ProgramABTest;
+import org.myrobotlab.service.RSSConnector;
 import org.slf4j.Logger;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.ServoMixer;
 
 @Ignore
 public class HarryTest {
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
   
+  //@Test
+  public void testDynamic() throws SolrServerException, IOException, InterruptedException {
+    
+    LoggingFactory.init("INFO");
+    // create memory
+    Solr solr = (Solr)Runtime.start("solr", "Solr");
+    solr.startEmbedded();
+    createAIML();
+    ProgramAB harry = (ProgramAB)Runtime.start("harry", "ProgramAB");
+    harry.startSession("testbots",  "username", "test");
+
+    goLearnStuff(solr, harry);
+    
+    Thread.sleep(1000);
+    
+    Runtime.start("gui", "SwingGui");
+    
+    
+    System.out.println("Any key");
+    System.in.read();
+    
+  }
+
+
+  private void goLearnStuff(Solr solr, ProgramAB harry) throws InterruptedException {
+    String rssUrl = "http://feeds.reuters.com/reuters/scienceNews";
+    RSSConnector rss = (RSSConnector)Runtime.start("rss", "RSSConnector");
+    rss.setRssUrl(rssUrl);
+    rss.addDocumentListener(solr);
+    
+    Thread.sleep(1000);
+    
+    rss.startCrawling();
+
+    // run a search and add a new category to programab. 
+    queryToCategory(solr, harry);
+    // TODO: pass the category in directly.
+  }
+  
+  
+  public void queryToCategory(Solr solr, ProgramAB ab) {
+    
+    SolrQuery qr = new SolrQuery("+title:* +description:*");
+    QueryResponse resp = solr.search(qr);
+    
+    // we want to find the most recent docs from solr
+    
+    String pattern = "NEWS";
+    
+    StringBuilder templateBuilder = new StringBuilder();
+    
+    // now iterate over the docs and build a response
+    // we'll set up a random response for AIML
+    String preamble = "In the news ";
+    templateBuilder.append(preamble);
+    templateBuilder.append("<random>");
+    for (SolrDocument d : resp.getResults()) {
+      if (d.getFieldNames().contains("title")) {
+        Object title = d.getFirstValue("title");
+        templateBuilder.append("<li>");
+        // get the title of the result.
+        templateBuilder.append(title.toString().trim());
+        templateBuilder.append("</li>");
+        // if the last reponse was title.. the tell me more should return the description.
+        if (d.getFirstValue("description") != null) {
+          ab.addCategory("TELL ME MORE", d.getFirstValue("description").toString().trim(), preamble + title.toString());
+        }
+      }
+    }
+    templateBuilder.append("</random>");
+    ab.addCategory(pattern, templateBuilder.toString());
+    
+    // now we want to build a category for just that
+    
+    
+    
+  }
+  
   @Test
-  public void testHarry() throws InterruptedException, IOException, SolrServerException {
+  public void testHarry() throws Exception {
 
     LoggingFactory.init("WARN");
     // create memory
     Solr solr = (Solr)Runtime.start("solr", "Solr");
     solr.startEmbedded();
     createAIML();
-    ProgramAB ab = (ProgramAB)Runtime.start("ab", "ProgramAB");
-    ab.startSession("testbots",  "username", "test");
-
+    ProgramAB harry = (ProgramAB)Runtime.start("harry", "ProgramAB");
+    harry.startSession("testbots",  "username", "test");
+    
     // start the opencv service with the yolo filter.
     OpenCV cv = (OpenCV)Runtime.start("cv", "OpenCV");
     OpenCVFilterYolo yoloFilter = new OpenCVFilterYolo("yolo");
     cv.addFilter(yoloFilter);
 
     // attach the memory to the programab and the opencv service
-    solr.attach(ab);
+    solr.attach(harry);
     solr.attach(cv);
 
-    // Turn on the camera
-    cv.capture();
 
     // watch for 5 seconds..
-    Thread.sleep(5000);
+   //  Thread.sleep(5000);
     // ask program ab something
-
     
     SolrQuery mostRecentObjectQuery = new SolrQuery("*:*");
     mostRecentObjectQuery.setSort("index_date", ORDER.desc);
@@ -68,10 +151,70 @@ public class HarryTest {
    //Response qresp = ab.getResponse("What have you seen?");
 
    Runtime.start("gui", "SwingGui");
+  //  Runtime.start("webgui", "WebGui");
     
-   // System.out.println("Any key");
+   
+   // let's add some speech synthesis
+   MarySpeech mouth = (MarySpeech)Runtime.createAndStart("mouth", "MarySpeech");
+   mouth.setVoice("cmu-bdl-hsmm");
+   
+   
+   // let's add some speech recognition
+   
+   WebkitSpeechRecognition ear = (WebkitSpeechRecognition)Runtime.createAndStart("i01.ear", "WebkitSpeechRecognition");
+   // ear.addListener("publishText", python.name, "heard");
+   ear.addMouth(mouth);
+
+   HtmlFilter htmlfilter = (HtmlFilter) Runtime.createAndStart("htmlfilter", "HtmlFilter");
+   // #####################################################################
+   // # MRL Routing webkitspeechrecognition/ear -> program ab -> htmlfilter -> mouth
+   // ######################################################################
+   ear.addTextListener(harry);
+   harry.addTextListener(htmlfilter);
+   htmlfilter.addTextListener(mouth);
+   
+   
+   // TODO: start the virtual arudinos 
+   String leftPort = "COM99";
+   String rightPort = "COM100";
+   setupVirtualArduinos(leftPort, rightPort);
+   
+   InMoov i01 = (InMoov)Runtime.createAndStart("i01", "InMoov");
+   i01.setMute(true);
+   i01.startAll(leftPort, rightPort);
+   //if startInMoov:
+   //      i01.startAll(leftPort, rightPort)
+   //    else:
+   i01.mouth = mouth;
+           
+   
+   solr.attachAllInboxes();
+   solr.attachAllOutboxes();
+   
+   ServoMixer servoMixer = (ServoMixer)Runtime.start("servoMixer", "ServoMixer");
+   
+   
+   // lastly turn on the camera
+   // Turn on the camera
+   // cv.capture();
+
+   goLearnStuff(solr, harry);
+
+   
+   
+   System.out.println("Any key");
    System.in.read();
 
+  }
+
+  private void setupVirtualArduinos(String leftPort, String rightPort) throws IOException {
+    // TODO Auto-generated method stub
+    VirtualArduino leftVirtual = (VirtualArduino) Runtime.start("leftVirtual", "VirtualArduino");
+    leftVirtual.getSerial().setTimeout(100);
+    leftVirtual.connect(leftPort);
+    VirtualArduino rightVirtual = (VirtualArduino) Runtime.start("rightVirtual", "VirtualArduino");
+    rightVirtual.getSerial().setTimeout(100);
+    rightVirtual.connect(rightPort);
   }
 
   private void printResponse(QueryResponse res) {
@@ -91,31 +234,37 @@ public class HarryTest {
   
   private void createAIML() throws IOException {
     // TODO Auto-generated method stub
-
     // we should create a bot directory, and put sme aiml in it.
     // also maybe config..
-    
     // TODO: pick a test subdirectory
     File f = new File ("testbots/bots/test/aiml");
     f.mkdirs();
-    
     File aimlFile = new File("testbots/bots/test/aiml/test.aiml");
     FileWriter fw = new FileWriter(aimlFile);
-    
     // create test aiml
+    String pattern = "*";
+    String template = "ok";
+    String category = createCategory(pattern, template);
+    
     StringBuilder b = new StringBuilder();
     b.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><aiml>");
-    b.append("<category>");
-    b.append("  <pattern>*</pattern>");
-    b.append("  <template>Ok.</template>");
-    b.append("</category>");
+    b.append(category);
     b.append("</aiml>");
-    
     fw.write(b.toString());
-
     fw.close();
-    
-    
-    
+  }
+  
+  // TODO: make some generic aiml tools that can be reused 
+  private String createCategory(String pattern, String template) {
+    StringBuilder b = new StringBuilder();
+    b.append("<category>");
+    b.append("  <pattern>");
+    b.append(pattern);
+    b.append("</pattern>");
+    b.append("  <template>");
+    b.append(template);
+    b.append("</template>");
+    b.append("</category>");
+    return b.toString();
   }
 }
