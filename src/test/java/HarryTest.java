@@ -1,19 +1,15 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
 
-import org.alicebot.ab.Category;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.service.Solr;
-import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.WebkitSpeechRecognition;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
@@ -24,9 +20,12 @@ import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.ProgramABTest;
 import org.myrobotlab.service.RSSConnector;
-import org.slf4j.Logger;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.ServoMixer;
+import org.myrobotlab.service.Solr;
+import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.WebkitSpeechRecognition;
+import org.slf4j.Logger;
 
 @Ignore
 public class HarryTest {
@@ -98,7 +97,7 @@ public class HarryTest {
         templateBuilder.append("</li>");
         // if the last reponse was title.. the tell me more should return the description.
         if (d.getFirstValue("description") != null) {
-          ab.addCategory("TELL ME MORE", d.getFirstValue("description").toString().trim(), preamble + title.toString());
+          // ab.addCategory("TELL ME MORE", d.getFirstValue("description").toString().trim(), preamble + title.toString());
         }
       }
     }
