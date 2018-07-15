@@ -314,8 +314,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   String display(Voice voice) {
     StringBuilder display = new StringBuilder();
     display.append(voice.getName());
-    // display.append((voice.getLanguageCode() == null) ? "" : " " + voice.getLanguageCode());
-    display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal());
+    display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal().toLanguageTag());    
     display.append((voice.getGender() == null) ? "" : " " + voice.getGender());
     return display.toString();
   }
