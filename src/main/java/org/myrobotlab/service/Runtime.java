@@ -2263,7 +2263,7 @@ public class Runtime extends Service implements MessageListener {
   
   public static void setLanguage(String language) {
 	  Runtime runtime = Runtime.getInstance();
-	  runtime.setLocale(new Locale(language));
+	  runtime.setLocale(new Locale(language)); 
   }
 
   public void setLocale(String language) {
@@ -2279,6 +2279,7 @@ public class Runtime extends Service implements MessageListener {
   }
   
   public void setLocale(Locale locale) {
+    // the local field is used for display & serialization
 	  this.locale = locale;
 	  Locale.setDefault(locale);
 	   /* I don't believe these are necessary 
@@ -2367,6 +2368,10 @@ public class Runtime extends Service implements MessageListener {
    */
   static public Security getSecurity() {
 	  return Runtime.getInstance().security;
+  }
+
+  public String getLocaleTag() {
+    return locale.toLanguageTag();
   }
  
 }

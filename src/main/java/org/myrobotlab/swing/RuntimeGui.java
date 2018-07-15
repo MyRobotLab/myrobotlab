@@ -320,8 +320,10 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     releaseMenuItem.addActionListener(this);
     releaseMenuItem.setIcon(Util.getScaledIcon(Util.getImage("release.png"), 0.50));
     popup.add(releaseMenuItem);
+    
+    Runtime runtime = Runtime.getInstance();
 
-    setTitle(myRuntime.getPlatform().toString());
+    setTitle(String.format("%s %s", runtime.getPlatform().toString(), runtime.getLocaleTag()));
 
     JPanel flow = new JPanel();
     flow.add(createCategories());
