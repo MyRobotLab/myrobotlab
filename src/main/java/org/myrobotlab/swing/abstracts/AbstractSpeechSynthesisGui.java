@@ -310,6 +310,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
   // TODO - add country flag instead of code - could add language name (it comes
   // from locale)
+  // FIXME - display Locale as en-GB vs en_GB
   String display(Voice voice) {
     StringBuilder display = new StringBuilder();
     display.append(voice.getName());
