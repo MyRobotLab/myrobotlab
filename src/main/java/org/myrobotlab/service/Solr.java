@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,11 +71,19 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   
   
   public void startEmbedded() throws SolrServerException, IOException {
-
-
-    // create and load the cores
-    Path solrHome = Paths.get("src/main/resources/resource/Solr");
+    File resDir = new File("src/main/resources/resource/Solr");
+    if (!resDir.exists()) {
+      // we're using the "Solr" directory
+      startEmbedded("Solr");
+    } else {
+      startEmbedded("src/main/resources/resource/Solr");
+    }
     
+  }
+  
+  public void startEmbedded(String path) throws SolrServerException, IOException {
+    // create and load the cores
+    Path solrHome = Paths.get(path);
     System.out.println(solrHome.toFile().getAbsolutePath());
     Path solrXml = solrHome.resolve("solr.xml");
     CoreContainer cores = CoreContainer.createAndLoad(solrHome, solrXml);
@@ -405,9 +414,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     meta.addCategory("data", "search");
     meta.addDependency("org.apache.solr", "solr-core", "7.2.1");
     meta.addDependency("org.apache.solr", "solr-solrj", "7.2.1");
+    
     meta.addDependency("commons-io", "commons-io", "2.5");
+    meta.addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
     // Dependencies issue
-    meta.setAvailable(false);
+    meta.setAvailable(true);
     return meta;
   }
 
@@ -650,7 +661,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         doc.addField("history", message.historyList);
       }
     }
-    System.out.println("Data: " + message.data);
+    // System.out.println("Data: " + message.data);
     // TODO: now we need to introspect the array of objects and figure out how to index them!! gah..
     if (message.data != null) {
       for (Object o : message.data) {
