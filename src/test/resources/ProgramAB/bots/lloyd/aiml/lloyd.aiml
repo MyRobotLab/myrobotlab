@@ -147,4 +147,12 @@
 <category><pattern>MRLSRAIX</pattern>
 <template><sraix>foobar</sraix></template>
 </category>
+<category><pattern>OOBMRLSRAIX</pattern>
+<template>You are talking to <sraix><oob>
+      <mrl>
+        <service>lloyd</service>
+        <method>getCurrentBotName</method>
+      </mrl>
+    </oob></sraix></template>
+</category>
 </aiml>

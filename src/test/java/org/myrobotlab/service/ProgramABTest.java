@@ -191,11 +191,13 @@ public class ProgramABTest extends AbstractServiceTest {
   public void sraixTest() {
     Response resp = testService.getResponse(username, "MRLSRAIX");
     // System.out.println(resp);
-    boolean contains = resp.msg.contains("Not impl");
+    boolean contains = resp.msg.contains("foobar");
     assertTrue(contains);
-    
+    resp = testService.getResponse(username, "OOBMRLSRAIX");
+    // System.out.println(resp);
+    contains = resp.msg.contains("You are talking to lloyd");
+    assertTrue(contains);
   }
-  
   
   @Override
   public void testService() throws Exception {
