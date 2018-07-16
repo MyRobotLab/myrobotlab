@@ -188,6 +188,15 @@ public class ProgramABTest extends AbstractServiceTest {
     assertTrue(contains);
   }
 
+  public void sraixTest() {
+    Response resp = testService.getResponse(username, "MRLSRAIX");
+    // System.out.println(resp);
+    boolean contains = resp.msg.contains("Not impl");
+    assertTrue(contains);
+    
+  }
+  
+  
   @Override
   public void testService() throws Exception {
     // run each of the test methods.
@@ -205,6 +214,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // This following test is known to be busted..
     // pannousTest();
     addCategoryTest();
+    sraixTest();
   }
 
 

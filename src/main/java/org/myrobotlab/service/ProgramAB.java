@@ -27,6 +27,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
+import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -698,6 +699,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       bot = new Bot(botName, path);
     }
 
+    // Hijack all the SRAIX requests and implement them as a synchronous call to a service to 
+    // return a string response for programab...
+    MrlSraixHandler sraixHandler = new MrlSraixHandler();
+    bot.setSraixHandler(sraixHandler);
+    
     Chat chat = new Chat(bot);
     // for (Category c : bot.brain.getCategories()) {
     // log.info(c.getPattern());
@@ -896,7 +902,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.6-SNAPSHOT");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.7-SNAPSHOT");
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
