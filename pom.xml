@@ -935,7 +935,7 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.7-SNAPSHOT</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
