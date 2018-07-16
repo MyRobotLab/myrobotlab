@@ -737,18 +737,26 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     broadcastState();
   }
   
-  public void addCategory(String pattern, String template) {
+  public void addCategory(Category c) {
+    bot.brain.addCategory(c);
+  }
+  
+  public void addCategory(String pattern, String template, String that) {
+    log.info("Adding category {} to respond with {} for the that context {}", pattern, template, that);
     // TODO: expose that / topic / etc..
     /// TODO: what filename?!
     int activationCnt = 0;
-    String that = "*";
     String topic = "*";
     // TODO: what is this used for?
     String filename= "mrl_added.aiml";
     // clean the pattern
     pattern = pattern.trim().toUpperCase();
     Category c = new Category(activationCnt, pattern, that, topic, template, filename);
-    bot.brain.addCategory(c);
+    addCategory(c);
+  }
+
+  public void addCategory(String pattern, String template) {
+    addCategory(pattern, template, "*");
   }
   
   public void setPath(String path) {
