@@ -57,6 +57,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -71,7 +72,6 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
-import org.myrobotlab.opencv.OpenCVFrameGrabber;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
@@ -413,8 +413,6 @@ public class OpenCV extends AbstractVideoSource {
       capture(grabber);
   }
 
-  
-
   public static String getDefaultFrameGrabberType() {
     Platform platform = Runtime.getInstance().getPlatform();
     if (platform.isWindows()) {
@@ -423,8 +421,6 @@ public class OpenCV extends AbstractVideoSource {
       return "org.bytedeco.javacv.OpenCVFrameGrabber";
     }
   }
-  
-
   
   private FrameGrabber createFrameGrabber(String inputSource, Integer cameraIndex, String inputFile, String pipelineSelected, String grabberType, String format) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
     // inputSource = INPUT_SOURCE_IMAGE_FILE;
@@ -831,7 +827,7 @@ public class OpenCV extends AbstractVideoSource {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    String javaCvVersion = "1.4.1";  
+    String javaCvVersion = "1.4.2";  
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
     

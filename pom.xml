@@ -798,13 +798,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
