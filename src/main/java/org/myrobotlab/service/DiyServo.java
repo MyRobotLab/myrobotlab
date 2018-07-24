@@ -1230,6 +1230,27 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   }
 
+  @Override
+  public void removeServoEventListener(NameProvider service) {
+    isEventsEnabled = false;
+    removeListener("publishServoEvent", service.getName(), "onServoEvent");
+  }
+  
+  /**
+   * unsynchronize 2 sevos.  If the servo is running in sync already,
+   * this method will stop the synchronization
+   * @param args
+   * @throws InterruptedException
+   */
+  public void unsync(ServoControl sc) {
+    // remove
+    this.removeServoEventListener(this);    
+    sc.removeServoEventListener(sc);
+    
+    unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+  }
+
+
 
 
 }

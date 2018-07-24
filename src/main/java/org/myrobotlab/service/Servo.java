@@ -339,6 +339,12 @@ public class Servo extends Service implements ServoControl {
     addListener("publishServoEvent", service.getName(), "onServoEvent");
   }
 
+  @Override
+  public void removeServoEventListener(NameProvider service) {
+    isEventsEnabled = false;
+    removeListener("publishServoEvent", service.getName(), "onServoEvent");
+  }
+  
   public void addIKServoEventListener(NameProvider service) {
     isIKEventEnabled = true;
     addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
@@ -1313,6 +1319,20 @@ public class Servo extends Service implements ServoControl {
     this.addServoEventListener(this);
     sc.addServoEventListener(sc);
     subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+  }
+  
+  /**
+   * unsynchronize 2 sevos.  If the servo is running in sync already,
+   * this method will stop the synchronization
+   * @param args
+   * @throws InterruptedException
+   */
+  public void unsync(ServoControl sc) {
+    // remove
+    this.removeServoEventListener(this);    
+    sc.removeServoEventListener(sc);
+    
+    unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
   public static void main(String[] args) throws InterruptedException {

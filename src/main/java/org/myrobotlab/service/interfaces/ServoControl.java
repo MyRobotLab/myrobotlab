@@ -245,6 +245,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * synchronizing servos together e.g. leftEye.sync(rightEye)
    */
   public void sync(ServoControl sc);
+  
+  /**
+   * unsync a servo
+   * @param sc
+   */
+  public void unsync(ServoControl sc);
 
   /**
    * @param rest
@@ -329,6 +335,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   void addServoEventListener(NameProvider service);
 
+  void removeServoEventListener(NameProvider service);
+
   public void enable();
 
   public void disable();
@@ -336,4 +344,5 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   String getControllerName();
 
   boolean isAttached();
+  
 }
