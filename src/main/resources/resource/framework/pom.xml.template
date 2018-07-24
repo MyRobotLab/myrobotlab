@@ -283,7 +283,14 @@
                     <fileset>
                       <directory>.myrobotlab</directory>
                       <followSymlinks>false</followSymlinks>
-                    </fileset>
+				    </fileset>
+					<fileset>
+						<directory>src/main/resources/resource/framework</directory>
+						<includes>
+							<include>**/serviceData.json</include>
+						</includes>
+						<followSymlinks>false</followSymlinks>
+					</fileset>
                   </filesets>
                 </configuration>
 			</plugin>
