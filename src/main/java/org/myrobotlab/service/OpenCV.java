@@ -189,6 +189,9 @@ public class OpenCV extends AbstractVideoSource {
   public String grabberType = getDefaultFrameGrabberType();
   public String format = null;
   
+  // use these to specify the resolution for the frame grabber
+  public Integer height = null;
+  public Integer width = null;
 
   public OpenCV(String n) {
     super(n);
@@ -405,6 +408,12 @@ public class OpenCV extends AbstractVideoSource {
       FrameGrabber grabber = null;
       try {
         grabber = createFrameGrabber(inputSource, cameraIndex, inputFile, pipelineSelected, grabberType, format);
+        
+        // set the height / width
+        if (height != null)
+          grabber.setImageHeight(height);
+        if (width != null) 
+          grabber.setImageWidth(width);
       } catch (Exception e) {
         error(e);
         this.capturing = false;
