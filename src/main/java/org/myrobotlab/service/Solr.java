@@ -274,6 +274,20 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return resp;
   }
 
+  public String fetchFirstResultField(String queryString, String fieldName) {
+    QueryResponse qr = search(queryString, 1,0);
+    if (qr.getResults().getNumFound() > 0) {
+      Object result = qr.getResults().get(0).getFirstValue(fieldName);
+      if (result == null) {
+        return "not found";
+      } else {
+        return (String)result;
+      }
+    } else {
+      return "not found";
+    }    
+  }
+  
   /*
    * Default query to fetch the top 10 documents that match the query request.
    * 
@@ -337,6 +351,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   @Override
   public ProcessingStatus onDocuments(List<Document> docs) {
     // Convert the input document to a solr input docs and send it!
+    if (docs.size() == 0) {
+      log.warn("Empty list of documents received.");
+      return ProcessingStatus.OK;
+    }
     ArrayList<SolrInputDocument> docsToSend = new ArrayList<SolrInputDocument>();
     for (Document d : docs) {
       docsToSend.add(convertDocument(d));
@@ -348,7 +366,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         solrServer.add(docsToSend);
       }
       return ProcessingStatus.OK;
-    } catch (SolrServerException | IOException e) {
+    } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
       return ProcessingStatus.DROP;
