@@ -124,8 +124,7 @@ public class IvyWrapper extends Repo {
       log.info("cmd {}", sb);
 
       // TODO: this breaks for me!  please review why this needed to be commented out.
-      // Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
-
+      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));    
       ResolveReport report = Main.run(cmd);
 
       // if no errors -

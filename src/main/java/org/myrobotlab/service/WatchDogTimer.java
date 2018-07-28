@@ -214,6 +214,10 @@ public class WatchDogTimer extends Service {
   public WatchDogTimer(String n) {
     super(n);
   }
+  
+  public Timer addTimer() {
+    return addTimer(getName());
+  }
 
   public Timer addTimer(String checkPointName) {
     Timer cp = addTimer(checkPointName, null, null, (Object[]) null);
@@ -236,6 +240,10 @@ public class WatchDogTimer extends Service {
 
     return timer;
   }
+  
+  public Timer activateTimer() {
+    return activateTimer(getName());
+  }
 
   public Timer activateTimer(String checkPointName) {
     if (timers.containsKey(checkPointName)) {
@@ -245,6 +253,18 @@ public class WatchDogTimer extends Service {
     }
     error("cannot activate timer %s - not found", checkPointName);
     return null;
+  }
+  
+  /**
+   * default method to "check-in" - a service calls this function to say
+   * "everything is ok"
+   * 
+   * @watchDogName
+   * 
+   * @return
+   */
+  public void checkPoint() {
+    checkPoint(getName(), getName());
   }
 
   /**
@@ -315,6 +335,16 @@ public class WatchDogTimer extends Service {
       worker.activate(false);
     }
   }
+  
+  public void start() {
+    for (Timer timer : timers.values()) {
+      timer.activate();
+    }
+
+    for (CheckPointWorker worker : checkpoints.values()) {
+      worker.activate(true);
+    }
+  }
 
   @Override
   public void stopService() {
@@ -376,6 +406,23 @@ public class WatchDogTimer extends Service {
     try {
 
       LoggingFactory.init(Level.INFO);
+      
+      {
+        // most basic use case
+        // single watchdog timer provides its own checkpoint
+        // FIXME - junit which verifies checkpoint suppression is working
+        
+        Runtime.start("log", "Log");
+        WatchDogTimer watchdog = (WatchDogTimer) Runtime.start("watchdog", "WatchDogTimer");
+        watchdog.addTimer();        
+        watchdog.addAction("log", "info", "corrective action applied");
+        
+        for (int i = 0; i < 100; ++i) {
+          watchdog.checkPoint();
+        }
+        
+      }
+      
 
       {
         // ============ wall-e raspi - watchdog e-power services ============
@@ -384,12 +431,20 @@ public class WatchDogTimer extends Service {
         WatchDogTimer watchdog = (WatchDogTimer) Runtime.start("watchdog", "WatchDogTimer");
 
         Motor m1 = (Motor) Runtime.start("m1", "Motor");
+        
 
         // configuration
         // adding and activating a checkpoint
+        // FIXME - junit "named" watchdogtimer 
         watchdog.addTimer("joystickCheck"); // <-- response action
                                             // watchdog.addTimer("joystickCheck",
                                             // "serial01", "r1", 1);
+        
+        
+        
+        
+        
+        
         watchdog.addTimer("raspiCheck"); // <-- response action
                                          // watchdog.addTimer("joystickCheck",
                                          // "serial01", "r1", 1);
