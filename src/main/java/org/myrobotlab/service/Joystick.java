@@ -439,6 +439,20 @@ public class Joystick extends Service {
 		try {
 
 			Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+			Runtime.start("gui","SwingGui");
+      // Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
+      WatchDogTimer watchdog = (WatchDogTimer) Runtime.start("watchdog", "WatchDogTimer");
+      Python python = (Python) Runtime.start("python", "Python");
+
+      Motor m1 = (Motor) Runtime.start("m1", "Motor");
+
+      // configuration
+      // adding and activating a checkpoint
+      watchdog.addTimer("joystickCheck"); // <-- response action
+                                          // watchdog.addTimer("joystickCheck",
+      
+      watchdog.addAction("m1", "stop");
+      
 			// joy.mapId("x", "rx");
 			// joy.map("y", -1, 1, 0, 180);
 			Runtime.start("cli", "Cli");
