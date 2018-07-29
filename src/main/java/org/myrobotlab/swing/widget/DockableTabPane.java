@@ -117,6 +117,7 @@ public class DockableTabPane implements ActionListener {
 	public void removeTab(String title) {
 		if (dockableTabs.containsKey(title)) {
 			DockableTab tab = dockableTabs.get(title);
+			dockableTabs.remove(title);
 			tabs.remove(tab.display);
 		}
 	}
