@@ -134,7 +134,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
 	public void addPeer(String name, String peerType, String comment) {
 		// peers.put(name, new ServiceReservation(name, peerType, comment));
-		mergePeer(new ServiceReservation(name, peerType, comment));
+		mergePeer(new ServiceReservation(name.trim(), peerType.trim(), comment));
 	}
 
 	/**
