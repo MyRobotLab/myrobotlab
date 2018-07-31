@@ -26,6 +26,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -219,7 +220,8 @@ public class Joystick extends Service {
 		// aren't found from the jinput-platform jar files!!
 		String jinputNativePath = new java.io.File(".").getAbsolutePath() + File.separatorChar + "jinput-natives";
 		System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
-
+		String [] controllers = getControllerNames();
+		info("found %d controllers %s", controllers.length, Arrays.toString(controllers));
 	}
 
 	public Map<String, Component> getComponents() {
@@ -310,7 +312,7 @@ public class Joystick extends Service {
 	}
 
 	public boolean setController(int index) {
-		log.info("attaching controller %d", index);
+		info("attaching controller %d", index);
 
 		if (index > -1 && index < hardwareControllers.length) {
 			hardwareController = hardwareControllers[index];
