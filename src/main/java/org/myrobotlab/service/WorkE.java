@@ -162,15 +162,20 @@ public class WorkE extends Service {
     try {
 
       LoggingFactory.init(Level.INFO);
+      
+      // FIXME - should be allowed to do this..
+      // Joystick.getControllerNames();
 
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
       WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
       // FIXME joystick.virtualize();
       // FIXME - make joystick.setDeadzone("x", 30, 30) -> setDeadzone(10)
-      worke.setJoystickControllerIndex(2);
+      // 2 for virtual 0 for "real" worke
+      // worke.setJoystickControllerIndex(2);
+      worke.setJoystickControllerIndex(0);
       // worke.setPort("/dev/ttyUSB0");
-      worke.virtualize();
+      // worke.virtualize();
       // FIXME - this is 'really' a motorcontrol thing ? how would a builder
       // handle it ?
       worke.setMotorPorts();
