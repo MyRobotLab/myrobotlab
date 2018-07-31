@@ -67,18 +67,21 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   public boolean commitOnFlush = true;
 
-  transient private EmbeddedSolrServer embeddedSolrServer = null;
+  // the directory for the solr configs and index. (default to mrl/Solr)
+  public String solrHome = "Solr";
   
+  //EmbeddedSolrServer embeddedSolrServer = null;
+  transient private EmbeddedSolrServer embeddedSolrServer = null;
   
   public void startEmbedded() throws SolrServerException, IOException {
     File resDir = new File("src/main/resources/resource/Solr");
     if (!resDir.exists()) {
       // we're using the "Solr" directory
-      startEmbedded("Solr");
+      
+      startEmbedded(solrHome);
     } else {
       startEmbedded("src/main/resources/resource/Solr");
     }
-    
   }
   
   public void startEmbedded(String path) throws SolrServerException, IOException {
@@ -118,6 +121,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
       SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
+      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();

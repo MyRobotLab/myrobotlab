@@ -27,7 +27,7 @@ public class KafkaConnector extends Service {
   public String valueDeserializer = "org.apache.kafka.common.serialization.StringDeserializer";
   private int pollInterval = 100;
   // TODO: how do templetize.. need to have generics here i think..
-  private KafkaConsumer<String, String> consumer;
+  private transient KafkaConsumer<String, String> consumer;
   // TODO: mark volitile?
     
   public KafkaConnector(String name) {

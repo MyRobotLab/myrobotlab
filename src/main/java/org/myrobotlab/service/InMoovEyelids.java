@@ -28,7 +28,7 @@ public class InMoovEyelids extends Service {
   private transient ServoController controller;
   // todo : make this deprecated
 
-  Timer blinkEyesTimer = new Timer();
+  transient Timer blinkEyesTimer = new Timer();
 
   
   public void blink()
