@@ -67,7 +67,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   public boolean commitOnFlush = true;
 
-  EmbeddedSolrServer embeddedSolrServer = null;
+  transient private EmbeddedSolrServer embeddedSolrServer = null;
   
   
   public void startEmbedded() throws SolrServerException, IOException {
