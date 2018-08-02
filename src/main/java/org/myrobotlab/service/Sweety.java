@@ -320,29 +320,53 @@ public class Sweety extends Service {
    * detach the servos from arduino pins
    */
   public void detach() {
-    rightElbowServo.detach();
-    rightShoulderServo.detach();
-    rightArmServo.detach();
-    rightBicepsServo.detach();
-    rightElbowServo.detach();
-    rightWristServo.detach();
-    leftShoulderServo.detach();
-    leftArmServo.detach();
-    leftBicepsServo.detach();
-    leftElbowServo.detach();
-    leftWristServo.detach();
-    rightThumbServo.detach();
-    rightIndexServo.detach();
-    rightMiddleServo.detach();
-    rightRingServo.detach();
-    rightPinkyServo.detach();
-    leftThumbServo.detach();
-    leftIndexServo.detach();
-    leftMiddleServo.detach();
-    leftRingServo.detach();
-    leftPinkyServo.detach();
-    neckTiltServo.detach();
-    neckPanServo.detach();
+    
+    if (rightElbowServo != null)
+      rightElbowServo.detach();
+    if (rightShoulderServo != null)
+      rightShoulderServo.detach();
+    if (rightArmServo != null)
+      rightArmServo.detach();
+    if (rightBicepsServo != null)
+      rightBicepsServo.detach();
+    if (rightElbowServo != null)
+      rightElbowServo.detach();
+    if (rightWristServo != null)
+      rightWristServo.detach();
+    if (leftShoulderServo != null)
+      leftShoulderServo.detach();
+    if (leftShoulderServo != null)
+      leftShoulderServo.detach();
+    if (leftBicepsServo != null)
+      leftBicepsServo.detach();
+    if (leftElbowServo != null)
+      leftElbowServo.detach();
+    if (leftWristServo != null)
+      leftWristServo.detach();
+    if (rightThumbServo != null)
+      rightThumbServo.detach();
+    if (rightIndexServo != null)
+      rightIndexServo.detach();
+    if (rightMiddleServo != null)
+      rightMiddleServo.detach();
+    if (rightRingServo != null)
+      rightRingServo.detach();
+    if (rightPinkyServo != null)
+      rightPinkyServo.detach();
+    if (leftThumbServo != null)
+      leftThumbServo.detach();
+    if (leftIndexServo != null)
+      leftIndexServo.detach();
+    if (leftMiddleServo != null)
+      leftMiddleServo.detach();
+    if (leftRingServo != null)
+      leftRingServo.detach();
+    if (leftPinkyServo != null)
+      leftPinkyServo.detach();
+    if (neckTiltServo != null)
+      neckTiltServo.detach();
+    if (neckPanServo != null)
+      neckPanServo.detach();
     
   }
   

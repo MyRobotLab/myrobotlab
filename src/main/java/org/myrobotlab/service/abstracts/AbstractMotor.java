@@ -194,7 +194,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       warn("motor locked");
       return;
     }
-    controller.motorMove(this);
+    if (controller != null) {
+      controller.motorMove(this);
+    } else {
+      log.debug("Motor controller was null.");
+    }
+    
     broadcastState();
   }
 
