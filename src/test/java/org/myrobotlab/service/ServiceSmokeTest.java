@@ -22,9 +22,9 @@ import java.util.ArrayList;
  * @author kwatters
  *
  */
-public class ServiceSerializationTest {
+public class ServiceSmokeTest {
 
-  transient public final static Logger log = LoggerFactory.getLogger(ServiceSerializationTest.class);
+  transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
   
   @Test
   public void testAllServiceSerialization() throws IOException {
@@ -87,7 +87,7 @@ public class ServiceSerializationTest {
       assertNotNull(s);
       testSerialization(s);
       // TODO: validate the service is released!
-      // s.releaseService();
+      s.releaseService();
 
       long delta = System.currentTimeMillis() - start;
       log.info("Done testing serialization of {} in {} ms", serviceType, delta);
