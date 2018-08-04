@@ -1,5 +1,8 @@
 package org.myrobotlab.service;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -11,17 +14,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
+import javax.swing.WindowConstants;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Inbox;
@@ -37,10 +51,19 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
+
 import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
+
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvvLoadImage;
+
 
 /**
  * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
@@ -81,6 +104,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       startEmbedded(solrHome);
     } else {
       startEmbedded("src/main/resources/resource/Solr");
+    }
+  }
+  
+  public void deleteEmbeddedIndex() throws SolrServerException, IOException {
+    if (embeddedSolrServer != null) {
+      log.info("Deleting the entire index!!!!");
+      embeddedSolrServer.deleteByQuery("*:*");
+      embeddedSolrServer.commit();
+      log.info("I know nothing...");
+    } else {
+      log.info("Only supported for embedded solr server");
     }
   }
   
@@ -278,6 +312,67 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return resp;
   }
 
+  
+  public IplImage fetchImage(String queryString) throws IOException {
+
+    String fieldName = "bytes";
+    // return an IplImage from the solr index.!
+    QueryResponse qr = search(queryString, 1,0);
+    if (qr.getResults().getNumFound() > 0) {
+      Object result = qr.getResults().get(0).getFirstValue(fieldName);
+      // TODO: this is a byte array or is it base64?
+//      byte[] decoded = Base64.decodeBase64((byte[])result);
+      // read these bytes as an image.
+      IplImage image = bytesToImage((byte[])result);
+      String docId = qr.getResults().get(0).getFirstValue("id").toString();
+      //show(image, docId);
+      return image;
+    } else {
+      log.info("Not Found");
+      return null;
+    }    
+  }
+  
+  
+  public byte[] imageToBytes(IplImage image) throws IOException {
+    
+    // lets make a buffered image 
+    BufferedImage buffImage = OpenCV.IplImageToBufferedImage(image);
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    try {
+        ImageIO.write(buffImage, "png", stream);
+    } catch(IOException e) {
+        // This *shouldn't* happen with a ByteArrayOutputStream, but if it
+        // somehow does happen, then we don't want to just ignore it
+        throw new RuntimeException(e);
+    }
+    return stream.toByteArray();
+  }
+  
+  public IplImage bytesToImage(byte[] bytes) throws IOException {
+    // 
+    // let's assume we're a buffered image .. those are serializable :)
+    BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
+    ToIplImage iplConverter = new OpenCVFrameConverter.ToIplImage();
+    Java2DFrameConverter java2dConverter = new Java2DFrameConverter();
+    IplImage iplImage = iplConverter.convert(java2dConverter.convert(bufImage));
+    // now convert the buffered image to ipl image
+    return iplImage;
+    //Again this could be try with resources but the original example was in Scala
+  }
+
+  
+  // for debugging.
+  // helper method to show an image. (todo; convert it to a Mat )
+  public void show(IplImage image, final String title) {
+    OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+    IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
+    cvCopy(image, image1);
+    CanvasFrame canvas = new CanvasFrame(title, 1);
+    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    canvas.showImage(converterToIpl.convert(image1));
+  }
+  
   public String fetchFirstResultField(String queryString, String fieldName) {
     QueryResponse qr = search(queryString, 1,0);
     if (qr.getResults().getNumFound() > 0) {
@@ -310,6 +405,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     query.set("q", queryString);
     query.setRows(rows);
     query.setStart(start);
+    query.setSort(new SortClause("index_date", ORDER.desc));
     QueryResponse resp = null;
     try {
       if (embeddedSolrServer != null) {
@@ -475,6 +571,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
   
   public OpenCVData onOpenCVData(OpenCVData data) {
+    if (data.getFrameIndex() % 30 != 0) {
+      // skipping
+      return data;
+    }
     // TODO: copy some useful metadata to the record being archived
     // TODO: convert this set of opencv data to a solr document...
     SolrInputDocument doc = new SolrInputDocument();
@@ -512,18 +612,21 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         // TODO: I might need to downsample this.. TODO: better downsampling.
         // assume frames per second is 30, sample once per second.
         if (data.getFrameIndex() % 30 == 0) {
-          log.info("Saving snapshot..");
-          Mat m = new Mat(data.getImage());
-          long sz = (m.total() * m.channels());
-          byte[] bytes = new byte[(int) sz];
-          m.data().get(bytes);
-          String encoded = Base64.encodeBase64String(bytes);
-          doc.addField("bytes", encoded);
-          // bytes field isn't searchaable
-          doc.addField("has_bytes", true);
-          log.warn("Image Size:" + encoded.length());
-          m.close();
           
+          log.info("Saving snapshot..");
+          IplImage img = data.getImage();
+          byte[] bytes = null;
+          try {
+            bytes = imageToBytes(img);
+            String encoded = Base64.encodeBase64String(bytes);
+            doc.addField("bytes", encoded);
+            // bytes field isn't searchaable
+            doc.addField("has_bytes", true);
+            log.warn("Image Size:" + encoded.length());
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
         }
 //      }
 //    }
