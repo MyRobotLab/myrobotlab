@@ -13,10 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.imageio.ImageIO;
 import javax.swing.WindowConstants;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -29,9 +27,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
@@ -61,9 +57,6 @@ import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvvLoadImage;
-
 
 /**
  * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
@@ -80,33 +73,42 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.cvvLoadImage;
  */
 public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
 
-  private static final long serialVersionUID = 1L;
-
   public final static Logger log = LoggerFactory.getLogger(Solr.class);
-
+  private static final long serialVersionUID = 1L;
   public String solrUrl = "http://localhost:8983/solr";
-
   transient private SolrClient solrServer;
-
   public boolean commitOnFlush = true;
-
   // the directory for the solr configs and index. (default to mrl/Solr)
   public String solrHome = "Solr";
-  
   //EmbeddedSolrServer embeddedSolrServer = null;
   transient private EmbeddedSolrServer embeddedSolrServer = null;
+  // TODO: consider moving this tagging logic into opencv..
+  // for now, we'll just set a counter that will count down how many opencv frames
+  // will be tagged with the given label.
+  public String openCvLabel = null;
+  public int openCvTrainingCount = 0;
+
+  public Solr(String n) {
+    super(n);
+  }
   
   public void startEmbedded() throws SolrServerException, IOException {
     File resDir = new File("src/main/resources/resource/Solr");
     if (!resDir.exists()) {
       // we're using the "Solr" directory
-      
       startEmbedded(solrHome);
     } else {
       startEmbedded("src/main/resources/resource/Solr");
     }
   }
-  
+
+  /**
+   * USE WITH CAUTION!!!  This will DELETE ALL OF YOUR ROBOTS MEMORIES.
+   * THERE IS NO RECOVERY FROM THIS.
+   * 
+   * @throws SolrServerException
+   * @throws IOException
+   */
   public void deleteEmbeddedIndex() throws SolrServerException, IOException {
     if (embeddedSolrServer != null) {
       log.info("Deleting the entire index!!!!");
@@ -117,7 +119,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       log.info("Only supported for embedded solr server");
     }
   }
-  
+
+  /**
+   * Start the embedded Solr instance with the solr home directory provided.
+   * This expects that you ahve a valid solr.xml and configset in that directory named "core1"
+   * 
+   * @param path
+   * @throws SolrServerException
+   * @throws IOException
+   */
   public void startEmbedded(String path) throws SolrServerException, IOException {
     // create and load the cores
     Path solrHome = Paths.get(path);
@@ -125,79 +135,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     Path solrXml = solrHome.resolve("solr.xml");
     CoreContainer cores = CoreContainer.createAndLoad(solrHome, solrXml);
     for (String coreName : cores.getAllCoreNames()) {
-      System.out.println("Core " + coreName);
+      log.info("Found core core {}", coreName);
     }
+    // create the actual solr instance with core1
     embeddedSolrServer = new EmbeddedSolrServer(cores, "core1");
-//    SolrInputDocument doc = new SolrInputDocument();
-//    doc.setField("id", "doc_1");
-//    embeddedSolrServer.add(doc);
-//    embeddedSolrServer.commit();
-//    SolrQuery q = new SolrQuery();
-//    QueryRequest r = new QueryRequest(q);
-//    q.setQuery("id:doc_2");
-//    QueryResponse qr = embeddedSolrServer.query(q);
-//    System.out.println(qr.getResults().getNumFound());
-//    // shutdown & cleanup
-//    embeddedSolrServer.getCoreContainer().shutdown();
-//    embeddedSolrServer.close();
-//    System.out.println("Done.");
-    
   }
-  
-  /*
-   * Static list of third party dependencies for this service. The list will be
-   * consumed by Ivy to download and manage the appropriate resources
+
+  /**
+   * Add a single document at a time to the solr server.
+   * 
+   * @param doc
    */
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-    try {
-      Solr solr = (Solr) Runtime.start("solr", "Solr");
-      solr.startEmbedded();
-      SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
-      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-      
-      // Create a test document
-      SolrInputDocument doc = new SolrInputDocument();
-      doc.setField("id", "Doc1");
-      doc.setField("title", "My title");
-      doc.setField("content", "This is the text field, for a sample document in myrobotlab.  ");
-      // add the document to the index
-      solr.addDocument(doc);
-      // commit the index
-      solr.commit();
-      // search for the word myrobotlab
-      String queryString = "myrobotlab";
-      QueryResponse resp = solr.search(queryString);
-      for (int i = 0; i < resp.getResults().size(); i++) {
-        System.out.println("---------------------------------");
-        System.out.println("-- Printing Result number :" + i);
-        // grab a document out of the result set.
-        SolrDocument d = resp.getResults().get(i);
-        // iterate over the fields on the returned document
-        for (String fieldName : d.getFieldNames()) {
-
-          System.out.print(fieldName + "\t");
-          // fields can be multi-valued
-          for (Object value : d.getFieldValues(fieldName)) {
-            System.out.print(value);
-            System.out.print("\t");
-          }
-          System.out.println("");
-        }
-      }
-      System.out.println("---------------------------------");
-      System.out.println("Done.");
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
-  public Solr(String n) {
-    super(n);
-  }
-
   public void addDocument(SolrInputDocument doc) {
     try {
       if (embeddedSolrServer != null) {
@@ -215,7 +163,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Add a solr document to the index
+   * Add a batch of documents (this is more effecient than adding one at a time.
+   * 
    * @param docs a collection of solr input docs to add to solr.
    */
   public void addDocuments(Collection<SolrInputDocument> docs) {
@@ -233,8 +182,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Commit the solr index and make documents that have been submitted become
-   * searchable.
+   * Commit the solr index and make documents that have been submitted become searchable.
+   * There is also a timed "autoCommit" setting in the solrconfig.xml
+   * 
    */
   public void commit() {
     try {
@@ -250,6 +200,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
   }
 
+  /**
+   * Delete a single document from the index provided a specific doc id.
+   * @param docId
+   */
   public void deleteDocument(String docId) {
     try {
       if (embeddedSolrServer!= null) {
@@ -267,7 +221,6 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * @return The url for the solr instance you wish to query. Defaults to
    * http://localhost:8983/solr
    */
-
   public String getSolrUrl() {
     return solrUrl;
   }
@@ -312,7 +265,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return resp;
   }
 
-  
+
+  /**
+   * Helper method that will run a search, and return the bytes field from the first result
+   * decoded into an IplImage
+   * 
+   * @param queryString
+   * @return
+   * @throws IOException
+   */
   public IplImage fetchImage(String queryString) throws IOException {
 
     String fieldName = "bytes";
@@ -321,7 +282,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     if (qr.getResults().getNumFound() > 0) {
       Object result = qr.getResults().get(0).getFirstValue(fieldName);
       // TODO: this is a byte array or is it base64?
-//      byte[] decoded = Base64.decodeBase64((byte[])result);
+      //      byte[] decoded = Base64.decodeBase64((byte[])result);
       // read these bytes as an image.
       IplImage image = bytesToImage((byte[])result);
       String docId = qr.getResults().get(0).getFirstValue("id").toString();
@@ -332,23 +293,38 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       return null;
     }    
   }
-  
-  
+
+
+  /**
+   * Helper method to serialize an IplImage into a byte array.
+   * returns a png version of the original image 
+   * 
+   * @param image
+   * @return
+   * @throws IOException
+   */
   public byte[] imageToBytes(IplImage image) throws IOException {
-    
+
     // lets make a buffered image 
     BufferedImage buffImage = OpenCV.IplImageToBufferedImage(image);
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     try {
-        ImageIO.write(buffImage, "png", stream);
+      ImageIO.write(buffImage, "png", stream);
     } catch(IOException e) {
-        // This *shouldn't* happen with a ByteArrayOutputStream, but if it
-        // somehow does happen, then we don't want to just ignore it
-        throw new RuntimeException(e);
+      // This *shouldn't* happen with a ByteArrayOutputStream, but if it
+      // somehow does happen, then we don't want to just ignore it
+      throw new RuntimeException(e);
     }
     return stream.toByteArray();
   }
-  
+
+  /**
+   * deserialize from a png byte array to an IplImage
+   * 
+   * @param bytes
+   * @return
+   * @throws IOException
+   */
   public IplImage bytesToImage(byte[] bytes) throws IOException {
     // 
     // let's assume we're a buffered image .. those are serializable :)
@@ -361,7 +337,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     //Again this could be try with resources but the original example was in Scala
   }
 
-  
+
   // for debugging.
   // helper method to show an image. (todo; convert it to a Mat )
   public void show(IplImage image, final String title) {
@@ -372,7 +348,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(converterToIpl.convert(image1));
   }
-  
+
+  /**
+   * Helper search function that runs a search and returns a specified field from the first result
+   * @param queryString
+   * @param fieldName
+   * @return
+   */
   public String fetchFirstResultField(String queryString, String fieldName) {
     QueryResponse qr = search(queryString, 1,0);
     if (qr.getResults().getNumFound() > 0) {
@@ -386,19 +368,17 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       return "not found";
     }    
   }
-  
-  /*
+
+  /**
    * Default query to fetch the top 10 documents that match the query request.
-   * 
    */
   public QueryResponse search(String queryString) {
     // default to 10 hits returned.
     return search(queryString, 10, 0);
   }
 
-  /*
+  /**
    * Default query to fetch the top 10 documents that match the query request.
-   * 
    */
   public QueryResponse search(String queryString, int rows, int start) {
     SolrQuery query = new SolrQuery();
@@ -421,16 +401,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return resp;
   }
 
-  // public String publishResults() {
-  // return "this is a foo.";
-  // };
   public QueryResponse publishResults(QueryResponse resp) {
     return resp;
   };
 
-  /*
+  /**
    * Set the url for the solr instance to communicate with.
-   * 
+   * This is not used with the embedded solr server
    */
   public void setSolrUrl(String solrUrl) {
     this.solrUrl = solrUrl;
@@ -526,13 +503,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
     meta.addDescription("Solr Service - Open source search engine");
     meta.addCategory("data", "search");
     meta.addDependency("org.apache.solr", "solr-core", "7.2.1");
     meta.addDependency("org.apache.solr", "solr-solrj", "7.2.1");
-    
     meta.addDependency("commons-io", "commons-io", "2.5");
     meta.addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
     // Dependencies issue
@@ -545,9 +520,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
     opencv.addListener("publishClassification", getName(), "onClassification");
     opencv.addListener("publishYoloClassification", getName(), "onYoloClassification");
-      
   }
 
+  // what to index when a yolo event occurs
   public ArrayList<YoloDetectedObject> onYoloClassification (ArrayList<YoloDetectedObject> yoloObjects) {
     // for now.. let's just do this.
     for (YoloDetectedObject yolo : yoloObjects) {
@@ -569,14 +544,35 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // add the document we just built up to solr so we can remember it!   
     return yoloObjects;
   }
-  
+
+  // to make it easier to call from aiml
+  public void setTrainingLabel(String label, String count) {
+    setTrainingLabel(label, Integer.valueOf(count));
+  }
+
+  //sets it so the next  N opencv frames will be tagged with the training label.
+  public void setTrainingLabel(String label, int count) {
+    this.openCvLabel = label;
+    this.openCvTrainingCount = count;
+  }
+
+  // when attached to an opencv instance this will return images and save them to solr if there is a label / count specified
   public OpenCVData onOpenCVData(OpenCVData data) {
-    if (data.getFrameIndex() % 30 != 0) {
-      // skipping
+    // Only record if we are training.
+    if (openCvLabel == null) {
+      // we're not training just return
       return data;
     }
-    // TODO: copy some useful metadata to the record being archived
-    // TODO: convert this set of opencv data to a solr document...
+    //we are training.
+    if (openCvTrainingCount == 0) {
+      // we're done recording our training data for this one. 
+      openCvLabel = null;
+      return data;
+    } else {
+      // decrement the count 
+      openCvTrainingCount--;
+    }
+    // ok.. here we are, create a "memory" out of the opencv data.
     SolrInputDocument doc = new SolrInputDocument();
     // create a document id for this document 
     // TODO: make this something much more deterministic!! 
@@ -589,58 +585,34 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     doc.setField("frame_index", data.getFrameIndex());
     doc.setField("selected_filter_name", data.getSelectedFilterName());
     doc.setField("name", data.getName());
-    // for now.. let's just do this.
-    
-    //ByteBuffer jpg = data.getJPGByteBuffer(data.getSelectedFilter());
-    
-//    byte[] bytes = jpg.array();
-//    String encoded = Base64.encodeBase64String(bytes);
-//    doc.addField("bytes", encoded);
-    
-    
-//    for (String key : data.keySet()) {
-//      IplImage img = data.get(key);
-//      if (img == null) {
-//        continue;
-//      }
-//     // byte[] bytes = new byte[img.imageSize()];
-//      // img.asByteBuffer().get(bytes);
-//      
-//      //ByteBuffer buffer = img.asByteBuffer();
-//      if (false) {
-    
-        // TODO: I might need to downsample this.. TODO: better downsampling.
-        // assume frames per second is 30, sample once per second.
-        if (data.getFrameIndex() % 30 == 0) {
-          
-          log.info("Saving snapshot..");
-          IplImage img = data.getImage();
-          byte[] bytes = null;
-          try {
-            bytes = imageToBytes(img);
-            String encoded = Base64.encodeBase64String(bytes);
-            doc.addField("bytes", encoded);
-            // bytes field isn't searchaable
-            doc.addField("has_bytes", true);
-            log.warn("Image Size:" + encoded.length());
-          } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        }
-//      }
-//    }
+    // add the training label
+    doc.setField("label", openCvLabel);
+    IplImage img = data.getImage();
+    byte[] bytes = null;
+    try {
+      bytes = imageToBytes(img);
+      String encoded = Base64.encodeBase64String(bytes);
+      // bytes field contains bindary data (sent as base64)
+      doc.addField("bytes", encoded);
+      doc.addField("has_bytes", true);
+      log.warn("Image Size:{}", encoded.length());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return data;
+    }
     // add the document we just built up to solr so we can remember it!	  
+    log.info("Saving snapshot.. of {}.", openCvLabel);
     addDocument(doc);
     //  TODO: kw, why return anything here at all?! who would ever call this method and depend on the response?
     return data;
   }
 
-  //
+  // attach pattern stuff
   public void attach(Deeplearning4j dl4j) {
-	  dl4j.addListener("publishClassification", getName(), "onClassification");
+    dl4j.addListener("publishClassification", getName(), "onClassification");
   }
-  
+
   // TODO: index the classifications with the cvdata. not separately.. 
   // o/w we need a way to relate back to the frame that this is a classification of
   public Map<String, Double> onClassification(Map<String, Double> data) throws SolrServerException, IOException {
@@ -655,20 +627,18 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // TODO: enforce UTC, or move this to the solr schema to do.
     doc.setField("date", new Date());
     // for now.. let's just do this.
-    
     double threshold = 0.2;
-   
     for (String key : data.keySet()) {
       double value = data.get(key);
       doc.addField(key, value);
       if (value > threshold) 
-    	  doc.addField("object", key);
-    //  doc.addField("recognized_object", key);
+        doc.addField("object", key);
+      //  doc.addField("recognized_object", key);
     }
     addDocument(doc);
     return data;
   }
-  
+
   // TODO: pass the interface, not the specific service
   // i need more on the interface if we pass the itnerfae
   public void attach(WebkitSpeechRecognition recognizer) {
@@ -695,14 +665,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     doc.setField("text", text);
     // now we need to add the doc!
     addDocument(doc);
-    
   }
-  
+
   // TODO: align this with an interface, not an explicit service
   public void attach(ProgramAB programab) {
     programab.addResponseListener(this);
   }
-  
+
   public void onResponse(Response response) {
     log.info("On Response invoked!");
     SolrInputDocument doc = new SolrInputDocument();
@@ -720,8 +689,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // now we need to add the doc!
     addDocument(doc);
   }
- 
-  
+
+  /**
+   * This method will iterate though all services in the system (except itself.) and attach the inboxes for indexing.
+   * Any time something is added to the inbox of a service, it will also trigger that message getting indexed in solr
+   * 
+   * this method can generate huge indexes and a lot of useless data!
+   */
   public void attachAllInboxes() {
     // attach all outboxes (except for our own..)
     for (ServiceInterface s : Runtime.getServices()) {
@@ -733,6 +707,14 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
   }
 
+  /**
+   * This method will iterate though all services in the system (except itself.) and attach the outboxes for indexing.
+   * Any time something is added to the outbox of a service, it will also trigger that message getting indexed in solr.
+   * This happens when an invoke is called in the framework
+   * 
+   * this method can generate huge indexes and a lot of useless data!
+   */
+
   public void attachAllOutboxes() {
     // attach all outboxes (except for our own..)
     for (ServiceInterface s : Runtime.getServices()) {
@@ -743,15 +725,14 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       s.getOutbox().addMessageListener(this);
     }
   }
-  
-  // TODO: attach a service inbox/outbox 
-  // TODO: what does this mean for solr to attach to a service?
+
+  // attach a specific inbox
   public void attachInbox(Inbox inbox) {
     // TODO: refactor this to just be attach(Service)  or maybe we pass the inbox / outbox?
     inbox.addMessageListener(this);
   }
-  
 
+  // attach a specific outbox
   public void attachOutbox(Outbox outbox) {
     // TODO: refactor this to just be attach(Service)  or maybe we pass the inbox / outbox?
     outbox.addMessageListener(this);
@@ -765,7 +746,6 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       log.warn("Null message in an inbox.. or maybe outbox?");
       return;
     }
-    
     // convert this message into a solr document
     // TODO: make messages more unique. 
     String docId = "message_" + UUID.randomUUID().toString() + "_" +  message.msgId;
@@ -796,4 +776,49 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
     addDocument(doc);
   }
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+    try {
+      Solr solr = (Solr) Runtime.start("solr", "Solr");
+      solr.startEmbedded();
+      SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
+      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      // Create a test document
+      SolrInputDocument doc = new SolrInputDocument();
+      doc.setField("id", "Doc1");
+      doc.setField("title", "My title");
+      doc.setField("content", "This is the text field, for a sample document in myrobotlab.  ");
+      // add the document to the index
+      solr.addDocument(doc);
+      // commit the index
+      solr.commit();
+      // search for the word myrobotlab
+      String queryString = "myrobotlab";
+      QueryResponse resp = solr.search(queryString);
+      for (int i = 0; i < resp.getResults().size(); i++) {
+        System.out.println("---------------------------------");
+        System.out.println("-- Printing Result number :" + i);
+        // grab a document out of the result set.
+        SolrDocument d = resp.getResults().get(i);
+        // iterate over the fields on the returned document
+        for (String fieldName : d.getFieldNames()) {
+
+          System.out.print(fieldName + "\t");
+          // fields can be multi-valued
+          for (Object value : d.getFieldValues(fieldName)) {
+            System.out.print(value);
+            System.out.print("\t");
+          }
+          System.out.println("");
+        }
+      }
+      System.out.println("---------------------------------");
+      System.out.println("Done.");
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+  
 }
