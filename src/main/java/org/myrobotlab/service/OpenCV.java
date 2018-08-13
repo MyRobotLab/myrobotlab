@@ -72,6 +72,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
@@ -155,7 +156,7 @@ public class OpenCV extends AbstractVideoSource {
       "Dilate", "DL4J", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
       "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
       "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
-      "Split", "State", "Surf", "Tesseract", "Threshold", "Transpose", "Yolo" };
+      "Split", "State", "Surf", "Tesseract", "Threshold", "Transpose", "Undistort", "Yolo" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -936,8 +937,17 @@ public class OpenCV extends AbstractVideoSource {
     //System.loadLibrary("opencv_java");      
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     
-    OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
-    opencv.capture(grabber);
+    
+    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
+    opencv.addFilter(ud);
+    
+    
+   // opencv.height = 1080;
+    //opencv.width= 1920;
+    
+    opencv.capture();
+   // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
+   // opencv.capture(grabber);
     
     
     // Runtime.start("right", "OpenCV");
@@ -953,8 +963,8 @@ public class OpenCV extends AbstractVideoSource {
    // OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
 // opencv.addFilter(yolo);
     
-    OpenCVFilterDL4J dl4j = new OpenCVFilterDL4J("dl4j");
-    opencv.addFilter(dl4j);
+ //   OpenCVFilterDL4J dl4j = new OpenCVFilterDL4J("dl4j");
+  //  opencv.addFilter(dl4j);
     
    // opencv.setStreamerEnabled(false);
     // opencv.addFilter("facerec", "FaceRecognizer");
