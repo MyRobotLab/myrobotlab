@@ -3,13 +3,12 @@ package org.myrobotlab.math;
 import java.io.Serializable;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
 public final class Mapper implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Servo.class);
+	public final static Logger log = LoggerFactory.getLogger(Mapper.class);
 
 	// input range
 	double minX;
@@ -25,22 +24,8 @@ public final class Mapper implements Serializable {
 
 	boolean inverted = false;
 
-	public Mapper(double minX, double maxX, double minY, double maxY) {
-	  
-	  if (maxY - minY == 0){
-	    log.error("maxY - minY == 0 ..  DIVIDE BY ZERO ERROR COMING !" );
-	  }
-	  
-		this.minX = minX;
-		this.maxX = maxX;
-		this.minY = minY;
-		this.maxY = maxY;
-
-		if (minY < maxY) {
-			setInverted(false);
-		} else {
-		  setInverted(true);
-		}
+	public Mapper(double minX, double maxX, double minY, double maxY) {	  
+	  map(minX, maxX, minY, maxY);
 	}
 
 	final public double calcOutput(double in) {
@@ -161,6 +146,23 @@ public final class Mapper implements Serializable {
   
   public double getMinInput() {
     return minX;
+  }
+  
+  public void map(double minX, double maxX, double minY, double maxY) {
+    if (maxY - minY == 0){
+      log.error("maxY - minY == 0 ..  DIVIDE BY ZERO ERROR COMING !" );
+    }
+    
+    this.minX = minX;
+    this.maxX = maxX;
+    this.minY = minY;
+    this.maxY = maxY;
+
+    if (minY < maxY) {
+      setInverted(false);
+    } else {
+      setInverted(true);
+    }
   }
 
 }

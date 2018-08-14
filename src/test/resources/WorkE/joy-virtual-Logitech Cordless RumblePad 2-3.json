@@ -1,0 +1,351 @@
+{
+  "name": "Logitech Cordless RumblePad 2",
+  "portNumber": 0,
+  "portType": "Unknown",
+  "type": "Gamepad",
+  "components": [
+    {
+      "id": "rz",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 0,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "z",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 1,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "y",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 2,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "x",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 3,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "pov",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Axis",
+      "index": 4,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "0",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 5,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "1",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 6,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "2",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 7,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "3",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 8,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "4",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 9,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "5",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 10,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "6",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 11,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "7",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 12,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "8",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 13,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "9",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 14,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "10",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 15,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    {
+      "id": "11",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 16,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    }
+  ],
+  "componentMap": {
+    "11": {
+      "id": "11",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 16,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "rz": {
+      "id": "rz",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 0,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "0": {
+      "id": "0",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 5,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "1": {
+      "id": "1",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 6,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "2": {
+      "id": "2",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 7,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "3": {
+      "id": "3",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 8,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "4": {
+      "id": "4",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 9,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "5": {
+      "id": "5",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 10,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "pov": {
+      "id": "pov",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Axis",
+      "index": 4,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "6": {
+      "id": "6",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 11,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "7": {
+      "id": "7",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 12,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "x": {
+      "id": "x",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 3,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "8": {
+      "id": "8",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 13,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "y": {
+      "id": "y",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 2,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "9": {
+      "id": "9",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 14,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "z": {
+      "id": "z",
+      "isRelative": false,
+      "isAnalog": true,
+      "type": "Axis",
+      "index": 1,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    },
+    "10": {
+      "id": "10",
+      "isRelative": false,
+      "isAnalog": false,
+      "type": "Button",
+      "index": 15,
+      "value": 0.0,
+      "virtualValue": 0.0,
+      "serviceName": "joy"
+    }
+  },
+  "serviceName": "joy"
+}

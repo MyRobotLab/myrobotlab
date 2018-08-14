@@ -72,11 +72,6 @@ public class RoboClaw extends AbstractMotorController
 
 	Integer address = 128;
 
-	/**
-	 * attached motors <names, port>
-	 */
-	transient HashMap<String, MotorPort> motors = new HashMap<String, MotorPort>();
-
 	List<String> ports = new ArrayList<String>();
 
 	String firmwareVersion;
@@ -101,7 +96,7 @@ public class RoboClaw extends AbstractMotorController
 		// add motor ports the roboclaw supports
 		ports.add("m1");
 		ports.add("m2");
-		powerMapper = new Mapper(-1.0, 1.0, -127, 127);
+		map(-1.0, 1.0, -127, 127);
 	}
 
 	public static class MotorData implements Serializable {
@@ -260,11 +255,11 @@ public class RoboClaw extends AbstractMotorController
 			return;
 		}
 
-		MotorPort motor = motors.get(mc.getName());
+		MotorPort motor = (MotorPort)motors.get(mc.getName());
 		String port = motor.getPort();
 
 		/// double pwr = motor.getPowerLevel();
-		int power = (int) powerMapper.calcOutput(mc.getPowerLevel());
+		int power = (int)calcOutput(motor);
 		// int power = (int) (pwr * 127);
 
 		if (port.equals("m1")) {
