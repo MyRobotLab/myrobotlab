@@ -115,7 +115,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 	 */
 	void setInverted(boolean invert);
 
-	void setPowerLevel(double power);
+	// void setPowerLevel(double power);
 
 	/**
 	 * stop the motor

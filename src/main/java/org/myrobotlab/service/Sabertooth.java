@@ -2,16 +2,14 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -53,12 +51,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   boolean setSaberToothBaud = false;
 
-  /**
-   * attached motors <names, port>
-   */
-  transient HashMap<String, MotorPort> motors = new HashMap<String, MotorPort>();
-
-  List<String> ports = new ArrayList<String>();
+  // motorPorts Promote ? - do you
+  List<String> motorPorts = new ArrayList<String>();
 
   public final static int MOTOR1_FORWARD = 0;
 
@@ -75,9 +69,9 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   public Sabertooth(String n) {
     super(n);
     // add motor ports the sabertooth supports
-    ports.add("m1");
-    ports.add("m2");
-    powerMapper = new Mapper(-1.0, 1.0, -127, 127);
+    motorPorts.add("m1");
+    motorPorts.add("m2");
+    map(-1.0, 1.0, -127, 127);
   }
 
   public void connect(String port) throws Exception {
@@ -90,6 +84,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     }
   }
 
+  // FIXME - checking min max could be done in abstract !!!
   public void driveBackwardsMotor1(int speed) {
     if (speed < 0 || speed > 127) {
       error("invalid speed", speed);
@@ -98,6 +93,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     sendPacket(MOTOR1_BACKWARD, speed);
   }
 
+  // FIXME - checking min max could be done in abstract !!!
   public void driveBackwardsMotor2(int speed) {
     if (speed < 0 || speed > 127) {
       error("invalid speed", speed);
@@ -106,6 +102,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     sendPacket(MOTOR2_BACKWARD, speed);
   }
 
+  // FIXME - checking min max could be done in abstract !!!
   public void driveForwardMotor1(int speed) {
     if (speed < 0 || speed > 127) {
       error("invalid speed", speed);
@@ -114,28 +111,13 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     sendPacket(MOTOR1_FORWARD, speed);
   }
 
+  // FIXME - checking min max could be done in abstract !!!
   public void driveForwardMotor2(int speed) {
     if (speed < 0 || speed > 127) {
       error("invalid speed %s", speed);
       return;
     }
     sendPacket(MOTOR2_FORWARD, speed);
-  }
-
-  public boolean motorDetach(String name) {
-    if (motors.containsKey(name)) {
-      motors.remove(name);
-      return true;
-    }
-    return false;
-  }
-
-  public void motorMove(String name) {
-    motorMove((MotorControl) Runtime.getService(name));
-  }
-
-  public void motorMoveTo(String name, Integer position) {
-    error("not implemented");
   }
 
   public void sendPacket(int command, int data) {
@@ -158,7 +140,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       serial.write(data);
       serial.write((address + command + data) & 0x7F);
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("sendPacket threw", e);
     }
   }
 
@@ -166,6 +148,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     this.address = address;
   }
 
+  // FIXME - promote ?
   public void setMaxVoltage(int maxVolts) {
     int actualValue = (int) Math.round(maxVolts / 5.12);
     info("setting max voltage to %d volts - actual value %f", actualValue);
@@ -174,6 +157,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   // ----------MotorController Interface End --------------
 
+  // FIXME - promote ?
   public void setMinVoltage(int min) {
     int actualValue = (min - 6) * 5;
     info("setting max voltage to %d volts - actual value %d", actualValue);
@@ -231,13 +215,17 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       return;
     }
 
-    MotorPort motor = motors.get(mc.getName());
+    MotorPort motor = (MotorPort) motors.get(mc.getName());
     String port = motor.getPort();
-    
-    /// double pwr = motor.getPowerLevel();
-    int power = (int)powerMapper.calcOutput(mc.getPowerLevel());
-    // int power = (int) (pwr * 127);
 
+    /// double pwr = motor.getPowerLevel();
+    int power = (int) calcOutput((AbstractMotor) mc);
+    // int power = (int) (pwr * 127);
+    info("%s.move(%f) -> %s.motorMove(%d)", mc.getName(), mc.getPowerLevel(), getName(), power);
+
+    log.info("motor {} power {}", mc.getName(), power);
+
+    // FIXME required "getMotorPortNames !!!"
     if (port.equals("m1")) {
       if (power >= 0) {
         driveForwardMotor1(power);
@@ -253,30 +241,12 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     } else {
       error("invalid port number %d", port);
     }
-
-  }
-
-  @Override
-  public void motorMoveTo(MotorControl motor) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void motorStop(MotorControl motor) {
-    motor.move(0);
   }
 
   @Override
   public boolean isConnected() {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  @Override
-  public void motorReset(MotorControl motor) {
-    // TODO Auto-generated method stub
-
   }
 
   /**
@@ -310,87 +280,18 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     // not much choice here :(
     // sabertooth is not 'readable' and connecting serial is almost always
     // an asynchronous process - since we have no way to verify the port is open
-    // we sadly must 
+    // we sadly must
     sleep(3000);
-  }
-
-  public void detach(MotorControl device) {
-    motors.remove(device);
   }
 
   // FIXME - become interface for motor port shields & controllers
   public List<String> getPorts() {
-    return ports;
-  }
-
-  @Override
-  public Set<String> getAttached() {
-    return motors.keySet();
-  }
-
-  /**
-   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
-   * methods for this class
-   */
-  @Override
-  public void attach(Attachable service) throws Exception {
-    // check if service already attached
-    if (isAttached(service)) {
-      log.info("{} is attached to {}", service.getName(), getName());
-      return;
-    }
-
-    if (MotorPort.class.isAssignableFrom(service.getClass())) {
-      MotorPort motor = (MotorPort) service;
-      String port = motor.getPort();
-
-      if (port == null || (!ports.contains(port))) {
-        throw new IOException("port number in motor must be set to m1 or m2");
-      }
-
-      motors.put(motor.getName(), motor);
-
-      // give opportunity for motor to attach
-      motor.attach(this);
-
-      // made changes broadcast it
-      broadcastState();
-      return;
-
-    } else if (SerialDevice.class.isAssignableFrom(service.getClass())) {
-
-      serial = (SerialDevice) service;
-
-      // here we check and warn regarding config - but
-      // it "might" be right if the user has customized it
-      // this works well - the user controls all config
-      // but the attach can check and report on it
-      if (serial.getRate() != 9600) {
-        warn("default rate for Sabertooth is 9600 serial is currently at %s", serial.getRate());
-      }
-
-      // give serial an opportunity to attach to this service
-      serial.attach(this);
-
-      if (serial.isConnected()) {
-        if (!setSaberToothBaud) {
-          serial.write(170);
-          sleep(500);
-          setSaberToothBaud = true;
-        }
-      }
-
-      // made changes broadcast it
-      broadcastState();
-      return;
-    }
-
-    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+    return motorPorts;
   }
 
   @Override
   public boolean isAttached(Attachable service) {
-    return motors.containsKey(service.getName()) || (serial != null && serial.getName().equals(service.getName()));
+    return super.isAttached(service) || (serial != null && serial.getName().equals(service.getName()));
   }
 
   @Override
@@ -398,14 +299,10 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     connect(port, rate, 8, 1, 0);
   }
 
+  // FIXME - could promote to AbstractMotorSerialPacketController
   @Override
   public void detach() {
-    for (String name : motors.keySet()) {
-      Motor m = (Motor) Runtime.getService(name);
-      if (m != null) {
-        m.detach(this);
-      }
-    }
+    super.detach();
 
     if (serial != null) {
       serial.detach(this);
@@ -427,7 +324,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // virtual = True
 
       String port = "COM14";
-      //String port = "/dev/ttyUSB0";
+      // String port = "/dev/ttyUSB0";
 
       // start optional virtual serial service, used for test
       if (virtual) {
@@ -448,7 +345,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       // configure services
       m1.setPort("m1");
       m2.setPort("m2");
-      
+
       joy.setController(5); // 0 on Linux
 
       // attach services
@@ -456,7 +353,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
       sabertooth.attach(m2);
       m1.attach(joy.getAxis("y"));
       m2.attach(joy.getAxis("rz"));
-      
+
       m1.setInverted(true);
       m2.setInverted(true);
       // m2.attach(arduino.getPin("A4"));
