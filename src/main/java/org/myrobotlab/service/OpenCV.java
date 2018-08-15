@@ -72,6 +72,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterTracker;
 import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -156,7 +157,7 @@ public class OpenCV extends AbstractVideoSource {
       "Dilate", "DL4J", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
       "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
       "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
-      "Split", "State", "Surf", "Tesseract", "Threshold", "Transpose", "Undistort", "Yolo" };
+      "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -918,9 +919,7 @@ public class OpenCV extends AbstractVideoSource {
     //
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
-
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     // OpenCV opencvLeft = (OpenCV) Runtime.start("left", "OpenCV");
     // Runtime.start("right", "OpenCV");
@@ -938,14 +937,20 @@ public class OpenCV extends AbstractVideoSource {
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     
     
-    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
-    opencv.addFilter(ud);
+//    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
+//    opencv.addFilter(ud);
     
+
+    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
+    opencv.addFilter(tld);
+
     
+    opencv.height = 480;
+    opencv.width = 640;
    // opencv.height = 1080;
     //opencv.width= 1920;
     
-    opencv.capture();
+   opencv.capture();
    // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
    // opencv.capture(grabber);
     
