@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +18,7 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.swing.WindowConstants;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -295,6 +298,39 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
 
+  public void createTrainingDataDir(SolrQuery query, String directory) throws IOException {
+    // This method will iterate a result set that contains images stored in the "bytes" field of a document
+    // It will then save these images to a directory based on the "label" field.
+    // TODO: use cursor mark for deep pagination to produce this training set and avoid large memory usage
+    QueryResponse qres = search(query);
+    File trainingDir = new File(directory);
+    if (!trainingDir.exists()) {
+      trainingDir.mkdirs();
+    }
+    // Ok directory exists.. iterate results and save bytes
+    for (SolrDocument doc : qres.getResults()) {
+      // TODO: bunch of null pointer checks here..
+      String id = (String)doc.getFirstValue("id").toString();
+      byte[] bytes = (byte[])doc.getFirstValue("bytes");
+      String label = (String)doc.getFirstValue("label");
+
+      String labelDir = directory + File.separator + label;
+      if (!new File(labelDir).exists()) {
+        new File(labelDir).mkdirs();
+      }
+      // TODO: scrub the label field to make it directory name safe.
+      // TODO: i'm pretty sure i save them as png bytes
+      String targetFile = labelDir + File.separator + id + ".png";
+      log.info("Saving {}", targetFile);
+      FileOutputStream stream = new FileOutputStream(targetFile);
+      try {
+          stream.write(bytes);
+      } finally {
+          stream.close();
+      }
+    }
+  }
+  
   /**
    * Helper method to serialize an IplImage into a byte array.
    * returns a png version of the original image 
@@ -506,11 +542,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
     meta.addDescription("Solr Service - Open source search engine");
     meta.addCategory("data", "search");
-    meta.addDependency("org.apache.solr", "solr-core", "7.2.1");
-    meta.addDependency("org.apache.solr", "solr-solrj", "7.2.1");
+    String solrVersion = "7.4.0";
+    meta.addDependency("org.apache.solr", "solr-core", solrVersion);
+    meta.addDependency("org.apache.solr", "solr-solrj", solrVersion);
     meta.addDependency("commons-io", "commons-io", "2.5");
+    // TODO: update this with the latest schema!
     meta.addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
-    // Dependencies issue
+    // log4j-slf4j conflicts with logback in solr 7.4.0+ (maybe earlier)
+    meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+	// Dependencies issue
     meta.setAvailable(true);
     return meta;
   }
