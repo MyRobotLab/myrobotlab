@@ -30,6 +30,9 @@ import java.util.List;
 import org.myrobotlab.framework.interfaces.Attachable;
 
 public interface MotorController extends Attachable {
+  
+  // FIXME 
+  // add getPortNames for "motor port" type controllers .. e.g. m1, m2 for Sabertooth & RoboClaw
 
 		
 	/**
