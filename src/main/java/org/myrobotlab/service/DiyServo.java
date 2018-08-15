@@ -162,7 +162,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
               double output = pid.getOutput(pidKey) / deltaVelocity;
 
-              motorControl.setPowerLevel(output);
+              // motorControl.setPowerLevel(output);
               // log.debug(String.format("setPoint(%s), processVariable(%s),
               // output(%s)", setPoint, processVariable, output));
               if (output != lastOutput) {

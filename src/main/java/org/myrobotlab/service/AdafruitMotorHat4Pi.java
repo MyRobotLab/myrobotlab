@@ -16,11 +16,10 @@ import java.util.Set;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -150,7 +149,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     super(n);
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    powerMapper = new Mapper(-1.0, 1.0, -1.0, 1.0);
+    map(-1.0, 1.0, -1.0, 1.0);
   }
 
   public void onRegistered(ServiceInterface s) {
@@ -265,7 +264,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
 
     Class<?> type = mc.getClass();
 
-    double powerOutput = powerMapper.calcOutput(mc.getPowerLevel ());
+    double powerOutput = calcOutput((AbstractMotor)mc);
     // log.info(String.format("powerOutput = %.3f", powerOutput));
 
     // Clamp powerOutput between -1 and 1
