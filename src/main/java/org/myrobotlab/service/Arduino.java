@@ -36,6 +36,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperInterface;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
@@ -2328,6 +2330,20 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void setZeroPoint(EncoderControl encoder) {
     // send the set zero point command to the encoder
     msg.setZeroPoint(getDeviceId(encoder.getName()));
+  }
+
+  @Override
+  public MapperInterface getDefaultMapper() {
+    // best guess :P
+    MapperLinear mapper = new MapperLinear(-1, 1, 0, 255);
+    return mapper;
+  }
+
+  // not used currently - should be refactored to use these methods for motor control
+  @Override
+  public double motorCalcOutput(MotorControl mc) {
+    double value = mc.calcControllerOutput();
+    return value;
   }
   
 }
