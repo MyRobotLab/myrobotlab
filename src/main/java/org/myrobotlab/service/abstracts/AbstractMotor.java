@@ -35,6 +35,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.joystick.Component;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MapperInterface;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
@@ -87,22 +89,11 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // feedback
   Double positionCurrent; // aka currentPos
-
-  // input range
-  Double minX;
-  Double maxX;
-
-  // output range
-  Double minY;
-  Double maxY;
-
-  // min max of input
-  Double minInput;
-  Double maxInput;
-
-  // min max of output
-  Double minOutput;
-  Double maxOutput;
+  
+  /**
+   * a new "un-set" mapper for merging with default motorcontroller
+   */
+  MapperInterface mapper = new MapperLinear();
 
   boolean inverted = false;
 
@@ -195,16 +186,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // ---- Servo begin ---------
   public void setMinMaxOutput(double min, double max) {
-    minOutput = min;
-    maxOutput = max;
+    mapper.setMinMaxOutput(min, max);
     broadcastState();
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    this.minX = minX;
-    this.maxX = maxX;
-    this.minY = minY;
-    this.maxY = maxY;
+    mapper.map(minX, maxX, minY, maxY);
     broadcastState();
   }
 
@@ -349,6 +336,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     this.controller = controller;
     this.controllerName = controller.getName();
+    this.mapper.merge(controller.getDefaultMapper());
 
     broadcastState();
     controller.attach(this);
@@ -384,37 +372,19 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
     return ret;
   }
-
-  public Double getMinX() {
-    return minX;
+  
+  // FIXME promote to interface
+  public MapperInterface getMapper() {
+    return mapper;
+  }
+  
+  // FIXME promote to interface
+  public void setMapper(MapperInterface mapper) {
+    this.mapper = mapper;
   }
 
-  public Double getMaxX() {
-    return maxX;
+  // FIXME promot to interface
+  public double calcControllerOutput() {
+    return mapper.calcOutput(getPowerLevel());
   }
-
-  public Double getMinY() {
-    return minY;
-  }
-
-  public Double getMaxY() {
-    return maxY;
-  }
-
-  public Double getMinInput() {
-    return minInput;
-  }
-
-  public Double getMaxInput() {
-    return maxInput;
-  }
-
-  public Double getMinOutput() {
-    return minOutput;
-  }
-
-  public Double getMaxOutput() {
-    return maxOutput;
-  }
-
 }

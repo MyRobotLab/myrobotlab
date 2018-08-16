@@ -132,4 +132,6 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 	 * unlocks the motor, so other commands can affect it
 	 */
 	void unlock();
+
+  double calcControllerOutput();
 }

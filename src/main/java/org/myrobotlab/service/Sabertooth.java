@@ -9,6 +9,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MapperInterface;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -51,7 +53,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   boolean setSaberToothBaud = false;
 
-  // motorPorts Promote ? - do you
+  // promote ?
   List<String> motorPorts = new ArrayList<String>();
 
   public final static int MOTOR1_FORWARD = 0;
@@ -68,7 +70,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   public Sabertooth(String n) {
     super(n);
-    // add motor ports the sabertooth supports
+    // setup config
     motorPorts.add("m1");
     motorPorts.add("m2");
     map(-1.0, 1.0, -127, 127);
@@ -84,39 +86,19 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     }
   }
 
-  // FIXME - checking min max could be done in abstract !!!
   public void driveBackwardsMotor1(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed", speed);
-      return;
-    }
     sendPacket(MOTOR1_BACKWARD, speed);
   }
 
-  // FIXME - checking min max could be done in abstract !!!
   public void driveBackwardsMotor2(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed", speed);
-      return;
-    }
     sendPacket(MOTOR2_BACKWARD, speed);
   }
 
-  // FIXME - checking min max could be done in abstract !!!
   public void driveForwardMotor1(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed", speed);
-      return;
-    }
     sendPacket(MOTOR1_FORWARD, speed);
   }
 
-  // FIXME - checking min max could be done in abstract !!!
   public void driveForwardMotor2(int speed) {
-    if (speed < 0 || speed > 127) {
-      error("invalid speed %s", speed);
-      return;
-    }
     sendPacket(MOTOR2_FORWARD, speed);
   }
 
@@ -218,10 +200,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     MotorPort motor = (MotorPort) motors.get(mc.getName());
     String port = motor.getPort();
 
-    /// double pwr = motor.getPowerLevel();
-    int power = (int) calcOutput((AbstractMotor) mc);
-    // int power = (int) (pwr * 127);
-    info("%s.move(%f) -> %s.motorMove(%d)", mc.getName(), mc.getPowerLevel(), getName(), power);
+    int power = (int) motorCalcOutput(mc);    
 
     log.info("motor {} power {}", mc.getName(), power);
 
