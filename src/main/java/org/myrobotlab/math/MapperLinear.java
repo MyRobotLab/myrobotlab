@@ -2,11 +2,8 @@ package org.myrobotlab.math;
 
 import java.io.Serializable;
 
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.WorkETest;
 import org.slf4j.Logger;
 
 public final class MapperLinear implements Serializable, MapperInterface {

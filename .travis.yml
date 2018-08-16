@@ -28,16 +28,16 @@ jdk:
 env:
   global:
 # AWS - secure: CPq2oomYvrYnhzd+H4HU2T0NfjGO48MvlJ/UWqvrD4j6IXIe2ybrwRWSJfcfbFgZA5csHBEF2VNDgZlGhDV5aSVyBVkqBM4LfhvGVZo31Z2QhFVm5pTV45LRaiqSLCi74RgJEsFJ9viW+MROoKtMbFzvP3kVqWm4VaAWJK5c4cA=
-  - 'SFTP_USER=[user]'
+#  - 'SFTP_USER=[user]'
 #  - 'SFTP_PASSWORD=[password]'
-  - 'SFTP_KEY=[base64-encoded-rsa-key]'
+#  - 'SFTP_KEY=[base64-encoded-rsa-key]'
 
-after_success:
-- echo "${SFTP_KEY}" | base64 --decode >/tmp/sftp_rsa
-- curl --ftp-create-dirs
-       -T filename
-       --key /tmp/sftp_rsa
-       sftp://${SFTP_USER}@example.com/directory/filename    
+# after_success:
+# - echo "${SFTP_KEY}" | base64 --decode >/tmp/sftp_rsa
+# - curl --ftp-create-dirs
+#       -T filename
+#       --key /tmp/sftp_rsa
+#       sftp://${SFTP_USER}@example.com/directory/filename    
        
        
        
