@@ -79,7 +79,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // ttsExeOutputFilePath + uuid + "0.AIFF");
       cmd = getOsTtsApp() + "\"" + toSpeak + "\"" + "-o " + filename;
     } else if (platform.isLinux()) {
-      cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
+      // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
+      String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
+      // Runtime.execute(args);
+      Runtime.exec(String.format("echo \"%s\" | festival --tts", furtherFiltered));
     }
 
     // log.info(cmd);
@@ -150,9 +153,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // FIXME - implement parse -v output
       addVoice("fred", "male", "en", "fred"); // in the interim added 1 voice
     } else  if (platform.isLinux()) {
-      // FIXME - implement
-      // festival load voice / add voice
-      log.error("implement festival");
+      addVoice("Linus", "male", "en", "festival");
     }
   }
 
