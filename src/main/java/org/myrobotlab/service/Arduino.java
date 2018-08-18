@@ -36,7 +36,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.math.MapperInterface;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.DeviceMapping;
@@ -2333,9 +2332,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   @Override
-  public MapperInterface getDefaultMapper() {
+  public org.myrobotlab.math.interfaces.Mapper getDefaultMapper() {
     // best guess :P
-    MapperLinear mapper = new MapperLinear(-1, 1, 0, 255);
+    MapperLinear mapper = new MapperLinear();
+    mapper.map(-1.0, 1.0, 0.0, 255.0);
     return mapper;
   }
 

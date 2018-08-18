@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -12,7 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
@@ -100,6 +98,8 @@ public class WorkETest {
     assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_20, sabertoothMsg));
 
     joystick.pressButton("a");
+    
+    Runtime.releaseAll();
 
   }
 

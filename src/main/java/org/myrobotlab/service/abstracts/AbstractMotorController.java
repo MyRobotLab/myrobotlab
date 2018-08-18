@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.math.MapperInterface;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -162,7 +162,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   }
   
   @Override
-  public MapperInterface getDefaultMapper() {
+  public Mapper getDefaultMapper() {
     return defaultMapper;
   }
   

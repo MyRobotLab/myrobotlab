@@ -35,8 +35,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.joystick.Component;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.MapperInterface;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
@@ -93,7 +93,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   /**
    * a new "un-set" mapper for merging with default motorcontroller
    */
-  MapperInterface mapper = new MapperLinear();
+  Mapper mapper = new MapperLinear();
 
   boolean inverted = false;
 
@@ -374,12 +374,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
   
   // FIXME promote to interface
-  public MapperInterface getMapper() {
+  public Mapper getMapper() {
     return mapper;
   }
   
   // FIXME promote to interface
-  public void setMapper(MapperInterface mapper) {
+  public void setMapper(Mapper mapper) {
     this.mapper = mapper;
   }
 
