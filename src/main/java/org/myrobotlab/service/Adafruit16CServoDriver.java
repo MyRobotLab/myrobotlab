@@ -23,8 +23,8 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperInterface;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -977,9 +977,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   // currently not a "real" motor control - it has to wait for merging of Servo & Motor
   @Override
-  public MapperInterface getDefaultMapper() {
+  public Mapper getDefaultMapper() {
     // best guess :P
-    MapperLinear mapper = new MapperLinear(-1, 1, 0, 255);
+    MapperLinear mapper = new MapperLinear();
+    mapper.map(-1.0, 1.0, 0.0, 255.0);
     return mapper;
   }
 
