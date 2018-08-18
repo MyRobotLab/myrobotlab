@@ -152,7 +152,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public void move(double powerInput) {
     info("%s.move(%.2f)", getName(), powerInput);
     this.powerInput = powerInput;
-    controller.motorMove(this);
+    if (controller != null)
+      controller.motorMove(this);
     broadcastState();
   }
 
