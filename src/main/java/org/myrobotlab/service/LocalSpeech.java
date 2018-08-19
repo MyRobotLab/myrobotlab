@@ -1,8 +1,6 @@
 package org.myrobotlab.service;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
@@ -76,7 +74,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
       // Runtime.execute(args);
       // Runtime.exec(String.format("bash -c echo \"%s\" | %s --tts", furtherFiltered, festivalPath));
-      Runtime.exec("bash", "-c", "echo\"" + furtherFiltered + "\" | festival --tts");
+      Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
     }
 
     
