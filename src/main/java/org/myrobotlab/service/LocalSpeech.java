@@ -32,9 +32,19 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
+  
+  /**
+   * default path of festival
+   */
+  String festivalPath = "/usr/bin/festival";
+  
 
   public LocalSpeech(String n) {
     super(n);
+  }
+  
+  public void setFestivalPath(String path) {
+	  festivalPath = path;
   }
 
   static public ServiceType getMetaData() {
@@ -48,21 +58,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     return meta;
   }
 
-  public String getOsTtsApp() {
-    Platform platform = Platform.getLocalInstance();
-    if (platform.isWindows()) {
-      return System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe";
-    } else if (platform.isMac()) {
-      return "say";
-    } else if (platform.isLinux()) {
-      return "festival";
-    }
-    log.error("platform {} not implemented", platform);
-    return null;
-  }
 
-  public String getTtsCmdLine(String toSpeak) throws UnsupportedEncodingException {
-    String cmd = null;
+  @Override
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
+
+    String localFileName = getLocalFileName(toSpeak);
 
     Platform platform = Runtime.getPlatform();
     String filename = getLocalFileName(toSpeak);
@@ -73,30 +73,28 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // so here we have to trim it off
 
       filename = filename.substring(0, filename.length() - 5);
-      cmd = getOsTtsApp() + " -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + filename + " \"" + toSpeak + " \"";
+      String cmd = "tts.exe -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + filename + " \"" + toSpeak + " \"";
+      Runtime.execute("cmd.exe", "/c", cmd);
     } else if (platform.isMac()) {
       // cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o",
       // ttsExeOutputFilePath + uuid + "0.AIFF");
-      cmd = getOsTtsApp() + "\"" + toSpeak + "\"" + "-o " + filename;
+      String cmd = "say \"" + toSpeak + "\"" + "-o " + filename;
+      Runtime.execute(cmd);
     } else if (platform.isLinux()) {
       // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
       // Runtime.execute(args);
-      Runtime.exec(String.format("echo \"%s\" | festival --tts", furtherFiltered));
+      // Runtime.exec(String.format("bash -c echo \"%s\" | %s --tts", furtherFiltered, festivalPath));
+      Runtime.exec("bash", "-c", "echo", "\"" + furtherFiltered + "\"", "|", "festival --tts");
     }
 
-    // log.info(cmd);
-    return cmd;
-  }
-
-  @Override
-  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
-
-    String localFileName = getLocalFileName(toSpeak);
-
+    
+    
+    /*
     String cmd = getTtsCmdLine(toSpeak);
 
-    Runtime.execute("cmd.exe", "/c", cmd);
+    
+    */
 
     return new AudioData(localFileName);
   }
@@ -129,7 +127,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     String voicesText = null;
     
     if (platform.isWindows()) {
-      voicesText = Runtime.execute(getOsTtsApp(), "-V");
+      voicesText = Runtime.execute("tts.exe -V");
       log.info("cmd {}", voicesText);
 
       String[] lines = voicesText.split(System.getProperty("line.separator"));
@@ -148,7 +146,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
-      voicesText = Runtime.execute(getOsTtsApp(), "-v"); 
+      voicesText = Runtime.execute("say -v"); 
 
       // FIXME - implement parse -v output
       addVoice("fred", "male", "en", "fred"); // in the interim added 1 voice
@@ -160,16 +158,18 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    // Runtime.start("gui", "SwingGui");
+    Runtime.start("gui", "SwingGui");
 
     LocalSpeech speech = (LocalSpeech) Runtime.start("speech", "LocalSpeech");
     // speech.parseEffects("#OINK##OINK# hey I thought #DOH# that was funny
     // #LAUGH01_F# very funny");
     // speech.getVoices();
     // speech.setVoice("1");
+    /*
     speech.speak(String.format("hello yes yes yes, my voice name is %s", speech.getVoice().getName()));
     speech.speakBlocking("I am your R 2 D 2 here me speak #R2D2#");
     speech.speak("unicode éléphant");
+    */
 
   }
 
