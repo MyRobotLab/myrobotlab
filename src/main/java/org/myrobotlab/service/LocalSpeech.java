@@ -33,18 +33,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
   
-  /**
-   * default path of festival
-   */
-  String festivalPath = "/usr/bin/festival";
-  
 
   public LocalSpeech(String n) {
     super(n);
-  }
-  
-  public void setFestivalPath(String path) {
-	  festivalPath = path;
   }
 
   static public ServiceType getMetaData() {
@@ -85,7 +76,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
       // Runtime.execute(args);
       // Runtime.exec(String.format("bash -c echo \"%s\" | %s --tts", furtherFiltered, festivalPath));
-      Runtime.exec("bash", "-c", "echo", "\"" + furtherFiltered + "\"", "|", "festival --tts");
+      Runtime.exec("bash", "-c", "echo\"" + furtherFiltered + "\" | festival --tts");
     }
 
     
