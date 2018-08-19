@@ -85,7 +85,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
       // Runtime.execute(args);
       // Runtime.exec(String.format("bash -c echo \"%s\" | %s --tts", furtherFiltered, festivalPath));
-      Runtime.execute("echo", "\"" + furtherFiltered + "\"", "|", "festival --tts");
+      Runtime.exec("bash", "-c", "echo", "\"" + furtherFiltered + "\"", "|", "festival --tts");
     }
 
     
