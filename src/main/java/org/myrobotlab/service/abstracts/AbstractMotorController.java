@@ -31,6 +31,10 @@ public abstract class AbstractMotorController extends Service implements MotorCo
       defaultMapper = new MapperLinear();
     }
     defaultMapper.map(minX, maxX, minY, maxY);
+    // we want to setMap because we merge with motorControl values
+    // which initially hold limits - and we don't want to int
+    // defaultMapper.setMap(minX, maxX, minY, maxY);
+    // defaultMapper.setMinMaxOutput(minY, maxY);
     broadcastState();
   }
   
