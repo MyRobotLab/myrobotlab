@@ -46,6 +46,11 @@ public final class MapperLinear implements Serializable, Mapper {
   final public double calcOutput(Double in) {
 
     double c = 0.0;
+    
+    if (in == null) {
+      log.warn("calcOutput(null)");
+      return c;
+    }
 
     boolean willCalculate = (minX != null && maxX != null && minY != null && maxY != null);
 
@@ -136,9 +141,14 @@ public final class MapperLinear implements Serializable, Mapper {
    * @see org.myrobotlab.math.MapperInterface#setMinMaxOutput(double, double)
    */
   @Override
-  public void setMinMaxOutput(Double minOutput, Double maxOutput) {
-    this.minOutput = minOutput;
-    this.maxOutput = maxOutput;
+  public void setMinMaxOutput(Double min, Double max) {
+    if (min != null && max != null && max < min) {
+      double t = min;
+      min = max;
+      max = t;
+    }
+    minOutput = min;
+    maxOutput = max;
   }
 
   /*
@@ -167,13 +177,18 @@ public final class MapperLinear implements Serializable, Mapper {
    * @see org.myrobotlab.math.MapperInterface#setMinMaxInput(double, double)
    */
   @Override
-  public void setMinMaxInput(Double minInput, Double maxInput) {
-    this.minInput = minInput;
-    this.maxInput = maxInput;
+  public void setMinMaxInput(Double min, Double max) {
+    if (min != null && max != null && max < min) {
+      double t = min;
+      min = max;
+      max = t;
+    }
+    this.minInput = min;
+    this.maxInput = max;
   }
 
   public String toString() {
-    return String.format(" < i < %.2f => map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f ", minInput, maxInput, minX, maxX, minY, maxY, minOutput, maxOutput);
+    return String.format(" %.2f < i < %.2f => map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f ", minInput, maxInput, minX, maxX, minY, maxY, minOutput, maxOutput);
   }
 
   /*
@@ -232,41 +247,47 @@ public final class MapperLinear implements Serializable, Mapper {
     this.minY = minY;
     this.maxY = maxY;
 
-    // if clip values are not set (only if they are not set) - set them
-    // not need with new setMap function
-    /*
-    if (minInput == null)
-      minInput = minX;
-    if (maxInput == null)
-      maxInput = maxX;
-    if (minOutput == null)
-      minOutput = minY;
-    if (maxOutput == null)
-      maxOutput = maxY;
-      */
-    minInput = minX;
-    maxInput = maxX;
-    minOutput = minY;
-    maxOutput = maxY;
+    setMinMaxInput(minX, maxX);
+    setMinMaxOutput(minY, maxY);
   }
 
   @Override
   public void setMaxInput(Double max) {
+    if (max != null && minInput != null && max < minInput) {
+      maxInput = minInput;
+      minInput = max;
+      return;
+    }
     maxInput = max;
   }
 
   @Override
   public void setMaxOutput(Double max) {
+    if (max != null && minOutput != null && max < minOutput) {
+      maxOutput = minOutput;
+      minOutput = max;
+      return;
+    }
     maxOutput = max;
   }
 
   @Override
   public void setMinInput(Double min) {
+    if (min != null && maxInput != null && min > maxInput) {
+      minInput = maxInput;
+      maxInput = min;
+      return;
+    }
     minInput = min;
   }
 
   @Override
   public void setMinOutput(Double min) {
+    if (min != null && maxOutput != null && min > maxOutput) {
+      minOutput = maxOutput;
+      maxOutput = min;
+      return;
+    }
     minOutput = min;
   }
 

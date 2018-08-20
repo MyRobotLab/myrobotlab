@@ -21,10 +21,14 @@ public class MapperLinearTest {
     mapper.map(-1.0, 1.0, -1.0, 1.0);
     double result = mapper.calcOutput(0.5);
     assertEquals(0.5, result, 0);
-    mapper.map(-1.0, 1.0, 1.0, -1.0);
-    result = mapper.calcOutput(0.5);
-    assertEquals(-0.5, result, 0);
+    
+    mapper.setMap(-1.0, 1.0, 1.0, -1.0);
+    assertEquals(-0.5, mapper.calcOutput(0.5), 0);
 
+    mapper.map(-1.0, 1.0, 1.0, -1.0);
+    assertEquals(-0.5, mapper.calcOutput(0.5), 0);
+    mapper.setMinMaxOutput(null, null);
+    assertEquals(-0.5, mapper.calcOutput(0.5), 0);
   }
 
   @Test
@@ -144,10 +148,35 @@ public class MapperLinearTest {
 
   @Test
   public void testMerge() {
-    MapperLinear controller = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
+    
     MapperLinear control = new MapperLinear();
     
+    // the "preferred" default of a motor control
+    // it has no idea what controller it will interface with - but "wants" to have a standard
+    // front end map of -1.0 to 1.0 
+    control.map(-1.0, 1.0, null, null);
+    
+    // sabertooth
+    MapperLinear controller = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
+    
     control.merge(controller);
+    
+    assertEquals( 127.0, control.getMaxOutput(), 0);
+    assertEquals(-127.0, control.getMinOutput(), 0);
+    
+    assertEquals(0.0, control.calcOutput(null), 0);
+    assertEquals(127.0, control.calcOutput(3.0), 0);
+    assertEquals(-127.0, control.calcOutput(-3.0), 0);
+    
+    // use case user has to limit output - important !!!
+    control.setMinMaxOutput(-34.0, 38.0);
+    assertEquals(38.0, control.calcOutput(1.0), 0);
+    assertEquals(-34.0, control.calcOutput(-1.0), 0);
+    log.info("here");
+    
+    // TODO - get controller map for motor x ... it should == control map
+    
+    // TODO check for preservation of motor control limits ...
     
     
   }

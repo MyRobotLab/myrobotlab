@@ -109,6 +109,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public AbstractMotor(String n) {
     super(n);
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    // "top" half of the mapper is set by the control
+    // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same input limits
+    // "bottom" half of the mapper will be set by the controller
+    mapper.map(-1.0, 1.0, null, null);
   }
 
   public void onRegistered(ServiceInterface s) {
