@@ -1,5 +1,9 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,10 +21,10 @@ public class WorkETest {
 
   static WorkE worke = null;
   static SwingGui swing = null;
+  static Serial uart = null;
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-
     if (!Runtime.isHeadless()) {
       // swing = (SwingGui) Runtime.start("swing", "SwingGui");
     }
@@ -28,6 +32,7 @@ public class WorkETest {
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
+    // Runtime.shutdown(); - this shuts down junit which will be considered a "failure"
   }
 
   @Before
@@ -37,6 +42,11 @@ public class WorkETest {
   @After
   public void tearDown() throws Exception {
   }
+  
+  final static byte[] M1_FORWARD_POWER_LEVEL_3 = new byte[] {-86, -128, 0, 3};
+  final static byte[] M1_FORWARD_POWER_LEVEL_6 = new byte[] {3, -128, 0, 6};
+  final static byte[] M1_FORWARD_POWER_LEVEL_12 = new byte[] {6, -128, 0, 12};
+  final static byte[] M1_FORWARD_POWER_LEVEL_20 = new byte[] {12, -128, 0, 20};
 
   @Test
   public final void integrationTest() throws Exception {
@@ -45,53 +55,57 @@ public class WorkETest {
     // "starting"
     worke = (WorkE) Runtime.create("worke", "WorkE");
 
-    // opportunity to do substitutions
-    // Joystick joy = (Joystick)Runtime.start("custom", "Joystick");
-    // worke.setJoystick(joy);
-
-    // set configuration
-    // worke.virtualize("someController.json");
-    worke.virtualize();
-
-    // worke.setLeftAxis(leftAxis);
-    Joystick joystick = worke.getJoystick();
-    // log.info("{}", Arrays.toString(joystick.getControllerNames()));
-    // joystick.setController("RumblePad");
-
-    // worke.setJoystickControllerIndex(3); // TODO by name ?
+    // opportunity to do substitutions - with create
+    // e.g. - worke.setAxisLeft("zz");
+   
+    // virtualize for unit testing
+    uart = worke.virtualize();
 
     // start the services
     worke.startService();
 
-    Runtime.start("gui", "SwingGui");
-
     // attach with existing configuration
+    // can be skipped if user wants to do all the attaching manually
     worke.attach();
 
-    // connect
+    // connect to "virtual" hardware
     worke.connect();
 
-    // test
+    // get left axis of joystick
     String lefAxis = worke.getAxisLeft();
-    String righAxis = worke.getAxisRight();
+    
+    byte[] sabertoothMsg = new byte[4];
 
+    // get virtual joystick
+    // and move work-e around 
+    Joystick joystick = worke.getJoystick();
+
+    // joystick and validating appropriate power level
     joystick.moveTo(lefAxis, 0.16);
+    uart.read(sabertoothMsg);
+    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_3, sabertoothMsg));
+    
     joystick.moveTo(lefAxis, 0.32);
+    uart.read(sabertoothMsg);
+    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_6, sabertoothMsg));
+       
     joystick.moveTo(lefAxis, 0.64);
+    uart.read(sabertoothMsg);
+    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_12, sabertoothMsg));
+    
     joystick.moveTo(lefAxis, 1.0);
+    uart.read(sabertoothMsg);
+    assertTrue(Arrays.equals(M1_FORWARD_POWER_LEVEL_20, sabertoothMsg));
 
     joystick.pressButton("a");
+    
+    Runtime.releaseAll();
 
   }
 
   public static void main(String[] args) {
     try {
-      LoggingFactory.init("INFO");
-      boolean quitNow = false;
-
-      if (quitNow) {
-        return;
-      }
+      LoggingFactory.init("WARN");
 
       // run junit as java app
       JUnitCore junit = new JUnitCore();

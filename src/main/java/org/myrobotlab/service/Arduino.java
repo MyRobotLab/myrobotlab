@@ -36,6 +36,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.Pin;
@@ -2220,12 +2221,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       LoggingFactory.init(Level.INFO);
       log.info("{}", "nano".hashCode());
 
-      boolean virtual = false;
+      boolean virtual = true;
       boolean isDone = true;
       String port = "COM10";
       
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
       Serial serial = (Serial)Runtime.start("serial", "Serial");
       log.info("{}", serial.getPortNames());
       // Runtime.start("cli", "Cli");
@@ -2328,6 +2330,21 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void setZeroPoint(EncoderControl encoder) {
     // send the set zero point command to the encoder
     msg.setZeroPoint(getDeviceId(encoder.getName()));
+  }
+
+  @Override
+  public org.myrobotlab.math.interfaces.Mapper getDefaultMapper() {
+    // best guess :P
+    MapperLinear mapper = new MapperLinear();
+    mapper.map(-1.0, 1.0, 0.0, 255.0);
+    return mapper;
+  }
+
+  // not used currently - should be refactored to use these methods for motor control
+  @Override
+  public double motorCalcOutput(MotorControl mc) {
+    double value = mc.calcControllerOutput();
+    return value;
   }
   
 }

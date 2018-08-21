@@ -259,7 +259,7 @@ public class RoboClaw extends AbstractMotorController
 		String port = motor.getPort();
 
 		/// double pwr = motor.getPowerLevel();
-		int power = (int)calcOutput(motor);
+		int power = (int)motorCalcOutput(motor);
 		// int power = (int) (pwr * 127);
 
 		if (port.equals("m1")) {

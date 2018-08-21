@@ -28,6 +28,7 @@ package org.myrobotlab.service.interfaces;
 import java.util.List;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.math.interfaces.Mapper;
 
 public interface MotorController extends Attachable {
   
@@ -78,5 +79,9 @@ public interface MotorController extends Attachable {
 	 * @return
 	 */
 	List<String> getPorts();
+
+  public Mapper getDefaultMapper();
+  
+  public double motorCalcOutput(MotorControl mc);
 
 }

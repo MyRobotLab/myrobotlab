@@ -264,7 +264,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
 
     Class<?> type = mc.getClass();
 
-    double powerOutput = calcOutput((AbstractMotor)mc);
+    double powerOutput = motorCalcOutput(mc);
     // log.info(String.format("powerOutput = %.3f", powerOutput));
 
     // Clamp powerOutput between -1 and 1
