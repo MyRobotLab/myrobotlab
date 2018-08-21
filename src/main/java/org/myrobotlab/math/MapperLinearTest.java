@@ -79,7 +79,21 @@ public class MapperLinearTest {
     assertEquals(0.7, mapper2.calcOutput(0.7), 0);
     assertEquals(-0.5, mapper2.calcOutput(-0.5), 0);
     assertEquals(0.7, mapper2.calcOutput(1.5), 0);
-
+    
+    // asymmetrical 
+    MapperLinear mapper3 = new MapperLinear();
+    mapper3.map(-1.0, 1.0, 0.0, 90.0);
+    // mapper3.setLimits(min, max);
+    log.info("{}", mapper3.calcOutput(0.3));
+    assertEquals(58.5, mapper3.calcOutput(0.3), 0);
+    log.info("{}", mapper3.calcOutput(0.7));
+    assertEquals(76.5, mapper3.calcOutput(0.7), 0);
+    mapper3.setInverted(true);
+    
+    log.info("{}", mapper3.calcOutput(0.3));
+    assertEquals(31.499999999999996, mapper3.calcOutput(0.3), 0);
+    log.info("{}", mapper3.calcOutput(0.7));
+    assertEquals(13.500000000000002, mapper3.calcOutput(0.7), 0);
   }
 
   @Test
