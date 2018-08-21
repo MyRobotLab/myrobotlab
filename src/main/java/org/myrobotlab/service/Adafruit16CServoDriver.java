@@ -23,6 +23,9 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -286,6 +289,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     createPinList();
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real" motor controller because
+    // it doesn't inherit from AbstractMotorController & Servo's aren't merged with Motors
+    // it will need to wait for the grand unification of Servos & Motors
   }
 
   public void onRegistered(ServiceInterface s) {
@@ -503,7 +509,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     // double powerOutput = mc.getPowerOutput();
 
     // this is guaranteed to be between -1.0 and 1.0
-    double powerLevel = mc.getPowerLevel();
+    // double powerLevel = mc.getPowerLevel();
+    
+    double powerLevel = motorCalcOutput(mc);
 
     if (Motor.class == type) {
       Motor motor = (Motor) mc;
@@ -959,6 +967,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
+  // currently not a "real" motor control - it has to wait for merging of Servo & Motor
   @Override
   public List<String> getPorts() {
     // we use pins not ports
@@ -966,4 +975,20 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return ret;
   }
 
+  // currently not a "real" motor control - it has to wait for merging of Servo & Motor
+  @Override
+  public Mapper getDefaultMapper() {
+    // best guess :P
+    MapperLinear mapper = new MapperLinear();
+    mapper.map(-1.0, 1.0, 0.0, 255.0);
+    return mapper;
+  }
+
+  // not used currently - should be refactored to use these methods for motor control
+  @Override
+  public double motorCalcOutput(MotorControl mc) {
+    double value = mc.calcControllerOutput();
+    return value;
+  }
+  
 }

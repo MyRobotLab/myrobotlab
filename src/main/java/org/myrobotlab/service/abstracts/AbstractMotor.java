@@ -35,6 +35,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.joystick.Component;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
@@ -87,24 +89,11 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // feedback
   Double positionCurrent; // aka currentPos
-
-  // input range
-  Double minX;
-  Double maxX;
-
-  // output range
-  Double minY;
-  Double maxY;
-
-  // min max of input
-  Double minInput;
-  Double maxInput;
-
-  // min max of output
-  Double minOutput;
-  Double maxOutput;
-
-  boolean inverted = false;
+  
+  /**
+   * a new "un-set" mapper for merging with default motorcontroller
+   */
+  Mapper mapper = new MapperLinear();
 
   transient MotorEncoder encoder = null;
 
@@ -118,6 +107,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public AbstractMotor(String n) {
     super(n);
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    // "top" half of the mapper is set by the control
+    // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same input limits
+    // "bottom" half of the mapper will be set by the controller
+    mapper.map(-1.0, 1.0, null, null);
   }
 
   public void onRegistered(ServiceInterface s) {
@@ -147,7 +140,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public boolean isInverted() {
-    return inverted;
+    return mapper.isInverted();
   }
 
   @Override
@@ -190,22 +183,18 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void setInverted(boolean invert) {
-    this.inverted = invert;
+    mapper.setInverted(invert);
     broadcastState();
   }
 
   // ---- Servo begin ---------
   public void setMinMaxOutput(double min, double max) {
-    minOutput = min;
-    maxOutput = max;
+    mapper.setLimits(min, max);
     broadcastState();
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    this.minX = minX;
-    this.maxX = maxX;
-    this.minY = minY;
-    this.maxY = maxY;
+    mapper.map(minX, maxX, minY, maxY);
     broadcastState();
   }
 
@@ -350,6 +339,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     this.controller = controller;
     this.controllerName = controller.getName();
+    this.mapper.merge(controller.getDefaultMapper());
 
     broadcastState();
     controller.attach(this);
@@ -385,37 +375,19 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
     return ret;
   }
-
-  public Double getMinX() {
-    return minX;
+  
+  // FIXME promote to interface
+  public Mapper getMapper() {
+    return mapper;
+  }
+  
+  // FIXME promote to interface
+  public void setMapper(Mapper mapper) {
+    this.mapper = mapper;
   }
 
-  public Double getMaxX() {
-    return maxX;
+  // FIXME promot to interface
+  public double calcControllerOutput() {
+    return mapper.calcOutput(getPowerLevel());
   }
-
-  public Double getMinY() {
-    return minY;
-  }
-
-  public Double getMaxY() {
-    return maxY;
-  }
-
-  public Double getMinInput() {
-    return minInput;
-  }
-
-  public Double getMaxInput() {
-    return maxInput;
-  }
-
-  public Double getMinOutput() {
-    return minOutput;
-  }
-
-  public Double getMaxOutput() {
-    return maxOutput;
-  }
-
 }

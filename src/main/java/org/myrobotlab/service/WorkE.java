@@ -8,6 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.data.JoystickData;
 import org.slf4j.Logger;
 
@@ -21,11 +22,17 @@ public class WorkE extends Service {
   String axisLeft = "y";
   String axisRight = "rz";
 
-  // peers
+  // peer names
+  final public static String MOTOR_LEFT = "motorLeft";
+  final public static String MOTOR_RIGHT = "motorRight";
+  final public static String JOYSTICK = "joystick";
+  final public static String CONTROLLER = "controller";
+
+  // peers references
   private transient Joystick joystick = null;
   private transient AbstractMotor motorLeft = null;
   private transient AbstractMotor motorRight = null;
-  private transient Sabertooth sabertooth = null;
+  private transient AbstractMotorController controller = null;
 
   // joystick controller default
   String joystickControllerName = "Rumble";
@@ -59,27 +66,22 @@ public class WorkE extends Service {
   // FIXME - no defaults ?
   public void attach() throws Exception {
     // FIXME - do all createPeers here ????
-    
+    motorLeft = (AbstractMotor) createPeer("motorLeft");
+    motorRight = (AbstractMotor) createPeer("motorRight");
+
     // joystick.setController(joystickControllerIndex);
     joystick.setController(joystickControllerName);
     ((MotorPort) motorLeft).setPort(motorPortLeft);
     ((MotorPort) motorRight).setPort(motorPortRight);
-    sabertooth.attach(motorLeft);
-    sabertooth.attach(motorRight);
+
+    controller.attach(motorLeft);
+    controller.attach(motorRight);
+
     motorLeft.attach(joystick.getAxis(axisLeft));
     motorRight.attach(joystick.getAxis(axisRight));
-    // sabertooth range is -127 to 127
-    // re-mapping
-    // joystick.map("y", -1, 1, -20, 20);
-    // sabertooth.map(-1, 1, -20, 20);
-    // motorLeft.map(-1.0, 1.0, -20, 20);
-    // motorRight.map(-1.0, 1.0, -20, 20);
-    // motorLeft.setMinMaxOutput(-20, 20);
-    // motorLeft.setMinMax(min, max);
-    // motorRight.setMinMax(min, max);
-    // joystick.map(axisLeft, -1.0, 1.0, -127.0, 127.0);
-    // joystick.map(axisRight, -1.0, 1.0, -127.0, 127.0);
+
     map(minX, maxX, minY, maxY);
+    setInverted(true);
   }
 
   public void connect() throws Exception {
@@ -87,8 +89,8 @@ public class WorkE extends Service {
   }
 
   public void connect(String port) throws Exception {
-    sabertooth = (Sabertooth) startPeer("sabertooth");
-    sabertooth.connect(port);
+    controller = (AbstractMotorController) startPeer("controller");
+    controller.connect(port);
   }
 
   public String getAxisLeft() {
@@ -111,8 +113,8 @@ public class WorkE extends Service {
     return motorRight;
   }
 
-  public Sabertooth getSabertooth() {
-    return sabertooth;
+  public AbstractMotorController getController() {
+    return controller;
   }
 
   public String getSerialPort() {
@@ -120,14 +122,15 @@ public class WorkE extends Service {
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
+    // GOOD - guaranteed to get "a" motor ... probably even the "right" motor !!
+    motorLeft = (AbstractMotor) createPeer("motorLeft");
+    motorRight = (AbstractMotor) createPeer("motorRight");
+
     // set
     this.minX = minX;
     this.maxX = maxX;
     this.minY = minY;
     this.maxY = maxY;
-    // GOOD - guaranteed to get "a" motor ... probably even the "right" motor !!
-    motorLeft = (AbstractMotor) createPeer("motorLeft");
-    motorRight = (AbstractMotor) createPeer("motorRight");
 
     motorLeft.map(minX, maxX, minY, maxY);
     motorRight.map(minX, maxX, minY, maxY);
@@ -185,8 +188,8 @@ public class WorkE extends Service {
     this.motorRight = motorRight;
   }
 
-  public void setSabertooth(Sabertooth sabertooth) {
-    this.sabertooth = sabertooth;
+  public void setController(AbstractMotorController controller) {
+    this.controller = controller;
   }
 
   // FIXME - configuration builder ?
@@ -199,7 +202,7 @@ public class WorkE extends Service {
       super.startService();
       // GOOD ? - start "typeless" (because type is defined in meta data)
       // services here
-      sabertooth = (Sabertooth) startPeer("sabertooth");
+      controller = (AbstractMotorController) startPeer("controller");
       joystick = (Joystick) startPeer("joystick");
       motorLeft = (AbstractMotor) startPeer("motorLeft");
       motorRight = (AbstractMotor) startPeer("motorRight");
@@ -209,16 +212,22 @@ public class WorkE extends Service {
     }
   }
 
-  public void virtualize() throws IOException {
-    // sabertooth virtualization
-    Serial uart = Serial.connectVirtualUart(serialPort);
-    uart.logRecv(true);// # dump bytes sent from sabertooth
+  public Serial virtualize() throws IOException {
+    return virtualize("src/test/resources/WorkE/joy-virtual-Logitech Cordless RumblePad 2-3.json");
+  }
 
-    // FIXME - this is "test" virtualization vs generalized virtualization - 
+  public Serial virtualize(String virtualJoystickDefinitionFile) throws IOException {
+
+    // controller virtualization
+    Serial uart = Serial.connectVirtualUart(serialPort);
+    uart.logRecv(true);// # dump bytes sent from controller
+
+    // FIXME - this is "test" virtualization vs generalized virtualization -
     // rumble-pad tele-operation virtualization
     joystick = (Joystick) createPeer("joystick");
-    joystick.loadVirtualController("src/test/resources/WorkE/joy-virtual-Logitech Cordless RumblePad 2-3.json");
+    joystick.loadVirtualController(virtualJoystickDefinitionFile);
     broadcastState();
+    return uart;
   }
 
   /**
@@ -236,7 +245,7 @@ public class WorkE extends Service {
     // GOOD "TYPE" INFO ONLY IN META DATA - this allows user to switch types
     // safely
     // it becomes "default" data - which was its intent
-    meta.addPeer("sabertooth", "Sabertooth", "motor controller");
+    meta.addPeer("controller", "Sabertooth", "motor controller");
     meta.addPeer("motorLeft", "MotorPort", "left motor");
     meta.addPeer("motorRight", "MotorPort", "right motor");
     meta.addPeer("joystick ", "Joystick", "joystick control");
@@ -250,6 +259,7 @@ public class WorkE extends Service {
     try {
 
       LoggingFactory.init(Level.WARN);
+      boolean virtualize = false;
 
       // FIXME - should be allowed to do this..
       // Joystick.getControllerNames();
@@ -257,12 +267,14 @@ public class WorkE extends Service {
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
       WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       // FIXME joystick.virtualize();
       // FIXME - make joystick.setDeadzone("x", 30, 30) -> setDeadzone(10)
 
       // worke.setPort("/dev/ttyUSB0");
-      worke.virtualize();
+      if (virtualize) {
+        worke.virtualize();
+      }
       // FIXME - this is 'really' a motorcontrol thing ? how would a builder
       // handle it ?
       // !!! Configuration !!!!
@@ -282,28 +294,27 @@ public class WorkE extends Service {
       worke.attach();
       worke.connect();
 
-      // x
-      Joystick joystick = worke.getJoystick();
-      joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.08F));
-      joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.16F));
-      joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.32F));
-      joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.64F));
-      joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 1.0F));
-      // FIXME - WOW - axis mapping uses "send" and no "route" :P ... I think
-      // this is to do filtering
-      // - the result is "invoke" on the joystick doesn't activate it !
-      // to "simulate" - you'd want inject the data into the joystick polling
-      // thread
-      // FIXME - the following do "nothing"
-      joystick.invoke("publishJoystickInput", new JoystickData("y", 0.25F));
-      joystick.invoke("publishJoystickInput", new JoystickData("y", 1.0F));
-
+      if (virtualize) {
+        Joystick joystick = worke.getJoystick();
+        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.08F));
+        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.16F));
+        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.32F));
+        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.64F));
+        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 1.0F));
+        // FIXME - WOW - axis mapping uses "send" and no "route" :P ... I think
+        // this is to do filtering
+        // - the result is "invoke" on the joystick doesn't activate it !
+        // to "simulate" - you'd want inject the data into the joystick polling
+        // thread
+        // FIXME - the following do "nothing"
+        joystick.invoke("publishJoystickInput", new JoystickData("y", 0.25F));
+        joystick.invoke("publishJoystickInput", new JoystickData("y", 1.0F));
+      }
       // Runtime.start("servo", "Servo");
       // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
-      log.error("main threw", e);
+      log.error("work-e no worky !", e);
     }
   }
-
 }

@@ -31,7 +31,6 @@ import org.myrobotlab.sensor.EncoderPublisher;
 
 public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
   
-
   void attachMotorController(MotorController controller) throws Exception;
 
 	void detachMotorController(MotorController controller);
@@ -132,4 +131,6 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 	 * unlocks the motor, so other commands can affect it
 	 */
 	void unlock();
+
+  double calcControllerOutput();
 }

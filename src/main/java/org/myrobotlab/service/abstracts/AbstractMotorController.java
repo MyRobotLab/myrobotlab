@@ -6,7 +6,8 @@ import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Motor;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -18,96 +19,30 @@ public abstract class AbstractMotorController extends Service implements MotorCo
 
   private static final long serialVersionUID = 1L;
   
-  // @Deprecated // use MotorControl's powerMapper as its "per" Motor ! - this is global :P
-  // protected Mapper powerMapper = null;
+  MapperLinear defaultMapper;
   
-  /**
-   * default mapping and limits !
-   * This will be overriden by the AbstractMotor's values (if set)
-   */
-  // input range
-  Double minX = -1.0;
-  Double maxX = 1.0;
-
-  // output range
-  Double minY = -1.0;
-  Double maxY = 1.0;
-  
-  // min max of input
-  Double minInput = null;
-  Double maxInput = null;
-
-  // min max of output
-  Double minOutput = null;
-  Double maxOutput = null;
-
   public AbstractMotorController(String reservedKey) {
     super(reservedKey);    
   }
   
   // setting default map values
   public void map(double minX, double maxX, double minY, double maxY) {
-    this.minX = minX;
-    this.maxX = maxX;
-    this.minY = minY;
-    this.maxY = maxY;
+    if (defaultMapper == null) {
+      defaultMapper = new MapperLinear();
+    }
+    defaultMapper.map(minX, maxX, minY, maxY);
+    // we want to setMap because we merge with motorControl values
+    // which initially hold limits - and we don't want to int
+    // defaultMapper.setMap(minX, maxX, minY, maxY);
+    // defaultMapper.setMinMaxOutput(minY, maxY);
     broadcastState();
   }
   
   // TODO - switch to MotorControl interface instead of AbstractMotor
-  public double calcOutput(AbstractMotor mc) {
-    double in = mc.getPowerLevel();
-    
-    // FIXME - an optimization would be to "set" the values of the MotorControl
-    // if they are null "once" in the attach - so this doesn't have to be done each 
-    // calc
-    double minX = (mc.getMinX() == null)? this.minX:mc.getMinX();
-    double maxX = (mc.getMaxX() == null)? this.maxX:mc.getMaxX();
-    double minY = (mc.getMinY() == null)? this.minY:mc.getMinY();
-    double maxY = (mc.getMaxY() == null)? this.maxY:mc.getMaxY();
-    
-    // motor control has highest precedence
-    Double minInput = mc.getMinInput();
-    Double maxInput = mc.getMaxInput();
-    // motor controller has next order of precedence
-    if (minInput == null) {
-      minInput = this.minInput;
-    }
-    if (maxInput == null) {
-      maxInput = this.maxInput;
-    }
-
-    // motor control has highest precedence
-    Double minOutput = mc.getMinOutput();
-    Double maxOutput = mc.getMaxOutput();
-    // motor controller has next order of precedence
-    if (minOutput == null) {
-      minOutput = this.minOutput;
-    }
-    if (maxOutput == null) {
-      maxOutput = this.maxOutput;
-    }
-    
-    if (minInput != null && in < minInput) {
-      log.warn("clipping input {} to {}", in, minInput);
-      in = minInput;
-    }
-    if (maxInput != null && in > maxInput) {
-      log.warn("clipping input {} to {}", in, maxInput);
-      in = maxInput;
-    }
-    
-    double c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
-
-    if (minOutput != null && c < minOutput) {
-      log.warn("clipping output {} to {}", c, minOutput);
-      return minOutput;
-    }
-    if (maxOutput != null && c > maxOutput) {
-      log.warn("clipping output {} to {}", c, maxOutput);
-      return maxOutput;
-    }
-    return c;
+  public double motorCalcOutput(MotorControl mc) {
+    double calculatedMotorControllerOutput =  mc.calcControllerOutput();
+    info("%s.move(%f) -> %s.motorMove %.2f -> hardware", mc.getName(), mc.getPowerLevel(), getName(), calculatedMotorControllerOutput);
+    return calculatedMotorControllerOutput;
   }
   
   // FIXME - if kept they should be put in interface
@@ -178,11 +113,11 @@ public abstract class AbstractMotorController extends Service implements MotorCo
    * methods for this class
    */
   @Override
-  public void attach(Attachable motor) throws Exception {
+  public void attach(Attachable service) throws Exception {
     
     // check if service already attached
-    if (isAttached(motor)) {
-      log.info("{} is attached to {}", motor.getName(), getName());
+    if (isAttached(service)) {
+      log.info("{} is attached to {}", service.getName(), getName());
       return;
     }
 
@@ -212,13 +147,27 @@ public abstract class AbstractMotorController extends Service implements MotorCo
     </pre>
     */
     // FIXME - decide what unit AbstractMotorController will use (probably AbstractMotor)
-    if (MotorControl.class.isAssignableFrom(motor.getClass())) {
+    if (MotorControl.class.isAssignableFrom(service.getClass())) {
+      MotorControl motor = (MotorControl)service;
+      // add motor to set of current motors this controller is attached to
       motors.put(motor.getName(), (AbstractMotor)motor);
+
+      // give opportunity for motor to attach
       motor.attach(this);
+      broadcastState();
       return;
     }
 
-    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), motor.getClass().getSimpleName());
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+  }
+
+  public void connect(String port) throws Exception {
+    log.warn("AbstractMotorController connect not implemented");
+  }
+  
+  @Override
+  public Mapper getDefaultMapper() {
+    return defaultMapper;
   }
   
 }

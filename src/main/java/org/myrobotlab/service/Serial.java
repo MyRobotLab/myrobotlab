@@ -806,6 +806,7 @@ public class Serial extends Service
 		return newByte;
 	}
 
+	// FIXME add timeout parameter (with default)
 	synchronized public int read(byte[] data) throws IOException, InterruptedException {
 		for (int i = 0; i < data.length; ++i) {
 			data[i] = (byte) read();
