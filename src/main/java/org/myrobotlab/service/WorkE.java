@@ -259,7 +259,7 @@ public class WorkE extends Service {
     try {
 
       LoggingFactory.init(Level.WARN);
-      boolean virtualize = true;
+      boolean virtualize = false;
 
       // FIXME - should be allowed to do this..
       // Joystick.getControllerNames();
@@ -314,7 +314,7 @@ public class WorkE extends Service {
       // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
-      log.error("main threw", e);
+      log.error("work-e no worky !", e);
     }
   }
 }
