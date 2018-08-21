@@ -18,13 +18,11 @@ public final class MapperLinear implements Serializable, Mapper {
   Double minY;
   Double maxY;
 
-  // clipping
-  Double minOutput;
-  Double maxOutput;
+  // limits
+  Double min;
+  Double max;
 
   Boolean inverted = false;
-  Double maxInput;
-  Double minInput;
 
   /**
    * non-parameterized contructor for "un-set" mapper use the merge function to
@@ -37,13 +35,8 @@ public final class MapperLinear implements Serializable, Mapper {
     map(minX, maxX, minY, maxY);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.math.MapperInterface#calcOutput(double)
-   */
   @Override
-  final public double calcOutput(Double in) {
+  final public Double calcOutput(Double in) {
 
     double c = 0.0;
     
@@ -53,15 +46,6 @@ public final class MapperLinear implements Serializable, Mapper {
     }
 
     boolean willCalculate = (minX != null && maxX != null && minY != null && maxY != null);
-
-    if (minInput != null && in < minInput) {
-      log.warn("clipping input {} to {}", in, minInput);
-      in = minInput;
-    }
-    if (maxInput != null && in > maxInput) {
-      log.warn("clipping input {} to {}", in, maxInput);
-      in = maxInput;
-    }
 
     if (willCalculate) {
       if (maxX - minX == 0) {
@@ -78,14 +62,14 @@ public final class MapperLinear implements Serializable, Mapper {
       log.error("mapping values are not set - will not calculate");
     }
 
-    if (minOutput != null && c < minOutput) {
-      log.warn("clipping output {} to {}", c, minOutput);
-      return minOutput;
+    if (this.min != null && c < this.min) {
+      log.warn("clipping output {} to {}", c, this.min);
+      return this.min;
     }
 
-    if (maxOutput != null && c > maxOutput) {
-      log.warn("clipping output {} to {}", c, maxOutput);
-      return maxOutput;
+    if (this.max != null && c > this.max) {
+      log.warn("clipping output {} to {}", c, this.max);
+      return this.max;
     }
 
     return c;
@@ -115,80 +99,29 @@ public final class MapperLinear implements Serializable, Mapper {
     inverted = invert;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.math.MapperInterface#getMinOutput()
-   */
   @Override
-  public Double getMinOutput() {
-    return minOutput;
+  public Double getMin() {
+    return this.min;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.math.MapperInterface#getMaxOutput()
-   */
   @Override
-  public Double getMaxOutput() {
-    return maxOutput;
+  public Double getMax() {
+    return this.max;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.math.MapperInterface#setMinMaxOutput(double, double)
-   */
   @Override
-  public void setMinMaxOutput(Double min, Double max) {
+  public void setLimits(Double min, Double max) {
     if (min != null && max != null && max < min) {
       double t = min;
       min = max;
       max = t;
     }
-    minOutput = min;
-    maxOutput = max;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.math.MapperInterface#getMinInput()
-   */
-  @Override
-  public Double getMinInput() {
-    return minInput;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.math.MapperInterface#getMaxInput()
-   */
-  @Override
-  public Double getMaxInput() {
-    return maxInput;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.math.MapperInterface#setMinMaxInput(double, double)
-   */
-  @Override
-  public void setMinMaxInput(Double min, Double max) {
-    if (min != null && max != null && max < min) {
-      double t = min;
-      min = max;
-      max = t;
-    }
-    this.minInput = min;
-    this.maxInput = max;
+    this.min = min;
+    this.max = max;
   }
 
   public String toString() {
-    return String.format(" %.2f < i < %.2f => map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f ", minInput, maxInput, minX, maxX, minY, maxY, minOutput, maxOutput);
+    return String.format(" map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f ", minX, maxX, minY, maxY, min, max);
   }
 
   /*
@@ -209,14 +142,10 @@ public final class MapperLinear implements Serializable, Mapper {
         minY = other.minY;
       if (maxY == null)
         maxY = other.maxY;
-      if (minInput == null)
-        minInput = other.minInput;
-      if (maxInput == null)
-        maxInput = other.maxInput;
-      if (minOutput == null)
-        minOutput = other.minOutput;
-      if (maxOutput == null)
-        maxOutput = other.maxOutput;
+      if (this.min == null)
+        this.min = other.min;
+      if (this.max == null)
+        this.max = other.max;
     } else {
       log.error("don't know how to merge %s into a MapperLinear mapper", in.getClass().getCanonicalName());
     }
@@ -246,49 +175,8 @@ public final class MapperLinear implements Serializable, Mapper {
     this.maxX = maxX;
     this.minY = minY;
     this.maxY = maxY;
-
-    setMinMaxInput(minX, maxX);
-    setMinMaxOutput(minY, maxY);
-  }
-
-  @Override
-  public void setMaxInput(Double max) {
-    if (max != null && minInput != null && max < minInput) {
-      maxInput = minInput;
-      minInput = max;
-      return;
-    }
-    maxInput = max;
-  }
-
-  @Override
-  public void setMaxOutput(Double max) {
-    if (max != null && minOutput != null && max < minOutput) {
-      maxOutput = minOutput;
-      minOutput = max;
-      return;
-    }
-    maxOutput = max;
-  }
-
-  @Override
-  public void setMinInput(Double min) {
-    if (min != null && maxInput != null && min > maxInput) {
-      minInput = maxInput;
-      maxInput = min;
-      return;
-    }
-    minInput = min;
-  }
-
-  @Override
-  public void setMinOutput(Double min) {
-    if (min != null && maxOutput != null && min > maxOutput) {
-      minOutput = maxOutput;
-      maxOutput = min;
-      return;
-    }
-    minOutput = min;
+    
+    setLimits(minY, maxY);
   }
 
   /**
@@ -300,13 +188,10 @@ public final class MapperLinear implements Serializable, Mapper {
     minY = null;
     maxY = null;
 
-    minInput = null;
-    maxInput = null;
-    minOutput = null;
-    maxOutput = null;
+    min = null;
+    max = null;
 
     inverted = false;
-
   }
 
   @Override

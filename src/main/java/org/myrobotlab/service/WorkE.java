@@ -90,6 +90,7 @@ public class WorkE extends Service {
     // joystick.map(axisLeft, -1.0, 1.0, -127.0, 127.0);
     // joystick.map(axisRight, -1.0, 1.0, -127.0, 127.0);
     map(minX, maxX, minY, maxY);
+    setInverted(true);
   }
 
   public void connect() throws Exception {

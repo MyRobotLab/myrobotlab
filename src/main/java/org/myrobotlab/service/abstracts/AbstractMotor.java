@@ -191,7 +191,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // ---- Servo begin ---------
   public void setMinMaxOutput(double min, double max) {
-    mapper.setMinMaxOutput(min, max);
+    mapper.setLimits(min, max);
     broadcastState();
   }
 
