@@ -2221,12 +2221,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       LoggingFactory.init(Level.INFO);
       log.info("{}", "nano".hashCode());
 
-      boolean virtual = false;
+      boolean virtual = true;
       boolean isDone = true;
       String port = "COM10";
       
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
       Serial serial = (Serial)Runtime.start("serial", "Serial");
       log.info("{}", serial.getPortNames());
       // Runtime.start("cli", "Cli");

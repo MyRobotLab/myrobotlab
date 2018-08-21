@@ -2,15 +2,11 @@ package org.myrobotlab.math.interfaces;
 
 public interface Mapper {
 
-  double calcOutput(Double in);
+  Double calcOutput(Double in);
 
-  Double getMaxInput();
+  Double getMin();
 
-  Double getMaxOutput();
-
-  Double getMinInput();
-
-  Double getMinOutput();
+  Double getMax();
 
   /**
    * <pre>
@@ -42,16 +38,6 @@ public interface Mapper {
 
   void merge(Mapper mapperInterface);
   
-  void setMaxInput(Double max);
-  
-  void setMaxOutput(Double max);
-  
-  void setMinInput(Double min);
-
-  void setMinOutput(Double min);
-  
-  void setMinMaxInput(Double minInput, Double maxInput);
-
-  void setMinMaxOutput(Double minOutput, Double maxOutput);
+  void setLimits(Double minOutput, Double maxOutput);
 
 }
