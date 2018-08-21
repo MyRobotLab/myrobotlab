@@ -95,8 +95,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
    */
   Mapper mapper = new MapperLinear();
 
-  boolean inverted = false;
-
   transient MotorEncoder encoder = null;
 
   // FIXME - implements an Encoder interface
@@ -142,7 +140,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public boolean isInverted() {
-    return inverted;
+    return mapper.isInverted();
   }
 
   @Override
@@ -185,7 +183,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   @Override
   public void setInverted(boolean invert) {
-    this.inverted = invert;
+    mapper.setInverted(invert);
     broadcastState();
   }
 

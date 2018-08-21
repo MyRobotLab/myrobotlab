@@ -53,11 +53,12 @@ public final class MapperLinear implements Serializable, Mapper {
         return 0.0;
       }
 
-      if (!inverted) {
-        c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
-      } else {
-        c = minY + ((in - maxX) * (maxY - minY)) / (minX - maxX);
-      }
+      c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
+      
+      if (inverted) {
+        c = c * -1;
+      } 
+      
     } else {
       log.error("mapping values are not set - will not calculate");
     }
@@ -121,7 +122,7 @@ public final class MapperLinear implements Serializable, Mapper {
   }
 
   public String toString() {
-    return String.format(" map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f ", minX, maxX, minY, maxY, min, max);
+    return String.format(" map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f %b", minX, maxX, minY, maxY, min, max, inverted);
   }
 
   /*
