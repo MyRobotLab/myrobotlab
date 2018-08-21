@@ -202,7 +202,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
     int power = (int) motorCalcOutput(mc);    
 
-    log.info("motor {} power {}", mc.getName(), power);
+    log.error("motor {} power {}", mc.getName(), power);
 
     // FIXME required "getMotorPortNames !!!"
     if (port.equals("m1")) {
