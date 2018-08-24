@@ -74,6 +74,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
       // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
       Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
+      audioFile.play(audioData);
     }
     
     /*
