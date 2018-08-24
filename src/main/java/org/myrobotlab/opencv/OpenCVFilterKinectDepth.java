@@ -29,6 +29,8 @@ import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
+import java.nio.ByteBuffer;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
@@ -50,6 +52,8 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   transient IplImage dst = null;
   transient IplImage src = null;
   transient IplImage mask = null;
+  
+  transient IplImage lastDepthImage = null;
 
   int x = 0;
   int y = 0;
@@ -84,7 +88,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
     // INFO - This filter has 2 sources !!!
     IplImage kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
-
+    lastDepthImage = kinectDepth;
     
     boolean processDepth = false;
     if (kinectDepth != null && processDepth) {
@@ -150,7 +154,8 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     ++clickCounter;
     x = inX;
     y = inY;
-
+    ByteBuffer buffer = lastDepthImage.createBuffer();
+    int value = buffer.get(y*lastDepthImage.width() + x) & 0xFF;
   }
 
 }
