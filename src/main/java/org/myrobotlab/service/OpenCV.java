@@ -181,8 +181,9 @@ public class OpenCV extends AbstractVideoSource {
   // GROG : .. perhaps just a filter in the pipeline could stream it via http
   transient public VideoStreamer streamer;
 
-  // Changed default to false.  Otherwise multiple opencv instances will get a port in use bind exception.
-  // TODO: fix how the opencv service can stream video to the webgui.  
+  // Changed default to false. Otherwise multiple opencv instances will get a
+  // port in use bind exception.
+  // TODO: fix how the opencv service can stream video to the webgui.
   public boolean streamerEnabled = false;
   public String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
   public Integer cameraIndex = 0;
@@ -190,7 +191,7 @@ public class OpenCV extends AbstractVideoSource {
   public String pipelineSelected = "";
   public String grabberType = getDefaultFrameGrabberType();
   public String format = null;
-  
+
   // use these to specify the resolution for the frame grabber
   public Integer height = null;
   public Integer width = null;
@@ -267,7 +268,7 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public Integer setCameraIndex(Integer index) {
-    this.cameraIndex  = index;
+    this.cameraIndex = index;
     return index;
   }
 
@@ -373,15 +374,15 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   // publish functions end ---------------------------
-  
+
   public void stopCapture() {
     log.info("opencv - stop capture");
-   // videoProcessor.stop();
-    
+    // videoProcessor.stop();
+
     log.debug("stopping capture");
     capturing = false;
     videoProcessor.videoThread = null;
-    
+
     broadcastState(); // let everyone know
     // TODO: do we need this?
     sleep(500);
@@ -395,7 +396,8 @@ public class OpenCV extends AbstractVideoSource {
         streamer = (VideoStreamer) startPeer("streamer");
         streamer.attach(this);
       }
-      // TODO: The elusive API preference for the VideoCapture api! where you can specify plugins!
+      // TODO: The elusive API preference for the VideoCapture api! where you
+      // can specify plugins!
       videoProcessor.start(grabber);
       // there's a nasty race condition,
       // so we sleep here for 500 milliseconds to make sure
@@ -406,22 +408,23 @@ public class OpenCV extends AbstractVideoSource {
       error(e);
     }
   }
+
   public void capture() {
-      FrameGrabber grabber = null;
-      try {
-        grabber = createFrameGrabber(inputSource, cameraIndex, inputFile, pipelineSelected, grabberType, format);
-        
-        // set the height / width
-        if (height != null)
-          grabber.setImageHeight(height);
-        if (width != null) 
-          grabber.setImageWidth(width);
-      } catch (Exception e) {
-        error(e);
-        this.capturing = false;
-        return;
-      }
-      capture(grabber);
+    FrameGrabber grabber = null;
+    try {
+      grabber = createFrameGrabber(inputSource, cameraIndex, inputFile, pipelineSelected, grabberType, format);
+
+      // set the height / width
+      if (height != null)
+        grabber.setImageHeight(height);
+      if (width != null)
+        grabber.setImageWidth(width);
+    } catch (Exception e) {
+      error(e);
+      this.capturing = false;
+      return;
+    }
+    capture(grabber);
   }
 
   public static String getDefaultFrameGrabberType() {
@@ -432,8 +435,9 @@ public class OpenCV extends AbstractVideoSource {
       return "org.bytedeco.javacv.OpenCVFrameGrabber";
     }
   }
-  
-  private FrameGrabber createFrameGrabber(String inputSource, Integer cameraIndex, String inputFile, String pipelineSelected, String grabberType, String format) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+
+  private FrameGrabber createFrameGrabber(String inputSource, Integer cameraIndex, String inputFile, String pipelineSelected, String grabberType, String format)
+      throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
     // inputSource = INPUT_SOURCE_IMAGE_FILE;
     log.info(String.format("video source is %s", inputSource));
     Class<?>[] paramTypes = new Class[1];
@@ -465,13 +469,11 @@ public class OpenCV extends AbstractVideoSource {
     Constructor<?> c = nfg.getConstructor(paramTypes);
 
     FrameGrabber grabber = (FrameGrabber) c.newInstance(params);
-    
-    
+
     if (format != null) {
       grabber.setFormat(format);
     }
 
-    
     log.info(String.format("using %s", grabber.getClass().getCanonicalName()));
 
     if (grabber == null) {
@@ -479,10 +481,10 @@ public class OpenCV extends AbstractVideoSource {
       videoProcessor.stop();
       capturing = false;
     }
-    
+
     return grabber;
   }
-  
+
   public void stopRecording(String filename) {
     // cvReleaseVideoWriter(outputFileStreams.get(filename).pointerByReference());
   }
@@ -815,13 +817,13 @@ public class OpenCV extends AbstractVideoSource {
 
   public Map<String, Double> publishClassification(Map<String, Double> classifications) {
     // log.info("Publish Classification in opencv!");
-	  return classifications;
+    return classifications;
   }
 
   public ArrayList<YoloDetectedObject> publishYoloClassification(ArrayList<YoloDetectedObject> classifications) {
     return classifications;
   }
-  
+
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -838,40 +840,41 @@ public class OpenCV extends AbstractVideoSource {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    String javaCvVersion = "1.4.2";  
+    String javaCvVersion = "1.4.2";
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
-    
+
     boolean gpu = false;
     if (gpu) {
-      // TODO: integrate in the following dependencies for GPU support in OpenCV.
+      // TODO: integrate in the following dependencies for GPU support in
+      // OpenCV.
       // add additional metadata dependencies.
-      //      <dependency>
-      //      <groupId>org.bytedeco.javacpp-presets</groupId>
-      //      <artifactId>opencv</artifactId>
-      //      <version>3.4.1-1.4.1</version>
-      //      <classifier>linux-x86_64-gpu</classifier>
-      //    </dependency>
-      //    <dependency>
-      //      <groupId>org.bytedeco.javacpp-presets</groupId>
-      //      <artifactId>opencv</artifactId>
-      //      <version>3.4.1-1.4.1</version>
-      //      <classifier>macosx-x86_64-gpu</classifier>
-      //    </dependency>
-      //    <dependency>
-      //      <groupId>org.bytedeco.javacpp-presets</groupId>
-      //      <artifactId>opencv</artifactId>
-      //      <version>3.4.1-1.4.1</version>
-      //      <classifier>windows-x86_64-gpu</classifier>
-      //    </dependency>
+      // <dependency>
+      // <groupId>org.bytedeco.javacpp-presets</groupId>
+      // <artifactId>opencv</artifactId>
+      // <version>3.4.1-1.4.1</version>
+      // <classifier>linux-x86_64-gpu</classifier>
+      // </dependency>
+      // <dependency>
+      // <groupId>org.bytedeco.javacpp-presets</groupId>
+      // <artifactId>opencv</artifactId>
+      // <version>3.4.1-1.4.1</version>
+      // <classifier>macosx-x86_64-gpu</classifier>
+      // </dependency>
+      // <dependency>
+      // <groupId>org.bytedeco.javacpp-presets</groupId>
+      // <artifactId>opencv</artifactId>
+      // <version>3.4.1-1.4.1</version>
+      // <classifier>windows-x86_64-gpu</classifier>
+      // </dependency>
     }
     // meta.exclude("commons-codec", "commons-codec");
     // meta.addDependency("commons-codec", "commons-codec", "1.10");
-    
+
     // sarxos webcam
     meta.addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
     // meta.exclude("");
-    
+
     // FaceRecognizer no worky if missing it
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // for the mjpeg streamer frame grabber
@@ -881,15 +884,15 @@ public class OpenCV extends AbstractVideoSource {
     meta.exclude("commons-lang", "commons-lang");
     meta.addDependency("commons-lang", "commons-lang", "2.6");
 
-
     // TODO: should be something about yolo here too..
-    // maybe make the yolo filter download the model and cache it?  
+    // maybe make the yolo filter download the model and cache it?
     // or have it as a dependency
-    // TODO: the yolo model files are too large for artifactory..  it's limited to 100mb currently
-    
+    // TODO: the yolo model files are too large for artifactory.. it's limited
+    // to 100mb currently
+
     // the haar / hog / lp classifier xml files for opencv from the MRL repo
     meta.addDependency("opencv", "opencv_classifiers", "0.0.1", "zip");
-    
+
     // yolo models
     meta.addDependency("yolo", "yolov2", "v2", "zip");
 
@@ -919,7 +922,7 @@ public class OpenCV extends AbstractVideoSource {
     //
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
-    LoggingFactory.init("info");
+    LoggingFactory.init("WARN");
 
     // OpenCV opencvLeft = (OpenCV) Runtime.start("left", "OpenCV");
     // Runtime.start("right", "OpenCV");
@@ -931,30 +934,26 @@ public class OpenCV extends AbstractVideoSource {
     // OpenCVFilterTranspose tr = new OpenCVFilterTranspose("tr");
     // opencv.addFilter(tr);
 
-    //System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
-          
-    //System.loadLibrary("opencv_java");      
+    // System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+
+    // System.loadLibrary("opencv_java");
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-    
-    
-//    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
-//    opencv.addFilter(ud);
-    
+
+    // OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
+    // opencv.addFilter(ud);
 
     OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
     opencv.addFilter(tld);
 
-    
     opencv.height = 480;
     opencv.width = 640;
-   // opencv.height = 1080;
-    //opencv.width= 1920;
-    
-   opencv.capture();
-   // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
-   // opencv.capture(grabber);
-    
-    
+    // opencv.height = 1080;
+    // opencv.width= 1920;
+
+    opencv.capture();
+    // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
+    // opencv.capture(grabber);
+
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
@@ -965,13 +964,13 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.setInputFileName("http://192.168.4.125:8080/?action=stream");
     // opencv.setInputFileName("http://192.168.4.112:8081/?action=stream");
 
-   // OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
-// opencv.addFilter(yolo);
-    
- //   OpenCVFilterDL4J dl4j = new OpenCVFilterDL4J("dl4j");
-  //  opencv.addFilter(dl4j);
-    
-   // opencv.setStreamerEnabled(false);
+    // OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
+    // opencv.addFilter(yolo);
+
+    // OpenCVFilterDL4J dl4j = new OpenCVFilterDL4J("dl4j");
+    // opencv.addFilter(dl4j);
+
+    // opencv.setStreamerEnabled(false);
     // opencv.addFilter("facerec", "FaceRecognizer");
 
     // OpenCVFilterPyramidDown pyramid = new OpenCVFilterPyramidDown("pyramid");
@@ -981,18 +980,19 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.addFilter(dilate);
     // OpenCVFilterTesseract tess = new OpenCVFilterTesseract("tess");
 
-//    OpenCVFilterFaceDetect facedetect2 = new OpenCVFilterFaceDetect("facedetect");
-//    opencv.addFilter(facedetect2);
+    // OpenCVFilterFaceDetect facedetect2 = new
+    // OpenCVFilterFaceDetect("facedetect");
+    // opencv.addFilter(facedetect2);
 
- //   OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
+    // OpenCVFilterOverlay filter = new OpenCVFilterOverlay("overlay");
     // filter.addImage("overlay1.png", 0.3);
     // filter.addImage("red.png", 0.4);
-   // filter.addImage("overlay_640x480.png", 1.0);
+    // filter.addImage("overlay_640x480.png", 1.0);
 
     // filter.addText("scanmode", 20, 40, 0.6, "SCAN MODE NONE");
     // filter.addText("assessment", 20, 50, 0.6, "ASSESSMENT COMPLETED");
 
-//    opencv.addFilter(filter);
+    // opencv.addFilter(filter);
 
     // OpenCVFilterFaceDetect2 facedetect2 = new
     // OpenCVFilterFaceDetect2("facedetect2");
@@ -1008,8 +1008,8 @@ public class OpenCV extends AbstractVideoSource {
     // VideoStreamer vs = (VideoStreamer)Runtime.start("vs",
     // "VideoStreamer");
     // vs.attach(opencv);
-   // opencv.capture();
-    // opencvLeft.capture(); 
+    // opencv.capture();
+    // opencvLeft.capture();
     // opencvRight.capture();
 
     /*
