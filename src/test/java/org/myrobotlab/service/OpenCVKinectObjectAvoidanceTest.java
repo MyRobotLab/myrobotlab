@@ -35,6 +35,7 @@ public class OpenCVKinectObjectAvoidanceTest {
   @Test
   public void testClickPoint() {
     OpenCV cv = (OpenCV)Runtime.start("cv", "OpenCV");
+    //cv.setFrameGrabberType(grabberType);
   }
   
   public static void main(String[] args) {
