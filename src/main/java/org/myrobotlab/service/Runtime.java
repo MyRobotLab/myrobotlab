@@ -2374,11 +2374,12 @@ public class Runtime extends Service implements MessageListener {
     return locale.toLanguageTag();
   }
 
-public static void exec(String ... cmd) throws IOException {
+public static Process exec(String ... cmd) throws IOException {
 	// FIXME - can't return a process - it will explode in serialization
 	// but we might want to keep it and put it on a transient map
     log.info("Runtime exec {}", Arrays.toString(cmd));
-	Process p = java.lang.Runtime.getRuntime().exec(cmd);
+  	Process p = java.lang.Runtime.getRuntime().exec(cmd);
+  	return p;
 }
  
 }

@@ -49,7 +49,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
 
   @Override
-  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
+  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
     String localFileName = getLocalFileName(toSpeak);
 
@@ -73,7 +73,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
       // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
-      Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
+      Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
+      p.waitFor();
       audioFile.play(audioData);
     }
     
