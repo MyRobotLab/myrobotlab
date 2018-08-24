@@ -153,7 +153,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   /**
    * AudioFile peer for caching and playing effects
    */
-  transient AudioFile audioFile = null;
+  protected transient AudioFile audioFile = null;
 
   // FIXME - should be inside of audiofile cache service not here ..
   // private String audioCacheExtension = "mp3";
