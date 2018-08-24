@@ -72,12 +72,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     } else if (platform.isLinux()) {
       // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
-      // Runtime.execute(args);
-      // Runtime.exec(String.format("bash -c echo \"%s\" | %s --tts", furtherFiltered, festivalPath));
-      Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
+      // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
+      Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
     }
-
-    
     
     /*
     String cmd = getTtsCmdLine(toSpeak);
@@ -98,7 +95,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     } else if (Platform.getLocalInstance().isWindows()) {
       return "0.mp3"; // ya stoopid no ?
     }
-    return "mp3"; // hopefully Linux festival can do this (if not can we ?)
+    return ".wav"; // hopefully Linux festival can do this (if not can we ?)
   }
 
   /**
