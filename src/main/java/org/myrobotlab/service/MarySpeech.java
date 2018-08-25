@@ -282,11 +282,12 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
     try {
 
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       // Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
+      Runtime.start("cli", "Cli");
       // mary.grabRemoteAudioEffect("LAUGH01_F");
-      Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
 
       // examples are generously copied from
       // marytts.signalproc.effects.EffectsApplier.java L319-324
