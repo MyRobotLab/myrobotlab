@@ -283,6 +283,12 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public String setFrameGrabberType(String grabberType) {
+    if (grabberType != null && !grabberType.contains(".")) {
+      grabberType = "org.myrobotlab.opencv." + grabberType;
+      if (!grabberType.endsWith("FrameGrabber")) {
+        grabberType += "FrameGrabber";
+      }
+    }
     this.grabberType = grabberType;
     return grabberType;
   }

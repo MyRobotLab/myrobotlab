@@ -1,7 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -11,10 +9,11 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVFilterKinectNavigate;
 import org.slf4j.Logger;
 
-public class OpenCVKinectObjectAvoidanceTest {
-  public final static Logger log = LoggerFactory.getLogger(WorkETest.class);
+public class OpenCVFilterKinectNavigateTest {
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectNavigateTest.class);
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -35,6 +34,14 @@ public class OpenCVKinectObjectAvoidanceTest {
   @Test
   public void testClickPoint() {
     OpenCV cv = (OpenCV)Runtime.start("cv", "OpenCV");
+    Runtime.start("gui", "SwingGui");
+    cv.setInputFileName("src/test/resources/OpenCV/white-black-center-640x480.png");
+    cv.setFrameGrabberType("ImageFile");
+    cv.setInputSource("file");
+    // OpenF
+    OpenCVFilterKinectNavigate filter = new OpenCVFilterKinectNavigate("kinect-nav");
+    cv.addFilter(filter);
+    cv.capture();
     //cv.setFrameGrabberType(grabberType);
   }
   
@@ -44,7 +51,7 @@ public class OpenCVKinectObjectAvoidanceTest {
 
       // run junit as java app
       JUnitCore junit = new JUnitCore();
-      Result result = junit.run(WorkETest.class);
+      Result result = junit.run(OpenCVFilterKinectNavigateTest.class);
       log.info("Result failures: {}", result.getFailureCount());
     } catch (Exception e) {
       log.error("main threw", e);
