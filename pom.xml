@@ -258,6 +258,16 @@
     <version>0.4.8</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.sweble.wikitext</groupId>
+    <artifactId>swc-engine</artifactId>
+    <version>3.1.7</version>
+  </dependency>
+  <dependency>
+    <groupId>org.sweble.wom3</groupId>
+    <artifactId>sweble-wom3-core</artifactId>
+    <version>3.1.7</version>
+  </dependency>	
 <!-- DocumentPipeline end -->
 
 <!-- Esp8266_01 begin -->
