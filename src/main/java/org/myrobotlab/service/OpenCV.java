@@ -82,7 +82,9 @@ import org.myrobotlab.service.data.Point2Df;
 import org.slf4j.Logger;
 
 /*
-
+<pre>
+// extremely useful list of static imports - since auto-complete won't work with statics
+ 
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_calib3d.*;
 import static org.bytedeco.javacpp.opencv_core.*;
@@ -98,6 +100,7 @@ import static org.bytedeco.javacpp.opencv_stitching.*;
 import static org.bytedeco.javacpp.opencv_video.*;
 import static org.bytedeco.javacpp.opencv_videostab.*;
 
+</pre>
 */
 
 /**
@@ -284,7 +287,16 @@ public class OpenCV extends AbstractVideoSource {
 
   public String setFrameGrabberType(String grabberType) {
     if (grabberType != null && !grabberType.contains(".")) {
-      grabberType = "org.myrobotlab.opencv." + grabberType;
+      
+      String prefixPath;
+      if ("IPCamera".equals(grabberType) || "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType)
+          || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
+        prefixPath = "org.myrobotlab.opencv.";
+      } else {
+        prefixPath = "org.bytedeco.javacv.";
+      }
+      
+      grabberType = prefixPath + grabberType;
       if (!grabberType.endsWith("FrameGrabber")) {
         grabberType += "FrameGrabber";
       }

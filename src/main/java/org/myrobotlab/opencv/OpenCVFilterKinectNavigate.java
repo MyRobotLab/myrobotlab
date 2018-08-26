@@ -25,10 +25,26 @@
 
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_imgproc.*;
+import static org.bytedeco.javacpp.opencv_calib3d.*;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.*;
+import static org.bytedeco.javacpp.opencv_flann.*;
+import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_ml.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_photo.*;
+import static org.bytedeco.javacpp.opencv_shape.*;
+import static org.bytedeco.javacpp.opencv_stitching.*;
+import static org.bytedeco.javacpp.opencv_video.*;
+import static org.bytedeco.javacpp.opencv_videostab.*;
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
+import java.awt.Color;
 import java.nio.ByteBuffer;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -59,6 +75,11 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
   int y = 0;
   int clickCounter = 0;
 
+  double minX = 0;
+  double maxX = 65535;
+  double minY = 0.0;
+  double maxY = 1.0;
+
   boolean displayCamera = false;
 
   public OpenCVFilterKinectNavigate() {
@@ -87,20 +108,83 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
 
     // INFO - This filter has 2 sources !!!
-    IplImage kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
-    if (kinectDepth != null) {
+    IplImage depth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
+    if (depth != null) {
 
-      lastDepthImage = kinectDepth;
+      lastDepthImage = depth;
+
+      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1 channel for grey rgb
+
+      ByteBuffer colorBuffer = color.getByteBuffer();
+      // it may be deprecated but the "new" function .asByteBuffer() does not
+      // return all data
+      ByteBuffer depthBuffer = depth.getByteBuffer();
+
+      int depthBytesPerChannel = lastDepthImage.depth() / 8;
+      int bytesPerX = depthBytesPerChannel * lastDepthImage.nChannels();
+
+
+      // iterate through the depth bytes bytes and convert to HSV / RGB format
+      // map depth gray (0,65535) => 3 x (0,255) HSV :P
+      for (int y = 0; y < depth.height(); y++) { // 480
+        for (int x = 0; x < depth.width(); x++) { // 640
+          int depthIndex = y * depth.widthStep() + x * depth.nChannels() * depthBytesPerChannel;
+          int colorIndex = y * color.widthStep() + x * color.nChannels();
+
+          // int value = buffer.get(y * bytesPerX * lastDepthImage.width() + x *
+          // bytesPerX) & 0xFF;
+
+          // Used to read the pixel value - the 0xFF is needed to cast from
+          // an unsigned byte to an int.
+          // int value = depthBuffer.get(depthIndex);// << 8 & 0xFF +
+          // buffer.get(depthIndex+1)& 0xFF;
+          // this is 16 bit depth - I switched the MSB !!!!
+          int value = (depthBuffer.get(depthIndex+1) & 0xFF) << 8 | (depthBuffer.get(depthIndex ) & 0xFF);
+          double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
+//          log.warn(String.format("(%d, %d) = %d => %f", x, y, value, hsv));
+
+          Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
+
+          if (color.nChannels() == 3) {
+            colorBuffer.put(colorIndex, (byte) c.getBlue());
+            colorBuffer.put(colorIndex + 1, (byte) c.getRed());
+            colorBuffer.put(colorIndex + 2, (byte) c.getGreen());
+          } else if (color.nChannels() == 1) {
+            colorBuffer.put(colorIndex, (byte) c.getBlue());
+          }
+
+          // Sets the pixel to a value (greyscale).
+          // colorBuffer.put(index, (byte)hsv);
+
+          // Sets the pixel to a value (RGB, stored in BGR order).
+          // buffer.put(index, blue);
+          // buffer.put(index + 1, green);
+          // buffer.put(index + 2, red);
+        }
+      }
 
       boolean processDepth = false;
-      if (kinectDepth != null && processDepth) {
+
+      if (!processDepth) {
+        return color;
+      }
+
+      // IplImage color = IplImage.create(img.width(), img.height(),
+      // IPL_DEPTH_8U, 3);
+      // cvCvtColor(img, color, CV_GRAY2RGB );
+
+      // BufferedImage image = OpenCV.IplImageToBufferedImage(img);
+
+      // SerializableImage.writeToFile(image, "test.png");
+
+      if (depth != null && processDepth) {
 
         // allowing publish & fork
         if (dst == null || dst.width() != image.width() || dst.nChannels() != image.nChannels()) {
-          dst = cvCreateImage(cvSize(kinectDepth.width() / 2, kinectDepth.height() / 2), kinectDepth.depth(), kinectDepth.nChannels());
+          dst = cvCreateImage(cvSize(depth.width() / 2, depth.height() / 2), depth.depth(), depth.nChannels());
         }
 
-        cvPyrDown(kinectDepth, dst, filter);
+        cvPyrDown(depth, dst, filter);
         invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
       }
       // end fork
@@ -109,7 +193,7 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
         return image;
       }
 
-      return kinectDepth;
+      return depth;
 
     } else {
       lastDepthImage = image;
@@ -162,10 +246,11 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
     if (lastDepthImage != null) {
       x = inX;
       y = inY;
+
       ByteBuffer buffer = lastDepthImage.createBuffer();
       lastDepthImage.depth();
-      
-      int bytesPerChannel = lastDepthImage.depth()/8;
+
+      int bytesPerChannel = lastDepthImage.depth() / 8;
       int bytesPerX = bytesPerChannel * lastDepthImage.nChannels();
       int value = buffer.get(y * bytesPerX * lastDepthImage.width() + x * bytesPerX) & 0xFF;
       log.info("{}", value);

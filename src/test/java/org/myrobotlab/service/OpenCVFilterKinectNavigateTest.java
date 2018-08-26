@@ -33,18 +33,29 @@ public class OpenCVFilterKinectNavigateTest {
 
   @Test
   public void testClickPoint() {
-    OpenCV cv = (OpenCV)Runtime.start("cv", "OpenCV");
+    OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     Runtime.start("gui", "SwingGui");
-    cv.setInputFileName("src/test/resources/OpenCV/white-black-center-640x480.png");
-    cv.setFrameGrabberType("ImageFile");
-    cv.setInputSource("file");
-    // OpenF
+
+    cv.setFrameGrabberType("OpenKinect");
+    cv.broadcastState();
+
+    boolean virtual = false;
+
+    if (virtual) {
+      // FIXME - this should just be a single switch - like setting the image
+      // file
+      // or a 2 parameter method setting the source
+      cv.setInputFileName("src/test/resources/OpenCV/white-black-center-640x480.png");
+      cv.setFrameGrabberType("ImageFile");
+      cv.setInputSource("file");
+    }
+
     OpenCVFilterKinectNavigate filter = new OpenCVFilterKinectNavigate("kinect-nav");
     cv.addFilter(filter);
     cv.capture();
-    //cv.setFrameGrabberType(grabberType);
+    // cv.setFrameGrabberType(grabberType);
   }
-  
+
   public static void main(String[] args) {
     try {
       LoggingFactory.init("WARN");
