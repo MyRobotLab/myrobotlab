@@ -42,7 +42,7 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterKinectNavigateGui extends OpenCVFilterGui implements ActionListener, ChangeListener {
   
-  JLabel selectedPoint = new JLabel("here");
+  JLabel selectedPoint = new JLabel("here xxxxxxxxxxxxxxxxx");
 
   public OpenCVFilterKinectNavigateGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
@@ -55,6 +55,8 @@ public class OpenCVFilterKinectNavigateGui extends OpenCVFilterGui implements Ac
     // thread wait?
     // send the event
     myService.send(boundServiceName, "publishFilterState", boundFilterName);
+    display.setLayout(new BorderLayout());
+    display.add(selectedPoint, BorderLayout.CENTER);
   }
 
   @Override
