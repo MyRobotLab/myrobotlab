@@ -9,7 +9,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
-import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.slf4j.Logger;
 
 public class WorkE extends Service {
@@ -18,39 +19,72 @@ public class WorkE extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  // joystick to motor axis defaults
-  String axisLeft = "y";
-  String axisRight = "rz";
-
   // peer names
   final public static String MOTOR_LEFT = "motorLeft";
   final public static String MOTOR_RIGHT = "motorRight";
+
   final public static String JOYSTICK = "joystick";
   final public static String CONTROLLER = "controller";
 
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(WorkE.class);
+
+    // GOOD "TYPE" INFO ONLY IN META DATA - this allows user to switch types
+    // safely
+    // it becomes "default" data - which was its intent
+    meta.addPeer("controller", "Sabertooth", "motor controller");
+    meta.addPeer("motorLeft", "MotorPort", "left motor");
+    meta.addPeer("motorRight", "MotorPort", "right motor");
+    meta.addPeer("joystick ", "Joystick", "joystick control");
+    meta.addPeer("cv ", "OpenCV", "computer vision");
+    meta.addPeer("speech ", "MarySpeech", "speech");
+    meta.addPeer("recognizer ", "WebkitSpeechRecognition", "recognizer");
+    meta.addPeer("brain", "ProgramAB", "recognizer");
+    meta.addPeer("cli", "Cli", "commnnd line interface");
+
+    meta.addDescription("used as a general worke");
+    meta.addCategory("robot");
+    return meta;
+  }
+
+  // joystick to motor axis defaults
+  String axisLeft = "y";
+  String axisRight = "rz";
   // peers references
   private transient Joystick joystick = null;
   private transient AbstractMotor motorLeft = null;
   private transient AbstractMotor motorRight = null;
   private transient AbstractMotorController controller = null;
+  private transient OpenCV cv = null;
+  private transient AbstractSpeechSynthesis speech = null;
+  private transient AbstractSpeechRecognizer recognizer = null;
+  private transient ProgramAB brain = null;
 
   // joystick controller default
   String joystickControllerName = "Rumble";
 
   // min max default
-  Double max = null; // 20
+  Double maxz = null; // 20
   Double min = null; // -20;
 
-  String motorPortLeft = "m1";
-  String motorPortRight = "m2";
+  String motorPortLeft = "m2";
 
+  String motorPortRight = "m1";
   String serialPort = "/dev/ttyUSB0";
-
   // FIXME - get/use defaults from controller ????
-  Double minX = -1.0; // -1.0
-  Double maxX = 1.0; // 1.0
-  Double minY = -20.0; // -20.0
-  Double maxY = 20.0; // 20.0
+  Double minX = -1.0;
+  Double maxX = 1.0;
+  Double minY = -20.0;
+  Double maxY = 20.0;
 
   public WorkE(String n) {
     super(n);
@@ -65,9 +99,9 @@ public class WorkE extends Service {
   // - in this particular case it was "randomly" decided that 2 parameters
   // FIXME - no defaults ?
   public void attach() throws Exception {
-    // FIXME - do all createPeers here ????
-    motorLeft = (AbstractMotor) createPeer("motorLeft");
-    motorRight = (AbstractMotor) createPeer("motorRight");
+    // FIXME - do all createPeers here ???? No - can be left in startService as a startPeer
+    // motorLeft = (AbstractMotor) createPeer("motorLeft");
+    // motorRight = (AbstractMotor) createPeer("motorRight");
 
     // joystick.setController(joystickControllerIndex);
     joystick.setController(joystickControllerName);
@@ -81,7 +115,11 @@ public class WorkE extends Service {
     motorRight.attach(joystick.getAxis(axisRight));
 
     map(minX, maxX, minY, maxY);
-    setInverted(true);
+
+    motorLeft.setInverted(true);
+    
+    brain.attach(recognizer);
+    // setInverted(true);
   }
 
   public void connect() throws Exception {
@@ -101,6 +139,18 @@ public class WorkE extends Service {
     return axisRight;
   }
 
+  public AbstractMotorController getController() {
+    return controller;
+  }
+
+  public ProgramAB getBrain() {
+    return brain;
+  }
+
+  public OpenCV getCv() {
+    return cv;
+  }
+
   public Joystick getJoystick() {
     return joystick;
   }
@@ -113,12 +163,16 @@ public class WorkE extends Service {
     return motorRight;
   }
 
-  public AbstractMotorController getController() {
-    return controller;
+  public AbstractSpeechRecognizer getRecognizer() {
+    return recognizer;
   }
 
   public String getSerialPort() {
     return serialPort;
+  }
+
+  public AbstractSpeechSynthesis getSpeech() {
+    return speech;
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
@@ -140,19 +194,6 @@ public class WorkE extends Service {
     this.axisLeft = axisLeft;
   }
 
-  public void setAxisRight(String axisRight) {
-    this.axisRight = axisRight;
-  }
-
-  public void setInverted(boolean b) {
-    motorLeft.setInverted(b);
-    motorRight.setInverted(b);
-  }
-
-  public void setJoystick(Joystick joystick) {
-    this.joystick = joystick;
-  }
-
   // FIXME - possible fix - how to handle "default" builds with MotorPorts ?
   // This one is "most" motor subtype specific
   // FIXME - "setting" the port should be an attribute of the MotorController
@@ -163,13 +204,20 @@ public class WorkE extends Service {
    * ((MotorPort) motorRight).setPort("m2"); }
    */
 
-  public void setJoystick(String joystickControllerName) {
-    this.joystickControllerName = joystickControllerName;
+  public void setAxisRight(String axisRight) {
+    this.axisRight = axisRight;
   }
 
-  public void setMinMax(double min, double max) {
-    this.min = min;
-    this.max = max;
+  public void setController(AbstractMotorController controller) {
+    this.controller = controller;
+  }
+
+  public void setJoystick(Joystick joystick) {
+    this.joystick = joystick;
+  }
+
+  public void setJoystick(String joystickControllerName) {
+    this.joystickControllerName = joystickControllerName;
   }
 
   public void setMotorLeft(AbstractMotor motorLeft) {
@@ -188,10 +236,6 @@ public class WorkE extends Service {
     this.motorRight = motorRight;
   }
 
-  public void setController(AbstractMotorController controller) {
-    this.controller = controller;
-  }
-
   // FIXME - configuration builder ?
   public void setSerialPort(String port) {
     this.serialPort = port;
@@ -206,10 +250,22 @@ public class WorkE extends Service {
       joystick = (Joystick) startPeer("joystick");
       motorLeft = (AbstractMotor) startPeer("motorLeft");
       motorRight = (AbstractMotor) startPeer("motorRight");
+      cv = (OpenCV) startPeer("cv");
+      speech = (AbstractSpeechSynthesis) startPeer("speech");
+      recognizer = (AbstractSpeechRecognizer) startPeer("recognizer");
+      brain = (ProgramAB) startPeer("brain");
+      
+      // default 
+      startPeer("cli");
 
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  public void stop() {
+    motorLeft.stop();
+    motorRight.stop();
   }
 
   public Serial virtualize() throws IOException {
@@ -230,36 +286,33 @@ public class WorkE extends Service {
     return uart;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+  public void checkSystems() {
+    // start voice - to report
+    // reporting - visual, led, voice
 
-    ServiceType meta = new ServiceType(WorkE.class);
+    speech = (AbstractSpeechSynthesis) startPeer("speech");
 
-    // GOOD "TYPE" INFO ONLY IN META DATA - this allows user to switch types
-    // safely
-    // it becomes "default" data - which was its intent
-    meta.addPeer("controller", "Sabertooth", "motor controller");
-    meta.addPeer("motorLeft", "MotorPort", "left motor");
-    meta.addPeer("motorRight", "MotorPort", "right motor");
-    meta.addPeer("joystick ", "Joystick", "joystick control");
+    // check if started
+    // check if attached
+    // check if connected
+    // check if manual control exists - joystick
+    // check speech
+    // check speech recognition - can i hear myself - check ;)
+    // check network
+    // check power / battery level - power meter
+    // check if can see
+    // check if can move
 
-    meta.addDescription("used as a general worke");
-    meta.addCategory("robot");
-    return meta;
+    // check news
+    // check calender
+    // check ethereum :p
+
   }
 
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.WARN);
-      boolean virtualize = false;
 
       // FIXME - should be allowed to do this..
       // Joystick.getControllerNames();
@@ -267,14 +320,11 @@ public class WorkE extends Service {
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
       WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
+      Runtime.start("gui", "SwingGui");
       // Runtime.start("gui", "SwingGui");
       // FIXME joystick.virtualize();
       // FIXME - make joystick.setDeadzone("x", 30, 30) -> setDeadzone(10)
 
-      // worke.setPort("/dev/ttyUSB0");
-      if (virtualize) {
-        worke.virtualize();
-      }
       // FIXME - this is 'really' a motorcontrol thing ? how would a builder
       // handle it ?
       // !!! Configuration !!!!
@@ -282,9 +332,16 @@ public class WorkE extends Service {
       // worke.setJoystick("Rumble");
       // worke.setJoystickControllerIndex(0);
       // worke.setMinMax();
-      worke.setMotorPortLeft("m1");
+      // worke.setMotorPortLeft("m1");
       // worke.setMotorPorts();
       // !!! Configuration !!!!
+      
+      AbstractSpeechSynthesis speech = worke.getSpeech();
+      speech.speak("hello, my name is worke");
+      
+      ProgramAB brain = worke.getBrain();
+      brain.setCurrentBotName("worke");
+      log.info("response {}", brain.getResponse("hello worke"));
 
       // FIXME configure stage
       // FIXME default builder ???
@@ -293,23 +350,7 @@ public class WorkE extends Service {
       // "apply !! configuration"
       worke.attach();
       worke.connect();
-
-      if (virtualize) {
-        Joystick joystick = worke.getJoystick();
-        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.08F));
-        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.16F));
-        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.32F));
-        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 0.64F));
-        joystick.send("worke.motorLeft", "onJoystickData", new JoystickData("y", 1.0F));
-        // FIXME - WOW - axis mapping uses "send" and no "route" :P ... I think
-        // this is to do filtering
-        // - the result is "invoke" on the joystick doesn't activate it !
-        // to "simulate" - you'd want inject the data into the joystick polling
-        // thread
-        // FIXME - the following do "nothing"
-        joystick.invoke("publishJoystickInput", new JoystickData("y", 0.25F));
-        joystick.invoke("publishJoystickInput", new JoystickData("y", 1.0F));
-      }
+      worke.stop();
       // Runtime.start("servo", "Servo");
       // Runtime.start("gui", "SwingGui");
 
