@@ -34,6 +34,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   static String globalFileCacheDir = "audioFile";
   public static final String journalFilename = "journal.txt";
+  
+  /**
+   * substitutions are phonetic substitutions for a specific instance of speech synthesis service
+   */
+  Map<String,String> substitutions = new HashMap<String,String>();
 
   public static class Voice {
     /**
@@ -466,6 +471,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     
     // broadcast the original text to be processed/parsed
     invoke("publishSpeechRequested", toSpeak);
+    
+    // normalize to lower case
+    toSpeak = toSpeak.toLowerCase();
+    
+    // process substitutions
+    for (String substitute: substitutions.keySet()) {
+      toSpeak.replace(substitute, substitutions.get(substitute));
+    }
 
     List<String> spokenParts = parseEffects(toSpeak);
     
@@ -498,6 +511,18 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // and finished speaking is when the last audio is finished
   
     return playList;
+  }
+  
+  /**
+   * substitutions for example :
+   *  worke could get substituted to worky or work-ee or "something" that phonetically works for the current
+   *  speech synthesis service
+   *   
+   * @param key
+   * @param replace
+   */
+  public void addSubstitution(String key, String replace) {
+    substitutions.put(key.toLowerCase(), replace.toLowerCase());
   }
   
   public Long publishGenerationTime(Long timeMs) {

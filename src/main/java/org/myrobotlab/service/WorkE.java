@@ -144,6 +144,9 @@ public class WorkE extends Service {
   }
 
   public ProgramAB getBrain() {
+    if (brain == null) {
+      brain = (ProgramAB)startPeer("brain");
+    }
     return brain;
   }
 
@@ -286,12 +289,20 @@ public class WorkE extends Service {
     return uart;
   }
 
+  // FIXME - CheckResult pass / fail with Status detail
   public void checkSystems() {
     // start voice - to report
     // reporting - visual, led, voice
-
+    
     speech = (AbstractSpeechSynthesis) startPeer("speech");
 
+    // making sure services are started
+    startService();
+    
+    // FIXME - relays - giving power
+    
+    // stop motors
+    
     // check if started
     // check if attached
     // check if connected
@@ -319,8 +330,17 @@ public class WorkE extends Service {
 
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
-      WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
+      WorkE worke = (WorkE) Runtime.create("worke", "WorkE");
       Runtime.start("gui", "SwingGui");
+
+      ProgramAB brain = worke.getBrain();
+      brain.setCurrentBotName("worke");
+      log.info("response {}", brain.getResponse("hello there"));
+      log.info("response {}", brain.getResponse("what is your name?"));
+      log.info("response {}", brain.getResponse("who am i?"));
+      log.info("response {}", brain.getResponse("how tall is the empire state building ?"));
+
+      Runtime.start("worke", "WorkE");
       // Runtime.start("gui", "SwingGui");
       // FIXME joystick.virtualize();
       // FIXME - make joystick.setDeadzone("x", 30, 30) -> setDeadzone(10)
@@ -336,12 +356,10 @@ public class WorkE extends Service {
       // worke.setMotorPorts();
       // !!! Configuration !!!!
       
+      
       AbstractSpeechSynthesis speech = worke.getSpeech();
       speech.speak("hello, my name is worke");
       
-      ProgramAB brain = worke.getBrain();
-      brain.setCurrentBotName("worke");
-      log.info("response {}", brain.getResponse("hello worke"));
 
       // FIXME configure stage
       // FIXME default builder ???
@@ -355,7 +373,7 @@ public class WorkE extends Service {
       // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
-      log.error("work-e no worky !", e);
+      log.error("worke no worky !", e);
     }
   }
 }
