@@ -2,7 +2,6 @@ package org.myrobotlab.programab;
 
 import java.io.File;
 import java.util.ArrayList;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -31,6 +30,7 @@ public class OOBPayload {
       jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
       jaxbMarshaller.marshal(payload, file);
       jaxbMarshaller.marshal(payload, System.out);
+      
       // String xml =
       // "<mrl><method>exec</method><param>bar</param><service>foo</service></mrl>";
       // StringReader xmlR = new StringReader(xml);
@@ -79,6 +79,33 @@ public class OOBPayload {
   @XmlElement(name = "service")
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
+  }
+  
+  public static String asOOBTag(OOBPayload payload) {
+    // TODO: this isn't really safe as XML/AIML.. but we don't want to end up double encoding things like 
+    // the important  <star/> tags...  So, for now, it's just wrapped in the tags.
+    StringBuilder oobBuilder = new StringBuilder();
+    oobBuilder.append("<oob>");
+    oobBuilder.append("<mrl>");
+    oobBuilder.append("<service>");
+    oobBuilder.append(payload.getServiceName());
+    oobBuilder.append("</service>");
+    oobBuilder.append("<method>");
+    oobBuilder.append(payload.getMethodName());
+    oobBuilder.append("</method>");
+    for (String param : payload.params) {
+      oobBuilder.append("<param>");
+      // TODO: this could be problematic if the param contains XML chars that are not AIML ...
+      oobBuilder.append(param);
+      oobBuilder.append("</param>");
+    }
+    oobBuilder.append("</mrl>");
+    oobBuilder.append("</oob>");
+    return oobBuilder.toString();
+  }
+
+  public static String asBlockingOOBTag(OOBPayload oobTag) {
+    return "<sraix>"+OOBPayload.asOOBTag(oobTag)+"</sraix>";
   }
 
 }

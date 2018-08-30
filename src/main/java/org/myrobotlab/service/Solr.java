@@ -254,6 +254,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * @return a query response from solr
    */
   public QueryResponse search(SolrQuery query) {
+    log.info("Solr Query Request: {}", query);
     QueryResponse resp = null;
     try {
       if (embeddedSolrServer != null) {
@@ -281,7 +282,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
     String fieldName = "bytes";
     // return an IplImage from the solr index.!
-    QueryResponse qr = search(queryString, 1,0);
+    QueryResponse qr = search(queryString, 1,0, false);
     if (qr.getResults().getNumFound() > 0) {
       Object result = qr.getResults().get(0).getFirstValue(fieldName);
       // TODO: this is a byte array or is it base64?
@@ -392,7 +393,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * @return
    */
   public String fetchFirstResultField(String queryString, String fieldName) {
-    QueryResponse qr = search(queryString, 1,0);
+    QueryResponse qr = search(queryString, 1,0, false);
     if (qr.getResults().getNumFound() > 0) {
       Object result = qr.getResults().get(0).getFirstValue(fieldName);
       if (result == null) {
@@ -410,18 +411,19 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public QueryResponse search(String queryString) {
     // default to 10 hits returned.
-    return search(queryString, 10, 0);
+    return search(queryString, 10, 0, true);
   }
 
   /**
    * Default query to fetch the top 10 documents that match the query request.
    */
-  public QueryResponse search(String queryString, int rows, int start) {
+  public QueryResponse search(String queryString, int rows, int start, boolean mostRecent) {
     SolrQuery query = new SolrQuery();
     query.set("q", queryString);
     query.setRows(rows);
     query.setStart(start);
-    query.setSort(new SortClause("index_date", ORDER.desc));
+    if (mostRecent)
+      query.setSort(new SortClause("index_date", ORDER.desc));
     QueryResponse resp = null;
     try {
       if (embeddedSolrServer != null) {
