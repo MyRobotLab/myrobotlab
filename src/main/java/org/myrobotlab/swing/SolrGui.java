@@ -165,8 +165,11 @@ public class SolrGui extends ServiceGui implements ActionListener {
   private SolrQuery createSearchRequest() {
     SolrQuery query = new SolrQuery(queryStringBox.getText());
     query.setSort("index_date", ORDER.desc);
+    query.addFacetField("sender");
+    query.addFacetField("method");
     query.addFacetField("type");
     query.addFacetField("label");
+    query.setFacetMinCount(1);
     return query;
   }
 }
