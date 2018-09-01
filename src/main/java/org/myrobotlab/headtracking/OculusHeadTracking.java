@@ -37,10 +37,10 @@ public class OculusHeadTracking implements Runnable, Serializable {
 
   @Override
   public void run() {
-
     running = true;
     while (running) {
-      TrackingState trackingState = hmd.getTrackingState(0, false);
+      TrackingState trackingState = hmd.getTrackingState(pollIntervalMS, false);
+      
       // TODO: do we care about "w" ?
       // double w = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.w);
       // rotations about x axis (pitch)
@@ -49,12 +49,7 @@ public class OculusHeadTracking implements Runnable, Serializable {
       double yaw = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.y);
       // rotation about z axis (roll)
       double roll = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.z);
-      // log.info("Roll: " + z*RAD_TO_DEGREES);
-      // log.info("Pitch:"+ x*RAD_TO_DEGREES);
-      // log.info("Yaw:"+ y*RAD_TO_DEGREES );
 
-      // TODO: remove the oculus data class and just use the point publisher
-      // stuff.
       Orientation headTrackingData = new Orientation(roll, pitch, yaw);
       oculus.invoke("publishOrientation", headTrackingData);
 

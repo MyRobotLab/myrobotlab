@@ -112,7 +112,7 @@ public class Deeplearning4j extends Service {
   // TODO: clean all of this up!  for now
   // we're just going to hack in the deeplearning4j zoo , in particular vgg16 model
   // pretrained from imagenet.
-  
+
   private ComputationGraph vgg16 = null;
   
   private ComputationGraph darknet = null;
@@ -519,8 +519,8 @@ public class Deeplearning4j extends Service {
   
   
   public List<List<ClassPrediction>> decodePredictions(Labels labels, INDArray predictions, int n) {
-    int rows = predictions.size(0);
-    int cols = predictions.size(1);
+    long rows = predictions.size(0);
+    long cols = predictions.size(1);
     if (predictions.isColumnVector()) {
         predictions = predictions.ravel();
         rows = predictions.size(0);
@@ -616,18 +616,37 @@ public class Deeplearning4j extends Service {
 	  return classifications;
   }
   
+  public MultiLayerNetwork getNetwork() {
+    return network;
+  }
+
+  public void setNetwork(MultiLayerNetwork network) {
+    this.network = network;
+  }
+  
+  public List<String> getNetworkLabels() {
+    return networkLabels;
+  }
+
+  public void setNetworkLabels(List<String> networkLabels) {
+    this.networkLabels = networkLabels;
+  }
+
+  
   static public ServiceType getMetaData() {
     
-    String dl4jVersion = "1.0.0-beta";
+    String dl4jVersion = "1.0.0-beta2";
     
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "true"));
-    boolean supportRasPi = true;
+    boolean supportRasPi = false;
     
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());
     meta.addDescription("A wrapper service for the Deeplearning4j framework.");
     meta.addCategory("ai");
     meta.addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
     meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", dl4jVersion);
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-nn", dl4jVersion);
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-modelimport", dl4jVersion);
     if (!cudaEnabled) {
       // By default support native CPU execution.
       meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
@@ -635,8 +654,10 @@ public class Deeplearning4j extends Service {
       System.out.println("-------------------------------");
       System.out.println("-----DL4J CUDA!          ------");
       System.out.println("-------------------------------");
-      // Use this if you want cuda 9.1 NVidia GPU support 
-      meta.addDependency("org.nd4j", "nd4j-cuda-9.1-platform", dl4jVersion);
+      // Use this if you want cuda 9.1 NVidia GPU support
+      // TODO: figure out the cuDNN stuff.
+      meta.addDependency("org.nd4j", "nd4j-cuda-9.2-platform", dl4jVersion);
+      meta.addDependency("org.nd4j", "deeplearning4j-cuda-9.2-platform", dl4jVersion);
     }
     // The default build of 1.0.0-alpha does not support the raspi,  we built & host the following dependencies.
     // to support native cpu execution on the raspi.
