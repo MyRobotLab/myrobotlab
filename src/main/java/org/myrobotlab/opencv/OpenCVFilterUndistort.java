@@ -24,6 +24,13 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
    * Based on blog post here : https://github.com/opencv/opencv/blob/master/samples/cpp/calibration.cpp
    * and CV docs here: https://docs.opencv.org/3.4.1/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
    * 
+   * The following code and coeffiecnets are taken directly from this stack overflow post.
+   * https://stackoverflow.com/questions/40545992/opencv-how-to-provide-matrix-for-undistort-if-i-know-lens-correction-factor
+   * 
+   * This one is the bomb!
+   * https://medium.com/@kennethjiang/calibrate-fisheye-lens-using-opencv-333b05afa0b0
+   * 
+   * 
    * This filter does not implement the calibration logic.. it expects the calibration matrix is already known
    * and its hard coded!  oops.. TODO:  make it configurable.
    */
