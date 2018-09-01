@@ -24,6 +24,7 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glScissor;
 import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
@@ -146,6 +147,8 @@ public class OculusDisplay implements Runnable {
   private volatile boolean newFrame = true;
   private float screenSize = 1.0f;
 
+  public volatile boolean trackHead = true;
+  
   static {
     try {
       UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.vs"), Charsets.UTF_8);
@@ -306,15 +309,16 @@ public class OculusDisplay implements Runnable {
       // FIXME there has to be a better way to do this
       poses[eye].Orientation = pose.Orientation;
       poses[eye].Position = pose.Position;
-      mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1))
-      .preRotate(toQuaternion(poses[eye].Orientation).inverse());
+      if (trackHead)
+        mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1)).preRotate(toQuaternion(poses[eye].Orientation).inverse());
       // TODO: is there a way to render both of these are the same time? 
       if (eye == 0 && currentFrame.left != null) {
         renderScreen(leftTexture, orientationInfo);
       } else if (eye == 1 && currentFrame.right != null) {
         renderScreen(rightTexture, orientationInfo);
       }
-      mv.pop();
+      if (trackHead)
+        mv.pop();
     }
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
     frameBuffer.deactivate();
@@ -335,6 +339,13 @@ public class OculusDisplay implements Runnable {
   }
 
   private void loadRiftFrameTextures() {
+    
+    // if the left & right texture are already loaded, let's delete them
+    if (leftTexture != null)
+      glDeleteTextures(leftTexture.id);
+    if (rightTexture != null)
+      glDeleteTextures(rightTexture.id);
+    
     // here we can just update the textures that we're using
     leftTexture = Texture.loadImage(currentFrame.left.getImage());
     rightTexture = Texture.loadImage(currentFrame.right.getImage());

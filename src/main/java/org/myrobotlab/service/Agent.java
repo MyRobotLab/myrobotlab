@@ -911,7 +911,7 @@ public class Agent extends Service {
       autoUpdate(true);
     }
 
-    log.info(String.format("Agent starting spawn %s", formatter.format(new Date())));
+    log.info("Agent starting spawn {}", formatter.format(new Date()));
     log.info("in args {}", Arrays.toString(in));
 
     // String jvmMemory = "-Xmx2048m -Xms256m";
@@ -944,7 +944,7 @@ public class Agent extends Service {
     }
 
 
-    log.info(String.format("spawning -> [%s]", sb.toString()));
+    log.info("spawning -> [{}]", sb.toString());
     
     ProcessBuilder builder = new ProcessBuilder(cmdLine);
 
@@ -952,7 +952,7 @@ public class Agent extends Service {
     String spawnDir = new File(pd.jarPath).getParent();
     builder.directory(new File(spawnDir));
 
-    log.info(String.format("in %s spawning -> [%s]", spawnDir, sb.toString()));
+    log.info("in {} spawning -> [{}]", spawnDir, sb.toString());
 
     // environment variables setup
     setEnv(builder.environment());
@@ -1080,6 +1080,7 @@ public class Agent extends Service {
     meta.setSponsor("GroG");
     meta.setLicenseApache();
     
+    meta.addDependency("commons-cli", "commons-cli", "1.4");
     meta.includeServiceInOneJar(true);
 
     // meta.addPeer("webadmin", "WebGui", "webgui for the Agent");

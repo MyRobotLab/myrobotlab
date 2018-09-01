@@ -47,7 +47,7 @@ public class Tensorflow extends Service {
     meta.addDependency("org.tensorflow", "tensorflow", "1.8.0");
     
     // enable GPU support ?
-    boolean gpu = Boolean.valueOf(System.getProperty("gpu.enabled", "true"));
+    boolean gpu = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     if (gpu) {
       // Currently only supported on Linux. 64 bit.
       meta.addDependency("org.tensorflow", "libtensorflow", "1.8.0");
