@@ -1714,8 +1714,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
     try {
       File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName())));
       // serializer.write(this, cfg);
-      info("saving %s", cfg.getName());
-
+      // this is a spammy log message
+      // info("saving %s", cfg.getName());
       if (this instanceof Runtime) {
         info("we cant serialize runtime yet");
         return false;

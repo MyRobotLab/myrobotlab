@@ -26,7 +26,7 @@ public class SendToSolr extends AbstractStage {
   public final static Logger log = LoggerFactory.getLogger(SendToSolr.class);
   private String idField = "id";
   private String fieldsField = "fields";
-  private boolean addFieldsField = false;
+  private boolean addFieldsField = true;
   private SolrClient solrClient = null;
   private String solrUrl = "http://localhost:8983/solr/collection1";
   private boolean issueCommit = true;
@@ -100,7 +100,7 @@ public class SendToSolr extends AbstractStage {
           // System.out.println("Solr Server Flush Batch...");
           // you are blocking?
           solrClient.add(batch);
-          log.info("Sending Batch to Solr. Size: {}", batch.size());
+          log.debug("Sending Batch to Solr. Size: {}", batch.size());
           // System.out.println("Solr batch sent..");
           // batch.clear();
           batch = Collections.synchronizedList(new ArrayList<SolrInputDocument>());
