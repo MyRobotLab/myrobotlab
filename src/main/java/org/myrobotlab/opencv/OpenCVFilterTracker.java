@@ -37,6 +37,8 @@ import static org.bytedeco.javacpp.opencv_tracking.TrackerMIL;
 import static org.bytedeco.javacpp.opencv_tracking.TrackerMOSSE;
 import static org.bytedeco.javacpp.opencv_tracking.TrackerTLD;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -68,17 +70,24 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   private Rect2d boundingBox;
   
   // configure these to set the initial box size.
-  public int boxWidth = 10;
-  public int boxHeight = 10;
-  // Boosting
-  //  CSRT
-  //  GOTURN
-  //  KCF
-  //  MedianFlow
-  //  MIL
-  //  MOSSE
-  //  TLD
+  //  public int boxWidth = 224;
+  //  public int boxHeight = 224;
+  
+  // TODO: is there a way to dynamically adjust what this should be?!  That'd be cool..
+  public int boxWidth = 25;
+  public int boxHeight = 25;
+
+  // TODO: i'm not sure there is really a performance difference here.. 
+  public boolean blackAndWhite = false;
+  // Boosting,CSRT,GOTURN,KCF,MedianFlow,MIL,MOSSE,TLD
   public String trackerType = "TLD";
+  
+  // The current mat that is being processed.
+  private Mat mat = null;
+  
+  // To hold x,y,w,h 
+  int[] points = new int[4];
+  
   
   public OpenCVFilterTracker() {
     super();
@@ -88,16 +97,24 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     super(name);
   }
 
+  private Frame makeGrayScale(IplImage image) {
+    IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
+    cvCvtColor(image, imageBW, CV_BGR2GRAY);
+    return converterToMat.convert(imageBW);
+  }
+  
   @Override
   public IplImage process(IplImage image, OpenCVData data) {
-    Frame frame = converterToIpl.convert(image);
-    Mat mat = converterToMat.convert(frame);
-    if (boundingBox != null && tracker == null) {
-      tracker = createTracker(trackerType);
-      // log.info("Init tracker");
-      tracker.init(mat,boundingBox);
-      log.info("Tracker initialized");
+    
+    // TODO: I suspect this would be faster if we cut color first.
+    // cvCutColor()
+    Frame frame = null;
+    if (blackAndWhite) {
+      frame = makeGrayScale(image);
+    } else {
+      frame = converterToIpl.convert(image);
     }
+    mat = converterToMat.convert(frame);
     if (boundingBox != null && tracker != null) {
       // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(), boundingBox.y(), boundingBox.width() ,boundingBox.height());
       tracker.update(mat, boundingBox);
@@ -151,10 +168,18 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   }
 
   public void samplePoint(Integer x, Integer y) {
-    boundingBox = new Rect2d(x-boxWidth, y-boxHeight, boxWidth*2, boxHeight*2);
+    // TODO: implement a state machine where you select the first corner. then you select the second corner
+    // that would define the size of the bounding box also.
+    boundingBox = new Rect2d(x-boxWidth/2, y-boxHeight/2, boxWidth, boxHeight);
     log.info("Create bounding box for tracking x:{} y:{} w:{} h:{}" , boundingBox.x() , boundingBox.y(), boundingBox.width(), boundingBox.height());
-    //TODO:  the tracker will initialize on the next frame..  (I know , I know. it'd be better to have the current frame and do the initialization here.
-    tracker = null;
+    // TODO: start tracking multiple points ? 
+    // the tracker will initialize on the next frame..  (I know , I know. it'd be better to have the current frame and do the initialization here.)
+    tracker = createTracker(trackerType);
+    // log.info("Init tracker");
+    // TODO: I'm worried about thread safety with the "mat" object.
+    synchronized(mat) {
+      tracker.init(mat,boundingBox);
+    }
   }
 
   @Override

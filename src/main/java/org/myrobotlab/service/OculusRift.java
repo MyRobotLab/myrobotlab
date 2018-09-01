@@ -7,10 +7,12 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
+import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.PointPublisher;
 import org.slf4j.Logger;
@@ -51,8 +53,8 @@ public class OculusRift extends Service implements PointPublisher {
 	private boolean initialized = false;
 	transient private RiftFrame lastRiftFrame = new RiftFrame();
 
-	transient private OpenCVFilterAffine leftAffine = new OpenCVFilterAffine("left");
-	transient private OpenCVFilterAffine rightAffine = new OpenCVFilterAffine("right");
+	transient private OpenCVFilterAffine leftAffine = new OpenCVFilterAffine("leftAffine");
+	transient private OpenCVFilterAffine rightAffine = new OpenCVFilterAffine("rightAffine");
 
 	private boolean calibrated = false;
 	// Two OpenCV services, one for the left eye, one for the right eye.
@@ -73,9 +75,13 @@ public class OculusRift extends Service implements PointPublisher {
 	public float rightCameraDy = 0;
 	public float rightCameraAngle = 0;
 
-	public String leftEyeURL = null;
-	public String rightEyeURL = null;
-	public String frameGrabberType = null;
+//	public String leftEyeURL = "http://192.168.4.125:8080/?action=stream";
+//	public String rightEyeURL = "http://192.168.4.125:8081/?action=stream";
+
+  public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
+  public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
+
+	public String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
 	public String cvInputSource = null;
 
 	private HmdDesc hmdDesc;
@@ -83,7 +89,7 @@ public class OculusRift extends Service implements PointPublisher {
 	transient public OculusHeadTracking headTracker = null;
 
 	// for single camera support, mirror the images
-	private boolean mirrorLeftCamera = true;
+	private boolean mirrorLeftCamera = false;
 
 	public static class RiftFrame {
 		public SerializableImage left;
@@ -145,7 +151,8 @@ public class OculusRift extends Service implements PointPublisher {
 
 			// create and start the open cv services
 			// TODO: start via runtime?
-			leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
+			//leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
+			leftOpenCV = (OpenCV)Runtime.start(getName() + "." + LEFT_OPEN_CV, "OpenCV");
 			leftOpenCV.startService();
 			// TODO: remove me this is a work around for opencv
 			leftOpenCV.setStreamerEnabled(false);
@@ -158,21 +165,25 @@ public class OculusRift extends Service implements PointPublisher {
 			}
 			if (leftEyeURL != null) {
 				leftOpenCV.setInputFileName(leftEyeURL);
+				leftOpenCV.setInputSource(OpenCV.INPUT_SOURCE_NETWORK);
 			}
 			subscribe(leftOpenCV.getName(), "publishDisplay");
 
 			// start the right eye
 			if (!mirrorLeftCamera) {
-				rightOpenCV = new OpenCV(getName() + "." + RIGHT_OPEN_CV);
+				String serviceName = getName() + "." + RIGHT_OPEN_CV;
+				// rightOpenCV = new OpenCV(serviceName);
+				rightOpenCV = (OpenCV)Runtime.start(serviceName, "OpenCV");
 				rightOpenCV.startService();
 				// TODO: remove me this is a work around for opencv
-				leftOpenCV.setStreamerEnabled(false);
+				rightOpenCV.setStreamerEnabled(false);
 				rightOpenCV.setCameraIndex(rightCameraIndex);
 				if (frameGrabberType != null) {
 					rightOpenCV.setFrameGrabberType(frameGrabberType);
 				}
 				if (rightEyeURL != null) {
 					rightOpenCV.setInputFileName(rightEyeURL);
+		      rightOpenCV.setInputSource(OpenCV.INPUT_SOURCE_NETWORK);
 				}
 				if (cvInputSource != null) {
 					rightOpenCV.setInputSource(cvInputSource);
@@ -195,7 +206,7 @@ public class OculusRift extends Service implements PointPublisher {
 					rightOpenCV.addFilter(t2);
 				}
 			}
-
+			
 			// OpenCVFilterResize leftResizeFilter = new
 			// OpenCVFilterResize("lrf");
 			// TODO: resize the image resolution so it works with the rift.
@@ -219,7 +230,7 @@ public class OculusRift extends Service implements PointPublisher {
 			leftAffine.setAngle(leftCameraAngle);
 			// the affine is always on top i guess
 			leftOpenCV.addFilter(leftAffine);
-			leftOpenCV.setDisplayFilter("left");
+			//leftOpenCV.setDisplayFilter("left");
 			// start the left camera.
 			leftOpenCV.capture();
 			if (!mirrorLeftCamera) {
@@ -227,10 +238,25 @@ public class OculusRift extends Service implements PointPublisher {
 				rightAffine.setDy(rightCameraDy);
 				rightAffine.setAngle(rightCameraAngle);
 				rightOpenCV.addFilter(rightAffine);
-				rightOpenCV.setDisplayFilter("right");
+				//rightOpenCV.setDisplayFilter("right");
 				// start the right camera
 				rightOpenCV.capture();
 			}
+			
+			
+			// TODO: handle the "end of the pipeline" as the input source.
+	     boolean addYolo = true;
+	      if (addYolo) {
+	        OpenCVFilterYolo yoloLeft = new OpenCVFilterYolo("left");
+	        leftOpenCV.addFilter(yoloLeft);
+	        leftOpenCV.setDisplayFilter("left");
+          if (!mirrorLeftCamera) {
+            OpenCVFilterYolo yoloRight = new OpenCVFilterYolo("right");
+	          // TODO: consider what it means to add this to both eyes.
+	          rightOpenCV.addFilter(yoloRight);
+	          rightOpenCV.setDisplayFilter("right");
+          }
+	      }
 			// Now turn on the camras.
 			// set camera index
 			// Now that the Rift and OpenCV has been setup.
@@ -253,8 +279,7 @@ public class OculusRift extends Service implements PointPublisher {
 	}
 
 	public void updateAffine() {
-		// this method will update the angle / dx / dy settings on the affine
-		// filters.
+		// this method will update the angle / dx / dy settings on the affine filters.
 		leftAffine.setDx(leftCameraDx);
 		leftAffine.setDy(leftCameraDy);
 		leftAffine.setAngle(leftCameraAngle);
@@ -277,14 +302,16 @@ public class OculusRift extends Service implements PointPublisher {
 				lastRiftFrame.left = frame;
 				lastRiftFrame.right = frame;
 			}
-		} else if ("left".equals(frame.getSource())) {
-			lastRiftFrame.left = frame;
-		} else if ("right".equals(frame.getSource())) {
-			lastRiftFrame.right = frame;
-		} else {
-			error("unknown source %s", frame.getSource());
+		} else { 
+		  if ("left".equals(frame.getSource())) {
+		    lastRiftFrame.left = frame;
+		  } else if ("right".equals(frame.getSource())) {
+		    lastRiftFrame.right = frame;
+		  } else {
+		    log.error("unknown source {}", frame.getSource());
+		  }
 		}
-
+		
 		if (!calibrated) {
 			if (leftAffine.getLastClicked() != null && rightAffine.getLastClicked() != null) {
 				// calibrate!
@@ -360,7 +387,6 @@ public class OculusRift extends Service implements PointPublisher {
 	public float getYaw() {
 		TrackingState trackingState = hmd.getTrackingState(ABS_TIME_MS, LATENCY_MARKER);
 		float y = trackingState.HeadPose.Pose.Orientation.y * RAD_TO_DEGREES;
-		;
 		return y;
 	}
 
@@ -416,7 +442,7 @@ public class OculusRift extends Service implements PointPublisher {
 	@Override
 	public List<Point> publishPoints(List<Point> points) {
 		// TODO Auto-generated method stub
-		return null;
+		return points;
 	}
 
 	/**
@@ -439,7 +465,7 @@ public class OculusRift extends Service implements PointPublisher {
 		// "shared right streamer");
 
 		meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
-		meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing left eye camera");
+		// meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing left eye camera");
 		meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
 		// compile(group: 'org.saintandreas', name: 'jovr', version: '0.7.0.0')
 		
@@ -456,6 +482,11 @@ public class OculusRift extends Service implements PointPublisher {
 
 	public static void main(String s[]) {
 		// LoggingFactory.init("INFO");
+	  
+    //org.apache.log4j.BasicConfigurator.configure();
+    //LoggingFactory.getInstance().setLevel(Level.INFO);
+
+	  
 		Runtime.createAndStart("gui", "SwingGui");
 		Runtime.createAndStart("python", "Python");
 		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
