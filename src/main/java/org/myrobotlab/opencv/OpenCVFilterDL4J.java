@@ -2,15 +2,18 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Deeplearning4j;
@@ -27,6 +30,8 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   
   public Map<String, Double> lastResult = null; 
+  
+  public ArrayList<YoloDetectedObject> yoloLastResult = null;
   private volatile IplImage lastImage = null;
   
   public OpenCVFilterDL4J() {
@@ -36,14 +41,19 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   
   public OpenCVFilterDL4J(String name) {
     super(name);
+    log.info("Constructor of dl4j filter");
     loadDL4j();
+    log.info("Finished loading vgg16 model.");
   }
   
   private void loadDL4j() {
     dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
     log.info("Loading VGG 16 Model.");
     try {
-      dl4j.loadVGG16();
+      // dl4j.loadYolo2();
+      // dl4j.loadVGG16();
+      // dl4j.loadDarknet();
+      dl4j.loadTinyYOLO();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -64,6 +74,9 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       // log.info("Display result " );
       displayResult(image, lastResult);
     }
+    if (yoloLastResult != null) {
+      displayResultYolo(image, yoloLastResult);
+    }
     // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
     lastImage = image;
     return image;
@@ -71,6 +84,21 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   public static String padRight(String s, int n) {
     return String.format("%1$-" + n + "s", s);  
+  }
+  
+  public void drawRect(IplImage image, Rect rect, CvScalar color) {
+    cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
+  }
+  
+  private void displayResultYolo(IplImage image, ArrayList<YoloDetectedObject> result) {
+    DecimalFormat df2 = new DecimalFormat("#.###");
+    for (YoloDetectedObject obj : result) {
+      String label =  obj.label + " (" + df2.format(obj.confidence*100) + "%)";
+      // anchor point for text.
+      cvPutText(image, label , cvPoint(obj.boundingBox.x(), obj.boundingBox.y()), font, CvScalar.YELLOW);
+      // obj.boundingBox.
+      drawRect(image,obj.boundingBox, CvScalar.BLUE);
+    }
   }
   
   private void displayResult(IplImage image, Map<String, Double> result) {
@@ -103,6 +131,8 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   @Override
   public void run() {
     
+    int count = 0;
+    long start = System.currentTimeMillis();
     log.info("Starting the DL4J classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
@@ -112,9 +142,19 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       // be updating it while it's being classified maybe?!
       if (lastImage != null) {
         try {
-          lastResult = dl4j.classifyImageVGG16(lastImage);
+          // dl4j.yoloImage(lastImage);
+          yoloLastResult = dl4j.classifyImageTinyYolo(lastImage, getVideoProcessor().frameIndex);
+          count++;
+          
+          if (count % 100 == 0) {
+            double rate = 1000.0*count / (System.currentTimeMillis() - start);
+            System.out.println("Yolo Rate " + rate);
+          }
+          //dl4j.classifyImageDarknet(lastImage);
+          // lastResult = dl4j.classifyImageVGG16(lastImage);
           invoke("publishClassification", lastResult);
-          log.info(formatResultString(lastResult));
+          if (lastResult != null)
+            log.info(formatResultString(lastResult));
         } catch (IOException e) {
           // TODO Auto-generated catch block
           log.warn("Exception classifying image!");

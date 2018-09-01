@@ -25,10 +25,6 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<nd4j.version>0.9.1</nd4j.version>
-		<dl4j.version>0.9.1</dl4j.version>
-		<nd4j.backend>nd4j-native-platform</nd4j.backend>
 		<!-- To enable CUDA / GPU Support replace backend with the following. <nd4j.backend>nd4j-cuda-8.0-platform</nd4j.backend> -->
 		<aws.java.sdk.version>1.11.255</aws.java.sdk.version>
 
@@ -93,6 +89,7 @@
           <url>http://mary.dfki.de/repo</url>
         </repository>
      </repositories>
+	
 	
 	
 	
@@ -190,36 +187,42 @@
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta</version>
+    <version>1.0.0-beta2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta</version>
+    <version>1.0.0-beta2</version>
     <scope>provided</scope>
   </dependency>
 <!-- https://mvnrepository.com/artifact/org.deeplearning4j/deeplearning4j-modelimport -->
 	<dependency>
 		<groupId>org.deeplearning4j</groupId>
 		<artifactId>deeplearning4j-nn</artifactId>
-		<version>1.0.0-beta</version>
+		<version>1.0.0-beta2</version>
 		<scope>provided</scope>
 	</dependency>
 	<dependency>
 		<groupId>org.deeplearning4j</groupId>
 		<artifactId>deeplearning4j-modelimport</artifactId>
-		<version>1.0.0-beta</version>
+		<version>1.0.0-beta2</version>
 		<scope>provided</scope>
 	</dependency>
+  <!--  <dependency>
+    <groupId>org.nd4j</groupId>
+    <artifactId>nd4j-native-platform</artifactId> 
+    <version>1.0.0-beta2</version>
+    <scope>provided</scope>
+  </dependency>  -->
   <dependency>
     <groupId>org.nd4j</groupId>
-    <artifactId>nd4j-native-platform</artifactId>
-    <!--  <artifactId>nd4j-cuda-9.1-platform</artifactId>  -->
-    <version>1.0.0-beta</version>
+    <artifactId>nd4j-cuda-9.2-platform</artifactId> 
+    <version>1.0.0-beta2</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
+
+  <!--  <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-pi-mrl</artifactId>
     <version>1.0.0-beta</version>
@@ -230,7 +233,7 @@
     <artifactId>nd4j-native-platform-pi-mrl</artifactId>
     <version>1.0.0-beta</version>
     <scope>provided</scope>
-  </dependency> 
+  </dependency>  --> 
   <dependency>
     <groupId>com.twelvemonkeys.imageio</groupId>
     <artifactId>imageio-core</artifactId>
