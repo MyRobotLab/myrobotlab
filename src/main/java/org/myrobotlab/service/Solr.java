@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import javax.swing.WindowConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -406,6 +407,20 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }    
   }
 
+  public String fetchFirstResultSentence(String queryString, String fieldName) {
+    String res = fetchFirstResultField(queryString, fieldName);
+    // Now we want to sentence detect this string.. and return the first sentence..
+    // for now.. cheating, and just pulling everything up to the first period.
+    if (!StringUtils.isEmpty(res)) {
+      // TODO: better sentence boundary detection
+      String fragment = res.split(".")[0];
+      return fragment;
+    } else {
+      // TODO: log a warning or something.
+      return null;
+    }
+  }
+  
   /**
    * Default query to fetch the top 10 documents that match the query request.
    */
@@ -418,6 +433,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Default query to fetch the top 10 documents that match the query request.
    */
   public QueryResponse search(String queryString, int rows, int start, boolean mostRecent) {
+    log.info("Searching for : {}", queryString);
     SolrQuery query = new SolrQuery();
     query.set("q", queryString);
     query.setRows(rows);

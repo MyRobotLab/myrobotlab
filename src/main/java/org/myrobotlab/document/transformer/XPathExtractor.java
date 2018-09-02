@@ -23,6 +23,9 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.myrobotlab.document.Document;
+import org.myrobotlab.logging.LoggerFactory;
+import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -37,6 +40,7 @@ import org.xml.sax.SAXException;
  */
 public class XPathExtractor extends AbstractStage {
 
+  public final static Logger log = LoggerFactory.getLogger(XPathExtractor.class.getCanonicalName());
   protected String xmlField = "xml";
   protected String configFile = "config/xpaths.txt";
   // mapping of field name to the xpaths that evaluate for its extraction
@@ -82,7 +86,11 @@ public class XPathExtractor extends AbstractStage {
   @Override
   public List<Document> processDocument(Document doc) {
     // TODO Auto-generated method stub
-
+    if (!doc.hasField(xmlField)) {
+      log.info("No XML Field on doc {}", doc.getId());
+      return null;
+    }
+    
     for (Object o : doc.getField(xmlField)) {
       // TODO: this is bad , lets cast
       String xml = (String) o;
