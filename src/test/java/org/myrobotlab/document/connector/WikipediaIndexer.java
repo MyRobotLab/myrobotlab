@@ -45,12 +45,15 @@ public class WikipediaIndexer {
     deleteXMLFieldConfig.setStringParam("fieldName", "xml");
     // TODO: remove the xml field.. ?!?! argh!
     StageConfiguration parseWikiTextConfig = new StageConfiguration("parseWikiText", "org.myrobotlab.document.transformer.ParseWikiText");
+    
+    StageConfiguration createTeaser = new StageConfiguration("createTeaser", "org.myrobotlab.document.transformer.CreateStaticTeaser");
+    
     // parseWikiTextConfig.setStringParam("fieldName", "text");
     // TODO: followed by a wiki markup parser
     // followed by a solr output stage.
     StageConfiguration solrStageConfig = new StageConfiguration("sendToSolr", "org.myrobotlab.document.transformer.SendToSolr");
     solrStageConfig.setStringParam("solrUrl", solrUrl);
-    solrStageConfig.setIntegerParam("batchSize", 200);
+    solrStageConfig.setIntegerParam("batchSize", 500);
     solrStageConfig.setBoolParam("issueCommit", false);
     DocumentPipeline docproc = new DocumentPipeline("docproc");
     // build the pipeline.. assemble the stages.
@@ -63,13 +66,14 @@ public class WikipediaIndexer {
     // remove the original xml.. it's icky
     workflowConfig.addStage(deleteXMLFieldConfig);
     workflowConfig.addStage(parseWikiTextConfig);
+    workflowConfig.addStage(createTeaser);
     workflowConfig.addStage(solrStageConfig);
     docproc.setConfig(workflowConfig);
     docproc.initalize();
     docproc.startService();
     // attach the doc proc to the connector
     wikipediaConnector.addDocumentListener(docproc);
-    wikipediaConnector.setBatchSize(200);
+    wikipediaConnector.setBatchSize(500);
     // start crawling...
     wikipediaConnector.startCrawling();
 
