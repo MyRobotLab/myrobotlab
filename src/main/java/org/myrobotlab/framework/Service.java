@@ -786,7 +786,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     this.outbox.setCommunicationManager(cm);
 
     tsFormatter.setCalendar(cal);
-    load();
+    // load(); removed by GroG
     Runtime.register(this, null);
   }
 
@@ -1946,7 +1946,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       thisThread.interrupt();
     }
     thisThread = null;
-    save();
+    // save(); removed by GroG
   }
 
   // -------------- Messaging Begins -----------------------

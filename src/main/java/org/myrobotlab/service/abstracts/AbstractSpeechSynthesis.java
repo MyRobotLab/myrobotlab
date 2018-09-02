@@ -477,7 +477,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     
     // process substitutions
     for (String substitute: substitutions.keySet()) {
-      toSpeak.replace(substitute, substitutions.get(substitute));
+      toSpeak = toSpeak.replace(substitute, substitutions.get(substitute));
     }
 
     List<String> spokenParts = parseEffects(toSpeak);
@@ -889,6 +889,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * public static String getGlobalFileCacheDir() { return globalFileCacheDir; }
    */
 
+  public String setAudioEffects(String audioEffects) {
+    return audioEffects;
+  }
+  
   static public ServiceType getMetaData(String serviceType) {
 
     ServiceType meta = new ServiceType(serviceType);
