@@ -351,7 +351,7 @@ public class TextConverter extends AstVisitor<WtNode> {
     
     
     
-    
+    // TODO: maybe this throws an exception?  not sure.. 
     String templateName = n.getName().getAsString().trim();
     if (templateName.toLowerCase().contains("infobox")) { 
       // it should be the the format of  Infobox infobox_type ... we'll see
@@ -374,7 +374,7 @@ public class TextConverter extends AstVisitor<WtNode> {
       doc.setField("has_infobox", true);
       doc.addToField("infobox_type", infoBoxType);
       childDoc.addToField("infobox_type", infoBoxType);
-      log.info("Doc ID: {} Template Name : {} -- Infobox Type: {}" , doc.getId(), templateName, infoBoxType);
+      // log.info("Doc ID: {} Template Name : {} -- Infobox Type: {}" , doc.getId(), templateName, infoBoxType);
       if (n.size() == 2) {
         WtNode a = n.get(0);
         // B is the infobox data
@@ -393,7 +393,7 @@ public class TextConverter extends AstVisitor<WtNode> {
                   continue;
                 String payload = tv.getContent().trim();
                // log.info("Doc ID : {} Field: {} Value: {}" , doc.getId(), fieldName, payload);
-                doc.addToField(fieldName, payload);
+                //doc.addToField(fieldName, payload);
                 childDoc.addToField(fieldName, payload);
                 
               } else if (vn instanceof WtTemplate) {
