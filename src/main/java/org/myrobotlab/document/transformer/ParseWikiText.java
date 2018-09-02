@@ -31,31 +31,30 @@ public class ParseWikiText extends AbstractStage {
   public List<Document> processDocument(Document doc) {
     // TODO: what's the wiki id to use for this? does it even really matter?
     String title = doc.getId();
+    if (!doc.hasField(input)) {
+      log.info("no input field for wiki {}", doc.getId());
+      return null;
+    }
     String wikiText = doc.getField(input).get(0).toString();
     try {
-      String result = convertWikiText(title, wikiText, 132, doc);
-      //System.out.println(result);
+      WikiConfig config = DefaultConfigEnWp.generate();
+      // Instantiate a compiler for wiki pages
+      WtEngineImpl engine = new WtEngineImpl(config);
+      // Retrieve a page
+      PageTitle pageTitle = PageTitle.make(config, title);
+      PageId pageId = new PageId(pageTitle, -1);
+      // Compile the retrieved page
+      EngProcessedPage cp = engine.postprocess(pageId, wikiText, null);
+      // This compiled page i think has all the mojo i seek!
+      TextConverter p = new TextConverter(config, 132, doc);
+      String result = (String)p.go(cp.getPage());
       doc.setField(output, result);
+      // emit the children docs from this method.
+      return p.getChildrenDocs();
     } catch (Exception e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return null;
-  }
-
-  public String convertWikiText(String title, String wikiText, int maxLineLength, Document doc) throws LinkTargetException, EngineException {
-    // Set-up a simple wiki configuration
-    WikiConfig config = DefaultConfigEnWp.generate();
-    // Instantiate a compiler for wiki pages
-    WtEngineImpl engine = new WtEngineImpl(config);
-    // Retrieve a page
-    PageTitle pageTitle = PageTitle.make(config, title);
-    PageId pageId = new PageId(pageTitle, -1);
-    // Compile the retrieved page
-    EngProcessedPage cp = engine.postprocess(pageId, wikiText, null);
-    // This compiled page i think has all the mojo i seek!
-    TextConverter p = new TextConverter(config, maxLineLength, doc);
-    return (String)p.go(cp.getPage());
   }
 
   @Override

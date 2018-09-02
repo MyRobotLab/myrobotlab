@@ -13,9 +13,12 @@ import org.myrobotlab.service.XMLConnector;
 public class WikipediaIndexer {
 
   public static void main(String[] args) throws ClassNotFoundException {
-    String solrUrl = "http://phobos:8983/solr/wikipedia";
-    String wikipediaFilename = "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
-    int NUM_THREADS = 8;
+  //  String solrUrl = "http://phobos:8983/solr/wikipedia";
+    String solrUrl = "http://localhost:8983/solr/wikipedia";
+    //String wikipediaFilename = "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
+    String wikipediaFilename = "Z:\\enwiki-20180820-pages-articles-multistream.xml";
+    
+    int NUM_THREADS = 6;
     
     //TODO: why do I need this to index wikipedia from the xml dump?!  I know , it's like a 50GB xml file.. gah..
     System.setProperty("jdk.xml.totalEntitySizeLimit", String.valueOf(Integer.MAX_VALUE));
