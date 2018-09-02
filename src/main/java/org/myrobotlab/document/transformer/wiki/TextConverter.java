@@ -17,7 +17,10 @@
 
 package org.myrobotlab.document.transformer.wiki;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.myrobotlab.document.Document;
@@ -107,12 +110,14 @@ public class TextConverter extends AstVisitor<WtNode> {
   private LinkedList<Integer> sections;
 
   private final Document doc;
+  private ArrayList<Document> childDocs;
   // =========================================================================
 
   public TextConverter(WikiConfig config, int wrapCol, Document doc) {
     this.config = config;
     this.wrapCol = wrapCol;
     this.doc = doc;
+    childDocs = new ArrayList<Document>();
   }
 
   @Override
@@ -342,15 +347,33 @@ public class TextConverter extends AstVisitor<WtNode> {
     // System.out.println("Visit Template" + n);
     // This is where the infoboxes are stored i guess?
 
+    // we need a doc id fore this one.
+    
+    
+    
+    
     String templateName = n.getName().getAsString().trim();
     if (templateName.toLowerCase().contains("infobox")) { 
       // it should be the the format of  Infobox infobox_type ... we'll see
       // ok.. i guess we think that infoboxes are of size 2 ?
+      
+      // TODO: what's a good deterministic way to know .. it'd be nice to have 
+      // something deterministic for the infoboxid.. 
+      String infoboxId = UUID.randomUUID().toString();
+      String docId = doc.getId() + "_" + infoboxId;
+      Document childDoc = new Document(docId);
+      childDocs.add(childDoc);
+      childDoc.setField("table", "infobox");
+
+      // let's grab what doc it came from
+      childDoc.setField("parent_id", doc.getId());
+      
       String infoBoxType = templateName.toLowerCase().replaceFirst("infobox", "").trim();
       // Infobox type probably needs to be cleaned.
       String cleanInfoBoxType = cleanWikiMarkup(infoBoxType);
       doc.setField("has_infobox", true);
       doc.addToField("infobox_type", infoBoxType);
+      childDoc.addToField("infobox_type", infoBoxType);
       log.info("Doc ID: {} Template Name : {} -- Infobox Type: {}" , doc.getId(), templateName, infoBoxType);
       if (n.size() == 2) {
         WtNode a = n.get(0);
@@ -371,6 +394,8 @@ public class TextConverter extends AstVisitor<WtNode> {
                 String payload = tv.getContent().trim();
                // log.info("Doc ID : {} Field: {} Value: {}" , doc.getId(), fieldName, payload);
                 doc.addToField(fieldName, payload);
+                childDoc.addToField(fieldName, payload);
+                
               } else if (vn instanceof WtTemplate) {
                 WtTemplate wt = (WtTemplate)vn;
                 // TODO: parse me!
@@ -503,5 +528,12 @@ public class TextConverter extends AstVisitor<WtNode> {
 
   private void write(int num) {
     writeWord(String.valueOf(num));
+  }
+
+  public List<Document> getChildrenDocs() {
+    
+    
+    return childDocs;
+    
   }
 }
