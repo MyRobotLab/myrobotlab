@@ -39,12 +39,16 @@ public class Lloyd extends Service {
   private int leftEyeCameraIndex = 1;
   private OpenCV rightEye;
   private int rightEyeCameraIndex = 0;
-  
+  private OculusRift oculusRift;
   private boolean record = false;
   private boolean enableSpeech = true;
-  private boolean enableEyes = false;
+  private boolean enableEyes = true;
+  // these are probably mutually exclusive.  but maybe not?!
+  private boolean enableOculus = false;
+  
   
   private transient WebGui webgui;
+  
   
   
   String cloudSolrUrl = "http://phobos:8983/solr/wikipedia";
@@ -68,6 +72,11 @@ public class Lloyd extends Service {
     startBrain();
     // start memory last :(  can't attach eyes until the eyes exist.
     startMemory();
+    
+    // If we're in telepresence mode start the oculus service.
+    if (enableOculus) {
+      startOculus();
+    }
   }
 
   public void startEar() {
@@ -122,15 +131,11 @@ public class Lloyd extends Service {
   public void addWikiLookups() {
     // Start working on questions.
     inventorLookup();
-
     // add more "lookups" ?
-    
     // What questions ?
     whatTypeLookup();
-    
     // Where questions ?
     tellMeAboutLookup();
-    
   }
   
   public void inventorLookup() {
@@ -168,7 +173,8 @@ public class Lloyd extends Service {
   
   private OOBPayload createSolrFieldSearchOOB(String fieldName) {
     String serviceName = "cloudMemory";
-    String methodName = "fetchFirstResultField";
+    // TODO: make this something that's completely abstracted out from here.
+    String methodName = "fetchFirstResultSentence";
     ArrayList<String> params = new ArrayList<String>();
     // TODO: add the "qf" parameter to improve precision/recall
     // TODO: add the has infobox as a filter query
@@ -209,6 +215,20 @@ public class Lloyd extends Service {
     leftEye.capture();
   }
   
+  public void startOculus() {
+    oculusRift = (OculusRift)Runtime.start("oculusRift", "OculusRift");
+    
+    oculusRift.leftCameraAngle = 180;
+    oculusRift.leftCameraDy = -20;
+    oculusRift.rightCameraAngle = 0;
+    oculusRift.rightCameraDy = 20;
+    // call this once you've updated the affine stuff?
+    oculusRift.updateAffine();
+    oculusRift.initContext();
+    oculusRift.logOrientation();
+  }
+  
+  
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Lloyd.class.getCanonicalName());
@@ -241,7 +261,7 @@ public class Lloyd extends Service {
   
   public static void main(String[] args) throws SolrServerException, IOException, JAXBException {
     // 
-    //LoggingFactory.init("INFO");
+    LoggingFactory.init("INFO");
     Lloyd lloyd = (Lloyd)Runtime.start("lloyd", "Lloyd");
     SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
     // start python

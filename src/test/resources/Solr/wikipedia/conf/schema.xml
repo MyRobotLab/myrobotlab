@@ -438,6 +438,11 @@
   <field name="type" type="string" multiValued="false" indexed="true" stored="true" docValues="true"/>
   <field name="parent_id" type="string" multiValued="true" indexed="true" stored="true" docValues="true"/>
 
+
+  <!-- infobox stuff. -->
+  <field name="name" type="text_general"/>
+  <field name="type" type="string"/>
+
   <!-- useful dynamic fields TODO: trim down as necessary -->
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
@@ -503,7 +508,7 @@
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
   
   <!-- the catch all field.. -->
-  <dynamicField name="*" type="strings" indexed="true" stored="true"/>
+  <dynamicField name="*" type="text_general" multiValued="true" indexed="true" stored="true"/>
 
   <!-- TODO: create a default search field.  (Or do it all at query time?
     <copyField source="title" dest="title_str" maxChars="256"/>
