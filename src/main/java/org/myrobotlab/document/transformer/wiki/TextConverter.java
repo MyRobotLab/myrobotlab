@@ -20,11 +20,9 @@ package org.myrobotlab.document.transformer.wiki;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.myrobotlab.document.Document;
-import org.myrobotlab.document.transformer.OpenNLP;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 import org.sweble.wikitext.engine.PageTitle;
@@ -39,6 +37,7 @@ import org.sweble.wikitext.parser.nodes.WtInternalLink;
 import org.sweble.wikitext.parser.nodes.WtItalics;
 import org.sweble.wikitext.parser.nodes.WtListItem;
 import org.sweble.wikitext.parser.nodes.WtName;
+import org.sweble.wikitext.parser.nodes.WtName.WtNoName;
 import org.sweble.wikitext.parser.nodes.WtNode;
 import org.sweble.wikitext.parser.nodes.WtNodeList;
 import org.sweble.wikitext.parser.nodes.WtOrderedList;
@@ -92,7 +91,7 @@ import de.fau.cs.osr.utils.StringTools;
  * </ul>
  */
 public class TextConverter extends AstVisitor<WtNode> {
-  
+
   public final static Logger log = LoggerFactory.getLogger(TextConverter.class.getCanonicalName());
   private static final Pattern ws = Pattern.compile("\\s+");
   private final WikiConfig config;
@@ -346,34 +345,50 @@ public class TextConverter extends AstVisitor<WtNode> {
   public void visit(WtTemplate n) {
     // System.out.println("Visit Template" + n);
     // This is where the infoboxes are stored i guess?
-
+//if (true)
+//    return;
     // we need a doc id fore this one.
-    
-    
-    
+
+
+
     // TODO: maybe this throws an exception?  not sure.. 
-    String templateName = n.getName().getAsString().trim();
+    WtName nameNode = n.getName();
+    // log.info("Tempalte Box Name Node: {}", nameNode);
+    if (nameNode.size() == 0) {
+      log.warn("Name node size was zero!");
+      return;
+    }
+    WtNode firstValue = nameNode.get(0);
+    if (!(firstValue instanceof WtText)) {
+      log.warn("First value wasn't a wt text node!");
+      return;
+    }
+     
+    String templateName = "";
+    try {
+      templateName = ((WtText)firstValue).getContent().trim();
+    } catch (UnsupportedOperationException e) {
+      log.warn("Runtime caught!!!!!");
+      return;
+    }
     if (templateName.toLowerCase().contains("infobox")) { 
       // it should be the the format of  Infobox infobox_type ... we'll see
       // ok.. i guess we think that infoboxes are of size 2 ?
-      
       // TODO: what's a good deterministic way to know .. it'd be nice to have 
       // something deterministic for the infoboxid.. 
-      String infoboxId = UUID.randomUUID().toString();
-      String docId = doc.getId() + "_" + infoboxId;
+      // String infoboxId = UUID.randomUUID().toString();
+      // TODO: fix me : The doc id of the child infoboxes is fixed in the stage.
+      String docId = doc.getId();
       Document childDoc = new Document(docId);
       childDocs.add(childDoc);
       childDoc.setField("table", "infobox");
-
-      // let's grab what doc it came from
       childDoc.setField("parent_id", doc.getId());
-      
       String infoBoxType = templateName.toLowerCase().replaceFirst("infobox", "").trim();
       // Infobox type probably needs to be cleaned.
       String cleanInfoBoxType = cleanWikiMarkup(infoBoxType);
       doc.setField("has_infobox", true);
-      doc.addToField("infobox_type", infoBoxType);
-      childDoc.addToField("infobox_type", infoBoxType);
+      doc.addToField("infobox_type", cleanInfoBoxType);
+      childDoc.addToField("infobox_type", cleanInfoBoxType);
       // log.info("Doc ID: {} Template Name : {} -- Infobox Type: {}" , doc.getId(), templateName, infoBoxType);
       if (n.size() == 2) {
         WtNode a = n.get(0);
@@ -381,47 +396,63 @@ public class TextConverter extends AstVisitor<WtNode> {
         WtNode b = n.get(1);
         // System.out.println("Node B Size: " + b.size());
         for (WtNode x : b) {
-          WtName name = (WtName) x.get(0);
-          String fieldName =  "infobox_" + normalizeFieldName(name.getAsString()) + "_ss";
-          if (x.get(1) instanceof WtValue) {
-            WtValue value = (WtValue) x.get(1);
-            for (WtNode vn : value) {
-              if (vn instanceof WtText) {
-                WtText tv = (WtText) vn;
-                // This is the case where we actually
-                if (tv.getContent() == null || tv.getContent().trim().length() == 0)
-                  continue;
-                String payload = tv.getContent().trim();
-               // log.info("Doc ID : {} Field: {} Value: {}" , doc.getId(), fieldName, payload);
-                //doc.addToField(fieldName, payload);
-                childDoc.addToField(fieldName, payload);
-                
-              } else if (vn instanceof WtTemplate) {
-                WtTemplate wt = (WtTemplate)vn;
-                // TODO: parse me!
-              } else if (vn instanceof WtXmlComment) {
-                // TODO: this gives us a label or logical grouping of the infobox attributes below.
-              } else if (vn instanceof WtTagExtension) {
-                // TODO: parse this stuff?
-              } else {
-                log.info("Unknown Type : {}", vn);
-              }
+          if (x.get(0) instanceof WtName) {
+            WtName name = (WtName) x.get(0);
+            String fieldName = "";
+            if (name instanceof WtNoName) {
+              // Uh oh..
+              // log.warn("No Name on a Name Node?!");
+              continue;
             }
-          } else {
-            log.info("Non-text node. {}", x);
+            try {
+              if (!name.isResolved()) {
+                log.warn("WT Name not resolved..");
+                continue;
+              }
+              fieldName =  normalizeFieldName(name.getAsString());
+            } catch  (UnsupportedOperationException e) {
+             log.warn("Error.. un caught runtime!!!");
+             return;
+            }
+            if (x.get(1) instanceof WtValue) {
+              WtValue value = (WtValue) x.get(1);
+              for (WtNode vn : value) {
+                if (vn instanceof WtText) {
+                  WtText tv = (WtText) vn;
+                  // This is the case where we actually
+                  if (tv.getContent() == null || tv.getContent().trim().length() == 0)
+                    continue;
+                  String payload = tv.getContent().trim();
+                  // log.info("Doc ID : {} Field: {} Value: {}" , doc.getId(), fieldName, payload);
+                  //doc.addToField(fieldName, payload);
+                  childDoc.addToField(fieldName, payload);
+                } else if (vn instanceof WtTemplate) {
+                  WtTemplate wt = (WtTemplate)vn;
+                  // TODO: parse me!
+                } else if (vn instanceof WtXmlComment) {
+                  // TODO: this gives us a label or logical grouping of the infobox attributes below.
+                } else if (vn instanceof WtTagExtension) {
+                  // TODO: parse this stuff?
+                } else {
+                  log.info("Unknown Type : {}", vn);
+                }
+              }
+            } else {
+              log.info("Non-text node. {}", x);
+            }
           }
         }
       }
     }
   }
-  
+
 
   private String cleanWikiMarkup(String infoBoxType) {
     // TODO Auto-generated method stub
-    
+
     String clean = infoBoxType.replaceAll("\\[", "");
     clean = clean.replaceAll("\\]", "");
-    
+
     return clean;
   }
 
@@ -431,6 +462,11 @@ public class TextConverter extends AstVisitor<WtNode> {
     String cleanVerb = fieldName.trim().replaceAll(" ", "_").toLowerCase();
     cleanVerb = cleanVerb.replaceAll("__", "_");
     cleanVerb = cleanVerb.replaceAll("_$", "");
+    
+    // special fix for "date"
+   // if (cleanVerb.equalsIgnoreCase("date")) {
+      cleanVerb = cleanVerb + "_txt";
+   // }
     return cleanVerb;
   }
 
@@ -531,9 +567,9 @@ public class TextConverter extends AstVisitor<WtNode> {
   }
 
   public List<Document> getChildrenDocs() {
-    
-    
+
+
     return childDocs;
-    
+
   }
 }

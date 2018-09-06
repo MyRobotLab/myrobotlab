@@ -7,8 +7,8 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.headtracking.OculusHeadTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
@@ -73,13 +73,13 @@ public class OculusRift extends Service implements PointPublisher {
 
 	public float rightCameraDx = 0;
 	public float rightCameraDy = 0;
-	public float rightCameraAngle = 0;
+	public float rightCameraAngle = 180;
 
-//	public String leftEyeURL = "http://192.168.4.125:8080/?action=stream";
-//	public String rightEyeURL = "http://192.168.4.125:8081/?action=stream";
+	public String leftEyeURL  = "http://192.168.4.104:8081/?action=stream";
+	public String rightEyeURL = "http://192.168.4.104:8080/?action=stream";
 
-  public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
-  public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
+  //public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
+  //public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
 
 	public String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
 	public String cvInputSource = null;
@@ -193,7 +193,7 @@ public class OculusRift extends Service implements PointPublisher {
 
 			// if the cameras are mounted at 90 degrees rotation, transpose the
 			// image data to flip the resolution.
-			boolean addTransposeEyes = true;
+			boolean addTransposeEyes = false;
 			if (addTransposeEyes) {
 				// left eye
 				OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1");
@@ -245,7 +245,7 @@ public class OculusRift extends Service implements PointPublisher {
 			
 			
 			// TODO: handle the "end of the pipeline" as the input source.
-	     boolean addYolo = true;
+	     boolean addYolo = false;
 	      if (addYolo) {
 	        OpenCVFilterYolo yoloLeft = new OpenCVFilterYolo("left");
 	        leftOpenCV.addFilter(yoloLeft);
@@ -257,6 +257,8 @@ public class OculusRift extends Service implements PointPublisher {
 	          rightOpenCV.setDisplayFilter("right");
           }
 	      }
+	      
+	      
 			// Now turn on the camras.
 			// set camera index
 			// Now that the Rift and OpenCV has been setup.
@@ -280,10 +282,12 @@ public class OculusRift extends Service implements PointPublisher {
 
 	public void updateAffine() {
 		// this method will update the angle / dx / dy settings on the affine filters.
+	  log.info("Update left affine");
 		leftAffine.setDx(leftCameraDx);
 		leftAffine.setDy(leftCameraDy);
 		leftAffine.setAngle(leftCameraAngle);
 		if (!mirrorLeftCamera) {
+		  log.info("Update right affine");
 			rightAffine.setDx(rightCameraDx);
 			rightAffine.setDy(rightCameraDy);
 			rightAffine.setAngle(rightCameraAngle);
@@ -305,7 +309,11 @@ public class OculusRift extends Service implements PointPublisher {
 		} else { 
 		  if ("left".equals(frame.getSource())) {
 		    lastRiftFrame.left = frame;
+		  } else if ("leftAffine".equals(frame.getSource())) {
+		    lastRiftFrame.left = frame;
 		  } else if ("right".equals(frame.getSource())) {
+		    lastRiftFrame.right = frame;
+		  } else if ("rightAffine".equals(frame.getSource())) {
 		    lastRiftFrame.right = frame;
 		  } else {
 		    log.error("unknown source {}", frame.getSource());
@@ -485,13 +493,14 @@ public class OculusRift extends Service implements PointPublisher {
 	  
     //org.apache.log4j.BasicConfigurator.configure();
     //LoggingFactory.getInstance().setLevel(Level.INFO);
-
+	  LoggingFactory.init("INFO");
+	  
 	  
 		Runtime.createAndStart("gui", "SwingGui");
 		Runtime.createAndStart("python", "Python");
 		OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
-		rift.leftCameraAngle = 180;
+		rift.leftCameraAngle = 0;
 		rift.leftCameraDy = 5;
 		rift.rightCameraDy = -5;
 		// call this once you've updated the affine stuff?
