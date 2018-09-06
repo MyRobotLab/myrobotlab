@@ -697,7 +697,7 @@
       <!-- Default search field   -->
       <str name="df">text</str> 
       <!--  set additional edismax params. parameters -->
-      <str name="qf">title^10 text</str>
+      <str name="qf">title^10 name^5 type^2 text</str>
       
     </lst>
     <!-- In addition to defaults, "appends" params can be specified

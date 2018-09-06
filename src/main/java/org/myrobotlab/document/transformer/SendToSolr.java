@@ -100,7 +100,7 @@ public class SendToSolr extends AbstractStage {
           // System.out.println("Solr Server Flush Batch...");
           // you are blocking?
           solrClient.add(batch);
-          log.debug("Sending Batch to Solr. Size: {}", batch.size());
+          log.info("Sending Batch to Solr. Size: {}", batch.size());
           // System.out.println("Solr batch sent..");
           // batch.clear();
           batch = Collections.synchronizedList(new ArrayList<SolrInputDocument>());
@@ -131,6 +131,7 @@ public class SendToSolr extends AbstractStage {
 
   public synchronized void flush() {
 
+    log.info("Flush called for Send to solr stage. ");
     // Is this where I should flush the last batch?
     if (solrClient != null && batch.size() > 0) {
       try {

@@ -24,9 +24,9 @@ public class WorkflowWorker extends Thread {
 
   private final LinkedBlockingQueue<Document> queue;
 
-  WorkflowWorker(WorkflowConfiguration workflowConfig, LinkedBlockingQueue<Document> queue) throws ClassNotFoundException {
+  WorkflowWorker(WorkflowConfiguration workflowConfig, LinkedBlockingQueue<Document> queue, String workerId) throws ClassNotFoundException {
     // set the thread name
-    this.setName("WorkflowWorker-" + workflowConfig.getName());
+    this.setName("WorkflowWorker-" + workflowConfig.getName() + "-" + workerId);
     this.queue = queue;
     stages = new ArrayList<AbstractStage>();
     for (StageConfiguration stageConf : workflowConfig.getStages()) {
@@ -64,8 +64,9 @@ public class WorkflowWorker extends Thread {
           processDocumentInternal(doc, 0);
           processing = false;
         }
-      } catch (InterruptedException e) {
-        // TODO: handle these properly
+      } catch (Exception e) {
+        // TODO: Why didn't I see this message before? because the exception was a runtime exception
+        // and this was previously only catching interrupted.
         log.warn("Workflow Worker Died! {}", e.getMessage());
         e.printStackTrace();
       }
