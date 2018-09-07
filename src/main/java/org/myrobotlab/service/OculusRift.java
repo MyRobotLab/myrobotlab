@@ -12,6 +12,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
+import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.PointPublisher;
@@ -75,8 +76,8 @@ public class OculusRift extends Service implements PointPublisher {
 	public float rightCameraDy = 0;
 	public float rightCameraAngle = 180;
 
-	public String leftEyeURL  = "http://192.168.4.104:8081/?action=stream";
-	public String rightEyeURL = "http://192.168.4.104:8080/?action=stream";
+	public String leftEyeURL  = "http://192.168.4.104:8080/?action=stream";
+	public String rightEyeURL = "http://192.168.4.104:8081/?action=stream";
 
   //public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
   //public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
@@ -191,6 +192,16 @@ public class OculusRift extends Service implements PointPublisher {
 				subscribe(rightOpenCV.getName(), "publishDisplay");
 			}
 
+			boolean addUndistort = true;
+			if (addUndistort) {
+			  OpenCVFilterUndistort ud1 = new OpenCVFilterUndistort("ud1");
+			  leftOpenCV.addFilter(ud1);
+			  if (!mirrorLeftCamera) {
+			    OpenCVFilterUndistort ud2 = new OpenCVFilterUndistort("ud2");
+			    rightOpenCV.addFilter(ud2);
+			  }
+			}
+			
 			// if the cameras are mounted at 90 degrees rotation, transpose the
 			// image data to flip the resolution.
 			boolean addTransposeEyes = false;
@@ -453,6 +464,17 @@ public class OculusRift extends Service implements PointPublisher {
 		return points;
 	}
 
+	// This publishes the hand position and orientation from the oculus touch controllers.
+	public Point publishLeftHandPosition(Point point) {
+    // 
+    return point;
+  }
+  public Point publishRightHandPosition(Point point) {
+    // 
+    return point;
+  }
+
+	
 	/**
 	 * This static method returns all the details of the class without it having
 	 * to be constructed. It has description, categories, dependencies, and peer
