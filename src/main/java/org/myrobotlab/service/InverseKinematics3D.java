@@ -331,6 +331,18 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public Point publishTracking(Point tracking) {
     return tracking;
   }
+  
+  public void onPoint(Point point) {
+    // TODO : move input matrix translation to here? or somewhere?
+    // TODO: also don't like that i'm going to just say take the first point
+    // now.
+    // TODO: points should probably be a map, each point should have a name ?
+    log.info("Attempting to move to {}", point);
+    
+    // TODO: scale / translate & rotate...
+  //  moveTo(point);
+  }
+  
 
   @Override
   public void onPoints(List<Point> points) {
