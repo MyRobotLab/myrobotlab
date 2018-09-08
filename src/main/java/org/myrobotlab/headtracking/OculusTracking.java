@@ -19,9 +19,9 @@ import com.oculusvr.capi.TrackingState;
  * tracking information and it will publish the roll/pitch/yaw information.
  *
  */
-public class OculusHeadTracking implements Runnable, Serializable {
+public class OculusTracking implements Runnable, Serializable {
 
-  public final static Logger log = LoggerFactory.getLogger(OculusHeadTracking.class);
+  public final static Logger log = LoggerFactory.getLogger(OculusTracking.class);
   private static final long serialVersionUID = -4067064437788846187L;
   protected final Hmd hmd;
   protected final HmdDesc hmdDesc;
@@ -30,7 +30,11 @@ public class OculusHeadTracking implements Runnable, Serializable {
   transient Thread trackerThread = null;
   private int pollIntervalMS = 20;
 
-  public OculusHeadTracking(Hmd hmd, HmdDesc hmdDesc) {
+  
+  private long frameCount = 0;
+  private int downSample = 50;
+  
+  public OculusTracking(Hmd hmd, HmdDesc hmdDesc) {
     // Grab a handle to the initialized hmd.
     this.hmd = hmd;
     this.hmdDesc = hmdDesc;
@@ -40,6 +44,8 @@ public class OculusHeadTracking implements Runnable, Serializable {
   public void run() {
     running = true;
     while (running) {
+      
+      frameCount++;
       TrackingState trackingState = hmd.getTrackingState(pollIntervalMS, false);
       
      
@@ -63,11 +69,10 @@ public class OculusHeadTracking implements Runnable, Serializable {
       ArrayList<Point> points = new ArrayList<Point>();
       points.add(new Point(x, y, z, roll, pitch, yaw));
       oculus.invoke("publishPoints", points);
-
       
       PoseStatef[] hands = trackingState.HandPoses;
       if (hands.length > 0) {
-        System.out.println(hands.length);
+        //System.out.println(hands.length);
         PoseStatef leftHand = hands[1];
         PoseStatef rightHand = hands[0];
 
@@ -99,9 +104,12 @@ public class OculusHeadTracking implements Runnable, Serializable {
         // publish left and hand positions.  This is pretty much raw data
         // we need to scale it / translate it rotate it.. etc..
         // probably best done inside of the ik service.
-        oculus.invoke("publishLeftHandPosition", leftHandPoint);
-        oculus.invoke("publishRightHandPosition", rightHandPoint);
         
+        // need to down sample this
+        if (frameCount % downSample == 0) {
+          oculus.invoke("publishLeftHandPosition", leftHandPoint);
+          oculus.invoke("publishRightHandPosition", rightHandPoint);
+        }
       }
       
       try {

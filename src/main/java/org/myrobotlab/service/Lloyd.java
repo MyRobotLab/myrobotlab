@@ -8,6 +8,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.OOBPayload;
@@ -42,14 +43,20 @@ public class Lloyd extends Service {
   private OculusRift oculusRift;
   private boolean record = false;
   private boolean enableSpeech = true;
-  private boolean enableEyes = true;
+  private boolean enableEyes = false;
   // these are probably mutually exclusive.  but maybe not?!
-  private boolean enableOculus = false;
+  private boolean enableOculus = true;
   
+  private boolean enableIK = true;
   
   private transient WebGui webgui;
   
+  // Ok.. let's create 2 ik solvers one for the left hand, one for the right hand.
+  private InverseKinematics3D leftIK;
+  private InverseKinematics3D rightIK;
   
+  public String leftEyeURL  = "http://192.168.4.104:8080/?action=stream";
+  public String rightEyeURL = "http://192.168.4.104:8081/?action=stream";
   
   String cloudSolrUrl = "http://phobos:8983/solr/wikipedia";
   // TODO: add all of the servos and other mechanical stuff.
@@ -76,6 +83,11 @@ public class Lloyd extends Service {
     // If we're in telepresence mode start the oculus service.
     if (enableOculus) {
       startOculus();
+    }
+    
+    
+    if (enableIK) {
+      startIK();
     }
   }
 
@@ -218,16 +230,54 @@ public class Lloyd extends Service {
   public void startOculus() {
     oculusRift = (OculusRift)Runtime.start("oculusRift", "OculusRift");
     
-    oculusRift.leftCameraAngle = 180;
-    oculusRift.leftCameraDy = -20;
-    oculusRift.rightCameraAngle = 0;
-    oculusRift.rightCameraDy = 20;
+    
+    oculusRift.setLeftEyeURL(leftEyeURL);
+    oculusRift.setRightEyeURL(rightEyeURL);
+    oculusRift.leftCameraAngle = 0;
+    oculusRift.leftCameraDy = -25;
+    oculusRift.rightCameraAngle = 180;
+    oculusRift.rightCameraDy = 25;
     // call this once you've updated the affine stuff?
     oculusRift.updateAffine();
     oculusRift.initContext();
     oculusRift.logOrientation();
   }
   
+  
+  public void startIK() {
+    leftIK = (InverseKinematics3D)Runtime.start("leftIK", "InverseKinematics3D");
+    rightIK = (InverseKinematics3D)Runtime.start("rightIK", "InverseKinematics3D");
+    
+    // TODO : proper IK models for left & right.
+    leftIK.setCurrentArm(InMoovArm.getDHRobotArm());
+    rightIK.setCurrentArm(InMoovArm.getDHRobotArm());
+
+    // specify the input scaling factors  TODO: what should these be?
+    leftIK.createInputScale(500.0, 500.0, 500.0);
+    rightIK.createInputScale(500.0, 500.0, 500.0);
+
+    
+    // create the translation/rotation input matrix.
+    leftIK.createInputMatrix(50, 250, 500, 0, 0, 0);
+    rightIK.createInputMatrix(50, 250, 500, 0, 0, 0);
+    
+    // we should probably put the joint angles in the middle.
+    leftIK.centerAllJoints();
+    rightIK.centerAllJoints();
+    
+    // TODO: our palm position when we're centered.. probably could be calibration for input translate/rotate / scale matrix?
+    Point leftHandPos = leftIK.getCurrentArm().getPalmPosition();
+    Point rightHandPos = rightIK.getCurrentArm().getPalmPosition();
+    
+    // Initial position of left hand
+    log.info("Initial Left Hand Position : {}", leftHandPos );
+    log.info("Initial Right Hand Position : {}", rightHandPos );
+    
+    oculusRift.addListener("publishLeftHandPosition", leftIK.getName(), "onPoint");
+    // TODO: re-enable me.. for now .. just left hand as we're debugging.
+    // oculusRift.addListener("publishRightHandPosition", rightIK.getName(), "onPoint");
+    
+  }
   
   static public ServiceType getMetaData() {
 

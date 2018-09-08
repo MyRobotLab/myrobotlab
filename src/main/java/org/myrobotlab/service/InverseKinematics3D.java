@@ -10,7 +10,6 @@ import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
@@ -44,7 +43,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   private Point joystickLinearVelocity = new Point(0, 0, 0, 0, 0, 0);
 
   private Matrix inputMatrix = null;
-
+  private Point scale = null;
+  
   transient InputTrackingThread trackingThread = null;
 
   public InverseKinematics3D(String n) {
@@ -161,6 +161,12 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     return inputMatrix;
   }
 
+  
+  public Point createInputScale(double x, double y, double z) {
+    scale = new Point(x,y,z, 0,0,0);
+    return scale;
+  }
+  
   public Point rotateAndTranslate(Point pIn) {
 
     Matrix m = new Matrix(4, 1);
@@ -184,11 +190,26 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     publishTelemetry();
   }
 
+  /**
+   * Compute the inverse kinematics to move the robot hand to the destination
+   * first scale the input point, then apply 
+   * @param p
+   */
   public void moveTo(Point p) {
 
-    // log.info("Move TO {}", p );
+    
+    log.info("Raw Input : {}", p);
+    if (scale != null) {
+      // scale the x,y,z by the factors stored in the scale point. (really vector i guess?)
+      double x = scale.getX() * p.getX();
+      double y = scale.getY() * p.getY();
+      double z = scale.getZ() * p.getZ();
+      p = new Point(x,y,z, p.getRoll(), p.getPitch(), p.getYaw());
+      log.info("Scaled Input {}", p );
+    }
     if (inputMatrix != null) {
       p = rotateAndTranslate(p);
+      log.info("Rot/Translated input {}", p);
     }
     boolean success = currentArm.moveToGoal(p);
 
@@ -340,7 +361,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     log.info("Attempting to move to {}", point);
     
     // TODO: scale / translate & rotate...
-  //  moveTo(point);
+    moveTo(point);
   }
   
 
