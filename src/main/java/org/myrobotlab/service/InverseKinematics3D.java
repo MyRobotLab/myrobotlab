@@ -215,6 +215,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
     if (success) {
       publishTelemetry();
+    } else {
+      log.info("Unsuccessful to solve IK!");
     }
   }
 
