@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.headtracking.OculusHeadTracking;
+import org.myrobotlab.headtracking.OculusTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
@@ -87,7 +87,7 @@ public class OculusRift extends Service implements PointPublisher {
 
 	private HmdDesc hmdDesc;
 
-	transient public OculusHeadTracking headTracker = null;
+	transient public OculusTracking headTracker = null;
 
 	// for single camera support, mirror the images
 	private boolean mirrorLeftCamera = false;
@@ -145,7 +145,7 @@ public class OculusRift extends Service implements PointPublisher {
 
 			initialized = true;
 			// now that we have the hmd. lets start up the polling thread.
-			headTracker = new OculusHeadTracking(hmd, hmdDesc);
+			headTracker = new OculusTracking(hmd, hmdDesc);
 			headTracker.oculus = this;
 			headTracker.start();
 			log.info("Started head tracking thread.");
