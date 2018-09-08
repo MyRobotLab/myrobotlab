@@ -1,7 +1,10 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -27,7 +30,7 @@ public class Lloyd extends Service {
   
   public final static Logger log = LoggerFactory.getLogger(Lloyd.class);
   private static final long serialVersionUID = 1L;
-  // TODO: mark for transienta s needed
+  // TODO: mark for transient needed
   // All of the services that make up harry.
   private ProgramAB brain;
   
@@ -58,8 +61,12 @@ public class Lloyd extends Service {
   public String leftEyeURL  = "http://192.168.4.104:8080/?action=stream";
   public String rightEyeURL = "http://192.168.4.104:8081/?action=stream";
   
-  String cloudSolrUrl = "http://phobos:8983/solr/wikipedia";
+  public String cloudSolrUrl = "http://phobos:8983/solr/wikipedia";
   // TODO: add all of the servos and other mechanical stuff.
+  
+  
+  // The URL to the remote MRL instance that is controlling the servos.
+  public String skeletonBaseUrl = "http://192.168.4.107:8888/";
   
   public Lloyd(String name) {
     super(name);
@@ -277,6 +284,11 @@ public class Lloyd extends Service {
     // TODO: re-enable me.. for now .. just left hand as we're debugging.
     // oculusRift.addListener("publishRightHandPosition", rightIK.getName(), "onPoint");
     
+    leftIK.addListener("publishJointAngles", getName(), "onLeftJointAngles");
+    rightIK.addListener("publishJointAngles", getName(), "onRightJointAngles");
+    
+    
+    
   }
   
   static public ServiceType getMetaData() {
@@ -319,23 +331,46 @@ public class Lloyd extends Service {
     gui.undockTab("memory");
     // gui.undockTab("leftEye");
     // opencvdata_214c7381-ddfe-406a-adfa-f1bf9aebd367
-    
     lloyd.initializeBrain();
-    
     lloyd.addWikiLookups();
     // Initialize a clean index!
     // lloyd.memory.deleteEmbeddedIndex();
-    
     // lloyd.memory.fetchImage("id:opencvdata_214c7381-ddfe-406a-adfa-f1bf9aebd367");
-    
     lloyd.attachCallbacks();
-
-    
-    
-    lloyd.launchWebGui();
-    
-    // opencvdata_214c7381-ddfe-406a-adfa-f1bf9aebd367 is an image!
+    // TODO: re-enable?
+    // lloyd.launchWebGui();
   }
 
+  // TODO: similar approach for sending the oculus head tracking info to the remote !
+  
+  public void onLeftJointAngles(Map<String, Double> angleMap) {
+    // This is our callback for the IK stuff! 
+    log.info("Left Joint Angles updated! {}", angleMap);
+    for (String key : angleMap.keySet()) {
+      log.info("Left Send update to {} set to {}", key, angleMap.get(key));
+      try {
+        //  /api/service/i01.head.neck/moveTo/
+        String servoRestUri = skeletonBaseUrl + "api/service/i01.leftArm." +key+ "/moveTo/" + angleMap.get(key);
+        log.info("Invoking URL : {}" , servoRestUri);
+        URL uri = new URL(servoRestUri);
+        uri.openConnection().getInputStream().close();
+        // gah.. 
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      
+    }
+  }
 
+  public void onRightJointAngles(Map<String, Double> angleMap) {
+    // This is our callback for the IK stuff!  
+    log.info("Right Joint Angles updated! {}", angleMap);
+    for (String key : angleMap.keySet()) {
+      log.info("Right Send update to {} set to {}", key, angleMap.get(key));
+    }
+
+  }
+
+  
 }
