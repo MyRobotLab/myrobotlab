@@ -119,6 +119,8 @@ public class Sweety extends Service {
   int max = 2;
   int rest = 3;
       
+  // for arms and hands, the values are pin,min,max,rest
+  
   //Right arm
   int rightShoulder[] = {34,0,180,0};
   int rightArm[] = {1,45,155,140};
@@ -152,7 +154,7 @@ public class Sweety extends Service {
   int neckPan[] = {7,20,140,80};
   
   /**
-   * Check if a value of an array is -1 and if needed replace -1 by the old value
+   * Replace the  values of an array , if a value == -1 the old value is keep
    * Exemple if rightArm[]={35,1,2,3} and user ask to change by {-1,1,2,3}, this method will return {35,1,2,3}
    * This method must receive an array of ten arrays.
    * If one of these arrays is less or more than four numbers length , it doesn't will be changed.
@@ -228,9 +230,9 @@ public class Sweety extends Service {
   }
   
   /**
-   * Set pin, min, max, and rest for each servos. -1 mean in an array mean "no change"
-   * Exemple setNeck({39,1,2,3},{40,1,2,3})
-   * Python exemple : sweety.setNeck([1,0,180,90],[2,0,180,0])
+   * Set pin, min, max, and rest for head tilt and pan . -1 in an array mean "no change"
+   * Exemple setHead({39,1,2,3},{40,1,2,3})
+   * Python exemple : sweety.setHead([1,0,180,90],[2,0,180,0])
    */
   public void setHead(int[] tilt, int[] pan){
     int[][] valuesArray = new int[][]{tilt, pan,neckTilt,neckPan};
@@ -720,16 +722,16 @@ public class Sweety extends Service {
     if (leftElbowServo != null)leftElbowServo.publishState();
     if (leftBicepsServo != null)leftBicepsServo.publishState();
     if (leftWristServo != null)leftWristServo.publishState();
-    if (rightThumbServo != null)neckTiltServo.publishState();
-    if (rightIndexServo != null)neckTiltServo.publishState();
-    if (rightMiddleServo != null)neckTiltServo.publishState();
-    if (rightRingServo != null)neckTiltServo.publishState();
-    if (rightPinkyServo != null)neckTiltServo.publishState();
-    if (leftThumbServo != null)neckTiltServo.publishState();
-    if (leftIndexServo != null)neckTiltServo.publishState();
-    if (leftMiddleServo != null)neckTiltServo.publishState();
-    if (leftRingServo != null)neckTiltServo.publishState();
-    if (leftPinkyServo != null)neckTiltServo.publishState();
+    if (rightThumbServo != null)rightThumbServo.publishState();
+    if (rightIndexServo != null)rightIndexServo.publishState();
+    if (rightMiddleServo != null)rightMiddleServo.publishState();
+    if (rightRingServo != null)rightRingServo.publishState();
+    if (rightPinkyServo != null)rightPinkyServo.publishState();
+    if (leftThumbServo != null)leftThumbServo.publishState();
+    if (leftIndexServo != null)leftIndexServo.publishState();
+    if (leftMiddleServo != null)leftMiddleServo.publishState();
+    if (leftRingServo != null)leftRingServo.publishState();
+    if (leftPinkyServo != null)leftPinkyServo.publishState();
     if (neckTiltServo != null)neckTiltServo.publishState();
     if (neckPanServo != null)neckPanServo.publishState();
     
