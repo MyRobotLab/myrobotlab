@@ -56,7 +56,7 @@ public class OpenWeatherMap extends HttpClient {
       log.info("Response: {}", response);
       obj = new JSONObject(response);
     } catch (Exception e) {
-      error("Cannot get json from OWM : {}", e);
+      error("Cannot get json from OWM : %s", e);
       e.printStackTrace();
     }
     return obj;
@@ -85,11 +85,11 @@ public class OpenWeatherMap extends HttpClient {
         list = jsonObj.getJSONArray("list");
       } catch (Exception e) {
         if (jsonObj.toString().contains("city not found")) {
-          error("OpenWeatherMap : The city : " + location + " is not recognized !", e);
+          error("OpenWeatherMap : The city : " + location + " is not recognized !");
         } else if (jsonObj.toString().contains("Invalid API key")) {
-          error("OpenWeatherMap : Invalid API key !", e);
+          error("OpenWeatherMap : Invalid API key !");
         } else {
-          error("OpenWeatherMap error {}", e);
+          error("OpenWeatherMap error %s", e);
         }
         return null;
       }
@@ -107,8 +107,8 @@ public class OpenWeatherMap extends HttpClient {
         result[5] = temp.get("humidity").toString();
         result[6] = temp.get("temp_min").toString();
         result[7] = temp.get("temp_max").toString();
-        result[8] = item.getJSONObject("wind").getString("speed");
-        result[9] = item.getJSONObject("wind").getString("deg");
+        result[8] = item.getJSONObject("wind").get("speed").toString();
+        result[9] = item.getJSONObject("wind").get("deg").toString();
         result[10] = localUnits;
 
         weatherDescription = result[0];
@@ -122,7 +122,7 @@ public class OpenWeatherMap extends HttpClient {
         windOrientation = Double.parseDouble(result[9]);
 
       } catch (JSONException e) {
-        error("Problem parsing OWM json parameters : {}", e);
+        error("Problem parsing OWM json parameters : %s", e);
       }
 
     }
