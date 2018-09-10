@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 
 import org.json.JSONArray;
@@ -14,16 +13,30 @@ import org.slf4j.Logger;
  * A service to query into OpenWeatherMap to get the current weather. For more
  * info check out http://openweathermap.org This service requires an API key
  * that is free to register for from Open Weather Map.
+ * RECENT CHANGES BECAUSE API LIMITATION : period is 3 hours per index, 40 is maximum for free api key ( 3 hours TO 5 days forecast )
  * 
  */
 public class OpenWeatherMap extends HttpClient {
 
   private static final long serialVersionUID = 1L;
-  private String apiBase = "http://api.openweathermap.org/data/2.5/weather?q=";
   private String apiForecast = "http://api.openweathermap.org/data/2.5/forecast/?q=";
-  private String units = "imperial"; // metric
+  private String units = "imperial"; // or metric
+  private String localUnits = "fahrenheit"; // or celcius
   private String lang = "en";
-  private String apiKey = "GET_API_KEY_FROM_OPEN_WEATHER_MAP";
+  private String location = "Paris,FR";
+  private Integer period = 1; // next 3 hours by default
+
+  // OWM objects
+  private Integer weatherCode = 0;
+  private String weatherDescription = "error";
+  private Double degrees = -459.67;
+  private Double minDegrees = -459.67;
+  private Double maxDegrees = -459.67;
+  private Double humidity = 0.0;
+  private Double pressure = 0.0;
+  private Double windSpeed = 0.0;
+  private Double windOrientation = 0.0;
+
   public final static Logger log = LoggerFactory.getLogger(OpenWeatherMap.class);
 
   public OpenWeatherMap(String reservedKey) {
@@ -31,114 +44,94 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * Return a array describing the forecast weather
+   * Return a json from OWM server
    */
-  private JSONObject fetch(String location, int hourPeriod) throws IOException, JSONException {
-    String apiUrl = apiForecast + URLEncoder.encode(location, "utf-8") + "&appid=" + apiKey + "&mode=json&units=" + units + "&lang=" + lang + "&cnt=" + hourPeriod;
-    String response = this.get(apiUrl);
-    log.info("apiUrl: {}", apiUrl);
-    log.info("Respnse: {}", response);
-    JSONObject obj = new JSONObject(response);
+  private JSONObject getJsonFromOwm(int hourPeriod) {
+    String apiUrl;
+    JSONObject obj = null;
+    try {
+      apiUrl = apiForecast + URLEncoder.encode(location, "utf-8") + "&appid=" + getKey() + "&mode=json&units=" + units + "&lang=" + lang + "&cnt=" + hourPeriod;
+      String response = this.get(apiUrl);
+      log.info("apiUrl: {}", apiUrl);
+      log.info("Response: {}", response);
+      obj = new JSONObject(response);
+    } catch (Exception e) {
+      error("Cannot get json from OWM : {}", e);
+      e.printStackTrace();
+    }
     return obj;
   }
 
   /**
    * retrieve a string list of weather for the period indicated by hourPeriod 1 >=
    * hourPeriod is 3 hours per index -> 24 hours is 8.
-   * 
-   * {"city":{"id":2802985,"name":"location","coord":{"lon":5.8581,"lat":50.7019},"country":"FR","population":0},
-   * "cod":"200", "message":0.1309272, "cnt":3, "list":[ {"dt":1505386800,
-   * "temp":{"day":11.62,"min":10.59,"max":12.39,"night":11.01,"eve":10.59,"morn":10.98},
-   * "pressure":1006.58, "humidity":100,
-   * "weather":[{"id":502,"main":"Rain","description":"heavy intensity
-   * rain","icon":"10d"}], "speed":6.73, "deg":259, "clouds":92, "rain":17.33},
-   * 
-   * {"dt":1505473200,
-   * "temp":{"day":14.96,"min":8.43,"max":14.96,"night":8.43,"eve":12.71,"morn":9.46},
-   * "pressure":1014.87, "humidity":89,
-   * "weather":[{"id":500,"main":"Rain","description":"light
-   * rain","icon":"10d"}], "speed":4.8, "deg":249, "clouds":20, "rain":0.36},
-   * 
-   * {"dt":1505559600,
-   * "temp":{"day":13.85,"min":8.09,"max":14.5,"night":8.44,"eve":12.5,"morn":8.09},
-   * "pressure":1013.37, "humidity":95,
-   * "weather":[{"id":501,"main":"Rain","description":"moderate
-   * rain","icon":"10d"}], "speed":5.38, "deg":241, "clouds":44, "rain":5.55} ]}
-   * @throws JSONException 
-   * @throws IOException 
-   * @throws ClientProtocolException 
    */
-  public String[] fetchForecast(String location) throws IOException, JSONException {
-    return fetchForecast(location, 0);
-  }
-  
-  
-  public String[] fetchForecast(String location, int hourPeriod) throws IOException, JSONException {
+  public String[] fetchForecast() {
     String[] result = new String[11];
-    String localUnits = "fahrenheit";
     if (units.equals("metric")) {
       // for metric, celsius
       localUnits = "celsius";
     }
-    if ((hourPeriod >= 0) && (hourPeriod <= 40)) {
-      JSONObject jsonObj = null;
-      try {
-        jsonObj = fetch(location, (hourPeriod));
-      } catch (IOException | JSONException e) {
-        error("OpenWeatherMap : fetch error",e);
-        return null;
-      }
+    JSONObject jsonObj = getJsonFromOwm(period);
+    if (jsonObj == null) {
+      error("OWM can't parse a NULL json !");
+      return null;
+    } else {
+
       //log.info(jsonObj.toString());
       // Getting the list node
-      JSONArray list;
+      JSONArray list = null;
       try {
         list = jsonObj.getJSONArray("list");
-      } catch (JSONException e) {
-        error("OpenWeatherMap : API key or the city is not recognized",e);
+      } catch (Exception e) {
+        if (jsonObj.toString().contains("city not found")) {
+          error("OpenWeatherMap : The city : " + location + " is not recognized !", e);
+        } else if (jsonObj.toString().contains("Invalid API key")) {
+          error("OpenWeatherMap : Invalid API key !", e);
+        } else {
+          error("OpenWeatherMap error {}", e);
+        }
         return null;
       }
       // Getting the required element from list by dayIndex
-      JSONObject item = list.getJSONObject(hourPeriod-1);
+      JSONObject item;
+      try {
+        item = list.getJSONObject(period - 1);
 
-      result[0] = item.getJSONArray("weather").getJSONObject(0).get("description").toString();
-      JSONObject temp = item.getJSONObject("main");
-      result[1] = temp.get("temp").toString();
-      result[2] = location;
-      result[3] = item.getJSONArray("weather").getJSONObject(0).get("id").toString();
-      result[4] = temp.get("pressure").toString();
-      result[5] = temp.get("humidity").toString();
-      result[6] = temp.get("temp_min").toString();
-      result[7] = temp.get("temp_max").toString();
-      result[8] = item.getJSONObject("wind").getString("speed");
-      result[9] = item.getJSONObject("wind").getString("deg");
-      result[10] = localUnits;
-    } else {
-      error("OpenWeatherMap : Index is out of range");
-      return null;
+        result[0] = item.getJSONArray("weather").getJSONObject(0).get("description").toString();
+        JSONObject temp = item.getJSONObject("main");
+        result[1] = temp.get("temp").toString();
+        result[2] = location;
+        result[3] = item.getJSONArray("weather").getJSONObject(0).get("id").toString();
+        result[4] = temp.get("pressure").toString();
+        result[5] = temp.get("humidity").toString();
+        result[6] = temp.get("temp_min").toString();
+        result[7] = temp.get("temp_max").toString();
+        result[8] = item.getJSONObject("wind").getString("speed");
+        result[9] = item.getJSONObject("wind").getString("deg");
+        result[10] = localUnits;
+
+        weatherDescription = result[0];
+        degrees = Double.parseDouble(result[1]);
+        weatherCode = Integer.parseInt(result[3]);
+        pressure = Double.parseDouble(result[4]);
+        humidity = Double.parseDouble(result[5]);
+        minDegrees = Double.parseDouble(result[6]);
+        maxDegrees = Double.parseDouble(result[7]);
+        windSpeed = Double.parseDouble(result[8]);
+        windOrientation = Double.parseDouble(result[9]);
+
+      } catch (JSONException e) {
+        error("Problem parsing OWM json parameters : {}", e);
+      }
+
     }
     return result;
   }
-  
-  @Deprecated
-  public String fetchWeather(String location) throws IOException, JSONException {
-    return fetchForecast(location,0)[0];
-  }
 
-  public String getApiBase() {
-    return apiBase;
-  }
-
-  /**
-   * @param apiBase
-   *          The base url that is assocaited with the open weather map api.
-   */
-  public void setApiBase(String apiBase) {
-    this.apiBase = apiBase;
-  }
-
-  public String getUnits() {
-    return units;
-  }
+  // ---------------------------------------------------------------
+  // setters & getters
+  // ---------------------------------------------------------------
 
   /**
    * @param units
@@ -148,20 +141,104 @@ public class OpenWeatherMap extends HttpClient {
     this.units = units;
   }
 
-  public String getApiKey() {
-    return apiKey;
-  }
-
   /**
    * @param apiKey
    *          REQUIRED: specify your API key with this method.
    */
-  public void setApiKey(String apiKey) {
-    this.apiKey = apiKey;
+  public void setKey(String apiKey) {
+    Security security = Runtime.getSecurity();
+    security.setKey("OPENWEATHERMAP", apiKey);
   }
 
+  //TODO use locale
   public void setLang(String lang) {
     this.lang = lang;
+  }
+
+  /**
+   * @param location
+   *          format : town,country code
+   */
+  public void setLocation(String location) {
+    this.location = location;
+    if (!location.contains(",")) {
+      warn("Recommended location for OWM is TOWN,COUNTRY CODE, exemple : paris,FR");
+    }
+  }
+
+  /**
+   * @param period
+   *          period : integer from 1 to 40 
+   *          ( 1 = 3 hours )
+   */
+  public void setPeriod(Integer period) {
+    if ((period > 0) && (period <= 40)) {
+      this.period = period;
+    } else {
+      error("OpenWeatherMap : Index is out of range ( 1 to 40 ), hourPeriod is 3 hours per index, 40 is maximum for free api key ( 5 days )");
+    }
+  }
+
+  public String getKey() {
+    Security security = Runtime.getSecurity();
+    return security.getKey("OPENWEATHERMAP");
+  }
+
+  public String getLocation() {
+    return location;
+  }
+
+  public String getUnits() {
+    return units;
+  }
+
+  public Integer getWeatherCode() {
+    fetchForecast();
+    return weatherCode;
+  }
+
+  public String getWeatherDescription() {
+    fetchForecast();
+    return weatherDescription;
+  }
+
+  public Double getDegrees() {
+    fetchForecast();
+    return degrees;
+  }
+
+  public Double getMinDegrees() {
+    fetchForecast();
+    return minDegrees;
+  }
+
+  public Double getMaxDegrees() {
+    fetchForecast();
+    return maxDegrees;
+  }
+
+  public Double getWindSpeed() {
+    fetchForecast();
+    return windSpeed;
+  }
+
+  public Double getWindOrientation() {
+    fetchForecast();
+    return windOrientation;
+  }
+
+  public Double getHumidity() {
+    fetchForecast();
+    return humidity;
+  }
+
+  public Double getPressure() {
+    fetchForecast();
+    return pressure;
+  }
+
+  public String getLocalUnits() {
+    return localUnits;
   }
 
   /**
@@ -185,19 +262,17 @@ public class OpenWeatherMap extends HttpClient {
 
   public static void main(String[] args) {
     OpenWeatherMap owm = new OpenWeatherMap("weather");
-    owm.setApiKey("KEY_HERE");
+    //owm.setKey("XXX");
+    owm.setLocation("Paris,FR");
+    owm.setPeriod(1);
     owm.startService();
-    try {
-      //tomorrow is 8 ( 3 * 8 )  
-      String[] fetchForecast = owm.fetchForecast("Boston,US", 2);
-      String sentence = "("+fetchForecast[3]+") In " + fetchForecast[2] + " the weather is " + fetchForecast[0] + ".  " + fetchForecast[1] + " degrees " + fetchForecast[10];
-      log.info(sentence);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (JSONException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+
+    //tomorrow is 8 ( 3 * 8 )
+    owm.setUnits("metric");
+    String sentence = "( Raw code : " + owm.getWeatherCode() + "), In " + owm.getLocation() + " the weather is " + owm.getWeatherDescription() + ".  " + owm.getDegrees()
+        + " degrees " + owm.getLocalUnits() + " humidity " + owm.getHumidity() + " Min Degrees " + owm.getMinDegrees() + " max Degrees " + owm.getMaxDegrees() + " pressure "
+        + owm.getPressure() + " Wind Speed " + owm.getWindSpeed() + " Wind Orientation " + owm.getWindOrientation();
+    log.info(sentence);
   }
+
 }
