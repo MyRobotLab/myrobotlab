@@ -56,6 +56,7 @@ public class JMonkeyEngine extends Service implements Simulator {
       //settings.setEmulateMouse(false);
       // settings.setUseJoysticks(false);
       settings.setUseInput(true);
+      settings.setAudioRenderer(null);
       app.setSettings(settings);
       app.setShowSettings(false);
       app.start();
