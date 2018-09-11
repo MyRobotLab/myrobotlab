@@ -2053,6 +2053,7 @@ public class InMoov extends Service {
       // settings.setEmulateMouse(false);
       // settings.setUseJoysticks(false);
       settings.setUseInput(true);
+      settings.setAudioRenderer(null);
       vinMoovApp.setSettings(settings);
       vinMoovApp.setShowSettings(false);
       vinMoovApp.setDisplayStatView(debugVinmoov);
