@@ -29,7 +29,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
         // use another scope var to transfer/merge selection
         // from user - service.currentSession is always read-only
         // all service data should never be written to, only read from
-        $scope.currentSession = service.currentUserName + "-" + service.currentBotName;
+        $scope.currentSession = service.currentUserName + "_" + service.currentBotName;
         $scope.service = service;
     }
     ;
@@ -68,7 +68,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     
     $scope.getSessionResponse = function(session, utterance) {
     	$log.info("SESSION GET RESPONSE" + session);
-    	$scope.getResponse(session.split("-")[0], session.split("-")[1], utterance);
+    	$scope.getResponse(session.split("_")[0], session.split("_")[1], utterance);
     }
     
     $scope.getResponse = function(username, botname, utterance) {

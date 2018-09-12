@@ -309,7 +309,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public String resolveSessionKey(String username, String botname) {
-    return username + "-" + botname;
+    return username + "_" + botname;
   }
 
   public void repetition_count(int val) {
@@ -617,7 +617,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     for (String session : sessions.keySet()) {
 
       // TODO: better parsing of this.
-      String[] parts = session.split("-");
+      String[] parts = session.split("_");
       String username = parts[0];
       String botname = session.substring(username.length() + 1);
 
