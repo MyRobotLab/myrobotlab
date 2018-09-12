@@ -223,6 +223,10 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 		scripts.put(script.getName(), panel);
 		return panel;
 	}
+	
+	public void onAppendScript(Script script) {
+	  onAppendScript(script.getCode());
+	}
 
 	public void onAppendScript(String data) {
 		String currentScriptName = getSelected();
