@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
@@ -58,15 +59,15 @@ public class Lloyd extends Service {
   private InverseKinematics3D leftIK;
   private InverseKinematics3D rightIK;
   
-  public String leftEyeURL  = "http://192.168.4.104:8080/?action=stream";
-  public String rightEyeURL = "http://192.168.4.104:8081/?action=stream";
+  public String leftEyeURL  = "http://192.168.4.105:8080/?action=stream";
+  public String rightEyeURL = "http://192.168.4.105:8081/?action=stream";
   
   public String cloudSolrUrl = "http://phobos:8983/solr/wikipedia";
   // TODO: add all of the servos and other mechanical stuff.
   
   
   // The URL to the remote MRL instance that is controlling the servos.
-  public String skeletonBaseUrl = "http://192.168.4.107:8888/";
+  public String skeletonBaseUrl = "http://192.168.4.108:8888/";
   
   public Lloyd(String name) {
     super(name);
@@ -260,13 +261,15 @@ public class Lloyd extends Service {
     rightIK.setCurrentArm(InMoovArm.getDHRobotArm());
 
     // specify the input scaling factors  TODO: what should these be?
-    leftIK.createInputScale(500.0, 500.0, 500.0);
-    rightIK.createInputScale(500.0, 500.0, 500.0);
+    // z axis is inverted!
+    // invert z again?!
+    leftIK.createInputScale(1000.0, 1000.0, 1000.0);
+    rightIK.createInputScale(1000.0, 1000.0, 1000.0);
 
     
     // create the translation/rotation input matrix.
-    leftIK.createInputMatrix(50, 250, 500, 0, 0, 0);
-    rightIK.createInputMatrix(50, 250, 500, 0, 0, 0);
+    leftIK.createInputMatrix(0, 0, 0, 0, 0, 0);
+    rightIK.createInputMatrix(0, 0, 0, 0, 0, 0);
     
     // we should probably put the joint angles in the middle.
     leftIK.centerAllJoints();
@@ -345,6 +348,8 @@ public class Lloyd extends Service {
   
   public void onLeftJointAngles(Map<String, Double> angleMap) {
     // This is our callback for the IK stuff! 
+    // calibrate between DH model and real world model.
+    angleMap = calibrateLeftAngles(angleMap);
     log.info("Left Joint Angles updated! {}", angleMap);
     for (String key : angleMap.keySet()) {
       log.info("Left Send update to {} set to {}", key, angleMap.get(key));
@@ -363,6 +368,39 @@ public class Lloyd extends Service {
     }
   }
 
+  public static Map<String, Double> calibrateLeftAngles(Map<String, Double> angleMap) {
+    
+    HashMap<String, Double> calibratedMap = new HashMap<String, Double>();
+    
+
+    // we map the servo 90 degrees to be 0 degrees.
+    HashMap<String, Double> phaseShiftMap = new HashMap<String, Double>();
+   
+    // When reviewing the current dh model.. 
+    phaseShiftMap.put("omoplate", -90.0);
+    phaseShiftMap.put("shoulder", -90.0);
+    phaseShiftMap.put("rotate", 90.0);
+    phaseShiftMap.put("bicep", -90.0);
+
+    // TODO: is the direction of rotation correct?
+    HashMap<String, Double> gainMap = new HashMap<String, Double>();
+    gainMap.put("omoplate", 1.0);
+    gainMap.put("shoulder", 1.0);
+    gainMap.put("rotate", 1.0);
+    gainMap.put("bicep", 1.0);
+    
+    for (String key : angleMap.keySet()) {
+      // 
+      Double calibrated = (angleMap.get(key)*gainMap.get(key) + phaseShiftMap.get(key)) % 360;
+      log.info("Target Servo: {} Input Value: {} and Calibrated Value: {}", key, angleMap.get(key), calibrated);
+      calibratedMap.put(key, calibrated);
+    }
+    
+    return calibratedMap;
+    
+  }
+  
+  
   public void onRightJointAngles(Map<String, Double> angleMap) {
     // This is our callback for the IK stuff!  
     log.info("Right Joint Angles updated! {}", angleMap);
