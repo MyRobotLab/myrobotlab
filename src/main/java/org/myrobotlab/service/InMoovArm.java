@@ -439,23 +439,27 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
     // TODO: the DH links should take into account the encoder offsets and
     // calibration maps
-    DHLink link1 = new DHLink("omoplate", 0, 40, 0, MathUtils.degToRad(-90));
-    link1.setMin(MathUtils.degToRad(-80));
+    DHLink link1 = new DHLink("omoplate", 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
+    // dh model + 90 degrees = real 
+    link1.setMin(MathUtils.degToRad(-90));
     link1.setMax(MathUtils.degToRad(0));
 
-    DHLink link2 = new DHLink("shoulder", 80, 0, 0, MathUtils.degToRad(90));
+    // -80 vs +80 difference between left/right arm.
+    DHLink link2 = new DHLink("shoulder", -80, 0, MathUtils.degToRad(90), MathUtils.degToRad(90));
     // TODO: this is actually 90 to -90 ? validate if inverted.
+    // this link is inverted :-/
     link2.setMin(MathUtils.degToRad(-90));
     link2.setMax(MathUtils.degToRad(90));
 
-    DHLink link3 = new DHLink("rotate", 280, 0, 0, MathUtils.degToRad(90));
-    link3.setMin(MathUtils.degToRad(90));
-    link3.setMax(MathUtils.degToRad(270));
+    DHLink link3 = new DHLink("rotate", 280, 0, MathUtils.degToRad(0), MathUtils.degToRad(90));
+    // TODO: check if this is inverted.  i think it is.
+    link3.setMin(MathUtils.degToRad(0));
+    link3.setMax(MathUtils.degToRad(180));
 
-    DHLink link4 = new DHLink("bicep", 0, 280, 0, MathUtils.degToRad(0));
+    DHLink link4 = new DHLink("bicep", 0, 280, MathUtils.degToRad(90), MathUtils.degToRad(0));
     // TODO: this is probably inverted? should be 90 to 0...
-    link4.setMin(MathUtils.degToRad(0));
-    link4.setMax(MathUtils.degToRad(90));
+    link4.setMin(MathUtils.degToRad(90));
+    link4.setMax(MathUtils.degToRad(180));
 
     arm.addLink(link1);
     arm.addLink(link2);
