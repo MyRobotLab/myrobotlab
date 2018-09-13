@@ -175,7 +175,7 @@ public class InMoovHead extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format((Locale)null,"%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(), jaw.getPos(), rollNeck.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(), jaw.getPos(), rollNeck.getPos());
   }
 
   public boolean isAttached() {

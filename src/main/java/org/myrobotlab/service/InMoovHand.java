@@ -280,7 +280,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format((Locale)null,"%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getPos(), index.getPos(), majeure.getPos(), ringFinger.getPos(), pinky.getPos(),
+    return String.format(Locale.ENGLISH,"%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getPos(), index.getPos(), majeure.getPos(), ringFinger.getPos(), pinky.getPos(),
         wrist.getPos());
   }
 
