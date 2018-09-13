@@ -355,7 +355,6 @@ public class InMoov extends Service {
 
   public String captureGesture(String gestureName) {
     StringBuffer script = new StringBuffer();
-    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     Date date = new Date();
 
     String indentSpace = "";
