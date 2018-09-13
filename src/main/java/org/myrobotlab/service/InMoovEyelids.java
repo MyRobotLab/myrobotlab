@@ -174,7 +174,7 @@ public class InMoovEyelids extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format((Locale)null,"%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidleft.getPos(), eyelidright.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidleft.getPos(), eyelidright.getPos());
   }
 
   public boolean isAttached() {

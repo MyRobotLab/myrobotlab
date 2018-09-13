@@ -204,7 +204,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format((Locale)null,"%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(), omoplate.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(), omoplate.getPos());
   }
 
   public Servo getShoulder() {

@@ -177,7 +177,7 @@ public class InMoovTorso extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format((Locale)null,"%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
   }
 
   public boolean isAttached() {
