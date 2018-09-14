@@ -190,7 +190,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         startSessionButton.setEnabled(true);
-        if (programab.getSessionNames().isEmpty()) {
+        if (programab.getSessions().isEmpty()) {
           startSessionButton.setText("Start Session");
           startSessionButton.setBackground(Color.RED);
         } else {
