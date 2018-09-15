@@ -1,14 +1,16 @@
 <div class="col-md-12">         
 
 <!-- <form ui-keypress="{13:'askProgramAB(session,utterance)'}"> -->
+<!-- TODO , later, grab session list
 <div class="input-group">       
    <select class="form-control"
             ng-model="currentSession" 
-            ng-options="key as key for (key , value) in service.sessions">
+            ng-options="key as key for key in service.sessions">
    </select>
- 
-   <span class="input-group-btn"><button class="btn btn-default" ng-click="startDialog()">start session</button></span>
-   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(currentSession,utterance)" placeholder="type here"/>
+--> Session : ( {{currentBotName}} : {{currentUserName}} )
+   <span class="input-group-btn"><button class="btn btn-default" ng-click="startDialog()">New session</button></span>
+   <input class="form-control" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(utterance)" placeholder="type here"/>
+   <span class="input-group-btn"><button class="btn btn-default" ng-click="getSessionResponse(utterance)">Talk</button></span>
 <!--    <span class="input-group-btn"><button class="btn btn-default" ng-show="currentSession.key != null" ng-click="getResponse(currentSession,utterance)">Ask</button></span>  -->
    <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.startSession(username,botName)">Start</button></span> -->
    <!-- <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.savePredicates()">Save Predicates</button></span> -->
@@ -36,7 +38,7 @@
  <script type="text/ng-template" id="startDialog.html">
   <div class="modal-header">
         <button type="button" class="close" ng-click="cancel()" aria-hidden="true">&times;</button>
-        start session
+        Start a new session here :
     </div>
         <div class="modal-body">
         <div class="input-group">     

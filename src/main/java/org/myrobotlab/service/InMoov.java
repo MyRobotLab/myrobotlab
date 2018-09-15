@@ -3,6 +3,8 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -139,19 +141,19 @@ public class InMoov extends Service {
 
   // TODO InMoovLife service
   public static boolean RobotIsTrackingSomething() {
-    if (eyesTracking != null ) {      
+    if (eyesTracking != null) {
       if (!eyesTracking.isIdle()) {
         return true;
       }
-    } 
-    if (headTracking != null ) {      
+    }
+    if (headTracking != null) {
       if (!headTracking.isIdle()) {
         return true;
       }
-    } 
+    }
     return false;
   }
-  
+
   public static boolean RobotIsOpenCvCapturing() {
     if (opencv != null) {
       if (opencv.capturing) {
@@ -176,7 +178,6 @@ public class InMoov extends Service {
   public static boolean RobotCanMoveRandom = true;
   public static boolean RobotIsSleeping = false;
   public static boolean RobotIsStarted = false;
-
 
   // END TODO InMoovLife service
 
@@ -354,8 +355,10 @@ public class InMoov extends Service {
 
   public String captureGesture(String gestureName) {
     StringBuffer script = new StringBuffer();
+    Date date = new Date();
 
     String indentSpace = "";
+    script.append("# - " + date + " - Captured gesture :\n");
 
     if (gestureName != null) {
       indentSpace = "  ";
@@ -732,7 +735,7 @@ public class InMoov extends Service {
       log.error("moveTorso - I have a null torso");
     }
   }
-  
+
   public void moveTorsoBlocking(double topStom, double midStom, double lowStom) {
     if (torso != null) {
       torso.moveToBlocking(topStom, midStom, lowStom);
@@ -748,7 +751,7 @@ public class InMoov extends Service {
       log.error("moveEyelids - I have a null Eyelids");
     }
   }
-  
+
   public void moveHeadBlocking(double neck, double rothead) {
     if (head != null) {
       head.moveToBlocking(neck, rothead);
@@ -772,7 +775,7 @@ public class InMoov extends Service {
       log.error("I have a null head");
     }
   }
-  
+
   public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw, double rollNeck) {
     if (head != null) {
       head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw, rollNeck);
@@ -780,22 +783,22 @@ public class InMoov extends Service {
       log.error("I have a null head");
     }
   }
-  
+
   public void waitTargetPos() {
     if (head != null)
       head.waitTargetPos();
     if (eyelids != null)
-      eyelids.waitTargetPos();   
+      eyelids.waitTargetPos();
     if (leftArm != null)
-      leftArm.waitTargetPos();   
+      leftArm.waitTargetPos();
     if (rightArm != null)
-      rightArm.waitTargetPos();   
+      rightArm.waitTargetPos();
     if (leftHand != null)
-      leftHand.waitTargetPos();   
+      leftHand.waitTargetPos();
     if (rightHand != null)
-      rightHand.waitTargetPos(); 
+      rightHand.waitTargetPos();
     if (torso != null)
-      torso.waitTargetPos();   
+      torso.waitTargetPos();
   }
 
   public void onOpenNIData(OpenNiData data) {
@@ -1262,7 +1265,7 @@ public class InMoov extends Service {
   public void enableAutoDisable(Boolean param) {
     setAutoDisable(param);
   }
-  
+
   public void setAutoDisable(Boolean param) {
     if (head != null) {
       head.setAutoDisable(param);
@@ -1321,7 +1324,7 @@ public class InMoov extends Service {
     }
     //rest before tracking at fullspeed
     setHeadVelocity(80.0, 80.0, 80.0);
-    moveHeadBlocking(head.neck.getRest(),head.rothead.getRest(),head.rollNeck.getRest());
+    moveHeadBlocking(head.neck.getRest(), head.rothead.getRest(), head.rollNeck.getRest());
     setHeadVelocity(-1.0, -1.0, -1.0);
     headTracking = (Tracking) startPeer("headTracking");
     // We should pass the servos that control the head in here! 
@@ -1330,13 +1333,12 @@ public class InMoov extends Service {
     arduinos.put(port, (Arduino) headTracking.controller);
     return headTracking;
   }
-  
-  public void stopHeadTracking() {   
-    if (headTracking!=null)
-    {
+
+  public void stopHeadTracking() {
+    if (headTracking != null) {
       headTracking.stopTracking();
       setHeadVelocity(80.0, 80.0, 80.0);
-      moveHeadBlocking(head.neck.getRest(),head.rothead.getRest(),head.rollNeck.getRest());
+      moveHeadBlocking(head.neck.getRest(), head.rothead.getRest(), head.rollNeck.getRest());
     }
   }
 
@@ -1523,7 +1525,7 @@ public class InMoov extends Service {
   public InMoovEyelids startEyelids(String port, String type, int eyeLidLeftPin, int eyeLidRightPin) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     speakBlocking(String.format("starting eyelids on %s", port));
-    
+
     Arduino eyelidsArduino = (Arduino) createPeer("eyelidsArduino");
     eyelidsArduino.startService();
 
@@ -1540,16 +1542,16 @@ public class InMoov extends Service {
       return null;
     }
     arduinos.put(port, eyelidsArduino);
-    return startEyelids(eyelidsArduino, eyeLidLeftPin, eyeLidRightPin);    
+    return startEyelids(eyelidsArduino, eyeLidLeftPin, eyeLidRightPin);
   }
-  
+
   /*
    * New startEyelids attach method ( for testing );
    */
   public InMoovEyelids startEyelids(ServoController controller, Integer eyeLidLeftPin, Integer eyeLidRightPin) throws Exception {
     eyelids = (InMoovEyelids) startPeer("eyelids");
     eyelids.attach(controller, eyeLidLeftPin, eyeLidRightPin);
-    return eyelids;    
+    return eyelids;
   }
 
   public void stopPIR() {
@@ -1766,10 +1768,10 @@ public class InMoov extends Service {
           } else {
             calibrationWriter.write("# " + s.getName() + ".setPin(" + s.getPin() + ")\n");
           }
-          
+
           s.map(s.getMinInput(), s.getMaxInput(), s.getMinOutput(), s.getMaxOutput());
           // save the servo map
-          calibrationWriter.write(s.getName() + ".map(" +s.getMinInput() +","+ s.getMaxInput()+","+ s.getMinOutput()+","+ s.getMaxOutput() + ")\n");
+          calibrationWriter.write(s.getName() + ".map(" + s.getMinInput() + "," + s.getMaxInput() + "," + s.getMinOutput() + "," + s.getMaxOutput() + ")\n");
           // if there's a controller reattach it at rest
           if (s.getController() != null) {
             String controller = s.getController().getName();
@@ -1793,9 +1795,9 @@ public class InMoov extends Service {
   public void savePose(String poseName) {
     // TODO: consider a prefix for the pose name? 
     String script = captureGesture(poseName);
-    
+
   }
-  
+
   private File makeGesturesDirectory(String directory) {
     File dir = new File(directory);
     dir.mkdirs();
@@ -1863,12 +1865,10 @@ public class InMoov extends Service {
   public void startedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
       warn("Warning 1 gesture already running, this can break spacetime and lot of things");
-    }
-    else
-    {
-    gestureAlreadyStarted = true;
-    RobotCanMoveRandom = false;
-    setOverrideAutoDisable(true);
+    } else {
+      gestureAlreadyStarted = true;
+      RobotCanMoveRandom = false;
+      setOverrideAutoDisable(true);
     }
   }
 
@@ -1878,10 +1878,10 @@ public class InMoov extends Service {
 
   public void finishedGesture(String nameOfGesture) {
     if (gestureAlreadyStarted) {
-    waitTargetPos();
-    RobotCanMoveRandom = true;
-    setOverrideAutoDisable(false);
-    gestureAlreadyStarted = false;
+      waitTargetPos();
+      RobotCanMoveRandom = true;
+      setOverrideAutoDisable(false);
+      gestureAlreadyStarted = false;
     }
   }
 
@@ -1897,9 +1897,13 @@ public class InMoov extends Service {
       vleft.connect("COM3");
       vright.connect("COM4");
       Runtime.start("gui", "SwingGui");
-
+      Runtime.start("python", "Python");
       InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
       i01.startAll(leftPort, rightPort);
+      i01.moveArm("left", 20.0, 10.0, 5.0, 40.0);
+      log.info(i01.captureGesture());
+      i01.rest();
+      log.info(i01.captureGesture("rest"));
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -1923,7 +1927,6 @@ public class InMoov extends Service {
     // meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
     meta.addDependency("inmoov.fr", "inmoov", "1.1.1", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
-
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
@@ -2279,37 +2282,31 @@ public class InMoov extends Service {
   public NeoPixel neopixel;
   public Arduino neopixelArduino;
   public UltrasonicSensor ultrasonicSensor;
-  
+
   public Double getUltrasonicSensorDistance() {
     if (ultrasonicSensor != null) {
       return ultrasonicSensor.range();
-    }
-    else
-    {
+    } else {
       warn("No UltrasonicSensor attached");
       return 0.0;
     }
   }
-  
+
   public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
     if (neopixel != null && neopixelArduino != null) {
       neopixel.setAnimation(animation, red, green, blue, speed);
-    }
-    else
-    {
+    } else {
       warn("No Neopixel attached");
     }
   }
-  
+
   public void stopNeopixelAnimation() {
     if (neopixel != null && neopixelArduino != null) {
       neopixel.animationStop();
-    }
-    else
-    {
+    } else {
       warn("No Neopixel attached");
     }
-  }  
+  }
 
   @Override
   public void stopService() {

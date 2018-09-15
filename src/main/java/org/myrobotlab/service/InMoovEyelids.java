@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
@@ -173,7 +174,7 @@ public class InMoovEyelids extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format("%s.moveEyelids(%d,%d)\n", inMoovServiceName, eyelidleft.getPos(), eyelidright.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidleft.getPos(), eyelidright.getPos());
   }
 
   public boolean isAttached() {

@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.util.Locale;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -175,7 +177,7 @@ public class InMoovTorso extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format("%s.moveTorso(%d,%d,%d)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
   }
 
   public boolean isAttached() {

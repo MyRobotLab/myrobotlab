@@ -726,7 +726,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // TODO: enforce UTC, or move this to the solr schema to do.
     doc.setField("date", new Date());
     // for now.. let's just do this.
-    doc.setField("username", response.session);
+    doc.setField("username", response.userName);
     doc.setField("text", response.msg);
     // now we need to add the doc!
     addDocument(doc);
