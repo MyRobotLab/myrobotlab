@@ -1,8 +1,12 @@
 package org.myrobotlab.service;
 
+import java.util.Locale;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
@@ -171,7 +175,7 @@ public class InMoovHead extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format("%s.moveHead(%d,%d,%d,%d,%d,%d)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(), jaw.getPos(), rollNeck.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(), jaw.getPos(), rollNeck.getPos());
   }
 
   public boolean isAttached() {
@@ -513,6 +517,26 @@ public class InMoovHead extends Service {
     if (rollNeckSpeed != null) {
     	rollNeck.setVelocity(rollNeckSpeed);
       }
+  }
+  
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.init(Level.INFO);
+
+      String leftPort = "COM3";
+
+      VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
+      vleft.connect("COM3");
+      Runtime.start("gui", "SwingGui");
+
+      InMoovHead head = (InMoovHead) Runtime.start("head", "InMoovHead");
+      head.connect("COM3");
+      
+      log.info(head.getScript("i01"));
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }

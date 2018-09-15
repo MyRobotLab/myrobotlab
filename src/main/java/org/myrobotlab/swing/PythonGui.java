@@ -223,8 +223,8 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 		scripts.put(script.getName(), panel);
 		return panel;
 	}
-
-	public void onAppendScript(String data) {
+	
+	public void onAppendScript(Script data) {
 		String currentScriptName = getSelected();
 		if (currentScriptName == null) {
 			error("no script selected to append");
@@ -232,7 +232,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 		}
 		EditorPanel p = scripts.get(currentScriptName);
 		if (p != null) {
-			p.setText(String.format("%s\n%s", p.getText(), data));
+			p.setText(String.format("%s\n%s", p.getText(), data.getCode()));
 		} else {
 			info("can't append Script to current");
 		}

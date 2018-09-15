@@ -12,8 +12,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
     $scope.utterance = '';
     $scope.currentText = '';
 
-    $scope.currentSession = '';
-    // TODO: which should we use?
     $scope.currentUserName =  '';
     $scope.currentBotName = '';
 
@@ -29,7 +27,8 @@ angular.module('mrlapp.service.ProgramABGui', [])
         // use another scope var to transfer/merge selection
         // from user - service.currentSession is always read-only
         // all service data should never be written to, only read from
-        $scope.currentSession = service.currentUserName + "-" + service.currentBotName;
+        $scope.currentUserName = service.currentUserName;
+        $scope.currentBotName = service.currentBotName;
         $scope.service = service;
     }
     ;
@@ -66,13 +65,13 @@ angular.module('mrlapp.service.ProgramABGui', [])
     }
     
     
-    $scope.getSessionResponse = function(session, utterance) {
-    	$log.info("SESSION GET RESPONSE" + session);
-    	$scope.getResponse(session.split("-")[0], session.split("-")[1], utterance);
+    $scope.getSessionResponse = function(utterance) {
+    	$log.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.currentBotName + ")");
+    	$scope.getResponse($scope.currentUserName, $scope.currentBotName, utterance);
     }
     
     $scope.getResponse = function(username, botname, utterance) {
-    	$log.info("USER BOT RESPNSE" + username + " - " + botname);
+    	$log.info("USER BOT RESPONSE (" + username + " " + botname + ")");
         msg.send("getResponse", username, botname, utterance);
         $scope.rows.unshift({
             name: "User",

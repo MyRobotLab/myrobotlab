@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
@@ -203,7 +204,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format("%s.moveArm(\"%s\",%d,%d,%d,%d)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(), omoplate.getPos());
+    return String.format(Locale.ENGLISH,"%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(), omoplate.getPos());
   }
 
   public Servo getShoulder() {

@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.util.Locale;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -278,7 +280,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format("%s.moveHand(\"%s\",%d,%d,%d,%d,%d,%d)\n", inMoovServiceName, side, thumb.getPos(), index.getPos(), majeure.getPos(), ringFinger.getPos(), pinky.getPos(),
+    return String.format(Locale.ENGLISH,"%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getPos(), index.getPos(), majeure.getPos(), ringFinger.getPos(), pinky.getPos(),
         wrist.getPos());
   }
 

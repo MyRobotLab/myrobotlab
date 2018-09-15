@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,21 +46,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
 
   public static class Response {
-    public String session;
+
     public String msg;
     transient public List<OOBPayload> payloads;
     // FIXME - timestamps are usually longs System.currentTimeMillis()
     public Date timestamp;
+    public String botName;
+    public String userName;
 
-    public Response(String session, String msg, List<OOBPayload> payloads, Date timestamp) {
-      this.session = session;
+    public Response(String userName, String botName, String msg, List<OOBPayload> payloads, Date timestamp) {
+      this.botName = botName;
+      this.userName = userName;
       this.msg = msg;
       this.payloads = payloads;
       this.timestamp = timestamp;
     }
 
     public String toString() {
-      return String.format("%d %s %s", timestamp.getTime(), session, msg);
+      return String.format("%d %s %s %s", timestamp.getTime(), userName, botName, msg);
     }
   }
 
@@ -80,7 +82,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   // String currentSession = "default";
   // Session is a user and a bot. so the key to the session should be the
   // username, and the bot name.
-  transient HashMap<String, ChatData> sessions = new HashMap<String, ChatData>();
+  transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
   // TODO: better parsing than a regex...
   transient Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
   transient Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
@@ -218,8 +220,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public int getMaxConversationDelay() {
-
-    return sessions.get(resolveSessionKey(getCurrentUserName(), getCurrentBotName())).maxConversationDelay;
+    return sessions.get(getCurrentBotName()).get(getCurrentUserName()).maxConversationDelay;
   }
 
   public Response getResponse(String text) {
@@ -241,26 +242,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return getResponse(username, text);
   }
 
-  public Response getResponse(String username, String text) {
-    log.info("Get Response for : user {} bot {} : {}", username, getCurrentBotName(), text);
-
+  public Response getResponse(String userName, String text) {
+    log.info("Get Response for : user {} bot {} : {}", userName, getCurrentBotName(), text);
     if (bot == null) {
       String error = "ERROR: Core not loaded, please load core before chatting.";
       error(error);
-      return new Response(username, error, null, new Date());
+      return new Response(userName, getCurrentBotName(), error, null, new Date());
     }
 
     if (text.isEmpty()) {
-      return new Response(username, "", null, new Date());
+      return new Response(userName, getCurrentBotName(), "", null, new Date());
     }
 
-    String sessionKey = resolveSessionKey(username, getCurrentBotName());
-    if (!sessions.containsKey(sessionKey)) {
-      startSession(getPath(), username, getCurrentBotName());
+    if (!sessions.containsKey(getCurrentBotName()) || !sessions.get(getCurrentBotName()).containsKey(userName)) {
+      startSession(getPath(), userName, getCurrentBotName());
     }
 
-    ChatData chatData = sessions.get(sessionKey);
-    String res = getChat(username, getCurrentBotName()).multisentenceRespond(text);
+    ChatData chatData = sessions.get(getCurrentBotName()).get(userName);
+    String res = getChat(userName, getCurrentBotName()).multisentenceRespond(text);
     // grab and update the time when this response came in.
     chatData.lastResponseTime = new Date();
 
@@ -275,7 +274,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     Matcher matcher = oobPattern.matcher(res);
     res = matcher.replaceAll("").trim();
 
-    Response response = new Response(username, res, payloads, chatData.lastResponseTime);
+    Response response = new Response(userName, getCurrentBotName(), res, payloads, chatData.lastResponseTime);
     // Now that we've said something, lets create a timer task to wait for N
     // seconds
     // and if nothing has been said.. try say something else.
@@ -286,14 +285,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // int numExecutions = 1;
       // TODO: we need a way for the task to just execute one time
       // it'd be good to have access to the timer here, but it's transient
-      addTask("getResponse", chatData.maxConversationDelay, 0, "getResponse", username, text);
+      addTask("getResponse", chatData.maxConversationDelay, 0, "getResponse", userName, text);
     }
 
     // EEK! clean up the API!
     invoke("publishResponse", response);
     invoke("publishResponseText", response);
     invoke("publishText", response.msg);
-    info("to: %s - %s", username, res);
+    info("to: %s - %s", userName, res);
 
     // if (log.isDebugEnabled()) {
     // for (String key : sessions.get(session).predicates.keySet()) {
@@ -308,21 +307,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return response;
   }
 
-  public String resolveSessionKey(String username, String botname) {
-    return username + "-" + botname;
-  }
-
   public void repetition_count(int val) {
     org.alicebot.ab.MagicNumbers.repetition_count = val;
   }
 
   public Chat getChat(String userName, String botName) {
-    String sessionKey = resolveSessionKey(userName, botName);
-    if (!sessions.containsKey(sessionKey)) {
-      error("%s session does not exist", sessionKey);
+    if (!sessions.containsKey(botName) || !sessions.get(botName).containsKey(userName)) {
+      error("%s %S session does not exist", botName, userName);
       return null;
     } else {
-      return sessions.get(sessionKey).chat;
+      return sessions.get(botName).get(userName).chat;
     }
   }
 
@@ -388,8 +382,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
-   * @param session
-   *          - current session/username
+   * @param username
+   *          - current username
    * @param text
    *          - text to get a response for
    * @param delay
@@ -397,11 +391,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    *          response.
    * @return the response
    */
-  public Response getResponse(String session, String text, Long delay) {
-    ChatData chatData = sessions.get(session);
+  public Response getResponse(String userName, String text, Long delay) {
+    ChatData chatData = sessions.get(getCurrentBotName()).get(userName);
     long delta = System.currentTimeMillis() - chatData.lastResponseTime.getTime();
     if (delta > delay) {
-      return getResponse(session, text);
+      return getResponse(userName, text);
     } else {
       return null;
     }
@@ -409,11 +403,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public boolean isEnableAutoConversation() {
-    return sessions.get(resolveSessionKey(getCurrentUserName(), getCurrentBotName())).enableAutoConversation;
+    return sessions.get(getCurrentBotName()).get(getCurrentUserName()).enableAutoConversation;
   }
 
   public boolean isProcessOOB() {
-    return sessions.get(resolveSessionKey(getCurrentUserName(), getCurrentBotName())).processOOB;
+    return sessions.get(getCurrentBotName()).get(getCurrentUserName()).processOOB;
   }
 
   /**
@@ -438,7 +432,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * @return milliseconds
    */
   public long millisecondsSinceLastResponse() {
-    ChatData chatData = sessions.get(resolveSessionKey(getCurrentUserName(), getCurrentBotName()));
+    ChatData chatData = sessions.get(getCurrentBotName()).get(getCurrentUserName());
     if (chatData.lastResponseTime == null) {
       return -1;
     }
@@ -588,25 +582,25 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     reloadSession(getPath(), session, botName);
   }
 
-  public void reloadSession(String path, String username, String botname) {
-    reloadSession(path, username, botname, false);
+  public void reloadSession(String path, String userName, String botName) {
+    reloadSession(path, userName, botName, false);
   }
 
-  public void reloadSession(String path, String username, String botname, Boolean killAimlIf) {
+  public void reloadSession(String path, String userName, String botName, Boolean killAimlIf) {
     loading = true;
     broadcastState();
     // kill the bot
     writeAndQuit(killAimlIf);
     // kill the session
-    String sessionKey = resolveSessionKey(username, botname);
-    if (sessions.containsKey(sessionKey)) {
+
+    if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       // TODO: will garbage collection clean up the bot now ?
       // Or are there other handles to it?
-      sessions.remove(sessionKey);
+      sessions.remove(sessions.get(botName).get(userName));
     }
     bot = null;
     // TODO: we should make sure we keep the same path as before.
-    startSession(path, username, getCurrentBotName());
+    startSession(path, userName, getCurrentBotName());
   }
 
   /**
@@ -614,79 +608,73 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * 
    */
   public void savePredicates() throws IOException {
-    for (String session : sessions.keySet()) {
+    for (String botName : sessions.keySet()) {
+      for (String userName : sessions.get(botName).keySet()) {
 
-      // TODO: better parsing of this.
-      String[] parts = session.split("-");
-      String username = parts[0];
-      String botname = session.substring(username.length() + 1);
-
-      String sessionPredicateFilename = createSessionPredicateFilename(username, botname);
-      File sessionPredFile = new File(sessionPredicateFilename);
-      Chat chat = getChat(username, botname);
-      // overwrite the original file , this should always be a full set.
-      log.info("Writing predicate file for session {}", session);
-      FileWriter predWriter = new FileWriter(sessionPredFile, false);
-      for (String predicate : chat.predicates.keySet()) {
-        String value = chat.predicates.get(predicate);
-        predWriter.write(predicate + ":" + value + "\n");
+        String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
+        File sessionPredFile = new File(sessionPredicateFilename);
+        Chat chat = getChat(userName, botName);
+        // overwrite the original file , this should always be a full set.
+        log.info("Writing predicate file for session {} {}", botName, userName);
+        FileWriter predWriter = new FileWriter(sessionPredFile, false);
+        for (String predicate : chat.predicates.keySet()) {
+          String value = chat.predicates.get(predicate);
+          predWriter.write(predicate + ":" + value + "\n");
+        }
+        predWriter.close();
       }
-      predWriter.close();
     }
     log.info("Done saving predicates.");
   }
 
   public void setEnableAutoConversation(boolean enableAutoConversation) {
-    sessions.get(resolveSessionKey(getCurrentUserName(), getCurrentBotName())).enableAutoConversation = enableAutoConversation;
+    sessions.get(getCurrentBotName()).get(getCurrentUserName()).enableAutoConversation = enableAutoConversation;
   }
 
   public void setMaxConversationDelay(int maxConversationDelay) {
-    sessions.get(resolveSessionKey(getCurrentUserName(), getCurrentBotName())).maxConversationDelay = maxConversationDelay;
+    sessions.get(getCurrentBotName()).get(getCurrentUserName()).maxConversationDelay = maxConversationDelay;
   }
 
   public void setProcessOOB(boolean processOOB) {
-    sessions.get(resolveSessionKey(getCurrentUserName(), getCurrentBotName())).processOOB = processOOB;
+    sessions.get(getCurrentBotName()).get(getCurrentUserName()).processOOB = processOOB;
   }
 
   public void startSession() {
     startSession(null);
   }
 
-  public void startSession(String session) {
-    startSession(session, getCurrentBotName());
-  }
-
-  public Set<String> getSessionNames() {
-    return sessions.keySet();
+  public void startSession(String username) {
+    startSession(username, getCurrentBotName());
   }
 
   /**
    * Load the AIML 2.0 Bot config and start a chat session. This must be called
    * after the service is created.
    * 
-   * @param session
-   *          - The new session name
+   * @param username
+   *          - The new user name
    * @param botName
    *          - The name of the bot to load. (example: alice2)
    */
-  public void startSession(String session, String botName) {
-    startSession(getPath(), session, botName);
+  public void startSession(String username, String botName) {
+    startSession(getPath(), username, botName);
   }
 
   public void startSession(String path, String userName, String botName) {
     loading = true;
     this.setPath(path);
-    info("starting Chat Session path:%s username:%s botname:%s", path, userName, botName);
+    info("Starting chat session path: %s username: %s botname: %s", path, userName, botName);
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
+
     broadcastState();
     // Session is between a user and a bot. key is compound.
-    String sessionKey = resolveSessionKey(userName, botName);
-    if (sessions.containsKey(sessionKey)) {
-      warn("session %s already created", sessionKey);
+
+    if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
+      warn("Session %s %s already created", botName, userName);
       return;
     }
-    if (!getSessionNames().isEmpty()) {
+    if (!sessions.isEmpty()) {
       wasCleanyShutdowned = "ok";
     }
     cleanOutOfDateAimlIFFiles(botName);
@@ -703,7 +691,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // return a string response for programab...
     MrlSraixHandler sraixHandler = new MrlSraixHandler();
     bot.setSraixHandler(sraixHandler);
-    
+
     Chat chat = new Chat(bot);
     // for (Category c : bot.brain.getCategories()) {
     // log.info(c.getPattern());
@@ -714,8 +702,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // load session specific predicates, these override the default ones.
     String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
     chat.predicates.getPredicateDefaults(sessionPredicateFilename);
-    //
-    sessions.put(resolveSessionKey(getCurrentUserName(), getCurrentBotName()), new ChatData(chat));
+    HashMap<String, ChatData> session = new HashMap<String, ChatData>();
+
+    if (sessions.containsKey(botName)) {
+      session = sessions.get(botName);
+    }
+    session.put(userName, new ChatData(chat));
+    sessions.put(botName, session);
     // lets test if the robot knows the name of the person in the session
     String name = chat.predicates.get("name").trim();
     // TODO: this implies that the default value for "name" is default
@@ -736,11 +729,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     loading = false;
     broadcastState();
   }
-  
+
   public void addCategory(Category c) {
     bot.brain.addCategory(c);
   }
-  
+
   public void addCategory(String pattern, String template, String that) {
     log.info("Adding category {} to respond with {} for the that context {}", pattern, template, that);
     // TODO: expose that / topic / etc..
@@ -748,7 +741,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     int activationCnt = 0;
     String topic = "*";
     // TODO: what is this used for?
-    String filename= "mrl_added.aiml";
+    String filename = "mrl_added.aiml";
     // clean the pattern
     pattern = pattern.trim().toUpperCase();
     Category c = new Category(activationCnt, pattern, that, topic, template, filename);
@@ -758,7 +751,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void addCategory(String pattern, String template) {
     addCategory(pattern, template, "*");
   }
-  
+
   public void setPath(String path) {
     this.path = path;
   }
@@ -768,6 +761,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
+   * TODO : maybe merge / check with startsession directly
    * setUsername will check if username correspond to current session If no, a
    * new session is started
    * 
@@ -781,7 +775,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       log.error("chatbot username is empty");
       return false;
     }
-    if (getSessionNames().isEmpty()) {
+    if (sessions.isEmpty()) {
       log.info(username + " first session started");
       startSession(username);
       return false;
@@ -876,13 +870,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void attach(Attachable attachable) {
     if (attachable instanceof TextPublisher) {
       addTextPublisher((TextPublisher) attachable);
-    } else if (attachable instanceof TextListener){
+    } else if (attachable instanceof TextListener) {
       addListener("publishText", attachable.getName(), "onText");
     } else {
       log.error("don't know how to attach a {}", attachable.getName());
     }
   }
-  
 
   @Override
   public void stopService() {
@@ -916,7 +909,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDependency("commons-io", "commons-io", "2.5");
     //needed if we dont "install all" > HttpClient used by sraix
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");        
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
     return meta;
   }
 
@@ -979,6 +972,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public String getCurrentBotName() {
     return currentBotName;
+  }
+
+  /**
+   * @return the sessions
+   */
+  public HashMap<String, HashMap<String, ChatData>> getSessions() {
+    return sessions;
   }
 
 }
