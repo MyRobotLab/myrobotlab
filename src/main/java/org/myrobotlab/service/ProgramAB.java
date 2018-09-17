@@ -631,7 +631,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       // TODO: will garbage collection clean up the bot now ?
       // Or are there other handles to it?
-      sessions.remove(sessions.get(botName).get(userName));
+      HashMap<String, ChatData> session = new HashMap<String, ChatData>();
+      session.put(userName, sessions.get(botName).get(userName));
+      log.info("{} session removed", sessions);
+      sessions.remove(botName, session);
     }
     bot = null;
     // TODO: we should make sure we keep the same path as before.
