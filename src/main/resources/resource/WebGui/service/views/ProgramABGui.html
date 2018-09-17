@@ -28,8 +28,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="rowContent in rows track by $index">
-            <td>{{rowContent.name}}</td><td><div ng-bind-html="rowContent.response"></div></td>
+        <tr ng-repeat="rowContent in conversation"> <!-- | reverse -->
+            <td><div ng-bind-html="rowContent"></div></td>
         </tr>
       </tbody>
     </table>    

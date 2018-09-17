@@ -12,10 +12,10 @@ import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -40,7 +40,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   static final String START_SESSION_LABEL = "Start Session";
   // TODO: make this auto-resize when added to gui..
   private JTextField text = new JTextField("", 30);
-  private JTextArea response = new JTextArea("BOT Response :");
+  private JEditorPane response = new JEditorPane("text/html", "BOT Response :");
+  String textAreacontent = "";
   JLabel askLabel = new JLabel();
   JLabel nothingLabel = new JLabel();
 
@@ -141,12 +142,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         textFiltered = textFiltered.replace("'", " ").replace("-", " ");
       }
       Response answer = (Response) swingGui.sendBlocking(boundServiceName, 10000, "getResponse", textFiltered);
-      // response.setText(response.getText() + "<br/>\n\r" + answer);
-      if (answer != null) {
-        response.append("\n" + answer.msg.trim());
-      } else {
-        response.append("\nERROR: NULL Response");
-      }
+
       // clear out the original question.
       text.setText("");
       response.setCaretPosition(response.getDocument().getLength());
@@ -210,6 +206,15 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         progABPath.setText(new File(programab.getPath()).getAbsolutePath());
         userName.setText(programab.getCurrentUserName());
         botName.setText(programab.getCurrentBotName());
+        textAreacontent = "<font face=\"Verdana\" size=-1>";
+        programab.getConversationHistory().stream().forEach(conversation -> {
+          if (conversation == null) {
+            conversation = "ERROR: NULL";
+          }
+          textAreacontent = textAreacontent + conversation + "<br>";
+
+        });
+        response.setText(textAreacontent);
       }
     });
 

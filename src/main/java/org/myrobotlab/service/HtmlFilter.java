@@ -111,7 +111,9 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   public static String stripHtml(String text) {
     // TODO: something fancier but this works for now.
     String cleanText = text.replaceAll("\\<.*?\\>", " ");
-    cleanText = cleanText.replaceAll("  ", " ");
+    cleanText = cleanText.replaceAll("\\n", " ");
+    cleanText = cleanText.replaceAll("\\r", " ");
+    cleanText = cleanText.replaceAll("\\s{2,}", " ");
     return cleanText.trim();
   }
 
