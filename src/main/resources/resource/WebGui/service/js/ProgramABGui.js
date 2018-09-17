@@ -8,9 +8,8 @@ angular.module('mrlapp.service.ProgramABGui', [])
     
     // use $scope only when the variable
     // needs to interract with the display
-    $scope.currResponse = '';
     $scope.utterance = '';
-    $scope.currentText = '';
+    $scope.conversation = [];
 
     $scope.currentUserName =  '';
     $scope.currentBotName = '';
@@ -18,6 +17,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     // grab defaults.
     $scope.newUserName = $scope.service.currentUserName;
     $scope.newBotName = $scope.service.currentBotName;
+    $scope.conversation = $scope.service.conversationHistory;
 
     // start info status
     $scope.rows = [];
@@ -29,6 +29,10 @@ angular.module('mrlapp.service.ProgramABGui', [])
         // all service data should never be written to, only read from
         $scope.currentUserName = service.currentUserName;
         $scope.currentBotName = service.currentBotName;
+        $scope.conversation = service.conversationHistory;
+                  for (var i = 0; i < $scope.conversation.length; i++) {
+        $scope.conversation[i] = $sce.trustAsHtml($scope.conversation[i]);
+        }
         $scope.service = service;
     }
     ;
@@ -40,16 +44,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(inMsg.data[0]);
-            $scope.$apply();
-            break;
-        case 'onText':
-            var textData = inMsg.data[0];
-            $scope.currResponse = textData;
-            $scope.rows.unshift({
-                name: "Bot:",
-                response: $sce.trustAsHtml(textData)
-            });
-            $log.info('currResponse', $scope.currResponse);
             $scope.$apply();
             break;
         default:
@@ -109,9 +103,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
     };
     
     // subscribe to the response from programab.
-    msg.subscribe('publishText');
     msg.subscribe(this);
 }
 ]);
-
-
