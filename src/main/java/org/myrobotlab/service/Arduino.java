@@ -1885,17 +1885,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.stopRecording();
   }
 
-  public boolean usedByInmoov = false;
 
   @Override
   public void stopService() {
-    detachI2CControls();
     super.stopService();
-    // we give some time to inmoov service
-    if (!usedByInmoov) {
+    detachI2CControls();
       disconnect();
     }
-  }
 
   public void detachI2CControls() {
     for (Map.Entry<String, I2CDeviceMap> i2cDevice : i2cDevices.entrySet()) {

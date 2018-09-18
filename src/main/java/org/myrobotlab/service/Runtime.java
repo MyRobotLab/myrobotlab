@@ -1422,8 +1422,12 @@ public class Runtime extends Service implements MessageListener {
    *
    */
   public static void shutdown() {
-    // - saveAll(); not needed as release at some point calls save()
     log.info("mrl shutdown");
+
+    for (ServiceInterface service: getServices()) {
+      service.makeReadyForShutdown();
+    }
+   
     try {
       releaseAll();
     } catch (Exception e) {
