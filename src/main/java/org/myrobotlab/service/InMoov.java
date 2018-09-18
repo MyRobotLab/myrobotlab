@@ -1174,8 +1174,6 @@ public class InMoov extends Service {
     }
 
     arm.arduino.setBoard(type);
-    arm.arduino.usedByInmoov = true;
-    arm.arduino.serial.usedByInmoov = true;
     arm.connect(port);
     arduinos.put(port, arm.arduino);
 
@@ -1222,8 +1220,6 @@ public class InMoov extends Service {
     }
 
     hand.arduino.setBoard(type);
-    hand.arduino.serial.usedByInmoov = true;
-    hand.arduino.usedByInmoov = true;
     hand.connect(port);
     arduinos.put(port, hand.arduino);
     return hand;
@@ -1254,8 +1250,6 @@ public class InMoov extends Service {
     }
 
     head.arduino.setBoard(type);
-    head.arduino.usedByInmoov = true;
-    head.arduino.serial.usedByInmoov = true;
     head.connect(port, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
     arduinos.put(port, head.arduino);
     return head;
@@ -1501,8 +1495,6 @@ public class InMoov extends Service {
     }
 
     torso.arduino.setBoard(type);
-    torso.arduino.usedByInmoov = true;
-    torso.arduino.serial.usedByInmoov = true;
     torso.connect(port);
     arduinos.put(port, torso.arduino);
 
@@ -1534,8 +1526,6 @@ public class InMoov extends Service {
     }
 
     eyelidsArduino.setBoard(type);
-    eyelidsArduino.usedByInmoov = true;
-    eyelidsArduino.serial.usedByInmoov = true;
     eyelidsArduino.connect(port);
     if (!eyelidsArduino.isConnected()) {
       error("arduino %s not connected", eyelidsArduino.getName());
