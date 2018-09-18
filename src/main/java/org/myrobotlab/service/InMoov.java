@@ -1475,6 +1475,12 @@ public class InMoov extends Service {
   }
 
   @Override
+  public void makeReadyForShutdown() {
+    rest();
+    sleep(2);
+  }
+
+  @Override
   public void startService() {
     super.startService();
     python = getPython();
