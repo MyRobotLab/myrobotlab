@@ -47,6 +47,8 @@ import org.deeplearning4j.nn.layers.objdetect.DetectedObject;
 import org.deeplearning4j.nn.layers.objdetect.YoloUtils;
 // import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.nn.transferlearning.FineTuneConfiguration;
+import org.deeplearning4j.nn.transferlearning.TransferLearning;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
@@ -72,6 +74,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -632,6 +635,38 @@ public class Deeplearning4j extends Service {
     this.networkLabels = networkLabels;
   }
 
+  
+  public ComputationGraph createVGG16TransferModel(String featureExtractionLayer, int numClasses) throws IOException {
+    log.info("Loading org.deeplearning4j.transferlearning.vgg16...\n\n");
+    ZooModel zooModel = VGG16.builder().build();
+    ComputationGraph vgg16 = (ComputationGraph) zooModel.initPretrained();
+    log.info(vgg16.summary());
+    //Decide on a fine tune configuration to use.
+    //In cases where there already exists a setting the fine tune setting will
+    //  override the setting for all layers that are not "frozen".
+    FineTuneConfiguration fineTuneConf = new FineTuneConfiguration.Builder()
+        .updater(new Nesterovs(5e-5))
+        .seed(seed)
+        .build();
+    //Construct a new model with the intended architecture and print summary
+    ComputationGraph vgg16Transfer = new TransferLearning.GraphBuilder(vgg16)
+        .fineTuneConfiguration(fineTuneConf)
+        .setFeatureExtractor(featureExtractionLayer) //the specified layer and below are "frozen"
+        .removeVertexKeepConnections("predictions") //replace the functionality of the final vertex
+        .addLayer("predictions",
+            new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+            .nIn(4096).nOut(numClasses)
+            .weightInit(WeightInit.DISTRIBUTION)
+            .dist(new NormalDistribution(0,0.2*(2.0/(4096+numClasses)))) //This weight init dist gave better results than Xavier
+            .activation(Activation.SOFTMAX).build(),
+            "fc2")
+        .build();
+    log.info(vgg16Transfer.summary());
+    return vgg16Transfer;
+  }
+
+  
+  
   
   static public ServiceType getMetaData() {
     

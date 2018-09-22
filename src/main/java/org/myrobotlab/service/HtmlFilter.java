@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import org.jivesoftware.smack.util.StringUtils;
+import org.jsoup.Jsoup;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Logging;
@@ -107,11 +109,11 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     this.stripHtml = stripHtml;
   }
 
-  // helper function to strip html tags.
+  // helper function to strip html tags. 
   public static String stripHtml(String text) {
-    // TODO: something fancier but this works for now.
-    String cleanText = text.replaceAll("\\<.*?\\>", " ");
-    cleanText = cleanText.replaceAll("  ", " ");
+    if (StringUtils.isEmpty(text))
+      return text;
+    String cleanText = Jsoup.parse(text).text().trim();
     return cleanText.trim();
   }
 
