@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
@@ -65,6 +66,9 @@ import org.deeplearning4j.zoo.util.darknet.VOCLabels;
 import org.deeplearning4j.zoo.util.imagenet.ImageNetLabels;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
+import org.myrobotlab.deeplearning4j.SolrImageRecordReader;
+import org.myrobotlab.deeplearning4j.SolrInputSplit;
+import org.myrobotlab.deeplearning4j.SolrLabelGenerator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -76,6 +80,8 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.factory.Nd4jBackend;
+import org.nd4j.linalg.factory.Nd4jBackend.NoAvailableBackendException;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
@@ -126,6 +132,16 @@ public class Deeplearning4j extends Service {
   // constructor.
   public Deeplearning4j(String reservedKey) {
     super(reservedKey);
+    // initialize the nd4j backend once up front.   
+    // not sure if you can call this multiple times.  
+    try {
+      Nd4jBackend.load();
+    } catch (NoAvailableBackendException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      warn("ND4j backend initialization error. Deeplearning4j did not start properly.");
+    }
+
   }
 
   /**
@@ -561,6 +577,39 @@ public class Deeplearning4j extends Service {
     return results;
   }
   
+
+  public DataSetIterator makeSolrInputSplitIterator(Solr solr, SolrQuery datasetQuery, long numFound, List<String> labels, int batch,int height,int width,int channels) throws IOException {
+    // TODO: don't depend on the solr service, but rather some datasource that can produce input splits...
+    // TODO: pass in the record reader and the preprocessor
+    // training set iterator
+    SolrInputSplit split = new SolrInputSplit(solr, datasetQuery, labels);
+    SolrLabelGenerator labelMaker = new SolrLabelGenerator();
+    labelMaker.setSolrInputSplit(split);
+    SolrImageRecordReader recordReader = new SolrImageRecordReader(height,width,channels,labelMaker);
+    recordReader.setLabels(labels);
+    // TODO: This initializes the locations?! ouch.  avoid that.. just use an iterator!
+    recordReader.initialize(split);
+    DataSetIterator iter = new RecordReaderDataSetIterator(recordReader, batch, 1, labels.size());
+    iter.setPreProcessor( new VGG16ImagePreProcessor());
+    return iter;    
+  }
+  
+  public CustomModel trainAndSaveModel(List<String> labels, DataSetIterator trainIter, DataSetIterator testIter, String filename, int maxEpochs, double targetAccuracy, String featureExtractionLayer) throws IOException {
+    // loop for each epoch?
+    ComputationGraph model = createVGG16TransferModel(featureExtractionLayer, labels.size());
+    model.addListeners(new ScoreIterationListener(1));
+    for (int i = 0 ; i < maxEpochs; i++) {
+      runFitter(trainIter, model);
+      double accuracy = evaluateModel(testIter, model);
+      if (accuracy > targetAccuracy) {
+        // ok. if we got here this is a good model.. let's save it
+        saveModel(model, labels, filename);
+        return new CustomModel(model, labels);
+      }
+    }
+    log.info("Model didn't converge to desired accuracy.");
+    return new CustomModel(model, labels);
+  }
   
   public List<List<ClassPrediction>> decodePredictions(Labels labels, INDArray predictions, int n) {
     long rows = predictions.size(0);

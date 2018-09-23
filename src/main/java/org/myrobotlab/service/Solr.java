@@ -300,6 +300,26 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
 
+  /**
+   * This query returns the superset of all data that will be used for training and testing of a dl4j model.
+   * This will return a query that when executed will return the number of records found for the query, as well
+   * as a facet on the label field.
+   * 
+   * @param queryString
+   * @param labelField
+   * @return
+   */
+  public SolrQuery makeDatasetQuery(String queryString, String labelField) {
+    SolrQuery solrQuery = new SolrQuery(queryString);
+    // TODO: avoid this and use cursor mark pagination.
+    solrQuery.setRows(0);
+    // add a facet on the label field so we know what's in the training dataset.
+    solrQuery.addFacetField(labelField);
+    solrQuery.setFacetMinCount(1);
+    solrQuery.setFacet(true);
+    return solrQuery;
+  }
+
   public void createTrainingDataDir(SolrQuery query, String directory) throws IOException {
     // This method will iterate a result set that contains images stored in the "bytes" field of a document
     // It will then save these images to a directory based on the "label" field.
@@ -674,7 +694,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // TODO: index the classifications with the cvdata. not separately.. 
   // o/w we need a way to relate back to the frame that this is a classification of
   public Map<String, Double> onClassification(Map<String, Double> data) throws SolrServerException, IOException {
-    log.info("On Classification invoked!");
+    // log.info("On Classification invoked!");
     SolrInputDocument doc = new SolrInputDocument();
     // create a document id for this document 
     // TODO: make this something much more deterministic!! 
