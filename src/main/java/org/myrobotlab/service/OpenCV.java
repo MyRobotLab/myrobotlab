@@ -68,6 +68,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
+import org.myrobotlab.opencv.MJpegFrameGrabber;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;
@@ -157,7 +158,7 @@ public class OpenCV extends AbstractVideoSource {
   transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
   static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "DL4J", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
+      "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
       "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
       "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
       "Solr", "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
@@ -958,21 +959,32 @@ public class OpenCV extends AbstractVideoSource {
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     
     
+    
+    //String url  = "http://192.168.4.104:8081/?action=stream";
+    String url = "http://192.168.4.104:8080/?action=stream";
+
+    //public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
+    //public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
+
+    //String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
+    MJpegFrameGrabber grabber =  new MJpegFrameGrabber(url);
+    // grabber.start();
+    opencv.capture(grabber);
 
     
-//    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
-//    opencv.addFilter(ud);
+    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
+    opencv.addFilter(ud);
     
 
-    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
-    opencv.addFilter(tld);
+//    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
+//    opencv.addFilter(tld);
 
-    opencv.height = 480;
-    opencv.width = 640;
+//    opencv.height = 480;
+//    opencv.width = 640;
 //    opencv.height = 1080;
 //    opencv.width= 1920;
     
-   opencv.capture();
+  // opencv.capture();
    // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
    // opencv.capture(grabber);
     

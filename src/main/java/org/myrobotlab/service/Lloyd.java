@@ -14,6 +14,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVFilterDL4JTransfer;
 import org.myrobotlab.programab.OOBPayload;
 import org.slf4j.Logger;
 
@@ -229,6 +230,15 @@ public class Lloyd extends Service {
     // TODO: enable right eye / config
     // rightEye = (OpenCV)Runtime.start("rightEye", "OpenCV");
     leftEye = (OpenCV)Runtime.start("leftEye", "OpenCV");
+    
+    // let's start up the trained transfer learning model here.
+    OpenCVFilterDL4JTransfer dl4jTransfer = new OpenCVFilterDL4JTransfer("dl4jTransfer");
+    // TODO: specify the model filename?  TODO: refactor the loading of the model out of the constructor of the filter!
+    // dl4jTransfer.modelFilename = "";
+    String modelFilename = "my_new_model.bin";
+    dl4jTransfer.loadCustomModel(modelFilename);
+
+    leftEye.addFilter(dl4jTransfer);
     
     leftEye.cameraIndex = leftEyeCameraIndex;
     // TODO: ?
