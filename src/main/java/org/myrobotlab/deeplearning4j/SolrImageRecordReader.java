@@ -49,6 +49,8 @@ public class SolrImageRecordReader extends ImageRecordReader {
 
   @Override
   public void initialize(InputSplit split) throws IOException {
+    
+    // Ok. this seems reasonable create the native image loader.
     if (imageLoader == null) {
       imageLoader = new NativeImageLoader(height, width, channels, imageTransform);
     }
@@ -63,6 +65,10 @@ public class SolrImageRecordReader extends ImageRecordReader {
     inputSplit = split;
     // TODO: don't call locations!!!
     // This totally sucks and is handled by solr by returning the labels with a facet
+    
+    // we really just need a sorted list of labels for this split. right?
+    
+    
     URI[] locations = split.locations();
     if (locations != null && locations.length >= 1) {
       if (appendLabel && labelGenerator != null && labelGenerator.inferLabelClasses()) {
@@ -103,7 +109,7 @@ public class SolrImageRecordReader extends ImageRecordReader {
 
   @Override
   public List<Writable> next() {
-    // TODO Auto-generated method stub
+    // TODO maybe we can use the input stream input split?
     if(inputSplit instanceof InputStreamInputSplit) {
       InputStreamInputSplit inputStreamInputSplit = (InputStreamInputSplit) inputSplit;
       try {

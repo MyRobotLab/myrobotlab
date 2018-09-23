@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -34,21 +36,30 @@ public class SolrInputSplit extends BaseInputSplit {
   private final Solr solr;
   private final SolrQuery query;
   private final String bytesField = "bytes";
+  private final String labelField = "label";
   private QueryResponse response;
   private HashMap<String, byte[]> byteMap;
+  private HashMap<String, String> labelMap;
+  private final List<String> labels;
+  
 
   // we probably need a constructor ? that takes a solr server in mrl?
-  public SolrInputSplit(Solr solr, SolrQuery query) {
+  public SolrInputSplit(Solr solr, SolrQuery query, List<String> labels) {
     this.solr = solr;
     this.query = query;
+    // TODO: i guess we're going to infer this so maybe we don't need it passed in?
+    this.labels = labels;
     // We should execute a result set
     response = solr.search(query);
     // should compile this down to make it faster
     byteMap = new HashMap<String, byte[]>();
+    labelMap = new HashMap<String, String>();
     for (SolrDocument doc : response.getResults()) {
       String id = doc.getFirstValue("id").toString();
       byte[] bytes = (byte[])doc.getFirstValue(bytesField);
       byteMap.put(id, bytes);
+      String label = (String)doc.getFirstValue(labelField);
+      labelMap.put(id, label);
     }
     log.info("Found {} example documents", response.getResults().size());
   }
@@ -129,6 +140,7 @@ public class SolrInputSplit extends BaseInputSplit {
 
   @Override
   public URI[] locations() {
+    log.info("Are we called anymore?!");
     // TODO Auto-generated method stub
     log.info("Locations Return all?!");
     this.uriStrings = new ArrayList<String>();
@@ -191,4 +203,10 @@ public class SolrInputSplit extends BaseInputSplit {
     return super.sample(pathFilter, weights);
   }
 
+  
+  public String resolveLabelForID(String docID) {
+    // we should error check this ? 
+    return labelMap.get(docID);
+  }
+  
 }

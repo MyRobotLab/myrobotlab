@@ -63,6 +63,7 @@ import org.deeplearning4j.zoo.util.Labels;
 import org.deeplearning4j.zoo.util.darknet.DarknetLabels;
 import org.deeplearning4j.zoo.util.darknet.VOCLabels;
 import org.deeplearning4j.zoo.util.imagenet.ImageNetLabels;
+import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -242,6 +243,26 @@ public class Deeplearning4j extends Service {
     return network;
   }
 
+  
+  public void saveModel(ComputationGraph model, List<String> labels, String filename) throws IOException {
+    File dir = new File(modelDir);
+    if (!dir.exists()) {
+      dir.mkdirs();
+      log.info("Creating models directory {}" , dir);
+    }
+    File f = new File(filename);
+    log.info("Saving DL4J computation graph model to {}", f.getAbsolutePath());
+    ModelSerializer.writeModel(model, filename, true);
+    // also need to save the labels!
+    String labelFilename = filename + ".labels";
+    FileWriter fw = new FileWriter(new File(labelFilename));
+    fw.write(StringUtils.join(labels, "|"));
+    fw.flush();
+    fw.close();
+    log.info("Model saved: {}", f.getAbsolutePath());
+  }
+
+  
   // save the current model and it's set of labels
   public void saveModel(String filename) throws IOException {
     File dir = new File(modelDir);
@@ -284,7 +305,26 @@ public class Deeplearning4j extends Service {
     modelNumLabels = networkLabels.size();
     log.info("Network labels {} objects", modelNumLabels);
   }
-
+  
+  public CustomModel loadComputationGraph(String filename) throws IOException {
+    File f = new File(filename);
+    log.info("Loading network from : {}", f.getAbsolutePath());
+    // ModelSerializer.re
+    ComputationGraph model = ModelSerializer.restoreComputationGraph(f, true);
+    log.info("Network restored. {}", model);
+    // TODO: there has to be a better way to manage the labels!?!?!! Gah
+    List<String> labels = new ArrayList<String>();
+    for (String s : StringUtils.split(FileIO.toString(new File(filename + ".labels")), "\\|")) {
+      labels.add(s);
+    }
+    int numLabels = labels.size();
+    log.info("Network labels {} objects", numLabels);
+    
+    CustomModel cusModel = new CustomModel(model, labels);
+    return cusModel;
+    
+  }
+  
   public void evaluateModel(File file) throws IOException {
     log.info("Evaluate model....");
     NativeImageLoader nativeImageLoader = new NativeImageLoader(height, width, channels);
@@ -551,6 +591,48 @@ public class Deeplearning4j extends Service {
     return descriptions;
 }
 
+  public Map<String, Double> classifyImageCustom(IplImage iplImage, ComputationGraph model, List<String> labels) throws IOException {
+    // this height width channel info is for VGG16 based models.
+    NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
+    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    INDArray image = loader.asMatrix(buffImg);
+    DataNormalization scaler = new VGG16ImagePreProcessor();
+    scaler.transform(image);
+    INDArray[] output = model.output(false,image);
+    return decodePredictions(output[0], labels);
+  }
+  
+  public Map<String, Double> decodePredictions(INDArray predictions, List<String> labels) throws IOException {
+    
+    LinkedHashMap<String, Double> recognizedObjects = new LinkedHashMap<String, Double>(); 
+    // ArrayList<String> labels;
+    String predictionDescription = "";
+    int[] top5 = new int[5];
+    float[] top5Prob = new float[5];
+    //brute force collect top 5
+    int i = 0;
+    for (int batch = 0; batch < predictions.size(0); batch++) {
+        if (predictions.size(0) > 1) {
+            predictionDescription += String.valueOf(batch);
+        }
+        predictionDescription += " :";
+        INDArray currentBatch = predictions.getRow(batch).dup();
+        while (i < 5) {
+            top5[i] = Nd4j.argMax(currentBatch, 1).getInt(0, 0);
+            top5Prob[i] = currentBatch.getFloat(batch, top5[i]);
+            // interesting, this cast looses precision.. float to double.
+            recognizedObjects.put(labels.get(top5[i]), (double)top5Prob[i]);
+            currentBatch.putScalar(0, top5[i], 0);
+            predictionDescription += "\n\t" + String.format("%3f", top5Prob[i] * 100) + "%, " + labels.get(top5[i]);
+            i++;
+        }
+    }
+    invoke("publishClassification", (Map<String, Double>)recognizedObjects);
+    return recognizedObjects;
+  }
+
+  
+  
   
   public Map<String, Double> classifyImageVGG16(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
@@ -582,7 +664,6 @@ public class Deeplearning4j extends Service {
     //log.info("Image Predictions: {}", predictions);
     return decodeVGG16Predictions(output[0]);
   }
-  
   
   // adapted from dl4j TrainedModels.VGG16 class.
   public Map<String, Double> decodeVGG16Predictions(INDArray predictions) throws IOException {
