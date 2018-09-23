@@ -841,7 +841,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
       SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
-      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
       doc.setField("id", "Doc1");
