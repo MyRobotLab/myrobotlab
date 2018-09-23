@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,17 +40,17 @@ public class Lloyd extends Service {
   private WebkitSpeechRecognition ear;
   private MarySpeech mouth;
   private OpenCV leftEye;
-  private int leftEyeCameraIndex = 1;
+  private int leftEyeCameraIndex = 0;
   private OpenCV rightEye;
   private int rightEyeCameraIndex = 0;
   private OculusRift oculusRift;
-  private boolean record = false;
+  private boolean record = true;
   private boolean enableSpeech = true;
-  private boolean enableEyes = false;
+  private boolean enableEyes = true;
   // these are probably mutually exclusive.  but maybe not?!
-  private boolean enableOculus = true;
+  private boolean enableOculus = false;
   
-  private boolean enableIK = true;
+  private boolean enableIK = false;
   
   private transient WebGui webgui;
   
@@ -59,13 +58,14 @@ public class Lloyd extends Service {
   private InverseKinematics3D leftIK;
   private InverseKinematics3D rightIK;
   
+  // oculus settings for telepresence
   public String leftEyeURL  = "http://192.168.4.105:8080/?action=stream";
   public String rightEyeURL = "http://192.168.4.105:8081/?action=stream";
   
   public String cloudSolrUrl = "http://phobos:8983/solr/wikipedia";
   // TODO: add all of the servos and other mechanical stuff.
   
-  
+  // for telemanipulation
   // The URL to the remote MRL instance that is controlling the servos.
   public String skeletonBaseUrl = "http://192.168.4.108:8888/";
   

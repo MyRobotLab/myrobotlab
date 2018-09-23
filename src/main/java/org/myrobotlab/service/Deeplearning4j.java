@@ -27,6 +27,7 @@ import org.datavec.image.transform.ImageTransform;
 import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator;
+import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -635,7 +636,17 @@ public class Deeplearning4j extends Service {
     this.networkLabels = networkLabels;
   }
 
-  
+  /**
+   * Create a transfer learning representation of VGG16 Imagenet model.
+   * Choose where to freeze the pretrained model.  
+   * To freeze all layers except for the output layer, choose "fc2"
+   * The numClasses property will specify the size of the new output layer of the transfer learned model
+   * 
+   * @param featureExtractionLayer specifies the frozen layer of the model
+   * @param numClasses the new number of outputs for the model.
+   * @return
+   * @throws IOException
+   */
   public ComputationGraph createVGG16TransferModel(String featureExtractionLayer, int numClasses) throws IOException {
     log.info("Loading org.deeplearning4j.transferlearning.vgg16...\n\n");
     ZooModel zooModel = VGG16.builder().build();
@@ -664,15 +675,41 @@ public class Deeplearning4j extends Service {
     log.info(vgg16Transfer.summary());
     return vgg16Transfer;
   }
+  
+  /**
+   * Fit a model against a training set
+   * Note: iterator is reset before fitting
+   * 
+   * @param trainIter
+   * @param vgg16Transfer
+   */
+  public void runFitter(DataSetIterator trainIter, ComputationGraph model) {
+    trainIter.reset();
+    while(trainIter.hasNext()) {
+      model.fit(trainIter.next());
+    }
+  }
 
-  
-  
+  /**
+   * Evaluate a model against a given testing dataset
+   * Note iterator is reset before evaluating.
+   * 
+   * @param testIter
+   * @param model
+   * @return
+   */
+  public double evaluateModel(DataSetIterator testIter, ComputationGraph model) {
+    testIter.reset();
+    Evaluation eval = model.evaluate(testIter);
+    log.info(eval.stats());
+    return eval.accuracy();
+  }
   
   static public ServiceType getMetaData() {
     
     String dl4jVersion = "1.0.0-beta2";
     
-    boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "true"));
+    boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     boolean supportRasPi = false;
     
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());

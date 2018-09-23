@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author kwatters
  *
  */
+// TODO: change this to an InputStreamInputSplit instead!!!
 public class SolrInputSplit extends BaseInputSplit {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
