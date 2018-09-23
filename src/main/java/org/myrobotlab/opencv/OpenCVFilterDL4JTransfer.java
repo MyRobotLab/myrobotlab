@@ -57,6 +57,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   }
   
   public void loadCustomModel(String filename) {
+    // TODO: test if file exists!
     try {
       // got to load up the custom model.
       log.info("Loading model.");
@@ -148,12 +149,14 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
           if (count % 100 == 0) {
             double rate = 1000.0*count / (System.currentTimeMillis() - start);
             System.out.println("Rate " + rate);
+            log.info(formatResultString(lastResult));
           }
           //dl4j.classifyImageDarknet(lastImage);
           // lastResult = dl4j.classifyImageVGG16(lastImage);
           invoke("publishClassification", lastResult);
-          if (lastResult != null)
-            log.info(formatResultString(lastResult));
+          if (lastResult != null) {
+            //log.info(formatResultString(lastResult));
+          }
         } catch (IOException e) {
           // TODO Auto-generated catch block
           log.warn("Exception classifying image!");
@@ -165,7 +168,8 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
       // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
       // maybe lastImage needs to be marked as volatile ?
       try {
-        Thread.sleep(1);
+        // Let's limit the speed at which we try to classify  at most 2 fps should be fine
+        Thread.sleep(500);
       } catch (InterruptedException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -181,6 +185,13 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
 	  
 	  // 
 	  
+  }
+
+  public void unloadModel() {
+    // TODO Auto-generated method stub
+    this.model = null;
+    this.lastResult = null;
+    
   }
   
 }

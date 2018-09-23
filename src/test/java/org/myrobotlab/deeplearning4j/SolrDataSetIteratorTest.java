@@ -22,6 +22,7 @@ import org.datavec.api.split.InputSplit;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.service.Solr;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -34,7 +35,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;
 
-//@Ignore
+// @Ignore
 public class SolrDataSetIteratorTest {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -66,53 +67,38 @@ public class SolrDataSetIteratorTest {
   public void testSolrTransferLearningVGG16() throws IOException, NoAvailableBackendException, SolrServerException {
     LoggingFactory.init("INFO");
     System.out.println(System.getProperty("java.library.path"));
-    Nd4jBackend.load();
+    // Nd4jBackend.load();
     // start solr and dl4j service.
     initServices();
     // consider increasing this if there's enough training data.
     // Phase 1 . get the metadata from the solr query about how many classes there are, and how many results there are.
     String queryString = "+has_bytes:true -label:unknown";
     String labelField = "label";
-    SolrQuery datasetQuery = makeTrainQuery(queryString, labelField);
+    SolrQuery datasetQuery = solr.makeDatasetQuery(queryString, labelField);
     // run that query.. get the number of items and the labels
     QueryResponse resp = solr.search(datasetQuery);
     long numFound = resp.getResults().getNumFound();
     // sorted list (according to solr) of the labels for this data set
     List<String> labels = resolveLabels(resp);
-    
-    SolrQuery trainQuery = datasetQuery;
-    // TODO: fix me! i shouldn't be the same query.. 
-    SolrQuery testQuery = datasetQuery;
-    // Random sort ascending for a percentage
     long trainMaxOffset = (long)((double)numFound * trainPerc);
     long testMaxOffset = (long)((double)numFound * (1.0 - trainPerc));
-    // we could just add start/rows for the train set vs the test set?
+    
+    // training query
+    SolrQuery trainQuery = solr.makeDatasetQuery(queryString, labelField);
     trainQuery.addSort("random_"+seed, ORDER.asc);
     trainQuery.setRows((int)trainMaxOffset);
-    // change sort order, grab the last N
+    DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch , height, width, channels);
+
+    // testing query
+    SolrQuery testQuery = solr.makeDatasetQuery(queryString, labelField);
     testQuery.addSort("random_"+seed, ORDER.desc);
     testQuery.setRows((int)testMaxOffset);
-
-    DataSetIterator trainIter = makeSolrInputSplitIterator(trainQuery, numFound, labels);
-    DataSetIterator testIter = makeSolrInputSplitIterator(testQuery, numFound, labels);
-    
-    // loop for each epoch?
-    ComputationGraph vgg16Transfer = dl4j.createVGG16TransferModel(featureExtractionLayer, labels.size());
-    vgg16Transfer.addListeners(new ScoreIterationListener(1));
-    for (int i = 0 ; i < maxEpochs; i++) {
-      dl4j.runFitter(trainIter, vgg16Transfer);
-      double accuracy = dl4j.evaluateModel(testIter, vgg16Transfer);
-      if (accuracy > targetAccuracy) {
-        // ok. if we got here this is a good model.. let's save it
-        dl4j.saveModel(vgg16Transfer, labels, "my_new_model.bin");
-        break;
-      }
-    }
-    
+    DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch , height, width, channels);
+    //
+    String filename = "my_new_model.bin";
+    dl4j.trainAndSaveModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
     testNewModel();
-    
   }
-
   
   private void testNewModel() throws IOException {
     // Ok. now let's see can we load the model up and ask it to predict?
@@ -142,31 +128,5 @@ public class SolrDataSetIteratorTest {
     return labels;
   }
 
-  private DataSetIterator makeSolrInputSplitIterator(SolrQuery datasetQuery, long numFound, List<String> labels) throws IOException {
-    // TODO: pass in the record reader and the preprocessor
-    // training set iterator
-    SolrInputSplit split = new SolrInputSplit(solr, datasetQuery, labels);
-    SolrLabelGenerator labelMaker = new SolrLabelGenerator();
-    labelMaker.setSolrInputSplit(split);
-    SolrImageRecordReader recordReader = new SolrImageRecordReader(height,width,channels,labelMaker);
-    recordReader.setLabels(labels);
-    // TODO: This initializes the locations?! ouch.  avoid that.. just use an iterator!
-    recordReader.initialize(split);
-    DataSetIterator iter = new RecordReaderDataSetIterator(recordReader, batch, 1, labels.size());
-    iter.setPreProcessor( new VGG16ImagePreProcessor());
-    return iter;    
-  }
-
-  // this query returns the superset of all data that will be used for training and testing.
-  public SolrQuery makeTrainQuery(String queryString, String labelField) {
-    SolrQuery solrQuery = new SolrQuery(queryString);
-    // TODO: avoid this and use cursor mark pagination.
-    solrQuery.setRows(0);
-    // add a facet on the label field so we know what's in the training dataset.
-    solrQuery.addFacetField(labelField);
-    solrQuery.setFacetMinCount(1);
-    solrQuery.setFacet(true);
-    return solrQuery;
-  }
   
 }

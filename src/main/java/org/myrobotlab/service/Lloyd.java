@@ -3,12 +3,20 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.Point;
@@ -16,6 +24,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterDL4JTransfer;
 import org.myrobotlab.programab.OOBPayload;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.slf4j.Logger;
 
 /**
@@ -38,10 +47,13 @@ public class Lloyd extends Service {
   private Solr memory;
   private Solr cloudMemory;
   
+  // the cortex is the part of the brain responsible for image recognition.. this seems like a fitting name
+  private Deeplearning4j cortex;
+  
   private WebkitSpeechRecognition ear;
   private MarySpeech mouth;
   private OpenCV leftEye;
-  private int leftEyeCameraIndex = 0;
+  private int leftEyeCameraIndex = 1;
   private OpenCV rightEye;
   private int rightEyeCameraIndex = 0;
   private OculusRift oculusRift;
@@ -70,6 +82,9 @@ public class Lloyd extends Service {
   // The URL to the remote MRL instance that is controlling the servos.
   public String skeletonBaseUrl = "http://192.168.4.108:8888/";
   
+  // used by the cortex
+  public String imageRecognizerModelFilename = "visual_cortex.bin";
+  
   public Lloyd(String name) {
     super(name);
   }
@@ -86,6 +101,7 @@ public class Lloyd extends Service {
       startEyes();
     }
     startBrain();
+    startCortex();
     // start memory last :(  can't attach eyes until the eyes exist.
     startMemory();
     
@@ -119,33 +135,33 @@ public class Lloyd extends Service {
     // TODO: add some actual aiml files 
     brain.addCategory("*", "Default");
     brain.addCategory("Hello", "Hi");
-    
     // we need a category to turn on the camera.
-    
     // we need a category to set the training label
-    
     String trainingPattern = "THIS IS *";
     // OOB tag here. 
     int numExamples = 50;
     String trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
-    
+
     trainingPattern = "THIS IS A *";
     // OOB tag here. 
     trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
-    
 
     trainingPattern = "THIS IS AN *";
     // OOB tag here. 
     trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
-
     
     trainingPattern = "THIS IS THE *";
     // OOB tag here. 
     trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
+    
+    // I want a category that will tell my to rebuild my brain!
+    String reloadPattern = "BUILD A MODEL";
+    String buildModelTemplate = "Re-compiling my visual cortex. <oob><mrl><service>lloyd</service><method>updateRecognitionModel</method></mrl></oob>";
+    brain.addCategory(reloadPattern, buildModelTemplate);
     
   }
   
@@ -225,21 +241,81 @@ public class Lloyd extends Service {
     cloudMemory.setSolrUrl(cloudSolrUrl);
   }
   
-  public void startEyes() {
+  public void startCortex() {
+    cortex = (Deeplearning4j)Runtime.start("cortex", "Deeplearning4j");
+    // TODO: ?? any other initialization?  load the current image recognition model?
+  }
+  
+  // 
+  public void updateRecognitionModel() throws IOException {
+    // Here we should train a new image recognition model..
+    // when that's done.. have it update the current model in use by the dl4jtranfer filter.
+    int seed = 42;
+    double trainPerc = 0.5;
+    // vgg16 specific values
+    int channels = 3;
+    int height = 224;
+    int width = 224;
+    // training mini batch size.
+    int batch = 20;
+    // target accuracy
+    double targetAccuracy = 0.90;
+    String featureExtractionLayer = "fc2";
+    int maxEpochs = 5;
     
+    String queryString = "+has_bytes:true -label:unknown";
+    String labelField = "label";
+    SolrQuery datasetQuery = memory.makeDatasetQuery(queryString, labelField);
+    // run that query.. get the number of items and the labels
+    QueryResponse resp = memory.search(datasetQuery);
+    long numFound = resp.getResults().getNumFound();
+    // sorted list (according to solr) of the labels for this data set
+    FacetField labelFacet =  resp.getFacetField("label");
+    // maintain sort order with a linked hash set
+    List<String> labels = new ArrayList<String>();
+    for (Count c : labelFacet.getValues()) {
+      labels.add(c.getName());
+    }
+    Collections.sort(labels);
+    long trainMaxOffset = (long)((double)numFound * trainPerc);
+    long testMaxOffset = (long)((double)numFound * (1.0 - trainPerc));
+    
+    // training query
+    SolrQuery trainQuery = memory.makeDatasetQuery(queryString, labelField);
+    trainQuery.addSort("random_"+seed, ORDER.asc);
+    trainQuery.setRows((int)trainMaxOffset);
+    DataSetIterator trainIter = cortex.makeSolrInputSplitIterator(memory, trainQuery, numFound, labels, batch , height, width, channels);
+
+    // testing query
+    SolrQuery testQuery = memory.makeDatasetQuery(queryString, labelField);
+    testQuery.addSort("random_"+seed, ORDER.desc);
+    testQuery.setRows((int)testMaxOffset);
+    DataSetIterator testIter = cortex.makeSolrInputSplitIterator(memory, testQuery, numFound, labels, batch , height, width, channels);
+    //
+    //String filename = "my_new_model.bin";
+    // TODO: make this runnable?
+    // At this point we should null out the current model so it stops classifying.
+    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
+    
+    CustomModel imageRecognizer = cortex.trainAndSaveModel(labels, trainIter, testIter, imageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
+    
+    
+    // now we want to get a hold of the dl4j transfer filter and set the model on it with this one.
+    // OpenCVFilterDL4JTransfer("dl4jTransfer");
+    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).loadCustomModel(imageRecognizerModelFilename);
+    
+    // ok. once that model is saved.
+    
+  }
+  
+  public void startEyes() {
     // TODO: enable right eye / config
     // rightEye = (OpenCV)Runtime.start("rightEye", "OpenCV");
     leftEye = (OpenCV)Runtime.start("leftEye", "OpenCV");
-    
     // let's start up the trained transfer learning model here.
     OpenCVFilterDL4JTransfer dl4jTransfer = new OpenCVFilterDL4JTransfer("dl4jTransfer");
-    // TODO: specify the model filename?  TODO: refactor the loading of the model out of the constructor of the filter!
-    // dl4jTransfer.modelFilename = "";
-    String modelFilename = "my_new_model.bin";
-    dl4jTransfer.loadCustomModel(modelFilename);
-
+    dl4jTransfer.loadCustomModel(imageRecognizerModelFilename);
     leftEye.addFilter(dl4jTransfer);
-    
     leftEye.cameraIndex = leftEyeCameraIndex;
     // TODO: ?
     leftEye.capture();
@@ -247,8 +323,6 @@ public class Lloyd extends Service {
   
   public void startOculus() {
     oculusRift = (OculusRift)Runtime.start("oculusRift", "OculusRift");
-    
-    
     oculusRift.setLeftEyeURL(leftEyeURL);
     oculusRift.setRightEyeURL(rightEyeURL);
     oculusRift.leftCameraAngle = 0;
@@ -260,7 +334,6 @@ public class Lloyd extends Service {
     oculusRift.initContext();
     oculusRift.logOrientation();
   }
-  
   
   public void startIK() {
     leftIK = (InverseKinematics3D)Runtime.start("leftIK", "InverseKinematics3D");
@@ -342,6 +415,8 @@ public class Lloyd extends Service {
     // start python
     Runtime.start("python", "Python");
     gui.undockTab("memory");
+    gui.undockTab("brain");
+    gui.undockTab("leftEye");
     // gui.undockTab("leftEye");
     // opencvdata_214c7381-ddfe-406a-adfa-f1bf9aebd367
     lloyd.initializeBrain();
