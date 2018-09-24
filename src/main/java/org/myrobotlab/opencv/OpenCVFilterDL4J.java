@@ -51,9 +51,9 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     log.info("Loading VGG 16 Model.");
     try {
       // dl4j.loadYolo2();
-      // dl4j.loadVGG16();
+      dl4j.loadVGG16();
       // dl4j.loadDarknet();
-      dl4j.loadTinyYOLO();
+      // dl4j.loadTinyYOLO();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -143,15 +143,14 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       if (lastImage != null) {
         try {
           // dl4j.yoloImage(lastImage);
-          yoloLastResult = dl4j.classifyImageTinyYolo(lastImage, getVideoProcessor().frameIndex);
+          //yoloLastResult = dl4j.classifyImageTinyYolo(lastImage, getVideoProcessor().frameIndex);
+          //dl4j.classifyImageDarknet(lastImage);
           count++;
-          
+          lastResult = dl4j.classifyImageVGG16(lastImage);
           if (count % 100 == 0) {
             double rate = 1000.0*count / (System.currentTimeMillis() - start);
-            System.out.println("Yolo Rate " + rate);
+            log.info("DL4J Filter Rate: {}", rate);
           }
-          //dl4j.classifyImageDarknet(lastImage);
-          // lastResult = dl4j.classifyImageVGG16(lastImage);
           invoke("publishClassification", lastResult);
           if (lastResult != null)
             log.info(formatResultString(lastResult));
