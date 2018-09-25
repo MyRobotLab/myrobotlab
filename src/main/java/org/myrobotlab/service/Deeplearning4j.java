@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
@@ -27,6 +28,7 @@ import org.datavec.image.transform.ImageTransform;
 import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator;
+import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -47,6 +49,8 @@ import org.deeplearning4j.nn.layers.objdetect.DetectedObject;
 import org.deeplearning4j.nn.layers.objdetect.YoloUtils;
 // import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.nn.transferlearning.FineTuneConfiguration;
+import org.deeplearning4j.nn.transferlearning.TransferLearning;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
@@ -60,7 +64,11 @@ import org.deeplearning4j.zoo.util.Labels;
 import org.deeplearning4j.zoo.util.darknet.DarknetLabels;
 import org.deeplearning4j.zoo.util.darknet.VOCLabels;
 import org.deeplearning4j.zoo.util.imagenet.ImageNetLabels;
+import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.deeplearning4j.MRLLabelGenerator;
+import org.myrobotlab.deeplearning4j.SolrImageRecordReader;
+import org.myrobotlab.deeplearning4j.SolrInputSplit;
+import org.myrobotlab.deeplearning4j.SolrLabelGenerator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -72,6 +80,9 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.factory.Nd4jBackend;
+import org.nd4j.linalg.factory.Nd4jBackend.NoAvailableBackendException;
+import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -112,7 +123,7 @@ public class Deeplearning4j extends Service {
   // TODO: clean all of this up!  for now
   // we're just going to hack in the deeplearning4j zoo , in particular vgg16 model
   // pretrained from imagenet.
-  
+
   private ComputationGraph vgg16 = null;
   
   private ComputationGraph darknet = null;
@@ -121,6 +132,16 @@ public class Deeplearning4j extends Service {
   // constructor.
   public Deeplearning4j(String reservedKey) {
     super(reservedKey);
+    // initialize the nd4j backend once up front.   
+    // not sure if you can call this multiple times.  
+    try {
+      Nd4jBackend.load();
+    } catch (NoAvailableBackendException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      warn("ND4j backend initialization error. Deeplearning4j did not start properly.");
+    }
+
   }
 
   /**
@@ -238,6 +259,26 @@ public class Deeplearning4j extends Service {
     return network;
   }
 
+  
+  public void saveModel(ComputationGraph model, List<String> labels, String filename) throws IOException {
+    File dir = new File(modelDir);
+    if (!dir.exists()) {
+      dir.mkdirs();
+      log.info("Creating models directory {}" , dir);
+    }
+    File f = new File(filename);
+    log.info("Saving DL4J computation graph model to {}", f.getAbsolutePath());
+    ModelSerializer.writeModel(model, filename, true);
+    // also need to save the labels!
+    String labelFilename = filename + ".labels";
+    FileWriter fw = new FileWriter(new File(labelFilename));
+    fw.write(StringUtils.join(labels, "|"));
+    fw.flush();
+    fw.close();
+    log.info("Model saved: {}", f.getAbsolutePath());
+  }
+
+  
   // save the current model and it's set of labels
   public void saveModel(String filename) throws IOException {
     File dir = new File(modelDir);
@@ -280,7 +321,26 @@ public class Deeplearning4j extends Service {
     modelNumLabels = networkLabels.size();
     log.info("Network labels {} objects", modelNumLabels);
   }
-
+  
+  public CustomModel loadComputationGraph(String filename) throws IOException {
+    File f = new File(filename);
+    log.info("Loading network from : {}", f.getAbsolutePath());
+    // ModelSerializer.re
+    ComputationGraph model = ModelSerializer.restoreComputationGraph(f, true);
+    log.info("Network restored. {}", model);
+    // TODO: there has to be a better way to manage the labels!?!?!! Gah
+    List<String> labels = new ArrayList<String>();
+    for (String s : StringUtils.split(FileIO.toString(new File(filename + ".labels")), "\\|")) {
+      labels.add(s);
+    }
+    int numLabels = labels.size();
+    log.info("Network labels {} objects", numLabels);
+    
+    CustomModel cusModel = new CustomModel(model, labels);
+    return cusModel;
+    
+  }
+  
   public void evaluateModel(File file) throws IOException {
     log.info("Evaluate model....");
     NativeImageLoader nativeImageLoader = new NativeImageLoader(height, width, channels);
@@ -517,10 +577,43 @@ public class Deeplearning4j extends Service {
     return results;
   }
   
+
+  public DataSetIterator makeSolrInputSplitIterator(Solr solr, SolrQuery datasetQuery, long numFound, List<String> labels, int batch,int height,int width,int channels) throws IOException {
+    // TODO: don't depend on the solr service, but rather some datasource that can produce input splits...
+    // TODO: pass in the record reader and the preprocessor
+    // training set iterator
+    SolrInputSplit split = new SolrInputSplit(solr, datasetQuery, labels);
+    SolrLabelGenerator labelMaker = new SolrLabelGenerator();
+    labelMaker.setSolrInputSplit(split);
+    SolrImageRecordReader recordReader = new SolrImageRecordReader(height,width,channels,labelMaker);
+    recordReader.setLabels(labels);
+    // TODO: This initializes the locations?! ouch.  avoid that.. just use an iterator!
+    recordReader.initialize(split);
+    DataSetIterator iter = new RecordReaderDataSetIterator(recordReader, batch, 1, labels.size());
+    iter.setPreProcessor( new VGG16ImagePreProcessor());
+    return iter;    
+  }
+  
+  public CustomModel trainAndSaveModel(List<String> labels, DataSetIterator trainIter, DataSetIterator testIter, String filename, int maxEpochs, double targetAccuracy, String featureExtractionLayer) throws IOException {
+    // loop for each epoch?
+    ComputationGraph model = createVGG16TransferModel(featureExtractionLayer, labels.size());
+    model.addListeners(new ScoreIterationListener(1));
+    for (int i = 0 ; i < maxEpochs; i++) {
+      runFitter(trainIter, model);
+      double accuracy = evaluateModel(testIter, model);
+      if (accuracy > targetAccuracy) {
+        // ok. if we got here this is a good model.. let's save it
+        saveModel(model, labels, filename);
+        return new CustomModel(model, labels);
+      }
+    }
+    log.info("Model didn't converge to desired accuracy.");
+    return new CustomModel(model, labels);
+  }
   
   public List<List<ClassPrediction>> decodePredictions(Labels labels, INDArray predictions, int n) {
-    int rows = predictions.size(0);
-    int cols = predictions.size(1);
+    long rows = predictions.size(0);
+    long cols = predictions.size(1);
     if (predictions.isColumnVector()) {
         predictions = predictions.ravel();
         rows = predictions.size(0);
@@ -547,6 +640,48 @@ public class Deeplearning4j extends Service {
     return descriptions;
 }
 
+  public Map<String, Double> classifyImageCustom(IplImage iplImage, ComputationGraph model, List<String> labels) throws IOException {
+    // this height width channel info is for VGG16 based models.
+    NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
+    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    INDArray image = loader.asMatrix(buffImg);
+    DataNormalization scaler = new VGG16ImagePreProcessor();
+    scaler.transform(image);
+    INDArray[] output = model.output(false,image);
+    return decodePredictions(output[0], labels);
+  }
+  
+  public Map<String, Double> decodePredictions(INDArray predictions, List<String> labels) throws IOException {
+    
+    LinkedHashMap<String, Double> recognizedObjects = new LinkedHashMap<String, Double>(); 
+    // ArrayList<String> labels;
+    String predictionDescription = "";
+    int[] top5 = new int[5];
+    float[] top5Prob = new float[5];
+    //brute force collect top 5
+    int i = 0;
+    for (int batch = 0; batch < predictions.size(0); batch++) {
+        if (predictions.size(0) > 1) {
+            predictionDescription += String.valueOf(batch);
+        }
+        predictionDescription += " :";
+        INDArray currentBatch = predictions.getRow(batch).dup();
+        while (i < 5) {
+            top5[i] = Nd4j.argMax(currentBatch, 1).getInt(0, 0);
+            top5Prob[i] = currentBatch.getFloat(batch, top5[i]);
+            // interesting, this cast looses precision.. float to double.
+            recognizedObjects.put(labels.get(top5[i]), (double)top5Prob[i]);
+            currentBatch.putScalar(0, top5[i], 0);
+            predictionDescription += "\n\t" + String.format("%3f", top5Prob[i] * 100) + "%, " + labels.get(top5[i]);
+            i++;
+        }
+    }
+    invoke("publishClassification", (Map<String, Double>)recognizedObjects);
+    return recognizedObjects;
+  }
+
+  
+  
   
   public Map<String, Double> classifyImageVGG16(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
@@ -578,7 +713,6 @@ public class Deeplearning4j extends Service {
     //log.info("Image Predictions: {}", predictions);
     return decodeVGG16Predictions(output[0]);
   }
-  
   
   // adapted from dl4j TrainedModels.VGG16 class.
   public Map<String, Double> decodeVGG16Predictions(INDArray predictions) throws IOException {
@@ -616,18 +750,108 @@ public class Deeplearning4j extends Service {
 	  return classifications;
   }
   
+  public MultiLayerNetwork getNetwork() {
+    return network;
+  }
+
+  public void setNetwork(MultiLayerNetwork network) {
+    this.network = network;
+  }
+  
+  public List<String> getNetworkLabels() {
+    return networkLabels;
+  }
+
+  public void setNetworkLabels(List<String> networkLabels) {
+    this.networkLabels = networkLabels;
+  }
+
+  /**
+   * Create a transfer learning representation of VGG16 Imagenet model.
+   * Choose where to freeze the pretrained model.  
+   * To freeze all layers except for the output layer, choose "fc2"
+   * The numClasses property will specify the size of the new output layer of the transfer learned model
+   * 
+   * @param featureExtractionLayer specifies the frozen layer of the model
+   * @param numClasses the new number of outputs for the model.
+   * @return
+   * @throws IOException
+   */
+  public ComputationGraph createVGG16TransferModel(String featureExtractionLayer, int numClasses) throws IOException {
+    log.info("Loading org.deeplearning4j.transferlearning.vgg16...\n\n");
+    ZooModel zooModel = VGG16.builder().build();
+    ComputationGraph vgg16 = (ComputationGraph) zooModel.initPretrained();
+    log.info(vgg16.summary());
+    //Decide on a fine tune configuration to use.
+    //In cases where there already exists a setting the fine tune setting will
+    //  override the setting for all layers that are not "frozen".
+    FineTuneConfiguration fineTuneConf = new FineTuneConfiguration.Builder()
+        .updater(new Nesterovs(5e-5))
+        .seed(seed)
+        .build();
+    //Construct a new model with the intended architecture and print summary
+    ComputationGraph vgg16Transfer = new TransferLearning.GraphBuilder(vgg16)
+        .fineTuneConfiguration(fineTuneConf)
+        .setFeatureExtractor(featureExtractionLayer) //the specified layer and below are "frozen"
+        .removeVertexKeepConnections("predictions") //replace the functionality of the final vertex
+        .addLayer("predictions",
+            new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+            .nIn(4096).nOut(numClasses)
+            .weightInit(WeightInit.DISTRIBUTION)
+            .dist(new NormalDistribution(0,0.2*(2.0/(4096+numClasses)))) //This weight init dist gave better results than Xavier
+            .activation(Activation.SOFTMAX).build(),
+            "fc2")
+        .build();
+    log.info(vgg16Transfer.summary());
+    return vgg16Transfer;
+  }
+  
+  /**
+   * Fit a model against a training set
+   * Note: iterator is reset before fitting
+   * 
+   * @param trainIter
+   * @param vgg16Transfer
+   */
+  public void runFitter(DataSetIterator trainIter, ComputationGraph model) {
+    trainIter.reset();
+    while(trainIter.hasNext()) {
+      model.fit(trainIter.next());
+    }
+  }
+
+  /**
+   * Evaluate a model against a given testing dataset
+   * Note iterator is reset before evaluating.
+   * 
+   * @param testIter
+   * @param model
+   * @return
+   */
+  public double evaluateModel(DataSetIterator testIter, ComputationGraph model) {
+    testIter.reset();
+    Evaluation eval = model.evaluate(testIter);
+    log.info(eval.stats());
+    return eval.accuracy();
+  }
+  
   static public ServiceType getMetaData() {
     
-    String dl4jVersion = "1.0.0-beta";
+    String dl4jVersion = "1.0.0-beta2";
     
-    boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "true"));
-    boolean supportRasPi = true;
+    boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
+    boolean supportRasPi = false;
     
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());
     meta.addDescription("A wrapper service for the Deeplearning4j framework.");
     meta.addCategory("ai");
     meta.addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
     meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", dl4jVersion);
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-nn", dl4jVersion);
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-modelimport", dl4jVersion);
+    // TODO: which scala version?!  for now 2.11
+    meta.addDependency("org.deeplearning4j", "deeplearning4j-ui_2.11", dl4jVersion);
+    
     if (!cudaEnabled) {
       // By default support native CPU execution.
       meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
@@ -635,8 +859,10 @@ public class Deeplearning4j extends Service {
       System.out.println("-------------------------------");
       System.out.println("-----DL4J CUDA!          ------");
       System.out.println("-------------------------------");
-      // Use this if you want cuda 9.1 NVidia GPU support 
-      meta.addDependency("org.nd4j", "nd4j-cuda-9.1-platform", dl4jVersion);
+      // Use this if you want cuda 9.1 NVidia GPU support
+      // TODO: figure out the cuDNN stuff.
+      meta.addDependency("org.nd4j", "nd4j-cuda-9.2-platform", dl4jVersion);
+      meta.addDependency("org.nd4j", "deeplearning4j-cuda-9.2-platform", dl4jVersion);
     }
     // The default build of 1.0.0-alpha does not support the raspi,  we built & host the following dependencies.
     // to support native cpu execution on the raspi.

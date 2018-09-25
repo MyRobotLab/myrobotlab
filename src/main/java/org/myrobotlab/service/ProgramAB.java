@@ -28,6 +28,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -128,6 +129,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void addTextListener(TextListener service) {
+    addListener("publishText", service.getName(), "onText");
+  }
+
+  public void addTextListener(SpeechSynthesis service) {
     addListener("publishText", service.getName(), "onText");
   }
 

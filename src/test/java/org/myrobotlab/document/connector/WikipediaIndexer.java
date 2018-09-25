@@ -13,8 +13,12 @@ import org.myrobotlab.service.XMLConnector;
 public class WikipediaIndexer {
 
   public static void main(String[] args) throws ClassNotFoundException {
-    String solrUrl = "http://phobos:8983/solr/wikipedia";
-    String wikipediaFilename = "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
+  //  String solrUrl = "http://phobos:8983/solr/wikipedia";
+    //String solrUrl = "http://localhost:8983/solr/wikipedia";
+    String solrUrl = "http://localhost:8983/solr/wiki2";
+    //String wikipediaFilename = "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
+    String wikipediaFilename = "Z:\\enwiki-20180820-pages-articles-multistream.xml";
+    
     int NUM_THREADS = 8;
     
     //TODO: why do I need this to index wikipedia from the xml dump?!  I know , it's like a 50GB xml file.. gah..
@@ -42,12 +46,14 @@ public class WikipediaIndexer {
     deleteXMLFieldConfig.setStringParam("fieldName", "xml");
     // TODO: remove the xml field.. ?!?! argh!
     StageConfiguration parseWikiTextConfig = new StageConfiguration("parseWikiText", "org.myrobotlab.document.transformer.ParseWikiText");
+    StageConfiguration createTeaser = new StageConfiguration("createTeaser", "org.myrobotlab.document.transformer.CreateStaticTeaser");
+    
     // parseWikiTextConfig.setStringParam("fieldName", "text");
     // TODO: followed by a wiki markup parser
     // followed by a solr output stage.
     StageConfiguration solrStageConfig = new StageConfiguration("sendToSolr", "org.myrobotlab.document.transformer.SendToSolr");
     solrStageConfig.setStringParam("solrUrl", solrUrl);
-    solrStageConfig.setIntegerParam("batchSize", 200);
+    solrStageConfig.setIntegerParam("batchSize", 500);
     solrStageConfig.setBoolParam("issueCommit", false);
     DocumentPipeline docproc = new DocumentPipeline("docproc");
     // build the pipeline.. assemble the stages.
@@ -60,16 +66,32 @@ public class WikipediaIndexer {
     // remove the original xml.. it's icky
     workflowConfig.addStage(deleteXMLFieldConfig);
     workflowConfig.addStage(parseWikiTextConfig);
+    workflowConfig.addStage(createTeaser);
     workflowConfig.addStage(solrStageConfig);
     docproc.setConfig(workflowConfig);
     docproc.initalize();
     docproc.startService();
     // attach the doc proc to the connector
     wikipediaConnector.addDocumentListener(docproc);
-    wikipediaConnector.setBatchSize(200);
+    wikipediaConnector.setBatchSize(500);
     // start crawling...
+    wikipediaConnector.getOutbox().setMaxQueueSize(1);
     wikipediaConnector.startCrawling();
+    
+    docproc.flush();
+    // now we should be done?
+    System.out.println("done..");
+    
+    
+    System.out.println("Inbox connector size " + wikipediaConnector.getInbox().size());
+    System.out.println("Outbox connector size " + wikipediaConnector.getOutbox().size());
+    // wikipediaConnector.getInbox().size();
+    System.gc();
+    System.out.println("gc done..");
+  
 
   }
 
+  
+  
 }
