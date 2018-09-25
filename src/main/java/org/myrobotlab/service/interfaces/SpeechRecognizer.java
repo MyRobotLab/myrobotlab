@@ -64,4 +64,7 @@ public interface SpeechRecognizer extends NameProvider {
    */
   public boolean isListening();
 
+  
+  public void addTextListener(TextListener listener);
+  
 }

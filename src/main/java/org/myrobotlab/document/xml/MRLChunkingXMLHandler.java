@@ -7,6 +7,7 @@ import java.util.Stack;
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
+import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import org.xml.sax.SAXException;
 
 public class MRLChunkingXMLHandler implements ContentHandler {
 
-  transient public final static Logger log = LoggerFactory.getLogger(Service.class);
+  transient public final static Logger log = LoggerFactory.getLogger(MRLChunkingXMLHandler.class);
 
   Stack<String> currentPath = new Stack<String>();
   private AbstractConnector connector;
@@ -36,14 +37,13 @@ public class MRLChunkingXMLHandler implements ContentHandler {
 
   @Override
   public void startDocument() throws SAXException {
-    // TODO Auto-generated method stub
-
+    log.info("Started parsing XML Document.");
   }
 
   @Override
   public void endDocument() throws SAXException {
     // TODO Auto-generated method stub
-
+    log.info("End of XML document reached.");
   }
 
   @Override
@@ -62,6 +62,13 @@ public class MRLChunkingXMLHandler implements ContentHandler {
   public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
     //
 
+    // check if the connector is interrupted.. if so just return & break..
+    if (!connector.getState().equals(ConnectorState.RUNNING)) {
+      // something interrupted us.. we are not running.
+      throw new SAXException("Connector is not running.. aborting!");
+    }
+    
+    
     // push on the stack.
     currentPath.push(qName);
     // log.info("Start element: {}",qName);

@@ -236,12 +236,13 @@ public class DHRobotArm implements Serializable {
     // we know where we are.. we know where we want to go.
     int numSteps = 0;
     double iterStep = 0.25;
-    double errorThreshold = 0.05;
+    // we're in millimeters.. one centimeter is pretty decent i think?
+    double errorThreshold = 10.0;
     // what's the current point
     while (true) {
       numSteps++;
       if (numSteps >= maxIterations) {
-        log.info("Attempted to iterate there, but didn't make it. giving up.");
+        log.info("Attempted to iterate, didn't make it. Current Position: {} Goal: {} Distance: {}", getPalmPosition(), goal, goal.distanceTo(getPalmPosition()));
         // we shouldn't publish if we don't solve!
         return false;
       }
@@ -281,8 +282,7 @@ public class DHRobotArm implements Serializable {
       // }
 
       if (deltaPoint.magnitude() < errorThreshold) {
-        // log.debug("Final Position {} Number of Iterations {}" ,
-        // getPalmPosition() , numSteps);
+        log.info("Final Position {} Number of Iterations {}" , getPalmPosition() , numSteps);
         break;
       }
     }
