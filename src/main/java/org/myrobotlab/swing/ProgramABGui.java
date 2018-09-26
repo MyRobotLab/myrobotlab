@@ -51,20 +51,15 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   HTMLEditorKit responseKit = new HTMLEditorKit();
 
   JLabel askLabel = new JLabel();
-  JLabel nothingLabel = new JLabel();
 
   private JButton askButton = new JButton("Send it");
   private JScrollPane scrollResponse = new JScrollPane(response);
-
   private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
   private JTextField userName = new JTextField();
   private JTextField botName = new JTextField();
-
   private JButton startSessionButton = new JButton(START_SESSION_LABEL);
-  private JButton killAiml = new JButton("Restart (w/o AIMLiF)");
-  private JButton reloadSession = new JButton("Reload session");
+  JButton reloadSession = new JButton("New session");
   private JButton saveAIML = new JButton("Save AIML");
-  private JButton savePredicates = new JButton("Save Predicates");
 
   JCheckBox filter = new JCheckBox("Filter ( ' , - )");
 
@@ -112,22 +107,19 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     JPanel PAGEEND = new JPanel();
 
-    JPanel botControl = new JPanel(new GridLayout(3, 4));
+    JPanel botControl = new JPanel(new GridLayout(3, 3));
 
     botControl.add(pathP);
     botControl.add(progABPath);
     botControl.add(startSessionButton);
-    botControl.add(killAiml);
 
     botControl.add(userP);
     botControl.add(userName);
     botControl.add(reloadSession);
-    botControl.add(savePredicates);
 
     botControl.add(botnameP);
     botControl.add(botName);
     botControl.add(saveAIML);
-    botControl.add(nothingLabel);
 
     PAGEEND.add(botControl);
 
@@ -136,13 +128,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     text.addActionListener(this);
     askButton.addActionListener(this);
-
     startSessionButton.addActionListener(this);
-    killAiml.addActionListener(this);
     reloadSession.addActionListener(this);
-
     saveAIML.addActionListener(this);
-    savePredicates.addActionListener(this);
 
   }
 
@@ -165,21 +153,12 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       String user = userName.getText().trim();
       String bot = botName.getText().trim();
       swingGui.send(boundServiceName, "setPath", path);
-      swingGui.send(boundServiceName, "reloadSession", path, user, bot);
-
-    } else if (o == killAiml) {
-      String path = progABPath.getText().trim();
-      String user = userName.getText().trim();
-      String bot = botName.getText().trim();
-      swingGui.send(boundServiceName, "setPath", path);
       swingGui.send(boundServiceName, "reloadSession", path, user, bot, true);
     } else if (o == reloadSession) {
       swingGui.send(boundServiceName, "setUsername", userName.getText().trim());
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
       swingGui.send(boundServiceName, "writeAIMLIF");
-    } else if (o == savePredicates) {
-      swingGui.send(boundServiceName, "savePredicates");
     } else {
       log.info(o.toString());
       log.info("Unknown action!");
@@ -255,7 +234,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
           startSessionButton.setText("Start Session");
           startSessionButton.setBackground(Color.RED);
         } else {
-          startSessionButton.setText("Restart Chatbot");
+          startSessionButton.setText("Reload Chatbot");
           startSessionButton.setBackground(Color.GREEN);
         }
         if (programab.loading) {
