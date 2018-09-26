@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import javax.swing.WindowConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -299,6 +300,26 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
 
+  /**
+   * This query returns the superset of all data that will be used for training and testing of a dl4j model.
+   * This will return a query that when executed will return the number of records found for the query, as well
+   * as a facet on the label field.
+   * 
+   * @param queryString
+   * @param labelField
+   * @return
+   */
+  public SolrQuery makeDatasetQuery(String queryString, String labelField) {
+    SolrQuery solrQuery = new SolrQuery(queryString);
+    // TODO: avoid this and use cursor mark pagination.
+    solrQuery.setRows(0);
+    // add a facet on the label field so we know what's in the training dataset.
+    solrQuery.addFacetField(labelField);
+    solrQuery.setFacetMinCount(1);
+    solrQuery.setFacet(true);
+    return solrQuery;
+  }
+
   public void createTrainingDataDir(SolrQuery query, String directory) throws IOException {
     // This method will iterate a result set that contains images stored in the "bytes" field of a document
     // It will then save these images to a directory based on the "label" field.
@@ -406,6 +427,20 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }    
   }
 
+  public String fetchFirstResultSentence(String queryString, String fieldName) {
+    String res = fetchFirstResultField(queryString, fieldName);
+    // Now we want to sentence detect this string.. and return the first sentence..
+    // for now.. cheating, and just pulling everything up to the first period.
+    if (!StringUtils.isEmpty(res)) {
+      // TODO: better sentence boundary detection
+      String fragment = res.split(".")[0];
+      return fragment;
+    } else {
+      // TODO: log a warning or something.
+      return null;
+    }
+  }
+  
   /**
    * Default query to fetch the top 10 documents that match the query request.
    */
@@ -418,6 +453,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * Default query to fetch the top 10 documents that match the query request.
    */
   public QueryResponse search(String queryString, int rows, int start, boolean mostRecent) {
+    log.info("Searching for : {}", queryString);
     SolrQuery query = new SolrQuery();
     query.set("q", queryString);
     query.setRows(rows);
@@ -658,7 +694,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // TODO: index the classifications with the cvdata. not separately.. 
   // o/w we need a way to relate back to the frame that this is a classification of
   public Map<String, Double> onClassification(Map<String, Double> data) throws SolrServerException, IOException {
-    log.info("On Classification invoked!");
+    // log.info("On Classification invoked!");
     SolrInputDocument doc = new SolrInputDocument();
     // create a document id for this document 
     // TODO: make this something much more deterministic!! 
@@ -825,7 +861,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();
       SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
-      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
       doc.setField("id", "Doc1");

@@ -68,6 +68,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.BlockingQueueGrabber;
 import org.myrobotlab.opencv.FilterWrapper;
+import org.myrobotlab.opencv.MJpegFrameGrabber;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDL4J;
@@ -157,10 +158,10 @@ public class OpenCV extends AbstractVideoSource {
   transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
   static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "DL4J", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
+      "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
       "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
       "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
-      "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+      "Solr", "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -956,22 +957,38 @@ public class OpenCV extends AbstractVideoSource {
 
     // System.loadLibrary("opencv_java");
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+    
+    
+    
+    //String url  = "http://192.168.4.104:8081/?action=stream";
+    String url = "http://192.168.4.104:8080/?action=stream";
 
-    // OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
-    // opencv.addFilter(ud);
+    //public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
+    //public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
 
-    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
-    opencv.addFilter(tld);
+    //String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
+    MJpegFrameGrabber grabber =  new MJpegFrameGrabber(url);
+    // grabber.start();
+    opencv.capture(grabber);
 
-    opencv.height = 480;
-    opencv.width = 640;
-    // opencv.height = 1080;
-    // opencv.width= 1920;
+    
+    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
+    opencv.addFilter(ud);
+    
 
-    opencv.capture();
-    // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
-    // opencv.capture(grabber);
+//    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
+//    opencv.addFilter(tld);
 
+//    opencv.height = 480;
+//    opencv.width = 640;
+//    opencv.height = 1080;
+//    opencv.width= 1920;
+    
+  // opencv.capture();
+   // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
+   // opencv.capture(grabber);
+    
+    
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");

@@ -66,6 +66,12 @@ public interface ServiceInterface
   public void releaseService();
 
   /**
+   * called by runtime when system is shutting down
+   * a service can use this method when it has to do some "ordered" cleanup
+   */
+  public void makeReadyForShutdown();
+
+  /**
    * asked by the framework - to determine if the service needs to be secure
    * 
    * @return true/false
