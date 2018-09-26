@@ -70,7 +70,7 @@ public class Inbox implements Serializable {
     msg.historyList.add(name);
 
     synchronized (msgBox) {
-      while (blocking && msgBox.size() == maxQueue) // queue "full"
+      while (blocking && (msgBox.size() >= maxQueue)) // queue "full"
       {
         try {
           msgBox.wait();

@@ -52,7 +52,7 @@ public class Workflow {
   private void initializeWorkerThread(int threadNum) {
     WorkflowWorker worker = null;
     try {
-      worker = new WorkflowWorker(workflowConfig, queue);
+      worker = new WorkflowWorker(workflowConfig, queue, Integer.toString(threadNum));
     } catch (ClassNotFoundException e) {
       // TODO: better handling?
       log.warn("Error starting the worker thread. {}", e.getLocalizedMessage());
