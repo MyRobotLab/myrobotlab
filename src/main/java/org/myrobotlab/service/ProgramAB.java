@@ -132,6 +132,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     addListener("publishText", service.getName(), "onText");
   }
 
+  public void addTextListener(SpeechSynthesis service) {
+    addListener("publishText", service.getName(), "onText");
+  }
+
   public void addTextPublisher(TextPublisher service) {
     subscribe(service.getName(), "publishText");
   }

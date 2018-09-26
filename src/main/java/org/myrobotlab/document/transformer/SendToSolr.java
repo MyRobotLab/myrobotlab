@@ -26,7 +26,7 @@ public class SendToSolr extends AbstractStage {
   public final static Logger log = LoggerFactory.getLogger(SendToSolr.class);
   private String idField = "id";
   private String fieldsField = "fields";
-  private boolean addFieldsField = false;
+  private boolean addFieldsField = true;
   private SolrClient solrClient = null;
   private String solrUrl = "http://localhost:8983/solr/collection1";
   private boolean issueCommit = true;
@@ -131,6 +131,7 @@ public class SendToSolr extends AbstractStage {
 
   public synchronized void flush() {
 
+    log.info("Flush called for Send to solr stage. ");
     // Is this where I should flush the last batch?
     if (solrClient != null && batch.size() > 0) {
       try {
