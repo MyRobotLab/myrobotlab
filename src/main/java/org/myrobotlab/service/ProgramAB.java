@@ -139,10 +139,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void addTextPublisher(TextPublisher service) {
     subscribe(service.getName(), "publishText");
   }
-  
-  public void addTextListener(SpeechSynthesis service) {
-    addListener("publishText", service.getName(), "onText");
-  }
 
   private void cleanOutOfDateAimlIFFiles(String botName) {
     String aimlPath = getPath() + File.separator + "bots" + File.separator + botName + File.separator + "aiml";
