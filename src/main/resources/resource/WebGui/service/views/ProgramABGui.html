@@ -28,8 +28,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="rowContent in conversation"> <!-- | reverse -->
-            <td><div ng-bind-html="rowContent"></div></td>
+        <tr ng-repeat="rowContent in rows track by $index">
+            <td><b>{{rowContent.name}} : </b></td><td><div ng-bind-html="rowContent.text"></div></td>
         </tr>
       </tbody>
     </table>    
@@ -65,5 +65,3 @@
   -->
 <!-- TODO - MAKE THIS A GLOBAL SERVICE WITH FORMATED -->
 <!-- <pre>{{service}}</pre> -->
- 
-

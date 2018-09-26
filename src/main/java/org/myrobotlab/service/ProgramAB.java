@@ -28,6 +28,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -97,11 +98,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
   public String wasCleanyShutdowned;
 
-  // Creating a fifo List for conversation history, single place used by all UI
-  private List<String> conversationHistory = new ArrayList<String>();
-  // Max elements inside list
-  public Integer maxConversationHistory = 200;
-
   public ProgramAB(String name) {
     super(name);
     // Tell programAB to persist it's learned predicates about people
@@ -138,6 +134,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void addTextPublisher(TextPublisher service) {
     subscribe(service.getName(), "publishText");
+  }
+  
+  public void addTextListener(SpeechSynthesis service) {
+    addListener("publishText", service.getName(), "onText");
   }
 
   private void cleanOutOfDateAimlIFFiles(String botName) {
@@ -294,36 +294,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     // EEK! clean up the API!
+    invoke("publishRequest", text); // publisher used by uis
     invoke("publishResponse", response);
     invoke("publishResponseText", response);
-    invoke("publishText", HtmlFilter.stripHtml(response.msg));
+    invoke("publishText", response.msg);
     info("to: %s - %s", userName, res);
-
-    // get optional bot surname, if set..
-    Predicates preds = getChat(userName, getCurrentBotName()).predicates;
-    String botname = getCurrentBotName();
-    if (!preds.get("botname").equals("unknown") && !preds.get("botname").isEmpty()) {
-      botname = preds.get("botname");
-    }
-
-    // feed conversation list
-
-    conversationHistory.add("<b>" + userName + " : </b>" + text);
-    conversationHistory.add("<i><b>" + botname + " : </b>" + HtmlFilter.stripHtml(response.msg) + "</i>");
-
-    // Queue conversationHistory list to prevent unlimited results..
-    if (conversationHistory.size() > maxConversationHistory)
-
-    {
-      List<String> conversationHistoryQueue = new ArrayList<String>();
-      for (int i = conversationHistory.size() - maxConversationHistory; i < conversationHistory.size(); i++) {
-        conversationHistoryQueue.add(conversationHistoryQueue.size(), conversationHistory.get(i));
-      }
-      conversationHistory = conversationHistoryQueue;
-    }
-    // end queue conversationHistory
-
-    broadcastState();
 
     // if (log.isDebugEnabled()) {
     // for (String key : sessions.get(session).predicates.keySet()) {
@@ -331,10 +306,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // sessions.get(session).predicates.get(key));
     // }
     // }
-
-    // TODO: wire this in so the gui updates properly. ??
-    // broadcastState();
-
     return response;
   }
 
@@ -551,12 +522,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
         ServiceInterface s = Runtime.getService(payload.getServiceName());
         if (s == null) {
           log.warn("Service name in OOB/MRL tag unknown. {}", mrlPayload);
-
-          if (payload.getParams() != null) {
-            conversationHistory.add("<font color='#FF0000'><b> -> Missing OOB : " + payload.getParams() + "</b></font>");
-          } else {
-            conversationHistory.add("<font color='#FF0000'><b> -> Missing OOB : " + payload.getServiceName() + "</b></font>");
-          }
           return null;
         }
         // TODO: should you be able to be synchronous for this
@@ -564,10 +529,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
         Object result = null;
         if (payload.getParams() != null) {
           result = s.invoke(payload.getMethodName(), payload.getParams().toArray());
-          conversationHistory.add("<font color='#008000'><b> -> OOB: " + payload.getParams() + "</b></font>");
         } else {
           result = s.invoke(payload.getMethodName());
-          conversationHistory.add("<font color='#008000'><b> -> OOB: " + payload.getMethodName() + "</b></font>");
         }
         log.info("OOB PROCESSING RESULT: {}", result);
       }
@@ -610,7 +573,15 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Override
   public String publishText(String text) {
+    // clean up whitespaces & cariage return
+    text = text.replaceAll("\\n", " ");
+    text = text.replaceAll("\\r", " ");
+    text = text.replaceAll("\\s{2,}", " ");
     return text;
+  }
+
+  public String publishRequest(String text) {
+    return text.trim();
   }
 
   public void reloadSession(String session, String botName) {
@@ -631,10 +602,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       // TODO: will garbage collection clean up the bot now ?
       // Or are there other handles to it?
-      HashMap<String, ChatData> session = new HashMap<String, ChatData>();
-      session.put(userName, sessions.get(botName).get(userName));
+      sessions.get(botName).remove(userName);
       log.info("{} session removed", sessions);
-      sessions.remove(botName, session);
     }
     bot = null;
     // TODO: we should make sure we keep the same path as before.
@@ -1017,10 +986,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public HashMap<String, HashMap<String, ChatData>> getSessions() {
     return sessions;
-  }
-
-  public List<String> getConversationHistory() {
-    return conversationHistory;
   }
 
 }

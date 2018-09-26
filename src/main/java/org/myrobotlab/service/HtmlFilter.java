@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import org.jsoup.Jsoup;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Logging;
@@ -107,13 +108,11 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     this.stripHtml = stripHtml;
   }
 
-  // helper function to strip html tags.
+  // helper function to strip html tags. 
   public static String stripHtml(String text) {
-    // TODO: something fancier but this works for now.
-    String cleanText = text.replaceAll("\\<.*?\\>", " ");
-    cleanText = cleanText.replaceAll("\\n", " ");
-    cleanText = cleanText.replaceAll("\\r", " ");
-    cleanText = cleanText.replaceAll("\\s{2,}", " ");
+    if (text.isEmpty())
+      return text;
+    String cleanText = Jsoup.parse(text).text().trim();
     return cleanText.trim();
   }
 
@@ -130,7 +129,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     ServiceType meta = new ServiceType(HtmlFilter.class.getCanonicalName());
     meta.addDescription("This service will strip html markup from the input text");
     meta.addCategory("data", "filter");
-
+    meta.addDependency("org.jsoup", "jsoup", "1.8.3");
     return meta;
   }
 

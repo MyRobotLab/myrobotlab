@@ -8,6 +8,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -18,11 +21,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.html.HTML.Tag;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
-import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
@@ -40,20 +46,25 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   static final String START_SESSION_LABEL = "Start Session";
   // TODO: make this auto-resize when added to gui..
   private JTextField text = new JTextField("", 30);
-  private JEditorPane response = new JEditorPane("text/html", "BOT Response :");
-  String textAreacontent = "";
+  private JEditorPane response = new JEditorPane("text/html", "");
+  HTMLDocument responseDoc = new HTMLDocument();
+  HTMLEditorKit responseKit = new HTMLEditorKit();
+
   JLabel askLabel = new JLabel();
+  JLabel nothingLabel = new JLabel();
 
   private JButton askButton = new JButton("Send it");
   private JScrollPane scrollResponse = new JScrollPane(response);
 
   private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
-  private JTextField userName = new JTextField("default", 16);
-  private JTextField botName = new JTextField("alice2", 16);
+  private JTextField userName = new JTextField();
+  private JTextField botName = new JTextField();
 
   private JButton startSessionButton = new JButton(START_SESSION_LABEL);
+  private JButton killAiml = new JButton("Restart (w/o AIMLiF)");
   private JButton reloadSession = new JButton("Reload session");
   private JButton saveAIML = new JButton("Save AIML");
+  private JButton savePredicates = new JButton("Save Predicates");
 
   JCheckBox filter = new JCheckBox("Filter ( ' , - )");
 
@@ -64,7 +75,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   JLabel botnameP = new JLabel();
   ImageIcon botnameI = Util.getImageIcon("robot.png");
 
-  public ProgramABGui(String boundServiceName, SwingGui myService) {
+  public ProgramABGui(String boundServiceName, SwingGui myService) throws BadLocationException, IOException {
     super(boundServiceName, myService);
     this.boundServiceName = boundServiceName;
     pathP.setText("Path : ");
@@ -79,6 +90,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     filter.setSelected(true);
 
     response.setAutoscrolls(true);
+    response.setEditable(false);
+    response.setEditorKit(responseKit);
+    response.setDocument(responseDoc);
+
+    responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font face=\\\"Verdana\\\">Conversation :<br/>", 0, 0, null);
 
     //
     scrollResponse.setAutoscrolls(true);
@@ -96,19 +112,22 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     JPanel PAGEEND = new JPanel();
 
-    JPanel botControl = new JPanel(new GridLayout(3, 3));
+    JPanel botControl = new JPanel(new GridLayout(3, 4));
 
     botControl.add(pathP);
     botControl.add(progABPath);
     botControl.add(startSessionButton);
+    botControl.add(killAiml);
 
     botControl.add(userP);
     botControl.add(userName);
     botControl.add(reloadSession);
+    botControl.add(savePredicates);
 
     botControl.add(botnameP);
     botControl.add(botName);
     botControl.add(saveAIML);
+    botControl.add(nothingLabel);
 
     PAGEEND.add(botControl);
 
@@ -119,9 +138,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     askButton.addActionListener(this);
 
     startSessionButton.addActionListener(this);
+    killAiml.addActionListener(this);
     reloadSession.addActionListener(this);
 
     saveAIML.addActionListener(this);
+    savePredicates.addActionListener(this);
 
   }
 
@@ -133,7 +154,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       if (filter.isSelected()) {
         textFiltered = textFiltered.replace("'", " ").replace("-", " ");
       }
-      swingGui.send(boundServiceName, "getResponse", textFiltered);
+      // response.setText(response.getText() + "<br/>\n\r" + answer);
+      send("getResponse", textFiltered);
 
       // clear out the original question.
       text.setText("");
@@ -143,13 +165,21 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       String user = userName.getText().trim();
       String bot = botName.getText().trim();
       swingGui.send(boundServiceName, "setPath", path);
-      swingGui.send(boundServiceName, "reloadSession", path, user, bot, true);
+      swingGui.send(boundServiceName, "reloadSession", path, user, bot);
 
+    } else if (o == killAiml) {
+      String path = progABPath.getText().trim();
+      String user = userName.getText().trim();
+      String bot = botName.getText().trim();
+      swingGui.send(boundServiceName, "setPath", path);
+      swingGui.send(boundServiceName, "reloadSession", path, user, bot, true);
     } else if (o == reloadSession) {
       swingGui.send(boundServiceName, "setUsername", userName.getText().trim());
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
       swingGui.send(boundServiceName, "writeAIMLIF");
+    } else if (o == savePredicates) {
+      swingGui.send(boundServiceName, "savePredicates");
     } else {
       log.info(o.toString());
       log.info("Unknown action!");
@@ -158,10 +188,59 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
+    subscribe("publishRequest");
+    subscribe("publishText");
+    subscribe("publishOOBText");
   }
 
   @Override
   public void unsubscribeGui() {
+    unsubscribe("publishText");
+    unsubscribe("publishRequest");
+    unsubscribe("publishOOBText");
+  }
+
+  public void onText(String text) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<i><b><br>" + botName.getText() + "</b>: " + text.replaceAll("\\<.*?\\>", " ").trim(), 0, 0, Tag.I);
+        } catch (Exception e) {
+          log.error("ProgramAB onText error : {}", e);
+        }
+      }
+    });
+  }
+
+  public void onRequest(String text) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<b>" + userName.getText() + "</b>: " + text, 0, 0, null);
+        } catch (Exception e) {
+          log.error("ProgramAB onRequest error : {}", e);
+        }
+      }
+    });
+  }
+
+  public void onOOBText(String text) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          String filteredOOB = "";
+          Pattern oobPattern = Pattern.compile("<param>(.+?)</param>");
+          Matcher oobMatcher = oobPattern.matcher(text);
+          filteredOOB = oobMatcher.find() ? filteredOOB = oobMatcher.group(1) : "";
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b><br> > OOB: </b>" + filteredOOB, 0, 0, Tag.FONT);
+        } catch (BadLocationException | IOException e) {
+          log.error("ProgramAB onOOBText error : {}", e);
+        }
+      }
+    });
   }
 
   public void onState(final ProgramAB programab) {
@@ -169,12 +248,14 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
+        String botname = programab.getCurrentBotName();
+        String username = programab.getCurrentUserName();
         startSessionButton.setEnabled(true);
         if (programab.getSessions().isEmpty()) {
           startSessionButton.setText("Start Session");
           startSessionButton.setBackground(Color.RED);
         } else {
-          startSessionButton.setText("Force reload ( kill csv )");
+          startSessionButton.setText("Restart Chatbot");
           startSessionButton.setBackground(Color.GREEN);
         }
         if (programab.loading) {
@@ -188,17 +269,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
           startSessionButton.setEnabled(false);
         }
         progABPath.setText(new File(programab.getPath()).getAbsolutePath());
-        userName.setText(programab.getCurrentUserName());
-        botName.setText(programab.getCurrentBotName());
-        textAreacontent = "<font face=\"Verdana\" size=-1>";
-        programab.getConversationHistory().stream().forEach(conversation -> {
-          if (conversation == null) {
-            conversation = "ERROR: NULL";
-          }
-          textAreacontent = textAreacontent + conversation + "<br>";
+        userName.setText(username);
+        botName.setText(botname);
 
-        });
-        response.setText(textAreacontent);
       }
     });
 
