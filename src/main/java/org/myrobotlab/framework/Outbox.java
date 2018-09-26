@@ -80,7 +80,7 @@ public class Outbox implements Runnable, Serializable {
     // myService.getName(), msg.sender, msg.sendingMethod, msg.name,
     // msg.method));
     synchronized (msgBox) {
-      while (blocking && msgBox.size() == maxQueue) {
+      while (blocking && (msgBox.size() >= maxQueue)) {
         // queue "full"
         try {
           // log.debug("outbox enque msg WAITING ");
@@ -225,6 +225,10 @@ public class Outbox implements Runnable, Serializable {
     return maxQueue;
   }
 
+  public void setMaxQueueSize(int size) {
+    maxQueue = size;
+  }
+  
   public boolean isBlocking() {
     return blocking;
   }

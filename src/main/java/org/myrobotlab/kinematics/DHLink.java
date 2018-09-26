@@ -231,7 +231,9 @@ public class DHLink implements Serializable {
 
   @Override
   public String toString() {
-    return "DHLink [d=" + d + ", theta=" + theta + ", r=" + r + ", alpha=" + alpha + " min=" + min + " max=" + max + "]";
+    // print in degrees
+    
+    return "DHLink [d=" + d + ", theta=" + MathUtils.radToDeg(theta) + ", r=" + r + ", alpha=" + MathUtils.radToDeg(alpha) + " min=" + MathUtils.radToDeg(min) + " max=" + MathUtils.radToDeg(max) + "]";
   }
 
   public void incrRotate(double delta) {
