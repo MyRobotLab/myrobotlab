@@ -88,7 +88,6 @@ public class SolrDataSetIteratorTest {
     trainQuery.addSort("random_"+seed, ORDER.asc);
     trainQuery.setRows((int)trainMaxOffset);
     DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch , height, width, channels);
-
     // testing query
     SolrQuery testQuery = solr.makeDatasetQuery(queryString, labelField);
     testQuery.addSort("random_"+seed, ORDER.desc);
@@ -96,20 +95,18 @@ public class SolrDataSetIteratorTest {
     DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch , height, width, channels);
     //
     String filename = "my_new_model.bin";
-    dl4j.trainAndSaveModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
-    testNewModel();
+    CustomModel custModel = dl4j.trainModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
+    dl4j.saveModel(custModel, filename);
+    testNewModel(filename);
   }
   
-  private void testNewModel() throws IOException {
+  private void testNewModel(String filename) throws IOException {
     // Ok. now let's see can we load the model up and ask it to predict?
-    
-    CustomModel newMod = dl4j.loadComputationGraph("my_new_model.bin");
-    
+    CustomModel newMod = dl4j.loadComputationGraph(filename);
     // TODO: load am image!
     // a test image
     String path = "C:\\dev\\workspace\\myrobotlab\\src\\main\\resources\\resource\\OpenCV\\testData\\rachel.jpg";
     IplImage image = cvLoadImage(path);
-    
     Map<String, Double> results =  dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
     for (String key : results.keySet()) {
       log.info("label: {} : {} ", key, results.get(key));

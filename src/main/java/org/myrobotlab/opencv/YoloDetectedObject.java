@@ -1,21 +1,25 @@
 package org.myrobotlab.opencv;
 
 import org.bytedeco.javacpp.opencv_core.Rect;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class YoloDetectedObject {
 
-  public YoloDetectedObject(Rect boundingBox, float confidence, String label, int frameIndex) {
+  public Rect boundingBox;
+  public float confidence;
+  public String label;
+  public int frameIndex;
+  public IplImage image;
+
+  public YoloDetectedObject(Rect boundingBox, float confidence, String label, int frameIndex, IplImage cropped) {
     super();
     this.boundingBox = boundingBox;
     this.confidence = confidence;
     this.label = label;
     this.frameIndex = frameIndex;
+    this.image = cropped;
   }
   
-  public Rect boundingBox;
-  public float confidence;
-  public String label;
-  public int frameIndex;
   
   @Override
   public String toString() {

@@ -8,6 +8,11 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -21,7 +26,10 @@ import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import javax.swing.WindowConstants;
+
 import org.apache.commons.io.IOUtils;
+import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -30,6 +38,7 @@ import org.bytedeco.javacpp.opencv_core.Scalar;
 import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_dnn.Net;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -58,7 +67,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public String modelWeightsUrl = "https://pjreddie.com/media/files/yolov2.weights";
   public String modelNamesUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names";
 
-  
+  transient private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+
+
+  boolean debug = false;
   private Net net;
   ArrayList<String> classNames;
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
@@ -66,6 +79,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
 
+  
   public OpenCVFilterYolo() {
     super();
     // start classifier thread
@@ -321,21 +335,72 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           // ok. in theory this is something we think it might actually be.
           float x = currentRow.getFloatBuffer().get(0);
           float y = currentRow.getFloatBuffer().get(1);
+          
+        
           float width = currentRow.getFloatBuffer().get(2);
           float height = currentRow.getFloatBuffer().get(3);
           int xLeftBottom = (int) ((x - width / 2) * inputMat.cols());
           int yLeftBottom = (int) ((y - height / 2) * inputMat.rows());
           int xRightTop = (int) ((x + width / 2) * inputMat.cols());
           int yRightTop = (int) ((y + height / 2) * inputMat.rows());
+          
+          if (xLeftBottom < 0) {
+            xLeftBottom = 0;
+          }
+          if (yLeftBottom < 0) {
+            yLeftBottom = 0;
+          }
+
+          // crop the right top 
+          if (xRightTop > inputMat.cols()) {
+            xRightTop = inputMat.cols();
+          }
+          
+          if (yRightTop > inputMat.rows()) {
+            yRightTop = inputMat.rows();
+          }
+
+          
           log.info(label  + " (" + confidence + "%) [(" + xLeftBottom + "," + yLeftBottom + "),(" + xRightTop + "," + yRightTop + ")]");
           Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().frameIndex);
+          // grab just the bytes for the ROI defined by that rect..
+          // get that as a mat, save it as a byte array (png?) other encoding?
+          // TODO: have a target size?
+          
+          IplImage cropped = extractSubImage(inputMat, boundingBox);
+          if (debug) {
+            show(cropped, "detected img");
+          }
+          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().frameIndex, cropped);
           yoloObjects.add(obj);
         }
       }
       
     }
     return yoloObjects;
+  }
+
+  private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
+    // 
+    System.out.println(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
+    
+    // TODO: figure out if the width/height is too large!  don't want to go array out of bounds
+    Mat cropped = new Mat(inputMat, boundingBox);
+
+    
+    IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));
+    // This mat should be the cropped image!
+
+    return image;
+  }
+  
+  // helper method to show an image. (todo; convert it to a Mat )
+  public void show(final IplImage image, final String title) {
+    final IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
+    cvCopy(image, image1);
+    CanvasFrame canvas = new CanvasFrame(title, 1);
+    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    canvas.showImage(converterToIpl.convert(image1));
   }
 
 }
