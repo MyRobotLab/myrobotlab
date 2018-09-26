@@ -523,5 +523,6 @@ public class VideoProcessor implements Runnable, Serializable {
 	public void stop() {
 		log.debug("stopping capture");
 		videoThread = null;
+    opencv.capturing = false;
 	}
 }

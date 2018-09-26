@@ -302,15 +302,11 @@ public class Lloyd extends Service {
     // At this point we should null out the current model so it stops classifying.
     ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
 
-    CustomModel imageRecognizer = visualCortex.trainAndSaveModel(labels, trainIter, testIter, imageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
-
-
-    // now we want to get a hold of the dl4j transfer filter and set the model on it with this one.
-    // OpenCVFilterDL4JTransfer("dl4jTransfer");
-    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).loadCustomModel(imageRecognizerModelFilename);
-
-    // ok. once that model is saved.
-
+    CustomModel imageRecognizer = visualCortex.trainModel(labels, trainIter, testIter, imageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
+    // update the cv filter with the new model
+    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).setModel(imageRecognizer);
+    // save this model to disk
+    visualCortex.saveModel(imageRecognizer, imageRecognizerModelFilename);
   }
 
   public void startEyes() {

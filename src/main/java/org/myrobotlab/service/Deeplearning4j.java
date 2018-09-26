@@ -260,7 +260,9 @@ public class Deeplearning4j extends Service {
   }
 
   
-  public void saveModel(ComputationGraph model, List<String> labels, String filename) throws IOException {
+  public void saveModel(CustomModel custModel, String filename) throws IOException {
+   // ComputationGraph model  
+    //List<String> labels
     File dir = new File(modelDir);
     if (!dir.exists()) {
       dir.mkdirs();
@@ -268,11 +270,11 @@ public class Deeplearning4j extends Service {
     }
     File f = new File(filename);
     log.info("Saving DL4J computation graph model to {}", f.getAbsolutePath());
-    ModelSerializer.writeModel(model, filename, true);
+    ModelSerializer.writeModel(custModel.getModel(), filename, true);
     // also need to save the labels!
     String labelFilename = filename + ".labels";
     FileWriter fw = new FileWriter(new File(labelFilename));
-    fw.write(StringUtils.join(labels, "|"));
+    fw.write(StringUtils.join(custModel.getLabels(), "|"));
     fw.flush();
     fw.close();
     log.info("Model saved: {}", f.getAbsolutePath());
@@ -569,7 +571,7 @@ public class Deeplearning4j extends Service {
         int xRightTop = y2;
         
         Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel(), frameIndex);
+        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel(), frameIndex, null);
         System.out.println("Yolo Object: " + yoloobj);
         results.add(yoloobj);
       }
@@ -594,7 +596,7 @@ public class Deeplearning4j extends Service {
     return iter;    
   }
   
-  public CustomModel trainAndSaveModel(List<String> labels, DataSetIterator trainIter, DataSetIterator testIter, String filename, int maxEpochs, double targetAccuracy, String featureExtractionLayer) throws IOException {
+  public CustomModel trainModel(List<String> labels, DataSetIterator trainIter, DataSetIterator testIter, String filename, int maxEpochs, double targetAccuracy, String featureExtractionLayer) throws IOException {
     // loop for each epoch?
     ComputationGraph model = createVGG16TransferModel(featureExtractionLayer, labels.size());
     model.addListeners(new ScoreIterationListener(1));
@@ -603,8 +605,8 @@ public class Deeplearning4j extends Service {
       double accuracy = evaluateModel(testIter, model);
       if (accuracy > targetAccuracy) {
         // ok. if we got here this is a good model.. let's save it
-        saveModel(model, labels, filename);
-        return new CustomModel(model, labels);
+        CustomModel custModel = new CustomModel(model, labels);
+        return custModel;
       }
     }
     log.info("Model didn't converge to desired accuracy.");

@@ -91,6 +91,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // will be tagged with the given label.
   public String openCvLabel = null;
   public int openCvTrainingCount = 0;
+  public int yoloPersonTrainingCount = 0;
+  public String yoloPersonLabel = null;
 
   public Solr(String n) {
     super(n);
@@ -600,8 +602,25 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     opencv.addListener("publishYoloClassification", getName(), "onYoloClassification");
   }
 
+  // to make it easier to call from aiml
+  public void setYoloPersonTrainingLabel(String label, String count) {
+    setTrainingLabel(label, Integer.valueOf(count));
+  }
+
+  //sets it so the next  N opencv frames will be tagged with the training label.
+  public void setYoloPersonTrainingLabel(String label, int count) {
+    this.yoloPersonLabel = label;
+    this.yoloPersonTrainingCount = count;
+  }
+  
   // what to index when a yolo event occurs
   public ArrayList<YoloDetectedObject> onYoloClassification (ArrayList<YoloDetectedObject> yoloObjects) {
+
+    //we are training.
+    if (yoloPersonTrainingCount >= 0) {
+      // decrement the count 
+      yoloPersonTrainingCount--;
+    }
     // for now.. let's just do this.
     for (YoloDetectedObject yolo : yoloObjects) {
       SolrInputDocument doc = new SolrInputDocument();
@@ -617,6 +636,34 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // TODO something better.. also include the ROI from the original image.
       doc.addField("boundingbox", yolo.toString());
       // TODO: more meta data
+      // If there is training information about the current type of object ...
+      // TODO: 
+      if (yolo.label.equalsIgnoreCase("person")) {
+        // Here we should also add the label.
+        //we are training.
+        if (yoloPersonTrainingCount >= 0) {
+          // decrement the count 
+          yoloPersonTrainingCount--;
+          doc.setField("label", yoloPersonLabel);  
+          byte[] bytes = null;
+          try {
+            bytes = imageToBytes(yolo.image);
+            String encoded = Base64.encodeBase64String(bytes);
+            // bytes field contains bindary data (sent as base64)
+            doc.addField("bytes", encoded);
+            doc.addField("has_bytes", true);
+            log.warn("Image Size:{}", encoded.length());
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            continue;
+          }
+          
+        }
+      }
+      
+
+      
       addDocument(doc);
     }
     // add the document we just built up to solr so we can remember it!   
