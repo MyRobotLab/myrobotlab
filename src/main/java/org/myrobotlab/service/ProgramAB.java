@@ -196,7 +196,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
           f.delete();
           // edit moz4r : we need to change the last modification date to aiml
           // folder for recompilation
-          sleep(1000);
           String fil = aimlPath + File.separator + "folder_updated";
           File file = new File(fil);
           file.delete();
@@ -593,8 +592,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void reloadSession(String path, String userName, String botName, Boolean killAimlIf) {
-    loading = true;
-    broadcastState();
     // kill the bot
     writeAndQuit(killAimlIf);
     // kill the session
@@ -668,19 +665,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void startSession(String path, String userName, String botName) {
-    loading = true;
     this.setPath(path);
     info("Starting chat session path: %s username: %s botname: %s", path, userName, botName);
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
 
-    broadcastState();
     // Session is between a user and a bot. key is compound.
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       warn("Session %s %s already created", botName, userName);
       return;
     }
+
+    loading = true;
+    broadcastState();
+
     if (!sessions.isEmpty()) {
       wasCleanyShutdowned = "ok";
     }
@@ -727,6 +726,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // load those predicates
       chat.predicates.getPredicateDefaultsFromInputStream(FileIO.toInputStream(inputPredicateStream));
     }
+
+    // TODO move this inside high level :
+    // it is used to know the last username...
+    if (sessions.get(botName).containsKey("default")) {
+      setPredicate("default", "lastUsername", userName);
+      // robot surname is stored inside default.predicates, not inside system.prop
+      setPredicate(userName, "botname", getPredicate("default", "botname"));
+    }
+    // END TODO
+
     // this.currentBotName = botName;
     // String userName = chat.predicates.get("name");
     log.info("Started session for bot name:{} , username:{}", botName, userName);
@@ -768,51 +777,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * TODO : maybe merge / check with startsession directly
-   * setUsername will check if username correspond to current session If no, a
-   * new session is started
-   * 
-   * @param username
-   *          - The new username
-   * @return boolean - True if username changed
-   * @throws IOException
+   * TODO : check things using it
    */
+  @Deprecated
   public boolean setUsername(String username) {
-    if (username.isEmpty()) {
-      log.error("chatbot username is empty");
-      return false;
-    }
-    if (sessions.isEmpty()) {
-      log.info(username + " first session started");
-      startSession(username);
-      return false;
-    }
-    try {
-      savePredicates();
-    } catch (IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    if (username.equalsIgnoreCase(this.getCurrentUserName())) {
-      log.info(username + " already connected");
-      return false;
-    }
-    if (!username.equalsIgnoreCase(this.getCurrentUserName())) {
       startSession(this.getPath(), username, this.getCurrentBotName());
-      setPredicate(username, "name", username);
-      setPredicate("default", "lastUsername", username);
-      // robot name is stored inside default.predicates, not inside system.prop
-      setPredicate(username, "botname", getPredicate("default", "botname"));
-      try {
-        savePredicates();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      log.info(username + " session started");
       return true;
-    }
-    return false;
   }
 
   public void writeAIML() {
@@ -853,7 +823,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // edit moz4r : we need to change the last modification date to aimlif
       // folder because at this time all is compilated.
       // so programAb don't need to load AIML at startup
-      sleep(1000);
       File folder = new File(bot.aimlif_path);
 
       for (File f : folder.listFiles()) {
