@@ -8,16 +8,13 @@ angular.module('mrlapp.service.ProgramABGui', [])
     
     // use $scope only when the variable
     // needs to interract with the display
-    $scope.utterance = '';
-    $scope.conversation = [];
-
     $scope.currentUserName =  '';
     $scope.currentBotName = '';
+    $scope.utterance = '';
 
     // grab defaults.
     $scope.newUserName = $scope.service.currentUserName;
     $scope.newBotName = $scope.service.currentBotName;
-    $scope.conversation = $scope.service.conversationHistory;
 
     // start info status
     $scope.rows = [];
@@ -29,10 +26,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
         // all service data should never be written to, only read from
         $scope.currentUserName = service.currentUserName;
         $scope.currentBotName = service.currentBotName;
-        $scope.conversation = service.conversationHistory;
-                  for (var i = 0; i < $scope.conversation.length; i++) {
-        $scope.conversation[i] = $sce.trustAsHtml($scope.conversation[i]);
-        }
         $scope.service = service;
     }
     ;
@@ -44,6 +37,33 @@ angular.module('mrlapp.service.ProgramABGui', [])
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(inMsg.data[0]);
+            $scope.$apply();
+            break;
+        case 'onRequest':
+            var textData = inMsg.data[0];
+            $scope.rows.unshift({
+                name: $scope.currentUserName,
+                text: $sce.trustAsHtml(textData)
+            });
+            $log.info('currRequest', textData);
+            $scope.$apply();
+            break;
+        case 'onText':
+            var textData = inMsg.data[0];
+            $scope.rows.unshift({
+                name: $scope.currentBotName,
+                text: $sce.trustAsHtml(textData)
+            });
+            $log.info('currResponse', textData);
+            $scope.$apply();
+            break;
+        case 'onOOBText':
+            var textData = inMsg.data[0];
+            $scope.rows.unshift({
+                name: " > oob <",
+                text: $sce.trustAsHtml(textData)
+            });
+            $log.info('currResponse', textData);
             $scope.$apply();
             break;
         default:
@@ -67,10 +87,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
     $scope.getResponse = function(username, botname, utterance) {
     	$log.info("USER BOT RESPONSE (" + username + " " + botname + ")");
         msg.send("getResponse", username, botname, utterance);
-        $scope.rows.unshift({
-            name: "User",
-            response: $sce.trustAsHtml(utterance)
-        });        
         $scope.utterance = "";
     };
     
@@ -103,6 +119,9 @@ angular.module('mrlapp.service.ProgramABGui', [])
     };
     
     // subscribe to the response from programab.
+    msg.subscribe('publishRequest');
+    msg.subscribe('publishText');
+    msg.subscribe('publishOOBText');
     msg.subscribe(this);
 }
 ]);
