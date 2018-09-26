@@ -155,7 +155,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       swingGui.send(boundServiceName, "setPath", path);
       swingGui.send(boundServiceName, "reloadSession", path, user, bot, true);
     } else if (o == reloadSession) {
-      swingGui.send(boundServiceName, "setUsername", userName.getText().trim());
+      swingGui.send(boundServiceName, "startSession", userName.getText().trim());
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
       swingGui.send(boundServiceName, "writeAIMLIF");
