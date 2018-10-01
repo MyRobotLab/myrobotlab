@@ -789,6 +789,25 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // load(); removed by GroG
     Runtime.register(this, null);
   }
+  
+  /**
+   * new overload - mqtt uses this for json encoded MrlListener to
+   * process subscriptions
+   * @param data
+   */
+  public void addListener(Map data) {
+	  // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
+	  if (!data.containsKey("topicMethod")) {
+		  error("addListener topicMethod missing");
+	  }
+	  if (!data.containsKey("callbackName")) {
+		  error("addListener callbackName missing");
+	  }
+	  if (!data.containsKey("callbackMethod")) {
+		  error("addListener callbackMethod missing");
+	  }
+	  addListener(data.get("topicMethod").toString(), data.get("callbackName").toString(), data.get("callbackMethod").toString());
+  }
 
   public void addListener(MRLListener listener) {
     addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
@@ -1410,7 +1429,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
           return retobj;
         } catch (Exception e1) {
           log.error("boom goes method {}", m.getName());
-          Logging.logError(e1);
+          // Logging.logError(e1);
         }
       }
 
@@ -1773,6 +1792,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // get the correct sendingMethod
     // here its hardcoded
     msg.sendingMethod = "send";
+    // log.info(CodecUtils.toJson(msg));
     send(msg);
   }
 
