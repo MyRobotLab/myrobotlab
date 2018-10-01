@@ -71,7 +71,8 @@ public class Ads1115Gui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService);
     boundService = (Ads1115) Runtime.getService(boundServiceName);
 
-    // addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
+    // addTopLine(controllerLabel, controllerList, deviceBusLabel,
+    // deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
     addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList, refresh));
 
     JPanel center = new JPanel();

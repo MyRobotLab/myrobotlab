@@ -52,7 +52,7 @@ public class Inbox implements Serializable {
   HashMap<Long, Object[]> blockingList = new HashMap<Long, Object[]>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
-  
+
   public Inbox() {
     this("Inbox");
   }
@@ -92,7 +92,7 @@ public class Inbox implements Serializable {
         msgBox.notifyAll(); // must own the lock
       }
     }
-    
+
     // TODO: move this to a base class Inbox/Outbox are very similar.
     // now that it's actually in the queue. let's notify the listeners
     for (MessageListener ml : listeners) {
@@ -126,16 +126,17 @@ public class Inbox implements Serializable {
    * message they invoke it.
    * 
    * @return the Message on the queue
-   * @throws InterruptedException e
+   * @throws InterruptedException
+   *           e
    * @see Message
    */
   public Message getMsg() throws InterruptedException {
     /*
      * TODO - remove below - Inbox will call switchboards
-     * serializer/deserializer &amp; communicator send/recieve interface switchboard
-     * has references to serializer and communicator - also all configuration
-     * needed At this level ALL details on where the Message / Message came from
-     * should be hidden and interfaces should be exposed only-
+     * serializer/deserializer &amp; communicator send/recieve interface
+     * switchboard has references to serializer and communicator - also all
+     * configuration needed At this level ALL details on where the Message /
+     * Message came from should be hidden and interfaces should be exposed only-
      */
 
     Message msg = null;
@@ -199,5 +200,5 @@ public class Inbox implements Serializable {
       return;
     listeners.add(ml);
   }
-  
+
 }

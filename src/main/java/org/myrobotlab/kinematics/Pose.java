@@ -1,7 +1,6 @@
 package org.myrobotlab.kinematics;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ public class Pose {
   public HashMap<String, Double> positions = new HashMap<String, Double>();
   public final String name;
   public final Date createdDate;
-  
+
   public Pose(String name, List<ServoControl> servos) {
     this.name = name;
     this.createdDate = new Date();
@@ -29,21 +28,21 @@ public class Pose {
       servoNames.add(sc.getName());
     }
   }
-  
+
   public HashMap<String, Double> getPositions() {
     return positions;
   }
-  
+
   public void savePose(String filename) throws IOException {
     String s = CodecUtils.toJson(this);
     FileOutputStream out = new FileOutputStream(new File(filename));
     out.write(s.getBytes());
     out.close();
   }
-  
+
   public static Pose loadPose(String filename) throws IOException {
-    String json = FileIO.toString(filename);    
-    Pose pose = (Pose)CodecUtils.fromJson(json, Pose.class);
+    String json = FileIO.toString(filename);
+    Pose pose = (Pose) CodecUtils.fromJson(json, Pose.class);
     return pose;
   }
 
@@ -88,5 +87,5 @@ public class Pose {
   public String toString() {
     return "Pose [positions=" + positions + ", name=" + name + ", createdDate=" + createdDate + "]";
   }
-  
+
 }

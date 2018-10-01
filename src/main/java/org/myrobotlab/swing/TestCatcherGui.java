@@ -46,7 +46,7 @@ public class TestCatcherGui extends ServiceGui {
     display.add(new JLabel("catchInteger : "));
     display.add(catchInteger);
     display.add(getBindCatchIntegerButton());
-  
+
   }
 
   @Override

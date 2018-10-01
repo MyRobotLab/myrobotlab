@@ -41,9 +41,7 @@ public class Motor_ArduinoGui extends MotorControllerPanel implements ActionList
     // FIXME - BLOCKING I BORKED
     Arduino o = (Arduino) Runtime.getService(controllerName);
 
-
-     pinList = o.getPinList();
-    
+    pinList = o.getPinList();
 
     for (int i = 0; i < pinList.size(); ++i) {
       PinDefinition pindef = pinList.get(i);
@@ -57,7 +55,7 @@ public class Motor_ArduinoGui extends MotorControllerPanel implements ActionList
     }
 
     for (int i = 0; i < pinList.size(); ++i) {
-    	PinDefinition pin = pinList.get(i);
+      PinDefinition pin = pinList.get(i);
       directionPin.addItem(String.format("%d", pin.getAddress()));
     }
 

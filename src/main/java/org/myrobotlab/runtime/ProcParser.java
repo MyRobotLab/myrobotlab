@@ -195,7 +195,8 @@ public class ProcParser {
   }
 
   /**
-   * @param _processPid the process id
+   * @param _processPid
+   *          the process id
    * @return memory usage information. Files: /proc/[pid]/statm /proc/[pid]/stat
    * 
    */
@@ -252,10 +253,14 @@ public class ProcParser {
 
   /**
    * DEPRECATE - why do this? Java can do this?
+   * 
    * @return int
-   * @throws FileNotFoundException e 
-   * @throws IOException e
-   * @throws NumberFormatException e 
+   * @throws FileNotFoundException
+   *           e
+   * @throws IOException
+   *           e
+   * @throws NumberFormatException
+   *           e
    */
   public static int getNumberofCores() throws FileNotFoundException, IOException, NumberFormatException {
     String[] tempData = null;

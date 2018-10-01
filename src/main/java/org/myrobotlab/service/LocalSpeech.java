@@ -20,17 +20,16 @@ import org.slf4j.Logger;
  *
  *         FIXME - use sapi/creatObject if necessary Say -
  *         https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
- *         
+ * 
  *         Linux possibilities
- *          https://launchpad.net/ubuntu/precise/+source/svox/
- *           
+ *         https://launchpad.net/ubuntu/precise/+source/svox/
+ * 
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
-  
 
   public LocalSpeech(String n) {
     super(n);
@@ -46,7 +45,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     meta.addDependency("com.microsoft", "tts", "1.1", "zip");
     return meta;
   }
-
 
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
@@ -71,18 +69,21 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       Runtime.execute(cmd);
     } else if (platform.isLinux()) {
       // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
-      String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
-      // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
+      String furtherFiltered = toSpeak.replace("\"", "");// .replace("\'",
+                                                         // "").replace("|",
+                                                         // "");
+      // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival
+      // --tts");
       Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
       p.waitFor();
       // audioFile.play(audioData);
     }
-    
-    /*
-    String cmd = getTtsCmdLine(toSpeak);
 
-    
-    */
+    /*
+     * String cmd = getTtsCmdLine(toSpeak);
+     * 
+     * 
+     */
 
     return new AudioData(localFileName);
   }
@@ -101,11 +102,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * one of the few methods a SpeechSynthesis service must implement if derived from
-   * AbstractSpeechSynthesis - 
+   * one of the few methods a SpeechSynthesis service must implement if derived
+   * from AbstractSpeechSynthesis -
    * 
    * Use protected addVoice(name, gender, lang, voiceProvider) to add voices
-   * Voice.voiceProvider allows a serializable key to map MRL's Voice to a implementation of a voice
+   * Voice.voiceProvider allows a serializable key to map MRL's Voice to a
+   * implementation of a voice
    */
   @Override
   protected void loadVoices() {
@@ -113,7 +115,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     // voices returned from local app
     String voicesText = null;
-    
+
     if (platform.isWindows()) {
       voicesText = Runtime.execute("tts.exe -V");
       log.info("cmd {}", voicesText);
@@ -134,11 +136,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
-      voicesText = Runtime.execute("say -v"); 
+      voicesText = Runtime.execute("say -v");
 
       // FIXME - implement parse -v output
       addVoice("fred", "male", "en", "fred"); // in the interim added 1 voice
-    } else  if (platform.isLinux()) {
+    } else if (platform.isLinux()) {
       addVoice("Linus", "male", "en", "festival");
     }
   }
@@ -154,10 +156,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     // speech.getVoices();
     // speech.setVoice("1");
     /*
-    speech.speak(String.format("hello yes yes yes, my voice name is %s", speech.getVoice().getName()));
-    speech.speakBlocking("I am your R 2 D 2 here me speak #R2D2#");
-    speech.speak("unicode éléphant");
-    */
+     * speech.speak(String.format("hello yes yes yes, my voice name is %s",
+     * speech.getVoice().getName()));
+     * speech.speakBlocking("I am your R 2 D 2 here me speak #R2D2#");
+     * speech.speak("unicode éléphant");
+     */
 
   }
 

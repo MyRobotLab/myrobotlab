@@ -139,11 +139,12 @@ public class Tracking extends Service {
    * call back of all video data video calls this whenever a frame is processed
    * 
    */
-  //TODO: should be a function of the current frame rate  for now, require at least 1.
+  // TODO: should be a function of the current frame rate for now, require at
+  // least 1.
   int faceFoundFrameCount = 0;
   int faceFoundFrameCountMin = 2;
-  //int faceLostFrameCount = 0;
-  //int faceLostFrameCountMin = 20;
+  // int faceLostFrameCount = 0;
+  // int faceLostFrameCountMin = 20;
   // -------------- System Specific Initialization End --------------
 
   boolean scan = false;
@@ -162,7 +163,8 @@ public class Tracking extends Service {
 
     pid = (Pid) createPeer("pid");
     setDefaultPreFilters();
-    // the kp should be propotional to the input min/max of the servo.. for now we'll go with 45 for now.
+    // the kp should be propotional to the input min/max of the servo.. for now
+    // we'll go with 45 for now.
     pid.setPID("x", 3.0, 1.0, 0.1);
     pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
@@ -197,24 +199,20 @@ public class Tracking extends Service {
   // -------------- System Specific Initialization Begin --------------
 
   public OpenCVFilter faceDetect(boolean PleaseRecognizeToo) {
-    // opencv.addFilter("Gray"); needed ?    
+    // opencv.addFilter("Gray"); needed ?
     stopTracking();
     log.info("starting faceDetect");
     for (int i = 0; i < preFilters.size(); ++i) {
-      //grayFilter+Facerecognition=crash
-      if (preFilters.get(i).name==FILTER_GRAY && PleaseRecognizeToo)
-      {
+      // grayFilter+Facerecognition=crash
+      if (preFilters.get(i).name == FILTER_GRAY && PleaseRecognizeToo) {
         log.info("skip gray filter for faceRecognize");
-      }
-      else
-      {
-      opencv.addFilter(preFilters.get(i));
+      } else {
+        opencv.addFilter(preFilters.get(i));
       }
     }
-    OpenCVFilter fr=null;
-    if (PleaseRecognizeToo)
-    {
-      fr=opencv.addFilter(FILTER_FACE_RECOGNIZER);
+    OpenCVFilter fr = null;
+    if (PleaseRecognizeToo) {
+      fr = opencv.addFilter(FILTER_FACE_RECOGNIZER);
     }
     opencv.addFilter(FILTER_FACE_DETECT);
     opencv.setDisplayFilter(FILTER_FACE_DETECT);
@@ -223,11 +221,11 @@ public class Tracking extends Service {
     setState(STATE_FACE_DETECT);
     return fr;
   }
-  
+
   public void faceDetect() {
     faceDetect(false);
   }
-  
+
   public void findFace() {
     scan = true;
   }
@@ -305,7 +303,7 @@ public class Tracking extends Service {
   public void removeFilters() {
     opencv.removeFilters();
     sleep(1000);
-    }
+  }
 
   public void reset() {
     // TODO - reset pid values
@@ -567,7 +565,9 @@ public class Tracking extends Service {
     for (TrackingServoData tsd : servoControls.values()) {
       pid.setInput(tsd.axis, targetPoint.get(tsd.axis));
       if (pid.compute(tsd.name)) {
-        // TODO: verify this.. we want the pid output to be the input for our servo..min/max are input min/max on the servo to ensure proper scaling 
+        // TODO: verify this.. we want the pid output to be the input for our
+        // servo..min/max are input min/max on the servo to ensure proper
+        // scaling
         // of values between services.
         tsd.currentServoPos += pid.getOutput(tsd.name);
         tsd.servoControl.moveTo(tsd.currentServoPos);
@@ -643,7 +643,7 @@ public class Tracking extends Service {
   public void connect(OpenCV opencv, Servo x, Servo y) {
     log.info("Connect 2 servos for head tracking!... aye aye captain.  Also.. an open cv instance.");
     attach(opencv);
-    attach(x, y);    
+    attach(x, y);
     // TODO: consider using the input min/max of the servo here..
     pid.setOutputRange("x", -20, 20);
     pid.setOutputRange("y", -20, 20);
@@ -654,8 +654,7 @@ public class Tracking extends Service {
     sleep(100);
     rest();
   }
-  
-  
+
   public void connect(String port, int xPin, int yPin) throws Exception {
     connect(port, xPin, yPin, 0);
   }
@@ -672,10 +671,12 @@ public class Tracking extends Service {
       servoControls.put(axis[i], x);
       servoControls.get(axis[i]).servoControl.setPin(pins[i]);
       servoControls.get(axis[i]).servoControl.attach(controller, pins[i]);
-      // use the output min/max for the pid output i guess?  TODO: what should the output range be set to??
+      // use the output min/max for the pid output i guess? TODO: what should
+      // the output range be set to??
       pid.setOutputRange(axis[i], -x.servoControl.getMaxInput(), x.servoControl.getMaxInput());
-      // TODO: parameterize this better!  connect method is too smart for it's own good.
-      //pid.setOutputRange(axis[i], -5, 5);
+      // TODO: parameterize this better! connect method is too smart for it's
+      // own good.
+      // pid.setOutputRange(axis[i], -5, 5);
       x.servoControl.moveTo(x.servoControl.getRest() + 2);
       x.currentServoPos = x.servoControl.getPos();
       log.info("Attached to servo {} current pos {}", x.name, x.currentServoPos);
@@ -716,7 +717,7 @@ public class Tracking extends Service {
       log.info("Axis must be x or y");
       return;
     }
-    TrackingServoData tsd  = new TrackingServoData(axis);
+    TrackingServoData tsd = new TrackingServoData(axis);
     tsd.servoControl = servo;
     tsd.axis = axis;
     servoControls.put(axis, tsd);
@@ -793,15 +794,14 @@ public class Tracking extends Service {
       opencv.captureFromImageFile("resource/OpenCV/testData/ryan.jpg");
       opencv.broadcastState();
 
-
-      //t01.startLKTracking();
-      OpenCVFilterFaceRecognizer fr=(OpenCVFilterFaceRecognizer)t01.faceDetect(true);
+      // t01.startLKTracking();
+      OpenCVFilterFaceRecognizer fr = (OpenCVFilterFaceRecognizer) t01.faceDetect(true);
       fr.train();
-     
-      //opencv.stopCapture();
-      //opencv.captureFromImageFile("resource/OpenCV/testData/rachel.jpg");
-     // opencv.broadcastState();
-      //t01.faceDetect(true);
+
+      // opencv.stopCapture();
+      // opencv.captureFromImageFile("resource/OpenCV/testData/rachel.jpg");
+      // opencv.broadcastState();
+      // t01.faceDetect(true);
       // Runtime.start("python", "Python");
 
       // tracker.startLKTracking();

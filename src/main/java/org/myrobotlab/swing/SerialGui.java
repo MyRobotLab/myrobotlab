@@ -54,230 +54,233 @@ import org.slf4j.Logger;
 
 public class SerialGui extends ServiceGui implements ActionListener, ItemListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(SerialGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(SerialGui.class);
 
-	// menu
-	JComboBox<String> reqFormat = new JComboBox<String>(new String[] { "decimal", "hex", "ascii", "arduino" });
+  // menu
+  JComboBox<String> reqFormat = new JComboBox<String>(new String[] { "decimal", "hex", "ascii", "arduino" });
 
-	// FIXME !!!
-	JButton createVirtualPort = new JButton("create virtual uart");
-	JButton monitor = new JButton("monitor");
-	boolean monitoring = false;
-	JButton clear = new JButton("clear");
-	JButton record = new JButton();
+  // FIXME !!!
+  JButton createVirtualPort = new JButton("create virtual uart");
+  JButton monitor = new JButton("monitor");
+  boolean monitoring = false;
+  JButton clear = new JButton("clear");
+  JButton record = new JButton();
 
-	// recv data display
-	JTextArea rx = new JTextArea(10, 10);
-	JLabel rxTotal = new JLabel("0");
-	JLabel txTotal = new JLabel("0");
+  // recv data display
+  JTextArea rx = new JTextArea(10, 10);
+  JLabel rxTotal = new JLabel("0");
+  JLabel txTotal = new JLabel("0");
 
-	int rxCount = 0;
-	int txCount = 0;
+  int rxCount = 0;
+  int txCount = 0;
 
-	// trasmit data display
-	JTextArea tx = new JTextArea(5, 10);
-	JTextArea toSend = new JTextArea(2, 10);
-	JButton send = new JButton("send");
-	JButton sendFile = new JButton("send file");
+  // trasmit data display
+  JTextArea tx = new JTextArea(5, 10);
+  JTextArea toSend = new JTextArea(2, 10);
+  JButton send = new JButton("send");
+  JButton sendFile = new JButton("send file");
 
-	Serial mySerial = null;
-	final SerialGui self;
+  Serial mySerial = null;
+  final SerialGui self;
 
-	// gui's formatters
-	Codec rxFormatter = new DecimalCodec(swingGui);
-	Codec txFormatter = new DecimalCodec(swingGui);
+  // gui's formatters
+  Codec rxFormatter = new DecimalCodec(swingGui);
+  Codec txFormatter = new DecimalCodec(swingGui);
 
-	PortGui portGui;
+  PortGui portGui;
 
-	public SerialGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		self = this;
-		mySerial = (Serial) Runtime.getService(boundServiceName);
-		rx.setEditable(false);
-		tx.setEditable(false);
-		autoScroll(true);
+  public SerialGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    self = this;
+    mySerial = (Serial) Runtime.getService(boundServiceName);
+    rx.setEditable(false);
+    tx.setEditable(false);
+    autoScroll(true);
 
-		portGui = new PortGui(boundServiceName, myService);
-		addTopLeft(5, portGui.getDisplay());
-		addTopLeft(monitor, reqFormat, clear, record, createVirtualPort);
-		
-		add(new JScrollPane(rx));
-		add(new JScrollPane(tx));
-		add("send");
-		add(new JScrollPane(toSend));
-		addBottomGroup(null, send, sendFile, "rx", rxTotal, "tx", txTotal);
+    portGui = new PortGui(boundServiceName, myService);
+    addTopLeft(5, portGui.getDisplay());
+    addTopLeft(monitor, reqFormat, clear, record, createVirtualPort);
 
-		createVirtualPort.addActionListener(this);
-		send.addActionListener(this);
-		sendFile.addActionListener(this);
-		record.addActionListener(this);
-		reqFormat.addItemListener(this);
-		clear.addActionListener(this);
-		monitor.addActionListener(this);
-	}
+    add(new JScrollPane(rx));
+    add(new JScrollPane(tx));
+    add("send");
+    add(new JScrollPane(toSend));
+    addBottomGroup(null, send, sendFile, "rx", rxTotal, "tx", txTotal);
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		if (o == record) {
-			if (record.getText().startsWith("record")) {
-				send("record");
-				send("broadcastState");
-			} else {
-				send("stopRecording");
-				send("broadcastState");
-			}
-		}
+    createVirtualPort.addActionListener(this);
+    send.addActionListener(this);
+    sendFile.addActionListener(this);
+    record.addActionListener(this);
+    reqFormat.addItemListener(this);
+    clear.addActionListener(this);
+    monitor.addActionListener(this);
+  }
 
-		if (o == clear) {
-			clear();
-		}
-		if (o == createVirtualPort) {
-			String portName = portGui.getSelected();
-			if (portName == null || portName.length() == 0){
-				log.info("port name must be specified");
-				return;
-			}
-			send("connectVirtualUart", portName);
-		}
-		
-		if (o == monitor){
-			JButton m = (JButton)o;
-			if (m.getText().equals("monitor")){				
-				m.setText("stop monitor");
-				monitoring = true;
-				subscribe("publishRX");
-				subscribe("publishTX");
-			} else {
-				m.setText("monitor");
-				monitoring = false;
-				unsubscribe("publishRX");
-				unsubscribe("publishTX");
-			}
-		}
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
+    if (o == record) {
+      if (record.getText().startsWith("record")) {
+        send("record");
+        send("broadcastState");
+      } else {
+        send("stopRecording");
+        send("broadcastState");
+      }
+    }
 
-		if (o == sendFile) {
-			JFileChooser fileChooser = new JFileChooser();
-			// set current directory
-			fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
-			int result = fileChooser.showOpenDialog(this.getDisplay());
-			if (result == JFileChooser.APPROVE_OPTION) {
-				// user selects a file
-				File selectedFile = fileChooser.getSelectedFile();
-				send("writeFile", selectedFile.getAbsolutePath());
-			}
-		}
+    if (o == clear) {
+      clear();
+    }
+    if (o == createVirtualPort) {
+      String portName = portGui.getSelected();
+      if (portName == null || portName.length() == 0) {
+        log.info("port name must be specified");
+        return;
+      }
+      send("connectVirtualUart", portName);
+    }
 
-		if (o == send) {
-			String data = toSend.getText();
-			send("write", data.getBytes());
-			log.info("sent [{}]", data);
-		}
-	}
+    if (o == monitor) {
+      JButton m = (JButton) o;
+      if (m.getText().equals("monitor")) {
+        m.setText("stop monitor");
+        monitoring = true;
+        subscribe("publishRX");
+        subscribe("publishTX");
+      } else {
+        m.setText("monitor");
+        monitoring = false;
+        unsubscribe("publishRX");
+        unsubscribe("publishTX");
+      }
+    }
 
-	public void clear() {
-		rx.setText("");
-		tx.setText("");
-	}
+    if (o == sendFile) {
+      JFileChooser fileChooser = new JFileChooser();
+      // set current directory
+      fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+      int result = fileChooser.showOpenDialog(this.getDisplay());
+      if (result == JFileChooser.APPROVE_OPTION) {
+        // user selects a file
+        File selectedFile = fileChooser.getSelectedFile();
+        send("writeFile", selectedFile.getAbsolutePath());
+      }
+    }
 
-	@Override
-	public void subscribeGui() {
-	}
+    if (o == send) {
+      String data = toSend.getText();
+      send("write", data.getBytes());
+      log.info("sent [{}]", data);
+    }
+  }
 
-	@Override
-	public void unsubscribeGui() {		
-	}
+  public void clear() {
+    rx.setText("");
+    tx.setText("");
+  }
 
-	public void autoScroll(boolean b) {
-		DefaultCaret caret = (DefaultCaret) rx.getCaret();
-		if (b) {
-			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		} else {
-			caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-		}
+  @Override
+  public void subscribeGui() {
+  }
 
-		DefaultCaret caretTX = (DefaultCaret) tx.getCaret();
-		if (b) {
-			caretTX.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		} else {
-			caretTX.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-		}
-	}
+  @Override
+  public void unsubscribeGui() {
+  }
 
-	/*
-	 * the gui is no simplified - a single broadcastState() -&gt; onState(Serial)
-	 * is used to propegate all data which needs updating. Since that is the
-	 * case a single invokeLater is used. It is unadvised to have more
-	 * invokeLater in other methods as race conditions are possible
-	 */
-	public void onState(final Serial serial) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					mySerial = serial;
-					if (!serial.isRecording()) {
-						record.setText("record");
-					} else {
-						record.setText("stop recording");
-					}
-				} catch (Exception e) {
-					log.error("onState threw", e);
-				}
-			}
-		});
-	}
+  public void autoScroll(boolean b) {
+    DefaultCaret caret = (DefaultCaret) rx.getCaret();
+    if (b) {
+      caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+    } else {
+      caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+    }
 
-	// onChange of ports
-	@Override
-	public void itemStateChanged(ItemEvent event) {
-		Object o = event.getSource();
+    DefaultCaret caretTX = (DefaultCaret) tx.getCaret();
+    if (b) {
+      caretTX.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+    } else {
+      caretTX.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+    }
+  }
 
-		if (o == reqFormat) {
-			String newFormat = (String) reqFormat.getSelectedItem();
-			// changing our display and the Service's format
-			try {
-				clear();
-				rxFormatter = Codec.getDecoder(newFormat, swingGui);
-				txFormatter = Codec.getDecoder(newFormat, swingGui);
-				send("setFormat", newFormat);
-			} catch (Exception e) {
-				Logging.logError(e);
-			}
-		}
-	}
+  /*
+   * the gui is no simplified - a single broadcastState() -&gt; onState(Serial)
+   * is used to propegate all data which needs updating. Since that is the case
+   * a single invokeLater is used. It is unadvised to have more invokeLater in
+   * other methods as race conditions are possible
+   */
+  public void onState(final Serial serial) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          mySerial = serial;
+          if (!serial.isRecording()) {
+            record.setText("record");
+          } else {
+            record.setText("stop recording");
+          }
+        } catch (Exception e) {
+          log.error("onState threw", e);
+        }
+      }
+    });
+  }
 
-	/**
-	 * onRX displays the "interpreted" byte it is interpreted by the Serial's
-	 * service selected "format"
-	 * 
-	 * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as
-	 * 1 byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
-	 * @param data the data received
-	 * @throws BadLocationException an exception
-	 * 
-	 */
-	public final void onRX(final Integer data) throws BadLocationException {
-		++rxCount;
-		if (this.swingGui.getInbox().size() > 500) {
-			rx.append("...\n");
-			return;
-		}
-		String formatted = rxFormatter.decode(data);
-		rx.append(formatted);
-		if (formatted != null && rx.getLineCount() > 50) {
-			Document doc = rx.getDocument();
-			doc.remove(0, formatted.length());
-		}
+  // onChange of ports
+  @Override
+  public void itemStateChanged(ItemEvent event) {
+    Object o = event.getSource();
 
-		rxTotal.setText(String.format("%d", rxCount));
-	}
+    if (o == reqFormat) {
+      String newFormat = (String) reqFormat.getSelectedItem();
+      // changing our display and the Service's format
+      try {
+        clear();
+        rxFormatter = Codec.getDecoder(newFormat, swingGui);
+        txFormatter = Codec.getDecoder(newFormat, swingGui);
+        send("setFormat", newFormat);
+      } catch (Exception e) {
+        Logging.logError(e);
+      }
+    }
+  }
 
-	public final void onTX(final Integer data) {
-		++txCount;
-		tx.append(txFormatter.decode(data));
-		txTotal.setText(String.format("%d", txCount));
-	}
+  /**
+   * onRX displays the "interpreted" byte it is interpreted by the Serial's
+   * service selected "format"
+   * 
+   * FORMAT_DECIMEL is a 3 digit decimal in ascii FORMAT_RAW is interpreted as 1
+   * byte = 1 ascii char FORMAT_HEX is 2 digit asci hex
+   * 
+   * @param data
+   *          the data received
+   * @throws BadLocationException
+   *           an exception
+   * 
+   */
+  public final void onRX(final Integer data) throws BadLocationException {
+    ++rxCount;
+    if (this.swingGui.getInbox().size() > 500) {
+      rx.append("...\n");
+      return;
+    }
+    String formatted = rxFormatter.decode(data);
+    rx.append(formatted);
+    if (formatted != null && rx.getLineCount() > 50) {
+      Document doc = rx.getDocument();
+      doc.remove(0, formatted.length());
+    }
+
+    rxTotal.setText(String.format("%d", rxCount));
+  }
+
+  public final void onTX(final Integer data) {
+    ++txCount;
+    tx.append(txFormatter.decode(data));
+    txTotal.setText(String.format("%d", txCount));
+  }
 
 }

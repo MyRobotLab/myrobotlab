@@ -87,7 +87,8 @@ public class Node implements Serializable {
    * 
    * other examples /background /background/position/x /background/position/y
    * /foreground /known/ball/red /known/ball/yellow /known/cup /unknown/object1
-   * /positions/x/ &lt;map&gt; /positions/y/ &lt;map&gt; /positions/time/ &lt;map&gt; /tracking
+   * /positions/x/ &lt;map&gt; /positions/y/ &lt;map&gt; /positions/time/
+   * &lt;map&gt; /tracking
    * 
    * @return - an object found at the given path
    */

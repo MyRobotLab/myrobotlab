@@ -68,7 +68,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   JLabel cacheFile = new JLabel("no file");
   JLabel audioState = new JLabel("not playing");
   JLabel generationTime = new JLabel("generation time : 0 ms");
-  
+
   JCheckBox useSSML = new JCheckBox();
 
   JComboBox<String> voices = new JComboBox<String>();
@@ -90,7 +90,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   JSlider volume = new JSlider(JSlider.HORIZONTAL, 0, 100, 100);
 
   JComboBox<String> voiceEffectFiles = new JComboBox<String>();
-  
+
   final AbstractSpeechSynthesisGui self;
 
   AudioData lastAudioData;
@@ -101,12 +101,12 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     speakButton.setSelectedIcon(null);
     lastUtterance.setWrapStyleWord(true);
     lastUtterance.setLineWrap(true);
-    
+
     addTop("speaking state : ", speakingState);
     addTop("generation time : ", generationTime);
     addTop("audio state : ", audioState);
     // generationTime, audioState
-    //addTop("cache file : ", purgeFile);
+    // addTop("cache file : ", purgeFile);
     addTop(2, cacheFile);
 
     addLeftLine("voices:", voices);
@@ -118,15 +118,15 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     resume.setPreferredSize(new Dimension(85, 45));
     stop.setPreferredSize(new Dimension(85, 45));
     // purgeCache.setPreferredSize(new Dimension(170, 45));
-    addBottom(save, /*purgeCache, */ pause, resume, stop, speakButton);
+    addBottom(save, /* purgeCache, */ pause, resume, stop, speakButton);
     addLine(lastUtterance);
 
     // FIXME - hide status - unless cloud provider
     // FIXME - hide save buttons unless a cloud provider with keys
-    
+
     voices.addActionListener(this);
     voiceEffectFiles.addActionListener(this);
-    
+
     speakButton.addActionListener(this);
     pause.addActionListener(this);
     resume.addActionListener(this);
@@ -150,7 +150,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     subscribe("publishAudioStart");
     subscribe("publishAudioEnd");
-    
+
     send("getVoiceEffectFiles");
   }
 
@@ -170,19 +170,19 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   }
 
   public void onVoiceEffectFiles(List<File> files) {
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         voiceEffectFiles.removeActionListener(self);
         voiceEffectFiles.removeAllItems();
         voiceEffectFiles.addItem("");
-        
+
         for (File file : files) {
           log.info("adding voice effect file {}", file.getName());
           voiceEffectFiles.addItem(displayEffectFile(file));
         }
-        
+
         voiceEffectFiles.addActionListener(self);
       }
     });
@@ -235,8 +235,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   public void onSpeechRequested(String toSpeak) {
     lastUtterance.setText(toSpeak);
   }
-  
-  protected String displayEffectFile(File file){
+
+  protected String displayEffectFile(File file) {
     String ret = "";
     String filename = file.getName();
     int pos = filename.indexOf(".");
@@ -259,11 +259,11 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
             send("setVoice", vparts[0]);
           }
         }
-        
+
         if (o == voiceEffectFiles) {
-          lastUtterance.setText(lastUtterance.getText() + " " + (String)voiceEffectFiles.getSelectedItem());
+          lastUtterance.setText(lastUtterance.getText() + " " + (String) voiceEffectFiles.getSelectedItem());
         }
-        
+
         if (o == speakButton) {
           send("speak", lastUtterance.getText());
         }
@@ -280,17 +280,13 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           send("stop");
         }
 
-        /* wont work because AudioProcessor wont close file :(
-        <pre>
-        if (o == purgeCache) {
-          send("purgeCache");
-        }
-
-        if (o == purgeFile) {
-          send("purgeFile", lastAudioData.getFileName());
-        }
-        </pre>
-        */
+        /*
+         * wont work because AudioProcessor wont close file :( <pre> if (o ==
+         * purgeCache) { send("purgeCache"); }
+         * 
+         * if (o == purgeFile) { send("purgeFile", lastAudioData.getFileName());
+         * } </pre>
+         */
 
         if (o == save) {
           // save keys if any
@@ -314,7 +310,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   String display(Voice voice) {
     StringBuilder display = new StringBuilder();
     display.append(voice.getName());
-    display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal().toLanguageTag());    
+    display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal().toLanguageTag());
     display.append((voice.getGender() == null) ? "" : " " + voice.getGender());
     return display.toString();
   }
@@ -338,10 +334,10 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
             voices.addItem(display(voice));
           }
         }
-        
+
         if (voices.getItemCount() > 0 && speech.getVoice() != null && !speech.getVoice().getName().equals(voices.getSelectedItem())) {
           voices.setSelectedItem(display(speech.getVoice()));
-      }
+        }
 
         // keys
         if (speech.getKeyNames().length != keys.size()) {

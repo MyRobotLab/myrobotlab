@@ -7,9 +7,9 @@ import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.MotorController;
 
 /**
- * A general motor implementation with a "simple H-bridge" where 
- * one control line is power with pwm and the
- * other control line is determines direction of spin.
+ * A general motor implementation with a "simple H-bridge" where one control
+ * line is power with pwm and the other control line is determines direction of
+ * spin.
  * 
  */
 
@@ -30,7 +30,6 @@ public class Motor extends AbstractMotor {
     this.dirPin = dirPin;
     broadcastState();
   }
-  
 
   public Integer getPwrPin() {
     return pwrPin;
@@ -55,11 +54,10 @@ public class Motor extends AbstractMotor {
   public void setPwmFreq(Integer pwmfreq) {
     this.pwmFreq = pwmfreq;
   }
-  
+
   public static void main(String[] args) {
 
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     try {
 
@@ -166,7 +164,7 @@ public class Motor extends AbstractMotor {
     }
 
   }
-  
+
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
@@ -175,6 +173,5 @@ public class Motor extends AbstractMotor {
 
     return meta;
   }
-
 
 }

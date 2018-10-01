@@ -77,7 +77,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   }
 
   public void flush() {
-    
+
     while (getInbox().size() > 0) {
       // TODO: we've gotta wait until we've consumed our inbox if we're
       // flushing?

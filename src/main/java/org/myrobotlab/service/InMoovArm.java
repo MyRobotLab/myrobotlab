@@ -55,10 +55,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.setRest(90);
     shoulder.setRest(30);
     omoplate.setRest(10);
-    
+
     setVelocity(20.0, 20.0, 20.0, 20.0);
-    
-    }
+
+  }
 
   /*
    * attach all the servos - this must be re-entrant and accomplish the
@@ -80,29 +80,29 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate.enable();
     return true;
   }
-  
+
   @Deprecated
   public void enableAutoEnable(Boolean param) {
-	  }
-  
+  }
+
   @Deprecated
   public void enableAutoDisable(Boolean param) {
     setAutoDisable(param);
-	  }
-  
+  }
+
   public void setAutoDisable(Boolean param) {
     bicep.setAutoDisable(param);
     rotate.setAutoDisable(param);
     shoulder.setAutoDisable(param);
     omoplate.setAutoDisable(param);
-    }
-  
+  }
+
   public void setOverrideAutoDisable(Boolean param) {
     bicep.setOverrideAutoDisable(param);
     rotate.setOverrideAutoDisable(param);
     shoulder.setOverrideAutoDisable(param);
     omoplate.setOverrideAutoDisable(param);
-    }
+  }
 
   @Override
   public void broadcastState() {
@@ -131,7 +131,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.attach(arduino, 9, rotate.getRest(), rotate.getVelocity());
     shoulder.attach(arduino, 10, shoulder.getRest(), shoulder.getVelocity());
     omoplate.attach(arduino, 11, omoplate.getRest(), omoplate.getVelocity());
-    
+
     enableAutoEnable(true);
 
     broadcastState();
@@ -204,7 +204,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH,"%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(), omoplate.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(),
+        omoplate.getPos());
   }
 
   public Servo getShoulder() {
@@ -241,15 +242,15 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     moveTo(bicep, rotate, shoulder, omoplate);
     waitTargetPos();
     log.info("end {} moveToBlocking", getName());
-    }
+  }
 
   public void waitTargetPos() {
     bicep.waitTargetPos();
     rotate.waitTargetPos();
     shoulder.waitTargetPos();
     omoplate.waitTargetPos();
-    }
-  
+  }
+
   // FIXME - releasePeers()
   public void release() {
     disable();
@@ -273,7 +274,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public void rest() {
 
-    //setSpeed(1.0, 1.0, 1.0, 1.0);
+    // setSpeed(1.0, 1.0, 1.0, 1.0);
 
     bicep.rest();
     rotate.rest();
@@ -311,18 +312,16 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   // ------------- added set pins
-  /* OLD WAY
-  public void setpins(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
+  /*
+   * OLD WAY public void setpins(Integer bicep, Integer rotate, Integer
+   * shoulder, Integer omoplate) {
+   * 
+   * log.info(String.format("setPins %d %d %d %d %d %d", bicep, rotate,
+   * shoulder, omoplate)); // createPeers(); this.bicep.setPin(bicep);
+   * this.rotate.setPin(rotate); this.shoulder.setPin(shoulder);
+   * this.omoplate.setPin(omoplate); }
+   */
 
-    log.info(String.format("setPins %d %d %d %d %d %d", bicep, rotate, shoulder, omoplate));
-    // createPeers();
-    this.bicep.setPin(bicep);
-    this.rotate.setPin(rotate);
-    this.shoulder.setPin(shoulder);
-    this.omoplate.setPin(omoplate);
-  }
- 	*/
- 
   public void setRotate(Servo rotate) {
     this.rotate = rotate;
   }
@@ -337,7 +336,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   @Deprecated
   public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
-	log.warn("setspeed deprecated please use setvelocity");
+    log.warn("setspeed deprecated please use setvelocity");
     this.bicep.setSpeed(bicep);
     this.rotate.setSpeed(rotate);
     this.shoulder.setSpeed(shoulder);
@@ -441,7 +440,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     // TODO: the DH links should take into account the encoder offsets and
     // calibration maps
     DHLink link1 = new DHLink("omoplate", 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
-    // dh model + 90 degrees = real 
+    // dh model + 90 degrees = real
     link1.setMin(MathUtils.degToRad(-90));
     link1.setMax(MathUtils.degToRad(0));
 
@@ -453,7 +452,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     link2.setMax(MathUtils.degToRad(90));
 
     DHLink link3 = new DHLink("rotate", 280, 0, MathUtils.degToRad(0), MathUtils.degToRad(90));
-    // TODO: check if this is inverted.  i think it is.
+    // TODO: check if this is inverted. i think it is.
     link3.setMin(MathUtils.degToRad(0));
     link3.setMax(MathUtils.degToRad(180));
 

@@ -58,14 +58,13 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(IntegratedMovementGui.class);
 
-
   IntegratedMovement boundService = null;
-  
-	JButton stop = new JButton("Stop");
-	JButton process = new JButton("Process Kinect Data");
-	JButton startKinect = new JButton("Start OpenNi");
-	
-	private JPanel armsCoordPane = new JPanel();
+
+  JButton stop = new JButton("Stop");
+  JButton process = new JButton("Process Kinect Data");
+  JButton startKinect = new JButton("Start OpenNi");
+
+  private JPanel armsCoordPane = new JPanel();
   private JPanel itemPane = new JPanel();
   ButtonGroup armRadio = new ButtonGroup();
 
@@ -74,16 +73,15 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   private HashMap<String, JButton> buttons = new HashMap<String, JButton>();
   private HashMap<String, Component> components = new HashMap<String, Component>();
   private transient ConcurrentHashMap<String, CollisionItem> objects;
-  
+
   public IntegratedMovementGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     boundService = (IntegratedMovement) Runtime.getService(boundServiceName);
     addTop(buildControl());
     addTopLine(armsCoordPane);
-    itemPane.setLayout(new GridLayout(0,1));
+    itemPane.setLayout(new GridLayout(0, 1));
     addTopLine(itemPane);
   }
-
 
   private JPanel buildControl() {
     JPanel controlPane = new JPanel();
@@ -100,50 +98,47 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   public void actionPerformed(ActionEvent e) {
     log.info("IntegratedMovementGUI actionPerformed");
     ButtonModel rad = armRadio.getSelection();
-    if (e.getActionCommand().contains("move-")){
+    if (e.getActionCommand().contains("move-")) {
       String armName = e.getActionCommand().substring(5);
       try {
-        Double x = Double.valueOf(armText.get(armName+"-x").getText());
-        Double y = Double.valueOf(armText.get(armName+"-y").getText());
-        Double z = Double.valueOf(armText.get(armName+"-z").getText());
+        Double x = Double.valueOf(armText.get(armName + "-x").getText());
+        Double y = Double.valueOf(armText.get(armName + "-y").getText());
+        Double z = Double.valueOf(armText.get(armName + "-z").getText());
         swingGui.send(boundService.getName(), "moveTo", armName, x, y, z);
-      }
-      catch(NumberFormatException except) {
+      } catch (NumberFormatException except) {
         log.info("Couln't parse coordinated for {}", armName);
       }
     }
     if (e.getActionCommand().contains("radio-")) {
       String armName = e.getActionCommand().substring(6);
       for (JButton button : buttons.values()) {
-        if (button.getActionCommand().substring(0, 4).contains("move")){
+        if (button.getActionCommand().substring(0, 4).contains("move")) {
           if (button.getActionCommand().contains(armName)) {
             button.setEnabled(true);
-          }
-          else {
+          } else {
             button.setEnabled(false);
           }
         }
       }
-      
+
       for (JTextField at : armText.values()) {
         if (at.getName().contains(armName)) {
           at.setEnabled(true);
-        }
-        else {
+        } else {
           at.setEnabled(false);
         }
       }
-      if(rad != null) {
+      if (rad != null) {
         for (Component comp : components.values()) {
           comp.setEnabled(true);
         }
       }
-      
+
     }
     Object o = e.getSource();
     if (e.getActionCommand().equals("moveTo")) {
-      JButton but = (JButton)o;
-      ObjectPointLocation opl= (ObjectPointLocation) ((JComboBox<?>)components.get("itemLocation-"+but.getName())).getSelectedItem();
+      JButton but = (JButton) o;
+      ObjectPointLocation opl = (ObjectPointLocation) ((JComboBox<?>) components.get("itemLocation-" + but.getName())).getSelectedItem();
       String armName = armRadio.getSelection().getActionCommand().substring(6);
       swingGui.send(boundServiceName, "moveTo", armName, but.getName(), opl);
     }
@@ -151,8 +146,8 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     if (o == stop) {
       swingGui.send(boundServiceName, "stopMoving");
     }
-    if (o== process) {
-    	swingGui.send(boundServiceName, "processKinectData");
+    if (o == process) {
+      swingGui.send(boundServiceName, "processKinectData");
     }
     if (o == startKinect) {
       swingGui.send(boundServiceName, "startOpenNI");
@@ -167,7 +162,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
   }
 
   @Override
-  public void unsubscribeGui() {    
+  public void unsubscribeGui() {
     unsubscribe("publishPosition");
   }
 
@@ -176,21 +171,22 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
       @Override
       public void run() {
         for (IMEngine engine : im.getArms()) {
-          if (!armPanels.containsKey(engine.getName())){
+          if (!armPanels.containsKey(engine.getName())) {
             createArmPanel(engine);
           }
         }
-      	objects =  im.getCollisionObject();
-      	if (objects == null) return;
-      	itemPane.removeAll();
-      	itemPane.add(createItemPanelHeader());
-      	for (CollisionItem ci : objects.values()) {
-      	  if (ci.isRender()) {
-      	    itemPane.add(createItemPanel(ci));
-      	  }
-      	}
+        objects = im.getCollisionObject();
+        if (objects == null)
+          return;
+        itemPane.removeAll();
+        itemPane.add(createItemPanelHeader());
+        for (CollisionItem ci : objects.values()) {
+          if (ci.isRender()) {
+            itemPane.add(createItemPanel(ci));
+          }
+        }
         ButtonModel rad = armRadio.getSelection();
-        if(rad == null) {
+        if (rad == null) {
           for (Component comp : components.values()) {
             comp.setEnabled(false);
           }
@@ -198,8 +194,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
         if (im.getOpenni() == null) {
           startKinect.setVisible(true);
           process.setVisible(false);
-        }
-        else {
+        } else {
           startKinect.setVisible(false);
           process.setVisible(true);
         }
@@ -208,11 +203,10 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     });
   }
 
-
   private JPanel createItemPanelHeader() {
     JPanel panel = new JPanel();
-    panel.setLayout(new GridLayout(1,6, 10,1));
-    String[] labels = new String[]{"Name","Origin","End", "Radius", "Interraction", "Action"};
+    panel.setLayout(new GridLayout(1, 6, 10, 1));
+    String[] labels = new String[] { "Name", "Origin", "End", "Radius", "Interraction", "Action" };
     for (String s : labels) {
       JLabel label = new JLabel(s);
       panel.add(label);
@@ -220,34 +214,32 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     return panel;
   }
 
-
   private JPanel createItemPanel(CollisionItem ci) {
-    JPanel panel = new JPanel(new GridLayout(0,6,10,1));
+    JPanel panel = new JPanel(new GridLayout(0, 6, 10, 1));
     JTextField name = new JTextField(15);
     name.setText(ci.getName());
     panel.add(name);
-    JLabel origin = new JLabel(String.format("(%d, %d, %d)", (int)ci.getOrigin().getX(), (int)ci.getOrigin().getY(), (int)ci.getOrigin().getZ()));
+    JLabel origin = new JLabel(String.format("(%d, %d, %d)", (int) ci.getOrigin().getX(), (int) ci.getOrigin().getY(), (int) ci.getOrigin().getZ()));
     panel.add(origin);
-    JLabel end = new JLabel(String.format("(%d, %d, %d)", (int)ci.getEnd().getX(), (int)ci.getEnd().getY(), (int)ci.getEnd().getZ()));
+    JLabel end = new JLabel(String.format("(%d, %d, %d)", (int) ci.getEnd().getX(), (int) ci.getEnd().getY(), (int) ci.getEnd().getZ()));
     panel.add(end);
-    JLabel radius = new JLabel(String.format("%d", (int)ci.getRadius()));
+    JLabel radius = new JLabel(String.format("%d", (int) ci.getRadius()));
     panel.add(radius);
     JComboBox<ObjectPointLocation> moveLocation = new JComboBox<ObjectPointLocation>();
     for (ObjectPointLocation loc : IntegratedMovement.ObjectPointLocation.values()) {
       moveLocation.addItem(loc);
     }
     moveLocation.setSelectedItem(ObjectPointLocation.CLOSEST_POINT);
-    components.put("itemLocation-"+ci.getName(), moveLocation);
+    components.put("itemLocation-" + ci.getName(), moveLocation);
     panel.add(moveLocation);
     JButton but = new JButton("Move To");
     but.setName(ci.getName());
     but.setActionCommand("moveTo");
     but.addActionListener(this);
-    components.put("butMoveTo-"+ci.getName(), but);
+    components.put("butMoveTo-" + ci.getName(), but);
     panel.add(but);
     return panel;
   }
-
 
   private void createArmPanel(IMEngine engine) {
     JPanel panel = new JPanel();
@@ -257,29 +249,29 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     panel.add(button);
     button.addActionListener(this);
     JTextField textx = new JTextField(5);
-    textx.setName(engine.getName()+"-x");
+    textx.setName(engine.getName() + "-x");
     textx.setEnabled(false);
     textx.setToolTipText("x");
     panel.add(textx);
     JTextField texty = new JTextField(5);
-    texty.setName(engine.getName()+"-y");
+    texty.setName(engine.getName() + "-y");
     texty.setEnabled(false);
     texty.setToolTipText("y");
     panel.add(texty);
     JTextField textz = new JTextField(5);
-    textz.setName(engine.getName()+"-z");
+    textz.setName(engine.getName() + "-z");
     textz.setEnabled(false);
     textz.setToolTipText("z");
     panel.add(textz);
-    armText.put(engine.getName()+"-x", textx);
-    armText.put(engine.getName()+"-y", texty);
-    armText.put(engine.getName()+"-z", textz);
+    armText.put(engine.getName() + "-x", textx);
+    armText.put(engine.getName() + "-y", texty);
+    armText.put(engine.getName() + "-z", textz);
     Point point = engine.getDHRobotArm().getPalmPosition();
-    armText.get(engine.getName()+"-x").setText(String.format("%d", (int)point.getX()));
-    armText.get(engine.getName()+"-y").setText(String.valueOf((int)point.getY()));
-    armText.get(engine.getName()+"-z").setText(String.valueOf((int)point.getZ()));
+    armText.get(engine.getName() + "-x").setText(String.format("%d", (int) point.getX()));
+    armText.get(engine.getName() + "-y").setText(String.valueOf((int) point.getY()));
+    armText.get(engine.getName() + "-z").setText(String.valueOf((int) point.getZ()));
     JButton but = new JButton("Move");
-    but.setActionCommand("move-"+engine.getName());
+    but.setActionCommand("move-" + engine.getName());
     but.addActionListener(this);
     but.setEnabled(false);
     buttons.put("move-" + engine.getName(), but);
@@ -289,25 +281,24 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     armsCoordPane.revalidate();
     armPanels.put(engine.getName(), panel);
     display.validate();
-     swingGui.pack();
+    swingGui.pack();
   }
 
-
   public void onPosition() {
-    
+
   }
 
   public void onPosition(final PositionData position) {
-    if (this.swingGui.getInbox().size()>512) {
+    if (this.swingGui.getInbox().size() > 512) {
       return;
     }
-    if (!armPanels.containsKey(position.armName)){
-        createArmPanel((IMEngine) boundService.getEngine(position.armName));
+    if (!armPanels.containsKey(position.armName)) {
+      createArmPanel((IMEngine) boundService.getEngine(position.armName));
     }
     if (!armText.get(position.armName + "-x").isEnabled()) {
-      armText.get(position.armName + "-x").setText(String.format("%d", (int)position.position.getX()));
-      armText.get(position.armName + "-y").setText(String.format("%d", (int)position.position.getY()));
-      armText.get(position.armName + "-z").setText(String.format("%d", (int)position.position.getZ()));
+      armText.get(position.armName + "-x").setText(String.format("%d", (int) position.position.getX()));
+      armText.get(position.armName + "-y").setText(String.format("%d", (int) position.position.getY()));
+      armText.get(position.armName + "-z").setText(String.format("%d", (int) position.position.getZ()));
     }
   }
 }

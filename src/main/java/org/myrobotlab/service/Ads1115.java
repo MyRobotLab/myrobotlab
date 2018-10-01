@@ -12,7 +12,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -918,7 +917,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     pinIndex = new HashMap<Integer, PinDefinition>();
 
     for (int i = 0; i < pinDataCnt; ++i) {
-      PinDefinition pindef = new PinDefinition(getName(), i, String.format("A%d", i));  
+      PinDefinition pindef = new PinDefinition(getName(), i, String.format("A%d", i));
       pindef.setRx(false);
       pindef.setTx(false);
       pindef.setAnalog(true);
@@ -1100,16 +1099,16 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     ;
     return false;
   }
-  
+
   public PinDefinition getPin(String pinName) {
-    if (pinMap.containsKey(pinName)){
+    if (pinMap.containsKey(pinName)) {
       return pinMap.get(pinName);
     }
     return null;
   }
-  
+
   public PinDefinition getPin(Integer address) {
-    if (pinIndex.containsKey(address)){
+    if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
     }
     return null;

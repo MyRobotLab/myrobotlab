@@ -45,7 +45,7 @@ public class RSSConnector extends AbstractConnector {
       e.printStackTrace();
       return;
     }
-    
+
     SyndFeedInput input = new SyndFeedInput();
     SyndFeed feed;
     try {
@@ -56,31 +56,32 @@ public class RSSConnector extends AbstractConnector {
       this.state = ConnectorState.STOPPED;
       return;
     }
-    
-    //    System.out.println(feed);
-    //    try {
-    //      feed = FeedParser.parse(url);
-    //    } catch (FeedIOException | FeedXMLParseException | UnsupportedFeedException e) {
-    //      // TODO Auto-generated catch block
-    //      e.printStackTrace();
-    //      return;
-    //    }
 
-    //FeedHeader header = feed.getHeader();
-    //    int items = feed.getItemCount();
-    
+    // System.out.println(feed);
+    // try {
+    // feed = FeedParser.parse(url);
+    // } catch (FeedIOException | FeedXMLParseException |
+    // UnsupportedFeedException e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // return;
+    // }
+
+    // FeedHeader header = feed.getHeader();
+    // int items = feed.getItemCount();
+
     int i = 0;
     for (Object o : feed.getEntries()) {
-      
-      SyndEntryImpl item = (SyndEntryImpl)o;
-      
+
+      SyndEntryImpl item = (SyndEntryImpl) o;
+
       i++;
       if (interrupted) {
         state = ConnectorState.INTERRUPTED;
         // TODO: clean up after yourself!
         return;
       }
-      //FeedItem item = feed.getItem(i);
+      // FeedItem item = feed.getItem(i);
       // create an id for this as being url # item offset
       Document feedItem = new Document(url + "#" + i);
       feedItem.setField("rss_title", feed.getTitle());
@@ -90,7 +91,7 @@ public class RSSConnector extends AbstractConnector {
       feedItem.setField("rss_date", feed.getPublishedDate());
       feedItem.setField("title", item.getTitle());
       feedItem.setField("link", item.getLink());
-      // TODO: if this is html vs plain text. we should 
+      // TODO: if this is html vs plain text. we should
       String text = HtmlFilter.stripHtml(item.getDescription().getValue());
       feedItem.setField("description", text);
       feedItem.setField("date", item.getPublishedDate());
@@ -112,9 +113,9 @@ public class RSSConnector extends AbstractConnector {
 
   public static void main(String[] args) throws Exception {
     RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
-//    Solr solr = (Solr) Runtime.start("solr", "Solr");
-//    solr.setSolrUrl("http://www.skizatch.org:8983/solr/graph");
-//    connector.addDocumentListener(solr);
+    // Solr solr = (Solr) Runtime.start("solr", "Solr");
+    // solr.setSolrUrl("http://www.skizatch.org:8983/solr/graph");
+    // connector.addDocumentListener(solr);
     connector.startCrawling();
   }
 
@@ -141,7 +142,6 @@ public class RSSConnector extends AbstractConnector {
     // Tried to add this dependency, but no luck with defining the ivy.xml
     meta.addDependency("rome", "rome", "1.0");
     // meta.addDependency("feed4j", "feed4j", "1.0.0");
-    
 
     return meta;
   }

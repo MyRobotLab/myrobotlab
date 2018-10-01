@@ -67,14 +67,16 @@ public class DefaultKinematic extends KinematicModel {
   }
 
   /**
-   * @param rv Sets rotational velocity in radians per second.
+   * @param rv
+   *          Sets rotational velocity in radians per second.
    */
   public final void setRotationalVelocity(double rv) {
     rotationalVelocity = rv;
   }
 
   /**
-   * @param tv Sets translational velocity in meter per second.
+   * @param tv
+   *          Sets translational velocity in meter per second.
    */
   public final void setTranslationalVelocity(double tv) {
     translationalVelocity = tv;

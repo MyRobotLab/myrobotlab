@@ -309,7 +309,6 @@ public abstract class RoombaComm {
 
   public static final int REMOTE_SPINRIGHT = 0x81;
 
-
   static public final short toShort(byte hi, byte lo) {
     return (short) ((hi << 8) | (lo & 0xff));
   }
@@ -390,7 +389,9 @@ public abstract class RoombaComm {
     return sensor_bytes[BUTTONS];
   }
 
-  /*@
+  /*
+   * @
+   * 
    * @return Estimated charge capacity of battery units: mAh range: 0-65535
    */
   public int capacity() {
@@ -458,7 +459,7 @@ public abstract class RoombaComm {
     return (sensor_bytes[CLIFFLEFT] != 0);
   }
 
-  /**  @return right cliff sensor */
+  /** @return right cliff sensor */
   public boolean cliffRight() {
     return sensor_bytes[CLIFFRIGHT] != 0;
   }
@@ -484,7 +485,9 @@ public abstract class RoombaComm {
   /**
    * Connect to a port (for serial, portid is serial port name, for net, portid
    * is url?)
-   * @param portid port
+   * 
+   * @param portid
+   *          port
    * @return true on successful connect, false otherwise
    */
   public abstract boolean connect(String portid);
@@ -557,7 +560,8 @@ public abstract class RoombaComm {
   }
 
   /**
-   * @return Current flowing in or out of battery units: mA range: -332768 - 32767
+   * @return Current flowing in or out of battery units: mA range: -332768 -
+   *         32767
    */
   public short current() {
     return toShort(sensor_bytes[CURRENT_HI], sensor_bytes[CURRENT_LO]);
@@ -610,7 +614,8 @@ public abstract class RoombaComm {
   public abstract void disconnect();
 
   /**
-   * @return Distance traveled since last requested units: mm range: -32768 - 32767
+   * @return Distance traveled since last requested units: mm range: -32768 -
+   *         32767
    */
   public short distance() {
     return toShort(sensor_bytes[DISTANCE_HI], sensor_bytes[DISTANCE_LO]);
@@ -647,7 +652,7 @@ public abstract class RoombaComm {
     send(FULL);
   }
 
-  /** @return  speed for movement commands */
+  /** @return speed for movement commands */
   public int getSpeed() {
     return speed;
   }
@@ -749,7 +754,7 @@ public abstract class RoombaComm {
    * List available ports
    * 
    * @return a list available portids, if applicable or empty set if no ports,
-   *         or return null if list is not enumerable
+   * or return null if list is not enumerable
    */
   public abstract String[] listPorts();
 
@@ -845,8 +850,8 @@ public abstract class RoombaComm {
 
   /**
    * Play a musical note Does it via the hacky method of defining a one-note
-   * song &amp; playing it Uses up song slot 15. If another note is played before
-   * one is finished, the new note cuts off the old one.
+   * song &amp; playing it Uses up song slot 15. If another note is played
+   * before one is finished, the new note cuts off the old one.
    * 
    * @param note
    *          a note number from 31 (G0) to 127 (G8)
@@ -1119,7 +1124,10 @@ public abstract class RoombaComm {
     sensorsUpdateTime = i;
   }
 
-  /** @param s speed for movement commands */
+  /**
+   * @param s
+   *          speed for movement commands
+   */
   public void setSpeed(int s) {
     speed = Math.abs(s);
   }

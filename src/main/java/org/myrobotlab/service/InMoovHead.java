@@ -38,7 +38,6 @@ public class InMoovHead extends Service {
     rollNeck = (Servo) createPeer("rollNeck");
     arduino = (Arduino) createPeer("arduino");
 
-
     neck.setMinMax(20, 160);
     rollNeck.setMinMax(20, 160);
     rothead.setMinMax(30, 150);
@@ -52,9 +51,9 @@ public class InMoovHead extends Service {
     jaw.setRest(10);
     eyeX.setRest(80);
     eyeY.setRest(90);
-    
-    setVelocity(45.0,45.0,-1.0,-1.0,-1.0,45.0);
-    
+
+    setVelocity(45.0, 45.0, -1.0, -1.0, -1.0, 45.0);
+
   }
 
   /*
@@ -63,7 +62,7 @@ public class InMoovHead extends Service {
    */
   @Deprecated
   public boolean attach() {
-  log.warn("attach deprecated please use enable");
+    log.warn("attach deprecated please use enable");
     sleep(InMoov.attachPauseMs);
     eyeX.enable();
     sleep(InMoov.attachPauseMs);
@@ -108,16 +107,14 @@ public class InMoovHead extends Service {
     eyeY.broadcastState();
     jaw.broadcastState();
   }
-  
-
 
   // FIXME - make interface for Arduino / Servos !!!
   public boolean connect(String port) throws Exception {
-	  return connect(port,12,13,22,24,26,30);
-	  
+    return connect(port, 12, 13, 22, 24, 26, 30);
+
   }
-  
-  public boolean connect(String port,Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
+
+  public boolean connect(String port, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) throws Exception {
     arduino.connect(port);
     neck.attach(arduino, headYPin, neck.getRest(), neck.getVelocity());
     rothead.attach(arduino, headXPin, rothead.getRest(), rothead.getVelocity());
@@ -126,15 +123,15 @@ public class InMoovHead extends Service {
     eyeY.attach(arduino, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
     rollNeck.attach(arduino, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
     broadcastState();
-    
+
     enableAutoEnable(true);
-    
+
     return true;
   }
 
   @Deprecated
   public void detach() {
-  log.warn("detach deprecated please use disable");
+    log.warn("detach deprecated please use disable");
     disable();
   }
 
@@ -175,7 +172,8 @@ public class InMoovHead extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH,"%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(), jaw.getPos(), rollNeck.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(),
+        jaw.getPos(), rollNeck.getPos());
   }
 
   public boolean isAttached() {
@@ -214,26 +212,26 @@ public class InMoovHead extends Service {
   public void moveTo(double neck, double rothead) {
     moveTo(neck, rothead, null, null, null, null);
   }
-  
-//TODO IK head moveTo ( neck + rollneck + rothead ? )
+
+  // TODO IK head moveTo ( neck + rollneck + rothead ? )
   public void moveTo(double neck, double rothead, double rollNeck) {
-	    moveTo(neck, rothead, null, null, null, rollNeck);
-	  }
-  
+    moveTo(neck, rothead, null, null, null, rollNeck);
+  }
+
   public void moveTo(double neck, double rothead, double eyeX, double eyeY) {
     moveTo(neck, rothead, eyeX, eyeY, null, null);
   }
-  
+
   public void moveTo(double neck, double rothead, double eyeX, double eyeY, double jaw) {
-	    moveTo(neck, rothead, eyeX, eyeY, jaw, null);
-	  }
+    moveTo(neck, rothead, eyeX, eyeY, jaw, null);
+  }
 
   public void moveTo(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     if (log.isDebugEnabled()) {
       log.debug("head.moveTo {} {} {} {} {} {}", neck, rothead, eyeX, eyeY, jaw, rollNeck);
     }
-      if (rothead != null)
-    this.rothead.moveTo(rothead);
+    if (rothead != null)
+      this.rothead.moveTo(rothead);
     if (neck != null)
       this.neck.moveTo(neck);
     if (eyeX != null)
@@ -243,25 +241,25 @@ public class InMoovHead extends Service {
     if (jaw != null)
       this.jaw.moveTo(jaw);
     if (rollNeck != null)
-        this.rollNeck.moveTo(rollNeck);
+      this.rollNeck.moveTo(rollNeck);
   }
-  
+
   public void moveToBlocking(double neck, double rothead) {
     moveToBlocking(neck, rothead, null, null, null, null);
   }
-  
+
   public void moveToBlocking(double neck, double rothead, double rollNeck) {
     moveToBlocking(neck, rothead, null, null, null, rollNeck);
-    }
-  
+  }
+
   public void moveToBlocking(double neck, double rothead, double eyeX, double eyeY) {
     moveToBlocking(neck, rothead, eyeX, eyeY, null, null);
   }
-  
+
   public void moveToBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw) {
     moveToBlocking(neck, rothead, eyeX, eyeY, jaw, null);
-    }
-  
+  }
+
   public void moveToBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     log.info("init {} moveToBlocking ", getName());
     moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
@@ -276,7 +274,7 @@ public class InMoovHead extends Service {
     eyeY.waitTargetPos();
     jaw.waitTargetPos();
     rollNeck.waitTargetPos();
-    }
+  }
 
   public void release() {
     disable();
@@ -290,8 +288,8 @@ public class InMoovHead extends Service {
 
   public void rest() {
     // initial positions
-    //setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-	rothead.rest();
+    // setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+    rothead.rest();
     neck.rest();
     eyeX.rest();
     eyeY.rest();
@@ -313,71 +311,72 @@ public class InMoovHead extends Service {
 
   @Deprecated
   public void enableAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
-    setAutoDisable(rotheadParam, neckParam, rollNeckParam);	
+    setAutoDisable(rotheadParam, neckParam, rollNeckParam);
   }
-  
+
   @Deprecated
   public void enableAutoDisable(Boolean param) {
     setAutoDisable(param);
-	  }
-  
-  public void setAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
-  rothead.setAutoDisable(rotheadParam);
-  rollNeck.setAutoDisable(rollNeckParam);
-  neck.setAutoDisable(neckParam);
-  
   }
-  
+
+  public void setAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
+    rothead.setAutoDisable(rotheadParam);
+    rollNeck.setAutoDisable(rollNeckParam);
+    neck.setAutoDisable(neckParam);
+
+  }
+
   public void setAutoDisable(Boolean param) {
-      rothead.setAutoDisable(param);
-      neck.setAutoDisable(param);
-      eyeX.setAutoDisable(param);
-      eyeY.setAutoDisable(param);
-      jaw.setAutoDisable(param);
-      rollNeck.setAutoDisable(param);
-    }
-  
+    rothead.setAutoDisable(param);
+    neck.setAutoDisable(param);
+    eyeX.setAutoDisable(param);
+    eyeY.setAutoDisable(param);
+    jaw.setAutoDisable(param);
+    rollNeck.setAutoDisable(param);
+  }
+
   @Deprecated
   public void enableAutoEnable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
     enableAutoEnable(true);
-	  }
-	  
-  @Deprecated  
+  }
+
+  @Deprecated
   public void enableAutoEnable(Boolean param) {
-		  }
-	  
+  }
+
   public void setOverrideAutoDisable(Boolean param) {
-       rothead.setOverrideAutoDisable(param);
-       neck.setOverrideAutoDisable(param);
-       eyeX.setOverrideAutoDisable(param);
-       eyeY.setOverrideAutoDisable(param);
-       jaw.setOverrideAutoDisable(param);
-       rollNeck.setOverrideAutoDisable(param);
-     }	  
+    rothead.setOverrideAutoDisable(param);
+    neck.setOverrideAutoDisable(param);
+    eyeX.setOverrideAutoDisable(param);
+    eyeY.setOverrideAutoDisable(param);
+    jaw.setOverrideAutoDisable(param);
+    rollNeck.setOverrideAutoDisable(param);
+  }
 
   public void setAcceleration(Double headXSpeed, Double headYSpeed, Double rollNeckSpeed) {
-	rothead.setAcceleration(headXSpeed);
-	neck.setAcceleration(headYSpeed);
-	rollNeck.setAcceleration(rollNeckSpeed);
+    rothead.setAcceleration(headXSpeed);
+    neck.setAcceleration(headYSpeed);
+    rollNeck.setAcceleration(rollNeckSpeed);
   }
-  
+
   public void setAcceleration(Double speed) {
-	    rothead.setAcceleration(speed);
-	    neck.setAcceleration(speed);
-	    eyeX.setAcceleration(speed);
-	    eyeY.setAcceleration(speed);
-	    jaw.setAcceleration(speed);
-	    rollNeck.setAcceleration(speed);
-	  }
-	  
-  public void setLimits(int headXMin, int headXMax, int headYMin, int headYMax, int eyeXMin, int eyeXMax, int eyeYMin, int eyeYMax, int jawMin, int jawMax, int rollNeckMin, int rollNeckMax) {
-	    rothead.setMinMax(headXMin, headXMax);
-	    neck.setMinMax(headYMin, headYMax);
-	    eyeX.setMinMax(eyeXMin, eyeXMax);
-	    eyeY.setMinMax(eyeYMin, eyeYMax);
-	    jaw.setMinMax(jawMin, jawMax);
-	    rollNeck.setMinMax(rollNeckMin, rollNeckMax);
-	  }
+    rothead.setAcceleration(speed);
+    neck.setAcceleration(speed);
+    eyeX.setAcceleration(speed);
+    eyeY.setAcceleration(speed);
+    jaw.setAcceleration(speed);
+    rollNeck.setAcceleration(speed);
+  }
+
+  public void setLimits(int headXMin, int headXMax, int headYMin, int headYMax, int eyeXMin, int eyeXMax, int eyeYMin, int eyeYMax, int jawMin, int jawMax, int rollNeckMin,
+      int rollNeckMax) {
+    rothead.setMinMax(headXMin, headXMax);
+    neck.setMinMax(headYMin, headYMax);
+    eyeX.setMinMax(eyeXMin, eyeXMax);
+    eyeY.setMinMax(eyeYMin, eyeYMax);
+    jaw.setMinMax(jawMin, jawMax);
+    rollNeck.setMinMax(rollNeckMin, rollNeckMax);
+  }
 
   // ----- initialization end --------
   // ----- movements begin -----------
@@ -386,15 +385,12 @@ public class InMoovHead extends Service {
     log.info("setPins {} {} {} {} {} {}", headXPin, headYPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
 
     /*
-    rothead.setPin(headXPin);
-    neck.setPin(headYPin);
-    eyeX.setPin(eyeXPin);
-    eyeY.setPin(eyeYPin);
-    jaw.setPin(jawPin);
-    rollNeck.setPin(rollNeckPin);
-    */
+     * rothead.setPin(headXPin); neck.setPin(headYPin); eyeX.setPin(eyeXPin);
+     * eyeY.setPin(eyeYPin); jaw.setPin(jawPin); rollNeck.setPin(rollNeckPin);
+     */
 
-    //Calamity: not sure it should be called in the Arduino, should be on the Servo
+    // Calamity: not sure it should be called in the Arduino, should be on the
+    // Servo
     arduino.servoAttachPin(rothead, headXPin);
     arduino.servoAttachPin(neck, headYPin);
     arduino.servoAttachPin(eyeX, eyeXPin);
@@ -403,12 +399,13 @@ public class InMoovHead extends Service {
     arduino.servoAttachPin(rollNeck, rollNeckPin);
 
   }
+
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
 
-	  setSpeed(headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+    setSpeed(headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, null);
 
-	}
-  
+  }
+
   @Deprecated
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     if (log.isDebugEnabled()) {
@@ -427,8 +424,8 @@ public class InMoovHead extends Service {
       jaw.setSpeed(jawSpeed);
     }
     if (rollNeckSpeed != null) {
-        jaw.setSpeed(rollNeckSpeed);
-      }
+      jaw.setSpeed(rollNeckSpeed);
+    }
 
   }
 
@@ -494,10 +491,10 @@ public class InMoovHead extends Service {
 
   public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
 
-	  setVelocity(headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+    setVelocity(headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, null);
 
-	}
-  
+  }
+
   public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed));
@@ -515,10 +512,10 @@ public class InMoovHead extends Service {
       jaw.setVelocity(jawSpeed);
     }
     if (rollNeckSpeed != null) {
-    	rollNeck.setVelocity(rollNeckSpeed);
-      }
+      rollNeck.setVelocity(rollNeckSpeed);
+    }
   }
-  
+
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
@@ -531,7 +528,7 @@ public class InMoovHead extends Service {
 
       InMoovHead head = (InMoovHead) Runtime.start("head", "InMoovHead");
       head.connect("COM3");
-      
+
       log.info(head.getScript("i01"));
 
     } catch (Exception e) {

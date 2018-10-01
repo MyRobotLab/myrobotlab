@@ -42,10 +42,10 @@ public class Piston extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Piston piston = (Piston)Runtime.start("piston", "Piston");
-      Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      Piston piston = (Piston) Runtime.start("piston", "Piston");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       Runtime.start("gui", "SwingGui");
-      
+
       // piston.attach()
 
     } catch (Exception e) {

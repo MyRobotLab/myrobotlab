@@ -19,10 +19,8 @@ import org.junit.runner.Result;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class RepoTest implements StatusPublisher {
@@ -69,17 +67,15 @@ public class RepoTest implements StatusPublisher {
   }
 
   /*
-   * @Test public void testErrorException() { Repo repo =
-   * Repo.getInstance(); repo.getErrors().clear(); repo.error(new
-   * IOException("io exception test")); assertTrue(repo.getErrors().size() > 0);
-   * }
+   * @Test public void testErrorException() { Repo repo = Repo.getInstance();
+   * repo.getErrors().clear(); repo.error(new IOException("io exception test"));
+   * assertTrue(repo.getErrors().size() > 0); }
    */
 
   /*
    * @Test public void explode(){ boolean explode = true; assertFalse(explode);
    * }
    */
-
 
   /*
    * 
@@ -101,8 +97,6 @@ public class RepoTest implements StatusPublisher {
     File check = new File("libraries");
     assertFalse(check.exists());
   }
-
- 
 
   @Test
   public void testResolveArtifacts() {
@@ -156,7 +150,6 @@ public class RepoTest implements StatusPublisher {
     repo.install("Arduino");
     assertTrue(repo.isInstalled("Arduino"));
   }
-
 
   public static void main(String[] args) {
     try {

@@ -98,7 +98,7 @@ public class InMoov2Gui extends ServiceGui implements ActionListener {
     }
 
     speechCombo.setFont(f);
-    speechCombo.setBackground(new Color(227,251,209));
+    speechCombo.setBackground(new Color(227, 251, 209));
     vocalRecoPanel.add(speechCombo);
 
     vocalRecoPanel.add(startSpeech);
@@ -115,7 +115,7 @@ public class InMoov2Gui extends ServiceGui implements ActionListener {
 
     }
     earCombo.setFont(f);
-    earCombo.setBackground(new Color(241,253,231));
+    earCombo.setBackground(new Color(241, 253, 231));
     vocalRecoPanel.add(earCombo);
 
     vocalRecoPanel.add(startEar);

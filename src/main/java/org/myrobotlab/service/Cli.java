@@ -516,9 +516,8 @@ public class Cli extends Service {
   }
 
   /**
-   * unfortunate collision of names :(
-   * this detach() does not detach from services - but detaches from the 
-   * std i/o of another process
+   * unfortunate collision of names :( this detach() does not detach from
+   * services - but detaches from the std i/o of another process
    */
   public void detach() {
     try {
@@ -655,15 +654,15 @@ public class Cli extends Service {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Cli.class.getCanonicalName());
     meta.addDescription("command line interpreter interface for myrobotlab");
-    meta.addCategory("framework");    
+    meta.addCategory("framework");
     meta.includeServiceInOneJar(true);
-   
+
     return meta;
   }
-  
-  public void releaseService(){
+
+  public void releaseService() {
     super.releaseService();
-    if (in != null){
+    if (in != null) {
       in.isRunning = false;
       // in.interrupt();
       in = null;

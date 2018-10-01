@@ -42,11 +42,9 @@ import com.sun.j3d.utils.geometry.Primitive;
 
 /**
  * A KheperaRobot Agents. This class provides a prebuild khepera robot with the
- * following functionalities:
- * 8 IR sensors
- * Two wheels control
- * Note the numbering and angle in degrees of the IR
- * sensors: 0 -&gt;+85 1 -&gt; +45 2 -&gt; +10 3 -&gt; -10 4 -&gt; -45 5 -&gt;-85 6 et 7 -&gt;180
+ * following functionalities: 8 IR sensors Two wheels control Note the numbering
+ * and angle in degrees of the IR sensors: 0 -&gt;+85 1 -&gt; +45 2 -&gt; +10 3
+ * -&gt; -10 4 -&gt; -45 5 -&gt;-85 6 et 7 -&gt;180
  * 
  * 
  */
@@ -59,7 +57,8 @@ public class KheperaRobot extends Agent {
    * 
    * @param pos
    *          start position.
-   * @param name name
+   * @param name
+   *          name
    */
   public KheperaRobot(Vector3d pos, String name) {
     super(pos, name);

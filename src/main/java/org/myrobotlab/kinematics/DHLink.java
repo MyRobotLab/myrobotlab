@@ -23,7 +23,7 @@ import org.slf4j.Logger;
  *
  */
 public class DHLink implements Serializable {
- 
+
   private static final long serialVersionUID = 1L;
   private double d;
   private double theta;
@@ -40,7 +40,7 @@ public class DHLink implements Serializable {
   private String name;
 
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
-  
+
   private double velocity;
   private int state = Servo.SERVO_EVENT_STOPPED;
   private double targetPos;
@@ -48,6 +48,7 @@ public class DHLink implements Serializable {
   public double servoMin;
   public double servoMax;
   private double currentPos = 0.0;
+
   // private Matrix m;
   // TODO: add max/min angle
   public DHLink(String name, double d, double r, double theta, double alpha) {
@@ -63,8 +64,8 @@ public class DHLink implements Serializable {
     this.type = DHLinkType.REVOLUTE;
     // m = resolveMatrix();
   }
-  
-  public DHLink(DHLink copy){
+
+  public DHLink(DHLink copy) {
     super();
     this.d = copy.d;
     this.theta = copy.theta;
@@ -83,7 +84,6 @@ public class DHLink implements Serializable {
     this.servoMin = copy.servoMin;
     this.currentPos = copy.currentPos;
   }
-  
 
   /**
    * @return a 4x4 homogenous transformation matrix for the given D-H parameters
@@ -172,7 +172,7 @@ public class DHLink implements Serializable {
         // TODO: it's out of range!
         System.out.println("Rotation out of range for link " + angle);
       }
-    } 
+    }
     if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
       if (angle <= max && angle >= min) {
         alpha = angle;
@@ -180,8 +180,7 @@ public class DHLink implements Serializable {
         // TODO: it's out of range!
         System.out.println("Rotation out of range for link " + angle);
       }
-    }
-    else {
+    } else {
       // TODO: You can't rotate a prismatic joint!
       // TODO Throw something?
     }
@@ -232,32 +231,30 @@ public class DHLink implements Serializable {
   @Override
   public String toString() {
     // print in degrees
-    
-    return "DHLink [d=" + d + ", theta=" + MathUtils.radToDeg(theta) + ", r=" + r + ", alpha=" + MathUtils.radToDeg(alpha) + " min=" + MathUtils.radToDeg(min) + " max=" + MathUtils.radToDeg(max) + "]";
+
+    return "DHLink [d=" + d + ", theta=" + MathUtils.radToDeg(theta) + ", r=" + r + ", alpha=" + MathUtils.radToDeg(alpha) + " min=" + MathUtils.radToDeg(min) + " max="
+        + MathUtils.radToDeg(max) + "]";
   }
 
   public void incrRotate(double delta) {
-    if (DHLinkType.REVOLUTE.equals(type)){
+    if (DHLinkType.REVOLUTE.equals(type)) {
       // we shouldn't go beyond the max
       double destAngle = this.theta + delta;
       // I suppose this means min/max are in radians..
       if (destAngle > max || destAngle < min) {
         // we're out of range
         // log.info("Link {} angle out of range {} ", name, destAngle);
-      }
-      else {
+      } else {
         this.theta = destAngle;
       }
-    }
-    else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+    } else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
       // we shouldn't go beyond the max
       double destAngle = alpha + delta;
       // I suppose this means min/max are in radians..
       if (destAngle > max || destAngle < min) {
         // we're out of range
         // log.info("Link {} angle out of range {} ", name, destAngle);
-      }
-      else {
+      } else {
         alpha = destAngle;
       }
     }
@@ -294,74 +291,72 @@ public class DHLink implements Serializable {
   public void addPositionValue(double positionDeg) {
     if (DHLinkType.REVOLUTE.equals(type)) {
       theta = initialTheta + MathUtils.degToRad(positionDeg);
-    }
-    else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+    } else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
       alpha = initialTheta + MathUtils.degToRad(positionDeg);
     }
   }
-  
+
   public double getInitialTheta() {
     return initialTheta;
   }
-  
+
   public Double getPositionValueDeg() {
     if (DHLinkType.REVOLUTE.equals(type)) {
-      return (theta * 180/Math.PI) - (initialTheta*180/Math.PI);
-    }
-    else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
-      return (alpha * 180/Math.PI) - (initialTheta*180/Math.PI);
+      return (theta * 180 / Math.PI) - (initialTheta * 180 / Math.PI);
+    } else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+      return (alpha * 180 / Math.PI) - (initialTheta * 180 / Math.PI);
     }
     return 0.0;
   }
 
-	public double getVelocity() {
-		return velocity;
-	}
+  public double getVelocity() {
+    return velocity;
+  }
 
-	public void setVelocity(double velocity) {
-		this.velocity = velocity;
-	}
+  public void setVelocity(double velocity) {
+    this.velocity = velocity;
+  }
 
-	public Integer getState() {
-		return state;
-	}
+  public Integer getState() {
+    return state;
+  }
 
-	public void setState(Integer state) {
-		this.state = state;
-	}
+  public void setState(Integer state) {
+    this.state = state;
+  }
 
-	/**
-	 * @return the targetPos
-	 */
-	public Double getTargetPos() {
-		return targetPos;
-	}
+  /**
+   * @return the targetPos
+   */
+  public Double getTargetPos() {
+    return targetPos;
+  }
 
-	/**
-	 * @param targetPos2 the targetPos to set
-	 */
-	public void setTargetPos(Double targetPos2) {
-		this.targetPos = targetPos2;
-	}
+  /**
+   * @param targetPos2
+   *          the targetPos to set
+   */
+  public void setTargetPos(Double targetPos2) {
+    this.targetPos = targetPos2;
+  }
 
   public void setCurrentPos(double pos) {
     currentPos = pos;
-    
+
   }
-  
-  public Double getCurrentPos(){
+
+  public Double getCurrentPos() {
     return currentPos;
   }
 
   public DHLinkType getType() {
-  	return type;
+    return type;
   }
-  
+
   public void setType(DHLinkType type) {
-  	this.type = type;
-  	if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
-  	  initialTheta = alpha;
-  	}
+    this.type = type;
+    if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+      initialTheta = alpha;
+    }
   }
 }
-

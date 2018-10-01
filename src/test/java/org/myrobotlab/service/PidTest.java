@@ -10,9 +10,9 @@ public class PidTest {
   @Test
   public void testCompute() {
     Pid pid = (Pid) Runtime.start("pid", "Pid");
-    
+
     // pid.init("x");
-    
+
     pid.setPID("x", 10.0, 0.0, 0.0);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("x", 10.0, 50.0);
@@ -46,6 +46,5 @@ public class PidTest {
     }
 
   }
-
 
 }

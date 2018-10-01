@@ -48,8 +48,7 @@ public class TesseractOcr extends Service {
       // String found = tesseract.ocr("phototest.jpg");
       // String found = tesseract.ocr("30.speed.JPG");
       String found = tesseract.ocr("traffic.sign.jpg");
-      
-      
+
       // String found = tesseract.ocr("test.jpg");
       // String found = tesseract.ocr("test.tif");
       log.info("found {}", found);
@@ -71,7 +70,7 @@ public class TesseractOcr extends Service {
     // javacv is expecting.. so we are going to do it the "file" way :P
     File temp = File.createTempFile("tesseract", ".jpg");
     FileOutputStream fos = new FileOutputStream(temp);
-    ImageIO.write(image, "jpg", fos);    
+    ImageIO.write(image, "jpg", fos);
     temp.deleteOnExit();
     return ocr(temp.getAbsolutePath());
   }
@@ -83,8 +82,9 @@ public class TesseractOcr extends Service {
       api = new TessBaseAPI();
     }
     // Initialize tesseract-ocr with English, without specifying tessdata path
-    // FIXME - maybe don't just dump in the root - perhaps subdirectory - and what
-    // about integrating with other /resources ? 
+    // FIXME - maybe don't just dump in the root - perhaps subdirectory - and
+    // what
+    // about integrating with other /resources ?
     if (api.Init(System.getProperty("user.dir"), "eng") != 0) {
       log.error("Could not initialize tesseract.");
     }
@@ -121,8 +121,8 @@ public class TesseractOcr extends Service {
     ServiceType meta = new ServiceType(TesseractOcr.class);
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
-  
-    // TODO: update me to 1.4 
+
+    // TODO: update me to 1.4
     meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "3.05.01-1.4.1");
 
     // meta.addDependency("net.sourceforge.tess4j", "tess4j", "3.4.0");

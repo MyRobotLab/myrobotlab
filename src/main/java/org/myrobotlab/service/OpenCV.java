@@ -36,7 +36,6 @@ package org.myrobotlab.service;
 //import static org.bytedeco.javacpp.opencv_core.*;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-
 //import static org.bytedeco.javacpp.opencv_gpu.*;
 //import static org.bytedeco.javacpp.opencv_superres.*;
 //import static org.bytedeco.javacpp.opencv_ts.*;
@@ -49,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvRect;
@@ -57,7 +57,6 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -71,9 +70,7 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.MJpegFrameGrabber;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterDL4J;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
-import org.myrobotlab.opencv.OpenCVFilterTracker;
 import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -158,10 +155,10 @@ public class OpenCV extends AbstractVideoSource {
   transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
   static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
-      "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
-      "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
-      "Solr", "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+      "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack",
+      "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse",
+      "Not", "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector",
+      "Smooth", "Solr", "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -288,15 +285,15 @@ public class OpenCV extends AbstractVideoSource {
 
   public String setFrameGrabberType(String grabberType) {
     if (grabberType != null && !grabberType.contains(".")) {
-      
+
       String prefixPath;
-      if ("IPCamera".equals(grabberType) || "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType)
-          || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
+      if ("IPCamera".equals(grabberType) || "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType)
+          || "MJpeg".equals(grabberType)) {
         prefixPath = "org.myrobotlab.opencv.";
       } else {
         prefixPath = "org.bytedeco.javacv.";
       }
-      
+
       grabberType = prefixPath + grabberType;
       if (!grabberType.endsWith("FrameGrabber")) {
         grabberType += "FrameGrabber";
@@ -957,38 +954,33 @@ public class OpenCV extends AbstractVideoSource {
 
     // System.loadLibrary("opencv_java");
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-    
-    
-    
-    //String url  = "http://192.168.4.104:8081/?action=stream";
+
+    // String url = "http://192.168.4.104:8081/?action=stream";
     String url = "http://192.168.4.104:8080/?action=stream";
 
-    //public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
-    //public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
+    // public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
+    // public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
 
-    //String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
-    MJpegFrameGrabber grabber =  new MJpegFrameGrabber(url);
+    // String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
+    MJpegFrameGrabber grabber = new MJpegFrameGrabber(url);
     // grabber.start();
     opencv.capture(grabber);
 
-    
     OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
     opencv.addFilter(ud);
-    
 
-//    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
-//    opencv.addFilter(tld);
+    // OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
+    // opencv.addFilter(tld);
 
-//    opencv.height = 480;
-//    opencv.width = 640;
-//    opencv.height = 1080;
-//    opencv.width= 1920;
-    
-  // opencv.capture();
-   // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
-   // opencv.capture(grabber);
-    
-    
+    // opencv.height = 480;
+    // opencv.width = 640;
+    // opencv.height = 1080;
+    // opencv.width= 1920;
+
+    // opencv.capture();
+    // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
+    // opencv.capture(grabber);
+
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");

@@ -25,7 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-
 /*
  import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
  import static org.bytedeco.javacpp.opencv_imgproc.CV_HAAR_DO_CANNY_PRUNING;
@@ -185,9 +184,11 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
       // 3, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
       // faces = cvHaarDetectObjects(grayImage, classifier_eyes, storage,
       // 1.1, 3, CV_HAAR_DO_CANNY_PRUNING);
-      // performance change from here: https://github.com/bytedeco/javacv/issues/272
+      // performance change from here:
+      // https://github.com/bytedeco/javacv/issues/272
       CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
-      // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
+      // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1,
+      // CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
       if (faces != null) {
         ArrayList<Rectangle> bb = new ArrayList<Rectangle>();
         faceCnt = faces.total();

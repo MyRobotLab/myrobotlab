@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -28,8 +28,8 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.slf4j.Logger;
 
 /**
- * This is a reference implementation of Harry.
- * Harry is an InMoov.  (Harry / Lloyd.. it's all the same.)
+ * This is a reference implementation of Harry. Harry is an InMoov. (Harry /
+ * Lloyd.. it's all the same.)
  * 
  * Very much a WIP
  * 
@@ -47,7 +47,8 @@ public class Lloyd extends Service {
   private Solr memory;
   private Solr cloudMemory;
 
-  // the cortex is the part of the brain responsible for image recognition.. this seems like a fitting name
+  // the cortex is the part of the brain responsible for image recognition..
+  // this seems like a fitting name
   private Deeplearning4j visualCortex;
 
   // speech recognition (the ear!)
@@ -61,23 +62,24 @@ public class Lloyd extends Service {
   private int rightEyeCameraIndex = 0;
   // the oculus for connecting to a remote inmoov
   private OculusRift oculusRift;
-  
+
   private boolean record = true;
   private boolean enableSpeech = true;
   private boolean enableEyes = true;
-  // these are probably mutually exclusive.  but maybe not?!
+  // these are probably mutually exclusive. but maybe not?!
   private boolean enableOculus = false;
   private boolean enableIK = false;
 
   private transient WebGui webgui;
 
-  // Ok.. let's create 2 ik solvers one for the left hand, one for the right hand.
+  // Ok.. let's create 2 ik solvers one for the left hand, one for the right
+  // hand.
   // "motor control"
   private InverseKinematics3D leftIK;
   private InverseKinematics3D rightIK;
 
   // oculus settings for telepresence
-  public String leftEyeURL  = "http://192.168.4.105:8080/?action=stream";
+  public String leftEyeURL = "http://192.168.4.105:8080/?action=stream";
   public String rightEyeURL = "http://192.168.4.105:8081/?action=stream";
 
   public String cloudSolrUrl = "http://phobos:8983/solr/wikipedia";
@@ -107,7 +109,7 @@ public class Lloyd extends Service {
     }
     startBrain();
     startCortex();
-    // start memory last :(  can't attach eyes until the eyes exist.
+    // start memory last :( can't attach eyes until the eyes exist.
     startMemory();
 
     // If we're in telepresence mode start the oculus service.
@@ -121,45 +123,46 @@ public class Lloyd extends Service {
   }
 
   public void startEar() {
-    ear = (WebkitSpeechRecognition)Runtime.start("ear", "WebkitSpeechRecognition");
+    ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
   }
 
   public void startMouth() {
-    mouth = (MarySpeech)Runtime.start("mouth", "MarySpeech");
+    mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
   }
 
   public void startBrain() {
-    brain = (ProgramAB)Runtime.start("brain", "ProgramAB");
+    brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
     // TODO: setup the AIML / chat bot directory for all of this.
-    brain.startSession("ProgramAB",  "person", "lloyd");
+    brain.startSession("ProgramAB", "person", "lloyd");
   }
 
   public void initializeBrain() {
     // programmatically add the aiml instead of from the file system
-    // TODO: add some actual aiml files 
+    // TODO: add some actual aiml files
     brain.addCategory("*", "Default");
     brain.addCategory("Hello", "Hi");
     // we need a category to turn on the camera.
     // we need a category to set the training label
     String trainingPattern = "THIS IS *";
-    // OOB tag here. 
+    // OOB tag here.
     int numExamples = 50;
-    String trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
+    String trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>" + numExamples
+        + "</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
     trainingPattern = "THIS IS A *";
-    // OOB tag here. 
-    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
+    // OOB tag here.
+    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>" + numExamples + "</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
     trainingPattern = "THIS IS AN *";
-    // OOB tag here. 
-    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
+    // OOB tag here.
+    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>" + numExamples + "</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
     trainingPattern = "THIS IS THE *";
-    // OOB tag here. 
-    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
+    // OOB tag here.
+    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>" + numExamples + "</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
     // I want a category that will tell my to rebuild my brain!
@@ -188,7 +191,7 @@ public class Lloyd extends Service {
     createKnowledgeLookup(pattern, fieldName, prefix, suffix);
   }
 
-  public void  whatTypeLookup() {
+  public void whatTypeLookup() {
     String pattern = "WHAT IS *";
     String fieldName = "infobox_type";
     String prefix = "<star/> is a ";
@@ -196,8 +199,7 @@ public class Lloyd extends Service {
     createKnowledgeLookup(pattern, fieldName, prefix, suffix);
   }
 
-
-  public void  tellMeAboutLookup() {
+  public void tellMeAboutLookup() {
     String pattern = "TELL ME ABOUT *";
     String fieldName = "text";
     String prefix = "";
@@ -209,7 +211,7 @@ public class Lloyd extends Service {
     OOBPayload oobTag = createSolrFieldSearchOOB(fieldName);
     // TODO: handle (in the template) a zero hit result ?)
     String template = prefix + OOBPayload.asBlockingOOBTag(oobTag) + suffix;
-    brain.addCategory(pattern, template);    
+    brain.addCategory(pattern, template);
   }
 
   private OOBPayload createSolrFieldSearchOOB(String fieldName) {
@@ -219,7 +221,8 @@ public class Lloyd extends Service {
     ArrayList<String> params = new ArrayList<String>();
     // TODO: add the "qf" parameter to improve precision/recall
     // TODO: add the has infobox as a filter query
-    // params.add("title:<star/> text:<star/> +" + fieldName + ":* +has_infobox:true");
+    // params.add("title:<star/> text:<star/> +" + fieldName + ":*
+    // +has_infobox:true");
     params.add("infobox_name_ss:<star/> title:<star/> text:<star/> +" + fieldName + ":* +has_infobox:true");
     params.add(fieldName);
     OOBPayload oobTag = new OOBPayload(serviceName, methodName, params);
@@ -227,7 +230,7 @@ public class Lloyd extends Service {
   }
 
   public void startMemory() {
-    memory = (Solr)Runtime.start("memory", "Solr");
+    memory = (Solr) Runtime.start("memory", "Solr");
     // TODO: add config to use embedded or external
     try {
       memory.startEmbedded();
@@ -241,20 +244,22 @@ public class Lloyd extends Service {
       memory.attach(leftEye);
       memory.attach(brain);
     }
-    cloudMemory = (Solr)Runtime.start("cloudMemory", "Solr");
+    cloudMemory = (Solr) Runtime.start("cloudMemory", "Solr");
     cloudMemory.setSolrUrl(cloudSolrUrl);
   }
 
   public void startCortex() {
-    visualCortex = (Deeplearning4j)Runtime.start("visualCortex", "Deeplearning4j");
-    // TODO: ?? any other initialization?  load the current image recognition model?
-    
+    visualCortex = (Deeplearning4j) Runtime.start("visualCortex", "Deeplearning4j");
+    // TODO: ?? any other initialization? load the current image recognition
+    // model?
+
   }
 
-  // 
+  //
   public void updateRecognitionModel() throws IOException {
     // Here we should train a new image recognition model..
-    // when that's done.. have it update the current model in use by the dl4jtranfer filter.
+    // when that's done.. have it update the current model in use by the
+    // dl4jtranfer filter.
     int seed = 42;
     double trainPerc = 0.5;
     // vgg16 specific values
@@ -275,39 +280,40 @@ public class Lloyd extends Service {
     QueryResponse resp = memory.search(datasetQuery);
     long numFound = resp.getResults().getNumFound();
     // sorted list (according to solr) of the labels for this data set
-    FacetField labelFacet =  resp.getFacetField("label");
+    FacetField labelFacet = resp.getFacetField("label");
     // maintain sort order with a linked hash set
     List<String> labels = new ArrayList<String>();
     for (Count c : labelFacet.getValues()) {
       labels.add(c.getName());
     }
     Collections.sort(labels);
-    long trainMaxOffset = (long)((double)numFound * trainPerc);
-    long testMaxOffset = (long)((double)numFound * (1.0 - trainPerc));
+    long trainMaxOffset = (long) ((double) numFound * trainPerc);
+    long testMaxOffset = (long) ((double) numFound * (1.0 - trainPerc));
 
     // training query
     SolrQuery trainQuery = memory.makeDatasetQuery(queryString, labelField);
-    trainQuery.addSort("random_"+seed, ORDER.asc);
-    trainQuery.setRows((int)trainMaxOffset);
-    DataSetIterator trainIter = visualCortex.makeSolrInputSplitIterator(memory, trainQuery, numFound, labels, batch , height, width, channels);
+    trainQuery.addSort("random_" + seed, ORDER.asc);
+    trainQuery.setRows((int) trainMaxOffset);
+    DataSetIterator trainIter = visualCortex.makeSolrInputSplitIterator(memory, trainQuery, numFound, labels, batch, height, width, channels);
 
     // testing query
     SolrQuery testQuery = memory.makeDatasetQuery(queryString, labelField);
-    testQuery.addSort("random_"+seed, ORDER.desc);
-    testQuery.setRows((int)testMaxOffset);
-    DataSetIterator testIter = visualCortex.makeSolrInputSplitIterator(memory, testQuery, numFound, labels, batch , height, width, channels);
+    testQuery.addSort("random_" + seed, ORDER.desc);
+    testQuery.setRows((int) testMaxOffset);
+    DataSetIterator testIter = visualCortex.makeSolrInputSplitIterator(memory, testQuery, numFound, labels, batch, height, width, channels);
     //
-    //String filename = "my_new_model.bin";
+    // String filename = "my_new_model.bin";
     // TODO: make this runnable?
-    // At this point we should null out the current model so it stops classifying.
-    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
+    // At this point we should null out the current model so it stops
+    // classifying.
+    ((OpenCVFilterDL4JTransfer) leftEye.getFilter("dl4jTransfer")).unloadModel();
 
     CustomModel imageRecognizer = visualCortex.trainAndSaveModel(labels, trainIter, testIter, imageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
 
-
-    // now we want to get a hold of the dl4j transfer filter and set the model on it with this one.
+    // now we want to get a hold of the dl4j transfer filter and set the model
+    // on it with this one.
     // OpenCVFilterDL4JTransfer("dl4jTransfer");
-    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).loadCustomModel(imageRecognizerModelFilename);
+    ((OpenCVFilterDL4JTransfer) leftEye.getFilter("dl4jTransfer")).loadCustomModel(imageRecognizerModelFilename);
 
     // ok. once that model is saved.
 
@@ -316,7 +322,7 @@ public class Lloyd extends Service {
   public void startEyes() {
     // TODO: enable right eye / config
     // rightEye = (OpenCV)Runtime.start("rightEye", "OpenCV");
-    leftEye = (OpenCV)Runtime.start("leftEye", "OpenCV");
+    leftEye = (OpenCV) Runtime.start("leftEye", "OpenCV");
     // let's start up the trained transfer learning model here.
     OpenCVFilterDL4JTransfer dl4jTransfer = new OpenCVFilterDL4JTransfer("dl4jTransfer");
     dl4jTransfer.loadCustomModel(imageRecognizerModelFilename);
@@ -327,7 +333,7 @@ public class Lloyd extends Service {
   }
 
   public void startOculus() {
-    oculusRift = (OculusRift)Runtime.start("oculusRift", "OculusRift");
+    oculusRift = (OculusRift) Runtime.start("oculusRift", "OculusRift");
     oculusRift.setLeftEyeURL(leftEyeURL);
     oculusRift.setRightEyeURL(rightEyeURL);
     oculusRift.leftCameraAngle = 0;
@@ -341,19 +347,18 @@ public class Lloyd extends Service {
   }
 
   public void startIK() {
-    leftIK = (InverseKinematics3D)Runtime.start("leftIK", "InverseKinematics3D");
-    rightIK = (InverseKinematics3D)Runtime.start("rightIK", "InverseKinematics3D");
+    leftIK = (InverseKinematics3D) Runtime.start("leftIK", "InverseKinematics3D");
+    rightIK = (InverseKinematics3D) Runtime.start("rightIK", "InverseKinematics3D");
 
     // TODO : proper IK models for left & right.
     leftIK.setCurrentArm(InMoovArm.getDHRobotArm());
     rightIK.setCurrentArm(InMoovArm.getDHRobotArm());
 
-    // specify the input scaling factors  TODO: what should these be?
+    // specify the input scaling factors TODO: what should these be?
     // z axis is inverted!
     // invert z again?!
     leftIK.createInputScale(1000.0, 1000.0, 1000.0);
     rightIK.createInputScale(1000.0, 1000.0, 1000.0);
-
 
     // create the translation/rotation input matrix.
     leftIK.createInputMatrix(0, 0, 0, 0, 0, 0);
@@ -363,31 +368,31 @@ public class Lloyd extends Service {
     leftIK.centerAllJoints();
     rightIK.centerAllJoints();
 
-    // TODO: our palm position when we're centered.. probably could be calibration for input translate/rotate / scale matrix?
+    // TODO: our palm position when we're centered.. probably could be
+    // calibration for input translate/rotate / scale matrix?
     Point leftHandPos = leftIK.getCurrentArm().getPalmPosition();
     Point rightHandPos = rightIK.getCurrentArm().getPalmPosition();
 
     // Initial position of left hand
-    log.info("Initial Left Hand Position : {}", leftHandPos );
-    log.info("Initial Right Hand Position : {}", rightHandPos );
+    log.info("Initial Left Hand Position : {}", leftHandPos);
+    log.info("Initial Right Hand Position : {}", rightHandPos);
 
     oculusRift.addListener("publishLeftHandPosition", leftIK.getName(), "onPoint");
     // TODO: re-enable me.. for now .. just left hand as we're debugging.
-    // oculusRift.addListener("publishRightHandPosition", rightIK.getName(), "onPoint");
+    // oculusRift.addListener("publishRightHandPosition", rightIK.getName(),
+    // "onPoint");
 
     leftIK.addListener("publishJointAngles", getName(), "onLeftJointAngles");
     rightIK.addListener("publishJointAngles", getName(), "onRightJointAngles");
-
-
 
   }
 
   public void launchWebGui() {
     // # now start the webgui
-    webgui = (WebGui)Runtime.create("webgui", "WebGui");
+    webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();
-    webgui.startBrowser("http://localhost:8888/#/service/"+ear.getName());
+    webgui.startBrowser("http://localhost:8888/#/service/" + ear.getName());
   }
 
   public void attachCallbacks() {
@@ -402,22 +407,23 @@ public class Lloyd extends Service {
     brain.addTextListener(mouth);
   }
 
-  // TODO: similar approach for sending the oculus head tracking info to the remote !
+  // TODO: similar approach for sending the oculus head tracking info to the
+  // remote !
 
   public void onLeftJointAngles(Map<String, Double> angleMap) {
-    // This is our callback for the IK stuff! 
+    // This is our callback for the IK stuff!
     // calibrate between DH model and real world model.
     angleMap = calibrateLeftAngles(angleMap);
     log.info("Left Joint Angles updated! {}", angleMap);
     for (String key : angleMap.keySet()) {
       log.info("Left Send update to {} set to {}", key, angleMap.get(key));
       try {
-        //  /api/service/i01.head.neck/moveTo/
-        String servoRestUri = skeletonBaseUrl + "api/service/i01.leftArm." +key+ "/moveTo/" + angleMap.get(key);
-        log.info("Invoking URL : {}" , servoRestUri);
+        // /api/service/i01.head.neck/moveTo/
+        String servoRestUri = skeletonBaseUrl + "api/service/i01.leftArm." + key + "/moveTo/" + angleMap.get(key);
+        log.info("Invoking URL : {}", servoRestUri);
         URL uri = new URL(servoRestUri);
         uri.openConnection().getInputStream().close();
-        // gah.. 
+        // gah..
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -430,11 +436,10 @@ public class Lloyd extends Service {
 
     HashMap<String, Double> calibratedMap = new HashMap<String, Double>();
 
-
     // we map the servo 90 degrees to be 0 degrees.
     HashMap<String, Double> phaseShiftMap = new HashMap<String, Double>();
 
-    // When reviewing the current dh model.. 
+    // When reviewing the current dh model..
     phaseShiftMap.put("omoplate", -90.0);
     phaseShiftMap.put("shoulder", -90.0);
     phaseShiftMap.put("rotate", 90.0);
@@ -448,8 +453,8 @@ public class Lloyd extends Service {
     gainMap.put("bicep", 1.0);
 
     for (String key : angleMap.keySet()) {
-      // 
-      Double calibrated = (angleMap.get(key)*gainMap.get(key) + phaseShiftMap.get(key)) % 360;
+      //
+      Double calibrated = (angleMap.get(key) * gainMap.get(key) + phaseShiftMap.get(key)) % 360;
       log.info("Target Servo: {} Input Value: {} and Calibrated Value: {}", key, angleMap.get(key), calibrated);
       calibratedMap.put(key, calibrated);
     }
@@ -459,7 +464,7 @@ public class Lloyd extends Service {
   }
 
   public void onRightJointAngles(Map<String, Double> angleMap) {
-    // This is our callback for the IK stuff!  
+    // This is our callback for the IK stuff!
     log.info("Right Joint Angles updated! {}", angleMap);
     for (String key : angleMap.keySet()) {
       log.info("Right Send update to {} set to {}", key, angleMap.get(key));
@@ -471,15 +476,15 @@ public class Lloyd extends Service {
     ServiceType meta = new ServiceType(Lloyd.class.getCanonicalName());
     meta.addDescription("Lloyd an evolved InMoov.");
     meta.addCategory("robot");
-    // TODO: add pears 
+    // TODO: add pears
     return meta;
   }
 
   public static void main(String[] args) throws SolrServerException, IOException {
-    // 
+    //
     LoggingFactory.init("INFO");
-    Lloyd lloyd = (Lloyd)Runtime.start("lloyd", "Lloyd");
-    SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
+    Lloyd lloyd = (Lloyd) Runtime.start("lloyd", "Lloyd");
+    SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
     // start python
     Runtime.start("python", "Python");
     gui.undockTab("memory");

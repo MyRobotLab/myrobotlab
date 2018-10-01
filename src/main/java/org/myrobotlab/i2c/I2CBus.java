@@ -83,7 +83,7 @@ public class I2CBus implements Attachable, I2CBusControl {
 
   @Override
   public boolean isAttached(String name) {
-    if (controller != null & controller.getName().equals(name)){
+    if (controller != null & controller.getName().equals(name)) {
       return true;
     }
     return false;
@@ -91,7 +91,7 @@ public class I2CBus implements Attachable, I2CBusControl {
 
   @Override
   public void attach(Attachable service) throws Exception {
-    if (service != null){
+    if (service != null) {
       attach(service.getName());
     }
   }
@@ -99,24 +99,24 @@ public class I2CBus implements Attachable, I2CBusControl {
   @Override
   public void attach(String serviceName) throws Exception {
     // already attached to {serviceName} controller
-    if (isAttached(serviceName)){
+    if (isAttached(serviceName)) {
       Log.info("already attached to {}", serviceName);
       return;
     }
-    
+
     // attached to different controller
-    if (controller != null){
+    if (controller != null) {
       detach(controller);
     }
-    
-    controller = (I2CBusController)Runtime.getService(serviceName);
+
+    controller = (I2CBusController) Runtime.getService(serviceName);
   }
 
   @Override
   public void detach() {
     // detach all controllers
     // turns out to be only one controller
-    if (controller != null){
+    if (controller != null) {
       controller.detach(this);
     }
 

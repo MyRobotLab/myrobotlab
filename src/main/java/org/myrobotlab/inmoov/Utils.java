@@ -14,14 +14,14 @@ public class Utils {
   public final static Logger log = LoggerFactory.getLogger(Utils.class);
 
   /**
-   * This method will load a python file into the python interpreter. 
+   * This method will load a python file into the python interpreter.
    */
   public static boolean loadPythonFile(String file, String intanceName) {
     File f = new File(file);
 
     Python p = (Python) Runtime.getService("python");
     if (!intanceName.equals("inMoov")) {
-      //p.exec("inMoov=" + intanceName, true, true);
+      // p.exec("inMoov=" + intanceName, true, true);
     }
     log.info("Loading  Python file {}", f.getAbsolutePath());
     String script = null;

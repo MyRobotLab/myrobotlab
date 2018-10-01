@@ -38,7 +38,6 @@ public class PollyGui extends AbstractSpeechSynthesisGui implements ActionListen
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(PollyGui.class);
 
-
   public PollyGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
   }

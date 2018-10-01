@@ -19,19 +19,19 @@ import org.slf4j.Logger;
 @Ignore
 public class ArduinoMotorPotTest {
 
-  //public boolean uploadSketch = false;
+  // public boolean uploadSketch = false;
   public boolean uploadSketch = false;
-  
+
   public final static Logger log = LoggerFactory.getLogger(ArduinoMotorPotTest.class);
-  private String port ="COM30";
-  private String boardType ="uno";
+  private String port = "COM30";
+  private String boardType = "uno";
   private int leftPwm = 6;
   private int rightPwm = 7;
-  
-  // A0 
+
+  // A0
   private int potPin = 0;
 
-  private double kp = 0.050; 
+  private double kp = 0.050;
   private double ki = 0.020;
   private double kd = 0.020;
 
@@ -50,9 +50,10 @@ public class ArduinoMotorPotTest {
   // platform dependent... (doesn't seem to require the .exe on windows)
   private String arduinoExecutable = "arduino";
   private String sketchFilename = "src\\resource\\Arduino\\MRLComm.c";
-  // in order for arduino to update a sketch it needs to end in .ino and 
+  // in order for arduino to update a sketch it needs to end in .ino and
   // it needs to be in its own directory.
   private String destFilename = "\\MRLComm\\MRLComm.ino";
+
   // A helper function to upload the MRLComm sketch to the Arduino.
   // using the command line utilities.
   public void uploadMRLComm(String port, String board) throws IOException, InterruptedException {
@@ -63,7 +64,7 @@ public class ArduinoMotorPotTest {
     }
     File src = new File(sketchFilename);
     File dest = new File(arduinoPath + destFilename);
-    System.out.println("Copy from " +src.getAbsolutePath() + " to " + dest.getAbsolutePath());
+    System.out.println("Copy from " + src.getAbsolutePath() + " to " + dest.getAbsolutePath());
     // copy MRLComm.c to MRLComm/MRLComm.ino for compilation and upload.
     FileUtils.copyFile(src, dest);
     // Create the command to run (and it's args.)
@@ -83,53 +84,54 @@ public class ArduinoMotorPotTest {
 
     System.out.println("Uploaded Sketch.");
     System.out.flush();
-    // take a breath...  We think it probably worked?  but not sure..
+    // take a breath... We think it probably worked? but not sure..
     Thread.sleep(2000);
   }
-  
+
   @Test
   public void testArduinoMotPot() throws Exception {
-    
-    
+
     if (uploadSketch)
       uploadMRLComm(port, boardType);
-    
+
     boolean enableLoadTiming = false;
     // Runtime.create("gui", "SwingGui");
-    // initialize the logger 
+    // initialize the logger
     TestUtils.initEnvirionment();
-    // Create the pid controller 
-    pid = (Pid)Runtime.createAndStart("pid", "Pid");
-    // # set the pid parameters KP KI KD  (for now just porportial control)
+    // Create the pid controller
+    pid = (Pid) Runtime.createAndStart("pid", "Pid");
+    // # set the pid parameters KP KI KD (for now just porportial control)
     pid.setPID(key, kp, ki, kd);
     int direction = 1;
     pid.setControllerDirection(key, direction);
     pid.setMode(key, 1);
-    // clip the output values from the pid control to a range between -1 and 1. 
+    // clip the output values from the pid control to a range between -1 and 1.
     pid.setOutputRange(key, -1.0, 1.0);
-    // This is the desired sample value from the potentiometer 512 = ~ 90 degrees
+    // This is the desired sample value from the potentiometer 512 = ~ 90
+    // degrees
     int desiredValue = 512;
     pid.setSetpoint(key, desiredValue);
     pid.setSampleTime(key, 40);
     // Start the arduino and the feedback potentiometer polling
-    arduino = (Arduino)Runtime.createAndStart("arduino", "Arduino");
-    // make arduino connect blocking (or at least as long as "getVersion()" takes.
+    arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
+    // make arduino connect blocking (or at least as long as "getVersion()"
+    // takes.
     arduino.connect(port);
     // wait for the arduino to actually connect!
     // Start the motor and attach it to the arduino.
-    motor = (MotorDualPwm)Runtime.createAndStart("motor", "Motor");
+    motor = (MotorDualPwm) Runtime.createAndStart("motor", "Motor");
     motor.setPwmPins(leftPwm, rightPwm);
     motor.attachMotorController(arduino);
     // Sensor callback
     // arduino.analogReadPollingStart(potPin);
     // arduino.sensorAttach(this);
-    
-    // pin zero sample rate 1.  (TODO: fix the concept of a sample rate!)
-    // we actually want it to be specified in Hz..  not cycles ...
+
+    // pin zero sample rate 1. (TODO: fix the concept of a sample rate!)
+    // we actually want it to be specified in Hz.. not cycles ...
     // AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
     // feedbackPot.addSensorDataListener(this); // null config is this right ?
     // arduino.sensorAttach(feedbackPot);
-    
+
     if (enableLoadTiming) {
       arduino.enableBoardInfo(true);
     }
@@ -140,10 +142,9 @@ public class ArduinoMotorPotTest {
 
   }
 
-  
   public void onSensorData(SensorData event) {
     // about we downsample this call?
-	int[] data = (int[])event.getData();
+    int[] data = (int[]) event.getData();
     count++;
     int value = data[0];
     log.info("Data: {}", data);
@@ -153,15 +154,15 @@ public class ArduinoMotorPotTest {
     log.info("Data {} , Output : {}", data, output);
     if (Math.abs(pid.getSetpoint(key) - value) > tolerance) {
       // log.info("Setting pin mode as a test.");
-     //  arduino.pinMode(6,0);
-     // arduino.analogWrite(6, 0);
-      //arduino.pinMode(address, mode);
-      //arduino.digitalWrite(4, 0);
+      // arduino.pinMode(6,0);
+      // arduino.analogWrite(6, 0);
+      // arduino.pinMode(address, mode);
+      // arduino.digitalWrite(4, 0);
       if (count % rate == 0) {
         motor.invoke("move", output);
       }
       // motor.move(output);
-      //motor.move(-1.0);
+      // motor.move(-1.0);
     } else {
       // we made it!
       log.info("Arrived.");
@@ -172,9 +173,9 @@ public class ArduinoMotorPotTest {
 
   }
 
-  
   /**
-   * Helper function to run a system command and return the stdout / stderr as a string
+   * Helper function to run a system command and return the stdout / stderr as a
+   * string
    * 
    * @param program
    * @param args
@@ -182,7 +183,7 @@ public class ArduinoMotorPotTest {
    * @throws IOException
    * @throws InterruptedException
    */
-  protected String runCommand(String program , ArrayList<String> args) throws IOException, InterruptedException {
+  protected String runCommand(String program, ArrayList<String> args) throws IOException, InterruptedException {
 
     ArrayList<String> command = new ArrayList<String>();
     command.add(program);
@@ -191,17 +192,17 @@ public class ArduinoMotorPotTest {
         command.add(arg);
       }
     }
-    System.out.println("RUNNING COMMAND :" + join(command," "));
+    System.out.println("RUNNING COMMAND :" + join(command, " "));
 
     ProcessBuilder builder = new ProcessBuilder(command);
     // we need to specify environment variables
     Map<String, String> environment = builder.environment();
-    
+
     String ldLibPath = commandPath;
-    if (additionalEnv.length() >0) {
+    if (additionalEnv.length() > 0) {
       ldLibPath += ":" + additionalEnv;
     }
-    
+
     environment.put("LD_LIBRARY_PATH", ldLibPath);
     Process handle = builder.start();
 
@@ -214,7 +215,7 @@ public class ArduinoMotorPotTest {
     StringBuilder outputBuilder = new StringBuilder();
     byte[] buff = new byte[4096];
 
-    // TODO: should we read both of these streams? 
+    // TODO: should we read both of these streams?
     // if we break out of the first loop is the process terminated?
     // read stdout
     for (int n; (n = stdOut.read(buff)) != -1;) {
@@ -246,8 +247,8 @@ public class ArduinoMotorPotTest {
   }
 
   /**
-   * Helper function to run a program , return the stderr / stdout as a string and 
-   * to catch any exceptions that occur
+   * Helper function to run a program , return the stderr / stdout as a string
+   * and to catch any exceptions that occur
    * 
    * @param cmd
    * @param args
@@ -268,7 +269,7 @@ public class ArduinoMotorPotTest {
     }
     return returnValue;
   }
-  
+
   // TODO: this should be on a string utils static class.
   private String join(ArrayList<String> list, String joinChar) {
     StringBuilder sb = new StringBuilder();
@@ -284,12 +285,9 @@ public class ArduinoMotorPotTest {
     return sb.toString();
   }
 
-public boolean isLocal() {
-	// TODO Auto-generated method stub
-	return true;
-}
-
-
+  public boolean isLocal() {
+    // TODO Auto-generated method stub
+    return true;
+  }
 
 }
-

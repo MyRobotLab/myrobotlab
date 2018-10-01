@@ -60,8 +60,10 @@ public class ServoOrchestratorGUI_middlemiddle_main {
    * Returns (creating, if necessary) the DataFlavor representing
    * ServoOrchestratorGUI_middlemiddle_panel
    * </p>
+   * 
    * @return data flavor
-   * @throws Exception e
+   * @throws Exception
+   *           e
    *
    */
   public static DataFlavor getDragAndDropPanelDataFlavor() throws Exception {

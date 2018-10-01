@@ -11,16 +11,16 @@ public class YoloDetectedObject {
     this.label = label;
     this.frameIndex = frameIndex;
   }
-  
+
   public Rect boundingBox;
   public float confidence;
   public String label;
   public int frameIndex;
-  
+
   @Override
   public String toString() {
-    String box = "X:" + boundingBox.x() + ",Y:" + boundingBox.y() + " W:" + boundingBox.width() + " H:"+ boundingBox.height();
-    return "YoloDetectedObject [boundingBox=" + box + ", confidence=" + confidence + ", label=" + label + ", frameIndex= "+frameIndex+"]";
+    String box = "X:" + boundingBox.x() + ",Y:" + boundingBox.y() + " W:" + boundingBox.width() + " H:" + boundingBox.height();
+    return "YoloDetectedObject [boundingBox=" + box + ", confidence=" + confidence + ", label=" + label + ", frameIndex= " + frameIndex + "]";
   }
-  
+
 }

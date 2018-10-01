@@ -74,7 +74,7 @@ public class Esp8266_01 extends Service implements I2CController {
     public void setReadSize(String readSize) {
       this.readSize = readSize;
     }
-    
+
     public String getBuffer() {
       return buffer;
     }
@@ -102,7 +102,7 @@ public class Esp8266_01 extends Service implements I2CController {
 
   String host = "192.168.1.99";
 
-  public static void main(String[] args) {    
+  public static void main(String[] args) {
     LoggingFactory.init(Level.DEBUG);
 
   }
@@ -249,7 +249,7 @@ public class Esp8266_01 extends Service implements I2CController {
       // log.info(resultGson.fromJson(result.toString(),
       // i2cParms.class).toString());
 
-      log.info("bus {}, device {}, size {}, buffer {}",returndata.bus, returndata.device, returndata.readSize, returndata.buffer);
+      log.info("bus {}, device {}, size {}, buffer {}", returndata.bus, returndata.device, returndata.readSize, returndata.buffer);
     }
 
     hexStringToArray(returndata.buffer, buffer);
@@ -269,14 +269,14 @@ public class Esp8266_01 extends Service implements I2CController {
   }
 
   /*
-  @Override
-  public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+   * @Override public int i2cWriteRead(I2CControl control, int busAddress, int
+   * deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int
+   * readSize) {
+   * 
+   * i2cWrite(control, busAddress, deviceAddress, writeBuffer, writeSize);
+   * return i2cRead(control, busAddress, deviceAddress, readBuffer, readSize); }
+   */
 
-    i2cWrite(control, busAddress, deviceAddress, writeBuffer, writeSize);
-    return i2cRead(control, busAddress, deviceAddress, readBuffer, readSize);
-  }
-  */
-  
   @Override
   public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
 
@@ -349,12 +349,12 @@ public class Esp8266_01 extends Service implements I2CController {
       // log.info(resultGson.fromJson(result.toString(),
       // i2cParms.class).toString());
 
-      log.info("bus {}, device {}, readSize {}, buffer {}",returndata.bus, returndata.device, returndata.readSize, returndata.buffer);
+      log.info("bus {}, device {}, readSize {}, buffer {}", returndata.bus, returndata.device, returndata.readSize, returndata.buffer);
     }
-    
+
     hexStringToArray(returndata.buffer, readBuffer);
 
-    return  Integer.decode(returndata.readSize);
+    return Integer.decode(returndata.readSize);
   }
 
   public void setHost(String host) {
@@ -370,7 +370,7 @@ public class Esp8266_01 extends Service implements I2CController {
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (i2cDevices.containsKey(key)) {
       devicedata = i2cDevices.get(key);
-      if (control.getName() != devicedata.serviceName){
+      if (control.getName() != devicedata.serviceName) {
         log.error("Attach of {} failed: {} already exists on bus %s address {}", control.getName(), devicedata.serviceName, control.getDeviceBus(), control.getDeviceAddress());
       }
     } else {
@@ -392,7 +392,7 @@ public class Esp8266_01 extends Service implements I2CController {
     // needs this service to still be availabe
     String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
     if (i2cDevices.containsKey(key)) {
-      log.info("detach : "+control.getName());
+      log.info("detach : " + control.getName());
       i2cDevices.remove(key);
       control.detachI2CController(this);
     }
@@ -412,12 +412,12 @@ public class Esp8266_01 extends Service implements I2CController {
     meta.addDescription("ESP8266-01 service to communicate using WiFi and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
-    //meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+    // meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     // FIXME - add HttpClient as a peer .. and use its interface .. :)
     // then remove direct dependencies to httpcomponents ...
     // One HttpClient to Rule them all !!
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");  
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
 
     return meta;
   }

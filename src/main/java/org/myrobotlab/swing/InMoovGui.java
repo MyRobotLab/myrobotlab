@@ -84,7 +84,7 @@ public class InMoovGui extends ServiceGui implements ActionListener {
     display.setLayout(new BorderLayout());
 
     opencv = new VideoWidget(String.format("%s.opencv", boundServiceName), myService);
-    
+
     // opencv = new VideoWidget(boundServiceName, myService, tabs);
     // opencv.
 
@@ -115,7 +115,7 @@ public class InMoovGui extends ServiceGui implements ActionListener {
     rightHand.addActionListener(this);
     rightArm.addActionListener(this);
     head.addActionListener(this);
-  
+
   }
 
   @Override

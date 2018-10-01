@@ -162,7 +162,6 @@ public class RemoteAdapterGui extends ServiceGui implements ActionListener {
     });
   }
 
-
   public void onNewConnection(Connection conn) {
     swingGui.info("new connection found %d %s", System.currentTimeMillis(), conn.toString());
   }

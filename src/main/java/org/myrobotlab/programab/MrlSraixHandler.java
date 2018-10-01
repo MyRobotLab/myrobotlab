@@ -1,9 +1,9 @@
 package org.myrobotlab.programab;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.SraixHandler;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -15,21 +15,20 @@ public class MrlSraixHandler implements SraixHandler {
   transient public final static Logger log = LoggerFactory.getLogger(MrlSraixHandler.class);
   Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
   Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-  
+
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit) {
     // TODO: what the heck gets passed in here?!?!
-    
-    // the INPUT has the string we care about.  if this is an OOB tag, let's evaluate it and return the result.  o/w fall back to default behavior 
+
+    // the INPUT has the string we care about. if this is an OOB tag, let's
+    // evaluate it and return the result. o/w fall back to default behavior
     // of pannous / pandorabots?
     String response = processInlineOOB(input);
-    
-    
-    // ok.. 
+
+    // ok..
     return response;
   }
 
-  
   private String processInlineOOB(String text) {
     // Find any oob tags
     StringBuilder responseBuilder = new StringBuilder();
@@ -66,13 +65,13 @@ public class MrlSraixHandler implements SraixHandler {
         responseBuilder.append(result);
       }
     }
-    // append the last part. (assume the start is set to the end of the last match.. 
+    // append the last part. (assume the start is set to the end of the last
+    // match..
     // or zero if no matches found.
     responseBuilder.append(text.substring(start));
-    return responseBuilder.toString();    
+    return responseBuilder.toString();
   }
 
-  
   private OOBPayload parseOOB(String oobPayload) {
 
     // TODO: fix the damn double encoding issue.

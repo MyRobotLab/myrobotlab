@@ -24,7 +24,7 @@ public class ProgramABTest extends AbstractServiceTest {
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
 
   public Service createService() {
-    
+
     log.info("Setting up the Program AB Service ########################################");
     // Load the service under test
     // a test robot
@@ -56,7 +56,6 @@ public class ProgramABTest extends AbstractServiceTest {
     return testService;
   }
 
-  
   public void testProgramAB() throws Exception {
     // a response
     Response resp = testService.getResponse(username, "UNIT TEST PATTERN");
@@ -64,7 +63,6 @@ public class ProgramABTest extends AbstractServiceTest {
     assertEquals("Unit Test Pattern Passed", resp.msg);
   }
 
-  
   public void testOOBTags() throws Exception {
     Response resp = testService.getResponse(username, "OOB TEST");
     assertEquals("OOB Tag Test", resp.msg);
@@ -106,18 +104,18 @@ public class ProgramABTest extends AbstractServiceTest {
     // Response resp1 = testService.getResponse(session, "SET FOO BAR");
     // System.out.println(resp1.msg);
     Response resp = testService.getResponse(username, "LEARN AAA IS BBB");
-    //System.out.println(resp.msg);
+    // System.out.println(resp.msg);
     resp = testService.getResponse(username, "WHAT IS AAA");
     assertEquals("BBB", resp.msg);
   }
-  
+
   public void testSets() {
     Response resp = testService.getResponse(username, "SETTEST CAT");
     assertEquals("An Animal.", resp.msg);
     resp = testService.getResponse(username, "SETTEST MOUSE");
     assertEquals("An Animal.", resp.msg);
     resp = testService.getResponse(username, "SETTEST DOG");
-    //System.out.println(resp.msg);
+    // System.out.println(resp.msg);
     assertEquals("An Animal.", resp.msg);
   }
 
@@ -159,7 +157,7 @@ public class ProgramABTest extends AbstractServiceTest {
     resp = testService.getResponse(username, "TESTTOPICTEST");
     assertEquals("TOPIC IS unknown", resp.msg);
   }
-  
+
   public void umlautTest() {
     Response resp = testService.getResponse(username, "Lars Ümlaüt");
     // @GroG says - "this is not working"
@@ -171,15 +169,15 @@ public class ProgramABTest extends AbstractServiceTest {
     assertTrue(res.size() > 0);
   }
 
-  
   public void addCategoryTest() {
     testService.addCategory("BOOG", "HOWDY");
     Response resp = testService.getResponse(username, "BOOG");
     assertTrue(resp.msg.equals("HOWDY"));
   }
-  
+
   // the pannous service seems borked at the moment due to bad ssl, and maybe
-  // other stuff..  kwatters: I recommend we build our own service that does this stuff
+  // other stuff.. kwatters: I recommend we build our own service that does this
+  // stuff
   // @Test
   public void pannousTest() {
     Response resp = testService.getResponse(username, "SHOW ME INMOOV");
@@ -198,7 +196,7 @@ public class ProgramABTest extends AbstractServiceTest {
     contains = resp.msg.contains("You are talking to lloyd");
     assertTrue(contains);
   }
-  
+
   @Override
   public void testService() throws Exception {
     // run each of the test methods.
@@ -218,7 +216,5 @@ public class ProgramABTest extends AbstractServiceTest {
     addCategoryTest();
     sraixTest();
   }
-
-
 
 }

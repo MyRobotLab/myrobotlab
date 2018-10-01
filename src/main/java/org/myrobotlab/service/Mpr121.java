@@ -12,7 +12,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -60,7 +59,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
           log.info("Shutting down Publisher");
         } else {
           isPublishing = false;
-          log.error("publisher threw {}",e);
+          log.error("publisher threw {}", e);
         }
       }
     }
@@ -295,8 +294,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
                          // default // hZ.
 
   public static void main(String[] args) {
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     try {
       Mpr121 mpr121 = (Mpr121) Runtime.start("mpr121", "Mpr121");
@@ -394,8 +392,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       sleep(1);
       config = readRegister8(AFE_CONFIGURATION_2);
       log.info(String.format("AFE Configuraiton register 0x%02X", config));
-      retries ++;
-      if (retries > 10) break;
+      retries++;
+      if (retries > 10)
+        break;
     }
 
     if (config != 0x24) {
@@ -853,16 +852,16 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     ;
     return false;
   }
-  
+
   public PinDefinition getPin(String pinName) {
-    if (pinMap.containsKey(pinName)){
+    if (pinMap.containsKey(pinName)) {
       return pinMap.get(pinName);
     }
     return null;
   }
-  
+
   public PinDefinition getPin(Integer address) {
-    if (pinIndex.containsKey(address)){
+    if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
     }
     return null;

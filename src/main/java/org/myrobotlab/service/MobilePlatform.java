@@ -54,7 +54,7 @@ import org.slf4j.Logger;
  */
 @Deprecated // use Chassis
 public class MobilePlatform extends Service {
- 
+
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MobilePlatform.class);
 
@@ -63,15 +63,15 @@ public class MobilePlatform extends Service {
   public int targetX = 0;
 
   public int targetY = 0;
-  
+
   public Double headingCurrent = 0.0;
   public Double headingTarget = 0.0;
   public Double headingLast = 0.0;
   public Double headingDelta = 0.0;
-  
+
   transient MotorControl left = null;
   transient MotorControl right = null;
-  
+
   // String directionTarget = null;
 
   // TODO - determine if control needs to be serialized
@@ -329,7 +329,6 @@ public class MobilePlatform extends Service {
     left.move(-power);
   }
 
-
   // from motor interface begin-------
   public void stop() {
     right.stop();
@@ -341,14 +340,13 @@ public class MobilePlatform extends Service {
     left.stopAndLock();
   }
 
-  
   // waitForHeadingChange will block and wait for heading change
   public final double waitForHeadingChange() {
     synchronized (lock) {
       try {
         lock.wait();
       } catch (InterruptedException e) {
-    	  log.info("lock interrupted");
+        log.info("lock interrupted");
       }
     }
 
@@ -373,7 +371,7 @@ public class MobilePlatform extends Service {
 
     return meta;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

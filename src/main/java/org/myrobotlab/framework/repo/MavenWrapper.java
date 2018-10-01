@@ -52,14 +52,14 @@ public class MavenWrapper extends Repo {
   // FIXME - call external mvn since Embedded Maven is not documented and buggy
   @Override
   public void install(String location, String[] serviceTypes) {
-	
-	createBuildFiles(location, serviceTypes);
-	
-	log.error("TODO - implement dependency copy with ProcessBuilder & external mvn install");
-	boolean done = true;
-	if (done) {
-		return;
-	}
+
+    createBuildFiles(location, serviceTypes);
+
+    log.error("TODO - implement dependency copy with ProcessBuilder & external mvn install");
+    boolean done = true;
+    if (done) {
+      return;
+    }
 
     info("===== starting installation of %d services =====", serviceTypes.length);
     for (String serviceType : serviceTypes) {
@@ -223,19 +223,19 @@ public class MavenWrapper extends Repo {
     try {
 
       LoggingFactory.init(Level.INFO);
-      
+
       Repo repo = Repo.getInstance("MavenWrapper");
 
       String serviceType = "_TemplateService";
-      
+
       serviceType = null;
-      
-      long ts = System.currentTimeMillis();      
+
+      long ts = System.currentTimeMillis();
 
       String dir = String.format("install.maven.%s.%d", serviceType, ts);
 
       repo.createBuildFiles(dir, serviceType);
-      
+
       // repo.install("install.dl4j.maven", "Deeplearning4j");
       // repo.install("install.opencv.maven","OpenCV");
       // repo.createBuildFiles(dir, "Arm");

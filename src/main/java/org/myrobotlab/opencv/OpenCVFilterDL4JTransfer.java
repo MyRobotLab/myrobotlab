@@ -29,18 +29,18 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
 
   private transient Deeplearning4j dl4j;
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-  
-  public Map<String, Double> lastResult = null; 
-  
+
+  public Map<String, Double> lastResult = null;
+
   public CustomModel model = null;
-  
+
   private volatile IplImage lastImage = null;
-  
+
   public OpenCVFilterDL4JTransfer() {
     super();
     init();
   }
-  
+
   public OpenCVFilterDL4JTransfer(String name) {
     super(name);
     log.info("Constructor of dl4j filter");
@@ -48,14 +48,14 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   }
 
   private void init() {
-    dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
+    dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
     // loadDL4j();
-    //log.info("Finished loading vgg16 model.");
+    // log.info("Finished loading vgg16 model.");
     Thread classifier = new Thread(this, "DL4JClassifierThread");
     classifier.start();
     log.info("DL4J Classifier thread started : {}", this.name);
   }
-  
+
   public void loadCustomModel(String filename) {
     // TODO: test if file exists!
     try {
@@ -65,52 +65,54 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
     } catch (IOException e) {
       e.printStackTrace();
       log.warn("Error loading model! {}", e);
-      return;      
+      return;
     }
     log.info("Done loading model..");
     // start classifier thread
   }
-  
+
   @Override
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
     if (lastResult != null) {
-      // the thread running will be updating lastResult for it as fast as it can.
+      // the thread running will be updating lastResult for it as fast as it
+      // can.
       // log.info("Display result " );
       displayResult(image, lastResult);
     }
-    // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
+    // ok now we just need to update the image that the current thread is
+    // processing (if the current thread is idle i guess?)
     lastImage = image;
     return image;
   }
 
   public static String padRight(String s, int n) {
-    return String.format("%1$-" + n + "s", s);  
+    return String.format("%1$-" + n + "s", s);
   }
-  
+
   public void drawRect(IplImage image, Rect rect, CvScalar color) {
     cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
   }
-  
+
   private void displayResultYolo(IplImage image, ArrayList<YoloDetectedObject> result) {
     DecimalFormat df2 = new DecimalFormat("#.###");
     for (YoloDetectedObject obj : result) {
-      String label =  obj.label + " (" + df2.format(obj.confidence*100) + "%)";
+      String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
       // anchor point for text.
-      cvPutText(image, label , cvPoint(obj.boundingBox.x(), obj.boundingBox.y()), font, CvScalar.YELLOW);
+      cvPutText(image, label, cvPoint(obj.boundingBox.x(), obj.boundingBox.y()), font, CvScalar.YELLOW);
       // obj.boundingBox.
-      drawRect(image,obj.boundingBox, CvScalar.BLUE);
+      drawRect(image, obj.boundingBox, CvScalar.BLUE);
     }
   }
-  
+
   private void displayResult(IplImage image, Map<String, Double> result) {
     DecimalFormat df2 = new DecimalFormat("#.###");
     int i = 0;
     int percentOffset = 150;
     for (String label : result.keySet()) {
       i++;
-      String val = df2.format(result.get(label)*100) + "%";
-      cvPutText(image, label + " : " , cvPoint(20, 60+(i*12)), font, CvScalar.YELLOW);
-      cvPutText(image, val, cvPoint(20+percentOffset, 60+(i*12)), font, CvScalar.YELLOW);
+      String val = df2.format(result.get(label) * 100) + "%";
+      cvPutText(image, label + " : ", cvPoint(20, 60 + (i * 12)), font, CvScalar.YELLOW);
+      cvPutText(image, val, cvPoint(20 + percentOffset, 60 + (i * 12)), font, CvScalar.YELLOW);
     }
   }
 
@@ -119,7 +121,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
     StringBuilder res = new StringBuilder();
     for (String key : result.keySet()) {
       res.append(key + " : ");
-      res.append(df2.format(result.get(key)*100) + "% , ");        
+      res.append(df2.format(result.get(key) * 100) + "% , ");
     }
     return res.toString();
   }
@@ -131,7 +133,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
 
   @Override
   public void run() {
-    
+
     int count = 0;
     long start = System.currentTimeMillis();
     log.info("Starting the DL4J classifier thread...");
@@ -139,7 +141,8 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
     while (true) {
       // log.info("Running!!!");
       // now we need to know which image we should classify
-      // there likely needs to be some synchronization on this too.. o/w the main thread will
+      // there likely needs to be some synchronization on this too.. o/w the
+      // main thread will
       // be updating it while it's being classified maybe?!
       if (lastImage != null && model != null) {
         try {
@@ -147,15 +150,15 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
           lastResult = dl4j.classifyImageCustom(lastImage, model.getModel(), model.getLabels());
           count++;
           if (count % 100 == 0) {
-            double rate = 1000.0*count / (System.currentTimeMillis() - start);
+            double rate = 1000.0 * count / (System.currentTimeMillis() - start);
             System.out.println("Rate " + rate);
             log.info(formatResultString(lastResult));
           }
-          //dl4j.classifyImageDarknet(lastImage);
+          // dl4j.classifyImageDarknet(lastImage);
           // lastResult = dl4j.classifyImageVGG16(lastImage);
           invoke("publishClassification", lastResult);
           if (lastResult != null) {
-            //log.info(formatResultString(lastResult));
+            // log.info(formatResultString(lastResult));
           }
         } catch (IOException e) {
           // TODO Auto-generated catch block
@@ -165,10 +168,12 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
       } else {
         // log.info("No Image to classify...");
       }
-      // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
+      // TODO: see why there's a race condition. i seem to need a little delay
+      // here o/w the recognition never seems to start.
       // maybe lastImage needs to be marked as volatile ?
       try {
-        // Let's limit the speed at which we try to classify  at most 2 fps should be fine
+        // Let's limit the speed at which we try to classify at most 2 fps
+        // should be fine
         Thread.sleep(500);
       } catch (InterruptedException e) {
         // TODO Auto-generated catch block
@@ -177,21 +182,21 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
     }
   }
 
-  public Map<String, Double> publishClassification(Map<String, Double> classification) {	
-	  return classification;
+  public Map<String, Double> publishClassification(Map<String, Double> classification) {
+    return classification;
   }
-  
+
   public void attach(Solr solr) {
-	  
-	  // 
-	  
+
+    //
+
   }
 
   public void unloadModel() {
     // TODO Auto-generated method stub
     this.model = null;
     this.lastResult = null;
-    
+
   }
-  
+
 }

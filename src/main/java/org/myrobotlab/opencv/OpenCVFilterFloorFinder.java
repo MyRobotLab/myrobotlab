@@ -69,16 +69,16 @@ public class OpenCVFilterFloorFinder extends OpenCVFilter {
   public void updateUpDiff(int r, int g, int b) {
     up_diff = CV_RGB(r, g, b);
   }
-  
+
   public void updateFillColor(int r, int g, int b) {
     fillColor = cvScalar(r, g, b, 1.0);
   }
-  
+
   @Override
   public IplImage process(IplImage image, OpenCVData data) {
     // if (startPoint == null) {
     startPoint = cvPoint(image.width() / 2, image.height() - 4);
-    //}    
+    // }
     cvFloodFill(image, startPoint, fillColor, lo_diff, up_diff, null, 4, null);
     return image;
 

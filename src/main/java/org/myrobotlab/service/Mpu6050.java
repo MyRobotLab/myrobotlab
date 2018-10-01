@@ -542,8 +542,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   public static void main(String[] args) {
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     try {
 

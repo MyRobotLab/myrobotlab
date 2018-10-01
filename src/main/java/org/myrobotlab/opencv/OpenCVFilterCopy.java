@@ -36,47 +36,47 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterCopy extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCopy.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCopy.class.getCanonicalName());
 
-	public OpenCVFilterCopy() {
-		super();
-	}
+  public OpenCVFilterCopy() {
+    super();
+  }
 
-	public OpenCVFilterCopy(String name) {
-		super(name);
-	}
+  public OpenCVFilterCopy(String name) {
+    super(name);
+  }
 
-	/*
-	 * 
-	 * void getSubImg(IplImage* img, IplImage* subImg, CvRect roiRect) {
-	 * 
-	 * cvSetImageROI(img, roiRect); subImg = cvCreateImage(cvGetSize(img),
-	 * img->depth, img->nChannels); cvCopy(img, subImg, NULL);
-	 * cvResetImageROI(img); }
-	 */
+  /*
+   * 
+   * void getSubImg(IplImage* img, IplImage* subImg, CvRect roiRect) {
+   * 
+   * cvSetImageROI(img, roiRect); subImg = cvCreateImage(cvGetSize(img),
+   * img->depth, img->nChannels); cvCopy(img, subImg, NULL);
+   * cvResetImageROI(img); }
+   */
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage img, OpenCVData data) {
-		IplImage copy = null;
+  @Override
+  public IplImage process(IplImage img, OpenCVData data) {
+    IplImage copy = null;
 
-		// CvRect roiRect = new CvRect(0, 0, 30, 120);
-		// cvSetImageROI(img, roiRect);
-		copy = cvCreateImage(cvGetSize(img), img.depth(), img.nChannels());
+    // CvRect roiRect = new CvRect(0, 0, 30, 120);
+    // cvSetImageROI(img, roiRect);
+    copy = cvCreateImage(cvGetSize(img), img.depth(), img.nChannels());
 
-		cvCopy(img, copy, null);
-		// vp.sources.put(vp.boundServiceName, String.format("%s.copy",
-		// vp.boundServiceName, name), img);
-		// cvResetImageROI(img);
+    cvCopy(img, copy, null);
+    // vp.sources.put(vp.boundServiceName, String.format("%s.copy",
+    // vp.boundServiceName, name), img);
+    // cvResetImageROI(img);
 
-		return copy;
-	}
+    return copy;
+  }
 
 }

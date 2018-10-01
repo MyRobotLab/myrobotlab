@@ -78,10 +78,10 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   Set<String> subscriptions = new HashSet<String>();
 
   // String url = "tcp://iot.eclipse.org:1883";
-  
+
   /**
-   * Two types of connection are supported tcp:// for a TCP connection and ssl:// ,
-   * which is weird, that its not mqtt:// & mqtts:// :P
+   * Two types of connection are supported tcp:// for a TCP connection and
+   * ssl:// , which is weird, that its not mqtt:// & mqtts:// :P
    */
   String url = "tcp://iot.eclipse.org:1883";
 
@@ -203,29 +203,28 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     // protobuf or native Java
     try {
       Message msg = (Message) codec.decode(payload, Message.class);
-      
+
       // COMMON GATEWAY REGISTERATION AND X-FORWARDED BEGIN --------------
-      
+
       // make a mrl key and protocol uri begin ------
-      // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as this is a detail for tcp
-      
+      // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as
+      // this is a detail for tcp
+
       // String clientKey = String.format("mqtt://%s:%d", this.url);
       URI uri = new URI(url);
       // HELP PROTOKEY VS MRL KEY ??
       // TcpThread tcp = new TcpThread(myService, uri, clientSocket);
       // tcpClientList.put(uri, tcp);
       // myService.connections.put(uri, tcp.data);
-      
+
       // make a mrl key and protocol uri end -------
-      
-      
+
       // registration request - security is applied here
-      // x-forwarded is 
+      // x-forwarded is
       // msg.name == runtime;
-          
-          
-      // COMMON GATEWAY REGISTERATION AND X-FORWARDED END ----------------       
-      
+
+      // COMMON GATEWAY REGISTERATION AND X-FORWARDED END ----------------
+
     } catch (Exception e) {
       error("tried decoding [%] into a message", payload);
     }
@@ -355,9 +354,12 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     meta.addDescription(
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
     meta.addCategory("connectivity", "cloud");
-    /*<!-- https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3 -->
-<dependency org="org.eclipse.paho" name="org.eclipse.paho.client.mqttv3" rev="1.2.0"/>
-*/
+    /*
+     * <!--
+     * https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.
+     * client.mqttv3 --> <dependency org="org.eclipse.paho"
+     * name="org.eclipse.paho.client.mqttv3" rev="1.2.0"/>
+     */
     meta.addDependency("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0");
     meta.setCloudService(true);
     return meta;
@@ -372,10 +374,10 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       LoggingFactory.init();
 
       Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
-      
-      //      | mrl gateway uri | protocol key
+
+      // | mrl gateway uri | protocol key
       // URI = mrl://{getName()}/tcp://iot.eclipse.org:1883
-      
+
       // (broadcast)
       // allow-register list of id's
 

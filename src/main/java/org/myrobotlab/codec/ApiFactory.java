@@ -95,10 +95,13 @@ public class ApiFactory {
    * @param out
    *          - an OutputStream from the requestor, results (if any) will be
    *          sent back to this OutputStream
-   * @param requestUri - request Uri - the original requestUri of the request
-   * @param data - request Payload data - inbound data
+   * @param requestUri
+   *          - request Uri - the original requestUri of the request
+   * @param data
+   *          - request Payload data - inbound data
    * @return - return data from the invoked method
-   * @throws Exception - can throw from invalid or broken streams
+   * @throws Exception
+   *           - can throw from invalid or broken streams
    */
   // TODO public Object process(MessageSender sender, OutputStream out, String
   // requestUri, byte data) throws Exception {
@@ -113,7 +116,7 @@ public class ApiFactory {
     String apiKey = msg.apiKey;
 
     log.warn("{}", msg);
-    
+
     if (!processors.containsKey(apiKey)) {
       String className = null;
       Object p = null;
@@ -121,12 +124,12 @@ public class ApiFactory {
         className = String.format("org.myrobotlab.codec.Api%s", apiKey.substring(0, 1).toUpperCase() + apiKey.substring(1));
         Class<?> clazz = Class.forName(className);
         Constructor<?> ctor = clazz.getConstructor();
-        p = ctor.newInstance(new Object[] {});     
+        p = ctor.newInstance(new Object[] {});
         processors.put(msg.apiKey, (Api) p);
       } catch (Exception e) {
         log.error("could not create api", e);
         return null; // vs return message status error with detail or getApis ?
-      }      
+      }
     }
 
     // delegate request to process

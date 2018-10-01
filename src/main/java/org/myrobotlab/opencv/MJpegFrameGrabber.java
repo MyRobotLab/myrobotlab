@@ -68,7 +68,7 @@ public class MJpegFrameGrabber extends FrameGrabber {
   public Frame grab() throws Exception {
     BufferedImage img;
     try {
-      img = (BufferedImage)(mStream.readMjpegFrame().getImage());
+      img = (BufferedImage) (mStream.readMjpegFrame().getImage());
       // Frame frame = converter.getFrame(img, 1.0, true);
       Frame frame = converter.getFrame(img);
       return frame;

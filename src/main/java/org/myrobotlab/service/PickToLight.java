@@ -60,14 +60,14 @@ import com.pi4j.io.i2c.I2CFactory;
  *         C:\mrl\myrobotlab&gt;xjc -d src -p org.myrobotlab.pickToLight
  *         PickToLightTypes.xsd
  * 
- *         TODO - post report &amp; statistics TODO - update URI - meta data - make
- *         update.jar bin calls moduleList calls setAllBoxesLEDs (on off)
+ *         TODO - post report &amp; statistics TODO - update URI - meta data -
+ *         make update.jar bin calls moduleList calls setAllBoxesLEDs (on off)
  *         setBoxesOn(String list) setBoxesOff(String list) getBesSwitchState()
  *         displayString(boxlist, str) ZOD update uri blinkOff TODO - automated
  *         registration Polling / Sensor - important - check sensor state FIXME
- *         - EROR is not being handled in non IP address &amp; no connectivity !!!!
- *         - read config in /boot/ - registration url including password - proxy
- *         ?
+ *         - EROR is not being handled in non IP address &amp; no connectivity
+ *         !!!! - read config in /boot/ - registration url including password -
+ *         proxy ?
  * 
  */
 public class PickToLight extends Service implements GpioPinListenerDigital {
@@ -677,13 +677,14 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     try {
       CloseableHttpClient client = HttpClients.createDefault();
       List<String> authpref = new ArrayList<String>();
-      /* ALL DEPRECATED
-      authpref.add(AuthPolicy.NTLM);
-      client.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
-      NTCredentials creds = new NTCredentials(mesUser, mesPassword, "", mesDomain);
-      client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
-	  */
-      
+      /*
+       * ALL DEPRECATED authpref.add(AuthPolicy.NTLM);
+       * client.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
+       * NTCredentials creds = new NTCredentials(mesUser, mesPassword, "",
+       * mesDomain);
+       * client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
+       */
+
       HttpContext localContext = new BasicHttpContext();
       HttpPost post = new HttpPost(mesEndpoint);
 

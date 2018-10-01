@@ -9,7 +9,6 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
     extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
@@ -66,8 +65,8 @@ public interface ServiceInterface
   public void releaseService();
 
   /**
-   * called by runtime when system is shutting down
-   * a service can use this method when it has to do some "ordered" cleanup
+   * called by runtime when system is shutting down a service can use this
+   * method when it has to do some "ordered" cleanup
    */
   public void makeReadyForShutdown();
 

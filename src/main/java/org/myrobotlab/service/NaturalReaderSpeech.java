@@ -32,9 +32,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   public NaturalReaderSpeech(String reservedKey) {
     super(reservedKey);
   }
-  
+
   /**
    * implementation specific value
+   * 
    * @param rate
    */
   public void setRate(int rate) {
@@ -61,7 +62,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    
+
     // try {
     // Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
@@ -89,32 +90,32 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
 
-      // other examples :
-      // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=de-DE_BirgitVoice&rate=100&text=test&outputFormat=mp3
-      // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=Salli&rate=100&text=test&outputFormat=mp3
-      // https://api.naturalreaders.com/v4/tts/ibmspeak?speaker=en-US_MichaelVoice&text=<prosody
-      // rate="0%">starting left arm, I am a watson voice</prosody>
-      // String url =
-      // "http://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&t="
-      // + encoded + "&r=2&s=0";
+    // other examples :
+    // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=de-DE_BirgitVoice&rate=100&text=test&outputFormat=mp3
+    // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=Salli&rate=100&text=test&outputFormat=mp3
+    // https://api.naturalreaders.com/v4/tts/ibmspeak?speaker=en-US_MichaelVoice&text=<prosody
+    // rate="0%">starting left arm, I am a watson voice</prosody>
+    // String url =
+    // "http://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&t="
+    // + encoded + "&r=2&s=0";
 
-      Voice voice = getVoice();
-      String encoded = URLEncoder.encode(toSpeak, "UTF-8");
-      String url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId=" + voice.getVoiceProvider().toString() + "&rate=" + rate + "&text=" + encoded + "&outputFormat=mp3";
+    Voice voice = getVoice();
+    String encoded = URLEncoder.encode(toSpeak, "UTF-8");
+    String url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId=" + voice.getVoiceProvider().toString() + "&rate=" + rate + "&text=" + encoded + "&outputFormat=mp3";
 
-      byte[] b = null;
+    byte[] b = null;
 
-      log.info("url {}", url);
-      // get mp3 file & save to cache
-      // cache the mp3 content
-      b = httpClient.getBytes(url);
-      if (b == null || b.length == 0) {
-        error("%s returned 0 byte file !!! - it may block you", getName());
-        b = null;
-      } else {
-        FileIO.toFile(audioData.getFileName(), b);
-      }
-      return audioData;
+    log.info("url {}", url);
+    // get mp3 file & save to cache
+    // cache the mp3 content
+    b = httpClient.getBytes(url);
+    if (b == null || b.length == 0) {
+      error("%s returned 0 byte file !!! - it may block you", getName());
+      b = null;
+    } else {
+      FileIO.toFile(audioData.getFileName(), b);
+    }
+    return audioData;
   }
 
   @Override

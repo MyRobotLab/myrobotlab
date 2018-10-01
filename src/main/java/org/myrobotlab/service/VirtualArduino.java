@@ -114,7 +114,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
           ino.loop();
 
-         Thread.sleep(1);
+          Thread.sleep(1);
         } catch (Exception e) {
           log.error("mrlcomm threw", e);
         }
@@ -173,9 +173,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     runner = new InoScriptRunner(this, ino);
     runner.start();
   }
-  
-  public boolean usedByInmoov=false;
-  
+
+  public boolean usedByInmoov = false;
+
   public void stop() {
     if (runner != null) {
       runner.isRunning = false;
@@ -211,10 +211,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart.addPortListener(getName());
     start();
   }
-  
-  public void releaseService(){
+
+  public void releaseService() {
     super.releaseService();
-    if (runner != null){
+    if (runner != null) {
       runner.isRunning = false;
     }
   }
@@ -383,33 +383,14 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   /*
-  public void setAref(String aref) {
-    int arefInt = 1;
-    switch (aref) {
-      case "EXTERNAL":
-        arefInt = 0;
-        break;
-      case "DEFAULT":
-        arefInt = 1;
-        break;
-      case "INTERNAL1V1":
-        arefInt = 2;
-        break;
-      case "INTERNAL":
-        arefInt = 3;
-        break;
-      case "INTERNAL2V56":
-        arefInt = 3;
-        break;
-      default:
-        error("Aref " + aref.toUpperCase() + " is unknown");
-    }
-    log.info("set aref to " + aref);
-    this.aref = aref;
-    msg.setAref(arefInt);
-  }
-*/
-  
+   * public void setAref(String aref) { int arefInt = 1; switch (aref) { case
+   * "EXTERNAL": arefInt = 0; break; case "DEFAULT": arefInt = 1; break; case
+   * "INTERNAL1V1": arefInt = 2; break; case "INTERNAL": arefInt = 3; break;
+   * case "INTERNAL2V56": arefInt = 3; break; default: error("Aref " +
+   * aref.toUpperCase() + " is unknown"); } log.info("set aref to " + aref);
+   * this.aref = aref; msg.setAref(arefInt); }
+   */
+
   public String getAref() {
     return aref;
   }

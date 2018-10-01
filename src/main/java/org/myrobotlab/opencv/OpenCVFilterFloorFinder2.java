@@ -95,14 +95,15 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
   transient IplImage dst = null;
   transient CvSeq contourPointer = new CvSeq();
   transient CvMemStorage storage = null;
-  
+
   transient CvPoint startPoint = cvPoint(180, 120);
   transient CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
-  transient CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
+  transient CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0,
+                                                        // 0.5, 1.0);
   transient CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
-  
+
   // floor finder related
-  CvPoint origin =  null;
+  CvPoint origin = null;
   public List<Point2Df> edgePoints;
 
   public OpenCVFilterFloorFinder2() {
@@ -167,7 +168,7 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
     } else {
       grey = image.clone();
     }
-    
+
     // ============ floor finder begin ================
     fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);
 
@@ -177,7 +178,7 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
     cvFloodFill(image, startPoint, fillColor, lo_diff, up_diff, null, 4, null);
 
     fillColor = cvScalar(0.0, 255.0, 0.0, 1.0);
-    // ============ floor finder end  ================
+    // ============ floor finder end ================
 
     cvFindContours(grey, storage, contourPointer, Loader.sizeof(CvContour.class), 0, CV_CHAIN_APPROX_SIMPLE);
     CvSeq contours = contourPointer;
@@ -234,18 +235,20 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
           list.add(box);
 
           log.info("box {}", box);
-          
-          if (origin == null){
-            origin = new CvPoint(width/2, 10 /*height ??*/);
+
+          if (origin == null) {
+            origin = new CvPoint(width / 2, 10 /* height ?? */);
           }
-          
+
           if (publishPolygon) {
             // CvSeq points = cvApproxPoly(contour,
             // Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP,
             // cvContourPerimeter(contour) * 0.02, 1);
-            // CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours)*0.02, 0)
+            // CvSeq result = cvApproxPoly(contours,
+            // Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP,
+            // cvContourPerimeter(contours)*0.02, 0)
             CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours) * 0.02, 1);
-            for(int i = 0; i < result.total(); i++ ) {
+            for (int i = 0; i < result.total(); i++) {
               CvPoint point = new CvPoint(cvGetSeqElem(result, i));
               log.info("point {}", point);
             }

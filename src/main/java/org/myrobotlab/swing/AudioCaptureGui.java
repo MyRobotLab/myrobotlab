@@ -91,10 +91,9 @@ public class AudioCaptureGui extends ServiceGui {
 
     display.setLayout(new FlowLayout());
 
-  
   }
-  
-  public void onState(final AudioCapture audiocapture){
+
+  public void onState(final AudioCapture audiocapture) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -117,6 +116,5 @@ public class AudioCaptureGui extends ServiceGui {
   @Override
   public void unsubscribeGui() {
   }
-
 
 }

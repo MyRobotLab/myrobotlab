@@ -33,12 +33,12 @@ public class LidarVlp16 extends Service {
 
   public void listen() throws SocketException, UnknownHostException {
     dataSocket = new DatagramSocket(dataPort, InetAddress.getByName("0.0.0.0"));
-    dataSocket.setBroadcast(true); 
+    dataSocket.setBroadcast(true);
     positionSocket = new DatagramSocket(positionPort, InetAddress.getByName("0.0.0.0"));
     positionSocket.setBroadcast(true);
   }
 
-  public void receiveData() throws IOException {    
+  public void receiveData() throws IOException {
     byte[] recvBuf = new byte[15000];
     DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
     dataSocket.receive(receivePacket);

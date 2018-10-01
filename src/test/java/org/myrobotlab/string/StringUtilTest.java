@@ -20,18 +20,17 @@ public class StringUtilTest {
   // should we get rid of the string util class?
   // or make it more useful
 
-  
   @Test
   public void testChunkString() {
     int maxLength = 30;
-    String text = "This is a test of the emergency broadcast system. It has been done in a foo bar. With Testing of some foo. Slightly more bar. A little bit of foo though. And why shouldn't there be some sort of fooness to the air. foo for all and all for foo."; 
+    String text = "This is a test of the emergency broadcast system. It has been done in a foo bar. With Testing of some foo. Slightly more bar. A little bit of foo though. And why shouldn't there be some sort of fooness to the air. foo for all and all for foo.";
     List<String> result = StringUtil.chunkText(text, maxLength);
-    //for (String s : result) {
-    //  System.out.println(s);
-    //}
-    //System.out.println("ORG:"+text);
-    //System.out.println("RES:"+StringUtils.join(result, " "));
+    // for (String s : result) {
+    // System.out.println(s);
+    // }
+    // System.out.println("ORG:"+text);
+    // System.out.println("RES:"+StringUtils.join(result, " "));
     assertEquals(text, StringUtils.join(result, " "));
-    
+
   }
 }

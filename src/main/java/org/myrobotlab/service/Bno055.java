@@ -71,147 +71,103 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   public static final int BNO055_ID = 0xA0;
 
   public enum register {
-    //page 0 value
-    CHIP_ID           ((byte)0x00, (byte)0, "Chip ID"),
-    ACC_ID            ((byte)0x01, (byte)0, "Accelerometer ID"),
-    MAG_ID            ((byte)0x02, (byte)0, "Magnetometer ID"),
-    GYR_ID            ((byte)0x03, (byte)0, "Gyroscope ID"),
-    SW_REV_ID_LSB     ((byte)0x04, (byte)0, "SW Revision ID"),
-    SW_REV_ID_MSB     ((byte)0x05, (byte)0, ""),
-    BL_REV_ID         ((byte)0x06, (byte)0, "Bootloader Version"),
-    PAGE_ID           ((byte)0x07, (byte)0, "Page ID"),
-    ACC_DATA_X_LSB    ((byte)0x08, (byte)0, ""),
-    ACC_DATA_X_MSB    ((byte)0x09, (byte)0, ""),
-    ACC_DATA_Y_LSB    ((byte)0x0A, (byte)0, ""),
-    ACC_DATA_Y_MSB    ((byte)0x0B, (byte)0, ""),
-    ACC_DATA_Z_LSB    ((byte)0x0C, (byte)0, ""),
-    ACC_DATA_Z_MSB    ((byte)0x0D, (byte)0, ""),
-    MAG_DATA_X_LSB    ((byte)0x0E, (byte)0, ""),
-    MAG_DATA_X_MSB    ((byte)0x0F, (byte)0, ""),
-    MAG_DATA_Y_LSB    ((byte)0x10, (byte)0, ""),
-    MAG_DATA_Y_MSB    ((byte)0x11, (byte)0, ""),
-    MAG_DATA_Z_LSB    ((byte)0x12, (byte)0, ""),
-    MAG_DATA_Z_MSB    ((byte)0x13, (byte)0, ""),
-    GYR_DATA_X_LSB    ((byte)0x14, (byte)0, ""),
-    GYR_DATA_X_MSB    ((byte)0x15, (byte)0, ""),
-    GYR_DATA_Y_LSB    ((byte)0x16, (byte)0, ""),
-    GYR_DATA_Y_MSB    ((byte)0x17, (byte)0, ""),
-    GYR_DATA_Z_LSB    ((byte)0x18, (byte)0, ""),
-    GYR_DATA_Z_MSB    ((byte)0x19, (byte)0, ""),
-    EUL_HEADING_LSB   ((byte)0x1A, (byte)0, "Euler Heading LSB"),
-    EUL_HEADING_MSB   ((byte)0x1B, (byte)0, "Euler Heading MSB"),
-    EUL_ROLL_LSB      ((byte)0x1C, (byte)0, "Euler Roll LSB"),
-    EUL_ROLL_MSB      ((byte)0x1D, (byte)0, "Euler Roll MSB"),
-    EUL_PITCH_LSB     ((byte)0x1E, (byte)0, "Euler Pitch LSB"),
-    EUL_PITCH_MSB     ((byte)0x1F, (byte)0, "Euler Pitch MSB"),
-    QUA_DATA_W_LSB    ((byte)0x20, (byte)0, ""),
-    QUA_DATA_W_MSB    ((byte)0x21, (byte)0, ""),
-    QUA_DATA_X_LSB    ((byte)0x22, (byte)0, ""),
-    QUA_DATA_X_MSB    ((byte)0x23, (byte)0, ""),
-    QUA_DATA_Y_LSB    ((byte)0x24, (byte)0, ""),
-    QUA_DATA_Y_MSB    ((byte)0x25, (byte)0, ""),
-    QUA_DATA_Z_LSB    ((byte)0x26, (byte)0, ""),
-    QUA_DATA_Z_MSB    ((byte)0x27, (byte)0, ""),
-    LIA_DATA_X_LSB    ((byte)0x28, (byte)0, ""),
-    LIA_DATA_X_MSB    ((byte)0x29, (byte)0, ""),
-    LIA_DATA_Y_LSB    ((byte)0x2A, (byte)0, ""),
-    LIA_DATA_Y_MSB    ((byte)0x2B, (byte)0, ""),
-    LIA_DATA_Z_LSB    ((byte)0x2C, (byte)0, ""),
-    LIA_DATA_Z_MSB    ((byte)0x2D, (byte)0, ""),
-    GRV_DATA_X_LSB    ((byte)0x2E, (byte)0, ""),
-    GRV_DATA_X_MSB    ((byte)0x2F, (byte)0, ""),
-    GRV_DATA_Y_LSB    ((byte)0x30, (byte)0, ""),
-    GRV_DATA_Y_MSB    ((byte)0x31, (byte)0, ""),
-    GRV_DATA_Z_LSB    ((byte)0x32, (byte)0, ""),
-    GRV_DATA_Z_MSB    ((byte)0x33, (byte)0, ""),
-    TEMP              ((byte)0x34, (byte)0, "Temperature"),
-    CALIB_STAT        ((byte)0x35, (byte)0, "Calibration Status"),
-    ST_RESULT         ((byte)0x36, (byte)0, ""),
-    INT_STA           ((byte)0x37, (byte)0, ""),
-    SYS_CLK_STATUS    ((byte)0x38, (byte)0, ""),
-    SYS_STATUS        ((byte)0x39, (byte)0, ""),
-    SYS_ERR           ((byte)0x3A, (byte)0, ""),
-    UNIT_SEL          ((byte)0x3B, (byte)0, "Unit Selection"),
-    OPR_MODE          ((byte)0x3D, (byte)0, "Operation Mode"),
-    PWR_MODE          ((byte)0x3E, (byte)0, "Power Mode"),
-    SYS_TRIGGGER      ((byte)0x3F, (byte)0, "System Trigger"),
-    TEMP_SOURCE       ((byte)0x40, (byte)0, "Temperature Source"),
-    AXIS_MAP_CONFIG   ((byte)0x41, (byte)0, "Configuration Axis Map"),
-    AXIS_MAP_SIGN     ((byte)0x42, (byte)0, "Axis Sign"),
-    ACC_OFFSET_X_LSB  ((byte)0x55, (byte)0, ""),
-    ACC_OFFSET_X_MSB  ((byte)0x56, (byte)0, ""),
-    ACC_OFFSET_Y_LSB  ((byte)0x57, (byte)0, ""),
-    ACC_OFFSET_Y_MSB  ((byte)0x58, (byte)0, ""),
-    ACC_OFFSET_Z_LSB  ((byte)0x59, (byte)0, ""),
-    ACC_OFFSET_Z_MSB  ((byte)0x5A, (byte)0, ""),
-    MAG_OFFSET_X_LSB  ((byte)0x5B, (byte)0, ""),
-    MAG_OFFSET_X_MSB  ((byte)0x5C, (byte)0, ""),
-    MAG_OFFSET_Y_LSB  ((byte)0x5D, (byte)0, ""),
-    MAG_OFFSET_Y_MSB  ((byte)0x5E, (byte)0, ""),
-    MAG_OFFSET_Z_LSB  ((byte)0x5F, (byte)0, ""),
-    MAG_OFFSET_Z_MSB  ((byte)0x60, (byte)0, ""),
-    GYR_OFFSET_X_LSB  ((byte)0x61, (byte)0, ""),
-    GYR_OFFSET_X_MSB  ((byte)0x62, (byte)0, ""),
-    GYR_OFFSET_Y_LSB  ((byte)0x63, (byte)0, ""),
-    GYR_OFFSET_Y_MSB  ((byte)0x64, (byte)0, ""),
-    GYR_OFFSET_Z_LSB  ((byte)0x65, (byte)0, ""),
-    GYR_OFFSET_Z_MSB  ((byte)0x66, (byte)0, ""),
-    ACC_RADIUS_LSB    ((byte)0x67, (byte)0, ""),
-    ACC_RADIUS_MSB    ((byte)0x68, (byte)0, ""),
-    MAG_RADIUS_LSB    ((byte)0x69, (byte)0, ""),
-    MAG_RADIUS_MSB    ((byte)0x6A, (byte)0, ""),
-    //page 1 value
-    ACC_CONFIG        ((byte)0x08, (byte)1, "Accelerometer Config"),
-    MAG_CONFIG        ((byte)0x09, (byte)1, "Magetometer Config"),
-    GYR_CONFIG_0      ((byte)0x0A, (byte)1, "Gyroscope Config 0"),
-    GYR_CONFIG_1      ((byte)0x0B, (byte)1, "Gyroscope Config 1"),
-    ACC_SLEEP_CONFIG  ((byte)0x0C, (byte)1, ""),
-    GYR_SLEEP_CONFIG  ((byte)0x0D, (byte)1, ""),
-    INT_MSK           ((byte)0x0F, (byte)1, ""),
-    INT_EN            ((byte)0x10, (byte)1, ""),
-    ACC_AM_THRES      ((byte)0x11, (byte)1, "Any Motion Accelerometer"),
-    ACC_INT_SETTINGS  ((byte)0x12, (byte)1, "Accelerometer Interrupt Setting"),
-    ACC_HG_DURATION   ((byte)0x13, (byte)1, ""),
-    ACC_HG_THRES      ((byte)0x14, (byte)1, ""),
-    ACC_NM_THRES      ((byte)0x15, (byte)0, "Accelerometer No Motion Threshold"),
-    ACC_NM_SET        ((byte)0x16, (byte)1, "Accelerometer No Motion Setting"),
-    GYR_INT_SETTING    ((byte)0x17, (byte)1, ""),
-    GYR_HR_X_SET      ((byte)0x18, (byte)1, ""),
-    GYR_DUR_X         ((byte)0x19, (byte)1, ""),
-    GYR_HR_Y_SET      ((byte)0x1A, (byte)1, ""),
-    GYR_DUR_Y         ((byte)0x1B, (byte)1, ""),
-    GYR_HR_Z_SET      ((byte)0x1C, (byte)1, ""),
-    GYR_DUR_Z         ((byte)0x1D, (byte)1, ""),
-    GYR_AM_THRES      ((byte)0x1E, (byte)1, ""),
-    GYR_AM_SET        ((byte)0x1F, (byte)1, "");
+    // page 0 value
+    CHIP_ID((byte) 0x00, (byte) 0, "Chip ID"), ACC_ID((byte) 0x01, (byte) 0, "Accelerometer ID"), MAG_ID((byte) 0x02, (byte) 0, "Magnetometer ID"), GYR_ID((byte) 0x03, (byte) 0,
+        "Gyroscope ID"), SW_REV_ID_LSB((byte) 0x04, (byte) 0, "SW Revision ID"), SW_REV_ID_MSB((byte) 0x05, (byte) 0, ""), BL_REV_ID((byte) 0x06, (byte) 0,
+            "Bootloader Version"), PAGE_ID((byte) 0x07, (byte) 0, "Page ID"), ACC_DATA_X_LSB((byte) 0x08, (byte) 0, ""), ACC_DATA_X_MSB((byte) 0x09, (byte) 0,
+                ""), ACC_DATA_Y_LSB((byte) 0x0A, (byte) 0, ""), ACC_DATA_Y_MSB((byte) 0x0B, (byte) 0, ""), ACC_DATA_Z_LSB((byte) 0x0C, (byte) 0, ""), ACC_DATA_Z_MSB((byte) 0x0D,
+                    (byte) 0, ""), MAG_DATA_X_LSB((byte) 0x0E, (byte) 0, ""), MAG_DATA_X_MSB((byte) 0x0F, (byte) 0, ""), MAG_DATA_Y_LSB((byte) 0x10, (byte) 0, ""), MAG_DATA_Y_MSB(
+                        (byte) 0x11, (byte) 0, ""), MAG_DATA_Z_LSB((byte) 0x12, (byte) 0, ""), MAG_DATA_Z_MSB((byte) 0x13, (byte) 0, ""), GYR_DATA_X_LSB((byte) 0x14, (byte) 0,
+                            ""), GYR_DATA_X_MSB((byte) 0x15, (byte) 0, ""), GYR_DATA_Y_LSB((byte) 0x16, (byte) 0, ""), GYR_DATA_Y_MSB((byte) 0x17, (byte) 0, ""), GYR_DATA_Z_LSB(
+                                (byte) 0x18, (byte) 0, ""), GYR_DATA_Z_MSB((byte) 0x19, (byte) 0, ""), EUL_HEADING_LSB((byte) 0x1A, (byte) 0, "Euler Heading LSB"), EUL_HEADING_MSB(
+                                    (byte) 0x1B, (byte) 0, "Euler Heading MSB"), EUL_ROLL_LSB((byte) 0x1C, (byte) 0, "Euler Roll LSB"), EUL_ROLL_MSB((byte) 0x1D, (byte) 0,
+                                        "Euler Roll MSB"), EUL_PITCH_LSB((byte) 0x1E, (byte) 0, "Euler Pitch LSB"), EUL_PITCH_MSB((byte) 0x1F, (byte) 0,
+                                            "Euler Pitch MSB"), QUA_DATA_W_LSB((byte) 0x20, (byte) 0, ""), QUA_DATA_W_MSB((byte) 0x21, (byte) 0, ""), QUA_DATA_X_LSB((byte) 0x22,
+                                                (byte) 0, ""), QUA_DATA_X_MSB((byte) 0x23, (byte) 0, ""), QUA_DATA_Y_LSB((byte) 0x24, (byte) 0, ""), QUA_DATA_Y_MSB((byte) 0x25,
+                                                    (byte) 0, ""), QUA_DATA_Z_LSB((byte) 0x26, (byte) 0, ""), QUA_DATA_Z_MSB((byte) 0x27, (byte) 0, ""), LIA_DATA_X_LSB((byte) 0x28,
+                                                        (byte) 0, ""), LIA_DATA_X_MSB((byte) 0x29, (byte) 0, ""), LIA_DATA_Y_LSB((byte) 0x2A, (byte) 0, ""), LIA_DATA_Y_MSB(
+                                                            (byte) 0x2B, (byte) 0,
+                                                            ""), LIA_DATA_Z_LSB((byte) 0x2C, (byte) 0, ""), LIA_DATA_Z_MSB((byte) 0x2D, (byte) 0, ""), GRV_DATA_X_LSB((byte) 0x2E,
+                                                                (byte) 0, ""), GRV_DATA_X_MSB((byte) 0x2F, (byte) 0, ""), GRV_DATA_Y_LSB((byte) 0x30, (byte) 0, ""), GRV_DATA_Y_MSB(
+                                                                    (byte) 0x31, (byte) 0,
+                                                                    ""), GRV_DATA_Z_LSB((byte) 0x32, (byte) 0, ""), GRV_DATA_Z_MSB((byte) 0x33, (byte) 0, ""), TEMP((byte) 0x34,
+                                                                        (byte) 0, "Temperature"), CALIB_STAT((byte) 0x35, (byte) 0, "Calibration Status"), ST_RESULT((byte) 0x36,
+                                                                            (byte) 0, ""), INT_STA((byte) 0x37, (byte) 0, ""), SYS_CLK_STATUS((byte) 0x38, (byte) 0,
+                                                                                ""), SYS_STATUS((byte) 0x39, (byte) 0, ""), SYS_ERR((byte) 0x3A, (byte) 0, ""), UNIT_SEL(
+                                                                                    (byte) 0x3B, (byte) 0,
+                                                                                    "Unit Selection"), OPR_MODE((byte) 0x3D, (byte) 0, "Operation Mode"), PWR_MODE((byte) 0x3E,
+                                                                                        (byte) 0, "Power Mode"), SYS_TRIGGGER((byte) 0x3F, (byte) 0, "System Trigger"), TEMP_SOURCE(
+                                                                                            (byte) 0x40, (byte) 0, "Temperature Source"), AXIS_MAP_CONFIG((byte) 0x41, (byte) 0,
+                                                                                                "Configuration Axis Map"), AXIS_MAP_SIGN((byte) 0x42, (byte) 0,
+                                                                                                    "Axis Sign"), ACC_OFFSET_X_LSB((byte) 0x55, (byte) 0, ""), ACC_OFFSET_X_MSB(
+                                                                                                        (byte) 0x56, (byte) 0,
+                                                                                                        ""), ACC_OFFSET_Y_LSB((byte) 0x57, (byte) 0, ""), ACC_OFFSET_Y_MSB(
+                                                                                                            (byte) 0x58, (byte) 0,
+                                                                                                            ""), ACC_OFFSET_Z_LSB((byte) 0x59, (byte) 0, ""), ACC_OFFSET_Z_MSB(
+                                                                                                                (byte) 0x5A, (byte) 0,
+                                                                                                                ""), MAG_OFFSET_X_LSB((byte) 0x5B, (byte) 0, ""), MAG_OFFSET_X_MSB(
+                                                                                                                    (byte) 0x5C, (byte) 0, ""), MAG_OFFSET_Y_LSB((byte) 0x5D,
+                                                                                                                        (byte) 0, ""), MAG_OFFSET_Y_MSB((byte) 0x5E, (byte) 0,
+                                                                                                                            ""), MAG_OFFSET_Z_LSB((byte) 0x5F, (byte) 0,
+                                                                                                                                ""), MAG_OFFSET_Z_MSB((byte) 0x60, (byte) 0,
+                                                                                                                                    ""), GYR_OFFSET_X_LSB((byte) 0x61, (byte) 0,
+                                                                                                                                        ""), GYR_OFFSET_X_MSB((byte) 0x62, (byte) 0,
+                                                                                                                                            ""), GYR_OFFSET_Y_LSB((byte) 0x63,
+                                                                                                                                                (byte) 0,
+                                                                                                                                                ""), GYR_OFFSET_Y_MSB((byte) 0x64,
+                                                                                                                                                    (byte) 0, ""), GYR_OFFSET_Z_LSB(
+                                                                                                                                                        (byte) 0x65, (byte) 0,
+                                                                                                                                                        ""), GYR_OFFSET_Z_MSB(
+                                                                                                                                                            (byte) 0x66, (byte) 0,
+                                                                                                                                                            ""), ACC_RADIUS_LSB(
+                                                                                                                                                                (byte) 0x67,
+                                                                                                                                                                (byte) 0,
+                                                                                                                                                                ""), ACC_RADIUS_MSB(
+                                                                                                                                                                    (byte) 0x68,
+                                                                                                                                                                    (byte) 0,
+                                                                                                                                                                    ""), MAG_RADIUS_LSB(
+                                                                                                                                                                        (byte) 0x69,
+                                                                                                                                                                        (byte) 0,
+                                                                                                                                                                        ""), MAG_RADIUS_MSB(
+                                                                                                                                                                            (byte) 0x6A,
+                                                                                                                                                                            (byte) 0,
+                                                                                                                                                                            ""),
+    // page 1 value
+    ACC_CONFIG((byte) 0x08, (byte) 1, "Accelerometer Config"), MAG_CONFIG((byte) 0x09, (byte) 1, "Magetometer Config"), GYR_CONFIG_0((byte) 0x0A, (byte) 1,
+        "Gyroscope Config 0"), GYR_CONFIG_1((byte) 0x0B, (byte) 1, "Gyroscope Config 1"), ACC_SLEEP_CONFIG((byte) 0x0C, (byte) 1, ""), GYR_SLEEP_CONFIG((byte) 0x0D, (byte) 1,
+            ""), INT_MSK((byte) 0x0F, (byte) 1, ""), INT_EN((byte) 0x10, (byte) 1, ""), ACC_AM_THRES((byte) 0x11, (byte) 1,
+                "Any Motion Accelerometer"), ACC_INT_SETTINGS((byte) 0x12, (byte) 1, "Accelerometer Interrupt Setting"), ACC_HG_DURATION((byte) 0x13, (byte) 1,
+                    ""), ACC_HG_THRES((byte) 0x14, (byte) 1, ""), ACC_NM_THRES((byte) 0x15, (byte) 0, "Accelerometer No Motion Threshold"), ACC_NM_SET((byte) 0x16, (byte) 1,
+                        "Accelerometer No Motion Setting"), GYR_INT_SETTING((byte) 0x17, (byte) 1, ""), GYR_HR_X_SET((byte) 0x18, (byte) 1, ""), GYR_DUR_X((byte) 0x19, (byte) 1,
+                            ""), GYR_HR_Y_SET((byte) 0x1A, (byte) 1, ""), GYR_DUR_Y((byte) 0x1B, (byte) 1, ""), GYR_HR_Z_SET((byte) 0x1C, (byte) 1,
+                                ""), GYR_DUR_Z((byte) 0x1D, (byte) 1, ""), GYR_AM_THRES((byte) 0x1E, (byte) 1, ""), GYR_AM_SET((byte) 0x1F, (byte) 1, "");
     public byte value;
     public byte pageId;
     public String description;
+
     private register(byte value, byte pageId, String description) {
       this.value = value;
       this.pageId = pageId;
       this.description = description;
     }
   }
-  
+
   public enum Device {
-    ACCELEROMETER((byte)0x00, "Accelerometer"),
-    MAGNETOMETER((byte)0x01, "Magnetometer"),
-    GYROSCOPE((byte)0x02, "Gyroscope");
+    ACCELEROMETER((byte) 0x00, "Accelerometer"), MAGNETOMETER((byte) 0x01, "Magnetometer"), GYROSCOPE((byte) 0x02, "Gyroscope");
     public byte value;
     public String description;
+
     private Device(byte value, String description) {
       this.value = value;
       this.description = description;
     }
   }
- 
+
   public enum PowerMode {
-    NORMAL  ((byte)0x00, "Normal"),
-    LOW     ((byte)0x01, "Low"),
-    SUSPEND ((byte)0x02, "Suspend");
+    NORMAL((byte) 0x00, "Normal"), LOW((byte) 0x01, "Low"), SUSPEND((byte) 0x02, "Suspend");
     public byte value;
     public String description;
+
     private PowerMode(byte value, String description) {
       this.value = value;
       this.description = description;
@@ -219,50 +175,38 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum OperationMode {
-    CONFIG        ((byte)0x00, "Configuration Mode"),
-    ACCONLY       ((byte)0x01, "Accelerometer Only"), //raw accelerometer data only
-    MAGONLY       ((byte)0x02, "Magnetometer Only"), //raw magnetometer only
-    GYROONLY      ((byte)0x03, "Gyroscope Only"),
-    ACCMAG        ((byte)0x04, "Accelerometer and Magnetometer"),
-    ACCGYRO       ((byte)0x05, "Accelerometer and Gyroscope"),
-    MAGGYRO       ((byte)0x06, "Magnetometer and Gyroscope"),
-    AMG           ((byte)0x07, "Accelerometer, Magnetometer, Gyroscope"),
-    IMU           ((byte)0x08, "IMU"),
-    COMPASS       ((byte)0x09, "Compass"),
-    M4G           ((byte)0x0A, "Magnet for Gyroscope"),
-    NDOF_FMC_OFF  ((byte)0x0B, "NDOF Fast Magnetometer Calibration Off"),
-    NDOF          ((byte)0x0C, "NDOF");
+    CONFIG((byte) 0x00, "Configuration Mode"), ACCONLY((byte) 0x01, "Accelerometer Only"), // raw
+                                                                                           // accelerometer
+                                                                                           // data
+                                                                                           // only
+    MAGONLY((byte) 0x02, "Magnetometer Only"), // raw magnetometer only
+    GYROONLY((byte) 0x03, "Gyroscope Only"), ACCMAG((byte) 0x04, "Accelerometer and Magnetometer"), ACCGYRO((byte) 0x05, "Accelerometer and Gyroscope"), MAGGYRO((byte) 0x06,
+        "Magnetometer and Gyroscope"), AMG((byte) 0x07, "Accelerometer, Magnetometer, Gyroscope"), IMU((byte) 0x08, "IMU"), COMPASS((byte) 0x09,
+            "Compass"), M4G((byte) 0x0A, "Magnet for Gyroscope"), NDOF_FMC_OFF((byte) 0x0B, "NDOF Fast Magnetometer Calibration Off"), NDOF((byte) 0x0C, "NDOF");
     public byte value;
     public String description;
+
     private OperationMode(byte value, String description) {
       this.value = value;
       this.description = description;
     }
   }
-  
+
   public enum AccelerometerConfig {
-    RANGE_2G              ((byte)0x00, (byte)0x03, 0, "Range 2G"),
-    RANGE_4G              ((byte)0x01, (byte)0x03, 0, "Range 4G"),
-    RANGE_8G              ((byte)0x02, (byte)0x03, 0, "Range 8G"),
-    RANGE_16G             ((byte)0x03, (byte)0x03, 0, "Range 16G"),
-    BANDWITH_7_81HZ       ((byte)0x00, (byte)0b11100, 2, "Bandwith 7.81Hz"),
-    BANDWITH_15_63HZ      ((byte)0x01, (byte)0b11100, 2, "Bandwith 15.63Hz"),
-    BANDWITH_31_25HZ      ((byte)0x02, (byte)0b11100, 2, "Bandwith 31.25Hz"),
-    BANDWITH_62_5HZ       ((byte)0x03, (byte)0b11100, 2, "Bandwith 62.5Hz"),
-    BANDWITH_125HZ        ((byte)0x04, (byte)0b11100, 2, "Bandwith 125Hz"),
-    BANDWITH_250HZ        ((byte)0x05, (byte)0b11100, 2, "Bandwith 250Hz"),
-    BANDWITH_500HZ        ((byte)0x06, (byte)0b11100, 2, "Bandwith 500Hz"),
-    BANDWITH_1000HZ       ((byte)0x07, (byte)0b11100, 2, "Bandwith 1000Hz"),
-    OPR_MODE_NORMAL       ((byte)0x00, (byte)0b11100000, 5, "Operation Mode Normal"),
-    OPR_MODE_SUSPEND      ((byte)0x01, (byte)0b11100000, 5, "Operation Mode Suspend"),
-    OPR_MODE_LOW_POWER_1  ((byte)0x02, (byte)0b11100000, 5, "Operation Mode Low Power 1"),
-    OPR_MODE_STANBY       ((byte)0x03, (byte)0b11100000, 5, "Operation Mode Stanby"),
-    OPR_MODE_LOW_POWER_2  ((byte)0x04, (byte)0b11100000, 5, "Operation Mode Low Power 2"),
-    OPR_MODE_DEEP_SUSPEND ((byte)0x05, (byte)0b11100000, 5, "Operation Mode Deep Suspend");
+    RANGE_2G((byte) 0x00, (byte) 0x03, 0, "Range 2G"), RANGE_4G((byte) 0x01, (byte) 0x03, 0, "Range 4G"), RANGE_8G((byte) 0x02, (byte) 0x03, 0, "Range 8G"), RANGE_16G((byte) 0x03,
+        (byte) 0x03, 0, "Range 16G"), BANDWITH_7_81HZ((byte) 0x00, (byte) 0b11100, 2, "Bandwith 7.81Hz"), BANDWITH_15_63HZ((byte) 0x01, (byte) 0b11100, 2,
+            "Bandwith 15.63Hz"), BANDWITH_31_25HZ((byte) 0x02, (byte) 0b11100, 2, "Bandwith 31.25Hz"), BANDWITH_62_5HZ((byte) 0x03, (byte) 0b11100, 2,
+                "Bandwith 62.5Hz"), BANDWITH_125HZ((byte) 0x04, (byte) 0b11100, 2, "Bandwith 125Hz"), BANDWITH_250HZ((byte) 0x05, (byte) 0b11100, 2,
+                    "Bandwith 250Hz"), BANDWITH_500HZ((byte) 0x06, (byte) 0b11100, 2, "Bandwith 500Hz"), BANDWITH_1000HZ((byte) 0x07, (byte) 0b11100, 2,
+                        "Bandwith 1000Hz"), OPR_MODE_NORMAL((byte) 0x00, (byte) 0b11100000, 5, "Operation Mode Normal"), OPR_MODE_SUSPEND((byte) 0x01, (byte) 0b11100000, 5,
+                            "Operation Mode Suspend"), OPR_MODE_LOW_POWER_1((byte) 0x02, (byte) 0b11100000, 5, "Operation Mode Low Power 1"), OPR_MODE_STANBY((byte) 0x03,
+                                (byte) 0b11100000, 5, "Operation Mode Stanby"), OPR_MODE_LOW_POWER_2((byte) 0x04, (byte) 0b11100000, 5,
+                                    "Operation Mode Low Power 2"), OPR_MODE_DEEP_SUSPEND((byte) 0x05, (byte) 0b11100000, 5, "Operation Mode Deep Suspend");
     public byte value;
     public byte mask;
     public int shift;
     public String description;
+
     private AccelerometerConfig(byte value, byte mask, int shift, String description) {
       this.value = value;
       this.mask = mask;
@@ -272,29 +216,22 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum GyroscopeConfig {
-    RANGE_2000DPS               ((byte)0x00, (byte)0b111, 0, (byte)0, "Range 2000 dps"),
-    RANGE_1000DPS               ((byte)0x01, (byte)0b111, 0, (byte)0, "Range 1000 dps"),
-    RANGE_500DPS                ((byte)0x02, (byte)0b111, 0, (byte)0, "Range 500 dps"),
-    RANGE_250DPS                ((byte)0x03, (byte)0b111, 0, (byte)0, "Range 250 dps"),
-    RANGE_125DPS                ((byte)0x04, (byte)0b111, 0, (byte)0, "Range 125 dps"),
-    BANDWITH_523Hz              ((byte)0x00, (byte)0b111000, 3, (byte)0, "Bandwith 523Hz"),
-    BANDWITH_230Hz              ((byte)0x01, (byte)0b111000, 3, (byte)0, "Bandwith 230Hz"),
-    BANDWITH_116Hz              ((byte)0x02, (byte)0b111000, 3, (byte)0, "Bandwith 116Hz"),
-    BANDWITH_47Hz               ((byte)0x03, (byte)0b111000, 3, (byte)0, "Bandwith 47Hz"),
-    BANDWITH_23Hz               ((byte)0x04, (byte)0b111000, 3, (byte)0, "Bandwith 23Hz"),
-    BANDWITH_12Hz               ((byte)0x05, (byte)0b111000, 3, (byte)0, "Bandwith 12Hz"),
-    BANDWITH_64Hz               ((byte)0x06, (byte)0b111000, 3, (byte)0, "Bandwith 64Hz"),
-    BANDWITH_32Hz               ((byte)0x07, (byte)0b111000, 3, (byte)0, "Bandwith 32Hz"),
-    OPR_MODE_NORMAL             ((byte)0x00, (byte)0b111, 0, (byte)1, "Operation Mode Normal"),
-    OPR_MODE_FAST_POWER_UP      ((byte)0x01, (byte)0b111, 0, (byte)1, "Operation Mode Fast Power Up"),
-    OPR_MODE_DEEP_SUSPEND       ((byte)0x02, (byte)0b111, 0, (byte)1, "Operation Mode Deep Suspend"),
-    OPR_MODE_SUSPEND            ((byte)0x03, (byte)0b111, 0, (byte)1, "Operation Mode Suspend"),
-    OPR_MODE_ADVANCE_POWERSAVE  ((byte)0x04, (byte)0b111, 0, (byte)1, "Operation Mode Advance Powersave");
+    RANGE_2000DPS((byte) 0x00, (byte) 0b111, 0, (byte) 0, "Range 2000 dps"), RANGE_1000DPS((byte) 0x01, (byte) 0b111, 0, (byte) 0, "Range 1000 dps"), RANGE_500DPS((byte) 0x02,
+        (byte) 0b111, 0, (byte) 0, "Range 500 dps"), RANGE_250DPS((byte) 0x03, (byte) 0b111, 0, (byte) 0, "Range 250 dps"), RANGE_125DPS((byte) 0x04, (byte) 0b111, 0, (byte) 0,
+            "Range 125 dps"), BANDWITH_523Hz((byte) 0x00, (byte) 0b111000, 3, (byte) 0, "Bandwith 523Hz"), BANDWITH_230Hz((byte) 0x01, (byte) 0b111000, 3, (byte) 0,
+                "Bandwith 230Hz"), BANDWITH_116Hz((byte) 0x02, (byte) 0b111000, 3, (byte) 0, "Bandwith 116Hz"), BANDWITH_47Hz((byte) 0x03, (byte) 0b111000, 3, (byte) 0,
+                    "Bandwith 47Hz"), BANDWITH_23Hz((byte) 0x04, (byte) 0b111000, 3, (byte) 0, "Bandwith 23Hz"), BANDWITH_12Hz((byte) 0x05, (byte) 0b111000, 3, (byte) 0,
+                        "Bandwith 12Hz"), BANDWITH_64Hz((byte) 0x06, (byte) 0b111000, 3, (byte) 0, "Bandwith 64Hz"), BANDWITH_32Hz((byte) 0x07, (byte) 0b111000, 3, (byte) 0,
+                            "Bandwith 32Hz"), OPR_MODE_NORMAL((byte) 0x00, (byte) 0b111, 0, (byte) 1, "Operation Mode Normal"), OPR_MODE_FAST_POWER_UP((byte) 0x01, (byte) 0b111, 0,
+                                (byte) 1, "Operation Mode Fast Power Up"), OPR_MODE_DEEP_SUSPEND((byte) 0x02, (byte) 0b111, 0, (byte) 1,
+                                    "Operation Mode Deep Suspend"), OPR_MODE_SUSPEND((byte) 0x03, (byte) 0b111, 0, (byte) 1,
+                                        "Operation Mode Suspend"), OPR_MODE_ADVANCE_POWERSAVE((byte) 0x04, (byte) 0b111, 0, (byte) 1, "Operation Mode Advance Powersave");
     public byte value;
     public byte mask;
     public int shift;
     public byte regAdd;
     public String description;
+
     private GyroscopeConfig(byte value, byte mask, int shift, byte regAdd, String description) {
       this.value = value;
       this.mask = mask;
@@ -303,28 +240,22 @@ public class Bno055 extends Service implements I2CControl, PinListener {
       this.description = description;
     }
   }
-  
+
   public enum MagnetometerConfig {
-    DATA_OUTPUT_RATE_2HZ      ((byte)0x00, (byte)0b111, 0, "Data Output Rate 2Hz"),
-    DATA_OUTPUT_RATE_6HZ      ((byte)0x01, (byte)0b111, 0, "Data Output Rate 6Hz"),
-    DATA_OUTPUT_RATE_8HZ      ((byte)0x02, (byte)0b111, 0, "Data Output Rate 8Hz"),
-    DATA_OUTPUT_RATE_10HZ     ((byte)0x03, (byte)0b111, 0, "Data Output Rate 10Hz"),
-    DATA_OUTPUT_RATE_15HZ     ((byte)0x04, (byte)0b111, 0, "Data Output Rate 15Hz"),
-    DATA_OUTPUT_RATE_20HZ     ((byte)0x05, (byte)0b111, 0, "Data Output Rate 20Hz"),
-    DATA_OUTPUT_RATE_25HZ     ((byte)0x06, (byte)0b111, 0, "Data Output Rate 25Hz"),
-    DATA_OUTPUT_RATE_30HZ     ((byte)0x07, (byte)0b111, 0, "Data Output Rate 30Hz"),
-    OPR_MODE_LOW_POWER        ((byte)0x00, (byte)0b11000, 3, "Operation Mode Low Power"),
-    OPR_MODE_REGULAR          ((byte)0x01, (byte)0b11000, 3, "Operation Mode Regular"),
-    OPR_MODE_ENHANCED_REGULAR ((byte)0x02, (byte)0b11000, 3, "Operation Mode Enhanced Regular"),
-    OPR_MODE_HIGH_ACCURACY    ((byte)0x03, (byte)0b11000, 3, "Operation Mode High Accuracy"),
-    PWR_MODE_NORMAL           ((byte)0x00, (byte)0b1100000, 5, "Power Mode Normal"),
-    PWR_MODE_SLEEP            ((byte)0x01, (byte)0b1100000, 5, "Power Mode Sleep"),
-    PWR_MODE_SUSPEND          ((byte)0x02, (byte)0b1100000, 5, "Power Mode Suspend"),
-    PWR_MODE_FORCE_MODE       ((byte)0x03, (byte)0b1100000, 5, "Power Mode Force Mode");
+    DATA_OUTPUT_RATE_2HZ((byte) 0x00, (byte) 0b111, 0, "Data Output Rate 2Hz"), DATA_OUTPUT_RATE_6HZ((byte) 0x01, (byte) 0b111, 0, "Data Output Rate 6Hz"), DATA_OUTPUT_RATE_8HZ(
+        (byte) 0x02, (byte) 0b111, 0, "Data Output Rate 8Hz"), DATA_OUTPUT_RATE_10HZ((byte) 0x03, (byte) 0b111, 0, "Data Output Rate 10Hz"), DATA_OUTPUT_RATE_15HZ((byte) 0x04,
+            (byte) 0b111, 0,
+            "Data Output Rate 15Hz"), DATA_OUTPUT_RATE_20HZ((byte) 0x05, (byte) 0b111, 0, "Data Output Rate 20Hz"), DATA_OUTPUT_RATE_25HZ((byte) 0x06, (byte) 0b111, 0,
+                "Data Output Rate 25Hz"), DATA_OUTPUT_RATE_30HZ((byte) 0x07, (byte) 0b111, 0, "Data Output Rate 30Hz"), OPR_MODE_LOW_POWER((byte) 0x00, (byte) 0b11000, 3,
+                    "Operation Mode Low Power"), OPR_MODE_REGULAR((byte) 0x01, (byte) 0b11000, 3, "Operation Mode Regular"), OPR_MODE_ENHANCED_REGULAR((byte) 0x02, (byte) 0b11000,
+                        3, "Operation Mode Enhanced Regular"), OPR_MODE_HIGH_ACCURACY((byte) 0x03, (byte) 0b11000, 3, "Operation Mode High Accuracy"), PWR_MODE_NORMAL((byte) 0x00,
+                            (byte) 0b1100000, 5, "Power Mode Normal"), PWR_MODE_SLEEP((byte) 0x01, (byte) 0b1100000, 5, "Power Mode Sleep"), PWR_MODE_SUSPEND((byte) 0x02,
+                                (byte) 0b1100000, 5, "Power Mode Suspend"), PWR_MODE_FORCE_MODE((byte) 0x03, (byte) 0b1100000, 5, "Power Mode Force Mode");
     public byte value;
     public byte mask;
     public int shift;
     public String description;
+
     private MagnetometerConfig(byte value, byte mask, int shift, String description) {
       this.value = value;
       this.mask = mask;
@@ -332,15 +263,14 @@ public class Bno055 extends Service implements I2CControl, PinListener {
       this.description = description;
     }
   }
-  
+
   public enum AxisMapConfig {
-    X_AXIS  ((byte)0x00, (byte)0b11, 0, "Axis X"),
-    Y_AXIS  ((byte)0x01, (byte)0b1100, 2, "Axis Y"),
-    Z_AXIS  ((byte)0x02, (byte)0b110000, 4, "Axis Z");
+    X_AXIS((byte) 0x00, (byte) 0b11, 0, "Axis X"), Y_AXIS((byte) 0x01, (byte) 0b1100, 2, "Axis Y"), Z_AXIS((byte) 0x02, (byte) 0b110000, 4, "Axis Z");
     public byte value;
     public byte mask;
     public int shift;
     public String description;
+
     private AxisMapConfig(byte value, byte mask, int shift, String description) {
       this.value = value;
       this.mask = mask;
@@ -348,24 +278,18 @@ public class Bno055 extends Service implements I2CControl, PinListener {
       this.description = description;
     }
   }
-  
+
   public enum Unit {
-    ACC_M_S2              ((byte)0x00, (byte)0b1, 0, "m/s2"),
-    ACC_MG                ((byte)0x01, (byte)0b1, 0, "mg"),
-    ANGULAR_RATE_DPS      ((byte)0x00, (byte)0b10, 1, "dps"),
-    ANGULAR_RATE_RPS      ((byte)0x01, (byte)0b10, 1, "rps"),
-    EULER_ANGLE_DEG       ((byte)0x00, (byte)0b100, 2, "degree"),
-    EULER_ANGLE_RAD       ((byte)0x01, (byte)0b100, 2, "radian"),
-    TEMP_C                ((byte)0x00, (byte)0b10000, 4, "C"),
-    TEMP_F                ((byte)0x01, (byte)0b10000, 4, "F"),
-    OUTPUT_FORMAT_WINDOWS ((byte)0x00, (byte)0b10000000, 7, "Output Format Window"), 
-    OUTPUT_FORMAT_ANDROID ((byte)0x01, (byte)0b10000000, 7, "Output Format Android"), 
-    MAG                   ((byte)0x00, (byte)0b0, 0, "Micro Tesla"),
-    QUAT                  ((byte)0x00, (byte)0b0, 0, "");
+    ACC_M_S2((byte) 0x00, (byte) 0b1, 0, "m/s2"), ACC_MG((byte) 0x01, (byte) 0b1, 0, "mg"), ANGULAR_RATE_DPS((byte) 0x00, (byte) 0b10, 1, "dps"), ANGULAR_RATE_RPS((byte) 0x01,
+        (byte) 0b10, 1, "rps"), EULER_ANGLE_DEG((byte) 0x00, (byte) 0b100, 2, "degree"), EULER_ANGLE_RAD((byte) 0x01, (byte) 0b100, 2, "radian"), TEMP_C((byte) 0x00,
+            (byte) 0b10000, 4,
+            "C"), TEMP_F((byte) 0x01, (byte) 0b10000, 4, "F"), OUTPUT_FORMAT_WINDOWS((byte) 0x00, (byte) 0b10000000, 7, "Output Format Window"), OUTPUT_FORMAT_ANDROID((byte) 0x01,
+                (byte) 0b10000000, 7, "Output Format Android"), MAG((byte) 0x00, (byte) 0b0, 0, "Micro Tesla"), QUAT((byte) 0x00, (byte) 0b0, 0, "");
     public byte value;
     public byte mask;
     public int shift;
     public String description;
+
     private Unit(byte value, byte mask, int shift, String description) {
       this.value = value;
       this.mask = mask;
@@ -373,16 +297,15 @@ public class Bno055 extends Service implements I2CControl, PinListener {
       this.description = description;
     }
   }
-  
+
   public enum CalibStat {
-    MAG ((byte)0x00, (byte)0b11, 0, "Magnetometer Calibration Status"),
-    ACC ((byte)0x01, (byte)0b1100, 2, "Accelerometer Calibration Status"),
-    GYR ((byte)0x02, (byte)0b110000, 4, "Gyroscope Calibration Status"),
-    SYS ((byte)0x03, (byte)0b11000000, 6, "System Calibration Status");
+    MAG((byte) 0x00, (byte) 0b11, 0, "Magnetometer Calibration Status"), ACC((byte) 0x01, (byte) 0b1100, 2, "Accelerometer Calibration Status"), GYR((byte) 0x02, (byte) 0b110000,
+        4, "Gyroscope Calibration Status"), SYS((byte) 0x03, (byte) 0b11000000, 6, "System Calibration Status");
     public byte value;
     public byte mask;
     public int shift;
     public String description;
+
     private CalibStat(byte value, byte mask, int shift, String description) {
       this.value = value;
       this.mask = mask;
@@ -390,21 +313,19 @@ public class Bno055 extends Service implements I2CControl, PinListener {
       this.description = description;
     }
   }
-  
+
   public enum InterruptType {
-    ACC_NM ((byte)0x00, (byte)0b10000000),
-    ACC_SM ((byte)0x01, (byte)0b10000000),
-    ACC_AM ((byte)0x02, (byte)0b1000000),
-    ACC_HG ((byte)0x03, (byte)0b100000),
-    GYR_HR ((byte)0x04, (byte)0b1000),
-    GYR_AM ((byte)0x05, (byte)0b100);
+    ACC_NM((byte) 0x00, (byte) 0b10000000), ACC_SM((byte) 0x01, (byte) 0b10000000), ACC_AM((byte) 0x02, (byte) 0b1000000), ACC_HG((byte) 0x03, (byte) 0b100000), GYR_HR((byte) 0x04,
+        (byte) 0b1000), GYR_AM((byte) 0x05, (byte) 0b100);
     public byte value;
     public byte mask;
+
     InterruptType(byte value, byte mask) {
       this.value = value;
       this.mask = mask;
     }
   }
+
   private OperationMode mode;
 
   private PinArrayControl pinControl = null;
