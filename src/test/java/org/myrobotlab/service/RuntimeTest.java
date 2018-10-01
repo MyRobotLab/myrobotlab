@@ -68,17 +68,17 @@ public class RuntimeTest {
   // Assert.assertNotNull(se.platform.getOS());
   // Assert.assertNotNull(se.platform.getBitness());
   // }
-  
+
   @Test
   public void testRuntimeLocale() {
-    
+
     long curr = 1479044758691L;
     Date d = new Date(curr);
 
     Runtime runtime = Runtime.getInstance();
     runtime.setLocale("fr", "FR");
     // TODO: how do i test this?
-    
+
     // you can't test default reliably
     DateFormat formatter = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
     String today = formatter.format(d);
@@ -91,8 +91,7 @@ public class RuntimeTest {
     today = formatter.format(d);
 
     assertEquals("November 13, 2016", today);
-    
-    
+
   }
 
 }

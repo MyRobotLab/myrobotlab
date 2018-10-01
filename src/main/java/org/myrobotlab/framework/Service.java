@@ -86,7 +86,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
-  
+
   /**
    * contains all the meta data about the service - pulled from the static
    * method getMetaData() each instance will call the method and populate the
@@ -181,8 +181,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
-   * @param myKey m
-   * @param serviceClass class 
+   * 
+   * @param myKey
+   *          m
+   * @param serviceClass
+   *          class
    * @return a map of string to service reservation
    * 
    */
@@ -265,10 +268,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * this method returns the current build strucutre for which name &amp; type is
-   * specified
+   * this method returns the current build strucutre for which name &amp; type
+   * is specified
    * 
-   * @param dna - a.k.a myDna which information will be added to
+   * @param dna
+   *          - a.k.a myDna which information will be added to
    * @param myKey
    *          - key (name) instance of the class currently under construction
    * @param serviceClass
@@ -375,8 +379,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * copyShallowFrom is used to help maintain state information with
-   * @param target t
-   * @param source s
+   * 
+   * @param target
+   *          t
+   * @param source
+   *          s
    * @return o
    */
   public static Object copyShallowFrom(Object target, Object source) {
@@ -385,88 +392,89 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
     Set<Class<?>> ancestry = new HashSet<Class<?>>();
     Class<?> targetClass = source.getClass();
-    
+
     ancestry.add(targetClass);
-    
+
     // if we are a org.myrobotlab object climb up the ancestry to
-    // copy all super-type fields ... 
-    // GroG says: I wasn't comfortable copying of "Service" - because its never been tested before - so we copy all definitions from
+    // copy all super-type fields ...
+    // GroG says: I wasn't comfortable copying of "Service" - because its never
+    // been tested before - so we copy all definitions from
     // other superclasses e.g. - org.myrobotlab.service.abstracts
     // it might be safe in the future to copy all the way up without stopping...
-   while(targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")){
-     ancestry.add(targetClass);
-     targetClass = targetClass.getSuperclass();
-   }
-   
-   for(Class<?> sourceClass : ancestry) {
-    
-    Field fields[] = sourceClass.getDeclaredFields();
-    for (int j = 0, m = fields.length; j < m; j++) {
-      try {
-        Field f = fields[j];
+    while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
+      ancestry.add(targetClass);
+      targetClass = targetClass.getSuperclass();
+    }
 
-        int modifiers = f.getModifiers();
+    for (Class<?> sourceClass : ancestry) {
 
-        // if (Modifier.isPublic(mod)
-        // !(Modifier.isPublic(f.getModifiers())
-        // Hmmm JSON mappers do hacks to get by
-        // IllegalAccessExceptions.... Hmmmmm
+      Field fields[] = sourceClass.getDeclaredFields();
+      for (int j = 0, m = fields.length; j < m; j++) {
+        try {
+          Field f = fields[j];
 
-        // GROG - recent change from this
-        // if ((!Modifier.isPublic(modifiers)
-        // to this
-        String fname = f.getName();
-        /*
-         * if (fname.equals("desktops") || fname.equals("useLocalResources") ){
-         * log.info("here"); }
-         */
+          int modifiers = f.getModifiers();
 
-        if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-          log.debug("skipping {}", f.getName());
-          continue;
-        } else {
-          log.debug("copying {}", f.getName());
+          // if (Modifier.isPublic(mod)
+          // !(Modifier.isPublic(f.getModifiers())
+          // Hmmm JSON mappers do hacks to get by
+          // IllegalAccessExceptions.... Hmmmmm
+
+          // GROG - recent change from this
+          // if ((!Modifier.isPublic(modifiers)
+          // to this
+          String fname = f.getName();
+          /*
+           * if (fname.equals("desktops") || fname.equals("useLocalResources")
+           * ){ log.info("here"); }
+           */
+
+          if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+            log.debug("skipping {}", f.getName());
+            continue;
+          } else {
+            log.debug("copying {}", f.getName());
+          }
+          Type t = f.getType();
+
+          // log.info(String.format("setting %s", f.getName()));
+          /*
+           * if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+           * continue; }
+           */
+
+          // GroG - this is new 1/26/2017 - needed to get webgui data to
+          // load
+          f.setAccessible(true);
+          Field targetField = sourceClass.getDeclaredField(f.getName());
+          targetField.setAccessible(true);
+
+          if (t.equals(java.lang.Boolean.TYPE)) {
+            targetField.setBoolean(target, f.getBoolean(source));
+          } else if (t.equals(java.lang.Character.TYPE)) {
+            targetField.setChar(target, f.getChar(source));
+          } else if (t.equals(java.lang.Byte.TYPE)) {
+            targetField.setByte(target, f.getByte(source));
+          } else if (t.equals(java.lang.Short.TYPE)) {
+            targetField.setShort(target, f.getShort(source));
+          } else if (t.equals(java.lang.Integer.TYPE)) {
+            targetField.setInt(target, f.getInt(source));
+          } else if (t.equals(java.lang.Long.TYPE)) {
+            targetField.setLong(target, f.getLong(source));
+          } else if (t.equals(java.lang.Float.TYPE)) {
+            targetField.setFloat(target, f.getFloat(source));
+          } else if (t.equals(java.lang.Double.TYPE)) {
+            targetField.setDouble(target, f.getDouble(source));
+          } else {
+            // log.debug(String.format("setting reference to remote
+            // object %s", f.getName()));
+            targetField.set(target, f.get(source));
+          }
+        } catch (Exception e) {
+          log.error("copy failed", e);
         }
-        Type t = f.getType();
-
-        // log.info(String.format("setting %s", f.getName()));
-        /*
-         * if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-         * continue; }
-         */
-
-        // GroG - this is new 1/26/2017 - needed to get webgui data to
-        // load
-        f.setAccessible(true);
-        Field targetField = sourceClass.getDeclaredField(f.getName());
-        targetField.setAccessible(true);
-
-        if (t.equals(java.lang.Boolean.TYPE)) {
-          targetField.setBoolean(target, f.getBoolean(source));
-        } else if (t.equals(java.lang.Character.TYPE)) {
-          targetField.setChar(target, f.getChar(source));
-        } else if (t.equals(java.lang.Byte.TYPE)) {
-          targetField.setByte(target, f.getByte(source));
-        } else if (t.equals(java.lang.Short.TYPE)) {
-          targetField.setShort(target, f.getShort(source));
-        } else if (t.equals(java.lang.Integer.TYPE)) {
-          targetField.setInt(target, f.getInt(source));
-        } else if (t.equals(java.lang.Long.TYPE)) {
-          targetField.setLong(target, f.getLong(source));
-        } else if (t.equals(java.lang.Float.TYPE)) {
-          targetField.setFloat(target, f.getFloat(source));
-        } else if (t.equals(java.lang.Double.TYPE)) {
-          targetField.setDouble(target, f.getDouble(source));
-        } else {
-          // log.debug(String.format("setting reference to remote
-          // object %s", f.getName()));
-          targetField.set(target, f.get(source));
-        }
-      } catch (Exception e) {
-        log.error("copy failed", e);
-      }
-    } // for each field in class
-   } // for each in ancestry
+      } // for each field in class
+    } // for each in ancestry
     return target;
   }
 
@@ -539,8 +547,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * - from which it will be accessible for create methods
    * 
    * template merge with existing dna
-   * @param myKey the key
-   * @param className the class name
+   * 
+   * @param myKey
+   *          the key
+   * @param className
+   *          the class name
    */
   public void mergePeerDna(String myKey, String className) {
     if (serviceType != null) {
@@ -617,10 +628,15 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * a method to recursively move all peer children of this server
-   * @param myKey key
-   * @param actualName name 
-   * @param fullTypeName  full 
-   * @param comment a comment
+   * 
+   * @param myKey
+   *          key
+   * @param actualName
+   *          name
+   * @param fullTypeName
+   *          full
+   * @param comment
+   *          a comment
    */
   public void movePeerDna(String myKey, String actualName, String fullTypeName, String comment) {
     ServiceType meta = getMetaData(fullTypeName);
@@ -646,9 +662,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Reserves a name for a root level Service. allows modifications to the
    * reservation map at the highest level
-   * @param key the key
-   * @param simpleTypeName the type 
-   * @param comment a comment
+   * 
+   * @param key
+   *          the key
+   * @param simpleTypeName
+   *          the type
+   * @param comment
+   *          a comment
    */
   static public void reserveRoot(String key, String simpleTypeName, String comment) {
     // strip delimeter out if put in by key
@@ -663,8 +683,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * basic useful reset of a peer before service is created
-   * @param peerName name
-   * @param peerType type
+   * 
+   * @param peerName
+   *          name
+   * @param peerType
+   *          type
    */
   public void setPeer(String peerName, String peerType) {
     String fullKey = String.format("%s.%s", getName(), peerName);
@@ -710,7 +733,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * sleep without the throw
-   * @param millis the time in milliseconds
+   * 
+   * @param millis
+   *          the time in milliseconds
    * 
    */
   public static void sleep(int millis) {
@@ -847,11 +872,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * a stronger bigger better task handler !
-   * @param taskName task name
-   * @param intervalMs how frequent in milliseconds
-   * @param delay the delay 
-   * @param method the method
-   * @param params the params to pass
+   * 
+   * @param taskName
+   *          task name
+   * @param intervalMs
+   *          how frequent in milliseconds
+   * @param delay
+   *          the delay
+   * @param method
+   *          the method
+   * @param params
+   *          the params to pass
    */
   public void addTask(String taskName, int intervalMs, int delay, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
@@ -950,7 +981,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * FIXME - if not local - it needs to be prefixed by the gateway e.g.
    * {remote}.arduino.serial
-   * @param reservedKey r
+   * 
+   * @param reservedKey
+   *          r
    * @return service interface
    */
   /*
@@ -989,7 +1022,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * This method will update the registry, additionally it will block until the
    * refresh response comes back
-   * @param pulse p
+   * 
+   * @param pulse
+   *          p
    * @return a heartbeat
    */
 
@@ -1142,7 +1177,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * FIXME - the SwingGui currently has attachGUI() and detachGUI() - these are
    * to bind Services with their swing views/tab panels. It should be
    * generalized to this attach method
-   * @param subpath s
+   * 
+   * @param subpath
+   *          s
    * 
    * @return if successful
    * 
@@ -1183,8 +1220,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * // check this type <-- not sure i want to support this
    * 
-   * // check this name &amp; method // if any access limitations exist which might
-   * be applicable if (accessRules.containsKey(msg.name) ||
+   * // check this name &amp; method // if any access limitations exist which
+   * might be applicable if (accessRules.containsKey(msg.name) ||
    * accessRules.containsKey(String.format("%s.%s", msg.name, msg.method))) { //
    * restricted service - check for authorization // Security service only
    * provides authorization ? if (security == null) { return false; } else {
@@ -1305,9 +1342,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * the core working invoke method
    * 
-   * @param obj - the object
-   * @param method - the method to invoke on that object
-   * @param params - the list of args to pass to the method
+   * @param obj
+   *          - the object
+   * @param method
+   *          - the method to invoke on that object
+   * @param params
+   *          - the list of args to pass to the method
    * @return return object
    */
   @Override
@@ -1466,8 +1506,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       if (cfg.exists()) {
         // serializer.read(o, cfg);
         String json = FileIO.toString(filename);
-        Object saved = CodecUtils.fromJson(json, o.getClass()); 
-        
+        Object saved = CodecUtils.fromJson(json, o.getClass());
+
         copyShallowFrom(o, saved);
         return true;
       }
@@ -1520,7 +1560,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * framework diagnostic publishing method for examining load, capacity, and
    * throughput of Inbox &amp; Outbox queues
-   * @param stats s
+   * 
+   * @param stats
+   *          s
    * @return the stats
    */
   public QueueStats publishQueueStats(QueueStats stats) {
@@ -1529,6 +1571,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * publishing point for the whole service the entire Service is published
+   * 
    * @return the service
    */
   public Service publishState() {
@@ -1570,7 +1613,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void releaseService() {
 
     // recently added - preference over detach(Runtime.getService(getName()));
-    // since this service is releasing - it should be detached from all existing services
+    // since this service is releasing - it should be detached from all existing
+    // services
     detach();
 
     // note - if stopService is overwritten with extra
@@ -1581,7 +1625,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // detach();
     // @grog is it ok for now ?
 
-    // GroG says, I don't think so - this is releasing itself from itself 
+    // GroG says, I don't think so - this is releasing itself from itself
     // detach(Runtime.getService(getName()));
 
     // FIXME - deprecate - peers are no longer used ...
@@ -1789,9 +1833,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * this send forces remote connect - for registering services
-   * @param url u
-   * @param method m 
-   * @param param1 the param
+   * 
+   * @param url
+   *          u
+   * @param method
+   *          m
+   * @param param1
+   *          the param
    */
   public void send(URI url, String method, Object param1) {
     Object[] params = new Object[1];
@@ -2019,7 +2067,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * set status broadcasts an info string to any subscribers
-   * @param msg m
+   * 
+   * @param msg
+   *          m
    * @return string
    */
   public Status info(String msg) {
@@ -2039,7 +2089,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * error only channel publishing point versus publishStatus which handles
    * info, warn &amp; error
-   * @param status status
+   * 
+   * @param status
+   *          status
    * @return the status
    */
   public Status publishError(Status status) {
@@ -2104,7 +2156,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Calls the static method getMetaData on the appropriate class. The class
    * static data is passed back as a template to be merged in with the global
    * static dna
-   * @param serviceClass sc
+   * 
+   * @param serviceClass
+   *          sc
    * @return the service type info
    */
   static public ServiceType getMetaData(String serviceClass) {
@@ -2150,7 +2204,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   public void detach() {
     log.info("detach was called but I'm a NOOP in Service.java - probably not what you wanted - override me !");
-    // FIXME - attach should probably have a Service.java level of understanding where a Service understands
+    // FIXME - attach should probably have a Service.java level of understanding
+    // where a Service understands
     // that another service is attached
   }
 
@@ -2167,8 +2222,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * This detach when overriden "routes" to the appropriately typed parameterized
-   * detach within a service.
+   * This detach when overriden "routes" to the appropriately typed
+   * parameterized detach within a service.
    * 
    * When overriden, the first thing it should do is check to see if the
    * referenced service is already detached. If it is already detached it should
@@ -2204,7 +2259,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    *       // call to detaching service
    *       service.detach(this);  
-   * }  
+   * }
    * </pre>
    * 
    * @param service
@@ -2215,8 +2270,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * the "routing" isAttached - when overridden by a service this
-   * "routes" to the appropriate typed isAttached
+   * the "routing" isAttached - when overridden by a service this "routes" to
+   * the appropriate typed isAttached
    */
   @Override
   public boolean isAttached(Attachable instance) {
@@ -2232,8 +2287,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * This attach when overriden "routes" to the appropriately typed parameterized
-   * attach within a service.
+   * This attach when overriden "routes" to the appropriately typed
+   * parameterized attach within a service.
    * 
    * When overriden, the first thing it should do is check to see if the
    * referenced service is already attached. If it is already attached it should
@@ -2269,7 +2324,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    *       // call to attaching service
    *       service.attach(this);  
-   * }  
+   * }
    * </pre>
    * 
    * @param service
@@ -2287,10 +2342,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean isVirtual() {
     return isVirtual;
   }
-  
+
   /**
-   * Called by Runtime when system is shutting down
-   * a service can use this method when it has to do some "ordered" cleanup.
+   * Called by Runtime when system is shutting down a service can use this
+   * method when it has to do some "ordered" cleanup.
    */
   public void makeReadyForShutdown() {
   }

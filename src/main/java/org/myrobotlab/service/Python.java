@@ -263,7 +263,7 @@ public class Python extends Service {
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
   transient InputQueueThread inputQueueThread;
   transient PythonInterpreter interp = null;
-  //transient PIThread interpThread = null;
+  // transient PIThread interpThread = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
   int interpreterThreadCount = 0;
@@ -702,8 +702,9 @@ public class Python extends Service {
   }
 
   /**
-   * stop all scripts
-   * (not sure the pros/cons of this management vs thread.interruptAllThreads())
+   * stop all scripts (not sure the pros/cons of this management vs
+   * thread.interruptAllThreads())
+   * 
    * @return
    */
   public boolean stop() {

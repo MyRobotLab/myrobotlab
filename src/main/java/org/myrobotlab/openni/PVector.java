@@ -202,12 +202,11 @@ public class PVector implements Serializable {
    * Divide each element of one vector by the individual elements of another
    * vector, and write the result into a target vector.
    * 
-   * @param v1
-   *          the first vector
-   * @param v2
-   *          the second vector
-   * @param target
-   *          PVector to store the result
+   * @param v1 the first vector
+   * 
+   * @param v2 the second vector
+   * 
+   * @param target PVector to store the result
    */
   static public PVector div(PVector v1, PVector v2, PVector target) {
     if (target == null) {
@@ -267,12 +266,11 @@ public class PVector implements Serializable {
    * Multiply each element of one vector by the individual elements of another
    * vector, and write the result into a target vector.
    * 
-   * @param v1
-   *          the first vector
-   * @param v2
-   *          the second vector
-   * @param target
-   *          PVector to store the result
+   * @param v1 the first vector
+   * 
+   * @param v2 the second vector
+   * 
+   * @param target PVector to store the result
    */
   static public PVector mult(PVector v1, PVector v2, PVector target) {
     if (target == null) {
@@ -361,8 +359,8 @@ public class PVector implements Serializable {
 
   /**
    * @return a representation of this vector as a float array. This is only for
-   * temporary use. If used in any other fashion, the contents should be copied
-   * by using the get() command to copy into your own array.
+   *         temporary use. If used in any other fashion, the contents should be
+   *         copied by using the get() command to copy into your own array.
    */
   public float[] array() {
     if (array == null) {
@@ -375,7 +373,8 @@ public class PVector implements Serializable {
   }
 
   /**
-   * @param v vector
+   * @param v
+   *          vector
    * @return a vector composed of the cross product between this and another.
    */
   public PVector cross(PVector v) {

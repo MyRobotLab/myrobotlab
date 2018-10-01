@@ -2,31 +2,31 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.slf4j.Logger;
 import org.myrobotlab.service.abstracts.AbstractBodyPart;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.slf4j.Logger;
 
 /**
- * Body spare parts for universal ServoControl gestures
- * Inspired by InMoov.java...
+ * Body spare parts for universal ServoControl gestures Inspired by
+ * InMoov.java...
  * 
  * TODO : IK moveTo(x,y,z) ?
  * 
- * Syntax to declare body part
- * Runtime.start("nodeToAttach.name", "BodyPart");
+ * Syntax to declare body part Runtime.start("nodeToAttach.name", "BodyPart");
  * 
- * Syntax to declare an actuator
- * Runtime.start("nodeToAttach.name", "Servo");
+ * Syntax to declare an actuator Runtime.start("nodeToAttach.name", "Servo");
  * 
  * 
- * Do not declare the whole path i01.rightarm.righthand.thumb... as name , just the node to attach :
- * The root will learn every nodes attached for a complete linkage
+ * Do not declare the whole path i01.rightarm.righthand.thumb... as name , just
+ * the node to attach : The root will learn every nodes attached for a complete
+ * linkage
  * 
  */
 public class BodyPart extends AbstractBodyPart {
@@ -78,10 +78,11 @@ public class BodyPart extends AbstractBodyPart {
     rightArm.moveTo(10.0);
 
     rightArm.moveTo(90.0, 90.0, 90.0, 90.0, 90.0);
-    //log.info(rightArm.childs.toString() + "childNodes");
-    //log.info(rightArm.childs.crawlForDataStartingWith("") + "");
+    // log.info(rightArm.childs.toString() + "childNodes");
+    // log.info(rightArm.childs.crawlForDataStartingWith("") + "");
 
-    //inMoovTorso.servos = inMoovTorso.childs.crawlForDataStartingWith("rightArm");
+    // inMoovTorso.servos =
+    // inMoovTorso.childs.crawlForDataStartingWith("rightArm");
     rightArm.moveTo("rightHand", 63.0);
     rightArm.getBodyParts();
   }
@@ -151,7 +152,7 @@ public class BodyPart extends AbstractBodyPart {
     waitTargetPos(this.getIntanceName());
   }
 
-  /** 
+  /**
    * Detect if every servo of the group are attached to a controller
    */
   public boolean isAttached() {
@@ -162,7 +163,7 @@ public class BodyPart extends AbstractBodyPart {
     return attached;
   }
 
-  /** 
+  /**
    * Electrize servos group
    */
   public void enable() {
@@ -171,7 +172,7 @@ public class BodyPart extends AbstractBodyPart {
     }
   }
 
-  /** 
+  /**
    * Shutdown power of servos group
    */
   public void disable() {

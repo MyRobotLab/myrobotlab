@@ -119,8 +119,11 @@ public class World {
   Color3f white = new Color3f(1, 1, 1);
   Color3f black = new Color3f(0, 0, 0);
 
-  /** Construct a World from a given EnvironmentDescription. 
-   * @param ed e
+  /**
+   * Construct a World from a given EnvironmentDescription.
+   * 
+   * @param ed
+   *          e
    */
   public World(EnvironmentDescription ed) {
     create(ed);

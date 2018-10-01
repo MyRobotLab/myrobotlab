@@ -171,8 +171,8 @@ public class Twitter extends Service {
     ServiceType meta = new ServiceType(Twitter.class.getCanonicalName());
     meta.addDescription("Service which can relay tweets");
     meta.addCategory("cloud", "connectivity");
-  
-    meta.addDependency("org.twitter4j",  "twitter4j-core", "3.0.5");
+
+    meta.addDependency("org.twitter4j", "twitter4j-core", "3.0.5");
     meta.setCloudService(true);
     return meta;
   }

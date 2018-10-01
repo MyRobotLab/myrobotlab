@@ -13,7 +13,6 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.i2c.I2CFactory;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -26,8 +25,6 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
@@ -35,11 +32,13 @@ import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
+import com.pi4j.system.SystemInfo;
 import com.pi4j.wiringpi.I2C;
 import com.pi4j.wiringpi.SoftPwm;
-import com.pi4j.system.*;
 
 /**
  * 
@@ -50,7 +49,8 @@ import com.pi4j.system.*;
  * 
  */
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
-// TODO pi4j implementation NOWORKY : I/O errors, dont know why, not know this enough :)
+// TODO pi4j implementation NOWORKY : I/O errors, dont know why, not know this
+// enough :)
 public class RasPi extends Service implements I2CController, PinArrayControl {
 
   public static class I2CDeviceMap {
@@ -69,13 +69,13 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   }
 
-  private boolean wiringPi = true ; // Defined to be able to switch between
-                                    // the original pi4j
-                                    // implementation and the wiringpi
-                                    // implemenation that supports repeated
-                                    // start.
-                                    // Repeated start is used by Mpr121 and
-                                    // may be needed by other devices
+  private boolean wiringPi = true; // Defined to be able to switch between
+                                   // the original pi4j
+                                   // implementation and the wiringpi
+                                   // implemenation that supports repeated
+                                   // start.
+                                   // Repeated start is used by Mpr121 and
+                                   // may be needed by other devices
 
   transient Map<String, PinArrayListener> pinArrayListeners = new ConcurrentHashMap<String, PinArrayListener>();
 
@@ -111,10 +111,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
-
   public static void main(String[] args) {
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     /*
      * RasPi.displayString(1, 70, "1");
@@ -157,10 +155,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       /*
        * Removed since it seems to make MRL stop
        * 
-      log.info("Initiating GPIO");
-      gpio = GpioFactory.getInstance();
-      log.info("GPIO Initiated");
-      */
+       * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance();
+       * log.info("GPIO Initiated");
+       */
       // TODO Check if the is correct. I don't think it is /Mats // GPIO pins
       /*
        * should be provisioned in the CreateDevice /* gpio01
@@ -174,7 +171,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
     getPinList();
 
-}
+  }
 
   @Override
   public void startService() {
@@ -264,14 +261,14 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
-    
-    String key = String.format("%d.%d", busAddress, deviceAddress);    
+
+    String key = String.format("%d.%d", busAddress, deviceAddress);
     I2CDeviceMap devicedata = i2cDevices.get(key);
     if (devicedata == null) {
       createI2cDevice(busAddress, deviceAddress, control.getName());
       devicedata = i2cDevices.get(key);
-    } 
-    
+    }
+
     if (wiringPi) {
       int reg = buffer[0] & 0xFF;
       for (int i = 1; i < size; i++) {
@@ -298,7 +295,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       createI2cDevice(busAddress, deviceAddress, control.getName());
       devicedata = i2cDevices.get(key);
     }
-    
+
     if (wiringPi) {
       for (int i = 0; i < size; i++) {
         buffer[i] = (byte) (I2C.wiringPiI2CRead(devicedata.deviceHandle) & 0xFF);
@@ -326,7 +323,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       createI2cDevice(busAddress, deviceAddress, control.getName());
       devicedata = i2cDevices.get(key);
     }
-    
+
     if (wiringPi) {
       for (int i = 0; i < readSize; i++) {
         readBuffer[i] = (byte) (I2C.wiringPiI2CReadReg8(devicedata.deviceHandle, (writeBuffer[0] + i) & 0xFF));
@@ -371,7 +368,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    
+
     String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
 
     if (i2cDevices.containsKey(key)) {
@@ -381,9 +378,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       control.attachI2CController(this);
     }
   }
-  
-  void createI2cDevice(int bus, int address, String serviceName){
-    
+
+  void createI2cDevice(int bus, int address, String serviceName) {
+
     String key = String.format("%d.%d", bus, address);
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (!i2cDevices.containsKey(key)) {
@@ -529,7 +526,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void pinMode(Integer address, String mode) {
-    
+
     if (mode != null && mode.equalsIgnoreCase("INPUT")) {
       pinMode(address, INPUT);
     } else {
@@ -625,9 +622,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void disablePins() {
-    for (int i = 0; i < pinIndex.size(); i++){
+    for (int i = 0; i < pinIndex.size(); i++) {
       PinDefinition pin = pinIndex.get(i);
-      if (pin.getGpioPin() != null){
+      if (pin.getGpioPin() != null) {
         pin.getGpioPin().removeListener();
         pin.setEnabled(false);
       }
@@ -636,7 +633,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void enablePin(Integer address, Integer rate) {
-    
+
     PinDefinition pin = pinIndex.get(address);
     pin.getGpioPin().addListener(new GpioPinListener());
     pin.setEnabled(true);

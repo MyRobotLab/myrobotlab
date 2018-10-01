@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
 
@@ -45,40 +44,39 @@ public class OpenCVTest {
   @Test
   public final void testFileCapture() throws InterruptedException {
     opencv.captureFromImageFile("src/test/resources/OpenCV/multipleFaces.jpg");
-    
+
     opencv.setCameraIndex(3);
     assertEquals(3, opencv.getCameraIndex());
-    // TODO: sorry for changing the unit test.  this thread sleep is needed now!
-    // TODO: remove this thread.sleep call.. 
+    // TODO: sorry for changing the unit test. this thread sleep is needed now!
+    // TODO: remove this thread.sleep call..
     long now = System.currentTimeMillis();
     long delta = System.currentTimeMillis() - now;
     int threshold = 1000;
     OpenCVData data = null;
-     while (delta <  threshold) {
-       delta = System.currentTimeMillis() - now;
-        data = opencv.getOpenCVData();
-        if (data != null) 
-          break;
-     }
+    while (delta < threshold) {
+      delta = System.currentTimeMillis() - now;
+      data = opencv.getOpenCVData();
+      if (data != null)
+        break;
+    }
     assertNotNull(data);
     // adding filter when running - TODO - test addFilter when not running
     // opencv.addFilter("FaceDetect");
     // no guarantee filter is applied before retrieval
     // data = opencv.getOpenCVData();
     data = opencv.getFaceDetect();
-    
-   
+
   }
 
   public static void main(String[] args) {
     try {
       // LoggingFactory.init("INFO");
       boolean quitNow = false;
-      
-      if (quitNow){
+
+      if (quitNow) {
         return;
       }
-      
+
       // run junit as java app
       JUnitCore junit = new JUnitCore();
       Result result = junit.run(OpenCVTest.class);

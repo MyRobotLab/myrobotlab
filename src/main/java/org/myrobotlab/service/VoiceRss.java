@@ -69,7 +69,6 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     this.rate = rate;
   }
 
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     Runtime.start("gui", "SwingGui");
@@ -135,40 +134,40 @@ public class VoiceRss extends AbstractSpeechSynthesis {
   protected void loadVoices() {
     // derived from
     // http://www.voicerss.org/api/documentation.aspx
-    
-    addVoice("Lei","female","ca-es","ca-es"); // Catalan
-    addVoice("Hui","female","zh-cn","zh-cn"); // Chinese (China)
-    addVoice("Jiao","female","zh-hk","zh-hk"); // Chinese (Hong Kong)
-    addVoice("Ju","female","zh-tw","zh-tw"); // Chinese (Taiwan)
-    addVoice("Ella","female","da-dk","da-dk"); // Danish
-    addVoice("Eva","female","nl-nl","nl-nl"); // Dutch
-    addVoice("Agnes","female","en-au","en-au"); // English (Australia)
-    addVoice("Chloe","female","en-ca","en-ca"); // English (Canada)
-    addVoice("Mary","female","en-gb","en-gb"); // English (Great Britain)
-    addVoice("Aditi","female","en-in","en-in"); // English (India)
-    addVoice("Sally","female","en-us","en-us"); // English (United States)
-    addVoice("Ansa","female","fi-fi","fi-fi"); // Finnish
-    addVoice("Adelle","female","fr-ca","fr-ca"); // French (Canada)
-    addVoice("Adyelya","female","fr-fr","fr-fr"); // French (France)
-    addVoice("Anna","female","de-de","de-de"); // German
-    addVoice("Alessandra","female","it-it","it-it"); // Italian
-    addVoice("Akari","female","ja-jp","ja-jp"); // Japanese
-    addVoice("Su","female","ko-kr","ko-kr"); // Korean
-    addVoice("Anette","female","nb-no","nb-no"); // Norwegian
-    addVoice("Agata","female","pl-pl","pl-pl"); // Polish
-    addVoice("Analia","female","pt-br","pt-br"); // Portuguese (Brazil)
-    addVoice("Balei","female","pt-pt","pt-pt"); // Portuguese (Portugal)
-    addVoice("Anastasia","female","ru-ru","ru-ru"); // Russian
-    addVoice("Isabella","female","es-mx","es-mx"); // Spanish (Mexico)
-    addVoice("Camila","female","es-es","es-es"); // Spanish (Spain)
-    addVoice("Elsa","female","sv-se","sv-se"); // Swedish (Sweden)
-    
+
+    addVoice("Lei", "female", "ca-es", "ca-es"); // Catalan
+    addVoice("Hui", "female", "zh-cn", "zh-cn"); // Chinese (China)
+    addVoice("Jiao", "female", "zh-hk", "zh-hk"); // Chinese (Hong Kong)
+    addVoice("Ju", "female", "zh-tw", "zh-tw"); // Chinese (Taiwan)
+    addVoice("Ella", "female", "da-dk", "da-dk"); // Danish
+    addVoice("Eva", "female", "nl-nl", "nl-nl"); // Dutch
+    addVoice("Agnes", "female", "en-au", "en-au"); // English (Australia)
+    addVoice("Chloe", "female", "en-ca", "en-ca"); // English (Canada)
+    addVoice("Mary", "female", "en-gb", "en-gb"); // English (Great Britain)
+    addVoice("Aditi", "female", "en-in", "en-in"); // English (India)
+    addVoice("Sally", "female", "en-us", "en-us"); // English (United States)
+    addVoice("Ansa", "female", "fi-fi", "fi-fi"); // Finnish
+    addVoice("Adelle", "female", "fr-ca", "fr-ca"); // French (Canada)
+    addVoice("Adyelya", "female", "fr-fr", "fr-fr"); // French (France)
+    addVoice("Anna", "female", "de-de", "de-de"); // German
+    addVoice("Alessandra", "female", "it-it", "it-it"); // Italian
+    addVoice("Akari", "female", "ja-jp", "ja-jp"); // Japanese
+    addVoice("Su", "female", "ko-kr", "ko-kr"); // Korean
+    addVoice("Anette", "female", "nb-no", "nb-no"); // Norwegian
+    addVoice("Agata", "female", "pl-pl", "pl-pl"); // Polish
+    addVoice("Analia", "female", "pt-br", "pt-br"); // Portuguese (Brazil)
+    addVoice("Balei", "female", "pt-pt", "pt-pt"); // Portuguese (Portugal)
+    addVoice("Anastasia", "female", "ru-ru", "ru-ru"); // Russian
+    addVoice("Isabella", "female", "es-mx", "es-mx"); // Spanish (Mexico)
+    addVoice("Camila", "female", "es-es", "es-es"); // Spanish (Spain)
+    addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
+
   }
-  
+
   @Override
   public boolean isReady() {
     // minimal check...
-    return getKey(VOICERSS_API_KEY) !=null && !getKey(VOICERSS_API_KEY).isEmpty() ? true : false;
+    return getKey(VOICERSS_API_KEY) != null && !getKey(VOICERSS_API_KEY).isEmpty() ? true : false;
   }
 
 }

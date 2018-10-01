@@ -42,7 +42,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     meta.addDependency("org.boofcv", "all", "0.26");
     meta.addCategory("vision", "video");
     meta.exclude("org.bytedeco", "javacv");
-    meta.exclude("org.bytedeco.javacpp-presets", "opencv");    
+    meta.exclude("org.bytedeco.javacpp-presets", "opencv");
     return meta;
   }
 
@@ -54,21 +54,21 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     System.out.println("Receinvig");
     return point;
   }
-  
-  public ObjectTracker<GrayU8> createTracker(){
+
+  public ObjectTracker<GrayU8> createTracker() {
     TrackerObjectQuad<GrayU8> tracker =
         // FactoryTrackerObjectQuad.circulant(null, GrayU8.class);
         // FactoryTrackerObjectQuad.sparseFlow(null,GrayU8.class,null);
         FactoryTrackerObjectQuad.tld(null, GrayU8.class);
-        // FactoryTrackerObjectQuad.meanShiftComaniciu2003(new
-        // ConfigComaniciu2003(), colorType);
-        // FactoryTrackerObjectQuad.meanShiftComaniciu2003(new
-        // ConfigComaniciu2003(true),colorType);
-        // FactoryTrackerObjectQuad.meanShiftLikelihood(30,5,255,
-        // MeanShiftLikelihoodType.HISTOGRAM,colorType);
+    // FactoryTrackerObjectQuad.meanShiftComaniciu2003(new
+    // ConfigComaniciu2003(), colorType);
+    // FactoryTrackerObjectQuad.meanShiftComaniciu2003(new
+    // ConfigComaniciu2003(true),colorType);
+    // FactoryTrackerObjectQuad.meanShiftLikelihood(30,5,255,
+    // MeanShiftLikelihoodType.HISTOGRAM,colorType);
 
-        ObjectTracker<GrayU8> app = new ObjectTracker<GrayU8>(tracker, 640, 480);
-        return app;
+    ObjectTracker<GrayU8> app = new ObjectTracker<GrayU8>(tracker, 640, 480);
+    return app;
   }
 
   public static void main(String[] args) {
@@ -77,12 +77,12 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
       LoggingFactory.init(Level.INFO);
 
       // ImageType<Planar<GrayU8>> colorType = ImageType.pl(3,GrayU8.class);
-      BoofCv boofcv = (BoofCv)Runtime.start("boofcv", "BoofCv");
+      BoofCv boofcv = (BoofCv) Runtime.start("boofcv", "BoofCv");
       ObjectTracker<GrayU8> tracker = boofcv.createTracker();
       tracker.start();
       Service.sleep(5000);
       tracker.stop();
-      
+
       // BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
       // Runtime.start("gui", "SwingGui");
     } catch (Exception e) {

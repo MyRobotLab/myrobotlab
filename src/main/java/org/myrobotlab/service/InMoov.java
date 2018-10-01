@@ -3,8 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -202,7 +200,7 @@ public class InMoov extends Service {
 
   static String speechService = "MarySpeech";
   // static String speechService = "AcapelaSpeech";
-  //static String speechService = "NaturalReaderSpeech";
+  // static String speechService = "NaturalReaderSpeech";
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   public InMoov(String n) {
@@ -692,7 +690,7 @@ public class InMoov extends Service {
     }
   }
 
-  // ------ composites servos end ----------- 
+  // ------ composites servos end -----------
 
   public void moveHead(double neck, double rothead) {
     if (head != null) {
@@ -1152,7 +1150,7 @@ public class InMoov extends Service {
 
     startLeftHand(leftPort);
     startRightHand(rightPort);
-    //startEyelids(rightPort);
+    // startEyelids(rightPort);
     startLeftArm(leftPort);
     startRightArm(rightPort);
     startTorso(leftPort);
@@ -1316,12 +1314,12 @@ public class InMoov extends Service {
     if (head == null) {
       startHead(port);
     }
-    //rest before tracking at fullspeed
+    // rest before tracking at fullspeed
     setHeadVelocity(80.0, 80.0, 80.0);
     moveHeadBlocking(head.neck.getRest(), head.rothead.getRest(), head.rollNeck.getRest());
     setHeadVelocity(-1.0, -1.0, -1.0);
     headTracking = (Tracking) startPeer("headTracking");
-    // We should pass the servos that control the head in here! 
+    // We should pass the servos that control the head in here!
     headTracking.connect(opencv, head.rothead, head.neck);
     // TODO: why is this needed?!
     arduinos.put(port, (Arduino) headTracking.controller);
@@ -1516,9 +1514,9 @@ public class InMoov extends Service {
   }
 
   /*
-   * Old startEyelids method for backward compatibility;
-   * Old because arduino controller dependent...
-   * So, here we create a default peer arduino controller
+   * Old startEyelids method for backward compatibility; Old because arduino
+   * controller dependent... So, here we create a default peer arduino
+   * controller
    */
   public InMoovEyelids startEyelids(String port, String type, int eyeLidLeftPin, int eyeLidRightPin) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
@@ -1789,7 +1787,7 @@ public class InMoov extends Service {
   }
 
   public void savePose(String poseName) {
-    // TODO: consider a prefix for the pose name? 
+    // TODO: consider a prefix for the pose name?
     String script = captureGesture(poseName);
 
   }
@@ -2215,7 +2213,7 @@ public class InMoov extends Service {
     im.setDHLink("kinect", "camera", 0, 90, 10, 90);
 
     // log.info("{}",im.createJointPositionMap("leftArm").toString());
-    // start the kinematics engines 
+    // start the kinematics engines
 
     // define object, each dh link are set as an object, but the
     // start point and end point will be update by the ik service, but still
@@ -2272,7 +2270,7 @@ public class InMoov extends Service {
 
   }
 
-  //extra services used inside gestures, todo inmoov refactor attach things...
+  // extra services used inside gestures, todo inmoov refactor attach things...
   public Relay LeftRelay1;
   public Relay RightRelay1;
   public NeoPixel neopixel;

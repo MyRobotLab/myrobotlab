@@ -336,10 +336,10 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         }
         // newGui.getDisplay().setBackground(Color.CYAN);
 
-        tabs.addTab(name, newGui.getDisplay(),Runtime.getService(name).getDescription());
+        tabs.addTab(name, newGui.getDisplay(), Runtime.getService(name).getDescription());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
-//        pack();  FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
+        // pack(); FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
       }
     });
   }
@@ -460,6 +460,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   /**
    * set the main status bar with Status information
+   * 
    * @param inStatus
    */
   public void setStatus(Status inStatus) {
@@ -768,7 +769,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
       SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
-      for(int i = 0; i < 40; ++i){
+      for (int i = 0; i < 40; ++i) {
         Runtime.start(String.format("servo%d", i), "Servo");
       }
 
@@ -780,7 +781,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public void setActiveTab(String title) {
     // we need to wait a little after Runtime.start to select an active tab
     // TODO understand why we need a sleep(1000);
-    this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));       
+    this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));
   }
 
   /**
@@ -796,13 +797,13 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     ServiceType meta = new ServiceType(SwingGui.class.getCanonicalName());
     meta.addDescription("Service used to graphically display and control other services");
     meta.addCategory("display");
-    
+
     meta.includeServiceInOneJar(true);
     meta.addDependency("com.fifesoft", "rsyntaxtextarea", "2.0.5.1");
     meta.addDependency("com.fifesoft", "autocomplete", "2.0.5.1");
     meta.addDependency("com.jidesoft", "jide-oss", "3.6.18");
     meta.addDependency("com.mxgraph", "jgraphx", "1.10.4.2");
-    
+
     return meta;
   }
 

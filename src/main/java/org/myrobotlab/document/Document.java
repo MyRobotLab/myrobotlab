@@ -37,7 +37,7 @@ public class Document {
     if (value == null) {
       data.remove(fieldName);
     } else {
-      data.put(fieldName, value);  
+      data.put(fieldName, value);
     }
   }
 

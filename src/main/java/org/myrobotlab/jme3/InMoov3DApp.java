@@ -524,7 +524,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(5));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("jaw", node);
-    maps.put("jaw", new Mapper(0, 180,-10, 5));
+    maps.put("jaw", new Mapper(0, 180, -10, 5));
 
     // poc monitor declaration
 
@@ -602,21 +602,21 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   /*
    * 
-   * @param name
-   *          : name of the part
-   * @param modelPath
-   *          : path leading the the 3dmesh (null for no model)
-   * @param modelScale
-   *          : model will be scale to this parameter
-   * @param hookTo
-   *          : attach this part to the hook part (null to hook to the root)
-   * @param relativePosition
-   *          : position relative to the hook part
-   * @param rotationMask
-   *          : set Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z) for the
-   *          axe of rotation
-   * @param initialAngle
-   *          : initial angle of rotation of the part (in radian)
+   * @param name : name of the part
+   * 
+   * @param modelPath : path leading the the 3dmesh (null for no model)
+   * 
+   * @param modelScale : model will be scale to this parameter
+   * 
+   * @param hookTo : attach this part to the hook part (null to hook to the
+   * root)
+   * 
+   * @param relativePosition : position relative to the hook part
+   * 
+   * @param rotationMask : set Vector3f.UNIT_X, Vector3f.UNIT_Y,
+   * Vector3f.UNIT_Z) for the axe of rotation
+   * 
+   * @param initialAngle : initial angle of rotation of the part (in radian)
    */
 
   public void updatePosition(IKData event) {
@@ -727,7 +727,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   }
 
-  // FIXME - race condition, if this method is called before JME is fully initialized :(
+  // FIXME - race condition, if this method is called before JME is fully
+  // initialized :(
   // the result is no servos are successfully added
   public void addServo(String partName, Servo servo) {
     if (nodes.containsKey(partName)) {

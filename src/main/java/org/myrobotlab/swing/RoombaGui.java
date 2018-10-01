@@ -207,14 +207,14 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
 
     connectButton.setText("connecting");
     try {
-    	roombacomm.connect(portname);
-    } catch(Exception e){
-    	log.error("could not connect", e);
-    	updateDisplay("Couldn't connect to " + portname + "\n");
-        connectButton.setText("  connect  ");
-        return false;
+      roombacomm.connect(portname);
+    } catch (Exception e) {
+      log.error("could not connect", e);
+      updateDisplay("Couldn't connect to " + portname + "\n");
+      connectButton.setText("  connect  ");
+      return false;
     }
-    
+
     updateDisplay("Roomba startup\n");
 
     roombacomm.startup();
@@ -254,7 +254,6 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
     }
 
   }
-
 
   /** Handle the key pressed event from the text field. */
   @Override

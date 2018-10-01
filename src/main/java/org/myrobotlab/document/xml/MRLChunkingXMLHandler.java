@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 import org.xml.sax.Attributes;
@@ -67,8 +66,7 @@ public class MRLChunkingXMLHandler implements ContentHandler {
       // something interrupted us.. we are not running.
       throw new SAXException("Connector is not running.. aborting!");
     }
-    
-    
+
     // push on the stack.
     currentPath.push(qName);
     // log.info("Start element: {}",qName);

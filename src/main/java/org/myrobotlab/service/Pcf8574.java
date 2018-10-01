@@ -12,7 +12,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -183,8 +182,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   // assignment
 
   public static void main(String[] args) {
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     try {
       Pcf8574 pcf8574t = (Pcf8574) Runtime.start("Pcf8574t", "Pcf8574t");
@@ -598,16 +596,16 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     ;
     return false;
   }
-  
+
   public PinDefinition getPin(String pinName) {
-    if (pinMap.containsKey(pinName)){
+    if (pinMap.containsKey(pinName)) {
       return pinMap.get(pinName);
     }
     return null;
   }
-  
+
   public PinDefinition getPin(Integer address) {
-    if (pinIndex.containsKey(address)){
+    if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
     }
     return null;

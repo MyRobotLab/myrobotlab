@@ -55,15 +55,15 @@ public class OpenCVFilterFork extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
 
-	  forked = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
+    forked = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
   }
 
   @Override
   public IplImage process(IplImage image, OpenCVData data) {
 
-	// TODO - duplicate of OpenCVFilterCopy :P
-	forked = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
-	cvCopy(image, forked, null);	
+    // TODO - duplicate of OpenCVFilterCopy :P
+    forked = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
+    cvCopy(image, forked, null);
     return forked;
   }
 

@@ -9,9 +9,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.math.interfaces.Mapper;
-import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
@@ -200,7 +197,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     MotorPort motor = (MotorPort) motors.get(mc.getName());
     String port = motor.getPort();
 
-    int power = (int) motorCalcOutput(mc);    
+    int power = (int) motorCalcOutput(mc);
 
     log.error("motor {} power {}", mc.getName(), power);
 

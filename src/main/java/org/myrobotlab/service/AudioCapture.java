@@ -216,7 +216,7 @@ public class AudioCapture extends Service {
       captureThread.start();
     } catch (Exception e) {
       Logging.logError(e);
-    } 
+    }
     broadcastState();
     // end catch
   }// end captureAudio method

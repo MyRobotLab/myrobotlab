@@ -155,7 +155,6 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     myIPCamera = (IpCamera) Runtime.getService(boundServiceName);
     direction.setDirectionListener(dirEventListener);
 
-
     display.setLayout(new BorderLayout());
 
     video0 = new VideoWidget(boundServiceName, myService);
@@ -191,7 +190,7 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     /*
      * ++gc.gridy; display.add(capture, gc); ++gc.gridy; display.add(info, gc);
      */
-  
+
   }
 
   @Override
@@ -201,14 +200,12 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     subscribe("publishDisplay");
   };
 
-
   @Override
   public void unsubscribeGui() {
     video0.unsubscribeGui();
     unsubscribe("setEnableControls");
     unsubscribe("publishDisplay");
   }
-
 
   /*
    * JUST STREAM THE #*%(%(*# VIDEO ! The return of IPCamera.getStatus which is

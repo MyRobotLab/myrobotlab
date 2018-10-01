@@ -99,7 +99,8 @@ public class WorkE extends Service {
   // - in this particular case it was "randomly" decided that 2 parameters
   // FIXME - no defaults ?
   public void attach() throws Exception {
-    // FIXME - do all createPeers here ???? No - can be left in startService as a startPeer
+    // FIXME - do all createPeers here ???? No - can be left in startService as
+    // a startPeer
     // motorLeft = (AbstractMotor) createPeer("motorLeft");
     // motorRight = (AbstractMotor) createPeer("motorRight");
 
@@ -117,7 +118,7 @@ public class WorkE extends Service {
     map(minX, maxX, minY, maxY);
 
     motorLeft.setInverted(true);
-    
+
     brain.attach(recognizer);
     // setInverted(true);
   }
@@ -145,7 +146,7 @@ public class WorkE extends Service {
 
   public ProgramAB getBrain() {
     if (brain == null) {
-      brain = (ProgramAB)startPeer("brain");
+      brain = (ProgramAB) startPeer("brain");
     }
     return brain;
   }
@@ -257,8 +258,8 @@ public class WorkE extends Service {
       speech = (AbstractSpeechSynthesis) startPeer("speech");
       recognizer = (AbstractSpeechRecognizer) startPeer("recognizer");
       brain = (ProgramAB) startPeer("brain");
-      
-      // default 
+
+      // default
       startPeer("cli");
 
     } catch (Exception e) {
@@ -293,16 +294,16 @@ public class WorkE extends Service {
   public void checkSystems() {
     // start voice - to report
     // reporting - visual, led, voice
-    
+
     speech = (AbstractSpeechSynthesis) startPeer("speech");
 
     // making sure services are started
     startService();
-    
+
     // FIXME - relays - giving power
-    
+
     // stop motors
-    
+
     // check if started
     // check if attached
     // check if connected
@@ -355,11 +356,9 @@ public class WorkE extends Service {
       // worke.setMotorPortLeft("m1");
       // worke.setMotorPorts();
       // !!! Configuration !!!!
-      
-      
+
       AbstractSpeechSynthesis speech = worke.getSpeech();
       speech.speak("hello, my name is worke");
-      
 
       // FIXME configure stage
       // FIXME default builder ???

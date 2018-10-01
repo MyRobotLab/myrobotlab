@@ -39,12 +39,12 @@ public class Point2Df implements Serializable {
   public String toString() {
     return String.format("(%f,%f)", x, y);
   }
-  
-  public float get(String coord){
-    if (coord.equals("x")){
+
+  public float get(String coord) {
+    if (coord.equals("x")) {
       return x;
     }
-    if (coord.equals("y")){
+    if (coord.equals("y")) {
       return y;
     }
     return 0;

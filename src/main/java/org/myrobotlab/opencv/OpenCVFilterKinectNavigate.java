@@ -25,20 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
@@ -113,7 +99,11 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
       lastDepthImage = depth;
 
-      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1 channel for grey rgb
+      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1
+                                                                                        // channel
+                                                                                        // for
+                                                                                        // grey
+                                                                                        // rgb
 
       ByteBuffer colorBuffer = color.getByteBuffer();
       // it may be deprecated but the "new" function .asByteBuffer() does not
@@ -122,7 +112,6 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
       int depthBytesPerChannel = lastDepthImage.depth() / 8;
       int bytesPerX = depthBytesPerChannel * lastDepthImage.nChannels();
-
 
       // iterate through the depth bytes bytes and convert to HSV / RGB format
       // map depth gray (0,65535) => 3 x (0,255) HSV :P
@@ -139,9 +128,9 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
           // int value = depthBuffer.get(depthIndex);// << 8 & 0xFF +
           // buffer.get(depthIndex+1)& 0xFF;
           // this is 16 bit depth - I switched the MSB !!!!
-          int value = (depthBuffer.get(depthIndex+1) & 0xFF) << 8 | (depthBuffer.get(depthIndex ) & 0xFF);
+          int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
           double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
-//          log.warn(String.format("(%d, %d) = %d => %f", x, y, value, hsv));
+          // log.warn(String.format("(%d, %d) = %d => %f", x, y, value, hsv));
 
           Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
 

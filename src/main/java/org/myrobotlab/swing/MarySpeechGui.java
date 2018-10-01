@@ -25,15 +25,12 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.MarySpeech;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.abstracts.AbstractSpeechSynthesisGui;
 import org.slf4j.Logger;
@@ -52,28 +49,25 @@ public class MarySpeechGui extends AbstractSpeechSynthesisGui implements ActionL
   public MarySpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
     /*
-    Runtime.getInstance();
-    MarySpeech mary = (MarySpeech) Runtime.getService(boundServiceName);
-    EffectpanelTLeft.setLayout(new GridLayout(1, 1, 0, 0));
-    EffectpanelTRight.setLayout(new GridLayout(1, 1, 0, 0));
-    EffectpanelBLeft.setLayout(new GridLayout(1, 1, 0, 0));
-    EffectpanelBRight.setLayout(new GridLayout(1, 1, 0, 0));
-
-    mary.getEffectsList().forEach((k, v) -> comboEffects.addItem(k));
-
-    EffectpanelTLeft.add(ComboEffectLabel);
-    EffectpanelTLeft.add(comboEffects);
-    EffectpanelBRight.add(selectedEffects);
-
-    EffectpanelTRight.add(ComboEffectLabel2);
-    EffectpanelTRight.add(effetsParameters);
-    EffectpanelBLeft.add(addEffect);
-    EffectpanelBLeft.add(updateEffect);
-    speechGuiPanel.add(EffectpanelTLeft);
-    speechGuiPanel.add(EffectpanelTRight);
-    speechGuiPanel.add(EffectpanelBLeft);
-    speechGuiPanel.add(EffectpanelBRight);
-    */
+     * Runtime.getInstance(); MarySpeech mary = (MarySpeech)
+     * Runtime.getService(boundServiceName); EffectpanelTLeft.setLayout(new
+     * GridLayout(1, 1, 0, 0)); EffectpanelTRight.setLayout(new GridLayout(1, 1,
+     * 0, 0)); EffectpanelBLeft.setLayout(new GridLayout(1, 1, 0, 0));
+     * EffectpanelBRight.setLayout(new GridLayout(1, 1, 0, 0));
+     * 
+     * mary.getEffectsList().forEach((k, v) -> comboEffects.addItem(k));
+     * 
+     * EffectpanelTLeft.add(ComboEffectLabel);
+     * EffectpanelTLeft.add(comboEffects);
+     * EffectpanelBRight.add(selectedEffects);
+     * 
+     * EffectpanelTRight.add(ComboEffectLabel2);
+     * EffectpanelTRight.add(effetsParameters); EffectpanelBLeft.add(addEffect);
+     * EffectpanelBLeft.add(updateEffect); speechGuiPanel.add(EffectpanelTLeft);
+     * speechGuiPanel.add(EffectpanelTRight);
+     * speechGuiPanel.add(EffectpanelBLeft);
+     * speechGuiPanel.add(EffectpanelBRight);
+     */
 
   }
 

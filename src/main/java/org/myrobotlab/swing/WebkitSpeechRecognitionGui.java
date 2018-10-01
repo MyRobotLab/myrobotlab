@@ -64,9 +64,9 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
     startWebGui.addActionListener(this);
     micro.addActionListener(this);
     comboLanguage.addActionListener(this);
-   // for (Entry<String, String> e : i02.languages.entrySet()) {
-   //   comboLanguage.addItem(e.getValue());
-   // }
+    // for (Entry<String, String> e : i02.languages.entrySet()) {
+    // comboLanguage.addItem(e.getValue());
+    // }
     JPanel pan2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
     pan2.add(startWebGui);
     pan2.add(autoListen);

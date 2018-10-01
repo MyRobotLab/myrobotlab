@@ -346,7 +346,7 @@ public class ServiceData implements Serializable {
       if (args.length > 0) {
         path = args[0];
       } else {
-    	  path = ".";
+        path = ".";
       }
 
       String filename = FileIO.gluePaths(path, "serviceData.json");
@@ -354,13 +354,13 @@ public class ServiceData implements Serializable {
       if (path.length() > 0) {
         new File(path).mkdirs();
       }
-      
+
       // remove pre-existing filename
       File removeExisting = new File(filename);
       removeExisting.delete();
-      
+
       // remove .myrobotlab/serviceData.json
-      removeExisting = new File(System.getProperty("user.dir") + File.separatorChar +  ".myrobotlab" + File.separatorChar + "serviceData.json");
+      removeExisting = new File(System.getProperty("user.dir") + File.separatorChar + ".myrobotlab" + File.separatorChar + "serviceData.json");
       removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
@@ -369,18 +369,14 @@ public class ServiceData implements Serializable {
       fos.write(CodecUtils.toJson(sd).getBytes());
       fos.close();
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
-      
 
     } catch (Exception e) {
       Logging.logError(e);
       System.exit(-1);
     }
-    
-    
+
     // System.exit(0);
-    
-    
-    
+
   }
 
 }

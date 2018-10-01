@@ -178,7 +178,8 @@ public class Polly extends AbstractSpeechSynthesis {
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
     getPolly();
     Voice voice = getVoice();
-    // com.amazonaws.services.polly.model.Voice awsVoice = ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
+    // com.amazonaws.services.polly.model.Voice awsVoice =
+    // ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
     SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName()).withOutputFormat("mp3");
     SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
     InputStream data = synthRes.getAudioStream();

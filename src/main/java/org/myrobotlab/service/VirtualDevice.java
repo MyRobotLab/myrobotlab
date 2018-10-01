@@ -35,16 +35,16 @@ public class VirtualDevice extends Service implements SerialDataListener {
   public final static Logger log = LoggerFactory.getLogger(VirtualDevice.class);
 
   /**
-   * uarts - the serial endpoints for thing which need testing over
-   * serial connections
+   * uarts - the serial endpoints for thing which need testing over serial
+   * connections
    */
   transient HashMap<String, Serial> uarts = new HashMap<String, Serial>();
-  
+
   /**
    * the logic to control all virtual devices
    */
   transient Python logic;
-  
+
   transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 
   public VirtualDevice(String n) {
@@ -150,9 +150,8 @@ public class VirtualDevice extends Service implements SerialDataListener {
    * before being processed/invoked in the Service.
    * 
    * 
-   *           @see
-   *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
-   *           framework.Message)
+   * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
+   * framework.Message)
    */
   @Override
   public boolean preProcessHook(Message msg) {
@@ -225,7 +224,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
     // put peer definitions in
     meta.addPeer("uart", "Serial", "uart");
     meta.addPeer("logic", "Python", "logic to implement");
-    
+
     // this is used for testing, and does not need to be tested
     meta.setAvailable(false);
 

@@ -45,9 +45,9 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
@@ -303,7 +303,7 @@ public class Servo extends Service implements ServoControl {
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
-    
+
     // here we define default values if not inside servo.json
     if (mapper == null) {
       mapper = new Mapper(0, 180, 0, 180);
@@ -344,7 +344,7 @@ public class Servo extends Service implements ServoControl {
     isEventsEnabled = false;
     removeListener("publishServoEvent", service.getName(), "onServoEvent");
   }
-  
+
   public void addIKServoEventListener(NameProvider service) {
     isIKEventEnabled = true;
     addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
@@ -1320,18 +1320,19 @@ public class Servo extends Service implements ServoControl {
     sc.addServoEventListener(sc);
     subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
-  
+
   /**
-   * unsynchronize 2 sevos.  If the servo is running in sync already,
-   * this method will stop the synchronization
+   * unsynchronize 2 sevos. If the servo is running in sync already, this method
+   * will stop the synchronization
+   * 
    * @param args
    * @throws InterruptedException
    */
   public void unsync(ServoControl sc) {
     // remove
-    this.removeServoEventListener(this);    
+    this.removeServoEventListener(this);
     sc.removeServoEventListener(sc);
-    
+
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 

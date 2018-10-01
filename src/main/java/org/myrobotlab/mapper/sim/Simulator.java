@@ -34,14 +34,11 @@ import javax.swing.JInternalFrame;
 
 /**
  * The Simulator class. It manages the list of agents and performs the
- * simulation steps. For each agent a simulation step is is as follow:
- * update sensors
- * call agent performBehavior
- * update position In normal operation the steps are triggered by a
- * timer event. 
- * The Simulator class also provides a Background Mode with limited rendering.
- * This mode is mainly useful for batch simulation ( ie genetic algorithms). See
- * Also Simbatch class.
+ * simulation steps. For each agent a simulation step is is as follow: update
+ * sensors call agent performBehavior update position In normal operation the
+ * steps are triggered by a timer event. The Simulator class also provides a
+ * Background Mode with limited rendering. This mode is mainly useful for batch
+ * simulation ( ie genetic algorithms). See Also Simbatch class.
  * 
  * Cooperates with: World, PhysicalEngine
  * 
@@ -319,7 +316,8 @@ public class Simulator {
   /**
    * Set the time factor. Used to increase or decrease the simulation rate.
    * 
-   * @param fact  : factor to use typical value 1.0 (default) , 2.0 or 0.5
+   * @param fact
+   *          : factor to use typical value 1.0 (default) , 2.0 or 0.5
    */
   public void setVirtualTimeFactor(float fact) {
     System.out.println("[SIM] virtualTimeFactor = " + fact);

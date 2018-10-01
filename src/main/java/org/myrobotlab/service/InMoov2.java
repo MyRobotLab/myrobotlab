@@ -3,29 +3,24 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
-import org.myrobotlab.framework.Index;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.service.WebGui;
-import org.myrobotlab.service.abstracts.AbstractBodyPart;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.inmoov.LanguagePack;
+import org.myrobotlab.inmoov.Utils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.abstracts.AbstractBodyPart;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
-import org.myrobotlab.inmoov.LanguagePack;
-import org.myrobotlab.inmoov.Utils;
 
 /**
  * InMoov2 - The InMoov Service ( very WIP ).
@@ -35,15 +30,15 @@ import org.myrobotlab.inmoov.Utils;
  * and instructions to build are on http://www.inmoov.fr/). InMoov is a
  * composite of servos, Arduinos, microphone, camera, kinect and computer. The
  * InMoov service is composed of many other services, and allows easy
- * initialization and control of these sub systems.
- * Generic bodyPart service is used for skeleton control.
+ * initialization and control of these sub systems. Generic bodyPart service is
+ * used for skeleton control.
  *
  */
 public class InMoov2 extends AbstractBodyPart {
-  
-  //TODO : check if skeleton tree is serialized
-  //TODO : migrate most of py code from inmoov repo
-  //TODO : check all gestures
+
+  // TODO : check if skeleton tree is serialized
+  // TODO : migrate most of py code from inmoov repo
+  // TODO : check all gestures
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
@@ -165,20 +160,20 @@ public class InMoov2 extends AbstractBodyPart {
       inMoov.attach(leftArm);
       inMoov.attach(rightArm);
 
-      //inMoov.attach(lHand, "hand", "left");
-      //inMoov.attach(rightHand, "hand", "right");
-      //inMoov.attach(leftArm, "arm", "left");
-      //inMoov.attach(rArm, "arm", "right");
-      //inMoov.attach(torso, "torso");
-      //inMoov.attach(head, "head");
-      //inMoov.attach(ear);
+      // inMoov.attach(lHand, "hand", "left");
+      // inMoov.attach(rightHand, "hand", "right");
+      // inMoov.attach(leftArm, "arm", "left");
+      // inMoov.attach(rArm, "arm", "right");
+      // inMoov.attach(torso, "torso");
+      // inMoov.attach(head, "head");
+      // inMoov.attach(ear);
       inMoov.startMouth();
       inMoov.startEar();
       inMoov.loadGestures();
       ProgramAB bot = (ProgramAB) Runtime.start("bot", "ProgramAB");
       inMoov.attach(bot);
 
-      //LoggingFactory.init(Level.WARN);
+      // LoggingFactory.init(Level.WARN);
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -287,14 +282,14 @@ public class InMoov2 extends AbstractBodyPart {
       brain.setPredicate("default", "questionfirstinit", "");
       brain.setPredicate("default", "tmpname", "");
       brain.setPredicate("default", "null", "");
-      //brain.setPredicate("default","MagicCommandToWakeUp",MagicCommandToWakeUp)
+      // brain.setPredicate("default","MagicCommandToWakeUp",MagicCommandToWakeUp)
       if (!brain.getPredicate("default", "name").isEmpty()) {
         if (brain.getPredicate("default", "lastUsername").isEmpty() || brain.getPredicate("default", "lastUsername").equals("unknown")) {
           brain.setPredicate("default", "lastUsername", brain.getPredicate("default", "name"));
         }
       }
       brain.savePredicates();
-      //start session based on last recognized person
+      // start session based on last recognized person
       if (!brain.getPredicate("default", "lastUsername").isEmpty() && !brain.getPredicate("default", "lastUsername").equals("unknown")) {
         brain.setUsername(brain.getPredicate("default", "lastUsername"));
 
@@ -336,14 +331,14 @@ public class InMoov2 extends AbstractBodyPart {
    * Start InMoov speech engine also called "mouth"
    * 
    * @return started SpeechSynthesis service
-   * @throws Exception 
+   * @throws Exception
    */
   public SpeechSynthesis startMouth() throws Exception {
     SpeechSynthesis mouth = (SpeechSynthesis) Runtime.start(this.getIntanceName() + ".mouth", getSpeechEngine());
 
     this.attach((Attachable) mouth);
     broadcastState();
-    //return mouth;
+    // return mouth;
     return mouth;
   }
 
@@ -351,7 +346,7 @@ public class InMoov2 extends AbstractBodyPart {
    * Start InMoov ear engine
    * 
    * @return started SpeechRecognizer service
-   * @throws Exception 
+   * @throws Exception
    */
   public SpeechRecognizer startEar() throws Exception {
     ear = (SpeechRecognizer) Runtime.start(this.getIntanceName() + ".ear", getEarEngine());
@@ -364,7 +359,7 @@ public class InMoov2 extends AbstractBodyPart {
    * Start InMoov brain engine
    * 
    * @return started SpeechRecognizer service
-   * @throws Exception 
+   * @throws Exception
    */
   public ProgramAB startBrain() throws Exception {
     brain = (ProgramAB) Runtime.start(this.getIntanceName() + ".brain", "ProgramAB");
@@ -428,7 +423,7 @@ public class InMoov2 extends AbstractBodyPart {
   }
 
   /**
-   *  Iterate over every skeleton members for setOverrideAutoDisable
+   * Iterate over every skeleton members for setOverrideAutoDisable
    * 
    */
   private void setOverrideAutoDisable(Boolean param) {
@@ -438,7 +433,7 @@ public class InMoov2 extends AbstractBodyPart {
   }
 
   /**
-   *  over every skeleton members for waitTargetPos
+   * over every skeleton members for waitTargetPos
    * 
    */
   private void waitTargetPos() {
@@ -485,7 +480,7 @@ public class InMoov2 extends AbstractBodyPart {
       warn("Warning 1 gesture already running, this can break spacetime and lot of things");
     } else {
       gestureIsRunning = true;
-      //RobotCanMoveRandom = false;
+      // RobotCanMoveRandom = false;
       setOverrideAutoDisable(true);
     }
   }
@@ -497,7 +492,7 @@ public class InMoov2 extends AbstractBodyPart {
   public void finishedGesture(String nameOfGesture) {
     if (gestureIsRunning) {
       waitTargetPos();
-      //RobotCanMoveRandom = true;
+      // RobotCanMoveRandom = true;
       setOverrideAutoDisable(false);
       gestureIsRunning = false;
     }
@@ -555,8 +550,8 @@ public class InMoov2 extends AbstractBodyPart {
   }
 
   /**
-   * TODO : use system locale
-   * set language for InMoov service used by chatbot + ear + mouth
+   * TODO : use system locale set language for InMoov service used by chatbot +
+   * ear + mouth
    * 
    * @param i
    *          - format : java Locale
@@ -578,7 +573,7 @@ public class InMoov2 extends AbstractBodyPart {
    */
   public String getLanguage() {
     if (this.language == null) {
-      //check if default locale supported by inmoov
+      // check if default locale supported by inmoov
       if (languages.containsKey(Locale.getDefault().toLanguageTag())) {
         this.language = Locale.getDefault().toLanguageTag();
       } else {

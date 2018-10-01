@@ -68,9 +68,9 @@ public class Joystick extends Service {
   private static final long serialVersionUID = 1L;
 
   List<Controller> controllers;
-  
+
   List<Controller> virtualControllers = new ArrayList<Controller>();
-  
+
   /**
    * current selected controller
    */
@@ -147,18 +147,16 @@ public class Joystick extends Service {
 
           // v net.java.games.input.Component hwComp = hwComponents[i];
           Component hwComp = hwComponents[i];
-          
+
           String id = hwComp.getIdentifier().toString();
-/*          
-          if (id.equals("3")) {
-            log.info("here");
-          }
-*/          
-          
+          /*
+           * if (id.equals("3")) { log.info("here"); }
+           */
+
           float input = hwComp.getPollData();
-          
+
           // log.info("", input);
-          
+
           Component component = components.get(id);
           if (component == null) {
             log.error("{} component is not valid", id);
@@ -243,12 +241,12 @@ public class Joystick extends Service {
     // v hardwareControllers =
     // ControllerEnvironment.getDefaultEnvironment().getControllers();
     controllers = getControllerList();
-    
+
     // adding virtual controllers if any are defined
     for (Controller vc : virtualControllers) {
       controllers.add(vc);
     }
-    
+
     info(String.format("found %d controllers", controllers.size()));
     controllerNames.clear();
     for (int i = 0; i < controllers.size(); i++) {
@@ -257,7 +255,7 @@ public class Joystick extends Service {
     }
     return controllerNames;
   }
-  
+
   // FIXME - clear global
   public List<Controller> getControllerList() {
     List<Controller> controllers = new ArrayList<Controller>();
@@ -347,7 +345,7 @@ public class Joystick extends Service {
       setController(controllerNames.get(s));
       return true;
     }
-    
+
     // close match
     for (String controllerName : controllerNames.keySet()) {
       if (controllerName.contains(s)) {
@@ -355,7 +353,7 @@ public class Joystick extends Service {
         return true;
       }
     }
-    
+
     error("setController - can't find %s", s);
     return false;
   }
@@ -503,35 +501,35 @@ public class Joystick extends Service {
     pressButton(buttonName);
     releaseButton(buttonName);
   }
-  
+
   public Controller cloneController(int index) throws IOException {
     if (controllers == null) {
       log.error("controllers not set");
       return null;
     }
-    
-    Controller controller = controllers.get(index);  
+
+    Controller controller = controllers.get(index);
     String filename = String.format("%s-virtual-%s-%s.json", getName(), controller.getName(), ++index);
-    
+
     save(controller, filename);
-    
+
     // FIXME - non-symmetric save and load :(
     String fname = String.format("%s%s%s", cfgDir, File.separator, filename);
-    
-    Controller v = loadVirtualController(fname);   
+
+    Controller v = loadVirtualController(fname);
     return v;
   }
-  
-  public Controller loadVirtualController(String filename) throws IOException{
+
+  public Controller loadVirtualController(String filename) throws IOException {
     String json = FileIO.toString(filename);
     Controller controller = CodecUtils.fromJson(json, Controller.class);
-    
+
     if (controller != null) {
       // v.setName(String.format("virtual %s", controller.getName()));
       controller.reIndex(getName());
       virtualControllers.add(controller);
     }
-    
+
     return controller;
   }
 
@@ -542,9 +540,9 @@ public class Joystick extends Service {
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       Runtime.start("gui", "SwingGui");
-      
+
       joy.setController(2);
-      
+
       // TODO - clone all
       // TODO - virtualize all
       joy.cloneController(2);
@@ -593,9 +591,9 @@ public class Joystick extends Service {
     }
 
   }
-  
+
   public void moveTo(String axisName, float value) {
-    moveTo(axisName, (double)value);
+    moveTo(axisName, (double) value);
   }
 
   public void moveTo(String axisName, double value) {

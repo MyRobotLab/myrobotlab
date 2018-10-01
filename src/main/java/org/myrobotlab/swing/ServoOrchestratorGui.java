@@ -86,7 +86,6 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
   public ServoOrchestratorGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     myService.send(boundServiceName, "setsoguireference", ServoOrchestratorGui.this);
-    
 
     myService.send(boundServiceName, "setmiddlemiddlesize");
 
@@ -430,7 +429,7 @@ public class ServoOrchestratorGui extends ServiceGui implements ActionListener, 
 
     // splitpane_top_middlebottom.pack();
     display.add(splitpane_top_middlebottom);
-  
+
   }
 
   @Override

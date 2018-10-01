@@ -52,7 +52,7 @@ public abstract class OpenCVFilter implements Serializable {
   int width;
   int height;
   int channels;
-//   int frameIndex;
+  // int frameIndex;
 
   transient CvSize imageSize;
 

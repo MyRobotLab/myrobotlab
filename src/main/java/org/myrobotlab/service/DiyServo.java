@@ -73,7 +73,7 @@ import org.slf4j.Logger;
  *         and use an Aduino, Ads1115 or some other input source that can give
  *         an analog input from a potentiometer or other device that can give
  *         analog feedback.
- *         
+ * 
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
@@ -212,19 +212,18 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   public class EncoderUpdater extends Thread {
-    
-    
-    
+
     public EncoderUpdater(String name) {
       super(String.format("%s.encoderUpdater", name));
     }
-    
-    // 
+
+    //
     public void run() {
-      // here we want to poll the encoder control to keep our "currentPosition" value up to date..
+      // here we want to poll the encoder control to keep our "currentPosition"
+      // value up to date..
       // effectively this replaces onPin ...
       while (true) {
-        currentPosInput = ((AbstractEncoder)encoderControl).lastPosition;
+        currentPosInput = ((AbstractEncoder) encoderControl).lastPosition;
         try {
           // someting to keep the cpu from thrashing.
           pid.setInput(pidKey, currentPosInput);
@@ -234,11 +233,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
           e.printStackTrace();
           break;
         }
-        
+
       }
-      
+
     }
-    
+
   }
 
   private static final long serialVersionUID = 1L;
@@ -260,7 +259,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    */
   transient PinArrayControl pinArrayControl;
   public String pinControlName;
-  
+
   transient EncoderControl encoderControl;
 
   /**
@@ -816,7 +815,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO: do i need anything else?
     this.encoderControl = encoder;
   }
-  
+
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
     // myServo = (DiyServo) Runtime.getService(boundServiceName);
     attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
@@ -1149,8 +1148,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO Auto-generated method stub
     return null;
   }
-  
-  
+
   public static void main(String[] args) throws InterruptedException {
 
     LoggingFactory.getInstance().configure();
@@ -1158,13 +1156,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     try {
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
-//      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-//      virtual.connect("COM3");
-//      boolean done = false;
-//      if (done) {
-//        return;
-//      }
-      
+      // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual",
+      // "VirtualArduino");
+      // virtual.connect("COM3");
+      // boolean done = false;
+      // if (done) {
+      // return;
+      // }
+
       String port = "COM4";
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       // arduino.setBoardUno();
@@ -1182,7 +1181,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       int leftPwmPin = 6;
       int rightPwmPin = 7;
       motor.setPwmPins(leftPwmPin, rightPwmPin);
-      
+
       motor.attach(arduino);
 
       Thread.sleep(1000);
@@ -1192,8 +1191,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
       arduino.attach(encoder);
       Thread.sleep(1000);
-      
-      
+
       // Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
       // ads.setController(arduino, "1", "0x48");
 
@@ -1205,21 +1203,20 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       // diyServo.map(0, 180, 60, 175);
       diyServo = (DiyServo) Runtime.start("diyServo", "DiyServo");
       diyServo.pid.setPID("diyServo", 1.0, 0.2, 0.1);
-     // diyServo.pid.setOutputRange("diyServo", 1, -1);
+      // diyServo.pid.setOutputRange("diyServo", 1, -1);
       // diyServo.pid.setOutput("diyS, Output);
       // diyServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
       // diyServo.setInverted(true);
       diyServo.attach(encoder);
-      
+
       diyServo.setMaxVelocity(-1);
-      
-      
-//      diyServo.setAutoDisable(true);
-//      diyServo.setMaxVelocity(10);
-//      diyServo.moveToBlocking(0);
-//      diyServo.moveToBlocking(180);
-//      diyServo.setMaxVelocity(-1);
-//      diyServo.moveTo(0);
+
+      // diyServo.setAutoDisable(true);
+      // diyServo.setMaxVelocity(10);
+      // diyServo.moveToBlocking(0);
+      // diyServo.moveToBlocking(180);
+      // diyServo.setMaxVelocity(-1);
+      // diyServo.moveTo(0);
 
       // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
 
@@ -1235,22 +1232,20 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     isEventsEnabled = false;
     removeListener("publishServoEvent", service.getName(), "onServoEvent");
   }
-  
+
   /**
-   * unsynchronize 2 sevos.  If the servo is running in sync already,
-   * this method will stop the synchronization
+   * unsynchronize 2 sevos. If the servo is running in sync already, this method
+   * will stop the synchronization
+   * 
    * @param args
    * @throws InterruptedException
    */
   public void unsync(ServoControl sc) {
     // remove
-    this.removeServoEventListener(this);    
+    this.removeServoEventListener(this);
     sc.removeServoEventListener(sc);
-    
+
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
-
-
-
 
 }

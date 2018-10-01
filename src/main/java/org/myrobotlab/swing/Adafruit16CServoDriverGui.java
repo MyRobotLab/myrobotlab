@@ -63,7 +63,8 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
     super(boundServiceName, myService);
     boundService = (Adafruit16CServoDriver) Runtime.getService(boundServiceName);
 
-    // addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
+    // addTopLine(controllerLabel, controllerList, deviceBusLabel,
+    // deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
     addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
     refreshControllers();
@@ -150,7 +151,7 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
     for (int i = 0; i < v.size(); ++i) {
       controllerList.addItem(v.get(i));
     }
-    
+
     if (boundService.controller != null) {
       controllerList.setSelectedItem(boundService.controller.getName());
     }

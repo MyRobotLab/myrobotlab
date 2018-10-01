@@ -9,13 +9,16 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * A proxy for services in other languages (Javascript, Python, C++, Go, Node, Lisp) defined
- * and running outside of this Jvm.  Potentially, if the service complies with convention - a
- * proxy will be created and the services will be able to communicate with each other.
+ * A proxy for services in other languages (Javascript, Python, C++, Go, Node,
+ * Lisp) defined and running outside of this Jvm. Potentially, if the service
+ * complies with convention - a proxy will be created and the services will be
+ * able to communicate with each other.
  * 
- * The messaging conversation to establish connectivity is (will/be) well structured.
+ * The messaging conversation to establish connectivity is (will/be) well
+ * structured.
  * 
- * Although other encodings and Apis are possible, this one follows the "messaging api"
+ * Although other encodings and Apis are possible, this one follows the
+ * "messaging api"
  * 
  * @author GroG
  *
@@ -25,7 +28,7 @@ public class Proxy extends Service {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Proxy.class);
-  
+
   // LinkedTreeMap<String> data;
 
   public Proxy(String n) {

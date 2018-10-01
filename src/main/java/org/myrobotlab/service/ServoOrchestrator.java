@@ -243,7 +243,7 @@ public class ServoOrchestrator extends Service {
       settingsitemholder[middleright_shownitem].arduinopos = sogui_ref.middleright_arduino_list.getSelectedIndex();
       settingsitemholder[middleright_shownitem].pinpos = sogui_ref.middleright_pin_list.getSelectedIndex();
       String arduinoName = (String) sogui_ref.middleright_arduino_list.getSelectedValue();
-      Arduino arduino = (Arduino)Runtime.getService(arduinoName);
+      Arduino arduino = (Arduino) Runtime.getService(arduinoName);
       int pin = Integer.parseInt((String) sogui_ref.middleright_pin_list.getSelectedValue());
       int min = settingsitemholder[middleright_shownitem].min;
       int max = settingsitemholder[middleright_shownitem].max;

@@ -58,16 +58,16 @@ public class Console implements Appender<ILoggingEvent> {
   }
 
   /**
-   * to begin logging call this function Log must not begin before the
-   * SwingGui has finished drawing. For some reason, if log entries are
-   * written to a JScrollPane before the gui has completed the whole gui will
-   * tank
+   * to begin logging call this function Log must not begin before the SwingGui
+   * has finished drawing. For some reason, if log entries are written to a
+   * JScrollPane before the gui has completed the whole gui will tank
    * 
    * by default logging is off
    */
   public void startLogging() {
     ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    // root.setLevel(ch.qos.logback.classic.Level.INFO); GAH !!! DONT DO THIS runtime sets the root
+    // root.setLevel(ch.qos.logback.classic.Level.INFO); GAH !!! DONT DO THIS
+    // runtime sets the root
     root.addAppender(this);
     // PatternLayout layout = new PatternLayout("%-4r [%t] %-5p %c %x -
     // %m%n");

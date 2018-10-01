@@ -20,10 +20,8 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.codec.serial.HexCodec;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.Port;
 import org.slf4j.Logger;
 
@@ -56,7 +54,7 @@ public class SerialTest {
     virtualDevice = (VirtualDevice) Runtime.start("virtualDevice", "VirtualDevice");
     virtualDevice.createVirtualSerial(vport);
 
-    uart = (Serial)virtualDevice.getUart(vport);
+    uart = (Serial) virtualDevice.getUart(vport);
     uart.setTimeout(300);
     Thread.sleep(100);
     serial.open(vport);
@@ -96,7 +94,6 @@ public class SerialTest {
     if (!serial.isConnected()) {
       serial.open(vport);
     }
-
 
     serial.addByteListener(catcher);
   }
@@ -676,23 +673,18 @@ public class SerialTest {
       return;
     }
 
- 
-
     testReadAndWrite();
 
     // ==== decimal codec test ===
     // serial.setCodec("decimal");
 
-  
     testReadAndWrite();
 
     // ==== hex codec test ===
- 
 
     testReadAndWrite();
 
     // ==== ascii codec test ===
-   
 
     testReadAndWrite();
   }

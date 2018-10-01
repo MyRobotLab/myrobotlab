@@ -32,7 +32,6 @@ import georegression.struct.shapes.Rectangle2D_F64;
 
 public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseListener, MouseMotionListener, Runnable {
 
-  
   /**
    * 
    */
@@ -81,15 +80,15 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
     window.setContentPane(this);
     window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
   }
-  
-  public void start(){
-    if (worker == null){
+
+  public void start() {
+    if (worker == null) {
       worker = new Thread(this, "objectTracker");
       worker.start();
     }
   }
-  
-  public void stop(){
+
+  public void stop() {
     processing = false;
     worker = null;
     window.dispose();
@@ -119,7 +118,7 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
 
     while (processing) {
       BufferedImage buffered = webcam.getImage();
-      
+
       ConvertBufferedImage.convertFrom(webcam.getImage(), input, true);
 
       // mode is read/written to by the GUI also
@@ -243,9 +242,9 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
     // ImageType<Planar<GrayU8>> colorType = ImageType.pl(3,GrayU8.class);
 
     TrackerObjectQuad<GrayU8> tracker =
-    // FactoryTrackerObjectQuad.circulant(null, GrayU8.class);
-    // FactoryTrackerObjectQuad.sparseFlow(null,GrayU8.class,null);
-    FactoryTrackerObjectQuad.tld(null, GrayU8.class);
+        // FactoryTrackerObjectQuad.circulant(null, GrayU8.class);
+        // FactoryTrackerObjectQuad.sparseFlow(null,GrayU8.class,null);
+        FactoryTrackerObjectQuad.tld(null, GrayU8.class);
     // FactoryTrackerObjectQuad.meanShiftComaniciu2003(new
     // ConfigComaniciu2003(), colorType);
     // FactoryTrackerObjectQuad.meanShiftComaniciu2003(new

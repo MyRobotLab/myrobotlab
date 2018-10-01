@@ -19,10 +19,10 @@ public class Speech extends Service {
   }
 
   /**
-   * TODO - default mrl Speech service ..
-   *        can proxy other Speech services like Amazon, Azure, Google via cloud
-   *        default to MarySpeech because it's open source
-   *        
+   * TODO - default mrl Speech service .. can proxy other Speech services like
+   * Amazon, Azure, Google via cloud default to MarySpeech because it's open
+   * source
+   * 
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
@@ -46,7 +46,7 @@ public class Speech extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Runtime.start("speech", "Speech");      
+      Runtime.start("speech", "Speech");
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {

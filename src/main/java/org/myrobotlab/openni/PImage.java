@@ -895,15 +895,12 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /*
-   * Method to apply a variety of basic filters to this image.
-   * <P>
-   * <UL>
-   * <LI>filter(BLUR) provides a basic blur.
-   * <LI>filter(GRAY) converts the image to grayscale based on luminance.
-   * <LI>filter(INVERT) will invert the color components in the image.
-   * <LI>filter(OPAQUE) set all the high bits in the image to opaque
-   * <LI>filter(THRESHOLD) converts the image to black and white.
-   * </UL>
+   * Method to apply a variety of basic filters to this image. <P> <UL>
+   * <LI>filter(BLUR) provides a basic blur. <LI>filter(GRAY) converts the image
+   * to grayscale based on luminance. <LI>filter(INVERT) will invert the color
+   * components in the image. <LI>filter(OPAQUE) set all the high bits in the
+   * image to opaque <LI>filter(THRESHOLD) converts the image to black and
+   * white. </UL>
    */
   public void filter(int kind) {
     switch (kind) {
@@ -960,16 +957,11 @@ public class PImage implements PConstants, Cloneable {
 
   /*
    * Method to apply a variety of basic filters to this image. These filters all
-   * take a parameter.
-   * <P>
-   * <UL>
-   * <LI>filter(BLUR, int radius) performs a gaussian blur of the specified
-   * radius.
-   * <LI>filter(POSTERIZE, int levels) will posterize the image to between 2 and
-   * 255 levels.
-   * <LI>filter(THRESHOLD, float center) allows you to set the center point for
-   * the threshold. It takes a value from 0 to 1.0.
-   * </UL>
+   * take a parameter. <P> <UL> <LI>filter(BLUR, int radius) performs a gaussian
+   * blur of the specified radius. <LI>filter(POSTERIZE, int levels) will
+   * posterize the image to between 2 and 255 levels. <LI>filter(THRESHOLD,
+   * float center) allows you to set the center point for the threshold. It
+   * takes a value from 0 to 1.0. </UL>
    */
   public void filter(int kind, float param) {
     switch (kind) {
@@ -1075,18 +1067,14 @@ public class PImage implements PConstants, Cloneable {
   /*
    * Returns an ARGB "color" type (a packed 32 bit int with the color. If the
    * coordinate is outside the image, zero is returned (black, but completely
-   * transparent).
-   * <P>
-   * If the image is in RGB format (i.e. on a PVideo object), the value will get
-   * its high bits set, just to avoid cases where they haven't been set already.
-   * <P>
-   * If the image is in ALPHA format, this returns a white color that has its
-   * alpha value set.
-   * <P>
-   * This function is included primarily for beginners. It is quite slow because
-   * it has to check to see if the x, y that was provided is inside the bounds,
-   * and then has to check to see what image type it is. If you want things to
-   * be more efficient, access the pixels[] array directly.
+   * transparent). <P> If the image is in RGB format (i.e. on a PVideo object),
+   * the value will get its high bits set, just to avoid cases where they
+   * haven't been set already. <P> If the image is in ALPHA format, this returns
+   * a white color that has its alpha value set. <P> This function is included
+   * primarily for beginners. It is quite slow because it has to check to see if
+   * the x, y that was provided is inside the bounds, and then has to check to
+   * see what image type it is. If you want things to be more efficient, access
+   * the pixels[] array directly.
    */
   public int get(int x, int y) {
     if ((x < 0) || (y < 0) || (x >= width) || (y >= height))
@@ -1223,13 +1211,12 @@ public class PImage implements PConstants, Cloneable {
   /*
    * Set alpha channel for an image. Black colors in the source image will make
    * the destination image completely transparent, and white will make things
-   * fully opaque. Gray values will be in-between steps.
-   * <P>
-   * Strictly speaking the "blue" value from the source image is used as the
-   * alpha color. For a fully grayscale image, this is correct, but for a color
-   * image it's not 100% accurate. For a more accurate conversion, first use
-   * filter(GRAY) which will make the image into a "correct" grayscake by
-   * performing a proper luminance-based conversion.
+   * fully opaque. Gray values will be in-between steps. <P> Strictly speaking
+   * the "blue" value from the source image is used as the alpha color. For a
+   * fully grayscale image, this is correct, but for a color image it's not 100%
+   * accurate. For a more accurate conversion, first use filter(GRAY) which will
+   * make the image into a "correct" grayscake by performing a proper
+   * luminance-based conversion.
    */
   public void mask(int alpha[]) {
     // don't execute if mask image is different size

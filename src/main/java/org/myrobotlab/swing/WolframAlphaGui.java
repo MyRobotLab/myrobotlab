@@ -74,7 +74,7 @@ public class WolframAlphaGui extends ServiceGui implements ActionListener {
         query.setText("");
       }
     });
-  
+
   }
 
   @Override

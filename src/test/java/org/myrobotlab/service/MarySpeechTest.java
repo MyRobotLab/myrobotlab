@@ -13,8 +13,8 @@ public class MarySpeechTest {
 
   @Test
   public void testMarySpeech() throws IOException, SynthesisException, InterruptedException {
-    MarySpeech speech = (MarySpeech)Runtime.createAndStart("speech", "MarySpeech");
+    MarySpeech speech = (MarySpeech) Runtime.createAndStart("speech", "MarySpeech");
     speech.speakBlocking("hello world");
-    
+
   }
 }

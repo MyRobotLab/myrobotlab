@@ -324,8 +324,8 @@ public interface PConstants {
 
   /**
    * textMode(MODEL) is the default, meaning that characters will be affected by
-   * transformations like any other shapes.
-   * Changed value in 0093 to not interfere with LEFT, CENTER, and RIGHT.
+   * transformations like any other shapes. Changed value in 0093 to not
+   * interfere with LEFT, CENTER, and RIGHT.
    */
   static final int MODEL = 4;
 

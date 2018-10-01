@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.util.HashMap;
+
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
@@ -199,7 +200,8 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   public void stopListening() {
     log.debug("Stop listening event seen.");
     if (this.autoListen && !this.speaking) {
-      // bug if there is multiple chrome tabs OR no internet..., we disable autolisten
+      // bug if there is multiple chrome tabs OR no internet..., we disable
+      // autolisten
       if (System.currentTimeMillis() - lastAutoListenEvent > 300) {
         startListening();
       } else {

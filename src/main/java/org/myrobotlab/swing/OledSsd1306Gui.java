@@ -145,7 +145,7 @@ public class OledSsd1306Gui extends ServiceGui implements ActionListener {
 
   public void refreshControllers() {
 
-    if (boundService != null){
+    if (boundService != null) {
       List<String> v = boundService.controllers;
       controllerList.removeAllItems();
       for (int i = 0; i < v.size(); ++i) {

@@ -49,8 +49,6 @@ public class Chassis extends Service {
     return meta;
   }
 
-  
-
   public static void main(String[] args) {
     try {
 
@@ -66,7 +64,7 @@ public class Chassis extends Service {
       // virtual = True
 
       String port = "COM14";
-      //String port = "/dev/ttyUSB0";
+      // String port = "/dev/ttyUSB0";
 
       // start optional virtual serial service, used for test
       if (virtual) {
@@ -94,12 +92,12 @@ public class Chassis extends Service {
       sabertooth.attach(m2);
       m1.attach(joy.getAxis("y"));
       m2.attach(joy.getAxis("rz"));
-      
+
       m1.setInverted(true);
       m2.setInverted(true);
 
       sabertooth.connect(port);
-      
+
       Chassis chassis = (Chassis) Runtime.start("m1", "MotorPort");
       // chassis.setLeftMotor(m1);
       // chassis.setRightMotor(m1);
@@ -146,4 +144,4 @@ public class Chassis extends Service {
       Logging.logError(e);
     }
   }
-  }
+}

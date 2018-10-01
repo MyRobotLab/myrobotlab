@@ -1,7 +1,6 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,18 +29,18 @@ import org.slf4j.Logger;
 import com.jidesoft.swing.JideLabel;
 
 public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeListener, MouseListener {
-  
+
   public final static Logger log = LoggerFactory.getLogger(ServoMixerGui.class.toString());
-  static final long serialVersionUID = 1L;  
+  static final long serialVersionUID = 1L;
   private final String boundServiceName;
   private final ServoMixer servoMixer;
-  
+
   JButton savePoseButton = new JButton("Save Pose");
   JButton loadPoseButton = new JButton("Load Pose");
   JTextField poseName = new JTextField("defaultPose", 16);
   JPanel servoControlPanel = new JPanel();
   JPanel poseControls = new JPanel();
-  
+
   public ServoMixerGui(String boundServiceName, SwingGui myService) {
     super(boundServiceName, myService);
     this.boundServiceName = boundServiceName;
@@ -49,51 +48,51 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
     display.setLayout(new BorderLayout());
     createServoGuiLayout();
   }
-  
+
   private void createServoGuiLayout() {
-    
+
     servoControlPanel.setLayout(new FlowLayout());
     List<ServoControl> servos = servoMixer.listAllServos();
     for (ServoControl sc : servos) {
       // TODO: create a better single servo control panel here.
-      
+
       JPanel servoMiniControl = new JPanel();
-      // servoMiniControl.setLayout(new BoxLayout(servoMiniControl, BoxLayout.Y_AXIS));
+      // servoMiniControl.setLayout(new BoxLayout(servoMiniControl,
+      // BoxLayout.Y_AXIS));
       servoMiniControl.setLayout(new BorderLayout());
       // TODO: make this lable render vertically
       JideLabel servoLabel = new JideLabel(sc.getName());
       servoLabel.setOrientation(JideLabel.VERTICAL);
-      JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, (int)(sc.getPos()));
+      JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, (int) (sc.getPos()));
       servoSlider.setName(sc.getName());
       servoSlider.addChangeListener(this);
       servoMiniControl.add(servoSlider, BorderLayout.PAGE_START);
       servoMiniControl.add(servoLabel, BorderLayout.PAGE_END);
-      
+
       servoControlPanel.add(servoMiniControl);
-      
+
     }
     // add a control bar to the bottom
-    
+
     poseControls.setLayout(new FlowLayout());
     JLabel saveLabel = new JLabel("Save Pose");
-   
 
-    // 
+    //
     poseControls.add(saveLabel);
     poseControls.add(poseName);
     poseControls.add(savePoseButton);
     poseControls.add(loadPoseButton);
-    
+
     // add callbacks
     savePoseButton.addActionListener(this);
     loadPoseButton.addActionListener(this);
-    
+
     display.add(servoControlPanel, BorderLayout.PAGE_START);
     display.add(poseControls, BorderLayout.PAGE_END);
   }
-  
+
   public void refreshPanel() {
-    
+
     // first clear the dispaly?
     display.remove(servoControlPanel);
     display.remove(poseControls);
@@ -101,9 +100,9 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
     poseControls.removeAll();
     // rebuild the gui.
     createServoGuiLayout();
-    
+
   }
-  
+
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
@@ -124,10 +123,10 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       String name = poseName.getText();
       try {
         Pose p = servoMixer.loadPose(name);
-        
+
         servoMixer.moveToPose(p);
         refreshPanel();
-        
+
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -164,11 +163,11 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
   public void stateChanged(ChangeEvent e) {
     // update the position of a servo based on the update from the gui.
     if (e.getSource() instanceof JSlider) {
-      JSlider slider = (JSlider)e.getSource();
+      JSlider slider = (JSlider) e.getSource();
       // this is an update to the position of the slider.
       log.info("{} moveTo {}", slider.getName(), slider.getValue());
       // At this point we need to get the servo and move it to the new value
-      Servo s = (Servo)Runtime.getService(slider.getName());
+      Servo s = (Servo) Runtime.getService(slider.getName());
       if (s.isAttached() && s.isEnabled()) {
         // TODO: how to handle the autoenable/disable mojo..
         s.moveTo(slider.getValue());

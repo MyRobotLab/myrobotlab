@@ -468,12 +468,12 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
   /*
    * Enable the depthMap data collection
    * 
-   * @param width
-   *          int
-   * @param height
-   *          int
-   * @param fps
-   *          int
+   * @param width int
+   * 
+   * @param height int
+   * 
+   * @param fps int
+   * 
    * @return returns true if depthMap generation was succesfull
    */
   /*
@@ -614,7 +614,9 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
   /**
    * Enable hands
-   * @param cbObject c
+   * 
+   * @param cbObject
+   *          c
    * @return true/false
    */
   public boolean enableHand(Object cbObject) {
@@ -783,7 +785,9 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
   /**
    * Enable user
-   * @param cbObject c
+   * 
+   * @param cbObject
+   *          c
    * @return true/false
    */
   public boolean enableUser(Object cbObject) {

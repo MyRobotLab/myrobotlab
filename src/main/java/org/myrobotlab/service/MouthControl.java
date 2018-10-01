@@ -17,8 +17,9 @@ import org.slf4j.Logger;
  */
 public class MouthControl extends Service {
 
-  // TODO: remove Peer & Make it attachable between generic servoControl & SpeechSynthesis
-  
+  // TODO: remove Peer & Make it attachable between generic servoControl &
+  // SpeechSynthesis
+
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
   public int mouthClosedPos = 20;
@@ -29,7 +30,7 @@ public class MouthControl extends Service {
   transient Servo jaw;
   transient Arduino arduino;
   transient SpeechSynthesis mouth;
-  
+
   @Deprecated
   public boolean autoAttach = true;
 
@@ -64,7 +65,7 @@ public class MouthControl extends Service {
     }
 
     jaw.attach(arduino, 26);
-    
+
     return true;
   }
 
@@ -104,61 +105,62 @@ public class MouthControl extends Service {
 
   public synchronized void onStartSpeaking(String text) {
     log.info("move moving to :" + text);
-      if (jaw == null) {
-        return;
-      }
-      if (!jaw.isEnabled()) {
-        log.warn("{} not enabled", jaw.getName());
-      }
-      boolean ison = false;
-      String testword;
-      String[] a = text.split(" ");
-      for (int w = 0; w < a.length; w++) {
-        // String word = ;
-        // log.info(String.valueOf(a[w].length()));
+    if (jaw == null) {
+      return;
+    }
+    if (!jaw.isEnabled()) {
+      log.warn("{} not enabled", jaw.getName());
+    }
+    boolean ison = false;
+    String testword;
+    String[] a = text.split(" ");
+    for (int w = 0; w < a.length; w++) {
+      // String word = ;
+      // log.info(String.valueOf(a[w].length()));
 
-        if (a[w].endsWith("es")) {
-          testword = a[w].substring(0, a[w].length() - 2);
+      if (a[w].endsWith("es")) {
+        testword = a[w].substring(0, a[w].length() - 2);
 
-        } else if (a[w].endsWith("e")) {
-          testword = a[w].substring(0, a[w].length() - 1);
-          // log.info("e gone");
+      } else if (a[w].endsWith("e")) {
+        testword = a[w].substring(0, a[w].length() - 1);
+        // log.info("e gone");
+      } else {
+        testword = a[w];
+
+      }
+
+      char[] c = testword.toCharArray();
+
+      for (int x = 0; x < c.length; x++) {
+        char s = c[x];
+        // russian а ... <> a
+        if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э'
+            || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
+          jaw.moveTo(mouthOpenedPos); // # move the servo to the
+          // open spot
+          ison = true;
+          sleep(delaytime);
+          jaw.moveTo(mouthClosedPos);// #// close the servo
+        } else if (s == '.') {
+          ison = false;
+          sleep(delaytimestop);
         } else {
-          testword = a[w];
-
+          ison = false;
+          sleep(delaytimeletter); // # sleep half a second
         }
 
-        char[] c = testword.toCharArray();
-
-        for (int x = 0; x < c.length; x++) {
-          char s = c[x];
-          // russian а ... <> a
-          if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э' || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
-            jaw.moveTo(mouthOpenedPos); // # move the servo to the
-            // open spot
-            ison = true;
-            sleep(delaytime);
-            jaw.moveTo(mouthClosedPos);// #// close the servo
-          } else if (s == '.') {
-            ison = false;
-            sleep(delaytimestop);
-          } else {
-            ison = false;
-            sleep(delaytimeletter); // # sleep half a second
-          }
-
-        }
-
-        sleep(80);
       }
 
+      sleep(80);
+    }
 
   }
 
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
     // TODO: consider a jaw move to closed position
-    //this will only work if the mouth animation ends before it end playing the voice.
+    // this will only work if the mouth animation ends before it end playing the
+    // voice.
     jaw.moveTo(mouthClosedPos);
   }
 
@@ -173,12 +175,12 @@ public class MouthControl extends Service {
     mouthClosedPos = closed;
     mouthOpenedPos = opened;
 
-   // jaw.setMinMax(closed, opened);
-//    if (closed < opened) {
-//      jaw.map(closed, opened, closed, opened);
-//    } else {
-//      jaw.map(opened, closed, opened, closed);
-//    }
+    // jaw.setMinMax(closed, opened);
+    // if (closed < opened) {
+    // jaw.map(closed, opened, closed, opened);
+    // } else {
+    // jaw.map(opened, closed, opened, closed);
+    // }
   }
 
   @Override
@@ -228,5 +230,5 @@ public class MouthControl extends Service {
   @Deprecated
   public void enableAutoAttach(boolean enable) {
   }
-  
+
 }

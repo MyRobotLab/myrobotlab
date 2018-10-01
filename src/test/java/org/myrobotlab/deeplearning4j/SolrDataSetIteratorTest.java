@@ -6,34 +6,25 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
-
-import org.datavec.api.split.InputSplit;
-import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.deeplearning4j.nn.graph.ComputationGraph;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.service.Solr;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
-import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
-import org.nd4j.linalg.factory.Nd4jBackend;
-import org.nd4j.linalg.factory.Nd4jBackend.NoAvailableBackendException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Solr;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4jBackend.NoAvailableBackendException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // @Ignore
 public class SolrDataSetIteratorTest {
@@ -58,9 +49,9 @@ public class SolrDataSetIteratorTest {
   private Deeplearning4j dl4j;
 
   private void initServices() throws SolrServerException, IOException {
-    solr = (Solr)Runtime.start("solr", "Solr");
+    solr = (Solr) Runtime.start("solr", "Solr");
     solr.startEmbedded();
-    dl4j = (Deeplearning4j)Runtime.start("dl4j", "Deeplearning4j");
+    dl4j = (Deeplearning4j) Runtime.start("dl4j", "Deeplearning4j");
   }
 
   @Test
@@ -71,7 +62,8 @@ public class SolrDataSetIteratorTest {
     // start solr and dl4j service.
     initServices();
     // consider increasing this if there's enough training data.
-    // Phase 1 . get the metadata from the solr query about how many classes there are, and how many results there are.
+    // Phase 1 . get the metadata from the solr query about how many classes
+    // there are, and how many results there are.
     String queryString = "+has_bytes:true -label:unknown";
     String labelField = "label";
     SolrQuery datasetQuery = solr.makeDatasetQuery(queryString, labelField);
@@ -80,37 +72,37 @@ public class SolrDataSetIteratorTest {
     long numFound = resp.getResults().getNumFound();
     // sorted list (according to solr) of the labels for this data set
     List<String> labels = resolveLabels(resp);
-    long trainMaxOffset = (long)((double)numFound * trainPerc);
-    long testMaxOffset = (long)((double)numFound * (1.0 - trainPerc));
-    
+    long trainMaxOffset = (long) ((double) numFound * trainPerc);
+    long testMaxOffset = (long) ((double) numFound * (1.0 - trainPerc));
+
     // training query
     SolrQuery trainQuery = solr.makeDatasetQuery(queryString, labelField);
-    trainQuery.addSort("random_"+seed, ORDER.asc);
-    trainQuery.setRows((int)trainMaxOffset);
-    DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch , height, width, channels);
+    trainQuery.addSort("random_" + seed, ORDER.asc);
+    trainQuery.setRows((int) trainMaxOffset);
+    DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch, height, width, channels);
 
     // testing query
     SolrQuery testQuery = solr.makeDatasetQuery(queryString, labelField);
-    testQuery.addSort("random_"+seed, ORDER.desc);
-    testQuery.setRows((int)testMaxOffset);
-    DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch , height, width, channels);
+    testQuery.addSort("random_" + seed, ORDER.desc);
+    testQuery.setRows((int) testMaxOffset);
+    DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch, height, width, channels);
     //
     String filename = "my_new_model.bin";
     dl4j.trainAndSaveModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
     testNewModel();
   }
-  
+
   private void testNewModel() throws IOException {
     // Ok. now let's see can we load the model up and ask it to predict?
-    
+
     CustomModel newMod = dl4j.loadComputationGraph("my_new_model.bin");
-    
+
     // TODO: load am image!
     // a test image
     String path = "C:\\dev\\workspace\\myrobotlab\\src\\main\\resources\\resource\\OpenCV\\testData\\rachel.jpg";
     IplImage image = cvLoadImage(path);
-    
-    Map<String, Double> results =  dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
+
+    Map<String, Double> results = dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
     for (String key : results.keySet()) {
       log.info("label: {} : {} ", key, results.get(key));
     }
@@ -118,7 +110,7 @@ public class SolrDataSetIteratorTest {
 
   // return the sorted set of labels for this training set.
   private List<String> resolveLabels(QueryResponse resp) {
-    FacetField labelFacet =  resp.getFacetField("label");
+    FacetField labelFacet = resp.getFacetField("label");
     // maintain sort order with a linked hash set
     List<String> labels = new ArrayList<String>();
     for (Count c : labelFacet.getValues()) {
@@ -128,5 +120,4 @@ public class SolrDataSetIteratorTest {
     return labels;
   }
 
-  
 }

@@ -15,86 +15,80 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.data.Script;
 
 public class EditorPanel {
-	String filename;
-	TextEditorPane editor;
-	JScrollPane panel;
+  String filename;
+  TextEditorPane editor;
+  JScrollPane panel;
 
-	public EditorPanel(Script script) {
-		try {
-			filename = script.getName();
-			editor = new TextEditorPane(RTextArea.INSERT_MODE, false, FileLocation.create(new File(filename)));
-			editor.setText(script.getCode());
-			editor.setCaretPosition(0);
-			
-			// editor tweaks
-			editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
-			editor.setCodeFoldingEnabled(true);
-			editor.setAntiAliasingEnabled(true);
+  public EditorPanel(Script script) {
+    try {
+      filename = script.getName();
+      editor = new TextEditorPane(RTextArea.INSERT_MODE, false, FileLocation.create(new File(filename)));
+      editor.setText(script.getCode());
+      editor.setCaretPosition(0);
 
-			// auto-completion
-			/*
-			if (ac != null) {
-				ac.install(editor);
-				ac.setShowDescWindow(true);
-			}
-			*/
-			
-			panel = new RTextScrollPane(editor);
-			
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      // editor tweaks
+      editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
+      editor.setCodeFoldingEnabled(true);
+      editor.setAntiAliasingEnabled(true);
 
+      // auto-completion
+      /*
+       * if (ac != null) { ac.install(editor); ac.setShowDescWindow(true); }
+       */
 
+      panel = new RTextScrollPane(editor);
 
-	public String getTitle() {
-		if (filename.startsWith("Python/examples/")) {
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-			return filename.substring("Python/examples/".length());
+  public String getTitle() {
+    if (filename.startsWith("Python/examples/")) {
 
-		} else {
-			int begin = filename.lastIndexOf(File.separator);
-			if (begin > 0) {
-				++begin;
-			} else {
-				begin = 0;
-			}
+      return filename.substring("Python/examples/".length());
 
-			return filename.substring(begin);
-		}
-	}
+    } else {
+      int begin = filename.lastIndexOf(File.separator);
+      if (begin > 0) {
+        ++begin;
+      } else {
+        begin = 0;
+      }
 
-	public TextEditorPane getEditor() {
-		return editor;
-	}
+      return filename.substring(begin);
+    }
+  }
 
-	public String getFilename() {
-		return filename;
-	}
+  public TextEditorPane getEditor() {
+    return editor;
+  }
 
-	public String getText() {
-		return editor.getText();
-	}
+  public String getFilename() {
+    return filename;
+  }
 
-	public Container getDisplay() {		
-		return panel;
-	}
+  public String getText() {
+    return editor.getText();
+  }
 
-	public void setText(String text) {
-		editor.setText(text);
-	}
-	
-	public boolean isDirty() {
-		return editor.isDirty();
-	}
+  public Container getDisplay() {
+    return panel;
+  }
 
-	public Icon getIcon() {		
-		return null;
-	}
+  public void setText(String text) {
+    editor.setText(text);
+  }
 
-	public String getToolTip() {
-		return "tool tip";
-	}
+  public boolean isDirty() {
+    return editor.isDirty();
+  }
+
+  public Icon getIcon() {
+    return null;
+  }
+
+  public String getToolTip() {
+    return "tool tip";
+  }
 }
-

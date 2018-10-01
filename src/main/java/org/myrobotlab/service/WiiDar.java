@@ -178,9 +178,8 @@ public class WiiDar extends Service {
   /*
    * // TODO remoe these service ----- DEBUG ONLY ------ BEGIN Wii wii = new
    * Wii("wii"); Arduino arduino = new Arduino("arduino"); Servo servo = new
-   * Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); SwingGui gui =
-   * new SwingGui("gui"); // TODO remoe these service ----- DEBUG ONLY ------
-   * END
+   * Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); SwingGui gui = new
+   * SwingGui("gui"); // TODO remoe these service ----- DEBUG ONLY ------ END
    */
 
   public final static Logger log = LoggerFactory.getLogger(WiiDar.class);

@@ -692,7 +692,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       bot = new Bot(botName, path);
     }
 
-    // Hijack all the SRAIX requests and implement them as a synchronous call to a service to 
+    // Hijack all the SRAIX requests and implement them as a synchronous call to
+    // a service to
     // return a string response for programab...
     MrlSraixHandler sraixHandler = new MrlSraixHandler();
     bot.setSraixHandler(sraixHandler);
@@ -766,9 +767,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * TODO : maybe merge / check with startsession directly
-   * setUsername will check if username correspond to current session If no, a
-   * new session is started
+   * TODO : maybe merge / check with startsession directly setUsername will
+   * check if username correspond to current session If no, a new session is
+   * started
    * 
    * @param username
    *          - The new username
@@ -910,9 +911,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
     meta.addDependency("program-ab", "program-ab-kw", "0.0.7-SNAPSHOT");
     meta.addDependency("org.json", "json", "20090211");
-    //used by FileIO
+    // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
-    //needed if we dont "install all" > HttpClient used by sraix
+    // needed if we dont "install all" > HttpClient used by sraix
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
     return meta;

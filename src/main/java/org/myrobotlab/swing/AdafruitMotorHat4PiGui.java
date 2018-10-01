@@ -63,7 +63,8 @@ public class AdafruitMotorHat4PiGui extends ServiceGui implements ActionListener
     super(boundServiceName, myService);
     boundService = (AdafruitMotorHat4Pi) Runtime.getService(boundServiceName);
 
-    // addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
+    // addTopLine(controllerLabel, controllerList, deviceBusLabel,
+    // deviceBusList, deviceAddressLabel, deviceAddressList, attachButton);
     addTopLine(createFlowPanel("Controller", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
     refreshControllers();
@@ -150,7 +151,7 @@ public class AdafruitMotorHat4PiGui extends ServiceGui implements ActionListener
     for (int i = 0; i < v.size(); ++i) {
       controllerList.addItem(v.get(i));
     }
-    
+
     if (boundService.controller != null) {
       controllerList.setSelectedItem(boundService.controller.getName());
     }

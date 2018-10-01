@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -40,7 +39,7 @@ public class Pir extends Service implements PinListener {
   public static void main(String[] args) {
     try {
 
-            LoggingFactory.init("info");
+      LoggingFactory.init("info");
 
       Pir pir = (Pir) Runtime.start("pir", "Pir");
       Runtime.start("gui", "SwingGui");
@@ -122,7 +121,7 @@ public class Pir extends Service implements PinListener {
 
   @Override
   public void onPin(PinData pindata) {
-    if (isVerbose){
+    if (isVerbose) {
       log.info("onPin {}", pindata);
     }
     boolean sense = (pindata.value != 0);

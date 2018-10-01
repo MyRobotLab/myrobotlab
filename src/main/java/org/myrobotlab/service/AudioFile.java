@@ -77,11 +77,15 @@ public class AudioFile extends Service {
   // http://stackoverflow.com/questions/198679/convert-audio-stream-to-wav-byte-array-in-java-without-temp-file
   // TODO - utilize
   // http://docs.oracle.com/javase/7/docs/api/javax/sound/sampled/Clip.html
-  
-  // FIXME - AudioProcessor is a bit weird looking not sure if the decodedFormat stream is needed
-  // FIXME - https://stackoverflow.com/questions/12863081/how-do-i-get-mixer-channels-layout-in-java support multiple mixers
-  // FIXME - review - https://stackoverflow.com/questions/25798200/java-record-mic-to-byte-array-and-play-sound
-  // 
+
+  // FIXME - AudioProcessor is a bit weird looking not sure if the decodedFormat
+  // stream is needed
+  // FIXME -
+  // https://stackoverflow.com/questions/12863081/how-do-i-get-mixer-channels-layout-in-java
+  // support multiple mixers
+  // FIXME - review -
+  // https://stackoverflow.com/questions/25798200/java-record-mic-to-byte-array-and-play-sound
+  //
 
   String currentTrack = DEFAULT_TRACK;
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
@@ -271,8 +275,8 @@ public class AudioFile extends Service {
     // TODO Auto-generated method stub
     return null;
   }
-  
-  public List<File> getFiles(){
+
+  public List<File> getFiles() {
     return getFiles(null, true);
   }
 
@@ -474,11 +478,11 @@ public class AudioFile extends Service {
   public void deleteFiles(String subDir) {
     // TODO Auto-generated method stub
     List<File> list = getFiles(subDir, true);
-    for (File file: list) {
+    for (File file : list) {
       try {
-      file.delete();
-      } catch(Exception e) {
-        
+        file.delete();
+      } catch (Exception e) {
+
       }
     }
   }
@@ -487,7 +491,6 @@ public class AudioFile extends Service {
     File file = new File(filename);
     file.delete();
   }
-  
 
   /**
    * This static method returns all the details of the class without it having

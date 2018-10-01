@@ -97,9 +97,8 @@ public class TestCatcher extends Service implements SerialDataListener {
    * before being processed/invoked in the Service.
    * 
    * 
-   *           @see
-   *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
-   *           framework.Message)
+   * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
+   * framework.Message)
    */
   @Override
   public boolean preProcessHook(Message msg) {
@@ -266,8 +265,8 @@ public class TestCatcher extends Service implements SerialDataListener {
    * @return ServiceType - returns all the data
    * 
    */
-  
-  public double testDouble(double d){
+
+  public double testDouble(double d) {
     return d;
   }
 

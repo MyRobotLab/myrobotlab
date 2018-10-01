@@ -7,8 +7,10 @@ import java.util.Map;
  * LRUCache - ultra simplistic LRU cache
  * http://chriswu.me/blog/a-lru-cache-in-10-lines-of-java/
  * 
- * @param <K> - the key for the cache
- * @param <V> - the value stored by the cache.
+ * @param <K>
+ *          - the key for the cache
+ * @param <V>
+ *          - the value stored by the cache.
  */
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
   /**

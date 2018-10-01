@@ -29,16 +29,20 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface I2CControl extends NameProvider, Attachable {
-	
-	public void setDeviceBus(String deviceBus);
-	public void setDeviceAddress(String deviceAddress);
-	
-	public String getDeviceBus();
-	public String getDeviceAddress();
-	
-	public void attach(String controllerName, String deviceBus, String deviceAddress);
-	public void attach(I2CController controller, String deviceBus, String deviceAddress);
-	
-	public void attachI2CController(I2CController controller);	
-	public void detachI2CController(I2CController controller);
+
+  public void setDeviceBus(String deviceBus);
+
+  public void setDeviceAddress(String deviceAddress);
+
+  public String getDeviceBus();
+
+  public String getDeviceAddress();
+
+  public void attach(String controllerName, String deviceBus, String deviceAddress);
+
+  public void attach(I2CController controller, String deviceBus, String deviceAddress);
+
+  public void attachI2CController(I2CController controller);
+
+  public void detachI2CController(I2CController controller);
 }

@@ -52,7 +52,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   transient IplImage dst = null;
   transient IplImage src = null;
   transient IplImage mask = null;
-  
+
   transient IplImage lastDepthImage = null;
 
   int x = 0;
@@ -68,7 +68,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   public OpenCVFilterKinectDepth(String name) {
     super(name);
   }
-  
+
   public void setDisplayCamera(boolean b) {
     displayCamera = b;
   }
@@ -89,7 +89,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     // INFO - This filter has 2 sources !!!
     IplImage kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
     lastDepthImage = kinectDepth;
-    
+
     boolean processDepth = false;
     if (kinectDepth != null && processDepth) {
 
@@ -102,7 +102,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
       invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
     }
     // end fork
-    
+
     if (displayCamera) {
       return image;
     }
@@ -155,7 +155,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     x = inX;
     y = inY;
     ByteBuffer buffer = lastDepthImage.createBuffer();
-    int value = buffer.get(y*lastDepthImage.width() + x) & 0xFF;
+    int value = buffer.get(y * lastDepthImage.width() + x) & 0xFF;
   }
 
 }

@@ -105,12 +105,12 @@ public class Outbox implements Runnable, Serializable {
       }
       msgBox.notifyAll(); // must own the lock
     }
-    
+
     // now that it's actually in the queue. let's notify the listeners
     for (MessageListener ml : listeners) {
       ml.onMessage(msg);
     }
-    
+
   }
 
   public CommunicationInterface getCommunicationManager() {
@@ -228,7 +228,7 @@ public class Outbox implements Runnable, Serializable {
   public void setMaxQueueSize(int size) {
     maxQueue = size;
   }
-  
+
   public boolean isBlocking() {
     return blocking;
   }

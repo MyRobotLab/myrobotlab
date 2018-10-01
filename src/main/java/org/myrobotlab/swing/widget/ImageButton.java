@@ -8,9 +8,10 @@ import javax.swing.JButton;
 import org.myrobotlab.image.Util;
 
 /**
- * @author GroG .rollover are done with originals + gimp -&gt; colorize -&gt; adjust
- *         color balance -&gt; 100 green .activated are done with originals + gimp
- *         -&gt; colorize -&gt; adjust color balance -&gt; 100 red
+ * @author GroG .rollover are done with originals + gimp -&gt; colorize -&gt;
+ *         adjust color balance -&gt; 100 green .activated are done with
+ *         originals + gimp -&gt; colorize -&gt; adjust color balance -&gt; 100
+ *         red
  * 
  */
 public class ImageButton extends JButton {

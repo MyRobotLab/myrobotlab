@@ -56,7 +56,9 @@ public class Sample implements MqttCallback {
    *
    * This method handles parsing of the arguments specified on the command-line
    * before performing the specified action.
-   * @param args a
+   * 
+   * @param args
+   *          a
    */
   public static void main(String[] args) {
 
@@ -233,7 +235,8 @@ public class Sample implements MqttCallback {
    *          the username to connect with
    * @param password
    *          the password for the user
-   * @throws MqttException if an error happens
+   * @throws MqttException
+   *           if an error happens
    */
   public Sample(String brokerUrl, String clientId, boolean cleanSession, boolean quietMode, String userName, String password) throws MqttException {
     this.brokerUrl = brokerUrl;
@@ -283,7 +286,8 @@ public class Sample implements MqttCallback {
    *          the quality of service to delivery the message at (0,1,2)
    * @param payload
    *          the set of bytes to send to the MQTT server
-   * @throws MqttException if an error happens
+   * @throws MqttException
+   *           if an error happens
    */
   public void publish(String topicName, int qos, byte[] payload) throws MqttException {
 
@@ -319,7 +323,8 @@ public class Sample implements MqttCallback {
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
-   * @throws MqttException if an error happens
+   * @throws MqttException
+   *           if an error happens
    */
   public void subscribe(String topicName, int qos) throws MqttException {
 

@@ -130,7 +130,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
         while (isRunning) {
 
           info("listening: %b", isListening);
-          invoke("listeningEvent",true);
+          invoke("listeningEvent", true);
           Result result = recognizer.recognize();
 
           if (!isListening) {
@@ -397,8 +397,8 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * example: Sphinx.createGrammar ("ear", "stop | go | left | right | back");
    * ear = Runtime.create("ear", "Sphinx")
    * 
-   * param filename
-   *          - name of the Service which will be utilizing this grammar
+   * param filename - name of the Service which will be utilizing this grammar
+   * 
    * @param grammar
    *          - grammar content
    * @return true/false
@@ -508,8 +508,8 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
   /**
    * method to suppress recognition listening events This is important when
-   * Sphinx is listening --&gt; then Speaking, typically you don't want Sphinx to
-   * listen to its own speech, it causes a feedback loop and with Sphinx not
+   * Sphinx is listening --&gt; then Speaking, typically you don't want Sphinx
+   * to listen to its own speech, it causes a feedback loop and with Sphinx not
    * really very accurate, it leads to weirdness -- additionally it does not
    * recreate the speech processor - so its not as heavy handed
    */
@@ -681,7 +681,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
     // https://cmusphinx.github.io/wiki/tutorialsphinx4/
     // meta.addDependency("javax.speech.recognition", "1.0");
     // meta.addDependency("edu.cmu.sphinx", "4-1.0beta6");
-    meta.addDependency("edu.cmu.sphinx", "sphinx4-core", "5prealpha-SNAPSHOT");    
+    meta.addDependency("edu.cmu.sphinx", "sphinx4-core", "5prealpha-SNAPSHOT");
     meta.addDependency("edu.cmu.sphinx", "sphinx4-data", "5prealpha-SNAPSHOT");
     return meta;
   }
@@ -689,7 +689,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public void setAutoListen(boolean autoListen) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -697,6 +697,5 @@ public class Sphinx extends AbstractSpeechRecognizer {
     // TODO Auto-generated method stub
     return false;
   }
-
 
 }
