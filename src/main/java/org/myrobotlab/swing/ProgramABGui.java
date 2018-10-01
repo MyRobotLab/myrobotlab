@@ -214,7 +214,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
           Pattern oobPattern = Pattern.compile("<param>(.+?)</param>");
           Matcher oobMatcher = oobPattern.matcher(text);
           filteredOOB = oobMatcher.find() ? filteredOOB = oobMatcher.group(1) : "";
-          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b><br> > OOB: </b>" + filteredOOB, 0, 0, Tag.FONT);
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b><br> &gt; OOB: </b>" + filteredOOB, 0, 0, Tag.FONT);
         } catch (BadLocationException | IOException e) {
           log.error("ProgramAB onOOBText error : {}", e);
         }
