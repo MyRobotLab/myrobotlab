@@ -84,7 +84,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     text.setPreferredSize(new Dimension(40, 35));
     askLabel.setText("Ask : ");
     filter.setSelected(true);
-    cssKit.addRule("body {font-family:\"Vernana\";}");
+    cssKit.addRule("body {font-family:\"Verdana\";}");
     response.setAutoscrolls(true);
     response.setEditable(false);
     response.setEditorKit(responseKit);
