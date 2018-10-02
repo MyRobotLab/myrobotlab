@@ -22,7 +22,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
@@ -184,7 +183,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         try {
-          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<i><b><br>" + botName.getText() + "</b>: " + text.replaceAll("\\<.*?\\>", " ").trim(), 0, 0, Tag.I);
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<i><b>" + botName.getText() + "</b>: " + text.replaceAll("\\<.*?\\>", " ").trim() + "</i>", 0, 0, null);
         } catch (Exception e) {
           log.error("ProgramAB onText error : {}", e);
         }
@@ -214,7 +213,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
           Pattern oobPattern = Pattern.compile("<param>(.+?)</param>");
           Matcher oobMatcher = oobPattern.matcher(text);
           filteredOOB = oobMatcher.find() ? filteredOOB = oobMatcher.group(1) : "";
-          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b><br> &gt; OOB: </b>" + filteredOOB, 0, 0, Tag.FONT);
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b>&nbsp;&gt;&nbsp;OOB: </b>" + filteredOOB + "</font>", 0, 0, null);
         } catch (BadLocationException | IOException e) {
           log.error("ProgramAB onOOBText error : {}", e);
         }
