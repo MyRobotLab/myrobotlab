@@ -36,7 +36,7 @@ public class SolrInputSplit extends BaseInputSplit {
   private final Solr solr;
   private final SolrQuery query;
   private final String bytesField = "bytes";
-  private final String labelField = "label";
+  private final String labelField;
   private QueryResponse response;
   private HashMap<String, byte[]> byteMap;
   private HashMap<String, String> labelMap;
@@ -44,11 +44,12 @@ public class SolrInputSplit extends BaseInputSplit {
   
 
   // we probably need a constructor ? that takes a solr server in mrl?
-  public SolrInputSplit(Solr solr, SolrQuery query, List<String> labels) {
+  public SolrInputSplit(Solr solr, SolrQuery query, List<String> labels, String labelField) {
     this.solr = solr;
     this.query = query;
     // TODO: i guess we're going to infer this so maybe we don't need it passed in?
     this.labels = labels;
+    this.labelField = labelField;
     // We should execute a result set
     response = solr.search(query);
     // should compile this down to make it faster
@@ -148,7 +149,7 @@ public class SolrInputSplit extends BaseInputSplit {
     for (int i= 0; i < length(); i++) {
       // create a uri from the doc id.
       String docId = response.getResults().get(i).getFieldValue("id").toString();
-      Collection<Object> labels = response.getResults().get(i).getFieldValues("label");
+      Collection<Object> labels = response.getResults().get(i).getFieldValues(labelField);
       String label = labels.iterator().next().toString();
       label = cleanLabel(label);
       try {

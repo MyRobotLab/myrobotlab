@@ -571,7 +571,7 @@ public class Deeplearning4j extends Service {
         int xRightTop = y2;
         
         Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel(), frameIndex, null);
+        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel(), frameIndex, null, null);
         System.out.println("Yolo Object: " + yoloobj);
         results.add(yoloobj);
       }
@@ -580,11 +580,11 @@ public class Deeplearning4j extends Service {
   }
   
 
-  public DataSetIterator makeSolrInputSplitIterator(Solr solr, SolrQuery datasetQuery, long numFound, List<String> labels, int batch,int height,int width,int channels) throws IOException {
+  public DataSetIterator makeSolrInputSplitIterator(Solr solr, SolrQuery datasetQuery, long numFound, List<String> labels, int batch,int height,int width,int channels, String labelField) throws IOException {
     // TODO: don't depend on the solr service, but rather some datasource that can produce input splits...
     // TODO: pass in the record reader and the preprocessor
     // training set iterator
-    SolrInputSplit split = new SolrInputSplit(solr, datasetQuery, labels);
+    SolrInputSplit split = new SolrInputSplit(solr, datasetQuery, labels, labelField);
     SolrLabelGenerator labelMaker = new SolrLabelGenerator();
     labelMaker.setSolrInputSplit(split);
     SolrImageRecordReader recordReader = new SolrImageRecordReader(height,width,channels,labelMaker);
