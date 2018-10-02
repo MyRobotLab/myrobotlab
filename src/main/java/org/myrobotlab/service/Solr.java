@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,10 +28,13 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.request.QueryRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
+import org.apache.solr.search.QueryResult;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Java2DFrameConverter;
@@ -77,6 +81,7 @@ import static org.bytedeco.javacpp.opencv_core.cvGetSize;
  */
 public class Solr extends Service implements DocumentListener, TextListener, MessageListener {
 
+  private static final String CORE_NAME = "core1";
   public final static Logger log = LoggerFactory.getLogger(Solr.class);
   private static final long serialVersionUID = 1L;
   public String solrUrl = "http://localhost:8983/solr";
@@ -144,7 +149,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       log.info("Found core core {}", coreName);
     }
     // create the actual solr instance with core1
-    embeddedSolrServer = new EmbeddedSolrServer(cores, "core1");
+    embeddedSolrServer = new EmbeddedSolrServer(cores, CORE_NAME);
+    // TODO: make sure the embedded server is actually loaded / started fully up 
+    // poll perhaps ?
   }
 
   /**
@@ -223,6 +230,41 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
   }
 
+  
+  /**
+   * Returns a document given the doc id from the index if it exists
+   * otherwise null
+   * @throws IOException 
+   * @throws SolrServerException 
+   */
+  public SolrDocument getDocById(String docId) {
+    SolrQuery query = new SolrQuery();
+    query.set("q", "id:\""+docId +"\"");
+    query.setRows(1);
+    QueryResponse resp = null;
+    if (embeddedSolrServer != null) {
+      try {
+        resp = embeddedSolrServer.query(query);
+      } catch (SolrServerException | IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    } else {
+      try {
+        resp = solrServer.query(query);
+      } catch (SolrServerException | IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    long num = resp.getResults().getNumFound();
+    if (num == 0) {
+      // TODO: log a message that the doc wasn't found or something
+      return null;
+    }
+    return resp.getResults().get(0);
+  }
+  
   /**
    * @return The url for the solr instance you wish to query. Defaults to
    * http://localhost:8983/solr
@@ -282,7 +324,6 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * @throws IOException
    */
   public IplImage fetchImage(String queryString) throws IOException {
-
     String fieldName = "bytes";
     // return an IplImage from the solr index.!
     QueryResponse qr = search(queryString, 1,0, false);
@@ -604,7 +645,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   // to make it easier to call from aiml
   public void setYoloPersonTrainingLabel(String label, String count) {
-    setTrainingLabel(label, Integer.valueOf(count));
+    setYoloPersonTrainingLabel(label, Integer.valueOf(count));
   }
 
   //sets it so the next  N opencv frames will be tagged with the training label.
@@ -616,15 +657,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // what to index when a yolo event occurs
   public ArrayList<YoloDetectedObject> onYoloClassification (ArrayList<YoloDetectedObject> yoloObjects) {
 
-    //we are training.
-    if (yoloPersonTrainingCount >= 0) {
-      // decrement the count 
-      yoloPersonTrainingCount--;
+    if (yoloPersonTrainingCount <= 0) { 
+      // skip it.. we're not recording
+      return yoloObjects;
     }
+    
     // for now.. let's just do this.
     for (YoloDetectedObject yolo : yoloObjects) {
       SolrInputDocument doc = new SolrInputDocument();
-      String type = "yolo";    
+      String type = "yolo";
       String id = type + "_" + UUID.randomUUID().toString();
       doc.setField("id", id);
       doc.setField("type", type);
@@ -644,7 +685,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         if (yoloPersonTrainingCount >= 0) {
           // decrement the count 
           yoloPersonTrainingCount--;
-          doc.setField("label", yoloPersonLabel);  
+          if (yoloPersonTrainingCount > 0) {
+            invoke("publishDoneYoloLabel", yoloPersonLabel);
+          }
+          doc.setField("person_label", yoloPersonLabel);  
           byte[] bytes = null;
           try {
             bytes = imageToBytes(yolo.image);
@@ -652,24 +696,32 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
             // bytes field contains bindary data (sent as base64)
             doc.addField("bytes", encoded);
             doc.addField("has_bytes", true);
-            log.warn("Image Size:{}", encoded.length());
+            log.info("Image Size:{}", encoded.length());
           } catch (IOException e) {
             // TODO Auto-generated catch block
+            log.warn("Error creating bytes field");
             e.printStackTrace();
             continue;
           }
-          
         }
       }
-      
-
-      
       addDocument(doc);
     }
     // add the document we just built up to solr so we can remember it!   
     return yoloObjects;
   }
 
+  // subscribe to this to get a callback when a particular yolo person label finished
+  public String publishDoneYoloLabel(String label) {
+    // here we should publish
+    return label;
+  }
+  
+  // subscribe to this to get the vgg16 dl4j transfer learning labeling is done.
+  public String publishDoneLabeling(String label) {
+    return label;
+  }
+  
   // to make it easier to call from aiml
   public void setTrainingLabel(String label, String count) {
     setTrainingLabel(label, Integer.valueOf(count));
@@ -696,6 +748,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     } else {
       // decrement the count 
       openCvTrainingCount--;
+      if (openCvTrainingCount == 0) {
+        invoke("publishDoneLabeling", openCvLabel);
+      }
     }
     // ok.. here we are, create a "memory" out of the opencv data.
     SolrInputDocument doc = new SolrInputDocument();
@@ -945,5 +1000,48 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       Logging.logError(e);
     }
   }
+
+  /** This method will issue an atomic update to the solr index for a given document id
+   *  the value will be set on the document 
+   * @throws IOException 
+   * @throws SolrServerException */
+  public void updateDocument(String docId, String fieldName, String value) throws SolrServerException, IOException {
+    SolrInputDocument sdoc = new SolrInputDocument();
+    sdoc.addField("id",docId);
+    Map<String,Object> fieldModifier = new HashMap<>(1);
+    fieldModifier.put("set",value);
+    sdoc.addField(fieldName, fieldModifier);  // add the map as the field value
+    if (embeddedSolrServer != null) {
+      // use this/
+      embeddedSolrServer.add(sdoc);
+    } else {
+      // default solr client.
+      solrServer.add(sdoc);
+    }
+  }
+
+  
+  public void shutdown() {
+    //
+    if (embeddedSolrServer != null) {
+      try {
+        embeddedSolrServer.close();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    if (solrServer != null) {
+      try {
+        solrServer.close();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    
+  }
   
 }
+
+
