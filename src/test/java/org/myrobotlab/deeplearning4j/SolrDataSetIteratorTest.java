@@ -35,7 +35,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;
 
-// @Ignore
+@Ignore
 public class SolrDataSetIteratorTest {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -87,12 +87,12 @@ public class SolrDataSetIteratorTest {
     SolrQuery trainQuery = solr.makeDatasetQuery(queryString, labelField);
     trainQuery.addSort("random_"+seed, ORDER.asc);
     trainQuery.setRows((int)trainMaxOffset);
-    DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch , height, width, channels);
+    DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch , height, width, channels, labelField);
     // testing query
     SolrQuery testQuery = solr.makeDatasetQuery(queryString, labelField);
     testQuery.addSort("random_"+seed, ORDER.desc);
     testQuery.setRows((int)testMaxOffset);
-    DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch , height, width, channels);
+    DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch , height, width, channels, labelField);
     //
     String filename = "my_new_model.bin";
     CustomModel custModel = dl4j.trainModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
