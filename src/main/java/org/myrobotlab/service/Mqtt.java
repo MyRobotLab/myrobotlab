@@ -79,8 +79,14 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 	String topic = String.format("myrobotlab/%s", id);
 	int port = 1883;
 	int qos = 2;
+	
+	/**
+	 * not sure what this is supposed to be - perhaps a back-end id
+	 * to identify the transaction on the listener
+	 */
+	String userContext = "context";
 
-	Set<String> subscriptions = new HashSet<String>();
+  Set<String> subscriptions = new HashSet<String>();
 
 	/**
 	 * all incoming mqtt msgs
@@ -148,7 +154,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 				}
 
 				client.setCallback(this);
-				client.connect(conOpt, "context", this);
+				client.connect(conOpt, userContext, this);
 				int i = 0;
 
 				// wait for a CONNACK !
@@ -300,7 +306,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 		// are all necessary ?
 		invoke("publishMqttMsg", topic, message.getPayload());
 		invoke("publishMqttMsgByte", message.getPayload());
-		invoke("publishMqttMsgString", new String(message.getPayload()), topic);
+		invoke("publishMqttMsgString", topic, new String(message.getPayload()));
 	}
 
 	@Override
@@ -335,7 +341,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 		log.info("Publishing at: " + time + " to topic \"" + topic + "\" qos " + qos);
 
 		// FIXME - see if user context is like a backend id ...
-		client.publish(topic, message, "Pub sample context", this);
+		client.publish(topic, message, userContext, this);
 
 	}
 
@@ -347,7 +353,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 		return new MqttMsg(topic, msg);
 	}
 
-	public String[] publishMqttMsgString(String msg, String topic) {
+	public String[] publishMqttMsgString(String topic, String msg) {
 		String[] result = { msg, topic };
 		return result;
 	}
@@ -389,7 +395,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 	 *            subscription
 	 */
 	public void subscribe(String topic, int qos) throws MqttException {
-		client.subscribe(topic, qos, "Subscribe sample context", this);
+		client.subscribe(topic, qos, userContext, this);
 		subscriptions.add(topic);
 		broadcastState();
 	}
@@ -458,6 +464,14 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 		this.autoReconnect = b;
 		return b;
 	}
+	
+	public String getUserContext() {
+    return userContext;
+  }
+
+  public void setUserContext(String userContext) {
+    this.userContext = userContext;
+  }
 
 	public static void main(String[] args) {
 		try {
