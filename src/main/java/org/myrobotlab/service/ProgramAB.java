@@ -595,7 +595,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     loading = true;
     broadcastState();
     // kill the bot
-    writeAndQuit(killAimlIf);
+    // DO NOT SAVE THE AIML!  That overwrites any changes people would have made to it!
+    // writeAndQuit(killAimlIf);
     // kill the session
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
@@ -929,16 +930,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
       // brain.startSession("default", "alice2");
-      WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-      MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+      //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
+      //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
-      mouth.attach(ear);
-      ear.attach(mouth);
-      ear.addMouth(mouth);
-      brain.attach(ear);
-      mouth.attach(brain);
-      brain.startSession("default", "en-US");
-      //brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
+      //      mouth.attach(ear);
+      //      ear.attach(mouth);
+      //      ear.addMouth(mouth);
+      //      brain.attach(ear);
+      //      mouth.attach(brain);
+      // brain.startSession("default", "en-US");
+      brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
+      
+      // TODO: foo.
+      
       // ear.startListening();
 
       /*
