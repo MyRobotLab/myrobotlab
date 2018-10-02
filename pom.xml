@@ -229,7 +229,6 @@
     <version>1.0.0-beta2</version>
     <scope>provided</scope>
   </dependency>
-
   <!--  <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-pi-mrl</artifactId>
@@ -273,11 +272,13 @@
     <groupId>org.sweble.wikitext</groupId>
     <artifactId>swc-engine</artifactId>
     <version>3.1.7</version>
+    <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.sweble.wom3</groupId>
     <artifactId>sweble-wom3-core</artifactId>
     <version>3.1.7</version>
+    <scope>provided</scope>
   </dependency>	
 <!-- DocumentPipeline end -->
 
@@ -970,7 +971,7 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.7-SNAPSHOT</version>
+    <version>0.0.8.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
