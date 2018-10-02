@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
@@ -48,6 +49,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JEditorPane response = new JEditorPane("text/html", "");
   HTMLDocument responseDoc = new HTMLDocument();
   HTMLEditorKit responseKit = new HTMLEditorKit();
+  StyleSheet cssKit = responseDoc.getStyleSheet();
 
   JLabel askLabel = new JLabel();
 
@@ -82,13 +84,13 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     text.setPreferredSize(new Dimension(40, 35));
     askLabel.setText("Ask : ");
     filter.setSelected(true);
-
+    cssKit.addRule("body {font-family:\"Vernana\";}");
     response.setAutoscrolls(true);
     response.setEditable(false);
     response.setEditorKit(responseKit);
     response.setDocument(responseDoc);
 
-    responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font face=\\\"Verdana\\\">Conversation :<br/>", 0, 0, null);
+    responseKit.insertHTML(responseDoc, responseDoc.getLength(), "Conversation :<br/>", 0, 0, null);
 
     //
     scrollResponse.setAutoscrolls(true);
