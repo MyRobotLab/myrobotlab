@@ -224,8 +224,8 @@
   </dependency>  -->
   <dependency>
     <groupId>org.nd4j</groupId>
-    <!--  <artifactId>nd4j-cuda-9.2-platform</artifactId>  -->
-    <artifactId>nd4j-native-platform</artifactId> 
+    <!-- <artifactId>nd4j-cuda-9.2-platform</artifactId>  -->
+    <artifactId>nd4j-native-platform</artifactId>
     <version>1.0.0-beta2</version>
     <scope>provided</scope>
   </dependency>
@@ -971,7 +971,7 @@
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.8.2</version>
+    <version>0.0.8.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>

@@ -911,7 +911,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.2");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.3");
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
