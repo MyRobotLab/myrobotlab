@@ -26,19 +26,20 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
+import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
-import com.pi4j.system.SystemInfo;
 import com.pi4j.wiringpi.I2C;
 import com.pi4j.wiringpi.SoftPwm;
+import com.pi4j.system.*;
 
 /**
  * 
@@ -49,6 +50,7 @@ import com.pi4j.wiringpi.SoftPwm;
  * 
  */
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
+// TODO pi4j implementation NOWORKY : I/O errors, dont know why, not know this enough :)
 public class RasPi extends Service implements I2CController, PinArrayControl {
 
   public static class I2CDeviceMap {
@@ -67,7 +69,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   }
 
-  private boolean wiringPi = false; // Defined to be able to switch between
+  private boolean wiringPi = true ; // Defined to be able to switch between
                                     // the original pi4j
                                     // implementation and the wiringpi
                                     // implemenation that supports repeated
@@ -109,6 +111,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
+
   public static void main(String[] args) {
           LoggingFactory.init("info");
 
@@ -148,6 +151,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     log.info("architecture is {}", platform.getArch());
 
     if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
+      gpio = GpioFactory.getInstance();
       log.info("Executing on Raspberry PI");
       // init gpio
       /*
@@ -170,7 +174,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
     getPinList();
 
-  }
+}
 
   @Override
   public void startService() {
@@ -186,6 +190,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     }
   }
 
+  // FIXME - return array
   // FIXME - return array
   public Integer[] scanI2CDevices(int busAddress) {
     log.info("scanning through I2C devices");
@@ -351,7 +356,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware like th GPIO pins and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
-    meta.addDependency("com.pi4j", "pi4j-core", "1.1");
+    meta.addDependency("com.pi4j", "pi4j-core", "1.2-SNAPSHOT");
     return meta;
   }
 
@@ -482,7 +487,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
           pinList.add(pindef);
         }
       } else {
-        log.error("Unknown boardtype {}", SystemInfo.getBoardType());
+        log.error(String.format("Unknown boardtype %s", SystemInfo.getBoardType()));
       }
     } catch (UnsupportedOperationException | IOException | InterruptedException e) {
       // TODO Auto-generated catch block
