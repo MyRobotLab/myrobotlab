@@ -9,12 +9,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,6 +30,7 @@ import javax.swing.text.html.StyleSheet;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.HtmlFilter;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
@@ -43,7 +46,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(ProgramABGui.class.toString());
   static final long serialVersionUID = 1L;
   public final String boundServiceName;
-  static final String START_SESSION_LABEL = "Start Session";
+  static final String START_SESSION_LABEL = "Start chatbot";
   // TODO: make this auto-resize when added to gui..
   private JTextField text = new JTextField("", 30);
   private JEditorPane response = new JEditorPane("text/html", "");
@@ -57,9 +60,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JScrollPane scrollResponse = new JScrollPane(response);
   private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
   private JTextField userName = new JTextField();
-  private JTextField botName = new JTextField();
-  private JButton startSessionButton = new JButton(START_SESSION_LABEL);
-  JButton reloadSession = new JButton("New session");
+  private JComboBox<String> botName = new JComboBox<String>();
+  private JButton startChatbotButton = new JButton(START_SESSION_LABEL);
+  JButton newSession = new JButton("New session");
   private JButton saveAIML = new JButton("Save AIML");
 
   JCheckBox filter = new JCheckBox("Filter ( ' , - )");
@@ -77,9 +80,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     pathP.setText("Path : ");
     pathP.setIcon(pathI);
     userP.setIcon(userI);
-    userP.setText("User name : ");
+    userP.setText("User : ");
     botnameP.setIcon(botnameI);
-    botnameP.setText("Bot subfolderName : ");
+    botnameP.setText("Bot : ");
     text.setFont(new Font("Arial", Font.BOLD, 14));
     text.setPreferredSize(new Dimension(40, 35));
     askLabel.setText("Ask : ");
@@ -112,11 +115,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     botControl.add(pathP);
     botControl.add(progABPath);
-    botControl.add(startSessionButton);
+    botControl.add(startChatbotButton);
 
     botControl.add(userP);
     botControl.add(userName);
-    botControl.add(reloadSession);
+    botControl.add(newSession);
 
     botControl.add(botnameP);
     botControl.add(botName);
@@ -129,8 +132,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     text.addActionListener(this);
     askButton.addActionListener(this);
-    startSessionButton.addActionListener(this);
-    reloadSession.addActionListener(this);
+    startChatbotButton.addActionListener(this);
+    newSession.addActionListener(this);
     saveAIML.addActionListener(this);
 
   }
@@ -138,6 +141,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent event) {
     Object o = event.getSource();
+    String path = progABPath.getText().trim();
+    String user = userName.getText().trim();
+    String bot = botName.getSelectedItem().toString();
     if (o == askButton || o == text) {
       String textFiltered = text.getText();
       if (filter.isSelected()) {
@@ -149,14 +155,13 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       // clear out the original question.
       text.setText("");
       response.setCaretPosition(response.getDocument().getLength());
-    } else if (o == startSessionButton) {
-      String path = progABPath.getText().trim();
-      String user = userName.getText().trim();
-      String bot = botName.getText().trim();
+
+    } else if (o == startChatbotButton) {
       swingGui.send(boundServiceName, "setPath", path);
+      // TODO remove the last parameter, after CSV dead
       swingGui.send(boundServiceName, "reloadSession", path, user, bot, true);
-    } else if (o == reloadSession) {
-      swingGui.send(boundServiceName, "startSession", userName.getText().trim());
+    } else if (o == newSession) {
+      swingGui.send(boundServiceName, "startSession", user, bot);
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
       swingGui.send(boundServiceName, "writeAIMLIF");
@@ -185,7 +190,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         try {
-          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<i><b>" + botName.getText() + "</b>: " + text.replaceAll("\\<.*?\\>", " ").trim() + "</i>", 0, 0, null);
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<i><b>" + botName.getSelectedItem().toString() + "</b>: " + HtmlFilter.stripHtml(text).trim() + "</i>", 0,
+              0, null);
         } catch (Exception e) {
           log.error("ProgramAB onText error : {}", e);
         }
@@ -230,27 +236,31 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       public void run() {
         String botname = programab.getCurrentBotName();
         String username = programab.getCurrentUserName();
-        startSessionButton.setEnabled(true);
-        if (programab.getSessions().isEmpty()) {
-          startSessionButton.setText("Start Session");
-          startSessionButton.setBackground(Color.RED);
+        startChatbotButton.setEnabled(true);
+        if (programab.getSessions().isEmpty() || programab.aimlError) {
+          startChatbotButton.setText("Start Session");
+          startChatbotButton.setBackground(Color.RED);
         } else {
-          startSessionButton.setText("Reload Chatbot");
-          startSessionButton.setBackground(Color.GREEN);
+          startChatbotButton.setText("Reload Chatbot");
+          startChatbotButton.setBackground(Color.GREEN);
         }
         if (programab.loading) {
-          startSessionButton.setText("Loading...");
-          startSessionButton.setBackground(Color.ORANGE);
-          startSessionButton.setEnabled(false);
-        }
-        if (programab.aimlError) {
-          startSessionButton.setText("AIML error");
-          startSessionButton.setBackground(Color.RED);
-          startSessionButton.setEnabled(false);
+          startChatbotButton.setText("Loading...");
+          startChatbotButton.setBackground(Color.ORANGE);
+          startChatbotButton.setEnabled(false);
         }
         progABPath.setText(new File(programab.getPath()).getAbsolutePath());
         userName.setText(username);
-        botName.setText(botname);
+
+        botName.removeAllItems();
+        Iterator<String> iterator = programab.getBots().iterator();
+
+        while (iterator.hasNext()) {
+          botName.addItem(iterator.next());
+        }
+        if (programab.getCurrentBotName() != null) {
+          botName.setSelectedItem(programab.getCurrentBotName());
+        }
 
       }
     });

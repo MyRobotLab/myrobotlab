@@ -70,8 +70,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   transient Bot bot = null;
 
-  HashSet<String> bots = new HashSet<String>();
-
   private String path = "ProgramAB";
   public boolean aimlError = false;
 
@@ -98,26 +96,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
   public String wasCleanyShutdowned;
 
+  HashSet<String> bots = new HashSet<String>();
+
   public ProgramAB(String name) {
     super(name);
+    getBots();
     // Tell programAB to persist it's learned predicates about people
     // every 30 seconds.
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
-    // TODO: Lazy load this!
-    // look for local bots defined
-    File programAbDir = new File(String.format("%s/bots", getPath()));
-    if (!programAbDir.exists() || !programAbDir.isDirectory()) {
-      log.info("%s does not exist !!!");
-    } else {
-      File[] listOfFiles = programAbDir.listFiles();
-      for (int i = 0; i < listOfFiles.length; i++) {
-        if (listOfFiles[i].isFile()) {
-          // System.out.println("File " + listOfFiles[i].getName());
-        } else if (listOfFiles[i].isDirectory()) {
-          bots.add(listOfFiles[i].getName());
-        }
-      }
-    }
   }
 
   public void addOOBTextListener(TextListener service) {
@@ -580,7 +566,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public String publishRequest(String text) {
-    return text.trim();
+    return text;
   }
 
   public void reloadSession(String session, String botName) {
@@ -591,6 +577,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     reloadSession(path, userName, botName, false);
   }
 
+  // TODO : if there is no more csv, extra parameter to force writeAndQuit is not needed anymore
   public void reloadSession(String path, String userName, String botName, Boolean killAimlIf) {
     // kill the bot
     writeAndQuit(killAimlIf);
@@ -687,6 +674,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     wasCleanyShutdowned = "nok";
 
     // TODO: manage the bots in a collective pool/hash map.
+    // TODO: check for corrupted aiml -> NPE ! ( blocking inside standalone jar )
     if (bot == null) {
       bot = new Bot(botName, path);
     } else if (!botName.equalsIgnoreCase(bot.name)) {
@@ -741,9 +729,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     log.info("Started session for bot name:{} , username:{}", botName, userName);
     // TODO: to make sure if the start session is updated, that the button
     // updates in the gui ?
-    this.save();
     loading = false;
     broadcastState();
+    this.save();
   }
 
   public void addCategory(Category c) {
@@ -769,7 +757,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void setPath(String path) {
-    this.path = path;
+    if (path != null && !path.equalsIgnoreCase(this.path)) {
+      this.path = path;
+      // path changed, we nned to update bots list
+      getBots();
+      broadcastState();
+    }
   }
 
   public void setCurrentBotName(String currentBotName) {
@@ -781,8 +774,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   @Deprecated
   public boolean setUsername(String username) {
-      startSession(this.getPath(), username, this.getCurrentBotName());
-      return true;
+    startSession(this.getPath(), username, this.getCurrentBotName());
+    return true;
   }
 
   public void writeAIML() {
@@ -886,6 +879,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     //needed if we dont "install all" > HttpClient used by sraix
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
+    // UI use htmlFilter, so we need htmlFilter installed with his dependencies
+    meta.addPeer("htmlFilter", "HtmlFilter", "htmlFilter");
     return meta;
   }
 
@@ -955,6 +950,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public HashMap<String, HashMap<String, ChatData>> getSessions() {
     return sessions;
+  }
+
+  public HashSet<String> getBots() {
+    bots.clear();
+    File programAbDir = new File(String.format("%s/bots", getPath()));
+    if (!programAbDir.exists() || !programAbDir.isDirectory()) {
+      log.info("%s does not exist !!!");
+    } else {
+      File[] listOfFiles = programAbDir.listFiles();
+      for (int i = 0; i < listOfFiles.length; i++) {
+        if (listOfFiles[i].isFile()) {
+          // System.out.println("File " + listOfFiles[i].getName());
+        } else if (listOfFiles[i].isDirectory()) {
+          bots.add(listOfFiles[i].getName());
+        }
+      }
+    }
+    return bots;
   }
 
 }
