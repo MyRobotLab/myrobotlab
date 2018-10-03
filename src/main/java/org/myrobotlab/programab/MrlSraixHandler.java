@@ -2,9 +2,11 @@ package org.myrobotlab.programab;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.alicebot.ab.Chat;
+import org.alicebot.ab.Sraix;
 import org.alicebot.ab.SraixHandler;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
@@ -17,19 +19,29 @@ public class MrlSraixHandler implements SraixHandler {
   Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
   
   @Override
-  public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit) {
-    // TODO: what the heck gets passed in here?!?!
-    
-    // the INPUT has the string we care about.  if this is an OOB tag, let's evaluate it and return the result.  o/w fall back to default behavior 
-    // of pannous / pandorabots?
-    String response = processInlineOOB(input);
-    
-    
-    // ok.. 
-    return response;
+  public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
+    // the INPUT has the string we care about.  if this is an OOB tag, let's evaluate it and return the result.  
+    // TODO: o/w fall back to default behavior of pannous / pandorabots?
+    if (containsOOB(input)) {
+      String response = processInlineOOB(input);
+      return response;
+    } else {
+      return input;
+      // TODO: replace this with an wikipedia query instead?
+//      log.info("Falling back to ask Pannous! Input: {}", input);
+//      // TODO: do we care about passing a local here?! 
+//      // this locale is the locale of the bot.. not the locale of runtime..
+//      String result = Sraix.sraixPannous(input, hint, chatSession, locale);
+//      result.replaceAll("\\(Answers.com\\)", "");
+//      return result;
+    }
   }
 
-  
+
+  private boolean containsOOB(String text) {
+    Matcher oobMatcher = oobPattern.matcher(text);
+    return oobMatcher.matches();
+  }
   private String processInlineOOB(String text) {
     // Find any oob tags
     StringBuilder responseBuilder = new StringBuilder();
