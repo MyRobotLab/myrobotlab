@@ -467,8 +467,7 @@ public class VideoProcessor implements Runnable, Serializable {
 				}
 
 			} catch (Exception e) {
-				Logging.logError(e);
-				log.error("stopping capture");
+				log.error("stopping capture", e);
 				stop();
 			}
 
@@ -523,6 +522,8 @@ public class VideoProcessor implements Runnable, Serializable {
 	public void stop() {
 		log.debug("stopping capture");
 		videoThread = null;
-    opencv.capturing = false;
+		opencv.capturing = false;
+		opencv.broadcastState();
 	}
 }
+
