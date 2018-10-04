@@ -246,14 +246,14 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       try {
         resp = embeddedSolrServer.query(query);
       } catch (SolrServerException | IOException e) {
-        log.warn("Exception running embedded solr search : {} : {}", query, e);
+        log.warn("Exception running embedded solr search : {}", query, e);
       }
     } else {
       try {
         resp = solrServer.query(query);
       } catch (SolrServerException | IOException e) {
         // TODO Auto-generated catch block
-        log.warn("Exception running solr search : {} : {}", query, e);
+        log.warn("Exception running solr search : {}", query, e);
       }
     }
     long num = resp.getResults().getNumFound();
@@ -303,7 +303,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         resp = solrServer.query(query);
       }
     } catch (SolrServerException | IOException e) {
-      log.warn("Exception running search {} : {}", query, e);
+      log.warn("Exception running search {}", query, e);
     }
     return resp;
   }
@@ -555,7 +555,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       }
       return ProcessingStatus.OK;
     } catch (Exception e) {
-      log.warn("Exception in Solr onDocuments {}", e);
+      log.warn("Exception in Solr onDocuments.", e);
       return ProcessingStatus.DROP;
     }
   }
@@ -691,7 +691,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
             doc.addField("has_bytes", true);
             log.info("Image Size:{}", encoded.length());
           } catch (IOException e) {
-            log.warn("Error creating bytes field. {}", e);
+            log.warn("Error creating bytes field.", e);
             continue;
           }
         }
@@ -768,7 +768,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       doc.addField("has_bytes", true);
       log.warn("Image Size:{}", encoded.length());
     } catch (IOException e) {
-      log.warn("Exception Storing Image in Solr : {}", e);
+      log.warn("Exception Storing Image in Solr.", e);
       return data;
     }
     // add the document we just built up to solr so we can remember it!	  
@@ -1017,14 +1017,14 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       try {
         embeddedSolrServer.close();
       } catch (IOException e) {
-        log.warn("Exception shutting down the embedded solr server. {}", e);
+        log.warn("Exception shutting down the embedded solr server.", e);
       }
     }
     if (solrServer != null) {
       try {
         solrServer.close();
       } catch (IOException e) {
-        log.warn("Exception disconnecting from remote Solr server. {}", e);      
+        log.warn("Exception disconnecting from remote Solr server.", e);      
       }
     }
     

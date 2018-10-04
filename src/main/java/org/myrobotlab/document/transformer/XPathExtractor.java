@@ -68,7 +68,7 @@ public class XPathExtractor extends AbstractStage {
     try {
       builder = factory.newDocumentBuilder();
     } catch (ParserConfigurationException e) {
-      log.warn("Parser configuration error {}", e);
+      log.warn("Parser configuration error.", e);
     }
     xpathFactory = XPathFactory.newInstance();
     xpath = xpathFactory.newXPath();
@@ -77,7 +77,7 @@ public class XPathExtractor extends AbstractStage {
       xpaths = loadConfig(configFile);
     } catch (XPathExpressionException e) {
       // TODO Auto-generated catch block
-      log.warn("XPath Expression problem loading file {} : {}", configFile, e);
+      log.warn("XPath Expression problem loading file {}", configFile, e);
     }
 
   }
@@ -171,7 +171,7 @@ public class XPathExtractor extends AbstractStage {
         }
       }
     } catch (IOException e) {
-      log.warn("IO Exception reading from file {} : {}" , filename, e);
+      log.warn("IO Exception reading from file {}" , filename, e);
       // return what we can...
       return configMap;
     }
@@ -179,7 +179,7 @@ public class XPathExtractor extends AbstractStage {
     try {
       br.close();
     } catch (IOException e) {
-      log.warn("Exception occured when trying to close the config file.. {}", e);
+      log.warn("Exception occured when trying to close the config file.", e);
     }
 
     return configMap;

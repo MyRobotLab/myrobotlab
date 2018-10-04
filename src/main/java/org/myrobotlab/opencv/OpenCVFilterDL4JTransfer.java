@@ -64,7 +64,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
       model = dl4j.loadComputationGraph(filename);
     } catch (IOException e) {
       e.printStackTrace();
-      log.warn("Error loading model! {}", e);
+      log.warn("Error loading model!", e);
       return;      
     }
     log.info("Done loading model..");

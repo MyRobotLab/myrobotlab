@@ -35,7 +35,7 @@ public class MJpegFrameGrabber extends FrameGrabber {
       url = new URL(uri);
     } catch (MalformedURLException e) {
       // TODO Auto-generated catch block
-      log.warn("Error starting mjpeg frame grabber! {}", e);
+      log.warn("Error starting mjpeg frame grabber!", e);
       // e.printStackTrace();
     }
   }
@@ -47,7 +47,7 @@ public class MJpegFrameGrabber extends FrameGrabber {
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-      log.warn("Error starting the mjpeg stream grabber: {}", e);
+      log.warn("Error starting the mjpeg stream grabber.", e);
       return;
     }
     log.info("MJPEG Stream Open {}", url.toString());
@@ -88,7 +88,7 @@ public class MJpegFrameGrabber extends FrameGrabber {
       return frame;
     } catch (IOException e) {
       // This is a javacv specific frame grabber exception.
-      throw new Exception("MJpeg Frame grabber exception grabbing. {}", e);
+      throw new Exception("MJpeg Frame grabber exception grabbing.", e);
     }
   }
 
@@ -99,7 +99,7 @@ public class MJpegFrameGrabber extends FrameGrabber {
     try {
       mStream.close();
     } catch (IOException e) {
-      log.warn("Error releasing the MJpeg frame grabber :", e);
+      log.warn("Error releasing the MJpeg frame grabber. ", e);
     }
   }
 
