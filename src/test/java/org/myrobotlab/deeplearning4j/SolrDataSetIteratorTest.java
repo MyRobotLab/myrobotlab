@@ -35,7 +35,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;
 
-@Ignore
+// @Ignore
 public class SolrDataSetIteratorTest {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -63,7 +63,7 @@ public class SolrDataSetIteratorTest {
     dl4j = (Deeplearning4j)Runtime.start("dl4j", "Deeplearning4j");
   }
 
-  @Test
+  @Ignore
   public void testSolrTransferLearningVGG16() throws IOException, NoAvailableBackendException, SolrServerException {
     LoggingFactory.init("INFO");
     System.out.println(System.getProperty("java.library.path"));
