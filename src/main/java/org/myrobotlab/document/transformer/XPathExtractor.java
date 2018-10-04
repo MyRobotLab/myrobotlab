@@ -96,8 +96,7 @@ public class XPathExtractor extends AbstractStage {
       try {
         processXml(xml, doc);
       } catch (XPathExpressionException | SAXException | IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.warn("Exception processing xml", e);
         continue;
       }
 
@@ -131,8 +130,7 @@ public class XPathExtractor extends AbstractStage {
     try {
       fstream = new FileInputStream(filename);
     } catch (FileNotFoundException e) {
-      log.warn("XPATH Extractor config file not found: {}" , filename);
-      e.printStackTrace();
+      log.warn("XPATH Extractor config file not found: {}" , filename, e);
       return null;
     }
     DataInputStream in = new DataInputStream(fstream);
