@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
@@ -16,6 +17,10 @@ import org.slf4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+// TODO: this unit test is so loud!  we need a way to run it in mute mode
+// also it's long based on the length of the audio being generated/played.
+// TODO: find a way to validate that the mp3s are created, but don't actually play them.  (checksum? file length?  other approach?)
+@Ignore
 public class SpeechSynthesisTest {
 	
 	public final static Logger log = LoggerFactory.getLogger(SpeechSynthesisTest.class);
@@ -35,15 +40,11 @@ public class SpeechSynthesisTest {
 			try {
 				Class<?> clazz = Class.forName(service);
 				AbstractSpeechSynthesis speech = null;
-				
 				// FIXME - TEST ALL WITH AND WITHOUT CLOUD
 				// REQUIREMENTS SHOULD BE ALWAYS ATTEMPT CACHE FIRST e.g. POLLY SHOULD WORK AFTER CACHE AND NO INTERNET !!!
 				// FIXME - CACHE VOICES TO FILESYSTEM TOO !
-				
 				// FIXME - test multi-platform
-				
 				// FIXME - test publish speaking & publish audio
-				
 				
 				if (AbstractSpeechSynthesis.class.isAssignableFrom(clazz)) {
 					log.info("testing {}", clazz.getSimpleName());
@@ -64,12 +65,9 @@ public class SpeechSynthesisTest {
 					Date now = new Date();
 					// guaranteed to be unique - therefore not cached
 					speech.speak(String.format("the date and time is %s", now.toString()));
-					
 					List<Voice> voices = speech.getVoices();
 					speech.speak(String.format("this speech service has %d voices", voices.size()));
-					
 					// FIXME - speakBlocking
-					
 					// FIXME - test sound files  #LAUGH# - really a AudioFile detail - getFileList
 					
 		      // FIXME - shouldn't this be done in abstract base class ?????

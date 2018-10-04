@@ -526,3 +526,4 @@ public class VideoProcessor implements Runnable, Serializable {
 		opencv.broadcastState();
 	}
 }
+

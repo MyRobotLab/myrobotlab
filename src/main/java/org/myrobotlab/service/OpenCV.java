@@ -75,6 +75,7 @@ import org.myrobotlab.opencv.OpenCVFilterDL4J;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterTracker;
 import org.myrobotlab.opencv.OpenCVFilterUndistort;
+import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
@@ -957,23 +958,27 @@ public class OpenCV extends AbstractVideoSource {
 
     // System.loadLibrary("opencv_java");
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+
+     OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
+     opencv.addFilter(yolo);
+
     
-    
-    
+     opencv.capture();
+     
     //String url  = "http://192.168.4.104:8081/?action=stream";
-    String url = "http://192.168.4.104:8080/?action=stream";
+    //String url = "http://192.168.4.104:8080/?action=stream";
 
     //public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
     //public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
 
     //String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
-    MJpegFrameGrabber grabber =  new MJpegFrameGrabber(url);
+    //MJpegFrameGrabber grabber =  new MJpegFrameGrabber(url);
     // grabber.start();
-    opencv.capture(grabber);
+    //opencv.capture(grabber);
 
     
-    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
-    opencv.addFilter(ud);
+//    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
+//    opencv.addFilter(ud);
     
 
 //    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");

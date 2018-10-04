@@ -595,13 +595,15 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     loading = true;
     broadcastState();
     // kill the bot
-    writeAndQuit(killAimlIf);
+    // DO NOT SAVE THE AIML!  That overwrites any changes people would have made to it!
+    // writeAndQuit(killAimlIf);
     // kill the session
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
-      // TODO: will garbage collection clean up the bot now ?
-      // Or are there other handles to it?
-      sessions.remove(sessions.get(botName).get(userName));
+      // remove the current session, so we can start it again.
+      sessions.get(botName).remove(userName);
+    } else {
+      log.warn("Reloading an unknown session {} {}", botName, userName);
     }
     bot = null;
     // TODO: we should make sure we keep the same path as before.
@@ -908,7 +910,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.7-SNAPSHOT");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.3");
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
@@ -927,27 +929,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
       // brain.startSession("default", "alice2");
-      WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-      MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+      //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
+      //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
-      // mouth.attach(ear);
-      ear.attach(mouth);
-      // ear.addMouth(mouth);
-      brain.attach(ear);
-      mouth.attach(brain);
-
-      brain.startSession("default", "en-US");
+      //      mouth.attach(ear);
+      //      ear.attach(mouth);
+      //      ear.addMouth(mouth);
+      //      brain.attach(ear);
+      //      mouth.attach(brain);
+      // brain.startSession("default", "en-US");
+      brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
+      
+      // TODO: foo.
+      
       // ear.startListening();
-
-      // FIXME - make this work
-      // brain.attach(mouth);
-
-      // ear.attach(mouth);
-      // FIXME !!! - make this work
-      // ear.attach(mouth);
-
-      // brain.addTextPublisher(service);
-      // ear.attach(brain);
 
       /*
        * log.info(brain.getResponse("hi there").toString());

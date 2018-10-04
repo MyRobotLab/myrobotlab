@@ -170,7 +170,7 @@ public class DHLink implements Serializable {
         this.theta = angle;
       } else {
         // TODO: it's out of range!
-        System.out.println("Rotation out of range for link " + angle);
+        log.info("Rotation out of range for link {}" , angle);
       }
     } 
     if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
@@ -178,7 +178,7 @@ public class DHLink implements Serializable {
         alpha = angle;
       } else {
         // TODO: it's out of range!
-        System.out.println("Rotation out of range for link " + angle);
+        log.info("Rotation out of range for link {}", angle);
       }
     }
     else {
