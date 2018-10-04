@@ -218,7 +218,7 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
           srcTri.close();
           dstTri.close();
         } catch (Exception e) {
-          log.warn("Error releasing some OpenCV memory, you shouldn't see this: {}", e);
+          log.warn("Error releasing some OpenCV memory, you shouldn't see this!", e);
           // should we continue ?!
         }
           

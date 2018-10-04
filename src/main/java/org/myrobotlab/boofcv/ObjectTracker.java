@@ -14,8 +14,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.BoofCv;
 import org.myrobotlab.service.data.Point2Df;
+import org.slf4j.Logger;
 
 import com.github.sarxos.webcam.Webcam;
 
@@ -37,6 +39,7 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
    * 
    */
   private static final long serialVersionUID = 1L;
+  transient public final static Logger log = LoggerFactory.getLogger(ObjectTracker.class);
   BoofCv myService = null;
   TrackerObjectQuad<T> tracker;
 
@@ -188,7 +191,7 @@ public class ObjectTracker<T extends ImageBase> extends JPanel implements MouseL
     g2.drawLine((int) target.d.getX(), (int) target.d.getY(), (int) target.a.getX(), (int) target.a.getY());
     rectangleCenter.x = (float) (target.a.getX() + ((target.b.getX() - target.a.getX()) / 2));
     rectangleCenter.y = (float) (target.a.getY() + ((target.d.getY() - target.a.getY()) / 2));
-    System.out.println(rectangleCenter.x + " , " + rectangleCenter.y);
+    log.info(rectangleCenter.x + " , " + rectangleCenter.y);
   }
 
   // not used, commented out.
