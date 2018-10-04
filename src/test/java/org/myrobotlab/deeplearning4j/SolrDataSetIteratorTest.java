@@ -63,7 +63,7 @@ public class SolrDataSetIteratorTest {
     dl4j = (Deeplearning4j)Runtime.start("dl4j", "Deeplearning4j");
   }
 
-  @Test
+  @Ignore
   public void testSolrTransferLearningVGG16() throws IOException, NoAvailableBackendException, SolrServerException {
     LoggingFactory.init("INFO");
     System.out.println(System.getProperty("java.library.path"));
