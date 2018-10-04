@@ -500,6 +500,36 @@ public class Python extends Service {
     }
     return success;
   }
+  
+  /**
+   * This method will execute and block a string that represents a python script.
+   * Python return statement as return
+   * 
+   * @param code
+   *          - the script to execute
+   * @return - returns String of python return statement
+   */
+  public String evalAndWait(String code) {
+    // moz4r : eval() no worky for what I want, don't want to mod it & break things
+    String pyOutput = null;
+    log.info("eval(String) \n{}", code);
+    if (interp == null) {
+      createPythonInterpreter();
+    }
+    try {
+      pyOutput = interp.eval(code).toString();
+    } catch (PyException pe) {
+      // something specific with a python error
+      error(pe.toString());
+      Logging.logError(pe);
+    } catch (Exception e) {
+      // more general error handling.
+      error(e.getMessage());
+      // dump stack trace to log
+      Logging.logError(e);
+    }
+    return pyOutput;
+  }
 
   public void execAndWait(String code) {
     exec(code, true, true);
