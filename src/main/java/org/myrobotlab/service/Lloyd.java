@@ -257,8 +257,7 @@ public class Lloyd extends Service {
     try {
       memory.startEmbedded();
     } catch (SolrServerException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.warn("Solr / IO Exception starting embedded solr, corrupt index? {}", e);
     }
     // next we want to subscribe to specific data. initially just opencv.
     // TODO: we can only attach after eyes are started.
@@ -577,8 +576,7 @@ public class Lloyd extends Service {
     try {
       memory.updateDocument(entityId, fieldName, value);
     } catch (SolrServerException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.warn("Error updating record in Solr. {} : {}", entityId, e);
     }
   }
   

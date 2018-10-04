@@ -68,8 +68,7 @@ public class XPathExtractor extends AbstractStage {
     try {
       builder = factory.newDocumentBuilder();
     } catch (ParserConfigurationException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.warn("Parser configuration error {}", e);
     }
     xpathFactory = XPathFactory.newInstance();
     xpath = xpathFactory.newXPath();
@@ -78,7 +77,7 @@ public class XPathExtractor extends AbstractStage {
       xpaths = loadConfig(configFile);
     } catch (XPathExpressionException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.warn("XPath Expression problem loading file {} : {}", configFile, e);
     }
 
   }
