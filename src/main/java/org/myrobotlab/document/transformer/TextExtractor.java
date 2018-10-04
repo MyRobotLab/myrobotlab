@@ -14,6 +14,8 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.myrobotlab.document.Document;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
@@ -27,6 +29,8 @@ import org.xml.sax.SAXException;
  */
 public class TextExtractor extends AbstractStage {
 
+  transient public final static Logger log = LoggerFactory.getLogger(TextExtractor.class);
+  
   private String textField = "text";
   private String filePathField = "filepath";
 
@@ -64,7 +68,7 @@ public class TextExtractor extends AbstractStage {
       File f = new File(path);
       if (!f.exists()) {
         // TODO: log that the file path was not found
-        System.out.println("File path not found " + path);
+        log.warn("File path not found {}" , path);
         continue;
       }
 

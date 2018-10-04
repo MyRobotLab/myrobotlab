@@ -92,9 +92,11 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
     meta.addDescription("a general purpose http client, used to fetch information on the web");
     meta.addCategory("network");
+    /* Runtime currently includes these dependencies
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
-    meta.setCloudService(true);
+    */
+    meta.setCloudService(false);
     return meta;
   }
 

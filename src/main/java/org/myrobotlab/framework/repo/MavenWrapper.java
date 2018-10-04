@@ -18,11 +18,7 @@ import org.myrobotlab.logging.LoggingFactory;
 // so these methods should be un-hindered by actual maven, gradle or ivy imports !
 public class MavenWrapper extends Repo {
 
-  // transient static Maven localInstance = null;
-
   String installDir = "install";
-
-  // transient static MavenCli mavenCli = null;
 
   static String pomXmlTemplate = null;
 

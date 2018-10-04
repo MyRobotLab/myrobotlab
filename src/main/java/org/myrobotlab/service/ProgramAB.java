@@ -70,6 +70,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   transient Bot bot = null;
 
+  HashSet<String> bots = new HashSet<String>();
+
   private String path = "ProgramAB";
   public boolean aimlError = false;
 
@@ -96,14 +98,26 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
   public String wasCleanyShutdowned;
 
-  HashSet<String> bots = new HashSet<String>();
-
   public ProgramAB(String name) {
     super(name);
-    getBots();
     // Tell programAB to persist it's learned predicates about people
     // every 30 seconds.
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
+    // TODO: Lazy load this!
+    // look for local bots defined
+    File programAbDir = new File(String.format("%s/bots", getPath()));
+    if (!programAbDir.exists() || !programAbDir.isDirectory()) {
+      log.info("%s does not exist !!!");
+    } else {
+      File[] listOfFiles = programAbDir.listFiles();
+      for (int i = 0; i < listOfFiles.length; i++) {
+        if (listOfFiles[i].isFile()) {
+          // System.out.println("File " + listOfFiles[i].getName());
+        } else if (listOfFiles[i].isDirectory()) {
+          bots.add(listOfFiles[i].getName());
+        }
+      }
+    }
   }
 
   public void addOOBTextListener(TextListener service) {
@@ -182,6 +196,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
           f.delete();
           // edit moz4r : we need to change the last modification date to aiml
           // folder for recompilation
+          sleep(1000);
           String fil = aimlPath + File.separator + "folder_updated";
           File file = new File(fil);
           file.delete();
@@ -279,7 +294,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     // EEK! clean up the API!
-    invoke("publishRequest", text); // publisher used by uis
     invoke("publishResponse", response);
     invoke("publishResponseText", response);
     invoke("publishText", response.msg);
@@ -291,6 +305,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // sessions.get(session).predicates.get(key));
     // }
     // }
+
+    // TODO: wire this in so the gui updates properly. ??
+    // broadcastState();
+
     return response;
   }
 
@@ -565,10 +583,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return text;
   }
 
-  public String publishRequest(String text) {
-    return text;
-  }
-
   public void reloadSession(String session, String botName) {
     reloadSession(getPath(), session, botName);
   }
@@ -577,17 +591,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     reloadSession(path, userName, botName, false);
   }
 
-  // TODO : if there is no more csv, extra parameter to force writeAndQuit is not needed anymore
   public void reloadSession(String path, String userName, String botName, Boolean killAimlIf) {
+    loading = true;
+    broadcastState();
     // kill the bot
-    writeAndQuit(killAimlIf);
+    // DO NOT SAVE THE AIML!  That overwrites any changes people would have made to it!
+    // writeAndQuit(killAimlIf);
     // kill the session
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
-      // TODO: will garbage collection clean up the bot now ?
-      // Or are there other handles to it?
+      // remove the current session, so we can start it again.
       sessions.get(botName).remove(userName);
-      log.info("{} session removed", sessions);
+    } else {
+      log.warn("Reloading an unknown session {} {}", botName, userName);
     }
     bot = null;
     // TODO: we should make sure we keep the same path as before.
@@ -652,21 +668,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void startSession(String path, String userName, String botName) {
+    loading = true;
     this.setPath(path);
     info("Starting chat session path: %s username: %s botname: %s", path, userName, botName);
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
 
+    broadcastState();
     // Session is between a user and a bot. key is compound.
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       warn("Session %s %s already created", botName, userName);
       return;
     }
-
-    loading = true;
-    broadcastState();
-
     if (!sessions.isEmpty()) {
       wasCleanyShutdowned = "ok";
     }
@@ -674,7 +688,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     wasCleanyShutdowned = "nok";
 
     // TODO: manage the bots in a collective pool/hash map.
-    // TODO: check for corrupted aiml -> NPE ! ( blocking inside standalone jar )
     if (bot == null) {
       bot = new Bot(botName, path);
     } else if (!botName.equalsIgnoreCase(bot.name)) {
@@ -714,24 +727,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // load those predicates
       chat.predicates.getPredicateDefaultsFromInputStream(FileIO.toInputStream(inputPredicateStream));
     }
-
-    // TODO move this inside high level :
-    // it is used to know the last username...
-    if (sessions.get(botName).containsKey("default")) {
-      setPredicate("default", "lastUsername", userName);
-      // robot surname is stored inside default.predicates, not inside system.prop
-      setPredicate(userName, "botname", getPredicate("default", "botname"));
-    }
-    // END TODO
-
     // this.currentBotName = botName;
     // String userName = chat.predicates.get("name");
     log.info("Started session for bot name:{} , username:{}", botName, userName);
     // TODO: to make sure if the start session is updated, that the button
     // updates in the gui ?
+    this.save();
     loading = false;
     broadcastState();
-    this.save();
   }
 
   public void addCategory(Category c) {
@@ -757,12 +760,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void setPath(String path) {
-    if (path != null && !path.equalsIgnoreCase(this.path)) {
-      this.path = path;
-      // path changed, we nned to update bots list
-      getBots();
-      broadcastState();
-    }
+    this.path = path;
   }
 
   public void setCurrentBotName(String currentBotName) {
@@ -770,12 +768,51 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * TODO : check things using it
+   * TODO : maybe merge / check with startsession directly
+   * setUsername will check if username correspond to current session If no, a
+   * new session is started
+   * 
+   * @param username
+   *          - The new username
+   * @return boolean - True if username changed
+   * @throws IOException
    */
-  @Deprecated
   public boolean setUsername(String username) {
-    startSession(this.getPath(), username, this.getCurrentBotName());
-    return true;
+    if (username.isEmpty()) {
+      log.error("chatbot username is empty");
+      return false;
+    }
+    if (sessions.isEmpty()) {
+      log.info(username + " first session started");
+      startSession(username);
+      return false;
+    }
+    try {
+      savePredicates();
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    if (username.equalsIgnoreCase(this.getCurrentUserName())) {
+      log.info(username + " already connected");
+      return false;
+    }
+    if (!username.equalsIgnoreCase(this.getCurrentUserName())) {
+      startSession(this.getPath(), username, this.getCurrentBotName());
+      setPredicate(username, "name", username);
+      setPredicate("default", "lastUsername", username);
+      // robot name is stored inside default.predicates, not inside system.prop
+      setPredicate(username, "botname", getPredicate("default", "botname"));
+      try {
+        savePredicates();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      log.info(username + " session started");
+      return true;
+    }
+    return false;
   }
 
   public void writeAIML() {
@@ -816,6 +853,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // edit moz4r : we need to change the last modification date to aimlif
       // folder because at this time all is compilated.
       // so programAb don't need to load AIML at startup
+      sleep(1000);
       File folder = new File(bot.aimlif_path);
 
       for (File f : folder.listFiles()) {
@@ -872,15 +910,15 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.7-SNAPSHOT");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.3");
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
     //needed if we dont "install all" > HttpClient used by sraix
+    /* currently Runtime supplies these dependencies
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
-    // UI use htmlFilter, so we need htmlFilter installed with his dependencies
-    meta.addPeer("htmlFilter", "HtmlFilter", "htmlFilter");
+    */
     return meta;
   }
 
@@ -893,27 +931,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
       // brain.startSession("default", "alice2");
-      WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-      MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+      //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
+      //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
-      // mouth.attach(ear);
-      ear.attach(mouth);
-      // ear.addMouth(mouth);
-      brain.attach(ear);
-      mouth.attach(brain);
-
-      brain.startSession("default", "en-US");
+      //      mouth.attach(ear);
+      //      ear.attach(mouth);
+      //      ear.addMouth(mouth);
+      //      brain.attach(ear);
+      //      mouth.attach(brain);
+      // brain.startSession("default", "en-US");
+      brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
+      
+      // TODO: foo.
+      
       // ear.startListening();
-
-      // FIXME - make this work
-      // brain.attach(mouth);
-
-      // ear.attach(mouth);
-      // FIXME !!! - make this work
-      // ear.attach(mouth);
-
-      // brain.addTextPublisher(service);
-      // ear.attach(brain);
 
       /*
        * log.info(brain.getResponse("hi there").toString());
@@ -950,24 +981,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public HashMap<String, HashMap<String, ChatData>> getSessions() {
     return sessions;
-  }
-
-  public HashSet<String> getBots() {
-    bots.clear();
-    File programAbDir = new File(String.format("%s/bots", getPath()));
-    if (!programAbDir.exists() || !programAbDir.isDirectory()) {
-      log.info("%s does not exist !!!");
-    } else {
-      File[] listOfFiles = programAbDir.listFiles();
-      for (int i = 0; i < listOfFiles.length; i++) {
-        if (listOfFiles[i].isFile()) {
-          // System.out.println("File " + listOfFiles[i].getName());
-        } else if (listOfFiles[i].isDirectory()) {
-          bots.add(listOfFiles[i].getName());
-        }
-      }
-    }
-    return bots;
   }
 
 }

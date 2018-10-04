@@ -43,7 +43,7 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
         return;
       final HMove best = searcher.getBest();
       if (best == null) {
-        System.out.println("(no legal moves)");
+        log.info("(no legal moves)");
         computerSide = EMPTY;
         return;
       }

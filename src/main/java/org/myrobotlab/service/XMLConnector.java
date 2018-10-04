@@ -60,7 +60,7 @@ public class XMLConnector extends AbstractConnector {
       saxParser = spf.newSAXParser();
     } catch (ParserConfigurationException | SAXException e) {
       // TODO Auto-generated catch block
-      log.warn("SAX Parser Error {}", e);
+      log.warn("SAX Parser Error", e);
     }
 
     try {
@@ -81,7 +81,7 @@ public class XMLConnector extends AbstractConnector {
       // xmlReader.parse(convertToFileURL(filename));
     } catch (IOException | SAXException e) {
       // TODO Auto-generated catch block
-      log.warn("SAX Parser Error {}", e);
+      log.warn("SAX Parser Error", e);
     }
     
     // flush now that we're done.

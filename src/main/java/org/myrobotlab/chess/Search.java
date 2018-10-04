@@ -15,7 +15,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 final public class Search {
+  transient public final static Logger log = LoggerFactory.getLogger(Search.class);
   final static int MAX_PLY = 32;
 
   public Board board = new Board();
@@ -283,7 +287,7 @@ final public class Search {
       for (int i = 3; i <= MAX_PLY; ++i) {
         followPV = true;
         int x = search(-10000, 10000, i);
-        System.out.println(i + " " + nodes + " " + x);
+        log.info("{} {} {}", i , nodes , x);
         StringBuffer sb = new StringBuffer("[");
         sb.append(x);
         sb.append("]");
@@ -303,7 +307,7 @@ final public class Search {
         --ply;
       }
     }
-    System.out.println("Nodes searched: " + nodes);
+    log.info("Nodes searched: " , nodes);
     return;
   }
 }
