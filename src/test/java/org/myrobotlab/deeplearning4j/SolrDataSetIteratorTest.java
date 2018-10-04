@@ -63,7 +63,7 @@ public class SolrDataSetIteratorTest {
     dl4j = (Deeplearning4j)Runtime.start("dl4j", "Deeplearning4j");
   }
 
-  @Ignore
+  @Test
   public void testSolrTransferLearningVGG16() throws IOException, NoAvailableBackendException, SolrServerException {
     LoggingFactory.init("INFO");
     System.out.println(System.getProperty("java.library.path"));
@@ -87,29 +87,26 @@ public class SolrDataSetIteratorTest {
     SolrQuery trainQuery = solr.makeDatasetQuery(queryString, labelField);
     trainQuery.addSort("random_"+seed, ORDER.asc);
     trainQuery.setRows((int)trainMaxOffset);
-    DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch , height, width, channels);
-
+    DataSetIterator trainIter = dl4j.makeSolrInputSplitIterator(solr, trainQuery, numFound, labels, batch , height, width, channels, labelField);
     // testing query
     SolrQuery testQuery = solr.makeDatasetQuery(queryString, labelField);
     testQuery.addSort("random_"+seed, ORDER.desc);
     testQuery.setRows((int)testMaxOffset);
-    DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch , height, width, channels);
+    DataSetIterator testIter = dl4j.makeSolrInputSplitIterator(solr, testQuery, numFound, labels, batch , height, width, channels, labelField);
     //
     String filename = "my_new_model.bin";
-    dl4j.trainAndSaveModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
-    testNewModel();
+    CustomModel custModel = dl4j.trainModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
+    dl4j.saveModel(custModel, filename);
+    testNewModel(filename);
   }
   
-  private void testNewModel() throws IOException {
+  private void testNewModel(String filename) throws IOException {
     // Ok. now let's see can we load the model up and ask it to predict?
-    
-    CustomModel newMod = dl4j.loadComputationGraph("my_new_model.bin");
-    
+    CustomModel newMod = dl4j.loadComputationGraph(filename);
     // TODO: load am image!
     // a test image
     String path = "C:\\dev\\workspace\\myrobotlab\\src\\main\\resources\\resource\\OpenCV\\testData\\rachel.jpg";
     IplImage image = cvLoadImage(path);
-    
     Map<String, Double> results =  dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
     for (String key : results.keySet()) {
       log.info("label: {} : {} ", key, results.get(key));

@@ -47,6 +47,7 @@ public class SolrDataSetIterator implements DataSetIterator {
   private QueryResponse qresp = null;
   private Solr solr = null;
   private String queryString;
+  private String labelField;
   // TODO: we should derive this from the training dataset automagically? maybe not. (it's really more a function of the model...)
   final private int height;
   final private int width;
@@ -55,7 +56,7 @@ public class SolrDataSetIterator implements DataSetIterator {
   int seed = 42;
   private DataSet[] cache;
 
-  public SolrDataSetIterator(int batch, String queryString, Solr solr, int height, int width, int channels) {
+  public SolrDataSetIterator(int batch, String queryString, Solr solr, int height, int width, int channels, String labelField) {
     log.info("Solr Dataset Iterator");
     this.batch = batch;
     this.height = height;
@@ -65,6 +66,7 @@ public class SolrDataSetIterator implements DataSetIterator {
     // For now, just page it all into memory.. yum!
     this.solr = solr;
     this.queryString = queryString;
+    this.labelField = labelField;
     // TODO: remove this, and implement pagination for the query result set.
     int numSamples = 1000;
     // max number of categories in the training data.
@@ -73,7 +75,7 @@ public class SolrDataSetIterator implements DataSetIterator {
     solrQuery.setStart(0);
     solrQuery.setRows(numSamples);
     // the label field to use
-    solrQuery.addFacetField("label");
+    solrQuery.addFacetField(labelField);
     solrQuery.setFacetLimit(maxLabels);
     solrQuery.setFacetMinCount(1);
     solrQuery.setFacet(true);
@@ -163,7 +165,7 @@ public class SolrDataSetIterator implements DataSetIterator {
 
   private DataSet docToDataSet(SolrDocument trainingDoc) {
     // which document is being added tot he training result set.
-    String label = (String)trainingDoc.getFirstValue("label");
+    String label = (String)trainingDoc.getFirstValue(labelField);
     // log.info("Doc ID: {} - {}", trainingDoc.getFirstValue("id"), label);
     // TODO: grab the bytes field.. and convert to an IplImage (or NDArray?)
     byte[] bytes = (byte[])trainingDoc.getFirstValue("bytes");

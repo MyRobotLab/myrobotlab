@@ -33,7 +33,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   public Map<String, Double> lastResult = null; 
   
   public CustomModel model = null;
-  
+
   private volatile IplImage lastImage = null;
   
   public OpenCVFilterDL4JTransfer() {
@@ -64,7 +64,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
       model = dl4j.loadComputationGraph(filename);
     } catch (IOException e) {
       e.printStackTrace();
-      log.warn("Error loading model! {}", e);
+      log.warn("Error loading model!", e);
       return;      
     }
     log.info("Done loading model..");
@@ -148,7 +148,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
           count++;
           if (count % 100 == 0) {
             double rate = 1000.0*count / (System.currentTimeMillis() - start);
-            System.out.println("Rate " + rate);
+            log.info("Rate {}" , rate);
             log.info(formatResultString(lastResult));
           }
           //dl4j.classifyImageDarknet(lastImage);
@@ -194,4 +194,12 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
     
   }
   
+  
+  public CustomModel getModel() {
+    return model;
+  }
+
+  public void setModel(CustomModel model) {
+    this.model = model;
+  }
 }

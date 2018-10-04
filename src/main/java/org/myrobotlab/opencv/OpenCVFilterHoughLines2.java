@@ -134,9 +134,9 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
       CvPoint pt2 = new CvPoint(line);
       pt2.position(1);
 
-      System.out.println("Line spotted: ");
-      System.out.println("\t pt1: " + pt1);
-      System.out.println("\t pt2: " + pt2);
+      log.info("Line spotted: ");
+      log.info("\t pt1: " + pt1);
+      log.info("\t pt2: " + pt2);
       // cvLine(image, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0); // draw
       // the segment on the image
       cvDrawLine(image, p0, p1, CV_RGB(255, 255, 255), 2, 8, 0);
