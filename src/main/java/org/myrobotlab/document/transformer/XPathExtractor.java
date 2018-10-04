@@ -132,7 +132,7 @@ public class XPathExtractor extends AbstractStage {
     try {
       fstream = new FileInputStream(filename);
     } catch (FileNotFoundException e) {
-      System.out.println("XPATH Extractor config file not found: " + filename);
+      log.warn("XPATH Extractor config file not found: {}" , filename);
       e.printStackTrace();
       return null;
     }
@@ -160,7 +160,7 @@ public class XPathExtractor extends AbstractStage {
         XPathExpression xPath = xpath.compile(strXPath);
 
         if (debug) {
-          System.out.println("Adding XPATH " + strXPath + " Maps To : " + fieldName);
+          log.info("Adding XPATH {} Maps To : {}",strXPath , fieldName);
         }
 
         if (configMap.containsKey(xPath)) {
@@ -172,8 +172,7 @@ public class XPathExtractor extends AbstractStage {
         }
       }
     } catch (IOException e) {
-      System.out.println("IO Exception reading from file " + filename);
-      e.printStackTrace();
+      log.warn("IO Exception reading from file {} : {}" , filename, e);
       // return what we can...
       return configMap;
     }
@@ -181,8 +180,7 @@ public class XPathExtractor extends AbstractStage {
     try {
       br.close();
     } catch (IOException e) {
-      System.out.println("Exception occured when trying to close the config file..");
-      e.printStackTrace();
+      log.warn("Exception occured when trying to close the config file.. {}", e);
     }
 
     return configMap;

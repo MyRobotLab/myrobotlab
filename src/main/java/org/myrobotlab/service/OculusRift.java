@@ -390,7 +390,7 @@ public class OculusRift extends Service implements PointPublisher {
 		position.x *= 100.0f;
 		position.y *= 100.0f;
 		position.z *= 100.0f;
-		System.out.println((int) position.x + ", " + (int) position.y + " " + (int) position.z);
+		log.info((int) position.x + ", " + (int) position.y + " " + (int) position.z);
 
 		// TODO: see if we care about this value ?
 		// float w = trackingState.HeadPose.Pose.Orientation.w;

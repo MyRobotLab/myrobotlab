@@ -572,7 +572,7 @@ public class Deeplearning4j extends Service {
         
         Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
         YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float)(classPrediction.getProbability()) , classPrediction.getLabel(), frameIndex, null, null);
-        System.out.println("Yolo Object: " + yoloobj);
+        log.info("Yolo Object: {}", yoloobj);
         results.add(yoloobj);
       }
     }
@@ -859,7 +859,7 @@ public class Deeplearning4j extends Service {
       meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
     } else {
       System.out.println("-------------------------------");
-      System.out.println("-----DL4J CUDA!          ------");
+      System.out.println("----- DL4J CUDA!         ------");
       System.out.println("-------------------------------");
       // Use this if you want cuda 9.1 NVidia GPU support
       // TODO: figure out the cuDNN stuff.
