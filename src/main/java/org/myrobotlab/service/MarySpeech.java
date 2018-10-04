@@ -210,8 +210,10 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     meta.exclude("org.slf4j", "slf4j-log4j12");
     
     // try to fix httpcore override issue
+    /* currently these dependencies are in Runtime
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
+    */
     
     return meta;
   }
