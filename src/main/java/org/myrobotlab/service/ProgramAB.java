@@ -600,11 +600,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // kill the session
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
-      // TODO: will garbage collection clean up the bot now ?
-      // Or are there other handles to it?
-      // sessions.remove(sessions.get(botName).get(userName));
-      if (sessions.containsKey(botName))
-        sessions.get(botName).remove(userName);
+      // remove the current session, so we can start it again.
+      sessions.get(botName).remove(userName);
+    } else {
+      log.warn("Reloading an unknown session {} {}", botName, userName);
     }
     bot = null;
     // TODO: we should make sure we keep the same path as before.
