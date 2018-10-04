@@ -215,7 +215,7 @@ public class SolrImageRecordReader extends ImageRecordReader {
         ((NativeImageLoader) imageLoader).asMatrixView(is,
             features.tensorAlongDimension(i, 1, 2, 3));
       } catch (Exception e) {
-        System.out.println("Image file failed during load: " + currBatch.get(i).getAbsolutePath());
+        log.info("Image file failed during load: {}", currBatch.get(i).getAbsolutePath());
         throw new RuntimeException(e);
       }
     }

@@ -14,6 +14,7 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.common.SolrInputDocument;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -21,6 +22,7 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterDL4JTransfer;
+import org.myrobotlab.opencv.OpenCVFilterLloyd;
 import org.myrobotlab.programab.OOBPayload;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -89,6 +91,7 @@ public class Lloyd extends Service {
 
   // used by the cortex
   public String imageRecognizerModelFilename = "visual_cortex.bin";
+  public String yoloPersonImageRecognizerModelFilename = "person_visual_cortex.bin";
 
   public Lloyd(String name) {
     super(name);
@@ -98,6 +101,10 @@ public class Lloyd extends Service {
   public void startService() {
     super.startService();
     // additional initialization here i guess?
+    startBrain();
+    startCortex();
+    // start memory last :(  can't attach eyes until the eyes exist.
+
     if (enableSpeech) {
       startEar();
       startMouth();
@@ -105,11 +112,9 @@ public class Lloyd extends Service {
     if (enableEyes) {
       startEyes();
     }
-    startBrain();
-    startCortex();
-    // start memory last :(  can't attach eyes until the eyes exist.
-    startMemory();
 
+    startMemory();
+    
     // If we're in telepresence mode start the oculus service.
     if (enableOculus) {
       startOculus();
@@ -147,18 +152,19 @@ public class Lloyd extends Service {
     String trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
+    trainingPattern = "THESE ARE *";
+    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
+    brain.addCategory(trainingPattern, trainingTemplate);
+    
     trainingPattern = "THIS IS A *";
-    // OOB tag here. 
     trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
     trainingPattern = "THIS IS AN *";
-    // OOB tag here. 
     trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
     trainingPattern = "THIS IS THE *";
-    // OOB tag here. 
     trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
     brain.addCategory(trainingPattern, trainingTemplate);
 
@@ -167,6 +173,25 @@ public class Lloyd extends Service {
     String buildModelTemplate = "Re-compiling my visual cortex. <oob><mrl><service>lloyd</service><method>updateRecognitionModel</method></mrl></oob>";
     brain.addCategory(reloadPattern, buildModelTemplate);
 
+    //THESE ARE FOR THE YOLO Sub training
+    // setYoloPersonTrainingLabel(String label, int count)  for yolo training
+    trainingPattern = "HER NAME IS *";
+    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setYoloPersonTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
+    brain.addCategory(trainingPattern, trainingTemplate);
+    
+    trainingPattern = "HIS NAME IS *";
+    trainingTemplate = "Learning <star/><oob><mrl><service>memory</service><method>setYoloPersonTrainingLabel</method><param><star/></param><param>"+numExamples+"</param></mrl></oob>";
+    brain.addCategory(trainingPattern, trainingTemplate);
+
+    // build a new yolo based person model.
+    reloadPattern = "BUILD A PERSON MODEL";
+    buildModelTemplate = "Re-compiling my visual cortex. <oob><mrl><service>lloyd</service><method>updatePersonRecognitionModel</method></mrl></oob>";
+    brain.addCategory(reloadPattern, buildModelTemplate);
+
+    String createEntityPattern = "CREATE A * ENTITY NAMED *";
+    String createEntityTemplate = "Create entity <star/><oob><mrl><service>lloyd</service><method>createEntity</method><param><star index=1/></param><param><star index=2/></param></mrl></oob>";
+    brain.addCategory(createEntityPattern, createEntityTemplate);
+    
   }
 
   public void addWikiLookups() {
@@ -232,8 +257,7 @@ public class Lloyd extends Service {
     try {
       memory.startEmbedded();
     } catch (SolrServerException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.warn("Solr / IO Exception starting embedded solr, corrupt index? {}", e);
     }
     // next we want to subscribe to specific data. initially just opencv.
     // TODO: we can only attach after eyes are started.
@@ -247,10 +271,76 @@ public class Lloyd extends Service {
 
   public void startCortex() {
     visualCortex = (Deeplearning4j)Runtime.start("visualCortex", "Deeplearning4j");
-    // TODO: ?? any other initialization?  load the current image recognition model?
-    
+    // TODO: ?? any other initialization?  load the current image recognition model?    
   }
 
+  public void updatePersonRecognitionModel() throws IOException {
+    // TODO: this is copy and pasted !  find a different way t
+    // Here we want to train a new yolo model and save it off..
+    int seed = 42;
+    double trainPerc = 0.5;
+    // vgg16 specific values
+    int channels = 3;
+    int height = 224;
+    int width = 224;
+    // training mini batch size.
+    int batch = 20;
+    // target accuracy
+    double targetAccuracy = 0.70;
+    String featureExtractionLayer = "fc2";
+    int maxEpochs = 5;
+    String labelField = "person_label";
+    String queryString = "+has_bytes:true +label:person +type:yolo +"+labelField+":*";
+    // stop the current yolo filter.
+    ((OpenCVFilterLloyd)leftEye.getFilter("yolo")).setEnabled(false);
+    
+    SolrQuery datasetQuery = memory.makeDatasetQuery(queryString, labelField);
+    // run that query.. get the number of items and the labels
+    QueryResponse resp = memory.search(datasetQuery);
+    long numFound = resp.getResults().getNumFound();
+    // sorted list (according to solr) of the labels for this data set
+    // TODO: we should make this field case-insensitive...  
+    FacetField labelFacet =  resp.getFacetField(labelField);
+    // maintain sort order with a linked hash set
+    List<String> labels = new ArrayList<String>();
+    for (Count c : labelFacet.getValues()) {
+      labels.add(c.getName());
+    }
+    Collections.sort(labels);
+    long trainMaxOffset = (long)((double)numFound * trainPerc);
+    long testMaxOffset = (long)((double)numFound * (1.0 - trainPerc));
+
+    // training query
+    SolrQuery trainQuery = memory.makeDatasetQuery(queryString, labelField);
+    trainQuery.addSort("random_"+seed, ORDER.asc);
+    trainQuery.setRows((int)trainMaxOffset);
+    DataSetIterator trainIter = visualCortex.makeSolrInputSplitIterator(memory, trainQuery, numFound, labels, batch , height, width, channels, labelField);
+
+    // testing query
+    SolrQuery testQuery = memory.makeDatasetQuery(queryString, labelField);
+    testQuery.addSort("random_"+seed, ORDER.desc);
+    testQuery.setRows((int)testMaxOffset);
+    DataSetIterator testIter = visualCortex.makeSolrInputSplitIterator(memory, testQuery, numFound, labels, batch , height, width, channels, labelField);
+    //
+    //String filename = "my_new_model.bin";
+    // TODO: make this runnable?
+    // At this point we should null out the current model so it stops classifying.
+    // ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
+    
+    // before we do this. let's disable the yolo stuff
+    
+    
+    CustomModel imageRecognizer = visualCortex.trainModel(labels, trainIter, testIter, yoloPersonImageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
+    // update the cv filter with the new model
+//     ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).setModel(imageRecognizer);
+    ((OpenCVFilterLloyd)leftEye.getFilter("yolo")).setPersonModel(imageRecognizer);
+    ((OpenCVFilterLloyd)leftEye.getFilter("yolo")).setEnabled(true);
+    // save this model to disk
+    visualCortex.saveModel(imageRecognizer, yoloPersonImageRecognizerModelFilename);
+    
+    
+  }
+  
   // 
   public void updateRecognitionModel() throws IOException {
     // Here we should train a new image recognition model..
@@ -267,15 +357,14 @@ public class Lloyd extends Service {
     double targetAccuracy = 0.90;
     String featureExtractionLayer = "fc2";
     int maxEpochs = 5;
-
-    String queryString = "+has_bytes:true -label:unknown";
+    String queryString = "+has_bytes:true -label:unknown +type:opencvdata";
     String labelField = "label";
     SolrQuery datasetQuery = memory.makeDatasetQuery(queryString, labelField);
     // run that query.. get the number of items and the labels
     QueryResponse resp = memory.search(datasetQuery);
     long numFound = resp.getResults().getNumFound();
     // sorted list (according to solr) of the labels for this data set
-    FacetField labelFacet =  resp.getFacetField("label");
+    FacetField labelFacet =  resp.getFacetField(labelField);
     // maintain sort order with a linked hash set
     List<String> labels = new ArrayList<String>();
     for (Count c : labelFacet.getValues()) {
@@ -289,28 +378,24 @@ public class Lloyd extends Service {
     SolrQuery trainQuery = memory.makeDatasetQuery(queryString, labelField);
     trainQuery.addSort("random_"+seed, ORDER.asc);
     trainQuery.setRows((int)trainMaxOffset);
-    DataSetIterator trainIter = visualCortex.makeSolrInputSplitIterator(memory, trainQuery, numFound, labels, batch , height, width, channels);
+    DataSetIterator trainIter = visualCortex.makeSolrInputSplitIterator(memory, trainQuery, numFound, labels, batch , height, width, channels, labelField);
 
     // testing query
     SolrQuery testQuery = memory.makeDatasetQuery(queryString, labelField);
     testQuery.addSort("random_"+seed, ORDER.desc);
     testQuery.setRows((int)testMaxOffset);
-    DataSetIterator testIter = visualCortex.makeSolrInputSplitIterator(memory, testQuery, numFound, labels, batch , height, width, channels);
+    DataSetIterator testIter = visualCortex.makeSolrInputSplitIterator(memory, testQuery, numFound, labels, batch , height, width, channels, labelField);
     //
     //String filename = "my_new_model.bin";
     // TODO: make this runnable?
     // At this point we should null out the current model so it stops classifying.
     ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
 
-    CustomModel imageRecognizer = visualCortex.trainAndSaveModel(labels, trainIter, testIter, imageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
-
-
-    // now we want to get a hold of the dl4j transfer filter and set the model on it with this one.
-    // OpenCVFilterDL4JTransfer("dl4jTransfer");
-    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).loadCustomModel(imageRecognizerModelFilename);
-
-    // ok. once that model is saved.
-
+    CustomModel imageRecognizer = visualCortex.trainModel(labels, trainIter, testIter, imageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
+    // update the cv filter with the new model
+    ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).setModel(imageRecognizer);
+    // save this model to disk
+    visualCortex.saveModel(imageRecognizer, imageRecognizerModelFilename);
   }
 
   public void startEyes() {
@@ -319,8 +404,28 @@ public class Lloyd extends Service {
     leftEye = (OpenCV)Runtime.start("leftEye", "OpenCV");
     // let's start up the trained transfer learning model here.
     OpenCVFilterDL4JTransfer dl4jTransfer = new OpenCVFilterDL4JTransfer("dl4jTransfer");
-    dl4jTransfer.loadCustomModel(imageRecognizerModelFilename);
+    // TODO: think about re-enabling this model?
+    // dl4jTransfer.loadCustomModel(imageRecognizerModelFilename);
+    
+    
     leftEye.addFilter(dl4jTransfer);
+    
+    // let's add the yolo filter also.
+    OpenCVFilterLloyd yolo = new OpenCVFilterLloyd("yolo");
+    yolo.dl4j = visualCortex;
+    try {
+      CustomModel personModel = visualCortex.loadComputationGraph(yoloPersonImageRecognizerModelFilename);
+      yolo.setPersonModel(personModel);
+      
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    leftEye.addFilter(yolo);
+    
+    
+    
     leftEye.cameraIndex = leftEyeCameraIndex;
     // TODO: ?
     leftEye.capture();
@@ -354,7 +459,6 @@ public class Lloyd extends Service {
     leftIK.createInputScale(1000.0, 1000.0, 1000.0);
     rightIK.createInputScale(1000.0, 1000.0, 1000.0);
 
-
     // create the translation/rotation input matrix.
     leftIK.createInputMatrix(0, 0, 0, 0, 0, 0);
     rightIK.createInputMatrix(0, 0, 0, 0, 0, 0);
@@ -377,8 +481,6 @@ public class Lloyd extends Service {
 
     leftIK.addListener("publishJointAngles", getName(), "onLeftJointAngles");
     rightIK.addListener("publishJointAngles", getName(), "onRightJointAngles");
-
-
 
   }
 
@@ -466,7 +568,35 @@ public class Lloyd extends Service {
     }
 
   }
+  
+  public void addPropertyToEntity(String entityName, String entityType, String fieldName, String value) {
 
+    String entityId = "entity-" + entityType + "-" + entityName;
+    // Ok we want to do a partial update.
+    try {
+      memory.updateDocument(entityId, fieldName, value);
+    } catch (SolrServerException | IOException e) {
+      log.warn("Error updating record in Solr. {} : {}", entityId, e);
+    }
+  }
+  
+  /// Ok so we want a helper method to create an entity metadata record in the memory
+  public void createEntity(String entityName, String entityType) {
+    SolrInputDocument entityDocument = new SolrInputDocument();
+    // entity id (should be) deterministic.
+    String entityId = "entity-" + entityType + "-" + entityName;
+    entityDocument.setField("id", entityId);
+    entityDocument.setField("table", "entity");
+    entityDocument.setField("type", entityType);
+    entityDocument.setField("name", entityName);
+    if (memory.getDocById(entityId) == null) {
+      memory.addDocument(entityDocument);
+    } else {
+      // this already exists.
+      log.info("Entity / type already exists {} ", entityId);
+    }
+  }
+    
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Lloyd.class.getCanonicalName());
     meta.addDescription("Lloyd an evolved InMoov.");
@@ -493,8 +623,9 @@ public class Lloyd extends Service {
     // lloyd.memory.deleteEmbeddedIndex();
     // lloyd.memory.fetchImage("id:opencvdata_214c7381-ddfe-406a-adfa-f1bf9aebd367");
     lloyd.attachCallbacks();
+    
     // TODO: re-enable?
-    // lloyd.launchWebGui();
+    lloyd.launchWebGui();
   }
 
 }
