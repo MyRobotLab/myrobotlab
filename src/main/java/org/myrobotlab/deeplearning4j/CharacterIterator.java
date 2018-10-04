@@ -1,10 +1,12 @@
 package org.myrobotlab.deeplearning4j;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.util.*;
  * @author Alex Black
  */
 public class CharacterIterator implements DataSetIterator {
+  transient public final static Logger log = LoggerFactory.getLogger(CharacterIterator.class);
     //Valid characters
 	private char[] validCharacters;
     //Maps each character to an index ind the input/output
@@ -84,11 +87,9 @@ public class CharacterIterator implements DataSetIterator {
 				+" cannot exceed number of valid characters in file ("+fileCharacters.length+")");
 
 		int nRemoved = maxSize - fileCharacters.length;
-		System.out.println("Loaded and converted file: " + fileCharacters.length + " valid characters of "
-		+ maxSize + " total characters (" + nRemoved + " removed)");
-
-        initializeOffsets();
-    }
+		log.info("Loaded and converted file: {} valid characters of {} total characters ({} removed)", fileCharacters.length, maxSize, nRemoved);
+    initializeOffsets();
+  }
 
     /** A minimal character set, with a-z, A-Z, 0-9 and common punctuation etc */
 	public static char[] getMinimalCharacterSet(){

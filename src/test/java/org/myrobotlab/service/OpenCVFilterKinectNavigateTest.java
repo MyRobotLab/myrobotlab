@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -12,7 +13,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterKinectNavigate;
 import org.slf4j.Logger;
-
 
 public class OpenCVFilterKinectNavigateTest {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectNavigateTest.class);
@@ -36,13 +36,13 @@ public class OpenCVFilterKinectNavigateTest {
   @Test
   public void testClickPoint() {
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    Runtime.start("gui", "SwingGui");
-
     cv.setFrameGrabberType("OpenKinect");
     cv.broadcastState();
 
+
     // FIXME - all junit tests should inherit from common parent which handles some of the
     // common features like virtualization and headless
+
     boolean virtual = true;
 
     if (virtual) {
@@ -52,6 +52,8 @@ public class OpenCVFilterKinectNavigateTest {
       cv.setInputFileName("src/test/resources/OpenCV/white-black-center-640x480.png");
       cv.setFrameGrabberType("ImageFile");
       cv.setInputSource("file");
+    } else {
+      Runtime.start("gui", "SwingGui");
     }
 
     OpenCVFilterKinectNavigate filter = new OpenCVFilterKinectNavigate("kinect-nav");

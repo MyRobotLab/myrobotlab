@@ -3,6 +3,7 @@ package org.myrobotlab.boofcv;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.DepthFormat;
 import org.openkinect.freenect.DepthHandler;
@@ -11,6 +12,7 @@ import org.openkinect.freenect.FrameMode;
 import org.openkinect.freenect.Freenect;
 import org.openkinect.freenect.VideoFormat;
 import org.openkinect.freenect.VideoHandler;
+import org.slf4j.Logger;
 
 import com.sun.jna.NativeLibrary;
 
@@ -36,6 +38,8 @@ public class KinectStreamer {
     NativeLibrary.addSearchPath("freenect", "/home/pja/projects/thirdparty/libfreenect/build/lib");
   }
 
+  transient public final static Logger log = LoggerFactory.getLogger(KinectStreamer.class);
+      
   Planar<GrayU8> rgb = new Planar<GrayU8>(GrayU8.class, 1, 1, 3);
   GrayU16 depth = new GrayU16(1, 1);
 
@@ -72,7 +76,7 @@ public class KinectStreamer {
     long starTime = System.currentTimeMillis();
     while (starTime + 100000 > System.currentTimeMillis()) {
     }
-    System.out.println("100 Seconds elapsed");
+    log.info("100 Seconds elapsed");
 
     device.stopDepth();
     device.stopVideo();
@@ -81,7 +85,7 @@ public class KinectStreamer {
   }
 
   protected void processDepth(FrameMode mode, ByteBuffer frame, int timestamp) {
-    System.out.println("Got depth! " + timestamp);
+    log.info("Got depth! {}" , timestamp);
 
     if (outDepth == null) {
       depth.reshape(mode.getWidth(), mode.getHeight());
@@ -98,10 +102,10 @@ public class KinectStreamer {
 
   protected void processRgb(FrameMode mode, ByteBuffer frame, int timestamp) {
     if (mode.getVideoFormat() != VideoFormat.RGB) {
-      System.out.println("Bad rgb format!");
+      log.info("Bad rgb format!");
     }
 
-    System.out.println("Got rgb!   " + timestamp);
+    log.info("Got rgb! {}", timestamp);
 
     if (outRgb == null) {
       rgb.reshape(mode.getWidth(), mode.getHeight());

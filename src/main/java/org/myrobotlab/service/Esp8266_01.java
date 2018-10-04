@@ -416,8 +416,10 @@ public class Esp8266_01 extends Service implements I2CController {
     // FIXME - add HttpClient as a peer .. and use its interface .. :)
     // then remove direct dependencies to httpcomponents ...
     // One HttpClient to Rule them all !!
+    /* Runtime currently includes these dependencies
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");  
+    */
 
     return meta;
   }

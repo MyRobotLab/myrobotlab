@@ -25,10 +25,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.swing.WindowConstants;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -39,13 +41,22 @@ import org.bytedeco.javacpp.opencv_dnn.Net;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Deeplearning4j;
 import org.slf4j.Logger;
 
-public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
+/**
+ * Experimental filter to be used with Lloyd.
+ * All behaviors of this filter are subject to change.
+ * 
+ * @author kwatters
+ *
+ */
+public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterLloyd.class.getCanonicalName());
 
   // zero offset to where the confidence level is in the output matrix of the darknet.
   private static final int CONFIDENCE_INDEX = 4;
@@ -77,9 +88,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public ArrayList<YoloDetectedObject> lastResult = null; 
   private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
-
+  public Deeplearning4j dl4j;
   
-  public OpenCVFilterYolo() {
+  CustomModel personModel = null;
+  boolean enabled = true;
+  
+  public OpenCVFilterLloyd() {
     super();
     // start classifier thread
     Thread classifier = new Thread(this, "YoloClassifierThread");
@@ -87,7 +101,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     log.info("Yolo Classifier thread started : {}", this.name);
   }
 
-  public OpenCVFilterYolo(String name) {
+  public OpenCVFilterLloyd(String name) {
     super(name);
     // start classifier thread
     Thread classifier = new Thread(this, "YoloClassifierThread");
@@ -217,9 +231,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     DecimalFormat df2 = new DecimalFormat("#.###");
     for (YoloDetectedObject obj : result) {
       String label =  obj.label + " (" + df2.format(obj.confidence*100) + "%)";
+      String subLabel = obj.sublabel;
       // anchor point for text.
       cvPutText(image, label , cvPoint(obj.boundingBox.x(), obj.boundingBox.y()), font, CvScalar.YELLOW);
-      // obj.boundingBox.
+      if (!StringUtils.isEmpty(subLabel)) {
+        cvPutText(image, subLabel , cvPoint(obj.boundingBox.x(), obj.boundingBox.y()+20), font, CvScalar.YELLOW);
+      }
       drawRect(image,obj.boundingBox, CvScalar.BLUE);
     }
   }
@@ -246,11 +263,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     log.info("Starting the Yolo classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
-      if (!pending) {
+      
+      if (!pending || !enabled) {
         log.debug("Skipping frame");
         try {
           // prevent thrashing of the cpu ...
-          Thread.sleep(10);
+          Thread.sleep(20);
         } catch (InterruptedException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -288,7 +306,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   private ArrayList<YoloDetectedObject> yoloFrame(IplImage frame) {
-    log.info("Starting yolo on frame...");
+    // log.info("Starting yolo on frame...");
     // this is our list of objects that have been detected in a given frame.
     ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
@@ -302,12 +320,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
    // log.info("input blob created");
     net.setInput(inputBlob, "data");
     
-    log.info("Feed forward!");
+    // log.info("Feed forward!");
    // log.info("Input blob set on network.");
     // ask for the detection_out layer i guess?  not sure the details of the forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
    // log.info("output detection matrix produced");
-    log.info("detection matrix computed");
+    // log.info("detection matrix computed");
     // iterate the rows of the detection matrix.
     for (int i = 0; i < detectionMat.rows(); i++) {
       Mat currentRow = detectionMat.row(i);
@@ -358,30 +376,52 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           if (yRightTop > inputMat.rows()) {
             yRightTop = inputMat.rows();
           }
-
           
           log.info(label  + " (" + confidence + "%) [(" + xLeftBottom + "," + yLeftBottom + "),(" + xRightTop + "," + yRightTop + ")]");
           Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
           // grab just the bytes for the ROI defined by that rect..
           // get that as a mat, save it as a byte array (png?) other encoding?
           // TODO: have a target size?
-          
           IplImage cropped = extractSubImage(inputMat, boundingBox);
           if (debug) {
             show(cropped, "detected img");
           }
           YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().frameIndex, cropped, null);
           yoloObjects.add(obj);
+          // if the label is a person.. we want to look up the model for further classificatoin of a person
+          // then add that info to disambiguate who that person is.
+          // followed by a solr search for the current recognized person.
+          if (obj.label.equals("person")) {
+            if (dl4j != null && personModel != null) {
+              Map<String, Double> dl4JResult;
+              try {
+                dl4JResult = dl4j.classifyImageCustom(cropped,personModel.getModel(), personModel.getLabels());
+              } catch (IOException e) {
+                // TODO Auto-generated catch block
+                log.warn("Error in running dl4j person classifier");
+                e.printStackTrace();
+                continue;
+              }
+              // print this out!
+              for (String key : dl4JResult.keySet()) {
+                double dlVal = dl4JResult.get(key);
+                if (dlVal > 0.9) {
+                  obj.sublabel = key + "("+dlVal+")";
+//                  System.out.println("PERSON RECOGNITION RESULT : " + key + " val " + dlVal);
+//                  show(cropped,key);
+                }
+              }
+            }
+          }
         }
       }
-      
     }
     return yoloObjects;
   }
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     // 
-    log.info(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
+    // System.out.println(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
     
     // TODO: figure out if the width/height is too large!  don't want to go array out of bounds
     Mat cropped = new Mat(inputMat, boundingBox);
@@ -400,6 +440,30 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     CanvasFrame canvas = new CanvasFrame(title, 1);
     canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(converterToIpl.convert(image1));
+  }
+
+  public Deeplearning4j getDl4j() {
+    return dl4j;
+  }
+
+  public void setDl4j(Deeplearning4j dl4j) {
+    this.dl4j = dl4j;
+  }
+
+  public CustomModel getPersonModel() {
+    return personModel;
+  }
+
+  public void setPersonModel(CustomModel personModel) {
+    this.personModel = personModel;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
 }

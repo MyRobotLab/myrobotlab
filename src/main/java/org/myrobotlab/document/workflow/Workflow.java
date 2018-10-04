@@ -114,7 +114,7 @@ public class Workflow {
         break;
       }
       try {
-        System.out.println("Workers are still running...");
+        log.info("Workers are still running...");
         Thread.sleep(1000);
       } catch (InterruptedException e) {
         // TODO Auto-generated catch block

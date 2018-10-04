@@ -253,6 +253,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         userName.setText(username);
 
         botName.removeAllItems();
+        /*
         Iterator<String> iterator = programab.getBots().iterator();
 
         while (iterator.hasNext()) {
@@ -261,6 +262,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         if (programab.getCurrentBotName() != null) {
           botName.setSelectedItem(programab.getCurrentBotName());
         }
+        */
 
       }
     });
