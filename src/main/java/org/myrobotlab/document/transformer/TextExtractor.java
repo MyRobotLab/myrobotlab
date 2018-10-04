@@ -64,7 +64,7 @@ public class TextExtractor extends AbstractStage {
       File f = new File(path);
       if (!f.exists()) {
         // TODO: log that the file path was not found
-        System.out.println("File path not found " + path);
+        log.warn("File path not found {}" , path);
         continue;
       }
 

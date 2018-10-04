@@ -148,7 +148,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
           count++;
           if (count % 100 == 0) {
             double rate = 1000.0*count / (System.currentTimeMillis() - start);
-            System.out.println("Rate " + rate);
+            log.info("Rate {}" , rate);
             log.info(formatResultString(lastResult));
           }
           //dl4j.classifyImageDarknet(lastImage);

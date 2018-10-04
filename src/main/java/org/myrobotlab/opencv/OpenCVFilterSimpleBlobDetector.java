@@ -124,7 +124,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
     if (!dupPoint) {
       pointsToPublish.add(new Point2Df(x, y));
-      System.out.println("There are " + pointsToPublish.size() + " blobs.");
+      log.info("There are " + pointsToPublish.size() + " blobs.");
     }
     return image;
   }

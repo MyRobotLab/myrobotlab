@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.io.IOUtils;
-import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -382,7 +381,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     // 
-    System.out.println(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
+    log.info(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
     
     // TODO: figure out if the width/height is too large!  don't want to go array out of bounds
     Mat cropped = new Mat(inputMat, boundingBox);

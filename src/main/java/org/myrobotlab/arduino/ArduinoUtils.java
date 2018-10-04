@@ -135,8 +135,7 @@ public class ArduinoUtils {
       }
     }
     log.info("RUNNING COMMAND : {}" , StringUtils.join(command, " "));
-    System.out.println();
-
+    
     ProcessBuilder builder = new ProcessBuilder(command);
     // we need to specify environment variables
     Map<String, String> environment = builder.environment();
@@ -195,10 +194,9 @@ public class ArduinoUtils {
 
       exitValue = handle.exitValue();
       // print the output from the command
-      System.out.println(outputBuilder.toString());
-      System.out.println("Exit Value : " + exitValue);
+      log.info(outputBuilder.toString());
+      log.info("Exit Value : {}" , exitValue);
       outputBuilder.append("Exit Value : " + exitValue);
-
       return outputBuilder.toString();
     } catch (IOException e) {
       exitValue = 5;
