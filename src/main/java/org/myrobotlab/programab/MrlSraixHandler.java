@@ -42,6 +42,8 @@ public class MrlSraixHandler implements SraixHandler {
     Matcher oobMatcher = oobPattern.matcher(text);
     return oobMatcher.matches();
   }
+  
+  // TODO override it inside programAB to share methods and publish OOB
   private String processInlineOOB(String text) {
     // Find any oob tags
     StringBuilder responseBuilder = new StringBuilder();
