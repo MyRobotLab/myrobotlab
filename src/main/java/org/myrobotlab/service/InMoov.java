@@ -1475,7 +1475,7 @@ public class InMoov extends Service {
   }
 
   @Override
-  public void makeReadyForShutdown() {
+  public void preShutdown() {
     rest();
     sleep(2);
   }
