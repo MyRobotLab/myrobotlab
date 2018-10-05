@@ -29,7 +29,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="rowContent in rows track by $index">
-            <td>{{rowContent.name}}</td><td><div ng-bind-html="rowContent.response"></div></td>
+            <td><b>{{rowContent.name}} : </b></td><td><div ng-bind-html="rowContent.text"></div></td>
         </tr>
       </tbody>
     </table>    
@@ -47,7 +47,7 @@
 
             <select class="form-control"
             ng-model="newBotName" 
-            ng-options="o as o for o in service.bots">
+            ng-options="o as o for o in service.availableBots">
             </select>
  
  
@@ -65,5 +65,3 @@
   -->
 <!-- TODO - MAKE THIS A GLOBAL SERVICE WITH FORMATED -->
 <!-- <pre>{{service}}</pre> -->
- 
-
