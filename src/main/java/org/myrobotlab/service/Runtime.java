@@ -1425,7 +1425,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("mrl shutdown");
 
     for (ServiceInterface service: getServices()) {
-      service.makeReadyForShutdown();
+      service.preShutdown();
     }
    
     try {
