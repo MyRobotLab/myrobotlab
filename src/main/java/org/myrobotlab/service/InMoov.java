@@ -1476,8 +1476,57 @@ public class InMoov extends Service {
 
   @Override
   public void preShutdown() {
+
+    RobotCanMoveRandom = false;
+    stopTracking();
+    setMute(false);
+    speakBlocking(lang_shutDown);
+    halfSpeed();
     rest();
-    sleep(2);
+    waitTargetPos();
+
+    // if relay used, we switch on power
+    if (LeftRelay1 != null) {
+      LeftRelay1.on();
+    }
+    if (RightRelay1 != null) {
+      RightRelay1.on();
+    }
+
+    if (eyelids != null) {
+      eyelids.autoBlink(false);
+      eyelids.moveToBlocking(180, 180);
+    }
+
+    stopVinMoov();
+    if (neopixel != null && neopixelArduino != null) {
+      neopixel.animationStop();
+      sleep(500);
+      neopixel.detach(neopixelArduino);
+      sleep(100);
+      neopixelArduino.serial.disconnect();
+      neopixelArduino.serial.stopRecording();
+      neopixelArduino.disconnect();
+    }
+    disable();
+    if (LeftRelay1 != null) {
+      LeftRelay1.off();
+    }
+    if (RightRelay1 != null) {
+      RightRelay1.off();
+    }
+    // TODO better thing to detect connected arduinos
+    // we cant use arduino.stopService()
+    if (rightHand != null) {
+      rightHand.arduino.serial.disconnect();
+      rightHand.arduino.serial.stopRecording();
+      rightHand.arduino.disconnect();
+    }
+    if (leftHand != null || head != null) {
+      leftHand.arduino.serial.disconnect();
+      leftHand.arduino.serial.stopRecording();
+      leftHand.arduino.disconnect();
+    }
   }
 
   @Override
@@ -1921,7 +1970,7 @@ public class InMoov extends Service {
     meta.addCategory("robot");
     // meta.addDependency("inmoov.fr", "1.0.0");
     // meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
-    meta.addDependency("inmoov.fr", "inmoov", "1.1.1", "zip");
+    meta.addDependency("inmoov.fr", "inmoov", "1.1.2", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------
@@ -2301,60 +2350,6 @@ public class InMoov extends Service {
       neopixel.animationStop();
     } else {
       warn("No Neopixel attached");
-    }
-  }
-
-  @Override
-  public void stopService() {
-    super.stopService();
-
-    RobotCanMoveRandom = false;
-    stopTracking();
-    halfSpeed();
-
-    // if relay used, we switch on power
-    if (LeftRelay1 != null) {
-      LeftRelay1.on();
-    }
-    if (RightRelay1 != null) {
-      RightRelay1.on();
-    }
-    rest();
-    if (eyelids != null) {
-      eyelids.autoBlink(false);
-      eyelids.moveTo(180, 180);
-    }
-    setMute(false);
-    speakBlocking(lang_shutDown);
-    stopVinMoov();
-    if (neopixel != null && neopixelArduino != null) {
-      neopixel.animationStop();
-      sleep(500);
-      neopixel.detach(neopixelArduino);
-      sleep(100);
-      neopixelArduino.serial.disconnect();
-      neopixelArduino.serial.stopRecording();
-      neopixelArduino.disconnect();
-    }
-    sleep(4500);
-    disable();
-    if (LeftRelay1 != null) {
-      LeftRelay1.off();
-    }
-    if (RightRelay1 != null) {
-      RightRelay1.off();
-    }
-    // TODO better thing to detect connected arduinos
-    // we cant use arduino.stopService()
-    if (rightHand != null) {
-      rightHand.arduino.serial.disconnect();
-      rightHand.arduino.serial.stopRecording();
-      rightHand.arduino.disconnect();
-    }
-    if (leftHand != null) {
-      leftHand.arduino.serial.disconnect();
-      leftHand.arduino.serial.stopRecording();
-      leftHand.arduino.disconnect();
     }
   }
 }
