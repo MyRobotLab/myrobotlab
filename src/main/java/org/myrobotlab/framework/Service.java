@@ -2312,6 +2312,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Called by Runtime when system is shutting down
    * a service can use this method when it has to do some "ordered" cleanup.
    */
-  public void makeReadyForShutdown() {
+  public void preShutdown() {
   }
 }
