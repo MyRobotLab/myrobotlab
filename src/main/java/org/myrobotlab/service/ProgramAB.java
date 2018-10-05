@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,19 +69,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   transient Bot bot = null;
 
-  HashSet<String> bots = new HashSet<String>();
-
   private String path = "ProgramAB";
-  public boolean aimlError = false;
 
-  /**
-   * botName - is un-initialized to preserve serialization stickyness
-   */
-  // String botName;
-  // This is the username that is chatting with the bot.
-  // String currentSession = "default";
-  // Session is a user and a bot. so the key to the session should be the
-  // username, and the bot name.
   transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
   // TODO: better parsing than a regex...
   transient Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
@@ -92,32 +80,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   private String currentBotName = "en-US";
   // this is the username that is chatting with the bot.
   private String currentUserName = "default";
-  public boolean loading = false;
 
   static final long serialVersionUID = 1L;
   static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
-  public String wasCleanyShutdowned;
+  private Boolean ready = false;
+  @Deprecated
+  Boolean wasCleanyShutdowned = true;
+
+  HashSet<String> availableBots = new HashSet<String>();
 
   public ProgramAB(String name) {
     super(name);
+    getBots();
     // Tell programAB to persist it's learned predicates about people
     // every 30 seconds.
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
-    // TODO: Lazy load this!
-    // look for local bots defined
-    File programAbDir = new File(String.format("%s/bots", getPath()));
-    if (!programAbDir.exists() || !programAbDir.isDirectory()) {
-      log.info("%s does not exist !!!");
-    } else {
-      File[] listOfFiles = programAbDir.listFiles();
-      for (int i = 0; i < listOfFiles.length; i++) {
-        if (listOfFiles[i].isFile()) {
-          // System.out.println("File " + listOfFiles[i].getName());
-        } else if (listOfFiles[i].isDirectory()) {
-          bots.add(listOfFiles[i].getName());
-        }
-      }
-    }
   }
 
   public void addOOBTextListener(TextListener service) {
@@ -140,76 +117,29 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     subscribe(service.getName(), "publishText");
   }
 
-  private void cleanOutOfDateAimlIFFiles(String botName) {
+  /**
+   * We don't use csv fiiles anymore, just a check there is no more aimlIf folder
+   * Check also if there is Aiml files inside folder...
+   */
+  private boolean checkBrain(String botName) {
+    if (botName == null || botName.isEmpty()) {
+      error("checkBrain: Bot name is null !! please check..");
+      return false;
+    }
     String aimlPath = getPath() + File.separator + "bots" + File.separator + botName + File.separator + "aiml";
     String aimlIFPath = getPath() + File.separator + "bots" + File.separator + botName + File.separator + "aimlif";
-    aimlError = false;
-    log.info("AIML FILES:");
+    log.info("AIML Files:");
     File folder = new File(aimlPath);
     File folderaimlIF = new File(aimlIFPath);
     if (!folder.exists()) {
-      log.error("{} does not exist", aimlPath);
-      aimlError = true;
-      return;
+      error("{} does not exist", aimlPath);
+      return false;
     }
-    if (wasCleanyShutdowned == null || wasCleanyShutdowned.isEmpty()) {
-      wasCleanyShutdowned = "firstStart";
+    if (folderaimlIF.exists()) {
+      folderaimlIF.renameTo(new File(folderaimlIF + ".old"));
+      log.warn("Moving aimlIf folder to old, we don't need it anymore, and can cause issues !");
     }
-    if (wasCleanyShutdowned.equals("nok")) {
-      if (folderaimlIF.exists()) {
-        // warn("Bad previous shutdown, ProgramAB need to recompile AimlIf
-        // files. Don't worry.");
-        log.info("Bad previous shutdown, ProgramAB need to recompile AimlIf files. Don't worry.");
-        for (File f : folderaimlIF.listFiles()) {
-          f.delete();
-        }
-      }
-    }
-
-    log.info(folder.getAbsolutePath());
-    HashMap<String, Long> modifiedDates = new HashMap<String, Long>();
-    for (File f : folder.listFiles()) {
-      log.info(f.getAbsolutePath());
-      // TODO: better stripping of the file extension
-      String aiml = f.getName().replace(".aiml", "");
-      modifiedDates.put(aiml, f.lastModified());
-    }
-    log.info("AIMLIF FILES:");
-    folderaimlIF = new File(aimlIFPath);
-    if (!folderaimlIF.exists()) {
-      // TODO: throw an exception warn / log ?
-      log.info("aimlif directory missing,creating it. " + folderaimlIF.getAbsolutePath());
-      folderaimlIF.mkdirs();
-      return;
-    }
-    for (File f : folderaimlIF.listFiles()) {
-      log.info(f.getAbsolutePath());
-      // TODO: better stripping of the file extension
-      String aimlIF = f.getName().replace(".aiml.csv", "");
-      Long lastMod = modifiedDates.get(aimlIF);
-      if (lastMod != null) {
-        if (f.lastModified() < lastMod) {
-          // the AIMLIF file is newer than the AIML file.
-          // delete the AIMLIF file so ProgramAB recompiles it
-          // properly.
-          log.info("Deleteing AIMLIF file because the original AIML file was modified. {}", aimlIF);
-          f.delete();
-          // edit moz4r : we need to change the last modification date to aiml
-          // folder for recompilation
-          sleep(1000);
-          String fil = aimlPath + File.separator + "folder_updated";
-          File file = new File(fil);
-          file.delete();
-          try {
-            PrintWriter writer = new PrintWriter(fil, "UTF-8");
-            writer.println(lastMod.toString());
-            writer.close();
-          } catch (IOException e) {
-            // do something
-          }
-        }
-      }
-    }
+    return true;
   }
 
   private String createSessionPredicateFilename(String username, String botName) {
@@ -294,6 +224,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     // EEK! clean up the API!
+    invoke("publishRequest", text); // publisher used by uis
     invoke("publishResponse", response);
     invoke("publishResponseText", response);
     invoke("publishText", response.msg);
@@ -305,10 +236,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // sessions.get(session).predicates.get(key));
     // }
     // }
-
-    // TODO: wire this in so the gui updates properly. ??
-    // broadcastState();
-
     return response;
   }
 
@@ -583,27 +510,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return text;
   }
 
+  public String publishRequest(String text) {
+    return text;
+  }
+
   public void reloadSession(String session, String botName) {
     reloadSession(getPath(), session, botName);
   }
 
   public void reloadSession(String path, String userName, String botName) {
-    reloadSession(path, userName, botName, false);
-  }
-
-  public void reloadSession(String path, String userName, String botName, Boolean killAimlIf) {
-    loading = true;
-    broadcastState();
-    // kill the bot
-    // DO NOT SAVE THE AIML!  That overwrites any changes people would have made to it!
-    // writeAndQuit(killAimlIf);
-    // kill the session
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
-      // remove the current session, so we can start it again.
+      // TODO: will garbage collection clean up the bot now ?
+      // Or are there other handles to it?
       sessions.get(botName).remove(userName);
-    } else {
-      log.warn("Reloading an unknown session {} {}", botName, userName);
+      log.info("{} session removed", sessions);
     }
     bot = null;
     // TODO: we should make sure we keep the same path as before.
@@ -668,26 +589,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void startSession(String path, String userName, String botName) {
-    loading = true;
+    // Session is between a user and a bot. key is compound.
+    if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
+      warn("Session %s %s already created", botName, userName);
+      return;
+    }
+
+    ready = false;
     this.setPath(path);
     info("Starting chat session path: %s username: %s botname: %s", path, userName, botName);
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
 
-    broadcastState();
-    // Session is between a user and a bot. key is compound.
-
-    if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
-      warn("Session %s %s already created", botName, userName);
+    if (!checkBrain(botName)) {
       return;
     }
-    if (!sessions.isEmpty()) {
-      wasCleanyShutdowned = "ok";
-    }
-    cleanOutOfDateAimlIFFiles(botName);
-    wasCleanyShutdowned = "nok";
 
     // TODO: manage the bots in a collective pool/hash map.
+    // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside standalone jar )
     if (bot == null) {
       bot = new Bot(botName, path);
     } else if (!botName.equalsIgnoreCase(bot.name)) {
@@ -709,13 +628,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // load session specific predicates, these override the default ones.
     String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
     chat.predicates.getPredicateDefaults(sessionPredicateFilename);
-    HashMap<String, ChatData> session = new HashMap<String, ChatData>();
 
-    if (sessions.containsKey(botName)) {
-      session = sessions.get(botName);
-    }
+    HashMap<String, ChatData> session = new HashMap<String, ChatData>();
     session.put(userName, new ChatData(chat));
-    sessions.put(botName, session);
+
+    // take care of not kill other sessions...
+    if (sessions.containsKey(botName)) {
+      sessions.get(botName).putAll(session);
+    } else {
+      sessions.put(botName, session);
+    }
+
     // lets test if the robot knows the name of the person in the session
     String name = chat.predicates.get("name").trim();
     // TODO: this implies that the default value for "name" is default
@@ -727,13 +650,28 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // load those predicates
       chat.predicates.getPredicateDefaultsFromInputStream(FileIO.toInputStream(inputPredicateStream));
     }
+
+    // TODO move this inside high level :
+    // it is used to know the last username...
+    if (sessions.get(botName).containsKey("default") && !userName.equals("default")) {
+      setPredicate("default", "lastUsername", userName);
+      // robot surname is stored inside default.predicates, not inside system.prop
+      setPredicate(userName, "botname", getPredicate("default", "botname"));
+      try {
+        savePredicates();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    // END TODO
+
     // this.currentBotName = botName;
     // String userName = chat.predicates.get("name");
     log.info("Started session for bot name:{} , username:{}", botName, userName);
     // TODO: to make sure if the start session is updated, that the button
     // updates in the gui ?
-    this.save();
-    loading = false;
+    ready = true;
     broadcastState();
   }
 
@@ -759,82 +697,33 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     addCategory(pattern, template, "*");
   }
 
-  public void setPath(String path) {
-    this.path = path;
-  }
-
-  public void setCurrentBotName(String currentBotName) {
-    this.currentBotName = currentBotName;
-  }
-
   /**
-   * TODO : maybe merge / check with startsession directly
-   * setUsername will check if username correspond to current session If no, a
-   * new session is started
-   * 
-   * @param username
-   *          - The new username
-   * @return boolean - True if username changed
-   * @throws IOException
+   * TODO : check things using it
    */
+  @Deprecated
   public boolean setUsername(String username) {
-    if (username.isEmpty()) {
-      log.error("chatbot username is empty");
-      return false;
-    }
-    if (sessions.isEmpty()) {
-      log.info(username + " first session started");
-      startSession(username);
-      return false;
-    }
-    try {
-      savePredicates();
-    } catch (IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    if (username.equalsIgnoreCase(this.getCurrentUserName())) {
-      log.info(username + " already connected");
-      return false;
-    }
-    if (!username.equalsIgnoreCase(this.getCurrentUserName())) {
-      startSession(this.getPath(), username, this.getCurrentBotName());
-      setPredicate(username, "name", username);
-      setPredicate("default", "lastUsername", username);
-      // robot name is stored inside default.predicates, not inside system.prop
-      setPredicate(username, "botname", getPredicate("default", "botname"));
-      try {
-        savePredicates();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      log.info(username + " session started");
-      return true;
-    }
-    return false;
+    startSession(this.getPath(), username, this.getCurrentBotName());
+    return true;
   }
 
   public void writeAIML() {
-    bot.writeAIMLFiles();
+    if (bot != null) {
+      bot.writeAIMLFiles();
+    }
   }
 
+  @Deprecated
   public void writeAIMLIF() {
-    bot.writeAIMLIFFiles();
-  }
-
-  public void writeAndQuit() {
-    writeAndQuit(false);
+    if (bot != null) {
+      bot.writeAIMLIFFiles();
+    }
   }
 
   /**
-   * writeAndQuit will clean shutdown BOT so next stratup is sync & faaaast
-   * 
-   * @param killAimlIf
-   *          - Delete aimlif and restart bot from aiml - Useful to push aiml
-   *          modifications in realtime - Without restart whole script
+   * writeAndQuit will write brain to disk
+   * For learn.aiml is concerned
    */
-  public void writeAndQuit(Boolean killAimlIf) {
+  public void writeAndQuit() {
     if (bot == null) {
       log.info("no bot - don't need to write and quit");
       return;
@@ -845,34 +734,66 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    String fil = bot.aimlif_path + File.separator + "folder_updated";
-    if (!killAimlIf) {
-      bot.writeQuit();
-      wasCleanyShutdowned = "ok";
+    bot.writeQuit();
+  }
 
-      // edit moz4r : we need to change the last modification date to aimlif
-      // folder because at this time all is compilated.
-      // so programAb don't need to load AIML at startup
-      sleep(1000);
-      File folder = new File(bot.aimlif_path);
+  // getters - setters
 
-      for (File f : folder.listFiles()) {
-        f.setLastModified(System.currentTimeMillis());
-      }
-
-    } else {
-      fil = bot.aiml_path + File.separator + "folder_updated";
-    }
-    File file = new File(fil);
-    file.delete();
-    try {
-      PrintWriter writer = new PrintWriter(fil, "UTF-8");
-      writer.println("");
-      writer.close();
-    } catch (IOException e) {
-      log.error("PrintWriter error");
+  public void setPath(String path) {
+    if (path != null && !path.equals(this.path)) {
+      this.path = path;
+      // path changed, we need to update bots list
+      getBots();
+      broadcastState();
     }
   }
+
+  public void setCurrentBotName(String currentBotName) {
+    this.currentBotName = currentBotName;
+  }
+
+  public void setCurrentUserName(String currentUserName) {
+    this.currentUserName = currentUserName;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public String getCurrentUserName() {
+    return currentUserName;
+  }
+
+  public String getCurrentBotName() {
+    return currentBotName;
+  }
+
+  /**
+   * @return the sessions
+   */
+  public HashMap<String, HashMap<String, ChatData>> getSessions() {
+    return sessions;
+  }
+
+  public HashSet<String> getBots() {
+    availableBots.clear();
+    File programAbDir = new File(String.format("%s/bots", getPath()));
+    if (!programAbDir.exists() || !programAbDir.isDirectory()) {
+      log.info("%s does not exist !!!");
+    } else {
+      File[] listOfFiles = programAbDir.listFiles();
+      for (int i = 0; i < listOfFiles.length; i++) {
+        if (listOfFiles[i].isFile()) {
+          // System.out.println("File " + listOfFiles[i].getName());
+        } else if (listOfFiles[i].isDirectory()) {
+          availableBots.add(listOfFiles[i].getName());
+        }
+      }
+    }
+    return availableBots;
+  }
+
+  // Framework
 
   public void attach(Attachable attachable) {
     if (attachable instanceof TextPublisher) {
@@ -886,14 +807,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Override
   public void stopService() {
-    try {
-      savePredicates();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
     writeAndQuit();
     super.stopService();
+  }
+
+  @Override
+  public boolean isReady() {
+    return ready != null ? true : false;
   }
 
   /**
@@ -914,6 +834,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
+    // UI use htmlFilter, so we need htmlFilter installed with his dependencies
+    meta.addPeer("htmlFilter", "HtmlFilter", "htmlFilter");
     //needed if we dont "install all" > HttpClient used by sraix
     /* currently Runtime supplies these dependencies
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
@@ -927,60 +849,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       LoggingFactory.init("INFO");
 
       Runtime.start("gui", "SwingGui");
-      // Runtime.start("webgui", "WebGui");
+      Runtime.start("webgui", "WebGui");
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-      // brain.startSession("default", "alice2");
       //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-      //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+      MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
-      //      mouth.attach(ear);
-      //      ear.attach(mouth);
-      //      ear.addMouth(mouth);
-      //      brain.attach(ear);
-      //      mouth.attach(brain);
-      // brain.startSession("default", "en-US");
-      brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
-      
-      // TODO: foo.
-      
-      // ear.startListening();
+      // mouth.attach(ear);
+      // brain.attach(ear);
+      brain.attach(mouth);
 
-      /*
-       * log.info(brain.getResponse("hi there").toString());
-       * log.info(brain.getResponse("こんにちは").toString());
-       * log.info(brain.getResponse("test").toString());
-       * log.info(brain.getResponse("").toString()); brain.setUsername("test");
-       */
+      //brain.startSession("default", "en-US");
+      //brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
 
-      brain.savePredicates();
+      //brain.savePredicates();
     } catch (Exception e) {
       log.error("main threw", e);
     }
 
-  }
-
-  public String getPath() {
-    return path;
-  }
-
-  public String getCurrentUserName() {
-    return currentUserName;
-  }
-
-  public void setCurrentUserName(String currentUserName) {
-    this.currentUserName = currentUserName;
-  }
-
-  public String getCurrentBotName() {
-    return currentBotName;
-  }
-
-  /**
-   * @return the sessions
-   */
-  public HashMap<String, HashMap<String, ChatData>> getSessions() {
-    return sessions;
   }
 
 }

@@ -143,7 +143,10 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     Object o = event.getSource();
     String path = progABPath.getText().trim();
     String user = userName.getText().trim();
-    String bot = botName.getSelectedItem().toString();
+    String bot = null;
+    if (botName.getItemCount() > 0) {
+      bot = botName.getSelectedItem().toString();
+    }
     if (o == askButton || o == text) {
       String textFiltered = text.getText();
       if (filter.isSelected()) {
@@ -159,9 +162,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     } else if (o == startChatbotButton) {
       swingGui.send(boundServiceName, "setPath", path);
       // TODO remove the last parameter, after CSV dead
-      swingGui.send(boundServiceName, "reloadSession", path, user, bot, true);
+      swingGui.send(boundServiceName, "startSession", path, user, bot);
     } else if (o == newSession) {
-      swingGui.send(boundServiceName, "startSession", user, bot);
+      swingGui.send(boundServiceName, "reloadSession", user, bot);
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
       swingGui.send(boundServiceName, "writeAIMLIF");
@@ -237,23 +240,18 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         String botname = programab.getCurrentBotName();
         String username = programab.getCurrentUserName();
         startChatbotButton.setEnabled(true);
-        if (programab.getSessions().isEmpty() || programab.aimlError) {
+        if (programab.getSessions().isEmpty() || !programab.isReady()) {
           startChatbotButton.setText("Start Session");
           startChatbotButton.setBackground(Color.RED);
         } else {
           startChatbotButton.setText("Reload Chatbot");
           startChatbotButton.setBackground(Color.GREEN);
         }
-        if (programab.loading) {
-          startChatbotButton.setText("Loading...");
-          startChatbotButton.setBackground(Color.ORANGE);
-          startChatbotButton.setEnabled(false);
-        }
+
         progABPath.setText(new File(programab.getPath()).getAbsolutePath());
         userName.setText(username);
 
         botName.removeAllItems();
-        /*
         Iterator<String> iterator = programab.getBots().iterator();
 
         while (iterator.hasNext()) {
@@ -262,7 +260,6 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         if (programab.getCurrentBotName() != null) {
           botName.setSelectedItem(programab.getCurrentBotName());
         }
-        */
 
       }
     });
