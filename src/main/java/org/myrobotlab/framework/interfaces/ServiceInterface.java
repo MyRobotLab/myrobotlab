@@ -69,7 +69,7 @@ public interface ServiceInterface
    * called by runtime when system is shutting down
    * a service can use this method when it has to do some "ordered" cleanup
    */
-  public void makeReadyForShutdown();
+  public void preShutdown();
 
   /**
    * asked by the framework - to determine if the service needs to be secure
