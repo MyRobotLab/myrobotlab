@@ -46,7 +46,6 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(ProgramABGui.class.toString());
   static final long serialVersionUID = 1L;
   public final String boundServiceName;
-  static final String START_SESSION_LABEL = "Start chatbot";
   // TODO: make this auto-resize when added to gui..
   private JTextField text = new JTextField("", 30);
   private JEditorPane response = new JEditorPane("text/html", "");
@@ -61,8 +60,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JTextField progABPath = new JTextField(new File("ProgramAB").getAbsolutePath(), 16);
   private JTextField userName = new JTextField();
   private JComboBox<String> botName = new JComboBox<String>();
-  private JButton startChatbotButton = new JButton(START_SESSION_LABEL);
-  JButton newSession = new JButton("New session");
+  private JButton startSession = new JButton("New session");
+  private JButton reloadSession = new JButton("Reload chatbot");
   private JButton saveAIML = new JButton("Save AIML");
 
   JCheckBox filter = new JCheckBox("Filter ( ' , - )");
@@ -115,11 +114,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     botControl.add(pathP);
     botControl.add(progABPath);
-    botControl.add(startChatbotButton);
+    botControl.add(startSession);
 
     botControl.add(userP);
     botControl.add(userName);
-    botControl.add(newSession);
+    botControl.add(reloadSession);
 
     botControl.add(botnameP);
     botControl.add(botName);
@@ -132,8 +131,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     text.addActionListener(this);
     askButton.addActionListener(this);
-    startChatbotButton.addActionListener(this);
-    newSession.addActionListener(this);
+    startSession.addActionListener(this);
+    reloadSession.addActionListener(this);
     saveAIML.addActionListener(this);
 
   }
@@ -159,11 +158,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       text.setText("");
       response.setCaretPosition(response.getDocument().getLength());
 
-    } else if (o == startChatbotButton) {
+    } else if (o == startSession) {
       swingGui.send(boundServiceName, "setPath", path);
       // TODO remove the last parameter, after CSV dead
       swingGui.send(boundServiceName, "startSession", path, user, bot);
-    } else if (o == newSession) {
+    } else if (o == reloadSession) {
       swingGui.send(boundServiceName, "reloadSession", user, bot);
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
@@ -239,13 +238,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       public void run() {
         String botname = programab.getCurrentBotName();
         String username = programab.getCurrentUserName();
-        startChatbotButton.setEnabled(true);
+        startSession.setEnabled(true);
         if (programab.getSessions().isEmpty() || !programab.isReady()) {
-          startChatbotButton.setText("Start Session");
-          startChatbotButton.setBackground(Color.RED);
+          startSession.setBackground(Color.RED);
         } else {
-          startChatbotButton.setText("Reload Chatbot");
-          startChatbotButton.setBackground(Color.GREEN);
+          startSession.setBackground(Color.GREEN);
         }
 
         progABPath.setText(new File(programab.getPath()).getAbsolutePath());
