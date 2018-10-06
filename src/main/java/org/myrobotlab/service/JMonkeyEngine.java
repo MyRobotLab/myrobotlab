@@ -129,6 +129,16 @@ public class JMonkeyEngine extends Service implements Simulator {
 
   public static void main(String[] args) {
     try {
+      
+      InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
+      Runtime.start("gui", "SwingGui");
+      i01.startVinMoov();
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
 
       Runtime.start("gui", "SwingGui");
       Servo servo = (Servo)Runtime.start("servo", "Servo");
