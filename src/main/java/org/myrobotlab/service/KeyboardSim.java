@@ -23,16 +23,10 @@ public class KeyboardSim extends Service {
 
 	public KeyboardSim(String n) {
 		super(n);
-	}
-
-	@Override
-	public void startService() {
-		super.startService();
 		try {
 			robot = new Robot();
-		} catch (AWTException e) {
-			log.error("could not create java.awt.Robot");
-			log.error(e.getMessage());
+		} catch (Exception e) {
+			log.error("could not create java.awt.Robot", e);
 		}
 	}
 
@@ -44,10 +38,7 @@ public class KeyboardSim extends Service {
 	 */
 	public void pressAndRelease(int keycode, int duration) {
 		press(keycode);
-		try {
-			Thread.sleep(duration);
-		} catch (InterruptedException e) {
-		}
+		sleep(duration);
 		release(keycode);
 	}
 
@@ -81,10 +72,7 @@ public class KeyboardSim extends Service {
 	 */
 	public void pressAndRelease(int[] keycodes, int duration) {
 		press(keycodes);
-		try {
-			Thread.sleep(duration);
-		} catch (InterruptedException e) {
-		}
+		sleep(duration);
 		releaseReversed(keycodes);
 	}
 
@@ -131,10 +119,7 @@ public class KeyboardSim extends Service {
 		Runtime.start("swing", "SwingGui");
 		KeyboardSim keysim = (KeyboardSim) Runtime.start("keysim", "KeyboardSim");
 
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		}
+		sleep(1000);
 
 		keysim.pressAndRelease(new int[] { KeyEvent.VK_SHIFT, KeyEvent.VK_A }, 1000);
 	}
