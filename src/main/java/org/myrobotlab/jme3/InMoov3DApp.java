@@ -718,7 +718,11 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
     }
 
-    // to achieve 30 fps - we sleep 33 ms - the time the user took to update
+    // To achieve ~30 fps, the thread will need to sleep for 33ms otherwise the
+    // update thread races through this function without pause to generating 300+ fps.
+    // If this update takes deltaMs to process then we will subtract that from the initial 33ms,
+    // to make total time spent in this method as close to 33ms as possible.
+    
     deltaMs = System.currentTimeMillis() - startUpdateTs;
     sleepMs = 33 - deltaMs;
     try {
