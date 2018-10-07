@@ -17,7 +17,7 @@
 	    	maven or jenkins can do this
 	    	
 	     -->
-	    <build.number>${global.build.number}</build.number>	    
+	    <build.number>1.1.${global.build.number}</build.number>	    
 	    <username>${global.username}</username>	    
 	    <platform>${global.platform}</platform>	    
 	    <!-- end env vars -->
