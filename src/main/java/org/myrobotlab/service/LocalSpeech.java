@@ -31,7 +31,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
-  private String ttsPath = "\"" + System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe" + "\"";
+  private String ttsPath = System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe";
 
   public LocalSpeech(String n) {
     super(n);
@@ -62,7 +62,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // so here we have to trim it off
 
       filename = filename.substring(0, filename.length() - 5);
-      String cmd = ttsPath + " -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + "\"" + filename + "\" \"" + toSpeak + "\"";
+      String cmd = "\"" + ttsPath + "\" -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + "\"" + filename + "\" \"" + toSpeak + "\"";
       Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
     } else if (platform.isMac()) {
       // cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o",
@@ -115,7 +115,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     String voicesText = null;
 
     if (platform.isWindows()) {
-      voicesText = Runtime.execute("cmd.exe", "/c", "\"" + ttsPath + " -V" + "\"");
+      voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
       log.info("cmd {}", voicesText);
 
       String[] lines = voicesText.split(System.getProperty("line.separator"));
@@ -142,6 +142,22 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       addVoice("Linus", "male", "en-US", "festival");
     }
   }
+  
+  /**
+   * override default tts.exe path
+   * 
+   * @param ttsPath
+   *          - full path to windows tts.exe executable
+   * TODO - override also other os
+   */
+  public void setPath(String ttsPath) {
+    this.ttsPath = ttsPath;
+  }
+
+  public String getPath() {
+    return ttsPath;
+  }
+
 
   public static void main(String[] args) throws Exception {
 
