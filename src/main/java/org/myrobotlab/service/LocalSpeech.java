@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Platform;
@@ -30,7 +31,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
-  
+  private String ttsPath = System.getProperty("user.dir") + File.separator + "tts" + File.separator;
 
   public LocalSpeech(String n) {
     super(n);
@@ -47,7 +48,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     return meta;
   }
 
-
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
@@ -62,7 +62,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // so here we have to trim it off
 
       filename = filename.substring(0, filename.length() - 5);
-      String cmd = "tts.exe -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + filename + " \"" + toSpeak + " \"";
+      String cmd = ttsPath + "tts.exe -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + "\"" + filename + "\" \"" + toSpeak + "\"";
       Runtime.execute("cmd.exe", "/c", cmd);
     } else if (platform.isMac()) {
       // cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o",
@@ -77,10 +77,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       p.waitFor();
       // audioFile.play(audioData);
     }
-    
+
     /*
     String cmd = getTtsCmdLine(toSpeak);
-
+    
     
     */
 
@@ -113,33 +113,33 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     // voices returned from local app
     String voicesText = null;
-    
+
     if (platform.isWindows()) {
-      voicesText = Runtime.execute("tts.exe -V");
+      voicesText = Runtime.execute("cmd.exe", "/c", ttsPath + "tts.exe -V");
       log.info("cmd {}", voicesText);
 
       String[] lines = voicesText.split(System.getProperty("line.separator"));
       for (String line : lines) {
         // String[] parts = cmd.split(" ");
         String gender = "female"; // unknown
-        String lang = "en"; // unknown
+        String lang = "en-US"; // unknown
 
         if (line.startsWith("Exit")) {
           break;
         }
         // lame-ass parsing ..
-        String voiceProvider = line.split("")[0];
-        String name = line.split(" ")[2];
-        addVoice(name, gender, lang, voiceProvider);
+        String voiceProvider = line.split(" ", 2)[0];
+        // voice name cause issues because of spaces or (null), let's just use original number as name...
+        addVoice(voiceProvider, gender, lang, voiceProvider);
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
-      voicesText = Runtime.execute("say -v"); 
+      voicesText = Runtime.execute("say -v");
 
       // FIXME - implement parse -v output
-      addVoice("fred", "male", "en", "fred"); // in the interim added 1 voice
-    } else  if (platform.isLinux()) {
-      addVoice("Linus", "male", "en", "festival");
+      addVoice("fred", "male", "en-US", "fred"); // in the interim added 1 voice
+    } else if (platform.isLinux()) {
+      addVoice("Linus", "male", "en-US", "festival");
     }
   }
 
