@@ -150,11 +150,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    *          - full path to windows tts.exe executable
    * TODO - override also other os
    */
-  public void setPath(String ttsPath) {
+  public void setTtsPath(String ttsPath) {
     this.ttsPath = ttsPath;
   }
 
-  public String getPath() {
+  public String getTtsPath() {
     return ttsPath;
   }
 
