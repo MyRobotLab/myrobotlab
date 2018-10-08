@@ -31,7 +31,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
-  private String ttsPath = System.getProperty("user.dir") + File.separator + "tts" + File.separator;
+  private String ttsPath = "\"" + System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe" + "\"";
 
   public LocalSpeech(String n) {
     super(n);
@@ -62,8 +62,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // so here we have to trim it off
 
       filename = filename.substring(0, filename.length() - 5);
-      String cmd = ttsPath + "tts.exe -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + "\"" + filename + "\" \"" + toSpeak + "\"";
-      Runtime.execute("cmd.exe", "/c", cmd);
+      String cmd = ttsPath + " -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + "\"" + filename + "\" \"" + toSpeak + "\"";
+      Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
     } else if (platform.isMac()) {
       // cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o",
       // ttsExeOutputFilePath + uuid + "0.AIFF");
@@ -115,7 +115,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     String voicesText = null;
 
     if (platform.isWindows()) {
-      voicesText = Runtime.execute("cmd.exe", "/c", ttsPath + "tts.exe -V");
+      voicesText = Runtime.execute("cmd.exe", "/c", "\"" + ttsPath + " -V" + "\"");
       log.info("cmd {}", voicesText);
 
       String[] lines = voicesText.split(System.getProperty("line.separator"));
