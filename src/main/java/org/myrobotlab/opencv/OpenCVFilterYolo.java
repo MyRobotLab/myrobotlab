@@ -239,7 +239,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     long start = System.currentTimeMillis();
     log.info("Starting the Yolo classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
-    while (true) {
+    running = true;
+    while (running) {
       if (!pending) {
         log.debug("Skipping frame");
         try {
@@ -391,6 +392,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     CanvasFrame canvas = new CanvasFrame(title, 1);
     canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(converterToIpl.convert(image1));
+  }
+
+  @Override
+  public void release() {
+    running = false;
   }
 
 }
