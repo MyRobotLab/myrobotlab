@@ -63,7 +63,7 @@ public class VideoProcessor implements Runnable, Serializable {
   transient public BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
   private transient FrameGrabber grabber = null;
   public transient Thread videoThread = null;
-  private transient LinkedHashMap<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
+  private transient Map<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
   private transient List<OpenCVFilter> addFilterQueue = new ArrayList<OpenCVFilter>();
   private transient List<String> removeFilterQueue = new ArrayList<String>();
   private transient SimpleDateFormat sdf = new SimpleDateFormat();
