@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.MarySpeechGui', []).controller('MarySpeechGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
-    $log.info('MarySpeechGuiCtrl');
+angular.module('mrlapp.service.NaturalReaderSpeechGui', []).controller('NaturalReaderSpeechGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
+    $log.info('NaturalReaderSpeechGuiCtrl');
     var _self = this;
     var msg = this.msg;
 
