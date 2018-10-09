@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,7 +63,7 @@ public class VideoProcessor implements Runnable, Serializable {
   transient public BlockingQueue<Object> blockingData = new LinkedBlockingQueue<Object>();
   private transient FrameGrabber grabber = null;
   public transient Thread videoThread = null;
-  private transient Map<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
+  private transient LinkedHashMap<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
   private transient List<OpenCVFilter> addFilterQueue = new ArrayList<OpenCVFilter>();
   private transient List<String> removeFilterQueue = new ArrayList<String>();
   private transient SimpleDateFormat sdf = new SimpleDateFormat();
@@ -336,6 +337,7 @@ public class VideoProcessor implements Runnable, Serializable {
                 data.put(f.name);
               }
               filters.put(f.name, f);
+              log.info("lastSourceKey changed from {} to {}", lastSourceKey, f.name);
               lastSourceKey = f.name;
             }
             addFilterQueue.clear();
@@ -354,10 +356,24 @@ public class VideoProcessor implements Runnable, Serializable {
                 OpenCVFilter filter = filters.get(name);
                 filter.release();
                 filters.remove(name);
-                lastSourceKey = INPUT_KEY;
               }
             }
+
             removeFilterQueue.clear();
+
+            // Oh !! we need to repair sourcekey for filters now !
+            // because removefilterQueue just break it !
+            // So we parse every filters to get the previous one as source
+
+            Iterator filtersIt = filters.entrySet().iterator();
+            lastSourceKey = INPUT_KEY;
+            while (filtersIt.hasNext()) {
+              Map.Entry thisFilter = (Map.Entry) filtersIt.next();
+              log.info("Filter SourceKey for {} changed from {} to {}", thisFilter.getKey(), filters.get(thisFilter.getKey()).sourceKey, lastSourceKey);
+              filters.get(thisFilter.getKey()).sourceKey = lastSourceKey;
+              lastSourceKey = thisFilter.getKey().toString();
+            }
+
             opencv.broadcastState(); // filters have changed
           }
           // removeFilters must blocking because do not do the job if capture is stopped by user just after
