@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -94,6 +95,7 @@ public class VideoProcessor implements Runnable, Serializable {
    * default source
    */
   public String lastSourceKey;
+  transient Object filtersRemoved = new Object();
 
   public VideoProcessor(OpenCV opencv) {
     this.opencv = opencv;
@@ -236,6 +238,17 @@ public class VideoProcessor implements Runnable, Serializable {
       OpenCVFilter f = copy.get(i);
       removeFilterQueue.add(f.name);
     }
+    // lets wait a little the queue on the different thread
+    // 5s timeout security delay, just in case...
+    if (opencv.capturing) {
+      synchronized (filtersRemoved) {
+        try {
+          filtersRemoved.wait(5000);
+        } catch (InterruptedException e) {
+          log.warn("removeFilters interrupt {}", e);
+        }
+      }
+    }
   }
 
   private void warn(String msg, Object... params) {
@@ -324,6 +337,7 @@ public class VideoProcessor implements Runnable, Serializable {
                 data.put(f.name);
               }
               filters.put(f.name, f);
+              log.info("lastSourceKey changed from {} to {}", lastSourceKey, f.name);
               lastSourceKey = f.name;
             }
             addFilterQueue.clear();
@@ -338,12 +352,35 @@ public class VideoProcessor implements Runnable, Serializable {
                 continue;
               }
               if (filters.containsKey(name)) {
+                // lets kill the filter just in case, it should'n play alone in the dark
+                OpenCVFilter filter = filters.get(name);
+                filter.release();
                 filters.remove(name);
-                lastSourceKey = INPUT_KEY;
               }
             }
+
             removeFilterQueue.clear();
+
+            // Oh !! we need to repair sourcekey for filters now !
+            // because removefilterQueue just break it !
+            // So we parse every filters to get the previous one as source
+
+            Iterator filtersIt = filters.entrySet().iterator();
+            lastSourceKey = INPUT_KEY;
+            while (filtersIt.hasNext()) {
+              Map.Entry thisFilter = (Map.Entry) filtersIt.next();
+              log.info("Filter SourceKey for {} changed from {} to {}", thisFilter.getKey(), filters.get(thisFilter.getKey()).sourceKey, lastSourceKey);
+              filters.get(thisFilter.getKey()).sourceKey = lastSourceKey;
+              lastSourceKey = thisFilter.getKey().toString();
+            }
+
             opencv.broadcastState(); // filters have changed
+          }
+          // removeFilters must blocking because do not do the job if capture is stopped by user just after
+          if (filters.size() == 0) {
+            synchronized (filtersRemoved) {
+              filtersRemoved.notify();
+            }
           }
 
           // process each filter

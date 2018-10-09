@@ -59,6 +59,8 @@ public abstract class OpenCVFilter implements Serializable {
   public String sourceKey;
 
   transient protected VideoProcessor vp;
+  
+  protected transient Boolean running;
 
   public OpenCVFilter() {
     this.name = this.getClass().getSimpleName().substring("OpenCVFilter".length());
