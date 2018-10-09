@@ -283,7 +283,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   private ArrayList<YoloDetectedObject> yoloFrame(IplImage frame) {
-    log.info("Starting yolo on frame...");
+    log.debug("Starting yolo on frame...");
     // this is our list of objects that have been detected in a given frame.
     ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
@@ -297,12 +297,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // log.info("input blob created");
     net.setInput(inputBlob, "data");
 
-    log.info("Feed forward!");
+    log.debug("Feed forward!");
     // log.info("Input blob set on network.");
     // ask for the detection_out layer i guess?  not sure the details of the forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
     // log.info("output detection matrix produced");
-    log.info("detection matrix computed");
+    log.debug("detection matrix computed");
     // iterate the rows of the detection matrix.
     for (int i = 0; i < detectionMat.rows(); i++) {
       Mat currentRow = detectionMat.row(i);
@@ -353,7 +353,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
             yRightTop = inputMat.rows();
           }
 
-          log.info(label + " (" + confidence + "%) [(" + xLeftBottom + "," + yLeftBottom + "),(" + xRightTop + "," + yRightTop + ")]");
+          log.debug(label + " (" + confidence + "%) [(" + xLeftBottom + "," + yLeftBottom + "),(" + xRightTop + "," + yRightTop + ")]");
           Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
           // grab just the bytes for the ROI defined by that rect..
           // get that as a mat, save it as a byte array (png?) other encoding?
@@ -374,7 +374,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     // 
-    log.info(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
+    log.debug(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
 
     // TODO: figure out if the width/height is too large!  don't want to go array out of bounds
     Mat cropped = new Mat(inputMat, boundingBox);
