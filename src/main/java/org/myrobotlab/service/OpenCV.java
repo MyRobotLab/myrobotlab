@@ -159,10 +159,10 @@ public class OpenCV extends AbstractVideoSource {
   transient public final static String SOURCE_KINECT_DEPTH = "SOURCE_KINECT_DEPTH";
 
   static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack", "Gray",
-      "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse", "Not",
-      "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
-      "Solr", "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+      "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack",
+      "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse",
+      "Not", "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector",
+      "Smooth", "Solr", "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   // yep its public - cause a whole lotta data
   // will get set on it before a setState
@@ -289,15 +289,15 @@ public class OpenCV extends AbstractVideoSource {
 
   public String setFrameGrabberType(String grabberType) {
     if (grabberType != null && !grabberType.contains(".")) {
-      
+
       String prefixPath;
-      if ("IPCamera".equals(grabberType) || "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType)
-          || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
+      if ("IPCamera".equals(grabberType) || "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType)
+          || "MJpeg".equals(grabberType)) {
         prefixPath = "org.myrobotlab.opencv.";
       } else {
         prefixPath = "org.bytedeco.javacv.";
       }
-      
+
       grabberType = prefixPath + grabberType;
       if (!grabberType.endsWith("FrameGrabber")) {
         grabberType += "FrameGrabber";
@@ -959,12 +959,11 @@ public class OpenCV extends AbstractVideoSource {
     // System.loadLibrary("opencv_java");
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
 
-     OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
-     opencv.addFilter(yolo);
+    OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
+    opencv.addFilter(yolo);
 
-    
-     opencv.capture();
-     
+    opencv.capture();
+
     //String url  = "http://192.168.4.104:8081/?action=stream";
     //String url = "http://192.168.4.104:8080/?action=stream";
 
@@ -976,24 +975,21 @@ public class OpenCV extends AbstractVideoSource {
     // grabber.start();
     //opencv.capture(grabber);
 
-    
-//    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
-//    opencv.addFilter(ud);
-    
+    //    OpenCVFilterUndistort ud = new OpenCVFilterUndistort("ud");
+    //    opencv.addFilter(ud);
 
-//    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
-//    opencv.addFilter(tld);
+    //    OpenCVFilterTracker tld = new OpenCVFilterTracker("tld");
+    //    opencv.addFilter(tld);
 
-//    opencv.height = 480;
-//    opencv.width = 640;
-//    opencv.height = 1080;
-//    opencv.width= 1920;
-    
-  // opencv.capture();
-   // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
-   // opencv.capture(grabber);
-    
-    
+    //    opencv.height = 480;
+    //    opencv.width = 640;
+    //    opencv.height = 1080;
+    //    opencv.width= 1920;
+
+    // opencv.capture();
+    // OpenCVFrameGrabber grabber = new OpenCVFrameGrabber("foo",1);
+    // opencv.capture(grabber);
+
     // Runtime.start("right", "OpenCV");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.SarxosFrameGrabber");
     // opencv.setFrameGrabberType("org.myrobotlab.opencv.MJpegFrameGrabber");
