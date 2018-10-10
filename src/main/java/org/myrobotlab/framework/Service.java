@@ -1460,6 +1460,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean isReady() {
     return isReady ;
   }
+  
+  public void setIsReady(Boolean isReady) {
+    this.isReady = isReady;
+    broadcastState();
+  }
 
   @Override
   public boolean isRunning() {
