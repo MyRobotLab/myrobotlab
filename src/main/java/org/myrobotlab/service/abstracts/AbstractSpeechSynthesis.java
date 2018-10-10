@@ -816,7 +816,16 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       broadcastState();
       return true;
     }
+    error("could not set voice %s - valid voices are %s",name, String.join(", ", getVoiceNames()));
     return false;
+  }
+  
+  public List<String> getVoiceNames(){
+    List<String> names = new ArrayList<String>();
+    for (String voiceName : voices.keySet()) {
+      names.add(voiceName);
+    }
+    return names;
   }
 
   /**
