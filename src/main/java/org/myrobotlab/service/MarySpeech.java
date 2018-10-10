@@ -85,7 +85,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     if (!file.exists()) {
       file.mkdirs();
     }
-
+    setIsReady(false);
     try {
       marytts = new LocalMaryInterface();
     } catch (Exception e) {
@@ -276,6 +276,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Dennys", "male", "fr-CA", "enst-dennys-hsmm");
     addVoice("Conrad", "male", "de", "bits3-hsmm");
     addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
+    setIsReady(true);
     // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
 
