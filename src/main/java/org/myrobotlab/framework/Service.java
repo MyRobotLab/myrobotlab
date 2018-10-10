@@ -179,6 +179,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   protected boolean isVirtual = false;
 
   /**
+   * overload this if your service needs other environmental or dependencies to be ready
+   */
+  protected boolean isReady = true;
+
+  /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
    * @param myKey m
@@ -1453,7 +1458,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   @Override
   public boolean isReady() {
-    return true;
+    return isReady ;
   }
 
   @Override
