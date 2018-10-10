@@ -26,12 +26,11 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.javacpp.opencv_video.createBackgroundSubtractorMOG2;
 
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_video.BackgroundSubtractor;
-import org.bytedeco.javacpp.opencv_video.BackgroundSubtractorMOG2;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -68,13 +67,8 @@ public class OpenCVFilterDetector extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
     foreground = IplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
+    mog = createBackgroundSubtractorMOG2();
 
-    Pointer pointer = new Pointer();
-    
-    //mog = new BackgroundSubtractorMOG2(history, threshold, shadowDetection);
-    // TODO: test this..
-    mog = new BackgroundSubtractorMOG2(pointer);
-    
   }
 
   public void learn() {
@@ -85,9 +79,8 @@ public class OpenCVFilterDetector extends OpenCVFilter {
   public IplImage process(IplImage image, OpenCVData data) {
     // constructor changed to require Mat in javacv 0.10
     // mog.app
-    mog.apply(new Mat(image), new Mat(foreground), learningRate); // 0 trigger
-                                                                  // || -1 learn
-                                                                  // and
+    // 0 trigger || -1 learn
+    mog.apply(new Mat(image), new Mat(foreground), learningRate); // and
     return foreground;
   }
 
