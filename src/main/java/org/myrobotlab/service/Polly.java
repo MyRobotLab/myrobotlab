@@ -356,8 +356,8 @@ public class Polly extends AbstractSpeechSynthesis {
 
   @Override
   public boolean isReady() {
-    isReady=polly != null ? true : false;
-    return isReady;
+    ready=polly != null ? true : false;
+    return super.isReady();
   }
 
 }

@@ -86,7 +86,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
-  
+
   /**
    * contains all the meta data about the service - pulled from the static
    * method getMetaData() each instance will call the method and populate the
@@ -181,7 +181,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * overload this if your service needs other environmental or dependencies to be ready
    */
-  protected boolean isReady = true;
+  protected boolean ready = true;
 
   /**
    * Recursively builds Peer type information - which is not instance specific.
@@ -390,88 +390,88 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
     Set<Class<?>> ancestry = new HashSet<Class<?>>();
     Class<?> targetClass = source.getClass();
-    
+
     ancestry.add(targetClass);
-    
+
     // if we are a org.myrobotlab object climb up the ancestry to
     // copy all super-type fields ... 
     // GroG says: I wasn't comfortable copying of "Service" - because its never been tested before - so we copy all definitions from
     // other superclasses e.g. - org.myrobotlab.service.abstracts
     // it might be safe in the future to copy all the way up without stopping...
-   while(targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")){
-     ancestry.add(targetClass);
-     targetClass = targetClass.getSuperclass();
-   }
-   
-   for(Class<?> sourceClass : ancestry) {
-    
-    Field fields[] = sourceClass.getDeclaredFields();
-    for (int j = 0, m = fields.length; j < m; j++) {
-      try {
-        Field f = fields[j];
+    while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
+      ancestry.add(targetClass);
+      targetClass = targetClass.getSuperclass();
+    }
 
-        int modifiers = f.getModifiers();
+    for (Class<?> sourceClass : ancestry) {
 
-        // if (Modifier.isPublic(mod)
-        // !(Modifier.isPublic(f.getModifiers())
-        // Hmmm JSON mappers do hacks to get by
-        // IllegalAccessExceptions.... Hmmmmm
+      Field fields[] = sourceClass.getDeclaredFields();
+      for (int j = 0, m = fields.length; j < m; j++) {
+        try {
+          Field f = fields[j];
 
-        // GROG - recent change from this
-        // if ((!Modifier.isPublic(modifiers)
-        // to this
-        String fname = f.getName();
-        /*
-         * if (fname.equals("desktops") || fname.equals("useLocalResources") ){
-         * log.info("here"); }
-         */
+          int modifiers = f.getModifiers();
 
-        if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-          log.debug("skipping {}", f.getName());
-          continue;
-        } else {
-          log.debug("copying {}", f.getName());
+          // if (Modifier.isPublic(mod)
+          // !(Modifier.isPublic(f.getModifiers())
+          // Hmmm JSON mappers do hacks to get by
+          // IllegalAccessExceptions.... Hmmmmm
+
+          // GROG - recent change from this
+          // if ((!Modifier.isPublic(modifiers)
+          // to this
+          String fname = f.getName();
+          /*
+           * if (fname.equals("desktops") || fname.equals("useLocalResources") ){
+           * log.info("here"); }
+           */
+
+          if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+            log.debug("skipping {}", f.getName());
+            continue;
+          } else {
+            log.debug("copying {}", f.getName());
+          }
+          Type t = f.getType();
+
+          // log.info(String.format("setting %s", f.getName()));
+          /*
+           * if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+           * continue; }
+           */
+
+          // GroG - this is new 1/26/2017 - needed to get webgui data to
+          // load
+          f.setAccessible(true);
+          Field targetField = sourceClass.getDeclaredField(f.getName());
+          targetField.setAccessible(true);
+
+          if (t.equals(java.lang.Boolean.TYPE)) {
+            targetField.setBoolean(target, f.getBoolean(source));
+          } else if (t.equals(java.lang.Character.TYPE)) {
+            targetField.setChar(target, f.getChar(source));
+          } else if (t.equals(java.lang.Byte.TYPE)) {
+            targetField.setByte(target, f.getByte(source));
+          } else if (t.equals(java.lang.Short.TYPE)) {
+            targetField.setShort(target, f.getShort(source));
+          } else if (t.equals(java.lang.Integer.TYPE)) {
+            targetField.setInt(target, f.getInt(source));
+          } else if (t.equals(java.lang.Long.TYPE)) {
+            targetField.setLong(target, f.getLong(source));
+          } else if (t.equals(java.lang.Float.TYPE)) {
+            targetField.setFloat(target, f.getFloat(source));
+          } else if (t.equals(java.lang.Double.TYPE)) {
+            targetField.setDouble(target, f.getDouble(source));
+          } else {
+            // log.debug(String.format("setting reference to remote
+            // object %s", f.getName()));
+            targetField.set(target, f.get(source));
+          }
+        } catch (Exception e) {
+          log.error("copy failed", e);
         }
-        Type t = f.getType();
-
-        // log.info(String.format("setting %s", f.getName()));
-        /*
-         * if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-         * continue; }
-         */
-
-        // GroG - this is new 1/26/2017 - needed to get webgui data to
-        // load
-        f.setAccessible(true);
-        Field targetField = sourceClass.getDeclaredField(f.getName());
-        targetField.setAccessible(true);
-
-        if (t.equals(java.lang.Boolean.TYPE)) {
-          targetField.setBoolean(target, f.getBoolean(source));
-        } else if (t.equals(java.lang.Character.TYPE)) {
-          targetField.setChar(target, f.getChar(source));
-        } else if (t.equals(java.lang.Byte.TYPE)) {
-          targetField.setByte(target, f.getByte(source));
-        } else if (t.equals(java.lang.Short.TYPE)) {
-          targetField.setShort(target, f.getShort(source));
-        } else if (t.equals(java.lang.Integer.TYPE)) {
-          targetField.setInt(target, f.getInt(source));
-        } else if (t.equals(java.lang.Long.TYPE)) {
-          targetField.setLong(target, f.getLong(source));
-        } else if (t.equals(java.lang.Float.TYPE)) {
-          targetField.setFloat(target, f.getFloat(source));
-        } else if (t.equals(java.lang.Double.TYPE)) {
-          targetField.setDouble(target, f.getDouble(source));
-        } else {
-          // log.debug(String.format("setting reference to remote
-          // object %s", f.getName()));
-          targetField.set(target, f.get(source));
-        }
-      } catch (Exception e) {
-        log.error("copy failed", e);
-      }
-    } // for each field in class
-   } // for each in ancestry
+      } // for each field in class
+    } // for each in ancestry
     return target;
   }
 
@@ -794,24 +794,24 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // load(); removed by GroG
     Runtime.register(this, null);
   }
-  
+
   /**
    * new overload - mqtt uses this for json encoded MrlListener to
    * process subscriptions
    * @param data
    */
   public void addListener(Map data) {
-	  // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
-	  if (!data.containsKey("topicMethod")) {
-		  error("addListener topicMethod missing");
-	  }
-	  if (!data.containsKey("callbackName")) {
-		  error("addListener callbackName missing");
-	  }
-	  if (!data.containsKey("callbackMethod")) {
-		  error("addListener callbackMethod missing");
-	  }
-	  addListener(data.get("topicMethod").toString(), data.get("callbackName").toString(), data.get("callbackMethod").toString());
+    // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
+    if (!data.containsKey("topicMethod")) {
+      error("addListener topicMethod missing");
+    }
+    if (!data.containsKey("callbackName")) {
+      error("addListener callbackName missing");
+    }
+    if (!data.containsKey("callbackMethod")) {
+      error("addListener callbackMethod missing");
+    }
+    addListener(data.get("topicMethod").toString(), data.get("callbackName").toString(), data.get("callbackMethod").toString());
   }
 
   public void addListener(MRLListener listener) {
@@ -1458,12 +1458,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   @Override
   public boolean isReady() {
-    return isReady ;
+    return ready;
   }
-  
-  public void setIsReady(Boolean isReady) {
-    this.isReady = isReady;
-    broadcastState();
+
+  protected void setReady(Boolean ready) {
+    if (!ready.equals(this.ready)) {
+      this.ready = ready;
+      broadcastState();
+    }
   }
 
   @Override
@@ -1495,8 +1497,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       if (cfg.exists()) {
         // serializer.read(o, cfg);
         String json = FileIO.toString(filename);
-        Object saved = CodecUtils.fromJson(json, o.getClass()); 
-        
+        Object saved = CodecUtils.fromJson(json, o.getClass());
+
         copyShallowFrom(o, saved);
         return true;
       }
@@ -2317,7 +2319,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean isVirtual() {
     return isVirtual;
   }
-  
+
   /**
    * Called by Runtime when system is shutting down
    * a service can use this method when it has to do some "ordered" cleanup.

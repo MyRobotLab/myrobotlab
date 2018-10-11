@@ -42,7 +42,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
 
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
-    
+
     String userid = getKey(INDIANTTS_USER_USERID);
     String secret = getKey(INDIANTTS_USER_API);
 
@@ -125,6 +125,13 @@ public class IndianTts extends AbstractSpeechSynthesis {
     indianTts.speak("नमस्ते नमस्ते भारत मित्र");
 
     // }
+  }
+
+  @Override
+  public boolean isReady() {
+    // minimal check...
+    ready = getKey(INDIANTTS_USER_USERID) != null && !getKey(INDIANTTS_USER_USERID).isEmpty() && getKey(INDIANTTS_USER_API) != null && !getKey(INDIANTTS_USER_API).isEmpty() ? true : false;
+    return super.isReady();
   }
 
 }
