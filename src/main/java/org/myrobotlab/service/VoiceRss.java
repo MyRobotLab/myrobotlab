@@ -138,7 +138,6 @@ public class VoiceRss extends AbstractSpeechSynthesis {
   protected void loadVoices() {
     // derived from
     // http://www.voicerss.org/api/documentation.aspx
-
     addVoice("Lei", "female", "ca-es", "ca-es"); // Catalan
     addVoice("Hui", "female", "zh-cn", "zh-cn"); // Chinese (China)
     addVoice("Jiao", "female", "zh-hk", "zh-hk"); // Chinese (Hong Kong)
@@ -167,12 +166,4 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
 
   }
-
-  @Override
-  public boolean isReady() {
-    // minimal check...
-    ready = getKey(VOICERSS_API_KEY) != null && !getKey(VOICERSS_API_KEY).isEmpty() ? true : false;
-    return super.isReady();
-  }
-
 }
