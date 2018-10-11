@@ -676,7 +676,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       invoke("publishVoices", vs);
 
-      save();
+      //save();
       return vs;
     } catch (Exception e) {
       error("%s", e.getMessage());
@@ -905,6 +905,23 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public String setAudioEffects(String audioEffects) {
     return audioEffects;
+  }
+
+  // TODO check also internet for cloud services, not only api
+  @Override
+  public boolean isReady() {
+    String[] kn = getKeyNames();
+    if (kn != null && kn.length>0) {
+      for (String keyName : kn) {
+        String key = getKey(keyName);
+        if (key == null || key.isEmpty()) {
+          setReady(false);
+          return super.isReady();
+        }
+      }
+      setReady(true);
+    }
+    return super.isReady();
   }
 
   static public ServiceType getMetaData(String serviceType) {

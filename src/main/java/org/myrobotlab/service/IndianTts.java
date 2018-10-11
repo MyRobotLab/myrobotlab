@@ -126,12 +126,4 @@ public class IndianTts extends AbstractSpeechSynthesis {
 
     // }
   }
-
-  @Override
-  public boolean isReady() {
-    // minimal check...
-    ready = getKey(INDIANTTS_USER_USERID) != null && !getKey(INDIANTTS_USER_USERID).isEmpty() && getKey(INDIANTTS_USER_API) != null && !getKey(INDIANTTS_USER_API).isEmpty() ? true : false;
-    return super.isReady();
-  }
-
 }
