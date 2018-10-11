@@ -6,12 +6,14 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import org.junit.Assert;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
+import org.junit.Test;
 
 public class ProgramABTest extends AbstractServiceTest {
 
@@ -48,7 +50,6 @@ public class ProgramABTest extends AbstractServiceTest {
         // if there's a file here.
         log.info("Deleting pre-existing AIMLIF files : {}", f.getAbsolutePath());
         f.delete();
-
       }
     }
     // TODO: same thing for predicates! (or other artifacts from a previous aiml
@@ -170,7 +171,6 @@ public class ProgramABTest extends AbstractServiceTest {
     ArrayList<String> res = testService.listPatterns(botname);
     assertTrue(res.size() > 0);
   }
-
   
   public void addCategoryTest() {
     testService.addCategory("BOOG", "HOWDY");
@@ -219,6 +219,15 @@ public class ProgramABTest extends AbstractServiceTest {
     sraixTest();
   }
 
-
+  @Test
+  public void testJapanese() {
+    ProgramAB pikachu = new ProgramAB("pikachu");
+    // pikachu the service.
+    pikachu.startService();
+    // load the bot brain for the chat with the user
+    pikachu.startSession(path , username, "pikachu", new Locale("ja"));
+    Response resp = pikachu.getResponse("私はケビンです");
+    assertEquals("あなたに会えてよかったケビン", resp.msg);
+  }
 
 }

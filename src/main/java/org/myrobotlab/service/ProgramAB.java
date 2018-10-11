@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +18,7 @@ import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.Chat;
+import org.alicebot.ab.MagicBooleans;
 import org.alicebot.ab.Predicates;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -538,18 +541,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void savePredicates() throws IOException {
     for (String botName : sessions.keySet()) {
       for (String userName : sessions.get(botName).keySet()) {
-
         String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
         File sessionPredFile = new File(sessionPredicateFilename);
         Chat chat = getChat(userName, botName);
         // overwrite the original file , this should always be a full set.
         log.info("Writing predicate file for session {} {}", botName, userName);
-        FileWriter predWriter = new FileWriter(sessionPredFile, false);
+        StringBuilder sb = new StringBuilder();
         for (String predicate : chat.predicates.keySet()) {
           String value = chat.predicates.get(predicate);
-          predWriter.write(predicate + ":" + value + "\n");
+          sb.append(predicate + ":" + value + "\n");
         }
-        predWriter.close();
+        FileWriter predWriter = new FileWriter(sessionPredFile, false);
+        BufferedWriter bw = new BufferedWriter(predWriter);
+        bw.write(sb.toString());
+        bw.close();
       }
     }
     log.info("Done saving predicates.");
@@ -589,6 +594,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void startSession(String path, String userName, String botName) {
+    startSession( path,  userName,  botName, MagicBooleans.defaultLocale);
+  }
+  
+  public void startSession(String path, String userName, String botName, Locale locale) {
     // Session is between a user and a bot. key is compound.
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       warn("Session %s %s already created", botName, userName);
@@ -601,16 +610,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
 
-    if (!checkBrain(botName)) {
-      return;
-    }
+//    if (!checkBrain(botName)) {
+//      return;
+//    }
 
     // TODO: manage the bots in a collective pool/hash map.
     // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside standalone jar )
     if (bot == null) {
-      bot = new Bot(botName, path);
+      bot = new Bot(botName, path, locale);
     } else if (!botName.equalsIgnoreCase(bot.name)) {
-      bot = new Bot(botName, path);
+      bot = new Bot(botName, path, locale);
     }
 
     // Hijack all the SRAIX requests and implement them as a synchronous call to a service to 
@@ -825,22 +834,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.3");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.4");
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
     // UI use htmlFilter, so we need htmlFilter installed with his dependencies
     meta.addPeer("htmlFilter", "HtmlFilter", "htmlFilter");
-    //needed if we dont "install all" > HttpClient used by sraix
-    /* currently Runtime supplies these dependencies
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
-    */
+    // This is for CJK support in ProgramAB. 
+    // TODO: move this into the published POM for ProgramAB so they are pulled in transiently.
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
     return meta;
   }
 
