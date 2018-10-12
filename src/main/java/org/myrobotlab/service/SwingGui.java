@@ -300,7 +300,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
         String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getClass().getSimpleName());
 
-        log.info("createTab {} {}", name, guiClass);
+        log.debug("createTab {} {}", name, guiClass);
         ServiceGui newGui = null;
 
         newGui = (ServiceGui) Instantiator.getNewInstance(guiClass, name, self);

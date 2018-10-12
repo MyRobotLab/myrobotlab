@@ -18,7 +18,10 @@ public class Instantiator {
     try {
       return getThrowableNewInstance(cast, classname, params);
     } catch (Exception e) {
-      log.error("getNewInstance failed for {} {} {}", cast, classname, e.getClass());
+      // if we don't have gui it throw an error...
+      if (!classname.endsWith("Gui")) {
+        log.error("getNewInstance failed for {} {} {}", cast, classname, e.getClass());
+      }
     }
     return null;
   }
