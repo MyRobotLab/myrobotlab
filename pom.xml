@@ -446,6 +446,12 @@
     <artifactId>jme3-jogg</artifactId>
     <version>3.2.0-stable</version>
     <scope>provided</scope>
+    <exclusions>
+        <exclusion>
+          <groupId>de.jarnbjo</groupId>
+          <artifactId>j-ogg-all</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
@@ -1219,6 +1225,12 @@
     <groupId>com.googlecode.soundlibs</groupId>
     <artifactId>mp3spi</artifactId>
     <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>vorbisspi</artifactId>
+    <version>1.0.3.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>

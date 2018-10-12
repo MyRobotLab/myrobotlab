@@ -113,11 +113,14 @@ public class JMonkeyEngine extends Service implements Simulator {
     meta.addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
-    meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
+    // support for ogg added inside audiofile
+    // meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
+    meta.exclude("de.jarnbjo", "j-ogg-all");
     meta.addDependency("org.jmonkeyengine", "jme3-niftygui", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-niftygui", jmeVersion);
+
     // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"
     meta.addCategory("simulator");
     return meta;
