@@ -21,6 +21,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
@@ -49,6 +50,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   // TODO: make this auto-resize when added to gui..
   private JTextField text = new JTextField("", 30);
   private JEditorPane response = new JEditorPane("text/html", "");
+  private JTextArea debug = new JTextArea("Debug :");
+  private JScrollPane scrollDebug = new JScrollPane(debug);
+
   HTMLDocument responseDoc = new HTMLDocument();
   HTMLEditorKit responseKit = new HTMLEditorKit();
   StyleSheet cssKit = responseDoc.getStyleSheet();
@@ -63,15 +67,16 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JButton startSession = new JButton("New session");
   private JButton reloadSession = new JButton("Reload chatbot");
   private JButton saveAIML = new JButton("Save AIML");
+  private JButton savePredicates = new JButton("Save predicates");
 
   JCheckBox filter = new JCheckBox("Filter ( ' , - )");
 
   JLabel pathP = new JLabel();
-  ImageIcon pathI = Util.getImageIcon("GPS.png");
+  ImageIcon pathI = Util.getImageIcon("FileConnector.png");
   JLabel userP = new JLabel();
-  ImageIcon userI = Util.getImageIcon("FindHuman.png");
+  ImageIcon userI = Util.getImageIcon("user.png");
   JLabel botnameP = new JLabel();
-  ImageIcon botnameI = Util.getImageIcon("robot.png");
+  ImageIcon botnameI = Util.getImageIcon("chatbot.png");
 
   public ProgramABGui(String boundServiceName, SwingGui myService) throws BadLocationException, IOException {
     super(boundServiceName, myService);
@@ -96,35 +101,49 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     //
     scrollResponse.setAutoscrolls(true);
+    scrollDebug.setAutoscrolls(true);
     display.setLayout(new BorderLayout());
+    debug.setBackground(Color.BLACK);
+    debug.setForeground(Color.WHITE);
+
+    JPanel northPanel = new JPanel(new GridLayout(2, 1));
+
+    JPanel userSub = new JPanel();
+    userSub.add(userP);
+    userSub.add(userName);
+    userSub.add(startSession);
 
     JPanel inputControlSub = new JPanel();
     inputControlSub.add(askLabel);
     inputControlSub.add(text);
     inputControlSub.add(askButton);
     inputControlSub.add(filter);
+    northPanel.add(userSub);
+    northPanel.add(inputControlSub);
 
-    display.add(inputControlSub, BorderLayout.NORTH);
+    display.add(northPanel, BorderLayout.NORTH);
 
     display.add(scrollResponse, BorderLayout.CENTER);
 
-    JPanel PAGEEND = new JPanel();
+    JPanel PAGEENDLeft = new JPanel(new GridLayout(2, 1));
+    JPanel PAGEEND = new JPanel(new GridLayout(1, 2));
 
-    JPanel botControl = new JPanel(new GridLayout(3, 3));
+    JPanel botControl = new JPanel(new GridLayout(2, 2));
+    JPanel buttons = new JPanel();
 
     botControl.add(pathP);
     botControl.add(progABPath);
-    botControl.add(startSession);
-
-    botControl.add(userP);
-    botControl.add(userName);
-    botControl.add(reloadSession);
-
     botControl.add(botnameP);
     botControl.add(botName);
-    botControl.add(saveAIML);
+    buttons.add(saveAIML);
+    buttons.add(reloadSession);
+    buttons.add(savePredicates);
 
-    PAGEEND.add(botControl);
+    PAGEENDLeft.add(botControl);
+    PAGEENDLeft.add(buttons);
+
+    PAGEEND.add(PAGEENDLeft);
+    PAGEEND.add(scrollDebug, BorderLayout.CENTER);
 
     // display.add(botControl, BorderLayout.SOUTH);
     display.add(PAGEEND, BorderLayout.PAGE_END);
@@ -134,7 +153,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     startSession.addActionListener(this);
     reloadSession.addActionListener(this);
     saveAIML.addActionListener(this);
-
+    savePredicates.addActionListener(this);
   }
 
   @Override
@@ -166,7 +185,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       swingGui.send(boundServiceName, "reloadSession", user, bot);
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
-      swingGui.send(boundServiceName, "writeAIMLIF");
+    } else if (o == savePredicates) {
+      swingGui.send(boundServiceName, "savePredicates()");
     } else {
       log.info(o.toString());
       log.info("Unknown action!");
@@ -236,7 +256,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         String username = programab.getCurrentUserName();
         startSession.setEnabled(true);
         if (programab.getSessions().isEmpty() || !programab.isReady()) {
-          startSession.setBackground(Color.RED);
+          startSession.setBackground(Color.ORANGE);
         } else {
           startSession.setBackground(Color.GREEN);
         }
