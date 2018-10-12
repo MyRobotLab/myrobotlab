@@ -55,6 +55,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     Platform platform = Runtime.getPlatform();
     String filename = getLocalFileName(toSpeak);
+    if (filename == null) {
+      return null;
+    }
     if (platform.isWindows()) {
       // GAH ! .. tts.exe isn't like a Linux app where -o means output file to
       // "exact" name ...
@@ -74,6 +77,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       String furtherFiltered = toSpeak.replace("\"", "");//.replace("\'", "").replace("|", "");
       // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
       Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
+      // TODO : use (!p.waitFor(10, TimeUnit.SECONDS)) for security ?
       p.waitFor();
       // audioFile.play(audioData);
     }
@@ -83,8 +87,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     
     
     */
-
-    return new AudioData(localFileName);
+    File fileTest = new File(localFileName);
+    if (fileTest.exists() && fileTest.length() > 0) {
+      return new AudioData(localFileName);
+    } else {
+      error("%s returned 0 byte file !!! - it may block you", getName());
+      return null;
+    }
   }
 
   /**
@@ -122,15 +131,21 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       for (String line : lines) {
         // String[] parts = cmd.split(" ");
         String gender = "female"; // unknown
-        String lang = "en-US"; // unknown
+        String lang = "en-US"; // unknown        
 
         if (line.startsWith("Exit")) {
           break;
         }
         // lame-ass parsing ..
         String voiceProvider = line.split(" ", 2)[0];
-        // voice name cause issues because of spaces or (null), let's just use original number as name...
-        addVoice(voiceProvider, gender, lang, voiceProvider);
+        // is line start with a number ? yes it's ( maybe ) a voice...
+        try {
+          int isItaVoice = Integer.parseInt(voiceProvider);
+          // voice name cause issues because of spaces or (null), let's just use original number as name...
+          addVoice(voiceProvider, gender, lang, voiceProvider);
+        } catch (Exception e) {
+          break;
+        }
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
@@ -142,7 +157,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       addVoice("Linus", "male", "en-US", "festival");
     }
   }
-  
+
   /**
    * override default tts.exe path
    * 
@@ -157,7 +172,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public String getTtsPath() {
     return ttsPath;
   }
-
 
   public static void main(String[] args) throws Exception {
 

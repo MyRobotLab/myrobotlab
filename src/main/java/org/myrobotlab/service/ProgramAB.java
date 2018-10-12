@@ -83,7 +83,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   static final long serialVersionUID = 1L;
   static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
-  private Boolean ready = false;
+
   @Deprecated
   Boolean wasCleanyShutdowned = true;
 
@@ -671,8 +671,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     log.info("Started session for bot name:{} , username:{}", botName, userName);
     // TODO: to make sure if the start session is updated, that the button
     // updates in the gui ?
-    ready = true;
-    broadcastState();
+    setReady(true);
   }
 
   public void addCategory(Category c) {
@@ -809,11 +808,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void stopService() {
     writeAndQuit();
     super.stopService();
-  }
-
-  @Override
-  public boolean isReady() {
-    return ready != null ? true : false;
   }
 
   /**

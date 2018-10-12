@@ -50,6 +50,7 @@ import javax.swing.event.ChangeListener;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
@@ -64,11 +65,15 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
   JButton speakButton = new JButton(new ImageIcon(ImageIO.read(FileIO.class.getResource("/resource/Speech.png"))));
 
+  ImageIcon readyOK = new ImageIcon(ImageIO.read(FileIO.class.getResource("/resource/green.png")));
+  ImageIcon readyNOK = new ImageIcon(ImageIO.read(FileIO.class.getResource("/resource/red.png")));
+
   JLabel speakingState = new JLabel("not speaking");
+  JLabel isReadyIcon = new JLabel(readyNOK, JLabel.CENTER);
   JLabel cacheFile = new JLabel("no file");
   JLabel audioState = new JLabel("not playing");
   JLabel generationTime = new JLabel("generation time : 0 ms");
-  
+
   JCheckBox useSSML = new JCheckBox();
 
   JComboBox<String> voices = new JComboBox<String>();
@@ -90,7 +95,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   JSlider volume = new JSlider(JSlider.HORIZONTAL, 0, 100, 100);
 
   JComboBox<String> voiceEffectFiles = new JComboBox<String>();
-  
+
   final AbstractSpeechSynthesisGui self;
 
   AudioData lastAudioData;
@@ -101,7 +106,10 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     speakButton.setSelectedIcon(null);
     lastUtterance.setWrapStyleWord(true);
     lastUtterance.setLineWrap(true);
-    
+
+    Runtime runtime = Runtime.getInstance();
+
+    addTop("Class : " + runtime.getService(boundServiceName).getClass().getSimpleName(), isReadyIcon);
     addTop("speaking state : ", speakingState);
     addTop("generation time : ", generationTime);
     addTop("audio state : ", audioState);
@@ -123,10 +131,10 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     // FIXME - hide status - unless cloud provider
     // FIXME - hide save buttons unless a cloud provider with keys
-    
+
     voices.addActionListener(this);
     voiceEffectFiles.addActionListener(this);
-    
+
     speakButton.addActionListener(this);
     pause.addActionListener(this);
     resume.addActionListener(this);
@@ -150,7 +158,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
     subscribe("publishAudioStart");
     subscribe("publishAudioEnd");
-    
+
     send("getVoiceEffectFiles");
   }
 
@@ -170,19 +178,19 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   }
 
   public void onVoiceEffectFiles(List<File> files) {
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         voiceEffectFiles.removeActionListener(self);
         voiceEffectFiles.removeAllItems();
         voiceEffectFiles.addItem("");
-        
+
         for (File file : files) {
           log.info("adding voice effect file {}", file.getName());
           voiceEffectFiles.addItem(displayEffectFile(file));
         }
-        
+
         voiceEffectFiles.addActionListener(self);
       }
     });
@@ -235,8 +243,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   public void onSpeechRequested(String toSpeak) {
     lastUtterance.setText(toSpeak);
   }
-  
-  protected String displayEffectFile(File file){
+
+  protected String displayEffectFile(File file) {
     String ret = "";
     String filename = file.getName();
     int pos = filename.indexOf(".");
@@ -259,11 +267,11 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
             send("setVoice", vparts[0]);
           }
         }
-        
+
         if (o == voiceEffectFiles) {
-          lastUtterance.setText(lastUtterance.getText() + " " + (String)voiceEffectFiles.getSelectedItem());
+          lastUtterance.setText(lastUtterance.getText() + " " + (String) voiceEffectFiles.getSelectedItem());
         }
-        
+
         if (o == speakButton) {
           send("speak", lastUtterance.getText());
         }
@@ -285,7 +293,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
         if (o == purgeCache) {
           send("purgeCache");
         }
-
+        
         if (o == purgeFile) {
           send("purgeFile", lastAudioData.getFileName());
         }
@@ -314,7 +322,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   String display(Voice voice) {
     StringBuilder display = new StringBuilder();
     display.append(voice.getName());
-    display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal().toLanguageTag());    
+    display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal().toLanguageTag());
     display.append((voice.getGender() == null) ? "" : " " + voice.getGender());
     return display.toString();
   }
@@ -338,10 +346,10 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
             voices.addItem(display(voice));
           }
         }
-        
+
         if (voices.getItemCount() > 0 && speech.getVoice() != null && !speech.getVoice().getName().equals(voices.getSelectedItem())) {
           voices.setSelectedItem(display(speech.getVoice()));
-      }
+        }
 
         // keys
         if (speech.getKeyNames().length != keys.size()) {
@@ -362,6 +370,12 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
         volume.setValue((int) MathUtils.round(speech.getVolume() * 100, 0));
         lastUtterance.setText(speech.getlastUtterance());
+        if (speech.isReady()) {
+          isReadyIcon.setIcon(readyOK);
+        } else {
+          isReadyIcon.setIcon(readyNOK);
+        }
+
         restoreListeners();
       }
     });

@@ -16,7 +16,8 @@ import org.slf4j.Logger;
  * Natural Reader speech to text service based on naturalreaders.com This code
  * is basically all the same as AcapelaSpeech...
  * 
- * FIXME - see if voices can be pulled down from API
+ * FIXME - see if voices can be pulled down from API :
+ * moz4r : it is a front service for 2 tts , amazon polly + ibm
  * 
  */
 public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
@@ -54,7 +55,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     meta.setSponsor("kwatters");
     meta.addPeer("httpClient", "HttpClient", "httpClient");
     meta.addCategory("speech", "sound");
-    meta.setAvailable(true);
+    // moz4r : set to hidden / poc only, unstable ...
+    meta.setAvailable(false);
     return meta;
   }
 
