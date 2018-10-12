@@ -1750,7 +1750,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // getTargetOutput ALWAYS ALWAYS Degrees !
     // so we convert to microseconds
     int us = degreeToMicroseconds(servo.getTargetOutput());
-    log.info("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getPos(), us);
+    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getPos(), us);
     msg.servoMoveToMicroseconds(deviceId, us);
   }
 
@@ -1762,7 +1762,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > servoWriteMicroseconds/deviceId/b16 ms
   public void servoWriteMicroseconds(ServoControl servo, int uS) {
     int deviceId = getDeviceId(servo);
-    log.info("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
+    log.debug("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
     // msg.servoWriteMicroseconds(deviceId, uS);
     // lets use speed control
     msg.servoMoveToMicroseconds(deviceId, uS);
