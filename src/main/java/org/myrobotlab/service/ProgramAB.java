@@ -610,9 +610,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
 
-//    if (!checkBrain(botName)) {
-//      return;
-//    }
+    // TODO: remove this completely!
+    // Ignore the return value, this checkBrain method doesn't work as expected for bots defined externally.
+    checkBrain(botName);
 
     // TODO: manage the bots in a collective pool/hash map.
     // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside standalone jar )
