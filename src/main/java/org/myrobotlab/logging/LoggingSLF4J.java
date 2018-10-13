@@ -199,7 +199,7 @@ public class LoggingSLF4J extends Logging {
 			clazz = Logger.ROOT_LOGGER_NAME;
 		}
 
-		Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		Logger logger = (Logger) LoggerFactory.getLogger(clazz);
 
 		if ("DEBUG".equalsIgnoreCase(targetLevel)) { 
 			logger.setLevel(Level.DEBUG);
