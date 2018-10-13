@@ -10,9 +10,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,7 +18,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
@@ -34,6 +30,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.HtmlFilter;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.swing.widget.Console;
 import org.slf4j.Logger;
 
 /**
@@ -50,9 +47,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   // TODO: make this auto-resize when added to gui..
   private JTextField text = new JTextField("", 30);
   private JEditorPane response = new JEditorPane("text/html", "");
-  private JTextArea debug = new JTextArea("Debug :");
-  private JScrollPane scrollDebug = new JScrollPane(debug);
 
+  final Console debugJavaConsole = new Console();
+  
   HTMLDocument responseDoc = new HTMLDocument();
   HTMLEditorKit responseKit = new HTMLEditorKit();
   StyleSheet cssKit = responseDoc.getStyleSheet();
@@ -101,11 +98,15 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     //
     scrollResponse.setAutoscrolls(true);
-    scrollDebug.setAutoscrolls(true);
-    display.setLayout(new BorderLayout());
-    debug.setBackground(Color.BLACK);
-    debug.setForeground(Color.WHITE);
+    
 
+    display.setLayout(new BorderLayout());
+    debugJavaConsole.getTextArea().setBackground(Color.BLACK);
+    debugJavaConsole.getTextArea().setForeground(Color.WHITE);
+    //debugJavaConsole.getTextArea().setPreferredSize(debugJavaConsole.getScrollPane().getPreferredSize());
+    debugJavaConsole.getScrollPane().setAutoscrolls(true);
+    debugJavaConsole.getScrollPane().setPreferredSize(new Dimension(150, 100));
+    
     JPanel northPanel = new JPanel(new GridLayout(2, 1));
 
     JPanel userSub = new JPanel();
@@ -143,7 +144,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     PAGEENDLeft.add(buttons);
 
     PAGEEND.add(PAGEENDLeft);
-    PAGEEND.add(scrollDebug, BorderLayout.CENTER);
+    PAGEEND.add(debugJavaConsole.getScrollPane(),BorderLayout.CENTER);
 
     // display.add(botControl, BorderLayout.SOUTH);
     display.add(PAGEEND, BorderLayout.PAGE_END);
@@ -153,7 +154,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     startSession.addActionListener(this);
     reloadSession.addActionListener(this);
     saveAIML.addActionListener(this);
-    savePredicates.addActionListener(this);
+    savePredicates.addActionListener(this);    
+    debugJavaConsole.startLogging();
   }
 
   @Override
@@ -175,7 +177,6 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
       // clear out the original question.
       text.setText("");
-      response.setCaretPosition(response.getDocument().getLength());
 
     } else if (o == startSession) {
       swingGui.send(boundServiceName, "setPath", path);
@@ -217,6 +218,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         } catch (Exception e) {
           log.error("ProgramAB onText error : {}", e);
         }
+        response.setCaretPosition(response.getDocument().getLength());
       }
     });
   }

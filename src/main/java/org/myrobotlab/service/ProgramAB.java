@@ -26,6 +26,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
@@ -34,6 +35,8 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
+
+import ch.qos.logback.classic.Level;
 
 /**
  * Program AB service for MyRobotLab Uses AIML 2.0 to create a ChatBot This is a
@@ -847,18 +850,27 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public static void main(String s[]) throws IOException {
     try {
-      LoggingFactory.init("INFO");
+      Runtime.setLogLevel("WARN");
+      Logging logging = LoggingFactory.getInstance();
+
+
 
       Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
+      //Runtime.start("webgui", "WebGui");
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      log.warn(brain.getClass().toString());
+      logging.setLevel("WARN");
+      //logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO"); //org.myrobotlab.service.ProgramAB
+      logging.setLevel("org.alicebot.ab.MagicBooleans", "INFO");
+      logging.setLevel("org.alicebot.ab.Graphmaster", "INFO");
+      
       //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-      MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+      //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
       // mouth.attach(ear);
       // brain.attach(ear);
-      brain.attach(mouth);
+      //brain.attach(mouth);
 
       //brain.startSession("default", "en-US");
       //brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
