@@ -776,7 +776,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // see if incoming key is my "actual" name
     ServiceReservation sr = dnaPool.get(reservedKey);
     if (sr != null) {
-      log.info("found reservation exchanging reservedKey {} for actual name {}", reservedKey, sr.actualName);
+      log.debug("found reservation exchanging reservedKey {} for actual name {}", reservedKey, sr.actualName);
       name = sr.actualName;
     } else {
       name = reservedKey;
@@ -1065,7 +1065,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public Set<String> getMessageSet() {
     Set<String> ret = new TreeSet<String>();
     Method[] methods = getMethods();
-    log.info("getMessageSet loading {} non-sub-routable methods", methods.length);
+    log.debug("getMessageSet loading {} non-sub-routable methods", methods.length);
     for (int i = 0; i < methods.length; ++i) {
       ret.add(methods[i].getName());
     }
@@ -1405,12 +1405,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
       }
 
       // TODO - build method cache map from errors
-      log.info("no such method {}.{} - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null));
+      log.debug("no such method {}.{} - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null));
 
       // TODO - optimize with a paramter TypeConverter & Map
       // c.getMethod - returns on EXACT match - not "Working" match
       Method[] allMethods = c.getMethods(); // ouch
-      log.info("searching through {} methods", allMethods.length);
+      log.debug("searching through {} methods", allMethods.length);
 
       for (Method m : allMethods) {
         String mname = m.getName();

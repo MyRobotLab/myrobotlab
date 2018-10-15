@@ -112,7 +112,7 @@ public class ApiFactory {
     Message msg = Api.uriToMsg(requestUri);
     String apiKey = msg.apiKey;
 
-    log.warn("{}", msg);
+    log.debug("{}", msg);
     
     if (!processors.containsKey(apiKey)) {
       String className = null;
