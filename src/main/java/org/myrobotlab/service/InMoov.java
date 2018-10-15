@@ -1970,7 +1970,7 @@ public class InMoov extends Service {
     meta.addCategory("robot");
     // meta.addDependency("inmoov.fr", "1.0.0");
     // meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
-    meta.addDependency("inmoov.fr", "inmoov", "1.1.3", "zip");
+    meta.addDependency("inmoov.fr", "inmoov", "1.1.4", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------
