@@ -907,6 +907,13 @@
     <version>1.96</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.myrobotlab.openni</groupId>
+    <artifactId>openni-deps</artifactId>
+    <version>0.1</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- OpenNi end -->
 
 <!-- Osc begin -->
