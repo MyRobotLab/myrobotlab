@@ -26,7 +26,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
@@ -35,8 +35,6 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
-
-import ch.qos.logback.classic.Level;
 
 /**
  * Program AB service for MyRobotLab Uses AIML 2.0 to create a ChatBot This is a
@@ -92,6 +90,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Deprecated
   Boolean wasCleanyShutdowned = true;
+  Boolean visualDebug;
 
   HashSet<String> availableBots = new HashSet<String>();
 
@@ -597,9 +596,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void startSession(String path, String userName, String botName) {
-    startSession( path,  userName,  botName, MagicBooleans.defaultLocale);
+    startSession(path, userName, botName, MagicBooleans.defaultLocale);
   }
-  
+
   public void startSession(String path, String userName, String botName, Locale locale) {
     // Session is between a user and a bot. key is compound.
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
@@ -763,6 +762,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     this.currentBotName = currentBotName;
   }
 
+  public void setVisualDebug(Boolean visualDebug) {
+    this.visualDebug = visualDebug;
+    broadcastState();
+  }
+
+  public Boolean getVisualDebug() {
+    if (visualDebug == null) {
+      visualDebug = true;
+    }
+    return visualDebug;
+  }
+
   public void setCurrentUserName(String currentUserName) {
     this.currentUserName = currentUserName;
   }
@@ -850,21 +861,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public static void main(String s[]) throws IOException {
     try {
-      Runtime.setLogLevel("WARN");
-      Logging logging = LoggingFactory.getInstance();
-
-
-
+      LoggingFactory.init(Level.WARN);
       Runtime.start("gui", "SwingGui");
       //Runtime.start("webgui", "WebGui");
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-      log.warn(brain.getClass().toString());
-      logging.setLevel("WARN");
+
       //logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO"); //org.myrobotlab.service.ProgramAB
-      logging.setLevel("org.alicebot.ab.MagicBooleans", "INFO");
-      logging.setLevel("org.alicebot.ab.Graphmaster", "INFO");
-      
+
       //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
       //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 

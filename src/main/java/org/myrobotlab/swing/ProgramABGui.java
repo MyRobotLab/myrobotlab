@@ -27,6 +27,7 @@ import javax.swing.text.html.StyleSheet;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.HtmlFilter;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.SwingGui;
@@ -49,7 +50,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JEditorPane response = new JEditorPane("text/html", "");
 
   final Console debugJavaConsole = new Console();
-  
+
   HTMLDocument responseDoc = new HTMLDocument();
   HTMLEditorKit responseKit = new HTMLEditorKit();
   StyleSheet cssKit = responseDoc.getStyleSheet();
@@ -67,6 +68,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JButton savePredicates = new JButton("Save predicates");
 
   JCheckBox filter = new JCheckBox("Filter ( ' , - )");
+  JCheckBox visualDebug = new JCheckBox("Debug : ");
 
   JLabel pathP = new JLabel();
   ImageIcon pathI = Util.getImageIcon("FileConnector.png");
@@ -96,17 +98,17 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
 
     responseKit.insertHTML(responseDoc, responseDoc.getLength(), "Conversation :<br/>", 0, 0, null);
 
-    //
     scrollResponse.setAutoscrolls(true);
-    
 
     display.setLayout(new BorderLayout());
     debugJavaConsole.getTextArea().setBackground(Color.BLACK);
     debugJavaConsole.getTextArea().setForeground(Color.WHITE);
-    //debugJavaConsole.getTextArea().setPreferredSize(debugJavaConsole.getScrollPane().getPreferredSize());
+    Font font = debugJavaConsole.getTextArea().getFont();
+    float size = font.getSize() - 1.0f;
+    debugJavaConsole.getTextArea().setFont(font.deriveFont(size));
     debugJavaConsole.getScrollPane().setAutoscrolls(true);
     debugJavaConsole.getScrollPane().setPreferredSize(new Dimension(150, 100));
-    
+
     JPanel northPanel = new JPanel(new GridLayout(2, 1));
 
     JPanel userSub = new JPanel();
@@ -139,12 +141,13 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     buttons.add(saveAIML);
     buttons.add(reloadSession);
     buttons.add(savePredicates);
+    buttons.add(visualDebug);
 
     PAGEENDLeft.add(botControl);
     PAGEENDLeft.add(buttons);
 
     PAGEEND.add(PAGEENDLeft);
-    PAGEEND.add(debugJavaConsole.getScrollPane(),BorderLayout.CENTER);
+    PAGEEND.add(debugJavaConsole.getScrollPane(), BorderLayout.CENTER);
 
     // display.add(botControl, BorderLayout.SOUTH);
     display.add(PAGEEND, BorderLayout.PAGE_END);
@@ -154,8 +157,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     startSession.addActionListener(this);
     reloadSession.addActionListener(this);
     saveAIML.addActionListener(this);
-    savePredicates.addActionListener(this);    
-    debugJavaConsole.startLogging();
+    savePredicates.addActionListener(this);
+    visualDebug.addActionListener(this);
   }
 
   @Override
@@ -186,8 +189,10 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       swingGui.send(boundServiceName, "reloadSession", user, bot);
     } else if (o == saveAIML) {
       swingGui.send(boundServiceName, "writeAIML");
+    } else if (o == visualDebug) {
+      swingGui.send(boundServiceName, "setVisualDebug", visualDebug.isSelected());
     } else if (o == savePredicates) {
-      swingGui.send(boundServiceName, "savePredicates()");
+      swingGui.send(boundServiceName, "savePredicates");
     } else {
       log.info(o.toString());
       log.info("Unknown action!");
@@ -201,11 +206,33 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     subscribe("publishOOBText");
   }
 
+  public void enableVisualDebug() {
+    if (!debugJavaConsole.isStarted()) {
+      debugJavaConsole.append("AIML debug ON :");
+      // force info log for specific class to feed debug window
+      if (LoggingFactory.getInstance().getLevel() == "WARN" || LoggingFactory.getInstance().getLevel() == "ERROR") {
+        LoggingFactory.getInstance().setLevel("org.alicebot.ab.MagicBooleans", "INFO");
+        LoggingFactory.getInstance().setLevel("org.alicebot.ab.Graphmaster", "INFO");
+      }
+      // filter events for aiml debug text area
+      String[] logsClassOnly = { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans" };
+      debugJavaConsole.startLogging(logsClassOnly);
+    }
+  }
+
+  public void disableVisualDebug() {
+    if (debugJavaConsole.isStarted()) {
+      debugJavaConsole.append("AIML debug OFF :");
+      debugJavaConsole.stopLogging();
+    }
+  }
+
   @Override
   public void unsubscribeGui() {
     unsubscribe("publishText");
     unsubscribe("publishRequest");
     unsubscribe("publishOOBText");
+    disableVisualDebug();
   }
 
   public void onText(String text) {
@@ -213,8 +240,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         try {
-          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<i><b>" + botName.getSelectedItem().toString() + "</b>: " + HtmlFilter.stripHtml(text).trim() + "</i>", 0,
-              0, null);
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<i><b>" + botName.getSelectedItem().toString() + "</b>: " + text.replace("  ", " ").trim() + "</i>", 0, 0,
+              null);
         } catch (Exception e) {
           log.error("ProgramAB onText error : {}", e);
         }
@@ -241,7 +268,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       @Override
       public void run() {
         try {
-          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b>&nbsp;&gt;&nbsp;OOB: </b>" + HtmlFilter.stripHtml(text).trim() + "</font>", 0, 0, null);
+          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b>&nbsp;&gt;&nbsp;OOB: </b>" + text.replaceAll("\\<[^>]*>", "").trim() + "</font>", 0, 0,
+              null);
         } catch (BadLocationException | IOException e) {
           log.error("ProgramAB onOOBText error : {}", e);
         }
@@ -262,10 +290,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         } else {
           startSession.setBackground(Color.GREEN);
         }
-
         progABPath.setText(new File(programab.getPath()).getAbsolutePath());
         userName.setText(username);
-
         botName.removeAllItems();
         Iterator<String> iterator = programab.getBots().iterator();
 
@@ -275,7 +301,12 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         if (programab.getCurrentBotName() != null) {
           botName.setSelectedItem(programab.getCurrentBotName());
         }
-
+        visualDebug.setSelected(programab.getVisualDebug());
+        if (programab.getVisualDebug()) {
+          enableVisualDebug();
+        } else {
+          disableVisualDebug();
+        }
       }
     });
 
