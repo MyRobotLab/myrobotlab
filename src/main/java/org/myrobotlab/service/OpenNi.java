@@ -967,6 +967,7 @@ public class OpenNi extends Service // implements
     // meta.addDependency("com.googlecode.simpleopenni", "1.96");
     
     meta.addDependency("simpleopenni",  "openni", "1.96");
+    meta.addDependency("org.myrobotlab.openni",  "openni-deps", "0.1", "zip");
     return meta;
   }
 
