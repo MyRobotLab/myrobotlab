@@ -28,7 +28,6 @@ import javax.swing.text.html.StyleSheet;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.HtmlFilter;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.Console;
@@ -210,12 +209,13 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     if (!debugJavaConsole.isStarted()) {
       debugJavaConsole.append("AIML debug ON :");
       // force info log for specific class to feed debug window
+      String[] logsClassOnly = { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" };
+
       if (LoggingFactory.getInstance().getLevel() == "WARN" || LoggingFactory.getInstance().getLevel() == "ERROR") {
-        LoggingFactory.getInstance().setLevel("org.alicebot.ab.MagicBooleans", "INFO");
-        LoggingFactory.getInstance().setLevel("org.alicebot.ab.Graphmaster", "INFO");
+        for (String s : logsClassOnly) {
+          LoggingFactory.getInstance().setLevel(s, "INFO");
+        }
       }
-      // filter events for aiml debug text area
-      String[] logsClassOnly = { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans" };
       debugJavaConsole.startLogging(logsClassOnly);
     }
   }
@@ -267,12 +267,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        try {
-          responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<font color=blue><b>&nbsp;&gt;&nbsp;OOB: </b>" + text.replaceAll("\\<[^>]*>", "").trim() + "</font>", 0, 0,
-              null);
-        } catch (BadLocationException | IOException e) {
-          log.error("ProgramAB onOOBText error : {}", e);
-        }
+        debugJavaConsole.append(text.replaceAll("\\s+","").trim());
       }
     });
   }
