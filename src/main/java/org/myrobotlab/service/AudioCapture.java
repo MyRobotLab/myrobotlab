@@ -62,7 +62,8 @@ public class AudioCapture extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public static boolean stopCapture = false;
+  public boolean stopCapture = true;
+  public boolean soundCaptured = false;
 
   ByteArrayOutputStream byteArrayOutputStream;
 
@@ -95,6 +96,7 @@ public class AudioCapture extends Service {
     public void run() {
       byteArrayOutputStream = new ByteArrayOutputStream();
       stopCapture = false;
+      broadcastState();
       try {// Loop until stopCapture is set
            // by another thread that
            // services the Stop button.
@@ -202,6 +204,7 @@ public class AudioCapture extends Service {
     try {
       // Get everything set up for
       // capture
+      soundCaptured = false;  
       audioFormat = getAudioFormat();
       DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
       targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
@@ -246,6 +249,10 @@ public class AudioCapture extends Service {
   // data that has been saved in the
   // ByteArrayOutputStream
   public void playAudio() {
+	if (!soundCaptured) {
+		log.error("No sound captured yet");
+	}
+	else {
     try {
       // Get everything set up for
       // playback.
@@ -273,6 +280,7 @@ public class AudioCapture extends Service {
       error(e);
     } // end catch
   }// end playAudio
+  }
 
   public ByteArrayOutputStream publishCapture() {
     return byteArrayOutputStream;
@@ -287,6 +295,7 @@ public class AudioCapture extends Service {
   public void stopAudioCapture() {
     targetDataLine.stop();
     stopCapture = true;
+    soundCaptured = true;
     broadcastState();
   }
 
