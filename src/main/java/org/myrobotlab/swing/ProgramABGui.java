@@ -210,12 +210,6 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
       debugJavaConsole.append("AIML debug ON :");
       // force info log for specific class to feed debug window
       String[] logsClassOnly = { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" };
-
-      if (LoggingFactory.getInstance().getLevel() == "WARN" || LoggingFactory.getInstance().getLevel() == "ERROR") {
-        for (String s : logsClassOnly) {
-          LoggingFactory.getInstance().setLevel(s, "INFO");
-        }
-      }
       debugJavaConsole.startLogging(logsClassOnly);
     }
   }
@@ -267,7 +261,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        debugJavaConsole.append(text.replaceAll("\\s+","").trim());
+        debugJavaConsole.append("[OOB] "+text.replaceAll("\\s+", "").trim());
       }
     });
   }
