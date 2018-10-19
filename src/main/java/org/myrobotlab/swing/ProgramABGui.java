@@ -27,7 +27,6 @@ import javax.swing.text.html.StyleSheet;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.Console;

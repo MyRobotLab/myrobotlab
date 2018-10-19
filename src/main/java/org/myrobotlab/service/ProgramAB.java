@@ -860,8 +860,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
-    // UI use htmlFilter, so we need htmlFilter installed with his dependencies
-    meta.addPeer("htmlFilter", "HtmlFilter", "htmlFilter");
     // This is for CJK support in ProgramAB. 
     // TODO: move this into the published POM for ProgramAB so they are pulled in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
