@@ -99,13 +99,14 @@ public class AudioCaptureGui extends ServiceGui {
       @Override
       public void run() {
 
-        if (AudioCapture.stopCapture) {
+        if (audiocapture.stopCapture) {
           captureBtn.setEnabled(true);
           stopBtn.setEnabled(false);
         } else {
           captureBtn.setEnabled(false);
           stopBtn.setEnabled(true);
         }
+        playBtn.setEnabled(audiocapture.soundCaptured);
       }
     });
   }
