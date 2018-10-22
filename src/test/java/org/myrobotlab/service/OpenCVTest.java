@@ -41,10 +41,17 @@ public class OpenCVTest {
   @After
   public void tearDown() throws Exception {
   }
+  
+  // FIXME - do the following test
+  // test all frame grabber types
+  // test all filters !
+  // test remote file source
+  // test mpeg streamer
+  
 
   @Test
   public final void testFileCapture() throws InterruptedException {
-    opencv.captureFromImageFile("src/test/resources/OpenCV/multipleFaces.jpg");
+    opencv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     
     opencv.setCameraIndex(3);
     assertEquals(3, opencv.getCameraIndex());

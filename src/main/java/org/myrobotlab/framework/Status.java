@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Objects;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
@@ -185,6 +186,26 @@ public class Status implements Serializable {// extends Exception {
   static public final Status newInstance(String name, String level, String key, String detail) {
     Status s = new Status(name, level, key, detail);
     return s;
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+
+      if (o == this) return true;
+      if (!(o instanceof Status)) {
+          return false;
+      }
+      Status status = (Status) o;
+      return 
+              Objects.equals(name, status.name) &&
+              Objects.equals(level, status.level) &&
+              Objects.equals(key, status.key) &&
+              Objects.equals(detail, status.detail);
+  }
+
+  @Override
+  public int hashCode() {
+      return Objects.hash(name, level, key, detail);
   }
 
   public static void main(String[] args) throws IOException, InterruptedException {

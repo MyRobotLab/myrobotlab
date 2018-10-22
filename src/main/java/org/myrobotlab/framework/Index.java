@@ -256,7 +256,7 @@ public class Index<T> {
   /**
    * check if selected node have leafs and return them as key list
    */
-  public ArrayList getLeafs(String node) {
+  public ArrayList<String> getLeafs(String node) {
 
     ArrayList<String> leafs = new ArrayList<String>();
     log.debug("getNodeLeafs for {}", node);
