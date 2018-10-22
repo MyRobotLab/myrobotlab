@@ -24,16 +24,10 @@ public class MouseSim extends Service {
 
 	public MouseSim(String n) {
 		super(n);
-	}
-
-	@Override
-	public void startService() {
-		super.startService();
 		try {
 			robot = new Robot();
-		} catch (AWTException e) {
-			log.error("could not create java.awt.Robot");
-			log.error(e.getMessage());
+		} catch (Exception e) {
+			log.error("could not create java.awt.Robot", e);
 		}
 	}
 
@@ -46,10 +40,7 @@ public class MouseSim extends Service {
 	 */
 	public void pressAndRelease(int keycode, int duration) {
 		press(keycode);
-		try {
-			Thread.sleep(duration);
-		} catch (InterruptedException e) {
-		}
+		sleep(duration);
 		release(keycode);
 	}
 
@@ -83,10 +74,7 @@ public class MouseSim extends Service {
 	 */
 	public void pressAndRelease(int[] keycodes, int duration) {
 		press(keycodes);
-		try {
-			Thread.sleep(duration);
-		} catch (InterruptedException e) {
-		}
+		sleep(duration);
 		releaseReversed(keycodes);
 	}
 
@@ -152,10 +140,7 @@ public class MouseSim extends Service {
 		// Runtime.start("swing", "SwingGui");
 		MouseSim mousesim = (MouseSim) Runtime.start("keysim", "KeyboardSim");
 
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		}
+		sleep(1000);
 
 		mousesim.pressAndRelease(InputEvent.BUTTON1_DOWN_MASK, 1000);
 		mousesim.move(10, 10);
