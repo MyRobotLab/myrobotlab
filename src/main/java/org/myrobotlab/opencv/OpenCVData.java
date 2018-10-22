@@ -1,7 +1,7 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvEncodeImage;
-import static org.myrobotlab.opencv.VideoProcessor.INPUT_KEY;
+import static org.myrobotlab.service.OpenCV.INPUT_KEY;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;

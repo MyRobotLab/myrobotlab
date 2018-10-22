@@ -25,7 +25,7 @@
 
 package org.myrobotlab.swing;
 
-import static org.myrobotlab.opencv.VideoProcessor.INPUT_KEY;
+import static org.myrobotlab.service.OpenCV.INPUT_KEY;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -35,7 +35,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -65,7 +64,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.image.SerializableImage;
@@ -73,9 +71,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.VideoProcessor;
 import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.myrobotlab.swing.opencv.ComboBoxModel2;
@@ -141,232 +137,24 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 	// output
 	JButton recordButton = new JButton("record");
 	JButton recordFrameButton = new JButton("record frame");
-
-	OpenCV myOpenCV;
+	
 	final OpenCVGui self;
-
-	private ActionListener captureListener = new ActionListener() {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-
-			/**
-			 * TODO - setState only done in Capture !!!!! TODO - setting all of
-			 * OpenCV's actual variables should ONLY be done here otherwise
-			 * invalid states may occur while a capture is running the model is
-			 * to set all the data of the gui just before the capture request is
-			 * sent
-			 */
-			VideoProcessor vp = myOpenCV.videoProcessor;
-
-			String selected = (String) grabberTypeSelect.getSelectedItem();
-
-			if ("IPCamera".equals(selected) || "Pipeline".equals(selected) || "ImageFile".equals(selected)
-					|| "SlideShow".equals(selected) || "Sarxos".equals(selected) || "MJpeg".equals(selected)) {
-				prefixPath = "org.myrobotlab.opencv.";
-			} else {
-				prefixPath = "org.bytedeco.javacv.";
-			}
-
-			myOpenCV.grabberType = prefixPath + (String) grabberTypeSelect.getSelectedItem() + "FrameGrabber";
-
-			if (fileRadio.isSelected()) {
-				String fileName = inputFile.getText();
-				myOpenCV.inputFile = fileName;
-				String extension = "";
-
-				int i = fileName.lastIndexOf('.');
-				if (i > 0) {
-					extension = fileName.substring(i + 1);
-				}
-
-				File inputFile = new File(fileName);
-
-				if (("jpg").equals(extension) || ("png").equals(extension)) {
-				  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_IMAGE_FILE;
-				  myOpenCV.grabberType = "org.myrobotlab.opencv.ImageFileFrameGrabber";
-
-				} else if (inputFile.isDirectory()) {
-					// this
-					// is
-					// a
-					// slide
-					// show.
-				  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY;
-				  myOpenCV.grabberType = "org.myrobotlab.opencv.SlideShowFrameGrabber";
-					send("setDirectory", inputFile);
-				} else {
-				  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_MOVIE_FILE;
-				}
-
-			} else if (cameraRadio.isSelected()) {
-			  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_CAMERA;
-			  myOpenCV.cameraIndex = (Integer) cameraIndex.getSelectedItem();
-			} else {
-				log.error("input source is " + myOpenCV.inputSource);
-			}
-
-			if ("IPCamera".equals(selected) || "MJpeg".equals(selected)) {
-			  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_NETWORK;
-			}
-
-			if ("Pipeline".equals(selected)) {
-			  myOpenCV.inputSource = OpenCV.INPUT_SOURCE_PIPELINE;
-			  myOpenCV.pipelineSelected = (String) pipelineHook.getSelectedItem();
-			}
-
-			send("setState", myOpenCV);
-
-			// set
-			// new
-			// button
-			// state
-			if (("capture".equals(capture.getText()))) {
-				send("capture");
-				capture.setText("stop");
-				// captureCfg.disable();
-				setChildrenEnabled(captureCfg, false);
-			} else {
-				send("stopCapture");
-				capture.setText("capture");
-				setChildrenEnabled(captureCfg, true);
-			}
-
-		}
-	};
-
-	/**
-	 * SwingGui defaults for grabber types
-	 */
-	private ActionListener grabberTypeListener = new ActionListener() {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-
-			String type = (String) grabberTypeSelect.getSelectedItem();
-			if ("OpenKinect".equals(type)) {
-				cameraRadio.setSelected(true);
-				cameraIndexLable.setVisible(true);
-				cameraIndex.setVisible(true);
-				modeLabel.setVisible(true);
-				kinectImageOrDepth.setVisible(true);
-				inputFileLable.setVisible(false);
-				inputFile.setVisible(false);
-				fileRadio.setVisible(false);
-
-				IPCameraType.setVisible(false);
-				pipelineHook.setVisible(false);
-			}
-
-			if ("OpenCV".equals(type) || "VideoInput".equals(type) || "FFmpeg".equals(type)) {
-				// cameraRadio.setSelected(true);
-				kinectImageOrDepth.setSelectedItem("image");
-				// myOpenCV.format
-				// =
-				// "image";
-				cameraIndexLable.setVisible(true);
-				cameraIndex.setVisible(true);
-				modeLabel.setVisible(false);
-				kinectImageOrDepth.setVisible(false);
-				inputFileLable.setVisible(true);
-				inputFile.setVisible(true);
-
-				fileRadio.setVisible(true);
-				cameraRadio.setVisible(true);
-
-				IPCameraType.setVisible(false);
-				pipelineHook.setVisible(false);
-			}
-
-			if ("IPCamera".equals(type)) {
-				// cameraRadio.setSelected(true);
-				// kinectImageOrDepth.setSelectedItem("image");
-				// myOpenCV.format
-				// =
-				// "image";
-				cameraIndexLable.setVisible(false);
-				cameraIndex.setVisible(false);
-				modeLabel.setVisible(false);
-				kinectImageOrDepth.setVisible(false);
-				inputFileLable.setVisible(true);
-				inputFile.setVisible(true);
-				fileRadio.setSelected(true);
-
-				fileRadio.setVisible(false);
-				cameraRadio.setVisible(false);
-
-				IPCameraType.setVisible(true);
-				pipelineHook.setVisible(false);
-			}
-
-			if ("Pipeline".equals(type)) {
-				// cameraRadio.setSelected(true);
-				// kinectImageOrDepth.setSelectedItem("image");
-				// myOpenCV.format
-				// =
-				// "image";
-				cameraIndexLable.setVisible(false);
-				cameraIndex.setVisible(false);
-				modeLabel.setVisible(false);
-				kinectImageOrDepth.setVisible(false);
-				inputFileLable.setVisible(false);
-				inputFile.setVisible(false);
-				fileRadio.setSelected(true);
-
-				fileRadio.setVisible(false);
-				cameraRadio.setVisible(false);
-
-				IPCameraType.setVisible(false);
-				// this
-				// has
-				// static
-				// /
-				// global
-				// internals
-				// VideoSources vs = new VideoSources();
-				// Set<String> p = vs.getKeySet();
-				/*
-				 * pipelineHookModel.removeAllElements(); for (String i : p) {
-				 * pipelineHookModel.insertElementAt(i, 0); }
-				 * pipelineHook.setVisible(true);
-				 */
-			}
-
-		}
-	};
-
+  
+  // FIXME - OpenCV.getGrabberTypes() in static block (with try / catch)
+	
 	public OpenCVGui(final String boundServiceName, final SwingGui myService) {
 		super(boundServiceName, myService);
 		self = this;
 
 		video0 = new VideoWidget(boundServiceName, myService);
+		
 
-		undock.addActionListener(this);
-
-		capture.addActionListener(captureListener);
-
-		ArrayList<String> frameGrabberList = new ArrayList<String>();
-		// Add all of the OpenCV defined FrameGrabbers
-		for (int i = 0; i < FrameGrabber.list.size(); ++i) {
-			String ss = FrameGrabber.list.get(i);
-			String fg = ss.substring(ss.lastIndexOf(".") + 1);
-			frameGrabberList.add(fg);
-		}
-
-		// Add the MRL Frame Grabbers
-		frameGrabberList.add("IPCamera");
-		frameGrabberList.add("Pipeline"); // service which implements
-		// ImageStreamSource
-		frameGrabberList.add("ImageFile");
-		frameGrabberList.add("SlideShowFile");
-		frameGrabberList.add("Sarxos");
-		frameGrabberList.add("MJpeg");
 		
 		ComboBoxModel2.add(INPUT_KEY);
 
 		// CanvasFrame cf = new CanvasFrame("hello");
 
-		grabberTypeSelect = new JComboBox(frameGrabberList.toArray());
-
-		kinectImageOrDepth.addActionListener(this);
+		grabberTypeSelect = new JComboBox(OpenCV.getGrabberTypes().toArray());
 
 		possibleFilters = new JList<String>(OpenCV.getPossibleFilters());
 		possibleFilters.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -397,8 +185,6 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
 		groupRadio.add(cameraRadio);
 		groupRadio.add(fileRadio);
-
-		grabberTypeSelect.addActionListener(grabberTypeListener);
 
 		// capture panel
 		JPanel cpanel = new JPanel();
@@ -437,15 +223,6 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		output.add(recordButton);
 		output.add(recordFrameButton);
 
-		recordButton.addActionListener(this);
-		recordFrameButton.addActionListener(this);
-
-		// build input end ------------------
-
-		// build filters begin ------------------
-		addFilterButton.addActionListener(this);
-		removeFilterButton.addActionListener(this);
-
 		JPanel filterPanel = new JPanel();
 		title = BorderFactory.createTitledBorder("filters: available - current");
 		filterPanel.setBorder(title);
@@ -456,8 +233,6 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
 		title = BorderFactory.createTitledBorder("filter parameters");
 		filterParameters.setBorder(title);
-		// filterParameters.setPreferredSize(new Dimension(340, 360));
-		// filterParameters.setPreferredSize(new Dimension(340, 400));
 		Box box = Box.createVerticalBox();
 		box.add(filterPanel);
 		box.add(filterParameters);
@@ -471,17 +246,37 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		display.add(output, BorderLayout.SOUTH);
 
 		setCurrentFilterMouseListener();
-		// build filters end ------------------
-
-		// TODO - bury in framework?
-		myOpenCV = (OpenCV) Runtime.getService(boundServiceName);
-
-		// TODO - remove action listener?
 		grabberTypeSelect.setSelectedItem("OpenCV");
+		
+		enableListeners(true);
 
 	}
 
-	@Override
+	private void enableListeners(boolean b) {
+    if (b) {
+      // add listeners
+      addFilterButton.addActionListener(this);
+      capture.addActionListener(this);
+      grabberTypeSelect.addActionListener(this);
+      kinectImageOrDepth.addActionListener(this);
+      recordButton.addActionListener(this);
+      recordFrameButton.addActionListener(this);
+      removeFilterButton.addActionListener(this);
+      undock.addActionListener(this);
+    } else {
+      // remove listeners
+      addFilterButton.removeActionListener(this);
+      capture.removeActionListener(this);
+      grabberTypeSelect.removeActionListener(this);
+      kinectImageOrDepth.removeActionListener(this);
+      recordButton.removeActionListener(this);
+      recordFrameButton.removeActionListener(this);
+      removeFilterButton.removeActionListener(this);
+      undock.removeActionListener(this);
+    }      
+  }
+
+  @Override
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 		if (o == addFilterButton) {
@@ -523,6 +318,121 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 				}
 			}
 		}
+		
+    String selected = (String) grabberTypeSelect.getSelectedItem();
+
+    if (fileRadio.isSelected()) {
+      String fileName = inputFile.getText();
+      
+
+    send("setInputSource", OpenCV.INPUT_SOURCE_IMAGE_FILE);
+
+    // set
+    // new
+    // button
+    // state
+    if (("capture".equals(capture.getText()))) {
+      send("capture");
+      capture.setText("stop");
+      // captureCfg.disable();
+      setChildrenEnabled(captureCfg, false);
+    } else {
+      send("stopCapture");
+      capture.setText("capture");
+      setChildrenEnabled(captureCfg, true);
+    }
+
+
+    String type = (String) grabberTypeSelect.getSelectedItem();
+    if ("OpenKinect".equals(type)) {
+      cameraRadio.setSelected(true);
+      cameraIndexLable.setVisible(true);
+      cameraIndex.setVisible(true);
+      modeLabel.setVisible(true);
+      kinectImageOrDepth.setVisible(true);
+      inputFileLable.setVisible(false);
+      inputFile.setVisible(false);
+      fileRadio.setVisible(false);
+
+      IPCameraType.setVisible(false);
+      pipelineHook.setVisible(false);
+    }
+
+    if ("OpenCV".equals(type) || "VideoInput".equals(type) || "FFmpeg".equals(type)) {
+      // cameraRadio.setSelected(true);
+      kinectImageOrDepth.setSelectedItem("image");
+      // myOpenCV.format
+      // =
+      // "image";
+      cameraIndexLable.setVisible(true);
+      cameraIndex.setVisible(true);
+      modeLabel.setVisible(false);
+      kinectImageOrDepth.setVisible(false);
+      inputFileLable.setVisible(true);
+      inputFile.setVisible(true);
+
+      fileRadio.setVisible(true);
+      cameraRadio.setVisible(true);
+
+      IPCameraType.setVisible(false);
+      pipelineHook.setVisible(false);
+    }
+
+    if ("IPCamera".equals(type)) {
+      // cameraRadio.setSelected(true);
+      // kinectImageOrDepth.setSelectedItem("image");
+      // myOpenCV.format
+      // =
+      // "image";
+      cameraIndexLable.setVisible(false);
+      cameraIndex.setVisible(false);
+      modeLabel.setVisible(false);
+      kinectImageOrDepth.setVisible(false);
+      inputFileLable.setVisible(true);
+      inputFile.setVisible(true);
+      fileRadio.setSelected(true);
+
+      fileRadio.setVisible(false);
+      cameraRadio.setVisible(false);
+
+      IPCameraType.setVisible(true);
+      pipelineHook.setVisible(false);
+    }
+
+    if ("Pipeline".equals(type)) {
+      // cameraRadio.setSelected(true);
+      // kinectImageOrDepth.setSelectedItem("image");
+      // myOpenCV.format
+      // =
+      // "image";
+      cameraIndexLable.setVisible(false);
+      cameraIndex.setVisible(false);
+      modeLabel.setVisible(false);
+      kinectImageOrDepth.setVisible(false);
+      inputFileLable.setVisible(false);
+      inputFile.setVisible(false);
+      fileRadio.setSelected(true);
+
+      fileRadio.setVisible(false);
+      cameraRadio.setVisible(false);
+
+      IPCameraType.setVisible(false);
+      // this
+      // has
+      // static
+      // /
+      // global
+      // internals
+      // VideoSources vs = new VideoSources();
+      // Set<String> p = vs.getKeySet();
+      /*
+       * pipelineHookModel.removeAllElements(); for (String i : p) {
+       * pipelineHookModel.insertElementAt(i, 0); }
+       * pipelineHook.setVisible(true);
+       */
+    }
+
+  }
 	}
 
 	public void addFilter() {
@@ -626,13 +536,11 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-
-				VideoProcessor vp = opencv.videoProcessor;
-
+			  
 				// seems pretty destructive :P
 				currentFilterListModel.clear();
 				// add new filters from service into gui
-				for (OpenCVFilter f : opencv.getFiltersCopy()) {
+				for (OpenCVFilter f : opencv.getFilters()) {
 				  ComboBoxModel2.removeSource(boundServiceName+"."+f.name);
 					addFilterToGui(f);
 				}
@@ -641,42 +549,39 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
 				for (int i = 0; i < grabberTypeSelect.getItemCount(); ++i) {
 					String currentObject = prefixPath + grabberTypeSelect.getItemAt(i) + "FrameGrabber";
-					if (currentObject.equals(myOpenCV.grabberType)) {
+					if (currentObject.equals(opencv.getGrabberType())) {
 						grabberTypeSelect.setSelectedIndex(i);
 						break;
 					}
 				}
 
-				if (opencv.capturing) {
+				if (opencv.isCapturing()) {
 					capture.setText("stop");
 				} else {
 					capture.setText("capture");
 				}
 
-				inputFile.setText(myOpenCV.inputFile);
-				cameraIndex.setSelectedIndex(myOpenCV.cameraIndex);
-				String inputSource = opencv.inputSource;
+				inputFile.setText(opencv.getInputFile());
+				cameraIndex.setSelectedIndex(opencv.getCameraIndex());
+				String inputSource = opencv.getInputSource();
 				if (OpenCV.INPUT_SOURCE_CAMERA.equals(inputSource)) {
 					cameraRadio.setSelected(true);
 				} else if (OpenCV.INPUT_SOURCE_CAMERA.equals(inputSource)) {
 					fileRadio.setSelected(true);
 				} else if (OpenCV.INPUT_SOURCE_PIPELINE.equals(inputSource)) {
-					// grabberTypeSelect.removeActionListener(grabberTypeListener);
 					grabberTypeSelect.setSelectedItem("Pipeline");
-					// grabberTypeSelect.addActionListener(grabberTypeListener);
-					pipelineHook.setSelectedItem(myOpenCV.pipelineSelected);
-				} else if (OpenCV.INPUT_SOURCE_IMAGE_FILE.equals(inputSource)
-						|| OpenCV.INPUT_SOURCE_IMAGE_DIRECTORY.equals(inputSource)) {
-					// the file input should be enabled if we are file or
-					// directory.
+					pipelineHook.setSelectedItem(inputSource);
+				} else if (OpenCV.INPUT_SOURCE_IMAGE_FILE.equals(inputSource)){						
 					fileRadio.setSelected(true);
 				}
 
+				/*
 				currentFilters.removeListSelectionListener(self);
-				currentFilters.setSelectedValue(vp.displayFilterName, true);// .setSelectedIndex(index);
+				currentFilters.setSelectedValue(displayFilterName, true);// .setSelectedIndex(index);
 				currentFilters.addListSelectionListener(self);
+				*/
 
-				if (opencv.undockDisplay == true) {
+				if (opencv.isUndocked() == true) {
 					cframe = new CanvasFrame("canvas frame");
 				} else {
 					if (cframe != null) {

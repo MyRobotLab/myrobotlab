@@ -226,33 +226,33 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     switch (state) {
       case STATE_LOST_TRACKING:
         if (faceCnt > 0) {
-          firstFaceFrame = vp.frameIndex;
+          firstFaceFrame = vp.getFrameIndex();
           state = STATE_DETECTING_FACE;
           broadcastFilterState();
         }
         break;
       case STATE_DETECTING_FACE:
-        if (faceCnt > 0 && vp.frameIndex - firstFaceFrame > minFaceFrames) {
+        if (faceCnt > 0 && vp.getFrameIndex() - firstFaceFrame > minFaceFrames) {
           state = STATE_DETECTED_FACE;
           // broadcastFilterState();
         } else if (faceCnt == 0) {
-          firstFaceFrame = vp.frameIndex;
+          firstFaceFrame = vp.getFrameIndex();
         }
         break;
       case STATE_DETECTED_FACE:
         if (faceCnt == 0) {
           state = STATE_LOSING_TRACKING;
-          firstFaceFrame = vp.frameIndex;
+          firstFaceFrame = vp.getFrameIndex();
           broadcastFilterState();
         }
         break;
 
       case STATE_LOSING_TRACKING:
-        if (faceCnt == 0 && vp.frameIndex - firstEmptyFrame > minEmptyFrames) {
+        if (faceCnt == 0 && vp.getFrameIndex() - firstEmptyFrame > minEmptyFrames) {
           state = STATE_LOST_TRACKING;
           // broadcastFilterState();
         } else if (faceCnt > 0) {
-          firstEmptyFrame = vp.frameIndex;
+          firstEmptyFrame = vp.getFrameIndex();
         }
         break;
       default:
@@ -260,7 +260,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
         break;
     }
     // face detection events
-    if (faceCnt > 0 && vp.frameIndex - firstFaceFrame > minFaceFrames) {
+    if (faceCnt > 0 && vp.getFrameIndex() - firstFaceFrame > minFaceFrames) {
 
     } else {
 

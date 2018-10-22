@@ -386,7 +386,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
           if (debug) {
             show(cropped, "detected img");
           }
-          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().frameIndex, cropped, null);
+          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().getFrameIndex(), cropped, null);
           yoloObjects.add(obj);
           // if the label is a person.. we want to look up the model for further classificatoin of a person
           // then add that info to disambiguate who that person is.

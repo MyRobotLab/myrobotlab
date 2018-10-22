@@ -240,17 +240,14 @@ public class Runtime extends Service implements MessageListener {
     // logging format can get challenging (Python trace-back) or they may
     // be completely lost - this is the last level the error can be handled
     // before
-    // going into the unkown - so we catch it !
+    // going into the unknown - so we catch it !
     try {
       s = create(name, type);
       s.startService();
     } catch (Exception e) {
-      String error = e.getMessage();
-      if (error == null) {
-        error = "error";
-      }
-      Runtime.getInstance().error(String.format("createAndStart(%s, %s) %s", name, type, error));
-      Logging.logError(e);
+      String error = String.format("createAndStart(%s, %s) %s", name, type, e.getClass().getCanonicalName());
+      Runtime.getInstance().error(error);
+      log.error(error, e);
     }
     return s;
   }
@@ -338,11 +335,12 @@ public class Runtime extends Service implements MessageListener {
       }
 
       // create an instance
-      Object newService = Instantiator.getNewInstance(fullTypeName, name);
+      // Object newService = Instantiator.getNewInstance(fullTypeName, name);
+      Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
       log.debug("returning {}", fullTypeName);
       return (Service) newService;
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("createService failed", e);
     }
     return null;
   }
@@ -499,7 +497,7 @@ public class Runtime extends Service implements MessageListener {
           // taking away capability of having a different runtime name
           runtimeName = "runtime";
           runtime = new Runtime(runtimeName);
-          
+
           // setting the singleton security
           security = Security.getInstance();
           Repo.getInstance().addStatusPublisher(runtime);
@@ -868,7 +866,6 @@ public class Runtime extends Service implements MessageListener {
     return java.lang.Runtime.getRuntime().totalMemory();
   }
 
-  
   /**
    * unique id's are need for sendBlocking - to uniquely identify the message
    * this is a method to support that - it is unique within a process, but not
@@ -897,9 +894,10 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * Get version returns the current version of mrl.
-   * It must be done this way, because the version may be queried on the command line
-   * without the desire to start a "Runtime"
+   * Get version returns the current version of mrl. It must be done this way,
+   * because the version may be queried on the command line without the desire
+   * to start a "Runtime"
+   * 
    * @return
    */
   public static String getVersion() {
@@ -1009,7 +1007,6 @@ public class Runtime extends Service implements MessageListener {
     return ret;
   }
 
-
   /*
    * Main starting method of MyRobotLab Parses command line options
    *
@@ -1109,8 +1106,8 @@ public class Runtime extends Service implements MessageListener {
         /*
          * FIXME - do " -extract {serviceType} in future ArrayList<String>
          * services = cmdline.getArgumentList("-extract"); Repo repo =
-         * Repo.getInstance(); if (services.size() == 0) { repo.install();
-         * } else { for (int i = 0; i < services.size(); ++i) {
+         * Repo.getInstance(); if (services.size() == 0) { repo.install(); }
+         * else { for (int i = 0; i < services.size(); ++i) {
          * repo.install(services.get(i)); } }
          */
         extract();
@@ -1424,10 +1421,10 @@ public class Runtime extends Service implements MessageListener {
   public static void shutdown() {
     log.info("mrl shutdown");
 
-    for (ServiceInterface service: getServices()) {
+    for (ServiceInterface service : getServices()) {
       service.preShutdown();
     }
-   
+
     try {
       releaseAll();
     } catch (Exception e) {
@@ -1542,7 +1539,7 @@ public class Runtime extends Service implements MessageListener {
     }
 
     locale = Locale.getDefault();
-    
+
     // 3 states
     // isAgent == make default directory (with pid) if custom not supplied
     // fromAgent == needs agentId
@@ -1673,7 +1670,8 @@ public class Runtime extends Service implements MessageListener {
     log.info("user.home [{}]", userHome);
     log.info("total mem [{}] Mb", Runtime.getTotalMemory() / 1048576);
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
-    // Access restriction - log.info("total physical mem [{}] Mb", Runtime.getTotalPhysicalMemory() / 1048576);
+    // Access restriction - log.info("total physical mem [{}] Mb",
+    // Runtime.getTotalPhysicalMemory() / 1048576);
 
     log.info("getting local repo");
 
@@ -1705,9 +1703,9 @@ public class Runtime extends Service implements MessageListener {
   public void checkingForUpdates() {
     log.info("checking for updates");
   }
-  
+
   public Locale getLocale() {
-	  return locale;
+    return locale;
   }
 
   static public String getInputAsString(InputStream is) {
@@ -2264,43 +2262,42 @@ public class Runtime extends Service implements MessageListener {
     }
     return r;
   }
-  
+
   public static void setLanguage(String language) {
-	  Runtime runtime = Runtime.getInstance();
-	  runtime.setLocale(new Locale(language)); 
+    Runtime runtime = Runtime.getInstance();
+    runtime.setLocale(new Locale(language));
   }
 
   public void setLocale(String language) {
-	  setLocale(new Locale(language));
+    setLocale(new Locale(language));
   }
 
   public void setLocale(String language, String country) {
-	  setLocale(new Locale(language, country));
+    setLocale(new Locale(language, country));
   }
 
   public void setLocale(String language, String country, String variant) {
-	setLocale(new Locale(language, country, variant));
-  }
-  
-  public void setLocale(Locale locale) {
-    // the local field is used for display & serialization
-	  this.locale = locale;
-	  Locale.setDefault(locale);
-	   /* I don't believe these are necessary 
-	    System.setProperty("user.language", language);
-	    System.setProperty("user.country", country);
-	    System.setProperty("user.variant", variant);
-	    */	    
-  }
-  
-  public String getLanguage() {
-	  return locale.getLanguage();
-  }
-  
-  public String getCountry() {
-	  return locale.getCountry();
+    setLocale(new Locale(language, country, variant));
   }
 
+  public void setLocale(Locale locale) {
+    // the local field is used for display & serialization
+    this.locale = locale;
+    Locale.setDefault(locale);
+    /*
+     * I don't believe these are necessary System.setProperty("user.language",
+     * language); System.setProperty("user.country", country);
+     * System.setProperty("user.variant", variant);
+     */
+  }
+
+  public String getLanguage() {
+    return locale.getLanguage();
+  }
+
+  public String getCountry() {
+    return locale.getCountry();
+  }
 
   public Platform login(Platform platform) {
     info("runtime %s says \"hello\" %s", platform.getId(), platform);
@@ -2332,8 +2329,7 @@ public class Runtime extends Service implements MessageListener {
     meta.addDependency("com.google.code.gson", "gson", "2.8.0");
     meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
-
+    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
 
     // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");
     // meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
@@ -2350,8 +2346,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   public String getDisplayLanguage() {
-	    return locale.getDisplayLanguage();
-   }
+    return locale.getDisplayLanguage();
+  }
 
   /**
    * Return supported system languages
@@ -2367,25 +2363,26 @@ public class Runtime extends Service implements MessageListener {
     }
     return languagesList;
   }
-  
+
   /**
    * get the Security singleton
+   * 
    * @return
    */
   static public Security getSecurity() {
-	  return Runtime.getInstance().security;
+    return Runtime.getInstance().security;
   }
 
   public String getLocaleTag() {
     return locale.toLanguageTag();
   }
 
-public static Process exec(String ... cmd) throws IOException {
-	// FIXME - can't return a process - it will explode in serialization
-	// but we might want to keep it and put it on a transient map
+  public static Process exec(String... cmd) throws IOException {
+    // FIXME - can't return a process - it will explode in serialization
+    // but we might want to keep it and put it on a transient map
     log.info("Runtime exec {}", Arrays.toString(cmd));
-  	Process p = java.lang.Runtime.getRuntime().exec(cmd);
-  	return p;
-}
- 
+    Process p = java.lang.Runtime.getRuntime().exec(cmd);
+    return p;
+  }
+
 }

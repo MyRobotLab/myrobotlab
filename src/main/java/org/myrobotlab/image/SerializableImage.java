@@ -65,7 +65,7 @@ public class SerializableImage implements Serializable {
   transient private BufferedImage image;
 
   /**
-   * jpg encoded byte buffer - TODO offer type png tff etc? TODO - consider
+   * png encoded byte buffer - TODO offer type png tff etc? TODO - consider
    * hashmap cache similar to the OpenCVData ???
    */
   private ByteBuffer buffer;
@@ -81,7 +81,7 @@ public class SerializableImage implements Serializable {
       LoggingFactory.init();
       ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("object.data"));
 
-      ImageIO.write(null, "jpg", new MemoryCacheImageOutputStream(out));
+      ImageIO.write(null, "png", new MemoryCacheImageOutputStream(out));
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -150,7 +150,7 @@ public class SerializableImage implements Serializable {
     if (image != null) {
       try {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ImageIO.write(image, "jpg", new MemoryCacheImageOutputStream(bos));
+        ImageIO.write(image, "png", new MemoryCacheImageOutputStream(bos));
         bytes = bos.toByteArray();
         return bytes;
       } catch (Exception e) {
@@ -223,7 +223,7 @@ public class SerializableImage implements Serializable {
   // FIXME ??? use OpenCV cvEncode ???
   // FIXME !! PNG default ???
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-    ImageIO.write(image, "jpg", new MemoryCacheImageOutputStream(out));
+    ImageIO.write(image, "png", new MemoryCacheImageOutputStream(out));
     Logging.logTime("writeObject");
   }
 

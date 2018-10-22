@@ -4,9 +4,25 @@ import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
 import static org.bytedeco.javacpp.opencv_dnn.readNetFromDarknet;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
+
+import static org.bytedeco.javacpp.opencv_imgproc.*;
+import static org.bytedeco.javacpp.opencv_calib3d.*;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.*;
+import static org.bytedeco.javacpp.opencv_flann.*;
+import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_ml.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_photo.*;
+import static org.bytedeco.javacpp.opencv_shape.*;
+import static org.bytedeco.javacpp.opencv_stitching.*;
+import static org.bytedeco.javacpp.opencv_video.*;
+import static org.bytedeco.javacpp.opencv_videostab.*;
 
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
@@ -29,6 +45,7 @@ import java.util.ArrayList;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.io.IOUtils;
+import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -47,12 +64,14 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class.getCanonicalName());
 
-  // zero offset to where the confidence level is in the output matrix of the darknet.
+  // zero offset to where the confidence level is in the output matrix of the
+  // darknet.
   private static final int CONFIDENCE_INDEX = 4;
   private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
 
   private float confidenceThreshold = 0.25F;
-  // the column in the detection matrix that contains the confidence level.  (I think?)
+  // the column in the detection matrix that contains the confidence level. (I
+  // think?)
   // int probability_index = 5;
   // yolo file locations
   // private String darknetHome = "c:/dev/workspace/darknet/";
@@ -168,11 +187,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     log.info("Completed downloading yolo model");
     net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
     log.info("Loaded yolo darknet model to opencv");
-    //load the class names
+    // load the class names
     try {
       classNames = loadClassNames(darknetHome + File.separator + modelNames);
     } catch (IOException e) {
-      //e.printStackTrace();
+      // e.printStackTrace();
       log.warn("Error unable to load class names from file {}", modelNames);
       return;
     }
@@ -197,10 +216,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
     if (lastResult != null) {
-      // the thread running will be updating lastResult for it as fast as it can.
+      // the thread running will be updating lastResult for it as fast as it
+      // can.
       displayResult(image, lastResult);
     }
-    // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
+    // ok now we just need to update the image that the current thread is
+    // processing (if the current thread is idle i guess?)
     lastImage = image;
     pending = true;
     return image;
@@ -213,10 +234,14 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   private void displayResult(IplImage image, ArrayList<YoloDetectedObject> result) {
     DecimalFormat df2 = new DecimalFormat("#.###");
     for (YoloDetectedObject obj : result) {
+      CvPoint leftCorner = cvPoint(obj.boundingBox.x(), obj.boundingBox.y());
       String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
-      // anchor point for text.
-      cvPutText(image, label, cvPoint(obj.boundingBox.x(), obj.boundingBox.y()), font, CvScalar.YELLOW);
-      // obj.boundingBox.
+      
+      cvDrawRect(image, leftCorner, cvPoint(obj.boundingBox.x() + 30 * obj.label.length(), obj.boundingBox.y()-20), CvScalar.BLUE,
+          CV_FILLED, 0, 0);
+      // TODO - hashcode related color
+      // CvScalar objColor = cvColorToScalar(obj.label.hashCode(), CV_8U);
+      cvPutText(image, label, cvPoint(obj.boundingBox.x() + 6, obj.boundingBox.y() - 6), font, CvScalar.YELLOW);
       drawRect(image, obj.boundingBox, CvScalar.BLUE);
     }
   }
@@ -258,7 +283,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         // lastResult = dl4j.classifyImageVGG16(lastImage);
         log.debug("Doing yolo...");
         lastResult = yoloFrame(lastImage);
-        //log.info("Yolo done.");
+        // log.info("Yolo done.");
         // we processed, next object we'll pick up.
         pending = false;
         count++;
@@ -270,14 +295,13 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       } else {
         log.info("No Image to classify...");
       }
-      // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
+      // TODO: see why there's a race condition. i seem to need a little delay
+      // here o/w the recognition never seems to start.
       // maybe lastImage needs to be marked as volatile ?
       try {
         Thread.sleep(1);
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+        /* dont care */}
     }
     log.info("Exited the run loop for Yolo!!! you shouldn't see this.");
   }
@@ -288,18 +312,25 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
 
-    //log.info("Yolo frame start");
+    // log.info("Yolo frame start");
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
-    //log.info("Input mat created");
-    // TODO: I think yolo expects RGB color (which is inverted in the next step)  so if the input image isn't in RGB color, we might need a cvCutColor
-    Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false); //Convert Mat to batch of images
+    // log.info("Input mat created");
+    // TODO: I think yolo expects RGB color (which is inverted in the next step)
+    // so if the input image isn't in RGB color, we might need a cvCutColor
+    Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false); // Convert
+                                                                                                       // Mat
+                                                                                                       // to
+                                                                                                       // batch
+                                                                                                       // of
+                                                                                                       // images
     // put our frame/input blob into the model.
     // log.info("input blob created");
     net.setInput(inputBlob, "data");
 
     log.debug("Feed forward!");
     // log.info("Input blob set on network.");
-    // ask for the detection_out layer i guess?  not sure the details of the forward method, but this computes everything like magic!
+    // ask for the detection_out layer i guess? not sure the details of the
+    // forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
     // log.info("output detection matrix produced");
     log.debug("detection matrix computed");
@@ -312,19 +343,22 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         continue;
       }
 
-      // System.out.println("\nCurrent row has " + currentRow.size().width() + "=width " + currentRow.size().height() + "=height.");
+      // System.out.println("\nCurrent row has " + currentRow.size().width() +
+      // "=width " + currentRow.size().height() + "=height.");
       // currentRow.position(probability_index);
       // int probability_size = detectionMat.cols() - probability_index;
       // detectionMat;
 
-      //String className = getWithDefault(classNames, i); 
-      // System.out.print("\nROW (" + className + "): " + currentRow.getFloatBuffer().get(4) + " -- \t\t");
+      // String className = getWithDefault(classNames, i);
+      // System.out.print("\nROW (" + className + "): " +
+      // currentRow.getFloatBuffer().get(4) + " -- \t\t");
       for (int c = CONFIDENCE_INDEX + 1; c < currentRow.size().get(); c++) {
         float val = currentRow.getFloatBuffer().get(c);
         // TODO: this filtering logic is probably wrong.
         if (val > 0.0) {
           String label = classNames.get(c - CONFIDENCE_INDEX - 1);
-          // System.out.println("Index : " + c + "->" + val + " label : " + classNames.get(c-probability_index) );
+          // System.out.println("Index : " + c + "->" + val + " label : " +
+          // classNames.get(c-probability_index) );
           // let's just say this is something we've detected..
           // ok. in theory this is something we think it might actually be.
           float x = currentRow.getFloatBuffer().get(0);
@@ -344,7 +378,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
             yLeftBottom = 0;
           }
 
-          // crop the right top 
+          // crop the right top
           if (xRightTop > inputMat.cols()) {
             xRightTop = inputMat.cols();
           }
@@ -363,7 +397,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           if (debug) {
             show(cropped, "detected img");
           }
-          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().frameIndex, cropped, null);
+          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().getFrameIndex(), cropped, null);
           yoloObjects.add(obj);
         }
       }
@@ -373,10 +407,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
-    // 
+    //
     log.debug(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
 
-    // TODO: figure out if the width/height is too large!  don't want to go array out of bounds
+    // TODO: figure out if the width/height is too large! don't want to go array
+    // out of bounds
     Mat cropped = new Mat(inputMat, boundingBox);
 
     IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));

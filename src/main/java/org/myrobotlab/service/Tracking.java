@@ -219,7 +219,6 @@ public class Tracking extends Service {
     opencv.addFilter(FILTER_FACE_DETECT);
     opencv.setDisplayFilter(FILTER_FACE_DETECT);
     opencv.capture();
-    opencv.publishOpenCVData(true);
     setState(STATE_FACE_DETECT);
     return fr;
   }
@@ -479,7 +478,6 @@ public class Tracking extends Service {
     opencv.setDisplayFilter(FILTER_LK_OPTICAL_TRACK);
 
     opencv.capture();
-    opencv.publishOpenCVData(true);
 
     setState(STATE_LK_TRACKING_POINT);
   }
@@ -790,7 +788,7 @@ public class Tracking extends Service {
 
       t01.connect(arduinoPort, xPin, yPin, cameraIndex);
       OpenCV opencv = t01.getOpenCV();
-      opencv.captureFromImageFile("resource/OpenCV/testData/ryan.jpg");
+      opencv.capture("resource/OpenCV/testData/ryan.jpg");
       opencv.broadcastState();
 
 

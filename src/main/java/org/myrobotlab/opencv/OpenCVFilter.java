@@ -34,6 +34,7 @@ import org.bytedeco.javacpp.opencv_core.CvSize;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public abstract class OpenCVFilter implements Serializable {
@@ -52,13 +53,12 @@ public abstract class OpenCVFilter implements Serializable {
   int width;
   int height;
   int channels;
-//   int frameIndex;
 
   transient CvSize imageSize;
 
   public String sourceKey;
 
-  transient protected VideoProcessor vp;
+  transient protected OpenCV vp;
   
   protected transient Boolean running;
 
@@ -86,11 +86,11 @@ public abstract class OpenCVFilter implements Serializable {
 
   public abstract void imageChanged(IplImage image);
 
-  public void setVideoProcessor(VideoProcessor vp) {
+  public void setVideoProcessor(OpenCV vp) {
     this.vp = vp;
   }
 
-  public VideoProcessor getVideoProcessor() {
+  public OpenCV getVideoProcessor() {
     return vp;
   }
 
@@ -113,12 +113,12 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   public void invoke(String method, Object... params) {
-    vp.getOpencv().invoke(method, params);
+    vp.invoke(method, params);
   }
 
   public void broadcastFilterState() {
     FilterWrapper fw = new FilterWrapper(this.name, this);
-    vp.getOpencv().invoke("publishFilterState", fw);
+    vp.invoke("publishFilterState", fw);
   }
 
   public ArrayList<String> getPossibleSources() {
