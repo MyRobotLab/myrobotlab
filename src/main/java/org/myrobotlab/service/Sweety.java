@@ -150,8 +150,8 @@ public class Sweety extends Service {
   int leftPinky[] = {9,65,180,180};
  
  // Head
-  int neckTilt[] = {6,0,75,30};
-  int neckPan[] = {7,20,140,80};
+  int neckTilt[] = {6,10,70,50};
+  int neckPan[] = {7,15,140,75};
   
   /**
    * Replace the  values of an array , if a value == -1 the old value is keep
@@ -849,7 +849,9 @@ public class Sweety extends Service {
     leftPinkyServo = (Servo) Runtime.start("leftPinkyServo","Servo"); 
     neckTiltServo = (Servo) Runtime.start("neckTiltServo","Servo");
     neckPanServo = (Servo) Runtime.start("neckPanServo","Servo");
-
+    
+    neckTiltServo.setInverted(true);
+    
     rightShoulderServo.setMinMax(rightShoulder[min], rightShoulder[max]);
     rightArmServo.setMinMax(rightArm[min], rightArm[max]);
     rightBicepsServo.setMinMax(rightBiceps[min], rightBiceps[max]);
@@ -875,28 +877,23 @@ public class Sweety extends Service {
 
   }
 
-  // TODO modify this function to fit new sweety head
+  /**
+   * Start the tracking services
+   */
   public void startTrack(String port, int CameraIndex) throws Exception {
     neckTiltServo.detach();
     neckPanServo.detach();
 
-    tracker = (Tracking) Runtime.start("tracker","Tracking");
-    // OLD WAY
-    //leftTracker.y.setPin(39); // neckTilt
-    //leftTracker.connect(port);
-    
-    tracker.connect(port, neckTilt[pin], neckPan[pin]);
-
+    tracker = (Tracking) Runtime.start("tracker","Tracking");    
+    tracker.connect(port, neckTilt[pin], neckPan[pin],CameraIndex);
     tracker.pid.invert("y");
-    tracker.opencv.setCameraIndex(CameraIndex);
+    tracker.clearPreFilters();
     tracker.opencv.capture();
-
-    saying("tracking activated.");
+    
   }
 
   /**
    * Start the ultrasonic sensors services
-   * Start the tracking services
    * @param port port
    * @throws Exception e 
    */
