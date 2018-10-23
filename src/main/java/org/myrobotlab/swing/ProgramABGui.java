@@ -27,6 +27,7 @@ import javax.swing.text.html.StyleSheet;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.Console;
@@ -64,6 +65,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   private JButton reloadSession = new JButton("Reload chatbot");
   private JButton saveAIML = new JButton("Save AIML");
   private JButton savePredicates = new JButton("Save predicates");
+  private String[] logsClassOnly = { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" };
 
   JCheckBox filter = new JCheckBox("Filter ( ' , - )");
   JCheckBox visualDebug = new JCheckBox("Debug : ");
@@ -208,7 +210,6 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     if (!debugJavaConsole.isStarted()) {
       debugJavaConsole.append("AIML debug ON :");
       // force info log for specific class to feed debug window
-      String[] logsClassOnly = { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" };
       debugJavaConsole.startLogging(logsClassOnly);
     }
   }
@@ -247,6 +248,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
+        checkLogLevelForConsole();
         try {
           responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<b>" + userName.getText() + "</b>: " + text, 0, 0, null);
         } catch (Exception e) {
@@ -260,9 +262,19 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        debugJavaConsole.append("[OOB] "+text.replaceAll("\\s+", "").trim());
+        debugJavaConsole.append("[OOB] " + text.replaceAll("\\s+", "").trim());
       }
     });
+  }
+
+  private void checkLogLevelForConsole() {
+    if (LoggingFactory.getInstance().getLevel() == "WARN" || LoggingFactory.getInstance().getLevel() == "ERROR") {
+      for (String s : logsClassOnly) {
+        if (!LoggerFactory.getLogger(s).isInfoEnabled()) {
+          LoggingFactory.getInstance().setLevel(s, "INFO");
+        }
+      }
+    }
   }
 
   public void onState(final ProgramAB programab) {
