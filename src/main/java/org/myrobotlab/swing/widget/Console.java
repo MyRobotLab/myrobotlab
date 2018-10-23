@@ -196,11 +196,6 @@ public class Console implements Appender<ILoggingEvent> {
     if (logging) {
       final String msg;
       // force info logging for debug console, if asked
-      if (LoggingFactory.getInstance().getLevel() == "WARN" || LoggingFactory.getInstance().getLevel() == "ERROR") {
-        for (String s : logsClassOnly) {
-          LoggingFactory.getInstance().setLevel(s, "INFO");
-        }
-      }
       if (logsClassOnly != null && Arrays.stream(logsClassOnly).anyMatch(loggingEvent.getLoggerName()::equals)) {
         msg = loggingEvent.toString().trim().replace("  ", " ") + "\n";
       } else if (logsClassOnly == null) {
