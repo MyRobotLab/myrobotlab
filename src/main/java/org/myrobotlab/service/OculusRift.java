@@ -166,7 +166,7 @@ public class OculusRift extends Service implements PointPublisher {
 			}
 			if (leftEyeURL != null) {
 				leftOpenCV.setInputFileName(leftEyeURL);
-				leftOpenCV.setInputSource(OpenCV.INPUT_SOURCE_IMAGE_FILE);
+				leftOpenCV.setInputSource(OpenCV.INPUT_SOURCE_FILE);
 			}
 			subscribe(leftOpenCV.getName(), "publishDisplay");
 
@@ -184,7 +184,7 @@ public class OculusRift extends Service implements PointPublisher {
 				}
 				if (rightEyeURL != null) {
 					rightOpenCV.setInputFileName(rightEyeURL);
-		      rightOpenCV.setInputSource(OpenCV.INPUT_SOURCE_IMAGE_FILE);
+		      rightOpenCV.setInputSource(OpenCV.INPUT_SOURCE_FILE);
 				}
 				if (cvInputSource != null) {
 					rightOpenCV.setInputSource(cvInputSource);

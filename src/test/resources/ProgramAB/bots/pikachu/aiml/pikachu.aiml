@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <aiml>
-	<category>
-		<pattern>私は*です</pattern>
-		<!--  あなたを*に会うのはいいことだ   ?? -->
-		<!--  あなたを*に会えてうれしい -->
-		<!-- あなたに会えてよかったXXXXX -->
-		<template>あなたに会えてよかった<star /></template>
-	</category>
+<!--  -->
+<!--  -->
+<category><pattern>私 は * です</pattern>
+<template>あなたに会えてよかった<star/></template>
+</category>
 </aiml>
