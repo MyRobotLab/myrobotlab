@@ -85,7 +85,10 @@ public class DruppIKSolver {
   
   public double[] solve(double roll, double pitch, double yaw) throws Exception {
     
-    double[] sols = new double[3];
+    //double[] sols = new double[3];
+    RPY[0] = roll;
+    RPY[1] = pitch;
+    RPY[2] = yaw;
     initConstants();
     sols[0] = solveUp();
     sols[1] = solveMiddle();
