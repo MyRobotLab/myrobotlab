@@ -1,7 +1,7 @@
 package org.myrobotlab.kinematics;
 
 import org.junit.Test;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class DruppIKSolverTest {
   
@@ -9,9 +9,9 @@ public class DruppIKSolverTest {
   public void testDrupp() throws Exception {
     DruppIKSolver solver = new DruppIKSolver();
 
-    double roll = 0;
-    double pitch = 0; 
-    double yaw = 0;
+    double roll = 0.0;
+    double pitch = 0.0; 
+    double yaw = 0.0;
     
     double[] result = solver.solve(roll, pitch, yaw);
     
@@ -19,8 +19,11 @@ public class DruppIKSolverTest {
     System.out.println("Result : " + result[1]);
     System.out.println("Result : " + result[2]);
     
-   // Assert.Equals(result[0], 0.0);
-    Assert.assertEquals(result[0], 0.0);
+   
+    Assert.assertEquals(0.0, result[0],  0.01);
+    Assert.assertEquals(-2.09, result[1],  0.01);
+    Assert.assertEquals(2.09, result[2],  0.01);
+
     
   }
 
