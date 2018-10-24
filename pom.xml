@@ -131,9 +131,10 @@
 <!-- BoofCv begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
-    <artifactId>all</artifactId>
-    <version>0.26</version>
+  <artifactId>boofcv-core</artifactId>
+  <version>0.31</version>
     <scope>provided</scope>
+    <!--  can this be removed
       <exclusions>
         <exclusion>
           <groupId>org.bytedeco</groupId>
@@ -144,6 +145,19 @@
           <artifactId>opencv</artifactId>
         </exclusion>
       </exclusions>
+       -->
+  </dependency>
+  <dependency>
+    <groupId>org.boofcv</groupId>
+    <artifactId>boofcv-swing</artifactId>
+    <version>0.31</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.boofcv</groupId>
+    <artifactId>boofcv-openkinect</artifactId>
+    <version>0.31</version>
+    <scope>provided</scope>
   </dependency>
 <!-- BoofCv end -->
 
@@ -288,6 +302,12 @@
     <version>3.1.7</version>
     <scope>provided</scope>
   </dependency>	
+	<dependency>
+	    <groupId>com.thoughtworks.xstream</groupId>
+	    <artifactId>xstream</artifactId>
+	    <version>1.4.10</version>
+	    <scope>provided</scope>
+	</dependency>  
 <!-- DocumentPipeline end -->
 
 <!-- Esp8266_01 begin -->
@@ -898,6 +918,11 @@
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
+  <dependency>
+  <groupId>com.github.axet</groupId>
+  <artifactId>vget</artifactId>
+  <version>1.1.34</version>
+</dependency>
 <!-- OpenCV end -->
 
 <!-- OpenNi begin -->

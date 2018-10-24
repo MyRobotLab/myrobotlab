@@ -496,7 +496,9 @@ public class OpenCVData implements Serializable {
 	 * 
 	 */
 	public void setFilter(OpenCVFilter inFilter) {
-		this.selectedFilter = inFilter.name;
+	  if (inFilter != null) {
+	    this.selectedFilter = inFilter.name;
+	  }
 	}
 
 	public void setInputFilterName(String inputFilterName) {
