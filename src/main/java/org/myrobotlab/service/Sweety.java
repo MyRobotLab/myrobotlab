@@ -31,12 +31,13 @@ public class Sweety extends Service {
   transient public WebkitSpeechRecognition ear;
   transient public WebGui webGui;
   transient public MarySpeech mouth;
-  transient public Tracking tracker;
+  transient public static Tracking tracker;
   transient public ProgramAB chatBot;
-  transient public OpenNi openni;
+  transient public static OpenNi openni;
   transient public Pid pid;
   transient public Pir pir;
   transient public HtmlFilter htmlFilter;
+  transient public static OpenCV opencv;
   
   // Right arm Servomotors
   transient public Servo rightShoulderServo;
@@ -880,16 +881,15 @@ public class Sweety extends Service {
   /**
    * Start the tracking services
    */
-  public void startTrack(String port, int CameraIndex) throws Exception {
-    neckTiltServo.detach();
-    neckPanServo.detach();
-
-    tracker = (Tracking) Runtime.start("tracker","Tracking");    
-    tracker.connect(port, neckTilt[pin], neckPan[pin],CameraIndex);
+  public void startTrack() throws Exception {
+    //neckTiltServo.detach();
+    //neckPanServo.detach();
+    tracker = (Tracking) Runtime.start("tracker","Tracking");  
+    opencv =  tracker.getOpenCV();
+    tracker.connect(opencv, neckTiltServo, neckPanServo);
     tracker.pid.invert("y");
-    tracker.clearPreFilters();
-    tracker.opencv.capture();
-    
+	tracker.clearPreFilters();
+     
   }
 
   /**
