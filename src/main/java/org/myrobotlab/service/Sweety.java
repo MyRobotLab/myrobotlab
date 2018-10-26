@@ -37,7 +37,6 @@ public class Sweety extends Service {
   transient public Pid pid;
   transient public Pir pir;
   transient public HtmlFilter htmlFilter;
-  transient public static OpenCV opencv;
   
   // Right arm Servomotors
   transient public Servo rightShoulderServo;
@@ -151,8 +150,8 @@ public class Sweety extends Service {
   int leftPinky[] = {9,65,180,180};
  
  // Head
-  int neckTilt[] = {6,10,70,50};
-  int neckPan[] = {7,15,140,75};
+  int neckTilt[] = {6,15,50,30};
+  int neckPan[] = {7,20,130,75};
   
   /**
    * Replace the  values of an array , if a value == -1 the old value is keep
@@ -161,7 +160,7 @@ public class Sweety extends Service {
    * If one of these arrays is less or more than four numbers length , it doesn't will be changed.
    */
   int[][] changeArrayValues(int[][] valuesArray){
-    // valuesArray contain first the news values and after the old values
+    // valuesArray contain first the news values and after, the old values
     for (int i = 0; i < (valuesArray.length / 2 ); i++) {
       if (valuesArray[i].length ==4 ){
         for (int j = 0; j < 3; j++) {
@@ -178,7 +177,7 @@ public class Sweety extends Service {
   }
 
   /**
-   * Set pin, min, max, and rest for each servos. -1 mean in an array mean "no change"
+   * Set pin, min, max, and rest for each servos. -1 in an array mean "no change"
    * Exemple setRightArm({39,1,2,3},{40,1,2,3},{41,1,2,3},{-1,1,2,3},{-1,1,2,3})
    * Python exemple : sweety.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
    */
@@ -303,6 +302,8 @@ public class Sweety extends Service {
     neckTiltServo.attach(arduino, neckTilt[pin]);
     neckPanServo.attach(arduino, neckPan[pin]);
     
+ // Inverted servos
+    neckTiltServo.setInverted(true);
   }
 
   /**
@@ -851,8 +852,7 @@ public class Sweety extends Service {
     neckTiltServo = (Servo) Runtime.start("neckTiltServo","Servo");
     neckPanServo = (Servo) Runtime.start("neckPanServo","Servo");
     
-    neckTiltServo.setInverted(true);
-    
+    // Set min and max angle for each servos
     rightShoulderServo.setMinMax(rightShoulder[min], rightShoulder[max]);
     rightArmServo.setMinMax(rightArm[min], rightArm[max]);
     rightBicepsServo.setMinMax(rightBiceps[min], rightBiceps[max]);
@@ -885,10 +885,11 @@ public class Sweety extends Service {
     //neckTiltServo.detach();
     //neckPanServo.detach();
     tracker = (Tracking) Runtime.start("tracker","Tracking");  
-    opencv =  tracker.getOpenCV();
-    tracker.connect(opencv, neckTiltServo, neckPanServo);
-    tracker.pid.invert("y");
+    sleep(1000);
+    tracker.connect(tracker.getOpenCV(),neckPanServo ,neckTiltServo);
+    //tracker.pid.invert("y");
 	tracker.clearPreFilters();
+	
      
   }
 
