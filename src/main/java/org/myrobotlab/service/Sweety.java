@@ -809,8 +809,8 @@ public class Sweety extends Service {
     
 
     arduino = (Arduino) Runtime.start("arduino","Arduino");
-    adaFruit16cLeft = (Adafruit16CServoDriver)  Runtime.start("adaFruit16C","Adafruit16CServoDriver");
-    adaFruit16cRight = (Adafruit16CServoDriver)  Runtime.start("adaFruit16C","Adafruit16CServoDriver");
+    adaFruit16cLeft = (Adafruit16CServoDriver)  Runtime.start("I2cServoControlLeft","Adafruit16CServoDriver");
+    adaFruit16cRight = (Adafruit16CServoDriver)  Runtime.start("I2cServoControlRight","Adafruit16CServoDriver");
     chatBot = (ProgramAB) Runtime.start("chatBot","ProgramAB");
     htmlFilter = (HtmlFilter) Runtime.start("htmlFilter","HtmlFilter");
     mouth = (MarySpeech) Runtime.start("mouth","MarySpeech");
@@ -876,14 +876,35 @@ public class Sweety extends Service {
     neckTiltServo.setMinMax(neckTilt[min], neckTilt[max]);
     neckPanServo.setMinMax(neckPan[min], neckPan[max]);
 
+    // Set rest for each servos
+    rightShoulderServo.setRest(rightShoulder[rest]);
+    rightArmServo.setRest(rightArm[rest]);
+    rightBicepsServo.setRest(rightBiceps[rest]);
+    rightElbowServo.setRest(rightElbow[rest]);
+    rightWristServo.setRest(rightWrist[rest]);
+    leftShoulderServo.setRest(leftShoulder[rest]);
+    leftArmServo.setRest(leftArm[rest]);
+    leftBicepsServo.setRest(leftBiceps[rest]);
+    leftElbowServo.setRest(leftElbow[rest]);
+    leftWristServo.setRest(leftWrist[rest]);
+    rightThumbServo.setRest(rightThumb[rest]);
+    rightIndexServo.setRest(rightIndex[rest]);
+    rightMiddleServo.setRest(rightMiddle[rest]);
+    rightRingServo.setRest(rightRing[rest]);
+    rightPinkyServo.setRest(rightPinky[rest]);
+    leftThumbServo.setRest(leftThumb[rest]);
+    leftIndexServo.setRest(leftIndex[rest]);
+    leftMiddleServo.setRest(leftMiddle[rest]);
+    leftRingServo.setRest(leftRing[rest]);
+    leftPinkyServo.setRest(leftPinky[rest]);
+    neckTiltServo.setRest(neckTilt[rest]);
+    neckPanServo.setRest(neckPan[rest]);
   }
 
   /**
    * Start the tracking services
    */
   public void startTrack() throws Exception {
-    //neckTiltServo.detach();
-    //neckPanServo.detach();
     tracker = (Tracking) Runtime.start("tracker","Tracking");  
     sleep(1000);
     tracker.connect(tracker.getOpenCV(),neckPanServo ,neckTiltServo);
@@ -922,10 +943,6 @@ public class Sweety extends Service {
   public void stopTrack() throws Exception {
     tracker.opencv.stopCapture();
     tracker.releaseService();
-    neckTiltServo.attach(arduino, neckTilt[pin]);
-    neckPanServo.attach(arduino, neckPan[pin]);
-
-    saying("the tracking if stopped.");
   }
 
   public OpenNi startOpenNI() throws Exception {
