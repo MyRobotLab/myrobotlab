@@ -1256,6 +1256,24 @@
   </dependency>
 <!-- WebGui end -->
 
+<!-- WebSocketConnector begin -->
+  <dependency>
+    <groupId>javax.websocket</groupId>
+    <artifactId>javax.websocket-api</artifactId>
+    <version>1.1</version>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus</groupId>
+    <artifactId>tyrus-client</artifactId>
+    <version>1.1</version>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus</groupId>
+    <artifactId>tyrus-container-grizzly</artifactId>
+    <version>1.1</version>
+  </dependency>
+<!-- WebSocketConnector end -->
+
 <!-- Wii begin -->
   <dependency>
     <groupId>wiiusej</groupId>
