@@ -25,6 +25,9 @@
 
 package org.myrobotlab.opencv;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -52,10 +55,15 @@ public class OpenCVFilterCreateHistogram extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // what can you expect? nothing? - if data != null then error?
 
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 

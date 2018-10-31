@@ -42,6 +42,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
 import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
 import static org.bytedeco.javacpp.opencv_video.cvCalcOpticalFlowPyrLK;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.BytePointer;
@@ -112,7 +114,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   }
 
   @Override
-  public IplImage display(IplImage frame, OpenCVData data) {
+  public void display() {
 
     // Make an image of the results
     // for (int i = 0; i < count.get(); i++) {
@@ -167,7 +169,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (channels == 3) {
       cvCvtColor(image, imgB, CV_BGR2GRAY);
@@ -300,5 +302,11 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       clearPoints();
     }
   }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
+
 
 }

@@ -27,15 +27,14 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCircle;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
-import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,7 +95,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 
   DecimalFormat df = new DecimalFormat("0.###");
 
-  transient CvScalar color = new CvScalar();
+  transient Color color = null;
 
   transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
@@ -109,7 +108,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
   }
 
   @Override
-  public IplImage display(IplImage frame, OpenCVData data) {
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
 
     float gradient = 1 / oldest.value;
     int x, y;
@@ -122,14 +121,14 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
       corners.position(i);
       x = (int) corners.x();
       y = (int) corners.y();
-
+      
       if (colorAgeOfPoint) {
         String key = String.format("%d.%d", x, y);
         if (values.containsKey(key)) {
           float scale = (values.get(String.format("%d.%d", x, y)) * (gradient));
           if (scale == 1.0f) // grey
           {
-            color = CvScalar.WHITE;
+            color = Color.WHITE;
             // TODO - find what this is color
 
           } else {
@@ -137,16 +136,15 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
             // color.setVal(3, scale*10);
             Color c = Color.getHSBColor(scale, 1.0f, 0.8f);
 
-            color.red(c.getRed());
-            color.blue(c.getBlue());
-            color.green(c.getGreen());
+            color = new Color(c.getRed(), c.getBlue(), c.getGreen());
             // graphics.setColor(new Color(Color.HSBtoRGB(scale,
             // 0.8f, 0.7f)));
             // CV_HSV2RGB(scale);
           }
-          cvCircle(frame, cvPoint(x, y), 1, color, -1, 8, 0);
-          cvPutText(frame, String.format("%s", df.format(scale)), cvPoint(x, y), font, color);
-
+          graphics.setColor(color);
+          graphics.drawOval(x, y, 10, 10);
+          graphics.drawString(String.format("%s", df.format(scale)), x, y);
+          
         } else {
           log.error(key); // FIXME FIXME FIXME ---- WHY THIS SHOULDN"T
           // HAPPEN BUT IT HAPPENS ALL THE TIME
@@ -155,9 +153,8 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
       corners.position(i);
       // graphics.drawOval(x, y, 3, 1);
     }
-
-    return frame; // TODO - ran out of memory here
-
+    
+    return image;
   }
 
   @Override
@@ -165,13 +162,11 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
     grey = cvCreateImage(cvGetSize(image), 8, 1);
     eig = cvCreateImage(cvGetSize(grey), 32, 1);
     temp = cvCreateImage(cvGetSize(grey), 32, 1);
-
     stableIterations = new HashMap<String, Integer>();
-
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (channels == 3) {
       grey = IplImage.create(imageSize, 8, 1);
@@ -233,8 +228,8 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 
     }
 
-    data.set(points);
-
+    put("points", points);
+    
     return image;
   }
 

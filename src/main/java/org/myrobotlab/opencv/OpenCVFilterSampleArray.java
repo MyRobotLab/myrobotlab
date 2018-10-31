@@ -25,6 +25,7 @@
 
 package org.myrobotlab.opencv;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -60,7 +61,7 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     frameBuffer = OpenCV.IplImageToBufferedImage(image);// image.getBufferedImage();
 
@@ -76,6 +77,11 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
 
     return image;
 
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

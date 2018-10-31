@@ -28,11 +28,8 @@ package org.myrobotlab.swing.opencv;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -40,7 +37,6 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.opencv.FilterWrapper;
-import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterTracker;
 import org.myrobotlab.service.SwingGui;
 

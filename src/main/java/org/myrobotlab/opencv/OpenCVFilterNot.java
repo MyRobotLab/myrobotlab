@@ -27,6 +27,9 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.cvNot;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -54,10 +57,16 @@ public class OpenCVFilterNot extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     buffer = image.clone(); // FIXME I think cvcopy is safer
     cvNot(image, buffer);
     return buffer;
   }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
+
 
 }

@@ -30,6 +30,9 @@ import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -38,13 +41,9 @@ public class OpenCVFilterGray extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGray.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGray.class);
 
   transient IplImage gray = null;
-
-  public OpenCVFilterGray() {
-    super();
-  }
 
   public OpenCVFilterGray(String name) {
     super(name);
@@ -56,13 +55,18 @@ public class OpenCVFilterGray extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (image.nChannels() == 3) {
       cvCvtColor(image, gray, CV_BGR2GRAY);
       return gray;
     }
 
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 

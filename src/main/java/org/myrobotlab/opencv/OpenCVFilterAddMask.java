@@ -28,6 +28,9 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvZero;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -36,15 +39,11 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAddMask.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAddMask.class);
   public String sourceName;
 
   transient IplImage dst = null;
   transient IplImage negativeImage = null;
-
-  public OpenCVFilterAddMask() {
-    super();
-  }
 
   public OpenCVFilterAddMask(String name) {
     super(name);
@@ -56,14 +55,10 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
-
-    // cvAnd (src1, src2, dst, mask)
-    // f'ing rocks ! -
-    // http://www.neuroforge.co.uk/index.php/masking-colour-images
+  public IplImage process(IplImage image) throws InterruptedException {
     if (sourceName != null) {
       // INFO - This filter has 2 keys !!!
-      IplImage src = data.get(sourceName);
+      IplImage src = data.getImage(sourceName);
       if (src != null) {
         if (dst == null) {
           dst = src.clone();
@@ -76,6 +71,11 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
       return image;
     }
 
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

@@ -2090,6 +2090,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // -------------- Messaging Ends -----------------------
   // ---------------- Status processing begin ------------------
   public Status error(Exception e) {
+    log.error("status:", e);
     Status ret = Status.error(e);
     ret.name = getName();
     invoke("publishStatus", ret);

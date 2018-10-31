@@ -45,6 +45,8 @@ import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -105,7 +107,7 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
 
     // INFO - This filter has 2 sources !!!
     IplImage depth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
@@ -255,6 +257,11 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
       int value = buffer.get(y * bytesPerX * lastDepthImage.width() + x * bytesPerX) & 0xFF;
       log.info("{}", value);
     }
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

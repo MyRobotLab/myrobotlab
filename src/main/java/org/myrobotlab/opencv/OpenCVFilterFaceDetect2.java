@@ -15,6 +15,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -173,7 +175,7 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) 
+  public IplImage process(IplImage image) 
 		  throws InterruptedException {
     // convert to grayscale
     Frame grayFrame = makeGrayScale(image);
@@ -430,6 +432,11 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
 
   public void setCascadeDir(String cascadeDir) {
     this.cascadeDir = cascadeDir;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

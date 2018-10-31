@@ -25,6 +25,9 @@
 
 package org.myrobotlab.opencv;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -54,7 +57,7 @@ public class OpenCVFilterResetImageRoi extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     /*
      * cfg.set(USE_INPUT_IMAGE_NAME, false); cfg.set(USE_OUTPUT_IMAGE_NAME,
@@ -75,6 +78,11 @@ public class OpenCVFilterResetImageRoi extends OpenCVFilter {
      * // if (cfg.getBoolean(USE_ROI)) // { cvResetImageROI(dst); // }
      */
     return image; // TODO - src dst or image? consistency?
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

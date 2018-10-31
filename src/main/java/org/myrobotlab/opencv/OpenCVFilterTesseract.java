@@ -5,6 +5,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -49,7 +50,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
   }
   
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
@@ -114,5 +115,10 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
         e.printStackTrace();
       }
     }
+  }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 }

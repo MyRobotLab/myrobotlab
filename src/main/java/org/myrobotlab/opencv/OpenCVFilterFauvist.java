@@ -31,6 +31,9 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCanny;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -63,7 +66,7 @@ public class OpenCVFilterFauvist extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (image == null) {
       log.error("image is null");
@@ -90,6 +93,11 @@ public class OpenCVFilterFauvist extends OpenCVFilter {
     cvCanny(gray, inlines, lowThreshold, highThreshold, apertureSize);
 
     return inlines;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

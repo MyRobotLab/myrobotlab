@@ -49,6 +49,9 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.Point2Df;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 
@@ -104,7 +107,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   }
   
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     
     // TODO: I suspect this would be faster if we cut color first.
     // cvCutColor()
@@ -131,7 +134,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
         float yC = (float) (boundingBox.y() + boundingBox.height()/2);
         Point2Df center = new Point2Df(xC, yC);
         pointsToPublish.add(center);
-        data.set(pointsToPublish);
+        data.put("TrackingPoints",pointsToPublish);
       }
     }
     return image;
@@ -201,6 +204,11 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   public void setBoxHeight(int boxHeight) {
     this.boxHeight = boxHeight;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

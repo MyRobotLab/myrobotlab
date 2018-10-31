@@ -25,7 +25,9 @@
 
 package org.myrobotlab.opencv;
 
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
@@ -52,11 +54,17 @@ public class OpenCVFilterSetImageROI extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // cvSetImageROI(image, cvRect(1.0,1.0,20));
 
     return image; // TODO - src dst or image? consistency?
   }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
+
 
 }

@@ -30,6 +30,8 @@ import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -67,8 +69,13 @@ public class OpenCVFilterSplit extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     cvCopy(image, splitImage);
+    return image;
+  }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 

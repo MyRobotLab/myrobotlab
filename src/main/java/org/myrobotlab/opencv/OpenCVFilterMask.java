@@ -29,6 +29,9 @@ import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -56,7 +59,7 @@ public class OpenCVFilterMask extends OpenCVFilter {
 	}
 
 	@Override
-	public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+	public IplImage process(IplImage image) throws InterruptedException {
 
 		if (maskName != null) {
 			// INFO - This filter has 2 keys !!!
@@ -71,5 +74,10 @@ public class OpenCVFilterMask extends OpenCVFilter {
 		}
 		return image;
 	}
+
+	 @Override
+	  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+	    return image;
+	  }
 
 }

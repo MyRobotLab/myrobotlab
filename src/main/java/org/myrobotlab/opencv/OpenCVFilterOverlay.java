@@ -33,6 +33,8 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -108,7 +110,7 @@ public class OpenCVFilterOverlay extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     // IPL_DEPTH_8U
     
     // make 4 channel buffer based on attributes of 3 channel image coming in...
@@ -150,6 +152,11 @@ public class OpenCVFilterOverlay extends OpenCVFilter {
   
   public void clear(){
     imageOverlays = new ArrayList<ImageOverlay>();
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

@@ -31,6 +31,8 @@ import static org.bytedeco.javacpp.opencv_core.cvScalar;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -67,7 +69,7 @@ public class OpenCVFilterKinectInterleave extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (image.nChannels() == 3) // rgb
     {
@@ -115,6 +117,11 @@ public class OpenCVFilterKinectInterleave extends OpenCVFilter {
     x = inX;
     y = inY;
 
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

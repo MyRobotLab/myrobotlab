@@ -42,6 +42,9 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvMatchTemplate;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.cvRectangle;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvRect;
@@ -107,7 +110,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     // cvMatchTemplate(iamge, arg1, arg2, arg3);
 
     /*
@@ -204,5 +207,11 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
     // }
     ++clickCount;
   }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
+
 
 }

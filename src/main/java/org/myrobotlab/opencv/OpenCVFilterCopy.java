@@ -30,6 +30,9 @@ import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -64,19 +67,25 @@ public class OpenCVFilterCopy extends OpenCVFilter {
 	}
 
 	@Override
-	public IplImage process(IplImage img, OpenCVData data) {
+	public IplImage process(IplImage image) {
 		IplImage copy = null;
 
 		// CvRect roiRect = new CvRect(0, 0, 30, 120);
 		// cvSetImageROI(img, roiRect);
-		copy = cvCreateImage(cvGetSize(img), img.depth(), img.nChannels());
-
-		cvCopy(img, copy, null);
+		copy = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
+		cvCopy(image, copy, null);
+		put("copy",image);
 		// vp.sources.put(vp.boundServiceName, String.format("%s.copy",
 		// vp.boundServiceName, name), img);
 		// cvResetImageROI(img);
 
 		return copy;
 	}
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

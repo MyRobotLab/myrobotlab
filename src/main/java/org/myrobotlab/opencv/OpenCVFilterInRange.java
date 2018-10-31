@@ -36,6 +36,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -108,7 +109,7 @@ public class OpenCVFilterInRange extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     ret = image;
 
@@ -243,6 +244,11 @@ public class OpenCVFilterInRange extends OpenCVFilter {
     int rgb = frameBuffer.getRGB(x, y);
     Color c = new Color(rgb);
     log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

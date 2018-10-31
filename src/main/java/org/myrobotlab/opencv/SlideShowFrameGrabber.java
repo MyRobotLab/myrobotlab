@@ -9,9 +9,6 @@ public class SlideShowFrameGrabber extends ImageFileFrameGrabber {
 
   // delay in ms between grabs.
   public int delay = 1000;
-
-  public String directory = "training";
-
   private ArrayList<File> imageFiles = new ArrayList<File>();
   private int grabCount = 0;
 
@@ -23,7 +20,10 @@ public class SlideShowFrameGrabber extends ImageFileFrameGrabber {
   }
 
   public void loadDirectory() {
-    File folder = new File(directory);
+    File folder = new File(path);
+    if (!folder.isDirectory()) {
+      log.error("file {} not a directory", path);
+    }
     File[] listOfFiles = folder.listFiles();
     for (File file : listOfFiles) {
       if (file.isFile()) {
@@ -67,11 +67,11 @@ public class SlideShowFrameGrabber extends ImageFileFrameGrabber {
   }
 
   public String getDirectory() {
-    return directory;
+    return path;
   }
 
   public void setDirectory(String directory) {
-    this.directory = directory;
+    this.path = directory;
   }
 
 }

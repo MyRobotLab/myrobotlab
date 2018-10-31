@@ -21,6 +21,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -399,7 +400,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     // convert to grayscale
     Frame grayFrame = makeGrayScale(image);
     int cols = grayFrame.imageWidth;
@@ -720,5 +721,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
   public void publishNoRecognizedFace() {
     log.info("Classifier not trained yet.");
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 }

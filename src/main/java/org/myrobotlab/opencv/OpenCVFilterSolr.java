@@ -89,7 +89,7 @@ public class OpenCVFilterSolr extends OpenCVFilter {
   }
   
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     
     if (solr == null) 
       initSolr();

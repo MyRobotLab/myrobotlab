@@ -27,6 +27,9 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_imgproc.cvErode;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -49,15 +52,18 @@ public class OpenCVFilterErode extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     cvErode(image, image, null, numberOfIterations); // 3 iterations
 
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 
