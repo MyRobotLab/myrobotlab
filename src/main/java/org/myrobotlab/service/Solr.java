@@ -754,7 +754,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // TODO: enforce UTC, or move this to the solr schema to do.
     doc.setField("date", new Date());
     doc.setField("frame_index", data.getFrameIndex());
-    doc.setField("selected_filter_name", data.getSelectedFilterName());
+    doc.setField("selected_filter_name", data.getSelectedFilter());
     doc.setField("name", data.getName());
     // add the training label
     doc.setField("label", openCvLabel);

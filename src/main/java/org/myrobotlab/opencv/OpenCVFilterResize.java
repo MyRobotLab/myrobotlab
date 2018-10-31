@@ -28,6 +28,9 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Size;
@@ -74,7 +77,7 @@ public class OpenCVFilterResize extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     Mat resizedMat = converterToMat.convertToMat(converterToIpl.convert(image));
     Mat res = resizeImage(resizedMat, destWidth, destHeight);
     return converterToMat.convertToIplImage(converterToIpl.convert(res));
@@ -94,6 +97,11 @@ public class OpenCVFilterResize extends OpenCVFilter {
 
   public void setDestHeight(int destHeight) {
     this.destHeight = destHeight;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

@@ -36,6 +36,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDilate;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawLine;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -387,7 +389,7 @@ public class OpenCVFilterMouse extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (image == null) {
       log.error("image is null");
@@ -438,6 +440,11 @@ public class OpenCVFilterMouse extends OpenCVFilter {
     invoke("publish", (Object) path);
 
     log.error("{}", path.size());
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 

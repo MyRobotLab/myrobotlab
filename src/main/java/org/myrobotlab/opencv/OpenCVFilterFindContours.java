@@ -45,6 +45,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,7 +132,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
    */
 
   @Override
-  public IplImage display(IplImage image, OpenCVData data) {
+  public void display() {
     ArrayList<Rectangle> boxes = data.getBoundingBoxArray();
     if (boxes != null) {
       for (Rectangle box : boxes) {
@@ -173,7 +175,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // FIXME 3 channel search ???
     if (image.nChannels() == 3) {
@@ -310,5 +312,11 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 
     return image;
   }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
+
 
 }

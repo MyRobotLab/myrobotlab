@@ -31,6 +31,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
@@ -90,7 +91,7 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     // cvCvtColor(image, buffer, CV_BGR2HSV);
     // avg = cxcore.cvAvg(image, null);
     // cvFillPoly( image, pt, arr, 2, random_color(&rng), line_type, 0 );
@@ -115,6 +116,11 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
      * cvScalar(160.0, 140.0, 20.0, 1.0); cvDrawRect(image, new CvPoint(20,200),
      * new CvPoint(40,230), fillColor, 2, 1, 0);
      */
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 

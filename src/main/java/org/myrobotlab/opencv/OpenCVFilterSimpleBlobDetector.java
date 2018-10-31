@@ -32,6 +32,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvCircle;
 import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -66,7 +68,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (image == null) {
       log.error("image is null");
@@ -130,7 +132,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
   }
 
   @Override
-  public IplImage display(IplImage frame, OpenCVData data) {
+  public void display() {
     float x, y;
     int xPixel, yPixel;
     for (int i = 0; i < pointsToPublish.size(); ++i) {
@@ -164,5 +166,8 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
   public int getNumberOfBlobs() {
     return pointsToPublish.size();
   }
-
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 }

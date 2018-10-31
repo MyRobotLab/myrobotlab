@@ -29,6 +29,9 @@ import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrUp;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -37,28 +40,22 @@ public class OpenCVFilterPyramidUp extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidUp.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidUp.class);
 
   transient IplImage dst = null;
 
   int filter = 7;
-
-  public OpenCVFilterPyramidUp() {
-    super();
-  }
 
   public OpenCVFilterPyramidUp(String name) {
     super(name);
   }
 
   @Override
-  public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
+  public void imageChanged(IplImage image) {    
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (image == null) {
       log.error("image is null");
@@ -71,6 +68,11 @@ public class OpenCVFilterPyramidUp extends OpenCVFilter {
     cvPyrUp(image, dst, filter);
 
     return dst;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

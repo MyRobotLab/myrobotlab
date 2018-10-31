@@ -1,34 +1,21 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
-import static org.bytedeco.javacpp.opencv_dnn.readNetFromDarknet;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
-import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
-
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
-
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
+import static org.bytedeco.javacpp.opencv_dnn.readNetFromDarknet;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FILLED;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
+import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -62,7 +49,7 @@ import org.slf4j.Logger;
 public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);
 
   // zero offset to where the confidence level is in the output matrix of the
   // darknet.
@@ -85,7 +72,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public String modelWeightsUrl = "https://pjreddie.com/media/files/yolov2.weights";
   public String modelNamesUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names";
 
-  transient private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   boolean debug = false;
@@ -95,14 +81,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public ArrayList<YoloDetectedObject> lastResult = null;
   private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
-
-  public OpenCVFilterYolo() {
-    super();
-    // start classifier thread
-    Thread classifier = new Thread(this, "YoloClassifierThread");
-    classifier.start();
-    log.info("Yolo Classifier thread started : {}", this.name);
-  }
 
   public OpenCVFilterYolo(String name) {
     super(name);
@@ -169,8 +147,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       fos.close();
       dis.close();
     } catch (IOException e) {
-      log.warn("Error downloading.");
-      e.printStackTrace();
+      log.warn("Error downloading.", e);
       // clean up a partially written file
       if (location.exists()) {
         log.warn("Partially downloaded file.. cleaning up");
@@ -191,12 +168,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     try {
       classNames = loadClassNames(darknetHome + File.separator + modelNames);
     } catch (IOException e) {
-      // e.printStackTrace();
-      log.warn("Error unable to load class names from file {}", modelNames);
+      log.warn("Error unable to load class names from file {}", modelNames, e);
       return;
     }
     log.info("Done loading model..");
-
   }
 
   private ArrayList<String> loadClassNames(String filename) throws IOException {
@@ -209,16 +184,17 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       names.add(line.trim());
       i++;
     }
+    log.info("read {} names", i);
     fileReader.close();
     return names;
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it
       // can.
-      displayResult(image, lastResult);
+//      displayResult(image, lastResult);
     }
     // ok now we just need to update the image that the current thread is
     // processing (if the current thread is idle i guess?)
@@ -227,18 +203,14 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     return image;
   }
 
-  public static String padRight(String s, int n) {
-    return String.format("%1$-" + n + "s", s);
-  }
-
+  /**<pre>
   private void displayResult(IplImage image, ArrayList<YoloDetectedObject> result) {
     DecimalFormat df2 = new DecimalFormat("#.###");
     for (YoloDetectedObject obj : result) {
       CvPoint leftCorner = cvPoint(obj.boundingBox.x(), obj.boundingBox.y());
       String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
-      
-      cvDrawRect(image, leftCorner, cvPoint(obj.boundingBox.x() + 30 * obj.label.length(), obj.boundingBox.y()-20), CvScalar.BLUE,
-          CV_FILLED, 0, 0);
+
+      cvDrawRect(image, leftCorner, cvPoint(obj.boundingBox.x() + 30 * obj.label.length(), obj.boundingBox.y() - 20), CvScalar.BLUE, CV_FILLED, 0, 0);
       // TODO - hashcode related color
       // CvScalar objColor = cvColorToScalar(obj.label.hashCode(), CV_8U);
       cvPutText(image, label, cvPoint(obj.boundingBox.x() + 6, obj.boundingBox.y() - 6), font, CvScalar.YELLOW);
@@ -249,10 +221,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public void drawRect(IplImage image, Rect rect, CvScalar color) {
     cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
   }
+  </pre>*/
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
   }
 
   @Override
@@ -272,7 +244,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           // prevent thrashing of the cpu ...
           Thread.sleep(10);
         } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
           break;
         }
@@ -291,7 +262,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
           log.info("Yolo Classification Rate : {}", rate);
         }
-        invoke("publishYoloClassification", lastResult);
+        invoke("publishClassification", lastResult);
       } else {
         log.info("No Image to classify...");
       }
@@ -397,7 +368,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           if (debug) {
             show(cropped, "detected img");
           }
-          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().getFrameIndex(), cropped, null);
+          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getOpenCV().getFrameIndex(), cropped, null);
           yoloObjects.add(obj);
         }
       }
@@ -432,6 +403,27 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public void release() {
     running = false;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (lastResult != null) {
+      DecimalFormat df2 = new DecimalFormat("#.###");
+      for (YoloDetectedObject obj : lastResult) {
+        String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
+        int x = obj.boundingBox.x();
+        int y = obj.boundingBox.y();
+        int width = obj.boundingBox.width();
+        int height = obj.boundingBox.height();
+        
+        graphics.setColor(Color.BLACK);
+        graphics.drawRect(x, y, width, height);
+        graphics.fillRect(x, y-20, 20 * obj.label.length(), 20);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString(label, x+6, y-6);
+      }
+    }
+    return image;
   }
 
 }

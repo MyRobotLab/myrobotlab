@@ -92,7 +92,7 @@ public class OpenCVFilterThreshold extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // CV_THRESH_BINARY
     // CV_THRESH_BINARY_INV

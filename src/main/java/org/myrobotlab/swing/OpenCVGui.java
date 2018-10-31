@@ -369,7 +369,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     if (cframe != null) {
       cframe.showImage(converter.convert(data.getImage()));
     } else {
-      video0.displayFrame(new SerializableImage(data.getDisplayBufferedImage(), data.getDisplayFilterName()));
+      video0.displayFrame(new SerializableImage(data.getDisplay(), data.getSelectedFilter()));
     }
   }
 
@@ -433,7 +433,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
           fileRadio.setSelected(true);
         }
 
-        currentFilters.setSelectedValue(opencv.getDisplayFilterName(), true);
+        currentFilters.setSelectedValue(opencv.getDisplayFilter(), true);
 
         if (opencv.isUndocked() == true) {
           cframe = new CanvasFrame("canvas frame");

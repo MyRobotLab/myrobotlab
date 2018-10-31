@@ -28,6 +28,9 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_GAUSSIAN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvSmooth;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -55,7 +58,7 @@ public class OpenCVFilterSmooth extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // cvDrawRect(image, startPoint, startPoint,
     // fillColor, 2, 1, 0);
@@ -64,5 +67,8 @@ public class OpenCVFilterSmooth extends OpenCVFilter {
     return image;
 
   }
-
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 }

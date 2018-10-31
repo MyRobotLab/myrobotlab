@@ -27,6 +27,9 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -40,18 +43,33 @@ import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public abstract class OpenCVFilter implements Serializable {
+  private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilter.class.toString());
 
-  private static final long serialVersionUID = 1L;
+  // communal data store
+  OpenCVData data;
+
   final public String name;
 
-  public boolean useFloatValues = true;
+  boolean enabled = true;
+  boolean displayEnabled = false;
+  boolean displayExport = false;
+  boolean displayMeta = false;
 
+  /**
+   * color of display if any overlay
+   */
+  transient Color displayColor;
+
+  // FIXME - deprecate - not needed or duplicated or in OpenCV framework
+  // pipeline...
+  public boolean useFloatValues = true;
   public boolean publishDisplay = false;
   public boolean publishData = true;
   public boolean publishImage = false;
 
+  // input image attributes
   int width;
   int height;
   int channels;
@@ -60,8 +78,9 @@ public abstract class OpenCVFilter implements Serializable {
 
   public String sourceKey;
 
-  transient protected OpenCV vp;
-  
+  // TODO change name to opencv
+  transient protected OpenCV opencv;
+
   protected transient Boolean running;
 
   public OpenCVFilter() {
@@ -80,47 +99,32 @@ public abstract class OpenCVFilter implements Serializable {
     this.sourceKey = sourceKey;
   }
 
-  public abstract IplImage process(IplImage image, OpenCVData data) throws InterruptedException;
-
-  public IplImage display(IplImage image, OpenCVData data) {
-    return image;
-  }
+  public abstract IplImage process(IplImage image) throws InterruptedException;
 
   public abstract void imageChanged(IplImage image);
 
-  public void setVideoProcessor(OpenCV vp) {
-    this.vp = vp;
+  public void setOpenCV(OpenCV opencv) {
+    if (displayColor == null) {
+      displayColor = opencv.getColor();
+    }
+    this.opencv = opencv;
   }
 
-  public OpenCV getVideoProcessor() {
-    return vp;
+  public OpenCV getOpenCV() {
+    return opencv;
   }
 
   public OpenCVFilter setState(OpenCVFilter other) {
     return (OpenCVFilter) Service.copyShallowFrom(this, other);
   }
 
-  public IplImage preProcess(int frameIndex, IplImage frame, OpenCVData data) {
-    // Logging.logTime(String.format("preProcess begin %s", data.filtername));
-    if (frame.width() != width || frame.nChannels() != channels) {
-      width = frame.width();
-      channels = frame.nChannels();
-      height = frame.height();
-      imageSize = cvGetSize(frame);
-      imageChanged(frame);
-      // Logging.logTime(String.format("image Changed !!! %s",
-      // data.filtername));
-    }
-    return frame;
-  }
-
   public void invoke(String method, Object... params) {
-    vp.invoke(method, params);
+    opencv.invoke(method, params);
   }
 
   public void broadcastFilterState() {
     FilterWrapper fw = new FilterWrapper(this.name, this);
-    vp.invoke("publishFilterState", fw);
+    opencv.invoke("publishFilterState", fw);
   }
 
   public ArrayList<String> getPossibleSources() {
@@ -129,9 +133,13 @@ public abstract class OpenCVFilter implements Serializable {
     return ret;
   }
 
+  /**
+   * when a filter is removed from the pipeline its given a chance to return
+   * resourcs
+   */
   public void release() {
   }
-  
+
   protected ImageIcon createImageIcon(String path, String description) {
     java.net.URL imgURL = getClass().getResource(path);
     if (imgURL != null) {
@@ -142,14 +150,110 @@ public abstract class OpenCVFilter implements Serializable {
     }
   }
 
-  /*
-   * public IplImage postProcess(IplImage image, OpenCVData data) { return
-   * image; }
-   */
-
   public void samplePoint(Integer x, Integer y) {
     //
     log.info("Sample point called " + x + " " + y);
+  }
+
+  public IplImage setData(OpenCVData data) {
+    this.data = data;
+    data.setSelectedFilter(name);
+    // FIXME - determine source of incoming image ...
+    // FIXME - getImage(filter.sourceKey) => if null then use getImage()
+    // grab the incoming image ..
+    IplImage image = data.getOutputImage(); // <-- getting input from output
+
+    if (image.width() != width || image.nChannels() != channels) {
+      width = image.width();
+      channels = image.nChannels();
+      height = image.height();
+      imageSize = cvGetSize(image);
+      imageChanged(image);
+    }
+    return image;
+  }
+
+  public void enableDisplay(boolean b) {
+    displayEnabled = b;
+  }
+
+  public void enable(boolean b) {
+    enabled = b;
+  }
+
+  // GET THE BUFFERED IMAGE FROM "MY" Iplimage !!!!
+  /*
+  public BufferedImage getBufferedImage() {
+    return data.getDisplay();
+  }
+  */
+
+  // GET THE Graphics IMAGE FROM "MY" BufferedImage !!!!
+  /*
+   * public Graphics2D getGraphics() { return data.getGraphics(); }
+   */
+
+  /**
+   * method which determines if this filter to process its display TODO - have
+   * it also decide if its cumulative display or not
+   */
+  public void processDisplay() {
+
+    if (enabled && displayEnabled) {
+      // TODO - this determines our "source" of image
+      // and appends meta data
+
+      // to make a decision about "source" you have to put either
+      // "current display" cv.display
+      //  previous buffered image <== aggregate
+      //  "input" buffered image ?
+      BufferedImage input = null;
+      
+      // displayExport displayMeta displayEnabled enabled
+      if (displayExport) {
+        // FIXME - be direct ! data.data.getBufferedImage(filter.name)
+        input = data.getBufferedImage();
+      } else {
+        // else cumulative display 
+        input = data.getDisplay();
+      }
+
+      if (input != null) {
+        Graphics2D graphics = input.createGraphics();
+
+        BufferedImage bi = processDisplay(graphics, input);
+
+        data.put(bi);
+        data.putDisplay(bi);
+      }
+    }
+  }
+
+  abstract public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image);
+
+  /**
+   * This is NOT the filter's image, but really the output of the previous
+   * filter ! to be used as input for "this" filters process method
+   * 
+   * @return
+   */
+  public IplImage getImage() {
+    return data.getImage();
+  }
+
+  /*
+   * FIXME - TODO public Mat getMat() { return data.getMat(); }
+   */
+
+  public void put(String keyPart, Object object) {
+    data.put(keyPart, object);
+  }
+
+  /**
+   * put'ing all the data into output and/or display
+   */
+  public void postProcess(IplImage processed) {
+    data.put(processed);
   }
 
 }

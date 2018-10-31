@@ -39,6 +39,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -77,7 +79,7 @@ public class OpenCVFilterHsv extends OpenCVFilter {
   }
 
   @Override
-  public IplImage display(IplImage image, OpenCVData data) {
+  public void display() {
 
     ++frameCounter;
     if (x != 0 && clickCounter % 2 == 0) {
@@ -106,7 +108,7 @@ public class OpenCVFilterHsv extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // CV_BGR2HSV_FULL - uses full 0-255 vs 0-180
     // CV_HSV2BGR_FULL
@@ -131,5 +133,11 @@ public class OpenCVFilterHsv extends OpenCVFilter {
     y = inY;
 
   }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
+
 
 }

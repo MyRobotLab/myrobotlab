@@ -29,6 +29,9 @@ import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -37,15 +40,11 @@ public class OpenCVFilterPyramidDown extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidDown.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidDown.class);
 
   final static int CV_GAUSSIAN_5X5 = 7;
 
   transient IplImage dst = null;
-
-  public OpenCVFilterPyramidDown() {
-    super();
-  }
 
   public OpenCVFilterPyramidDown(String name) {
     super(name);
@@ -57,9 +56,14 @@ public class OpenCVFilterPyramidDown extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     cvPyrDown(image, dst, CV_GAUSSIAN_5X5);
     return dst;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

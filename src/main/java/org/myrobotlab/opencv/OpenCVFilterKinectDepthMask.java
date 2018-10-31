@@ -52,7 +52,9 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.Loader;
@@ -120,22 +122,16 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   transient CvPoint p0 = cvPoint(0, 0);
   transient CvPoint p1 = cvPoint(0, 0);
 
-  public OpenCVFilterKinectDepthMask() {
-    super();
-  }
-
   public OpenCVFilterKinectDepthMask(String name) {
     super(name);
   }
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
 
     /*
      * 
@@ -152,7 +148,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     // TODO - clean up - remove input parameters? only use storage?
     if (imageKey != null) {
       // TODO: validate what this is doing?
-      kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
+      kinectDepth = data.getKinectDepth();
     } else {
       kinectDepth = image;
     }
@@ -305,6 +301,12 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
     return itemp2;
 
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

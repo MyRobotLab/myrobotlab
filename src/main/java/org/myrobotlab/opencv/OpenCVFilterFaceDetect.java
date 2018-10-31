@@ -56,6 +56,8 @@ import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_ROUGH_SEARCH;
 //import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
 import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.Loader;
@@ -112,7 +114,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   }
 
   @Override
-  public IplImage display(IplImage image, OpenCVData data) {
+  public void display() {
 
     if (data != null) {
       ArrayList<Rectangle> bb = data.getBoundingBoxArray();
@@ -166,7 +168,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // Clear the memory storage which was used before
     cvClearMemStorage(storage);
@@ -226,33 +228,33 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     switch (state) {
       case STATE_LOST_TRACKING:
         if (faceCnt > 0) {
-          firstFaceFrame = vp.getFrameIndex();
+          firstFaceFrame = opencv.getFrameIndex();
           state = STATE_DETECTING_FACE;
           broadcastFilterState();
         }
         break;
       case STATE_DETECTING_FACE:
-        if (faceCnt > 0 && vp.getFrameIndex() - firstFaceFrame > minFaceFrames) {
+        if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
           state = STATE_DETECTED_FACE;
           // broadcastFilterState();
         } else if (faceCnt == 0) {
-          firstFaceFrame = vp.getFrameIndex();
+          firstFaceFrame = opencv.getFrameIndex();
         }
         break;
       case STATE_DETECTED_FACE:
         if (faceCnt == 0) {
           state = STATE_LOSING_TRACKING;
-          firstFaceFrame = vp.getFrameIndex();
+          firstFaceFrame = opencv.getFrameIndex();
           broadcastFilterState();
         }
         break;
 
       case STATE_LOSING_TRACKING:
-        if (faceCnt == 0 && vp.getFrameIndex() - firstEmptyFrame > minEmptyFrames) {
+        if (faceCnt == 0 && opencv.getFrameIndex() - firstEmptyFrame > minEmptyFrames) {
           state = STATE_LOST_TRACKING;
           // broadcastFilterState();
         } else if (faceCnt > 0) {
-          firstEmptyFrame = vp.getFrameIndex();
+          firstEmptyFrame = opencv.getFrameIndex();
         }
         break;
       default:
@@ -260,13 +262,18 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
         break;
     }
     // face detection events
-    if (faceCnt > 0 && vp.getFrameIndex() - firstFaceFrame > minFaceFrames) {
+    if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
 
     } else {
 
     }
 
     lastFaceCnt = faceCnt;
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 

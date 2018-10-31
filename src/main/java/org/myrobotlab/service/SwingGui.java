@@ -477,7 +477,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       status.setOpaque(false);
     }
 
-    status.setText(inStatus.detail);
+    if (inStatus.detail != null && inStatus.detail.length() > 128) {
+      status.setText(inStatus.detail.substring(128));
+    } else {
+      status.setText(inStatus.detail);
+    }
   }
 
   public void hideAll() {

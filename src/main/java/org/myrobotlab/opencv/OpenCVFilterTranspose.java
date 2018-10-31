@@ -29,6 +29,9 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.javacpp.opencv_core.cvFlip;
 import static org.bytedeco.javacpp.opencv_core.cvTranspose;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -58,7 +61,7 @@ public class OpenCVFilterTranspose extends OpenCVFilter {
 
   // http://stackoverflow.com/questions/7813376/rotate-cvmat-using-cvwarpaffine-offsets-destination-image
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     cvTranspose(image, dst);
     cvFlip(dst, dst, flipCode);
@@ -66,4 +69,8 @@ public class OpenCVFilterTranspose extends OpenCVFilter {
     return dst;
   }
 
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 }

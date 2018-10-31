@@ -38,6 +38,9 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_GRAY2BGR;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.ObjectFinder;
@@ -75,7 +78,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     // TODO: Expose configuration of the object image to find.
     // TODO: create proper life cycle for the objectFinder obj.
     if (object == null || image == null) {
@@ -211,6 +214,11 @@ public class OpenCVFilterSURF extends OpenCVFilter {
   public void setObjectImage(IplImage image) {
     this.object = image;
     settings.setObjectImage(image);
+  }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

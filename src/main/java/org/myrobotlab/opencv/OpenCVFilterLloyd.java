@@ -13,6 +13,8 @@ import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -212,7 +214,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
   }
   
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
       displayResult(image, lastResult);
@@ -386,7 +388,7 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
           if (debug) {
             show(cropped, "detected img");
           }
-          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getVideoProcessor().getFrameIndex(), cropped, null);
+          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getOpenCV().getFrameIndex(), cropped, null);
           yoloObjects.add(obj);
           // if the label is a person.. we want to look up the model for further classificatoin of a person
           // then add that info to disambiguate who that person is.
@@ -464,6 +466,11 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
 
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

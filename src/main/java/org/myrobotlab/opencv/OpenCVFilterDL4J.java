@@ -6,6 +6,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -68,7 +70,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   }
   
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
       // log.info("Display result " );
@@ -181,6 +183,11 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 	  
 	  // 
 	  
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
   
 }

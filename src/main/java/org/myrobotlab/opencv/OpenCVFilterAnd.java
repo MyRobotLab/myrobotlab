@@ -32,6 +32,7 @@ import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -83,7 +84,7 @@ public class OpenCVFilterAnd extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // IplImage img = cvLoadImage("data/boldt.jpg",
     // CV_LOAD_IMAGE_GRAYSCALE);
@@ -114,6 +115,11 @@ public class OpenCVFilterAnd extends OpenCVFilter {
       // image negativeImage was an cvNot inverse
     }
 
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 

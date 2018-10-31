@@ -33,20 +33,20 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_THRESH_BINARY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvAdaptiveThreshold;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+// FIXME - add ui parameters
 public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAdaptiveThreshold.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAdaptiveThreshold.class);
 
   transient IplImage gray = null;
-
-  public OpenCVFilterAdaptiveThreshold() {
-    super();
-  }
 
   public OpenCVFilterAdaptiveThreshold(String name) {
     super(name);
@@ -89,7 +89,7 @@ public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     // CV_THRESH_BINARY
     // CV_THRESH_BINARY_INV
@@ -107,6 +107,11 @@ public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
     cvCvtColor(image, gray, CV_BGR2GRAY);
     cvAdaptiveThreshold(gray, gray, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 30);
 
+    return gray;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
 
