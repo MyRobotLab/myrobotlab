@@ -91,7 +91,7 @@ public class IvyWrapper extends Repo {
   }
 
   @Override
-  public void install(String location, String[] serviceTypes) {
+  synchronized public void install(String location, String[] serviceTypes) {
 
     try {
 
