@@ -1416,6 +1416,10 @@ public class Runtime extends Service implements MessageListener {
     for (ServiceInterface service: getServices()) {
       service.preShutdown();
     }
+    
+    for (ServiceInterface service: getServices()) {
+      service.save();
+    }
    
     try {
       releaseAll();
