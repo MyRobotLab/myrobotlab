@@ -14,7 +14,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.math.geometry.Point2Df;
 import org.slf4j.Logger;
 
 /**

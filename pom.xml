@@ -1034,6 +1034,13 @@
   </dependency>
 <!-- ProgramAB end -->
 
+<dependency>
+    <groupId>pl.allegro.tech</groupId>
+    <artifactId>embedded-elasticsearch</artifactId>
+    <version>2.7.0</version>
+    <scope>provided</scope>
+</dependency>
+ 
 <!-- Python begin -->
   <dependency>
     <groupId>org.python</groupId>

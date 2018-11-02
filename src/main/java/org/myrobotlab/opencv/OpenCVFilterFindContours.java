@@ -61,8 +61,8 @@ import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Point2Df;
-import org.myrobotlab.service.data.Rectangle;
+import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 //import static org.bytedeco.javacpp.opencv_core.cvFont;
 //import static org.bytedeco.javacpp.opencv_core.cvPutText;
@@ -71,96 +71,28 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFindContours.class.getCanonicalName());
-
-  transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-
-  // FIXME - ok - use awt - use mrl pojo's if expected to serialize to Android
-  // TODO - publish MRL objects - TODO make SerializableImage bundle with
-  // Object map for data publishing
-  // Stabalize with attributes of Object Map defined in OpenCV
-
-  //
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFindContours.class);
 
   boolean useMinArea = true;
 
-  public boolean publishBoundingBox = true;
   public boolean publishPolygon = true;
 
   boolean useMaxArea = false;
   int minArea = 150;
   int maxArea = -1;
 
-  int thresholdValue = 0;
-  boolean addPolygon = false;
-
   boolean isMinArea;
   boolean isMaxArea;
 
   transient IplImage grey = null;
-  // transient IplImage display = null;
-  transient IplImage dst = null;
   transient CvSeq contourPointer = new CvSeq();
-  transient CvPoint drawPoint0 = cvPoint(0, 0);
-  transient CvPoint drawPoint1 = cvPoint(0, 0);
   transient CvMemStorage storage = null;
-  
-  // floor finder related
-  CvPoint origin =  null;
-  public List<Point2Df> edgePoints;
 
-  public OpenCVFilterFindContours() {
-    super();
-  }
+  // floor finder related
+  CvPoint origin = null;
 
   public OpenCVFilterFindContours(String name) {
     super(name);
-  }
-
-  /*
-   * @Override public BufferedImage display(IplImage image, OpenCVData data) {
-   * 
-   * BufferedImage frameBuffer = image.getBufferedImage(); Graphics2D g =
-   * frameBuffer.createGraphics(); g.setColor(Color.green); if (data != null) {
-   * ArrayList<Rectangle> boxes = data.getBoundingBoxArray(); if (boxes != null)
-   * { for (Rectangle box : boxes) { if (useFloatValues){
-   * g.drawRect((int)(box.x*width), (int)(box.y*height), (int)(box.width*width),
-   * (int)(box.height*height)); } else { g.drawRect((int)box.x, (int)box.y,
-   * (int)box.width, (int)box.height); } } g.drawString(String.format("cnt %d",
-   * boxes.size()), 10, 10); } else { g.drawString("null", 10, 10); } } return
-   * frameBuffer; }
-   */
-
-  @Override
-  public void display() {
-    ArrayList<Rectangle> boxes = data.getBoundingBoxArray();
-    if (boxes != null) {
-      for (Rectangle box : boxes) {
-        // cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1),
-        // CvScalar.RED, 1, 1, 0);
-        if (useFloatValues) {
-          int x = (int) (box.x * width);
-          int y = (int) (box.y * height);
-          int w = x + (int) (box.width * width);
-          int h = y + (int) (box.height * height);
-          cvDrawRect(image, cvPoint(x, y), cvPoint(w, h), CvScalar.WHITE, 1, 1, 0);
-        } else {
-          int x = (int) box.x;
-          int y = (int) box.y;
-          int w = x + (int) box.width;
-          int h = y + (int) box.height;
-          cvDrawRect(image, cvPoint(x, y), cvPoint(w, h), CvScalar.WHITE, 1, 1, 0);
-        }
-      }
-      cvPutText(image, String.format("cnt %d", boxes.size()), cvPoint(10, 10), font, CvScalar.WHITE);
-    } else {
-      cvPutText(image, "null", cvPoint(10, 10), font, CvScalar.WHITE);
-    }
-
-    // cvPutText(image, "killroy was here", cvPoint(10,10), font,
-    // CvScalar.WHITE);
-
-    return image;
   }
 
   @Override
@@ -168,10 +100,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
     if (storage == null) {
       storage = cvCreateMemStorage(0);
     }
-
     grey = cvCreateImage(cvGetSize(image), 8, 1);
-    // display = cvCreateImage(cvGetSize(frame), 8, 3);
-
   }
 
   @Override
@@ -189,28 +118,14 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
     ArrayList<Rectangle> list = new ArrayList<Rectangle>();
 
     while (contours != null && !contours.isNull()) {
-      if (contours.elem_size() > 0) { // TODO - limit here for
-        // "TOOOO MANY !!!!"
+      if (contours.elem_size() > 0) {
 
         CvRect rect = cvBoundingRect(contours, 0);
 
         minArea = 600;
 
-        // find all the avg color of each polygon
-        // cxcore.cvZero(polyMask);
-        // cvDrawContours(polyMask, points, CvScalar.WHITE,
-        // CvScalar.BLACK, -1, cxcore.CV_FILLED, CV_AA);
-
-        // publish polygons
-        // CvScalar avg = cxcore.cvAvg(image, polyMask); - good idea -
-        // but not implemented
-
-        // log.error("{}", rect);
-        // size filter
         if (useMinArea) {
           isMinArea = (rect.width() * rect.height() > minArea) ? true : false;
-          // log.error("{} {}", isMinArea, rect.width() *
-          // rect.height());
         } else {
           useMinArea = true;
         }
@@ -239,84 +154,42 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
           list.add(box);
 
           log.info("box {}", box);
-          
-          if (origin == null){
-            origin = new CvPoint(width/2, 10 /*height ??*/);
+
+          if (origin == null) {
+            origin = new CvPoint(width / 2, 10 /* height ?? */);
           }
-          
+
           if (publishPolygon) {
-            // CvSeq points = cvApproxPoly(contour,
-            // Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP,
-            // cvContourPerimeter(contour) * 0.02, 1);
-            // CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours)*0.02, 0)
             CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours) * 0.02, 1);
-            for(int i = 0; i < result.total(); i++ ) {
+            for (int i = 0; i < result.total(); i++) {
               CvPoint point = new CvPoint(cvGetSeqElem(result, i));
               log.info("point {}", point);
             }
           }
-          // Polygon polygon = new Polygon();
-          // iterate through points - points.total() build awt Polygon
-          // polygons.add(polygon);
-
-          // polygons.add(new Polygon(rect, null,
-          // (cvCheckContourConvexity(points) == 1) ? true : false,
-          // cvPoint(rect.x() + rect.width() / 2, rect.y() +
-          // rect.height() / 2), points.total()));
-
-          /*
-           * WRONG FIXME - post processing should be done in Java on the
-           * buffered image !!!!S cvPutText(display, " " + points.total() + " "
-           * + (rect.x() + rect.width() / 2) + "," + (rect.y() + rect.height() /
-           * 2) + " " + rect.width() + "x" + rect.height() + "=" + (rect.width()
-           * * rect.height()) + " " + " " + cvCheckContourConvexity(points),
-           * cvPoint(rect.x() + rect.width() / 2, rect.y()), font,
-           * CvScalar.WHITE);
-           */
         }
-
-        // cvPutText(display, " " + points.total() + " " + (rect.x() *
-        // rect.height()) + "c" + (int)avg.getRed() + "," +
-        // (int)avg.getGreen() + "," + (int)avg.getBlue(),
-        // cvPoint(rect.x() + rect.width()/2,rect.y()), font,
-        // CV_RGB(255, 0, 0));
-        // cvPutText(display, " " + points.total() + " " + rect.x() +
-        // "," +
-        // rect.y() + " "+ (rect.x() * rect.height()/1000) + " " +
-        // OpenCVFilterAverageColor.getColorName2(avg) + " " +
-        // cv.cvCheckContourConvexity(points), cvPoint(rect.x() +
-        // rect.width()/2,rect.y()), font, CvScalar.WHITE);
-
-        /*
-         * drawPoint0.x(rect.x()); drawPoint0.y(rect.y());
-         * 
-         * drawPoint1.x(rect.x() + rect.width()); drawPoint1.y(rect.y() +
-         * rect.height());
-         * 
-         * cvDrawRect(display, drawPoint0, drawPoint1, CvScalar.RED, 1, 8, 0);
-         */
-
       }
       contours = contours.h_next();
     }
 
     // FIXME - sources could use this too
-    data.put(list);
-    // if (publishOpenCVData) invoke("publishOpenCVData", data);
-
-    // cvPutText(display, " " + cnt, cvPoint(10, 14), font, CvScalar.RED);
-    // log.error("x");
+    data.putBoundingBoxArray(list);
     cvClearMemStorage(storage);
-
-    // display(image, data);
-
     return image;
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+
+    ArrayList<Rectangle> boxes = data.getBoundingBoxArray();
+    if (boxes != null) {
+      for (Rectangle box : boxes) {
+        graphics.drawOval((int) box.x, (int) box.y, (int) (box.x + box.width), (int) (box.y + box.height));
+      }
+      graphics.drawString(String.format("cnt %d", boxes.size()), 10, 10);
+    } else {
+      graphics.drawString(String.format("cnt %d", 0), 10, 10);
+    }
     return image;
   }
-
 
 }

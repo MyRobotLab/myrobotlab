@@ -4,14 +4,8 @@ import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
 import static org.bytedeco.javacpp.opencv_dnn.readNetFromDarknet;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FILLED;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
-import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -32,18 +26,17 @@ import java.util.ArrayList;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.io.IOUtils;
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.Scalar;
 import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_dnn.Net;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
@@ -66,6 +59,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public String modelConfig = "yolov2.cfg";
   public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
+  
+  DecimalFormat df2 = new DecimalFormat("#.###");
 
   // TODO: store these somewhere as a resource / dependency ..
   public String modelConfigUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov2.cfg";
@@ -77,8 +72,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   boolean debug = false;
   private Net net;
   ArrayList<String> classNames;
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-  public ArrayList<YoloDetectedObject> lastResult = null;
+  // public ArrayList<Classification> lastResult = null;
+  public ArrayList<Classification> lastResult = null;
   private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
 
@@ -204,9 +199,9 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   /**<pre>
-  private void displayResult(IplImage image, ArrayList<YoloDetectedObject> result) {
+  private void displayResult(IplImage image, ArrayList<Classification> result) {
     DecimalFormat df2 = new DecimalFormat("#.###");
-    for (YoloDetectedObject obj : result) {
+    for (Classification obj : result) {
       CvPoint leftCorner = cvPoint(obj.boundingBox.x(), obj.boundingBox.y());
       String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
 
@@ -277,10 +272,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     log.info("Exited the run loop for Yolo!!! you shouldn't see this.");
   }
 
-  private ArrayList<YoloDetectedObject> yoloFrame(IplImage frame) {
+  private ArrayList<Classification> yoloFrame(IplImage frame) {
     log.debug("Starting yolo on frame...");
     // this is our list of objects that have been detected in a given frame.
-    ArrayList<YoloDetectedObject> yoloObjects = new ArrayList<YoloDetectedObject>();
+    ArrayList<Classification> yoloObjects = new ArrayList<Classification>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
 
     // log.info("Yolo frame start");
@@ -366,13 +361,19 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
           IplImage cropped = extractSubImage(inputMat, boundingBox);
           if (debug) {
+            debug = false;
             show(cropped, "detected img");
           }
-          YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getOpenCV().getFrameIndex(), cropped, null);
+          Classification obj = new Classification(String.format("%s.%s-%d", data.getName(), name, data.getFrameIndex()));
+          obj.setLabel(label);
+          obj.setBoundingBox(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
+          obj.setConfidence(confidence);
+          // obj.setImage(data.getDisplay());
+          // for non-serializable "local" image objects
+          obj.setObject(frame);
           yoloObjects.add(obj);
         }
       }
-
     }
     return yoloObjects;
   }
@@ -408,22 +409,33 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     if (lastResult != null) {
-      DecimalFormat df2 = new DecimalFormat("#.###");
-      for (YoloDetectedObject obj : lastResult) {
-        String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
-        int x = obj.boundingBox.x();
-        int y = obj.boundingBox.y();
-        int width = obj.boundingBox.width();
-        int height = obj.boundingBox.height();
+      
+      for (Classification obj : lastResult) {
+        String label = obj.getLabel() + " (" + df2.format(obj.getConfidence() * 100) + "%)";
+        
+        Rectangle bb = obj.getBoundingBox();
+        int x = (int)bb.x;
+        int y = (int)bb.y;
+        int width = (int)bb.width;
+        int height = (int)bb.height;
         
         graphics.setColor(Color.BLACK);
         graphics.drawRect(x, y, width, height);
-        graphics.fillRect(x, y-20, 20 * obj.label.length(), 20);
+        graphics.fillRect(x, y-20, 7 * label.length(), 20);
         graphics.setColor(Color.WHITE);
         graphics.drawString(label, x+6, y-6);
       }
     }
     return image;
+  }
+
+  public float getConfidenceThreshold() {
+    return confidenceThreshold;
+  }
+
+  public void setConfidenceThreshold(float i) {
+    confidenceThreshold = i;
+    broadcastFilterState();
   }
 
 }

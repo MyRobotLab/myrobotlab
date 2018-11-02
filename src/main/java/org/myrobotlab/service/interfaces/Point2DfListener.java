@@ -1,6 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.math.geometry.Point2Df;
 
 public interface Point2DfListener {
 

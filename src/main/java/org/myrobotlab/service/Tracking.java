@@ -40,6 +40,7 @@ import static org.myrobotlab.service.OpenCV.PART;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
@@ -49,6 +50,8 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDetector;
@@ -56,8 +59,6 @@ import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterGray;
 import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
-import org.myrobotlab.service.data.Point2Df;
-import org.myrobotlab.service.data.Rectangle;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -436,9 +437,9 @@ public class Tracking extends Service {
       case STATE_LK_TRACKING_POINT:
         // extract tracking info
         // data.setSelectedFilterName(LKOpticalTrackFilterName);
-        Point2Df targetPoint = data.getFirstPoint();
-        if (targetPoint != null) {
-          updateTrackingPoint(targetPoint);
+        List<Point2Df> targetPoint = data.getPointArray();
+        if (targetPoint != null && targetPoint.size() > 0) {
+          updateTrackingPoint(targetPoint.get(0));
         }
         break;
 
@@ -584,7 +585,7 @@ public class Tracking extends Service {
   }
 
   public void waitForObjects(OpenCVData data) {
-    data.setSelectedFilterName(FILTER_FIND_CONTOURS);
+    data.setSelectedFilter(FILTER_FIND_CONTOURS);
     ArrayList<Rectangle> objects = data.getBoundingBoxArray();
     int numberOfNewObjects = (objects == null) ? 0 : objects.size();
 
@@ -620,7 +621,7 @@ public class Tracking extends Service {
         if (numberOfNewObjects == 0) {
           // process background
           // data.putAttribute(BACKGROUND);
-          data.setAttribute(PART, BACKGROUND);
+          data.put(PART, BACKGROUND);
           invoke("toProcess", data);
           // ready to search foreground
           searchForeground();
@@ -628,7 +629,7 @@ public class Tracking extends Service {
       } else {
 
         if (numberOfNewObjects > 0) {
-          data.setAttribute(PART, FOREGROUND);
+          data.put(PART, FOREGROUND);
           invoke("toProcess", data);
         }
       }

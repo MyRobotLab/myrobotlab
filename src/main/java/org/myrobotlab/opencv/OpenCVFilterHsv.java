@@ -64,7 +64,6 @@ public class OpenCVFilterHsv extends OpenCVFilter {
   int x = 0;
   int y = 0;
   int clickCounter = 0;
-  int frameCounter = 0;
   Graphics g = null;
   String lastHexValueOfPoint = "";
 
@@ -79,50 +78,13 @@ public class OpenCVFilterHsv extends OpenCVFilter {
   }
 
   @Override
-  public void display() {
-
-    ++frameCounter;
-    if (x != 0 && clickCounter % 2 == 0) {
-
-      if (frameCounter % 10 == 0) {
-        // frameBuffer = hsv.getBufferedImage(); // TODO - ran out of
-        // memory here
-        ByteBuffer buffer = image.getByteBuffer();
-        int index = y * image.widthStep() + x * image.nChannels();
-        // Used to read the pixel value - the 0xFF is needed to cast
-        // from
-        // an unsigned byte to an int.
-        int value = buffer.get(index) & 0xFF;
-        lastHexValueOfPoint = Integer.toHexString(value & 0x00ffffff);
-      }
-
-      cvPutText(image, lastHexValueOfPoint, cvPoint(x, y), font, CvScalar.BLACK);
-    }
-
-    return image;
-  }
-
-  @Override
   public void imageChanged(IplImage image) {
     hsv = IplImage.createCompatible(image);
   }
 
   @Override
   public IplImage process(IplImage image) {
-
-    // CV_BGR2HSV_FULL - uses full 0-255 vs 0-180
-    // CV_HSV2BGR_FULL
     cvCvtColor(image, hsv, CV_RGB2HSV);
-
-    // cvSetImageCOI( hsv, 1);
-    // cvCopy(hsv, hue );
-
-    /*
-     * http://cgi.cse.unsw.edu.au/~cs4411/wiki/index.php?title=OpenCV_Guide#
-     * Calculating_color_histograms //Split out hue component and store in hue
-     * cxcore.cvSplit(hsv, hue, null, null, null);
-     */
-
     return hsv;
 
   }
@@ -131,13 +93,18 @@ public class OpenCVFilterHsv extends OpenCVFilter {
     ++clickCounter;
     x = inX;
     y = inY;
-
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+
+    if (x != 0 && clickCounter % 2 == 0) {
+      int clr = image.getRGB(x, y);
+      lastHexValueOfPoint = Integer.toHexString(clr);
+      graphics.drawString(lastHexValueOfPoint, x, y);
+    }
+
     return image;
   }
-
 
 }

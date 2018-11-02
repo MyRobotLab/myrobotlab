@@ -45,7 +45,7 @@ import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.math.geometry.Point2Df;
 import org.slf4j.Logger;
 
 import com.sun.jna.ptr.IntByReference;

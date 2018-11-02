@@ -25,7 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-
 /*
  import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
  import static org.bytedeco.javacpp.opencv_imgproc.CV_HAAR_DO_CANNY_PRUNING;
@@ -69,7 +68,7 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacpp.opencv_objdetect.CvHaarClassifierCascade;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Rectangle;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
@@ -82,6 +81,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   public CvHaarClassifierCascade cascade = null; // TODO - was static
   public String cascadeDir = "haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
+  ArrayList<Rectangle> bb = null;
   // public String cascadePath = "haarcascades/haarcascade_mcs_lefteye.xml";
   // public String cascadePath =
   // "haarcascades/haarcascade_mcs_eyepair_big.xml";
@@ -103,45 +103,8 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   private String state = STATE_LOST_TRACKING;
 
-  int x0, y0, x1, y1;
-
-  public OpenCVFilterFaceDetect() {
-    super();
-  }
-
   public OpenCVFilterFaceDetect(String name) {
     super(name);
-  }
-
-  @Override
-  public void display() {
-
-    if (data != null) {
-      ArrayList<Rectangle> bb = data.getBoundingBoxArray();
-      if (bb != null) {
-        for (int i = 0; i < bb.size(); ++i) {
-          Rectangle rect = bb.get(i);
-
-          if (useFloatValues) {
-            x0 = (int) (rect.x * width);
-            y0 = (int) (rect.y * height);
-            x1 = x0 + (int) (rect.width * width);
-            y1 = y0 + (int) (rect.height * height);
-            cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
-          } else {
-            x0 = (int) rect.x;
-            y0 = (int) rect.y;
-            x1 = x0 + (int) rect.width;
-            y1 = y0 + (int) rect.height;
-            cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
-          }
-        }
-
-        return image;
-      }
-    }
-
-    return image;
   }
 
   @Override
@@ -170,6 +133,8 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   @Override
   public IplImage process(IplImage image) {
 
+    bb = new ArrayList<Rectangle>();
+
     // Clear the memory storage which was used before
     cvClearMemStorage(storage);
 
@@ -187,11 +152,12 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
       // 3, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
       // faces = cvHaarDetectObjects(grayImage, classifier_eyes, storage,
       // 1.1, 3, CV_HAAR_DO_CANNY_PRUNING);
-      // performance change from here: https://github.com/bytedeco/javacv/issues/272
+      // performance change from here:
+      // https://github.com/bytedeco/javacv/issues/272
       CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
-      // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
+      // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1,
+      // CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
       if (faces != null) {
-        ArrayList<Rectangle> bb = new ArrayList<Rectangle>();
         faceCnt = faces.total();
         // Loop the number of faces found.
         for (i = 0; i < faces.total(); i++) {
@@ -215,7 +181,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
           }
         }
 
-        data.put(bb);
+        data.putBoundingBoxArray(bb);
       }
     } else {
       log.info("Creating and loading new classifier instance {}", cascadeFile);
@@ -274,6 +240,13 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (bb.size() > 0) {
+
+      for (int i = 0; i < bb.size(); ++i) {
+        Rectangle rect = bb.get(i);
+        graphics.drawRect((int)rect.x, (int)rect.y, (int) rect.width, (int) rect.height);
+      }
+    }
     return image;
   }
 
