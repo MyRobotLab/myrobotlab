@@ -47,7 +47,7 @@ public class MavenWrapper extends Repo {
   // FIXME - fix do createBuildFiles
   // FIXME - call external mvn since Embedded Maven is not documented and buggy
   @Override
-  public void install(String location, String[] serviceTypes) {
+  synchronized public void install(String location, String[] serviceTypes) {
 	
 	createBuildFiles(location, serviceTypes);
 	

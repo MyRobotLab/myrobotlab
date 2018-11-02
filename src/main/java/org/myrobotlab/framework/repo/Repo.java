@@ -295,7 +295,7 @@ public abstract class Repo {
 	  publishStatus(Status.info(format, args));
 	}
 
-	public void install() {
+	synchronized public void install() {
 		// if a runtime exits we'll broadcast we are starting to install
 		ServiceData sd = ServiceData.getLocalInstance();
 		info("starting installation of %s services", sd.getServiceTypeNames().length);
@@ -303,7 +303,7 @@ public abstract class Repo {
 		info("finished installing %d services", sd.getServiceTypeNames().length);
 	}
 
-	public void install(String serviceType) {	  
+	synchronized public void install(String serviceType) {	  
 	  
 		String[] types = null;
 		if (serviceType == null) {
@@ -316,13 +316,13 @@ public abstract class Repo {
 		install(DEFAULT_INSTALL_DIR, types);
 	}
 
-	public void install(String location, String serviceType) {
+	synchronized public void install(String location, String serviceType) {
 		install(location, new String[] { serviceType });
 	}
 
 	abstract public void install(String location, String[] serviceTypes);
 
-	public void install(String[] serviceTypes) {
+	synchronized public void install(String[] serviceTypes) {
 		install(DEFAULT_INSTALL_DIR, serviceTypes);
 	}
 
