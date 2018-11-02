@@ -142,13 +142,13 @@ public class OpenCV extends AbstractVideoSource {
         error(e);
         stopCapture();
       }
-      log.info("stopping capture");      
+      log.info("stopping capture");
     }
   }
 
   transient final static public String BACKGROUND = "background";
 
-    transient public static final String FILTER_DETECTOR = "Detector";
+  transient public static final String FILTER_DETECTOR = "Detector";
   transient public static final String FILTER_DILATE = "Dilate";
   transient public static final String FILTER_ERODE = "Erode";
   transient public static final String FILTER_FACE_DETECT = "FaceDetect";
@@ -163,7 +163,7 @@ public class OpenCV extends AbstractVideoSource {
   transient final static public String FOREGROUND = "foreground";
   static final Set<String> grabberTypes = new TreeSet<String>();
   public static final String INPUT_KEY = "input";
-  
+
   VideoProcessor vp = new VideoProcessor();
 
   // FIXME - make more simple
@@ -197,12 +197,7 @@ public class OpenCV extends AbstractVideoSource {
         grabberTypes.add(fg);
       }
 
-      // Add the MRL Frame Grabbers
-      // grabberTypes.add("IPCamera"); - given to bytedeco
-      grabberTypes.add("Pipeline"); // to/from another opencv service
-      // grabberTypes.add("ImageFile"); - FFmpeg support more types
-      // grabberTypes.add("SlideShowFile"); - if file is dir slideshow will be
-      // used
+      grabberTypes.add("Pipeline"); // to/from another opencv service      
       grabberTypes.add("Sarxos");
       grabberTypes.add("MJpeg");
     } catch (Exception e) {
@@ -397,8 +392,8 @@ public class OpenCV extends AbstractVideoSource {
     // System.loadLibrary("opencv_java");
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // opencv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
-    opencv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix 
-   
+    opencv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
+
     // check with
     // &timestart=
     opencv.setColor("black");
@@ -457,7 +452,7 @@ public class OpenCV extends AbstractVideoSource {
   Integer height = null;
   String inputFile = null;
   String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
-  
+
   Rollup rollup = new Rollup();
 
   transient Frame lastFrame;
@@ -552,21 +547,21 @@ public class OpenCV extends AbstractVideoSource {
       broadcastState();
     }
   }
-  
+
   synchronized public void pauseCapture() {
     capturing = false;
     videoThread = null;
     broadcastState();
   }
-  
-  /** 
-   * a resume is the same as a capture - the only difference
-   * is if the capture was "stopped" or "paused" - stop
-   * will cause the FrameGrabber to re-initialize with frame 0
+
+  /**
+   * a resume is the same as a capture - the only difference is if the capture
+   * was "stopped" or "paused" - stop will cause the FrameGrabber to
+   * re-initialize with frame 0
    */
   synchronized public void resumeCapture() {
     capture();
-  }  
+  }
 
   public void capture(FrameGrabber grabber) {
     stopCapture();
@@ -859,8 +854,8 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * Callback from the SwingGui (e.g. clicking on the display) 
-   * routes to the appropriate filter through this method.
+   * Callback from the SwingGui (e.g. clicking on the display) routes to the
+   * appropriate filter through this method.
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -1015,31 +1010,34 @@ public class OpenCV extends AbstractVideoSource {
   public String publish(String value) {
     return value;
   }
+
   public Classification publishNewClassification(Classification classification) {
     info("found new %s %f", classification.getLabel(), classification.getConfidence());
     // pauseCapture();
     return classification;
   }
-  
+
   public List<Classification> publishClassification(List<Classification> classifications) {
     // log.info("Publish Classification in opencv!");
-    // aggregate locally for fun - "better" is to send it to a search engine Solr or Elasticsearch
-    
-    // template matching ? 
-    // so potentially frame by frame passes through here 
+    // aggregate locally for fun - "better" is to send it to a search engine
+    // Solr or Elasticsearch
+
+    // template matching ?
+    // so potentially frame by frame passes through here
     // and what we are interested in is - during the running of this service
     // we would like a little aggregation and potentially re-training
-    // we want to know the general question 
-    // "what do you see" or "what is new" ? both have some direct or indirect reference to
+    // we want to know the general question
+    // "what do you see" or "what is new" ? both have some direct or indirect
+    // reference to
     // "time"
-    
+
     for (Classification object : classifications) {
       if (!rollup.contains(object.getLabel())) {
         invoke("publishNewClassification", object);
       }
       rollup.put(object);
     }
-    
+
     return classifications;
   }
 
@@ -1235,19 +1233,19 @@ public class OpenCV extends AbstractVideoSource {
   public void setDisplayFilter(String name) {
     displayFilter = name;
     OpenCVFilter filter = filters.get(name);
-    
+
     // turn off old filters - turn on new one
     for (OpenCVFilter f : filters.values()) {
       f.enableDisplay(false);
     }
-    
+
     if (filter == null || "input".equals(name) || "output".equals(name)) {
       log.info("make select & inverse select");
     } else {
       filter.enableDisplay(true);
       filter.enable(true);
     }
-    
+
   }
 
   public String getDisplayFilter() {
