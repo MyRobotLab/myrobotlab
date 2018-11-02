@@ -3,6 +3,7 @@ package org.myrobotlab.framework.repo;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,9 @@ import org.myrobotlab.logging.LoggingFactory;
 // FIXME - 2 layer abstraction - because to generate build files and 
 // other critical methods - they do not require actual "ivy" components
 // so these methods should be un-hindered by actual maven, gradle or ivy imports !
-public class MavenWrapper extends Repo {
+public class MavenWrapper extends Repo implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   String installDir = "install";
 

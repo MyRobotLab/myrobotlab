@@ -864,6 +864,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // TODO: move this into the published POM for ProgramAB so they are pulled in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
+    meta.addCategory("ai","control");
     return meta;
   }
 
