@@ -1,4 +1,4 @@
-package org.myrobotlab.service.data;
+package org.myrobotlab.math.geometry;
 
 public class Rectangle {
   public float x;

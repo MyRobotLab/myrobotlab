@@ -30,8 +30,9 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.service.data.Rectangle;
 import org.slf4j.Logger;
 
 /**
@@ -461,8 +462,15 @@ public class OpenCVData implements Serializable {
     return (ArrayList)sources.get(String.format("%s.output.BoundingBoxArray", name));
   }
 
+  public void putBoundingBoxArray(ArrayList<Rectangle> bb) {    
+    sources.put(String.format("%s.output.BoundingBoxArray", name), bb);
+  }
   public IplImage get(String fullKey) {    
     return (IplImage)sources.get(fullKey);
+  }
+
+  public List<Point2Df> getPointArray() {
+    return (ArrayList)sources.get(String.format("%s.output.PointArray", name));
   }
 
 }

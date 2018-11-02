@@ -58,6 +58,8 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.myrobotlab.document.Classification;
+import org.myrobotlab.document.Rollup;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -66,15 +68,16 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.geometry.Point2Df;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractVideoSource;
-import org.myrobotlab.service.data.Point2Df;
 import org.slf4j.Logger;
 
 import com.github.axet.vget.VGet;
@@ -137,10 +140,9 @@ public class OpenCV extends AbstractVideoSource {
         }
       } catch (Exception e) {
         error(e);
+        stopCapture();
       }
-
-      log.info("stopping capture");
-      stopCapture();
+      log.info("stopping capture");      
     }
   }
 
@@ -161,6 +163,8 @@ public class OpenCV extends AbstractVideoSource {
   transient final static public String FOREGROUND = "foreground";
   static final Set<String> grabberTypes = new TreeSet<String>();
   public static final String INPUT_KEY = "input";
+  
+  VideoProcessor vp = new VideoProcessor();
 
   // FIXME - make more simple
   transient public final static String INPUT_SOURCE_CAMERA = "camera";
@@ -393,7 +397,7 @@ public class OpenCV extends AbstractVideoSource {
     // System.loadLibrary("opencv_java");
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     // opencv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
-    opencv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+    opencv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix 
    
     // check with
     // &timestart=
@@ -405,8 +409,9 @@ public class OpenCV extends AbstractVideoSource {
     // opencv.addFilter("yolo");
     // opencv.capture("googleimagesdownload/downloads/cats");
     // opencv.capture("http://www.engr.colostate.edu/me/facil/dynamics/files/cbw3.avi");
-    // OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
-    // opencv.addFilter(yolo);
+    OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
+    opencv.addFilter(yolo);
+    log.info("here");
 
     // opencv.capture();
 
@@ -452,8 +457,8 @@ public class OpenCV extends AbstractVideoSource {
   Integer height = null;
   String inputFile = null;
   String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
-
-  String lastFilterNamex;
+  
+  Rollup rollup = new Rollup();
 
   transient Frame lastFrame;
   transient IplImage lastImage;
@@ -542,11 +547,26 @@ public class OpenCV extends AbstractVideoSource {
     if (videoThread != null) {
       info("already capturing");
     } else {
-      videoThread = new Thread(new VideoProcessor(), String.format("%s-video-processor", getName()));
+      videoThread = new Thread(vp, String.format("%s-video-processor", getName()));
       videoThread.start();
       broadcastState();
     }
   }
+  
+  synchronized public void pauseCapture() {
+    capturing = false;
+    videoThread = null;
+    broadcastState();
+  }
+  
+  /** 
+   * a resume is the same as a capture - the only difference
+   * is if the capture was "stopped" or "paused" - stop
+   * will cause the FrameGrabber to re-initialize with frame 0
+   */
+  synchronized public void resumeCapture() {
+    capture();
+  }  
 
   public void capture(FrameGrabber grabber) {
     stopCapture();
@@ -669,7 +689,7 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public OpenCVData getFaceDetect() {
-    OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect();
+    OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect("face");
     addFilter(fd);
     OpenCVData d = getOpenCVData();
     removeFilter(fd.name);
@@ -995,9 +1015,31 @@ public class OpenCV extends AbstractVideoSource {
   public String publish(String value) {
     return value;
   }
-
-  public Map<String, Double> publishClassification(Map<String, Double> classifications) {
+  public Classification publishNewClassification(Classification classification) {
+    info("found new %s %f", classification.getLabel(), classification.getConfidence());
+    // pauseCapture();
+    return classification;
+  }
+  
+  public List<Classification> publishClassification(List<Classification> classifications) {
     // log.info("Publish Classification in opencv!");
+    // aggregate locally for fun - "better" is to send it to a search engine Solr or Elasticsearch
+    
+    // template matching ? 
+    // so potentially frame by frame passes through here 
+    // and what we are interested in is - during the running of this service
+    // we would like a little aggregation and potentially re-training
+    // we want to know the general question 
+    // "what do you see" or "what is new" ? both have some direct or indirect reference to
+    // "time"
+    
+    for (Classification object : classifications) {
+      if (!rollup.contains(object.getLabel())) {
+        invoke("publishNewClassification", object);
+      }
+      rollup.put(object);
+    }
+    
     return classifications;
   }
 
@@ -1222,14 +1264,14 @@ public class OpenCV extends AbstractVideoSource {
    *          these.
    */
   public void setFilterState(FilterWrapper otherFilter) {
-
     OpenCVFilter filter = getFilter(otherFilter.name);
     if (filter != null) {
-      Service.copyShallowFrom(filter, otherFilter.filter);
+      if (filter != otherFilter.filter) {
+        Service.copyShallowFrom(filter, otherFilter.filter);
+      }
     } else {
       error("setFilterState - could not find %s ", otherFilter.name);
     }
-
   }
 
   public String setFrameGrabberType(String grabberType) {
@@ -1246,6 +1288,7 @@ public class OpenCV extends AbstractVideoSource {
   // camera or file => capture(int) or capture(String)
   public String setInputSource(String inputSource) {
     this.inputSource = inputSource;
+    broadcastState();
     return inputSource;
   }
 

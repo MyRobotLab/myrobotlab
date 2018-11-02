@@ -44,7 +44,7 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.math.geometry.Point2Df;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
@@ -69,11 +69,6 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) {
-
-    if (image == null) {
-      log.error("image is null");
-    }
-
     // TODO: track an array of blobs , not just one.
     SimpleBlobDetector o = new SimpleBlobDetector();
 
@@ -86,13 +81,8 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
     o.detect(new Mat(image), pv);
 
-    try {
-      // close this o/w you could leak something i guess?
-      o.close();
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    // close this o/w you could leak something i guess?
+    o.close();
 
     // System.out.println(point.toString());
     if (pv.size() == 0) {
@@ -132,31 +122,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
   }
 
   @Override
-  public void display() {
-    float x, y;
-    int xPixel, yPixel;
-    for (int i = 0; i < pointsToPublish.size(); ++i) {
-      Point2Df point = pointsToPublish.get(i);
-      x = point.x;
-      y = point.y;
-      // graphics.setColor(Color.red);
-      // if (useFloatValues) {
-      // xPixel = (int) (x * width);
-      // yPixel = (int) (y * height);
-      // } else {
-      xPixel = (int) x;
-      yPixel = (int) y;
-      // }
-      cvCircle(frame, cvPoint(xPixel, yPixel), 5, CvScalar.GREEN, -1, 8, 0);
-    }
-    cvPutText(frame, String.format("Blobs Found: %d", pointsToPublish.size()), cvPoint(20, 40), font, CvScalar.GREEN);
-    return frame;
-  }
-
-  @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   public void clearPoints() {
@@ -166,8 +132,15 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
   public int getNumberOfBlobs() {
     return pointsToPublish.size();
   }
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+
+    for (int i = 0; i < pointsToPublish.size(); ++i) {
+      Point2Df point = pointsToPublish.get(i);
+      graphics.drawOval((int) point.x, (int) point.y, 5, 5);
+    }
+    graphics.drawString(String.format("Blobs Found: %d", pointsToPublish.size()), 20, 40);
     return image;
   }
 }

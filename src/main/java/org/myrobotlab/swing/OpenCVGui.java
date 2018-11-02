@@ -93,6 +93,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   JComboBox<Integer> cameraIndex = new JComboBox<Integer>(new Integer[] { 0, 1, 2, 3, 4, 5, 6, 7 });
   JRadioButton cameraRadio = new JRadioButton();
   JButton capture = new JButton("capture");
+  JButton pause = new JButton("pause");
   JPanel captureCfg = new JPanel();
   CanvasFrame cframe = null;
   transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
@@ -158,6 +159,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     JPanel cpanel = new JPanel();
     cpanel.setBorder(BorderFactory.createEtchedBorder());
     cpanel.add(capture);
+    cpanel.add(pause);
     cpanel.add(grabberTypeSelect);
     cpanel.add(undock);
 
@@ -217,7 +219,13 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       } else {
         send("stopCapture");
       }
-
+    } else if (o == pause) {
+      send("pauseCapture");
+      if (("pause".equals(pause.getText()))) {
+        send("pauseCapture");
+      } else {
+        send("resumeCapture");
+      }
     } else if (o == cameraRadio) {
       send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA);
       send("setCameraIndex", cameraIndex.getSelectedItem());
@@ -226,7 +234,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       send("setInputSource", OpenCV.INPUT_SOURCE_FILE);
       
     } else if (o == open) {
-      int returnValue = fc.showSaveDialog(null);
+      int returnValue = fc.showOpenDialog(null);
       if (returnValue == JFileChooser.APPROVE_OPTION) {
         send("setInputFileName", fc.getSelectedFile().getAbsolutePath());
         send("setInputSource", OpenCV.INPUT_SOURCE_FILE);
@@ -334,6 +342,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       addFilterButton.addActionListener(this);
       cameraRadio.addActionListener(this);
       capture.addActionListener(this);
+      pause.addActionListener(this);
       fileRadio.addActionListener(this);
       grabberTypeSelect.addActionListener(this);
       open.addActionListener(this);
@@ -347,6 +356,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       addFilterButton.removeActionListener(this);
       cameraRadio.removeActionListener(this);
       capture.removeActionListener(this);
+      pause.removeActionListener(this);
       fileRadio.removeActionListener(this);
       grabberTypeSelect.removeActionListener(this);
       open.removeActionListener(this);
@@ -407,9 +417,13 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
 
         if (opencv.isCapturing()) {
           capture.setText("stop");
+          pause.setText("pause");
+          // pause.setVisible(true);
           setChildrenEnabled(captureCfg, false);
         } else {
           capture.setText("capture");
+          pause.setText("resume");
+          // pause.setVisible(false);
           setChildrenEnabled(captureCfg, true);
         }
 

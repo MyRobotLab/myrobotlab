@@ -226,7 +226,7 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
           
       // highlight each of the faces we find.
       drawFaceRects(image, dF);
-      data.setEyesDifference(dF.getRightEye().y() - dF.getLeftEye().y());
+     //  data.setEyesDifference(dF.getRightEye().y() - dF.getLeftEye().y());
     }}
     // pass through/return the original image marked up.
     return image;
@@ -357,7 +357,6 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getMouth().x(), dFace.getFace().y() + dFace.getMouth().y(), dFace.getMouth().width(), dFace.getMouth().height());
       drawRect(image, offset, CvScalar.GREEN);
     }
-
   }
 
   private void drawRects(IplImage image, RectVector rects, CvScalar color) {

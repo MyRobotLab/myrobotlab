@@ -31,6 +31,10 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_SIMPLEX;
 
@@ -103,6 +107,12 @@ public class OpenCVFilterSolr extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
     // TODO Auto-generated method stub
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 

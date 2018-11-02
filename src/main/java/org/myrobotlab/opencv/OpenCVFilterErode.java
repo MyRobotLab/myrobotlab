@@ -40,11 +40,7 @@ public class OpenCVFilterErode extends OpenCVFilter {
 
   public int numberOfIterations = 1;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterErode.class.getCanonicalName());
-
-  public OpenCVFilterErode() {
-    super();
-  }
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterErode.class);
 
   public OpenCVFilterErode(String name) {
     super(name);

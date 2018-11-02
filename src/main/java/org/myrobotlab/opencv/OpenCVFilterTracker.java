@@ -48,7 +48,7 @@ import org.bytedeco.javacpp.opencv_tracking.Tracker;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.math.geometry.Point2Df;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
