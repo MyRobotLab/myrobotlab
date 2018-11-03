@@ -3,7 +3,7 @@ package org.myrobotlab.document;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Aggregate {
+public class ClassSet {
 
   long newestTs = 0;
   long oldestTs = 0;
@@ -16,7 +16,7 @@ public class Aggregate {
 
   List<Classification> timeline = new ArrayList<>();
 
-  public Aggregate() {
+  public ClassSet() {
   }
 
   public void add(Classification object) {

@@ -60,7 +60,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
 import org.myrobotlab.document.Classification;
-import org.myrobotlab.document.Rollup;
+import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -485,7 +485,7 @@ public class OpenCV extends AbstractVideoSource {
   String inputFile = null;
   String inputSource = OpenCV.INPUT_SOURCE_CAMERA;
 
-  Rollup rollup = new Rollup();
+  Classifications rollup = new Classifications();
 
   transient Frame lastFrame;
   transient IplImage lastImage;
