@@ -141,6 +141,9 @@ public class OpenCVData implements Serializable {
     sources.put(String.format("%s.output.Frame", name), frame);
 
     IplImage firstImage = converterToIplImage.convertToIplImage(frame);
+    if (firstImage == null) {
+      log.error("could not convert frame to image !!!!");
+    }
     sources.put(String.format("%s.input.IplImage", name), firstImage);
     sources.put(String.format("%s.output.IplImage", name), firstImage);
 
@@ -223,7 +226,7 @@ public class OpenCVData implements Serializable {
   public String getName() {
     return name;
   }
-  
+
   public IplImage getOutputImage() {
     return getImage("output");
   }
@@ -275,13 +278,15 @@ public class OpenCVData implements Serializable {
     BufferedImage bi = null;
     String key = String.format("%s.BufferedImage", getKeyPrefix("output"));
     if (!sources.containsKey(key)) {
-      
-      IplImage image = getImage(); // <- should be output or "selected Filter .. i guess"
+
+      IplImage image = getImage(); // <- should be output or "selected Filter ..
+                                   // i guess"
       if (image != null) {
-      // bi = converterToJava.convert(getInputFrame());
+        // bi = converterToJava.convert(getInputFrame());
         bi = converterToJava.convert(converterToMat.convert(image));
       } else {
-        bi = converterToJava.convert(getInputFrame()); // logic should probably not be buried down
+        bi = converterToJava.convert(getInputFrame()); // logic should probably
+                                                       // not be buried down
       }
       // cache result
       sources.put(key, bi);
@@ -323,8 +328,9 @@ public class OpenCVData implements Serializable {
   }
 
   /**
-   * This is the typical method filters will use to store their output, it has a key
-   * with their filter's name and an "output" reference.
+   * This is the typical method filters will use to store their output, it has a
+   * key with their filter's name and an "output" reference.
+   * 
    * @param keyPart
    * @param object
    */
@@ -353,27 +359,31 @@ public class OpenCVData implements Serializable {
       sb.append("= ");
       sb.append(System.identityHashCode(o) % 1000);
       sb.append(" ");
-      sb.append(o.getClass().getSimpleName());
-      if (o.getClass().equals(IplImage.class)) {
-        IplImage i = (IplImage) o;
-        sb.append(" width=").append(i.width());
-        sb.append(" height=").append(i.height());
-        sb.append(" depth=").append(i.depth());
-        sb.append(" channels=").append(i.nChannels());
-      } else if (o.getClass().equals(IplImage.class)) {
-        Frame f = (Frame) o;
-        sb.append(" width=").append(f.imageWidth);
-        sb.append(" height=").append(f.imageHeight);
-        sb.append(" depth=").append(f.imageDepth);
-        sb.append(" channels=").append(f.imageChannels);
-        sb.append(" stride=").append(f.imageStride);
-      } else if (o.getClass().equals(BufferedImage.class)) {
-        BufferedImage f = (BufferedImage) o;
-        sb.append(" width=").append(f.getWidth());
-        sb.append(" height=").append(f.getHeight());
-        sb.append(" type=").append(f.getType());
+      if (o == null) {
+        sb.append("null");
       } else {
-        sb.append(o);
+        sb.append(o.getClass().getSimpleName());
+        if (o.getClass().equals(IplImage.class)) {
+          IplImage i = (IplImage) o;
+          sb.append(" width=").append(i.width());
+          sb.append(" height=").append(i.height());
+          sb.append(" depth=").append(i.depth());
+          sb.append(" channels=").append(i.nChannels());
+        } else if (o.getClass().equals(IplImage.class)) {
+          Frame f = (Frame) o;
+          sb.append(" width=").append(f.imageWidth);
+          sb.append(" height=").append(f.imageHeight);
+          sb.append(" depth=").append(f.imageDepth);
+          sb.append(" channels=").append(f.imageChannels);
+          sb.append(" stride=").append(f.imageStride);
+        } else if (o.getClass().equals(BufferedImage.class)) {
+          BufferedImage f = (BufferedImage) o;
+          sb.append(" width=").append(f.getWidth());
+          sb.append(" height=").append(f.getHeight());
+          sb.append(" type=").append(f.getType());
+        } else {
+          sb.append(o);
+        }
       }
       sb.append("\n");
     }
@@ -445,32 +455,33 @@ public class OpenCVData implements Serializable {
   public String getSelectedFilter() {
     return selectedFilter;
   }
-  
-  public void putKinectDepth(IplImage kinect) {    
+
+  public void putKinectDepth(IplImage kinect) {
     sources.put(OpenCV.INPUT_KEY, kinect);
   }
 
-  public IplImage getKinectDepth() {    
-    return (IplImage)sources.get(OpenCV.INPUT_KEY);
+  public IplImage getKinectDepth() {
+    return (IplImage) sources.get(OpenCV.INPUT_KEY);
   }
 
   public Object getFrameIndex() {
     return frameIndex;
   }
 
-  public ArrayList<Rectangle> getBoundingBoxArray() {    
-    return (ArrayList)sources.get(String.format("%s.output.BoundingBoxArray", name));
+  public ArrayList<Rectangle> getBoundingBoxArray() {
+    return (ArrayList) sources.get(String.format("%s.output.BoundingBoxArray", name));
   }
 
-  public void putBoundingBoxArray(ArrayList<Rectangle> bb) {    
+  public void putBoundingBoxArray(ArrayList<Rectangle> bb) {
     sources.put(String.format("%s.output.BoundingBoxArray", name), bb);
   }
-  public IplImage get(String fullKey) {    
-    return (IplImage)sources.get(fullKey);
+
+  public IplImage get(String fullKey) {
+    return (IplImage) sources.get(fullKey);
   }
 
   public List<Point2Df> getPointArray() {
-    return (ArrayList)sources.get(String.format("%s.output.PointArray", name));
+    return (ArrayList) sources.get(String.format("%s.output.PointArray", name));
   }
 
 }

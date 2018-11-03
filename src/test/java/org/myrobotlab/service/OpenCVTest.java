@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -11,22 +12,22 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
 
-public class OpenCVTest {
+public class OpenCVTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
 
-  static OpenCV opencv = null;
+  static OpenCV cv = null;
   static SwingGui swing = null;
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-    if (!Runtime.isHeadless()) {
-      // swing = (SwingGui) Runtime.start("swing", "SwingGui");
+    cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    Runtime.setLogLevel("warn");
+    if (!isHeadless()) {
+      swing = (SwingGui) Runtime.start("swing", "SwingGui");
     }
   }
 
@@ -51,10 +52,38 @@ public class OpenCVTest {
 
   @Test
   public final void testFileCapture() throws InterruptedException {
-    opencv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     
-    opencv.setCameraIndex(3);
-    assertEquals(3, opencv.getCameraIndex());
+    // we want "best guess" frame grabbers to auto set depdending on the requested resource
+    // which is being "captured"
+    
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    
+    for (String fn : OpenCV.POSSIBLE_FILTERS) {
+      log.warn("trying {}", fn);
+      cv.addFilter(fn);
+      sleep(100);
+      cv.removeFilters();
+    }
+    
+    cv.pauseCapture();
+    sleep(100);
+    int frameIndex = cv.getFrameIndex();
+    sleep(100);
+    assertEquals(frameIndex, cv.getFrameIndex());
+    cv.resumeCapture();
+    sleep(100);
+    assertTrue(cv.isCapturing());
+    assertTrue(frameIndex < cv.getFrameIndex());
+    cv.stopCapture();
+    assertTrue(!cv.isCapturing());
+    sleep(100);
+    frameIndex = cv.getFrameIndex();
+    sleep(100);
+    assertEquals(frameIndex, cv.getFrameIndex());
+    
+    
+    cv.setCameraIndex(3);
+    assertEquals(3, cv.getCameraIndex());
     // TODO: sorry for changing the unit test.  this thread sleep is needed now!
     // TODO: remove this thread.sleep call.. 
     long now = System.currentTimeMillis();
@@ -63,16 +92,16 @@ public class OpenCVTest {
     OpenCVData data = null;
      while (delta <  threshold) {
        delta = System.currentTimeMillis() - now;
-        data = opencv.getOpenCVData();
+        data = cv.getOpenCVData();
         if (data != null) 
           break;
      }
     assertNotNull(data);
     // adding filter when running - TODO - test addFilter when not running
-    // opencv.addFilter("FaceDetect");
+    // cv.addFilter("FaceDetect");
     // no guarantee filter is applied before retrieval
-    // data = opencv.getOpenCVData();
-    data = opencv.getFaceDetect();
+    // data = cv.getOpenCVData();
+    data = cv.getFaceDetect();
     
    
   }

@@ -51,6 +51,7 @@ import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
@@ -125,23 +126,46 @@ public class OpenCV extends AbstractVideoSource {
 
     @Override
     public void run() {
+      // getting a new grabber takes time ..
+      // so that is what we synchronize it and wait until we are "really"
+      // capturing
+      // when we are - we'll let all the gui/control/python threads go
+      // synchronized (lock) {
       try {
         log.info("beginning capture");
-        getGrabber();
         capturing = true;
+        getGrabber();
         lengthInFrames = grabber.getLengthInFrames();
         lengthInTime = grabber.getLengthInTime();
+
         while (capturing) {
-          processVideo();
-          if (lengthInFrames > 0 && loop && frameIndex > lengthInFrames - 2) {
+          if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames == 1 && frameIndex < 1)) {
+            // grab a single frame - never grab again
+            frame = grabber.grab();
+          }
+          processVideo(frame);
+          if (lengthInFrames > 1 && loop && frameIndex > lengthInFrames - 2) {
             grabber.setFrameNumber(0);
             frameIndex = 0;
           }
-        }
+        } // end of while - no longer capturing
+
       } catch (Exception e) {
-        error(e);
-        stopCapture();
+        log.error("getting grabber failed", e);
       }
+
+      capturing = false;
+      videoThread = null;
+      frameIndex = 0;
+      if (grabber != null) {
+        try {
+          grabber.close();
+        } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+        }
+        grabber = null;
+      }
+
+      broadcastState();
       log.info("stopping capture");
     }
   }
@@ -163,6 +187,7 @@ public class OpenCV extends AbstractVideoSource {
   transient final static public String FOREGROUND = "foreground";
   static final Set<String> grabberTypes = new TreeSet<String>();
   public static final String INPUT_KEY = "input";
+  public static final String OUTPUT_KEY = "output";
 
   VideoProcessor vp = new VideoProcessor();
 
@@ -178,11 +203,11 @@ public class OpenCV extends AbstractVideoSource {
 
   transient final static public String PART = "part";
 
-  static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddAlpha", "AddMask", "Affine", "And", "AverageColor", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector",
-      "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceRecognizer", "Fauvist", "Ffmpeg", "FindContours", "Flip", "FloodFill", "FloorFinder", "GoodFeaturesToTrack",
-      "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "LKOpticalTrack", "Mask", "MatchTemplate", "MotionTemplate", "Mouse",
-      "Not", "Output", "PyramidDown", "PyramidUp", "RepetitiveAnd", "RepetitiveOr", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector",
-      "Smooth", "Solr", "Split", "State", "Surf", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector", "Dilate", "DL4J",
+      "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack",
+      "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate",
+      "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
+      "Solr", "Split", "State", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -197,7 +222,7 @@ public class OpenCV extends AbstractVideoSource {
         grabberTypes.add(fg);
       }
 
-      grabberTypes.add("Pipeline"); // to/from another opencv service      
+      grabberTypes.add("Pipeline"); // to/from another opencv service
       grabberTypes.add("Sarxos");
       grabberTypes.add("MJpeg");
     } catch (Exception e) {
@@ -388,27 +413,34 @@ public class OpenCV extends AbstractVideoSource {
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
     LoggingFactory.init("WARN");
+    
+    OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
-    // System.loadLibrary("opencv_java");
-    OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-    // opencv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
-    opencv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
+    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
+    cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
+
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+
+    cv.capture(0);
+    // cv.capture("C:\\mrl\\myrobotlab.opencv-fixes\\d.mp4"); dunno why
+    // ffmpeg noWorky
+
 
     // check with
     // &timestart=
-    opencv.setColor("black");
-    // opencv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    // opencv.capture("testAvi/rassegna2.avi");
-    // opencv.addFilter("GoodFeaturesToTrack");
-    // opencv.addFilter("Canny");
-    // opencv.addFilter("yolo");
-    // opencv.capture("googleimagesdownload/downloads/cats");
-    // opencv.capture("http://www.engr.colostate.edu/me/facil/dynamics/files/cbw3.avi");
+    cv.setColor("black");
+    // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    // cv.capture("testAvi/rassegna2.avi");
+    // cv.addFilter("GoodFeaturesToTrack");
+    // cv.addFilter("Canny");
+    // cv.addFilter("yolo");
+    // cv.capture("googleimagesdownload/downloads/cats");
+    // cv.capture("http://www.engr.colostate.edu/me/facil/dynamics/files/cbw3.avi");
     OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
-    opencv.addFilter(yolo);
+    cv.addFilter(yolo);
     log.info("here");
 
-    // opencv.capture();
+    // cv.capture();
 
   }
 
@@ -466,8 +498,6 @@ public class OpenCV extends AbstractVideoSource {
   String pipelineSelected = null;
 
   String recordingSource = INPUT_KEY;
-
-  boolean recordOutput = false;
 
   transient SimpleDateFormat sdf = new SimpleDateFormat();
 
@@ -535,23 +565,25 @@ public class OpenCV extends AbstractVideoSource {
     return addFilter(filter);
   }
 
+  // final Object lock = new Object();
+
   /**
    * capture starts the frame grabber and video processing threads
    */
-  synchronized public void capture() {
-    if (videoThread != null) {
-      info("already capturing");
-    } else {
+  public void capture() {
+    if (capturing) {
+      return;
+    }
+    if (!capturing) {
       videoThread = new Thread(vp, String.format("%s-video-processor", getName()));
       videoThread.start();
+      sleep(300);
       broadcastState();
     }
   }
 
   synchronized public void pauseCapture() {
     capturing = false;
-    videoThread = null;
-    broadcastState();
   }
 
   /**
@@ -667,7 +699,6 @@ public class OpenCV extends AbstractVideoSource {
     setInputSource(INPUT_SOURCE_FILE);
     setInputFileName(filename);
     capture();
-
   }
 
   public void captureFromResourceFile(String filename) throws IOException {
@@ -878,11 +909,10 @@ public class OpenCV extends AbstractVideoSource {
     return undockDisplay;
   }
 
-  private void processVideo() throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
+  private void processVideo(Frame frame) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
 
     frameStartTs = System.currentTimeMillis();
-    frame = grabber.grab();
-
+    
     if (frame != null) {
       lastFrame = frame;
     } else if (frame == null && lastFrame != null) {
@@ -894,7 +924,6 @@ public class OpenCV extends AbstractVideoSource {
 
     ++frameIndex;
     data = new OpenCVData(getName(), frameStartTs, frameIndex, frame);
-
     // process each filter
     // for (String filterName : filters.keySet()) {
     for (OpenCVFilter filter : filters.values()) {
@@ -958,8 +987,7 @@ public class OpenCV extends AbstractVideoSource {
       blockingData.add(data);
     }
 
-    if (recordOutput) {
-      // TODO - add input, filter, & display
+    if (recording) {
       record(data);
     }
 
@@ -1148,37 +1176,41 @@ public class OpenCV extends AbstractVideoSource {
     try {
 
       if (!outputFileStreams.containsKey(recordingSource)) {
-        // FFmpegFrameRecorder recorder = new FFmpegFrameRecorder
-        // (String.format("%s.avi",filename), frame.width(),
-        // frame.height());
-        FrameRecorder recorder = new OpenCVFrameRecorder(String.format("%s.avi", recordingSource), frame.imageWidth, frame.imageHeight);
-        // recorder.setCodecID(CV_FOURCC('M','J','P','G'));
-        // TODO - set frame rate to framerate
+        String filename = String.format("%s-%d.avi", recordingSource, System.currentTimeMillis());
+        
+        
+        FrameRecorder recorder = new OpenCVFrameRecorder(filename, frame.imageWidth, frame.imageHeight);        
         recorder.setFrameRate(15);
         recorder.setPixelFormat(1);
         recorder.start();
+       
+        /**<pre>
+        FrameRecorder recorder = new FFmpegFrameRecorder(filename, frame.imageWidth, frame.imageHeight, 1);
+        recorder.setFormat("flv");
+        // recorder.setSampleRate(frameRate); for audio
+        recorder.setFrameRate(maxFps);
+        recorder.start();
+         </pre>
+        */
+        
         outputFileStreams.put(recordingSource, recorder);
       }
       // TODO - add input, filter & display
       outputFileStreams.get(recordingSource).record(converter.convert(data.getImage()));
 
       if (closeOutputs) {
-        OpenCVFrameRecorder output = (OpenCVFrameRecorder) outputFileStreams.get(recordingSource);
-        outputFileStreams.remove(output);
+        FrameRecorder output = (FrameRecorder) outputFileStreams.get(recordingSource);
+        outputFileStreams.remove(recordingSource);
         output.stop();
         output.release();
-        recordOutput = false;
+        recording = false;
         closeOutputs = false;
       }
-
     } catch (Exception e) {
       log.error("record threw", e);
     }
   }
 
-  public void recordOutput(Boolean b) {
-    recordOutput = b;
-  }
 
   /**
    * records a single frame to the filesystem from our data
@@ -1309,25 +1341,32 @@ public class OpenCV extends AbstractVideoSource {
     this.streamerEnabled = streamerEnabled;
   }
 
-  synchronized public void stopCapture() {
-    info("stopping capture");
-    try {
-
-      capturing = false;
-      videoThread = null;
-
-      if (grabber != null) {
-        grabber.close();
-        grabber = null;
-      }
-
-    } catch (Exception e) {
-      log.error("stopCapture threw", e);
-    }
-
-    broadcastState();
+  public void stopCapture() {
+    capturing = false;
+    sleep(300);
   }
 
+  /**
+   * <pre>
+   * public void stopCapturex() {
+   *   info("stopping capture");
+   *   try {
+   *     capturing = false;
+   * 
+   *     synchronized (lock) {
+   *       videoThread = null;
+   *       if (grabber != null) {
+   *         grabber.close();
+   *         grabber = null;
+   *       }
+   *     }
+   *   } catch (Exception e) {
+   *     log.error("stopCapture threw", e);
+   *   }
+   *   broadcastState();
+   * }
+   * </pre>
+   */
   public void setMaxFps(Integer fps) {
     if (fps == null || fps < 1 || fps > 1000) {
       maxFps = null;
@@ -1341,7 +1380,8 @@ public class OpenCV extends AbstractVideoSource {
 
   // FIXME - implement .. duh..
   public void stopRecording() {
-    recording = false;
+    // recording = false;
+    closeOutputs = true;
   }
 
   @Override
@@ -1354,6 +1394,10 @@ public class OpenCV extends AbstractVideoSource {
     undockDisplay = b;
     broadcastState();
     return b;
+  }
+  
+  public void record() {
+    recording = true;
   }
 
   public boolean isRecording() {

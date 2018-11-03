@@ -219,6 +219,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       } else {
         send("stopCapture");
       }
+      send("broadcastState");
     } else if (o == pause) {
       send("pauseCapture");
       if (("pause".equals(pause.getText()))) {
@@ -255,9 +256,9 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       // currentFilterListModel.removeElement(filterGui);
     } else if (o == recordButton) {
       if (recordButton.getText().equals("record")) {
-        send("recordOutput", true);
+        send("record");
       } else {
-        send("recordOutput", false);
+        send("stopRecording");
       }
     } else if (o == recordFrameButton) {
       send("recordSingleFrame");
