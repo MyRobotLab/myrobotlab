@@ -1988,7 +1988,7 @@ public class Runtime extends Service implements MessageListener {
       shutdown();
       // shutdown / exit
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("shutdown threw",e);
     }
   }
 
