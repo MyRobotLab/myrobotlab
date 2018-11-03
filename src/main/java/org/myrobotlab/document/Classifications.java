@@ -1,23 +1,22 @@
 package org.myrobotlab.document;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class Rollup {
+public class Classifications {
 
-  Map<String, Aggregate> aggregates = new TreeMap<>();
+  Map<String, ClassSet> aggregates = new TreeMap<>();
 
   public Set<String> getTypes() {
     return aggregates.keySet();
   }
 
   public void put(Classification object) {
-    Aggregate aggregate = null;
+    ClassSet aggregate = null;
     String label = object.getLabel();
     if (!aggregates.containsKey(label)) {
-      aggregate = new Aggregate();
+      aggregate = new ClassSet();
     } else {
       aggregate = aggregates.get(label);
     }
@@ -29,7 +28,7 @@ public class Rollup {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (String label : aggregates.keySet()) {
-      Aggregate agg = aggregates.get(label);
+      ClassSet agg = aggregates.get(label);
       sb.append(label);
       sb.append(" ");
       sb.append(agg.totalCount);
