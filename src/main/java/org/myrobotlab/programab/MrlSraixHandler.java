@@ -1,7 +1,6 @@
 package org.myrobotlab.programab;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +10,7 @@ import org.alicebot.ab.SraixHandler;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 public class MrlSraixHandler implements SraixHandler {
@@ -20,23 +20,31 @@ public class MrlSraixHandler implements SraixHandler {
   
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
+    log.debug("MRL Sraix handler! Input {}");
     // the INPUT has the string we care about.  if this is an OOB tag, let's evaluate it and return the result.  
-    // TODO: o/w fall back to default behavior of pannous / pandorabots?
     if (containsOOB(input)) {
       String response = processInlineOOB(input);
       return response;
     } else {
-      return input;
-      // TODO: replace this with an wikipedia query instead?
-//      log.info("Falling back to ask Pannous! Input: {}", input);
-//      // TODO: do we care about passing a local here?! 
-//      // this locale is the locale of the bot.. not the locale of runtime..
-//      String result = Sraix.sraixPannous(input, hint, chatSession, locale);
-//      result.replaceAll("\\(Answers.com\\)", "");
-//      return result;
+      // fall back to default behavior of pannous / pandorabots?
+      // TODO: expose pandora bots here if botid is set?
+      // TODO: enable call out to an official MRL hosted NLU service/ knowedge service.
+      
+      String response = Sraix.sraixPannous(input, hint, chatSession, locale);
+      if (StringUtil.isEmpty(response)) {
+        return defaultResponse;
+      } else {
+        // clean up the response a bit.
+        response = cleanPannousResponse(response);
+        return response;
+      }
     }
   }
 
+  private String cleanPannousResponse(String response) {
+    String clean = response.replaceAll("\\(Answers.com\\)", "").trim();
+    return clean;
+  }
 
   private boolean containsOOB(String text) {
     Matcher oobMatcher = oobPattern.matcher(text);
