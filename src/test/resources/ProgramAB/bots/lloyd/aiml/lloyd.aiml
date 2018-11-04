@@ -145,7 +145,7 @@
 <template>Search of pannous returned this: <sraix default="PICFAILED" hint="pic" service="pannous">SHOW ME <star/></sraix></template>
 </category>
 <category><pattern>MRLSRAIX</pattern>
-<template><sraix>foobar</sraix></template>
+<template><sraix>Why is the sky blue</sraix></template>
 </category>
 <category><pattern>OOBMRLSRAIX</pattern>
 <template>You are talking to <sraix><oob>
