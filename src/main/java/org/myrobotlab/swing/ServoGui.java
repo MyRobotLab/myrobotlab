@@ -544,6 +544,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
           send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
               Double.parseDouble(maxOutput.getText()));
           send("setVelocity", Double.parseDouble(velocity.getText()));
+          send("save");
           Integer delayIfV = 1000;
           Integer delayNoV = 10000;
 
