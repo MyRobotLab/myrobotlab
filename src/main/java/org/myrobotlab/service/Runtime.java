@@ -915,7 +915,7 @@ public class Runtime extends Service implements MessageListener {
     Repo.getInstance().install();
   }
 
-  /*
+  /**
    * Installs a single Service type. This "should" work even if there is no
    * Runtime. It can be invoked on the command line without starting a MRL
    * instance. If a runtime exits it will broadcast events of installation
@@ -948,17 +948,6 @@ public class Runtime extends Service implements MessageListener {
     }
 
   }
-
-  /**
-   * invoked to confirm with the user it is appropriate to restart now
-   *
-   * @return - the current autoRestartAfterUpdate to put in dialog to (never ask
-   *         again)
-   */
-  /*
-   * public boolean confirmRestart() { needsRestart = true; return
-   * autoRestartAfterUpdate; }
-   */
 
   static public boolean isAgent() {
     if (cmdline == null) {
@@ -1426,6 +1415,10 @@ public class Runtime extends Service implements MessageListener {
 
     for (ServiceInterface service: getServices()) {
       service.preShutdown();
+    }
+    
+    for (ServiceInterface service: getServices()) {
+      service.save();
     }
    
     try {
