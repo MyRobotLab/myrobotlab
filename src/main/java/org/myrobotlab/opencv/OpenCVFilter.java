@@ -64,7 +64,6 @@ public abstract class OpenCVFilter implements Serializable {
 
   // FIXME - deprecate - not needed or duplicated or in OpenCV framework
   // pipeline...
-  public boolean useFloatValues = true;
   public boolean publishDisplay = false;
   public boolean publishData = true;
   public boolean publishImage = false;
@@ -254,6 +253,10 @@ public abstract class OpenCVFilter implements Serializable {
    */
   public void postProcess(IplImage processed) {
     data.put(processed);
+  }
+  
+  public void saveToFile(String filename, IplImage image) {
+    opencv.saveToFile(filename, image);
   }
 
 }

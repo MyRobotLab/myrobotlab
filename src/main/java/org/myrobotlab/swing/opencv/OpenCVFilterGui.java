@@ -28,6 +28,8 @@ package org.myrobotlab.swing.opencv;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
@@ -40,7 +42,7 @@ import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
-public abstract class OpenCVFilterGui {
+public abstract class OpenCVFilterGui implements ActionListener {
 	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGui.class);
 
 	public final String name;
@@ -54,6 +56,8 @@ public abstract class OpenCVFilterGui {
 
 	JComboBox<String> sources = new JComboBox<String>();
 	ComboBoxModel2 sourcesModel = new ComboBoxModel2(this);
+	
+	OpenCVFilterGui self;
 
 	public OpenCVFilterGui(String boundFilterName, String boundServiceName, SwingGui myGui) {
 		name = boundFilterName;
@@ -75,7 +79,7 @@ public abstract class OpenCVFilterGui {
 		main.add(input, BorderLayout.NORTH);
 		*/
 		main.add(display, BorderLayout.CENTER);
-
+		self = this;
 	}
 
 	public JPanel getDisplay() {
@@ -97,6 +101,10 @@ public abstract class OpenCVFilterGui {
 	@Override
 	public String toString() {
 		return name;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
 	}
 
 }

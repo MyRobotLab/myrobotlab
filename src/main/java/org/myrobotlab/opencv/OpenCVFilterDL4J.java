@@ -23,6 +23,7 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
+// FIXME - should be OpenCVFilterDl4j
 public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
@@ -36,11 +37,6 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   public ArrayList<YoloDetectedObject> yoloLastResult = null;
   private volatile IplImage lastImage = null;
   
-  public OpenCVFilterDL4J() {
-    super();
-    loadDL4j();
-  }
-  
   public OpenCVFilterDL4J(String name) {
     super(name);
     log.info("Constructor of dl4j filter");
@@ -52,6 +48,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
     log.info("Loading VGG 16 Model.");
     try {
+      dl4j.loadTinyYOLO();
       // dl4j.loadYolo2();
       dl4j.loadVGG16();
       // dl4j.loadDarknet();
@@ -137,7 +134,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     long start = System.currentTimeMillis();
     log.info("Starting the DL4J classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
-    while (true) {
+    while (true) {// FIXME - must be able to release !!
       // log.info("Running!!!");
       // now we need to know which image we should classify
       // there likely needs to be some synchronization on this too.. o/w the main thread will

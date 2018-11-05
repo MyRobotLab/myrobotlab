@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -11,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
@@ -56,7 +60,15 @@ public class OpenCVTest extends AbstractTest {
     // we want "best guess" frame grabbers to auto set depdending on the requested resource
     // which is being "captured"
     
+    cv.addFilter("yolo");
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    Map<String, List<Classification>> c = cv.getClassifications();
+    
+    assertTrue(c.containsKey("person"));
+    assertEquals(5, c.get("person").size());
+    // cv.stopCapture();
+    cv.removeFilters();
+    // cv.getFaces();
     
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.warn("trying {}", fn);

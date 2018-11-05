@@ -121,7 +121,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
       corners.position(i);
       x = (int) corners.x();
       y = (int) corners.y();
-      
+
       if (colorAgeOfPoint) {
         String key = String.format("%d.%d", x, y);
         if (values.containsKey(key)) {
@@ -144,7 +144,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
           graphics.setColor(color);
           graphics.drawOval(x, y, 10, 10);
           graphics.drawString(String.format("%s", df.format(scale)), x, y);
-          
+
         } else {
           log.error(key); // FIXME FIXME FIXME ---- WHY THIS SHOULDN"T
           // HAPPEN BUT IT HAPPENS ALL THE TIME
@@ -153,7 +153,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
       corners.position(i);
       // graphics.drawOval(x, y, 3, 1);
     }
-    
+
     return image;
   }
 
@@ -214,11 +214,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 
       Point2Df np = null;
 
-      if (useFloatValues) {
-        np = new Point2Df((float) x / width, (float) y / height, value);
-      } else {
-        np = new Point2Df(x, y, value);
-      }
+      np = new Point2Df(x, y, value);
 
       if (np.value > oldest.value) {
         oldest = np;
@@ -229,7 +225,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
     }
 
     put("points", points);
-    
+
     return image;
   }
 

@@ -3,34 +3,22 @@ package org.myrobotlab.document;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Rect;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.service.Elasticsearch;
 import org.slf4j.Logger;
 
 public class Classification extends Document {
 
   public final static Logger log = LoggerFactory.getLogger(Classification.class);
 
-  public Rectangle boundingBox;
-
   public Classification(String id) {
     super(id);
     setTs(System.currentTimeMillis());
   }
-/*
-  public Classification(String id, Rect boundingBox, float confidence, String label, int frameIndex, BufferedImage cropped, String sublabel) {
-    super(id);
-    setTs(System.currentTimeMillis());
-  }
-*/  
 
   public void setTs(long ts) {
     setField("ts", ts);
