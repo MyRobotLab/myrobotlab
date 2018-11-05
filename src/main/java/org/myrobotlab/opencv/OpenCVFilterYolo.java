@@ -22,6 +22,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.swing.WindowConstants;
 
@@ -257,7 +260,20 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
           log.info("Yolo Classification Rate : {}", rate);
         }
-        invoke("publishClassification", lastResult);
+        
+        Map<String, List<Classification>> ret = new TreeMap<>();
+        for (Classification c : lastResult) {
+          List<Classification> nl = null;
+          if (ret.containsKey(c.getLabel())) {
+            nl = ret.get(c.getLabel());
+          } else {
+            nl = new ArrayList<>();            
+            ret.put(c.getLabel(), nl);
+          }
+          nl.add(c);
+        }
+        
+        invoke("publishClassification", ret);
       } else {
         log.info("No Image to classify...");
       }

@@ -190,17 +190,11 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
         if (isMinArea && isMaxArea) {
 
           Rectangle box = new Rectangle();
-          if (useFloatValues) {
-            box.x = (float) rect.x() / width;
-            box.y = (float) rect.y() / height;
-            box.width = (float) rect.width() / width;
-            box.height = (float) rect.height() / height;
-          } else {
-            box.x = rect.x();
-            box.y = rect.y();
-            box.width = rect.width();
-            box.height = rect.height();
-          }
+
+          box.x = rect.x();
+          box.y = rect.y();
+          box.width = rect.width();
+          box.height = rect.height();
 
           boxes.add(box);
 

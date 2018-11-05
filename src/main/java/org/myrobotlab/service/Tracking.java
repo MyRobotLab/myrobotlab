@@ -377,7 +377,7 @@ public class Tracking extends Service {
       case STATE_FACE_DETECT:
         // check for bounding boxes
         // data.setSelectedFilterName(FaceDetectFilterName);
-        ArrayList<Rectangle> bb = data.getBoundingBoxArray();
+        List<Rectangle> bb = data.getBoundingBoxArray();
 
         if (bb != null && bb.size() > 0) {
 
@@ -586,7 +586,7 @@ public class Tracking extends Service {
 
   public void waitForObjects(OpenCVData data) {
     data.setSelectedFilter(FILTER_FIND_CONTOURS);
-    ArrayList<Rectangle> objects = data.getBoundingBoxArray();
+    List<Rectangle> objects = data.getBoundingBoxArray();
     int numberOfNewObjects = (objects == null) ? 0 : objects.size();
 
     // if I'm not currently learning the background and

@@ -468,8 +468,8 @@ public class OpenCVData implements Serializable {
     return frameIndex;
   }
 
-  public ArrayList<Rectangle> getBoundingBoxArray() {
-    return (ArrayList) sources.get(String.format("%s.output.BoundingBoxArray", name));
+  public List<Rectangle> getBoundingBoxArray() {
+    return (List) sources.get(String.format("%s.output.BoundingBoxArray", name));
   }
 
   public void putBoundingBoxArray(ArrayList<Rectangle> bb) {
@@ -481,7 +481,7 @@ public class OpenCVData implements Serializable {
   }
 
   public List<Point2Df> getPointArray() {
-    return (ArrayList) sources.get(String.format("%s.output.PointArray", name));
+    return (List) sources.get(String.format("%s.output.PointArray", name));
   }
 
 }

@@ -139,17 +139,11 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
         if (isMinArea && isMaxArea) {
 
           Rectangle box = new Rectangle();
-          if (useFloatValues) {
-            box.x = (float) rect.x() / width;
-            box.y = (float) rect.y() / height;
-            box.width = (float) rect.width() / width;
-            box.height = (float) rect.height() / height;
-          } else {
-            box.x = rect.x();
-            box.y = rect.y();
-            box.width = rect.width();
-            box.height = rect.height();
-          }
+
+          box.x = rect.x();
+          box.y = rect.y();
+          box.width = rect.width();
+          box.height = rect.height();
 
           list.add(box);
 
@@ -180,7 +174,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
 
-    ArrayList<Rectangle> boxes = data.getBoundingBoxArray();
+    List<Rectangle> boxes = data.getBoundingBoxArray();
     if (boxes != null) {
       for (Rectangle box : boxes) {
         graphics.drawOval((int) box.x, (int) box.y, (int) (box.x + box.width), (int) (box.y + box.height));
