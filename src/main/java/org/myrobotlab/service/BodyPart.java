@@ -230,104 +230,113 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
   //pasted from inmoov service, for compatibility
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
-    // We should walk though our list of servos and see if
-    // the map has it.. if so .. move to it!
-    // Peers p = InMoovArm.getPeers(getName()).getPeers("Servo");
-    // TODO: look up the mapping for all the servos in the arm.
+    // todo implement other body parts
+    if (this.getIntanceName().toLowerCase().contains("arm")) {
+      // We should walk though our list of servos and see if
+      // the map has it.. if so .. move to it!
+      // Peers p = InMoovArm.getPeers(getName()).getPeers("Servo");
+      // TODO: look up the mapping for all the servos in the arm.
 
-    // we map the servo 90 degrees to be 0 degrees.
-    HashMap<String, Double> phaseShiftMap = new HashMap<String, Double>();
-    // phaseShiftMap.put("omoplate", 90);
-    // Harry's omoplate is +90 degrees from Gaels InMoov..
-    // These are for the encoder offsets.
-    // these map between the reference frames of the dh model & the actual arm.
-    // (calibration)
-    phaseShiftMap.put("omoplate", 90.0);
-    phaseShiftMap.put("shoulder", 90.0);
-    phaseShiftMap.put("rotate", -450.0);
-    phaseShiftMap.put("bicep", 90.0);
+      // we map the servo 90 degrees to be 0 degrees.
+      HashMap<String, Double> phaseShiftMap = new HashMap<String, Double>();
+      // phaseShiftMap.put("omoplate", 90);
+      // Harry's omoplate is +90 degrees from Gaels InMoov..
+      // These are for the encoder offsets.
+      // these map between the reference frames of the dh model & the actual arm.
+      // (calibration)
+      phaseShiftMap.put("omoplate", 90.0);
+      phaseShiftMap.put("shoulder", 90.0);
+      phaseShiftMap.put("rotate", -450.0);
+      phaseShiftMap.put("bicep", 90.0);
 
-    HashMap<String, Double> gainMap = new HashMap<String, Double>();
-    gainMap.put("omoplate", 1.0);
-    gainMap.put("shoulder", -1.0);
-    gainMap.put("rotate", -1.0);
-    gainMap.put("bicep", -1.0);
+      HashMap<String, Double> gainMap = new HashMap<String, Double>();
+      gainMap.put("omoplate", 1.0);
+      gainMap.put("shoulder", -1.0);
+      gainMap.put("rotate", -1.0);
+      gainMap.put("bicep", -1.0);
 
-    ArrayList<String> servos = new ArrayList<String>();
-    servos.add("omoplate");
-    servos.add("shoulder");
-    servos.add("rotate");
-    servos.add("bicep");
-    for (String s : servos) {
-      if (angleMap.containsKey(s)) {
-        if ("omoplate".equals(s)) {
-          Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
-          if (angle < 0) {
-            angle += 360;
+      ArrayList<String> servos = new ArrayList<String>();
+      servos.add("omoplate");
+      servos.add("shoulder");
+      servos.add("rotate");
+      servos.add("bicep");
+      for (String s : servos) {
+        if (angleMap.containsKey(s)) {
+          if ("omoplate".equals(s)) {
+            Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
+            if (angle < 0) {
+              angle += 360;
+            }
+            getServo("omoplate").moveTo(angle.intValue());
           }
-          getServo("omoplate").moveTo(angle.intValue());
-        }
-        if ("shoulder".equals(s)) {
-          Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
-          if (angle < 0) {
-            angle += 360;
+          if ("shoulder".equals(s)) {
+            Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
+            if (angle < 0) {
+              angle += 360;
+            }
+            getServo("shoulder").moveTo(angle.intValue());
           }
-          getServo("shoulder").moveTo(angle.intValue());
-        }
-        if ("rotate".equals(s)) {
-          Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
-          if (angle < 0) {
-            angle += 360;
+          if ("rotate".equals(s)) {
+            Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
+            if (angle < 0) {
+              angle += 360;
+            }
+            getServo("rotate").moveTo(angle.intValue());
           }
-          getServo("rotate").moveTo(angle.intValue());
-        }
-        if ("bicep".equals(s)) {
-          Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
-          getServo("bicep").moveTo(angle.intValue());
-          if (angle < 0) {
-            angle += 360;
+          if ("bicep".equals(s)) {
+            Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
+            getServo("bicep").moveTo(angle.intValue());
+            if (angle < 0) {
+              angle += 360;
+            }
           }
         }
       }
+    } else {
+      log.warn("Kinematics class not yet implemented for this body part");
     }
   }
-  
+
   //pasted from inmoov service, for compatibility
-  public static DHRobotArm getDHRobotArm() {
+  public DHRobotArm getDHRobotArm() {
+    if (this.getIntanceName().toLowerCase().contains("arm")) {
+      // TODO: specify this correctly and document the reference frames!
+      DHRobotArm arm = new DHRobotArm();
+      // d , r, theta , alpha
 
-    // TODO: specify this correctly and document the reference frames!
-    DHRobotArm arm = new DHRobotArm();
-    // d , r, theta , alpha
+      // TODO: the DH links should take into account the encoder offsets and
+      // calibration maps
+      DHLink link1 = new DHLink("omoplate", 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
+      // dh model + 90 degrees = real 
+      link1.setMin(MathUtils.degToRad(-90));
+      link1.setMax(MathUtils.degToRad(0));
 
-    // TODO: the DH links should take into account the encoder offsets and
-    // calibration maps
-    DHLink link1 = new DHLink("omoplate", 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
-    // dh model + 90 degrees = real 
-    link1.setMin(MathUtils.degToRad(-90));
-    link1.setMax(MathUtils.degToRad(0));
+      // -80 vs +80 difference between left/right arm.
+      DHLink link2 = new DHLink("shoulder", -80, 0, MathUtils.degToRad(90), MathUtils.degToRad(90));
+      // TODO: this is actually 90 to -90 ? validate if inverted.
+      // this link is inverted :-/
+      link2.setMin(MathUtils.degToRad(-90));
+      link2.setMax(MathUtils.degToRad(90));
 
-    // -80 vs +80 difference between left/right arm.
-    DHLink link2 = new DHLink("shoulder", -80, 0, MathUtils.degToRad(90), MathUtils.degToRad(90));
-    // TODO: this is actually 90 to -90 ? validate if inverted.
-    // this link is inverted :-/
-    link2.setMin(MathUtils.degToRad(-90));
-    link2.setMax(MathUtils.degToRad(90));
+      DHLink link3 = new DHLink("rotate", 280, 0, MathUtils.degToRad(0), MathUtils.degToRad(90));
+      // TODO: check if this is inverted.  i think it is.
+      link3.setMin(MathUtils.degToRad(0));
+      link3.setMax(MathUtils.degToRad(180));
 
-    DHLink link3 = new DHLink("rotate", 280, 0, MathUtils.degToRad(0), MathUtils.degToRad(90));
-    // TODO: check if this is inverted.  i think it is.
-    link3.setMin(MathUtils.degToRad(0));
-    link3.setMax(MathUtils.degToRad(180));
+      DHLink link4 = new DHLink("bicep", 0, 280, MathUtils.degToRad(90), MathUtils.degToRad(0));
+      // TODO: this is probably inverted? should be 90 to 0...
+      link4.setMin(MathUtils.degToRad(90));
+      link4.setMax(MathUtils.degToRad(180));
 
-    DHLink link4 = new DHLink("bicep", 0, 280, MathUtils.degToRad(90), MathUtils.degToRad(0));
-    // TODO: this is probably inverted? should be 90 to 0...
-    link4.setMin(MathUtils.degToRad(90));
-    link4.setMax(MathUtils.degToRad(180));
+      arm.addLink(link1);
+      arm.addLink(link2);
+      arm.addLink(link3);
+      arm.addLink(link4);
 
-    arm.addLink(link1);
-    arm.addLink(link2);
-    arm.addLink(link3);
-    arm.addLink(link4);
-
-    return arm;
+      return arm;
+    } else {
+      log.warn("Kinematics class not yet implemented for this body part");
+      return null;
+    }
   }
 }
