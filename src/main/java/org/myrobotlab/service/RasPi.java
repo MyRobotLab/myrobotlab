@@ -101,13 +101,13 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   public final static Logger log = LoggerFactory.getLogger(RasPi.class.getCanonicalName());
 
-  GpioController gpio;
+  transient GpioController gpio;
 
-  GpioPinDigitalOutput gpio01;
-  GpioPinDigitalOutput gpio03;
+  transient GpioPinDigitalOutput gpio01;
+  transient GpioPinDigitalOutput gpio03;
 
   // i2c bus
-  public static I2CBus i2c;
+  transient public static I2CBus i2c;
 
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
