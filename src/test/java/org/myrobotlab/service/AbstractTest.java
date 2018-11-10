@@ -13,4 +13,8 @@ abstract public class AbstractTest {
     return Runtime.isHeadless();
   }
   
+  static public boolean hasInternet() {
+    return Runtime.hasInternet();
+  }
+  
 }

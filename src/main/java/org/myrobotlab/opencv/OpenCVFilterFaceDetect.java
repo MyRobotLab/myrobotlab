@@ -40,6 +40,7 @@ import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_STAGE_MAX;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.Box;
@@ -63,8 +64,16 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   CvMemStorage storage = null;
   public CvHaarClassifierCascade cascade = null; // TODO - was static
+  
+  /**
+   * our default classifier - pre-trained 
+   */
   public String cascadeDir = "haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
+  
+  /**
+   * bounding boxes of faces
+   */
   ArrayList<Rectangle> bb = null;
   int i;
   double scaleFactor = 1.1;
@@ -82,10 +91,15 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   public static final String STATE_LOSING_TRACKING = "STATE_LOSING_TRACKING";
   public static final String STATE_DETECTING_FACE = "STATE_DETECTING_FACE";
   public static final String STATE_DETECTED_FACE = "STATE_DETECTED_FACE";
+  
+  /**
+   * Begin Recognition - which is just a sub-classification of "face"(detection)
+   */
+  public String trainingDir = "training" + File.separator + "_faces";
 
   private String state = STATE_LOST_TRACKING;
-  //int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default 
-  int option = 0; // default 
+  int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default 
+  // int option = 0; // default 
 
   public OpenCVFilterFaceDetect(String name) {
     super(name);

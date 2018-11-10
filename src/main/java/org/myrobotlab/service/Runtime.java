@@ -9,8 +9,10 @@ import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.URL;
@@ -95,7 +97,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
-  
+
   /**
    * instances of MRL - keyed with an instance key URI format is
    * mrl://gateway/(protocol key)
@@ -209,6 +211,8 @@ public class Runtime extends Service implements MessageListener {
 
   static private CmdLine cmdline = null;
 
+  private static String gateway;
+
   Locale locale;
 
   /*
@@ -217,6 +221,42 @@ public class Runtime extends Service implements MessageListener {
    */
   public static final int availableProcessors() {
     return java.lang.Runtime.getRuntime().availableProcessors();
+  }
+
+  /**
+   * function to test if internet connectivity is available
+   * 
+   * @return
+   */
+  static public String getPublicGateway() {
+    try {
+
+      URL url = new URL("http://checkip.amazonaws.com/");
+      HttpURLConnection con = (HttpURLConnection) url.openConnection();
+      con.setRequestMethod("GET");
+
+      int status = con.getResponseCode();
+      log.info("status " + status);
+
+      BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+      String inputLine;
+      StringBuffer content = new StringBuffer();
+      while ((inputLine = in.readLine()) != null) {
+        content.append(inputLine);
+      }
+      in.close();
+      
+      gateway = inputLine;
+      return gateway;
+
+    } catch (Exception e) {
+      log.error("can't connect", e);
+    }
+    return null;
+  }
+  
+  static public boolean hasInternet() {
+    return getPublicGateway() != null;
   }
 
   static public synchronized ServiceInterface create(String name, String type) {
@@ -1988,7 +2028,7 @@ public class Runtime extends Service implements MessageListener {
       shutdown();
       // shutdown / exit
     } catch (Exception e) {
-      log.error("shutdown threw",e);
+      log.error("shutdown threw", e);
     }
   }
 

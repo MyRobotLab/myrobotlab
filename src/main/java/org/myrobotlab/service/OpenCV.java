@@ -54,6 +54,7 @@ import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -77,6 +78,7 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceTraining;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -211,11 +213,11 @@ public class OpenCV extends AbstractVideoSource {
 
   transient final static public String PART = "part";
 
-  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "BoundingBoxToFile","And", "Canny", "ColorTrack", "Copy", "CreateHistogram", "Detector", "Dilate", "DL4J",
-      "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack",
-      "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate",
-      "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth",
-      "Solr", "Split", "State", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "BoundingBoxToFile", "And", "Canny", "ColorTrack", "Copy", "CreateHistogram",
+      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill", "FloorFinder",
+      "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "KinectNavigate",
+      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
+      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "State", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -409,14 +411,15 @@ public class OpenCV extends AbstractVideoSource {
 
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
 
-  OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-  Java2DFrameConverter jconverter = new Java2DFrameConverter();
+  final transient OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
+  final transient Java2DFrameConverter jconverter = new Java2DFrameConverter();
+  final transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+  final transient OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 
   int cameraIndex = 0;
 
   volatile boolean capturing = false;
   boolean closeOutputs = false;
-  final transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
   OpenCVData data;
   /**
    * all the filters in the pipeline
@@ -576,18 +579,6 @@ public class OpenCV extends AbstractVideoSource {
    * @param filename
    */
   public void capture(String filename) {
-    if (filename.contains("http") && filename.contains("youtube")) {
-      try { // FIXME - put in own Service - along with Google Image Downloader..
-        filename = getYouTube(filename);
-      } catch (Exception e) {
-        error(e);
-        return;
-      }
-    } else if (filename.contains("http")) {
-      // inspect the mime-type coming back -
-
-    }
-
     stopCapture();
     setInputSource(INPUT_SOURCE_FILE);
     setInputFileName(filename);
@@ -716,6 +707,19 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     newGrabberType = String.format("%s%sFrameGrabber", prefixPath, grabberType);
+
+    // certain files are "not" supported out of the box by certain grabbers
+    // ffmpeg is increadibly capable, however it won't do a youtube stream
+    // so we have to download/cache it and change the filename
+    if (inputFile != null && inputFile.startsWith("http") && inputFile.contains("youtube")) {
+      try { // FIXME - put in own Service - along with Google Image Downloader..
+        inputFile = getYouTube(inputFile);
+      } catch (Exception e) {
+        error(e);
+      }
+    } else if (inputFile != null && inputFile.startsWith("http")) {
+      // inspect the mime-type coming back -
+    }
 
     log.info(String.format("video source is %s", inputSource));
     Class<?>[] paramTypes = new Class[1];
@@ -916,6 +920,11 @@ public class OpenCV extends AbstractVideoSource {
     for (OpenCVFilter filter : filters.values()) {
       // OpenCVFilter filter = filters.get(filterName);
       IplImage input = filter.setData(data);
+      if (input == null) {
+        log.error("could not get setData image");
+        continue;
+      }
+      
       // process the previous filter's output
       IplImage processed = filter.process(input);
       filter.postProcess(processed);
@@ -1401,16 +1410,25 @@ public class OpenCV extends AbstractVideoSource {
 
     Runtime.start("gui", "SwingGui");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
+    cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
     // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
-    cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
-    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin street
-    
-    
-    cv.addFilter("FaceDetect");
+    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin
+    // street
+    // cv.capture("https://www.youtube.com/watch?v=m8e-FF8MsqU");// red blue
+    // pill - pulsy :(
+    // cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");// matrix-restaurant
+
+    // cv.addFilter("FaceDetect");
     // cv.addFilter("PyramidDown");
     // cv.addFilter("BoundingBoxToFile");
+
+    OpenCVFilterFaceTraining filter = new OpenCVFilterFaceTraining("training");
+    // filter.mode = Mode.TRAIN;
+    cv.addFilter(filter);
+
+    // filter.load("C:\\mrl\\myrobotlab.opencv-fixes\\myrobotlab\\BoundingBoxToFile\\neo");
+    // filter.mode = Mode.TRAIN;
 
     boolean leave = true;
     if (leave) {
@@ -1483,13 +1501,28 @@ public class OpenCV extends AbstractVideoSource {
 
   public void saveToFile(String filename, IplImage image) {
     try {
+      int i = filename.lastIndexOf(".");
+      String ext = "png";
+      if (i > 0) {
+        ext = filename.substring(i + 1).toLowerCase();
+      }
       BufferedImage bi = IplImageToBufferedImage(image);
       FileOutputStream fos = new FileOutputStream(filename);
-      ImageIO.write(bi, "png", new MemoryCacheImageOutputStream(fos));
+      ImageIO.write(bi, ext, new MemoryCacheImageOutputStream(fos));
       fos.close();
     } catch (IOException e) {
       log.error("saveToFile threw", e);
     }
   }
+
+  public Mat convertToMat(IplImage img) {
+    return converterToMat.convert(converterToMat.convert(img));
+  }
+
+  public Frame convertToFrame(IplImage image) {
+    return converter.convert(image);
+  }
+  
+  
 
 }

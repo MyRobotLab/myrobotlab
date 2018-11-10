@@ -25,6 +25,9 @@
 
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 
 import java.awt.Color;
@@ -34,9 +37,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
+import javax.swing.WindowConstants;
 
 import org.bytedeco.javacpp.opencv_core.CvSize;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacv.CanvasFrame;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
@@ -162,7 +168,7 @@ public abstract class OpenCVFilter implements Serializable {
     // grab the incoming image ..
     IplImage image = data.getOutputImage(); // <-- getting input from output
 
-    if (image.width() != width || image.nChannels() != channels) {
+    if (image != null && (image.width() != width || image.nChannels() != channels)) {
       width = image.width();
       channels = image.nChannels();
       height = image.height();
@@ -257,6 +263,16 @@ public abstract class OpenCVFilter implements Serializable {
   
   public void saveToFile(String filename, IplImage image) {
     opencv.saveToFile(filename, image);
+  }
+  
+  public Mat convertToMat(IplImage copy) {
+    return opencv.convertToMat(copy);
+  }
+  
+  public void show(final IplImage image, final String title) {
+    CanvasFrame canvas = new CanvasFrame(title, 1);
+    // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    canvas.showImage(opencv.convertToFrame(image));
   }
 
 }
