@@ -26,16 +26,33 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_imgproc.cvResize;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import static org.bytedeco.javacpp.opencv_imgproc.*;
+import static org.bytedeco.javacpp.opencv_calib3d.*;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.*;
+import static org.bytedeco.javacpp.opencv_flann.*;
+import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_ml.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_photo.*;
+import static org.bytedeco.javacpp.opencv_shape.*;
+import static org.bytedeco.javacpp.opencv_stitching.*;
+import static org.bytedeco.javacpp.opencv_video.*;
+import static org.bytedeco.javacpp.opencv_videostab.*;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
+import org.opencv.imgproc.Imgproc;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import org.slf4j.Logger;
 
 public class OpenCVFilterResize extends OpenCVFilter {
@@ -82,6 +99,63 @@ public class OpenCVFilterResize extends OpenCVFilter {
     Mat res = resizeImage(resizedMat, destWidth, destHeight);
     return converterToMat.convertToIplImage(converterToIpl.convert(res));
   }
+  
+  public static IplImage resizeImage(final IplImage img, float percent) {
+    int newWidth = (int)(img.width() * percent);
+    int newHeight = (int)(img.height() * percent);
+    IplImage ret = IplImage.create(newWidth, newHeight, img.depth(), img.nChannels());
+    cvResize(img, ret, Imgproc.INTER_AREA);
+    return ret;
+  }
+  
+  public static IplImage resizeImage(final IplImage img, int maxWidth, int maxHeight) {
+
+    int scaledWidth = img.width();
+    int scaledHeight = img.height();
+
+    if (img.width() != maxWidth) {
+        scaledWidth = maxWidth;
+        scaledHeight = (scaledWidth * img.height()) / img.width();
+    }
+
+    if (scaledHeight != maxHeight) {
+        scaledHeight = maxHeight;
+        scaledWidth = (scaledHeight * img.width()) / img.height();
+    }
+    
+    IplImage ret = IplImage.create(scaledWidth, scaledHeight, img.depth(), img.nChannels());
+    
+    // Imgproc.INTER_CUBIC
+    
+    cvResize(img, ret, Imgproc.INTER_AREA);
+    return ret;
+}
+  /*
+  public IplImage resizeWithAspect(IplImage img, int maxWidth, int maxHeight) {
+    int maxArea = maxWidth * maxHeight;
+    
+    // find the dimension (w or h) where when the original image is scaled
+    // the first dimension which "fits" determines the percentage of what
+    // the image should scale to
+    int dw = Math.abs(maxWidth - img.width());
+    int dh = Math.abs(maxHeight - img.height());
+    
+    boolean alignToWidth = (dw )
+    
+    // if the maxWidth & 
+    
+    int newWidth = (int)(img.width() * percent);
+    int newHeight = (int)(img.height() * percent);
+    IplImage ret = IplImage.create(800, 60, img.depth(), img.nChannels());
+    cvResize(img, ret, Imgproc.INTER_AREA);
+    
+    // resize with black padding ....
+    
+    // then center & copy the image
+    
+    return ret;
+  }
+  */
 
   public int getDestWidth() {
     return destWidth;

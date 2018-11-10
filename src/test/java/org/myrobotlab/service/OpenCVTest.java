@@ -53,6 +53,16 @@ public class OpenCVTest extends AbstractTest {
   // test remote file source
   // test mpeg streamer
   
+  @Test
+  public final void testCapture() throws InterruptedException {
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    // TODO -> cv.getFaces();
+    
+    if (hasInternet()) {
+      // remote fileloading
+    }
+  }
+  
 
   @Test
   public final void testFileCapture() throws InterruptedException {
