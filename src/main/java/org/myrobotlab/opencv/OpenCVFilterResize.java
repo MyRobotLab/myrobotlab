@@ -109,16 +109,22 @@ public class OpenCVFilterResize extends OpenCVFilter {
   }
   
   public static IplImage resizeImage(final IplImage img, int maxWidth, int maxHeight) {
-
+  
     int scaledWidth = img.width();
     int scaledHeight = img.height();
-
-    if (img.width() != maxWidth) {
+    
+    int deltaWidth = maxWidth - img.width();
+    int deltaHeight = maxHeight - img.height();
+    
+    boolean widthConstrained = (deltaWidth < deltaHeight);
+    boolean heightConstrained = (deltaWidth > deltaHeight);
+    
+    if (widthConstrained) {
         scaledWidth = maxWidth;
         scaledHeight = (scaledWidth * img.height()) / img.width();
     }
 
-    if (scaledHeight != maxHeight) {
+    if (heightConstrained) {
         scaledHeight = maxHeight;
         scaledWidth = (scaledHeight * img.width()) / img.height();
     }
