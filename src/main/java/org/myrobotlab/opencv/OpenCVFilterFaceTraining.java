@@ -333,7 +333,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
           // cvResize(ipImg, resizedImage, Imgproc.INTER_NEAREST);
           // resize(convertToMat(ipImg), convertToMat(resizedImage), new Size(0,0), 1.0, 1.0, Imgproc.INTER_CUBIC);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_AREA);
-          IplImage resizedImage = OpenCVFilterResize.resizeImage(ipImg, 256, 256);
+          IplImage resizedImage = OpenCVFilterResize.resizeImage(ipImg, 400, 256);
 
           saveToFile(imageFile.getName(), resizedImage);
           
