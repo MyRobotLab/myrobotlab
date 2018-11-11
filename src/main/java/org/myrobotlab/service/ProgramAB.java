@@ -26,6 +26,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
@@ -89,6 +90,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Deprecated
   Boolean wasCleanyShutdowned = true;
+  Boolean visualDebug;
 
   HashSet<String> availableBots = new HashSet<String>();
 
@@ -299,6 +301,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
+  public void setPredicate(String predicateName, String predicateValue) {
+    setPredicate(getCurrentUserName(), predicateName, predicateValue);
+  }
+
   public void setPredicate(String username, String predicateName, String predicateValue) {
     Predicates preds = getChat(username, getCurrentBotName()).predicates;
     preds.put(predicateName, predicateValue);
@@ -307,6 +313,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void unsetPredicate(String username, String predicateName) {
     Predicates preds = getChat(username, getCurrentBotName()).predicates;
     preds.remove(predicateName);
+  }
+
+  public String getPredicate(String predicateName) {
+    return getPredicate(getCurrentUserName(), predicateName);
   }
 
   public String getPredicate(String username, String predicateName) {
@@ -594,9 +604,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void startSession(String path, String userName, String botName) {
-    startSession( path,  userName,  botName, MagicBooleans.defaultLocale);
+    startSession(path, userName, botName, MagicBooleans.defaultLocale);
   }
-  
+
   public void startSession(String path, String userName, String botName, Locale locale) {
     // Session is between a user and a bot. key is compound.
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
@@ -738,6 +748,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
     try {
       savePredicates();
+      //important to save learnf.aiml
+      writeAIML();
     } catch (IOException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
@@ -758,6 +770,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void setCurrentBotName(String currentBotName) {
     this.currentBotName = currentBotName;
+  }
+
+  public void setVisualDebug(Boolean visualDebug) {
+    this.visualDebug = visualDebug;
+    broadcastState();
+  }
+
+  public Boolean getVisualDebug() {
+    if (visualDebug == null) {
+      visualDebug = true;
+    }
+    return visualDebug;
   }
 
   public void setCurrentUserName(String currentUserName) {
@@ -836,29 +860,30 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDependency("org.json", "json", "20090211");
     //used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
-    // UI use htmlFilter, so we need htmlFilter installed with his dependencies
-    meta.addPeer("htmlFilter", "HtmlFilter", "htmlFilter");
     // This is for CJK support in ProgramAB. 
     // TODO: move this into the published POM for ProgramAB so they are pulled in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
+    meta.addCategory("ai","control");
     return meta;
   }
 
   public static void main(String s[]) throws IOException {
     try {
-      LoggingFactory.init("INFO");
-
+      LoggingFactory.init(Level.WARN);
       Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
+      //Runtime.start("webgui", "WebGui");
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+
+      //logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO"); //org.myrobotlab.service.ProgramAB
+
       //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-      MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+      //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
       // mouth.attach(ear);
       // brain.attach(ear);
-      brain.attach(mouth);
+      //brain.attach(mouth);
 
       //brain.startSession("default", "en-US");
       //brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");

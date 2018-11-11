@@ -31,9 +31,9 @@ public class Sweety extends Service {
   transient public WebkitSpeechRecognition ear;
   transient public WebGui webGui;
   transient public MarySpeech mouth;
-  transient public Tracking tracker;
+  transient public static Tracking tracker;
   transient public ProgramAB chatBot;
-  transient public OpenNi openni;
+  transient public static OpenNi openni;
   transient public Pid pid;
   transient public Pir pir;
   transient public HtmlFilter htmlFilter;
@@ -150,8 +150,8 @@ public class Sweety extends Service {
   int leftPinky[] = {9,65,180,180};
  
  // Head
-  int neckTilt[] = {6,0,75,30};
-  int neckPan[] = {7,20,140,80};
+  int neckTilt[] = {6,15,50,30};
+  int neckPan[] = {7,20,130,75};
   
   /**
    * Replace the  values of an array , if a value == -1 the old value is keep
@@ -160,7 +160,7 @@ public class Sweety extends Service {
    * If one of these arrays is less or more than four numbers length , it doesn't will be changed.
    */
   int[][] changeArrayValues(int[][] valuesArray){
-    // valuesArray contain first the news values and after the old values
+    // valuesArray contain first the news values and after, the old values
     for (int i = 0; i < (valuesArray.length / 2 ); i++) {
       if (valuesArray[i].length ==4 ){
         for (int j = 0; j < 3; j++) {
@@ -177,7 +177,7 @@ public class Sweety extends Service {
   }
 
   /**
-   * Set pin, min, max, and rest for each servos. -1 mean in an array mean "no change"
+   * Set pin, min, max, and rest for each servos. -1 in an array mean "no change"
    * Exemple setRightArm({39,1,2,3},{40,1,2,3},{41,1,2,3},{-1,1,2,3},{-1,1,2,3})
    * Python exemple : sweety.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
    */
@@ -302,6 +302,8 @@ public class Sweety extends Service {
     neckTiltServo.attach(arduino, neckTilt[pin]);
     neckPanServo.attach(arduino, neckPan[pin]);
     
+ // Inverted servos
+    neckTiltServo.setInverted(true);
   }
 
   /**
@@ -807,8 +809,8 @@ public class Sweety extends Service {
     
 
     arduino = (Arduino) Runtime.start("arduino","Arduino");
-    adaFruit16cLeft = (Adafruit16CServoDriver)  Runtime.start("adaFruit16C","Adafruit16CServoDriver");
-    adaFruit16cRight = (Adafruit16CServoDriver)  Runtime.start("adaFruit16C","Adafruit16CServoDriver");
+    adaFruit16cLeft = (Adafruit16CServoDriver)  Runtime.start("I2cServoControlLeft","Adafruit16CServoDriver");
+    adaFruit16cRight = (Adafruit16CServoDriver)  Runtime.start("I2cServoControlRight","Adafruit16CServoDriver");
     chatBot = (ProgramAB) Runtime.start("chatBot","ProgramAB");
     htmlFilter = (HtmlFilter) Runtime.start("htmlFilter","HtmlFilter");
     mouth = (MarySpeech) Runtime.start("mouth","MarySpeech");
@@ -849,7 +851,8 @@ public class Sweety extends Service {
     leftPinkyServo = (Servo) Runtime.start("leftPinkyServo","Servo"); 
     neckTiltServo = (Servo) Runtime.start("neckTiltServo","Servo");
     neckPanServo = (Servo) Runtime.start("neckPanServo","Servo");
-
+    
+    // Set min and max angle for each servos
     rightShoulderServo.setMinMax(rightShoulder[min], rightShoulder[max]);
     rightArmServo.setMinMax(rightArm[min], rightArm[max]);
     rightBicepsServo.setMinMax(rightBiceps[min], rightBiceps[max]);
@@ -873,30 +876,46 @@ public class Sweety extends Service {
     neckTiltServo.setMinMax(neckTilt[min], neckTilt[max]);
     neckPanServo.setMinMax(neckPan[min], neckPan[max]);
 
+    // Set rest for each servos
+    rightShoulderServo.setRest(rightShoulder[rest]);
+    rightArmServo.setRest(rightArm[rest]);
+    rightBicepsServo.setRest(rightBiceps[rest]);
+    rightElbowServo.setRest(rightElbow[rest]);
+    rightWristServo.setRest(rightWrist[rest]);
+    leftShoulderServo.setRest(leftShoulder[rest]);
+    leftArmServo.setRest(leftArm[rest]);
+    leftBicepsServo.setRest(leftBiceps[rest]);
+    leftElbowServo.setRest(leftElbow[rest]);
+    leftWristServo.setRest(leftWrist[rest]);
+    rightThumbServo.setRest(rightThumb[rest]);
+    rightIndexServo.setRest(rightIndex[rest]);
+    rightMiddleServo.setRest(rightMiddle[rest]);
+    rightRingServo.setRest(rightRing[rest]);
+    rightPinkyServo.setRest(rightPinky[rest]);
+    leftThumbServo.setRest(leftThumb[rest]);
+    leftIndexServo.setRest(leftIndex[rest]);
+    leftMiddleServo.setRest(leftMiddle[rest]);
+    leftRingServo.setRest(leftRing[rest]);
+    leftPinkyServo.setRest(leftPinky[rest]);
+    neckTiltServo.setRest(neckTilt[rest]);
+    neckPanServo.setRest(neckPan[rest]);
   }
 
-  // TODO modify this function to fit new sweety head
-  public void startTrack(String port, int CameraIndex) throws Exception {
-    neckTiltServo.detach();
-    neckPanServo.detach();
-
-    tracker = (Tracking) Runtime.start("tracker","Tracking");
-    // OLD WAY
-    //leftTracker.y.setPin(39); // neckTilt
-    //leftTracker.connect(port);
-    
-    tracker.connect(port, neckTilt[pin], neckPan[pin]);
-
-    tracker.pid.invert("y");
-    tracker.opencv.setCameraIndex(CameraIndex);
-    tracker.opencv.capture();
-
-    saying("tracking activated.");
+  /**
+   * Start the tracking services
+   */
+  public void startTrack() throws Exception {
+    tracker = (Tracking) Runtime.start("tracker","Tracking");  
+    sleep(1000);
+    tracker.connect(tracker.getOpenCV(),neckPanServo ,neckTiltServo);
+    //tracker.pid.invert("y");
+	tracker.clearPreFilters();
+	
+     
   }
 
   /**
    * Start the ultrasonic sensors services
-   * Start the tracking services
    * @param port port
    * @throws Exception e 
    */
@@ -924,10 +943,6 @@ public class Sweety extends Service {
   public void stopTrack() throws Exception {
     tracker.opencv.stopCapture();
     tracker.releaseService();
-    neckTiltServo.attach(arduino, neckTilt[pin]);
-    neckPanServo.attach(arduino, neckPan[pin]);
-
-    saying("the tracking if stopped.");
   }
 
   public OpenNi startOpenNI() throws Exception {

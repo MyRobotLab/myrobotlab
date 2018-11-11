@@ -953,7 +953,7 @@ public class Runtime extends Service implements MessageListener {
     Repo.getInstance().install();
   }
 
-  /*
+  /**
    * Installs a single Service type. This "should" work even if there is no
    * Runtime. It can be invoked on the command line without starting a MRL
    * instance. If a runtime exits it will broadcast events of installation
@@ -986,17 +986,6 @@ public class Runtime extends Service implements MessageListener {
     }
 
   }
-
-  /**
-   * invoked to confirm with the user it is appropriate to restart now
-   *
-   * @return - the current autoRestartAfterUpdate to put in dialog to (never ask
-   *         again)
-   */
-  /*
-   * public boolean confirmRestart() { needsRestart = true; return
-   * autoRestartAfterUpdate; }
-   */
 
   static public boolean isAgent() {
     if (cmdline == null) {
@@ -1146,8 +1135,8 @@ public class Runtime extends Service implements MessageListener {
         /*
          * FIXME - do " -extract {serviceType} in future ArrayList<String>
          * services = cmdline.getArgumentList("-extract"); Repo repo =
-         * Repo.getInstance(); if (services.size() == 0) { repo.install(); }
-         * else { for (int i = 0; i < services.size(); ++i) {
+         * Repo.getInstance(); if (services.size() == 0) { repo.install();
+         * } else { for (int i = 0; i < services.size(); ++i) {
          * repo.install(services.get(i)); } }
          */
         extract();
@@ -1465,6 +1454,10 @@ public class Runtime extends Service implements MessageListener {
       service.preShutdown();
     }
 
+    for (ServiceInterface service: getServices()) {
+      service.save();
+    }
+   
     try {
       releaseAll();
     } catch (Exception e) {
@@ -1710,8 +1703,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("user.home [{}]", userHome);
     log.info("total mem [{}] Mb", Runtime.getTotalMemory() / 1048576);
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
-    // Access restriction - log.info("total physical mem [{}] Mb",
-    // Runtime.getTotalPhysicalMemory() / 1048576);
+    // Access restriction - log.info("total physical mem [{}] Mb", Runtime.getTotalPhysicalMemory() / 1048576);
 
     log.info("getting local repo");
 
@@ -2406,7 +2398,6 @@ public class Runtime extends Service implements MessageListener {
 
   /**
    * get the Security singleton
-   * 
    * @return
    */
   static public Security getSecurity() {

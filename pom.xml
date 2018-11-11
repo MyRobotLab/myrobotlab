@@ -371,7 +371,7 @@
   <dependency>
     <groupId>inmoov.fr</groupId>
     <artifactId>inmoov</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.5</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
@@ -420,7 +420,7 @@
   <dependency>
     <groupId>inmoov.fr</groupId>
     <artifactId>inmoov</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.5</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
@@ -1287,6 +1287,24 @@
     <version>2.3.0</version>
   </dependency>
 <!-- WebGui end -->
+
+<!-- WebSocketConnector begin -->
+  <dependency>
+    <groupId>javax.websocket</groupId>
+    <artifactId>javax.websocket-api</artifactId>
+    <version>1.1</version>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus</groupId>
+    <artifactId>tyrus-client</artifactId>
+    <version>1.1</version>
+  </dependency>
+  <dependency>
+    <groupId>org.glassfish.tyrus</groupId>
+    <artifactId>tyrus-container-grizzly</artifactId>
+    <version>1.1</version>
+  </dependency>
+<!-- WebSocketConnector end -->
 
 <!-- Wii begin -->
   <dependency>
