@@ -188,16 +188,28 @@ public class ProgramABTest extends AbstractServiceTest {
     assertTrue(contains);
   }
 
-  public void sraixTest() {
-    Response resp = testService.getResponse(username, "MRLSRAIX");
+  public void sraixOOBTest() {
+    // Response resp = testService.getResponse(username, "MRLSRAIX");
     // System.out.println(resp);
-    boolean contains = resp.msg.contains("foobar");
-    assertTrue(contains);
-    resp = testService.getResponse(username, "OOBMRLSRAIX");
+    //boolean contains = resp.msg.contains("foobar");
+    //assertTrue(contains);
+    Response resp = testService.getResponse(username, "OOBMRLSRAIX");
     // System.out.println(resp);
-    contains = resp.msg.contains("You are talking to lloyd");
+    boolean contains = resp.msg.contains("You are talking to lloyd");
     assertTrue(contains);
   }
+
+  
+  
+  public void sraixTest() {
+    Response resp = testService.getResponse(username, "MRLSRAIX");
+    System.out.println(resp);
+    //Response resp = testService.getResponse(username, "Why is the sky blue?");
+    // System.out.println(resp);
+    boolean contains = resp.msg.contains("atmosphere");
+    assertTrue(contains);
+  }
+
   
   @Override
   public void testService() throws Exception {
@@ -216,6 +228,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // This following test is known to be busted..
     // pannousTest();
     addCategoryTest();
+    sraixOOBTest();
     sraixTest();
   }
 

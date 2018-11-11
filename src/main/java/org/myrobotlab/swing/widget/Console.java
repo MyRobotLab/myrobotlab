@@ -2,6 +2,7 @@ package org.myrobotlab.swing.widget;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JScrollPane;
@@ -23,9 +24,14 @@ import ch.qos.logback.core.status.Status;
 // http://www.javaworld.com/javaworld/jw-12-2004/jw-1220-toolbox.html?page=5
 public class Console implements Appender<ILoggingEvent> {
 
-  public JTextArea textArea = null;
-  public JScrollPane scrollPane = null;
+  private JTextArea textArea = null;
+  private JScrollPane scrollPane = null;
   private boolean logging = false;
+
+  // get events only from class listed inside this array
+  // not sure about method... I think better is to listen directly to class log events. Do the job for now
+  // return all if null ( by default )
+  private String[] logsClassOnly = null;
 
   public Console() { // TODO boolean JFrame or component
     textArea = new JTextArea();
@@ -75,6 +81,11 @@ public class Console implements Appender<ILoggingEvent> {
     // setName("ConsoleGUI");
     // LoggingFactory.getInstance().addAppender(this);
     logging = true;
+  }
+
+  public void startLogging(String[] logsClassOnly) {
+    this.logsClassOnly = logsClassOnly;
+    startLogging();
   }
 
   public void stopLogging() {
@@ -183,13 +194,20 @@ public class Console implements Appender<ILoggingEvent> {
   public void doAppend(ILoggingEvent loggingEvent) throws LogbackException {
     // append(loggingEvent);
     if (logging) {
-      final String msg = String.format("[%s] %s", loggingEvent.getThreadName(), loggingEvent.toString()).trim();
-
+      final String msg;
+      // force info logging for debug console, if asked
+      if (logsClassOnly != null && Arrays.stream(logsClassOnly).anyMatch(loggingEvent.getLoggerName()::equals)) {
+        msg = loggingEvent.toString().trim().replace("  ", " ") + "\n";
+      } else if (logsClassOnly == null) {
+        msg = String.format("[%s] %s", loggingEvent.getThreadName(), loggingEvent.toString()).trim() + "\n";
+      } else {
+        msg = "";
+      }
       // textarea not threadsafe, needs invokelater
       EventQueue.invokeLater(new Runnable() {
         // @Override
         public void run() {
-          textArea.append(msg + "\n");
+          textArea.append(msg);
         }
       });
     }

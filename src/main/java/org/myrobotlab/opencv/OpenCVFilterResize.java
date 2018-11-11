@@ -134,6 +134,10 @@ public class OpenCVFilterResize extends OpenCVFilter {
     // Imgproc.INTER_CUBIC
     
     cvResize(img, ret, Imgproc.INTER_AREA);
+    IplImage img2 = IplImage.create(maxWidth, maxHeight, img.depth(), img.nChannels());
+    
+    // copy into the center
+    
     return ret;
 }
   /*

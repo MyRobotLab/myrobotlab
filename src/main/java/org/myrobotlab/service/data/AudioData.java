@@ -2,6 +2,7 @@ package org.myrobotlab.service.data;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.Serializable;
 
 /**
  * AudioData - represents all of the meta data concerning a sample and the playing of that sample.
@@ -11,8 +12,10 @@ import java.io.InputStream;
  * @author GroG
  *
  */
-public class AudioData {
+public class AudioData implements Serializable {
   
+  private static final long serialVersionUID = 1L;
+	  
   // FIXME STREAM (InputStream) & AND ENCODING TYPE mp3 wav aiff etc...
   // FIXME USE INPUTSTREAM - filename is just a reference & byte[] can be put in an InputStream 
   

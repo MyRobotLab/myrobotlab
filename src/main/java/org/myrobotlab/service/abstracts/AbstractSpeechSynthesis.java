@@ -1,6 +1,7 @@
 package org.myrobotlab.service.abstracts;
 
 import java.io.File;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +41,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   Map<String, String> substitutions = new HashMap<String, String>();
 
-  public static class Voice {
+  public static class Voice implements Serializable {
+	  
+	private static final long serialVersionUID = 1L;  
+	
     /**
      * unique name of the voice
      */
