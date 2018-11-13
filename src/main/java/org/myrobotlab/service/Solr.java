@@ -618,6 +618,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     meta.addCategory("data", "search");
     String solrVersion = "7.4.0";
     meta.addDependency("org.apache.solr", "solr-core", solrVersion);
+    meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
+    meta.addDependency("org.apache.solr", "solr-test-framework", solrVersion);
+    meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
     meta.addDependency("org.apache.solr", "solr-solrj", solrVersion);
     meta.addDependency("commons-io", "commons-io", "2.5");
     // TODO: update this with the latest schema!

@@ -231,7 +231,8 @@ public class MavenWrapper extends Repo implements Serializable {
       
       long ts = System.currentTimeMillis();      
 
-      String dir = String.format("install.maven.%s.%d", serviceType, ts);
+      // String dir = String.format("install.maven.%s.%d", serviceType, ts);
+      String dir = "install.maven.update";
 
       repo.createBuildFiles(dir, serviceType);
       

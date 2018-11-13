@@ -217,7 +217,7 @@ public class OpenCV extends AbstractVideoSource {
       "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill", "FloorFinder",
       "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "KinectNavigate",
       "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
-      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "State", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -380,6 +380,9 @@ public class OpenCV extends AbstractVideoSource {
     // the haar / hog / lp classifier xml files for opencv from the MRL repo
     meta.addDependency("opencv", "opencv_classifiers", "0.0.1", "zip");
 
+    // youtube downloader
+    meta.addDependency("com.github.axet", "vget", "1.1.34");
+    
     // yolo models
     meta.addDependency("yolo", "yolov2", "v2", "zip");
 

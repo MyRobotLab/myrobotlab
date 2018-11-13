@@ -126,6 +126,11 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   public void imageChanged(IplImage image) {
     // TODO Auto-generated method stub
   }
+  
+  @Override
+  public void release() {
+    running = false;
+  }
 
   @Override
   public void run() {
@@ -133,8 +138,9 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     int count = 0;
     long start = System.currentTimeMillis();
     log.info("Starting the DL4J classifier thread...");
+    running = true;
     // in a loop, grab the current image and classify it and update the result.
-    while (true) {// FIXME - must be able to release !!
+    while (running) {// FIXME - must be able to release !!
       // log.info("Running!!!");
       // now we need to know which image we should classify
       // there likely needs to be some synchronization on this too.. o/w the main thread will

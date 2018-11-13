@@ -25,11 +25,6 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- To enable CUDA / GPU Support replace backend with the following. <nd4j.backend>nd4j-cuda-8.0-platform</nd4j.backend> -->
-		<aws.java.sdk.version>1.11.255</aws.java.sdk.version>
-
-		<jme3_g>org.jmonkeyengine</jme3_g>
-		<jme3_v>3.1.0-stable</jme3_v>
 
 	</properties>
 	
@@ -92,8 +87,15 @@
 	
 	
 	
-	
 <dependencies>
+
+<!-- Agent begin -->
+  <dependency>
+    <groupId>commons-cli</groupId>
+    <artifactId>commons-cli</artifactId>
+    <version>1.4</version>
+  </dependency>
+<!-- Agent end -->
 
 <!-- AudioFile begin -->
   <dependency>
@@ -106,6 +108,12 @@
     <groupId>com.googlecode.soundlibs</groupId>
     <artifactId>mp3spi</artifactId>
     <version>1.9.5.4</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.googlecode.soundlibs</groupId>
+    <artifactId>vorbisspi</artifactId>
+    <version>1.0.3.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- AudioFile end -->
@@ -131,21 +139,9 @@
 <!-- BoofCv begin -->
   <dependency>
     <groupId>org.boofcv</groupId>
-  <artifactId>boofcv-core</artifactId>
-  <version>0.31</version>
+    <artifactId>boofcv-core</artifactId>
+    <version>0.31</version>
     <scope>provided</scope>
-    <!--  can this be removed
-      <exclusions>
-        <exclusion>
-          <groupId>org.bytedeco</groupId>
-          <artifactId>javacv</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.bytedeco.javacpp-presets</groupId>
-          <artifactId>opencv</artifactId>
-        </exclusion>
-      </exclusions>
-       -->
   </dependency>
   <dependency>
     <groupId>org.boofcv</groupId>
@@ -177,14 +173,12 @@
     <version>2.0.1</version>
     <scope>provided</scope>
   </dependency>
-<!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
-<dependency>
+  <dependency>
     <groupId>com.squareup.okhttp3</groupId>
     <artifactId>okhttp</artifactId>
     <version>3.9.0</version>
-</dependency>
-
-  
+    <scope>provided</scope>
+  </dependency>
 <!-- CleverBot end -->
 
 <!-- Cron begin -->
@@ -218,51 +212,30 @@
     <version>1.0.0-beta2</version>
     <scope>provided</scope>
   </dependency>
-<!-- https://mvnrepository.com/artifact/org.deeplearning4j/deeplearning4j-modelimport -->
-	<dependency>
-		<groupId>org.deeplearning4j</groupId>
-		<artifactId>deeplearning4j-nn</artifactId>
-		<version>1.0.0-beta2</version>
-		<scope>provided</scope>
-	</dependency>
-	<dependency>
-		<groupId>org.deeplearning4j</groupId>
-		<artifactId>deeplearning4j-modelimport</artifactId>
-		<version>1.0.0-beta2</version>
-		<scope>provided</scope>
-	</dependency>
-	<dependency>
-		<groupId>org.deeplearning4j</groupId>
-		<artifactId>deeplearning4j-ui_2.11</artifactId>
-		<version>1.0.0-beta2</version>
-    <scope>provided</scope>
-	</dependency>
-	
-  <!--  <dependency>
-    <groupId>org.nd4j</groupId>
-    <artifactId>nd4j-native-platform</artifactId> 
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-nn</artifactId>
     <version>1.0.0-beta2</version>
     <scope>provided</scope>
-  </dependency>  -->
+  </dependency>
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-modelimport</artifactId>
+    <version>1.0.0-beta2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-ui_2.11</artifactId>
+    <version>1.0.0-beta2</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>org.nd4j</groupId>
-    <!-- <artifactId>nd4j-cuda-9.2-platform</artifactId>  -->
     <artifactId>nd4j-native-platform</artifactId>
     <version>1.0.0-beta2</version>
     <scope>provided</scope>
   </dependency>
-  <!--  <dependency>
-    <groupId>org.nd4j</groupId>
-    <artifactId>nd4j-native-pi-mrl</artifactId>
-    <version>1.0.0-beta</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.nd4j</groupId>
-    <artifactId>nd4j-native-platform-pi-mrl</artifactId>
-    <version>1.0.0-beta</version>
-    <scope>provided</scope>
-  </dependency>  --> 
   <dependency>
     <groupId>com.twelvemonkeys.imageio</groupId>
     <artifactId>imageio-core</artifactId>
@@ -301,29 +274,23 @@
     <artifactId>sweble-wom3-core</artifactId>
     <version>3.1.7</version>
     <scope>provided</scope>
-  </dependency>	
-	<dependency>
-	    <groupId>com.thoughtworks.xstream</groupId>
-	    <artifactId>xstream</artifactId>
-	    <version>1.4.10</version>
-	    <scope>provided</scope>
-	</dependency>  
+  </dependency>
+  <dependency>
+    <groupId>com.thoughtworks.xstream</groupId>
+    <artifactId>xstream</artifactId>
+    <version>1.4.9</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- DocumentPipeline end -->
 
-<!-- Esp8266_01 begin -->
+<!-- Elasticsearch begin -->
   <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
+    <groupId>pl.allegro.tech</groupId>
+    <artifactId>embedded-elasticsearch</artifactId>
+    <version>2.7.0</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- Esp8266_01 end -->
+<!-- Elasticsearch end -->
 
 <!-- GoogleCloud begin -->
   <dependency>
@@ -334,6 +301,21 @@
   </dependency>
 <!-- GoogleCloud end -->
 
+<!-- HtmlFilter begin -->
+  <dependency>
+    <groupId>org.jsoup</groupId>
+    <artifactId>jsoup</artifactId>
+    <version>1.8.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.3.2</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- HtmlFilter end -->
+
 <!-- HtmlParser begin -->
   <dependency>
     <groupId>org.jsoup</groupId>
@@ -342,21 +324,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- HtmlParser end -->
-
-<!-- HttpClient begin -->
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- HttpClient end -->
 
 <!-- ImapEmailConnector begin -->
   <dependency>
@@ -466,7 +433,7 @@
     <artifactId>jme3-jogg</artifactId>
     <version>3.2.0-stable</version>
     <scope>provided</scope>
-    <exclusions>
+      <exclusions>
         <exclusion>
           <groupId>de.jarnbjo</groupId>
           <artifactId>j-ogg-all</artifactId>
@@ -605,6 +572,14 @@
     <scope>provided</scope>
       <exclusions>
         <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
         </exclusion>
@@ -615,24 +590,64 @@
     <artifactId>voice-bits3-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-cmu-bdl-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-cmu-nk-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-cmu-rms-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
@@ -640,6 +655,14 @@
     <version>5.2</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
@@ -651,60 +674,160 @@
     <artifactId>voice-dfki-obadiah-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-dfki-ot-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-dfki-pavoque-neutral-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-dfki-poppy-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-dfki-prudence-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-dfki-spike-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-enst-camille-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-enst-dennys-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-istc-lucia-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>voice-upmc-jessica-hsmm</artifactId>
     <version>5.2</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>de.dfki.mary</groupId>
@@ -712,6 +835,14 @@
     <version>5.2</version>
     <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
@@ -739,10 +870,6 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpcore</artifactId>
         </exclusion>
       </exclusions>
   </dependency>
@@ -890,12 +1017,6 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>commons-lang</groupId>
-    <artifactId>commons-lang</artifactId>
-    <version>2.6</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>net.sf.jipcam</groupId>
     <artifactId>jipcam</artifactId>
     <version>0.9.1</version>
@@ -912,6 +1033,12 @@
       </exclusions>
   </dependency>
   <dependency>
+    <groupId>commons-lang</groupId>
+    <artifactId>commons-lang</artifactId>
+    <version>2.6</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>opencv</groupId>
     <artifactId>opencv_classifiers</artifactId>
     <version>0.0.1</version>
@@ -919,10 +1046,18 @@
     <type>zip</type>
   </dependency>
   <dependency>
-  <groupId>com.github.axet</groupId>
-  <artifactId>vget</artifactId>
-  <version>1.1.34</version>
-</dependency>
+    <groupId>com.github.axet</groupId>
+    <artifactId>vget</artifactId>
+    <version>1.1.34</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>yolo</groupId>
+    <artifactId>yolov2</artifactId>
+    <version>v2</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
 <!-- OpenCV end -->
 
 <!-- OpenNi begin -->
@@ -940,6 +1075,15 @@
     <type>zip</type>
   </dependency>
 <!-- OpenNi end -->
+
+<!-- OpenWeatherMap begin -->
+  <dependency>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20090211</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- OpenWeatherMap end -->
 
 <!-- Osc begin -->
   <dependency>
@@ -993,7 +1137,13 @@
     <artifactId>aws-java-sdk-polly</artifactId>
     <version>1.11.118</version>
     <scope>provided</scope>
-    <exclusions>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>3.3.2</version>
+    <scope>provided</scope>
+      <exclusions>
         <exclusion>
           <groupId>org.apache.httpcomponents</groupId>
           <artifactId>httpcore</artifactId>
@@ -1032,15 +1182,20 @@
     <version>2.5</version>
     <scope>provided</scope>
   </dependency>
+  <dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-analyzers-common</artifactId>
+    <version>7.4.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-analyzers-kuromoji</artifactId>
+    <version>7.4.0</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- ProgramAB end -->
 
-<dependency>
-    <groupId>pl.allegro.tech</groupId>
-    <artifactId>embedded-elasticsearch</artifactId>
-    <version>2.7.0</version>
-    <scope>provided</scope>
-</dependency>
- 
 <!-- Python begin -->
   <dependency>
     <groupId>org.python</groupId>
@@ -1101,6 +1256,11 @@
     <artifactId>httpclient</artifactId>
     <version>4.5.2</version>
   </dependency>
+  <dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.6</version>
+  </dependency>
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -1148,12 +1308,6 @@
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
-    <artifactId>solr-solrj</artifactId>
-    <version>7.4.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
     <version>7.4.0</version>
     <scope>provided</scope>
@@ -1163,12 +1317,31 @@
     		<artifactId>log4j-slf4j-impl</artifactId>
     	</exclusion>
     </exclusions>
-  </dependency>  
+  </dependency>
+  <dependency>
+    <groupId>org.apache.solr</groupId>
+    <artifactId>solr-solrj</artifactId>
+    <version>7.4.0</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>commons-io</groupId>
     <artifactId>commons-io</artifactId>
     <version>2.5</version>
     <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>mrl-solr</groupId>
+    <artifactId>mrl-solr-data</artifactId>
+    <version>1.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
 <!-- Solr end -->
 
@@ -1209,6 +1382,15 @@
     <version>1.10.4.2</version>
   </dependency>
 <!-- SwingGui end -->
+
+<!-- Tensorflow begin -->
+  <dependency>
+    <groupId>org.tensorflow</groupId>
+    <artifactId>tensorflow</artifactId>
+    <version>1.8.0</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Tensorflow end -->
 
 <!-- TesseractOcr begin -->
   <dependency>
@@ -1267,12 +1449,6 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>vorbisspi</artifactId>
-    <version>1.0.3.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>com.voicerss</groupId>
     <artifactId>tts</artifactId>
     <version>1.0</version>
@@ -1293,16 +1469,19 @@
     <groupId>javax.websocket</groupId>
     <artifactId>javax.websocket-api</artifactId>
     <version>1.1</version>
+    <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.glassfish.tyrus</groupId>
     <artifactId>tyrus-client</artifactId>
     <version>1.1</version>
+    <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.glassfish.tyrus</groupId>
     <artifactId>tyrus-container-grizzly</artifactId>
     <version>1.1</version>
+    <scope>provided</scope>
   </dependency>
 <!-- WebSocketConnector end -->
 
@@ -1343,7 +1522,37 @@
           <groupId>org.apache.httpcomponents</groupId>
           <artifactId>httpclient</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+        </exclusion>
       </exclusions>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
   </dependency>
 <!-- WikiDataFetcher end -->
 
@@ -1352,18 +1561,6 @@
     <groupId>WolframAlpha</groupId>
     <artifactId>WolframAlpha</artifactId>
     <version>1.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
     <scope>provided</scope>
   </dependency>
 <!-- WolframAlpha end -->
@@ -1394,28 +1591,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- Xmpp end -->
-
-<!-- Tensorflow begin -->
-  <dependency>
-    <groupId>org.tensorflow</groupId>
-    <artifactId>tensorflow</artifactId>
-    <version>1.8.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <!--  the following are for GPU support on linux only.
-  <dependency>
-    <groupId>org.tensorflow</groupId>
-    <artifactId>libtensorflow</artifactId>
-    <version>1.8.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.tensorflow</groupId>
-    <artifactId>libtensorflow_jni_gpu</artifactId>
-    <version>1.8.0</version>
-    <scope>provided</scope>
-  </dependency>  -->
-<!-- Tensorflow end -->
 
   </dependencies>
 
@@ -1651,27 +1826,26 @@
 				</configuration>
 				<version>2.9</version>
 			</plugin>
-			<!-- This plugin deletes the lib dir populated by the dependency plugin
-				below. -->
+			<!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>2.3</version>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>.myrobotlab</directory>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-						<fileset>
-							<directory>src/main/resources/resource/framework</directory>
-							<includes>
-								<include>**/serviceData.json</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-					</filesets>
-				</configuration>
+                <configuration>
+                  <filesets>
+                    <fileset>
+                      <directory>.myrobotlab</directory>
+                      <followSymlinks>false</followSymlinks>
+				    </fileset>
+					<fileset>
+						<directory>src/main/resources/resource/framework</directory>
+						<includes>
+							<include>**/serviceData.json</include>
+						</includes>
+						<followSymlinks>false</followSymlinks>
+					</fileset>
+                  </filesets>
+                </configuration>
 			</plugin>
 			<!-- not needed as jenkins has a "latest successful artifacts link" - duh
 			<plugin>
