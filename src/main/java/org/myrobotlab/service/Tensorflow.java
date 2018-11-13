@@ -38,9 +38,11 @@ public class Tensorflow extends Service {
   public Tensorflow(String name) {
     super(name);
   }
-
-  static public ServiceType getMetaData(String serviceClass) {
-    ServiceType meta = new ServiceType(InMoov.class.getCanonicalName());
+  
+  static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(Tensorflow.class.getCanonicalName());
+    /** <pre> tensorflow not ready for primetime
+     * */
     meta.addDescription("Tensorflow machine learning library from Google");
     meta.addCategory("ai");
     // TODO: what happens when you try to install this on an ARM processor like RasPI or the Jetson TX2 ?
@@ -53,6 +55,7 @@ public class Tensorflow extends Service {
       meta.addDependency("org.tensorflow", "libtensorflow", "1.8.0");
       meta.addDependency("org.tensorflow", "libtensorflow_jni_gpu", "1.8.0");
     }
+    /*</pre>*/
     return meta;
   }
   

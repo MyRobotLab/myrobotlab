@@ -132,13 +132,18 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   }
 
   @Override
+  public void release() {
+    running = false;
+  }
+  
+  @Override
   public void run() {
-    
+    running = true;
     int count = 0;
     long start = System.currentTimeMillis();
     log.info("Starting the DL4J classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
-    while (true) {
+    while (running) {
       // log.info("Running!!!");
       // now we need to know which image we should classify
       // there likely needs to be some synchronization on this too.. o/w the main thread will

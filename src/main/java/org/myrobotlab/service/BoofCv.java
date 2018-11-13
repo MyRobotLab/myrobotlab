@@ -34,10 +34,14 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     meta.addDescription("a very portable vision library using pure Java");
     meta.setAvailable(true);
     // add dependency if necessary
-    meta.addDependency("org.boofcv", "all", "0.26");
+    meta.addDependency("org.boofcv", "boofcv-core", "0.31");
+    meta.addDependency("org.boofcv", "boofcv-swing", "0.31");
+    meta.addDependency("org.boofcv", "boofcv-openkinect", "0.31");
     meta.addCategory("vision", "video");
+    /*
     meta.exclude("org.bytedeco", "javacv");
     meta.exclude("org.bytedeco.javacpp-presets", "opencv");    
+    */
     return meta;
   }
 

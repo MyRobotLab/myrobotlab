@@ -111,6 +111,7 @@ public class OpenCVTest extends AbstractTest {
     long now = System.currentTimeMillis();
     long delta = System.currentTimeMillis() - now;
     int threshold = 1000;
+    cv.capture();
     OpenCVData data = null;
      while (delta <  threshold) {
        delta = System.currentTimeMillis() - now;

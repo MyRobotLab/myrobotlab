@@ -505,7 +505,7 @@ public class AudioFile extends Service {
 
     meta.addDependency("javazoom", "jlayer", "1.0.1");
     meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
-    meta.addDependency("com.googlecode.soundlibs", "vorbisspi", "1.0.3.3");
+    meta.addDependency("com.googlecode.soundlibs", "vorbisspi", "1.0.3.3"); // is this being used ?
 
     /*
      * meta.addDependency("javazoom.spi", "1.9.5");

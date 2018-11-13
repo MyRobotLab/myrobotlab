@@ -407,10 +407,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     //
     if (Mode.TRAIN.equals(mode)) {
       String status = "Training Mode: " + trainName;
-      cvPutText(image, status, cvPoint(20, 40), font, CvScalar.GREEN);
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.GREEN);
     } else if (Mode.RECOGNIZE.equals(mode)) {
       String status = "Recognize Mode:" + lastRecognizedName;
-      cvPutText(image, status, cvPoint(20, 40), font, CvScalar.YELLOW);
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.YELLOW);
+      
     }
 
     //
@@ -717,6 +718,16 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    
+    if (Mode.TRAIN.equals(mode)) {
+      String status = "Training Mode: " + trainName;
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.GREEN);
+      graphics.drawString(status, 20, 40);
+    } else if (Mode.RECOGNIZE.equals(mode)) {
+      String status = "Recognize Mode:" + lastRecognizedName;
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.YELLOW);
+      graphics.drawString(status, 20, 40);      
+    }
     return image;
   }
 }
