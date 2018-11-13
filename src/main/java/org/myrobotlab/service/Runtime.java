@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.URL;
