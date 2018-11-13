@@ -1410,18 +1410,13 @@ public class OpenCV extends AbstractVideoSource {
 
     Runtime.start("gui", "SwingGui");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
+    // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
     // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin
-    // street
-    // cv.capture("https://www.youtube.com/watch?v=m8e-FF8MsqU");// red blue
-    // pill - pulsy :(
-    // cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");// matrix-restaurant
-
-    // cv.addFilter("FaceDetect");
-    // cv.addFilter("PyramidDown");
-    // cv.addFilter("BoundingBoxToFile");
+    // FIXME - decompose into modular filters 
+    cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");// matrix-restaurant
+    cv.capture("https://www.youtube.com/watch?v=lPOXR4dXxDQ"); // matrix 30 min movie
 
     OpenCVFilterFaceTraining filter = new OpenCVFilterFaceTraining("training");
     // filter.mode = Mode.TRAIN;
@@ -1471,8 +1466,6 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     cv.addFilter("yolo");
-    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
-    // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
     cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin street
 
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");

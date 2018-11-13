@@ -108,7 +108,16 @@ public class OpenCVFilterResize extends OpenCVFilter {
     return ret;
   }
   
-  public static IplImage resizeImage(final IplImage img, int maxWidth, int maxHeight) {
+  public IplImage resizeNoAspect(final IplImage image, int width, int height) {
+    destWidth = width;
+    destHeight = height;
+    Mat resizedMat = converterToMat.convertToMat(converterToIpl.convert(image));
+    Mat res = resizeImage(resizedMat, destWidth, destHeight);
+    return converterToMat.convertToIplImage(converterToIpl.convert(res));
+  }
+  
+  
+  public static IplImage resizeImageMaintainAspect(final IplImage img, int maxWidth, int maxHeight) {
   
     int scaledWidth = img.width();
     int scaledHeight = img.height();
@@ -116,8 +125,8 @@ public class OpenCVFilterResize extends OpenCVFilter {
     int deltaWidth = maxWidth - img.width();
     int deltaHeight = maxHeight - img.height();
     
-    boolean widthConstrained = (deltaWidth < deltaHeight);
-    boolean heightConstrained = (deltaWidth > deltaHeight);
+    boolean widthConstrained = (deltaWidth <= deltaHeight);
+    boolean heightConstrained = (deltaWidth >= deltaHeight);
     
     if (widthConstrained) {
         scaledWidth = maxWidth;
@@ -134,7 +143,7 @@ public class OpenCVFilterResize extends OpenCVFilter {
     // Imgproc.INTER_CUBIC
     
     cvResize(img, ret, Imgproc.INTER_AREA);
-    IplImage img2 = IplImage.create(maxWidth, maxHeight, img.depth(), img.nChannels());
+    // IplImage img2 = IplImage.create(maxWidth, maxHeight, img.depth(), img.nChannels());
     
     // copy into the center
     
