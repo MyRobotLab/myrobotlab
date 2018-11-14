@@ -309,7 +309,7 @@ public class ServiceInterfaceTest {
     for (Class<?> c : classes) {
       // System.out.println("CLASS:" + c.toString());
       HashSet<String> superClasses = new HashSet<String>();
-      Class x = c;
+      Class<?> x = c;
       while (true) {
         if (x.getSuperclass() != null) {
           superClasses.add(x.getSuperclass().toString());

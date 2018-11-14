@@ -1,11 +1,11 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
  * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the Apache License 2.0 as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version (subject to the "Classpath" exception
  * as provided in the LICENSE.txt file that accompanied this code).
@@ -13,7 +13,7 @@
  * MyRobotLab is distributed in the hope that it will be useful or fun,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Apache License 2.0 for more details.
  *
  * All libraries in thirdParty bundle are subject to their own license
  * requirements - please refer to http://myrobotlab.org/libraries for 
@@ -28,31 +28,29 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
 import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_EPS;
 import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_ITER;
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_core.cvTermCriteria;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
-import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
 import static org.bytedeco.javacpp.opencv_video.cvCalcOpticalFlowPyrLK;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.helper.opencv_core.CvArr;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Point2Df;
+import org.myrobotlab.math.geometry.Point2Df;
 import org.slf4j.Logger;
 
 public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
@@ -71,9 +69,6 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   int validCorners = 0;
 
-  // start //////////////////////
-
-  // transient IntPointer count = new IntPointer(0).put(maxPointCount);
   transient IntPointer count = new IntPointer(0).put(0);
 
   transient IplImage imgA = null;
@@ -99,47 +94,12 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   public ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
 
-  public OpenCVFilterLKOpticalTrack() {
-    super();
-  }
-
   public OpenCVFilterLKOpticalTrack(String name) {
     super(name);
   }
 
   public void clearPoints() {
     clearPoints = true;
-  }
-
-  @Override
-  public IplImage display(IplImage frame, OpenCVData data) {
-
-    // Make an image of the results
-    // for (int i = 0; i < count.get(); i++) {
-    for (int i = 0; i < count.get(); i++) {
-      cornersA.position(i);
-      cornersB.position(i);
-      cornersC.position(i);
-
-      features_found.position(i);
-      feature_errors.position(i);
-
-      if (features_found.get() == 0 || feature_errors.get() > 550) {
-        continue;
-      }
-
-      // line from previous frame point to current frame point
-      CvPoint p0 = cvPoint(Math.round(cornersC.x()), Math.round(cornersC.y()));
-      CvPoint p1 = cvPoint(Math.round(cornersB.x()), Math.round(cornersB.y()));
-      cvLine(frame, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0);
-    }
-    // reset internal position
-    cornersA.position(0);
-    cornersB.position(0);
-    cornersC.position(0);
-    features_found.position(0);
-    feature_errors.position(0);
-    return frame;
   }
 
   @Override
@@ -167,7 +127,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
 
     if (channels == 3) {
       cvCvtColor(image, imgB, CV_BGR2GRAY);
@@ -237,11 +197,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
         continue;
       }
 
-      if (useFloatValues) {
-        pointsToPublish.add(new Point2Df(x / width, y / height));
-      } else {
-        pointsToPublish.add(new Point2Df(x, y));
-      }
+      pointsToPublish.add(new Point2Df(x, y));
 
       ++validCorners;
       // putting new points in previous buffer
@@ -259,9 +215,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       // cvLine(imgC, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0);
     } // iterated through points
 
-    if (publishData) {
-      data.set(pointsToPublish);
-    }
+    data.put("PointArray", pointsToPublish);
 
     log.debug("MAX_POINT_COUNT {}", maxPointCount);
     log.debug("count {}", count.get());
@@ -299,6 +253,30 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     } else {
       clearPoints();
     }
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    /*
+     * // Make an image of the results // for (int i = 0; i < count.get(); i++)
+     * { for (int i = 0; i < count.get(); i++) { cornersA.position(i);
+     * cornersB.position(i); cornersC.position(i);
+     * 
+     * features_found.position(i); feature_errors.position(i);
+     * 
+     * if (features_found.get() == 0 || feature_errors.get() > 550) { continue;
+     * }
+     * 
+     * // line from previous frame point to current frame point CvPoint p0 =
+     * cvPoint(Math.round(cornersC.x()), Math.round(cornersC.y())); CvPoint p1 =
+     * cvPoint(Math.round(cornersB.x()), Math.round(cornersB.y()));
+     * cvLine(frame, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0); } // reset internal
+     * position // FIXME - do not reset data - this should be in "process" - use
+     * pojos or data.get to get needed data cornersA.position(0);
+     * cornersB.position(0); cornersC.position(0); features_found.position(0);
+     * feature_errors.position(0);
+     */
+    return image;
   }
 
 }

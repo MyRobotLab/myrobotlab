@@ -117,15 +117,12 @@ public class VideoDisplayPanel {
 
   public void displayFrame(SerializableImage img) {
 
-    /*
-     * got new frame - check if a screen exists for it or if i'm in single
-     * screen mode
-     * 
-     * img.source is the name of the bound filter
-     */
-    // ++frameCount;
-
+    BufferedImage image = img.getImage();
     String source = img.getSource();
+    
+    if (image == null) {
+      return;
+    }
 
     if (lastImage != null) {
       screen.setIcon(lastIcon);

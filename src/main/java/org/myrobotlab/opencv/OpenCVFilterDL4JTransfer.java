@@ -6,6 +6,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -25,7 +27,7 @@ import org.slf4j.Logger;
 public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDL4JTransfer.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDL4JTransfer.class);
 
   private transient Deeplearning4j dl4j;
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
@@ -72,7 +74,7 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   }
   
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
       // log.info("Display result " );
@@ -130,13 +132,18 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   }
 
   @Override
+  public void release() {
+    running = false;
+  }
+  
+  @Override
   public void run() {
-    
+    running = true;
     int count = 0;
     long start = System.currentTimeMillis();
     log.info("Starting the DL4J classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
-    while (true) {
+    while (running) {
       // log.info("Running!!!");
       // now we need to know which image we should classify
       // there likely needs to be some synchronization on this too.. o/w the main thread will
@@ -201,5 +208,10 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
 
   public void setModel(CustomModel model) {
     this.model = model;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 }

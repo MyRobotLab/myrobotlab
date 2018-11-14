@@ -4,7 +4,7 @@
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
  * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the Apache License 2.0 as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version (subject to the "Classpath" exception
  * as provided in the LICENSE.txt file that accompanied this code).
@@ -12,7 +12,7 @@
  * MyRobotLab is distributed in the hope that it will be useful or fun,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Apache License 2.0 for more details.
  *
  * All libraries in thirdParty bundle are subject to their own license
  * requirements - please refer to http://myrobotlab.org/libraries for 
@@ -52,7 +52,9 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.Loader;
@@ -120,22 +122,16 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   transient CvPoint p0 = cvPoint(0, 0);
   transient CvPoint p1 = cvPoint(0, 0);
 
-  public OpenCVFilterKinectDepthMask() {
-    super();
-  }
-
   public OpenCVFilterKinectDepthMask(String name) {
     super(name);
   }
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
 
     /*
      * 
@@ -152,7 +148,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     // TODO - clean up - remove input parameters? only use storage?
     if (imageKey != null) {
       // TODO: validate what this is doing?
-      kinectDepth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
+      kinectDepth = data.getKinectDepth();
     } else {
       kinectDepth = image;
     }
@@ -305,6 +301,12 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
     return itemp2;
 
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

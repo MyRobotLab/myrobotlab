@@ -1,11 +1,11 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
  * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the Apache License 2.0 as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version (subject to the "Classpath" exception
  * as provided in the LICENSE.txt file that accompanied this code).
@@ -13,7 +13,7 @@
  * MyRobotLab is distributed in the hope that it will be useful or fun,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Apache License 2.0 for more details.
  *
  * All libraries in thirdParty bundle are subject to their own license
  * requirements - please refer to http://myrobotlab.org/libraries for 
@@ -29,6 +29,9 @@ import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
 import static org.bytedeco.javacpp.opencv_core.cvPoint;
 import static org.bytedeco.javacpp.opencv_core.cvScalar;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFloodFill;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -64,7 +67,7 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
     if (startPoint == null) {
       startPoint = cvPoint(image.width() / 2, image.height() - 4);
     }
@@ -85,5 +88,11 @@ public class OpenCVFilterFloodFill extends OpenCVFilter {
     return image;
 
   }
+  
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
+
 
 }

@@ -9,6 +9,9 @@ import org.bytedeco.javacpp.indexer.Indexer;
 
 import static org.bytedeco.javacpp.opencv_imgproc.undistort;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import javax.swing.WindowConstants;
 
 import static org.bytedeco.javacpp.opencv_core.CV_32FC1;
@@ -114,7 +117,7 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     // TODO: implement this.  perhaps reference: https://github.com/opencv/opencv/blob/master/samples/cpp/calibration.cpp
     Mat matIn = new Mat(image);
     Mat matOut = new Mat();
@@ -140,5 +143,9 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
     canvas.showImage(converterToIpl.convert(image1));
   }
 
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 
 }

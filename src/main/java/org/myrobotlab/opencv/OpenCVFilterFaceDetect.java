@@ -1,11 +1,11 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
  * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the Apache License 2.0 as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version (subject to the "Classpath" exception
  * as provided in the LICENSE.txt file that accompanied this code).
@@ -13,7 +13,7 @@
  * MyRobotLab is distributed in the hope that it will be useful or fun,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Apache License 2.0 for more details.
  *
  * All libraries in thirdParty bundle are subject to their own license
  * requirements - please refer to http://myrobotlab.org/libraries for 
@@ -25,66 +25,59 @@
 
 package org.myrobotlab.opencv;
 
-
-/*
- import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
- import static org.bytedeco.javacpp.opencv_imgproc.CV_HAAR_DO_CANNY_PRUNING;
- import static org.bytedeco.javacpp.opencv_imgproc.cvHaarDetectObjects;
- import static org.bytedeco.javacpp.opencv_core.CV_RGB;
- import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
- import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
- import static org.bytedeco.javacpp.opencv_core.cvDrawLine;
- import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
- import static org.bytedeco.javacpp.opencv_core.cvLoad;
- import static org.bytedeco.javacpp.opencv_core.cvRectangle;
- import static org.bytedeco.javacpp.opencv_core.cvSize;
- import org.bytedeco.javacpp.opencv_imgproc.CvHaarClassifierCascade;
- import org.bytedeco.javacpp.opencv_core.CvMemStorage;
- import org.bytedeco.javacpp.opencv_core.CvPoint;
- import org.bytedeco.javacpp.opencv_core.CvRect;
- import org.bytedeco.javacpp.opencv_core.CvSeq;
- import org.bytedeco.javacpp.opencv_core.IplImage;
- */
 import static org.bytedeco.javacpp.helper.opencv_objdetect.cvHaarDetectObjects;
 import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
 import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
 import static org.bytedeco.javacpp.opencv_core.cvLoad;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
 import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_ROUGH_SEARCH;
-//import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_FEATURE_MAX;
 import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_FIND_BIGGEST_OBJECT;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_MAGIC_VAL;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_SCALE_IMAGE;
+import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_STAGE_MAX;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
+
+import javax.swing.Box;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.CvMemStorage;
 import org.bytedeco.javacpp.opencv_core.CvRect;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacpp.opencv_objdetect.CvHaarClassifierCascade;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.data.Rectangle;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetect.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetect.class);
 
   CvMemStorage storage = null;
   public CvHaarClassifierCascade cascade = null; // TODO - was static
+  
+  /**
+   * our default classifier - pre-trained 
+   */
   public String cascadeDir = "haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
-  // public String cascadePath = "haarcascades/haarcascade_mcs_lefteye.xml";
-  // public String cascadePath =
-  // "haarcascades/haarcascade_mcs_eyepair_big.xml";
-
+  
+  /**
+   * bounding boxes of faces
+   */
+  ArrayList<Rectangle> bb = null;
   int i;
+  double scaleFactor = 1.1;
+  int minNeighbors = 1;
 
   // public int stablizedFrameCount = 10;
   public int minFaceFrames = 10;
@@ -98,48 +91,92 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   public static final String STATE_LOSING_TRACKING = "STATE_LOSING_TRACKING";
   public static final String STATE_DETECTING_FACE = "STATE_DETECTING_FACE";
   public static final String STATE_DETECTED_FACE = "STATE_DETECTED_FACE";
+  
+  /**
+   * Begin Recognition - which is just a sub-classification of "face"(detection)
+   */
+  public String trainingDir = "training" + File.separator + "_faces";
 
   private String state = STATE_LOST_TRACKING;
-
-  int x0, y0, x1, y1;
-
-  public OpenCVFilterFaceDetect() {
-    super();
-  }
+  int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default 
+  // int option = 0; // default 
 
   public OpenCVFilterFaceDetect(String name) {
     super(name);
   }
 
-  @Override
-  public IplImage display(IplImage image, OpenCVData data) {
+  /**
+   * causes flat regions (no lines) to be skipped
+   */
+  public void addOptionCannyPruning() {
+    option |= CV_HAAR_DO_CANNY_PRUNING;
+  }
 
-    if (data != null) {
-      ArrayList<Rectangle> bb = data.getBoundingBoxArray();
-      if (bb != null) {
-        for (int i = 0; i < bb.size(); ++i) {
-          Rectangle rect = bb.get(i);
+  public void addOptionRoughSearch() {
+    option |= CV_HAAR_DO_ROUGH_SEARCH;
+  }
 
-          if (useFloatValues) {
-            x0 = (int) (rect.x * width);
-            y0 = (int) (rect.y * height);
-            x1 = x0 + (int) (rect.width * width);
-            y1 = y0 + (int) (rect.height * height);
-            cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
-          } else {
-            x0 = (int) rect.x;
-            y0 = (int) rect.y;
-            x1 = x0 + (int) rect.width;
-            y1 = y0 + (int) rect.height;
-            cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
-          }
-        }
+  public void addOptionFeatureMax() {
+    option |= CV_HAAR_FEATURE_MAX;
+  }
 
-        return image;
-      }
-    }
+  /**
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
+   */
+  public void addOptionFindBiggestObject() {
+    option |= CV_HAAR_FIND_BIGGEST_OBJECT;
+  }
 
-    return image;
+  public void addOptionMagicVal() {
+    option |= CV_HAAR_MAGIC_VAL;
+  }
+
+  public void addOptionScaleImage() {
+    option |= CV_HAAR_SCALE_IMAGE;
+  }
+
+  public void addStageMax() {
+    option |= CV_HAAR_STAGE_MAX;
+  }
+
+  /**
+   * causes flat regions (no lines) to be skipped
+   */
+  public void removeOptionCannyPruning() {
+    option &= 0xFF ^ CV_HAAR_DO_CANNY_PRUNING;
+  }
+
+  public void removeOptionRoughSearch() {
+    option &= 0xFF ^ CV_HAAR_DO_ROUGH_SEARCH;
+  }
+
+  public void removeOptionFeatureMax() {
+    option &= 0xFF ^ CV_HAAR_FEATURE_MAX;
+  }
+
+  /**
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
+   */
+  public void removeOptionFindBiggestObject() {
+    option &= 0xFF ^ CV_HAAR_FIND_BIGGEST_OBJECT;
+  }
+
+  public void removeOptionMagicVal() {
+    option &= 0xFF ^ CV_HAAR_MAGIC_VAL;
+  }
+
+  public void removeOptionScaleImage() {
+    option &= 0xFF ^ CV_HAAR_SCALE_IMAGE;
+  }
+
+  public void removeStageMax() {
+    option &= 0xFF ^ CV_HAAR_STAGE_MAX;
+  }
+
+  public void setOption(int option) {
+    this.option = option;
   }
 
   @Override
@@ -155,9 +192,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
       log.info("Starting new classifier {}", cascadeFile);
       cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
-      // cascade = new
-      // CvHaarClassifierCascade(cvLoad("haarcascades/haarcascade_eye.xml"));
-
+  
       if (cascade == null) {
         log.error("Could not load classifier cascade");
       }
@@ -166,93 +201,64 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) {
+  public IplImage process(IplImage image) {
+
+    bb = new ArrayList<Rectangle>();
 
     // Clear the memory storage which was used before
     cvClearMemStorage(storage);
 
     // Find whether the cascade is loaded, to find the faces. If yes, then:
     if (cascade != null) {
-
-      // CV_HAAR_DO_CANNY_PRUNING - causes flat regions (no lines) to be
-      // skipped
-      // CV_HAAR_SCALE_IMAGE
-      // CV_HAAR_FIND_BIGGEST_OBJECT - tells the detector to return the
-      // biggest - hence # of objects will be 1 or none
-      // CV_HAAR_DO_ROUGH_SEARCH
-
-      // faces = cvHaarDetectObjects(grayImage, classifier, storage, 1.1,
-      // 3, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
-      // faces = cvHaarDetectObjects(grayImage, classifier_eyes, storage,
-      // 1.1, 3, CV_HAAR_DO_CANNY_PRUNING);
-      // performance change from here: https://github.com/bytedeco/javacv/issues/272
-      CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_ROUGH_SEARCH | CV_HAAR_FIND_BIGGEST_OBJECT);
-      // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, 1.1, 1, CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT);
+      CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor, minNeighbors, option);
       if (faces != null) {
-        ArrayList<Rectangle> bb = new ArrayList<Rectangle>();
         faceCnt = faces.total();
-        // Loop the number of faces found.
-        for (i = 0; i < faces.total(); i++) {
-
-          CvRect r = new CvRect(cvGetSeqElem(faces, i));
-
-          Rectangle rect;
-          if (useFloatValues) {
-            rect = new Rectangle((float) r.x() / width, (float) r.y() / height, (float) r.width() / width, (float) r.height() / height);
-          } else {
-            rect = new Rectangle(r.x(), r.y(), r.width(), r.height());
-          }
-          bb.add(rect);
-
+        for (i = 0; i < faceCnt; i++) {
           try {
-            // close resource
-            r.close();
-          } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        }
 
-        data.put(bb);
+            CvRect r = new CvRect(cvGetSeqElem(faces, i));
+            bb.add(new Rectangle(r.x(), r.y(), r.width(), r.height()));
+            data.putBoundingBoxArray(bb);
+            r.close();            
+          } catch (Exception e) {
+          }
+        }        
       }
     } else {
       log.info("Creating and loading new classifier instance {}", cascadeFile);
       cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
     }
 
-    // WOOHOO LOOK AT THAT A STRING SWITCH !!!
-    // 16 years later ! :D
-    // converted from compiler into 2 stage hash switch :) cool !
     switch (state) {
       case STATE_LOST_TRACKING:
         if (faceCnt > 0) {
-          firstFaceFrame = vp.frameIndex;
+          firstFaceFrame = opencv.getFrameIndex();
           state = STATE_DETECTING_FACE;
           broadcastFilterState();
         }
         break;
       case STATE_DETECTING_FACE:
-        if (faceCnt > 0 && vp.frameIndex - firstFaceFrame > minFaceFrames) {
+        if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
           state = STATE_DETECTED_FACE;
           // broadcastFilterState();
         } else if (faceCnt == 0) {
-          firstFaceFrame = vp.frameIndex;
+          firstFaceFrame = opencv.getFrameIndex();
         }
         break;
       case STATE_DETECTED_FACE:
         if (faceCnt == 0) {
           state = STATE_LOSING_TRACKING;
-          firstFaceFrame = vp.frameIndex;
+          firstFaceFrame = opencv.getFrameIndex();
           broadcastFilterState();
         }
         break;
 
       case STATE_LOSING_TRACKING:
-        if (faceCnt == 0 && vp.frameIndex - firstEmptyFrame > minEmptyFrames) {
+        if (faceCnt == 0 && opencv.getFrameIndex() - firstEmptyFrame > minEmptyFrames) {
           state = STATE_LOST_TRACKING;
           // broadcastFilterState();
         } else if (faceCnt > 0) {
-          firstEmptyFrame = vp.frameIndex;
+          firstEmptyFrame = opencv.getFrameIndex();
         }
         break;
       default:
@@ -260,13 +266,23 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
         break;
     }
     // face detection events
-    if (faceCnt > 0 && vp.frameIndex - firstFaceFrame > minFaceFrames) {
+    if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
 
     } else {
 
     }
-
     lastFaceCnt = faceCnt;
+    return image;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (bb.size() > 0) {
+      for (int i = 0; i < bb.size(); ++i) {
+        Rectangle rect = bb.get(i);
+        graphics.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
+      }
+    }
     return image;
   }
 

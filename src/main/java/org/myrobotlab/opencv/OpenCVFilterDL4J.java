@@ -6,6 +6,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
+// FIXME - should be OpenCVFilterDl4j
 public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
@@ -34,11 +37,6 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   public ArrayList<YoloDetectedObject> yoloLastResult = null;
   private volatile IplImage lastImage = null;
   
-  public OpenCVFilterDL4J() {
-    super();
-    loadDL4j();
-  }
-  
   public OpenCVFilterDL4J(String name) {
     super(name);
     log.info("Constructor of dl4j filter");
@@ -50,6 +48,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
     log.info("Loading VGG 16 Model.");
     try {
+      dl4j.loadTinyYOLO();
       // dl4j.loadYolo2();
       dl4j.loadVGG16();
       // dl4j.loadDarknet();
@@ -68,7 +67,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   }
   
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
       // log.info("Display result " );
@@ -127,6 +126,11 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
   public void imageChanged(IplImage image) {
     // TODO Auto-generated method stub
   }
+  
+  @Override
+  public void release() {
+    running = false;
+  }
 
   @Override
   public void run() {
@@ -134,8 +138,9 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     int count = 0;
     long start = System.currentTimeMillis();
     log.info("Starting the DL4J classifier thread...");
+    running = true;
     // in a loop, grab the current image and classify it and update the result.
-    while (true) {
+    while (running) {// FIXME - must be able to release !!
       // log.info("Running!!!");
       // now we need to know which image we should classify
       // there likely needs to be some synchronization on this too.. o/w the main thread will
@@ -181,6 +186,11 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 	  
 	  // 
 	  
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
   
 }

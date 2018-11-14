@@ -1,4 +1,4 @@
-package org.myrobotlab.service.data;
+package org.myrobotlab.math.geometry;
 
 import java.io.Serializable;
 

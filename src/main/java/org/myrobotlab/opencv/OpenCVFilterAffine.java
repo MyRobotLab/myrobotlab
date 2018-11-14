@@ -8,6 +8,9 @@ import static org.bytedeco.javacpp.opencv_imgproc.cv2DRotationMatrix;
 import static org.bytedeco.javacpp.opencv_imgproc.cvBoxPoints;
 import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
 import org.bytedeco.javacpp.opencv_core.CvBox2D;
 import org.bytedeco.javacpp.opencv_core.CvMat;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
@@ -30,7 +33,7 @@ public class OpenCVFilterAffine extends OpenCVFilter {
   // tranlsation along y axis (pixels)
   private double dy = 0;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class);
 
   private Point lastClicked = null;
 
@@ -47,7 +50,7 @@ public class OpenCVFilterAffine extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     // TODO : Create the affine filter and return the new image
     // Find the center of the image
 
@@ -137,6 +140,11 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 
   public Point getLastClicked() {
     return lastClicked;
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
   }
 
 }

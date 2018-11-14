@@ -1,11 +1,11 @@
 /**
  *                    
- * @author greg (at) myrobotlab.org
+ * @author grog (at) myrobotlab.org
  *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
  * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the Apache License 2.0 as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version (subject to the "Classpath" exception
  * as provided in the LICENSE.txt file that accompanied this code).
@@ -13,7 +13,7 @@
  * MyRobotLab is distributed in the hope that it will be useful or fun,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Apache License 2.0 for more details.
  *
  * All libraries in thirdParty bundle are subject to their own license
  * requirements - please refer to http://myrobotlab.org/libraries for 
@@ -40,6 +40,7 @@ import static org.myrobotlab.service.OpenCV.PART;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
@@ -49,6 +50,8 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDetector;
@@ -56,8 +59,6 @@ import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterGray;
 import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
-import org.myrobotlab.service.data.Point2Df;
-import org.myrobotlab.service.data.Rectangle;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -219,7 +220,6 @@ public class Tracking extends Service {
     opencv.addFilter(FILTER_FACE_DETECT);
     opencv.setDisplayFilter(FILTER_FACE_DETECT);
     opencv.capture();
-    opencv.publishOpenCVData(true);
     setState(STATE_FACE_DETECT);
     return fr;
   }
@@ -377,7 +377,7 @@ public class Tracking extends Service {
       case STATE_FACE_DETECT:
         // check for bounding boxes
         // data.setSelectedFilterName(FaceDetectFilterName);
-        ArrayList<Rectangle> bb = data.getBoundingBoxArray();
+        List<Rectangle> bb = data.getBoundingBoxArray();
 
         if (bb != null && bb.size() > 0) {
 
@@ -437,9 +437,9 @@ public class Tracking extends Service {
       case STATE_LK_TRACKING_POINT:
         // extract tracking info
         // data.setSelectedFilterName(LKOpticalTrackFilterName);
-        Point2Df targetPoint = data.getFirstPoint();
-        if (targetPoint != null) {
-          updateTrackingPoint(targetPoint);
+        List<Point2Df> targetPoint = data.getPointArray();
+        if (targetPoint != null && targetPoint.size() > 0) {
+          updateTrackingPoint(targetPoint.get(0));
         }
         break;
 
@@ -479,7 +479,6 @@ public class Tracking extends Service {
     opencv.setDisplayFilter(FILTER_LK_OPTICAL_TRACK);
 
     opencv.capture();
-    opencv.publishOpenCVData(true);
 
     setState(STATE_LK_TRACKING_POINT);
   }
@@ -586,15 +585,15 @@ public class Tracking extends Service {
   }
 
   public void waitForObjects(OpenCVData data) {
-    data.setSelectedFilterName(FILTER_FIND_CONTOURS);
-    ArrayList<Rectangle> objects = data.getBoundingBoxArray();
+    data.setSelectedFilter(FILTER_FIND_CONTOURS);
+    List<Rectangle> objects = data.getBoundingBoxArray();
     int numberOfNewObjects = (objects == null) ? 0 : objects.size();
 
     // if I'm not currently learning the background and
     // countour == background ??
     // set state to learn background
     if (!STATE_LEARNING_BACKGROUND.equals(state) && numberOfNewObjects == 1) {
-      SerializableImage img = new SerializableImage(data.getBufferedImage(), data.getSelectedFilterName());
+      SerializableImage img = new SerializableImage(data.getDisplay(), data.getSelectedFilter());
       double width = img.getWidth();
       double height = img.getHeight();
 
@@ -622,7 +621,7 @@ public class Tracking extends Service {
         if (numberOfNewObjects == 0) {
           // process background
           // data.putAttribute(BACKGROUND);
-          data.setAttribute(PART, BACKGROUND);
+          data.put(PART, BACKGROUND);
           invoke("toProcess", data);
           // ready to search foreground
           searchForeground();
@@ -630,7 +629,7 @@ public class Tracking extends Service {
       } else {
 
         if (numberOfNewObjects > 0) {
-          data.setAttribute(PART, FOREGROUND);
+          data.put(PART, FOREGROUND);
           invoke("toProcess", data);
         }
       }
@@ -790,7 +789,7 @@ public class Tracking extends Service {
 
       t01.connect(arduinoPort, xPin, yPin, cameraIndex);
       OpenCV opencv = t01.getOpenCV();
-      opencv.captureFromImageFile("resource/OpenCV/testData/ryan.jpg");
+      opencv.capture("resource/OpenCV/testData/ryan.jpg");
       opencv.broadcastState();
 
 
