@@ -106,6 +106,7 @@ public class OpenCVTest extends AbstractTest {
     
     cv.setCameraIndex(3);
     assertEquals(3, cv.getCameraIndex());
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // TODO: sorry for changing the unit test.  this thread sleep is needed now!
     // TODO: remove this thread.sleep call.. 
     long now = System.currentTimeMillis();

@@ -10,8 +10,12 @@ import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
-public class RuntimeTest {
+public class RuntimeTest extends AbstractTest {
+
+  public final static Logger log = LoggerFactory.getLogger(RuntimeTest.class);
 
   @Test
   public void testRuntime() throws Exception {
@@ -55,9 +59,15 @@ public class RuntimeTest {
 
   @Test
   public void testGetExternalIPAddress() throws Exception {
-    String externalIP = Runtime.getExternalIp();
-    Assert.assertNotNull(externalIP);
-    Assert.assertEquals(4, externalIP.split("\\.").length);
+    if (hasInternet()) {
+      try {
+        String externalIP = Runtime.getExternalIp();
+        Assert.assertNotNull(externalIP);
+        Assert.assertEquals(4, externalIP.split("\\.").length);
+      } catch (Exception e) {
+        log.error("testGetExternalIPAddress failed", e);
+      }
+    }
   }
 
   // @Test
@@ -68,17 +78,17 @@ public class RuntimeTest {
   // Assert.assertNotNull(se.platform.getOS());
   // Assert.assertNotNull(se.platform.getBitness());
   // }
-  
+
   @Test
   public void testRuntimeLocale() {
-    
+
     long curr = 1479044758691L;
     Date d = new Date(curr);
 
     Runtime runtime = Runtime.getInstance();
     runtime.setLocale("fr", "FR");
     // TODO: how do i test this?
-    
+
     // you can't test default reliably
     DateFormat formatter = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
     String today = formatter.format(d);
@@ -91,8 +101,7 @@ public class RuntimeTest {
     today = formatter.format(d);
 
     assertEquals("November 13, 2016", today);
-    
-    
+
   }
 
 }

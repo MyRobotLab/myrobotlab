@@ -249,7 +249,8 @@ public class Runtime extends Service implements MessageListener {
       return gateway;
 
     } catch (Exception e) {
-      log.error("can't connect", e);
+      // log.error("can't connect", e);
+      log.warn("internet not available");
     }
     return null;
   }
