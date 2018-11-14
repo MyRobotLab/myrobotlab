@@ -77,6 +77,7 @@ import org.myrobotlab.math.geometry.Point2Df;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterFaceTraining;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
@@ -1413,17 +1414,26 @@ public class OpenCV extends AbstractVideoSource {
 
     Runtime.start("gui", "SwingGui");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    
+    
+    boolean done = true;
+    if (done) {
+      return;
+    }
+    
     // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
-    // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin
     // FIXME - decompose into modular filters 
-    cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");// matrix-restaurant
-    cv.capture("https://www.youtube.com/watch?v=lPOXR4dXxDQ"); // matrix 30 min movie
+    // cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");// matrix-restaurant
+    // cv.capture("https://www.youtube.com/watch?v=lPOXR4dXxDQ"); // matrix 30 min movie
 
-    OpenCVFilterFaceTraining filter = new OpenCVFilterFaceTraining("training");
+    // OpenCVFilterFaceTraining filter = new OpenCVFilterFaceTraining("training");
     // filter.mode = Mode.TRAIN;
-    cv.addFilter(filter);
+    // cv.addFilter(filter);
+    
+    cv.addFilter("Yolo");    
 
     // filter.load("C:\\mrl\\myrobotlab.opencv-fixes\\myrobotlab\\BoundingBoxToFile\\neo");
     // filter.mode = Mode.TRAIN;

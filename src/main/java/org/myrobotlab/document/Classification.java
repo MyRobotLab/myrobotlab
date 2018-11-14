@@ -37,11 +37,11 @@ public class Classification extends Document {
   }
 
   public void setBoundingBox(int x, int y, int width, int height) {
-    setField("boundingBox", new Rectangle(x, y, width, height));
+    setField("bounding_box", new Rectangle(x, y, width, height));
   }
 
   public Rectangle getBoundingBox() {
-    return (Rectangle) getValue("boundingBox");
+    return (Rectangle) getValue("bounding_box");
   }
 
   public void setLabel(String label) {

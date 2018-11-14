@@ -25,9 +25,12 @@
 
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -36,15 +39,7 @@ public class OpenCVFilterResetImageRoi extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResetImageRoi.class.getCanonicalName());
-
-  transient IplImage src = null;
-
-  transient IplImage dst = null;
-
-  public OpenCVFilterResetImageRoi() {
-    super();
-  }
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResetImageRoi.class);
 
   public OpenCVFilterResetImageRoi(String name) {
     super(name);
@@ -52,32 +47,13 @@ public class OpenCVFilterResetImageRoi extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
   public IplImage process(IplImage image) {
-
-    /*
-     * cfg.set(USE_INPUT_IMAGE_NAME, false); cfg.set(USE_OUTPUT_IMAGE_NAME,
-     * false);
-     * 
-     * if (cfg.getBoolean(USE_INPUT_IMAGE_NAME)) { String srcName =
-     * cfg.get(INPUT_IMAGE_NAME); if (globalData.containsKey(srcName)) { src =
-     * (IplImage) globalData.get(srcName); } else { src = image.clone();
-     * globalData.put(srcName, src); } } else { src = image; }
-     * 
-     * if (cfg.getBoolean(USE_OUTPUT_IMAGE_NAME)) { String dstName =
-     * cfg.get(OUTPUT_IMAGE_NAME); if (globalData.containsKey(dstName)) { dst =
-     * (IplImage) globalData.get(dstName); } else { dst = image.clone();
-     * globalData.put(dstName, dst); }
-     * 
-     * } else { dst = src; }
-     * 
-     * // if (cfg.getBoolean(USE_ROI)) // { cvResetImageROI(dst); // }
-     */
-    return image; // TODO - src dst or image? consistency?
+    CvRect r = new CvRect(0, 0, image.width(), image.width());
+    cvSetImageROI(image, r);
+    return image;
   }
 
   @Override

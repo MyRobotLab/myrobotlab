@@ -25,10 +25,12 @@
 
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
+
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -36,12 +38,8 @@ import org.slf4j.Logger;
 public class OpenCVFilterSetImageROI extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-  Rectangle r = new Rectangle(10, 10, 100, 100);
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class.getCanonicalName());
-
-  public OpenCVFilterSetImageROI() {
-    super();
-  }
+  CvRect rect = null;
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class);
 
   public OpenCVFilterSetImageROI(String name) {
     super(name);
@@ -49,22 +47,29 @@ public class OpenCVFilterSetImageROI extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
+  }
 
+  public void setROI(int x, int y, int width, int height) {
+    rect = new CvRect(x, y, width, height);
   }
 
   @Override
   public IplImage process(IplImage image) {
 
-    // cvSetImageROI(image, cvRect(1.0,1.0,20));
-
-    return image; // TODO - src dst or image? consistency?
-  }
-  
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (rect != null) {
+      cvSetImageROI(image, rect);
+    }
     return image;
   }
 
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (rect != null) {
+      BufferedImage dest = image.getSubimage(0, 0, rect.width(), rect.height());
+      return dest;
+    } else {
+      return image;
+    }
+  }
 
 }
