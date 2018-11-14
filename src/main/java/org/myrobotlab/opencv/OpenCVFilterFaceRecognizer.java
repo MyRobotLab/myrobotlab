@@ -21,6 +21,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -101,7 +102,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
   
-  private boolean debug = false;
+  private boolean debug = true;
   // KW: I made up this word, but I think it's fitting.
   private boolean dePicaso = true;
 
@@ -116,18 +117,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   
   public String faceModelFilename = "faceModel.bin";
   
-  public OpenCVFilterFaceRecognizer() {
-    super();
-    initAll();
-  }
-
   public OpenCVFilterFaceRecognizer(String name) {
     super(name);
-    initAll();
-  }
-
-  public OpenCVFilterFaceRecognizer(String filterName, String sourceKey) {
-    super(filterName, sourceKey);
     initAll();
   }
 
@@ -142,6 +133,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public void initAll() {
     initHaarCas();
     initRecognizer();
+    // FIXME - deprecate - fonts/graphics should be done in java-land
     cvInitFont(font,CV_FONT_HERSHEY_SIMPLEX,0.5,0.5,2,1,10);
     cvInitFont(fontWarning,CV_FONT_HERSHEY_SIMPLEX,0.4,0.3);
   }
@@ -388,18 +380,19 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
   }
 
+  // FIXME - promote into OpenCVFilter
   // helper method to show an image. (todo; convert it to a Mat )
   public void show(final Mat imageMat, final String title) {
     IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(imageMat));
     final IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
-    cvCopy(image, image1);
+    cvCopy(image, image1); // <-- WHY !?!?!?!
     CanvasFrame canvas = new CanvasFrame(title, 1);
     canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(converterToIpl.convert(image1));
   }
 
   @Override
-  public IplImage process(IplImage image, OpenCVData data) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     // convert to grayscale
     Frame grayFrame = makeGrayScale(image);
     int cols = grayFrame.imageWidth;
@@ -414,10 +407,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     //
     if (Mode.TRAIN.equals(mode)) {
       String status = "Training Mode: " + trainName;
-      cvPutText(image, status, cvPoint(20, 40), font, CvScalar.GREEN);
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.GREEN);
     } else if (Mode.RECOGNIZE.equals(mode)) {
       String status = "Recognize Mode:" + lastRecognizedName;
-      cvPutText(image, status, cvPoint(20, 40), font, CvScalar.YELLOW);
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.YELLOW);
+      
     }
 
     //
@@ -720,5 +714,20 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
   public void publishNoRecognizedFace() {
     log.info("Classifier not trained yet.");
+  }
+
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    
+    if (Mode.TRAIN.equals(mode)) {
+      String status = "Training Mode: " + trainName;
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.GREEN);
+      graphics.drawString(status, 20, 40);
+    } else if (Mode.RECOGNIZE.equals(mode)) {
+      String status = "Recognize Mode:" + lastRecognizedName;
+      // cvPutText(image, status, cvPoint(20, 40), font, CvScalar.YELLOW);
+      graphics.drawString(status, 20, 40);      
+    }
+    return image;
   }
 }

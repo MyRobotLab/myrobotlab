@@ -2,6 +2,7 @@ package org.myrobotlab.document;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -51,6 +52,20 @@ public class Document {
       data.put(fieldName, values);
     }
   }
+  
+  /**
+   * helper for expected single value fields
+   * @param fieldName
+   * @return
+   */
+  public Object getValue(String fieldName) {
+    List<Object> ret = getField(fieldName);
+    if (ret != null && ret.size() > 0) {
+      return (Object) ret.get(0);
+    }
+    return null;
+  }
+
 
   public void renameField(String oldField, String newField) {
     if (data.containsKey(oldField)) {

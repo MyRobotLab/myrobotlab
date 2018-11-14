@@ -193,6 +193,9 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // for parsing wikitext
     meta.addDependency("org.sweble.wikitext", "swc-engine", "3.1.7");
     meta.addDependency("org.sweble.wom3", "sweble-wom3-core", "3.1.7");
+    
+    meta.addDependency("com.thoughtworks.xstream", "xstream", "1.4.9");    
+    
     // FIXME - add service page, python script, give example of how to use
     meta.setAvailable(false);
     return meta;

@@ -114,7 +114,7 @@ public class JMonkeyEngine extends Service implements Simulator {
     meta.addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
     // support for ogg added inside audiofile
-    // meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
     meta.exclude("de.jarnbjo", "j-ogg-all");
     meta.addDependency("org.jmonkeyengine", "jme3-niftygui", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
