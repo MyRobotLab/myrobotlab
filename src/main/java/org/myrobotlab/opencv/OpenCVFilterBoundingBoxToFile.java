@@ -66,16 +66,18 @@ public class OpenCVFilterBoundingBoxToFile extends OpenCVFilter {
   
   transient Java2DFrameConverter converterToJava = new Java2DFrameConverter();
 
-  String targetDir = String.format("%s.%s", opencv.getName(), name);
+  String targetDir;
 
   public OpenCVFilterBoundingBoxToFile(String name) {
     super(name);
-    File f = new File(targetDir);
-    f.mkdirs();
+    
   }
 
   @Override
   public void imageChanged(IplImage image) {
+    targetDir = String.format("%s.%s", opencv.getName(), name);
+    File f = new File(targetDir);
+    f.mkdirs();
   }
 
   @Override
