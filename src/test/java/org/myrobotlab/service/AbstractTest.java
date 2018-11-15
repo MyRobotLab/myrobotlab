@@ -2,6 +2,11 @@ package org.myrobotlab.service;
 
 abstract public class AbstractTest {
   
+  /**
+   * cached internet test value for tests
+   */
+  static Boolean hasInternet = null;
+  
   static public void sleep(int sleepMs) {
     try {
       Thread.sleep(sleepMs);
@@ -13,8 +18,11 @@ abstract public class AbstractTest {
     return Runtime.isHeadless();
   }
   
-  static public boolean hasInternet() {
-    return Runtime.hasInternet();
+  static public boolean hasInternet() {    
+    if (hasInternet == null) {
+      hasInternet = Runtime.hasInternet();
+    }
+    return hasInternet;
   }
   
 }
