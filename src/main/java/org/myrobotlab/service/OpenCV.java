@@ -77,9 +77,7 @@ import org.myrobotlab.math.geometry.Point2Df;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterCanny;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
-import org.myrobotlab.opencv.OpenCVFilterFaceTraining;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -133,12 +131,15 @@ public class OpenCV extends AbstractVideoSource {
     @Override
     public void run() {
       try {
-        log.info("beginning capture");
-        capturing = true;
-        getGrabber();
-        lengthInFrames = grabber.getLengthInFrames();
-        lengthInTime = grabber.getLengthInTime();
+        synchronized (lock) {
 
+          log.info("beginning capture");
+          capturing = true;
+          getGrabber();
+          lengthInFrames = grabber.getLengthInFrames();
+          lengthInTime = grabber.getLengthInTime();
+          lock.notifyAll();
+        }
         while (capturing) {
           Frame newFrame = null;
 
@@ -168,19 +169,24 @@ public class OpenCV extends AbstractVideoSource {
         log.error("getting grabber failed", e);
       }
 
-      capturing = false;
-      videoThread = null;
-      frameIndex = 0;
-      if (grabber != null) {
-        try {
-          grabber.close();
-        } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+      synchronized (lock) {
+        capturing = false;
+        videoThread = null;
+        frameIndex = 0;
+        if (grabber != null) {
+          try {
+            grabber.close();
+          } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+          }
+          grabber = null;
         }
-        grabber = null;
+        lock.notifyAll();
       }
 
       broadcastState();
       log.info("stopping capture");
+      // notify all lock'd threads we are done
+
     }
   }
 
@@ -383,7 +389,7 @@ public class OpenCV extends AbstractVideoSource {
 
     // youtube downloader
     meta.addDependency("com.github.axet", "vget", "1.1.34");
-    
+
     // yolo models
     meta.addDependency("yolo", "yolov2", "v2", "zip");
 
@@ -541,14 +547,20 @@ public class OpenCV extends AbstractVideoSource {
    * capture starts the frame grabber and video processing threads
    */
   public void capture() {
-    if (capturing) {
-      return;
-    }
-    if (!capturing) {
-      videoThread = new Thread(vp, String.format("%s-video-processor", getName()));
-      videoThread.start();
-      sleep(300);
-      broadcastState();
+    synchronized (lock) {
+      if (capturing) {
+        return;
+      }
+      if (!capturing) {
+        videoThread = new Thread(vp, String.format("%s-video-processor", getName()));
+        videoThread.start();
+        try {
+          // wait for capture thread to start
+          lock.wait();
+        } catch (InterruptedException e) {
+        }
+        broadcastState();
+      }
     }
   }
 
@@ -910,7 +922,9 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   synchronized public void pauseCapture() {
-    capturing = false;
+    synchronized (lock) {
+      capturing = false;
+    }
   }
 
   private void processVideo(Frame frame) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
@@ -928,7 +942,7 @@ public class OpenCV extends AbstractVideoSource {
         log.error("could not get setData image");
         continue;
       }
-      
+
       // process the previous filter's output
       IplImage processed = filter.process(input);
       filter.postProcess(processed);
@@ -971,7 +985,8 @@ public class OpenCV extends AbstractVideoSource {
       }
     }
 
-    log.info("data -> {}", data);
+    // useful but chatty debug statement - dumps opencvdata
+    // log.debug("data -> {}", data);
 
     // FIXME - should have had it
     invoke("publishOpenCVData", data);
@@ -1377,9 +1392,20 @@ public class OpenCV extends AbstractVideoSource {
     this.streamerEnabled = streamerEnabled;
   }
 
+  transient final Object lock = new Object();
+
   public void stopCapture() {
-    capturing = false;
-    sleep(300);
+    synchronized (lock) {
+      if (!capturing) {
+        return;
+      }
+      capturing = false;
+      // sleep(300);
+      try {
+        lock.wait();
+      } catch (InterruptedException e) {
+      }
+    }
   }
 
   // FIXME - implement .. duh..
@@ -1414,26 +1440,30 @@ public class OpenCV extends AbstractVideoSource {
 
     Runtime.start("gui", "SwingGui");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    
-    
+
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+
     boolean done = true;
     if (done) {
       return;
     }
-    
+
     // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin
-    // FIXME - decompose into modular filters 
-    // cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");// matrix-restaurant
-    // cv.capture("https://www.youtube.com/watch?v=lPOXR4dXxDQ"); // matrix 30 min movie
+    // FIXME - decompose into modular filters
+    // cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");//
+    // matrix-restaurant
+    // cv.capture("https://www.youtube.com/watch?v=lPOXR4dXxDQ"); // matrix 30
+    // min movie
 
-    // OpenCVFilterFaceTraining filter = new OpenCVFilterFaceTraining("training");
+    // OpenCVFilterFaceTraining filter = new
+    // OpenCVFilterFaceTraining("training");
     // filter.mode = Mode.TRAIN;
     // cv.addFilter(filter);
-    
-    cv.addFilter("Yolo");    
+
+    cv.addFilter("Yolo");
 
     // filter.load("C:\\mrl\\myrobotlab.opencv-fixes\\myrobotlab\\BoundingBoxToFile\\neo");
     // filter.mode = Mode.TRAIN;
@@ -1528,7 +1558,5 @@ public class OpenCV extends AbstractVideoSource {
   public Frame convertToFrame(IplImage image) {
     return converter.convert(image);
   }
-  
-  
 
 }
