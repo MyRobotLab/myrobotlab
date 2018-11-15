@@ -89,7 +89,6 @@ import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VGetParser;
 import com.github.axet.vget.info.VideoFileInfo;
 import com.github.axet.vget.info.VideoInfo;
-
 /*
 <pre>
 // extremely useful list of static imports - since auto-complete won't work with statics
@@ -1327,7 +1326,7 @@ public class OpenCV extends AbstractVideoSource {
     }
   }
 
-  public String setFrameGrabberType(String grabberType) {
+  public String setGrabberType(String grabberType) {    
     this.grabberType = grabberType;
     return grabberType;
   }
@@ -1557,6 +1556,21 @@ public class OpenCV extends AbstractVideoSource {
 
   public Frame convertToFrame(IplImage image) {
     return converter.convert(image);
+  }
+  
+  public Mat loadMat(String filename) {
+    // absolute file exists ?
+    File f = new File(filename);
+    if (!f.exists()) {
+      // service resources - when jar extracts ?
+      f = new File(filename);
+    }
+    // imread
+    return null;
+  }
+  
+  public IplImage loadImage(String filename) {
+    return null;
   }
 
 }
