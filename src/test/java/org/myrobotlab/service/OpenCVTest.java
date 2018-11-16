@@ -30,12 +30,14 @@ public class OpenCVTest extends AbstractTest {
   static OpenCV cv = null;
   static SwingGui swing = null;
   
-  static final String FACE_JPEG_TEST_FILE = "src/test/resources/OpenCV/multipleFaces.jpg"; 
+  static final String TEST_DIR = "src/test/resources/OpenCV/";
+  static final String TEST_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg"; 
+  static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png"; 
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    Runtime.setLogLevel("info");
+    Runtime.setLogLevel("warn");
     if (!isHeadless()) {
       swing = (SwingGui) Runtime.start("swing", "SwingGui");
     }
@@ -51,6 +53,8 @@ public class OpenCVTest extends AbstractTest {
 
   @After
   public void tearDown() throws Exception {
+    // cuz ffmpeg is the most durable
+    cv.setGrabberType("FFmpeg");
   }
 
   // FIXME - do the following test
@@ -103,7 +107,7 @@ public class OpenCVTest extends AbstractTest {
     sleep(1000);
     
     // can we still work ?
-    cv.capture(FACE_JPEG_TEST_FILE);
+    cv.capture(TEST_FACE_FILE_JPEG);
     OpenCVData data = cv.getOpenCVData();
     assertTrue(data != null);
     cv.stopCapture();
@@ -117,7 +121,7 @@ public class OpenCVTest extends AbstractTest {
     Set<String> grabbers = OpenCV.getGrabberTypes();
 
     // "unset" grabber type
-    cv.setFrameGrabberType(null);
+    cv.setGrabberType(null);
     assertEquals(null, cv.getGrabberType());
 
     // verify it will switch to something which
@@ -126,16 +130,16 @@ public class OpenCVTest extends AbstractTest {
 
     /*
     for (String g : grabbers) {
-      cv.setFrameGrabberType(g);
+      cv.setGrabberType(g);
       assertEquals(g, cv.getGrabberType());
       cv.getGrabber();
 
     }
     */
     
-    cv.capture(FACE_JPEG_TEST_FILE);
+    cv.capture(TEST_FACE_FILE_JPEG);
 
-    cv.setFrameGrabberType("FFmpeg");
+    cv.setGrabberType("FFmpeg");
     assertEquals("FFmpeg", cv.getGrabberType());
 
     // grabber types - if i set a grabber it should stay that way -
@@ -153,13 +157,13 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void testAllFilterTypes() {
-    cv.capture(FACE_JPEG_TEST_FILE);
+    cv.capture(TEST_FACE_FILE_JPEG);   
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.warn("trying {}", fn);
-      if (fn.equalsIgnoreCase("BoundingBoxToFile")) {
-        log.error("here");
-      }
+      // if (fn.equalsIgnoreCase("BoundingBoxToFile")) {
+      //   log.error("here");
+      // }
       cv.addFilter(fn);
       sleep(1000);
       cv.removeFilters();

@@ -24,6 +24,20 @@
  * */
 
 package org.myrobotlab.service;
+import static org.bytedeco.javacpp.opencv_imgproc.*;
+import static org.bytedeco.javacpp.opencv_calib3d.*;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.*;
+import static org.bytedeco.javacpp.opencv_flann.*;
+import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_ml.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_photo.*;
+import static org.bytedeco.javacpp.opencv_shape.*;
+import static org.bytedeco.javacpp.opencv_stitching.*;
+import static org.bytedeco.javacpp.opencv_video.*;
+import static org.bytedeco.javacpp.opencv_videostab.*;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -1558,19 +1572,49 @@ public class OpenCV extends AbstractVideoSource {
     return converter.convert(image);
   }
   
-  public Mat loadMat(String filename) {
+  public Mat loadMat(String infile) {
+    String tryfile = infile;
     // absolute file exists ?
-    File f = new File(filename);
-    if (!f.exists()) {
-      // service resources - when jar extracts ?
-      f = new File(filename);
+    File f = new File(tryfile);
+    if (f.exists()) {
+      return imread(tryfile);
+    } else {
+      log.warn("could load Mat {}", infile);
     }
-    // imread
+    
+    // service resources - when jar extracts ?
+    tryfile = "resource" + File.separator + infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return imread(tryfile);
+    } else {
+      log.warn("could load Mat {}", infile);
+    }
+    
+    // source/ide 
+    // e.g. src\main\resources\resource\OpenCV 
+    tryfile = "src"+File.separator+"main"+File.separator+"resources"+File.separator+"resource"+File.separator+getSimpleName()+File.separator+ infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return imread(tryfile);
+    } else {
+      log.warn("could load Mat {}", infile);
+    }
+
+    // src\test\resources\OpenCV
+    tryfile = "src"+File.separator+"test"+File.separator+"resources"+File.separator+getSimpleName()+ File.separator + infile;
+    if (f.exists()) {
+      return imread(tryfile);
+    } else {
+      log.warn("could load Mat {}", infile);
+    }
+    
     return null;
   }
   
   public IplImage loadImage(String filename) {
-    return null;
+    IplImage image = cvLoadImage(filename);
+    return image;
   }
 
 }

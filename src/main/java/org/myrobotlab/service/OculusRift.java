@@ -159,7 +159,7 @@ public class OculusRift extends Service implements PointPublisher {
 			leftOpenCV.setStreamerEnabled(false);
 			leftOpenCV.setCameraIndex(leftCameraIndex);
 			if (frameGrabberType != null) {
-				leftOpenCV.setFrameGrabberType(frameGrabberType);
+				leftOpenCV.setGrabberType(frameGrabberType);
 			}
 			if (cvInputSource != null) {
 				leftOpenCV.setInputSource(cvInputSource);
@@ -180,7 +180,7 @@ public class OculusRift extends Service implements PointPublisher {
 				rightOpenCV.setStreamerEnabled(false);
 				rightOpenCV.setCameraIndex(rightCameraIndex);
 				if (frameGrabberType != null) {
-					rightOpenCV.setFrameGrabberType(frameGrabberType);
+					rightOpenCV.setGrabberType(frameGrabberType);
 				}
 				if (rightEyeURL != null) {
 					rightOpenCV.setInputFileName(rightEyeURL);
@@ -567,7 +567,7 @@ public class OculusRift extends Service implements PointPublisher {
 		return frameGrabberType;
 	}
 
-	public void setFrameGrabberType(String frameGrabberType) {
+	public void setGrabberType(String frameGrabberType) {
 		this.frameGrabberType = frameGrabberType;
 	}
 
