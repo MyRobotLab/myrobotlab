@@ -265,8 +265,16 @@ public abstract class OpenCVFilter implements Serializable {
     opencv.saveToFile(filename, image);
   }
   
-  public Mat convertToMat(IplImage copy) {
+  public Mat convertToMat(IplImage copy) {    
     return opencv.convertToMat(copy);
+  }
+  
+  public void error(String format, Object...args) {
+    if (opencv == null) {
+      log.error(String.format(format, args));
+    } else {
+      opencv.error(format, args);
+    }    
   }
   
   public void show(final IplImage image, final String title) {

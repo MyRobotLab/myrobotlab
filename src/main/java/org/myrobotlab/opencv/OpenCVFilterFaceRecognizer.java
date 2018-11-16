@@ -102,7 +102,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
   
-  private boolean debug = true;
+  private boolean debug = false;
   // KW: I made up this word, but I think it's fitting.
   private boolean dePicaso = true;
 

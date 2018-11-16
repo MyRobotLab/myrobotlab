@@ -42,7 +42,7 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 $scope.selectFrameGrabber = function selectFrameGrabber(frameGrabber) {
                 	$log.info("Updating Frame Grabber ");
                 	$scope.frameGrabber = frameGrabber;
-                	mrl.sendTo($scope.service.name, "setFrameGrabberType" , frameGrabber);                	
+                	mrl.sendTo($scope.service.name, "setGrabberType" , frameGrabber);                	
                 }
                 
                 // controls for select frame grabber                
