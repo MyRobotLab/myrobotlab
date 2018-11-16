@@ -285,7 +285,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       } catch (InterruptedException e) {
         /* dont care */}
     }
-    log.info("Exited the run loop for Yolo!!! you shouldn't see this.");
+    log.info("yolo exiting classifier thread");
   }
 
   private ArrayList<Classification> yoloFrame(IplImage frame) {

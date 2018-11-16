@@ -28,19 +28,37 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvZero;
 
+import static org.bytedeco.javacpp.opencv_imgproc.*;
+import static org.bytedeco.javacpp.opencv_calib3d.*;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_features2d.*;
+import static org.bytedeco.javacpp.opencv_flann.*;
+import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_ml.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_photo.*;
+import static org.bytedeco.javacpp.opencv_shape.*;
+import static org.bytedeco.javacpp.opencv_stitching.*;
+import static org.bytedeco.javacpp.opencv_video.*;
+import static org.bytedeco.javacpp.opencv_videostab.*;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
+import org.myrobotlab.service.Runtime;
 
 public class OpenCVFilterAddMask extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAddMask.class);
-  public String sourceName;
+  Mat mask = null;
+  public String maskName;
 
   transient IplImage dst = null;
   transient IplImage negativeImage = null;
@@ -55,27 +73,61 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image) throws InterruptedException {
-    if (sourceName != null) {
-      // INFO - This filter has 2 keys !!!
-      IplImage src = data.getImage(sourceName);
-      if (src != null) {
-        if (dst == null) {
-          dst = src.clone();
-        }
-        cvZero(dst);
-        cvCopy(src, dst, image);
-      }
-      return dst;
-    } else {
-      return image;
+  public IplImage process(IplImage background) throws InterruptedException {
+    if (mask != null) {
+      /*
+      // Convert Mat to float data type
+      mask.convertTo(mask, CV_32FC3);
+      background.convertTo(background, CV_32FC3);
+      
+      // Normalize the alpha mask to keep intensity between 0 and 1
+      alpha.convertTo(alpha, CV_32FC3, 1.0/255); // 
+   
+      // Storage for output image
+      Mat ouImage = Mat::zeros(mask.size(), mask.type());
+   
+      // Multiply the mask with the alpha matte
+      multiply(alpha, mask, mask); 
+   
+      // Multiply the background with ( 1 - alpha )
+      multiply(Scalar::all(1.0)-alpha, background, background); 
+   
+      // Add the masked mask and background.
+      add(mask, background, ouImage); 
+      */
+       
     }
+    
+    return background;
+  }
+  
+  public void test() {
+    if (opencv == null) {
+      error("requires a opencv instance - please addFilter this filter to test");
+    }
+    // setMask(TEST_TRANSPARENT_FILE_PNG);
+  }
 
+  public void setMask(String maskName) {
+    this.maskName = maskName;
+    mask = imread(maskName);
   }
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
+  }
+
+  public static void main(String[] args) {
+    try {
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      OpenCVFilterAddMask mask = new OpenCVFilterAddMask("mask");
+      mask.setMask("src/test/resources/OpenCV/transparent-bubble.jpg");
+      cv.addFilter(mask);
+      cv.capture();
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }

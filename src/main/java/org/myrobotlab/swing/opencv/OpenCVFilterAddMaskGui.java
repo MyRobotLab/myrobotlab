@@ -65,7 +65,7 @@ public class OpenCVFilterAddMaskGui extends OpenCVFilterGui implements ActionLis
       @Override
       public void run() {
         OpenCVFilterAddMask bf = (OpenCVFilterAddMask) filterWrapper.filter;
-        sources.setSelectedItem(bf.sourceName);
+        sources.setSelectedItem(bf.maskName);
       }
     });
   }
