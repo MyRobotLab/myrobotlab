@@ -456,12 +456,33 @@ public class OpenCVData implements Serializable {
     return selectedFilter;
   }
 
-  public void putKinectDepth(IplImage kinect) {
-    sources.put(OpenCV.INPUT_KEY, kinect);
+  /**
+   * pushes a reference to both images from a kinect grabber
+   * default "input" image is depth - but both can be accessed from any filter
+   * 
+   * @param depth - depth image
+   * @param video - rgb image
+   */
+  public void putKinect(IplImage depth, IplImage video) {
+    sources.put(OpenCV.INPUT_KEY, depth);
+    sources.put(String.format("%s.depth", OpenCV.INPUT_KEY), depth);
+    sources.put(String.format("%s.video", OpenCV.INPUT_KEY), video);
   }
 
+  /**
+   * gets kinect depth image
+   * @return
+   */
   public IplImage getKinectDepth() {
-    return (IplImage) sources.get(OpenCV.INPUT_KEY);
+    return (IplImage) sources.get(String.format("%s.depth", OpenCV.INPUT_KEY));
+  }
+  
+  /**
+   * gets kinect rgb image
+   * @return
+   */
+  public IplImage getKinectVideo() {
+    return (IplImage) sources.get(String.format("%s.video", OpenCV.INPUT_KEY));
   }
 
   public Object getFrameIndex() {
