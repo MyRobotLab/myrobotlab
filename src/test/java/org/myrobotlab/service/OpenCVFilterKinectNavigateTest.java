@@ -36,7 +36,7 @@ public class OpenCVFilterKinectNavigateTest {
   @Test
   public void testClickPoint() {
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    cv.setFrameGrabberType("OpenKinect");
+    cv.setGrabberType("OpenKinect");
     cv.broadcastState();
 
 
@@ -50,7 +50,7 @@ public class OpenCVFilterKinectNavigateTest {
       // file
       // or a 2 parameter method setting the source
       cv.setInputFileName("src/test/resources/OpenCV/white-black-center-640x480.png");
-      cv.setFrameGrabberType("ImageFile");
+      cv.setGrabberType("ImageFile");
       cv.setInputSource("file");
     } else {
       Runtime.start("gui", "SwingGui");
@@ -62,9 +62,9 @@ public class OpenCVFilterKinectNavigateTest {
     Service.sleep(2000);
     cv.stopCapture();
     cv.removeFilters();
-    // cv.setFrameGrabberType("OpenCV");
+    // cv.setGrabberType("OpenCV");
     // cv.capture();
-    // cv.setFrameGrabberType(grabberType);
+    // cv.setGrabberType(grabberType);
   }
 
   public static void main(String[] args) {
