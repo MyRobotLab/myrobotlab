@@ -223,6 +223,8 @@ public class OpenCV extends AbstractVideoSource {
   public static final String OUTPUT_KEY = "output";
 
   Classifications classifications = null;
+  
+  public static final String CACHE_DIR = OpenCV.class.getSimpleName();
 
   // FIXME - make more simple
   transient public final static String INPUT_SOURCE_CAMERA = "camera";
@@ -516,6 +518,8 @@ public class OpenCV extends AbstractVideoSource {
     super(n);
     putText(20, 20, "time:  %d");
     putText(20, 30, "frame: %d");
+    File cacheDir = new File(CACHE_DIR);
+    cacheDir.mkdirs();
   }
 
   synchronized public OpenCVFilter addFilter(OpenCVFilter filter) {
@@ -785,7 +789,17 @@ public class OpenCV extends AbstractVideoSource {
 
     if (grabber.getClass() == OpenKinectFrameGrabber.class) {
       OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber) grabber;
-      data.putKinectDepth(kinect.grabDepth());
+
+      /*
+      kinect.grab();
+      kinect.grabVideo();
+      kinect.grabDepth();
+      kinect.grabIR();
+      kinect.set
+      */
+      // what is the behavior of (kinect.grabDepth(), kinect.grabVideo(), kinect.grabIR()) all at once - do these calls block ?
+      // or just return null ? how much time do they block ?  is it worth getting IR ?
+      data.putKinect(kinect.grabDepth(), kinect.grabVideo());
     }
 
     log.info(String.format("using %s", grabber.getClass().getCanonicalName()));
@@ -1572,49 +1586,5 @@ public class OpenCV extends AbstractVideoSource {
     return converter.convert(image);
   }
   
-  public Mat loadMat(String infile) {
-    String tryfile = infile;
-    // absolute file exists ?
-    File f = new File(tryfile);
-    if (f.exists()) {
-      return imread(tryfile);
-    } else {
-      log.warn("could load Mat {}", infile);
-    }
-    
-    // service resources - when jar extracts ?
-    tryfile = "resource" + File.separator + infile;
-    f = new File(tryfile);
-    if (f.exists()) {
-      return imread(tryfile);
-    } else {
-      log.warn("could load Mat {}", infile);
-    }
-    
-    // source/ide 
-    // e.g. src\main\resources\resource\OpenCV 
-    tryfile = "src"+File.separator+"main"+File.separator+"resources"+File.separator+"resource"+File.separator+getSimpleName()+File.separator+ infile;
-    f = new File(tryfile);
-    if (f.exists()) {
-      return imread(tryfile);
-    } else {
-      log.warn("could load Mat {}", infile);
-    }
-
-    // src\test\resources\OpenCV
-    tryfile = "src"+File.separator+"test"+File.separator+"resources"+File.separator+getSimpleName()+ File.separator + infile;
-    if (f.exists()) {
-      return imread(tryfile);
-    } else {
-      log.warn("could load Mat {}", infile);
-    }
-    
-    return null;
-  }
-  
-  public IplImage loadImage(String filename) {
-    IplImage image = cvLoadImage(filename);
-    return image;
-  }
 
 }
