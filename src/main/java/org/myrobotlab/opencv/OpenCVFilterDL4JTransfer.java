@@ -183,10 +183,11 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
       }
     }
   }
-
+/*
   public Map<String, Double> publishClassification(Map<String, Double> classification) {	
 	  return classification;
   }
+  */
   
   public void attach(Solr solr) {
 	  

@@ -35,6 +35,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.WindowConstants;
@@ -43,6 +45,7 @@ import org.bytedeco.javacpp.opencv_core.CvSize;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacv.CanvasFrame;
+import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
@@ -294,6 +297,12 @@ public abstract class OpenCVFilter implements Serializable {
   
   public String toString() {
     return String.format("%s - enabled %b display %b", name, enabled, displayEnabled);
+  }
+  
+  public void publishClassification(Map<String, List<Classification>> data) {
+    if (opencv != null) {
+    opencv.invoke("publishClassification", data);
+    }
   }
 
 }

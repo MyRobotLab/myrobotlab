@@ -177,7 +177,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
       }
     }
   }
-
+/*
   public Map<String, Double> publishClassification(Map<String, Double> classification) {	
 	  return classification;
   }
@@ -187,7 +187,7 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 	  // 
 	  
   }
-
+*/
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
