@@ -527,6 +527,13 @@ public class OpenCV extends AbstractVideoSource {
 
   synchronized public OpenCVFilter addFilter(OpenCVFilter filter) {
     filter.setOpenCV(this);
+    
+    // guard against putting same name filter in
+    if (filters.containsKey(filter.name)) {
+      warn("trying to add same named filter - %s - choose a different name", filter);
+      return filters.get(filter.name);
+    }
+    
     // heh - protecting against concurrency the way Scala does it ;
     Map<String, OpenCVFilter> newFilters = new LinkedHashMap<>();
     newFilters.putAll(filters);
