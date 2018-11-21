@@ -265,7 +265,7 @@ public class OpenCV extends AbstractVideoSource {
   /**
    * convert BufferedImages to IplImages
    */
-  public IplImage BufferedImageToIplImage(BufferedImage src) {
+  public static IplImage BufferedImageToIplImage(BufferedImage src) {
     return grabberConverter.convert(jconverter.convert(src));
   }
 
@@ -404,6 +404,7 @@ public class OpenCV extends AbstractVideoSource {
 
     // the DNN Face Detection module
     meta.addDependency("opencv", "opencv_facedetectdnn", "1.0.0", "zip");
+    
     // youtube downloader
     meta.addDependency("com.github.axet", "vget", "1.1.34");
 
@@ -438,8 +439,8 @@ public class OpenCV extends AbstractVideoSource {
 
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
 
-  final transient OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
-  final transient Java2DFrameConverter jconverter = new Java2DFrameConverter();
+  final static transient OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
+  final static transient Java2DFrameConverter jconverter = new Java2DFrameConverter();
   final static transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
   final static transient OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 
