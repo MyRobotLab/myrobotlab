@@ -178,13 +178,23 @@ public abstract class OpenCVFilter implements Serializable {
     return image;
   }
 
-  public void enableDisplay(boolean b) {
-    displayEnabled = b;
+  public void enableDisplay() {
+    displayEnabled = true;
+  }
+  
+
+  public void disableDisplay() {
+    displayEnabled = false;
   }
 
-  public void enable(boolean b) {
-    enabled = b;
+  public void enable() {
+    enabled = true;
   }
+
+  public void disable() {
+    enabled = false;
+  }
+
 
   // GET THE BUFFERED IMAGE FROM "MY" Iplimage !!!!
   /*
