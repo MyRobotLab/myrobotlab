@@ -26,34 +26,28 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.opencv_core.CV_32F;
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
+import static org.bytedeco.javacpp.opencv_dnn.readNetFromCaffe;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
-import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.Point;
-import org.bytedeco.javacpp.opencv_core.Rect;
-import org.bytedeco.javacpp.opencv_core.Scalar;
-import org.bytedeco.javacpp.opencv_core.Size;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
-import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
-import static org.bytedeco.javacpp.opencv_dnn.readNetFromCaffe;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_core.Scalar;
+import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_dnn.Net;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
-
-import javax.swing.WindowConstants;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
@@ -61,11 +55,14 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetectDNN.class.getCanonicalName());
   // int x0, y0, x1, y1;
+  
+  private String FACE_LABEL = "face";
   private Net net;
   /**
    * bounding boxes of faces
    */
-  ArrayList<Rectangle> bb = new ArrayList<Rectangle>();
+  final List<Rectangle> bb = new ArrayList<>();
+  final Map<String, List<Classification>> classifications = new TreeMap<>();
   public String model = "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
   public String protoTxt = "models/facedetectdnn/deploy.prototxt.txt";
   double threshold = .2;
@@ -125,6 +122,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     FloatIndexer srcIndexer = ne.createIndexer(); // create indexer to access elements of the matrix
     // log.info("Output Size: {}", output.size(3));
     bb.clear();
+    classifications.clear();
     for (int i = 0; i < output.size(3); i++) {//iterate to extract elements
       float confidence = srcIndexer.get(i, 2);
       // log.info("Getting element {} confidence {}", i, confidence);
@@ -140,10 +138,21 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
         float bx = f3 * w;//bottom right point's x
         float by = f4 * h;//bottom right point's y
         Rectangle rect = new Rectangle(tx,ty,bx-tx,by-ty);
+        List<Classification> cl = null;
+        Classification classification = new Classification(FACE_LABEL, confidence, rect);    
+        if (classifications.containsKey(FACE_LABEL)) {
+          classifications.get(FACE_LABEL).add(classification);
+        } else {
+          cl = new ArrayList<>();
+          cl.add(classification);
+          classifications.put(FACE_LABEL, cl);          
+        }
         bb.add(rect);
 
       }
     }
+    
+    publishClassification(classifications);
     IplImage result = grabberConverter.convert(converterToIpl.convert(srcMat));
     ne.close();
     return result;
@@ -151,10 +160,11 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    // TODO: move this method to a base face detect filter class.
-    if (bb.size() > 0) {
-      for (int i = 0; i < bb.size(); ++i) {
-        Rectangle rect = bb.get(i);
+    for (String label : classifications.keySet()) {
+      List<Classification> cl = classifications.get(label);
+      for (Classification c : cl) {
+        Rectangle rect = c.getBoundingBox();
+        graphics.drawString(String.format("%s %.3f",c.getLabel(), c.getConfidence()), (int) rect.x, (int) rect.y);
         graphics.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
       }
     }
