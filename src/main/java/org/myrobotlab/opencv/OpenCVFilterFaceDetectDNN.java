@@ -65,7 +65,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   /**
    * bounding boxes of faces
    */
-  ArrayList<Rectangle> bb = null;
+  ArrayList<Rectangle> bb = new ArrayList<Rectangle>();
   public String model = "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
   public String protoTxt = "models/facedetectdnn/deploy.prototxt.txt";
   double threshold = .2;
@@ -85,19 +85,17 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
 
 
   public void loadModel() {
-    log.info("loading DNN caffee model for face recogntion..");
+    //log.info("loading DNN caffee model for face recogntion..");
     if (!new File(protoTxt).exists()) {
-      log.warn("ProtoTxt not found {}", protoTxt);
+      log.warn("Caffe DNN Face Detector ProtoTxt not found {}", protoTxt);
       return;
     }
-
     if (!new File(model).exists()) {
-      log.warn("model not found {}", model);
+      log.warn("Caffe DNN Face Detector model not found {}", model);
       return;
     }
-
-
     net = readNetFromCaffe(protoTxt, model);
+    log.info("Caffe DNN Face Detector model loaded.");
   }
   @Override
   public void imageChanged(IplImage image) {
@@ -115,41 +113,34 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     //create a 4-dimensional blob from image with NCHW (Number of images in the batch -for training only-, Channel, Height, Width) dimensions order,
     //for more details read the official docs at https://docs.opencv.org/trunk/d6/d0f/group__dnn.html#gabd0e76da3c6ad15c08b01ef21ad55dd8
     Mat blob = blobFromImage(inputMat, 1.0, new Size(300, 300), new Scalar(104.0, 177.0, 123.0, 0), false, false, CV_32F);
-  //  Mat blob = blobFromImage(inputMat, 1.0, new Size(300,00,new )
-    log.info("Input Blob : {}", blob);
+  //  log.info("Input Blob : {}", blob);
     //set the input to network model  
+    if (blob == null) {
+      return image;
+    }
     net.setInput(blob);
     //feed forward the input to the network to get the output matrix
     Mat output = net.forward();
     Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));//extract a 2d matrix for 4d output matrix with form of (number of detections x 7)
     FloatIndexer srcIndexer = ne.createIndexer(); // create indexer to access elements of the matrix
-    log.info("Output Size: {}", output.size(3));
+    // log.info("Output Size: {}", output.size(3));
     bb.clear();
     for (int i = 0; i < output.size(3); i++) {//iterate to extract elements
       float confidence = srcIndexer.get(i, 2);
-      log.info("Getting element {} confidence {}", i, confidence);
+      // log.info("Getting element {} confidence {}", i, confidence);
       float f1 = srcIndexer.get(i, 3);
       float f2 = srcIndexer.get(i, 4);
       float f3 = srcIndexer.get(i, 5);
       float f4 = srcIndexer.get(i, 6);
       
       if (confidence > threshold) {
-        log.info("Passes the threshold test.");
+        // log.info("Passes the threshold test.");
         float tx = f1 * w;//top left point's x
         float ty = f2 * h;//top left point's y
         float bx = f3 * w;//bottom right point's x
         float by = f4 * h;//bottom right point's y
-        Rectangle rect = new Rectangle(tx,ty,bx,by);
+        Rectangle rect = new Rectangle(tx,ty,bx-tx,by-ty);
         bb.add(rect);
-        
-        Rect boundingBox = new Rect(new Point((int) tx, (int) ty), new Point((int) bx, (int) by));
-        // TODO: move this rendering to the processDiplay method?
-        rectangle(srcMat, boundingBox, new Scalar(255, 0, 0, 0));//print blue rectangle
-        // show(inputMat, "Detected..");
-
-        // convert the inputMat back to an image.
-        // IplImage result = grabberConverter.convert(converterToIpl.convert(srcMat));
-       //  return result;
 
       }
     }
@@ -158,18 +149,6 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     return result;
   }
 
-
-
-  // helper method to show an image. (todo; convert it to a Mat )
-  public void show(final Mat imageMat, final String title) {
-    IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(imageMat));
-    final IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
-    cvCopy(image, image1);
-    CanvasFrame canvas = new CanvasFrame(title, 1);
-    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(converterToIpl.convert(image1));
-  }
-  
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     // TODO: move this method to a base face detect filter class.
