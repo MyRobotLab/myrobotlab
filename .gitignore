@@ -93,3 +93,4 @@ Thumbs.db
 /target/
 /Solr/
 /OpenCV/
+/models/*
