@@ -291,5 +291,9 @@ public abstract class OpenCVFilter implements Serializable {
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(OpenCV.convertToFrame(image));
   }
+  
+  public String toString() {
+    return String.format("%s - enabled %b display %b", name, enabled, displayEnabled);
+  }
 
 }

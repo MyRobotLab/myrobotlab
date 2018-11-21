@@ -1329,10 +1329,13 @@ public class OpenCV extends AbstractVideoSource {
   public void setDisplayFilter(String name) {
     displayFilter = name;
     OpenCVFilter filter = filters.get(name);
+    if (filter == null) {
+      return;
+    }
 
     // turn off old filters - turn on new one
     for (OpenCVFilter f : filters.values()) {
-      f.enableDisplay();
+      f.disableDisplay();
     }
 
     if (filter == null || "input".equals(name) || "output".equals(name)) {

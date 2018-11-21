@@ -45,6 +45,10 @@ public class OpenCVTest extends AbstractTest {
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
+    // TODO - remove all services ??? DL4J others ? Runtime ?
+    // clean up all threads 
+    // clean up all services
+    // TODO - these utilities should be in base class !
   }
 
   @Before
@@ -160,14 +164,7 @@ public class OpenCVTest extends AbstractTest {
     cv.capture(TEST_FACE_FILE_JPEG);   
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
-      // String fn = OpenCV.POSSIBLE_FILTERS
-      log.warn("trying {}", fn);
-      // if (fn.equalsIgnoreCase("BoundingBoxToFile")) {
-      //   log.error("here");
-      // }
-      // if (fn.equals("DL4J")) {
-      //  continue;
-      // }
+      log.info("trying {}", fn);
       cv.addFilter(fn);
       sleep(1000);
       cv.removeFilters();
