@@ -1469,15 +1469,21 @@ public class OpenCV extends AbstractVideoSource {
     LoggingFactory.init("warn");
 
     Runtime.start("gui", "SwingGui");
+    Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
+    
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-
+    
     boolean done = true;
     if (done) {
       return;
     }
 
+    
+    OpenCVFilterYolo yolo = (OpenCVFilterYolo)cv.addFilter("yolo");
+
+ 
     // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
@@ -1557,8 +1563,8 @@ public class OpenCV extends AbstractVideoSource {
     // cv.addFilter("yolo");
     // cv.capture("googleimagesdownload/downloads/cats");
     // cv.capture("http://www.engr.colostate.edu/me/facil/dynamics/files/cbw3.avi");
-    OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
-    cv.addFilter(yolo);
+    OpenCVFilterYolo yolo1 = new OpenCVFilterYolo("yolo");
+    cv.addFilter(yolo1);
     log.info("here");
 
     // cv.capture();

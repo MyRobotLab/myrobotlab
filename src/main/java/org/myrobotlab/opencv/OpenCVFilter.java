@@ -182,7 +182,6 @@ public abstract class OpenCVFilter implements Serializable {
     displayEnabled = true;
   }
   
-
   public void disableDisplay() {
     displayEnabled = false;
   }

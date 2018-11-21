@@ -63,7 +63,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public String modelConfig = "yolov2.cfg";
   public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
-  
+
   DecimalFormat df2 = new DecimalFormat("#.###");
 
   // TODO: store these somewhere as a resource / dependency ..
@@ -80,11 +80,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public ArrayList<Classification> lastResult = null;
   private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
+  private transient Thread classifier;
 
   public OpenCVFilterYolo(String name) {
     super(name);
     // start classifier thread
-    Thread classifier = new Thread(this, "YoloClassifierThread");
+    classifier = new Thread(this, "YoloClassifierThread");
     classifier.start();
     log.info("Yolo Classifier thread started : {}", this.name);
   }
@@ -193,7 +194,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it
       // can.
-//      displayResult(image, lastResult);
+      // displayResult(image, lastResult);
     }
     // ok now we just need to update the image that the current thread is
     // processing (if the current thread is idle i guess?)
@@ -202,25 +203,27 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     return image;
   }
 
-  /**<pre>
-  private void displayResult(IplImage image, ArrayList<Classification> result) {
-    DecimalFormat df2 = new DecimalFormat("#.###");
-    for (Classification obj : result) {
-      CvPoint leftCorner = cvPoint(obj.boundingBox.x(), obj.boundingBox.y());
-      String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
-
-      cvDrawRect(image, leftCorner, cvPoint(obj.boundingBox.x() + 30 * obj.label.length(), obj.boundingBox.y() - 20), CvScalar.BLUE, CV_FILLED, 0, 0);
-      // TODO - hashcode related color
-      // CvScalar objColor = cvColorToScalar(obj.label.hashCode(), CV_8U);
-      cvPutText(image, label, cvPoint(obj.boundingBox.x() + 6, obj.boundingBox.y() - 6), font, CvScalar.YELLOW);
-      drawRect(image, obj.boundingBox, CvScalar.BLUE);
-    }
-  }
-
-  public void drawRect(IplImage image, Rect rect, CvScalar color) {
-    cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
-  }
-  </pre>*/
+  /**
+   * <pre>
+   * private void displayResult(IplImage image, ArrayList<Classification> result) {
+   *   DecimalFormat df2 = new DecimalFormat("#.###");
+   *   for (Classification obj : result) {
+   *     CvPoint leftCorner = cvPoint(obj.boundingBox.x(), obj.boundingBox.y());
+   *     String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
+   * 
+   *     cvDrawRect(image, leftCorner, cvPoint(obj.boundingBox.x() + 30 * obj.label.length(), obj.boundingBox.y() - 20), CvScalar.BLUE, CV_FILLED, 0, 0);
+   *     // TODO - hashcode related color
+   *     // CvScalar objColor = cvColorToScalar(obj.label.hashCode(), CV_8U);
+   *     cvPutText(image, label, cvPoint(obj.boundingBox.x() + 6, obj.boundingBox.y() - 6), font, CvScalar.YELLOW);
+   *     drawRect(image, obj.boundingBox, CvScalar.BLUE);
+   *   }
+   * }
+   * 
+   * public void drawRect(IplImage image, Rect rect, CvScalar color) {
+   *   cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
+   * }
+   * </pre>
+   */
 
   @Override
   public void imageChanged(IplImage image) {
@@ -261,19 +264,19 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
           log.info("Yolo Classification Rate : {}", rate);
         }
-        
+
         Map<String, List<Classification>> ret = new TreeMap<>();
         for (Classification c : lastResult) {
           List<Classification> nl = null;
           if (ret.containsKey(c.getLabel())) {
             nl = ret.get(c.getLabel());
           } else {
-            nl = new ArrayList<>();            
+            nl = new ArrayList<>();
             ret.put(c.getLabel(), nl);
           }
           nl.add(c);
         }
-        
+
         invoke("publishClassification", ret);
       } else {
         log.info("No Image to classify...");
@@ -416,26 +419,53 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public void release() {
     running = false;
+    classifier = null;
+    try {
+      // give a 1/2 second for thread to exit before
+      // deallocating all the model memory
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+    }
+    if (net != null) {
+      net.deallocate();
+    }
+
+  }
+
+  @Override
+  public void enable() {
+    super.enable();
+    if (classifier == null) {
+      classifier = new Thread(this, "YoloClassifierThread");
+      classifier.start();
+    }   
+  }
+
+  @Override
+  public void disable() {
+    super.disable();
+    running = false;
+    classifier = null;
   }
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     if (lastResult != null) {
-      
+
       for (Classification obj : lastResult) {
         String label = obj.getLabel() + " (" + df2.format(obj.getConfidence() * 100) + "%)";
-        
+
         Rectangle bb = obj.getBoundingBox();
-        int x = (int)bb.x;
-        int y = (int)bb.y;
-        int width = (int)bb.width;
-        int height = (int)bb.height;
-        
+        int x = (int) bb.x;
+        int y = (int) bb.y;
+        int width = (int) bb.width;
+        int height = (int) bb.height;
+
         graphics.setColor(Color.BLACK);
         graphics.drawRect(x, y, width, height);
-        graphics.fillRect(x, y-20, 7 * label.length(), 20);
+        graphics.fillRect(x, y - 20, 7 * label.length(), 20);
         graphics.setColor(Color.WHITE);
-        graphics.drawString(label, x+6, y-6);
+        graphics.drawString(label, x + 6, y - 6);
       }
     }
     return image;
