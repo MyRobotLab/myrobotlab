@@ -280,7 +280,7 @@ public abstract class OpenCVFilter implements Serializable {
   public void show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title, 1);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(opencv.convertToFrame(image));
+    canvas.showImage(OpenCV.convertToFrame(image));
   }
 
 }

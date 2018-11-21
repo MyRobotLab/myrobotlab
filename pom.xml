@@ -203,37 +203,37 @@
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta2</version>
+    <version>1.0.0-beta3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta2</version>
+    <version>1.0.0-beta3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta2</version>
+    <version>1.0.0-beta3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta2</version>
+    <version>1.0.0-beta3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-ui_2.11</artifactId>
-    <version>1.0.0-beta2</version>
+    <version>1.0.0-beta3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta2</version>
+    <version>1.0.0-beta3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -243,6 +243,33 @@
     <scope>provided</scope>
   </dependency>
 <!-- Deeplearning4j end -->
+
+<!-- Deeplearning4j2 begin -->
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-core</artifactId>
+    <version>1.0.0-beta3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-zoo</artifactId>
+    <version>1.0.0-beta3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-nn</artifactId>
+    <version>1.0.0-beta3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.deeplearning4j</groupId>
+    <artifactId>deeplearning4j-modelimport</artifactId>
+    <version>1.0.0-beta3</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Deeplearning4j2 end -->
 
 <!-- DocumentPipeline begin -->
   <dependency>
@@ -995,13 +1022,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv</artifactId>
-    <version>1.4.2</version>
+    <version>1.4.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.4.2</version>
+    <version>1.4.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1299,24 +1326,24 @@
     <artifactId>solr-core</artifactId>
     <version>7.4.0</version>
     <scope>provided</scope>
-    <exclusions>
-    	<exclusion>
-    		<groupId>org.apache.logging.log4j</groupId>
-    		<artifactId>log4j-slf4j-impl</artifactId>
-    	</exclusion>
-    </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
     <version>7.4.0</version>
     <scope>provided</scope>
-    <exclusions>
-    	<exclusion>
-    		<groupId>org.apache.logging.log4j</groupId>
-    		<artifactId>log4j-slf4j-impl</artifactId>
-    	</exclusion>
-    </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
@@ -1387,6 +1414,18 @@
   <dependency>
     <groupId>org.tensorflow</groupId>
     <artifactId>tensorflow</artifactId>
+    <version>1.8.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.tensorflow</groupId>
+    <artifactId>libtensorflow</artifactId>
+    <version>1.8.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.tensorflow</groupId>
+    <artifactId>libtensorflow_jni_gpu</artifactId>
     <version>1.8.0</version>
     <scope>provided</scope>
   </dependency>
