@@ -1325,14 +1325,14 @@ public class OpenCV extends AbstractVideoSource {
 
     // turn off old filters - turn on new one
     for (OpenCVFilter f : filters.values()) {
-      f.enableDisplay(false);
+      f.enableDisplay();
     }
 
     if (filter == null || "input".equals(name) || "output".equals(name)) {
       log.info("make select & inverse select");
     } else {
-      filter.enableDisplay(true);
-      filter.enable(true);
+      filter.enableDisplay();
+      filter.enable();
     }
 
   }
@@ -1589,5 +1589,4 @@ public class OpenCV extends AbstractVideoSource {
     return converter.convert(image);
   }
   
-
 }
