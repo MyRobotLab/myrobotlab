@@ -839,7 +839,7 @@ public class Deeplearning4j extends Service {
   
   static public ServiceType getMetaData() {
     
-    String dl4jVersion = "1.0.0-beta2";
+    String dl4jVersion = "1.0.0-beta3";
     
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     boolean supportRasPi = false;
@@ -864,7 +864,7 @@ public class Deeplearning4j extends Service {
       // Use this if you want cuda 9.1 NVidia GPU support
       // TODO: figure out the cuDNN stuff.
       meta.addDependency("org.nd4j", "nd4j-cuda-9.2-platform", dl4jVersion);
-      meta.addDependency("org.nd4j", "deeplearning4j-cuda-9.2-platform", dl4jVersion);
+      meta.addDependency("org.nd4j", "deeplearning4j-cuda-9.2", dl4jVersion);
     }
     // The default build of 1.0.0-alpha does not support the raspi,  we built & host the following dependencies.
     // to support native cpu execution on the raspi.

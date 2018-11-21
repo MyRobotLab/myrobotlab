@@ -202,7 +202,7 @@ public abstract class OpenCVFilter implements Serializable {
    * method which determines if this filter to process its display TODO - have
    * it also decide if its cumulative display or not
    */
-  public void processDisplay() {
+  public BufferedImage processDisplay() {
 
     if (enabled && displayEnabled) {
       // TODO - this determines our "source" of image
@@ -225,13 +225,13 @@ public abstract class OpenCVFilter implements Serializable {
 
       if (input != null) {
         Graphics2D graphics = input.createGraphics();
-
         BufferedImage bi = processDisplay(graphics, input);
-
         data.put(bi);
         data.putDisplay(bi);
+        return bi;
       }
     }
+    return null;
   }
 
   abstract public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image);
@@ -280,7 +280,7 @@ public abstract class OpenCVFilter implements Serializable {
   public void show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title, 1);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(opencv.convertToFrame(image));
+    canvas.showImage(OpenCV.convertToFrame(image));
   }
 
 }
