@@ -7,7 +7,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
-
+import static org.bytedeco.javacpp.opencv_core.CV_32F;
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
@@ -317,10 +317,10 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
     //log.info("Input mat created");
     // TODO: I think yolo expects RGB color (which is inverted in the next step)  so if the input image isn't in RGB color, we might need a cvCutColor
-    Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false); //Convert Mat to batch of images
+    Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false, CV_32F); //Convert Mat to batch of images
     // put our frame/input blob into the model.
    // log.info("input blob created");
-    net.setInput(inputBlob, "data");
+    net.setInput(inputBlob);
     
     // log.info("Feed forward!");
    // log.info("Input blob set on network.");

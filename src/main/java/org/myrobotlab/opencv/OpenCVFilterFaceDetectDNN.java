@@ -41,6 +41,7 @@ import org.bytedeco.javacpp.opencv_core.Size;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 
 import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
 import static org.bytedeco.javacpp.opencv_dnn.readNetFromCaffe;
@@ -50,7 +51,7 @@ import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
-
+import org.myrobotlab.math.geometry.Rectangle;
 
 import javax.swing.WindowConstants;
 import org.slf4j.Logger;
@@ -61,7 +62,10 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetectDNN.class.getCanonicalName());
   // int x0, y0, x1, y1;
   private Net net;
-
+  /**
+   * bounding boxes of faces
+   */
+  ArrayList<Rectangle> bb = null;
   public String model = "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
   public String protoTxt = "models/facedetectdnn/deploy.prototxt.txt";
   double threshold = .2;
@@ -111,16 +115,17 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     //create a 4-dimensional blob from image with NCHW (Number of images in the batch -for training only-, Channel, Height, Width) dimensions order,
     //for more details read the official docs at https://docs.opencv.org/trunk/d6/d0f/group__dnn.html#gabd0e76da3c6ad15c08b01ef21ad55dd8
     Mat blob = blobFromImage(inputMat, 1.0, new Size(300, 300), new Scalar(104.0, 177.0, 123.0, 0), false, false, CV_32F);
+  //  Mat blob = blobFromImage(inputMat, 1.0, new Size(300,00,new )
     log.info("Input Blob : {}", blob);
-    //set the input to network model
+    //set the input to network model  
     net.setInput(blob);
     //feed forward the input to the network to get the output matrix
     Mat output = net.forward();
     Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));//extract a 2d matrix for 4d output matrix with form of (number of detections x 7)
     FloatIndexer srcIndexer = ne.createIndexer(); // create indexer to access elements of the matrix
     log.info("Output Size: {}", output.size(3));
+    bb.clear();
     for (int i = 0; i < output.size(3); i++) {//iterate to extract elements
-      
       float confidence = srcIndexer.get(i, 2);
       log.info("Getting element {} confidence {}", i, confidence);
       float f1 = srcIndexer.get(i, 3);
@@ -134,6 +139,9 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
         float ty = f2 * h;//top left point's y
         float bx = f3 * w;//bottom right point's x
         float by = f4 * h;//bottom right point's y
+        Rectangle rect = new Rectangle(tx,ty,bx,by);
+        bb.add(rect);
+        
         Rect boundingBox = new Rect(new Point((int) tx, (int) ty), new Point((int) bx, (int) by));
         // TODO: move this rendering to the processDiplay method?
         rectangle(srcMat, boundingBox, new Scalar(255, 0, 0, 0));//print blue rectangle
@@ -164,9 +172,13 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    // TODO Auto-generated method stub
-    
-    // TODO: return the image here with stuff rendered on it.
+    // TODO: move this method to a base face detect filter class.
+    if (bb.size() > 0) {
+      for (int i = 0; i < bb.size(); ++i) {
+        Rectangle rect = bb.get(i);
+        graphics.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
+      }
+    }
     return image;
   }
 
