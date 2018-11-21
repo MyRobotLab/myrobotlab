@@ -20,6 +20,14 @@ public class Classification extends Document {
     setTs(System.currentTimeMillis());
   }
 
+  public Classification(String id, float confidence, Rectangle rect) {
+    super(id);
+    setLabel(id);
+    setTs(System.currentTimeMillis());
+    setConfidence(confidence);
+    setBoundingBox(rect);
+  }
+
   public void setTs(long ts) {
     setField("ts", ts);
   }
@@ -86,6 +94,10 @@ public class Classification extends Document {
 
   public Object getObject() {
     return getValue("imageObject");
+  }
+
+  public void setBoundingBox(Rectangle rect) {
+    setField("bounding_box", rect);
   }
 
 }
