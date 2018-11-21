@@ -85,8 +85,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public OpenCVFilterYolo(String name) {
     super(name);
     // start classifier thread
-    classifier = new Thread(this, "YoloClassifierThread");
-    classifier.start();
+    if (classifier == null) {
+      classifier = new Thread(this, "YoloClassifierThread");
+      classifier.start();
+    }
     log.info("Yolo Classifier thread started : {}", this.name);
   }
 
@@ -433,16 +435,16 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   @Override
-  public void enable() {
+  synchronized public void enable() {
     super.enable();
     if (classifier == null) {
       classifier = new Thread(this, "YoloClassifierThread");
       classifier.start();
-    }   
+    }
   }
 
   @Override
-  public void disable() {
+  synchronized public void disable() {
     super.disable();
     running = false;
     classifier = null;
