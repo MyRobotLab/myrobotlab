@@ -149,8 +149,14 @@ public class OpenCV extends AbstractVideoSource {
           log.info("beginning capture");
           capturing = true;
           getGrabber();
-          lengthInFrames = grabber.getLengthInFrames();
-          lengthInTime = grabber.getLengthInTime();
+          // Wait for the first frame
+          int loops = 0;
+          while  (lengthInFrames == 0 && loops < 200) {
+            lengthInFrames = grabber.getLengthInFrames();
+            lengthInTime = grabber.getLengthInTime();
+            sleep(40);
+            loops ++;
+            }
           lock.notifyAll();
         }
         while (capturing) {
@@ -797,21 +803,21 @@ public class OpenCV extends AbstractVideoSource {
       grabber.setFormat(format);
     }
 
+    /*
     if (grabber.getClass() == OpenKinectFrameGrabber.class) {
       OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber) grabber;
 
-      /*
-      kinect.grab();
-      kinect.grabVideo();
-      kinect.grabDepth();
-      kinect.grabIR();
-      kinect.set
-      */
+      // kinect.grab();
+      // kinect.grabVideo();
+      // kinect.grabDepth();
+      // kinect.grabIR();
+     
       // what is the behavior of (kinect.grabDepth(), kinect.grabVideo(), kinect.grabIR()) all at once - do these calls block ?
       // or just return null ? how much time do they block ?  is it worth getting IR ?
-      data.putKinect(kinect.grabDepth(), kinect.grabVideo());
+      // data.putKinect(kinect.grabDepth(), kinect.grabVideo());
     }
-
+    */
+    
     log.info(String.format("using %s", grabber.getClass().getCanonicalName()));
 
     // TODO other framegrabber parameters for frame grabber

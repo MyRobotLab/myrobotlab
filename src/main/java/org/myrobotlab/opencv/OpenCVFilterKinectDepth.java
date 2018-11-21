@@ -34,6 +34,9 @@ import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameGrabber.Exception;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
@@ -63,12 +66,17 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   boolean displayCamera = false;
 
+  OpenKinectFrameGrabber kinect;
+  int cameraIndex = 0;
+  
   public OpenCVFilterKinectDepth() {
     super();
+    kinect = new OpenKinectFrameGrabber(cameraIndex);
   }
 
   public OpenCVFilterKinectDepth(String name) {
     super(name);
+    kinect = new OpenKinectFrameGrabber(cameraIndex);
   }
   
   public void setDisplayCamera(boolean b) {
@@ -86,12 +94,20 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image) throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException{
 
     // INFO - This filter has 2 sources !!!
-    IplImage kinectDepth = data.getKinectDepth();
-    lastDepthImage = kinectDepth;
-    
+    // IplImage kinectDepth = data.getKinectDepth();
+    IplImage kinectDepth;
+	try {
+		kinectDepth = kinect.grabDepth();
+	    lastDepthImage = kinectDepth;
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+        log.error("getting grabber failed", e);
+		return null;
+	}    
+	
     boolean processDepth = false;
     if (kinectDepth != null && processDepth) {
 
@@ -106,7 +122,8 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     // end fork
     
     if (displayCamera) {
-      return image;
+    	log.info("OpenCVFilterKinect image");  
+    	return image;
     }
 
     return kinectDepth;
