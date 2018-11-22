@@ -149,14 +149,19 @@ public class OpenCV extends AbstractVideoSource {
           log.info("beginning capture");
           capturing = true;
           getGrabber();
-          // Wait for the first frame
-          int loops = 0;
-          while  (lengthInFrames == 0 && loops < 200) {
-            lengthInFrames = grabber.getLengthInFrames();
-            lengthInTime = grabber.getLengthInTime();
-            sleep(40);
-            loops ++;
+          // Wait for the Kinect to heat up.
+          if (grabber.getClass() == OpenKinectFrameGrabber.class) {
+            int loops = 0;
+            while  (lengthInFrames == 0 && loops < 200) {
+              lengthInFrames = grabber.getLengthInFrames();
+              lengthInTime = grabber.getLengthInTime();
+              sleep(40);
+              loops ++;
             }
+          } else {
+            lengthInFrames = grabber.getLengthInFrames();
+            lengthInTime = grabber.getLengthInTime();       	  
+          }
           lock.notifyAll();
         }
         while (capturing) {
