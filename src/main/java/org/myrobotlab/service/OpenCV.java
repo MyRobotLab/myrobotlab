@@ -167,7 +167,7 @@ public class OpenCV extends AbstractVideoSource {
         while (capturing) {
           Frame newFrame = null;
 
-          if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames == 1 && frameIndex < 1)) {
+          if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames == 1 && frameIndex < 1) || grabberType.startsWith("OpenKinect")) {
             // grab a single frame - never grab again
             newFrame = grabber.grab();
           }
