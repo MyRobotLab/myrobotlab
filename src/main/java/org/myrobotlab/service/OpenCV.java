@@ -24,6 +24,7 @@
  * */
 
 package org.myrobotlab.service;
+
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_calib3d.*;
 import static org.bytedeco.javacpp.opencv_core.*;
@@ -149,15 +150,18 @@ public class OpenCV extends AbstractVideoSource {
           log.info("beginning capture");
           capturing = true;
           getGrabber();
-          // Wait for the first frame
+
+          lengthInFrames = grabber.getLengthInFrames();
+          lengthInTime = grabber.getLengthInTime();
+
+          // Wait for the Kinect to heat up.
           int loops = 0;
-          while  (grabber.getClass() == OpenKinectFrameGrabber.class &&
-          lengthInFrames == 0 && loops < 200) {
+          while (grabber.getClass() == OpenKinectFrameGrabber.class && lengthInFrames == 0 && loops < 200) {
             lengthInFrames = grabber.getLengthInFrames();
             lengthInTime = grabber.getLengthInTime();
             sleep(40);
-            loops ++;
-            }
+            loops++;
+          }
           lock.notifyAll();
         }
         while (capturing) {
@@ -230,7 +234,7 @@ public class OpenCV extends AbstractVideoSource {
   public static final String OUTPUT_KEY = "output";
 
   Classifications classifications = null;
-  
+
   public static final String CACHE_DIR = OpenCV.class.getSimpleName();
 
   // FIXME - make more simple
@@ -243,10 +247,10 @@ public class OpenCV extends AbstractVideoSource {
   transient final static public String PART = "part";
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "BoundingBoxToFile", "And", "Canny", "ColorTrack", "Copy", "CreateHistogram",
-      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill", "FloorFinder",
-      "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave", "KinectNavigate",
-      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
-      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill",
+      "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave",
+      "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize",
+      "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -411,7 +415,7 @@ public class OpenCV extends AbstractVideoSource {
 
     // the DNN Face Detection module
     meta.addDependency("opencv", "opencv_facedetectdnn", "1.0.0", "zip");
-    
+
     // youtube downloader
     meta.addDependency("com.github.axet", "vget", "1.1.34");
 
@@ -534,13 +538,13 @@ public class OpenCV extends AbstractVideoSource {
 
   synchronized public OpenCVFilter addFilter(OpenCVFilter filter) {
     filter.setOpenCV(this);
-    
+
     // guard against putting same name filter in
     if (filters.containsKey(filter.name)) {
       warn("trying to add same named filter - %s - choose a different name", filter);
       return filters.get(filter.name);
     }
-    
+
     // heh - protecting against concurrency the way Scala does it ;
     Map<String, OpenCVFilter> newFilters = new LinkedHashMap<>();
     newFilters.putAll(filters);
@@ -805,20 +809,18 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     /*
-    if (grabber.getClass() == OpenKinectFrameGrabber.class) {
-      OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber) grabber;
+     * if (grabber.getClass() == OpenKinectFrameGrabber.class) {
+     * OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber) grabber;
+     * 
+     * // kinect.grab(); // kinect.grabVideo(); // kinect.grabDepth(); //
+     * kinect.grabIR();
+     * 
+     * // what is the behavior of (kinect.grabDepth(), kinect.grabVideo(),
+     * kinect.grabIR()) all at once - do these calls block ? // or just return
+     * null ? how much time do they block ? is it worth getting IR ? //
+     * data.putKinect(kinect.grabDepth(), kinect.grabVideo()); }
+     */
 
-      // kinect.grab();
-      // kinect.grabVideo();
-      // kinect.grabDepth();
-      // kinect.grabIR();
-     
-      // what is the behavior of (kinect.grabDepth(), kinect.grabVideo(), kinect.grabIR()) all at once - do these calls block ?
-      // or just return null ? how much time do they block ?  is it worth getting IR ?
-      // data.putKinect(kinect.grabDepth(), kinect.grabVideo());
-    }
-    */
-    
     log.info(String.format("using %s", grabber.getClass().getCanonicalName()));
 
     // TODO other framegrabber parameters for frame grabber
@@ -1374,7 +1376,7 @@ public class OpenCV extends AbstractVideoSource {
     }
   }
 
-  public String setGrabberType(String grabberType) {    
+  public String setGrabberType(String grabberType) {
     this.grabberType = grabberType;
     return grabberType;
   }
@@ -1489,18 +1491,15 @@ public class OpenCV extends AbstractVideoSource {
     Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
-    
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+
     boolean done = true;
     if (done) {
       return;
     }
 
-    
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    
-    OpenCVFilterYolo yolo = (OpenCVFilterYolo)cv.addFilter("yolo");
+    OpenCVFilterYolo yolo = (OpenCVFilterYolo) cv.addFilter("yolo");
 
- 
     // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
@@ -1611,5 +1610,5 @@ public class OpenCV extends AbstractVideoSource {
   public static Frame convertToFrame(IplImage image) {
     return converter.convert(image);
   }
-  
+
 }
