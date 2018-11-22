@@ -97,8 +97,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private CascadeClassifier eyeCascade;
   private CascadeClassifier mouthCascade;
   // These are cv converts that help us convert between mat,frame and iplimage 
-  transient private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+  
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
   
@@ -380,16 +379,6 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
   }
 
-  // FIXME - promote into OpenCVFilter
-  // helper method to show an image. (todo; convert it to a Mat )
-  public void show(final Mat imageMat, final String title) {
-    IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(imageMat));
-    final IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
-    cvCopy(image, image1); // <-- WHY !?!?!?!
-    CanvasFrame canvas = new CanvasFrame(title, 1);
-    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(converterToIpl.convert(image1));
-  }
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
@@ -399,7 +388,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     int rows = grayFrame.imageHeight;
 
     // convert to a Mat
-    Mat bwImgMat = converterToIpl.convertToMat(grayFrame);
+    Mat bwImgMat = toMat(grayFrame);
     //
     // Image detection is done on the grayscale image, so we can modify the
     // original frame once
@@ -533,10 +522,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // a work around because imwrite doesn't support unicode in the filename.
     // so we'll convert the image to something like a byte array, and write it out ourselves.
     //  imwrite(filename, dFaceMat);
-    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(converterToIpl.convertToIplImage(converterToIpl.convert(dFaceMat)));
+    BufferedImage buffImg = toBufferedImage(dFaceMat);
     ImageIO.write(buffImg,"png", new File(filename));
   }
-
+  
   private Frame makeGrayScale(IplImage image) {
     IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);

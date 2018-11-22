@@ -64,7 +64,7 @@ public class OpenCVFilterAnd extends OpenCVFilter {
   }
 
   public void loadMask(BufferedImage mask) {
-    this.and = opencv.BufferedImageToIplImage(mask);// IplImage.createFrom(mask);
+    this.and = toImage(mask);// IplImage.createFrom(mask);
   }
 
   public void loadMask(IplImage mask) {

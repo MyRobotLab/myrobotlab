@@ -96,7 +96,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
       // there likely needs to be some synchronization on this too.. o/w the main thread will
       // be updating it while it's being classified maybe?!
       if (lastImage != null) {
-        BufferedImage buffImg = OpenCV.IplImageToBufferedImage(lastImage);
+        BufferedImage buffImg = toBufferedImage(lastImage);
         try {
           lastResult = tesseract.ocr(buffImg);
         } catch (IOException e) {
