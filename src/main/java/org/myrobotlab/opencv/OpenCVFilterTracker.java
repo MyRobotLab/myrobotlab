@@ -128,14 +128,15 @@ public class OpenCVFilterTracker extends OpenCVFilter {
       int y1 = y0 + (int) (boundingBox.height() );
       // log.info("Drawing {} {} -- {} {}", x0,y0,x1,y1);
       cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
-      if (publishData) {
+      
+      
         ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
         float xC = (float) (boundingBox.x() + boundingBox.width()/2);
         float yC = (float) (boundingBox.y() + boundingBox.height()/2);
         Point2Df center = new Point2Df(xC, yC);
         pointsToPublish.add(center);
         data.put("TrackingPoints",pointsToPublish);
-      }
+      
     }
     return image;
   }

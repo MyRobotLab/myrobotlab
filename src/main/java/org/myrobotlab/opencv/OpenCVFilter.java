@@ -25,78 +25,245 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCopy;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
-import javax.swing.WindowConstants;
 
 import org.bytedeco.javacpp.opencv_core.CvSize;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.net.Http;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public abstract class OpenCVFilter implements Serializable {
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilter.class.toString());
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilter.class.toString());
+  static public String getCacheFile(String url) {
+    String path = OpenCV.CACHE_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+    File f = new File(path);
+    if (f.exists()) {
+      return path;
+    }
+    return null;
+  }
 
-  // communal data store
+  static public String getImageFromUrl(String url) {
+    String ret = getCacheFile(url);
+    if (ret != null) {
+      return ret;
+    }
+    byte[] data = Http.get(url);
+    if (data == null) {
+      log.error("could not get {}", url);
+      return null;
+    }
+    return putCacheFile(url, data);
+  }
+
+  static private IplImage load(String filename) {
+    return cvLoadImage(filename, CV_LOAD_IMAGE_UNCHANGED);
+  }
+
+  static public IplImage loadImage(String infile) {
+    String tryfile = infile;
+
+    if (tryfile.startsWith("http")) {
+      tryfile = getImageFromUrl(tryfile);
+    }
+
+    // absolute file exists ?
+    File f = new File(tryfile);
+    if (f.exists()) {
+      return load(tryfile);
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    // service resources - when jar extracts ?
+    tryfile = "resource" + File.separator + infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return load(tryfile);
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    // source/ide
+    // e.g. src\main\resources\resource\OpenCV
+    tryfile = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "resource" + File.separator + OpenCV.class.getSimpleName() + File.separator
+        + infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return load(tryfile);
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    // src\test\resources\OpenCV
+    tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return load(tryfile);
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    log.error("could not load Mat {}", infile);
+    return null;
+  }
+
+  static public Mat loadMat(String infile) {
+    String tryfile = infile;
+
+    if (tryfile.startsWith("http")) {
+      tryfile = getImageFromUrl(tryfile);
+    }
+
+    // absolute file exists ?
+    File f = new File(tryfile);
+    if (f.exists()) {
+      return read(tryfile); // load alpha
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    // service resources - when jar extracts ?
+    tryfile = "resource" + File.separator + infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return read(tryfile);
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    // source/ide
+    // e.g. src\main\resources\resource\OpenCV
+    tryfile = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "resource" + File.separator + OpenCV.class.getSimpleName() + File.separator
+        + infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return read(tryfile);
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    // src\test\resources\OpenCV
+    tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
+    f = new File(tryfile);
+    if (f.exists()) {
+      return read(tryfile);
+    } else {
+      log.warn("could load Mat {}", tryfile);
+    }
+
+    log.error("could not load Mat {}", infile);
+    return null;
+  }
+
+  static public String putCacheFile(String url, byte[] data) {
+    try {
+      String path = OpenCV.CACHE_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+      FileIO.toFile(path, data);
+      return path;
+    } catch (Exception e) {
+      log.error("putCacheFile threw", e);
+    }
+    return null;
+  }
+
+  static private Mat read(String filename) {
+    return imread(filename, CV_LOAD_IMAGE_UNCHANGED);
+  }
+  
+  /**
+   * number of channels of incoming image
+   */
+  int channels;
+  
+  /**
+   * converters for the filter
+   */
+  transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+  
+  /**
+   * converter for the filter
+   */
+  transient OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+
+  /**
+   * reference to the last OpenCVData processed and the one this filter will modify
+   */
   OpenCVData data;
-
-  final public String name;
-
-  boolean enabled = true;
-  boolean displayEnabled = false;
-  boolean displayExport = false;
-  boolean displayMeta = false;
 
   /**
    * color of display if any overlay
    */
   transient Color displayColor;
 
-  // FIXME - deprecate - not needed or duplicated or in OpenCV framework
-  // pipeline...
-  public boolean publishDisplay = false;
-  public boolean publishData = true;
-  public boolean publishImage = false;
+  /**
+   * This allows the display method to be processed in the filter
+   * typically its a conversion from opencv-jni-land to java-land
+   * and associated processing for human consumption
+   */
+  boolean displayEnabled = false;
 
-  // input image attributes
-  int width;
+  boolean displayExport = false;
+
+  /**
+   * This will enable/disable the filter in the pipeline
+   */
+  boolean enabled = true;
+
   int height;
-  int channels;
 
   transient CvSize imageSize;
 
-  public String sourceKey;
+  transient Java2DFrameConverter jconverter = new Java2DFrameConverter();
 
-  // TODO change name to opencv
+  final public String name;
+
   transient protected OpenCV opencv;
 
-  protected transient Boolean running;
+  protected Boolean running;
+
+  public String sourceKey;
+
+  int width;
 
   public OpenCVFilter() {
-    this.name = this.getClass().getSimpleName().substring("OpenCVFilter".length());
+    this(null);
   }
 
   public OpenCVFilter(String name) {
-    this.name = name;
+    if (name == null) {
+      this.name = this.getClass().getSimpleName().substring("OpenCVFilter".length());
+    } else {
+      this.name = name;
+    }
   }
 
   // TODO - refactor this back to single name constructor - the addFilter's new
@@ -107,45 +274,17 @@ public abstract class OpenCVFilter implements Serializable {
     this.sourceKey = sourceKey;
   }
 
-  public abstract IplImage process(IplImage image) throws InterruptedException;
-
-  public abstract void imageChanged(IplImage image);
-
-  public void setOpenCV(OpenCV opencv) {
-    if (displayColor == null) {
-      displayColor = opencv.getColor();
-    }
-    this.opencv = opencv;
-  }
-
-  public OpenCV getOpenCV() {
-    return opencv;
-  }
-
-  public OpenCVFilter setState(OpenCVFilter other) {
-    return (OpenCVFilter) Service.copyShallowFrom(this, other);
-  }
-
-  public void invoke(String method, Object... params) {
-    opencv.invoke(method, params);
-  }
-
   public void broadcastFilterState() {
     FilterWrapper fw = new FilterWrapper(this.name, this);
-    opencv.invoke("publishFilterState", fw);
+    if (opencv != null) {
+      opencv.invoke("publishFilterState", fw);
+    }
   }
 
-  public ArrayList<String> getPossibleSources() {
-    ArrayList<String> ret = new ArrayList<String>();
-    ret.add(name);
-    return ret;
-  }
-
-  /**
-   * when a filter is removed from the pipeline its given a chance to return
-   * resourcs
-   */
-  public void release() {
+  public IplImage copy(final IplImage image) {
+    IplImage copy = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
+    cvCopy(image, copy, null);
+    return copy;
   }
 
   protected ImageIcon createImageIcon(String path, String description) {
@@ -158,9 +297,127 @@ public abstract class OpenCVFilter implements Serializable {
     }
   }
 
+  public void disable() {
+    enabled = false;
+  }
+
+  public void disableDisplay() {
+    displayEnabled = false;
+  }
+
+  public void enable() {
+    enabled = true;
+  }
+
+  public void enableDisplay() {
+    displayEnabled = true;
+  }
+
+  public void error(String format, Object... args) {
+    if (opencv == null) {
+      log.error(String.format(format, args));
+    } else {
+      opencv.error(format, args);
+    }
+  }
+
+  /**
+   * This is NOT the filter's image, but really the output of the previous
+   * filter ! to be used as input for "this" filters process method
+   * 
+   * @return
+   */
+  public IplImage getImage() {
+    return data.getImage();
+  }
+
+  public OpenCV getOpenCV() {
+    return opencv;
+  }
+
+  public ArrayList<String> getPossibleSources() {
+    ArrayList<String> ret = new ArrayList<String>();
+    ret.add(name);
+    return ret;
+  }
+
+  public abstract void imageChanged(IplImage image);
+
+  public void invoke(String method, Object... params) {
+    opencv.invoke(method, params);
+  }
+
+  /**
+   * put'ing all the data into output and/or display
+   */
+  public void postProcess(IplImage processed) {
+    data.put(processed);
+  }
+
+  public abstract IplImage process(IplImage image) throws InterruptedException;
+
+  /**
+   * method which determines if this filter to process its display TODO - have
+   * it also decide if its cumulative display or not
+   */
+  public BufferedImage processDisplay() {
+
+    if (enabled && displayEnabled) {
+      // TODO - this determines our "source" of image
+      // and appends meta data
+
+      // to make a decision about "source" you have to put either
+      // "current display" cv.display
+      // previous buffered image <== aggregate
+      // "input" buffered image ?
+      BufferedImage input = null;
+
+      // displayExport displayMeta displayEnabled enabled
+      if (displayExport) {
+        // FIXME - be direct ! data.data.getBufferedImage(filter.name)
+        input = data.getBufferedImage();
+      } else {
+        // else cumulative display
+        input = data.getDisplay();
+      }
+
+      if (input != null) {
+        Graphics2D graphics = input.createGraphics();
+        BufferedImage bi = processDisplay(graphics, input);
+        data.put(bi);
+        data.putDisplay(bi);
+        return bi;
+      }
+    }
+    return null;
+  }
+
+  abstract public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image);
+
+  public void publishClassification(Map<String, List<Classification>> data) {
+    if (opencv != null) {
+      opencv.invoke("publishClassification", data);
+    }
+  }
+
+  public void put(String keyPart, Object object) {
+    data.put(keyPart, object);
+  }
+
+  /**
+   * when a filter is removed from the pipeline its given a chance to return
+   * resourcs
+   */
+  public void release() {
+  }
+
   public void samplePoint(Integer x, Integer y) {
     //
     log.info("Sample point called " + x + " " + y);
+  }
+
+  public void saveToFile(String filename, IplImage image) {
+    opencv.saveToFile(filename, image);
   }
 
   public IplImage setData(OpenCVData data) {
@@ -181,128 +438,69 @@ public abstract class OpenCVFilter implements Serializable {
     return image;
   }
 
-  public void enableDisplay() {
-    displayEnabled = true;
-  }
-  
-  public void disableDisplay() {
-    displayEnabled = false;
-  }
-
-  public void enable() {
-    enabled = true;
-  }
-
-  public void disable() {
-    enabled = false;
-  }
-
-
-  // GET THE BUFFERED IMAGE FROM "MY" Iplimage !!!!
-  /*
-  public BufferedImage getBufferedImage() {
-    return data.getDisplay();
-  }
-  */
-
-  // GET THE Graphics IMAGE FROM "MY" BufferedImage !!!!
-  /*
-   * public Graphics2D getGraphics() { return data.getGraphics(); }
-   */
-
-  /**
-   * method which determines if this filter to process its display TODO - have
-   * it also decide if its cumulative display or not
-   */
-  public BufferedImage processDisplay() {
-
-    if (enabled && displayEnabled) {
-      // TODO - this determines our "source" of image
-      // and appends meta data
-
-      // to make a decision about "source" you have to put either
-      // "current display" cv.display
-      //  previous buffered image <== aggregate
-      //  "input" buffered image ?
-      BufferedImage input = null;
-      
-      // displayExport displayMeta displayEnabled enabled
-      if (displayExport) {
-        // FIXME - be direct ! data.data.getBufferedImage(filter.name)
-        input = data.getBufferedImage();
-      } else {
-        // else cumulative display 
-        input = data.getDisplay();
-      }
-
-      if (input != null) {
-        Graphics2D graphics = input.createGraphics();
-        BufferedImage bi = processDisplay(graphics, input);
-        data.put(bi);
-        data.putDisplay(bi);
-        return bi;
-      }
+  public void setOpenCV(OpenCV opencv) {
+    if (displayColor == null) {
+      displayColor = opencv.getColor();
     }
-    return null;
+    this.opencv = opencv;
   }
 
-  abstract public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image);
-
-  /**
-   * This is NOT the filter's image, but really the output of the previous
-   * filter ! to be used as input for "this" filters process method
-   * 
-   * @return
-   */
-  public IplImage getImage() {
-    return data.getImage();
+  public OpenCVFilter setState(OpenCVFilter other) {
+    return (OpenCVFilter) Service.copyShallowFrom(this, other);
   }
 
-  /*
-   * FIXME - TODO public Mat getMat() { return data.getMat(); }
-   */
-
-  public void put(String keyPart, Object object) {
-    data.put(keyPart, object);
-  }
-
-  /**
-   * put'ing all the data into output and/or display
-   */
-  public void postProcess(IplImage processed) {
-    data.put(processed);
-  }
-  
-  public void saveToFile(String filename, IplImage image) {
-    opencv.saveToFile(filename, image);
-  }
-  
-  public Mat convertToMat(IplImage copy) {    
-    return opencv.convertToMat(copy);
-  }
-  
-  public void error(String format, Object...args) {
-    if (opencv == null) {
-      log.error(String.format(format, args));
-    } else {
-      opencv.error(format, args);
-    }    
-  }
-  
   public void show(final IplImage image, final String title) {
-    CanvasFrame canvas = new CanvasFrame(title, 1);
+    CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(OpenCV.convertToFrame(image));
+    canvas.showImage(toFrame(image));
+  }
+
+  public void show(final Mat image, final String title) {
+    CanvasFrame canvas = new CanvasFrame(title);
+    // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    canvas.showImage(toFrame(image));
+  }
+
+  /**
+   * converting IplImages to BufferedImages
+   */
+  public BufferedImage toBufferedImage(IplImage image) {    
+    return jconverter.convert(converterToImage.convert(image));
+  }
+
+  public BufferedImage toBufferedImage(Mat image) {
+    return jconverter.convert(converterToImage.convert(image));
+  }
+
+  public Frame toFrame(IplImage image) {
+    return converterToImage.convert(image);
+  }
+
+  public Frame toFrame(Mat image) {    
+    return converterToImage.convert(image);
+  }
+
+  /**
+   * convert BufferedImages to IplImages
+   */
+  public IplImage toImage(BufferedImage src) {
+    return converterToImage.convert(jconverter.convert(src));
+  }
+
+  public IplImage toImage(Frame image) {
+    return converterToImage.convertToIplImage(image);
+  }
+
+  public IplImage toImage(Mat image) {
+    return converterToImage.convert(converterToMat.convert(image));
+  }
+
+  public Mat toMat(Frame image) {
+    return converterToImage.convertToMat(image);
   }
   
-  public String toString() {
-    return String.format("%s - enabled %b display %b", name, enabled, displayEnabled);
-  }
-  
-  public void publishClassification(Map<String, List<Classification>> data) {
-    if (opencv != null) {
-    opencv.invoke("publishClassification", data);
-    }
+  public Mat toMat(IplImage image) {
+    return converterToMat.convert(converterToMat.convert(image));
   }
 
 }
