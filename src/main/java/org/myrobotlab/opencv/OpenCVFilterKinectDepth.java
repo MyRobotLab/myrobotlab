@@ -49,7 +49,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepth.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepth.class);
 
   int filter = 7;
   boolean createMask = false;
@@ -57,7 +57,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   transient IplImage dst = null;
   transient IplImage src = null;
   transient IplImage mask = null;
-  
+
   transient IplImage lastDepthImage = null;
 
   int x = 0;
@@ -68,9 +68,12 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   OpenKinectFrameGrabber kinect;
   int cameraIndex = 0;
-  
+
   public OpenCVFilterKinectDepth() {
     super();
+    if (opencv != null) {
+      cameraIndex = opencv.getCameraIndex();
+    }
     kinect = new OpenKinectFrameGrabber(cameraIndex);
   }
 
@@ -78,7 +81,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     super(name);
     kinect = new OpenKinectFrameGrabber(cameraIndex);
   }
-  
+
   public void setDisplayCamera(boolean b) {
     displayCamera = b;
   }
@@ -89,25 +92,22 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
-  public IplImage process(IplImage image) throws InterruptedException{
+  public IplImage process(IplImage image) throws InterruptedException {
 
     // INFO - This filter has 2 sources !!!
     // IplImage kinectDepth = data.getKinectDepth();
     IplImage kinectDepth;
-	try {
-		kinectDepth = kinect.grabDepth();
-	    lastDepthImage = kinectDepth;
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-        log.error("getting grabber failed", e);
-		return null;
-	}    
-	
+    try {
+      kinectDepth = kinect.grabDepth();
+      lastDepthImage = kinectDepth;
+    } catch (Exception e) {
+      log.error("getting grabber failed", e);
+      return null;
+    }
+
     boolean processDepth = false;
     if (kinectDepth != null && processDepth) {
 
@@ -116,57 +116,20 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
         dst = cvCreateImage(cvSize(kinectDepth.width() / 2, kinectDepth.height() / 2), kinectDepth.depth(), kinectDepth.nChannels());
       }
 
-      cvPyrDown(kinectDepth, dst, filter);
-      invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));
+      cvPyrDown(kinectDepth, dst, filter); // <-- why pyramid down ? should be
+                                           // left to the user
+      invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));// <-- if requested from the service - it will publish from this filter 
     }
     // end fork
-    
+
     if (displayCamera) {
-    	log.info("OpenCVFilterKinect image");  
-    	return image;
+      log.info("OpenCVFilterKinect image");
+      return image;
     }
+    
+    data.putKinect(kinectDepth, image);
 
     return kinectDepth;
-
-    /*
-     * // check for depth ! 1 ch 16 depth - if not format error & return if
-     * (image.nChannels() != 1 || image.depth() != 16) { log.error(
-     * "image is not a kinect depth image"); return image; }
-     * 
-     * if (dst == null) { //dst = cvCreateImage(cvSize(image.width(),
-     * image.height()), image.depth(),image.nChannels()); //dst =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); src =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); dst =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); }
-     * 
-     * cvConvertScale(image, src, 1, 0); //cvThreshold(dst, dst, 30, 255,
-     * CV_THRESH_BINARY);
-     * 
-     * CvScalar min = cvScalar(30000, 0.0, 0.0, 0.0); CvScalar max =
-     * cvScalar(150000, 0.0, 0.0, 0.0);
-     * 
-     * cvInRangeS(image, min, max, dst);
-     * 
-     * createMask = true; if (createMask) { if (mask == null) { mask =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); } cvCopy(dst,
-     * mask, null); myService.setMask(this.getName(), mask); createMask = false;
-     * } //cvCvtColor /* ByteBuffer source = image.getByteBuffer(); int z =
-     * source.capacity(); ByteBuffer destination = dst.getByteBuffer(); z =
-     * destination.capacity();
-     * 
-     * int depth = 0;
-     * 
-     * Byte b = 0xE; int max = 0;
-     * 
-     * for (int i=0; i<image.width()*image.height(); i++) {
-     * 
-     * depth = source.get(i) & 0xFF; depth <<= 8; depth = source.get(i+1) &
-     * 0xFF; if (depth > max) max = depth;
-     * 
-     * if (depth > 100 && depth < 400) { destination.put(i, b); } }
-     */
-
-    // return dst;
   }
 
   public void samplePoint(Integer inX, Integer inY) {
@@ -174,7 +137,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     x = inX;
     y = inY;
     ByteBuffer buffer = lastDepthImage.createBuffer();
-    int value = buffer.get(y*lastDepthImage.width() + x) & 0xFF;
+    int value = buffer.get(y * lastDepthImage.width() + x) & 0xFF;
   }
 
   @Override

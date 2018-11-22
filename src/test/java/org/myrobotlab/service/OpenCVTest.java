@@ -33,6 +33,10 @@ public class OpenCVTest extends AbstractTest {
   static final String TEST_DIR = "src/test/resources/OpenCV/";
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg"; 
   static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png"; 
+  
+  // TODO - getClassifictions publishClassifications 
+  // TODO - getFaces publishFaces
+  // TODO - chaos monkey filter tester
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -161,10 +165,18 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void testAllFilterTypes() {
-    cv.capture(TEST_FACE_FILE_JPEG);   
+    // cv.capture(TEST_FACE_FILE_JPEG);  
+    cv.stopCapture();
+    // cv.capture("multipleFaces.jpg"); did not work :(
+    
+    cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); 
+
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.info("trying {}", fn);
+      if(fn.startsWith("DL4J")) {
+        continue;
+      }
       cv.addFilter(fn);
       sleep(1000);
       cv.removeFilters();
