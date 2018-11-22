@@ -32,6 +32,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.ApiFactory;
@@ -838,6 +840,24 @@ public class Runtime extends Service implements MessageListener {
     String[] ret = new String[si.size()];
     for (int i = 0; i < ret.length; ++i) {
       ret[i] = si.get(i).getName();
+    }
+    return ret;
+  }
+
+  public static boolean match(String text, String pattern) {
+    return text.matches(pattern.replace("?", ".?").replace("*", ".*?"));
+  }
+
+  public static List<String> getServiceNames(String pattern) {
+    List<ServiceInterface> sis = getServices();
+    List<String> ret = new ArrayList<String>();
+    for (ServiceInterface si : sis) {
+      String serviceName = si.getName();
+
+      if (match(serviceName, pattern)) {
+        ret.add(serviceName);
+      }
+
     }
     return ret;
   }

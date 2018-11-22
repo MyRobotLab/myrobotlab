@@ -118,7 +118,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
       cvPyrDown(kinectDepth, dst, filter); // <-- why pyramid down ? should be
                                            // left to the user
-      invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(dst));// <-- if requested from the service - it will publish from this filter 
+      invoke("publishDisplay", "kinectDepth", toBufferedImage(dst));// <-- if requested from the service - it will publish from this filter 
     }
     // end fork
 

@@ -31,7 +31,7 @@ public class OpenCVFilterFaceDetectDNNTest {
     //String filename = "pose4.jpg";
    
     IplImage image = cvLoadImage(filename);
-    filter.setData(new OpenCVData(filename, 0, 0, OpenCV.convertToFrame(image)));
+    filter.setData(new OpenCVData(filename, 0, 0, OpenCV.toFrame(image)));
     assertNotNull(image);
     if (debug)
       filter.show(image, "Image");
@@ -40,7 +40,7 @@ public class OpenCVFilterFaceDetectDNNTest {
       filter.enabled=true;
       filter.displayEnabled=true;
       BufferedImage bi = filter.processDisplay();
-      IplImage displayVal = OpenCV.BufferedImageToIplImage(bi);
+      IplImage displayVal = OpenCV.toImage(bi);
       filter.show(displayVal, "Resulting image");
       System.out.println("Press the any key...");
       System.in.read();

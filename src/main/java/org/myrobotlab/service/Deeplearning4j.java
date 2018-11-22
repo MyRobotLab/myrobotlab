@@ -500,7 +500,7 @@ public class Deeplearning4j extends Service {
 
   public List<List<ClassPrediction>> classifyImageDarknet(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3, new ColorConversionTransform(COLOR_BGR2RGB));
-    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
@@ -520,7 +520,7 @@ public class Deeplearning4j extends Service {
     int gridHeight = 13;
 
     NativeImageLoader loader = new NativeImageLoader(416, 416, 3, new ColorConversionTransform(COLOR_BGR2RGB));
-    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
@@ -645,7 +645,7 @@ public class Deeplearning4j extends Service {
   public Map<String, Double> classifyImageCustom(IplImage iplImage, ComputationGraph model, List<String> labels) throws IOException {
     // this height width channel info is for VGG16 based models.
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
-    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     DataNormalization scaler = new VGG16ImagePreProcessor();
     scaler.transform(image);
@@ -687,7 +687,7 @@ public class Deeplearning4j extends Service {
   
   public Map<String, Double> classifyImageVGG16(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
-    BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
     // TODO: we should consider the model as not only the model, but also the input transforms
     // for that model.

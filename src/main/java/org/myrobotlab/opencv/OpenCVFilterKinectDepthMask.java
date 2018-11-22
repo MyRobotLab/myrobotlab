@@ -198,9 +198,9 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     cvResetImageROI(black);
     cvCopy(itemp, itemp2, black);
 
-    invoke("publishDisplay", "input", OpenCV.IplImageToBufferedImage(itemp));
-    invoke("publishDisplay", "kinectDepth", OpenCV.IplImageToBufferedImage(ktemp));
-    invoke("publishDisplay", "kinectMask", OpenCV.IplImageToBufferedImage(mask));
+    invoke("publishDisplay", "input", OpenCV.toBufferedImage(itemp));
+    invoke("publishDisplay", "kinectDepth", OpenCV.toBufferedImage(ktemp));
+    invoke("publishDisplay", "kinectMask", OpenCV.toBufferedImage(mask));
 
     // TODO - publish KinectImageNode ArrayList
     // find contours ---- begin ------------------------------------

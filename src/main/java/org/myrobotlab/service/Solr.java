@@ -401,7 +401,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public byte[] imageToBytes(IplImage image) throws IOException {
 
     // lets make a buffered image 
-    BufferedImage buffImage = OpenCV.IplImageToBufferedImage(image);
+    BufferedImage buffImage = OpenCV.toBufferedImage(image);
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     try {
       ImageIO.write(buffImage, "png", stream);

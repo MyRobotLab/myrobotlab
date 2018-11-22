@@ -240,7 +240,7 @@ public class OpenCVFilterInRange extends OpenCVFilter {
 
   public void samplePoint(Integer x, Integer y) {
 
-    frameBuffer = OpenCV.IplImageToBufferedImage(hsv);
+    frameBuffer = toBufferedImage(hsv);
     int rgb = frameBuffer.getRGB(x, y);
     Color c = new Color(rgb);
     log.error(x + "," + y + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue());

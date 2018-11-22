@@ -353,7 +353,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
 
           // END STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
 
-          images.put(counter, convertToMat(merged));
+          images.put(counter, toMat(merged));
           log.warn("{} {}-{}", totalImageFiles, label, counter);
           labelsBuf.put(counter, label.hashCode());
           idToLabelMap.put(label.hashCode(), label);
@@ -632,7 +632,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               IntPointer label = new IntPointer(1);
               DoublePointer confidence = new DoublePointer(1);
               OpenCVClassifier classifier = classifiers.get(facesSubclass);
-              classifier.recognizer.predict(convertToMat(merged), label, confidence);
+              classifier.recognizer.predict(toMat(merged), label, confidence);
               
               // IF HIGH ENOUGH CONFIDENCE GO TO APPROPRIATE DIRECTORIES
               if (confidence.get() > 50) {
