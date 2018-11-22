@@ -151,7 +151,8 @@ public class OpenCV extends AbstractVideoSource {
           getGrabber();
           // Wait for the first frame
           int loops = 0;
-          while  (lengthInFrames == 0 && loops < 200) {
+          while  (grabber.getClass() == OpenKinectFrameGrabber.class &&
+          lengthInFrames == 0 && loops < 200) {
             lengthInFrames = grabber.getLengthInFrames();
             lengthInTime = grabber.getLengthInTime();
             sleep(40);
@@ -1489,13 +1490,13 @@ public class OpenCV extends AbstractVideoSource {
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
     
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    
     boolean done = true;
     if (done) {
       return;
     }
 
+    
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     
     OpenCVFilterYolo yolo = (OpenCVFilterYolo)cv.addFilter("yolo");
 
