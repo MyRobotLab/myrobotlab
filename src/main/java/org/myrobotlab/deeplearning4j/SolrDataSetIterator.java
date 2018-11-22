@@ -174,7 +174,7 @@ public class SolrDataSetIterator implements DataSetIterator {
       IplImage iplImage = solr.bytesToImage(bytes);
       // solr.show(iplImage, label + " " + trainingDoc.getFirstValue("id"));
       // TODO: just get the buffered image directly.
-      BufferedImage buffImg = OpenCV.IplImageToBufferedImage(iplImage);
+      BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
       // I think i'm supposed to get an array of these images and lump them together.
       INDArray image = loader.asMatrix(buffImg);
       //Frame f = loader.asFrame(buffImg);

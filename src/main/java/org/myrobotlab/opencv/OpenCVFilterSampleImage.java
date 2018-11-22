@@ -51,7 +51,7 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 
   transient IplImage buffer = null;
 
-  Image fileImage = null;
+  IplImage fileImage = null;
   Graphics2D graphics = null;
 
   /*
@@ -80,14 +80,8 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
 
   }
 
-  public void loadImage(String path) {
-    try {
-      URL url = new URL(path);
-      fileImage = ImageIO.read(url);
-    } catch (IOException e) {
-      // Log.error("could not load image " + path);
-      e.printStackTrace();
-    }
+  public void addImage(String path) {
+    fileImage = loadImage(path);
   }
 
   @Override

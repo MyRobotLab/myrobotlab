@@ -34,8 +34,8 @@ public class KinectImageNode implements Serializable {
   public int lastGoodFitIndex = 0;
 
   public void convertToSerializableTypes() {
-    cameraFrame = new SerializableImage(OpenCV.IplImageToBufferedImage(cvCameraFrame), "camera");
-    mask = new SerializableImage(OpenCV.IplImageToBufferedImage(cvMask), "frame");
+    cameraFrame = new SerializableImage(OpenCV.toBufferedImage(cvCameraFrame), "camera");
+    mask = new SerializableImage(OpenCV.toBufferedImage(cvMask), "frame");
   }
 
   public IplImage getTemplate() {

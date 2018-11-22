@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -190,11 +191,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
-   * 
-   * @param myKey
-   *          m
-   * @param serviceClass
-   *          class
+   * @param myKey m
+   * @param serviceClass class 
    * @return a map of string to service reservation
    * 
    */
@@ -748,6 +746,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    */
   public static void sleep(int millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException e) {
+    }
+  }
+
+  public static void sleep(long millis) {
     try {
       Thread.sleep(millis);
     } catch (InterruptedException e) {
@@ -1887,13 +1892,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * this send forces remote connect - for registering services
-   * 
-   * @param url
-   *          u
-   * @param method
-   *          m
-   * @param param1
-   *          the param
+   * @param url u
+   * @param method m 
+   * @param param1 the param
    */
   public void send(URI url, String method, Object param1) {
     Object[] params = new Object[1];
@@ -2064,8 +2065,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("subscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
+    // TODO - do regex matching
+    if (topicName.contains("*")) { // FIXME "any regex expression
+      List<String> tnames = Runtime.getServiceNames(topicName);
+      for (String serviceName : tnames) {
+        MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+        cm.send(Message.createMessage(this, serviceName, "addListener", listener));
+      }
+    } else {
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
     cm.send(Message.createMessage(this, topicName, "addListener", listener));
+  }
   }
 
   public void sendPeer(String peerKey, String method, Object... params) {
