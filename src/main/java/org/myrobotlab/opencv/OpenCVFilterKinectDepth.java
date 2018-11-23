@@ -57,6 +57,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   int x = 0;
   int y = 0;
   int clickCounter = 0;
+  int selectedDepthValue;
 
   boolean useDepth = true;
 
@@ -102,10 +103,12 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
     IplImage kinectDepth;
     try {
-      kinectDepth = kinect.grabDepth();
-      lastDepthImage = kinectDepth;
-      data.putKinect(kinectDepth, image);
-      return kinectDepth;
+      if (useDepth) {
+        kinectDepth = kinect.grabDepth();
+        lastDepthImage = kinectDepth;
+        data.putKinect(kinectDepth, image);
+        return kinectDepth;
+      }
     } catch (Exception e) {
       log.error("kinect grabber failed", e);
     }
@@ -113,17 +116,22 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     return image;
   }
 
+  
   public void samplePoint(Integer inX, Integer inY) {
     ++clickCounter;
     x = inX;
     y = inY;
     ByteBuffer buffer = lastDepthImage.createBuffer();
-    int value = buffer.get(y * lastDepthImage.width() + x) & 0xFF;
+    selectedDepthValue = buffer.get(y * lastDepthImage.width() + x) & 0xFF;
   }
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
+  }
+
+  public boolean isDepth() {
+    return useDepth;
   }
 
 }
