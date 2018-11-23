@@ -25,10 +25,12 @@
 
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvSize;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
@@ -54,11 +56,25 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   transient IplImage lastDepthImage = null;
 
+  double minX = 0;
+  double maxX = 65535;
+  double minY = 0.0;
+  double maxY = 1.0;
+
   int x = 0;
   int y = 0;
   int clickCounter = 0;
+  int selectedDepthValue;
 
+  /**
+   * use depth as return image
+   */
   boolean useDepth = true;
+
+  /**
+   * default return colored 3x256(rgb) depth / false is a lossy 1x(256) grey scale
+   */
+  boolean useColor = true;
 
   public OpenKinectFrameGrabber getGrabber() {
 
@@ -102,10 +118,16 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
     IplImage kinectDepth;
     try {
-      kinectDepth = kinect.grabDepth();
-      lastDepthImage = kinectDepth;
-      data.putKinect(kinectDepth, image);
-      return kinectDepth;
+      if (useDepth) {
+        kinectDepth = kinect.grabDepth();
+        lastDepthImage = kinectDepth;
+        data.putKinect(kinectDepth, image);
+        
+        if (useColor) {
+          kinectDepth = color(kinectDepth);
+        }
+        return kinectDepth;
+      }
     } catch (Exception e) {
       log.error("kinect grabber failed", e);
     }
@@ -113,17 +135,81 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     return image;
   }
 
+  public IplImage color(IplImage depth) throws InterruptedException {
+
+    // 256 grey channels is not enough for kinect
+    // color (3x256 channels) is enough
+    IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); 
+
+    ByteBuffer colorBuffer = color.getByteBuffer();
+    // it may be deprecated but the "new" function .asByteBuffer() does not
+    // return all data
+    ByteBuffer depthBuffer = depth.getByteBuffer();
+
+    int depthBytesPerChannel = lastDepthImage.depth() / 8;
+
+    // iterate through the depth bytes bytes and convert to HSV / RGB format
+    // map depth gray (0,65535) => 3 x (0,255) HSV :P
+    for (int y = 0; y < depth.height(); y++) { // 480
+      for (int x = 0; x < depth.width(); x++) { // 640
+        int depthIndex = y * depth.widthStep() + x * depth.nChannels() * depthBytesPerChannel;
+        int colorIndex = y * color.widthStep() + x * color.nChannels();
+
+        // Used to read the pixel value - the 0xFF is needed to cast from
+        // an unsigned byte to an int.
+        // int value = depthBuffer.get(depthIndex);// << 8 & 0xFF +
+        // buffer.get(depthIndex+1)& 0xFF;
+        // this is 16 bit depth - I switched the MSB !!!!
+        int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
+        double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
+
+        Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
+
+        if (color.nChannels() == 3) {
+          colorBuffer.put(colorIndex, (byte) c.getBlue());
+          colorBuffer.put(colorIndex + 1, (byte) c.getRed());
+          colorBuffer.put(colorIndex + 2, (byte) c.getGreen());
+        } else if (color.nChannels() == 1) {
+          colorBuffer.put(colorIndex, (byte) c.getBlue());
+        }
+
+        // Sets the pixel to a value (greyscale).
+        // colorBuffer.put(index, (byte)hsv);
+
+        // Sets the pixel to a value (RGB, stored in BGR order).
+        // buffer.put(index, blue);
+        // buffer.put(index + 1, green);
+        // buffer.put(index + 2, red);
+      }
+    }
+
+    return color;
+
+  }
+
   public void samplePoint(Integer inX, Integer inY) {
     ++clickCounter;
     x = inX;
     y = inY;
     ByteBuffer buffer = lastDepthImage.createBuffer();
-    int value = buffer.get(y * lastDepthImage.width() + x) & 0xFF;
+    selectedDepthValue = buffer.get(y * lastDepthImage.width() + x) & 0xFF;
   }
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
+  }
+
+  public boolean isDepth() {
+    return useDepth;
+  }
+
+  public void useColor(boolean b) {
+    useColor = b;
+  }
+  
+  public boolean isColor() {
+    return useColor;
   }
 
 }
