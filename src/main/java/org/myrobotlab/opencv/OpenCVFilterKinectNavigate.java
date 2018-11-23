@@ -102,15 +102,13 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-
+    
     // INFO - This filter has 2 sources !!!
-    IplImage depth = data.get(OpenCV.SOURCE_KINECT_DEPTH);
+    IplImage depth = data.getKinectDepth();
     if (depth != null) {
 
       lastDepthImage = depth;
@@ -123,18 +121,13 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
       ByteBuffer depthBuffer = depth.getByteBuffer();
 
       int depthBytesPerChannel = lastDepthImage.depth() / 8;
-      int bytesPerX = depthBytesPerChannel * lastDepthImage.nChannels();
-
-
+      
       // iterate through the depth bytes bytes and convert to HSV / RGB format
       // map depth gray (0,65535) => 3 x (0,255) HSV :P
       for (int y = 0; y < depth.height(); y++) { // 480
         for (int x = 0; x < depth.width(); x++) { // 640
           int depthIndex = y * depth.widthStep() + x * depth.nChannels() * depthBytesPerChannel;
           int colorIndex = y * color.widthStep() + x * color.nChannels();
-
-          // int value = buffer.get(y * bytesPerX * lastDepthImage.width() + x *
-          // bytesPerX) & 0xFF;
 
           // Used to read the pixel value - the 0xFF is needed to cast from
           // an unsigned byte to an int.
@@ -143,7 +136,6 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
           // this is 16 bit depth - I switched the MSB !!!!
           int value = (depthBuffer.get(depthIndex+1) & 0xFF) << 8 | (depthBuffer.get(depthIndex ) & 0xFF);
           double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
-//          log.warn(String.format("(%d, %d) = %d => %f", x, y, value, hsv));
 
           Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
 
@@ -179,21 +171,7 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
       // SerializableImage.writeToFile(image, "test.png");
 
-      if (depth != null && processDepth) {
-
-        // allowing publish & fork
-        if (dst == null || dst.width() != image.width() || dst.nChannels() != image.nChannels()) {
-          dst = cvCreateImage(cvSize(depth.width() / 2, depth.height() / 2), depth.depth(), depth.nChannels());
-        }
-
-        cvPyrDown(depth, dst, filter);
-        invoke("publishDisplay", "kinectDepth", toBufferedImage(dst));
-      }
-      // end fork
-
-      if (displayCamera) {
-        return image;
-      }
+     
 
       return depth;
 
@@ -202,45 +180,6 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
     }
 
     return image;
-    /*
-     * // check for depth ! 1 ch 16 depth - if not format error & return if
-     * (image.nChannels() != 1 || image.depth() != 16) { log.error(
-     * "image is not a kinect depth image"); return image; }
-     * 
-     * if (dst == null) { //dst = cvCreateImage(cvSize(image.width(),
-     * image.height()), image.depth(),image.nChannels()); //dst =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); src =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); dst =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); }
-     * 
-     * cvConvertScale(image, src, 1, 0); //cvThreshold(dst, dst, 30, 255,
-     * CV_THRESH_BINARY);
-     * 
-     * CvScalar min = cvScalar(30000, 0.0, 0.0, 0.0); CvScalar max =
-     * cvScalar(150000, 0.0, 0.0, 0.0);
-     * 
-     * cvInRangeS(image, min, max, dst);
-     * 
-     * createMask = true; if (createMask) { if (mask == null) { mask =
-     * cvCreateImage(cvSize(image.width(), image.height()), 8, 1); } cvCopy(dst,
-     * mask, null); myService.setMask(this.getName(), mask); createMask = false;
-     * } //cvCvtColor /* ByteBuffer source = image.getByteBuffer(); int z =
-     * source.capacity(); ByteBuffer destination = dst.getByteBuffer(); z =
-     * destination.capacity();
-     * 
-     * int depth = 0;
-     * 
-     * Byte b = 0xE; int max = 0;
-     * 
-     * for (int i=0; i<image.width()*image.height(); i++) {
-     * 
-     * depth = source.get(i) & 0xFF; depth <<= 8; depth = source.get(i+1) &
-     * 0xFF; if (depth > max) max = depth;
-     * 
-     * if (depth > 100 && depth < 400) { destination.put(i, b); } }
-     */
-
-    // return dst;
   }
 
   public void samplePoint(Integer inX, Integer inY) {

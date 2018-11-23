@@ -43,14 +43,17 @@ import org.myrobotlab.service.SwingGui;
 public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements ActionListener, ChangeListener {
 
   JCheckBox useDepth = new JCheckBox("Use depth ");
+  JCheckBox useColor = new JCheckBox("Use color ");
 
   public OpenCVFilterKinectDepthGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     // updateState((OpenCVFilterKinectDepth) boundFilter.filter); noWorky - would be nice to have a good reference
     useDepth.setSelected(true);
+    useColor.setSelected(true);
     enableListeners();
     display.setLayout(new BorderLayout());
     display.add(useDepth, BorderLayout.CENTER);
+    display.add(useColor, BorderLayout.SOUTH);
   }
 
   @Override
@@ -62,6 +65,14 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
         myfilter.useDepth(true);
       } else {
         myfilter.useDepth(false);
+      }
+    }
+    
+    if (o == useColor) {
+      if (useColor.isSelected()) {
+        myfilter.useColor(true);
+      } else {
+        myfilter.useColor(false);
       }
     }
     // send the updated filter to OpenCV service
@@ -92,6 +103,11 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
         } else {
           useDepth.setSelected(true);
         }
+        if (myfilter.isColor()) {
+          useColor.setSelected(true);
+        } else {
+          useColor.setSelected(true);
+        }
         enableListeners();
       }
 
@@ -100,10 +116,12 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
 
   private void enableListeners() {
     useDepth.addActionListener(this);
+    useColor.addActionListener(this);
   }
 
   private void disableListeners() {
     useDepth.removeActionListener(this);
+    useColor.removeActionListener(this);
   }
 
   @Override
