@@ -31,6 +31,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -51,43 +52,40 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepth.class);
 
-  int filter = 7;
-  boolean createMask = false;
-
-  transient IplImage dst = null;
-  transient IplImage src = null;
-  transient IplImage mask = null;
-
   transient IplImage lastDepthImage = null;
 
   int x = 0;
   int y = 0;
   int clickCounter = 0;
 
-  boolean displayCamera = false;
+  boolean useDepth = true;
 
-  OpenKinectFrameGrabber kinect;
-  int cameraIndex = 0;
+  public OpenKinectFrameGrabber getGrabber() {
 
-  public OpenCVFilterKinectDepth() {
-    super();
-    if (opencv != null) {
-      cameraIndex = opencv.getCameraIndex();
+    OpenKinectFrameGrabber kinect = null;
+
+    if (kinect == null && opencv != null) {
+      try {
+        FrameGrabber grabber = opencv.getGrabber();
+        if (!grabber.getClass().equals(OpenKinectFrameGrabber.class)) {
+          log.error("KinectDepth filter requires OpenKinectFrameGrabber, please select Kinect for grabber type");
+          return null;
+        }
+        kinect = (OpenKinectFrameGrabber) grabber;
+        return kinect;
+      } catch (Throwable e) {
+        log.error("could not get framegrabber", e);
+      }
     }
-    kinect = new OpenKinectFrameGrabber(cameraIndex);
+    return null;
   }
 
   public OpenCVFilterKinectDepth(String name) {
     super(name);
-    kinect = new OpenKinectFrameGrabber(cameraIndex);
   }
 
-  public void setDisplayCamera(boolean b) {
-    displayCamera = b;
-  }
-
-  public void createMask() {
-    createMask = true;
+  public void useDepth(boolean b) {
+    useDepth = b;
   }
 
   @Override
@@ -97,39 +95,22 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
 
-    // INFO - This filter has 2 sources !!!
-    // IplImage kinectDepth = data.getKinectDepth();
+    OpenKinectFrameGrabber kinect = getGrabber();
+    if (kinect == null) {
+      return image;
+    }
+
     IplImage kinectDepth;
     try {
       kinectDepth = kinect.grabDepth();
       lastDepthImage = kinectDepth;
+      data.putKinect(kinectDepth, image);
+      return kinectDepth;
     } catch (Exception e) {
-      log.error("getting grabber failed", e);
-      return null;
+      log.error("kinect grabber failed", e);
     }
 
-    boolean processDepth = false;
-    if (kinectDepth != null && processDepth) {
-
-      // allowing publish & fork
-      if (dst == null || dst.width() != image.width() || dst.nChannels() != image.nChannels()) {
-        dst = cvCreateImage(cvSize(kinectDepth.width() / 2, kinectDepth.height() / 2), kinectDepth.depth(), kinectDepth.nChannels());
-      }
-
-      cvPyrDown(kinectDepth, dst, filter); // <-- why pyramid down ? should be
-                                           // left to the user
-      invoke("publishDisplay", "kinectDepth", toBufferedImage(dst));// <-- if requested from the service - it will publish from this filter 
-    }
-    // end fork
-
-    if (displayCamera) {
-      log.info("OpenCVFilterKinect image");
-      return image;
-    }
-    
-    data.putKinect(kinectDepth, image);
-
-    return kinectDepth;
+    return image;
   }
 
   public void samplePoint(Integer inX, Integer inY) {
