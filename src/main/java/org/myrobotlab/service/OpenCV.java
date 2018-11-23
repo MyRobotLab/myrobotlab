@@ -244,11 +244,11 @@ public class OpenCV extends AbstractVideoSource {
   public static final String OUTPUT_KEY = "output";
   transient final static public String PART = "part";
 
-  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "BoundingBoxToFile", "And", "Canny", "ColorTrack", "Copy", "CreateHistogram",
-      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill",
-      "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave",
-      "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize",
-      "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
+      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
+      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate",
+      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "OpticalFlow", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray",
+      "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
 
   static final long serialVersionUID = 1L;
 
@@ -565,24 +565,28 @@ public class OpenCV extends AbstractVideoSource {
     Java2DFrameConverter jconverter = new Java2DFrameConverter();
     return converterToImage.convert(jconverter.convert(src));
   }
+
   static public IplImage toImage(Frame image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     return converterToImage.convertToIplImage(image);
   }
+
   static public IplImage toImage(Mat image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
     return converterToImage.convert(converterToMat.convert(image));
   }
+
   static public Mat toMat(Frame image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     return converterToImage.convertToMat(image);
   }
+
   static public Mat toMat(IplImage image) {
     OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
     return converterToMat.convert(converterToMat.convert(image));
   }
-  
+
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
 
   transient BlockingQueue<OpenCVData> blockingData = new LinkedBlockingQueue<>();
@@ -1625,12 +1629,11 @@ public class OpenCV extends AbstractVideoSource {
     super.stopService();
     stopCapture();
   }
-  
+
   public boolean undockDisplay(boolean b) {
     undockDisplay = b;
     broadcastState();
     return b;
   }
-
 
 }
