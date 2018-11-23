@@ -74,7 +74,7 @@ import org.slf4j.Logger;
 public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepthMask.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepthMask.class);
 
   transient IplImage kinectDepth = null;
   transient IplImage ktemp = null;
