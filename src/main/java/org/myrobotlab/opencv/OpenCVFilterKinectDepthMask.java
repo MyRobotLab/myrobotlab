@@ -77,11 +77,8 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepthMask.class);
-
-  double minX = 0;
-  double maxX = 65535;
-  double minY = 0.0;
-  double maxY = 1.0;
+  
+  IplImage mask = null;
 
   public OpenCVFilterKinectDepthMask(String name) {
     super(name);
@@ -104,8 +101,6 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     return mask;
 
   }
-
-  IplImage mask = null;
 
   // consider parallel looping ...
   // http://bytedeco.org/news/2014/12/23/third-release/
@@ -137,16 +132,11 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
         // buffer.get(depthIndex+1)& 0xFF;
         // this is 16 bit depth - I switched the MSB !!!!
         int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
-        double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
 
-        Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
-
-        if (mask.nChannels() == 3) {
-          maskBuffer.put(colorIndex, (byte) c.getBlue());
-          maskBuffer.put(colorIndex + 1, (byte) c.getRed());
-          maskBuffer.put(colorIndex + 2, (byte) c.getGreen());
-        } else if (mask.nChannels() == 1) {
-          maskBuffer.put(colorIndex, (byte) c.getBlue());
+        if (value > minDepth && value < maxDepth) {
+          maskBuffer.put(colorIndex, (byte) 255);
+        } else {
+          maskBuffer.put(colorIndex, (byte) 0);
         }
 
         // Sets the pixel to a value (greyscale).
