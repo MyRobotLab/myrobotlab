@@ -160,10 +160,11 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     cpanel.setBorder(BorderFactory.createEtchedBorder());
     cpanel.add(capture);
     cpanel.add(pause);
-    cpanel.add(grabberTypeSelect);
+    // cpanel.add(grabberTypeSelect);
     cpanel.add(undock);
 
     captureCfg.setBorder(BorderFactory.createEtchedBorder());
+    captureCfg.add(grabberTypeSelect);
     captureCfg.add(cameraRadio);
     captureCfg.add(new JLabel("camera"));
     captureCfg.add(cameraIndex);
@@ -261,6 +262,12 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
         send("stopRecording");
       }
     } else if (o == grabberTypeSelect) {
+      String type = (String)grabberTypeSelect.getSelectedItem();
+      if (type.startsWith("OpenKinect") || type.equals("PS3Eye") || type.equals("Sarxos") || type.equals("VideoInput")|| type.equals("FlyCapture")) {
+        // cuz these are all cameras ...
+        log.warn("setting as camera as source");
+        send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA);
+      }
       send("setGrabberType", grabberTypeSelect.getSelectedItem());      
     } else if (o == recordFrameButton) {
       send("recordSingleFrame");
@@ -276,9 +283,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
           cframe = null;
         }
       }
-    }
-
-    if (fileRadio.isSelected()) {
+    } else if (o == fileRadio) {      
       send("setInputSource", OpenCV.INPUT_SOURCE_FILE);
     }
   }
