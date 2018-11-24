@@ -6,7 +6,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.service.interfaces.Point2DfListener;
 import org.myrobotlab.service.interfaces.Point2DfPublisher;
 import org.slf4j.Logger;
@@ -45,11 +45,11 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     return meta;
   }
 
-  public Point2Df publishPoint2Df(Point2Df point) {
+  public Point2df publishPoint2Df(Point2df point) {
     return point;
   }
 
-  public Point2Df onPoint2Df(Point2Df point) {
+  public Point2df onPoint2Df(Point2df point) {
     System.out.println("Receinvig");
     return point;
   }

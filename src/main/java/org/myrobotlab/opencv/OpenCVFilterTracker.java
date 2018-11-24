@@ -48,7 +48,7 @@ import org.bytedeco.javacpp.opencv_tracking.Tracker;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -130,10 +130,10 @@ public class OpenCVFilterTracker extends OpenCVFilter {
       cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
       
       
-        ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
+        ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
         float xC = (float) (boundingBox.x() + boundingBox.width()/2);
         float yC = (float) (boundingBox.y() + boundingBox.height()/2);
-        Point2Df center = new Point2Df(xC, yC);
+        Point2df center = new Point2df(xC, yC);
         pointsToPublish.add(center);
         data.put("TrackingPoints",pointsToPublish);
       

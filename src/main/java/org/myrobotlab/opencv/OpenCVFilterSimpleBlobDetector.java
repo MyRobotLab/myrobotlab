@@ -44,7 +44,7 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_features2d.SimpleBlobDetector;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
@@ -53,7 +53,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSimpleBlobDetector.class.getCanonicalName());
 
-  public ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
+  public ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
   transient CvFont font = new CvFont();
 
   public OpenCVFilterSimpleBlobDetector() {
@@ -105,7 +105,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
     double minDist = 20.0;
     // Is this a new blob? or an old blob?
     boolean dupPoint = false;
-    for (Point2Df p : pointsToPublish) {
+    for (Point2df p : pointsToPublish) {
       double dist = Math.sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y));
       if (dist < minDist) {
         // we already have this point ?
@@ -115,7 +115,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
     }
 
     if (!dupPoint) {
-      pointsToPublish.add(new Point2Df(x, y));
+      pointsToPublish.add(new Point2df(x, y));
       log.info("There are " + pointsToPublish.size() + " blobs.");
     }
     return image;
@@ -137,7 +137,7 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
 
     for (int i = 0; i < pointsToPublish.size(); ++i) {
-      Point2Df point = pointsToPublish.get(i);
+      Point2df point = pointsToPublish.get(i);
       graphics.drawOval((int) point.x, (int) point.y, 5, 5);
     }
     graphics.drawString(String.format("Blobs Found: %d", pointsToPublish.size()), 20, 40);
