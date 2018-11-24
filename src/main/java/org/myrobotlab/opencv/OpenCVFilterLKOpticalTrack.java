@@ -50,7 +50,7 @@ import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.helper.opencv_core.CvArr;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
@@ -65,7 +65,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   public boolean addRemovePoint = false;
   public boolean clearPoints = false;
   public boolean needTrackingPoints = false;
-  public Point2Df samplePoint = new Point2Df();
+  public Point2df samplePoint = new Point2df();
 
   int validCorners = 0;
 
@@ -92,7 +92,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   transient CvArr mask = null;
 
-  public ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
+  public ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
 
   public OpenCVFilterLKOpticalTrack(String name) {
     super(name);
@@ -172,7 +172,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     StringBuffer cB = new StringBuffer();
 
     validCorners = 0;
-    pointsToPublish = new ArrayList<Point2Df>();
+    pointsToPublish = new ArrayList<Point2df>();
 
     // shift newly calculated corner flows
     for (int i = 0; i < count.get(); i++) {
@@ -197,7 +197,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
         continue;
       }
 
-      pointsToPublish.add(new Point2Df(x, y));
+      pointsToPublish.add(new Point2df(x, y));
 
       ++validCorners;
       // putting new points in previous buffer

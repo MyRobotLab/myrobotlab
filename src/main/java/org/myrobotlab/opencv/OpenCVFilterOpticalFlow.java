@@ -60,7 +60,7 @@ import org.bytedeco.javacpp.opencv_core.CvSize;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.helper.opencv_core.CvArr;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 /**
@@ -123,7 +123,7 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
    */
   float minDistance = 5.0f;
 
-  public ArrayList<Point2Df> pointsToPublish = new ArrayList<Point2Df>();
+  public ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
 
   /**
    * Parameter characterizing the minimal accepted quality of image corners. The

@@ -30,7 +30,7 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
@@ -81,9 +81,9 @@ import org.slf4j.Logger;
  * 
  */
 public class OpenCVData implements Serializable {
-  private static final long serialVersionUID = 1L;
+  transient static OpenCVFrameConverter.ToIplImage converterToIplImage = new OpenCVFrameConverter.ToIplImage();
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
+  transient static Java2DFrameConverter converterToJava = new Java2DFrameConverter();
 
   /**
    * serializable objects - these can be transported TODO - implement later...
@@ -94,8 +94,71 @@ public class OpenCVData implements Serializable {
    * the type converters from JavaCV
    */
   transient static OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
-  transient static OpenCVFrameConverter.ToIplImage converterToIplImage = new OpenCVFrameConverter.ToIplImage();
-  transient static Java2DFrameConverter converterToJava = new Java2DFrameConverter();
+  public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
+  private static final long serialVersionUID = 1L;
+
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.init();
+      File f = new File("OpenCV/prpol-rerender2.avi");
+      log.info("{}", f.exists());
+      // TODO - test
+      FrameGrabber grabber = new FFmpegFrameGrabber(f);// OpenCVFrameGrabber.createDefault(f);
+
+      grabber.start();
+      Frame frame = grabber.grab();
+      OpenCVData data = new OpenCVData("cv", 1540660275000L, 0, frame);
+      BufferedImage img = data.getDisplay();
+
+      CanvasFrame cframe = new CanvasFrame("test");
+      cframe.showImage(frame);
+      // cframe.showImage(frame, true);
+
+      JFrame jframe = new JFrame();
+      ImageIcon icon = new ImageIcon(img);
+      JLabel label = new JLabel(icon, JLabel.CENTER);
+      JPanel jpanel = new JPanel();
+      jpanel.add(label);
+      jframe.setContentPane(jpanel);
+      jframe.pack();
+      jframe.setVisible(true);
+
+      grabber.close();
+
+      data.writeDisplay();
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  /**
+   * list of filters which have processed this pipeline
+   */
+  List<String> filters = new ArrayList<String>();
+
+
+  private int frameIndex;
+
+
+  /**
+   * graphics object for display
+   */
+  transient Map<String, Graphics2D> g2ds = new HashMap<>();
+
+
+  /**
+   * name of the service which produced this data
+   */
+  private String name;
+
+
+  /**
+   * the filter's name - used as a key to get or put data associated with a
+   * specific filter
+   */
+  
+  private String selectedFilter = INPUT_KEY;
 
   /**
    * all non-serializable data including frames an IplImages It will also
@@ -103,31 +166,10 @@ public class OpenCVData implements Serializable {
    */
   transient final Map<String, Object> sources = new TreeMap<>();
 
-  /**
-   * name of the service which produced this data
-   */
-  private String name;
-
-  /**
-   * graphics object for display
-   */
-  transient Map<String, Graphics2D> g2ds = new HashMap<>();
-
-  /**
-   * list of filters which have processed this pipeline
-   */
-  List<String> filters = new ArrayList<String>();
-
-  /**
-   * the filter's name - used as a key to get or put data associated with a
-   * specific filter
-   */
-  private String outputFilter = INPUT_KEY;
-  private String selectedFilter = INPUT_KEY;
-
   private long timestamp;
-  private int frameIndex;
-  private int eyesDifference;
+
+  public OpenCVData() {    
+  }
 
   public OpenCVData(String name, long frameStartTs, int frameIndex, Frame frame) {
     this.name = name;
@@ -148,6 +190,24 @@ public class OpenCVData implements Serializable {
     sources.put(String.format("%s.output.IplImage", name), firstImage);
 
   }
+  /**
+   * resource cleanup
+   */
+  public void dispose() {
+    for (Graphics2D g : g2ds.values()) {
+      g.dispose();
+    }
+  }
+  
+  
+  public IplImage get(String fullKey) {
+    return (IplImage) sources.get(fullKey);
+  }
+  
+
+  public List<Rectangle> getBoundingBoxArray() {
+    return (List) sources.get(String.format("%s.output.BoundingBoxArray", name));
+  }
 
   /**
    * Order of fetching a display try => displayFilterName try => output try =>
@@ -159,105 +219,17 @@ public class OpenCVData implements Serializable {
     return getBufferedImage(null);
   }
 
-  public Graphics2D getGraphics(String filterKey) {
-    if (g2ds.containsKey(filterKey)) {
-      return g2ds.get(filterKey);
-    } else {
-      Graphics2D graphics = getBufferedImage(filterKey).createGraphics();
-      g2ds.put(filterKey, graphics);
-      return graphics;
-    }
-  }
+  public BufferedImage getBufferedImage(String filterKey) {
+    // search through current sources
+    String key = String.format("%s.BufferedImage", getKeyPrefix(filterKey));
+    BufferedImage image = (BufferedImage) sources.get(key);
 
-  public Frame getInputFrame() {
-    return (Frame) sources.get(String.format("%s.input.Frame", name));
-  }
-
-  public IplImage getInputImage() {
-    return getImage("input");
-  }
-
-  public Mat getMat(String filterKey) {
-    String key = String.format("%s.%s.Mat", filterKey, name);
-    Mat image = null;
-    if (!sources.containsKey(key)) {
-      image = converterToMat.convert(getFrame(filterKey));
+    if (image != null) {
+      // 1st selected ? 2nd output ?
+      image = converterToJava.convert(converterToMat.convert(getImage(filterKey)));
       sources.put(key, image);
     }
-    return (Mat) sources.get(key);
-  }
-
-  public Frame getFrame() {
-    return getFrame(null);
-  }
-
-  public Frame getFrame(String filterKey) {
-    String key = String.format("%s.Frame", getKeyPrefix(filterKey));
-    return (Frame) sources.get(key);
-  }
-
-  public IplImage getImage() {
-    return getImage(null);
-  }
-
-  /**
-   * the generalized getImage returns the 'latest' output - if that does not
-   * exist it return the original input - most other type converters should use
-   * this method
-   * 
-   * @return
-   */
-  public IplImage getImage(String filterKey) {
-
-    // try cumulative output
-    String key = String.format("%s.IplImage", getKeyPrefix(filterKey));
-    if (sources.containsKey(key)) {
-      return (IplImage) sources.get(key);
-    }
-
-    IplImage image = null;
-    if (!sources.containsKey(key)) {
-      image = converterToMat.convertToIplImage(getFrame(filterKey));
-      sources.put(key, image);
-    }
-    return (IplImage) sources.get(key);
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public IplImage getOutputImage() {
-    return getImage("output");
-  }
-
-  /**
-   * resource cleanup
-   */
-  public void dispose() {
-    for (Graphics2D g : g2ds.values()) {
-      g.dispose();
-    }
-  }
-
-  public String writeDisplay() throws IOException {
-    return writeDisplay("OpenCV", "png");
-  }
-
-  public String writeDisplay(String dir, String format) throws IOException {
-    String filename = null;
-    if (dir == null) {
-      filename = String.format("%s-%05d.%s", name, frameIndex, format);
-    } else {
-      File parent = new File(dir);
-      parent.mkdirs();
-      filename = String.format("%s/%s-%05d.%s", dir, name, frameIndex, format);
-    }
-
-    FileOutputStream fos = new FileOutputStream(filename);
-    ImageIO.write(getDisplay(), format, fos);
-    fos.close();
-    return filename;
+    return (BufferedImage) sources.get(key);
   }
 
   /**
@@ -295,6 +267,124 @@ public class OpenCVData implements Serializable {
     return (BufferedImage) sources.get(key);
   }
 
+  public Frame getFrame() {
+    return getFrame(null);
+  }
+
+  public Frame getFrame(String filterKey) {
+    String key = String.format("%s.Frame", getKeyPrefix(filterKey));
+    return (Frame) sources.get(key);
+  }
+
+  public Object getFrameIndex() {
+    return frameIndex;
+  }
+
+  public Graphics2D getGraphics(String filterKey) {
+    if (g2ds.containsKey(filterKey)) {
+      return g2ds.get(filterKey);
+    } else {
+      Graphics2D graphics = getBufferedImage(filterKey).createGraphics();
+      g2ds.put(filterKey, graphics);
+      return graphics;
+    }
+  }
+
+  public IplImage getImage() {
+    return getImage(null);
+  }
+
+  /**
+   * the generalized getImage returns the 'latest' output - if that does not
+   * exist it return the original input - most other type converters should use
+   * this method
+   * 
+   * @return
+   */
+  public IplImage getImage(String filterKey) {
+
+    // try cumulative output
+    String key = String.format("%s.IplImage", getKeyPrefix(filterKey));
+    if (sources.containsKey(key)) {
+      return (IplImage) sources.get(key);
+    }
+
+    IplImage image = null;
+    if (!sources.containsKey(key)) {
+      image = converterToMat.convertToIplImage(getFrame(filterKey));
+      sources.put(key, image);
+    }
+    return (IplImage) sources.get(key);
+  }
+
+  public Frame getInputFrame() {
+    return (Frame) sources.get(String.format("%s.input.Frame", name));
+  }
+
+  public IplImage getInputImage() {
+    return getImage("input");
+  }
+
+  public String getKeyPrefix(String filterKey) {
+    if (filterKey == null && selectedFilter != null) {
+      filterKey = selectedFilter;
+    } else if (filterKey == null && selectedFilter == null) {
+      filterKey = "output";
+    }
+
+    return String.format("%s.%s", name, filterKey);
+  }
+
+  /**
+   * gets kinect depth image
+   * @return
+   */
+  public IplImage getKinectDepth() {
+    return (IplImage) sources.get(String.format("%s.depth", OpenCV.INPUT_KEY));
+  }
+
+  /**
+   * gets kinect rgb image
+   * @return
+   */
+  public IplImage getKinectVideo() {
+    return (IplImage) sources.get(String.format("%s.video", OpenCV.INPUT_KEY));
+  }
+
+  public Mat getMat(String filterKey) {
+    String key = String.format("%s.%s.Mat", filterKey, name);
+    Mat image = null;
+    if (!sources.containsKey(key)) {
+      image = converterToMat.convert(getFrame(filterKey));
+      sources.put(key, image);
+    }
+    return (Mat) sources.get(key);
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public IplImage getOutputImage() {
+    return getImage("output");
+  }
+
+  public List<Point2df> getPointArray() {
+    return (List) sources.get(String.format("%s.output.PointArray", name));
+  }
+
+  public String getSelectedFilter() {
+    return selectedFilter;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  public long getTs() {
+    return timestamp;
+  }
+
   /**
    * method called when a filter has finished processing
    * 
@@ -305,6 +395,11 @@ public class OpenCVData implements Serializable {
   public void postProcess(IplImage processedImage) {
     put(processedImage);
     filters.add(selectedFilter);
+  }
+
+  public void put(BufferedImage object) {
+    sources.put(String.format("%s.output.BufferedImage", name), object);
+    sources.put(String.format("%s.%s.BufferedImage", name, selectedFilter), object);
   }
 
   public void put(Graphics2D object) {
@@ -322,11 +417,6 @@ public class OpenCVData implements Serializable {
     sources.put(String.format("%s.%s.Mat", name, selectedFilter), object);
   }
 
-  public void put(BufferedImage object) {
-    sources.put(String.format("%s.output.BufferedImage", name), object);
-    sources.put(String.format("%s.%s.BufferedImage", name, selectedFilter), object);
-  }
-
   /**
    * This is the typical method filters will use to store their output, it has a
    * key with their filter's name and an "output" reference.
@@ -339,12 +429,41 @@ public class OpenCVData implements Serializable {
     sources.put(String.format("%s.%s.%s", name, selectedFilter, keyPart), object);
   }
 
-  public long getTs() {
-    return timestamp;
+  public void putBoundingBoxArray(ArrayList<Rectangle> bb) {
+    sources.put(String.format("%s.output.BoundingBoxArray", name), bb);
+  }
+
+  public void putDisplay(BufferedImage bi) {
+    sources.put(String.format("%s.BufferedImage", getKeyPrefix("output")), bi);
+  }
+
+  /**
+   * pushes a reference to both images from a kinect grabber
+   * default "input" image is depth - but both can be accessed from any filter
+   * 
+   * @param depth - depth image
+   * @param video - rgb image
+   */
+  public void putKinect(IplImage depth, IplImage video) {
+    sources.put(OpenCV.INPUT_KEY, depth);
+    sources.put(String.format("%s.depth", OpenCV.INPUT_KEY), depth);
+    sources.put(String.format("%s.video", OpenCV.INPUT_KEY), video);
+  }
+
+  public void setFrameIndex(int frameIndex) {
+    this.frameIndex = frameIndex;
+  }
+  
+  public void setName(String name) {
+    this.name = name;
   }
 
   public void setSelectedFilter(String selectedFilter) {
     this.selectedFilter = selectedFilter;
+  }
+
+  public void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
   }
 
   public String toString() {
@@ -390,119 +509,24 @@ public class OpenCVData implements Serializable {
     return sb.toString();
   }
 
-  public String getKeyPrefix(String filterKey) {
-    if (filterKey == null && selectedFilter != null) {
-      filterKey = selectedFilter;
-    } else if (filterKey == null && selectedFilter == null) {
-      filterKey = "output";
+  public String writeDisplay() throws IOException {
+    return writeDisplay("OpenCV", "png");
+  }
+
+  public String writeDisplay(String dir, String format) throws IOException {
+    String filename = null;
+    if (dir == null) {
+      filename = String.format("%s-%05d.%s", name, frameIndex, format);
+    } else {
+      File parent = new File(dir);
+      parent.mkdirs();
+      filename = String.format("%s/%s-%05d.%s", dir, name, frameIndex, format);
     }
 
-    return String.format("%s.%s", name, filterKey);
-  }
-
-  public BufferedImage getBufferedImage(String filterKey) {
-    // search through current sources
-    String key = String.format("%s.BufferedImage", getKeyPrefix(filterKey));
-    BufferedImage image = (BufferedImage) sources.get(key);
-
-    if (image != null) {
-      // 1st selected ? 2nd output ?
-      image = converterToJava.convert(converterToMat.convert(getImage(filterKey)));
-      sources.put(key, image);
-    }
-    return (BufferedImage) sources.get(key);
-  }
-
-  public static void main(String[] args) {
-    try {
-      LoggingFactory.init();
-      File f = new File("OpenCV/prpol-rerender2.avi");
-      log.info("{}", f.exists());
-      // TODO - test
-      FrameGrabber grabber = new FFmpegFrameGrabber(f);// OpenCVFrameGrabber.createDefault(f);
-
-      grabber.start();
-      Frame frame = grabber.grab();
-      OpenCVData data = new OpenCVData("cv", 1540660275000L, 0, frame);
-      BufferedImage img = data.getDisplay();
-
-      CanvasFrame cframe = new CanvasFrame("test");
-      cframe.showImage(frame);
-      // cframe.showImage(frame, true);
-
-      JFrame jframe = new JFrame();
-      ImageIcon icon = new ImageIcon(img);
-      JLabel label = new JLabel(icon, JLabel.CENTER);
-      JPanel jpanel = new JPanel();
-      jpanel.add(label);
-      jframe.setContentPane(jpanel);
-      jframe.pack();
-      jframe.setVisible(true);
-
-      grabber.close();
-
-      data.writeDisplay();
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
-  public void putDisplay(BufferedImage bi) {
-    sources.put(String.format("%s.BufferedImage", getKeyPrefix("output")), bi);
-  }
-
-  public String getSelectedFilter() {
-    return selectedFilter;
-  }
-
-  /**
-   * pushes a reference to both images from a kinect grabber
-   * default "input" image is depth - but both can be accessed from any filter
-   * 
-   * @param depth - depth image
-   * @param video - rgb image
-   */
-  public void putKinect(IplImage depth, IplImage video) {
-    sources.put(OpenCV.INPUT_KEY, depth);
-    sources.put(String.format("%s.depth", OpenCV.INPUT_KEY), depth);
-    sources.put(String.format("%s.video", OpenCV.INPUT_KEY), video);
-  }
-
-  /**
-   * gets kinect depth image
-   * @return
-   */
-  public IplImage getKinectDepth() {
-    return (IplImage) sources.get(String.format("%s.depth", OpenCV.INPUT_KEY));
-  }
-  
-  /**
-   * gets kinect rgb image
-   * @return
-   */
-  public IplImage getKinectVideo() {
-    return (IplImage) sources.get(String.format("%s.video", OpenCV.INPUT_KEY));
-  }
-
-  public Object getFrameIndex() {
-    return frameIndex;
-  }
-
-  public List<Rectangle> getBoundingBoxArray() {
-    return (List) sources.get(String.format("%s.output.BoundingBoxArray", name));
-  }
-
-  public void putBoundingBoxArray(ArrayList<Rectangle> bb) {
-    sources.put(String.format("%s.output.BoundingBoxArray", name), bb);
-  }
-
-  public IplImage get(String fullKey) {
-    return (IplImage) sources.get(fullKey);
-  }
-
-  public List<Point2Df> getPointArray() {
-    return (List) sources.get(String.format("%s.output.PointArray", name));
+    FileOutputStream fos = new FileOutputStream(filename);
+    ImageIO.write(getDisplay(), format, fos);
+    fos.close();
+    return filename;
   }
 
 }

@@ -52,9 +52,11 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
 import static org.bytedeco.javacpp.opencv_imgproc.cvPyrDown;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.Loader;
@@ -75,52 +77,8 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepthMask.class);
-
-  transient IplImage kinectDepth = null;
-  transient IplImage ktemp = null;
-  transient IplImage ktemp2 = null;
-  transient IplImage black = null;
-  transient IplImage itemp = null;
-  transient IplImage itemp2 = null;
-  transient IplImage gray = null;
-  transient IplImage mask = null;
-
-  // Make memory - do not optimize - will only lead to bugs
-  // the correct optimization would be NOT TO PUBLISH
-  // public ArrayList<KinectImageNode> nodes = new
-  // ArrayList<KinectImageNode>();
-  public ArrayList<KinectImageNode> nodes = null;
-
-  String imageKey = "kinectDepth";
-
-  int mWidth = 0;
-  int mHeight = 0;
-  int mX = 0;
-  int mY = 0;
-
-  int scale = 2;
-
-  // countours
-  CvSeq contourPointer = new CvSeq();
-
-  int minArea = 30;
-  int maxArea = 0;
-  boolean isMinArea = true;
-  boolean isMaxArea = true;
-
-  public boolean drawBoundingBoxes = false;
-  public boolean publishNodes = false;
-
-  transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
-
-  // cvDrawRect has to have 2 points - no cvDrawRect can't draw a cvRect ???
-  // http://code.google.com/p/opencvx/ - apparently - I'm not the only one who
-  // thinks this is silly
-  // http://opencvx.googlecode.com/svn/trunk/cvdrawrectangle.h
-  transient CvMemStorage cvStorage = null;
-
-  transient CvPoint p0 = cvPoint(0, 0);
-  transient CvPoint p1 = cvPoint(0, 0);
+  
+  IplImage mask = null;
 
   public OpenCVFilterKinectDepthMask(String name) {
     super(name);
@@ -131,182 +89,96 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image) throws InterruptedException {
-
-    /*
-     * 
-     * 0 - is about 23 " 30000 - is about 6' There is a blackzone in between -
-     * (sign issue?)
-     * 
-     * CvScalar min = cvScalar( 30000, 0.0, 0.0, 0.0); CvScalar max =
-     * cvScalar(100000, 0.0, 0.0, 0.0);
-     */
-    if (cvStorage == null) {
-      cvStorage = cvCreateMemStorage(0);
+  public IplImage process(IplImage image) {
+    // verify we can get a kinect depth
+    IplImage kinectDepth = data.getKinectDepth();
+    if (kinectDepth == null) {
+      return image;
     }
 
-    // TODO - clean up - remove input parameters? only use storage?
-    if (imageKey != null) {
-      // TODO: validate what this is doing?
-      kinectDepth = data.getKinectDepth();
-    } else {
-      kinectDepth = image;
-    }
+    // create mask based on desired depth
+    IplImage mask = getDepthMask(480, 500, kinectDepth, image);
+    return mask;
 
-    // cv Pyramid Down
+  }
 
-    if (mask == null) // || image.width() != mask.width()
+  // consider parallel looping ...
+  // http://bytedeco.org/news/2014/12/23/third-release/
+
+  private IplImage getDepthMask(int minDepth, int maxDepth, IplImage depth, IplImage video) {
+
+    if (video == null) 
     {
-      mask = cvCreateImage(cvSize(kinectDepth.width() / scale, kinectDepth.height() / scale), 8, 1);
-      ktemp = cvCreateImage(cvSize(kinectDepth.width() / scale, kinectDepth.height() / scale), 16, 1);
-      ktemp2 = cvCreateImage(cvSize(kinectDepth.width() / scale, kinectDepth.height() / scale), 8, 1);
-      black = cvCreateImage(cvSize(kinectDepth.width() / scale, kinectDepth.height() / scale), 8, 1);
-      itemp = cvCreateImage(cvSize(kinectDepth.width() / scale, kinectDepth.height() / scale), 8, 3);
-      itemp2 = cvCreateImage(cvSize(kinectDepth.width() / scale, kinectDepth.height() / scale), 8, 3);
-      gray = cvCreateImage(cvSize(kinectDepth.width() / scale, kinectDepth.height() / scale), 8, 1);
-    }
-    cvZero(black);
-    cvZero(mask);
-    cvZero(itemp2);
-
-    cvPyrDown(image, itemp, 7);
-    cvPyrDown(kinectDepth, ktemp, 7);
-
-    // cvReshape(arg0, arg1, arg2, arg3);
-    // cvConvertScale(ktemp, ktemp2, 0.009, 0);
-
-    CvScalar min = cvScalar(0, 0.0, 0.0, 0.0);
-    // CvScalar max = cvScalar(30000, 0.0, 0.0, 0.0);
-    CvScalar max = cvScalar(10000, 0.0, 0.0, 0.0);
-
-    cvInRangeS(ktemp, min, max, mask);
-
-    int offsetX = 0;
-    int offsetY = 0;
-    mWidth = 607 / scale - offsetX;
-    mHeight = 460 / scale - offsetY;
-    mX = 25 / scale + offsetX;
-    mY = 20 / scale + offsetY;
-
-    // shifting mask 32 down and to the left 25 x 25 y
-    cvSetImageROI(mask, cvRect(mX, 0, mWidth, mHeight)); // 615-8 = to
-    // remove right
-    // hand band
-    cvSetImageROI(black, cvRect(0, mY, mWidth, mHeight));
-    cvCopy(mask, black);
-    cvResetImageROI(mask);
-    cvResetImageROI(black);
-    cvCopy(itemp, itemp2, black);
-
-    invoke("publishDisplay", "input", OpenCV.toBufferedImage(itemp));
-    invoke("publishDisplay", "kinectDepth", OpenCV.toBufferedImage(ktemp));
-    invoke("publishDisplay", "kinectMask", OpenCV.toBufferedImage(mask));
-
-    // TODO - publish KinectImageNode ArrayList
-    // find contours ---- begin ------------------------------------
-    CvSeq contour = contourPointer;
-    // int cnt = 0;
-
-    // cvFindContours(mask, cvStorage, contourPointer,
-    // Loader.sizeof(CvContour.class), 0 ,CV_CHAIN_APPROX_SIMPLE); NOT
-    // CORRECTED
-    if (itemp2.nChannels() == 3) {
-      cvCvtColor(itemp2, gray, CV_BGR2GRAY);
-    } else {
-      gray = itemp2.clone();
+      // create a 1 channel mask
+      video = cvCreateImage(cvSize(depth.width(), depth.height()), 8, 1);
     }
 
-    cvFindContours(gray, cvStorage, contourPointer, Loader.sizeof(CvContour.class), 0, CV_CHAIN_APPROX_SIMPLE);
+    ByteBuffer maskBuffer = video.getByteBuffer();
+    // it may be deprecated but the "new" function .asByteBuffer() does not
+    // return all data
+    ByteBuffer depthBuffer = depth.getByteBuffer();
 
-    // new cvFindContours(gray, storage, contourPointer,
-    // Loader.sizeof(CvContour.class), CV_RETR_LIST,
-    // CV_CHAIN_APPROX_SIMPLE);
-    // old cvFindContours(gray, storage, contourPointer, sizeofCvContour, 0
-    // ,CV_CHAIN_APPROX_SIMPLE);
+    int depthBytesPerChannel = depth.depth() / 8;
 
-    // log.error("getStructure");
+    // iterate through the depth bytes bytes and convert to HSV / RGB format
+    // map depth gray (0,65535) => 3 x (0,255) HSV :P
+    for (int y = 0; y < depth.height(); y++) { // 480
+      for (int x = 0; x < depth.width(); x++) { // 640
+        int depthIndex = y * depth.widthStep() + x * depth.nChannels() * depthBytesPerChannel;
+        int colorIndex = y * video.widthStep() + x * video.nChannels();
 
-    if (publishNodes) {
-      minArea = 1500;
-      nodes = new ArrayList<KinectImageNode>();
-      while (contour != null && !contour.isNull()) {
-        if (contour.elem_size() > 0) { // TODO - limit here for
-          // "TOOOO MANY !!!!"
+        // Used to read the pixel value - the 0xFF is needed to cast from
+        // an unsigned byte to an int.
+        // int value = depthBuffer.get(depthIndex);// << 8 & 0xFF +
+        // buffer.get(depthIndex+1)& 0xFF;
+        // this is 16 bit depth - I switched the MSB !!!!
+        int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
 
-          CvRect rect = cvBoundingRect(contour, 0);
-
-          // size filter
-          if (minArea > 0 && (rect.width() * rect.height()) < minArea) {
-            isMinArea = false;
+        minDepth = 6000;
+        maxDepth = 20000;
+                
+        
+        if (video.nChannels() == 3) {
+          /* do nothing
+          video.put(colorIndex, (byte) c.getBlue());
+          video.put(colorIndex + 1, (byte) c.getRed());
+          video.put(colorIndex + 2, (byte) c.getGreen());
+          */ 
+          if (value > minDepth && value < maxDepth) {
+            // maskBuffer.put(colorIndex, (byte) 255); - do nothing
+          } else {
+            // maskBuffer.put(colorIndex, (byte) 0);
+            maskBuffer.put(colorIndex, (byte) 0);
+            maskBuffer.put(colorIndex + 1, (byte) 0);
+            maskBuffer.put(colorIndex + 2, (byte) 0);
           }
-
-          if (maxArea > 0) {
-            isMaxArea = false;
+          
+        } else if (video.nChannels() == 1) {
+          
+          if (value > minDepth && value < maxDepth) {
+            maskBuffer.put(colorIndex, (byte) 255);
+          } else {
+            maskBuffer.put(colorIndex, (byte) 0);
           }
-
-          if (isMinArea && isMaxArea) {
-            CvSeq points = cvApproxPoly(contour, Loader.sizeof(CvContour.class), cvStorage, CV_POLY_APPROX_DP, cvContourPerimeter(contour) * 0.02, 1);
-            // FIXME - do the work of changing all data types so
-            // that the only
-            // published material is java.awt object no OpenCV
-            // objects
-            KinectImageNode node = new KinectImageNode();
-            // node.cameraFrame = image.getBufferedImage();
-            node.cvCameraFrame = itemp.clone(); // pyramid down
-            // version
-            node.cvBoundingBox = new CvRect(rect);
-            node.boundingBox = new Rectangle(rect.x(), rect.y(), rect.width(), rect.height());
-
-            // convert camera frame
-            // FIXME node.cameraFrame = OpenCV.publishFrame("",
-            // node.cvCameraFrame.getBufferedImage());
-
-            // cropped
-            cvSetImageROI(node.cvCameraFrame, node.cvBoundingBox);
-            node.cvCropped = cvCreateImage(cvSize(node.cvBoundingBox.width(), node.cvBoundingBox.height()), 8, 3);
-            cvCopy(node.cvCameraFrame, node.cvCropped);
-            cvResetImageROI(node.cvCameraFrame);
-            // FIXME node.cropped = OpenCV.publishFrame("",
-            // node.cvCropped.getBufferedImage());
-
-            log.error("{}", rect);
-            log.error("{}", node.cvBoundingBox);
-            log.error("{}", node.boundingBox);
-            nodes.add(node);
-
-            if (drawBoundingBoxes) {
-              cvPutText(itemp2, " " + points.total() + " " + (rect.x() + rect.width() / 2) + "," + (rect.y() + rect.height() / 2) + " " + rect.width() + "x" + rect.height() + "="
-                  + (rect.width() * rect.height()) + " " + " " + cvCheckContourConvexity(points), cvPoint(rect.x() + rect.width() / 2, rect.y()), font, CvScalar.WHITE);
-              p0.x(rect.x());
-              p0.y(rect.y());
-              p1.x(rect.x() + rect.width());
-              p1.y(rect.y() + rect.height());
-              cvDrawRect(itemp2, p0, p1, CvScalar.RED, 1, 8, 0);
-            }
-          }
-
-          isMinArea = true;
-          isMaxArea = true;
-
-          // ++cnt;
         }
-        contour = contour.h_next();
-      } // while (contour != null && !contour.isNull())
-      invoke("publish", (Object) nodes);
-    } // if (publishNodes)
 
-    cvClearMemStorage(cvStorage);
 
-    // find contours ---- end --------------------------------------
+        // Sets the pixel to a value (greyscale).
+        // maskBuffer.put(index, (byte)hsv);
 
-    return itemp2;
+        // Sets the pixel to a value (RGB, stored in BGR order).
+        // buffer.put(index, blue);
+        // buffer.put(index + 1, green);
+        // buffer.put(index + 2, red);
+      }
+    }
 
+    return video;
   }
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    // TODO Auto-generated method stub
-    return null;
+    return image;
   }
 
 }

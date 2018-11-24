@@ -31,7 +31,9 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -44,6 +46,7 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
 
   JCheckBox useDepth = new JCheckBox("Use depth ");
   JCheckBox useColor = new JCheckBox("Use color ");
+  JButton clearSamplePoints = new JButton("Clear Points");
 
   public OpenCVFilterKinectDepthGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
@@ -52,29 +55,38 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
     useColor.setSelected(true);
     enableListeners();
     display.setLayout(new BorderLayout());
-    display.add(useDepth, BorderLayout.CENTER);
-    display.add(useColor, BorderLayout.SOUTH);
+    JPanel f = new JPanel();
+    f.add(useDepth);
+    f.add(useColor);
+    display.add(f, BorderLayout.CENTER);
+    display.add(clearSamplePoints, BorderLayout.SOUTH);
+    clearSamplePoints.addActionListener(this);
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     Object o = e.getSource();
-    OpenCVFilterKinectDepth myfilter = (OpenCVFilterKinectDepth) boundFilter.filter;
+    OpenCVFilterKinectDepth filter = (OpenCVFilterKinectDepth) boundFilter.filter;
     if (o == useDepth) {
       if (useDepth.isSelected()) {
-        myfilter.useDepth(true);
+        filter.useDepth(true);
       } else {
-        myfilter.useDepth(false);
+        filter.useDepth(false);
       }
     }
     
     if (o == useColor) {
       if (useColor.isSelected()) {
-        myfilter.useColor(true);
+        filter.useColor(true);
       } else {
-        myfilter.useColor(false);
+        filter.useColor(false);
       }
     }
+    
+    if (o == clearSamplePoints) {
+      filter.clearSamplePoints();
+    }
+    
     // send the updated filter to OpenCV service
     myGui.send(boundServiceName, "setFilterState", boundFilter);
   }

@@ -117,7 +117,7 @@ public class TrackingGui extends ServiceGui {
       public void run() {
 
         cnt.setText(String.format("%d ", tracker.cnt));
-        latency.setText(String.format("%d ms", tracker.latency));
+        // latency.setText(String.format("%d ms", tracker.latency));
       }
     });
   }

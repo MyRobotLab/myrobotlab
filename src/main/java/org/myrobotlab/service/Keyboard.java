@@ -14,7 +14,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 /**
@@ -35,7 +35,7 @@ public class Keyboard extends Service {
   transient MouseEvent mouseEvent = new MouseEvent();
   
   static public class MouseEvent {
-    public Point2Df pos = new Point2Df();
+    public Point2df pos = new Point2df();
   }
 
   public class NativeKeyboard implements NativeKeyListener, NativeMouseInputListener, NativeMouseWheelListener {
