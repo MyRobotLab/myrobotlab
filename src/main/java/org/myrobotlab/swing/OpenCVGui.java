@@ -270,7 +270,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       }
       send("setGrabberType", grabberTypeSelect.getSelectedItem());      
     } else if (o == recordFrameButton) {
-      send("recordSingleFrame");
+      send("recordFrame");
     } else if (o == undock) {
       if (undock.isSelected()) {
         if (cframe != null) {
