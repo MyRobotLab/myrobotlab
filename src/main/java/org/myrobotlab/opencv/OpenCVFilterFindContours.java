@@ -61,7 +61,7 @@ import org.bytedeco.javacpp.opencv_core.CvSeq;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 //import static org.bytedeco.javacpp.opencv_core.cvFont;

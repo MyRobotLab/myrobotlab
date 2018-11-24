@@ -45,7 +45,7 @@ import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 import com.sun.jna.ptr.IntByReference;
@@ -80,7 +80,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
   // Free parameter of Harris detector; used only if useHarris != 0
   public double k = 0.0;
 
-  public Point2Df oldest = new Point2Df();
+  public Point2df oldest = new Point2df();
 
   public HashMap<String, Integer> stableIterations;
 
@@ -190,7 +190,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
     cvGoodFeaturesToTrack(grey, eig, temp, corners, countPointer, qualityLevel, minDistance, mask, blockSize, useHarris, k);
 
     // FIXME - another sad data conversion :(
-    ArrayList<Point2Df> points = new ArrayList<Point2Df>();
+    ArrayList<Point2df> points = new ArrayList<Point2df>();
     Float value = null;
     int x, y;
     for (int i = 0; i < count[0]; ++i) {
@@ -212,9 +212,9 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
         values.put(key, value);
       }
 
-      Point2Df np = null;
+      Point2df np = null;
 
-      np = new Point2Df(x, y, value);
+      np = new Point2df(x, y, value);
 
       if (np.value > oldest.value) {
         oldest = np;

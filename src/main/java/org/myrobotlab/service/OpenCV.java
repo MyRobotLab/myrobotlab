@@ -73,6 +73,7 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_imgproc.CvFont;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameGrabber.ImageMode;
 import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
@@ -88,11 +89,12 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -164,11 +166,12 @@ public class OpenCV extends AbstractVideoSource {
           }
           lock.notifyAll();
         }
+        
         while (capturing) {
           Frame newFrame = null;
 
-          if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames == 1 && frameIndex < 1) || grabberType.startsWith("OpenKinect")) {
-            // grab a single frame - never grab again
+          // if the 
+          if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames == 1 && frameIndex < 1) || inputSource.equals(INPUT_SOURCE_CAMERA)) {            
             newFrame = grabber.grab();
           }
 
@@ -180,8 +183,23 @@ public class OpenCV extends AbstractVideoSource {
             error("could not get valid frame");
             stopCapture();
           }
+          
+          frameStartTs = System.currentTimeMillis();
+          ++frameIndex;
+          
+          data = new OpenCVData(getName(), frameStartTs, frameIndex, newFrame);
+          
 
-          processVideo(newFrame);
+          if (grabber.getClass().equals(OpenKinectFrameGrabber.class)) {
+            // by default this framegrabber returns video 
+            // getGrabber will set the format to "depth" - which will grab depth by default
+            // here we need ot add the video
+            
+            IplImage video = ((OpenKinectFrameGrabber)grabber).grabVideo();
+            data.putKinect(toImage(newFrame), video);
+          }
+          
+          processVideo(data);
 
           if (lengthInFrames > 1 && loop && frameIndex > lengthInFrames - 2) {
             grabber.setFrameNumber(0);
@@ -244,11 +262,11 @@ public class OpenCV extends AbstractVideoSource {
   public static final String OUTPUT_KEY = "output";
   transient final static public String PART = "part";
 
-  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "BoundingBoxToFile", "And", "Canny", "ColorTrack", "Copy", "CreateHistogram",
-      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "Fauvist", "FindContours", "Flip", "FloodFill",
-      "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectInterleave",
-      "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize",
-      "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
+      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
+      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate",
+      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "OpticalFlow", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray",
+      "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
 
   static final long serialVersionUID = 1L;
 
@@ -440,8 +458,15 @@ public class OpenCV extends AbstractVideoSource {
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    cv.setGrabberType("OpenKinect");
+   
 
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    
+    OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
+    cv.addFilter(depth);
+    cv.capture();
+    
 
     boolean done = true;
     if (done) {
@@ -565,24 +590,28 @@ public class OpenCV extends AbstractVideoSource {
     Java2DFrameConverter jconverter = new Java2DFrameConverter();
     return converterToImage.convert(jconverter.convert(src));
   }
+
   static public IplImage toImage(Frame image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     return converterToImage.convertToIplImage(image);
   }
+
   static public IplImage toImage(Mat image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
     return converterToImage.convert(converterToMat.convert(image));
   }
+
   static public Mat toMat(Frame image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
     return converterToImage.convertToMat(image);
   }
+
   static public Mat toMat(IplImage image) {
     OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
     return converterToMat.convert(converterToMat.convert(image));
   }
-  
+
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
 
   transient BlockingQueue<OpenCVData> blockingData = new LinkedBlockingQueue<>();
@@ -946,6 +975,15 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     grabber = newGrabber;
+    
+    if (grabber.getClass().equals(OpenKinectFrameGrabber.class)) {
+      OpenKinectFrameGrabber g = (OpenKinectFrameGrabber)grabber;
+      //g.setImageMode(ImageMode.COLOR); - this still gives grey - but 3 channels of 16 bit :P
+      g.setImageMode(ImageMode.GRAY); // gray is 1 channel 16 bit
+      // g.setFormat("depth");
+      format = "depth";
+    }
+    
 
     if (format != null) {
       grabber.setFormat(format);
@@ -1118,12 +1156,9 @@ public class OpenCV extends AbstractVideoSource {
     }
   }
 
-  private void processVideo(Frame frame) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
+  private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
 
-    frameStartTs = System.currentTimeMillis();
-    ++frameIndex;
 
-    data = new OpenCVData(getName(), frameStartTs, frameIndex, frame);
     // process each filter
     // for (String filterName : filters.keySet()) {
     for (OpenCVFilter filter : filters.values()) {
@@ -1231,7 +1266,7 @@ public class OpenCV extends AbstractVideoSource {
     return data;
   }
 
-  public Point2Df publish(Point2Df point) {
+  public Point2df publish(Point2df point) {
     return point;
   }
 
@@ -1626,11 +1661,24 @@ public class OpenCV extends AbstractVideoSource {
     stopCapture();
   }
   
+  public void setFormat(String format) {
+    this.format = format;
+    if (grabber != null) {
+      grabber.setFormat(format);
+    }
+  }
+
+  public String getFormat() {
+    if (grabber != null) {
+      format = grabber.getFormat();
+    }
+    return format;
+  }
+  
   public boolean undockDisplay(boolean b) {
     undockDisplay = b;
     broadcastState();
     return b;
   }
-
 
 }
