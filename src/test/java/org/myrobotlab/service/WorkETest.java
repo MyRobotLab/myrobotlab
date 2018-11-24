@@ -61,7 +61,7 @@ public class WorkETest {
     // e.g. - worke.setAxisLeft("zz");
    
     // virtualize for unit testing
-    uart = worke.virtualize();
+    // uart = worke.virtualize(); FIXME
 
     // start the services
     worke.startService();
