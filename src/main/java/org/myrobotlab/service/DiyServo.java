@@ -585,6 +585,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
     // if (isEventsEnabled) {
     // update others of our position change
+    invoke("publishMoveTo", this);
     invoke("publishServoEvent", targetOutput);
     // }
 
@@ -1250,7 +1251,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
+  @Override
+  public ServoControl publishMoveTo(ServoControl sc) {
+    return sc;
+  }
 
-
+  @Override
+  public Double getLastPos() {
+    return lastPos;
+  }
 
 }

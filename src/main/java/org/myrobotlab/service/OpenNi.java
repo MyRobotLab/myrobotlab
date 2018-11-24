@@ -134,7 +134,7 @@ public class OpenNi extends Service // implements
   private boolean initialized = false;
 
   transient Worker worker = null;
-  private boolean recordSingleFrame = false;
+  private boolean recordFrame = false;
 
   private boolean createHeader = true;
 
@@ -626,11 +626,11 @@ public class OpenNi extends Service // implements
 
     }
 
-    if (recordSingleFrame) {
-      addCSVDataFrame(skeleton, recordSingleFrame);
-      addRubySketchUpFrame(skeleton, recordSingleFrame);
+    if (recordFrame) {
+      addCSVDataFrame(skeleton, recordFrame);
+      addRubySketchUpFrame(skeleton, recordFrame);
       SerializableImage.writeToFile(frame, String.format("skeleton.%d.png", frameNumber));
-      recordSingleFrame = false;
+      recordFrame = false;
     }
 
   }
@@ -827,8 +827,8 @@ public class OpenNi extends Service // implements
   }
 
   // FIXME - doesnt currently work
-  public void recordSingleFrame() {
-    recordSingleFrame = true;
+  public void recordFrame() {
+    recordFrame = true;
   }
 
   public void registerDispose(SimpleOpenNI simpleOpenNI) {
@@ -946,7 +946,7 @@ public class OpenNi extends Service // implements
 
     OpenNi openni = (OpenNi) Runtime.createAndStart("openni", "OpenNi");
     openni.startUserTracking();
-    // openni.recordSingleFrame();
+    // openni.recordFrame();
     // openni.startHandTracking();
   }
 

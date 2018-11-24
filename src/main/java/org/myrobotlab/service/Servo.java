@@ -245,7 +245,7 @@ public class Servo extends Service implements ServoControl {
 
   double acceleration = -1;
 
-  double lastPos;
+  Double lastPos;
 
   @Deprecated
   private boolean autoEnable = true;
@@ -289,12 +289,23 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
-  public static class IKData {
+/*
+  public static class ServoEventData {
     public String name;
     public Double pos;
     public Integer state;
     public double velocity;
     public Double targetPos;
+    // public int type;
+  }
+*/
+ public static class ServoEventData {
+    public String name;
+    public Double pos;
+    public Integer state;
+    public double velocity;
+    public Double targetPos;
+    Servo src;
     // public int type;
   }
 
@@ -976,7 +987,7 @@ public class Servo extends Service implements ServoControl {
     return velocity;
   }
 
-  public IKData publishIKServoEvent(IKData data) {
+  public ServoEventData publishIKServoEvent(ServoEventData data) {
     return data;
   }
 
@@ -1267,7 +1278,7 @@ public class Servo extends Service implements ServoControl {
   public void onServoEvent(Integer eventType, double currentPos) {
     currentPosInput = mapper.calcInput(currentPos);
     if (isIKEventEnabled) {
-      IKData data = new IKData();
+      ServoEventData data = new ServoEventData();
       data.name = getName();
       data.pos = currentPosInput;
       data.state = eventType;
@@ -1515,6 +1526,18 @@ public class Servo extends Service implements ServoControl {
     if (!overrideAutoDisable) {
       delayDisable();
     }
+  }
+
+  @Override
+  public ServoControl publishMoveTo(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Double getLastPos() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

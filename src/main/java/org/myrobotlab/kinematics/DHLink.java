@@ -41,10 +41,10 @@ public class DHLink implements Serializable {
 
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
   
-  private double velocity;
-  private int state = Servo.SERVO_EVENT_STOPPED;
+  private double velocity; // FIXME - is this set by IK being dp/dt ? .. it should be
+  private int state = Servo.SERVO_EVENT_STOPPED; // FIXME - no servo info
   private double targetPos;
-  public boolean hasServo = false;
+  public boolean hasServo = false; // FIXME - no servo info
   public double servoMin;
   public double servoMax;
   private double currentPos = 0.0;

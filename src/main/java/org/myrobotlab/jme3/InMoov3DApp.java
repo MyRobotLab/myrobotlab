@@ -7,13 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.jme3.interfaces.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.Servo;
-import org.myrobotlab.service.Servo.IKData;
+import org.myrobotlab.service.Servo.ServoEventData;
 import org.python.jline.internal.Log;
 
 import com.jme3.app.SimpleApplication;
@@ -36,7 +35,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
-import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture2D;
 import com.jme3.ui.Picture;
 
@@ -45,7 +43,7 @@ import com.jme3.ui.Picture;
  */
 public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface {
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
-  private Queue<IKData> eventQueue = new ConcurrentLinkedQueue<IKData>();
+  private Queue<ServoEventData> eventQueue = new ConcurrentLinkedQueue<ServoEventData>();
   private transient HashMap<String, Node> servoToNode = new HashMap<String, Node>();
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
   private transient Service service = null;
@@ -609,7 +607,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
    *          : initial angle of rotation of the part (in radian)
    */
 
-  public void updatePosition(IKData event) {
+  public void updatePosition(ServoEventData event) {
     eventQueue.add(event);
   }
 
@@ -628,7 +626,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
 
     while (eventQueue.size() > 0) {
-      IKData event = eventQueue.remove();
+      ServoEventData event = eventQueue.remove();
       if (servoToNode.containsKey(event.name)) {
         Node node = servoToNode.get(event.name);
         Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));

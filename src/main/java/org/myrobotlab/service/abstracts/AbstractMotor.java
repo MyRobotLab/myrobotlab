@@ -67,7 +67,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   public final static Logger log = LoggerFactory.getLogger(AbstractMotor.class);
 
-  // my motor controller
+  // my motor controller - TODO support multiple controllers ??? would virtual benefit ?
   protected transient MotorController controller = null;
   /**
    * list of names of possible controllers

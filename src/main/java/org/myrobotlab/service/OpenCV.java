@@ -460,18 +460,20 @@ public class OpenCV extends AbstractVideoSource {
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     cv.setGrabberType("OpenKinect");
    
+    
+    //http://192.168.0.37/videostream.cgi
 
     // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    
+    boolean done = true;
+    if (done) {
+      return;
+    }
     
     OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
     cv.addFilter(depth);
     cv.capture();
     
-
-    boolean done = true;
-    if (done) {
-      return;
-    }
 
     OpenCVFilterYolo yolo = (OpenCVFilterYolo) cv.addFilter("yolo");
 
@@ -930,7 +932,7 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     String prefixPath;
-    if ("IPCamera".equals(grabberType) || "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType)
+    if (/*"IPCamera".equals(grabberType) ||*/ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType)
         || "MJpeg".equals(grabberType)) {
       prefixPath = "org.myrobotlab.opencv.";
     } else {

@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.jme3.interfaces.IntegratedMovementInterface;
-import org.myrobotlab.service.Servo.IKData;
+import org.myrobotlab.jme3.IntegratedMovementInterface;
+import org.myrobotlab.service.Servo.ServoEventData;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
@@ -36,7 +36,7 @@ import com.jme3.scene.shape.Cylinder;
  */
 public class TestJmeIMModel extends SimpleApplication implements IntegratedMovementInterface{
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
-  private Queue<IKData> eventQueue = new ConcurrentLinkedQueue<IKData>();
+  private Queue<ServoEventData> eventQueue = new ConcurrentLinkedQueue<ServoEventData>();
   private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
   private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
   private transient ArrayList<Node> collisionItems = new ArrayList<Node>();
@@ -143,7 +143,7 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
     nodeQueue.add(node);
   }
   
-  public void updatePosition(IKData event){
+  public void updatePosition(ServoEventData event){
     eventQueue.add(event) ;
   }
 
@@ -173,7 +173,7 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
       }
     }
     while (eventQueue.size() > 0) {
-      IKData event = eventQueue.remove();
+      ServoEventData event = eventQueue.remove();
       if (nodes.containsKey(event.name)){
         Node node = nodes.get(event.name);
         Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));

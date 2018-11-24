@@ -345,4 +345,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   boolean isAttached();
   
+  ServoControl publishMoveTo(ServoControl sc);
+
+  Double getLastPos();
+  
 }
