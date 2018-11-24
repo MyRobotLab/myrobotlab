@@ -26,7 +26,6 @@ import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -81,19 +80,8 @@ import org.slf4j.Logger;
  * 
  */
 public class OpenCVData implements Serializable {
-  transient static OpenCVFrameConverter.ToIplImage converterToIplImage = new OpenCVFrameConverter.ToIplImage();
-
-  transient static Java2DFrameConverter converterToJava = new Java2DFrameConverter();
-
-  /**
-   * serializable objects - these can be transported TODO - implement later...
-   */
-  // HashMap<String, Object> serializable = null;
-
-  /**
-   * the type converters from JavaCV
-   */
-  transient static OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+  
+   
   public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
   private static final long serialVersionUID = 1L;
 
@@ -182,7 +170,7 @@ public class OpenCVData implements Serializable {
     sources.put(String.format("%s.input.Frame", name), frame);
     sources.put(String.format("%s.output.Frame", name), frame);
 
-    IplImage firstImage = converterToIplImage.convertToIplImage(frame);
+    IplImage firstImage = OpenCV.toImage(frame);
     if (firstImage == null) {
       log.error("could not convert frame to image !!!!");
     }
@@ -226,7 +214,7 @@ public class OpenCVData implements Serializable {
 
     if (image != null) {
       // 1st selected ? 2nd output ?
-      image = converterToJava.convert(converterToMat.convert(getImage(filterKey)));
+      image = OpenCV.toBufferedImage(getImage(filterKey));
       sources.put(key, image);
     }
     return (BufferedImage) sources.get(key);
@@ -255,9 +243,9 @@ public class OpenCVData implements Serializable {
                                    // i guess"
       if (image != null) {
         // bi = converterToJava.convert(getInputFrame());
-        bi = converterToJava.convert(converterToMat.convert(image));
+        bi = OpenCV.toBufferedImage(image);
       } else {
-        bi = converterToJava.convert(getInputFrame()); // logic should probably
+        bi = OpenCV.toBufferedImage(getInputFrame()); // logic should probably
                                                        // not be buried down
       }
       // cache result
@@ -311,7 +299,7 @@ public class OpenCVData implements Serializable {
 
     IplImage image = null;
     if (!sources.containsKey(key)) {
-      image = converterToMat.convertToIplImage(getFrame(filterKey));
+      image = OpenCV.toImage(getFrame(filterKey));
       sources.put(key, image);
     }
     return (IplImage) sources.get(key);
@@ -355,7 +343,7 @@ public class OpenCVData implements Serializable {
     String key = String.format("%s.%s.Mat", filterKey, name);
     Mat image = null;
     if (!sources.containsKey(key)) {
-      image = converterToMat.convert(getFrame(filterKey));
+      image = OpenCV.toMat(getFrame(filterKey));
       sources.put(key, image);
     }
     return (Mat) sources.get(key);
