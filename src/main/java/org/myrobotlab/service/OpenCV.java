@@ -571,6 +571,11 @@ public class OpenCV extends AbstractVideoSource {
     Frame frame = grabberConverter.convert(src);
     return converter.getBufferedImage(frame, 1);
   }
+  
+  public static BufferedImage toBufferedImage(Frame inputFrame) {
+    Java2DFrameConverter converter = new Java2DFrameConverter();
+    return converter.getBufferedImage(inputFrame);
+  }
 
   static public Frame toFrame(IplImage image) {
     OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
@@ -1681,4 +1686,5 @@ public class OpenCV extends AbstractVideoSource {
     return b;
   }
 
+ 
 }
