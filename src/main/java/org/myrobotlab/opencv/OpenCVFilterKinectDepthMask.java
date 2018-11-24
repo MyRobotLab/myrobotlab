@@ -97,7 +97,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     }
 
     // create mask based on desired depth
-    IplImage mask = getDepthMask(480, 500, kinectDepth);
+    IplImage mask = getDepthMask(480, 500, kinectDepth, image);
     return mask;
 
   }
@@ -105,14 +105,15 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   // consider parallel looping ...
   // http://bytedeco.org/news/2014/12/23/third-release/
 
-  private IplImage getDepthMask(int minDepth, int maxDepth, IplImage depth) {
+  private IplImage getDepthMask(int minDepth, int maxDepth, IplImage depth, IplImage video) {
 
-    if (mask == null) // || image.width() != mask.width()
+    if (video == null) 
     {
-      mask = cvCreateImage(cvSize(depth.width(), depth.height()), 8, 1);
+      // create a 1 channel mask
+      video = cvCreateImage(cvSize(depth.width(), depth.height()), 8, 1);
     }
 
-    ByteBuffer maskBuffer = mask.getByteBuffer();
+    ByteBuffer maskBuffer = video.getByteBuffer();
     // it may be deprecated but the "new" function .asByteBuffer() does not
     // return all data
     ByteBuffer depthBuffer = depth.getByteBuffer();
@@ -124,7 +125,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     for (int y = 0; y < depth.height(); y++) { // 480
       for (int x = 0; x < depth.width(); x++) { // 640
         int depthIndex = y * depth.widthStep() + x * depth.nChannels() * depthBytesPerChannel;
-        int colorIndex = y * mask.widthStep() + x * mask.nChannels();
+        int colorIndex = y * video.widthStep() + x * video.nChannels();
 
         // Used to read the pixel value - the 0xFF is needed to cast from
         // an unsigned byte to an int.
@@ -133,11 +134,34 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
         // this is 16 bit depth - I switched the MSB !!!!
         int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
 
-        if (value > minDepth && value < maxDepth) {
-          maskBuffer.put(colorIndex, (byte) 255);
-        } else {
-          maskBuffer.put(colorIndex, (byte) 0);
+        minDepth = 6000;
+        maxDepth = 20000;
+                
+        
+        if (video.nChannels() == 3) {
+          /* do nothing
+          video.put(colorIndex, (byte) c.getBlue());
+          video.put(colorIndex + 1, (byte) c.getRed());
+          video.put(colorIndex + 2, (byte) c.getGreen());
+          */ 
+          if (value > minDepth && value < maxDepth) {
+            // maskBuffer.put(colorIndex, (byte) 255); - do nothing
+          } else {
+            // maskBuffer.put(colorIndex, (byte) 0);
+            maskBuffer.put(colorIndex, (byte) 0);
+            maskBuffer.put(colorIndex + 1, (byte) 0);
+            maskBuffer.put(colorIndex + 2, (byte) 0);
+          }
+          
+        } else if (video.nChannels() == 1) {
+          
+          if (value > minDepth && value < maxDepth) {
+            maskBuffer.put(colorIndex, (byte) 255);
+          } else {
+            maskBuffer.put(colorIndex, (byte) 0);
+          }
         }
+
 
         // Sets the pixel to a value (greyscale).
         // maskBuffer.put(index, (byte)hsv);
@@ -149,7 +173,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
       }
     }
 
-    return mask;
+    return video;
   }
 
   @Override

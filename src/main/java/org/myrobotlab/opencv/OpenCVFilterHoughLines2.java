@@ -61,7 +61,6 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
   double lowThreshold = 0.0;
   double highThreshold = 50.0;
   int apertureSize = 5;
-  // CvMemStorage storage = null;
   Pointer storage = null;
   transient IplImage inlines = null;
 
@@ -71,18 +70,12 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 
   CvPoint p1 = cvPoint(0, 0);
 
-  public OpenCVFilterHoughLines2() {
-    super();
-  }
-
   public OpenCVFilterHoughLines2(String name) {
     super(name);
   }
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -97,7 +90,6 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
     }
 
     if (storage == null) {
-      // storage = cvCreateMemStorage(0);
       storage = CvMemStorage.create();
     }
 

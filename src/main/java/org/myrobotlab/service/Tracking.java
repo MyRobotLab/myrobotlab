@@ -50,7 +50,7 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Point2Df;
+import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
@@ -127,10 +127,10 @@ public class Tracking extends Service {
   // statistics
   public int updateModulus = 1;
   public long cnt = 0;
-  public long latency = 0;
+  // public long latencyx = 0;
 
   // MRL points
-  public Point2Df lastPoint = new Point2Df();
+  public Point2df lastPoint = new Point2df();
 
   public String LKOpticalTrackFilterName;
 
@@ -437,7 +437,7 @@ public class Tracking extends Service {
       case STATE_LK_TRACKING_POINT:
         // extract tracking info
         // data.setSelectedFilterName(LKOpticalTrackFilterName);
-        List<Point2Df> targetPoint = data.getPointArray();
+        List<Point2df> targetPoint = data.getPointArray();
         if (targetPoint != null && targetPoint.size() > 0) {
           updateTrackingPoint(targetPoint.get(0));
         }
@@ -548,12 +548,12 @@ public class Tracking extends Service {
   // FIXME - this is WAY TO OPENCV specific !
   // OpenCV should have a publishTrackingPoint method !
   // This should be updateTrackingPoint(Point2Df) & perhaps Point3Df :)
-  final public void updateTrackingPoint(Point2Df targetPoint) {
+  final public void updateTrackingPoint(Point2df targetPoint) {
 
     ++cnt;
 
     // describe this time delta
-    latency = System.currentTimeMillis() - targetPoint.timestamp;
+    //latency = System.currentTimeMillis() - targetPoint.timestamp;
     log.info("Update Tracking Point {}", targetPoint);
 
     // pid.setInput("x", targetPoint.x);
