@@ -1,14 +1,14 @@
 /**
  * 
  */
-package org.myrobotlab.jme3.interfaces;
+package org.myrobotlab.jme3;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.service.Servo.IKData;
+import org.myrobotlab.service.Servo.ServoEventData;
 
 import com.jme3.system.AppSettings;
 
@@ -17,7 +17,7 @@ import com.jme3.system.AppSettings;
  *
  */
 public interface IntegratedMovementInterface {
-  public void updatePosition(IKData event);
+  public void updatePosition(ServoEventData event);
   public void setService(Service service);
   public void addObject(CollisionItem item);
   public void addObject(ConcurrentHashMap<String, CollisionItem> items);

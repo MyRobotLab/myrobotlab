@@ -3,8 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +21,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.Servo.IKData;
+import org.myrobotlab.service.Servo.ServoEventData;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -2178,7 +2176,7 @@ public class InMoov extends Service {
     return vinMoovApp;
   }
 
-  public void onIKServoEvent(IKData data) {
+  public void onIKServoEvent(ServoEventData data) {
     if (vinMoovApp != null) {
       vinMoovApp.updatePosition(data);
     }
