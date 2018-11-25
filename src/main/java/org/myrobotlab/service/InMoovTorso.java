@@ -8,6 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
@@ -24,7 +25,7 @@ public class InMoovTorso extends Service {
   transient public Servo topStom;
   transient public Servo midStom;
   transient public Servo lowStom;
-  transient public Arduino arduino;
+  transient public ServoController arduino;
 
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -48,7 +49,7 @@ public class InMoovTorso extends Service {
     topStom = (Servo) createPeer("topStom");
     midStom = (Servo) createPeer("midStom");
     lowStom = (Servo) createPeer("lowStom");
-    arduino = (Arduino) createPeer("arduino");
+    arduino = (ServoController) createPeer("arduino");
 
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
@@ -121,12 +122,15 @@ public class InMoovTorso extends Service {
       return false;
     }
 
+    /** FIXME - connections must be done externally - this
+     * needs to be a ServoController
     arduino.connect(port);
 
     if (!arduino.isConnected()) {
       error("arduino %s not connected", arduino.getName());
       return false;
     }
+    */
 
     topStom.attach(arduino, 27, topStom.getRest(), topStom.getVelocity());
     midStom.attach(arduino, 28, midStom.getRest(), midStom.getVelocity());
@@ -264,10 +268,12 @@ public class InMoovTorso extends Service {
     this.lowStom.setPin(lowStom);
     */
 	  
+    /** FIXME - has to be done outside of
 
 	    arduino.servoAttachPin(topStom, topStomPin);
 	    arduino.servoAttachPin(topStom, midStomPin);
 	    arduino.servoAttachPin(topStom, lowStomPin);
+	    */
   }
 
   @Deprecated
@@ -289,7 +295,8 @@ public class InMoovTorso extends Service {
     topStom.startService();
     midStom.startService();
     lowStom.startService();
-    arduino.startService();
+    // arduino.startService();
+    arduino = (ServoController)startPeer("arduino");
   }
 
   public void test() {
@@ -298,13 +305,17 @@ public class InMoovTorso extends Service {
       error("arduino is null");
     }
 
+    /* FIXME -  connections need to be outside ..
+     * this must be a ServoController 
     if (!arduino.isConnected()) {
       error("arduino not connected");
     }
+    */
 
     topStom.moveTo(topStom.getPos() + 2);
     midStom.moveTo(midStom.getPos() + 2);
     lowStom.moveTo(lowStom.getPos() + 2);
+
 
     moveTo(35.0, 45.0, 55.0);
     String move = getScript("i01");

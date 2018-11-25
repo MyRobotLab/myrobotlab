@@ -12,6 +12,7 @@ import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
@@ -33,7 +34,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   transient public Servo rotate;
   transient public Servo shoulder;
   transient public Servo omoplate;
-  transient public Arduino arduino;
+  transient public ServoController arduino;
   String side;
 
   public InMoovArm(String n) throws Exception {
@@ -44,7 +45,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate = (Servo) createPeer("rotate");
     shoulder = (Servo) createPeer("shoulder");
     omoplate = (Servo) createPeer("omoplate");
-    arduino = (Arduino) createPeer("arduino");
+    arduino = (ServoController) createPeer("arduino");
 
     bicep.setMinMax(5, 90);
     rotate.setMinMax(40, 180);
@@ -121,12 +122,16 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       return false;
     }
 
-    arduino.connect(port);
+    // FIXME - these need ot be set "out" of InMoov !!
+    // arduino.connect(port);
 
+ // FIXME - these need ot be set "out" of InMoov !!
+    /*
     if (!arduino.isConnected()) {
       error("arduino %s not connected", arduino.getName());
       return false;
     }
+    */
     bicep.attach(arduino, 8, bicep.getRest(), bicep.getVelocity());
     rotate.attach(arduino, 9, rotate.getRest(), rotate.getVelocity());
     shoulder.attach(arduino, 10, shoulder.getRest(), shoulder.getVelocity());
@@ -175,7 +180,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     }
   }
 
-  public Arduino getArduino() {
+  public ServoController getArduino() {
     return arduino;
   }
 
@@ -291,7 +296,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return true;
   }
 
-  public void setArduino(Arduino arduino) {
+  public void setArduino(ServoController arduino) {
     this.arduino = arduino;
   }
 
@@ -351,16 +356,19 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.startService();
     shoulder.startService();
     omoplate.startService();
-    arduino.startService();
+    arduino = (ServoController)startPeer("arduino");
+    // arduino.startService();
   }
 
   public void test() {
     if (arduino == null) {
       error("arduino is null");
     }
+    /* FIXME - non ServoController methods must go - or I2C needs a connect(baseAddress, address) with overloaded connect("0x48-
     if (!arduino.isConnected()) {
       error("arduino not connected");
     }
+    */
     bicep.moveTo(bicep.getPos() + 2);
     rotate.moveTo(rotate.getPos() + 2);
     shoulder.moveTo(shoulder.getPos() + 2);

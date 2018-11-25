@@ -7,6 +7,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
@@ -26,7 +27,7 @@ public class InMoovHead extends Service {
   transient public Servo rothead;
   transient public Servo neck;
   transient public Servo rollNeck;
-  transient public Arduino arduino;
+  transient public ServoController arduino;
 
   public InMoovHead(String n) {
     super(n);
@@ -36,7 +37,7 @@ public class InMoovHead extends Service {
     rothead = (Servo) createPeer("rothead");
     neck = (Servo) createPeer("neck");
     rollNeck = (Servo) createPeer("rollNeck");
-    arduino = (Arduino) createPeer("arduino");
+    arduino = (ServoController) createPeer("arduino");
 
 
     neck.setMinMax(20, 160);
@@ -118,7 +119,7 @@ public class InMoovHead extends Service {
   }
   
   public boolean connect(String port,Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
-    arduino.connect(port);
+ // FIXME -  !!! =>  cannot do this "here" ??? arduino.connect(port);
     neck.attach(arduino, headYPin, neck.getRest(), neck.getVelocity());
     rothead.attach(arduino, headXPin, rothead.getRest(), rothead.getVelocity());
     jaw.attach(arduino, jawPin, jaw.getRest(), jaw.getVelocity());
@@ -435,7 +436,8 @@ public class InMoovHead extends Service {
   @Override
   public void startService() {
     super.startService();
-    arduino.startService();
+    // arduino.startService();
+    startPeer("arduino");
     jaw.startService();
     eyeX.startService();
     eyeY.startService();
@@ -455,9 +457,11 @@ public class InMoovHead extends Service {
       error("arduino is null");
     }
 
+ /* FIXME -  !!! =>  cannot do this "here" ??? 
     if (!arduino.isConnected()) {
       error("arduino not connected");
     }
+    */
 
     rothead.moveTo(rothead.getPos() + 2);
     neck.moveTo(neck.getPos() + 2);
