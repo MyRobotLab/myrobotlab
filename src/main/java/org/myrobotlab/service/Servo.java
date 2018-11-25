@@ -636,6 +636,7 @@ public class Servo extends Service implements ServoControl {
   public void startService() {
     super.startService();
     this.addServoEventListener(this);
+    load();
   }
 
   public void rest() {
@@ -1429,8 +1430,8 @@ public class Servo extends Service implements ServoControl {
       // servo.attach(arduino, 8);
       // servo.attach(
       /// servo.attach(adafruit16CServoDriver, 7);
-      servo.moveToBlocking(90);
-      servo.moveToBlocking(30);
+      //servo.moveToBlocking(90);
+      //servo.moveToBlocking(30);
 
       /// servo.enable(9);
       /// servo.moveToBlocking(90);

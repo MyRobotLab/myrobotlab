@@ -867,6 +867,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addCategory("ai","control");
     return meta;
   }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    load();
+  }
 
   public static void main(String s[]) throws IOException {
     try {

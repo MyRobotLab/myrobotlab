@@ -425,6 +425,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void startService() {
     super.startService();
+    load();
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");

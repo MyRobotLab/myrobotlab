@@ -248,7 +248,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        checkLogLevelForConsole();
+        if (visualDebug.isSelected()) {
+          checkLogLevelForConsole();
+        }
         try {
           responseKit.insertHTML(responseDoc, responseDoc.getLength(), "<b>" + userName.getText() + "</b>: " + text, 0, 0, null);
         } catch (Exception e) {
