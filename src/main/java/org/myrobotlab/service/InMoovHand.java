@@ -11,11 +11,12 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.interfaces.LeapDataListener;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
  * InMoovHand - The Hand sub service for the InMoov Robot. This service has 6
- * servos controlled by an arduino. thumb,index,majeure,ringFinger,pinky, and
+ * servos controlled by an ServoController. thumb,index,majeure,ringFinger,pinky, and
  * wrist
  * 
  * There is also leap motion support.
@@ -36,7 +37,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   transient public Servo ringFinger;
   transient public Servo pinky;
   transient public Servo wrist;
-  transient public Arduino arduino;
+  transient public ServoController arduino;
   private String side;
 
   public static void main(String[] args) {
@@ -47,9 +48,9 @@ public class InMoovHand extends Service implements LeapDataListener {
       InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
       i01.startRightHand("COM15");
 
-      Arduino arduino = (Arduino) Runtime.getService("i01.right");
-      arduino.pinMode(13, Arduino.OUTPUT);
-      arduino.digitalWrite(13, 1);
+      ServoController arduino = (ServoController) Runtime.getService("i01.right");
+      // arduino.pinMode(13, ServoController.OUTPUT);
+      // arduino.digitalWrite(13, 1);
 
       InMoovHand rightHand = new InMoovHand("r01");
       Runtime.createAndStart("gui", "SwingGui");
@@ -82,7 +83,8 @@ public class InMoovHand extends Service implements LeapDataListener {
     ringFinger = (Servo) createPeer("ringFinger");
     pinky = (Servo) createPeer("pinky");
     wrist = (Servo) createPeer("wrist");
-    arduino = (Arduino) createPeer("arduino");
+    // FIXME should interfaces be started here ?
+    arduino = (ServoController) createPeer("arduino");
 
     thumb.setRest(2);
     index.setRest(2);
@@ -160,12 +162,14 @@ public class InMoovHand extends Service implements LeapDataListener {
       return false;
     }
 
+    /** FIXME - need to connect outside ServoController does not have connect
     arduino.connect(port);
 
     if (!arduino.isConnected()) {
       error("arduino %s not connected", arduino.getName());
       return false;
     }
+    */
 
     thumb.attach(arduino, 2, thumb.getRest(), thumb.getVelocity());
     index.attach(arduino, 3, index.getRest(), index.getVelocity());
@@ -540,15 +544,16 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   @Override
-  public void startService() {
+  public void startService() { // FIXME - all are wrong they just should do startPeer
     super.startService();
+    thumb = (Servo)startPeer("thumb"); 
     thumb.startService();
     index.startService();
     majeure.startService();
     ringFinger.startService();
     pinky.startService();
     wrist.startService();
-    arduino.startService();
+    // arduino.startService();
   }
 
   public void stopLeapTracking() {
@@ -568,9 +573,11 @@ public class InMoovHand extends Service implements LeapDataListener {
       error("arduino is null");
     }
 
+    /** FIXME - need to connect outside ServoController does not have connect
     if (!arduino.isConnected()) {
       error("arduino not connected");
     }
+    */
 
     thumb.moveTo(thumb.getPos() + 2);
     index.moveTo(index.getPos() + 2);
