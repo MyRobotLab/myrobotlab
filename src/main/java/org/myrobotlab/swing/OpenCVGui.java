@@ -228,7 +228,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       } else {
         send("resumeCapture");
       }
-    } else if (o == cameraRadio) {
+    } else if (o == cameraIndex || o == cameraRadio) {
       send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA);
       send("setCameraIndex", cameraIndex.getSelectedItem());
       
@@ -348,6 +348,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     if (b) {
       // add listeners
       addFilterButton.addActionListener(this);
+      cameraIndex.addActionListener(this);
       cameraRadio.addActionListener(this);
       capture.addActionListener(this);
       pause.addActionListener(this);
@@ -362,6 +363,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     } else {
       // remove listeners
       addFilterButton.removeActionListener(this);
+      cameraIndex.removeActionListener(this);
       cameraRadio.removeActionListener(this);
       capture.removeActionListener(this);
       pause.removeActionListener(this);
