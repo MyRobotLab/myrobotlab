@@ -315,12 +315,16 @@ public class Servo extends Service implements ServoControl {
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
     
+    
     // here we define default values if not inside servo.json
     if (mapper == null) {
       mapper = new Mapper(0, 180, 0, 180);
     }
     if (rest == null) {
       rest = 90.0;
+    }
+    if (lastPos == null) {
+      lastPos = rest;
     }
     if (velocity == null) {
       velocity = -1.0;
@@ -512,6 +516,12 @@ public class Servo extends Service implements ServoControl {
     }
   }
 
+  public ServoEventData publishMoveTo() {
+    ServoEventData ret = new ServoEventData();
+    ret.src = this;
+    return ret;
+  }
+
   public synchronized void moveTo(double pos) {
     // breakMoveToBlocking=true;
     synchronized (moveToBlocked) {
@@ -528,7 +538,7 @@ public class Servo extends Service implements ServoControl {
     if (pos > mapper.getMaxX()) {
       pos = mapper.getMaxX();
     }
-
+    lastPos = targetPos;
     targetPos = pos;
 
     if (!isEnabled()) {
@@ -1530,14 +1540,13 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public ServoControl publishMoveTo(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
+    return sc;
   }
 
   @Override
   public Double getLastPos() {
-    // TODO Auto-generated method stub
-    return null;
+    return lastPos;
   }
+
 
 }
