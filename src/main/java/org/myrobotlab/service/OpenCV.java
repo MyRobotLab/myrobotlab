@@ -155,6 +155,7 @@ public class OpenCV extends AbstractVideoSource {
 
           lengthInFrames = grabber.getLengthInFrames();
           lengthInTime = grabber.getLengthInTime();
+          log.info("grabber {} started - length time {} length frames {}", grabberType, lengthInTime, lengthInFrames);
 
           // Wait for the Kinect to heat up.
           int loops = 0;
@@ -166,14 +167,15 @@ public class OpenCV extends AbstractVideoSource {
           }
           lock.notifyAll();
         }
-        
+
         while (capturing) {
           Frame newFrame = null;
 
-          // if the 
-          if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames == 1 && frameIndex < 1) || inputSource.equals(INPUT_SOURCE_CAMERA)) {            
-            newFrame = grabber.grab();
-          }
+          // if the
+          // if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames ==
+          // 1 && frameIndex < 1) || inputSource.equals(INPUT_SOURCE_CAMERA)) {
+          newFrame = grabber.grab();
+          // }
 
           if (newFrame != null) {
             lastFrame = newFrame;
@@ -183,22 +185,22 @@ public class OpenCV extends AbstractVideoSource {
             error("could not get valid frame");
             stopCapture();
           }
-          
+
           frameStartTs = System.currentTimeMillis();
           ++frameIndex;
-          
+
           data = new OpenCVData(getName(), frameStartTs, frameIndex, newFrame);
-          
 
           if (grabber.getClass().equals(OpenKinectFrameGrabber.class)) {
-            // by default this framegrabber returns video 
-            // getGrabber will set the format to "depth" - which will grab depth by default
+            // by default this framegrabber returns video
+            // getGrabber will set the format to "depth" - which will grab depth
+            // by default
             // here we need ot add the video
-            
-            IplImage video = ((OpenKinectFrameGrabber)grabber).grabVideo();
+
+            IplImage video = ((OpenKinectFrameGrabber) grabber).grabVideo();
             data.putKinect(toImage(newFrame), video);
           }
-          
+
           processVideo(data);
 
           if (lengthInFrames > 1 && loop && frameIndex > lengthInFrames - 2) {
@@ -281,6 +283,7 @@ public class OpenCV extends AbstractVideoSource {
         grabberTypes.add(fg);
       }
 
+      grabberTypes.add("ImageFile");
       grabberTypes.add("Pipeline"); // to/from another opencv service
       grabberTypes.add("Sarxos");
       grabberTypes.add("MJpeg");
@@ -453,27 +456,53 @@ public class OpenCV extends AbstractVideoSource {
     // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
     //
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
-    LoggingFactory.init("warn");
+    LoggingFactory.init("info");
 
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    cv.setGrabberType("OpenKinect");
-   
-    
-    //http://192.168.0.37/videostream.cgi
+    // cv.setGrabberType("OpenKinect");
 
-    // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    
+    // cv.setGrabberType("OpenCV");
+    /*
+     * OpenCVFilter yoloFilter = new
+     * OpenCVFilterYolo("yolo");//cv.addFilter("Yolo"); yoloFilter.disable();
+     * cv.addFilter(yoloFilter);
+     */
+    OpenCVFilter yoloFilter = cv.addFilter("yolo");
+
+    yoloFilter.disable();
+    cv.capture();
+    yoloFilter.enable();
+    yoloFilter.disable();
+    yoloFilter.enable();
+    yoloFilter.disable();
+    yoloFilter.enable();
+
     boolean done = true;
     if (done) {
       return;
     }
-    
+
+    // http://192.168.0.37/videostream.cgi
+    cv.reset();
+
+    // directory test
+    cv.setGrabberType("ImageFile");
+    cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
+
+    // directory test
+    cv.capture("src/test/resources/OpenCV");
+
+    // single file test
+    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+
+    // mp4 test
+    cv.capture("src/test/resources/OpenCV/monkeyFace.mp4");
+
     OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
     cv.addFilter(depth);
     cv.capture();
-    
 
     OpenCVFilterYolo yolo = (OpenCVFilterYolo) cv.addFilter("yolo");
 
@@ -565,6 +594,18 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
+   * resets all the input specific settings
+   */
+  public void reset() {
+    stopCapture();
+    setGrabberType(null);
+    setInputSource(null);
+    setInputFileName(null);
+    lastFrame = null;
+    blockingData.clear();
+  }
+
+  /**
    * converting IplImages to BufferedImages
    */
   static public BufferedImage toBufferedImage(IplImage src) {
@@ -573,7 +614,7 @@ public class OpenCV extends AbstractVideoSource {
     Frame frame = grabberConverter.convert(src);
     return converter.getBufferedImage(frame, 1);
   }
-  
+
   public static BufferedImage toBufferedImage(Frame inputFrame) {
     Java2DFrameConverter converter = new Java2DFrameConverter();
     return converter.getBufferedImage(inputFrame);
@@ -907,6 +948,16 @@ public class OpenCV extends AbstractVideoSource {
 
     String newGrabberType = null;
 
+    // if grabber type != null && input source == null
+    // choose the apprpriate input source (best guess)
+    if (grabberType != null && inputSource == null) {
+      if (grabberType.equals("FFmpeg") || grabberType.equals("ImageFile")) {
+        inputSource = INPUT_SOURCE_FILE;
+      } else {
+        inputSource = INPUT_SOURCE_CAMERA;
+      }
+    }
+
     if (inputSource == null) {
       inputSource = INPUT_SOURCE_CAMERA;
     }
@@ -932,7 +983,7 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     String prefixPath;
-    if (/*"IPCamera".equals(grabberType) ||*/ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType)
+    if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "SlideShow".equals(grabberType) || "Sarxos".equals(grabberType)
         || "MJpeg".equals(grabberType)) {
       prefixPath = "org.myrobotlab.opencv.";
     } else {
@@ -982,15 +1033,15 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     grabber = newGrabber;
-    
+
     if (grabber.getClass().equals(OpenKinectFrameGrabber.class)) {
-      OpenKinectFrameGrabber g = (OpenKinectFrameGrabber)grabber;
-      //g.setImageMode(ImageMode.COLOR); - this still gives grey - but 3 channels of 16 bit :P
+      OpenKinectFrameGrabber g = (OpenKinectFrameGrabber) grabber;
+      // g.setImageMode(ImageMode.COLOR); - this still gives grey - but 3
+      // channels of 16 bit :P
       g.setImageMode(ImageMode.GRAY); // gray is 1 channel 16 bit
       // g.setFormat("depth");
       format = "depth";
     }
-    
 
     if (format != null) {
       grabber.setFormat(format);
@@ -1022,7 +1073,7 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     grabber.start();
-    broadcastState();
+    broadcastState(); // restarting/enabled filters ?? wth?
     return grabber;
   }
 
@@ -1165,22 +1216,21 @@ public class OpenCV extends AbstractVideoSource {
 
   private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
 
-
     // process each filter
     // for (String filterName : filters.keySet()) {
     for (OpenCVFilter filter : filters.values()) {
-      // OpenCVFilter filter = filters.get(filterName);
-      IplImage input = filter.setData(data);
-      if (input == null) {
-        log.error("could not get setData image");
-        continue;
+      if (filter.isEnabled()) {
+        IplImage input = filter.setData(data);
+        if (input == null) {
+          log.error("could not get setData image");
+          continue;
+        }
+
+        // process the previous filter's output
+        IplImage processed = filter.process(input);
+        filter.postProcess(processed);
+        filter.processDisplay();
       }
-
-      // process the previous filter's output
-      IplImage processed = filter.process(input);
-      filter.postProcess(processed);
-      filter.processDisplay();
-
     } // for each filter
 
     // get the display filter to process
@@ -1548,11 +1598,14 @@ public class OpenCV extends AbstractVideoSource {
       f.disableDisplay();
     }
 
+    if (filter != null && !filter.isEnabled()) {
+      name = "input";
+    }
+
     if (filter == null || "input".equals(name) || "output".equals(name)) {
       log.info("make select & inverse select");
     } else {
       filter.enableDisplay();
-      filter.enable();
     }
 
   }
@@ -1667,7 +1720,7 @@ public class OpenCV extends AbstractVideoSource {
     super.stopService();
     stopCapture();
   }
-  
+
   public void setFormat(String format) {
     this.format = format;
     if (grabber != null) {
@@ -1681,12 +1734,11 @@ public class OpenCV extends AbstractVideoSource {
     }
     return format;
   }
-  
+
   public boolean undockDisplay(boolean b) {
     undockDisplay = b;
     broadcastState();
     return b;
   }
 
- 
 }
