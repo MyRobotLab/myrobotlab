@@ -503,4 +503,8 @@ public abstract class OpenCVFilter implements Serializable {
     return converterToMat.convert(converterToMat.convert(image));
   }
 
+  public boolean isEnabled() {
+    return enabled;
+  }
+
 }

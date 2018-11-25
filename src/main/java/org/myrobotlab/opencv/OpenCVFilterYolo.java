@@ -446,8 +446,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   synchronized public void disable() {
     super.disable();
-    running = false;
-    classifier = null;
+    if (classifier != null) {
+      running = false;
+      classifier = null;
+    }
   }
 
   @Override
