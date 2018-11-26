@@ -477,7 +477,8 @@ public class OpenCV extends AbstractVideoSource {
     
     // must do this for 1 chn 16 bit
     cv.setGrabberType("ImageFile");
-    cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
+    cv.capture("kinect-data");
+    // cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
     
     // FIXME - todo FFmpeg tif, gif, jpg, mpg, avi
 
@@ -493,7 +494,7 @@ public class OpenCV extends AbstractVideoSource {
     cv.capture("OpenCV\\1543189994036");
     
     // set recording of frames both avi and single frames
-    cv.setRecordFrames(true);
+    cv.recordFrames();
     
     // record a set of files
     cv.capture();
@@ -767,7 +768,7 @@ public class OpenCV extends AbstractVideoSource {
 
   Integer width = null;
 
-  boolean recordFrames = false;
+  boolean recordingFrames = false;
 
   public OpenCV(String n) {
     super(n);
@@ -1304,10 +1305,10 @@ public class OpenCV extends AbstractVideoSource {
       blockingData.add(data);
     }
 
-    if (recording) {
+    if (recording || recordingFrames) {
       record(data);
     }
-
+    
     frameEndTs = System.currentTimeMillis();
 
     // delay if needed to maxFps
@@ -1502,8 +1503,8 @@ public class OpenCV extends AbstractVideoSource {
          * </pre>
          */
         FrameRecorder recorder = null;
-        if (!recordFrames) {
-          recordingFilename = String.format("%s-%d.flv", recordingSource, System.currentTimeMillis());
+        if (!recordingFrames) {
+          recordingFilename = String.format(CACHE_DIR + File.separator + "%s-%d.flv", recordingSource, System.currentTimeMillis());
           info("recording %s", recordingFilename);
           recorder = new FFmpegFrameRecorder(recordingFilename, frame.imageWidth, frame.imageHeight, 0);
           recorder.setFormat("flv");
@@ -1525,13 +1526,14 @@ public class OpenCV extends AbstractVideoSource {
         outputFileStreams.remove(recordingSource);
         output.stop();
         output.release();
-        recording = false;
-        closeOutputs = false;
-        if (!recordFrames) {
+        if (!recordingFrames) {
           info("finished recording %s", recordingFilename);
         } else {
           info("finished recording frames to %s", CACHE_DIR);
         }
+        recording = false;
+        recordingFrames = false;
+        closeOutputs = false;        
         broadcastState();
       }
     } catch (Exception e) {
@@ -1774,8 +1776,9 @@ public class OpenCV extends AbstractVideoSource {
     return b;
   }
   
-  public void setRecordFrames(boolean b) {
-    recordFrames = b;
+  public void recordFrames() {
+    recordingFrames = true;
+    recording = true;
   }
 
 }
