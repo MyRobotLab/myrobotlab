@@ -112,6 +112,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   OpenCVListAdapter popup = new OpenCVListAdapter(this);
   JList<String> possibleFilters;
   JButton recordButton = new JButton("record");
+  JCheckBox recordFrames = new JCheckBox("frames");
   JButton recordFrameButton = new JButton("record frame");
   BasicArrowButton removeFilterButton = new BasicArrowButton(BasicArrowButton.WEST);
   final OpenCVGui self;
@@ -183,6 +184,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     JPanel output = new JPanel();
     output.setBorder(BorderFactory.createTitledBorder("output"));
     output.add(recordButton);
+    output.add(recordFrames);
     output.add(recordFrameButton);
 
     JPanel filterPanel = new JPanel();
@@ -257,7 +259,11 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       // currentFilterListModel.removeElement(filterGui);
     } else if (o == recordButton) {
       if (recordButton.getText().equals("record")) {
-        send("record");
+        if (recordFrames.isSelected()) {
+          send("recordFrames");
+        } else {
+          send("record");
+        }        
       } else {
         send("stopRecording");
       }
