@@ -1,6 +1,6 @@
 package org.myrobotlab.jme3;
 
-import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualServo;
 import org.python.jline.internal.Log;
 
@@ -23,7 +23,7 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
   // jme3 side
   transient Spatial node;
   
-  transient Servo servo;
+  transient ServoControl servo;
 
   // FIXME - probably not needed
   int posUs;
@@ -35,7 +35,7 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
   // uber parent of all - moved up
   // transient SimpleApplication app;
   // FIXME - should allow input of Servo & 3D Info + ref to Jme3App
-  public void someWeirdConstructor(Servo servo, Jme3App app) {
+  public void someWeirdConstructor(ServoControl servo, Jme3App app) {
     // super(servo, app);
 
     this.servo = servo;
