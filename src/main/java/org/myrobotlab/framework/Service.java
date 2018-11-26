@@ -1571,7 +1571,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       }
       log.info("cfg file {} does not exist", filename);
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("failed loading {}", filename,e);
     }
     return false;
   }

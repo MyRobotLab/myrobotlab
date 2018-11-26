@@ -7,6 +7,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -27,7 +28,7 @@ public class InMoovHead extends Service {
   transient public Servo rothead;
   transient public Servo neck;
   transient public Servo rollNeck;
-  transient public ServoController arduino;
+  transient public ServoController controller;
 
   public InMoovHead(String n) {
     super(n);
@@ -37,7 +38,7 @@ public class InMoovHead extends Service {
     rothead = (Servo) createPeer("rothead");
     neck = (Servo) createPeer("neck");
     rollNeck = (Servo) createPeer("rollNeck");
-    arduino = (ServoController) createPeer("arduino");
+    controller = (ServoController) createPeer("arduino");
 
 
     neck.setMinMax(20, 160);
@@ -120,12 +121,14 @@ public class InMoovHead extends Service {
   
   public boolean connect(String port,Integer headYPin,Integer headXPin,Integer eyeXPin,Integer eyeYPin,Integer jawPin,Integer rollNeckPin) throws Exception {
  // FIXME -  !!! =>  cannot do this "here" ??? arduino.connect(port);
-    neck.attach(arduino, headYPin, neck.getRest(), neck.getVelocity());
-    rothead.attach(arduino, headXPin, rothead.getRest(), rothead.getVelocity());
-    jaw.attach(arduino, jawPin, jaw.getRest(), jaw.getVelocity());
-    eyeX.attach(arduino, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
-    eyeY.attach(arduino, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
-    rollNeck.attach(arduino, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
+    PortConnector arduino = (PortConnector)controller;
+    arduino.connect(port);
+    neck.attach(controller, headYPin, neck.getRest(), neck.getVelocity());
+    rothead.attach(controller, headXPin, rothead.getRest(), rothead.getVelocity());
+    jaw.attach(controller, jawPin, jaw.getRest(), jaw.getVelocity());
+    eyeX.attach(controller, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
+    eyeY.attach(controller, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
+    rollNeck.attach(controller, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
     broadcastState();
     
     enableAutoEnable(true);
@@ -396,12 +399,12 @@ public class InMoovHead extends Service {
     */
 
     //Calamity: not sure it should be called in the Arduino, should be on the Servo
-    arduino.servoAttachPin(rothead, headXPin);
-    arduino.servoAttachPin(neck, headYPin);
-    arduino.servoAttachPin(eyeX, eyeXPin);
-    arduino.servoAttachPin(eyeY, eyeYPin);
-    arduino.servoAttachPin(jaw, jawPin);
-    arduino.servoAttachPin(rollNeck, rollNeckPin);
+    controller.servoAttachPin(rothead, headXPin);
+    controller.servoAttachPin(neck, headYPin);
+    controller.servoAttachPin(eyeX, eyeXPin);
+    controller.servoAttachPin(eyeY, eyeYPin);
+    controller.servoAttachPin(jaw, jawPin);
+    controller.servoAttachPin(rollNeck, rollNeckPin);
 
   }
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -453,7 +456,7 @@ public class InMoovHead extends Service {
 
   public void test() {
 
-    if (arduino == null) {
+    if (controller == null) {
       error("arduino is null");
     }
 
