@@ -1183,7 +1183,7 @@ public class InMoov extends Service {
 
     // arm.arduino.setBoard(type); FIXME - this is wrong setting to Mega ... what if its a USB or I2C ???
     arm.connect(port); // FIXME are all ServoControllers "connectable" ?
-    arduinos.put(port, arm.arduino);
+    arduinos.put(port, arm.controller);
 
     return arm;
   }
@@ -1260,7 +1260,7 @@ public class InMoov extends Service {
 
     // FIXME -  !!! =>  cannot do this "here" ??? head.arduino.setBoard(type);
     head.connect(port, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
-    arduinos.put(port, head.arduino);
+    arduinos.put(port, head.controller);
     return head;
   }
 
@@ -1564,7 +1564,6 @@ public class InMoov extends Service {
     speakBlocking(String.format("starting torso on %s", port));
 
     torso = (InMoovTorso) startPeer("torso");
-
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
@@ -1572,7 +1571,7 @@ public class InMoov extends Service {
     // FIXME - needs to be a ServoController
    // torso.arduino.setBoard(type);
     torso.connect(port);
-    arduinos.put(port, torso.arduino);
+    arduinos.put(port, torso.controller);
 
     return torso;
   }

@@ -4,9 +4,6 @@ import org.myrobotlab.service.Servo;
 import org.myrobotlab.virtual.VirtualServo;
 import org.python.jline.internal.Log;
 
-import com.jme3.light.DirectionalLight;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;

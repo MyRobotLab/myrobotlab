@@ -8,6 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -25,7 +26,7 @@ public class InMoovTorso extends Service {
   transient public Servo topStom;
   transient public Servo midStom;
   transient public Servo lowStom;
-  transient public ServoController arduino;
+  transient public ServoController controller;
 
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -49,7 +50,7 @@ public class InMoovTorso extends Service {
     topStom = (Servo) createPeer("topStom");
     midStom = (Servo) createPeer("midStom");
     lowStom = (Servo) createPeer("lowStom");
-    arduino = (ServoController) createPeer("arduino");
+    controller = (ServoController) createPeer("arduino");
 
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
@@ -115,26 +116,21 @@ public class InMoovTorso extends Service {
   }
 
   public boolean connect(String port) throws Exception {
-    startService(); // NEEDED? I DONT THINK SO....
-
-    if (arduino == null) {
+    if (controller == null) {
       error("arduino is invalid");
       return false;
     }
 
-    /** FIXME - connections must be done externally - this
-     * needs to be a ServoController
+    PortConnector arduino = (PortConnector) controller;
     arduino.connect(port);
-
     if (!arduino.isConnected()) {
-      error("arduino %s not connected", arduino.getName());
+      error("torso arduino on port %s not connected", port);
       return false;
     }
-    */
-
-    topStom.attach(arduino, 27, topStom.getRest(), topStom.getVelocity());
-    midStom.attach(arduino, 28, midStom.getRest(), midStom.getVelocity());
-    lowStom.attach(arduino, 29, lowStom.getRest(), lowStom.getVelocity());
+    
+    topStom.attach(controller, 27, topStom.getRest(), topStom.getVelocity());
+    midStom.attach(controller, 28, midStom.getRest(), midStom.getVelocity());
+    lowStom.attach(controller, 29, lowStom.getRest(), lowStom.getVelocity());
     
     enableAutoEnable(true);
 
@@ -296,12 +292,12 @@ public class InMoovTorso extends Service {
     midStom.startService();
     lowStom.startService();
     // arduino.startService();
-    arduino = (ServoController)startPeer("arduino");
+    controller = (ServoController)startPeer("arduino");
   }
 
   public void test() {
 
-    if (arduino == null) {
+    if (controller == null) {
       error("arduino is null");
     }
 
