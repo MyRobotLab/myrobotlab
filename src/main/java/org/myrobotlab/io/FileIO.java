@@ -1471,4 +1471,13 @@ public class FileIO {
 		return new ByteArrayInputStream(bytes);
 	}
 
+  public static String toString(InputStream inputStream) {
+    byte[] bytes = toByteArray(inputStream);
+    String ret = null;
+    if (bytes != null) {
+      ret = new String(bytes);
+    }
+    return ret;
+  }
+
 }
