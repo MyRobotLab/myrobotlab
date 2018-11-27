@@ -75,6 +75,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
+import org.myrobotlab.net.Http;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
@@ -157,11 +158,9 @@ public class OpenCV extends AbstractVideoSource {
         while (capturing) {
           Frame newFrame = null;
 
-          // if the
-          // if (lengthInFrames < 0 || lengthInFrames > 1 || (lengthInFrames ==
-          // 1 && frameIndex < 1) || inputSource.equals(INPUT_SOURCE_CAMERA)) {
-          newFrame = grabber.grab();
-          // }
+          if (!singleFrame || (singleFrame && frameIndex < 1)) {
+            newFrame = grabber.grab();
+          }
 
           if (newFrame != null) {
             lastFrame = newFrame;
@@ -222,7 +221,6 @@ public class OpenCV extends AbstractVideoSource {
 
   transient final static public String BACKGROUND = "background";
 
-  public static final String CACHE_DIR = OpenCV.class.getSimpleName();
   transient public static final String FILTER_DETECTOR = "Detector";
   transient public static final String FILTER_DILATE = "Dilate";
   transient public static final String FILTER_ERODE = "Erode";
@@ -474,12 +472,12 @@ public class OpenCV extends AbstractVideoSource {
 
     // single kinect image file
     cv.reset();
-    
+
     // must do this for 1 chn 16 bit
     cv.setGrabberType("ImageFile");
     cv.capture("kinect-data");
     // cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
-    
+
     // FIXME - todo FFmpeg tif, gif, jpg, mpg, avi
 
     boolean done = true;
@@ -487,15 +485,14 @@ public class OpenCV extends AbstractVideoSource {
       return;
     }
 
-    
     // FIXME - make this work :P
     // http://192.168.0.37/videostream.cgi
     cv.reset();
     cv.capture("OpenCV\\1543189994036");
-    
+
     // set recording of frames both avi and single frames
     cv.recordFrames();
-    
+
     // record a set of files
     cv.capture();
     cv.record();
@@ -618,6 +615,7 @@ public class OpenCV extends AbstractVideoSource {
     setGrabberType(null);
     setInputSource(null);
     setInputFileName(null);
+    singleFrame = false;
     lastFrame = null;
     blockingData.clear();
   }
@@ -770,11 +768,13 @@ public class OpenCV extends AbstractVideoSource {
 
   boolean recordingFrames = false;
 
+  private boolean singleFrame;
+
   public OpenCV(String n) {
     super(n);
     putText(20, 20, "time:  %d");
     putText(20, 30, "frame: %d");
-    File cacheDir = new File(CACHE_DIR);
+    File cacheDir = new File(DATA_DIR);
     cacheDir.mkdirs();
   }
 
@@ -918,12 +918,16 @@ public class OpenCV extends AbstractVideoSource {
   public String getDisplayFilter() {
     return displayFilter;
   }
+  
+  public OpenCVData getFaceDetect() {
+    return getFaceDetect(500);
+  }
 
   // FIXME - getFaces() blocks ..
-  public OpenCVData getFaceDetect() {
+  public OpenCVData getFaceDetect(int timeout) {
     OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect("face");
     addFilter(fd);
-    OpenCVData d = getOpenCVData();
+    OpenCVData d = getOpenCVData(timeout);
     removeFilter(fd.name);
     return d;
   }
@@ -996,15 +1000,22 @@ public class OpenCV extends AbstractVideoSource {
       }
     }
 
+    if ((grabberType == null) && (inputSource.equals(INPUT_SOURCE_CAMERA))) {
+      grabberType = "OpenCV";
+    } else if ((grabberType == null) && (inputSource.equals(INPUT_SOURCE_FILE))) {
+      grabberType = "FFmpeg";
+    }
+
+    /*
     if ((grabberType == null || grabberType.equals("FFmpeg")) && (inputSource.equals(INPUT_SOURCE_CAMERA))) {
       grabberType = "OpenCV";
     } else if ((grabberType == null || grabberType.equals("OpenCV")) && (inputSource.equals(INPUT_SOURCE_FILE))) {
       grabberType = "FFmpeg";
     }
+    */
 
     String prefixPath;
-    if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "Sarxos".equals(grabberType)
-        || "MJpeg".equals(grabberType)) {
+    if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
       prefixPath = "org.myrobotlab.opencv.";
     } else {
       prefixPath = "org.bytedeco.javacv.";
@@ -1017,12 +1028,14 @@ public class OpenCV extends AbstractVideoSource {
     // so we have to download/cache it and change the filename
     if (inputFile != null && inputFile.startsWith("http") && inputFile.contains("youtube")) {
       try { // FIXME - put in own Service - along with Google Image Downloader..
+        // get and cache youtube video
         inputFile = getYouTube(inputFile);
       } catch (Exception e) {
         error(e);
       }
     } else if (inputFile != null && inputFile.startsWith("http")) {
-      // inspect the mime-type coming back -
+      // get and cache image file
+      inputFile = getImageFromUrl(inputFile);
     }
 
     log.info(String.format("video source is %s", inputSource));
@@ -1093,6 +1106,9 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     grabber.start();
+    
+    singleFrame = isSingleFrame();
+    
     broadcastState(); // restarting/enabled filters ?? wth?
     return grabber;
   }
@@ -1122,7 +1138,7 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public OpenCVData getOpenCVData() {
-    return getOpenCVData(500);
+    return getOpenCVData(3500);
   }
 
   // FIXME - TODO track(type)
@@ -1308,7 +1324,7 @@ public class OpenCV extends AbstractVideoSource {
     if (recording || recordingFrames) {
       record(data);
     }
-    
+
     frameEndTs = System.currentTimeMillis();
 
     // delay if needed to maxFps
@@ -1504,12 +1520,12 @@ public class OpenCV extends AbstractVideoSource {
          */
         FrameRecorder recorder = null;
         if (!recordingFrames) {
-          recordingFilename = String.format(CACHE_DIR + File.separator + "%s-%d.flv", recordingSource, System.currentTimeMillis());
+          recordingFilename = String.format(DATA_DIR + File.separator + "%s-%d.flv", recordingSource, System.currentTimeMillis());
           info("recording %s", recordingFilename);
           recorder = new FFmpegFrameRecorder(recordingFilename, frame.imageWidth, frame.imageHeight, 0);
           recorder.setFormat("flv");
         } else {
-          recorder = new FrameFileRecorder(CACHE_DIR);          
+          recorder = new FrameFileRecorder(DATA_DIR);
           // recorder.setFormat("png");
         }
         // recorder.setSampleRate(frameRate); for audio
@@ -1529,11 +1545,11 @@ public class OpenCV extends AbstractVideoSource {
         if (!recordingFrames) {
           info("finished recording %s", recordingFilename);
         } else {
-          info("finished recording frames to %s", CACHE_DIR);
+          info("finished recording frames to %s", DATA_DIR);
         }
         recording = false;
         recordingFrames = false;
-        closeOutputs = false;        
+        closeOutputs = false;
         broadcastState();
       }
     } catch (Exception e) {
@@ -1775,10 +1791,59 @@ public class OpenCV extends AbstractVideoSource {
     broadcastState();
     return b;
   }
-  
+
   public void recordFrames() {
     recordingFrames = true;
     recording = true;
+  }
+
+  /**
+   * method used to inspect details of grabber configuration and capture request
+   * to determine if a single frame is to be returned
+   * 
+   * @return
+   */
+  private boolean isSingleFrame() {   
+    if (inputSource.equals(INPUT_SOURCE_FILE) && inputFile != null) {
+      String testExt = inputFile.toLowerCase();
+      if (testExt.endsWith("jpg") || testExt.endsWith("jpeg") || testExt.endsWith("png") || testExt.endsWith("gif") || testExt.endsWith("tiff") || testExt.endsWith("tif")) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  static public String putCacheFile(String url, byte[] data) {
+    try {
+      String path = OpenCV.DATA_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+      FileIO.toFile(path, data);
+      return path;
+    } catch (Exception e) {
+      log.error("putCacheFile threw", e);
+    }
+    return null;
+  }
+  
+  static public String getCacheFile(String url) {
+    String path = OpenCV.DATA_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+    File f = new File(path);
+    if (f.exists()) {
+      return path;
+    }
+    return null;
+  }
+
+  static public String getImageFromUrl(String url) {
+    String ret = getCacheFile(url);
+    if (ret != null) {
+      return ret;
+    }
+    byte[] data = Http.get(url);
+    if (data == null) {
+      log.error("could not get {}", url);
+      return null;
+    }
+    return putCacheFile(url, data);
   }
 
 }
