@@ -66,6 +66,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.CommunicationManager;
 import org.myrobotlab.net.Heartbeat;
+import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
@@ -121,6 +122,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
+  
+  public static final String DATA_DIR = "data" + File.separator + OpenCV.class.getSimpleName();
+  public static final String RESOURCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName();
 
   /**
    * key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway
@@ -129,6 +133,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   private URI instanceId = null;
 
+  /**
+   * unique name of the service
+   */
   private String name;
 
   private String simpleName; // used in gson encoding for getSimpleName()
@@ -143,6 +150,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   transient Timer timer = null;
 
+  public final String DATA_INSTANCE_DIR = "data" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
+  public final String RESOURCE_INSTANCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
+  
   /**
    * a more capable task handler
    */

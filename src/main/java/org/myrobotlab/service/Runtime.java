@@ -239,15 +239,7 @@ public class Runtime extends Service implements MessageListener {
       int status = con.getResponseCode();
       log.info("status " + status);
 
-      BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-      String inputLine;
-      StringBuffer content = new StringBuffer();
-      while ((inputLine = in.readLine()) != null) {
-        content.append(inputLine);
-      }
-      in.close();
-      
-      gateway = inputLine;
+      gateway = FileIO.toString(con.getInputStream());      
       return gateway;
 
     } catch (Exception e) {
