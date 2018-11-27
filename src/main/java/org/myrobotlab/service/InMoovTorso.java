@@ -8,6 +8,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
@@ -24,13 +26,13 @@ public class InMoovTorso extends Service {
   transient public Servo topStom;
   transient public Servo midStom;
   transient public Servo lowStom;
-  transient public Arduino arduino;
+  transient public ServoController controller;
 
   static public void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     try {
-      VirtualArduino v = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
-      
+      VirtualArduino v = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+
       v.connect("COM4");
       InMoovTorso torso = (InMoovTorso) Runtime.start("i01.torso", "InMoovTorso");
       torso.connect("COM4");
@@ -48,7 +50,7 @@ public class InMoovTorso extends Service {
     topStom = (Servo) createPeer("topStom");
     midStom = (Servo) createPeer("midStom");
     lowStom = (Servo) createPeer("lowStom");
-    arduino = (Arduino) createPeer("arduino");
+    controller = (ServoController) createPeer("arduino");
 
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
@@ -58,9 +60,9 @@ public class InMoovTorso extends Service {
     midStom.setRest(90);
     lowStom.setRest(90);
 
-    setVelocity(5.0,5.0,5.0);
-    
-   }
+    setVelocity(5.0, 5.0, 5.0);
+
+  }
 
   /*
    * attach all the servos - this must be re-entrant and accomplish the
@@ -68,12 +70,12 @@ public class InMoovTorso extends Service {
    */
   @Deprecated
   public boolean attach() {
-  log.warn("attach deprecated please use enable");
+    log.warn("attach deprecated please use enable");
     return enable();
   }
 
   public boolean enable() {
-    
+
     sleep(InMoov.attachPauseMs);
     topStom.enable();
     sleep(InMoov.attachPauseMs);
@@ -83,28 +85,28 @@ public class InMoovTorso extends Service {
     sleep(InMoov.attachPauseMs);
     return true;
   }
-  
+
   @Deprecated
   public void enableAutoEnable(Boolean param) {
-	  }
-  
+  }
+
   @Deprecated
   public void enableAutoDisable(Boolean param) {
     setAutoDisable(param);
-	  }
-  
+  }
+
   public void setAutoDisable(Boolean param) {
     topStom.setAutoDisable(param);
     midStom.setAutoDisable(param);
     lowStom.setAutoDisable(param);
-    }
-  
+  }
+
   public void setOverrideAutoDisable(Boolean param) {
     topStom.setOverrideAutoDisable(param);
     midStom.setOverrideAutoDisable(param);
     lowStom.setOverrideAutoDisable(param);
-    }  
-  
+  }
+
   @Override
   public void broadcastState() {
     // notify the gui
@@ -114,24 +116,24 @@ public class InMoovTorso extends Service {
   }
 
   public boolean connect(String port) throws Exception {
-    startService(); // NEEDED? I DONT THINK SO....
-
-    if (arduino == null) {
+    if (controller == null) {
       error("arduino is invalid");
       return false;
     }
 
-    arduino.connect(port);
-
-    if (!arduino.isConnected()) {
-      error("arduino %s not connected", arduino.getName());
-      return false;
+    if (controller instanceof PortConnector) {
+      PortConnector arduino = (PortConnector) controller;
+      arduino.connect(port);
+      if (!arduino.isConnected()) {
+        error("torso arduino on port %s not connected", port);
+        return false;
+      }
     }
 
-    topStom.attach(arduino, 27, topStom.getRest(), topStom.getVelocity());
-    midStom.attach(arduino, 28, midStom.getRest(), midStom.getVelocity());
-    lowStom.attach(arduino, 29, lowStom.getRest(), lowStom.getVelocity());
-    
+    topStom.attach(controller, 27, topStom.getRest(), topStom.getVelocity());
+    midStom.attach(controller, 28, midStom.getRest(), midStom.getVelocity());
+    lowStom.attach(controller, 29, lowStom.getRest(), lowStom.getVelocity());
+
     enableAutoEnable(true);
 
     broadcastState();
@@ -140,11 +142,11 @@ public class InMoovTorso extends Service {
 
   @Deprecated
   public void detach() {
-  log.warn("detach deprecated please use disable");
+    log.warn("detach deprecated please use disable");
     if (topStom != null) {
       topStom.detach();
       sleep(InMoov.attachPauseMs);
-    } 
+    }
     if (midStom != null) {
       midStom.detach();
       sleep(InMoov.attachPauseMs);
@@ -159,7 +161,7 @@ public class InMoovTorso extends Service {
     if (topStom != null) {
       topStom.disable();
       sleep(InMoov.attachPauseMs);
-    } 
+    }
     if (midStom != null) {
       midStom.disable();
       sleep(InMoov.attachPauseMs);
@@ -177,7 +179,7 @@ public class InMoovTorso extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH,"%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
   }
 
   public boolean isAttached() {
@@ -199,21 +201,20 @@ public class InMoovTorso extends Service {
     this.lowStom.moveTo(lowStom);
 
   }
-  
+
   public void moveToBlocking(Double topStom, Double midStom, Double lowStom) {
     log.info("init {} moveToBlocking ", getName());
     moveTo(topStom, midStom, lowStom);
     waitTargetPos();
     log.info("end {} moveToBlocking", getName());
-    }
+  }
 
   public void waitTargetPos() {
     topStom.waitTargetPos();
     midStom.waitTargetPos();
     lowStom.waitTargetPos();
-    }
+  }
 
-  
   // FIXME - releasePeers()
   public void release() {
     disable();
@@ -233,7 +234,7 @@ public class InMoovTorso extends Service {
 
   public void rest() {
 
-    //setSpeed(1.0, 1.0, 1.0);
+    // setSpeed(1.0, 1.0, 1.0);
 
     topStom.rest();
     midStom.rest();
@@ -258,21 +259,23 @@ public class InMoovTorso extends Service {
   // ------------- added set pins
   public void setpins(Integer topStomPin, Integer midStomPin, Integer lowStomPin) {
     // createPeers();
-	  /*
-    this.topStom.setPin(topStom);
-    this.midStom.setPin(midStom);
-    this.lowStom.setPin(lowStom);
-    */
-	  
+    /*
+     * this.topStom.setPin(topStom); this.midStom.setPin(midStom);
+     * this.lowStom.setPin(lowStom);
+     */
 
-	    arduino.servoAttachPin(topStom, topStomPin);
-	    arduino.servoAttachPin(topStom, midStomPin);
-	    arduino.servoAttachPin(topStom, lowStomPin);
+    /**
+     * FIXME - has to be done outside of
+     * 
+     * arduino.servoAttachPin(topStom, topStomPin);
+     * arduino.servoAttachPin(topStom, midStomPin);
+     * arduino.servoAttachPin(topStom, lowStomPin);
+     */
   }
 
   @Deprecated
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {
-	log.warn("setspeed deprecated please use setvelocity");
+    log.warn("setspeed deprecated please use setvelocity");
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);
     this.lowStom.setSpeed(lowStom);
@@ -289,18 +292,20 @@ public class InMoovTorso extends Service {
     topStom.startService();
     midStom.startService();
     lowStom.startService();
-    arduino.startService();
+    // arduino.startService();
+    controller = (ServoController) startPeer("arduino");
   }
 
   public void test() {
 
-    if (arduino == null) {
+    if (controller == null) {
       error("arduino is null");
     }
 
-    if (!arduino.isConnected()) {
-      error("arduino not connected");
-    }
+    /*
+     * FIXME - connections need to be outside .. this must be a ServoController
+     * if (!arduino.isConnected()) { error("arduino not connected"); }
+     */
 
     topStom.moveTo(topStom.getPos() + 2);
     midStom.moveTo(midStom.getPos() + 2);
@@ -337,5 +342,5 @@ public class InMoovTorso extends Service {
     this.topStom.setVelocity(topStom);
     this.midStom.setVelocity(midStom);
     this.lowStom.setVelocity(lowStom);
-   }
+  }
 }

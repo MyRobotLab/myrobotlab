@@ -417,7 +417,7 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   public void saveToFile(String filename, IplImage image) {
-    opencv.saveToFile(filename, image);
+    OpenCV.saveToFile(filename, image);
   }
 
   public IplImage setData(OpenCVData data) {
@@ -501,6 +501,10 @@ public abstract class OpenCVFilter implements Serializable {
   
   public Mat toMat(IplImage image) {
     return converterToMat.convert(converterToMat.convert(image));
+  }
+
+  public boolean isEnabled() {
+    return enabled;
   }
 
 }

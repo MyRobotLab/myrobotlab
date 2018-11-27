@@ -1,13 +1,9 @@
-package org.myrobotlab.jme3.controller;
+package org.myrobotlab.jme3;
 
-import org.myrobotlab.jme3.interfaces.Jme3App;
-import org.myrobotlab.jme3.interfaces.Jme3Object;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualServo;
 import org.python.jline.internal.Log;
 
-import com.jme3.light.DirectionalLight;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
@@ -19,19 +15,32 @@ import com.jme3.scene.shape.Box;
  */
 public class Jme3Servo extends Jme3Object implements VirtualServo {
 
+  public Jme3Servo(Node node) {
+    super(node);
+    // TODO Auto-generated constructor stub
+  }
+
   // jme3 side
   transient Spatial node;
+  
+  transient ServoControl servo;
 
+  // FIXME - probably not needed
   int posUs;
 
+  // FIXME - probably not needed
   private int lastPosUs;
-
+  
+  
   // uber parent of all - moved up
   // transient SimpleApplication app;
+  // FIXME - should allow input of Servo & 3D Info + ref to Jme3App
+  public void someWeirdConstructor(ServoControl servo, Jme3App app) {
+    // super(servo, app);
 
-  public Jme3Servo(String name, Jme3App app) {
-    super(name, app);
-
+    this.servo = servo;
+    
+    // FIXME - should contain the Service its Virtualizing + 3D meta info
     // placement - orientation ????
 
     // graphics
@@ -77,7 +86,7 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
     //     geometry = (Geometry) assetManager.loadModel("Models/Teapot/Teapot.obj");
     // node = (Node)assetManager.loadModel("Models/InMoovHead/InMoovHead.j3o");
     // node = (Node)assetManager.loadModel("Models/InMoovHead/InMoovHead.blend");
-    node = assetManager.loadModel("Models/Teapot/Teapot.obj");
+    // node = assetManager.loadModel("Models/Teapot/Teapot.obj");
     /*
     node = assetManager.loadModel("Models/InMoovHead/InMoovHead.j3o");
     node = assetManager.loadModel("Models/VirtualInMoov236/VirtualInMoov236.j3odata");
@@ -91,10 +100,11 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
     node.setMaterial(mat_default);
     */
     // node.scale(4.0f, 4.0f, 4.0f);
-    rootNode.attachChild(node);
+    // rootNode.attachChild(node);
     
     
     // sunset light
+    /*
     DirectionalLight dl = new DirectionalLight();
     dl.setDirection(new Vector3f(-0.1f,-0.7f,1).normalizeLocal());
     dl.setColor(new ColorRGBA(0.44f, 0.30f, 0.20f, 1.0f));
@@ -111,9 +121,11 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
     dl.setDirection(new Vector3f(1, -0.5f,-0.1f).normalizeLocal());
     dl.setColor(new ColorRGBA(0.80f, 0.70f, 0.80f, 1.0f));
     rootNode.addLight(dl);
+    */
 
   }
 
+  /*
   @Override
   public Node getNode() {
     return null;
@@ -125,6 +137,7 @@ public class Jme3Servo extends Jme3Object implements VirtualServo {
     lastPosUs = posUs;
     // Log.info("simpleUpdate " + tpf);
   }
+  */
 
   @Override
   public void writeMicroseconds(int posUs) {

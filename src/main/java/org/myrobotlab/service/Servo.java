@@ -245,7 +245,7 @@ public class Servo extends Service implements ServoControl {
 
   double acceleration = -1;
 
-  double lastPos;
+  Double lastPos;
 
   @Deprecated
   private boolean autoEnable = true;
@@ -289,12 +289,23 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
-  public static class IKData {
+/*
+  public static class ServoEventData {
     public String name;
     public Double pos;
     public Integer state;
     public double velocity;
     public Double targetPos;
+    // public int type;
+  }
+*/
+ public static class ServoEventData {
+    public String name;
+    public Double pos;
+    public Integer state;
+    public double velocity;
+    public Double targetPos;
+    Servo src;
     // public int type;
   }
 
@@ -304,12 +315,16 @@ public class Servo extends Service implements ServoControl {
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
     
+    
     // here we define default values if not inside servo.json
     if (mapper == null) {
       mapper = new Mapper(0, 180, 0, 180);
     }
     if (rest == null) {
       rest = 90.0;
+    }
+    if (lastPos == null) {
+      lastPos = rest;
     }
     if (velocity == null) {
       velocity = -1.0;
@@ -501,6 +516,12 @@ public class Servo extends Service implements ServoControl {
     }
   }
 
+  public ServoEventData publishMoveTo() {
+    ServoEventData ret = new ServoEventData();
+    ret.src = this;
+    return ret;
+  }
+
   public synchronized void moveTo(double pos) {
     // breakMoveToBlocking=true;
     synchronized (moveToBlocked) {
@@ -517,7 +538,7 @@ public class Servo extends Service implements ServoControl {
     if (pos > mapper.getMaxX()) {
       pos = mapper.getMaxX();
     }
-
+    lastPos = targetPos;
     targetPos = pos;
 
     if (!isEnabled()) {
@@ -976,7 +997,7 @@ public class Servo extends Service implements ServoControl {
     return velocity;
   }
 
-  public IKData publishIKServoEvent(IKData data) {
+  public ServoEventData publishIKServoEvent(ServoEventData data) {
     return data;
   }
 
@@ -1267,7 +1288,7 @@ public class Servo extends Service implements ServoControl {
   public void onServoEvent(Integer eventType, double currentPos) {
     currentPosInput = mapper.calcInput(currentPos);
     if (isIKEventEnabled) {
-      IKData data = new IKData();
+      ServoEventData data = new ServoEventData();
       data.name = getName();
       data.pos = currentPosInput;
       data.state = eventType;
@@ -1516,5 +1537,16 @@ public class Servo extends Service implements ServoControl {
       delayDisable();
     }
   }
+
+  @Override
+  public ServoControl publishMoveTo(ServoControl sc) {
+    return sc;
+  }
+
+  @Override
+  public Double getLastPos() {
+    return lastPos;
+  }
+
 
 }

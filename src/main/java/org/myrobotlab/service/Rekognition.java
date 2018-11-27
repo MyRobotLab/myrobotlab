@@ -253,7 +253,7 @@ public class Rekognition extends Service {
 		/*
 		 * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV"); opencv.capture();
 		 * 
-		 * sleep(1000); String photo = opencv.recordSingleFrame();
+		 * sleep(1000); String photo = opencv.recordFrame();
 		 * 
 		 * 
 		 * System.out.println("Detected labels for " + photo);

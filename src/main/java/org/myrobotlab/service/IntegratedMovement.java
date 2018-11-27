@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticParameters;
-import org.myrobotlab.jme3.interfaces.IntegratedMovementInterface;
+import org.myrobotlab.jme3.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.CollisionDectection;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
@@ -29,7 +29,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
-import org.myrobotlab.service.Servo.IKData;
+import org.myrobotlab.service.Servo.ServoEventData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
@@ -650,7 +650,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     collisionItems.removeIgnore(object1, object2);
   }
   
-  public void onIKServoEvent(IKData data) {
+  public void onIKServoEvent(ServoEventData data) {
     Mapper map = maps.get(data.name);
     data.pos = map.calcOutput(data.pos);
     data.targetPos = map.calcOutput(data.targetPos);
