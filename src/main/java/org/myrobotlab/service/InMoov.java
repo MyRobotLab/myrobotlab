@@ -3,8 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +21,10 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.Servo.IKData;
+import org.myrobotlab.service.Servo.ServoEventData;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
@@ -71,7 +70,7 @@ public class InMoov extends Service {
 
   // this is good, because arduino's ultimately are identified by port keys
   // FIXME - should be controllers ServoControllers not Arduinos
-  HashMap<String, Arduino> arduinos = new HashMap<String, Arduino>();
+  HashMap<String, ServoController> arduinos = new HashMap<String, ServoController>();
 
   // services which do not require a body part
   // or can influence multiple body parts
@@ -198,11 +197,14 @@ public class InMoov extends Service {
   transient InMoov3DApp vinMoovApp;
 
   private IntegratedMovement integratedMovement;
-  private Arduino pirArduino;
+  private PinArrayControl pirArduino;
 
-  static String speechService = "MarySpeech";
+  // FIXME - obviously the externalized config interface (peers) is not
+  // sufficient,
+  // otherwise the stuff below would not have happened
+  // static String speechService = "MarySpeech";
   // static String speechService = "AcapelaSpeech";
-  //static String speechService = "NaturalReaderSpeech";
+  static String speechService = "NaturalReaderSpeech";
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   public InMoov(String n) {
@@ -608,6 +610,12 @@ public class InMoov extends Service {
     moveHand(which, 180, 180, 180, 180, 180);
   }
 
+  // FIXME - what is the purpose of onError(String ?) - onError(Status) is the
+  // callback
+  public void onError(Status status) {
+    onError(status.toString());
+  }
+
   public void onError(String msg) {
     // lets try not to nag
     if (!lastInMoovError.equals(msg) && speakErrors) {
@@ -692,7 +700,7 @@ public class InMoov extends Service {
     }
   }
 
-  // ------ composites servos end ----------- 
+  // ------ composites servos end -----------
 
   public void moveHead(double neck, double rothead) {
     if (head != null) {
@@ -933,7 +941,7 @@ public class InMoov extends Service {
     super.purgeTasks();
   }
 
-  /*
+  /**
    * Service registration event. On newly registered service the InMoov service
    * will set up various routing.
    * 
@@ -1152,7 +1160,7 @@ public class InMoov extends Service {
 
     startLeftHand(leftPort);
     startRightHand(rightPort);
-    //startEyelids(rightPort);
+    // startEyelids(rightPort);
     startLeftArm(leftPort);
     startRightArm(rightPort);
     startTorso(leftPort);
@@ -1173,9 +1181,10 @@ public class InMoov extends Service {
       type = Arduino.BOARD_TYPE_MEGA;
     }
 
-    arm.arduino.setBoard(type);
-    arm.connect(port);
-    arduinos.put(port, arm.arduino);
+    // arm.arduino.setBoard(type); FIXME - this is wrong setting to Mega ...
+    // what if its a USB or I2C ???
+    arm.connect(port); // FIXME are all ServoControllers "connectable" ?
+    arduinos.put(port, arm.controller);
 
     return arm;
   }
@@ -1205,7 +1214,7 @@ public class InMoov extends Service {
     eyesTracking = (Tracking) startPeer("eyesTracking");
     eyesTracking.connect(opencv, head.eyeX, head.eyeY);
     // TODO: why do we need this next line?
-    arduinos.put(port, (Arduino) eyesTracking.getArduino());
+    arduinos.put(port, (ServoController) eyesTracking.getArduino());
     return eyesTracking;
   }
 
@@ -1215,13 +1224,15 @@ public class InMoov extends Service {
     InMoovHand hand = (InMoovHand) startPeer(String.format("%sHand", side));
     hand.setSide(side);
     hands.put(side, hand);
+    // FIXME - this is wrong ! its configuratin of an Arduino, (we may not have
+    // an Arduino !!!)
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
 
-    hand.arduino.setBoard(type);
+    // hand.arduino.setBoard(type);
     hand.connect(port);
-    arduinos.put(port, hand.arduino);
+    arduinos.put(port, hand.controller);
     return hand;
   }
 
@@ -1249,9 +1260,9 @@ public class InMoov extends Service {
       type = Arduino.BOARD_TYPE_MEGA;
     }
 
-    head.arduino.setBoard(type);
+    // FIXME - !!! => cannot do this "here" ??? head.arduino.setBoard(type);
     head.connect(port, headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
-    arduinos.put(port, head.arduino);
+    arduinos.put(port, head.controller);
     return head;
   }
 
@@ -1316,15 +1327,17 @@ public class InMoov extends Service {
     if (head == null) {
       startHead(port);
     }
-    //rest before tracking at fullspeed
+    // rest before tracking at fullspeed
     setHeadVelocity(80.0, 80.0, 80.0);
-    moveHeadBlocking(head.neck.getRest(), head.rothead.getRest(), head.rollNeck.getRest());
+    // moveHeadBlocking(head.neck.getRest(), head.rothead.getRest(),
+    // head.rollNeck.getRest());
+    moveHead(head.neck.getRest(), head.rothead.getRest(), head.rollNeck.getRest());
     setHeadVelocity(-1.0, -1.0, -1.0);
     headTracking = (Tracking) startPeer("headTracking");
-    // We should pass the servos that control the head in here! 
+    // We should pass the servos that control the head in here!
     headTracking.connect(opencv, head.rothead, head.neck);
     // TODO: why is this needed?!
-    arduinos.put(port, (Arduino) headTracking.controller);
+    arduinos.put(port, (ServoController) headTracking.controller);
     return headTracking;
   }
 
@@ -1376,13 +1389,14 @@ public class InMoov extends Service {
 
       mouthControl = (MouthControl) startPeer("mouthControl");
 
-      mouthControl.arduino.connect(port);
+      // FIXME - connections must be done "outside" e.g. I2C config
+      // mouthControl.arduino.connect(port);
       mouthControl.jaw.attach(mouthControl.arduino, 26);
 
-      arduinos.put(port, mouthControl.arduino);
-      String p = mouthControl.getArduino().getSerial().getPortName();
-      if (p != null) {
-        arduinos.put(p, mouthControl.arduino);
+      // arduinos.put(port, mouthControl.arduino);
+      // String p = mouthControl.getArduino().getSerial().getPortName();
+      if (port != null) {
+        arduinos.put(port, mouthControl.arduino);
       }
       mouthControl.setmouth(10, 50);
     }
@@ -1436,13 +1450,16 @@ public class InMoov extends Service {
   public void startPIR(String port, int pin) throws IOException {
     speakBlocking(String.format("starting pee. eye. are. sensor on port %s pin %d", port, pin));
     if (arduinos.containsKey(port)) {
-      Arduino arduino = arduinos.get(port);
-      // arduino.connect(port);
-      // arduino.setSampleRate(8000);
-      arduino.enablePin(pin, 10);
-      pirArduino = arduino;
-      pirPin = pin;
-      arduino.addListener("publishPin", this.getName(), "publishPin");
+      ServoController sc = arduinos.get(port);
+      if (sc instanceof Arduino) {
+        Arduino arduino = (Arduino) sc;
+        // arduino.connect(port);
+        // arduino.setSampleRate(8000);
+        arduino.enablePin(pin, 10);
+        pirArduino = arduino;
+        pirPin = pin;
+        arduino.addListener("publishPin", this.getName(), "publishPin");
+      }
 
     } else {
       // FIXME - SHOULD ALLOW STARTUP AND LATER ACCESS VIA PORT ONCE OTHER
@@ -1517,15 +1534,16 @@ public class InMoov extends Service {
     }
     // TODO better thing to detect connected arduinos
     // we cant use arduino.stopService()
+    // ServoController don't have serials :P - new way must be figured out
     if (rightHand != null) {
-      rightHand.arduino.serial.disconnect();
-      rightHand.arduino.serial.stopRecording();
-      rightHand.arduino.disconnect();
+      // rightHand.arduino.serial.disconnect();
+      // rightHand.arduino.serial.stopRecording();
+      // rightHand.arduino.disconnect();
     }
     if (leftHand != null || head != null) {
-      leftHand.arduino.serial.disconnect();
-      leftHand.arduino.serial.stopRecording();
-      leftHand.arduino.disconnect();
+      // leftHand.arduino.serial.disconnect();
+      // leftHand.arduino.serial.stopRecording();
+      // leftHand.arduino.disconnect();
     }
   }
 
@@ -1533,6 +1551,14 @@ public class InMoov extends Service {
   public void startService() {
     super.startService();
     python = getPython();
+
+    // handle my own errors
+    subscribe(getName(), "publishError");
+
+    // get events of new services and shutdown
+    Runtime r = Runtime.getInstance();
+    subscribe(r.getName(), "registered");
+    subscribe(r.getName(), "shutdown");
   }
 
   public InMoovTorso startTorso(String port) throws Exception {
@@ -1544,14 +1570,14 @@ public class InMoov extends Service {
     speakBlocking(String.format("starting torso on %s", port));
 
     torso = (InMoovTorso) startPeer("torso");
-
     if (type == null) {
       type = Arduino.BOARD_TYPE_MEGA;
     }
 
-    torso.arduino.setBoard(type);
+    // FIXME - needs to be a ServoController
+    // torso.arduino.setBoard(type);
     torso.connect(port);
-    arduinos.put(port, torso.arduino);
+    arduinos.put(port, torso.controller);
 
     return torso;
   }
@@ -1565,29 +1591,31 @@ public class InMoov extends Service {
   }
 
   /*
-   * Old startEyelids method for backward compatibility;
-   * Old because arduino controller dependent...
-   * So, here we create a default peer arduino controller
+   * Old startEyelids method for backward compatibility; Old because arduino
+   * controller dependent... So, here we create a default peer arduino
+   * controller
    */
   public InMoovEyelids startEyelids(String port, String type, int eyeLidLeftPin, int eyeLidRightPin) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     speakBlocking(String.format("starting eyelids on %s", port));
 
-    Arduino eyelidsArduino = (Arduino) createPeer("eyelidsArduino");
-    eyelidsArduino.startService();
+    ServoController sc = (ServoController) startPeer("eyelidsArduino");
+    // eyelidsArduino.startService();
 
-    if (type == null) {
-      type = Arduino.BOARD_TYPE_MEGA;
+    if (sc instanceof Arduino) {
+      if (type == null) {
+        type = Arduino.BOARD_TYPE_MEGA;
+      }
+      Arduino eyelidsArduino = (Arduino) sc;
+      eyelidsArduino.setBoard(type);
+      eyelidsArduino.connect(port);
+      if (!eyelidsArduino.isConnected()) {
+        error("arduino %s not connected", eyelidsArduino.getName());
+        return null;
+      }
     }
-
-    eyelidsArduino.setBoard(type);
-    eyelidsArduino.connect(port);
-    if (!eyelidsArduino.isConnected()) {
-      error("arduino %s not connected", eyelidsArduino.getName());
-      return null;
-    }
-    arduinos.put(port, eyelidsArduino);
-    return startEyelids(eyelidsArduino, eyeLidLeftPin, eyeLidRightPin);
+    arduinos.put(port, sc);
+    return startEyelids(sc, eyeLidLeftPin, eyeLidRightPin);
   }
 
   /*
@@ -1838,7 +1866,7 @@ public class InMoov extends Service {
   }
 
   public void savePose(String poseName) {
-    // TODO: consider a prefix for the pose name? 
+    // TODO: consider a prefix for the pose name?
     String script = captureGesture(poseName);
 
   }
@@ -2108,6 +2136,8 @@ public class InMoov extends Service {
       vinMoovApp.setPauseOnLostFocus(false);
       vinMoovApp.setService(this);
       vinMoovApp.start();
+      // Grog Says ... WTH ?? - there should be a callback how do we know its
+      // not 6.5 seconds ?
       synchronized (this) {
         wait(6000);
       }
@@ -2178,7 +2208,7 @@ public class InMoov extends Service {
     return vinMoovApp;
   }
 
-  public void onIKServoEvent(IKData data) {
+  public void onIKServoEvent(ServoEventData data) {
     if (vinMoovApp != null) {
       vinMoovApp.updatePosition(data);
     }
@@ -2264,7 +2294,7 @@ public class InMoov extends Service {
     im.setDHLink("kinect", "camera", 0, 90, 10, 90);
 
     // log.info("{}",im.createJointPositionMap("leftArm").toString());
-    // start the kinematics engines 
+    // start the kinematics engines
 
     // define object, each dh link are set as an object, but the
     // start point and end point will be update by the ik service, but still
@@ -2321,7 +2351,7 @@ public class InMoov extends Service {
 
   }
 
-  //extra services used inside gestures, todo inmoov refactor attach things...
+  // extra services used inside gestures, todo inmoov refactor attach things...
   public Relay LeftRelay1;
   public Relay RightRelay1;
   public NeoPixel neopixel;

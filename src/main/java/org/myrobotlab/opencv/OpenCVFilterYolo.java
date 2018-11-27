@@ -39,6 +39,7 @@ import org.bytedeco.javacpp.opencv_dnn.Net;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
@@ -64,6 +65,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
 
+  private transient final Object lock = new Object();
+
   DecimalFormat df2 = new DecimalFormat("#.###");
 
   // TODO: store these somewhere as a resource / dependency ..
@@ -85,9 +88,15 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public OpenCVFilterYolo(String name) {
     super(name);
     // start classifier thread
-    if (classifier == null) {
-      classifier = new Thread(this, "YoloClassifierThread");
-      classifier.start();
+    synchronized (lock) {
+      if (classifier == null) {
+        classifier = new Thread(this, "ctor-YoloClassifierThread");
+        classifier.start();
+        try {
+          lock.wait();
+        } catch (InterruptedException e) {
+        }
+      }
     }
     log.info("Yolo Classifier thread started : {}", this.name);
   }
@@ -233,14 +242,18 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   @Override
   public void run() {
-
-    loadYolo();
-
     int count = 0;
     long start = System.currentTimeMillis();
-    log.info("Starting the Yolo classifier thread...");
-    // in a loop, grab the current image and classify it and update the result.
-    running = true;
+    synchronized (lock) {
+      loadYolo();
+      log.info("Starting the Yolo classifier thread...");
+      // in a loop, grab the current image and classify it and update the
+      // result.
+      running = true;
+      // loading the model takes a lot of time, we want to block enable/disable
+      // until we are actually running - then we notifyAll
+      lock.notifyAll();
+    }
     while (running) {
       if (!pending) {
         log.debug("Skipping frame");
@@ -420,34 +433,40 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   @Override
   public void release() {
-    running = false;
-    classifier = null;
-    try {
-      // give a 1/2 second for thread to exit before
-      // deallocating all the model memory
-      Thread.sleep(500);
-    } catch (InterruptedException e) {
-    }
-    if (net != null) {
-      net.deallocate();
-    }
-
-  }
-
-  @Override
-  synchronized public void enable() {
-    super.enable();
-    if (classifier == null) {
-      classifier = new Thread(this, "YoloClassifierThread");
-      classifier.start();
+    synchronized (lock) {
+      running = false;
+      classifier = null;
+      Service.sleep(500);
+      if (net != null) {
+        net.deallocate();
+      }
     }
   }
 
   @Override
-  synchronized public void disable() {
-    super.disable();
-    running = false;
-    classifier = null;
+  public void enable() {
+    synchronized (lock) {
+      super.enable();
+      if (classifier == null) {
+        classifier = new Thread(this, "YoloClassifierThread");
+        classifier.start();
+        try {
+          lock.wait();
+        } catch (InterruptedException e) {
+        }
+      }
+    }
+  }
+
+  @Override
+  public void disable() {
+    synchronized (lock) {
+      super.disable();
+      running = false;
+      classifier = null;
+      // wait until running thread bleeds out
+      Service.sleep(1500);
+    }
   }
 
   @Override
