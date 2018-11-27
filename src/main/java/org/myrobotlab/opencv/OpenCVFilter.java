@@ -63,25 +63,11 @@ public abstract class OpenCVFilter implements Serializable {
   private static final long serialVersionUID = 1L;
 
   static public String getCacheFile(String url) {
-    String path = OpenCV.CACHE_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-    File f = new File(path);
-    if (f.exists()) {
-      return path;
-    }
-    return null;
+    return OpenCV.getCacheFile(url);
   }
 
   static public String getImageFromUrl(String url) {
-    String ret = getCacheFile(url);
-    if (ret != null) {
-      return ret;
-    }
-    byte[] data = Http.get(url);
-    if (data == null) {
-      log.error("could not get {}", url);
-      return null;
-    }
-    return putCacheFile(url, data);
+    return OpenCV.getImageFromUrl(url);
   }
 
   static private IplImage load(String filename) {
@@ -185,14 +171,7 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   static public String putCacheFile(String url, byte[] data) {
-    try {
-      String path = OpenCV.CACHE_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-      FileIO.toFile(path, data);
-      return path;
-    } catch (Exception e) {
-      log.error("putCacheFile threw", e);
-    }
-    return null;
+    return putCacheFile(url, data);
   }
 
   static private Mat read(String filename) {
