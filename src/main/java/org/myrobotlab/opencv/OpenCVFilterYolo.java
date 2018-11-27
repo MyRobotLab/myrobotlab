@@ -250,9 +250,9 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // in a loop, grab the current image and classify it and update the
       // result.
       running = true;
-      //  loading the model takes a lot of time, we want to block enable/disable
+      // loading the model takes a lot of time, we want to block enable/disable
       // until we are actually running - then we notifyAll
-      lock.notifyAll(); 
+      lock.notifyAll();
     }
     while (running) {
       if (!pending) {
@@ -462,10 +462,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public void disable() {
     synchronized (lock) {
       super.disable();
-      if (classifier != null) {
-        running = false;
-        classifier = null;
-      }
+      running = false;
+      classifier = null;
+      // wait until running thread bleeds out
+      Service.sleep(1500);
     }
   }
 
