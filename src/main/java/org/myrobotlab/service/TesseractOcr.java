@@ -117,16 +117,10 @@ public class TesseractOcr extends Service {
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(TesseractOcr.class);
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("intelligence");
-  
-    // TODO: update me to 1.4 
-    meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "3.05.01-1.4.1");
-
-    // meta.addDependency("net.sourceforge.tess4j", "tess4j", "3.4.0");
-    // meta.addDependency("com.sun.jna", "3.2.2");
+    meta.addDependency("org.bytedeco.javacpp-presets", "tesseract-platform", "4.0.0-rc2-1.4.3");
     return meta;
   }
 
