@@ -85,6 +85,11 @@ public interface ServiceInterface
 
   public void startService();
 
+  /**
+   * loads json config and starts the service
+   */
+  public void loadAndStart();
+
   public void stopService();
 
   public String clearLastError();
