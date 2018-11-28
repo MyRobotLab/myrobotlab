@@ -239,7 +239,7 @@ public class Runtime extends Service implements MessageListener {
       int status = con.getResponseCode();
       log.info("status " + status);
 
-      gateway = FileIO.toString(con.getInputStream());      
+      gateway = FileIO.toString(con.getInputStream());
       return gateway;
 
     } catch (Exception e) {
@@ -248,7 +248,7 @@ public class Runtime extends Service implements MessageListener {
     }
     return null;
   }
-  
+
   static public boolean hasInternet() {
     return getPublicGateway() != null;
   }
@@ -264,6 +264,19 @@ public class Runtime extends Service implements MessageListener {
       fullTypeName = type;
     }
     return createService(name, fullTypeName);
+  }
+
+  /**
+   * This helper method will create, load then start a service
+   * @param name - name of instance
+   * @param type - type
+   * @return returns the service in the form of a ServiceInterface
+   */
+  static public ServiceInterface loadAndStart(String name, String type) {
+    ServiceInterface s = create(name, type);
+    s.load();
+    s.startService();
+    return s;
   }
 
   static public ServiceInterface createAndStart(String name, String type) {
@@ -1147,8 +1160,8 @@ public class Runtime extends Service implements MessageListener {
         /*
          * FIXME - do " -extract {serviceType} in future ArrayList<String>
          * services = cmdline.getArgumentList("-extract"); Repo repo =
-         * Repo.getInstance(); if (services.size() == 0) { repo.install();
-         * } else { for (int i = 0; i < services.size(); ++i) {
+         * Repo.getInstance(); if (services.size() == 0) { repo.install(); }
+         * else { for (int i = 0; i < services.size(); ++i) {
          * repo.install(services.get(i)); } }
          */
         extract();
@@ -1466,10 +1479,10 @@ public class Runtime extends Service implements MessageListener {
       service.preShutdown();
     }
 
-    for (ServiceInterface service: getServices()) {
+    for (ServiceInterface service : getServices()) {
       service.save();
     }
-   
+
     try {
       releaseAll();
     } catch (Exception e) {
@@ -1715,7 +1728,8 @@ public class Runtime extends Service implements MessageListener {
     log.info("user.home [{}]", userHome);
     log.info("total mem [{}] Mb", Runtime.getTotalMemory() / 1048576);
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
-    // Access restriction - log.info("total physical mem [{}] Mb", Runtime.getTotalPhysicalMemory() / 1048576);
+    // Access restriction - log.info("total physical mem [{}] Mb",
+    // Runtime.getTotalPhysicalMemory() / 1048576);
 
     log.info("getting local repo");
 
@@ -2410,6 +2424,7 @@ public class Runtime extends Service implements MessageListener {
 
   /**
    * get the Security singleton
+   * 
    * @return
    */
   static public Security getSecurity() {
