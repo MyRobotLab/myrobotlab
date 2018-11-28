@@ -1,0 +1,22 @@
+# RGB Depth Camera Calibration
+max_depth: 10000
+no_depth: 0
+model: visual_depth
+intrinsic:
+  pinhole:
+    fx: 529.74137370586
+    fy: 529.5715453060717
+    cx: 312.57382117058427
+    cy: 257.05061008728114
+    width: 640
+    height: 480
+    skew: 0.0
+  model: pinhole_radial_tangential
+  radial_tangential:
+    radial:
+    - 0.17889353480851655
+    - -0.32301207366192053
+    t1: 0.0
+    t2: 0.0
+  version: 0
+version: 0

@@ -48,8 +48,8 @@ import java.io.IOException;
 public class DisplayKinectPointCloudApp {
 
 	public static void main( String args[] ) throws IOException {
-		String baseDir = UtilIO.pathExample("kinect/basket");
-
+		// String baseDir = UtilIO.pathExample("kinect/basket");
+		String baseDir = "src/main/resources/resource/BoofCv";
 		String nameRgb = "basket_rgb.png";
 		String nameDepth = "basket_depth.png";
 		String nameCalib = "intrinsic.yaml";
