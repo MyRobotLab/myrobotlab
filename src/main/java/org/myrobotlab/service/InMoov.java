@@ -1765,7 +1765,7 @@ public class InMoov extends Service {
 
     // iterate over each of the python files in the directory
     // and load them into the python interpreter.
-    File dir = new File(directory);
+    File dir = makeGesturesDirectory(directory);
     boolean loaded = true;
     for (File f : dir.listFiles()) {
       loaded = Utils.loadPythonFile(f.getAbsolutePath());
@@ -1867,7 +1867,7 @@ public class InMoov extends Service {
     dir.mkdirs();
     if (!dir.isDirectory()) {
       // TODO: maybe create the directory ?
-      log.warn("Gestures directory {} doest not exist.", directory);
+      log.warn("Gestures directory {} doest not exist, will create it.", directory);
       return null;
     }
     return dir;
