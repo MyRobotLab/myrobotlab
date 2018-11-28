@@ -2015,6 +2015,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void startRecording() {
     invoke("startRecording", new Object[] { null });
   }
+  
+  @Override
+  public void loadAndStart() {
+    load();
+    startService();
+  }
 
   @Override
   public void startService() {
