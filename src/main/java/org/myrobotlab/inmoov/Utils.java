@@ -16,13 +16,9 @@ public class Utils {
   /**
    * This method will load a python file into the python interpreter. 
    */
-  public static boolean loadPythonFile(String file, String intanceName) {
+  public static boolean loadPythonFile(String file) {
     File f = new File(file);
-
     Python p = (Python) Runtime.getService("python");
-    if (!intanceName.equals("inMoov")) {
-      //p.exec("inMoov=" + intanceName, true, true);
-    }
     log.info("Loading  Python file {}", f.getAbsolutePath());
     String script = null;
     try {
