@@ -466,7 +466,7 @@ public class InMoov2 extends AbstractBodyPart {
     File dir = new File(directory);
     boolean loaded = true;
     for (File f : dir.listFiles()) {
-      loaded = Utils.loadPythonFile(f.getAbsolutePath(), this.getIntanceName());
+      loaded = Utils.loadPythonFile(f.getAbsolutePath());
     }
     return true;
   }
