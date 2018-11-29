@@ -60,6 +60,10 @@ public class MJpegFrameGrabber extends FrameGrabber {
 
   @Override
   public void stop() throws Exception {
+    if (mStream == null) {
+      // we aren't started. just return
+      return;
+    }
     log.info("MJpeg Frame grabber stop called");
     try {
       mStream.close();
