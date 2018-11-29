@@ -3,10 +3,11 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -138,7 +139,7 @@ public class InMoov extends Service {
   private boolean mute = false;
 
   public static int attachPauseMs = 100;
-  public List<String> gestureList = new ArrayList<>();
+  public Set<String> gesturesList = new TreeSet<String>();
 
   // TODO InMoovLife service
   public static boolean RobotIsTrackingSomething() {
@@ -1773,10 +1774,11 @@ public class InMoov extends Service {
     File dir = makeGesturesDirectory(directory);
     if (dir.exists()) {
       for (File f : dir.listFiles()) {
-        if (Utils.loadFile(f.getAbsolutePath(), extension)) {
+        Boolean fileLoaded = Utils.loadFile(f.getAbsolutePath(), extension);
+        if (fileLoaded != null && fileLoaded == true) {
           totalLoaded += 1;
-          gestureList.add(f.getName().replace("." + extension, ""));
-        } else {
+          gesturesList.add(f.getName().split("\\.")[0]);
+        } else if (fileLoaded != null) {
           totalError += 1;
         }
       }
