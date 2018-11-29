@@ -472,7 +472,7 @@ public class Python extends Service {
    *         false if there was an exception.
    */
   public boolean exec(String code, boolean replace, boolean blocking) {
-    log.info("exec(String) \n{}", code);
+    log.debug("exec(String) \n{}", code);
     boolean success = true;
     if (interp == null) {
       createPythonInterpreter();

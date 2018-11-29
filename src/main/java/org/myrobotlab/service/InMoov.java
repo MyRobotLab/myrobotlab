@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -137,6 +138,7 @@ public class InMoov extends Service {
   private boolean mute = false;
 
   public static int attachPauseMs = 100;
+  public List<String> gestureList = new ArrayList<>();
 
   // TODO InMoovLife service
   public static boolean RobotIsTrackingSomething() {
@@ -1761,16 +1763,25 @@ public class InMoov extends Service {
    * @param directory
    *          - the directory that contains the gesture python files.
    */
-  public boolean loadGestures(String directory) {
+  public void loadGestures(String directory) {
 
     // iterate over each of the python files in the directory
     // and load them into the python interpreter.
+    String extension = "py";
+    Integer totalLoaded = 0;
+    Integer totalError = 0;
     File dir = makeGesturesDirectory(directory);
-    boolean loaded = true;
-    for (File f : dir.listFiles()) {
-      loaded = Utils.loadPythonFile(f.getAbsolutePath());
+    if (dir.exists()) {
+      for (File f : dir.listFiles()) {
+        if (Utils.loadFile(f.getAbsolutePath(), extension)) {
+          totalLoaded += 1;
+          gestureList.add(f.getName().replace("." + extension, ""));
+        } else {
+          totalError += 1;
+        }
+      }
     }
-    return true;
+    info("%s Gestures loaded, %s Gestures with error", totalLoaded, totalError);
   }
 
   public void stopGesture() {
@@ -1867,7 +1878,7 @@ public class InMoov extends Service {
     dir.mkdirs();
     if (!dir.isDirectory()) {
       // TODO: maybe create the directory ?
-      log.warn("Gestures directory {} doest not exist, will create it.", directory);
+      log.warn("Gestures directory {} doest not exist.", directory);
       return null;
     }
     return dir;
