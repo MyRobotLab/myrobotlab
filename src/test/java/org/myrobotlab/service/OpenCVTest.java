@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -37,7 +36,7 @@ public class OpenCVTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    Runtime.setLogLevel("warn");
+    Runtime.setLogLevel("info");
     if (!isHeadless()) {
       swing = (SwingGui) Runtime.start("swing", "SwingGui");
     }
@@ -117,6 +116,19 @@ public class OpenCVTest extends AbstractTest {
     cv.stopCapture();
 
   }
+  
+  @Test
+  public final void chaosCaptureTest() throws Exception {
+    giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
+    giveToMonkey(cv, "stopCapture");
+    giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+    giveToMonkey(cv, "stopCapture");
+    // giveToMonkey(cv, "capture", 0); // if hasHardware
+    startMonkeys();
+    monkeyReport();
+    cv.reset();
+  }
+
 
   @Test
   public final void testAllCaptures() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException,
@@ -265,9 +277,11 @@ public class OpenCVTest extends AbstractTest {
       // LoggingFactory.init("INFO");
       OpenCVTest test = new OpenCVTest();
       setUpBeforeClass();
-      test.testAllCaptures();
+      test.chaosCaptureTest();
+      
+      // test.testAllCaptures();
 
-      boolean quitNow = false;
+      boolean quitNow = true;
 
       if (quitNow) {
         return;

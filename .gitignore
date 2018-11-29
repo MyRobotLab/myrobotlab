@@ -1,6 +1,8 @@
 /.project
 /.classpath
 /.settings
+/data
+/resource
 /bin
 /dist
 /repo
@@ -20,7 +22,6 @@
 /audioFile
 /obj
 /bootstrap.jar
-/resource/
 /shoutbox/
 /ProgramAB/
 /build/
