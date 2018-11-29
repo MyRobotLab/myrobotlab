@@ -16,10 +16,10 @@ public class Utils {
   /**
    * This method will load a python file into the python interpreter. 
    */
-  public static boolean loadFile(String file, String type) {
+  public static Boolean loadFile(String file, String type) {
     if (!FilenameUtils.getExtension(file).equalsIgnoreCase(type)) {
       log.warn("{} is not a {} file", file, type);
-      return false;
+      return null;
     }
     File f = new File(file);
     Python p = (Python) Runtime.getService("python");
@@ -32,7 +32,7 @@ public class Utils {
     try {
       script = FileIO.toString(f.getAbsolutePath());
     } catch (IOException e) {
-      log.error("IO Error loading file : {}",e);
+      log.error("IO Error loading file : ",e);
       return false;
     }
     // evaluate the scripts in a blocking way.
