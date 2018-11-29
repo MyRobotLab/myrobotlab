@@ -120,10 +120,12 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void chaosCaptureTest() throws Exception {
     giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
+    giveToMonkey(cv, "capture");
     giveToMonkey(cv, "stopCapture");
+    giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=zDO1Q_ox4vk");
     giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
     giveToMonkey(cv, "stopCapture");
-    // giveToMonkey(cv, "capture", 0); // if hasHardware
+    giveToMonkey(cv, "capture", 0); // if hasHardware
     startMonkeys();
     monkeyReport();
     cv.reset();
@@ -277,6 +279,12 @@ public class OpenCVTest extends AbstractTest {
       // LoggingFactory.init("INFO");
       OpenCVTest test = new OpenCVTest();
       setUpBeforeClass();
+      
+      cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+      cv.capture(0);
+      cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+      cv.capture(0);
+      
       test.chaosCaptureTest();
       
       // test.testAllCaptures();
