@@ -861,7 +861,10 @@ public class OpenCV extends AbstractVideoSource {
    * 
    * @param cameraIndex
    */
-  public void capture(int cameraIndex) {
+  public void capture(Integer cameraIndex) {
+    if (cameraIndex == null) {
+      this.cameraIndex = 0;
+    }
     stopCapture();
     setInputSource(INPUT_SOURCE_CAMERA);
     setCameraIndex(cameraIndex);
@@ -986,6 +989,16 @@ public class OpenCV extends AbstractVideoSource {
       } else {
         inputSource = INPUT_SOURCE_CAMERA;
       }
+    }
+    
+    if (grabberType != null && grabberType.equals("FFmpeg") && inputSource.equals(INPUT_SOURCE_CAMERA)){
+      log.warn("invalid state of ffmpeg and input source camera - setting to OpenCV frame grabber");
+      grabberType = "OpenCV";
+    }
+    
+    if (grabberType != null && grabberType.equals("OpenCV") && inputSource.equals(INPUT_SOURCE_FILE)){
+      log.warn("invalid state of opencv and input source file - setting to FFmpeg frame grabber");
+      grabberType = "FFmpeg";
     }
 
     if (inputSource == null) {
