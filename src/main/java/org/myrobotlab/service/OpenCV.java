@@ -128,11 +128,13 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
  * 
  */
 public class OpenCV extends AbstractVideoSource {
+  
+  int vpId = 0;
 
   class VideoProcessor implements Runnable {
 
     @Override
-    public void run() {
+    synchronized public void run() {
       try {
         synchronized (lock) {
 
@@ -446,7 +448,7 @@ public class OpenCV extends AbstractVideoSource {
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     // cv.setGrabberType("OpenKinect");
-
+    cv.setStreamerEnabled(true);
     // cv.setGrabberType("OpenCV");
     /*
      * OpenCVFilter yoloFilter = new
@@ -471,11 +473,11 @@ public class OpenCV extends AbstractVideoSource {
     // cv.load();
 
     // single kinect image file
-    cv.reset();
+    // cv.reset();
 
     // must do this for 1 chn 16 bit
-    cv.setGrabberType("ImageFile");
-    cv.capture("kinect-data");
+    // cv.setGrabberType("ImageFile");
+    // cv.capture("kinect-data");
     // cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
 
     // FIXME - todo FFmpeg tif, gif, jpg, mpg, avi
@@ -827,15 +829,18 @@ public class OpenCV extends AbstractVideoSource {
    * capture starts the frame grabber and video processing threads
    */
   public void capture() {
+    log.info("capture before lock");
     synchronized (lock) {
       if (capturing) {
         return;
       }
       if (!capturing) {
-        videoThread = new Thread(vp, String.format("%s-video-processor", getName()));
+        log.info("not capturing in capture -> make new thread");
+        videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
         videoThread.start();
         try {
           // wait for capture thread to start
+          log.info("capture wait() - waiting");
           lock.wait();
         } catch (InterruptedException e) {
         }
@@ -844,9 +849,10 @@ public class OpenCV extends AbstractVideoSource {
     }
   }
 
-  public void capture(FrameGrabber grabber) {
-    stopCapture();
+  public void capture(FrameGrabber grabber) throws org.bytedeco.javacv.FrameGrabber.Exception {
+    stopCapture();    
     this.grabber = grabber;
+    grabber.restart();
     capture();
   }
 
@@ -1749,17 +1755,22 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public void stopCapture() {
+    log.info("stopCapture before lock");
     synchronized (lock) {
       if (!capturing) {
+        log.info("stopCapture !capturing - returning");
         return;
       }
+      log.info("stopCapture setting capturing");
       capturing = false;
       // sleep(300);
       try {
+        log.info("stopCapture waiting");
         lock.wait();
       } catch (InterruptedException e) {
       }
     }
+    log.info("stopCapture leaving lock");
   }
 
   public void stopRecording() {
