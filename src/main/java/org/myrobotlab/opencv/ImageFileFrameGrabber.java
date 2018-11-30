@@ -72,7 +72,12 @@ public class ImageFileFrameGrabber extends FrameGrabber {
       image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED);
       cache.put(path, image);
     } else {
-      image = cache.get(path).clone();
+      IplImage cachedImage = cache.get(path);
+      if (image != null) {
+        image = cachedImage.clone();
+      } else {
+        log.error("could not get cached image {}", path);
+      }
     }
 
     ++frameCounter;
