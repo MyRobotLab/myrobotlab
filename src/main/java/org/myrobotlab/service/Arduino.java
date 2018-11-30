@@ -456,6 +456,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
 
+    // test to see if we've been started. the serial might be null
+    initSerial();
     try {
       // FIXME - GroG asks, who put the try here - shouldn't it throw if
       // we
@@ -516,6 +518,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
 
     broadcastState();
+  }
+
+  private void initSerial() {
+    if (msg == null) {
+      serial = (Serial) startPeer("serial");
+      msg = new Msg(this, serial);
+      // FIXME - dynamically additive - if codec key has never been used - add key
+      // serial.getOutbox().setBlocking(true);
+      // inbox.setBlocking(true);
+      serial.addByteListener(this);
+    }
   }
 
   /**
@@ -1862,19 +1875,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void startService() {
     super.startService();
     try {
-      if (msg == null) {
-        serial = (Serial) startPeer("serial");
-        msg = new Msg(this, serial);
-        // FIXME - dynamically additive - if codec key has never been
-        // used -
-        // add key
-        // serial.getOutbox().setBlocking(true);
-        // inbox.setBlocking(true);
-        serial.addByteListener(this);
-
-        // FIXME - removing below .. it DOES NOT WORKY
-        // FileIO.extractResource("Arduino","resource/Arduino", false);
-      }
+      initSerial();
     } catch (Exception e) {
       log.error("Arduino.startService threw", e);
     }
