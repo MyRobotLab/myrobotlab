@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
 
@@ -38,12 +40,18 @@ public class OpenCVTest extends AbstractTest {
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
     Runtime.setLogLevel("info");
     if (!isHeadless()) {
-      swing = (SwingGui) Runtime.start("swing", "SwingGui");
+      swing = (SwingGui) Runtime.start("gui", "SwingGui");
     }
   }
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
+    Runtime.release("cv");
+    if (!isHeadless()) {
+      // Runtime.release("gui");
+    }
+    
+    // FIXME - helper - all threads not in my initial thread set.. tear down
     // TODO - remove all services ??? DL4J others ? Runtime ?
     // clean up all threads
     // clean up all services
@@ -56,8 +64,6 @@ public class OpenCVTest extends AbstractTest {
 
   @After
   public void tearDown() throws Exception {
-    // cuz ffmpeg is the most durable
-    cv.setGrabberType("FFmpeg");
   }
 
   // FIXME - do the following test
@@ -66,102 +72,80 @@ public class OpenCVTest extends AbstractTest {
   // test remote file source
   // test mpeg streamer
 
-  public class ChaosButtonPusher extends Thread {
-    public boolean running = false;
-    Random ran = new Random();
-
-    public void run() {
-      running = true;
-      while (running) {
-        int x = ran.nextInt(2);
-        if (x == 0) {
-          log.info("capture");
-          cv.capture();
-        } else {
-          log.info("stop capture");
-          cv.stopCapture();
-        }
-        try {
-          sleep(50);
-        } catch (InterruptedException e) {
-        }
-      }
-    }
-  }
-
-  @Test
-  public final void testChaosButtons() {
-    ChaosButtonPusher b0 = new ChaosButtonPusher();
-    b0.start();
-
-    ChaosButtonPusher b1 = new ChaosButtonPusher();
-    b1.start();
-
-    ChaosButtonPusher b2 = new ChaosButtonPusher();
-    b2.start();
-
-    // 5 seconds of pure chaos monkey !
-    sleep(5000);
-
-    b0.running = false;
-    b1.running = false;
-    b2.running = false;
-
-    sleep(1000);
-
-    // can we still work ?
-    cv.capture(TEST_FACE_FILE_JPEG);
-    OpenCVData data = cv.getOpenCVData();
-    assertTrue(data != null);
-    cv.stopCapture();
-
-  }
-  
   @Test
   public final void chaosCaptureTest() throws Exception {
     giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
     giveToMonkey(cv, "capture");
     giveToMonkey(cv, "stopCapture");
-    giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-    giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+    if (hasInternet()) {
+      // red pill green pill
+      giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=I9VA-U69yaY");
+      giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+    }
     giveToMonkey(cv, "stopCapture");
     giveToMonkey(cv, "capture", 0); // if hasHardware
     startMonkeys();
     monkeyReport();
+
+    // check after the monkeys have pounded on it - it still works !
     cv.reset();
+    cv.capture(TEST_FACE_FILE_JPEG);
+    OpenCVData data = cv.getFaceDetect();
+    assertNotNull(data);
+    List<Rectangle> x = data.getBoundingBoxArray();
+    assertTrue(x.size() > 0);
+  }
+  
+  
+  @Test
+  public final void simplteFaceDetect() {
+    cv.reset();
+    cv.capture(TEST_FACE_FILE_JPEG);
+    OpenCVData data = cv.getFaceDetect();
+    assertNotNull(data);
+    List<Rectangle> listOfFaces = data.getBoundingBoxArray();
+    assertTrue(listOfFaces.size() > 0);
   }
 
-
   @Test
-  public final void testAllCaptures() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException,
-      InvocationTargetException, org.bytedeco.javacv.FrameGrabber.Exception {
+  public final void testAllCaptures() throws Exception {
 
     OpenCVData data = null;
-   
+    
+    
+
     if (hasInternet()) {
-     
+
       cv.reset();
       // default is FFmpeg - but this too should be able to get the jpg
       cv.setGrabberType("ImageFile");
       cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
       data = cv.getFaceDetect();
       assertNotNull(data);
-      
-      
-      // if you have a internet this should auto-load the ffmpeg grabber and start capturing 
+
+      // if you have a internet this should auto-load the ffmpeg grabber and
+      // start capturing
       // mr. adam's picture and return a face
       cv.reset();
       cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
       // wait up to 10 seconds for bad internet connection
-      data = cv.getFaceDetect(10000);
+      data = cv.getFaceDetect();
       assertNotNull(data);
+      assertTrue(data.getBoundingBoxArray().size() > 0);
     }
     
+    cv.reset();
+    cv.capture("src/test/resources/OpenCV/monkeyFace.mp4");
+    data = cv.getFaceDetect();
+    assertNotNull(data);
+    assertTrue(data.getBoundingBoxArray().size() > 0);
+
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
     data = cv.getFaceDetect();
     assertNotNull(data);
-    
+    assertTrue(data.getBoundingBoxArray().size() > 0);
+
     // verify it will switch to something which
     // might capture
     // cv.capture("src/test/resources/OpenCV/monkeyFace.mp4");
@@ -184,21 +168,18 @@ public class OpenCVTest extends AbstractTest {
     // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     // TODO -> cv.getFaces();
 
-    // file types
-
-    if (hasInternet()) {
-      // remote fileloading
-    }
   }
 
   @Test
   public final void testAllFilterTypes() {
-    // cv.capture(TEST_FACE_FILE_JPEG);
-    cv.stopCapture();
+    cv.reset();
+    
+    // file load - different paths ?
     // cv.capture("multipleFaces.jpg"); did not work :(
 
-    cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-
+    // 19 second blue red pill
+    cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");
+    
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.info("trying {}", fn);
       if (fn.startsWith("DL4J")) {
@@ -208,6 +189,8 @@ public class OpenCVTest extends AbstractTest {
       sleep(1000);
       cv.removeFilters();
     }
+    
+    log.info("here");
 
   }
 
@@ -278,22 +261,34 @@ public class OpenCVTest extends AbstractTest {
     try {
       // LoggingFactory.init("INFO");
       OpenCVTest test = new OpenCVTest();
-      setUpBeforeClass();
+      setUpBeforeClass();      
       
-      cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-      cv.capture(0);
-      cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-      cv.capture(0);
+      test.simplteFaceDetect();
       
-      test.chaosCaptureTest();
-      
-      // test.testAllCaptures();
-
       boolean quitNow = true;
-
       if (quitNow) {
         return;
       }
+
+      
+      test.testAllFilterTypes();
+      /*
+      cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");// red pill
+                                                                // green pill
+      cv.capture(0);
+      cv.stopCapture();
+      cv.setGrabberType("Sarxos");
+      cv.capture(0);
+      cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+      cv.capture(0);
+      cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+      cv.capture(0);
+      */
+
+      test.chaosCaptureTest();
+
+      // test.testAllCaptures();
+
 
       // run junit as java app
       JUnitCore junit = new JUnitCore();

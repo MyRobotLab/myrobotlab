@@ -208,6 +208,7 @@ public class OpenCV extends AbstractVideoSource {
           try {
             grabber.close();
           } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+            log.error("could not close grabber", e);
           }
           grabber = null;
         }
@@ -929,7 +930,9 @@ public class OpenCV extends AbstractVideoSource {
   }
   
   public OpenCVData getFaceDetect() {
-    return getFaceDetect(500);
+    // willing to wait up to 5 seconds 
+    // but if we find a face before 5s we wont wait
+    return getFaceDetect(5000);
   }
 
   // FIXME - getFaces() blocks ..
@@ -1174,7 +1177,7 @@ public class OpenCV extends AbstractVideoSource {
 
   public String getYouTube(String url) throws IOException {
 
-    File cacheDir = new File(String.format("%s/%s-cache", getClass().getSimpleName(), getName()));
+    File cacheDir = new File(DATA_DIR);
     cacheDir.mkdirs();
 
     // get video key
