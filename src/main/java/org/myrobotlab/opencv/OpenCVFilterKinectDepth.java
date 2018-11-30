@@ -102,8 +102,13 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   @Override
   public IplImage process(IplImage depth) throws InterruptedException {
 
-    lastDepth = depth;
+    if (depth.depth() != 16 && depth.nChannels() != 1) {
+      log.error("not valid kinect depth image expecting 1 channel 16 depth got %d channel %d depth", depth.depth(), depth.nChannels());
+      return depth;
+    }
 
+    lastDepth = depth;
+    
     if (clearSamplePoints) {
       samplePoints.clear();
       clearSamplePoints = false;
@@ -153,6 +158,9 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (lastDepth == null) {
+      return image;
+    }
     ByteBuffer buffer = lastDepth.getByteBuffer();
     for (Point point : samplePoints) {
 
