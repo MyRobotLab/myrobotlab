@@ -134,8 +134,10 @@ public class OpenCVFilterOverlay extends OpenCVFilter {
       cvPutText(image, overlay.text, cvPoint(overlay.x, overlay.y), overlay.font, overlay.color);
     }
     */
-    
-    return imageOverlays.get(0).image;
+    if (imageOverlays.size() > 0) {
+      return imageOverlays.get(0).image;
+    }
+    return image;
   }
 
   public void addImage(String imageFilename, double alpha) {

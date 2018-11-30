@@ -172,7 +172,8 @@ public class OpenCVTest extends AbstractTest {
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.info("trying {}", fn);
-      if (fn.startsWith("DL4J")) {
+      if (fn.startsWith("DL4J") || fn.startsWith("SimpleBlobDetector")|| fn.startsWith("Solr")|| fn.startsWith("Split")) {
+        log.info("skipping {}", fn);
         continue;
       }
       cv.addFilter(fn);
