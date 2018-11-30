@@ -1777,7 +1777,7 @@ public class InMoov extends Service {
         Boolean fileLoaded = Utils.loadFile(f.getAbsolutePath(), extension);
         if (fileLoaded != null && fileLoaded == true) {
           totalLoaded += 1;
-          gesturesList.add(f.getName().split("\\.")[0]);
+          gesturesList.add(f.getName());
         } else if (fileLoaded != null) {
           totalError += 1;
         }
