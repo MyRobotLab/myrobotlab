@@ -67,6 +67,7 @@ import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacpp.opencv_objdetect.CvHaarClassifierCascade;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.opencv.imgproc.Imgproc;
@@ -404,6 +405,14 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
       // periodically crawl the training directory
       // trainer.sc
       classifiers.get(rootDir).scanAndProcess();
+    }
+  }
+  
+  @Override
+  public void release() {
+    if (scanTimer != null) {
+      scanTimer.cancel();
+      scanTimer = null;
     }
   }
 
