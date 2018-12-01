@@ -16,8 +16,8 @@ import org.slf4j.Logger;
  * Natural Reader speech to text service based on naturalreaders.com This code
  * is basically all the same as AcapelaSpeech...
  * 
- * FIXME - see if voices can be pulled down from API :
- * moz4r : it is a front service for 2 tts , amazon polly + ibm
+ * FIXME - see if voices can be pulled down from API : moz4r : it is a front
+ * service for 2 tts , amazon polly + ibm
  * 
  */
 public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
@@ -33,9 +33,10 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   public NaturalReaderSpeech(String reservedKey) {
     super(reservedKey);
   }
-  
+
   /**
    * implementation specific value
+   * 
    * @param rate
    */
   public void setRate(int rate) {
@@ -44,7 +45,9 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
 
   public void startService() {
     super.startService();
-    httpClient = (HttpClient) startPeer("httpClient");
+    if (httpClient == null) {
+      httpClient = (HttpClient) startPeer("httpClient");   
+    }
   }
 
   static public ServiceType getMetaData() {
@@ -63,7 +66,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    
+
     // try {
     // Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
@@ -101,7 +104,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
       // + encoded + "&r=2&s=0";
 
       Voice voice = getVoice();
-      String encoded = URLEncoder.encode(toSpeak, "UTF-8");
+      
+      String encoded = URLEncoder.encode(HtmlFilter.stripHtml(toSpeak), "UTF-8");
       String url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId=" + voice.getVoiceProvider().toString() + "&rate=" + rate + "&text=" + encoded + "&outputFormat=mp3";
 
       byte[] b = null;
