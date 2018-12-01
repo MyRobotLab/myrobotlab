@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -1774,12 +1775,15 @@ public class InMoov extends Service {
     File dir = makeGesturesDirectory(directory);
     if (dir.exists()) {
       for (File f : dir.listFiles()) {
-        Boolean fileLoaded = Utils.loadFile(f.getAbsolutePath(), extension);
-        if (fileLoaded != null && fileLoaded == true) {
-          totalLoaded += 1;
-          gesturesList.add(f.getName());
-        } else if (fileLoaded != null) {
-          totalError += 1;
+        if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
+          if (Utils.loadFile(f.getAbsolutePath()) == true) {
+            totalLoaded += 1;
+            gesturesList.add(f.getName());
+          } else {
+            totalError += 1;
+          }
+        } else {
+          log.warn("{} is not a {} file", f.getAbsolutePath(), extension);
         }
       }
     }
