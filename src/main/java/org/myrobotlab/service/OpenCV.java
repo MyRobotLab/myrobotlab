@@ -128,7 +128,7 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
  * 
  */
 public class OpenCV extends AbstractVideoSource {
-  
+
   int vpId = 0;
 
   class VideoProcessor implements Runnable {
@@ -208,6 +208,7 @@ public class OpenCV extends AbstractVideoSource {
           try {
             grabber.close();
           } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+            log.error("could not close grabber", e);
           }
           grabber = null;
         }
@@ -237,6 +238,8 @@ public class OpenCV extends AbstractVideoSource {
   transient public static final String FILTER_PYRAMID_DOWN = "PyramidDown";
   transient final static public String FOREGROUND = "foreground";
   static final Set<String> grabberTypes = new TreeSet<String>();
+  static final Set<String> videoFileExt = new TreeSet<String>();
+  static final Set<String> imageFileExt = new TreeSet<String>();
   public static final String INPUT_KEY = "input";
 
   // FIXME - make more simple
@@ -273,6 +276,23 @@ public class OpenCV extends AbstractVideoSource {
       grabberTypes.add("Pipeline"); // to/from another opencv service
       grabberTypes.add("Sarxos");
       grabberTypes.add("MJpeg");
+
+      videoFileExt.add("mpeg");
+      videoFileExt.add("mp4");
+      videoFileExt.add("avi");
+      videoFileExt.add("mov");
+      videoFileExt.add("flv");
+      videoFileExt.add("wmv");
+
+      imageFileExt.add("jpg");
+      imageFileExt.add("jpeg");
+      imageFileExt.add("gif");
+      imageFileExt.add("tiff");
+      imageFileExt.add("tif");
+      imageFileExt.add("png");
+      imageFileExt.add("pcd");
+      imageFileExt.add("pdf");
+
     } catch (Exception e) {
       log.error("initializing frame grabber types threw", e);
     }
@@ -850,7 +870,7 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   public void capture(FrameGrabber grabber) throws org.bytedeco.javacv.FrameGrabber.Exception {
-    stopCapture();    
+    stopCapture();
     this.grabber = grabber;
     grabber.restart();
     capture();
@@ -927,9 +947,11 @@ public class OpenCV extends AbstractVideoSource {
   public String getDisplayFilter() {
     return displayFilter;
   }
-  
+
   public OpenCVData getFaceDetect() {
-    return getFaceDetect(500);
+    // willing to wait up to 5 seconds
+    // but if we find a face before 5s we wont wait
+    return getFaceDetect(5000);
   }
 
   // FIXME - getFaces() blocks ..
@@ -990,15 +1012,41 @@ public class OpenCV extends AbstractVideoSource {
         inputSource = INPUT_SOURCE_CAMERA;
       }
     }
-    
-    if (grabberType != null && grabberType.equals("FFmpeg") && inputSource.equals(INPUT_SOURCE_CAMERA)){
+
+    // certain files are "not" supported out of the box by certain grabbers
+    // ffmpeg is increadibly capable, however it won't do a youtube stream
+    // so we have to download/cache it and change the filename
+    if (inputFile != null && inputFile.startsWith("http") && inputFile.contains("youtube")) {
+      try { // FIXME - put in own Service - along with Google Image Downloader..
+        // get and cache youtube video
+        inputFile = getYouTube(inputFile);
+      } catch (Exception e) {
+        error(e);
+      }
+    } else if (inputFile != null && inputFile.startsWith("http")) {
+      // get and cache image file
+      inputFile = getImageFromUrl(inputFile);
+    }
+
+    String ext = null;
+    if (inputFile != null) {
+      int pos = inputFile.lastIndexOf(".");
+      if (pos > 0) {
+        ext = inputFile.substring(pos + 1).toLowerCase();
+      }
+    }
+    if (grabberType != null && (grabberType.equals("FFmpeg") || grabberType.equals("ImageFile")) && inputSource.equals(INPUT_SOURCE_CAMERA)) {
       log.warn("invalid state of ffmpeg and input source camera - setting to OpenCV frame grabber");
       grabberType = "OpenCV";
     }
-    
-    if (grabberType != null && grabberType.equals("OpenCV") && inputSource.equals(INPUT_SOURCE_FILE)){
+
+    if (grabberType != null && grabberType.equals("OpenCV") && inputSource.equals(INPUT_SOURCE_FILE)) {
       log.warn("invalid state of opencv and input source file - setting to FFmpeg frame grabber");
-      grabberType = "FFmpeg";
+      if (ext != null && videoFileExt.contains(ext)) {
+        grabberType = "FFmpeg";
+      } else {
+        grabberType = "ImageFile";
+      }
     }
 
     if (inputSource == null) {
@@ -1015,23 +1063,23 @@ public class OpenCV extends AbstractVideoSource {
       if (isDir.isDirectory()) {
         grabberType = "ImageFile";
       } else {
-        grabberType = "FFmpeg";
+        if (ext != null && videoFileExt.contains(ext)) {
+          grabberType = "FFmpeg";
+        } else {
+          grabberType = "ImageFile";
+        }
       }
     }
 
     if ((grabberType == null) && (inputSource.equals(INPUT_SOURCE_CAMERA))) {
       grabberType = "OpenCV";
     } else if ((grabberType == null) && (inputSource.equals(INPUT_SOURCE_FILE))) {
-      grabberType = "FFmpeg";
+      if (ext != null && videoFileExt.contains(ext)) {
+        grabberType = "FFmpeg";
+      } else {
+        grabberType = "ImageFile";
+      }
     }
-
-    /*
-    if ((grabberType == null || grabberType.equals("FFmpeg")) && (inputSource.equals(INPUT_SOURCE_CAMERA))) {
-      grabberType = "OpenCV";
-    } else if ((grabberType == null || grabberType.equals("OpenCV")) && (inputSource.equals(INPUT_SOURCE_FILE))) {
-      grabberType = "FFmpeg";
-    }
-    */
 
     String prefixPath;
     if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
@@ -1041,21 +1089,6 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     newGrabberType = String.format("%s%sFrameGrabber", prefixPath, grabberType);
-
-    // certain files are "not" supported out of the box by certain grabbers
-    // ffmpeg is increadibly capable, however it won't do a youtube stream
-    // so we have to download/cache it and change the filename
-    if (inputFile != null && inputFile.startsWith("http") && inputFile.contains("youtube")) {
-      try { // FIXME - put in own Service - along with Google Image Downloader..
-        // get and cache youtube video
-        inputFile = getYouTube(inputFile);
-      } catch (Exception e) {
-        error(e);
-      }
-    } else if (inputFile != null && inputFile.startsWith("http")) {
-      // get and cache image file
-      inputFile = getImageFromUrl(inputFile);
-    }
 
     log.info(String.format("video source is %s", inputSource));
     Class<?>[] paramTypes = new Class[1];
@@ -1125,9 +1158,9 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     grabber.start();
-    
+
     singleFrame = isSingleFrame();
-    
+
     broadcastState(); // restarting/enabled filters ?? wth?
     return grabber;
   }
@@ -1174,7 +1207,7 @@ public class OpenCV extends AbstractVideoSource {
 
   public String getYouTube(String url) throws IOException {
 
-    File cacheDir = new File(String.format("%s/%s-cache", getClass().getSimpleName(), getName()));
+    File cacheDir = new File(DATA_DIR);
     cacheDir.mkdirs();
 
     // get video key
@@ -1827,7 +1860,7 @@ public class OpenCV extends AbstractVideoSource {
    * 
    * @return
    */
-  private boolean isSingleFrame() {   
+  private boolean isSingleFrame() {
     if (inputSource.equals(INPUT_SOURCE_FILE) && inputFile != null) {
       String testExt = inputFile.toLowerCase();
       if (testExt.endsWith("jpg") || testExt.endsWith("jpeg") || testExt.endsWith("png") || testExt.endsWith("gif") || testExt.endsWith("tiff") || testExt.endsWith("tif")) {
@@ -1836,7 +1869,7 @@ public class OpenCV extends AbstractVideoSource {
     }
     return false;
   }
-  
+
   static public String putCacheFile(String url, byte[] data) {
     try {
       String path = OpenCV.DATA_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
@@ -1847,7 +1880,7 @@ public class OpenCV extends AbstractVideoSource {
     }
     return null;
   }
-  
+
   static public String getCacheFile(String url) {
     String path = OpenCV.DATA_DIR + File.separator + url.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
     File f = new File(path);
