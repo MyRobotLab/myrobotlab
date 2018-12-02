@@ -553,6 +553,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       for (String userName : sessions.get(botName).keySet()) {
         String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
         File sessionPredFile = new File(sessionPredicateFilename);
+        // if the file doesn't exist.. we should create it..  (and make the directories for it.)
+        if (!sessionPredFile.getParentFile().exists()) {
+          // create the directory.
+          log.info("Creating the directory {}", sessionPredFile.getParentFile());
+          sessionPredFile.getParentFile().mkdirs();
+        }
         Chat chat = getChat(userName, botName);
         // overwrite the original file , this should always be a full set.
         log.info("Writing predicate file for session {} {}", botName, userName);
@@ -565,6 +571,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
         BufferedWriter bw = new BufferedWriter(predWriter);
         bw.write(sb.toString());
         bw.close();
+        log.info("Saved predicates to file {}", sessionPredFile.getAbsolutePath());
       }
     }
     log.info("Done saving predicates.");
@@ -870,7 +877,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public static void main(String s[]) throws IOException {
     try {
-      LoggingFactory.init(Level.WARN);
+      LoggingFactory.init(Level.INFO);
       Runtime.start("gui", "SwingGui");
       //Runtime.start("webgui", "WebGui");
 
