@@ -40,11 +40,11 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterSURF;
 import org.myrobotlab.service.SwingGui;
 
-public class OpenCVFilterSurfGui extends OpenCVFilterGui implements ActionListener {
+public class OpenCVFilterSURFGui extends OpenCVFilterGui implements ActionListener {
 
   JTextField objectFilename = new JTextField("objectFilename", 200);
 
-  public OpenCVFilterSurfGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+  public OpenCVFilterSURFGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     objectFilename.addActionListener(this);
     TitledBorder title;

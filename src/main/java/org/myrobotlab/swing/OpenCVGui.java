@@ -269,12 +269,16 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       }
     } else if (o == grabberTypeSelect) {
       String type = (String)grabberTypeSelect.getSelectedItem();
-      if (type.startsWith("OpenKinect") || type.equals("PS3Eye") || type.equals("Sarxos") || type.equals("VideoInput")|| type.equals("FlyCapture")) {
+      /** 
+       * <pre> ALL FRAME GRABBER LOGIC IS DONE IN OpenCV.getGrabber() !!! 1 place of chaotic logic to rule them all !
+       
+      if (type != null && type.startsWith("OpenKinect") || type.equals("PS3Eye") || type.equals("Sarxos") || type.equals("VideoInput")|| type.equals("FlyCapture")) {
         // cuz these are all cameras ...
         log.warn("setting as camera as source");
         send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA);
       }
-      send("setGrabberType", grabberTypeSelect.getSelectedItem());      
+      */
+      send("setGrabberType", type);      
     } else if (o == recordFrameButton) {
       send("recordFrame");
     } else if (o == undock) {

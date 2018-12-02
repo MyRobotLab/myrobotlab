@@ -103,7 +103,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   public IplImage process(IplImage depth) throws InterruptedException {
 
     if (depth.depth() != 16 && depth.nChannels() != 1) {
-      log.error("not valid kinect depth image expecting 1 channel 16 depth got %d channel %d depth", depth.depth(), depth.nChannels());
+      log.error("not valid kinect depth image expecting 1 channel 16 depth got {} channel {} depth", depth.depth(), depth.nChannels());
       return depth;
     }
 

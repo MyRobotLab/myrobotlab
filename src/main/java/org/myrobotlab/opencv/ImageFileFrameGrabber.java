@@ -25,7 +25,7 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   protected transient IplImage image;
   transient private IplImage lastImage;
   
-  transient private HashMap<String, IplImage> cache = new HashMap<String, IplImage>();
+  // transient private HashMap<String, IplImage> cache = new HashMap<String, IplImage>();
   private int frameCounter = 0;
   public String path;
   transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
@@ -68,6 +68,8 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     path = imageFiles.get(grabCount).getAbsolutePath();
     log.debug("Grabbing file {} - {}", grabCount, path);
     // grab it.
+    image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED);
+    /*
     if (!cache.containsKey(path)) {
       image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED);
       cache.put(path, image);
@@ -78,7 +80,9 @@ public class ImageFileFrameGrabber extends FrameGrabber {
       } else {
         log.error("could not get cached image {}", path);
       }
+      
     }
+    */
 
     ++frameCounter;
 
