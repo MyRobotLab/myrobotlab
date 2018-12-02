@@ -73,7 +73,6 @@ public class OpenCVTest extends AbstractTest {
   // test remote file source
   // test mpeg streamer
 
-  @Ignore
   @Test
   public final void chaosCaptureTest() throws Exception {
     log.info("=======OpenCVTest chaosCaptureTest=======");
