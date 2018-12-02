@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.io.FileIO;
+import org.myrobotlab.inmoov.Utils;
 import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.GravityCenter;
@@ -137,6 +140,7 @@ public class InMoov extends Service {
   private boolean mute = false;
 
   public static int attachPauseMs = 100;
+  public Set<String> gesturesList = new TreeSet<String>();
 
   // TODO InMoovLife service
   public static boolean RobotIsTrackingSomething() {
@@ -1762,29 +1766,33 @@ public class InMoov extends Service {
    *          - the directory that contains the gesture python files.
    */
   public void loadGestures(String directory) {
-    // TODO: iterate over each of the python files in the directory
+
+    // iterate over each of the python files in the directory
     // and load them into the python interpreter.
+    String extension = "py";
+    Integer totalLoaded = 0;
+    Integer totalError = 0;
     File dir = makeGesturesDirectory(directory);
-    for (File f : dir.listFiles()) {
-      if (f.getName().toLowerCase().endsWith(".py")) {
-        log.info("Loading Gesture Python file {}", f.getAbsolutePath());
-        Python p = (Python) Runtime.getService("python");
-        String script = null;
-        try {
-          script = FileIO.toString(f.getAbsolutePath());
-        } catch (IOException e) {
-          log.warn("IO Error loading gesture file {} -- {}", f.getAbsolutePath(), e);
-          continue;
-        }
-        // evaluate the gestures scripts in a blocking way.
-        boolean result = p.exec(script, true, true);
-        if (!result) {
-          log.warn("Error while loading gesture file: {}", f.getAbsolutePath());
+    if (dir.exists()) {
+      for (File f : dir.listFiles()) {
+        if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
+          if (Utils.loadFile(f.getAbsolutePath()) == true) {
+            totalLoaded += 1;
+            gesturesList.add(f.getName());
+          } else {
+            totalError += 1;
+          }
         } else {
-          log.info("Successfully loaded gesture {}", f.getAbsolutePath());
+          log.warn("{} is not a {} file", f.getAbsolutePath(), extension);
         }
       }
     }
+    info("%s Gestures loaded, %s Gestures with error", totalLoaded, totalError);
+  }
+
+  public void stopGesture() {
+    Python p = (Python) Runtime.getService("python");
+    p.stop();
   }
 
   public void loadCalibration() {
@@ -1972,8 +1980,10 @@ public class InMoov extends Service {
       Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
       InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-      i01.startAll(leftPort, rightPort);
-      i01.moveArm("left", 20.0, 10.0, 5.0, 40.0);
+      i01.startLeftArm(leftPort);
+      i01.startRightArm(rightPort);
+      i01.moveArm("right", 20.0, 10.0, 5.0, 40.0);
+      i01.loadGestures("InMoov/gestures");
       log.info(i01.captureGesture());
       i01.rest();
       log.info(i01.captureGesture("rest"));
