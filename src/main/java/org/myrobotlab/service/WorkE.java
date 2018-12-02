@@ -1,6 +1,6 @@
 package org.myrobotlab.service;
 
-import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
@@ -9,29 +9,15 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.opencv.OpenCVFilterOpticalFlow;
 import org.myrobotlab.opencv.OpenCVFilterKinectNavigate;
 import org.myrobotlab.opencv.OpenCVFilterLKOpticalTrack;
+import org.myrobotlab.opencv.OpenCVFilterOpticalFlow;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
 
 public class WorkE extends Service implements StatusListener {
 
@@ -45,6 +31,14 @@ public class WorkE extends Service implements StatusListener {
 
   final public static String MOTOR_RIGHT = "motorRight";
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * <pre>
+   * FOSCAM 
+   * WORKY !!! - for IPCamera frame grabber
+   *  
+   * http://admin:admin@192.168.0.37/videostream.cgi?user=admin&pwd=admin
+   */
 
   /**
    * This static method returns all the details of the class without it having
@@ -129,6 +123,8 @@ public class WorkE extends Service implements StatusListener {
 
   // virtual uart for controller
   private transient Serial uart = null;
+
+  final List<Status> lastErrors = new ArrayList<Status>();
   // </pre>
 
   public WorkE(String n) {
@@ -148,8 +144,10 @@ public class WorkE extends Service implements StatusListener {
   // - in this particular case it was "randomly" decided that 2 parameters
   // FIXME - no defaults ?
   public void attach() throws Exception {
+    
+    // speakBlocking = true; FIXME - promote to Abstract
 
-    mute();
+    // mute();
 
     if (isVirtual()) {
 
@@ -194,7 +192,7 @@ public class WorkE extends Service implements StatusListener {
      */
     // FIXME - sleep(1000); should be pauseContinue() which blocks and "stops"
     // waiting for input if error
-    speak("subscribing to errors");
+    speak("subscribing to errors.");
     subscribe("*", "publishStatus");
     sleep(1000);
 
@@ -242,7 +240,8 @@ public class WorkE extends Service implements StatusListener {
     // brain.setPath("ProgramAB/bots");
     brain.setPath("..");
     brain.setCurrentBotName("worke"); // does this create a session ?
-    brain.setUsername("greg");
+    // brain.setUsername("greg");
+    brain.reloadSession("greg", "worke");
     // brain.reloadSession("greg", "worke"); // is this necessary??
 
     brain.attach(recognizer);
@@ -273,9 +272,14 @@ public class WorkE extends Service implements StatusListener {
      * speak("stopping"); stop(); sleep(1000); </pre>
      */
 
-    speak("all systems are go..");
-
-    speak("worke is worky");
+    if (!hasErrors()) {
+      speak("all systems are go..");
+      speak("worke is worky");
+    } else {
+      speak("not all systems are fully functional");
+    }
+    
+    clearErrors();
 
     // speak("i am ready");
 
@@ -294,6 +298,14 @@ public class WorkE extends Service implements StatusListener {
     // battery level
     // charging state
 
+  }
+
+  public void clearErrors() {
+    lastErrors.clear();
+  }
+
+  private boolean hasErrors() {
+    return lastErrors.size() > 0;
   }
 
   public void capture() {
@@ -406,6 +418,7 @@ public class WorkE extends Service implements StatusListener {
   public void onStatus(Status status) {
     if (status.isError() || status.isWarn()) {
       speak(status.toString());
+      lastErrors.add(status);
     }
   }
 
@@ -487,7 +500,7 @@ public class WorkE extends Service implements StatusListener {
   }
 
   public void setVolume(double volume) {
-    speech.getAudioFile().setVolume(volume);
+    speech.setVolume(volume);
   }
 
   public void speak(String... texts) {
@@ -499,7 +512,7 @@ public class WorkE extends Service implements StatusListener {
   public void speak(String text) {
     // IF NOT SILENT
     if (!mute) {
-      if (speakBlocking) {
+      if (speakBlocking) {// FIXME - promote to Abstract
         speech.speakBlocking(text);
       } else {
         speech.speak(text);
