@@ -130,7 +130,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
   Runtime myRuntime = null;
   Repo myRepo = null;
-  // RuntimeGui myGui;
 
   ServiceData serviceData = null;
 

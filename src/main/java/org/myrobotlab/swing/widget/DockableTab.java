@@ -338,13 +338,11 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 		log.info("windowDeactivated");
 	}
 	
-
-
 	public void hideTab() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				log.info("hideTab");
+				//log.debug("hideTab");
 				if (undocked != null) {
 					undocked.setVisible(false);
 				} else {
@@ -357,12 +355,32 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 						log.error("{} - has -1 index", self.title.getText());
 					}
 				}
-
 				tabData.isHidden = true;
-
 			}
 		});
 	}
+	
+	 public void unhideTab() {
+	    SwingUtilities.invokeLater(new Runnable() {
+	      @Override
+	      public void run() {
+	        //log.debug("unhideTab");
+	        if (undocked != null) {
+	          undocked.setVisible(true);
+	        } else {
+	          // YAY! - the way to do it !
+	          // String label = self.title.getText();
+	          display.setVisible(true);
+	          tabs.add(display);
+	          log.debug("here tabs count {}", tabs.getTabCount());
+	          tabs.setTabComponentAt(tabs.getTabCount() - 1, self.getTitleLabel());
+	          tabs.setBackgroundAt(tabs.getTabCount() - 1,transitDockedColor);
+	        }
+	        tabData.isHidden = false;
+	      }
+	    });
+	    
+	  }
 	
 	 private void release() {
 	   log.info("release invoked from SwingGui");
@@ -377,17 +395,10 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 		}
 	}
 
-	public void unhideTab() {
-		// TODO Auto-generated method stub
 
-	}
-
-	public Component getTitleLabel() {
+	public JLabel getTitleLabel() {
 		return title;
 	}
-	
-
-
 
 	public int getX() {
 		return tabData.x;
