@@ -1656,6 +1656,16 @@ public class OpenCV extends AbstractVideoSource {
     broadcastState();
   }
 
+  /**
+   * disable all the filters in the pipeline
+   */
+  synchronized public void disableAll() {
+    for (OpenCVFilter filter : filters.values()) {
+      filter.disable();
+    }
+    broadcastState();
+  }
+
   public void removeOverlays() {
     overlays = new HashMap<String, Overlay>();
   }
@@ -1692,6 +1702,19 @@ public class OpenCV extends AbstractVideoSource {
 
   public void setColor(String colorStr) {
     color = getAwtColor(colorStr);
+  }
+
+  /**
+   * enable() and setDisplayFilter() needed filter
+   *
+   */
+  public void setActiveFilter(String name) {
+    OpenCVFilter filter = filters.get(name);
+    if (filter == null) {
+      return;
+    }
+    filter.enable();
+    setDisplayFilter(name);
   }
 
   public void setDisplayFilter(String name) {
