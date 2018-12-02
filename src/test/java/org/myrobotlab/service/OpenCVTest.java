@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -72,6 +73,7 @@ public class OpenCVTest extends AbstractTest {
   // test remote file source
   // test mpeg streamer
 
+  @Ignore
   @Test
   public final void chaosCaptureTest() throws Exception {
     giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
