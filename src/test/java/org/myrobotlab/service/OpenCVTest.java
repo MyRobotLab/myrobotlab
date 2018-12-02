@@ -76,6 +76,7 @@ public class OpenCVTest extends AbstractTest {
   @Ignore
   @Test
   public final void chaosCaptureTest() throws Exception {
+    log.info("=======OpenCVTest chaosCaptureTest=======");
     giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
     giveToMonkey(cv, "capture");
     giveToMonkey(cv, "stopCapture");
@@ -100,6 +101,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void simplteFaceDetect() {
+    log.info("=======OpenCVTest simplteFaceDetect=======");
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
     OpenCVData data = cv.getFaceDetect();
@@ -110,6 +112,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void testAllCaptures() throws Exception {
+    log.info("=======OpenCVTest testAllCaptures=======");
 
     OpenCVData data = null;
 
@@ -167,6 +170,8 @@ public class OpenCVTest extends AbstractTest {
    */
   @Test
   public final void testAllFilterTypes() {
+    log.info("=======OpenCVTest testAllFilterTypes=======");
+
     log.info("starting all filters test");
     cv.reset();
     // 19 second blue red pill
@@ -189,6 +194,8 @@ public class OpenCVTest extends AbstractTest {
  
   @Test
   public final void testGetClassifications() {
+    log.info("=======OpenCVTest testGetClassifications=======");
+
     cv.reset();
     cv.setGrabberType("ImageFile");
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
