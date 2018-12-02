@@ -1023,10 +1023,12 @@ public class OpenCV extends AbstractVideoSource {
       } catch (Exception e) {
         error(e);
       }
-    } else if (inputFile != null && (inputFile.startsWith("http") && grabberType != null && !grabberType.equals("MJpeg") && !grabberType.equals("IPCamera"))) {
+    } else if (inputFile != null && (inputFile.startsWith("http"))) {
       // get and cache image file
       // FIXME - perhaps "test" stream to try to determine what "type" it is - mjpeg/jpg/gif/  octet-stream :( ???
-      inputFile = getImageFromUrl(inputFile);
+      if (grabberType == null || (grabberType != null && (!grabberType.equals("MJpeg") && !grabberType.equals("IPCamera")))) {
+        inputFile = getImageFromUrl(inputFile);
+      }
     }
 
     String ext = null;
