@@ -352,7 +352,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 					if (index != -1) {
 						tabs.remove(index);
 					} else {
-						log.error("{} - has -1 index", self.title.getText());
+						// log.error("{} - has -1 index", self.title.getText());
 					}
 				}
 				tabData.isHidden = true;

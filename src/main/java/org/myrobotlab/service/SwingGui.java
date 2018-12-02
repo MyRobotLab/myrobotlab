@@ -859,12 +859,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   @Override
   public void changedUpdate(DocumentEvent e) {
-    log.info("changedUpdate");
+    // log.info("changedUpdate");
   }
 
   @Override
   public void insertUpdate(DocumentEvent e) {
-    log.info("insertUpdate");
+    // log.info("insertUpdate");
     Map<String, DockableTab> m = tabs.getDockableTabs();
     String type = search.getText().toLowerCase();
     for (DockableTab t : m.values()) {
