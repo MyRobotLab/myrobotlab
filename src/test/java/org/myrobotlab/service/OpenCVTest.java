@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -74,6 +75,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void chaosCaptureTest() throws Exception {
+    log.info("=======OpenCVTest chaosCaptureTest=======");
     giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
     giveToMonkey(cv, "capture");
     giveToMonkey(cv, "stopCapture");
@@ -98,6 +100,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void simplteFaceDetect() {
+    log.info("=======OpenCVTest simplteFaceDetect=======");
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
     OpenCVData data = cv.getFaceDetect();
@@ -108,6 +111,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void testAllCaptures() throws Exception {
+    log.info("=======OpenCVTest testAllCaptures=======");
 
     OpenCVData data = null;
 
@@ -165,14 +169,16 @@ public class OpenCVTest extends AbstractTest {
    */
   @Test
   public final void testAllFilterTypes() {
+    log.info("=======OpenCVTest testAllFilterTypes=======");
+
     log.info("starting all filters test");
     cv.reset();
     // 19 second blue red pill
     cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
-      log.info("trying {}", fn);
-      if (fn.startsWith("DL4J") || fn.startsWith("SimpleBlobDetector")|| fn.startsWith("Solr")|| fn.startsWith("Split")) {
+      log.info("trying filter {}", fn);
+      if (fn.startsWith("DL4J") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector")|| fn.startsWith("Solr")|| fn.startsWith("Split")) {
         log.info("skipping {}", fn);
         continue;
       }
@@ -187,6 +193,8 @@ public class OpenCVTest extends AbstractTest {
  
   @Test
   public final void testGetClassifications() {
+    log.info("=======OpenCVTest testGetClassifications=======");
+
     cv.reset();
     cv.setGrabberType("ImageFile");
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");

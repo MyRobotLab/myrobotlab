@@ -198,7 +198,7 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
 
           boxes.add(box);
 
-          log.info("box {}", box);
+          //log.debug("box {}", box);
 
           if (origin == null) {
             origin = new CvPoint(width / 2, 10 /* height ?? */);
@@ -214,7 +214,7 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
             CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours) * 0.02, 1);
             for (int i = 0; i < result.total(); i++) {
               CvPoint point = new CvPoint(cvGetSeqElem(result, i));
-              log.info("point {}", point);
+              // log.debug("point {}", point);
             }
           }
           // Polygon polygon = new Polygon();
