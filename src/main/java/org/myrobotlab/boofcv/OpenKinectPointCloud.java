@@ -125,6 +125,7 @@ public class OpenKinectPointCloud {
 			  points = new ArrayList<Point3D_F64>(cloud.size());
 			}
 			
+			points.clear();
 			for( int i = 0; i < cloud.size; i++ ) {
 			  Point3D_F64 p = cloud.get(i);
 				int[] color = cloudColor.get(i);
