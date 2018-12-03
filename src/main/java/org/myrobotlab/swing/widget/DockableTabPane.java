@@ -209,4 +209,9 @@ public class DockableTabPane implements ActionListener {
 			dockTab(key);
 		}
 	}
+	
+	public Map<String, DockableTab> getDockableTabs(){
+	  return dockableTabs;
+	}
+	
 }

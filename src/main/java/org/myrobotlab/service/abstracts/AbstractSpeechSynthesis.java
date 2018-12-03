@@ -40,6 +40,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * substitutions are phonetic substitutions for a specific instance of speech synthesis service
    */
   Map<String, String> substitutions = new HashMap<String, String>();
+  
+  /**
+   * mute or unmute service
+   */
+  boolean mute = false;
 
   public static class Voice implements Serializable {
 	  
@@ -70,7 +75,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
      * Installed means the voice is ready without any additional components
      */
     boolean installed = true;
-
+    
     /**
      * Serializable key of voice implementation - to be used to map this MRL
      * Voice to a voice implementation
@@ -511,7 +516,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
         continue;
       }
 
-      process(audioData, speak, block);
+      if (!mute) {
+        process(audioData, speak, block);
+      }
 
       // effect files are handled differently from generated audio
       playList.add(audioData);
@@ -926,6 +933,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       setReady(true);
     }
     return super.isReady();
+  }
+  
+  public void mute() {
+    this.mute = true;
+  }
+  
+  public void unmute() {
+    this.mute = false;
   }
 
   static public ServiceType getMetaData(String serviceType) {

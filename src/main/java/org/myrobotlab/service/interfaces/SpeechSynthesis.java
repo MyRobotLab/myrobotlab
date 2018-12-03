@@ -95,6 +95,16 @@ public interface SpeechSynthesis extends NameProvider {
    * @return text
    */
   public String publishEndSpeaking(String utterance);
+  
+  /**
+   * silence the service
+   */
+  public void mute();
+  
+  /**
+   * un-silence the service
+   */
+  public void unmute();
 
   // FIXME - not needed in interface
   // public String getLocalFileName(SpeechSynthesis provider, String toSpeak)

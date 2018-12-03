@@ -1023,9 +1023,12 @@ public class OpenCV extends AbstractVideoSource {
       } catch (Exception e) {
         error(e);
       }
-    } else if (inputFile != null && inputFile.startsWith("http")) {
+    } else if (inputFile != null && (inputFile.startsWith("http"))) {
       // get and cache image file
-      inputFile = getImageFromUrl(inputFile);
+      // FIXME - perhaps "test" stream to try to determine what "type" it is - mjpeg/jpg/gif/  octet-stream :( ???
+      if (grabberType == null || (grabberType != null && (!grabberType.equals("MJpeg") && !grabberType.equals("IPCamera")))) {
+        inputFile = getImageFromUrl(inputFile);
+      }
     }
 
     String ext = null;
@@ -1653,6 +1656,16 @@ public class OpenCV extends AbstractVideoSource {
     broadcastState();
   }
 
+  /**
+   * disable all the filters in the pipeline
+   */
+  synchronized public void disableAll() {
+    for (OpenCVFilter filter : filters.values()) {
+      filter.disable();
+    }
+    broadcastState();
+  }
+
   public void removeOverlays() {
     overlays = new HashMap<String, Overlay>();
   }
@@ -1689,6 +1702,19 @@ public class OpenCV extends AbstractVideoSource {
 
   public void setColor(String colorStr) {
     color = getAwtColor(colorStr);
+  }
+
+  /**
+   * enable() and setDisplayFilter() needed filter
+   *
+   */
+  public void setActiveFilter(String name) {
+    OpenCVFilter filter = filters.get(name);
+    if (filter == null) {
+      return;
+    }
+    filter.enable();
+    setDisplayFilter(name);
   }
 
   public void setDisplayFilter(String name) {

@@ -33,6 +33,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.Serializable;
@@ -55,6 +57,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
@@ -105,7 +109,7 @@ import com.mxgraph.view.mxGraph;
  * Tabs-On-JTabbedPaneI-Now-A-breeze
  * 
  */
-public class SwingGui extends Service implements WindowListener, ActionListener, Serializable {
+public class SwingGui extends Service implements WindowListener, ActionListener, Serializable, DocumentListener, FocusListener {
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(SwingGui.class);
@@ -145,6 +149,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   transient JTextField status = new JTextField("status:");
   transient JButton statusClear = new JButton("clear");
+
+  transient final JTextField search = new JTextField();
 
   boolean active = false;
 
@@ -223,6 +229,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     } else {
       tabs.setStateSaver(this);
     }
+
     log.info("tabs size {}", tabs.size());
 
     for (String title : tabs.keySet()) {
@@ -289,6 +296,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    */
   synchronized public void addTab(final ServiceInterface sw) {
 
+    // scroll.addItem(sw.getName());
+
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -336,10 +345,10 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         }
         // newGui.getDisplay().setBackground(Color.CYAN);
 
-        tabs.addTab(name, newGui.getDisplay(),Runtime.getService(name).getDescription());
+        tabs.addTab(name, newGui.getDisplay(), Runtime.getService(name).getDescription());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
-//        pack();  FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
+        // pack(); FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
       }
     });
   }
@@ -386,9 +395,15 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     JMenuItem about = new JMenuItem("about");
     about.addActionListener(this);
     help.add(about);
+
+    search.addFocusListener(this);
+
+    menuBar.add(search);
     menuBar.add(Box.createHorizontalGlue());
     menuBar.add(help);
 
+    search.getDocument().addDocumentListener(this);
+    // search.addActionListener(this);
     return menuBar;
   }
 
@@ -460,6 +475,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   /**
    * set the main status bar with Status information
+   * 
    * @param inStatus
    */
   public void setStatus(Status inStatus) {
@@ -772,7 +788,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
       SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
-      for(int i = 0; i < 40; ++i){
+      for (int i = 0; i < 40; ++i) {
         Runtime.start(String.format("servo%d", i), "Servo");
       }
 
@@ -784,7 +800,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public void setActiveTab(String title) {
     // we need to wait a little after Runtime.start to select an active tab
     // TODO understand why we need a sleep(1000);
-    this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));       
+    this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));
   }
 
   /**
@@ -800,13 +816,13 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     ServiceType meta = new ServiceType(SwingGui.class.getCanonicalName());
     meta.addDescription("Service used to graphically display and control other services");
     meta.addCategory("display");
-    
+
     meta.includeServiceInOneJar(true);
     meta.addDependency("com.fifesoft", "rsyntaxtextarea", "2.0.5.1");
     meta.addDependency("com.fifesoft", "autocomplete", "2.0.5.1");
     meta.addDependency("com.jidesoft", "jide-oss", "3.6.18");
     meta.addDependency("com.mxgraph", "jgraphx", "1.10.4.2");
-    
+
     return meta;
   }
 
@@ -820,6 +836,55 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   public void resetDesktop(String name) {
     tabs.resetDesktop(name);
+  }
+
+  @Override
+  public void focusGained(FocusEvent e) {
+    Object o = e.getSource();
+    if (o == search) {
+      // scroll.setVisible(true);
+    }
+    log.info("focusGained");
+  }
+
+  @Override
+  public void focusLost(FocusEvent e) {
+    Object o = e.getSource();
+    if (o == search) {
+      // scroll.setVisible(false);
+    }
+    log.info("focusLost");
+    // frame.pack();
+  }
+
+  @Override
+  public void changedUpdate(DocumentEvent e) {
+    // log.info("changedUpdate");
+  }
+
+  @Override
+  public void insertUpdate(DocumentEvent e) {
+    // log.info("insertUpdate");
+    Map<String, DockableTab> m = tabs.getDockableTabs();
+    String type = search.getText().toLowerCase();
+    for (DockableTab t : m.values()) {
+      if (t.getTitleLabel().getText().toString().toLowerCase().contains(type)) {
+        t.unhideTab();
+      } else {
+        t.hideTab();
+      }
+    }
+  }
+
+  @Override
+  public void removeUpdate(DocumentEvent e) {
+    String type = search.getText();
+    Map<String, DockableTab> m = tabs.getDockableTabs();
+    if (type == null || type.length() == 0) {
+      for (DockableTab t : m.values()) {
+        t.unhideTab();
+      }
+    }
   }
 
 }
