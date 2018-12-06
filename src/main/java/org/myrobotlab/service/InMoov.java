@@ -1217,8 +1217,6 @@ public class InMoov extends Service {
     }
     eyesTracking = (Tracking) startPeer("eyesTracking");
     eyesTracking.connect(opencv, head.eyeX, head.eyeY);
-    // TODO: why do we need this next line?
-    arduinos.put(port, (ServoController) eyesTracking.getArduino());
     return eyesTracking;
   }
 
@@ -1340,8 +1338,6 @@ public class InMoov extends Service {
     headTracking = (Tracking) startPeer("headTracking");
     // We should pass the servos that control the head in here!
     headTracking.connect(opencv, head.rothead, head.neck);
-    // TODO: why is this needed?!
-    arduinos.put(port, (ServoController) headTracking.controller);
     return headTracking;
   }
 
