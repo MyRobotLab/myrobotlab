@@ -700,7 +700,7 @@ public class OpenCV extends AbstractVideoSource {
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
 
   transient BlockingQueue<OpenCVData> blockingData = new LinkedBlockingQueue<>();
-  int cameraIndex = 0;
+  Integer cameraIndex;
   volatile boolean capturing = false;
   Classifications classifications = null;
   boolean closeOutputs = false;
@@ -729,7 +729,7 @@ public class OpenCV extends AbstractVideoSource {
   StringBuffer frameTitle = new StringBuffer();
   transient FrameGrabber grabber = null;
 
-  String grabberType = null;
+  String grabberType;
 
   Integer height = null;
   String inputFile = null;
@@ -776,7 +776,7 @@ public class OpenCV extends AbstractVideoSource {
   // Changed default to false. Otherwise multiple opencv instances will get a
   // port in use bind exception.
   // TODO: fix how the opencv service can stream video to the webgui.
-  boolean streamerEnabled = false;
+  Boolean streamerEnabled;
 
   // final Object lock = new Object();
 
@@ -798,6 +798,11 @@ public class OpenCV extends AbstractVideoSource {
     putText(20, 30, "frame: %d");
     File cacheDir = new File(DATA_DIR);
     cacheDir.mkdirs();
+
+    //Init default config
+    if (cameraIndex == null) {
+      cameraIndex = 0;
+    }
   }
 
   synchronized public OpenCVFilter addFilter(OpenCVFilter filter) {
