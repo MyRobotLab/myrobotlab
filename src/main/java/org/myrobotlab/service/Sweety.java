@@ -909,7 +909,7 @@ public class Sweety extends Service {
     sleep(1000);
     tracker.connect(tracker.getOpenCV(),neckPanServo ,neckTiltServo);
     //tracker.pid.invert("y");
-	tracker.clearPreFilters();
+	  //tracker.clearPreFilters();
 	
      
   }
