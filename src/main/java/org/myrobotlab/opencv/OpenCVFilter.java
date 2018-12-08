@@ -52,9 +52,8 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.net.Http;
+import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
@@ -376,6 +375,12 @@ public abstract class OpenCVFilter implements Serializable {
   public void publishClassification(Map<String, List<Classification>> data) {
     if (opencv != null) {
       opencv.invoke("publishClassification", data);
+    }
+  }
+  
+  public void publishPointCloud(PointCloud pointCloud) {
+    if (opencv != null) {
+      opencv.invoke("publishPointCloud", new Object[] {pointCloud});
     }
   }
 

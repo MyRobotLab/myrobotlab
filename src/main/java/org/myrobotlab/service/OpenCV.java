@@ -75,6 +75,8 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
+import org.myrobotlab.math.geometry.Point3df;
+import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.FrameFileRecorder;
@@ -791,6 +793,8 @@ public class OpenCV extends AbstractVideoSource {
   boolean recordingFrames = false;
 
   private boolean singleFrame;
+
+  private PointCloud lastPointCloud;
 
   public OpenCV(String n) {
     super(n);
@@ -1904,6 +1908,15 @@ public class OpenCV extends AbstractVideoSource {
       return null;
     }
     return putCacheFile(url, data);
+  }
+  
+  public PointCloud publishPointCloud(PointCloud pointCloud){
+    lastPointCloud = pointCloud;
+    return pointCloud;
+  }
+
+  public PointCloud getPointCloud() {    
+    return lastPointCloud;
   }
 
 }

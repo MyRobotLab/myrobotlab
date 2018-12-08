@@ -26,10 +26,10 @@ import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
+import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
@@ -515,6 +515,10 @@ public class OpenCVData implements Serializable {
     ImageIO.write(getDisplay(), format, fos);
     fos.close();
     return filename;
+  }
+
+  public PointCloud getPointCloud() {
+    return null;
   }
 
 }

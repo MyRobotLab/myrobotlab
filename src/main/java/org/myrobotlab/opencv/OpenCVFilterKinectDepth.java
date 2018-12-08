@@ -57,9 +57,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   double maxY = 1.0;
   double minX = 0;
   double minY = 0.0;
-
-  IplImage returnImage = null;
-
+  
   /**
    * list of samplepoint to return depth
    */
@@ -172,20 +170,6 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
       graphics.drawOval(point.x, point.y, 2, 2);
     }
     return image;
-  }
-
-  public IplImage processx(IplImage image) {
-
-    if (returnImage == null) {
-      returnImage = IplImage.create(image.width(), image.height(), 16, 3);
-    }
-
-    // cvCvtColor(image, returnImage, CV_GRAY2BGR);
-    // cvCvtColor(image, returnImage, CV_BGR2HSV);
-    // cvCvtColor(image, returnImage, COLOR_BGR2HSV);
-
-    return returnImage;
-
   }
 
   public void samplePoint(Integer x, Integer y) {
