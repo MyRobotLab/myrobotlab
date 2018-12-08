@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -19,13 +20,17 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.geometry.Point3df;
+import org.myrobotlab.math.geometry.PointCloud;
+import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.virtual.VirtualMotor;
 import org.slf4j.Logger;
 
-import com.google.gson.internal.LinkedTreeMap;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
 import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -35,13 +40,22 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.VertexBuffer;
+import com.jme3.scene.control.BillboardControl;
+import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
+import com.jme3.util.BufferUtils;
 
 public class JMonkeyEngine extends Service {
 
@@ -278,18 +292,35 @@ public class JMonkeyEngine extends Service {
   public static void main(String[] args) {
     try {
 
-      // FIXME - ADD DEFAULT ROTATION !!! ... default"move" & default"rotate" & default rotationalMask !!!
+      // FIXME - ADD DEFAULT ROTATION !!! ... default"move" & default"rotate" &
+      // default rotationalMask !!!
       // FIXME - something to autoAttach ! ... even at origin position
 
       LoggingFactory.init(Level.INFO);
 
+      Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      jme.subscribe("cv", "publishPointCloud");
+
+      cv.addFilter("floor", "KinectPointCloud");
+
+      // jme.putText("test", 5, 5, 5);
+      cv.capture("../1543648225286");
       // jme.startServoController("i01.left"); // GAH won't work :(
       // jme.startServoController("i01.right");
 
       //
       // Runtime.start("i01.left", "Jme3ServoController"); GAH won't work :(
       // Runtime.start("i01.right", "Jme3ServoController");
+      jme.start();
+
+      // jme.onPointCloud(cv.getPointCloud());
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       VirtualServoController vsc = (VirtualServoController) Runtime.start("i01.left", "VirtualServoController");
       vsc.attachSimulator(jme);
@@ -433,9 +464,11 @@ public class JMonkeyEngine extends Service {
 
     inputManager.setCursorVisible(true);
     flyCam.setEnabled(false);
-    cam.setLocation(new Vector3f(0f, 0f, 900f));
+    // cam.setLocation(new Vector3f(0f, 0f, 900f));
+    cam.setLocation(new Vector3f(0f, 0f, 600f));
 
     assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
+    assetManager.registerLocator("./", FileLocator.class);
 
     inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
     inputManager.addListener(analogListener, "MouseClickL");
@@ -468,7 +501,7 @@ public class JMonkeyEngine extends Service {
     inputManager.addMapping("FullScreen", new KeyTrigger(KeyInput.KEY_F));
     inputManager.addListener(analogListener, "FullScreen");
 
-    viewPort.setBackgroundColor(ColorRGBA.Gray);
+    viewPort.setBackgroundColor(ColorRGBA.Black);
 
     DirectionalLight sun = new DirectionalLight();
     sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
@@ -482,6 +515,12 @@ public class JMonkeyEngine extends Service {
     // FIXME - INPUT ALL THIS VIA TEXT/yaml/json config !!!
 
     putNode("rootNode", rootNode);
+
+    boolean test = true;
+    if (test) {
+      return;
+    }
+
     putNode("i01.torso.lowStom", "rootNode", "Models/ltorso.j3o", null, Vector3f.UNIT_X.mult(1), new Vector3f(0, 0, 0), 0);
 
     // FIXME - bind this to process Peers !!!! "default" "Peer" info in 3D form
@@ -531,10 +570,10 @@ public class JMonkeyEngine extends Service {
     putNode("i01.head.jaw", "i01.head.rothead", "Models/jaw.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(-5, 60, -50), 90);
 
     save("inmoov-jme.json");
-    
+
     // Vector3D vector = new Vector3D(7, 3, 120);
     load("inmoov-jme.json");
-    
+
     save("inmoov-jme1.json");
   }
 
@@ -575,7 +614,6 @@ public class JMonkeyEngine extends Service {
     }
     return nodes.put(name, new Jme3Object(this, name, parentName, assetPath, mapper, rotationMask, localTranslation, currentAngle));
   }
-  
 
   public boolean load(String jsonPath) {
     try {
@@ -610,6 +648,265 @@ public class JMonkeyEngine extends Service {
 
   public Spatial loadModel(String assetPath) {
     return assetManager.loadModel(assetPath);
+  }
+
+  // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
+
+  // TODO - PointCloudListener ...
+  public void onPointCloud() {
+    // FIXME - parallel !!!!
+    Vector3f[] lineVerticies = new Vector3f[13];
+
+    lineVerticies[0] = new Vector3f(0, 0, 0);
+    lineVerticies[1] = new Vector3f(100, 0, 0);
+    lineVerticies[2] = new Vector3f(0, 100, 0);
+    lineVerticies[3] = new Vector3f(0, 0, 100);
+    lineVerticies[4] = new Vector3f(0, 100, 100);
+    lineVerticies[5] = new Vector3f(100, 100, 0);
+    lineVerticies[6] = new Vector3f(100, 0, 100);
+    lineVerticies[7] = new Vector3f(0, 0, 0);
+    lineVerticies[8] = new Vector3f(200, 0, 0);
+    lineVerticies[9] = new Vector3f(-100, 0, 100);
+    lineVerticies[10] = new Vector3f(0, 100, 100);
+    lineVerticies[11] = new Vector3f(1, 1, 1);
+    lineVerticies[12] = new Vector3f(1, 4, 0);
+
+    // plotPoints(lineVerticies,ColorRGBA.White);
+
+    Mesh mesh = new Mesh();
+    mesh.setMode(Mesh.Mode.Points);
+
+    mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(lineVerticies));
+
+    mesh.updateBound();
+    mesh.updateCounts();
+
+    Geometry geo = new Geometry("line", mesh);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", ColorRGBA.Red);
+    geo.setMaterial(mat);
+
+    rootNode.attachChild(geo);
+  }
+
+  FloatBuffer pointCloudBuffer = null;
+  Mesh pointCloudMesh = new Mesh();
+  Material pointCloudMat = null;
+
+  // FIXME - get then write directly to Mesh.getBuffer()
+  // then set with mesh.setData(buffer)
+  // https://hub.jmonkeyengine.org/t/updating-mesh-vertices/25088/7
+
+  public void initPointCloud(PointCloud pointCloud) {
+    addFloor();
+    
+    Point3df[][] points = pointCloud.getViewPort();
+    int width = pointCloud.getViewPortX();
+    int height = pointCloud.getViewPortY();
+    Vector3f[] lineVerticies = new Vector3f[width * height];
+
+    // FIXME - BETTER WAY TO INITIALIZE !!
+
+    int index = 0;
+    for (int x = 0; x < width; ++x) {
+      for (int y = 0; y < height; ++y) {
+        Point3df p = points[x][y];
+        // log.info("p {}", p);
+        // lineVerticies[index] = new Vector3f(480 - p.y, 640 - p.x, p.z);
+        lineVerticies[index] = new Vector3f(0, 0, 0);
+        ++index;
+      }
+    }
+
+    pointCloudBuffer = BufferUtils.createFloatBuffer(lineVerticies);
+
+    // mesh.setMode(Mesh.Mode.TriangleFan);
+    pointCloudMesh.setMode(Mesh.Mode.Points);
+    // mesh.setMode(Mesh.Mode.Lines);
+    // mesh.setMode(Mesh.Mode.Triangles);
+
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
+    pointCloudMesh.updateBound();
+    pointCloudMesh.updateCounts();
+
+    Geometry geo = new Geometry("line", pointCloudMesh);
+    pointCloudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    pointCloudMat.setColor("Color", ColorRGBA.Green);
+    geo.setMaterial(pointCloudMat);
+
+    rootNode.attachChild(geo);
+
+    putTextx("blah", 5,5,5);
+
+  }
+
+  public void onPointCloud(PointCloud pointCloud) {
+
+    if (pointCloud == null) {
+      return;
+    }
+
+    if (pointCloudBuffer == null) {
+      initPointCloud(pointCloud);
+    }
+
+    Point3df[][] points = pointCloud.getViewPort();
+    int width = pointCloud.getViewPortX();
+    int height = pointCloud.getViewPortY();
+
+    // start at the beginning to begin update
+    pointCloudBuffer.rewind();
+
+    for (int x = 0; x < width; ++x) {
+      for (int y = 0; y < height; ++y) {
+        Point3df p = points[x][y];
+        // log.info("p {}", p);
+        // pointCloudBuffer.put(480 - p.y);
+        // pointCloudBuffer.put(640 - p.x);
+        pointCloudBuffer.put(p.y);
+        pointCloudBuffer.put(p.x);
+        pointCloudBuffer.put(p.z);
+        // lineVerticies[index] = new Vector3f(480 - p.y, 640 - p.x, p.z);
+      }
+    }
+
+    // pointCloudMesh.getBuffer(VertexBuffer.Type.Position).setData
+    // pointCloudMat.setColor("Color", ColorRGBA.Green);
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
+
+    // plotPoints(lineVerticies,ColorRGBA.White);
+
+    ///////////// Cube ////////////////////
+    /**
+     * Box b = new Box(100, 100, 100); // create cube shape Geometry geom = new
+     * Geometry("Box", b); // create cube geometry from the // shape mat = new
+     * Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"); // create //
+     * a // simple // material mat.setColor("Color", ColorRGBA.Blue); // set
+     * color of material to blue geom.setMaterial(mat); // set the cube's
+     * material
+     * 
+     * rootNode.attachChild(geom);
+     */
+
+    ///////////// 2nd mesh attempt ////////////////////
+    /**
+     * <pre>
+     * Mesh m = new Mesh();
+     * Vector3f[] vertices = new Vector3f[4];
+     * vertices[0] = new Vector3f(226.354990f, -240.326794f, 0);
+     * vertices[1] = new Vector3f(-236.938738f, 250.282257f, -100);
+     * vertices[2] = new Vector3f(246.516779f, 260.237816f, -220);
+     * vertices[3] = new Vector3f(-256.126751f, -270.237816f, 230);
+     * m.setBuffer(com.jme3.scene.VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
+     * m.updateBound();
+     * 
+     * // Creating a geometry, and apply a single color material to it
+     * 
+     * geom = new Geometry("OurMesh", m);
+     * // m.setMode(Mesh.Mode.Points);
+     * m.setMode(Mesh.Mode.Lines);
+     * m.setPointSize(100f);
+     * m.updateBound();
+     * m.setStatic();
+     * mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+     * mat.setColor("Color", ColorRGBA.Green);
+     * mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+     * geom.setMaterial(mat);
+     * 
+     * // Attaching our geometry to the root node.
+     * rootNode.attachChild(geom);
+     * </pre>
+     */
+  }
+
+  Node n;
+  Node n2;
+  
+  public void addFloor() {
+    Material matSoil = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+    matSoil.setBoolean("UseMaterialColors", true);
+    matSoil.setColor("Ambient", ColorRGBA.Gray);
+    matSoil.setColor("Diffuse", ColorRGBA.Gray);
+    matSoil.setColor("Specular", ColorRGBA.Black);
+    Geometry soil = new Geometry("soil", new Box(1000, 1, 1000));
+    soil.setLocalTranslation(0, -1, 0);
+    soil.setMaterial(matSoil);
+    rootNode.attachChild(soil);
+  }
+
+  public void putTextx(String text, int x, int y, int z) {
+    Quad q = new Quad(2, 2);
+    Geometry g = new Geometry("Quad", q);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", ColorRGBA.Blue);
+    g.setMaterial(mat);
+
+    Quad q2 = new Quad(1, 1);
+    Geometry g3 = new Geometry("Quad2", q2);
+    Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat2.setColor("Color", ColorRGBA.Yellow);
+    g3.setMaterial(mat2);
+    g3.setLocalTranslation(.5f, .5f, .01f);
+
+    Box b = new Box(.25f, .5f, .25f);
+    Geometry g2 = new Geometry("Box", b);
+    g2.setLocalTranslation(0, 0, 3);
+    g2.setMaterial(mat);
+
+    BitmapFont font = assetManager.loadFont("Common/Default.fnt");
+    BitmapText bmText = new BitmapText(font, false);
+
+    bmText.setSize(30);
+
+    bmText.setText("Billboard Data");
+
+    bmText.setQueueBucket(Bucket.Transparent);
+
+    bmText.setColor(ColorRGBA.White);
+
+    Node bb = new Node("billboard");
+
+    BillboardControl control = new BillboardControl();
+    control.setAlignment(BillboardControl.Alignment.Screen);
+
+    bb.addControl(control);
+    bb.attachChild(bmText);
+    bb.attachChild(g);
+    bb.attachChild(g3);
+    /*
+     * Node textNode = new Node("Node for text");
+     * 
+     * //textNode.setLocalTranslation(newPos);
+     * 
+     * // textNode.setCullHint(CullHint.Never);
+     * 
+     * textNode.attachChild(bmText);
+     * 
+     * textNode.addControl(control);
+     * 
+     * // Add the node to root node
+     * 
+     * app.getRootNode().attachChild(textNode);
+     */
+
+    n = new Node("parent");
+    n.attachChild(g2);
+    n.attachChild(bb);
+    rootNode.attachChild(n);
+
+    n2 = new Node("parentParent");
+    n2.setLocalTranslation(Vector3f.UNIT_X.mult(5));
+    n2.attachChild(n);
+
+    rootNode.attachChild(n2);
+  }
+
+  public void onOpenCVData(OpenCVData data) {
+
+    // data.getKinectDepth();
+    // PointCloud cloud =
+    onPointCloud(data.getPointCloud());
+
   }
 
 }
