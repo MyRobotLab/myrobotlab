@@ -279,46 +279,46 @@ public class OpenKinectOdometry {
 		// Load the (4*4) Transformation matrix from Rotations (3*3) and Translations (3*1) 
 		// From the Odometry
 		transMat.set(0, 0, R.get(0,0));
-        transMat.set(1, 0, R.get(1,0));
-        transMat.set(2, 0, R.get(2,0));
-        transMat.set(3, 0, T.getX());
-        transMat.set(0, 1, R.get(0,0));
-        transMat.set(1, 1, R.get(1,1));
-        transMat.set(2, 1, R.get(2,1));
-        transMat.set(3, 1, T.getY());
-        transMat.set(0, 2, R.get(0,2));
-        transMat.set(1, 2, R.get(1,2));
-        transMat.set(2, 2, R.get(2,2));
-        transMat.set(3, 2, T.getZ());
-        transMat.set(0, 3, 0.0);
-        transMat.set(1, 3, 0.0);
-        transMat.set(2, 3, 0.0);
-        transMat.set(3, 3, 1.0);
+    transMat.set(1, 0, R.get(1,0));
+    transMat.set(2, 0, R.get(2,0));
+    transMat.set(3, 0, T.getX());
+    transMat.set(0, 1, R.get(0,0));
+    transMat.set(1, 1, R.get(1,1));
+    transMat.set(2, 1, R.get(2,1));
+    transMat.set(3, 1, T.getY());
+    transMat.set(0, 2, R.get(0,2));
+    transMat.set(1, 2, R.get(1,2));
+    transMat.set(2, 2, R.get(2,2));
+    transMat.set(3, 2, T.getZ());
+    transMat.set(0, 3, 0.0);
+    transMat.set(1, 3, 0.0);
+    transMat.set(2, 3, 0.0);
+    transMat.set(3, 3, 1.0);
 
 		// Load the (4*4) Transformation matrix from Rotations (3*3) and Translations (3*1) 
-        //    No rotation or transformation (unit matrix)
-        // 1 0 0 0
-        // 0 1 0 0
-        // 0 0 1 0
-        // 0 0 0 1
-        transMat.set(0, 0, 1.0);
-        transMat.set(1, 0, 0.0);
-        transMat.set(2, 0, 0.0);
-        transMat.set(3, 0, 0.0); // Translate X
-        transMat.set(0, 1, 0.0);
-        transMat.set(1, 1, 1.0);
-        transMat.set(2, 1, 0.0);
-        transMat.set(3, 1, 0.0); // Translate Y
-        transMat.set(0, 2, 0.0);
-        transMat.set(1, 2, 0.0);
-        transMat.set(2, 2, 1.0);
-        transMat.set(3, 2, 0.0); // Translate Z
-        transMat.set(0, 3, 0.0);
-        transMat.set(1, 3, 0.0);
-        transMat.set(2, 3, 0.0);
-        transMat.set(3, 3, 1.0);
+    //    No rotation or transformation (unit matrix)
+    // 1 0 0 0
+    // 0 1 0 0
+    // 0 0 1 0
+    // 0 0 0 1
+    transMat.set(0, 0, 1.0);
+    transMat.set(1, 0, 0.0);
+    transMat.set(2, 0, 0.0);
+    transMat.set(3, 0, 0.0); // Translate X
+    transMat.set(0, 1, 0.0);
+    transMat.set(1, 1, 1.0);
+    transMat.set(2, 1, 0.0);
+    transMat.set(3, 1, 0.0); // Translate Y
+    transMat.set(0, 2, 0.0);
+    transMat.set(1, 2, 0.0);
+    transMat.set(2, 2, 1.0);
+    transMat.set(3, 2, 0.0); // Translate Z
+    transMat.set(0, 3, 0.0);
+    transMat.set(1, 3, 0.0);
+    transMat.set(2, 3, 0.0);
+    transMat.set(3, 3, 1.0);
         
-        Log.info("Points size() 2", points.size(), "\n");
+    Log.info("Points size() 2", points.size(), "\n");
 		for( int i = 0; i < points.size(); i++ ) {
 			// Transform from cartesian to homogenous coordinates ( 4 dimensions )
 		    Point3D_F64 p = points.get(i);
