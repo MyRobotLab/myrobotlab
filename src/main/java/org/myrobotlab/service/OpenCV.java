@@ -701,7 +701,7 @@ public class OpenCV extends AbstractVideoSource {
 
   transient BlockingQueue<OpenCVData> blockingData = new LinkedBlockingQueue<>();
   Integer cameraIndex;
-  volatile boolean capturing = false;
+  transient volatile boolean capturing = false;
   Classifications classifications = null;
   boolean closeOutputs = false;
 
