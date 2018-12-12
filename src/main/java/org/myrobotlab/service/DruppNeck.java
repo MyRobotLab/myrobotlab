@@ -4,9 +4,8 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.DruppIKSolver;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.ServoControl;
-
-import marytts.util.math.MathUtils;
 
 /**
  * 
@@ -49,24 +48,25 @@ public class DruppNeck extends Service {
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
     // convert to radians
-    double rollRad = MathUtils.degrees2radian(roll);
-    double pitchRad = MathUtils.degrees2radian(pitch);
-    double yawRad = MathUtils.degrees2radian(yaw);
+    
+    double rollRad = MathUtils.degToRad(roll);
+    double pitchRad = MathUtils.degToRad(pitch);
+    double yawRad = MathUtils.degToRad(yaw);
     // TODO: if the solver fails, should we catch this exception ?
     double[] result = solver.solve(rollRad, pitchRad, yawRad);
     // convert to degrees
-    double upDeg = MathUtils.radian2degrees(result[0]) + upOffset;
-    double middleDeg = MathUtils.radian2degrees(result[1]) + middleOffset;
-    double downDeg = MathUtils.radian2degrees(result[2]) + downOffset;
-    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}",roll,pitch,yaw,upDeg,middleDeg,downDeg);
+    double upDeg = MathUtils.radToDeg(result[0]) + upOffset;
+    double middleDeg = MathUtils.radToDeg(result[1]) + middleOffset;
+    double downDeg = MathUtils.radToDeg(result[2]) + downOffset;
     // Ok, servos can only (typically) move from 0 to 180.. if any of the angles are negative... we can't move there.. let's log a warning
     // TODO: use the actual min/max .. and if we're out of range.. then log this. but for the drupp neck, if you've installed it correctly,
     // all servos can go from 0 to 180...
     if (upDeg < 0 || middleDeg < 0 || downDeg < 0 || upDeg > 180 || middleDeg > 180 || downDeg > 180) {
-      log.warn("Target Position out of range! Roll:{} Pitch:{} Yaw:{}", roll, pitch, yaw);
+      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}",roll,pitch,yaw,MathUtils.round(upDeg,3),MathUtils.round(middleDeg,3),MathUtils.round(downDeg,3));
       // Skipping this movement as it's likely unstable!
       return;
     }
+    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}",roll,pitch,yaw,MathUtils.round(upDeg,3),MathUtils.round(middleDeg,3),MathUtils.round(downDeg,3));
     // we should probably track the last moved to position.
     up.moveTo(upDeg);
     middle.moveTo(middleDeg);
