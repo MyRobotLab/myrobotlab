@@ -51,7 +51,7 @@ import org.slf4j.Logger;
 public class InMoovGui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(InMoov2Gui.class);
+  public final static Logger log = LoggerFactory.getLogger(InMoovGui.class);
   Runtime myRuntime = (Runtime) Runtime.getInstance();
   InMoov i01 = (InMoov) myRuntime.getService(boundServiceName);
   private final JTabbedPane inmoovPane = new JTabbedPane(JTabbedPane.TOP);
