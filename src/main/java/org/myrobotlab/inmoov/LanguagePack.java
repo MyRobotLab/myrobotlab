@@ -28,12 +28,14 @@ public class LanguagePack {
       lpVars.clear();
       for (File f : dir.listFiles()) {
         if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
+          log.info("Inmoov languagePack load : {}", f.getName());
           try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             for (String line = br.readLine(); line != null; line = br.readLine()) {
-              log.info("Inmoov languagePack load : {}", line);
               String[] parts = line.split("::");
-              lpVars.put(parts[0].toUpperCase(), parts[1]);
+              if (parts.length > 1) {
+                lpVars.put(parts[0].toUpperCase(), parts[1]);
+              }
             }
           } catch (IOException e) {
             log.error("LanguagePack : {}", e);
