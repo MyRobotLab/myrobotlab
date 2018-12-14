@@ -140,9 +140,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   @Override
   public String publishText(String text) {
-    return text;
-    // GAP - we don't want to call publishText
-    // return recognized(text);
+    return recognized(text);
   }
 
   @Override
@@ -155,18 +153,20 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
     if (isStripAccents()) {
       cleanedText = StringUtil.removeAccents(cleanedText);
     }
-    if (commands.containsKey(cleanedText)) {
-      // If we have a command. send it when we recognize...
-      Command cmd = commands.get(cleanedText);
-      send(cmd.name, cmd.method, cmd.params);
+    if (text.equalsIgnoreCase(lockPhrase)) {
+      clearLock();
     }
     lastThingRecognized = cleanedText;
     broadcastState();
     if (!lockOutAllGrammar) {
+      if (commands.containsKey(cleanedText)) {
+        // If we have a command. send it when we recognize...
+        Command cmd = commands.get(cleanedText);
+        send(cmd.name, cmd.method, cmd.params);
+      }
       return cleanedText;
-    }
-    if (text.equalsIgnoreCase(lockPhrase)) {
-      clearLock();
+    } else {
+      log.info("Speech recognizer is locked by keyword : {}", lockPhrase);
     }
     return "";
   }
