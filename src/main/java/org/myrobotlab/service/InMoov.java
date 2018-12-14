@@ -1944,6 +1944,7 @@ public class InMoov extends Service {
 
   public InMoov3DApp startVinMoov() throws InterruptedException {
     if (vinMoovApp == null) {
+     speakBlocking(languagePack.get("startingVirtual"));
       vinMoovApp = new InMoov3DApp();
       if (VinmoovMonitorActivated) {
         // vinmoovFullScreen=true
@@ -1968,6 +1969,7 @@ public class InMoov extends Service {
       vinMoovApp.start();
       // Grog Says ... WTH ?? - there should be a callback how do we know its
       // not 6.5 seconds ?
+      // Moz4r says : I think it's a security timeout n=to not wait forever, not really a sleep
       synchronized (this) {
         wait(6000);
       }
