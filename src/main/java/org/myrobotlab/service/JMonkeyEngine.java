@@ -22,7 +22,6 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.virtual.VirtualMotor;
 import org.slf4j.Logger;
 
-import com.google.gson.internal.LinkedTreeMap;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
@@ -235,7 +234,7 @@ public class JMonkeyEngine extends Service {
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // TODO: extract version numbers like this into a constant/enum
     String jmeVersion = "3.2.0-stable";
-    meta.addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
+    meta.addDependency("org.myrobotlab.jme3", "jme3-core", "3.2.0-custom");
     meta.addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);

@@ -438,9 +438,9 @@
 
 <!-- JMonkeyEngine begin -->
   <dependency>
-    <groupId>org.jmonkeyengine</groupId>
+    <groupId>org.myrobotlab.jme3</groupId>
     <artifactId>jme3-core</artifactId>
-    <version>3.2.0-stable</version>
+    <version>3.2.0-custom</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
