@@ -149,7 +149,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', [])
                 
                 $log.info("Recognized Text Time to publish " + $scope.current_text);
                 $scope.service = mrl.getService($scope.service.name);
-                mrl.sendTo($scope.service.name, "recognized", $scope.current_text);
                 mrl.sendTo($scope.service.name, "publishText", $scope.current_text);
                 
                 final_transcript = '';
