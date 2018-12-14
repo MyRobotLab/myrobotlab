@@ -1,6 +1,5 @@
 package org.myrobotlab.inmoov;
 
-import java.util.Arrays;
 import java.util.List;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.InMoov;

@@ -1455,7 +1455,7 @@ public class InMoov extends Service {
     startMouth();
     startHead(leftPort);
     startEar();
-    startMouthControl(leftPort);
+    startMouthControl(head.jaw,mouth);
     startLeftHand(leftPort);
     startRightHand(rightPort);
     //startEyelids(rightPort);
@@ -1538,26 +1538,12 @@ public class InMoov extends Service {
     return mouth;
   }
 
-  //TODO change this... attach !
-  public MouthControl startMouthControl(String port) throws Exception {
+  public MouthControl startMouthControl(ServoControl jaw,SpeechSynthesis mouth) {
     speakBlocking(languagePack.get("STARTINGMOUTH"));
     if (mouthControl == null) {
-
-      if (head == null) {
-        startHead(port);
-      }
-
       mouthControl = (MouthControl) startPeer("mouthControl");
-
-      // FIXME - connections must be done "outside" e.g. I2C config
-      // mouthControl.arduino.connect(port);
-      mouthControl.jaw.attach(mouthControl.arduino, 26);
-
-      // arduinos.put(port, mouthControl.arduino);
-      // String p = mouthControl.getArduino().getSerial().getPortName();
-      if (port != null) {
-        arduinos.put(port, mouthControl.arduino);
-      }
+      mouthControl.attach(jaw);
+      mouthControl.attach((Attachable) mouth);
       mouthControl.setmouth(10, 50);
     }
     return mouthControl;
@@ -2280,8 +2266,6 @@ public class InMoov extends Service {
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
 
-    meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared left arduino");
-
     meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
     // eyelidsArduino peer for backward compatibility
@@ -2299,8 +2283,6 @@ public class InMoov extends Service {
     meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
     meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
-    meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared head Arduino");
-    meta.sharePeer("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
     // SHARING !!! - modified key / actual name end ------
 
     // Global - undecorated by self name
@@ -2329,10 +2311,10 @@ public class InMoov extends Service {
     return meta;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    /**
+    
     String leftPort = "COM3";
     String rightPort = "COM4";
     
@@ -2342,22 +2324,17 @@ public class InMoov extends Service {
     vright.connect("COM4");
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
-    InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-    i01.startLeftArm(leftPort);
-    i01.startRightArm(rightPort);
-    i01.moveArm("right", 20.0, 10.0, 5.0, 40.0);
-    i01.loadGestures("InMoov/gestures");
-    log.info(i01.captureGesture());
-    i01.rest();
-    log.info(i01.captureGesture("rest"));
-    log.info(i01.startOpenCV() + "startOpenCV");
-    */
+
+
     Runtime.start("gui", "SwingGui");
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.startMouth();
     i01.startEar();
     i01.startBrain();
+    i01.startHead(leftPort);
+    i01.startMouthControl(i01.head.jaw,i01.mouth);
     i01.loadGestures("InMoov/gestures");
+    i01.startVinMoov();
     i01.startOpenCV();
     i01.vision.setActiveFilter("Yolo");
   }
