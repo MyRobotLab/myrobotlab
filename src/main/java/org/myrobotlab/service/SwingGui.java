@@ -340,8 +340,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         send(name, "publishState");
 
         if (getName().equals(name) && guiServiceGui == null) {
-          guiServiceGui = (SwingGuiGui) newGui;
-          guiServiceGui.rebuildGraph();
+          try {
+            guiServiceGui = (SwingGuiGui) newGui;
+            guiServiceGui.rebuildGraph();
+          } catch (Exception e) {
+            log.error("Can't cast new guiServiceGui : ", e);
+          }
         }
         // newGui.getDisplay().setBackground(Color.CYAN);
 
