@@ -43,7 +43,7 @@ public class SpeechRecognition {
       return;
     }
     this.earEngine = earEngine;
-    log.info("Set InMoov ear engine : %s", earEngine);
+    log.info("Set InMoov ear engine : {}", earEngine);
     instance.broadcastState();
   }
 
@@ -53,7 +53,7 @@ public class SpeechRecognition {
 
   public void setLockPhrase(String lockPhrase) {
     this.lockPhrase = lockPhrase;
-    log.info("Set lockPhrase : %s", lockPhrase);
+    log.info("Set lockPhrase : {}", lockPhrase);
   }
 
 }
