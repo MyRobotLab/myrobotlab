@@ -18,6 +18,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.inmoov.LanguagePack;
@@ -96,6 +97,7 @@ public class InMoov extends Service {
   int maxInactivityTimeSeconds = 120;
   public static int attachPauseMs = 100;
   public Set<String> gesturesList = new TreeSet<String>();
+  private String lastGestureExecuted = "";
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
   public static boolean RobotCanMoveBodyRandom = true;
@@ -177,7 +179,7 @@ public class InMoov extends Service {
       if (htmlFilter == null) {
         htmlFilter = (HtmlFilter) Runtime.start(this.getIntanceName() + ".htmlFilter", "HtmlFilter");
       }
-      chatBot = (ProgramAB) attachable;      
+      chatBot = (ProgramAB) attachable;
     }
     //sub attach
     if (chatBot != null && ear != null) {
@@ -418,18 +420,29 @@ public class InMoov extends Service {
   }
 
   /**
-   * This method will try to launch a python comman from java land
+   * This method will try to launch a python command
+   * with error handling
    */
   public String execGesture(String gesture) {
+    lastGestureExecuted = gesture;
     String ret;
     if (python == null) {
       log.warn("execGesture : No jython engine...");
       return null;
     }
-    startedGesture(gesture);
+    subscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
+
+    startedGesture(lastGestureExecuted);
     ret = Utils.execPy(gesture);
-    finishedGesture(gesture);
     return ret;
+  }
+
+  public void onGestureStatus(Status status) {
+    if (!(status == Status.success()) && !(status == Status.warn("Python process killed !"))) {
+      speakAlert(languagePack.get("GESTURE_ERROR"));
+    }
+    finishedGesture(lastGestureExecuted);
+    unsubscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
   }
 
   /**
@@ -1455,7 +1468,7 @@ public class InMoov extends Service {
     startMouth();
     startHead(leftPort);
     startEar();
-    startMouthControl(head.jaw,mouth);
+    startMouthControl(head.jaw, mouth);
     startLeftHand(leftPort);
     startRightHand(rightPort);
     //startEyelids(rightPort);
@@ -1538,7 +1551,7 @@ public class InMoov extends Service {
     return mouth;
   }
 
-  public MouthControl startMouthControl(ServoControl jaw,SpeechSynthesis mouth) {
+  public MouthControl startMouthControl(ServoControl jaw, SpeechSynthesis mouth) {
     speakBlocking(languagePack.get("STARTINGMOUTH"));
     if (mouthControl == null) {
       mouthControl = (MouthControl) startPeer("mouthControl");
@@ -1930,7 +1943,7 @@ public class InMoov extends Service {
 
   public InMoov3DApp startVinMoov() throws InterruptedException {
     if (vinMoovApp == null) {
-     speakBlocking(languagePack.get("startingVirtual"));
+      speakBlocking(languagePack.get("startingVirtual"));
       vinMoovApp = new InMoov3DApp();
       if (VinmoovMonitorActivated) {
         // vinmoovFullScreen=true
@@ -2314,10 +2327,10 @@ public class InMoov extends Service {
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    
+
     String leftPort = "COM3";
     String rightPort = "COM4";
-    
+
     VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
     VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
     vleft.connect("COM3");
@@ -2325,17 +2338,18 @@ public class InMoov extends Service {
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
 
-
     Runtime.start("gui", "SwingGui");
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+    i01.setLanguage("en-US");
     i01.startMouth();
     i01.startEar();
     i01.startBrain();
     i01.startHead(leftPort);
-    i01.startMouthControl(i01.head.jaw,i01.mouth);
+    i01.startMouthControl(i01.head.jaw, i01.mouth);
     i01.loadGestures("InMoov/gestures");
     i01.startVinMoov();
     i01.startOpenCV();
-    i01.vision.setActiveFilter("Yolo");
+    i01.execGesture("daVidnci()");
+    i01.execGesture("daVinci()");
   }
 }
