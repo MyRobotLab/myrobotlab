@@ -1350,6 +1350,7 @@ public class InMoov extends Service {
   public void startAll(String leftPort, String rightPort) throws Exception {
     startMouth();
     startHead(leftPort);
+    startOpenCV();
     startEar();
     startMouthControl(leftPort);
     startLeftHand(leftPort);
@@ -1415,21 +1416,10 @@ public class InMoov extends Service {
     return mouthControl;
   }
 
-  // starting routines need to be fully re-entrant
-  // they can be used to get a reference and start a very limited sub-system
-  // of inmoov
-  // very useful in the fact a head subsystem can be tested without starting
-  // all of the peer services of the head
-  public boolean startOpenCV() {
-    if (opencv == null) {
-      OpenCV opencv = (OpenCV) Runtime.loadAndStart(this.getIntanceName() + ".opencv", "OpenCV");
-      this.attach(opencv);
-      // test for a worky opencv with hardware
-      broadcastState();
-      return vision.test();
+  public void startOpenCV() {
+    if (opencv == null)  {
+      opencv = (OpenCV)startPeer("opencv");
     }
-    broadcastState();
-    return false;
   }
 
   public OpenNi startOpenNI() throws Exception {
@@ -1544,7 +1534,6 @@ public class InMoov extends Service {
   @Override
   public void startService() {
     super.startService();
-    load();
     if (vision == null) {
       vision = new Vision();
       vision.init();
