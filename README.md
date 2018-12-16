@@ -3,6 +3,8 @@ myrobotlab
 
 Open Source Java Framework for Robotics and Creative Machine Control
 
+Project Website: http://www.myrobotlab.org  (Stop by and say hello in the shoutbox!)
+
 
 ## Installing Dependencies
 
@@ -37,8 +39,6 @@ To start a list of named services on startup, you can use the -service command l
 The above would start runtime, python, the swing gui and lastly the webgui.
 
 
-
-
 ## Building Project
 
 MyRobotLab builds using the Apache Maven java build system.
@@ -67,5 +67,18 @@ If you want to compile and skip the tests, you can use the standard maven approa
 
 `mvn clean install -DskipTests`
 
+
+## Contributing
+
+All development is done on the `develop` branch.  To contribute code, the typical approach is to create an issue about the feature/bug you're working on.
+
+From Github create a branch based off the "develop" branch with a descriptive name  (and associated Issue number if available)
+Locally switch to the new branch 
+Make code changes
+Commit & Push (frequently!)
+When code is ready, submit a pull request to the develop branch!
+Enjoy the code review, address issues and concern in the code review
+Reviewer merges pull request to develop.
+Reviewer deletes branch.
 
 
