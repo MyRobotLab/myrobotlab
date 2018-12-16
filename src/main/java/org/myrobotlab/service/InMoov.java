@@ -1416,10 +1416,13 @@ public class InMoov extends Service {
     return mouthControl;
   }
 
-  public void startOpenCV() {
+  public boolean startOpenCV() {
     if (opencv == null)  {
       opencv = (OpenCV)startPeer("opencv");
     }
+    // TODO: reconcile the "vision" class and the "test" method here. 
+    return true;
+    
   }
 
   public OpenNi startOpenNI() throws Exception {
