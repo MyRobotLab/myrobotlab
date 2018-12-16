@@ -1008,9 +1008,9 @@ public class InMoov extends Service {
   public InMoovArm startArm(String side, String port, String type) throws Exception {
     //TODO rework this...
     if (type == "left") {
-      speakBlocking(languagePack.get("STARTINGLEFTARM"));
+      speakBlocking(languagePack.get("STARTINGLEFTARM")+" "+port);
     } else {
-      speakBlocking(languagePack.get("STARTINGRIGHTARM"));
+      speakBlocking(languagePack.get("STARTINGRIGHTARM")+" "+port);
     }
 
     InMoovArm arm = (InMoovArm) startPeer(String.format("%sArm", side));
@@ -1031,9 +1031,9 @@ public class InMoov extends Service {
   public InMoovHand startHand(String side, String port, String type) throws Exception {
     //TODO rework this...
     if (type == "left") {
-      speakBlocking(languagePack.get("STARTINGLEFTHAND"));
+      speakBlocking(languagePack.get("STARTINGLEFTHAND")+" "+port);
     } else {
-      speakBlocking(languagePack.get("STARTINGRIGHTHAND"));
+      speakBlocking(languagePack.get("STARTINGRIGHTHAND")+" "+port);
     }
 
     InMoovHand hand = (InMoovHand) startPeer(String.format("%sHand", side));
@@ -1066,7 +1066,7 @@ public class InMoov extends Service {
   public InMoovHead startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin)
       throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    speakBlocking(languagePack.get("STARTINGHEAD"));
+    speakBlocking(languagePack.get("STARTINGHEAD")+" "+port);
     head = (InMoovHead) startPeer("head");
 
     if (type == null) {
@@ -1530,7 +1530,7 @@ public class InMoov extends Service {
   public boolean startOpenCV() {
     speakBlocking(languagePack.get("STARTINGOPENCV"));
     if (opencv == null) {
-      OpenCV opencv = (OpenCV) Runtime.loadAndStart(this.getIntanceName() + ".opencv", "OpenCV");
+      OpenCV opencv = (OpenCV) Runtime.start(this.getIntanceName() + ".opencv", "OpenCV");
     }
     this.attach(opencv);
     // test for a worky opencv with hardware
@@ -1637,19 +1637,6 @@ public class InMoov extends Service {
     if (RightRelay1 != null) {
       RightRelay1.off();
     }
-    // TODO better thing to detect connected arduinos
-    // we cant use arduino.stopService()
-    // ServoController don't have serials :P - new way must be figured out
-    if (rightHand != null) {
-      // rightHand.arduino.serial.disconnect();
-      // rightHand.arduino.serial.stopRecording();
-      // rightHand.arduino.disconnect();
-    }
-    if (leftHand != null || head != null) {
-      // leftHand.arduino.serial.disconnect();
-      // leftHand.arduino.serial.stopRecording();
-      // leftHand.arduino.disconnect();
-    }
   }
 
   @Override
@@ -1657,6 +1644,7 @@ public class InMoov extends Service {
     super.startService();
     //we need auto load : if user launch inmoov from runtime, or start from script
     //without load : this will overwrite EVERY previous personal configs !!
+    //OR : we need to disable autosave EVERYWHERE..
     load();
     if (vision == null) {
       vision = new Vision();
@@ -1699,7 +1687,7 @@ public class InMoov extends Service {
 
   public InMoovTorso startTorso(String port, String type) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    speakBlocking(languagePack.get("STARTINGTORSO"));
+    speakBlocking(languagePack.get("STARTINGTORSO")+" "+port);
 
     torso = (InMoovTorso) startPeer("torso");
     if (type == null) {
