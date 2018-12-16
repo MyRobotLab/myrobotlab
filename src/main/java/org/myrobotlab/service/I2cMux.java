@@ -48,13 +48,19 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
   public String deviceAddress = "0x70";
 
-  public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
+  public List<String> deviceBusList = Arrays.asList("0","1", "2", "3", "4", "5", "6", "7");
   public String deviceBus = "1";
 
   public boolean isAttached = false;
   private int lastBusAddress = -1;
 
-  transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
+  public static class I2CDeviceMap {
+    public String serviceName;
+    public String busAddress;
+    public String deviceAddress;
+  }
+  
+  public HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   public static void main(String[] args) {
     LoggingFactory.init("info");
@@ -113,7 +119,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     if (busAddress != lastBusAddress) {
       byte bus[] = new byte[1];
       bus[0] = (byte) (1 << busAddress);
-      log.debug("setMux this.deviceBus {} this.deviceAddress {} bus[0] {}", this.deviceBus, this.deviceAddress, bus[0]);
+      log.info("setMux this.deviceBus {} this.deviceAddress {} bus[0] {}", this.deviceBus, this.deviceAddress, bus[0]);
       controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
       lastBusAddress = busAddress;
     }
@@ -123,7 +129,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     setMuxBus(busAddress);
     String key = String.format("%d.%d", busAddress, deviceAddress);
-    log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+    log.info(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
     controller.i2cWrite(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
   }
 
@@ -173,17 +179,18 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
     I2CDeviceMap devicedata = new I2CDeviceMap();
+    String key = control.getName();
     if (i2cDevices.containsKey(key)) {
       log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
     } else {
+      devicedata.serviceName = key;
       devicedata.busAddress = control.getDeviceBus();
       devicedata.deviceAddress = control.getDeviceAddress();
-      devicedata.control = control;
       i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
     }
+    broadcastState();
   }
 
   @Override
@@ -193,10 +200,16 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     // The order of the detach is important because the higher level service may
     // want to execute something that
     // needs this service to still be availabe
-    if (i2cDevices.containsKey(control.getName())) {
-      i2cDevices.remove(control.getName());
+    log.info("detachI2CControl {}",control.getName());
+    String key = control.getName();
+    if (i2cDevices.containsKey(key)) {
+      i2cDevices.remove(key);
       control.detachI2CController(this);
+      log.info("Detached");
+    } else {
+      log.info("Detach failed. Not found in list of i2cDevices"); 
     }
+    broadcastState();
   }
 
   @Override
@@ -257,6 +270,10 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     broadcastState();
   }
 
+  public HashMap<String, I2CDeviceMap> geti2cDevices() {
+    return i2cDevices;
+  }
+  
   // This section contains all the new detach logic
   // TODO: This default code could be in Attachable
   @Override

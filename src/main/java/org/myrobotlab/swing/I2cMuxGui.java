@@ -27,16 +27,24 @@ package org.myrobotlab.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.I2cMux;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.I2cMux.I2CDeviceMap;
 import org.slf4j.Logger;
 
 public class I2cMuxGui extends ServiceGui implements ActionListener {
@@ -55,7 +63,11 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
   JLabel controllerLabel = new JLabel("Controller");
   JLabel deviceBusLabel = new JLabel("Bus");
   JLabel deviceAddressLabel = new JLabel("Address");
+  
+  JTable deviceJtable = new JTable(new DefaultTableModel(new Object[]{"Service", "i2cBus", "i2cAddress"},0));
 
+  JScrollPane scrollPane = new JScrollPane(deviceJtable);
+  
   I2cMux boundService = null;
 
   public I2cMuxGui(final String boundServiceName, final SwingGui myService) {
@@ -63,10 +75,12 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
     boundService = (I2cMux) Runtime.getService(boundServiceName);
 
     addTopLine(createFlowPanel("Controller", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
-
+    addCenter(scrollPane);
     refreshControllers();
     getDeviceBusList();
     getDeviceAddressList();
+    deviceJtable.setEnabled(false);
+    geti2cDevicesList();
     restoreListeners();
   }
 
@@ -114,6 +128,7 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
       deviceBusList.setEnabled(true);
       deviceAddressList.setEnabled(true);
     }
+    geti2cDevicesList();
     restoreListeners();
   }
 
@@ -132,6 +147,18 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
     }
   }
 
+  public void geti2cDevicesList() {
+
+    HashMap<String, I2CDeviceMap> devices = boundService.geti2cDevices();
+    DefaultTableModel model = (DefaultTableModel) deviceJtable.getModel();
+    model.setRowCount(0);
+    for (Map.Entry<String, I2CDeviceMap> entry : devices.entrySet()) {
+      I2CDeviceMap device = (I2CDeviceMap)entry.getValue();
+      String columns[] = {device.serviceName, device.busAddress, device.deviceAddress}; 
+      model.addRow(columns);
+    }
+  }
+  
   public void refreshControllers() {
     List<String> v = boundService.refreshControllers();
     controllerList.removeAllItems();
