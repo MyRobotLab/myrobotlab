@@ -66,7 +66,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.CommunicationManager;
 import org.myrobotlab.net.Heartbeat;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
@@ -123,9 +122,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
   
-  public static final String DATA_DIR = "data" + File.separator + OpenCV.class.getSimpleName();
-  public static final String RESOURCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName();
-
   /**
    * key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway
    * name]/scheme://key for gateway mrl://gateway/xmpp://incubator incubator if
@@ -149,9 +145,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
   transient protected Inbox inbox = null;
 
   transient Timer timer = null;
-
-  public final String DATA_INSTANCE_DIR = "data" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
-  public final String RESOURCE_INSTANCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
   
   /**
    * a more capable task handler
@@ -781,6 +774,22 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return "------\r\n" + sw.toString() + "------\r\n";
   }
 
+  public String getDataDir() {
+    return "data" + File.separator + getClass().getSimpleName();
+  }
+  
+  public String getDataInstanceDir() {
+    return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
+  }
+  
+  public String getResourceDir() {
+    return "data" + File.separator + getClass().getSimpleName();
+  }
+  
+  public String getResourceInstanceDir() {
+    return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
+  }
+  
   // FIXME - make a static initialization part !!!
 
   public Service(String reservedKey) {
@@ -788,7 +797,18 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
-
+    
+    // make class specific data & resource directories for this service
+    File dir = new File(getDataDir());
+    dir.mkdirs();
+    /**
+     * <pre>
+     * necessary ?
+     *
+    dir = new File(getResourceDir());
+    dir.mkdirs();
+    */
+    
     // xxx
     try {// FIXME !!! AFTER MERGE !!!
       serviceType = getMetaData(this.getClass().getCanonicalName());

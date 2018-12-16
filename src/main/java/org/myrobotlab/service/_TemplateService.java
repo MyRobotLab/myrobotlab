@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.File;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -13,8 +15,15 @@ public class _TemplateService extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(_TemplateService.class);
 
+  final static String DATA_DIR = "data" + File.separator + _TemplateService.class.getSimpleName();
+  final String DATA_INSTANCE_DIR;
+  final static String RESOURCE_DIR = "resource" + File.separator + _TemplateService.class.getSimpleName();
+  final String RESOURCE_INSTANCE_DIR;
+  
   public _TemplateService(String n) {
     super(n);
+    DATA_INSTANCE_DIR = "data" + File.separator + _TemplateService.class.getSimpleName() + File.separator  + n;
+    RESOURCE_INSTANCE_DIR = "resource" + File.separator + _TemplateService.class.getSimpleName() + File.separator  + n;
   }
 
   /**
