@@ -64,6 +64,8 @@ public class InMoovGui extends ServiceGui implements ActionListener {
   private final JPanel panel = new JPanel();
   private final JCheckBox Flip = new JCheckBox("Flip Camera");
   private final JCheckBox PyramidDown = new JCheckBox("PyramidDown");
+  private final JLabel lblNewLabel_1 = new JLabel("InMoov SwingGui is not yet ready... ");
+  private final JLabel lblNewLabel_2 = new JLabel(".");
 
   public InMoovGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
@@ -78,6 +80,11 @@ public class InMoovGui extends ServiceGui implements ActionListener {
     ImageIcon generalIcon = Util.getImageIcon("InMoov.png");
     inmoovPane.addTab("General", generalIcon, generalPanel);
     generalPanel.setLayout(new GridLayout(3, 2, 0, 0));
+    lblNewLabel_1.setForeground(Color.RED);
+    
+    generalPanel.add(lblNewLabel_1);
+    
+    generalPanel.add(lblNewLabel_2);
 
     JLabel lblNewLabel = new JLabel(" Language : ");
     generalPanel.add(lblNewLabel);
