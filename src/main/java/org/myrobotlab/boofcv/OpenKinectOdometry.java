@@ -74,6 +74,14 @@ import javax.swing.JComponent;
  * Example demonstrating how to process and display data from the Kinect.
  *
  * @author Peter Abeles & Mats Önnerby
+ * 
+ * This program currently calculates the Odometry ( how much the camera has moved as translations and rotations ).
+ * Second stage is to recalculate the second pointcloud to have the same origin as the first.
+ * Third stage is to update the original pointcloud with information from the new pointcloud to make the world pointcloud larger
+ * Do we need to keep track of the probability for each point in the pointcloud ?
+ * Can we transform the pointcloud to larger objects ? Like meshes ?
+ * https://www.mathworks.com/help/vision/examples/3-d-point-cloud-registration-and-stitching.html 
+ * 
  */
 public class OpenKinectOdometry {
 
