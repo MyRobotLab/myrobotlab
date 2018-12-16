@@ -1530,7 +1530,7 @@ public class InMoov extends Service {
   public boolean startOpenCV() {
     speakBlocking(languagePack.get("STARTINGOPENCV"));
     if (opencv == null) {
-      OpenCV opencv = (OpenCV) Runtime.start(this.getIntanceName() + ".opencv", "OpenCV");
+      opencv = (OpenCV) Runtime.loadAndStart(this.getIntanceName() + ".opencv", "OpenCV");
     }
     this.attach(opencv);
     // test for a worky opencv with hardware
