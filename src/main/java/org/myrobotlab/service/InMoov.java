@@ -1655,6 +1655,8 @@ public class InMoov extends Service {
   @Override
   public void startService() {
     super.startService();
+    //we need auto load : if user launch inmoov from runtime, or start from script
+    //without load : this will overwrite EVERY previous personal configs !!
     load();
     if (vision == null) {
       vision = new Vision();
