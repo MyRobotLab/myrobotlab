@@ -34,12 +34,12 @@ public class SpeechSynthesizer {
   }
 
   public void setSpeechEngine(String speechEngine) {
-    if (!speechEngine.contains(speechEngine)) {
+    if (!speechEngines.contains(speechEngine)) {
       log.error("Sorry, {} is an unknown speech service. {}", speechEngine);
       return;
     }
     this.speechEngine = speechEngine;
-    log.info("Set InMoov speech engine : %s", speechEngine);
+    log.info("Set InMoov speech engine : {}", speechEngine);
     instance.broadcastState();
   }
 

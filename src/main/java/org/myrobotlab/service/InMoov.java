@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -292,45 +291,10 @@ public class InMoov extends Service {
   }
 
   //TODO individual position for same detected object.. 
-  transient public LinkedHashMap<String, Double> collectionPositions = new LinkedHashMap<String, Double>();
-  transient public HashMap<String, Integer> collectionCount = new HashMap<String, Integer>();
-  transient private HashMap<String, Integer> collectionTemp = new HashMap<String, Integer>();
-
   public void onClassification(TreeMap<String, List<Classification>> classifications) {
-
-    //reset previous same classified objects ( to count same objetcs on the frame )
-    for (Map.Entry<String, List<Classification>> entry : classifications.entrySet()) {
-      List<Classification> value = entry.getValue();
-      for (Classification document : value) {
-        if (collectionCount.containsKey(document.getLabel())) {
-          collectionCount.remove(document.getLabel());
-        }
-      }
-    }
-
-    for (Map.Entry<String, List<Classification>> entry : classifications.entrySet()) {
-      List<Classification> value = entry.getValue();
-      for (Classification document : value) {
-        Integer existingLabelCount = 1;
-        if (collectionCount.containsKey(document.getLabel())) {
-          existingLabelCount = collectionCount.get(document.getLabel()) + 1;
-        }
-        collectionCount.put(document.getLabel(), existingLabelCount);
-        collectionPositions.put(document.getLabel(), (double) document.getBoundingBox().x);
-      }
-    }
-    //Sort result based on position
-    collectionTemp.clear();
-    collectionPositions.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(key -> collectionTemp.put(key.getKey(), collectionCount.get(key.getKey())));
-    collectionCount.clear();
-    collectionCount.putAll(collectionTemp);
-    log.info("onClassification collectionCount : {}", collectionTemp);
+    vision.onClassification(classifications);
   }
 
-  public Integer getPosition(String text) {
-    List<String> indexes = new ArrayList<String>(collectionCount.keySet());
-    return indexes.indexOf(text) + 1;
-  }
   // ---------------------------------------------------------------
   // END VISION methods
   // ---------------------------------------------------------------
@@ -1467,6 +1431,7 @@ public class InMoov extends Service {
   public void startAll(String leftPort, String rightPort) throws Exception {
     startMouth();
     startHead(leftPort);
+    startOpenCV();
     startEar();
     startMouthControl(head.jaw, mouth);
     startLeftHand(leftPort);
@@ -1562,27 +1527,20 @@ public class InMoov extends Service {
     return mouthControl;
   }
 
-  // starting routines need to be fully re-entrant
-  // they can be used to get a reference and start a very limited sub-system
-  // of inmoov
-  // very useful in the fact a head subsystem can be tested without starting
-  // all of the peer services of the head
   public boolean startOpenCV() {
+    speakBlocking(languagePack.get("STARTINGOPENCV"));
     if (opencv == null) {
-      speakBlocking(languagePack.get("STARTINGOPENCV"));
       OpenCV opencv = (OpenCV) Runtime.loadAndStart(this.getIntanceName() + ".opencv", "OpenCV");
-      this.attach(opencv);
-      // test for a worky opencv with hardware
-      broadcastState();
-      if (vision.test()) {
-        return true;
-      } else {
-        speakAlert(languagePack.get("OPENCVNOWORKY"));
-        return false;
-      }
     }
-    broadcastState();
-    return false;
+    this.attach(opencv);
+    // test for a worky opencv with hardware
+    if (vision.test()) {
+      broadcastState();
+      return true;
+    } else {
+      speakAlert(languagePack.get("OPENCVNOWORKY"));
+      return false;
+    }
   }
 
   public OpenNi startOpenNI() throws Exception {
@@ -2272,7 +2230,7 @@ public class InMoov extends Service {
     meta.addCategory("robot");
     // meta.addDependency("inmoov.fr", "1.0.0");
     // meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
-    meta.addDependency("inmoov.fr", "inmoov", "1.1.5", "zip");
+    meta.addDependency("inmoov.fr", "inmoov", "1.1.6", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------
@@ -2337,8 +2295,6 @@ public class InMoov extends Service {
     vright.connect("COM4");
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
-
-    Runtime.start("gui", "SwingGui");
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
