@@ -107,6 +107,9 @@ public class Vision {
     return false;
   }
 
+  /**
+   * check if robot do eyesTracking or headTracking
+   */
   public boolean isTracking() {
     if (instance.eyesTracking != null && !instance.eyesTracking.isIdle()) {
       return true;
@@ -125,9 +128,11 @@ public class Vision {
   }
 
   /**
-   * sub onClassification to a analyze yolo filter, and save some code lines from main service
+   * Method to a analyze a yolo filter classifier ( maybe dl4j also ? )
+   * This will count objects on the frame and get labels + positions
+   * //TODO individual position for multiple same labels.. 
    */
-  public void onClassification(TreeMap<String, List<Classification>> classifications) {
+  public void yoloInventory(TreeMap<String, List<Classification>> classifications) {
     
     //reset previous same classified objects ( to count same objetcs on the frame )
     for (Map.Entry<String, List<Classification>> entry : classifications.entrySet()) {

@@ -13,9 +13,6 @@ public class Utils {
 
   public final static Logger log = LoggerFactory.getLogger(Utils.class);
 
-  transient private static Runtime myRuntime = (Runtime) Runtime.getInstance();
-  transient private static ServiceData serviceData = myRuntime.getServiceData();
-
   /**
    * This method will load a python file into the python interpreter. 
    */
