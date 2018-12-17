@@ -107,15 +107,6 @@ public class Vision {
     return false;
   }
 
-  public boolean isCameraOn() {
-    if (instance.opencv != null) {
-      if (instance.opencv.isCapturing()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   public boolean isTracking() {
     if (instance.eyesTracking != null && !instance.eyesTracking.isIdle()) {
       return true;
