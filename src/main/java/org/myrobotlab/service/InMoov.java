@@ -162,16 +162,18 @@ public class InMoov extends Service {
     if (attachable instanceof OpenCV) {
       opencv = (OpenCV) attachable;
       subscribe(opencv.getName(), "publishClassification");
-      //SpeechRecognizer
+    } else if (attachable instanceof SpeechSynthesis) {
+      mouth = (SpeechSynthesis) attachable;
+      if (ear != null) {
+        ear.addMouth(mouth);
+      }
     } else if (attachable instanceof SpeechRecognizer) {
-
       ear = (SpeechRecognizer) attachable;
+      if (mouth != null) {
+        ear.addMouth(mouth);
+      }
     } else if (attachable instanceof ProgramAB) {
       chatBot = (ProgramAB) attachable;
-    }
-    if (mouth != null && ear != null) {
-      //TODO attach...
-      ear.addMouth(mouth);
     }
   }
 
@@ -278,9 +280,8 @@ public class InMoov extends Service {
     }
   }
 
-  //TODO individual position for same detected object.. 
   public void onClassification(TreeMap<String, List<Classification>> classifications) {
-    vision.onClassification(classifications);
+    vision.yoloInventory(classifications);
   }
 
   // ---------------------------------------------------------------
@@ -404,7 +405,7 @@ public class InMoov extends Service {
    * @param directory
    *          - the directory that contains the gesture python files.
    */
-  public Boolean loadGestures(String directory) {
+  public boolean loadGestures(String directory) {
 
     // iterate over each of the python files in the directory
     // and load them into the python interpreter.
@@ -1371,7 +1372,11 @@ public class InMoov extends Service {
   }
 
   public List<AudioData> speakBlocking(String toSpeak) {
-    if (mouth != null && !mute) {
+    if (mouth == null) {
+      log.error("speakBlocking is called, but my mouth is NULL...");
+      return null;
+    }
+    if (!mute) {
       try {
         return mouth.speakBlocking(toSpeak);
       } catch (Exception e) {
@@ -1387,7 +1392,11 @@ public class InMoov extends Service {
   }
 
   public List<AudioData> speak(String toSpeak) {
-    if (mouth != null && !mute) {
+    if (mouth == null) {
+      log.error("Speak is called, but my mouth is NULL...");
+      return null;
+    }
+    if (!mute) {
       try {
         return mouth.speak(toSpeak);
       } catch (Exception e) {
@@ -1495,13 +1504,13 @@ public class InMoov extends Service {
     }
     this.attach((Attachable) mouth);
     speakBlocking(languagePack.get("STARTINGMOUTH"));
-    speak(languagePack.get("WHATISTHISLANGUAGE"));
+    speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
 
     return mouth;
   }
 
   public MouthControl startMouthControl(ServoControl jaw, SpeechSynthesis mouth) {
-    speakBlocking(languagePack.get("STARTINGMOUTH"));
+    speakBlocking(languagePack.get("STARTINGMOUTHCONTROL"));
     if (mouthControl == null) {
       mouthControl = (MouthControl) startPeer("mouthControl");
       mouthControl.attach(jaw);
@@ -2256,14 +2265,23 @@ public class InMoov extends Service {
 
     VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
     VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
-    vleft.connect("COM3");
-    vright.connect("COM4");
+    vleft.connect(leftPort);
+    vright.connect(rightPort);
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
     i01.startEar();
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+    webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
+    HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
+    i01.chatBot=(ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
+    i01.chatBot.addTextListener(htmlFilter);
+    htmlFilter.addListener("publishText", "i01", "speak");
+    i01.chatBot.attach((Attachable) i01.ear);
     i01.startBrain();
     i01.startHead(leftPort);
     i01.startMouthControl(i01.head.jaw, i01.mouth);
