@@ -50,48 +50,6 @@ public class Utils {
     }
     return true;
   }
-
-  /**
-   * This method will try to launch a python comman from java land
-   */
-  public static String execPy(String command) {
-    Python python = (Python) Runtime.getService("python");
-    if (python == null) {
-      log.warn("execGesture : No jython engine...");
-    }
-    try {
-      return python.evalAndWait(command);
-    } catch (Exception e) {
-      log.error("execPy : {}", e);
-    }
-    return null;
-  }
-
-  //list services from meta category (pasted from RuntimeGui.java)
-  public static List<String> getServicesFromCategory(final String filter) {
-    List<String> servicesFromCategory = new ArrayList<String>();
-    Category category = serviceData.getCategory(filter);
-    HashSet<String> filtered = null;
-    filtered = new HashSet<String>();
-    ArrayList<String> f = category.serviceTypes;
-    for (int i = 0; i < f.size(); ++i) {
-      filtered.add(f.get(i));
-    }
-
-    // populate with serviceData
-    List<ServiceType> possibleService = serviceData.getServiceTypes();
-    for (int i = 0; i < possibleService.size(); ++i) {
-      ServiceType serviceType = possibleService.get(i);
-      if (filtered.contains(serviceType.getName())) {
-        if (serviceType.isAvailable()) {
-          // log.debug("serviceType : " + serviceType.getName());
-          servicesFromCategory.add(serviceType.getSimpleName());
-        }
-      }
-
-    }
-    return servicesFromCategory;
-  }
   
   public static File makeDirectory(String directory) {
     File dir = new File(directory);

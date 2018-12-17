@@ -21,8 +21,6 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.inmoov.LanguagePack;
-import org.myrobotlab.inmoov.SpeechRecognition;
-import org.myrobotlab.inmoov.SpeechSynthesizer;
 import org.myrobotlab.inmoov.Utils;
 import org.myrobotlab.inmoov.Vision;
 import org.myrobotlab.jme3.InMoov3DApp;
@@ -115,6 +113,8 @@ public class InMoov extends Service {
   public static List<String> languagesIndex = new ArrayList<String>();
   String language;
   boolean mute;
+  static String speechService = "MarySpeech";
+  static String speechRecognizer = "WebkitSpeechRecognition";
 
   // ---------------------------------------------------------------
   // end variables
@@ -127,9 +127,7 @@ public class InMoov extends Service {
   transient public OpenCV opencv;
   public Vision vision;
   transient public SpeechRecognizer ear;
-  public SpeechRecognition speechRecognition;
   transient public SpeechSynthesis mouth;
-  public SpeechSynthesizer speechSynthesizer;
   transient public Tracking eyesTracking;
   transient public Tracking headTracking;
   transient public OpenNi openni;
@@ -215,6 +213,15 @@ public class InMoov extends Service {
     startOpenCV();
     opencv.capture();
     vision.enablePreFilters();
+  }
+  
+  public boolean isCameraOn() {
+    if (opencv != null) {
+      if (opencv.isCapturing()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void stopTracking() {
@@ -397,8 +404,7 @@ public class InMoov extends Service {
     subscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
 
     startedGesture(lastGestureExecuted);
-    ret = Utils.execPy(gesture);
-    return ret;
+    return python.evalAndWait(gesture);
   }
 
   public void onGestureStatus(Status status) {
@@ -1008,9 +1014,9 @@ public class InMoov extends Service {
   public InMoovArm startArm(String side, String port, String type) throws Exception {
     //TODO rework this...
     if (type == "left") {
-      speakBlocking(languagePack.get("STARTINGLEFTARM")+" "+port);
+      speakBlocking(languagePack.get("STARTINGLEFTARM") + " " + port);
     } else {
-      speakBlocking(languagePack.get("STARTINGRIGHTARM")+" "+port);
+      speakBlocking(languagePack.get("STARTINGRIGHTARM") + " " + port);
     }
 
     InMoovArm arm = (InMoovArm) startPeer(String.format("%sArm", side));
@@ -1031,9 +1037,9 @@ public class InMoov extends Service {
   public InMoovHand startHand(String side, String port, String type) throws Exception {
     //TODO rework this...
     if (type == "left") {
-      speakBlocking(languagePack.get("STARTINGLEFTHAND")+" "+port);
+      speakBlocking(languagePack.get("STARTINGLEFTHAND") + " " + port);
     } else {
-      speakBlocking(languagePack.get("STARTINGRIGHTHAND")+" "+port);
+      speakBlocking(languagePack.get("STARTINGRIGHTHAND") + " " + port);
     }
 
     InMoovHand hand = (InMoovHand) startPeer(String.format("%sHand", side));
@@ -1066,7 +1072,7 @@ public class InMoov extends Service {
   public InMoovHead startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin)
       throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    speakBlocking(languagePack.get("STARTINGHEAD")+" "+port);
+    speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
     head = (InMoovHead) startPeer("head");
 
     if (type == null) {
@@ -1490,29 +1496,26 @@ public class InMoov extends Service {
   // "current context is right hand"
   // FIXME - voice control for all levels (ie just a hand or head !!!!)
   public SpeechRecognizer startEar() {
-    if (speechRecognition.getEarEngine() != null) {
-      if (ear == null) {
-        ear = (SpeechRecognizer) Runtime.loadAndStart(this.getIntanceName() + ".ear", speechRecognition.getEarEngine());
-      }
-      this.attach((Attachable) ear);
-      speakBlocking(languagePack.get("STARTINGEAR"));
+
+    if (ear == null) {
+      ear = (SpeechRecognizer) startPeer("ear");
     }
+    this.attach((Attachable) ear);
+    speakBlocking(languagePack.get("STARTINGEAR"));
+
     return ear;
   }
 
   // gestures begin ---------------
 
   public SpeechSynthesis startMouth() {
-    if (speechSynthesizer.getSpeechEngine() != null) {
-      if (mouth == null) {
-        mouth = (SpeechSynthesis) Runtime.loadAndStart(this.getIntanceName() + ".mouth", speechSynthesizer.getSpeechEngine());
-      }
-      this.attach((Attachable) mouth);
-      speakBlocking(languagePack.get("STARTINGMOUTH"));
-      speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
-    } else {
-      speakAlert(languagePack.get("MYVOICETYPE"));
+    if (mouth == null) {
+      mouth = (SpeechSynthesis) startPeer("mouth");
     }
+    this.attach((Attachable) mouth);
+    speakBlocking(languagePack.get("STARTINGMOUTH"));
+    speak(languagePack.get("WHATISTHISLANGUAGE"));
+
     return mouth;
   }
 
@@ -1651,16 +1654,6 @@ public class InMoov extends Service {
       vision.init();
     }
     vision.instance = this;
-    if (speechRecognition == null) {
-      speechRecognition = new SpeechRecognition();
-      speechRecognition.init();
-    }
-    speechRecognition.instance = this;
-    if (speechSynthesizer == null) {
-      speechSynthesizer = new SpeechSynthesizer();
-      speechSynthesizer.init();
-    }
-    speechSynthesizer.instance = this;
     // TODO : use locale it-IT,fi-FI
     languages.put("en-US", "English - United States");
     languages.put("fr-FR", "French - France");
@@ -1687,7 +1680,7 @@ public class InMoov extends Service {
 
   public InMoovTorso startTorso(String port, String type) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    speakBlocking(languagePack.get("STARTINGTORSO")+" "+port);
+    speakBlocking(languagePack.get("STARTINGTORSO") + " " + port);
 
     torso = (InMoovTorso) startPeer("torso");
     if (type == null) {
@@ -2238,7 +2231,7 @@ public class InMoov extends Service {
     meta.sharePeer("eyesTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
     meta.sharePeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
-
+    meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
     meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
     meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
@@ -2256,9 +2249,14 @@ public class InMoov extends Service {
     meta.addPeer("leftHand", "InMoovHand", "left hand");
     meta.addPeer("rightArm", "InMoovArm", "right arm");
     meta.addPeer("rightHand", "InMoovHand", "right hand");
+    // webkit speech.
+    meta.addPeer("ear", speechRecognizer, "InMoov webkit speech recognition service");
+    // meta.addPeer("ear", "Sphinx", "InMoov Sphinx speech recognition
+    // service");
     meta.addPeer("eyesTracking", "Tracking", "Tracking for the eyes");
     meta.addPeer("head", "InMoovHead", "the head");
     meta.addPeer("headTracking", "Tracking", "Head tracking system");
+    meta.addPeer("mouth", speechService, "InMoov speech service");
     meta.addPeer("mouthControl", "MouthControl", "MouthControl");
     meta.addPeer("openni", "OpenNi", "Kinect service");
     meta.addPeer("pid", "Pid", "Pid service");
