@@ -2,12 +2,6 @@ package org.myrobotlab.inmoov;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
-import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;

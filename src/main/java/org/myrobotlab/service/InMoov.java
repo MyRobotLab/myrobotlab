@@ -147,7 +147,6 @@ public class InMoov extends Service {
   transient public Arduino neopixelArduino;
   transient public UltrasonicSensor ultrasonicSensor;
   transient public ProgramAB chatBot;
-  transient public HtmlFilter htmlFilter;
   private IntegratedMovement integratedMovement;
 
   // ---------------------------------------------------------------
@@ -165,33 +164,15 @@ public class InMoov extends Service {
       subscribe(opencv.getName(), "publishClassification");
       //SpeechRecognizer
     } else if (attachable instanceof SpeechRecognizer) {
-      if (attachable.getClass().getSimpleName().equals("WebkitSpeechRecognition")) {
-        WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-        webgui.autoStartBrowser(false);
-        webgui.startService();
-        webgui.startBrowser("http://localhost:8888/#/service/" + attachable.getName());
-      }
+
       ear = (SpeechRecognizer) attachable;
     } else if (attachable instanceof ProgramAB) {
-      if (htmlFilter == null) {
-        htmlFilter = (HtmlFilter) Runtime.start(this.getIntanceName() + ".htmlFilter", "HtmlFilter");
-      }
       chatBot = (ProgramAB) attachable;
-    }
-    //sub attach
-    if (chatBot != null && ear != null) {
-      chatBot.attach((Attachable) ear);
-    }
-    if (chatBot != null && mouth != null) {
-      //TODO attach...
-      chatBot.addTextListener(htmlFilter);
-      htmlFilter.addListener("publishText", this.getName(), "speak");
     }
     if (mouth != null && ear != null) {
       //TODO attach...
       ear.addMouth(mouth);
     }
-    broadcastState();
   }
 
   // ---------------------------------------------------------------
@@ -214,7 +195,7 @@ public class InMoov extends Service {
     opencv.capture();
     vision.enablePreFilters();
   }
-  
+
   public boolean isCameraOn() {
     if (opencv != null) {
       if (opencv.isCapturing()) {
@@ -1302,7 +1283,7 @@ public class InMoov extends Service {
     disable();
 
     if (ear != null) {
-      ear.lockOutAllGrammarExcept("wake up");
+      ear.lockOutAllGrammarExcept("power up");
     }
 
     startSleep = System.currentTimeMillis();
@@ -1645,10 +1626,6 @@ public class InMoov extends Service {
   @Override
   public void startService() {
     super.startService();
-    //we need auto load : if user launch inmoov from runtime, or start from script
-    //without load : this will overwrite EVERY previous personal configs !!
-    //OR : we need to disable autosave EVERYWHERE..
-    load();
     if (vision == null) {
       vision = new Vision();
       vision.init();
