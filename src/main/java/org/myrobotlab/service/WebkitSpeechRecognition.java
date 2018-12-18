@@ -51,6 +51,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   private boolean listening = false;
   private boolean speaking = false;
+  private boolean commError = false;
 
   private long lastAutoListenEvent = System.currentTimeMillis();
   public boolean stripAccents = false;
@@ -198,14 +199,16 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   @Override
   public void stopListening() {
     log.debug("Stop listening event seen.");
+    commError = false;
     if (this.autoListen && !this.speaking) {
-      // bug if there is multiple chrome tabs OR no internet..., we disable autolisten
+
       if (System.currentTimeMillis() - lastAutoListenEvent > 300) {
         startListening();
       } else {
+        // loop if there is multiple chrome tabs OR no internet...
         if (listening) {
-          error("autoListen disabled, please close zombie tabs and check Internet connection");
-          setAutoListen(false);
+          error("Please close zombie tabs and check Internet connection");
+          commError = true;
         }
       }
       lastAutoListenEvent = System.currentTimeMillis();
@@ -213,7 +216,9 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
       log.debug("micNotListening");
       listening = false;
     }
-    broadcastState();
+    if (!commError) {
+      broadcastState();
+    }
   }
 
   @Override
@@ -275,14 +280,13 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
-    try {
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
-      WebkitSpeechRecognition w = (WebkitSpeechRecognition) Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
-      w.setStripAccents(true);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
+    Runtime.start("gui", "SwingGui");
+    WebkitSpeechRecognition webkitspeechrecognition = (WebkitSpeechRecognition) Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+    webgui.startBrowser("http://localhost:8888/#/service/webkitspeechrecognition");
+    webkitspeechrecognition.setAutoListen(true);
   }
 
   /**
