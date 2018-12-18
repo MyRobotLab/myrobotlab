@@ -2,10 +2,12 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
@@ -18,7 +20,7 @@ import org.slf4j.Logger;
 public class MouthControl extends Service {
 
   // TODO: remove Peer & Make it attachable between generic servoControl & SpeechSynthesis
-  
+
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
   public int mouthClosedPos = 20;
@@ -26,71 +28,23 @@ public class MouthControl extends Service {
   public int delaytime = 75;
   public int delaytimestop = 150;
   public int delaytimeletter = 45;
-  transient Servo jaw;
-  transient Arduino arduino;
-  transient SpeechSynthesis mouth;
-  
-  @Deprecated
-  public boolean autoAttach = true;
+  transient private ServoControl jaw;
+  transient private SpeechSynthesis mouth;
 
   public MouthControl(String n) {
     super(n);
-    jaw = (Servo) createPeer("jaw");
-    arduino = (Arduino) createPeer("arduino");
-    mouth = (SpeechSynthesis) createPeer("mouth");
-
-    // TODO: mouth should probably implement speech synthesis.
-    // in a way of speaking, one day, people may be able to read the lips
-    // of the inmoov.. so you're synthesising speech in a mechanical way.
-    // similar to sign language maybe?
-    subscribe(mouth.getName(), "publishStartSpeaking");
-    subscribe(mouth.getName(), "publishEndSpeaking");
   }
 
-  // FIXME make interface
-  public boolean connect(String port) throws Exception {
-    startService(); // NEEDED? I DONT THINK SO....
-
-    if (arduino == null) {
-      error("arduino is invalid");
-      return false;
+  public void attach(Attachable attachable) {
+    if (attachable instanceof SpeechSynthesis) {
+      mouth = (SpeechSynthesis) attachable;
+      subscribe(mouth.getName(), "publishStartSpeaking");
+      subscribe(mouth.getName(), "publishEndSpeaking");
+    } else if (attachable instanceof ServoControl) {
+      jaw = (ServoControl) attachable;
+    } else {
+      log.error("MouthControl can't attach : {}", attachable);
     }
-
-    arduino.connect(port);
-
-    if (!arduino.isConnected()) {
-      error("arduino %s not connected", arduino.getName());
-      return false;
-    }
-
-    jaw.attach(arduino, 26);
-    
-    return true;
-  }
-
-  public Arduino getArduino() {
-    return arduino;
-  }
-
-  public Servo getJaw() {
-    return jaw;
-  }
-
-  public void setJaw(Servo jaw) {
-    this.jaw = jaw;
-  }
-
-  public SpeechSynthesis getMouth() {
-    return mouth;
-  }
-
-  public void setMouth(SpeechSynthesis mouth) {
-    this.mouth = mouth;
-    subscribe(mouth.getName(), "publishStartSpeaking");
-  }
-
-  public void setArduino(Arduino arduino) {
-    this.arduino = arduino;
   }
 
   public String[] getCategories() {
@@ -104,54 +58,51 @@ public class MouthControl extends Service {
 
   public synchronized void onStartSpeaking(String text) {
     log.info("move moving to :" + text);
-      if (jaw == null) {
-        return;
-      }
-      if (!jaw.isEnabled()) {
-        log.warn("{} not enabled", jaw.getName());
-      }
-      boolean ison = false;
-      String testword;
-      String[] a = text.split(" ");
-      for (int w = 0; w < a.length; w++) {
-        // String word = ;
-        // log.info(String.valueOf(a[w].length()));
+    if (jaw == null) {
+      return;
+    }
+    boolean ison = false;
+    String testword;
+    String[] a = text.split(" ");
+    for (int w = 0; w < a.length; w++) {
+      // String word = ;
+      // log.info(String.valueOf(a[w].length()));
 
-        if (a[w].endsWith("es")) {
-          testword = a[w].substring(0, a[w].length() - 2);
+      if (a[w].endsWith("es")) {
+        testword = a[w].substring(0, a[w].length() - 2);
 
-        } else if (a[w].endsWith("e")) {
-          testword = a[w].substring(0, a[w].length() - 1);
-          // log.info("e gone");
+      } else if (a[w].endsWith("e")) {
+        testword = a[w].substring(0, a[w].length() - 1);
+        // log.info("e gone");
+      } else {
+        testword = a[w];
+
+      }
+
+      char[] c = testword.toCharArray();
+
+      for (int x = 0; x < c.length; x++) {
+        char s = c[x];
+        // russian а ... <> a
+        if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э'
+            || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
+          jaw.moveTo(mouthOpenedPos); // # move the servo to the
+          // open spot
+          ison = true;
+          sleep(delaytime);
+          jaw.moveTo(mouthClosedPos);// #// close the servo
+        } else if (s == '.') {
+          ison = false;
+          sleep(delaytimestop);
         } else {
-          testword = a[w];
-
+          ison = false;
+          sleep(delaytimeletter); // # sleep half a second
         }
 
-        char[] c = testword.toCharArray();
-
-        for (int x = 0; x < c.length; x++) {
-          char s = c[x];
-          // russian а ... <> a
-          if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э' || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
-            jaw.moveTo(mouthOpenedPos); // # move the servo to the
-            // open spot
-            ison = true;
-            sleep(delaytime);
-            jaw.moveTo(mouthClosedPos);// #// close the servo
-          } else if (s == '.') {
-            ison = false;
-            sleep(delaytimestop);
-          } else {
-            ison = false;
-            sleep(delaytimeletter); // # sleep half a second
-          }
-
-        }
-
-        sleep(80);
       }
 
+      sleep(80);
+    }
 
   }
 
@@ -173,20 +124,17 @@ public class MouthControl extends Service {
     mouthClosedPos = closed;
     mouthOpenedPos = opened;
 
-   // jaw.setMinMax(closed, opened);
-//    if (closed < opened) {
-//      jaw.map(closed, opened, closed, opened);
-//    } else {
-//      jaw.map(opened, closed, opened, closed);
-//    }
+    // jaw.setMinMax(closed, opened);
+    //    if (closed < opened) {
+    //      jaw.map(closed, opened, closed, opened);
+    //    } else {
+    //      jaw.map(opened, closed, opened, closed);
+    //    }
   }
 
   @Override
   public void startService() {
     super.startService();
-    jaw.startService();
-    arduino.startService();
-    // mouth.startService();
   }
 
   /**
@@ -202,11 +150,6 @@ public class MouthControl extends Service {
     ServiceType meta = new ServiceType(MouthControl.class.getCanonicalName());
     meta.addDescription("Mouth movements based on spoken text");
     meta.addCategory("control");
-
-    meta.addPeer("jaw", "Servo", "shared Jaw servo instance");
-    meta.addPeer("arduino", "Arduino", "shared Arduino instance");
-    meta.addPeer("mouth", "MarySpeech", "shared Speech instance");
-
     return meta;
   }
 
@@ -224,9 +167,4 @@ public class MouthControl extends Service {
       Logging.logError(e);
     }
   }
-
-  @Deprecated
-  public void enableAutoAttach(boolean enable) {
-  }
-  
 }

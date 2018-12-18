@@ -10,14 +10,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
+import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.inmoov.LanguagePack;
 import org.myrobotlab.inmoov.Utils;
 import org.myrobotlab.inmoov.Vision;
 import org.myrobotlab.jme3.InMoov3DApp;
@@ -89,9 +92,9 @@ public class InMoov extends Service {
   boolean speakErrors = false;
   String lastInMoovError = "";
   int maxInactivityTimeSeconds = 120;
-  public String lang_shutDown = "Extinguish my system, please wait 10 seconds";
   public static int attachPauseMs = 100;
   public Set<String> gesturesList = new TreeSet<String>();
+  private String lastGestureExecuted = "";
   public static boolean RobotCanMoveHeadRandom = true;
   public static boolean RobotCanMoveEyesRandom = true;
   public static boolean RobotCanMoveBodyRandom = true;
@@ -104,13 +107,14 @@ public class InMoov extends Service {
   boolean useHeadForTracking = true;
   boolean useEyesForTracking = false;
   transient InMoov3DApp vinMoovApp;
+  transient LanguagePack languagePack = new LanguagePack();
   private PinArrayControl pirArduino;
-  static String speechService = "NaturalReaderSpeech";
-  static String speechRecognizer = "WebkitSpeechRecognition";
   public static LinkedHashMap<String, String> languages = new LinkedHashMap<String, String>();
   public static List<String> languagesIndex = new ArrayList<String>();
   String language;
   boolean mute;
+  static String speechService = "MarySpeech";
+  static String speechRecognizer = "WebkitSpeechRecognition";
 
   // ---------------------------------------------------------------
   // end variables
@@ -154,8 +158,22 @@ public class InMoov extends Service {
   // ---------------------------------------------------------------
 
   public void attach(Attachable attachable) {
+    //opencv
     if (attachable instanceof OpenCV) {
       opencv = (OpenCV) attachable;
+      subscribe(opencv.getName(), "publishClassification");
+    } else if (attachable instanceof SpeechSynthesis) {
+      mouth = (SpeechSynthesis) attachable;
+      if (ear != null) {
+        ear.addMouth(mouth);
+      }
+    } else if (attachable instanceof SpeechRecognizer) {
+      ear = (SpeechRecognizer) attachable;
+      if (mouth != null) {
+        ear.addMouth(mouth);
+      }
+    } else if (attachable instanceof ProgramAB) {
+      chatBot = (ProgramAB) attachable;
     }
   }
 
@@ -175,9 +193,20 @@ public class InMoov extends Service {
   }
 
   public void cameraOn() {
-    startOpenCV();
+    if (opencv == null) {
+      startOpenCV();
+    }
     opencv.capture();
     vision.enablePreFilters();
+  }
+
+  public boolean isCameraOn() {
+    if (opencv != null) {
+      if (opencv.isCapturing()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void stopTracking() {
@@ -211,7 +240,7 @@ public class InMoov extends Service {
     }
 
     if (headTracking == null) {
-      this.speakBlocking("starting head tracking");
+      speakBlocking(languagePack.get("TRACKINGSTARTED"));
       headTracking = (Tracking) this.startPeer("headTracking");
       headTracking.connect(this.opencv, rothead, neck);
     }
@@ -226,7 +255,7 @@ public class InMoov extends Service {
       log.error("Tracking needs InMoov head and opencv activated");
       return;
     }
-    this.speakBlocking("starting eyes tracking");
+    speakBlocking(languagePack.get("TRACKINGSTARTED"));
     eyesTracking = (Tracking) this.startPeer("eyesTracking");
     eyesTracking.connect(this.opencv, head.eyeX, head.eyeY);
   }
@@ -251,6 +280,10 @@ public class InMoov extends Service {
       headTracking.startLKTracking();
       headTracking.trackPoint(0.5, 0.5);
     }
+  }
+
+  public void onClassification(TreeMap<String, List<Classification>> classifications) {
+    vision.yoloInventory(classifications);
   }
 
   // ---------------------------------------------------------------
@@ -342,21 +375,46 @@ public class InMoov extends Service {
   }
 
   /**
-   * This method will look at all of the .py files in a directory. One by one it
+   * This method will try to launch a python command
+   * with error handling
+   */
+  public String execGesture(String gesture) {
+    lastGestureExecuted = gesture;
+    String ret;
+    if (python == null) {
+      log.warn("execGesture : No jython engine...");
+      return null;
+    }
+    subscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
+
+    startedGesture(lastGestureExecuted);
+    return python.evalAndWait(gesture);
+  }
+
+  public void onGestureStatus(Status status) {
+    if (!(status == Status.success()) && !(status == Status.warn("Python process killed !"))) {
+      speakAlert(languagePack.get("GESTURE_ERROR"));
+    }
+    finishedGesture(lastGestureExecuted);
+    unsubscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
+  }
+
+  /**
+   * This blocking method will look at all of the .py files in a directory. One by one it
    * will load the files into the python interpreter. A gesture python file
    * should contain 1 method definition that is the same as the filename.
    * 
    * @param directory
    *          - the directory that contains the gesture python files.
    */
-  public void loadGestures(String directory) {
+  public boolean loadGestures(String directory) {
 
     // iterate over each of the python files in the directory
     // and load them into the python interpreter.
     String extension = "py";
     Integer totalLoaded = 0;
     Integer totalError = 0;
-    File dir = makeGesturesDirectory(directory);
+    File dir = Utils.makeDirectory(directory);
     if (dir.exists()) {
       for (File f : dir.listFiles()) {
         if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
@@ -372,6 +430,7 @@ public class InMoov extends Service {
       }
     }
     info("%s Gestures loaded, %s Gestures with error", totalLoaded, totalError);
+    return ((totalError == 0) ? true : false);
   }
 
   public void stopGesture() {
@@ -458,17 +517,6 @@ public class InMoov extends Service {
     captureGesture(poseName);
   }
 
-  private File makeGesturesDirectory(String directory) {
-    File dir = new File(directory);
-    dir.mkdirs();
-    if (!dir.isDirectory()) {
-      // TODO: maybe create the directory ?
-      log.warn("Gestures directory {} doest not exist.", directory);
-      return null;
-    }
-    return dir;
-  }
-
   public void saveGesture(String gestureName, String directory) {
     // TODO: consider the gestures directory as a property on the inmoov
     String gestureMethod = mapGestureNameToPythonMethod(gestureName);
@@ -526,6 +574,7 @@ public class InMoov extends Service {
     if (gestureAlreadyStarted) {
       warn("Warning 1 gesture already running, this can break spacetime and lot of things");
     } else {
+      log.info("Starting gesture : {}", nameOfGesture);
       gestureAlreadyStarted = true;
       RobotCanMoveRandom = false;
       setOverrideAutoDisable(true);
@@ -542,6 +591,7 @@ public class InMoov extends Service {
       RobotCanMoveRandom = true;
       setOverrideAutoDisable(false);
       gestureAlreadyStarted = false;
+      log.info("gesture : {} finished...", nameOfGesture);
     }
   }
 
@@ -946,7 +996,12 @@ public class InMoov extends Service {
   }
 
   public InMoovArm startArm(String side, String port, String type) throws Exception {
-    speakBlocking(String.format("starting %s arm", side));
+    //TODO rework this...
+    if (type == "left") {
+      speakBlocking(languagePack.get("STARTINGLEFTARM") + " " + port);
+    } else {
+      speakBlocking(languagePack.get("STARTINGRIGHTARM") + " " + port);
+    }
 
     InMoovArm arm = (InMoovArm) startPeer(String.format("%sArm", side));
     arms.put(side, arm);
@@ -964,7 +1019,12 @@ public class InMoov extends Service {
   }
 
   public InMoovHand startHand(String side, String port, String type) throws Exception {
-    speakBlocking(String.format("starting %s hand", side));
+    //TODO rework this...
+    if (type == "left") {
+      speakBlocking(languagePack.get("STARTINGLEFTHAND") + " " + port);
+    } else {
+      speakBlocking(languagePack.get("STARTINGRIGHTHAND") + " " + port);
+    }
 
     InMoovHand hand = (InMoovHand) startPeer(String.format("%sHand", side));
     hand.setSide(side);
@@ -996,7 +1056,7 @@ public class InMoov extends Service {
   public InMoovHead startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin)
       throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    speakBlocking(String.format("starting head on %s", port));
+    speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
     head = (InMoovHead) startPeer("head");
 
     if (type == null) {
@@ -1233,6 +1293,7 @@ public class InMoov extends Service {
     python.execMethod("power_down");
   }
 
+  //TODO FIX/CHECK this, migrate from python land
   public void powerUp() {
     startSleep = null;
     enable();
@@ -1246,6 +1307,7 @@ public class InMoov extends Service {
     python.execMethod("power_up");
   }
 
+  //TODO FIX/CHECK this, migrate from python land
   public void publishPin(Pin pin) {
     log.info("{} - {}", pin.pin, pin.value);
     if (pin.value == 1) {
@@ -1311,17 +1373,34 @@ public class InMoov extends Service {
     this.mute = mute;
   }
 
-  public List<AudioData> speakBlocking(Status test) {
-    if (test != null && !mute) {
-      return speakBlocking(test.toString());
+  public List<AudioData> speakBlocking(String toSpeak) {
+    if (mouth == null) {
+      log.error("speakBlocking is called, but my mouth is NULL...");
+      return null;
+    }
+    if (!mute) {
+      try {
+        return mouth.speakBlocking(toSpeak);
+      } catch (Exception e) {
+        Logging.logError(e);
+      }
     }
     return null;
   }
 
-  public List<AudioData> speakBlocking(String toSpeak) {
-    if (mouth != null && !mute) {
+  public List<AudioData> speakAlert(String toSpeak) {
+    speakBlocking(languagePack.get("ALERT"));
+    return speakBlocking(toSpeak);
+  }
+
+  public List<AudioData> speak(String toSpeak) {
+    if (mouth == null) {
+      log.error("Speak is called, but my mouth is NULL...");
+      return null;
+    }
+    if (!mute) {
       try {
-        return mouth.speakBlocking(toSpeak);
+        return mouth.speak(toSpeak);
       } catch (Exception e) {
         Logging.logError(e);
       }
@@ -1352,7 +1431,7 @@ public class InMoov extends Service {
     startHead(leftPort);
     startOpenCV();
     startEar();
-    startMouthControl(leftPort);
+    startMouthControl(head.jaw, mouth);
     startLeftHand(leftPort);
     startRightHand(rightPort);
     //startEyelids(rightPort);
@@ -1361,73 +1440,107 @@ public class InMoov extends Service {
     startTorso(leftPort);
     startHeadTracking();
     startEyesTracking();
+    //TODO LP
     speakBlocking("startup sequence completed");
+  }
+
+  /**
+   * Start InMoov brain engine
+   * And extra stuffs, like "what is you name" ( TODO finish migration )
+   * 
+   * @return started ProgramAB service
+   */
+  public ProgramAB startBrain() {
+    if (chatBot == null) {
+      chatBot = (ProgramAB) Runtime.start(this.getIntanceName() + ".brain", "ProgramAB");
+    }
+    this.attach(chatBot);
+    speakBlocking(languagePack.get("CHATBOTACTIVATED"));
+    chatBot.repetition_count(10);
+    chatBot.setPath("InMoov/chatBot");
+    chatBot.startSession("default", getLanguage());
+    //reset some parameters to default...
+    chatBot.setPredicate("topic", "default");
+    chatBot.setPredicate("questionfirstinit", "");
+    chatBot.setPredicate("tmpname", "");
+    chatBot.setPredicate("null", "");
+    //load last user session
+    if (!chatBot.getPredicate("name").isEmpty()) {
+      if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")) {
+        chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
+      }
+    }
+    chatBot.setPredicate("parameterHowDoYouDo", "");
+    try {
+      chatBot.savePredicates();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    //start session based on last recognized person
+    if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+      chatBot.startSession(chatBot.getPredicate("lastUsername"));
+    }
+    return chatBot;
   }
 
   // TODO TODO TODO - context & status report -
   // "current context is right hand"
   // FIXME - voice control for all levels (ie just a hand or head !!!!)
-  public SpeechRecognizer startEar() throws Exception {
-    speakBlocking("starting ear");
-    ear = (SpeechRecognizer) startPeer("ear");
-    subscribe(ear.getName(), "listeningEvent");
-    subscribe(ear.getName(), "pauseListening");
-    subscribe(ear.getName(), "recognized");
+  public SpeechRecognizer startEar() {
 
-    if (mouth != null) {
-      ear.addMouth(mouth);
+    if (ear == null) {
+      ear = (SpeechRecognizer) startPeer("ear");
     }
+    this.attach((Attachable) ear);
+    speakBlocking(languagePack.get("STARTINGEAR"));
+
     return ear;
   }
 
   // gestures begin ---------------
 
-  public SpeechSynthesis startMouth() throws Exception {
-    mouth = (SpeechSynthesis) startPeer("mouth");
-    speakBlocking("starting mouth");
-
-    if (ear != null) {
-      ear.addMouth(mouth);
+  public SpeechSynthesis startMouth() {
+    if (mouth == null) {
+      mouth = (SpeechSynthesis) startPeer("mouth");
     }
+    this.attach((Attachable) mouth);
+    speakBlocking(languagePack.get("STARTINGMOUTH"));
+    speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
+
     return mouth;
   }
 
-  public MouthControl startMouthControl(String port) throws Exception {
-    speakBlocking("starting mouth control");
+  public MouthControl startMouthControl(ServoControl jaw, SpeechSynthesis mouth) {
+    speakBlocking(languagePack.get("STARTINGMOUTHCONTROL"));
     if (mouthControl == null) {
-
-      if (head == null) {
-        startHead(port);
-      }
-
       mouthControl = (MouthControl) startPeer("mouthControl");
-
-      // FIXME - connections must be done "outside" e.g. I2C config
-      // mouthControl.arduino.connect(port);
-      mouthControl.jaw.attach(mouthControl.arduino, 26);
-
-      // arduinos.put(port, mouthControl.arduino);
-      // String p = mouthControl.getArduino().getSerial().getPortName();
-      if (port != null) {
-        arduinos.put(port, mouthControl.arduino);
-      }
+      mouthControl.attach(jaw);
+      mouthControl.attach((Attachable) mouth);
       mouthControl.setmouth(10, 50);
     }
     return mouthControl;
   }
 
   public boolean startOpenCV() {
-    if (opencv == null)  {
-      opencv = (OpenCV)startPeer("opencv");
+    speakBlocking(languagePack.get("STARTINGOPENCV"));
+    if (opencv == null) {
+      opencv = (OpenCV) Runtime.loadAndStart(this.getIntanceName() + ".opencv", "OpenCV");
     }
-    // TODO: reconcile the "vision" class and the "test" method here. 
-    return true;
-    
+    this.attach(opencv);
+    // test for a worky opencv with hardware
+    if (vision.test()) {
+      broadcastState();
+      return true;
+    } else {
+      speakAlert(languagePack.get("OPENCVNOWORKY"));
+      return false;
+    }
   }
 
   public OpenNi startOpenNI() throws Exception {
     if (openni == null) {
-      speakBlocking("starting kinect");
+      speakBlocking(languagePack.get("STARTINGOPENNI"));
       openni = (OpenNi) startPeer("openni");
       pid = (Pid) startPeer("pid");
 
@@ -1484,7 +1597,7 @@ public class InMoov extends Service {
 
     RobotCanMoveRandom = false;
     stopTracking();
-    speakBlocking(lang_shutDown);
+    speakBlocking(languagePack.get("SHUTDOWN"));
     halfSpeed();
     rest();
     waitTargetPos();
@@ -1519,19 +1632,6 @@ public class InMoov extends Service {
     if (RightRelay1 != null) {
       RightRelay1.off();
     }
-    // TODO better thing to detect connected arduinos
-    // we cant use arduino.stopService()
-    // ServoController don't have serials :P - new way must be figured out
-    if (rightHand != null) {
-      // rightHand.arduino.serial.disconnect();
-      // rightHand.arduino.serial.stopRecording();
-      // rightHand.arduino.disconnect();
-    }
-    if (leftHand != null || head != null) {
-      // leftHand.arduino.serial.disconnect();
-      // leftHand.arduino.serial.stopRecording();
-      // leftHand.arduino.disconnect();
-    }
   }
 
   @Override
@@ -1555,6 +1655,7 @@ public class InMoov extends Service {
     languagesIndex = new ArrayList<String>(languages.keySet());
     this.language = getLanguage();
     python = getPython();
+    languagePack.load(language);
 
     // get events of new services and shutdown
     Runtime r = Runtime.getInstance();
@@ -1567,7 +1668,7 @@ public class InMoov extends Service {
 
   public InMoovTorso startTorso(String port, String type) throws Exception {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    speakBlocking(String.format("starting torso on %s", port));
+    speakBlocking(languagePack.get("STARTINGTORSO") + " " + port);
 
     torso = (InMoovTorso) startPeer("torso");
     if (type == null) {
@@ -1744,12 +1845,6 @@ public class InMoov extends Service {
     }
   }
 
-  public void onRecognized(String text) {
-    if (vinMoovApp != null && VinmoovMonitorActivated && RobotIsStarted) {
-      vinMoovApp.onRecognized(text);
-    }
-  }
-
   public void setBatteryLevel(Integer level) {
     if (vinMoovApp != null && VinmoovMonitorActivated && RobotIsStarted) {
       vinMoovApp.setBatteryLevel(level);
@@ -1777,6 +1872,7 @@ public class InMoov extends Service {
 
   public InMoov3DApp startVinMoov() throws InterruptedException {
     if (vinMoovApp == null) {
+      speakBlocking(languagePack.get("startingVirtual"));
       vinMoovApp = new InMoov3DApp();
       if (VinmoovMonitorActivated) {
         // vinmoovFullScreen=true
@@ -1801,6 +1897,7 @@ public class InMoov extends Service {
       vinMoovApp.start();
       // Grog Says ... WTH ?? - there should be a callback how do we know its
       // not 6.5 seconds ?
+      // Moz4r says : I think it's a security timeout n=to not wait forever, not really a sleep
       synchronized (this) {
         wait(6000);
       }
@@ -2046,15 +2143,18 @@ public class InMoov extends Service {
    * @param i
    *          - format : java Locale
    */
-  public void setLanguage(String l) {
-    if (languages.containsKey(Locale.getDefault().toLanguageTag())) {
+  public boolean setLanguage(String l) {
+    if (languages.containsKey(l)) {
       this.language = l;
-      info("Set Runtime language to %s", languages.get(l));
+      info("Set language to %s", languages.get(l));
       Runtime runtime = Runtime.getInstance();
       runtime.setLocale(l);
-      broadcastState();
+      languagePack.load(language);
+      return true;
+      //this.broadcastState();
     } else {
       error("InMoov not yet support {}", l);
+      return false;
     }
   }
 
@@ -2103,14 +2203,12 @@ public class InMoov extends Service {
     meta.addCategory("robot");
     // meta.addDependency("inmoov.fr", "1.0.0");
     // meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
-    meta.addDependency("inmoov.fr", "inmoov", "1.1.5", "zip");
+    meta.addDependency("inmoov.fr", "inmoov", "1.1.6", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------
     meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
-
-    meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared left arduino");
 
     meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
     meta.sharePeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
@@ -2123,15 +2221,12 @@ public class InMoov extends Service {
     meta.sharePeer("eyesTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
     meta.sharePeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
-
+    meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
     meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
     meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head Arduino");
     meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
     meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
-    meta.sharePeer("mouthControl.arduino", "left", "Arduino", "shared head Arduino");
-    meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
-    meta.sharePeer("mouthControl.jaw", "head.jaw", "Servo", "shared servo");
     // SHARING !!! - modified key / actual name end ------
 
     // Global - undecorated by self name
@@ -2153,7 +2248,6 @@ public class InMoov extends Service {
     meta.addPeer("headTracking", "Tracking", "Head tracking system");
     meta.addPeer("mouth", speechService, "InMoov speech service");
     meta.addPeer("mouthControl", "MouthControl", "MouthControl");
-    meta.addPeer("opencv", "OpenCV", "InMoov OpenCV service");
     meta.addPeer("openni", "OpenNi", "Kinect service");
     meta.addPeer("pid", "Pid", "Pid service");
 
@@ -2166,31 +2260,39 @@ public class InMoov extends Service {
     return meta;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    /**
+
     String leftPort = "COM3";
     String rightPort = "COM4";
-    
+
     VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
     VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
-    vleft.connect("COM3");
-    vright.connect("COM4");
+    vleft.connect(leftPort);
+    vright.connect(rightPort);
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-    i01.startLeftArm(leftPort);
-    i01.startRightArm(rightPort);
-    i01.moveArm("right", 20.0, 10.0, 5.0, 40.0);
+    i01.setLanguage("en-US");
+    i01.startMouth();
+    i01.startEar();
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+    webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
+    HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
+    i01.chatBot = (ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
+    i01.chatBot.addTextListener(htmlFilter);
+    htmlFilter.addListener("publishText", "i01", "speak");
+    i01.chatBot.attach((Attachable) i01.ear);
+    i01.startBrain();
+    i01.startHead(leftPort);
+    i01.startMouthControl(i01.head.jaw, i01.mouth);
     i01.loadGestures("InMoov/gestures");
-    log.info(i01.captureGesture());
-    i01.rest();
-    log.info(i01.captureGesture("rest"));
-    log.info(i01.startOpenCV() + "startOpenCV");
-    */
-    Runtime.start("gui", "SwingGui");
-    InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+    i01.startVinMoov();
+    i01.startOpenCV();
+    i01.execGesture("daVidnci()");
+    i01.execGesture("daVinci()");
   }
-
 }
