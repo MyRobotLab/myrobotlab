@@ -51,7 +51,7 @@ import org.slf4j.Logger;
 public class InMoovGui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(InMoov2Gui.class);
+  public final static Logger log = LoggerFactory.getLogger(InMoovGui.class);
   Runtime myRuntime = (Runtime) Runtime.getInstance();
   InMoov i01 = (InMoov) myRuntime.getService(boundServiceName);
   private final JTabbedPane inmoovPane = new JTabbedPane(JTabbedPane.TOP);
@@ -64,6 +64,8 @@ public class InMoovGui extends ServiceGui implements ActionListener {
   private final JPanel panel = new JPanel();
   private final JCheckBox Flip = new JCheckBox("Flip Camera");
   private final JCheckBox PyramidDown = new JCheckBox("PyramidDown");
+  private final JLabel notReadyLabel1 = new JLabel("InMoov SwingGui is not yet ready... ");
+  private final JLabel notReadyLabel2 = new JLabel(".");
 
   public InMoovGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
@@ -78,6 +80,11 @@ public class InMoovGui extends ServiceGui implements ActionListener {
     ImageIcon generalIcon = Util.getImageIcon("InMoov.png");
     inmoovPane.addTab("General", generalIcon, generalPanel);
     generalPanel.setLayout(new GridLayout(3, 2, 0, 0));
+    notReadyLabel1.setForeground(Color.RED);
+    
+    generalPanel.add(notReadyLabel1);
+    
+    generalPanel.add(notReadyLabel2);
 
     JLabel lblNewLabel = new JLabel(" Language : ");
     generalPanel.add(lblNewLabel);

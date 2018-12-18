@@ -2,6 +2,7 @@ package org.myrobotlab.inmoov;
 
 import java.io.File;
 import java.io.IOException;
+import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Python;
@@ -39,6 +40,17 @@ public class Utils {
       log.debug("Successfully loaded {}", f.getAbsolutePath());
     }
     return true;
+  }
+  
+  public static File makeDirectory(String directory) {
+    File dir = new File(directory);
+    dir.mkdirs();
+    if (!dir.isDirectory()) {
+      // TODO: maybe create the directory ?
+      log.warn("Directory {} doest not exist.", directory);
+      return null;
+    }
+    return dir;
   }
 
 }
