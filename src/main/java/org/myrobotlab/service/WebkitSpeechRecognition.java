@@ -51,7 +51,6 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   private boolean listening = false;
   private boolean speaking = false;
-  private boolean commError = false;
 
   private long lastAutoListenEvent = System.currentTimeMillis();
   public boolean stripAccents = false;
@@ -199,7 +198,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   @Override
   public void stopListening() {
     log.debug("Stop listening event seen.");
-    commError = false;
+    boolean commError = false;
     if (this.autoListen && !this.speaking) {
 
       if (System.currentTimeMillis() - lastAutoListenEvent > 300) {
