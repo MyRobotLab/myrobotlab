@@ -380,19 +380,17 @@ public class InMoov extends Service {
    */
   public String execGesture(String gesture) {
     lastGestureExecuted = gesture;
-    String ret;
     if (python == null) {
       log.warn("execGesture : No jython engine...");
       return null;
     }
     subscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
-
     startedGesture(lastGestureExecuted);
     return python.evalAndWait(gesture);
   }
 
   public void onGestureStatus(Status status) {
-    if (!(status == Status.success()) && !(status == Status.warn("Python process killed !"))) {
+    if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {
       speakAlert(languagePack.get("GESTURE_ERROR"));
     }
     finishedGesture(lastGestureExecuted);
@@ -2203,7 +2201,7 @@ public class InMoov extends Service {
     meta.addCategory("robot");
     // meta.addDependency("inmoov.fr", "1.0.0");
     // meta.addDependency("org.myrobotlab.inmoov", "1.0.0");
-    meta.addDependency("inmoov.fr", "inmoov", "1.1.6", "zip");
+    meta.addDependency("inmoov.fr", "inmoov", "1.1.7", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------
@@ -2292,7 +2290,6 @@ public class InMoov extends Service {
     i01.loadGestures("InMoov/gestures");
     i01.startVinMoov();
     i01.startOpenCV();
-    i01.execGesture("daVidnci()");
     i01.execGesture("daVinci()");
   }
 }
