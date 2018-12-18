@@ -193,7 +193,9 @@ public class InMoov extends Service {
   }
 
   public void cameraOn() {
-    startOpenCV();
+    if (opencv == null) {
+      startOpenCV();
+    }
     opencv.capture();
     vision.enablePreFilters();
   }
@@ -2141,16 +2143,18 @@ public class InMoov extends Service {
    * @param i
    *          - format : java Locale
    */
-  public void setLanguage(String l) {
+  public boolean setLanguage(String l) {
     if (languages.containsKey(l)) {
       this.language = l;
       info("Set language to %s", languages.get(l));
       Runtime runtime = Runtime.getInstance();
       runtime.setLocale(l);
       languagePack.load(language);
+      return true;
       //this.broadcastState();
     } else {
       error("InMoov not yet support {}", l);
+      return false;
     }
   }
 
@@ -2278,7 +2282,7 @@ public class InMoov extends Service {
     webgui.startService();
     webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
     HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-    i01.chatBot=(ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
+    i01.chatBot = (ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
     i01.chatBot.addTextListener(htmlFilter);
     htmlFilter.addListener("publishText", "i01", "speak");
     i01.chatBot.attach((Attachable) i01.ear);
