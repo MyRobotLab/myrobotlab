@@ -32,5 +32,23 @@
     <li ng-repeat="possibleDeviceAddress in deviceAddressList" ng-click="setDeviceAddress(possibleDeviceAddress)">{{possibleDeviceAddress}}</li>
     </ul>
   </span>
-     
+  
   </div>
+  
+<div> 
+<br><p><b>Service map</b></p>
+<table>
+  <tr>
+    <th>Service</th>
+    <th>Bus</th>   
+    <th>Address</th>
+  </tr>
+  <tr ng-repeat="x in i2cDevices">
+    <td>{{ x.serviceName }}</td>
+    <td>{{ x.busAddress }}</td>
+    <td>{{ x.deviceAddress }}</td>
+  </tr>
+</table>
+
+</div>
+  

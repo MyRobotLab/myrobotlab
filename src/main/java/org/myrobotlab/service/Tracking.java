@@ -27,18 +27,13 @@ package org.myrobotlab.service;
 
 import static org.myrobotlab.service.OpenCV.BACKGROUND;
 import static org.myrobotlab.service.OpenCV.FILTER_DETECTOR;
-import static org.myrobotlab.service.OpenCV.FILTER_DILATE;
-import static org.myrobotlab.service.OpenCV.FILTER_ERODE;
 import static org.myrobotlab.service.OpenCV.FILTER_FACE_DETECT;
-import static org.myrobotlab.service.OpenCV.FILTER_FACE_RECOGNIZER;
 import static org.myrobotlab.service.OpenCV.FILTER_FIND_CONTOURS;
-import static org.myrobotlab.service.OpenCV.FILTER_GRAY;
 import static org.myrobotlab.service.OpenCV.FILTER_LK_OPTICAL_TRACK;
-import static org.myrobotlab.service.OpenCV.FILTER_PYRAMID_DOWN;
 import static org.myrobotlab.service.OpenCV.FOREGROUND;
 import static org.myrobotlab.service.OpenCV.PART;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,15 +48,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
-import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterDetector;
-import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
-import org.myrobotlab.opencv.OpenCVFilterGray;
-import org.myrobotlab.opencv.OpenCVFilterPyramidDown;
-import org.myrobotlab.opencv.OpenCVFilterTranspose;
-import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 // TODO - attach() ???  Static name peer key list ???
@@ -79,8 +67,6 @@ public class Tracking extends Service {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Tracking.class.getCanonicalName());
-
-  transient public ArrayList<OpenCVFilter> preFilters = new ArrayList<OpenCVFilter>();
 
   long lastTimestamp = 0;
   long waitInterval = 5000;
@@ -106,7 +92,6 @@ public class Tracking extends Service {
   // ------ PEER SERVICES BEGIN------
   transient public Pid pid;
   transient public OpenCV opencv;
-  transient public ServoController controller;
 
   // transient public ServoControl x, y;
   private class TrackingServoData {
@@ -131,8 +116,6 @@ public class Tracking extends Service {
 
   // MRL points
   public Point2df lastPoint = new Point2df();
-
-  public String LKOpticalTrackFilterName;
 
   double sizeIndexForBackgroundForegroundFlip = 0.10;
 
@@ -162,8 +145,7 @@ public class Tracking extends Service {
     super(n);
 
     pid = (Pid) createPeer("pid");
-    setDefaultPreFilters();
-    // the kp should be propotional to the input min/max of the servo.. for now we'll go with 45 for now.
+    // the kp should be proportional to the input min/max of the servo.. for now we'll go with 45 for now.
     pid.setPID("x", 3.0, 1.0, 0.1);
     pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
@@ -180,14 +162,6 @@ public class Tracking extends Service {
 
   }
 
-  public void addPreFilter(OpenCVFilter filter) {
-    preFilters.add(filter);
-  }
-
-  public void clearPreFilters() {
-    preFilters.clear();
-  }
-
   // reset better ?
   public void clearTrackingPoints() {
     opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "clearPoints");
@@ -197,47 +171,22 @@ public class Tracking extends Service {
 
   // -------------- System Specific Initialization Begin --------------
 
-  public OpenCVFilter faceDetect(boolean PleaseRecognizeToo) {
-    // opencv.addFilter("Gray"); needed ?    
-    stopTracking();
+  public void faceDetect() {
     log.info("starting faceDetect");
-    for (int i = 0; i < preFilters.size(); ++i) {
-      //grayFilter+Facerecognition=crash
-      if (preFilters.get(i).name==FILTER_GRAY && PleaseRecognizeToo)
-      {
-        log.info("skip gray filter for faceRecognize");
-      }
-      else
-      {
-      opencv.addFilter(preFilters.get(i));
-      }
+    if (!Arrays.asList(opencv.getFilters()).contains(opencv.getFilter(FILTER_FACE_DETECT))) {
+      opencv.addFilter(FILTER_FACE_DETECT);
     }
-    OpenCVFilter fr=null;
-    if (PleaseRecognizeToo)
-    {
-      fr=opencv.addFilter(FILTER_FACE_RECOGNIZER);
-    }
-    opencv.addFilter(FILTER_FACE_DETECT);
-    opencv.setDisplayFilter(FILTER_FACE_DETECT);
+    opencv.setActiveFilter(FILTER_FACE_DETECT);
     opencv.capture();
     setState(STATE_FACE_DETECT);
-    return fr;
   }
-  
-  public void faceDetect() {
-    faceDetect(false);
-  }
-  
+
   public void findFace() {
     scan = true;
   }
 
   public OpenCVData foundFace(OpenCVData data) {
     return data;
-  }
-
-  public ServoController getArduino() {
-    return controller;
   }
 
   // TODO - enhance with location - not just heading
@@ -252,7 +201,6 @@ public class Tracking extends Service {
   // ---------------------
 
   public OpenCV getOpenCV() {
-
     return opencv;
   }
 
@@ -302,68 +250,18 @@ public class Tracking extends Service {
     return image;
   }
 
-  public void removeFilters() {
-    opencv.removeFilters();
-    sleep(1000);
-    }
-
-  public void reset() {
-    // TODO - reset pid values
-    // clear filters
-    opencv.removeFilters();
-    // reset position
-    rest();
-  }
-
   public void rest() {
     log.info("rest");
-    if (controller == null) {
-      return;
-    }
-    String controllerName = controller.getName();
     for (TrackingServoData sc : servoControls.values()) {
-      if (sc.servoControl.isAttached(controllerName)) {
+      if (sc.servoControl.isAttached()) {
         sc.servoControl.rest();
       }
     }
   }
 
-  public void scan() {
-
-  }
-
   public void searchForeground() {
     ((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).search();
     setState(STATE_SEARCHING_FOREGROUND);
-  }
-
-  public void setDefaultPreFilters() {
-    if (preFilters.size() == 0) {
-      OpenCVFilterPyramidDown pd = new OpenCVFilterPyramidDown(FILTER_PYRAMID_DOWN);
-      OpenCVFilterGray gray = new OpenCVFilterGray(FILTER_GRAY);
-      preFilters.add(pd);
-      preFilters.add(gray);
-    }
-  }
-
-  public void addTransposeFilter() {
-    OpenCVFilterTranspose transpose = new OpenCVFilterTranspose("Transpose");
-    preFilters.add(transpose);
-  }
-
-  public void setForegroundBackgroundFilter() {
-    opencv.removeFilters();
-    for (int i = 0; i < preFilters.size(); ++i) {
-      opencv.addFilter(preFilters.get(i));
-    }
-    opencv.addFilter(FILTER_DETECTOR);
-    opencv.addFilter(FILTER_ERODE);
-    opencv.addFilter(FILTER_DILATE);
-    opencv.addFilter(FILTER_FIND_CONTOURS);
-
-    ((OpenCVFilterDetector) opencv.getFilter(FILTER_DETECTOR)).learn();
-
-    setState(STATE_LEARNING_BACKGROUND);
   }
 
   public void setIdle() {
@@ -376,18 +274,26 @@ public class Tracking extends Service {
 
       case STATE_FACE_DETECT:
         // check for bounding boxes
-        // data.setSelectedFilterName(FaceDetectFilterName);
         List<Rectangle> bb = data.getBoundingBoxArray();
+        int width = 0;
+        int height = 0;
 
         if (bb != null && bb.size() > 0) {
-
+          try {
+            // get image size for proportions compute
+            width = opencv.getGrabber().getImageWidth();
+            height = opencv.getGrabber().getImageHeight();
+          } catch (Exception e) {
+            log.error("Tracking can't get grabber dimentions, this is BAD : ", e);
+          }
           // data.logKeySet();
           // log.error("{}",bb.size());
 
           // found face
           // find centroid of first bounding box
-          lastPoint.x = bb.get(0).x + bb.get(0).width / 2;
-          lastPoint.y = bb.get(0).y + bb.get(0).height / 2;
+
+          lastPoint.x = (bb.get(0).x + bb.get(0).width / 2) / width;
+          lastPoint.y = (bb.get(0).y + bb.get(0).height / 2) / height;
           updateTrackingPoint(lastPoint);
 
           ++faceFoundFrameCount;
@@ -434,6 +340,7 @@ public class Tracking extends Service {
         // different detection
         break;
 
+      //TODO: test startLKTracking -> maybe fix targetPoint.get(0) for image proportion between 0>1
       case STATE_LK_TRACKING_POINT:
         // extract tracking info
         // data.setSelectedFilterName(LKOpticalTrackFilterName);
@@ -466,45 +373,15 @@ public class Tracking extends Service {
     info(state);
   }
 
+  //TODO: test startLKTracking
   public void startLKTracking() {
-    log.info("startLKTracking");
-
-    opencv.removeFilters();
-
-    for (int i = 0; i < preFilters.size(); ++i) {
-      opencv.addFilter(preFilters.get(i));
+    log.info("Starting LKTracking");
+    if (!Arrays.asList(opencv.getFilters()).contains(opencv.getFilter(FILTER_LK_OPTICAL_TRACK))) {
+      opencv.addFilter(FILTER_LK_OPTICAL_TRACK);
     }
-
-    opencv.addFilter(FILTER_LK_OPTICAL_TRACK, FILTER_LK_OPTICAL_TRACK);
-    opencv.setDisplayFilter(FILTER_LK_OPTICAL_TRACK);
-
+    opencv.setActiveFilter(FILTER_LK_OPTICAL_TRACK);
     opencv.capture();
-
     setState(STATE_LK_TRACKING_POINT);
-  }
-
-  // DATA WHICH MUST BE SET BEFORE ATTACH METHODS !!!! - names must be set of
-  // course !
-  // com port
-  // IMPORTANT CONCEPT - the Typed function should have ALL THE BUSINESS LOGIC
-  // TO ATTACH
-  // NON ANYWHERE ELSE !!
-  @Override
-  public void startService() {
-    super.startService();
-
-    TrackingServoData x = new TrackingServoData("x");
-    x.servoControl = (ServoControl) startPeer("x");
-    servoControls.put("x", x);
-
-    TrackingServoData y = new TrackingServoData("y");
-    y.servoControl = (ServoControl) startPeer("y");
-    servoControls.put("y", y);
-
-    controller = (Arduino) startPeer("controller");
-    pid = (Pid) startPeer("pid");
-    opencv = (OpenCV) startPeer("opencv");
-    rest();
   }
 
   public void stopScan() {
@@ -512,9 +389,9 @@ public class Tracking extends Service {
   }
 
   public void stopTracking() {
-    log.info("stop tracking");
+    log.info("stop tracking, all filters disabled");
     setState(STATE_IDLE);
-    removeFilters();
+    opencv.disableAll();
   }
 
   // --------------- publish methods begin ----------------------------
@@ -639,53 +516,18 @@ public class Tracking extends Service {
 
   }
 
-  public void connect(OpenCV opencv, Servo x, Servo y) {
+  public void connect(OpenCV opencv, ServoControl x, ServoControl y) {
     log.info("Connect 2 servos for head tracking!... aye aye captain.  Also.. an open cv instance.");
     attach(opencv);
-    attach(x, y);    
-    // TODO: consider using the input min/max of the servo here..
-    pid.setOutputRange("x", -20, 20);
-    pid.setOutputRange("y", -20, 20);
+    attach(x, y);
+    // don't understand this, it should be getMinInput and getMaxInput, no ? but seem worky..
+    pid.setOutputRange("x", -x.getMaxInput(), x.getMaxInput());
+    pid.setOutputRange("y", -y.getMaxInput(), y.getMaxInput());
     // target the center !
     pid.setSetpoint("x", 0.5);
     pid.setSetpoint("y", 0.5);
     // TODO: remove this sleep stmt
     sleep(100);
-    rest();
-  }
-  
-  
-  public void connect(String port, int xPin, int yPin) throws Exception {
-    connect(port, xPin, yPin, 0);
-  }
-
-  public void connect(String port, int xPin, int yPin, int cameraIndex) throws Exception {
-    int[] pins = new int[] { xPin, yPin };
-    controller = (Arduino) startPeer("controller");
-    ((PortConnector) controller).connect(port);
-
-    for (int i = 0; i < axis.length; i++) {
-      TrackingServoData x = new TrackingServoData(axis[i]);
-      x.axis = axis[i];
-      x.servoControl = (Servo) createPeer(axis[i]);
-      servoControls.put(axis[i], x);
-      servoControls.get(axis[i]).servoControl.setPin(pins[i]);
-      servoControls.get(axis[i]).servoControl.attach(controller, pins[i]);
-      // use the output min/max for the pid output i guess?  TODO: what should the output range be set to??
-      pid.setOutputRange(axis[i], -x.servoControl.getMaxInput(), x.servoControl.getMaxInput());
-      // TODO: parameterize this better!  connect method is too smart for it's own good.
-      //pid.setOutputRange(axis[i], -5, 5);
-      x.servoControl.moveTo(x.servoControl.getRest() + 2);
-      x.currentServoPos = x.servoControl.getPos();
-      log.info("Attached to servo {} current pos {}", x.name, x.currentServoPos);
-    }
-    opencv = (OpenCV) createPeer("opencv");
-    opencv.setCameraIndex(cameraIndex);
-    // opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
-    subscribe(opencv.getName(), "publishOpenCVData");
-    LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
-    // TODO - think of a "validate" method
-    sleep(300);
     rest();
   }
 
@@ -702,11 +544,8 @@ public class Tracking extends Service {
     ServiceType meta = new ServiceType(Tracking.class.getCanonicalName());
     meta.addDescription("uses a video input and vision library to visually track objects");
     meta.addCategory("vision", "video", "sensor", "control");
-    meta.addPeer("x", "Servo", "pan servo");
-    meta.addPeer("y", "Servo", "tilt servo");
     meta.addPeer("pid", "Pid", "Pid service - for all your pid needs");
     meta.addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
-    meta.addPeer("controller", "Arduino", "Tracking Arduino instance");
     return meta;
   }
 
@@ -715,7 +554,7 @@ public class Tracking extends Service {
       log.info("Axis must be x or y");
       return;
     }
-    TrackingServoData tsd  = new TrackingServoData(axis);
+    TrackingServoData tsd = new TrackingServoData(axis);
     tsd.servoControl = servo;
     tsd.axis = axis;
     servoControls.put(axis, tsd);
@@ -730,7 +569,6 @@ public class Tracking extends Service {
 
   public void attach(OpenCV opencv) {
     this.opencv = opencv;
-    LKOpticalTrackFilterName = String.format("%s.%s", opencv.getName(), FILTER_LK_OPTICAL_TRACK);
     opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
   }
 
@@ -752,78 +590,24 @@ public class Tracking extends Service {
 
     try {
       LoggingFactory.init(Level.INFO);
-      boolean useVirtualArduino = true;
-      int xPin = 9;
-      int yPin = 6;
-      String arduinoPort = "COM5";
-      int cameraIndex = 0;
-      String frameGrabberType = "org.myrobotlab.opencv.SarxosFrameGrabber";
 
-      /*
-       * <pre> 1. setting frame grabber type does not update gui correctly
-       * Sarxos => OpenCV :P </pre>
-       */
-
-      /*
-       * Pid pid = (Pid)Runtime.start("pid", "Pid"); Servo pan =
-       * (Servo)Runtime.start("x", "Servo"); Servo tilt =
-       * (Servo)Runtime.start("y", "Servo"); OpenCV video =
-       * (OpenCV)Runtime.start("opencv", "OpenCV"); Ssc32UsbServoController
-       * controller = (Ssc32UsbServoController)Runtime.start("controller",
-       * "Ssc32UsbServoController");
-       */
       Runtime.start("gui", "SwingGui");
       // Runtime.start("webgui", "WebGui");
 
-      if (useVirtualArduino) {
-        VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-        virtual.connect(arduinoPort);
-      }
+      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      virtual.connect("COM3");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect("COM3");
 
       Tracking t01 = (Tracking) Runtime.start("t01", "Tracking");
-      ServoControl x = t01.getX();
-      // x.setInverted(true);
-
-      ServoControl y = t01.getY();
-      // y.setInverted(true);
-
-      t01.connect(arduinoPort, xPin, yPin, cameraIndex);
-      OpenCV opencv = t01.getOpenCV();
-      opencv.capture("resource/OpenCV/testData/ryan.jpg");
-      opencv.broadcastState();
-
-
-      //t01.startLKTracking();
-      OpenCVFilterFaceRecognizer fr=(OpenCVFilterFaceRecognizer)t01.faceDetect(true);
-      fr.train();
-     
-      //opencv.stopCapture();
-      //opencv.captureFromImageFile("resource/OpenCV/testData/rachel.jpg");
-     // opencv.broadcastState();
-      //t01.faceDetect(true);
-      // Runtime.start("python", "Python");
-
-      // tracker.startLKTracking();
-      /*
-       * tracker.trackPoint(); tracker.faceDetect(); tracker.findFace();
-       */
-
-      /*
-       * pan.setPin(6); tilt.setPin(7);
-       * 
-       * 
-       * controller.attach(pan); controller.attach(tilt);
-       * 
-       * tracker.attach(video); tracker.attach(pan, tilt); tracker.attach(pid);
-       * 
-       * pid.attach(pan); pid.attach(tilt); pid.setPID("tracker.pid", 2.0, 5.0,
-       * 1.0);
-       * 
-       * Runtime.start("gui", "SwingGui");
-       * 
-       * tracker.connect(arduinoPort, xPin, yPin, cameraIndex);
-       */
-      // tracker.startLKTracking();
+      Servo rothead = (Servo) Runtime.start("rothead", "Servo");
+      Servo neck = (Servo) Runtime.start("neck", "Servo");
+      rothead.attach(arduino, 0);
+      neck.attach(arduino, 1);
+      OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+      t01.connect(opencv, rothead, neck);
+      opencv.capture();
+      t01.faceDetect();
 
       // tracker.getGoodFeatures();
     } catch (Exception e) {

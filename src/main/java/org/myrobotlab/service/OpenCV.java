@@ -709,8 +709,8 @@ public class OpenCV extends AbstractComputerVision {
   transient BlockingQueue<Map<String, List<Classification>>> blockingClassification = new LinkedBlockingQueue<>();
 
   transient BlockingQueue<OpenCVData> blockingData = new LinkedBlockingQueue<>();
-  int cameraIndex = 0;
-  volatile boolean capturing = false;
+  Integer cameraIndex;
+  transient volatile boolean capturing = false;
   Classifications classifications = null;
   boolean closeOutputs = false;
 
@@ -738,7 +738,7 @@ public class OpenCV extends AbstractComputerVision {
   StringBuffer frameTitle = new StringBuffer();
   transient FrameGrabber grabber = null;
 
-  String grabberType = null;
+  String grabberType;
 
   Integer height = null;
   String inputFile = null;
@@ -785,7 +785,7 @@ public class OpenCV extends AbstractComputerVision {
   // Changed default to false. Otherwise multiple opencv instances will get a
   // port in use bind exception.
   // TODO: fix how the opencv service can stream video to the webgui.
-  boolean streamerEnabled = false;
+  Boolean streamerEnabled;
 
   // final Object lock = new Object();
 
@@ -812,6 +812,11 @@ public class OpenCV extends AbstractComputerVision {
     DATA_DIR = getDataDir();
     File cacheDir = new File(getDataDir());
     cacheDir.mkdirs();
+
+    //Init default config
+    if (cameraIndex == null) {
+      cameraIndex = 0;
+    }
   }
 
   synchronized public OpenCVFilter addFilter(OpenCVFilter filter) {
@@ -1683,6 +1688,16 @@ public class OpenCV extends AbstractComputerVision {
     broadcastState();
   }
 
+  /**
+   * disable all the filters in the pipeline
+   */
+  synchronized public void disableAll() {
+    for (OpenCVFilter filter : filters.values()) {
+      filter.disable();
+    }
+    broadcastState();
+  }
+
   public void removeOverlays() {
     overlays = new HashMap<String, Overlay>();
   }
@@ -1719,6 +1734,19 @@ public class OpenCV extends AbstractComputerVision {
 
   public void setColor(String colorStr) {
     color = getAwtColor(colorStr);
+  }
+
+  /**
+   * enable() and setDisplayFilter() needed filter
+   *
+   */
+  public void setActiveFilter(String name) {
+    OpenCVFilter filter = filters.get(name);
+    if (filter == null) {
+      return;
+    }
+    filter.enable();
+    setDisplayFilter(name);
   }
 
   public void setDisplayFilter(String name) {

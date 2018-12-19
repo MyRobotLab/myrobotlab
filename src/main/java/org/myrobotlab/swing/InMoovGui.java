@@ -22,192 +22,191 @@
  * Enjoy !
  * 
  * */
-
 package org.myrobotlab.swing;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map.Entry;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLayeredPane;
-import javax.swing.JOptionPane;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.InMoov;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public class InMoovGui extends ServiceGui implements ActionListener {
 
-  HashSet<String> handTemplate = new HashSet<String>(
-      Arrays.asList("%s.%s", "%s.%sHand", "%s.%sHand.index", "%s.%sHand.majeure", "%s.%sHand.ringFinger", "%s.%sHand.pinky", "%s.%sHand.thumb", "%s.%sHand.wrist"));
-  HashSet<String> armTemplate = new HashSet<String>(Arrays.asList("%s.%s", "%s.%sArm", "%s.%sArm.bicep", "%s.%sArm.rotate", "%s.%sArm.shoulder", "%s.%sArm.omoplate"));
-  HashSet<String> headTemplate = new HashSet<String>(
-      Arrays.asList("%s.head", "%s.head.eyesTracking.xpid", "%s.head.eyesTracking.ypid", "%s.head.jaw", "%s.head.mouthControl", "%s.head.eyesTracking", "%s.head.eyeX",
-          "%s.head.eyeY", "%s.head.rothead", "%s.head.neck", "%s.head.headTracking.xpid", "%s.head.headTracking.ypid", "%s.head.headTracking", "%s.mouth", "speechAudioFile"));
-
-  HashMap<String, HashSet<String>> templates = new HashMap<String, HashSet<String>>();
-
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InMoovGui.class);
-
-  JLayeredPane imageMap;
-
-  JButton leftHand = new JButton("start left hand");
-  JButton leftArm = new JButton("start left arm");
-
-  JButton rightHand = new JButton("start right hand");
-  JButton rightArm = new JButton("start right arm");
-
-  JButton head = new JButton("start head");
-
-  JButton attachDetach = new JButton("attach");
-
-  String defaultLeftPort;
-  String defaultRightPort;
-
-  VideoWidget opencv;
+  Runtime myRuntime = (Runtime) Runtime.getInstance();
+  InMoov i01 = (InMoov) myRuntime.getService(boundServiceName);
+  private final JTabbedPane inmoovPane = new JTabbedPane(JTabbedPane.TOP);
+  JComboBox comboLanguage = new JComboBox();
+  JCheckBox muteCheckBox = new JCheckBox("");
+  JButton startVision = new JButton("startOpenCV()");
+  JButton configureVision = new JButton("Configure OpenCV");
+  private final JCheckBox enableOpenCV = new JCheckBox("");
+  private final JLabel lblFlipCamera = new JLabel("Always ON filters ( you can add more via scrip ) :");
+  private final JPanel panel = new JPanel();
+  private final JCheckBox Flip = new JCheckBox("Flip Camera");
+  private final JCheckBox PyramidDown = new JCheckBox("PyramidDown");
+  private final JLabel notReadyLabel1 = new JLabel("InMoov SwingGui is not yet ready... ");
+  private final JLabel notReadyLabel2 = new JLabel(".");
 
   public InMoovGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
-    templates.put("hand", handTemplate);
-    templates.put("arm", armTemplate);
-    templates.put("head", headTemplate);
 
-    display.setLayout(new BorderLayout());
+    Font f = new Font("SansSerif", Font.BOLD, 20);
+    // Create TABS and content
 
-    opencv = new VideoWidget(String.format("%s.opencv", boundServiceName), myService);
+    // general tab
+    JPanel generalPanel = new JPanel();
+    add(inmoovPane);
+    generalPanel.setBackground(Color.WHITE);
+    ImageIcon generalIcon = Util.getImageIcon("InMoov.png");
+    inmoovPane.addTab("General", generalIcon, generalPanel);
+    generalPanel.setLayout(new GridLayout(3, 2, 0, 0));
+    notReadyLabel1.setForeground(Color.RED);
     
-    // opencv = new VideoWidget(boundServiceName, myService, tabs);
-    // opencv.
+    generalPanel.add(notReadyLabel1);
+    
+    generalPanel.add(notReadyLabel2);
 
-    /*
-     * imageMap = new JLayeredPane(); imageMap.setPreferredSize(new
-     * Dimension(692, 688));
-     * 
-     * 
-     * JLabel image = new JLabel(); ImageIcon dPic =
-     * Util.getImageIcon("InMoov/body.png"); image.setIcon(dPic); Dimension s =
-     * image.getPreferredSize(); image.setBounds(0, 0, s.width, s.height);
-     * imageMap.add(image, new Integer(1));
-     */
+    JLabel lblNewLabel = new JLabel(" Language : ");
+    generalPanel.add(lblNewLabel);
 
-    JPanel controls = new JPanel(new GridLayout(6, 1));
+    for (Entry<String, String> e : InMoov.languages.entrySet()) {
+      comboLanguage.addItem(e.getValue());
+    }
+    generalPanel.add(comboLanguage);
 
-    controls.add(leftHand);
-    controls.add(leftArm);
-    controls.add(head);
-    controls.add(rightHand);
-    controls.add(rightArm);
+    JLabel MuteLabel = new JLabel("Mute startup :");
+    generalPanel.add(MuteLabel);
+    muteCheckBox.setHorizontalAlignment(SwingConstants.CENTER);
+    generalPanel.add(muteCheckBox);
 
-    display.add(controls, BorderLayout.EAST);
-    display.add(opencv.display, BorderLayout.CENTER);
+    // vision tab
+    JPanel visionPanel = new JPanel();
+    visionPanel.setBackground(Color.WHITE);
+    ImageIcon visionIcon = Util.getImageIcon("OpenCV.png");
+    inmoovPane.addTab("Vision", visionIcon, visionPanel);
+    visionPanel.setLayout(new GridLayout(3, 2, 0, 0));
+    visionPanel.add(startVision);
+    visionPanel.add(configureVision);
+    JLabel visionLabel = new JLabel("Enable OpenCV :");
+    visionPanel.add(visionLabel);
+    visionPanel.add(enableOpenCV);
 
-    leftHand.addActionListener(this);
-    leftArm.addActionListener(this);
-    rightHand.addActionListener(this);
-    rightArm.addActionListener(this);
-    head.addActionListener(this);
-  
+    visionPanel.add(lblFlipCamera);
+
+    visionPanel.add(panel);
+
+    panel.add(Flip);
+
+    panel.add(PyramidDown);
+
+    // listeners
+    restoreListeners();
   }
 
   @Override
-  public void actionPerformed(ActionEvent event) {
-    Object o = event.getSource();
-    if (o == leftHand) {
-      processAction(leftHand, "left", "hand");
-    } else if (o == rightHand) {
-      processAction(rightHand, "right", "hand");
-    } else if (o == leftArm) {
-      processAction(leftArm, "left", "arm");
-    } else if (o == rightArm) {
-      processAction(rightArm, "right", "arm");
-    } else if (o == head) {
-      processAction(head, "left", "head");
-    } else {
-      log.error("unkown event");
-    }
-
-  }
-
-  // FIXME sendNotifyStateRequest("publishState", "onState", String type); <-
-  // Class.forName(type)
-  @Override
-  public void subscribeGui() {
-    opencv.subscribeGui();
-  }
-
-  @Override
-  public void unsubscribeGui() {
-    opencv.unsubscribeGui();
-  }
-
-  public String getPort(String side) {
-    if ("left".equals(side) && defaultLeftPort == null) {
-      defaultLeftPort = JOptionPane.showInputDialog(getDisplay(), "left COM port");
-      return defaultLeftPort;
-    }
-
-    if ("right".equals(side) && defaultRightPort == null) {
-      defaultRightPort = JOptionPane.showInputDialog(getDisplay(), "right COM port");
-      return defaultRightPort;
-    }
-
-    if ("left".equals(side)) {
-      return defaultLeftPort;
-    }
-
-    if ("right".equals(side)) {
-      return defaultRightPort;
-    }
-
-    return null;
-  }
-
-  public void onState(final InMoov moov) {
-
+  public void actionPerformed(final ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-
+        Object o = event.getSource();
+        if (o == comboLanguage) {
+          send("setLanguage", (String) InMoov.languagesIndex.get(comboLanguage.getSelectedIndex()));
+        }
+        if (o == muteCheckBox) {
+          send("setMute", muteCheckBox.isSelected());
+        }
+        if (o == configureVision) {
+          swingGui.setActiveTab(boundServiceName + ".opencv");
+        }
+        if (o == startVision) {
+          send("startOpenCV");
+        }
+        if (o == enableOpenCV) {
+          i01.vision.setOpenCVenabled(enableOpenCV.isSelected());
+        }
+        if (o == Flip) {
+          if (Flip.isSelected()) {
+            i01.vision.addPreFilter("Flip");
+          } else {
+            i01.vision.removePreFilter("Flip");
+          }
+        }
+        if (o == PyramidDown) {
+          if (PyramidDown.isSelected()) {
+            i01.vision.addPreFilter("PyramidDown");
+          } else {
+            i01.vision.removePreFilter("PyramidDown");
+          }
+        }
       }
     });
   }
 
-  public void processAction(JButton button, String side, String part) {
-    log.info("processAction [{}], {} {}", button.getText(), side, part);
-    if (String.format("start %s %s", side, part).equals(button.getText())) {
-      String port = getPort(side);
-      log.info("starting {} {} with port {}", side, part, port);
-      String upperPart = Character.toUpperCase(part.charAt(0)) + part.substring(1);
-      String upperSide = Character.toUpperCase(side.charAt(0)) + side.substring(1);
-      send(String.format("start%s%s", upperSide, upperPart), port);
-      button.setText(String.format("hide %s %s", side, part));
-      return;
-    } else if (String.format("hide %s %s", side, part).equals(button.getText())) {
+  public void onState(final InMoov i01) {
 
-      HashSet<String> template = templates.get(part);
-      for (String s : template) {
-        swingGui.hideTab(String.format(s, boundServiceName, side));
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        removeListeners();
+        comboLanguage.setSelectedItem(i01.languages.get(i01.getLanguage()));
+        muteCheckBox.setSelected(i01.getMute());
+        if (i01.vision != null) {
+          enableOpenCV.setSelected(i01.vision.openCVenabled);
+          Flip.setSelected(i01.vision.preFilters.contains("Flip"));
+          PyramidDown.setSelected(i01.vision.preFilters.contains("PyramidDown"));
+        }
+        if (i01.opencv == null) {
+          startVision.setText("startOpenCV()");
+          startVision.setEnabled(true);
+          configureVision.setEnabled(false);
+        } else {
+          startVision.setText("OpenCV started...");
+          startVision.setEnabled(false);
+          configureVision.setEnabled(true);
+        }
+        restoreListeners();
       }
-      button.setText(String.format("show %s %s", side, part));
+    });
+  }
 
-    } else if (String.format("show %s %s", side, part).equals(button.getText())) {
-      HashSet<String> template = templates.get(part);
-      for (String s : template) {
-        swingGui.unhideTab(String.format(s, boundServiceName, side));
-      }
-      button.setText(String.format("hide %s %s", side, part));
-    } else {
-      log.error("can't process [{}]", button.getText());
-    }
+  public void removeListeners() {
+    comboLanguage.removeActionListener(this);
+    muteCheckBox.removeActionListener(this);
+    startVision.removeActionListener(this);
+    configureVision.removeActionListener(this);
+    Flip.removeActionListener(this);
+    enableOpenCV.removeActionListener(this);
+    PyramidDown.removeActionListener(this);
+  }
+
+  public void restoreListeners() {
+    comboLanguage.addActionListener(this);
+    muteCheckBox.addActionListener(this);
+    startVision.addActionListener(this);
+    configureVision.addActionListener(this);
+    enableOpenCV.addActionListener(this);
+    Flip.addActionListener(this);
+    PyramidDown.addActionListener(this);
   }
 
 }

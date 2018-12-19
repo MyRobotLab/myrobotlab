@@ -23,6 +23,7 @@ angular.module('mrlapp.service.I2cMuxGui', [])
         $scope.deviceAddressList = service.deviceAddressList;
         $scope.deviceAddress = service.deviceAddress;
         $scope.isAttached = service.isAttached;
+        $scope.i2cDevices = service.i2cDevices;
     }
     ;
     

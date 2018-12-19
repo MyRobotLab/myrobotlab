@@ -28,6 +28,7 @@ package org.myrobotlab.swing;
 import static org.myrobotlab.service.OpenCV.INPUT_KEY;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -43,6 +44,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -72,6 +74,7 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.service.OpenCV;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.myrobotlab.swing.opencv.ComboBoxModel2;
@@ -123,7 +126,8 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   public OpenCVGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     self = this;
-
+    Runtime myRuntime = (Runtime) Runtime.getInstance();
+    OpenCV opencv = (OpenCV) myRuntime.getService(boundServiceName);
     fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     fc.setDialogTitle("open file");
 
@@ -143,6 +147,30 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     possibleFilters.addMouseListener(popup);
 
     currentFilters = new JList<>(currentFilterListModel);
+
+    //Show if filter is enabled..
+    currentFilters.setCellRenderer(new DefaultListCellRenderer() {
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+        if (value instanceof OpenCVFilterGui) {
+          OpenCVFilterGui filter = (OpenCVFilterGui) value;
+
+          if (opencv.getFilter(filter.name).isEnabled()) {
+            setBackground(Color.GREEN);
+          } else {
+            setBackground(Color.WHITE);
+          }
+        }
+        return c;
+      }
+
+    });
+    //end
+
     currentFilters.setFixedCellWidth(100);
     currentFilters.addListSelectionListener(this);
     currentFilters.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -233,10 +261,10 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     } else if (o == cameraIndex || o == cameraRadio) {
       send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA);
       send("setCameraIndex", cameraIndex.getSelectedItem());
-      
+
     } else if (o == fileRadio) {
       send("setInputSource", OpenCV.INPUT_SOURCE_FILE);
-      
+
     } else if (o == open) {
       int returnValue = fc.showOpenDialog(null);
       if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -263,12 +291,12 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
           send("recordFrames");
         } else {
           send("record");
-        }        
+        }
       } else {
         send("stopRecording");
       }
     } else if (o == grabberTypeSelect) {
-      String type = (String)grabberTypeSelect.getSelectedItem();
+      String type = (String) grabberTypeSelect.getSelectedItem();
       /** 
        * <pre> ALL FRAME GRABBER LOGIC IS DONE IN OpenCV.getGrabber() !!! 1 place of chaotic logic to rule them all !
        
@@ -278,7 +306,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
         send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA);
       }
       */
-      send("setGrabberType", type);      
+      send("setGrabberType", type);
     } else if (o == recordFrameButton) {
       send("recordFrame");
     } else if (o == undock) {
@@ -293,7 +321,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
           cframe = null;
         }
       }
-    } else if (o == fileRadio) {      
+    } else if (o == fileRadio) {
       send("setInputSource", OpenCV.INPUT_SOURCE_FILE);
     }
   }
