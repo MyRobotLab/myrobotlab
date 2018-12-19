@@ -378,11 +378,21 @@ public abstract class OpenCVFilter implements Serializable {
     }
   }
   
+  /**
+   * <pre>
+                Perhaps don't do a bunch of publishing points
+                alot of different types of data can come from a pipeline
+                color, depth point cloud, bounding boxes, faces, classifcations 
+                Make it simple, make a single subscript where the data published can
+                potentially contain all these things....
+                
   public void publishPointCloud(PointCloud pointCloud) {
     if (opencv != null) {
       opencv.invoke("publishPointCloud", new Object[] {pointCloud});
     }
   }
+  </pre>
+  */
 
   public void put(String keyPart, Object object) {
     data.put(keyPart, object);
@@ -394,6 +404,7 @@ public abstract class OpenCVFilter implements Serializable {
    */
   public void release() {
   }
+  
 
   public void samplePoint(Integer x, Integer y) {
     //
@@ -489,6 +500,10 @@ public abstract class OpenCVFilter implements Serializable {
 
   public boolean isEnabled() {
     return enabled;
+  }
+  
+  public void put(PointCloud pc) {
+    data.put(pc);
   }
 
 }

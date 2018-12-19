@@ -2434,6 +2434,39 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean isVirtual() {
     return isVirtual;
   }
+  
+  /**
+   * a convenience method for a Service
+   * which always attempts to find a file with the same ordered precedence
+   * 
+   * 1. check data/{ServiceType} first  (users data directory)
+   * 2. check resource/{ServiceType}    (mrl's static resource directory)
+   * 3. check absolute path 
+   * 
+   * @return
+   */
+  public File getFile(String filename) {
+    File file = new File(getDataDir() + File.separator + filename);
+    if (file.exists()) {
+      log.info("found file in data directory - {}", file.getAbsolutePath());
+      return file;
+    }
+    file = new File(getResourceDir() + File.separator + filename);
+    if (file.exists()) {
+      log.info("found file in resource directory - {}", file.getAbsolutePath());
+      return file;
+    }
+    
+    file = new File(filename);
+    
+    if (file.exists()) {
+      log.info("found file - {}", file.getAbsolutePath());
+      return file;
+    }
+    
+    error("could not find file {}", file.getAbsolutePath());
+    return file;
+  }
 
   /**
    * Called by Runtime when system is shutting down a service can use this

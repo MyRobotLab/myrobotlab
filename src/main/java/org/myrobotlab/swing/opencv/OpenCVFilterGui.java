@@ -47,7 +47,7 @@ public abstract class OpenCVFilterGui implements ActionListener {
 
 	public final String name;
 	JPanel main = new JPanel(new BorderLayout());
-	JPanel display = new JPanel(new GridBagLayout());
+	JPanel display = new JPanel(new GridBagLayout()); // FIXME change to BorderLayout !
 	public final String boundServiceName;
 	final SwingGui myGui;
 	final public GridBagConstraints gc = new GridBagConstraints();

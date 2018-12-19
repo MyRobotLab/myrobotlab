@@ -14,16 +14,9 @@ public class _TemplateService extends Service {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(_TemplateService.class);
-
-  static String DATA_DIR = "data" + File.separator + _TemplateService.class.getSimpleName();
-  String DATA_INSTANCE_DIR;
-  static String RESOURCE_DIR = "resource" + File.separator + _TemplateService.class.getSimpleName();
-  String RESOURCE_INSTANCE_DIR;
   
   public _TemplateService(String n) {
     super(n);
-    DATA_INSTANCE_DIR = "data" + File.separator + _TemplateService.class.getSimpleName() + File.separator  + n;
-    RESOURCE_INSTANCE_DIR = "resource" + File.separator + _TemplateService.class.getSimpleName() + File.separator  + n;
   }
 
   /**

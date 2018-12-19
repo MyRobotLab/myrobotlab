@@ -38,6 +38,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
+import org.apache.hadoop.hdfs.protocol.proto.ClientDatanodeProtocolProtos.GetDatanodeInfoRequestProto;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -64,6 +66,7 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.myrobotlab.cv.CvData;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
@@ -75,7 +78,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
-import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.opencv.FilterWrapper;
@@ -88,7 +90,7 @@ import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
-import org.myrobotlab.service.abstracts.AbstractVideoSource;
+import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.slf4j.Logger;
 
 import com.github.axet.vget.VGet;
@@ -129,7 +131,7 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends AbstractVideoSource {
+public class OpenCV extends AbstractComputerVision {
 
   int vpId = 0;
 
@@ -264,6 +266,8 @@ public class OpenCV extends AbstractVideoSource {
   static final long serialVersionUID = 1L;
 
   transient public final static String SOURCE_KINECT_DEPTH = "kinect.depth.IplImage";
+  
+  static final Set<String> recordKeys = new HashSet<>();
 
   static {
     try {
@@ -294,6 +298,9 @@ public class OpenCV extends AbstractVideoSource {
       imageFileExt.add("png");
       imageFileExt.add("pcd");
       imageFileExt.add("pdf");
+      
+      recordKeys.add("input.video");
+      recordKeys.add("input.depth");
 
     } catch (Exception e) {
       log.error("initializing frame grabber types threw", e);
@@ -795,12 +802,15 @@ public class OpenCV extends AbstractVideoSource {
   private boolean singleFrame;
 
   private PointCloud lastPointCloud;
-
+  
+  static String DATA_DIR;
+  
   public OpenCV(String n) {
     super(n);
     putText(20, 20, "time:  %d");
     putText(20, 30, "frame: %d");
-    File cacheDir = new File(DATA_DIR);
+    DATA_DIR = getDataDir();
+    File cacheDir = new File(getDataDir());
     cacheDir.mkdirs();
   }
 
@@ -1214,7 +1224,7 @@ public class OpenCV extends AbstractVideoSource {
 
   public String getYouTube(String url) throws IOException {
 
-    File cacheDir = new File(DATA_DIR);
+    File cacheDir = new File(getDataDir());
     cacheDir.mkdirs();
 
     // get video key
@@ -1367,7 +1377,12 @@ public class OpenCV extends AbstractVideoSource {
     // log.debug("data -> {}", data);
 
     // FIXME - should have had it
+    
+    // FIXME - deprecate it
     invoke("publishOpenCVData", data);
+    
+    // future publishing (same as BoofCv !)
+    invoke("publishCvData", data);
 
     // FIXME - TODO
     // data.prepareToSerialize();
@@ -1504,7 +1519,11 @@ public class OpenCV extends AbstractVideoSource {
    * until asked for - then its cached SMART ! :)
    * 
    */
-  public final OpenCVData publishOpenCVData(OpenCVData data) {
+  public final OpenCVData publishOpenCVData(OpenCVData data) {    
+    return data;
+  }
+  
+  public final CvData publishCvData(CvData data) {
     return data;
   }
 
@@ -1558,7 +1577,8 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * thread safe recording of avi
+   * Generates either a flv movie file from selected output OR a series of non-lossy pngs from
+   * OpenCVData.
    * 
    * key- input, filter, or display
    */
@@ -1570,6 +1590,9 @@ public class OpenCV extends AbstractVideoSource {
 
         /**
          * <pre>
+         * Records a single output stream into flv format movie file 
+         * for which FFmpegFrameGrabber can "probably" ingest ...
+         * 
          *  This one freezes on windows :P
          FrameRecorder recorder = new OpenCVFrameRecorder(filename, frame.imageWidth, frame.imageHeight);
          recorder.setFrameRate(15);
@@ -1579,12 +1602,12 @@ public class OpenCV extends AbstractVideoSource {
          */
         FrameRecorder recorder = null;
         if (!recordingFrames) {
-          recordingFilename = String.format(DATA_DIR + File.separator + "%s-%d.flv", recordingSource, System.currentTimeMillis());
+          recordingFilename = String.format(getDataDir() + File.separator + "%s-%d.flv", recordingSource, System.currentTimeMillis());
           info("recording %s", recordingFilename);
           recorder = new FFmpegFrameRecorder(recordingFilename, frame.imageWidth, frame.imageHeight, 0);
           recorder.setFormat("flv");
         } else {
-          recorder = new FrameFileRecorder(DATA_DIR);
+          recorder = new FrameFileRecorder(getDataDir());
           // recorder.setFormat("png");
         }
         // recorder.setSampleRate(frameRate); for audio
@@ -1604,7 +1627,7 @@ public class OpenCV extends AbstractVideoSource {
         if (!recordingFrames) {
           info("finished recording %s", recordingFilename);
         } else {
-          info("finished recording frames to %s", DATA_DIR);
+          info("finished recording frames to %s", getDataDir());
         }
         recording = false;
         recordingFrames = false;
