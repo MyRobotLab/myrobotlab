@@ -391,7 +391,7 @@ public class InMoov extends Service {
 
   public void onGestureStatus(Status status) {
     if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {
-      speakAlert(languagePack.get("GESTURE_ERROR"));
+      error("I cannot execute %s, please check logs", lastGestureExecuted);
     }
     finishedGesture(lastGestureExecuted);
     unsubscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
@@ -428,7 +428,11 @@ public class InMoov extends Service {
       }
     }
     info("%s Gestures loaded, %s Gestures with error", totalLoaded, totalError);
-    return ((totalError == 0) ? true : false);
+    if (totalError > 0) {
+      speakAlert(languagePack.get("GESTURE_ERROR"));
+      return false;
+    }
+    return true;
   }
 
   public void stopGesture() {
@@ -2290,6 +2294,6 @@ public class InMoov extends Service {
     i01.loadGestures("InMoov/gestures");
     i01.startVinMoov();
     i01.startOpenCV();
-    i01.execGesture("daVinci()");
+    i01.execGesture("BREAKITdaVinci()");
   }
 }
