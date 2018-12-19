@@ -83,7 +83,6 @@ public class Tracking extends Service {
   public static final String STATE_WAITING_FOR_OBJECTS_TO_STABILIZE = "state waiting for objects to stabilize";
   public static final String STATE_WAITING_FOR_OBJECTS_TO_DISAPPEAR = "state waiting for objects to disappear";
   public static final String STATE_STABILIZED = "state stabilized";
-
   public static final String STATE_FACE_DETECT = "state face detect";
 
   // memory constants
@@ -169,16 +168,41 @@ public class Tracking extends Service {
     rest();
   }
 
-  // -------------- System Specific Initialization Begin --------------
+  /**
+   * generic method to compute filter output after setState()
+   */
+  public void execFilterFunctions(String filterName, String state) {
+    if (!Arrays.asList(OpenCV.getPossibleFilters()).contains(filterName)) {
+      log.error("Sorry, {} is an unknown filter.", filterName);
+      return;
+    }
+    log.info("starting {} related to {}", state, filterName);
+    if (!Arrays.asList(opencv.getFilters()).contains(opencv.getFilter(filterName))) {
+      opencv.addFilter(filterName);
+    }
+    opencv.setActiveFilter(filterName);
+    opencv.capture();
+    setState(state);
+  }
 
   public void faceDetect() {
-    log.info("starting faceDetect");
-    if (!Arrays.asList(opencv.getFilters()).contains(opencv.getFilter(FILTER_FACE_DETECT))) {
-      opencv.addFilter(FILTER_FACE_DETECT);
+    execFilterFunctions(FILTER_FACE_DETECT, STATE_FACE_DETECT);
+  }
+
+  public void startLKTracking() {
+    execFilterFunctions(FILTER_LK_OPTICAL_TRACK, STATE_LK_TRACKING_POINT);
+  }
+
+  public void trackPoint() {
+    trackPoint(0.5F, 0.5F);
+  }
+
+  public void trackPoint(Float x, Float y) {
+
+    if (!STATE_LK_TRACKING_POINT.equals(state)) {
+      startLKTracking();
     }
-    opencv.setActiveFilter(FILTER_FACE_DETECT);
-    opencv.capture();
-    setState(STATE_FACE_DETECT);
+    opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "samplePoint", x, y);
   }
 
   public void findFace() {
@@ -270,24 +294,22 @@ public class Tracking extends Service {
 
   public OpenCVData onOpenCVData(OpenCVData data) {
     // log.info("OnOpenCVData");
+    int width = 1;
+    int height = 1;
+    try {
+      // get image size for proportions compute
+      width = opencv.getGrabber().getImageWidth();
+      height = opencv.getGrabber().getImageHeight();
+    } catch (Exception e) {
+      log.error("Tracking can't get grabber dimentions, this is BAD : ", e);
+    }
     switch (state) {
 
       case STATE_FACE_DETECT:
         // check for bounding boxes
         List<Rectangle> bb = data.getBoundingBoxArray();
-        int width = 0;
-        int height = 0;
 
         if (bb != null && bb.size() > 0) {
-          try {
-            // get image size for proportions compute
-            width = opencv.getGrabber().getImageWidth();
-            height = opencv.getGrabber().getImageHeight();
-          } catch (Exception e) {
-            log.error("Tracking can't get grabber dimentions, this is BAD : ", e);
-          }
-          // data.logKeySet();
-          // log.error("{}",bb.size());
 
           // found face
           // find centroid of first bounding box
@@ -346,6 +368,9 @@ public class Tracking extends Service {
         // data.setSelectedFilterName(LKOpticalTrackFilterName);
         List<Point2df> targetPoint = data.getPointArray();
         if (targetPoint != null && targetPoint.size() > 0) {
+          targetPoint.get(0).x = targetPoint.get(0).x / width;
+          targetPoint.get(0).y = targetPoint.get(0).y / height;
+          log.info("targetPoint" + targetPoint.get(0));
           updateTrackingPoint(targetPoint.get(0));
         }
         break;
@@ -373,17 +398,6 @@ public class Tracking extends Service {
     info(state);
   }
 
-  //TODO: test startLKTracking
-  public void startLKTracking() {
-    log.info("Starting LKTracking");
-    if (!Arrays.asList(opencv.getFilters()).contains(opencv.getFilter(FILTER_LK_OPTICAL_TRACK))) {
-      opencv.addFilter(FILTER_LK_OPTICAL_TRACK);
-    }
-    opencv.setActiveFilter(FILTER_LK_OPTICAL_TRACK);
-    opencv.capture();
-    setState(STATE_LK_TRACKING_POINT);
-  }
-
   public void stopScan() {
     scan = false;
   }
@@ -397,28 +411,6 @@ public class Tracking extends Service {
   // --------------- publish methods begin ----------------------------
   public OpenCVData toProcess(OpenCVData data) {
     return data;
-  }
-
-  public void trackPoint() {
-    trackPoint(0.5, 0.5);
-  }
-
-  public void trackPoint(Double x, Double y) {
-
-    if (!STATE_LK_TRACKING_POINT.equals(state)) {
-      startLKTracking();
-    }
-
-    opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "samplePoint", x, y);
-  }
-
-  // GAAAAAAH figure out if (int , int) is SUPPORTED WOULD YA !
-  public void trackPoint(int x, int y) {
-
-    if (!STATE_LK_TRACKING_POINT.equals(state)) {
-      startLKTracking();
-    }
-    opencv.invokeFilterMethod(FILTER_LK_OPTICAL_TRACK, "samplePoint", x, y);
   }
 
   // FIXME - NEED A lost tracking event !!!!
@@ -607,7 +599,7 @@ public class Tracking extends Service {
       OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
       t01.connect(opencv, rothead, neck);
       opencv.capture();
-      t01.faceDetect();
+      t01.trackPoint();
 
       // tracker.getGoodFeatures();
     } catch (Exception e) {

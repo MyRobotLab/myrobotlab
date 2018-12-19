@@ -278,7 +278,7 @@ public class InMoov extends Service {
     startHeadTracking();
     if (headTracking != null) {
       headTracking.startLKTracking();
-      headTracking.trackPoint(0.5, 0.5);
+      headTracking.trackPoint();
     }
   }
 
