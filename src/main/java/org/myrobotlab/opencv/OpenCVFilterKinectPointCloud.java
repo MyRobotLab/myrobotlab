@@ -29,6 +29,7 @@ import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
 import org.bytedeco.javacv.Parallel;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point;
@@ -47,6 +49,11 @@ import org.myrobotlab.service.JMonkeyEngine;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
+
+import boofcv.alg.distort.radtan.RemoveRadialPtoN_F64;
+import boofcv.io.calibration.CalibrationIO;
+import boofcv.struct.calib.CameraPinholeRadial;
+import georegression.struct.point.Point2D_F64;
 /**
  * <pre>
  * 
@@ -70,6 +77,8 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
+  public boolean clearPoints = false;
+  
   transient IplImage lastDepth = null;
 
   IplImage returnImage = null;
@@ -79,37 +88,38 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
    */
   List<Point> samplePoints = new ArrayList<>();
   
-  // does array have a non-negligible smaller footprint ?
-  // List<Point3df> pointCloud = new ArrayList<>(640*480);
-  // Point3df[] pointCloud = new Point3df[640*480]; // for thread safety ? create it new ?
-  // FIXME ! - PointCloud needs to be an object with meta-data
-  // Point3df[][] pointCloud = null;
-  
   PointCloud pointCloud = null;
+  
+  int colors[] = null;
   
   SphericalCoordinates transformer = null;
 
   boolean clearSamplePoints = false;
   
-  // FIXME - position (x,y,z) heading(theta) & angle of kinect relative to the floor plane 
-  
   Point3df cameraLocation = new Point3df();
   // pitch yaw heading  necessary ? - or heading suffice ?
   float cameraHeading = 0;
-  
   float cameraTilt = 0;// degrees ?
-  
   double r, theta, phi;
-
-  /**
-   * color depth info
-   */
+  Point3df[] depthBuffer;
+  float [] colorBuffer;
   IplImage color;
+  // double focalLength = h / 2 * Math.tan((43 * 0.0174533)/2);
+  // BoofCv
+  RemoveRadialPtoN_F64 p2n = null;
   
-  double buffer[] = null;
+  int width, height = 0;
 
   public OpenCVFilterKinectPointCloud(String name) {
     super(name);
+    
+    String baseDir = "src/main/resources/resource/BoofCv";
+    String nameCalib = "intrinsic.yaml";
+    
+    CameraPinholeRadial param = CalibrationIO.load(new File(baseDir,nameCalib));
+    p2n = new RemoveRadialPtoN_F64();
+    p2n.setK(param.fx,param.fy,param.skew,param.cx,param.cy).setDistortion(param.radial,param.t1,param.t2);
+
     
     // http://myrobotlab.org/content/useful-kinect-info
     // vertical focal length
@@ -120,6 +130,8 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
+    width = image.width();
+    height = image.height();
   }
 
   @Override
@@ -132,9 +144,6 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
     
     if (transformer == null) {
       transformer = new SphericalCoordinates(r, theta, phi);      
-      //buffer = new double [depth.width() * depth.height()]
-      // buffer = new double [depth.width()];
-      buffer = new double [3];
     }
 
     lastDepth = depth;
@@ -162,83 +171,91 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
     // xy = y world coordinate
     // zy = z world coordinate
     
-    int w = 640;
-    int h = 480;
-    
-    // https://www.mathsisfun.com/polar-cartesian-coordinates.html
-    
-    // double f = w / 2 * Math.tan(57/2);
-    double f = h / 2 * Math.tan((43 * 0.0174533)/2);
-    Point3df[][] points = new Point3df[w][h];
-    
-    // pixels to degrees
-    
-    float verticalRadiansPerPixel   = 0.0015635247916667f; // kinect 43 vertical focal length (43 * 0.0174533)/480
-    float horizontalRadiansPerPixel = 0.00155443453125f;   // kinect 57 horizontal focal length (57 * 0.0174533)/640
-    
-    int tilt = 45;// degrees
 
-    Parallel.loop(0, depth.height(), new Parallel.Looper() {
+    // buffer = FloatBuffer.allocate(depth.width() * depth.height());
+    depthBuffer = new Point3df[width * height];
+    if (colorBuffer == null) {
+      colorBuffer = new float[width * height * 4]; // RGBA
+    }
+    
+    /**<pre>
+    for (int i = 0; i < color.width() * color.height(); ++i) {
+      colorBuffer[i] = 0.5f;
+      colorBuffer[i+1] = 0.5f;
+      colorBuffer[i+2] = i%100 * .999f;
+      colorBuffer[i+3] = 1f;
+    }
+    </pre>
+    */
+    
+    Point2D_F64 n = new Point2D_F64();
+    
+    Parallel.loop(0, height, new Parallel.Looper() {
       public void loop(int from, int to, int looperID) {
         for (int xv = from; xv < to; xv++) {
-          for (int yv = 0; yv < depth.width(); yv++) {
+          for (int yv = 0; yv < width; yv++) {
             
             // FIXME - find correct scale for x & y in mm
-            // (189, 290, 46851)
+
             double xw,yw,zw = 0;
-            int x,y,z = 0;
-            int depth = depthIdx.get(xv, yv)/100;
+            float depth = depthIdx.get(xv, yv);
             
-            // zw = D * f / sqrt(xv² + yv² + f²)
-            zw = depth * f / Math.sqrt(xv*xv + yv*yv + f*f);
-            
-            // xw = zw * xv / f
-            xw = zw * xv / f;
-            
-            yw = zw * yv / f;
-            
+            // zw = D * f / sqrt(xv² + yv² + f²)           
             //  https://hub.jmonkeyengine.org/t/point-cloud-visualization/25838
             
-            // DO zw !
+            int index = yv * height + xv;
+            // colorIdx.put(index, 33);
+            // colorIdx.put(index+1, 33);            
             
-            x = (int)Math.round(xw);
-            y = (int)Math.round(yw);
-            z = (int)Math.round(zw);
+            /**<pre>
+             * BoofCv way
+            p2n.compute(xv,yv,n);
+            Point3D_F64 p = new Point3D_F64();
+            p.z = depth;
+            p.x = n.x*p.z;
+            p.y = n.y*p.z;            
             
-//            points[yv][xv] = new Point3df(x,y,z); FIXME - WHAT HAPPENED ?!?!?
-//            points[yv][xv] = new Point3df(xv, yv, depth);
-//            points[yv][xv] = new Point3df(xv, (float)(Math.cos(yv)-Math.sin(xv)), depth);
-//            points[yv][xv] = new Point3df((float)(xv + depth*Math.cos(30)), yv, depth);
-//            points[yv][xv] = new Point3df(x,y,z);
-//            points[yv][xv] = new Point3df(xv,yv,depth);
-            buffer[0] = depth; // radius
-            buffer[1] = f * x; // theta
-            buffer[1] = f * y; // phi
-            double[] cartesian = transformer.toCartesianGradient(buffer);
-            points[yv][xv] = new Point3df((float)cartesian[0], (float)cartesian[1], (float)cartesian[2]);
+            float scaled = depth/1000;
             
-            zw = depth * Math.cos(yv * verticalRadiansPerPixel);
-            yw = depth * Math.sin(yv * verticalRadiansPerPixel);
-            xw = depth * Math.sin(xv * horizontalRadiansPerPixel);
-
-            points[yv][xv] = new Point3df((float)xv,(float)yv,(float)depth);
+            yw = n.y*scaled;
+            xw = n.x*scaled;
+            zw = scaled; // really ?
+            */
             
-            // points[yv][xv] = new Point3df(xv,yv,depth);
-            // z = depth;
-            // z = (depth >> 3)/1000;
-            // log.info("spherical ({},{},{}) -> world ({},{},{})", xv, yv, depth, x, y, z);
+            zw = -1 * depth/1000; // we want in 1 meter world unit
+            xw = 2 *(xv - 639/2)*Math.tan(57/2 * 0.0174533) * (zw/640);
+            yw = 2 *(479 - yv - 479/2)*Math.tan(43/2 * 0.0174533) * (zw/480);
+            
+            // points[index] = new Point3df((float)xw,(float)yw,(float)zw);
+            // jmonkey has a flipped y/x
+            depthBuffer[index] = new Point3df((float)yw, (float)xw, (float)zw);
+            if (color != null) {
+              
+            }
           }
         }
       }
     });
     
-    pointCloud = new PointCloud(points);
-    publishPointCloud(pointCloud);
+    pointCloud = new PointCloud(depthBuffer);
+    pointCloud.setColors(colorBuffer);
+    
+    // NO MORE PUBLISHING - just put into OpenCVData !!!
+    // publishPointCloud(pointCloud);
+
+    put(pointCloud);
 
     depthIdx.release();
     colorIdx.release();
 
     return depth;
+  }
+
+  public void publishPlane() {
+    // spin through sample points
+    for (int i = 0; i < samplePoints.size(); ++i) {
+      
+    }
   }
 
   @Override
@@ -271,13 +288,16 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
     try {
       LoggingFactory.init("info");
       Runtime.start("gui", "SwingGui");
-      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");      
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");  
       
-      jme.subscribe(cv.getName(), "publishPointCloud");
+      jme.attach(cv);
+      // jme.subscribe(cv.getName(), "publishPointCloud");
+      Service.sleep(3000); // FIXME - fix race condition...
       
       // kinect data
-      cv.capture("../1543648225287");
+      // cv.capture("../1543648225287");
+      cv.capture("../00000004.png");
       // OpenCVFilterKinectPointCloud floor = (OpenCVFilterKinectPointCloud)cv.addFilter("floor","KinectFloorFinder");
       OpenCVFilterKinectPointCloud cloud = (OpenCVFilterKinectPointCloud)cv.addFilter("cloud","KinectPointCloud");
       

@@ -1,38 +1,31 @@
 package org.myrobotlab.math.geometry;
 
 /**
- * TODO - a lot more meta data probably
+ * TODO - add more meta data ?
  * @author GroG
  *
  */
 public class PointCloud {
-  Point3df[][] viewPortData = null;
+  int width = 0;
+  int height = 0;
+  // FloatBuffer data = null;
+  Point3df[] data;
+  float[] colors;
   
-  public PointCloud(Point3df[][] points) {    
-    viewPortData = points;
+  public PointCloud(Point3df[] data) {    
+    this.data = data; 
   }
   
-  public int getViewPortX() {
-    if (viewPortData != null) {
-      return viewPortData.length;
-    }
-    return 0;
-  }
-  
-  public int getViewPortY() {
-    if (viewPortData != null) {
-      if (viewPortData.length > 0) {
-        return viewPortData[0].length;
-      }
-    }
-    return 0;
+  public Point3df[] getData() {
+    return data;
   }
 
-  public void set(Point3df[][] data) {
-    viewPortData = data;
+  public void setColors(float[] colors) {
+    this.colors = colors;
   }
   
-  public Point3df[][] getViewPort(){
-    return viewPortData;
+  public float[] getColors() {
+    return colors;
   }
+  
 }

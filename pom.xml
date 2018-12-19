@@ -486,6 +486,18 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-blender</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jmonkeyengine</groupId>
+    <artifactId>jme3-plugins</artifactId>
+    <version>3.2.0-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>de.jarnbjo</groupId>
     <artifactId>j-ogg-all</artifactId>
     <version>1.0.0</version>

@@ -7,11 +7,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.imageio.ImageIO;
@@ -26,6 +26,7 @@ import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
+import org.myrobotlab.cv.CvData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
@@ -79,7 +80,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class OpenCVData implements Serializable {
+public class OpenCVData  extends CvData {
   
    
   public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
@@ -264,7 +265,7 @@ public class OpenCVData implements Serializable {
     return (Frame) sources.get(key);
   }
 
-  public Object getFrameIndex() {
+  public int getFrameIndex() {
     return frameIndex;
   }
 
@@ -517,8 +518,37 @@ public class OpenCVData implements Serializable {
     return filename;
   }
 
+  
+  public void writeAll() {
+    for (String key : sources.keySet()) {
+      // OpenCV.recor
+    }
+  }
+
+  public List<PointCloud> getPointCloudList() {
+    return (List<PointCloud>)sources.get(CvData.POINT_CLOUDS);
+  }
+  
   public PointCloud getPointCloud() {
-    return null;
+    List<PointCloud> pcs = getPointCloudList();
+    if (pcs == null && pcs.size() != 0) {
+      return null;
+    }
+    return pcs.get(0);    
+  }
+
+  @Override
+  public Set<String> getKeySet() {
+    return sources.keySet();
+  }
+
+  public void put(PointCloud pc) {
+    List<PointCloud> pcs = (List<PointCloud>) sources.get(CvData.POINT_CLOUDS);
+    if (pcs == null) {
+      pcs = new ArrayList<PointCloud>();
+    } 
+    pcs.add(pc);
+   sources.put(CvData.POINT_CLOUDS, pcs);
   }
 
 }
