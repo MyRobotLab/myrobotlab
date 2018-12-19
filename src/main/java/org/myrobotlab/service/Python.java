@@ -161,11 +161,12 @@ public class Python extends Service {
       } catch (Exception e) {
         String error = Logging.stackToString(e);
         if (error.contains("KeyboardInterrupt")) {
-          warn("Python process killed !");
-          log.warn("Python process killed : {}", error);
+          String status = "Python process killed !";
+          warn(status);
+          log.warn(status, error);
+          invoke("publishStatus", Status.warn(status));
         } else {
           invoke("publishStatus", Status.error(e));
-
           String filtered = error;
           filtered = filtered.replace("'", "");
           filtered = filtered.replace("\"", "");
@@ -184,6 +185,7 @@ public class Python extends Service {
 
       } finally {
         executing = false;
+        invoke("publishStatus", Status.success());
         invoke("finishedExecutingScript");
       }
 
@@ -472,7 +474,7 @@ public class Python extends Service {
    *         false if there was an exception.
    */
   public boolean exec(String code, boolean replace, boolean blocking) {
-    log.info("exec(String) \n{}", code);
+    log.debug("exec(String) \n{}", code);
     boolean success = true;
     if (interp == null) {
       createPythonInterpreter();
@@ -500,7 +502,7 @@ public class Python extends Service {
     }
     return success;
   }
-  
+
   /**
    * This method will execute and block a string that represents a python script.
    * Python return statement as return

@@ -1,14 +1,11 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.DruppIKSolver;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.ServoControl;
-
-import marytts.util.math.MathUtils;
 
 /**
  * 
@@ -23,20 +20,20 @@ import marytts.util.math.MathUtils;
  */
 public class DruppNeck extends Service {
 
+  private static final long serialVersionUID = 1L;
   // 3 servos for the drupp neck
   public transient ServoControl up;
   public transient ServoControl middle;
   public transient ServoControl down;
 
   // this is an offset angle that is added to the solution from the IK solver
-  public double upOffset = 0;
-  public double middleOffset = 0;
-  public double downOffset = 0;
+  public double upOffset = 90;
+  public double middleOffset = 120+90;
+  public double downOffset = -120+90;
   
   public DruppNeck(String name) {
     super(name);
   }
-
 
   private DruppIKSolver solver = new DruppIKSolver();
 
@@ -50,23 +47,31 @@ public class DruppNeck extends Service {
    * @throws Exception 
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
-
-    double rollRad = MathUtils.degrees2radian(roll);
-    double pitchRad = MathUtils.degrees2radian(pitch);
-    double yawRad = MathUtils.degrees2radian(yaw);
     // convert to radians
+    
+    double rollRad = MathUtils.degToRad(roll);
+    double pitchRad = MathUtils.degToRad(pitch);
+    double yawRad = MathUtils.degToRad(yaw);
+    // TODO: if the solver fails, should we catch this exception ?
     double[] result = solver.solve(rollRad, pitchRad, yawRad);
     // convert to degrees
-    double upDeg = MathUtils.radian2degrees(result[0]) + upOffset;
-    double middleDeg = MathUtils.radian2degrees(result[1]) + middleOffset;
-    double downDeg = MathUtils.radian2degrees(result[2]) + downOffset;
-    
-    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}",roll,pitch,yaw,upDeg,middleDeg,downDeg);
-
+    double upDeg = MathUtils.radToDeg(result[0]) + upOffset;
+    double middleDeg = MathUtils.radToDeg(result[1]) + middleOffset;
+    double downDeg = MathUtils.radToDeg(result[2]) + downOffset;
+    // Ok, servos can only (typically) move from 0 to 180.. if any of the angles are negative... we can't move there.. let's log a warning
+    // TODO: use the actual min/max .. and if we're out of range.. then log this. but for the drupp neck, if you've installed it correctly,
+    // all servos can go from 0 to 180...
+    if (upDeg < 0 || middleDeg < 0 || downDeg < 0 || upDeg > 180 || middleDeg > 180 || downDeg > 180) {
+      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}",roll,pitch,yaw,MathUtils.round(upDeg,3),MathUtils.round(middleDeg,3),MathUtils.round(downDeg,3));
+      // Skipping this movement as it's likely unstable!
+      return;
+    }
+    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}",roll,pitch,yaw,MathUtils.round(upDeg,3),MathUtils.round(middleDeg,3),MathUtils.round(downDeg,3));
+    // we should probably track the last moved to position.
     up.moveTo(upDeg);
     middle.moveTo(middleDeg);
     down.moveTo(downDeg);
-    
+    // TODO: broadcast state?
   }
 
   /**
@@ -111,10 +116,16 @@ public class DruppNeck extends Service {
     this.down = down;
   }
 
-  public void setServos(ServoControl up, ServoControl middle, ServoControl down) {
+  // not really sure what sort of "attach" method we should have here.. this is really the same as setServos
+  // this assumes the servos are already attached to a servo controller
+  public void attach(ServoControl up, ServoControl middle, ServoControl down) {
     this.up = up;
     this.middle = middle;
     this.down = down;
+  }
+
+  public void setServos(ServoControl up, ServoControl middle, ServoControl down) {
+    attach(up,middle,down);
   }
   
   public double getUpOffset() {
@@ -159,38 +170,29 @@ public class DruppNeck extends Service {
     LoggingFactory.init("INFO");
     // To use the drup service you need to configure and attach the servos
     // then set them on the service.
+    Runtime.start("gui", "SwingGui");
+    Runtime.start("python", "Python");
     Servo up = (Servo)Runtime.start("up", "Servo");
     Servo middle = (Servo)Runtime.start("middle", "Servo");
     Servo down = (Servo)Runtime.start("down", "Servo");
-    
-    up.setPin(10);
-    middle.setPin(11);
-    down.setPin(12);
-    
+    up.setPin(6);
+    middle.setPin(5);
+    down.setPin(4);
+    // String port = "COM4";
+    String port = "VIRTUAL_COM_PORT";
     VirtualArduino va1 = (VirtualArduino)Runtime.start("va1", "VirtualArduino");
-    va1.connect("VIRTUAL_COM_PORT");
-    
+    va1.connect(port);
     Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
-    ard.connect("VIRTUAL_COM_PORT");
-    
-    
+    ard.connect(port);
     ard.attach(up);
     ard.attach(middle);
     ard.attach(down);
-    
     // Create the drupp service
     DruppNeck neck = (DruppNeck)Runtime.start("neck", "DruppNeck");
-    
     neck.setServos(up, middle, down);
-    
-    neck.moveTo(0, 0, 0);
-    
-    neck.moveTo(0, 0, -45);
-    
-    neck.moveTo(0, 0, 45);
-
-    
-    
+    //neck.moveTo(0, 0, 0);
+    //neck.moveTo(0, 0, -45);
+    //neck.moveTo(0, 0, 45);
   }
 
 }
