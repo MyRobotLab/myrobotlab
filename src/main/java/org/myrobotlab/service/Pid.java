@@ -175,8 +175,8 @@ public class Pid extends Service {
 			if (Math.abs(piddata.output - output) > piddata.deadband) {
 				piddata.output = output;
 			}
-
-			broadcastState();
+		  //keep calm and save MORE cpu ! ( buffer overrun )
+			//broadcastState();
 
 			/* Remember some variables for next time */
 			piddata.lastInput = piddata.input;
