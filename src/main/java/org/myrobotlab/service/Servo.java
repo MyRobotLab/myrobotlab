@@ -1548,5 +1548,9 @@ public class Servo extends Service implements ServoControl {
     return lastPos;
   }
 
+  public void preShutdown() {
+    detach();
+  }
+  
 
 }
