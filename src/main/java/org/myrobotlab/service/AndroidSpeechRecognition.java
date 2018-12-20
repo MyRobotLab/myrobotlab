@@ -228,7 +228,7 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
     } else if (mes.startsWith("recognized")) {
       String[] split = mes.split("=");
       log.info("recognized: " + split[1]);
-      invoke("recognized", split[1]);
+      invoke("publishText", split[1]);
     } else if (mes.startsWith("isListening")) {
       String[] split = mes.split("=");
       log.info("isListening: " + split[1]);
