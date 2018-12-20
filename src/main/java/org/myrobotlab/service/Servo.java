@@ -289,7 +289,7 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
-/*
+  /*
   public static class ServoEventData {
     public String name;
     public Double pos;
@@ -298,8 +298,8 @@ public class Servo extends Service implements ServoControl {
     public Double targetPos;
     // public int type;
   }
-*/
- public static class ServoEventData {
+  */
+  public static class ServoEventData {
     public String name;
     public Double pos;
     public Integer state;
@@ -314,8 +314,7 @@ public class Servo extends Service implements ServoControl {
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
-    
-    
+
     // here we define default values if not inside servo.json
     if (mapper == null) {
       mapper = new Mapper(0, 180, 0, 180);
@@ -359,7 +358,7 @@ public class Servo extends Service implements ServoControl {
     isEventsEnabled = false;
     removeListener("publishServoEvent", service.getName(), "onServoEvent");
   }
-  
+
   public void addIKServoEventListener(NameProvider service) {
     isIKEventEnabled = true;
     addListener("publishIKServoEvent", service.getName(), "onIKServoEvent");
@@ -538,7 +537,6 @@ public class Servo extends Service implements ServoControl {
     if (pos > mapper.getMaxX()) {
       pos = mapper.getMaxX();
     }
-    lastPos = targetPos;
     targetPos = pos;
 
     if (!isEnabled()) {
@@ -1341,7 +1339,7 @@ public class Servo extends Service implements ServoControl {
     sc.addServoEventListener(sc);
     subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
-  
+
   /**
    * unsynchronize 2 sevos.  If the servo is running in sync already,
    * this method will stop the synchronization
@@ -1350,122 +1348,44 @@ public class Servo extends Service implements ServoControl {
    */
   public void unsync(ServoControl sc) {
     // remove
-    this.removeServoEventListener(this);    
+    this.removeServoEventListener(this);
     sc.removeServoEventListener(sc);
-    
+
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
   public static void main(String[] args) throws InterruptedException {
+    String arduinoPort = "COM5";
+    LoggingFactory.init(Level.INFO);
+    VirtualArduino virtualArduino = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
+    Runtime.start("python", "Python");
+
     try {
-      LoggingFactory.init(Level.INFO);
-      String arduinoPort = "COM5";
-
-      VirtualArduino virtualArduino = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
       virtualArduino.connect(arduinoPort);
-
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      arduino.connect(arduinoPort);
-
-      // virtual arduino can't drive velocity at this time
-      // i2c service connected onto virtual arduino will do the job
-      // https://github.com/MyRobotLab/myrobotlab/issues/99
-      Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
-      adafruit16CServoDriver.attach(arduino, "0", "0x40");
-
-      Runtime.start("gui", "SwingGui");
-      // Runtime.start("python", "Python");
-
-      boolean done = false;
-      if (done) {
-        return;
-      }
-
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-      Servo servo2 = (Servo) Runtime.start("servo2", "Servo");
-      Map<String, MethodEntry> methods = servo.getMethodMap();
-
-      // String out = CodecUtils.toJson();
-      StringBuilder sb = new StringBuilder();
-      sb.append("<table border=1 cellpadding=5 cellspacing=0>");
-      sb.append("<tr><td>name</td><td>parameters</td><td>return type</td><td>comments</td></tr>");
-      for (MethodEntry m : methods.values()) {
-        sb.append("<tr>");
-        sb.append("<td>");
-        sb.append(m.getName());
-        sb.append("</td>");
-        sb.append("<td>");
-        sb.append(m.getSimpleParameterTypesAndNames());
-        // sb.append(m.getReturnType());
-        sb.append("</td>");
-        sb.append("<td>");
-        sb.append(m.getSimpleReturnTypeName());
-        // sb.append(m.getReturnType());
-        sb.append("</td>");
-
-        sb.append("<td>&nbsp;</td>");
-        sb.append("</tr>");
-        sb.append("\n");
-      }
-
-      sb.append("</table>");
-
-      FileOutputStream fos = new FileOutputStream("servo01.methods.html");
-      fos.write(sb.toString().getBytes());
-      fos.close();
-
-      // Runtime.start("webgui", "WebGui");
-      // arduino.record();
-      // arduino.getSerial().record();
-
-      log.info("ports {}", Arrays.toString(arduino.getSerial().getPortNames().toArray()));
-      log.info("ready here");
-      // arduino.ackEnabled = true;
-
-      servo.attach();
-      /// servo2.attach(adafruit16CServoDriver, 8);
-      // servo.sync(servo2);
-      // servo.moveTo(90);
-      // servo.setRest(30);
-
-      /// servo.enable(8);
-      // servo.moveTo(90);
-      // servo.moveTo(30);
-
-      // servo.enable(9);
-      /// servo.moveTo(90);
-      // servo.setRest(30);
-
-      // FIXME - JUNIT - test attach - detach - re-attach
-      // servo.detach(arduino);
-
-      log.info("servo attach {}", servo.isAttached());
-
-      /// arduino.disconnect();
-      /// arduino.connect(arduinoPort);
-
-      // arduino.reset();
-
-      log.info("ready here 2");
-      // servo.attach(arduino, 8);
-      // servo.attach(
-      /// servo.attach(adafruit16CServoDriver, 7);
-      servo.moveToBlocking(90);
-      servo.moveToBlocking(30);
-
-      /// servo.enable(9);
-      /// servo.moveToBlocking(90);
-      // servo.setRest(30);
-
-      /// servo.moveTo(90);
-      // servo.setRest(30);
-      // servo.moveTo(10);
-
-      // servo.test();
-    } catch (Exception e) {
-      Logging.logError(e);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
+    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+    arduino.connect(arduinoPort);
+    Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
+    adafruit16CServoDriver.attach(arduino, "0", "0x40");
+
+    Runtime.start("gui", "SwingGui");
+    Servo servo = (Servo) Runtime.start("servo", "Servo");
+    try {
+      servo.attach(adafruit16CServoDriver, 1);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    servo.setVelocity(20);
+    log.info("It should take some time..");
+    servo.moveToBlocking(0);
+    servo.moveToBlocking(180);
+    servo.moveToBlocking(0);
+    log.info("Right?");
   }
 
   // pasted from inmoov1
@@ -1551,6 +1471,5 @@ public class Servo extends Service implements ServoControl {
   public void preShutdown() {
     detach();
   }
-  
 
 }
