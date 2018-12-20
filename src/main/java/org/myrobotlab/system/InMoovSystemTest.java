@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.test.TestUtils;
 
 /**
  * InMoov system test.  given an inmoov script location, it will load that script.
@@ -22,11 +22,9 @@ public class InMoovSystemTest {
   public void testInMoovBuild() throws IOException {
 
     // setup some logging.. etc.
-    TestUtils.initEnvirionment();
-    // TODO: make sure the inmoov service (and dependencies are installed)
-    // TODO: maybe just force an install all here.
-    // for now assume the start_inmoov is installed locally.
-    // Ok. first thing to do.. we have 2 arduinos.. upload them with the latest
+    LoggingFactory.init("INFO");
+    // make sure the inmoov zip is installed locally
+    // Runtime.install();
     
     Python python = (Python)Runtime.createAndStart("python", "Python");
     python.execFile(inmoovScript);
