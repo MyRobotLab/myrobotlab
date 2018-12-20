@@ -40,6 +40,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
 import static org.bytedeco.javacpp.opencv_video.cvCalcOpticalFlowPyrLK;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -62,11 +63,12 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   private static final int maxPointCount = 30;
 
   // external modifiers
-  public boolean addRemovePoint = false;
+  public boolean addRemovePoint2dfPoint = false;
+  public boolean addRemovePointIntPoint = false;
   public boolean clearPoints = false;
   public boolean needTrackingPoints = false;
   public Point2df samplePoint = new Point2df();
-
+  private Point samplePointInt = new Point();
   int validCorners = 0;
 
   transient IntPointer count = new IntPointer(0).put(0);
@@ -128,7 +130,6 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) {
-
     if (channels == 3) {
       cvCvtColor(image, imgB, CV_BGR2GRAY);
     } else {
@@ -141,11 +142,18 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
       clearPoints = false;
     }
 
-    if (addRemovePoint && count.get() < maxPointCount) {
-      cornersA.position(count.get()).x(samplePoint.x);
-      cornersA.position(count.get()).y(samplePoint.y);
+    if (addRemovePoint2dfPoint && count.get() < maxPointCount) {
+      cornersA.position(count.get()).x(samplePoint.x * image.width());
+      cornersA.position(count.get()).y(samplePoint.y * image.height());
       count.put(count.get() + 1);
-      addRemovePoint = false;
+      addRemovePoint2dfPoint = false;
+    }
+
+    if (addRemovePointIntPoint && count.get() < maxPointCount) {
+      cornersA.position(count.get()).x(samplePointInt.x);
+      cornersA.position(count.get()).y(samplePointInt.y);
+      count.put(count.get() + 1);
+      addRemovePointIntPoint = false;
     }
 
     if (needTrackingPoints) {
@@ -242,14 +250,20 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   }
 
   public void samplePoint(Float x, Float y) {
-    samplePoint((int) (x * width), (int) (y * height));
+    if (count.get() < maxPointCount) {
+      samplePoint.x = x;
+      samplePoint.y = y;
+      addRemovePoint2dfPoint = true;
+    } else {
+      clearPoints();
+    }
   }
 
   public void samplePoint(Integer x, Integer y) {
     if (count.get() < maxPointCount) {
-      samplePoint.x = x;
-      samplePoint.y = y;
-      addRemovePoint = true;
+      samplePointInt.x = x;
+      samplePointInt.y = y;
+      addRemovePointIntPoint = true;
     } else {
       clearPoints();
     }

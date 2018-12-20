@@ -114,7 +114,7 @@ public class Tracking extends Service {
   // public long latencyx = 0;
 
   // MRL points
-  public Point2df lastPoint = new Point2df();
+  public Point2df lastPoint = new Point2df(0.5F, 0.5F);
 
   double sizeIndexForBackgroundForegroundFlip = 0.10;
 
@@ -177,7 +177,8 @@ public class Tracking extends Service {
       return;
     }
     log.info("starting {} related to {}", state, filterName);
-    if (!Arrays.asList(opencv.getFilters()).contains(opencv.getFilter(filterName))) {
+    clearTrackingPoints();
+    if (opencv.getFilter(filterName) == null) {
       opencv.addFilter(filterName);
     }
     opencv.setActiveFilter(filterName);
@@ -278,7 +279,11 @@ public class Tracking extends Service {
     log.info("rest");
     for (TrackingServoData sc : servoControls.values()) {
       if (sc.servoControl.isAttached()) {
-        sc.servoControl.rest();
+        //avoid dangerous moves
+        double velocity = sc.servoControl.getVelocity();
+        sc.servoControl.setVelocity(20);
+        sc.servoControl.moveToBlocking(sc.servoControl.getRest());
+        sc.servoControl.setVelocity(velocity);
       }
     }
   }
@@ -294,15 +299,9 @@ public class Tracking extends Service {
 
   public OpenCVData onOpenCVData(OpenCVData data) {
     // log.info("OnOpenCVData");
-    int width = 1;
-    int height = 1;
-    try {
-      // get image size for proportions compute
-      width = opencv.getGrabber().getImageWidth();
-      height = opencv.getGrabber().getImageHeight();
-    } catch (Exception e) {
-      log.error("Tracking can't get grabber dimentions, this is BAD : ", e);
-    }
+    SerializableImage img = new SerializableImage(data.getDisplay(), data.getSelectedFilter());
+    float width = img.getWidth();
+    float height = img.getHeight();
     switch (state) {
 
       case STATE_FACE_DETECT:
@@ -313,10 +312,14 @@ public class Tracking extends Service {
 
           // found face
           // find centroid of first bounding box
+          Point2df thisPoint = new Point2df();
+          thisPoint.x = ((bb.get(0).x + bb.get(0).width / 2) / width);
+          thisPoint.y = ((bb.get(0).y + bb.get(0).height / 2) / height);
 
-          lastPoint.x = (bb.get(0).x + bb.get(0).width / 2) / width;
-          lastPoint.y = (bb.get(0).y + bb.get(0).height / 2) / height;
-          updateTrackingPoint(lastPoint);
+          //keep calm and save MORE cpu!
+          if (thisPoint != lastPoint) {
+            updateTrackingPoint(thisPoint);
+          }
 
           ++faceFoundFrameCount;
 
@@ -358,6 +361,8 @@ public class Tracking extends Service {
         break;
 
       case STATE_IDLE:
+        lastPoint.x = 0.5F;
+        lastPoint.y = 0.5F;
         // setForegroundBackgroundFilter(); FIXME - setFGBGFilters for
         // different detection
         break;
@@ -370,19 +375,21 @@ public class Tracking extends Service {
         if (targetPoint != null && targetPoint.size() > 0) {
           targetPoint.get(0).x = targetPoint.get(0).x / width;
           targetPoint.get(0).y = targetPoint.get(0).y / height;
-          log.info("targetPoint" + targetPoint.get(0));
-          updateTrackingPoint(targetPoint.get(0));
+          //keep calm and save MORE cpu!
+          if (targetPoint.get(0) != lastPoint) {
+            updateTrackingPoint(targetPoint.get(0));
+          }
         }
         break;
 
       case STATE_LEARNING_BACKGROUND:
         waitInterval = 3000;
-        waitForObjects(data);
+        waitForObjects(data, width, height);
         break;
 
       case STATE_SEARCHING_FOREGROUND:
         waitInterval = 3000;
-        waitForObjects(data);
+        waitForObjects(data, width, height);
         break;
 
       default:
@@ -405,6 +412,7 @@ public class Tracking extends Service {
   public void stopTracking() {
     log.info("stop tracking, all filters disabled");
     setState(STATE_IDLE);
+    clearTrackingPoints();
     opencv.disableAll();
   }
 
@@ -448,12 +456,13 @@ public class Tracking extends Service {
     lastPoint = targetPoint;
 
     if (cnt % updateModulus == 0) {
-      broadcastState(); // update graphics ?
-      info(String.format("computeX %f computeY %f", pid.getOutput("x"), pid.getOutput("y")));
+      //moz4r : //keep calm and save MORE cpu!
+      //broadcastState(); // update graphics ?
+      //info(String.format("computeX %f computeY %f", pid.getOutput("x"), pid.getOutput("y")));
     }
   }
 
-  public void waitForObjects(OpenCVData data) {
+  public void waitForObjects(OpenCVData data, float width, float height) {
     data.setSelectedFilter(FILTER_FIND_CONTOURS);
     List<Rectangle> objects = data.getBoundingBoxArray();
     int numberOfNewObjects = (objects == null) ? 0 : objects.size();
@@ -462,19 +471,12 @@ public class Tracking extends Service {
     // countour == background ??
     // set state to learn background
     if (!STATE_LEARNING_BACKGROUND.equals(state) && numberOfNewObjects == 1) {
-      SerializableImage img = new SerializableImage(data.getDisplay(), data.getSelectedFilter());
-      double width = img.getWidth();
-      double height = img.getHeight();
-
       Rectangle rect = objects.get(0);
-
       // publish(data.getImages());
-
       if ((width - rect.width) / width < sizeIndexForBackgroundForegroundFlip && (height - rect.height) / height < sizeIndexForBackgroundForegroundFlip) {
         learnBackground();
         info(String.format("%s - object found was nearly whole view - foreground background flip", state));
       }
-
     }
 
     if (numberOfNewObjects != lastNumberOfObjects) {
@@ -599,8 +601,8 @@ public class Tracking extends Service {
       OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
       t01.connect(opencv, rothead, neck);
       opencv.capture();
-      t01.trackPoint();
-
+      //t01.trackPoint();
+      t01.faceDetect();
       // tracker.getGoodFeatures();
     } catch (Exception e) {
       e.printStackTrace();
