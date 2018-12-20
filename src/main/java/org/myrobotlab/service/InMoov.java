@@ -2278,6 +2278,7 @@ public class InMoov extends Service {
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
+    //i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear", "AndroidSpeechRecognition");
     i01.startEar();
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
