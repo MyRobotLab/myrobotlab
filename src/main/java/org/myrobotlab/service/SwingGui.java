@@ -708,6 +708,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
   }
 
+  public void maximise() {
+    if (getFrame().getExtendedState() != JFrame.MAXIMIZED_BOTH) {
+      getFrame().setExtendedState(JFrame.MAXIMIZED_BOTH);
+    }
+  }
+
   public void undockTab(final String title) {
     tabs.undockTab(title);
   }

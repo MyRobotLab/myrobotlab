@@ -122,12 +122,12 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   JCheckBox undock = new JCheckBox("undock");
   JButton url = new JButton("url");
   VideoWidget video0 = null;
+  Runtime myRuntime = Runtime.getInstance();
+  OpenCV opencv = (OpenCV) myRuntime.getService(boundServiceName);
 
   public OpenCVGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     self = this;
-    Runtime myRuntime = (Runtime) Runtime.getInstance();
-    OpenCV opencv = (OpenCV) myRuntime.getService(boundServiceName);
     fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     fc.setDialogTitle("open file");
 
@@ -429,6 +429,10 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
     } else {
       video0.displayFrame(new SerializableImage(data.getDisplay(), data.getSelectedFilter()));
     }
+    if (opencv.fixUIOverExpand)
+    {
+      swingGui.maximise();
+    }
   }
 
   /**
@@ -511,6 +515,10 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
         // which might change dimension of video feed
         // which might need to re-pack & re-paint components ...
         swingGui.pack();
+        if (opencv.fixUIOverExpand)
+        {
+          swingGui.maximise();
+        }
       } // end run()
     });
   }

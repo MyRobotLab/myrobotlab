@@ -10,15 +10,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.swing.JFrame;
-
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.service.InMoov;
 import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 /**
@@ -86,11 +82,6 @@ public class Vision {
       instance.opencv.addFilter(filterName);
     }
     instance.opencv.setActiveFilter(filterName);
-    SwingGui gui = (SwingGui) Runtime.getService("gui");
-    //fix overexpand windows
-    if (gui != null) {
-      gui.getFrame().setExtendedState(JFrame.MAXIMIZED_BOTH);
-    }
     return (OpenCVFilter) instance.opencv.getFilter(filterName);
   }
 
@@ -133,7 +124,7 @@ public class Vision {
    * //TODO individual position for multiple same labels.. 
    */
   public void yoloInventory(TreeMap<String, List<Classification>> classifications) {
-    
+
     //reset previous same classified objects ( to count same objetcs on the frame )
     for (Map.Entry<String, List<Classification>> entry : classifications.entrySet()) {
       List<Classification> value = entry.getValue();

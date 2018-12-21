@@ -252,6 +252,7 @@ public class OpenCV extends AbstractVideoSource {
   public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
   public static final String OUTPUT_KEY = "output";
   transient final static public String PART = "part";
+  public boolean fixUIOverExpand = false;
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
       "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
