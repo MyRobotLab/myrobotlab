@@ -33,7 +33,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
+// import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -109,7 +109,7 @@ import com.mxgraph.view.mxGraph;
  * Tabs-On-JTabbedPaneI-Now-A-breeze
  * 
  */
-public class SwingGui extends Service implements WindowListener, ActionListener, Serializable, DocumentListener, FocusListener {
+public class SwingGui extends Service implements WindowListener, ActionListener, Serializable, DocumentListener {
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(SwingGui.class);
@@ -384,7 +384,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
     return frame;
   }
-
+  
+  public void maximize() {
+    frame.setExtendedState( frame.getExtendedState() | JFrame.MAXIMIZED_BOTH );
+  }
+  
   /*
    * Build the menu for display.
    */
@@ -395,9 +399,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     JMenuItem about = new JMenuItem("about");
     about.addActionListener(this);
     help.add(about);
-
-    search.addFocusListener(this);
-
     menuBar.add(search);
     menuBar.add(Box.createHorizontalGlue());
     menuBar.add(help);
@@ -838,24 +839,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     tabs.resetDesktop(name);
   }
 
-  @Override
-  public void focusGained(FocusEvent e) {
-    Object o = e.getSource();
-    if (o == search) {
-      // scroll.setVisible(true);
-    }
-    log.info("focusGained");
-  }
-
-  @Override
-  public void focusLost(FocusEvent e) {
-    Object o = e.getSource();
-    if (o == search) {
-      // scroll.setVisible(false);
-    }
-    log.info("focusLost");
-    // frame.pack();
-  }
 
   @Override
   public void changedUpdate(DocumentEvent e) {
