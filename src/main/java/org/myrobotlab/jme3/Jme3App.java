@@ -1,7 +1,5 @@
 package org.myrobotlab.jme3;
 
-import java.util.concurrent.Callable;
-
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;

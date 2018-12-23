@@ -74,6 +74,9 @@ public class Jme3Object {
 
     node = new Node(name);
     this.parentName = parentName;
+    
+    float scaleFactor = 400f;
+    
     Node parentNode = jme.getNode(parentName);
     if (parentNode != null) {
       parentNode.attachChild(node);
@@ -85,8 +88,12 @@ public class Jme3Object {
         log.error("could not load model {}", assetPath);
       }
       spatial.setName(name);
+      spatial.scale(1/scaleFactor); // FIXME - import 1000 scale data 
       node.attachChild(spatial);
     }
+    localTranslation.x = localTranslation.x/scaleFactor; // FIXME scale 1000
+    localTranslation.y = localTranslation.y/scaleFactor;
+    localTranslation.z = localTranslation.z/scaleFactor;
     node.setLocalTranslation(localTranslation);
   }
 
