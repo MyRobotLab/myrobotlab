@@ -229,14 +229,20 @@ public class InMoov extends Service {
     }
   }
 
+  @Deprecated
+  public void startHeadTracking(String port, Integer rothead, Integer neck) {
+    log.warn("Please use ServoControl : startHeadTracking(YourServoRothead,YourServoNeck), I will try to do it for you...");
+    startHeadTracking();
+  }
+
   public void startHeadTracking() {
     startHeadTracking(head.rothead, head.neck);
   }
 
   public void startHeadTracking(ServoControl rothead, ServoControl neck) {
-    if (head == null || opencv == null) {
-      error("Tracking needs InMoov head and opencv activated");
-      return;
+    if (opencv == null) {
+      log.warn("Tracking needs Opencv activated, I will try to lauch it. It is better if you DIY");
+      startOpenCV();
     }
 
     if (headTracking == null) {
@@ -246,14 +252,20 @@ public class InMoov extends Service {
     }
   }
 
+  @Deprecated
+  public void startEyesTracking(String port, Integer eyeX, Integer eyeY) {
+    log.warn("Please use ServoControl : startEyesTracking(ServoX,ServoY), I will try to do it for you...");
+    startEyesTracking();
+  }
+
   public void startEyesTracking() {
     startEyesTracking(head.eyeX, head.eyeY);
   }
 
   public void startEyesTracking(ServoControl eyeX, ServoControl eyeY) {
-    if (head == null || opencv == null) {
-      log.error("Tracking needs InMoov head and opencv activated");
-      return;
+    if (opencv == null) {
+      log.warn("Tracking needs Opencv activated, I will try to lauch it. It is better if you DIY");
+      startOpenCV();
     }
     speakBlocking(languagePack.get("TRACKINGSTARTED"));
     eyesTracking = (Tracking) this.startPeer("eyesTracking");
@@ -1511,6 +1523,16 @@ public class InMoov extends Service {
     speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
 
     return mouth;
+  }
+
+  @Deprecated
+  public MouthControl startMouthControl(String port) {
+    log.warn("Please use ServoControl : startMouthControl(YourServoJaw,mouthService), I will try to do it for you...");
+    return startMouthControl();
+  }
+
+  public MouthControl startMouthControl() {
+    return startMouthControl(head.jaw, mouth);
   }
 
   public MouthControl startMouthControl(ServoControl jaw, SpeechSynthesis mouth) {
