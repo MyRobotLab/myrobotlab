@@ -1,6 +1,9 @@
 package org.myrobotlab.service;
 
 import java.awt.Color;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.FloatBuffer;
@@ -8,7 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
@@ -41,6 +46,7 @@ import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
@@ -53,35 +59,44 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.control.BillboardControl;
+import com.jme3.scene.control.CameraControl.ControlDirection;
 import com.jme3.scene.plugins.blender.BlenderLoader;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
 
-public class JMonkeyEngine extends Service {
+public class JMonkeyEngine extends Service implements ActionListener, AnalogListener {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
-  AssetManager assetManager;
-  InputManager inputManager;
-  FlyByCamera flyCam;
-  Camera cam;
-  AnalogListener analogListener;
-  ViewPort viewPort;
-  Node rootNode;
-  AppSettings settings;
+  // real JMonkeyEngine parts ...
+  transient AssetManager assetManager;
+  transient InputManager inputManager;
+  transient FlyByCamera flyCam;
+  transient Camera camera;
+  transient CameraNode camNode;
+  // transient AnalogListener analogListener;
+  transient ViewPort viewPort;
+  transient Node rootNode;
+  transient AppSettings settings;
+  transient Spatial control = null;
+  transient Node personNode = null;
 
+  static String color = "00FF00"; // green
   long startUpdateTs;
   long deltaMs;
   long sleepMs;
+  int width = 1024;
+  int height = 768;
 
   public void updatePosition(String name, Double angle) {
     Move move = new Move(name, angle);
@@ -177,75 +192,56 @@ public class JMonkeyEngine extends Service {
 
       // start it with "default" settings
       settings = new AppSettings(true);
-      settings.setResolution(1024, 768);
+      settings.setResolution(width, height);
       // settings.setEmulateMouse(false);
       // settings.setUseJoysticks(false);
       settings.setUseInput(true);
       settings.setAudioRenderer(null);
       app.setSettings(settings);
-      app.setShowSettings(false);
+      app.setShowSettings(false); // resolution bps etc dialog
       app.setPauseOnLostFocus(false);
-      analogListener = new InputListener();
 
       // the all important "start" - anyone goofing around with the engine
       // before this is done will
       // will generate error from jmonkey - this should "block"
       app.start();
+      Callable<String> callable = new Callable<String>() {
+        public String call() throws Exception {
+          System.out.println("Asynchronous Callable");
+          return "Callable Result";
+        }
+      };
+      Future<String> future = app.enqueue(callable);
+      try {
+        future.get();
+      } catch (Exception e) {
+        log.warn("future threw", e);
+      }
       return app;
     }
     info("already started app %s", appType);
     return app;
   }
 
-  class InputListener implements AnalogListener {
-
-    @Override
-    public void onAnalog(String name, float keyPressed, float tpf) {
-      if (name.equals("MouseClickL")) {
-        // rotate+= keyPressed;
-        rootNode.rotate(0, -keyPressed, 0);
-        // log.info(rotate);
-      } else if (name.equals("MouseClickR")) {
-        // rotate+= keyPressed;
-        rootNode.rotate(0, keyPressed, 0);
-        // log.info(rotate);
-      } else if (name.equals("MMouseUp") || name.equals("ZoomIn")) {
-        rootNode.setLocalScale(rootNode.getLocalScale().mult(1.01f));
-      } else if (name.equals("MMouseDown") || name.equals("ZoomOut")) {
-        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.99f));
-      } else if (name.equals("Up")) {
-        rootNode.move(0, keyPressed * 100, 0);
-      } else if (name.equals("Down")) {
-        rootNode.move(0, -keyPressed * 100, 0);
-      } else if (name.equals("Left")) {
-        rootNode.move(-keyPressed * 100, 0, 0);
-      } else if (name.equals("Right")) {
-        rootNode.move(keyPressed * 100, 0, 0);
-      }
-      // seem no worky
-      else if (name.equals("FullScreen")) {
-        if (settings.isFullscreen()) {
-          settings.setFullscreen(false);
-        } else {
-          settings.setFullscreen(true);
-        }
-      }
-    }
-
-  }
-
   @Override
   public void stopService() {
     super.stopService();
     try {
-      if (app != null) {
-        app.getRootNode().detachAllChildren();
-        app.getGuiNode().detachAllChildren();
-        app.stop();
-      }
-      // app.destroy();
+      stop();
     } catch (Exception e) {
       log.error("releasing jme3 app threw", e);
+    }
+  }
+
+  public void stop() {
+    if (app != null) {
+
+      // why ?
+      app.getRootNode().detachAllChildren();
+      app.getGuiNode().detachAllChildren();
+      app.stop();
+      // app.destroy(); not for "us"
+      app = null;
     }
   }
 
@@ -372,170 +368,63 @@ public class JMonkeyEngine extends Service {
     }
     return null;
   }
-  
-  
+
   public void addBox(String boxName) {
-    addBox(boxName, 1,1,1, "#FF0000", false);
+    addBox(boxName, 3f, 2f, 3f, null, null); // room box
   }
 
-  public void addBox(String boxName, Integer width, Integer depth, Integer height, String color, Boolean fill) {
+  public void addBox(String boxName, Float width, Float depth, Float height) {
+    addBox(boxName, width, depth, height, null, null);
+  }
+
+  public void addBox(String boxName, Float width, Float depth, Float height, String color, Boolean fill) {
     Box box = new Box(width, depth, height); // 1 meter square
 
     // wireCube.setMode(Mesh.Mode.LineLoop);
-    box.setMode(Mesh.Mode.Lines);
+    // box.setMode(Mesh.Mode.Lines);
 
     Geometry geom = new Geometry(boxName, box);
 
-    Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    Material mat1 = null;
 
-    mat1.setColor("Color", ColorRGBA.Red);
+    if (fill == null || fill.equals(false)) {
+      // mat1 = new Material(assetManager,
+      // "Common/MatDefs/Light/Lighting.j3md");
+      mat1 = new Material(assetManager, "Common/MatDefs/Light/PBRLighting.j3md");
+    } else {
+      mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+      if (color == null) {
+        color = JMonkeyEngine.color;
+      }
+      mat1.setColor("Color", toColor(color));
+    }
 
+    // mat1 = new Material(assetManager, "Common/MatDefs/Light/Deferred.j3md");
+
+    mat1.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Front);
     geom.setMaterial(mat1);
     rootNode.attachChild(geom);
-    
-    saveNode("Box");
 
   }
 
-  public void simpleInitApp() {
-
-    // wtf - assetManager == null - another race condition ?!?!?
-    // after start - these are initialized as "default"
-    assetManager = app.getAssetManager();
-    inputManager = app.getInputManager();
-    flyCam = app.getFlyByCamera();
-    cam = app.getCamera();
-    viewPort = app.getViewPort();
-    rootNode = app.getRootNode();
-    // cam.setFrustum(0, 1000, 0, 0, 0, 0);
-    // cam.setFrustumNear(1.0f);
-
-    inputManager.setCursorVisible(true);
-    flyCam.setEnabled(false);
-    cam.setLocation(new Vector3f(0f, 0f, 2f));
-    // cam.setLocation(new Vector3f(0f, 0f, 900f));
-    // cam.setLocation(new Vector3f(0f, 0f, 12f));
-    // cam.setClipPlan);
-    new File(getDataDir()).mkdirs();
-    new File(getResourceDir()).mkdirs();
-    assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
-    assetManager.registerLocator(getDataDir(), FileLocator.class);
-    assetManager.registerLocator(getResourceDir(), FileLocator.class);
-    assetManager.registerLocator("./", FileLocator.class);
-    assetManager.registerLocator(getDataDir(), FileLocator.class);
-    
-    assetManager.registerLoader(BlenderLoader.class, "blend");
-
-    inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    inputManager.addListener(analogListener, "MouseClickL");
-    inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
-    inputManager.addListener(analogListener, "MouseClickR");
-    inputManager.addMapping("MMouseUp", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
-    inputManager.addListener(analogListener, "MMouseUp");
-    inputManager.addMapping("MMouseDown", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
-    inputManager.addListener(analogListener, "MMouseDown");
-
-    //
-    /**
-     * <pre>
-     * LEFT       A and left arrow 
-     * RIGHT      D and right arrow
-     * UP         W and up arrow
-     * DOWN       S and down arrow
-     * ZOOM IN    J 
-     * ZOOM OUT   K
-     * </pre>
-     */
-    inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT));
-    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
-    inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP));
-    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
-    inputManager.addMapping("ZoomIn", new KeyTrigger(KeyInput.KEY_J));
-    inputManager.addMapping("ZoomOut", new KeyTrigger(KeyInput.KEY_K));
-    inputManager.addListener(analogListener, new String[] { "Left", "Right", "Up", "Down", "ZoomIn", "ZoomOut" });
-    // no worky
-    inputManager.addMapping("FullScreen", new KeyTrigger(KeyInput.KEY_F));
-    inputManager.addListener(analogListener, "FullScreen");
-
-    viewPort.setBackgroundColor(ColorRGBA.Black);
-
-    DirectionalLight sun = new DirectionalLight();
-    sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
-    rootNode.addLight(sun);
-
-    // AmbientLight sun = new AmbientLight();
-    rootNode.addLight(sun);
-    // rootNode.scale(.5f);
-    // rootNode.scale(1.0f);
-    // rootNode.setLocalTranslation(0, -200, 0);
-    rootNode.setLocalTranslation(0, 0, 0);
-
-    // FIXME NOT i01 !! - if a InMoov Type has been identified
-    // the InMoov {name} is pulled
-    // FIXME - correct names of types :P
-    // FIXME - INPUT ALL THIS VIA TEXT/yaml/json config !!!
-
-    putNode("rootNode", rootNode);
-
-    boolean test = true;
-    if (test) {
-      return;
+  static public ColorRGBA toColor(String userColor) {
+    if (userColor == null) {
+      userColor = JMonkeyEngine.color;
     }
 
-    putNode("i01.torso.lowStom", "rootNode", "Models/ltorso.j3o", null, Vector3f.UNIT_X.mult(1), new Vector3f(0, 0, 0), 0);
+    String clean = userColor.replace("0x", "").replace("#", "");
 
-    // FIXME - bind this to process Peers !!!! "default" "Peer" info in 3D form
-
-    putNode("i01.torso.midStom", "i01.torso.lowStom", "Models/mtorso.j3o", new Mapper(0, 180, 120, 60), Vector3f.UNIT_Y.mult(-1), new Vector3f(0, 0, 0), 0);
-    putNode("i01.torso.topStom", "i01.torso.midStom", "Models/ttorso1.j3o", new Mapper(0, 180, 80, 100), Vector3f.UNIT_Z.mult(1), new Vector3f(0, 105, 10), 0);
-    putNode("rightS", "i01.torso.topStom", null, null, Vector3f.UNIT_Z.mult(1), new Vector3f(0, 300, 0), 0);
-
-    // Vector3f angle = rotationMask.mult((float) Math.toRadians(6));
-    putNode("i01.rightArm.omoplate", "rightS", "Models/Romoplate1.j3o", new Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(-1), new Vector3f(-143, 0, -17), 0);
-
-    // angle = rotationMask.mult((float) Math.toRadians(-2));
-    // node.rotate(angle.x, angle.y, angle.z); <------------ additional rotation
-    // ...
-    putNode("i01.rightArm.shoulder", "i01.rightArm.omoplate", "Models/Rshoulder1.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(-23, -45, 0), 0);
-    putNode("i01.rightArm.rotate", "i01.rightArm.shoulder", "Models/rotate1.j3o", new Mapper(0, 180, 40, 180), Vector3f.UNIT_Y.mult(-1), new Vector3f(-57, -55, 8), 0);
-
-    // angle = rotationMask.mult((float) Math.toRadians(30)); // additional
-    // rotate !
-    // node.rotate(angle.x, angle.y, angle.z);
-    putNode("i01.rightArm.bicep", "i01.rightArm.rotate", "Models/Rbicep1.j3o", new Mapper(0, 180, 5, 60), Vector3f.UNIT_X.mult(-1), new Vector3f(5, -225, -32), 0);
-    putNode("leftS", "i01.torso.topStom", "Models/Lomoplate1.j3o", null, Vector3f.UNIT_Z.mult(1), new Vector3f(0, 300, 0), 0);
-
-    // angle = rotationMask.mult((float) Math.toRadians(4));
-    // node.rotate(angle.x, angle.y, angle.z); <-- another rotation ...
-    putNode("i01.leftArm.omoplate", "leftS", "Models/Lomoplate1.j3o", new Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(1), new Vector3f(143, 0, -15), 0);
-    putNode("i01.leftArm.shoulder", "i01.leftArm.omoplate", "Models/Lshoulder.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(17, -45, 5), 0);
-    putNode("i01.leftArm.rotate", "i01.leftArm.shoulder", "Models/rotate1.j3o", new Mapper(0, 180, 40, 180), Vector3f.UNIT_Y.mult(1), new Vector3f(65, -58, -3), 0);
-
-    // angle = rotationMask.mult((float) Math.toRadians(27));
-    // node.rotate(angle.x, angle.y, angle.z); <-------------- additional rotate
-    // !!!
-    putNode("i01.leftArm.bicep", "i01.leftArm.rotate", "Models/Lbicep.j3o", new Mapper(0, 180, 5, 60), Vector3f.UNIT_X.mult(-1), new Vector3f(-14, -223, -28), 0);
-
-    // angle = rotationMask.mult((float) Math.toRadians(-90)); <- Ha .. and an
-    // additional rotate
-    // node.rotate(angle.x, angle.y, angle.z);
-    putNode("i01.rightHand.wrist", "i01.rightArm.bicep", "Models/RWristFinger.j3o", new Mapper(0, 180, 130, 40), Vector3f.UNIT_X.mult(-1), new Vector3f(15, -290, -10), 0);
-
-    // angle = rotationMask.mult((float) Math.toRadians(-90)); <--- HA .. and
-    // additional rotation !
-    // node.rotate(angle.x, angle.y, angle.z);
-    putNode("i01.leftHand.wrist", "i01.leftArm.bicep", "Models/LWristFinger.j3o", new Mapper(0, 180, 40, 130), Vector3f.UNIT_Y.mult(1), new Vector3f(0, -290, -20), 90);
-    putNode("i01.head.neck", "i01.torso.topStom", "Models/neck.j3o", new Mapper(0, 180, 60, 110), Vector3f.UNIT_X.mult(-1), new Vector3f(0, 452.5f, -45), 0);
-    putNode("i01.head.rollNeck", "i01.head.neck", null, new Mapper(0, 180, 60, 115), Vector3f.UNIT_Z.mult(1), new Vector3f(0, 0, 0), 90);
-    putNode("i01.head.rothead", "i01.head.rollNeck", "Models/head.j3o", new Mapper(0, 180, 150, 30), Vector3f.UNIT_Y.mult(-1), new Vector3f(0, 10, 20), 90);
-    putNode("i01.head.jaw", "i01.head.rothead", "Models/jaw.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(-5, 60, -50), 90);
-
-    save("inmoov-jme.json");
-
-    // Vector3D vector = new Vector3D(7, 3, 120);
-    load("inmoov-jme.json");
-
-    save("inmoov-jme1.json");
+    ColorRGBA retColor = null;
+    Color c = null;
+    try {
+      int cint = Integer.parseInt(clean, 16);
+      c = new Color(cint);
+      retColor = new ColorRGBA((float) c.getRed() / 255, (float) c.getGreen() / 255, (float) c.getBlue() / 255, 1);
+      return retColor;
+    } catch (Exception e) {
+      log.error("creating color threw", e);
+    }
+    return ColorRGBA.Green;
   }
 
   public void simpleUpdate(float tpf) {
@@ -582,19 +471,17 @@ public class JMonkeyEngine extends Service {
   }
 
   // relative
-  public void move(String name, Float x, Float y, Float z) {
-
+  public void moveTo(String name, Float x, Float y, Float z) {
+    Spatial spatial = rootNode.getChild(name);
+    List<Spatial> childrenOfRoot = rootNode.getChildren();
+    spatial.setLocalTranslation(x, y, z);
   }
 
+  // relative move
   // favor the xy plane because we are not birds ?
   public void move(String name, Float x, Float y) {
     // must "get z"
-    move(name, x, y, null);
-  }
-
-  // absolute
-  public void moveTo(String name, Float x, Float y, Float z) {
-
+    // move(name, x, y, null);
   }
 
   /**
@@ -624,9 +511,12 @@ public class JMonkeyEngine extends Service {
   }
 
   // FIXME - more parameters - location & rotation (new function "move")
-  public boolean load(String filename) {
+  public boolean load(String filename, Float scale) {
 
-    
+    if (scale == null) {
+      scale = 1f;
+    }
+
     File file = getFile(filename);
 
     if (!file.exists()) {
@@ -654,6 +544,9 @@ public class JMonkeyEngine extends Service {
       // spatial.scale(0.05f, 0.05f, 0.05f);
       // spatial.rotate(0.0f, -3.0f, 0.0f);
       // spatial.setLocalTranslation(0.0f, -0.0f, -0.0f);
+      spatial.setLocalTranslation(0.0f, -1.0f, -0.0f);
+      spatial.setLocalScale(scale);
+      // spatial.scale(scale, scale, scale);
       rootNode.attachChild(spatial);
 
       return true;
@@ -733,6 +626,7 @@ public class JMonkeyEngine extends Service {
 
     pointCloudMat.setColor("Color", ColorRGBA.Green);
     pointCloudMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+    // pointCloudMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Front);
     pointCloudMat.setBoolean("VertexColor", false); // important for points !!
     // pointCloudMat.setBoolean("VertexColor", false); // important for points
     // !!
@@ -801,10 +695,11 @@ public class JMonkeyEngine extends Service {
   public class HudText {
     String updateText;
     String currentText;
+    String color;
     int x;
     int y;
     BitmapText node;
-    private String color;
+
     private int size;
 
     public HudText(String text, int x, int y) {
@@ -827,16 +722,7 @@ public class JMonkeyEngine extends Service {
         node.setText(updateText);
         currentText = updateText;
         if (color != null) {
-          Color c = null;
-          try {
-            int cint = Integer.parseInt(color.replace("#", "").replace("0x", ""), 16);
-            c = new Color(cint);
-          } catch (Exception e) {
-            log.error("creating color threw", e);
-          }
-          if (c != null) {
-            node.setColor(new ColorRGBA((float) c.getRed() / 255, (float) c.getGreen() / 255, (float) c.getBlue() / 255, 1));
-          }
+          node.setColor(JMonkeyEngine.toColor(color));
           node.setSize(size);
         }
       }
@@ -969,17 +855,17 @@ public class JMonkeyEngine extends Service {
       if (spatial == null) {
         error("could not save {} - node not found", name);
       }
-      
+
       BinaryExporter exporter = BinaryExporter.getInstance();
       FileOutputStream out = new FileOutputStream(name + ".j3o");
       exporter.save(spatial, out);
       out.close();
-      
+
       out = new FileOutputStream(name + ".xml");
       XMLExporter xmlExporter = XMLExporter.getInstance();
       xmlExporter.save(spatial, out);
       out.close();
-      
+
       return true;
     } catch (Exception e) {
       log.error("exporter.save threw", e);
@@ -1008,15 +894,32 @@ public class JMonkeyEngine extends Service {
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-      jme.addBox("box-1.1");
+
+      // jme.loadInMoov();
+      // jme.load("muro.obj");
+
+      // jme.load("Christmashat.obj", 0.01f);
+      // jme.moveTo("Christmashat-geom-0", 0f, 0.70f, 0f); // wtf name !=
+      // filename - shold change that
+
+      // jme.load("Chair.obj", 0.1f);
+      jme.addBox("ruler", 0.01f, 0.7747f, 0.01f, "FF0000", true);
+      jme.moveTo("ruler", 0.0f, 0.7f, 0.0f);
+      // jme.putText("camera x,y,z", 10, 10);
+      // jme.addBox("box-1.1"); ROOM ! FIXME - normals pointing inside !!!
       // jme.load("model.dae");
       // jme.load(jme.getDataDir() + File.separator + "serwo_9g_Tower_pro.obj");
       // jme.load("cube.blend");
-      jme.load("box_realistic.obj");
-      jme.saveNode("exported.obj");
+      // jme.load("box_realistic.obj");
+      // jme.saveNode("exported.obj");
       // jme.load(jme.getDataDir() + File.separator + "cbmchhh.dae");
 
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
       jme.attach(cv);
       jme.putText("stat: 1\nstat: 2\nstat: 3", 10, 10);
       jme.putText("stat: 5\nstat: 6\nstat: 7", 10, 10);
@@ -1040,11 +943,6 @@ public class JMonkeyEngine extends Service {
       // jme.start();
 
       // jme.onPointCloud(cv.getPointCloud());
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       VirtualServoController vsc = (VirtualServoController) Runtime.start("i01.left", "VirtualServoController");
       vsc.attachSimulator(jme);
@@ -1116,6 +1014,262 @@ public class JMonkeyEngine extends Service {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public void load(String name) {
+    load(name, (Float) null);
+  }
+
+  @Override
+  public void onAction(String name, boolean isPressed, float tpf) {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void enableFlyCam(boolean b) {
+    flyCam.setEnabled(b);
+  }
+
+  // FIXME - remove - just load a json file
+  // NOT TO BE CALLED BY ANY OTHER THREAD BESIDES JME THREAD !!! OR YOU GET A
+  // SPATIAL EXCEPTION !
+  private void loadInMoov() {
+
+    putNode("i01.torso.lowStom", "rootNode", "Models/ltorso.j3o", null, Vector3f.UNIT_X.mult(1), new Vector3f(0, 0, 0), 0);
+
+    // FIXME - bind this to process Peers !!!! "default" "Peer" info in 3D form
+
+    putNode("i01.torso.midStom", "i01.torso.lowStom", "Models/mtorso.j3o", new Mapper(0, 180, 120, 60), Vector3f.UNIT_Y.mult(-1), new Vector3f(0, 0, 0), 0);
+    putNode("i01.torso.topStom", "i01.torso.midStom", "Models/ttorso1.j3o", new Mapper(0, 180, 80, 100), Vector3f.UNIT_Z.mult(1), new Vector3f(0, 105, 10), 0);
+    putNode("rightS", "i01.torso.topStom", null, null, Vector3f.UNIT_Z.mult(1), new Vector3f(0, 300, 0), 0);
+
+    // Vector3f angle = rotationMask.mult((float) Math.toRadians(6));
+    putNode("i01.rightArm.omoplate", "rightS", "Models/Romoplate1.j3o", new Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(-1), new Vector3f(-143, 0, -17), 0);
+
+    // angle = rotationMask.mult((float) Math.toRadians(-2));
+    // node.rotate(angle.x, angle.y, angle.z); <------------ additional rotation
+    // ...
+    putNode("i01.rightArm.shoulder", "i01.rightArm.omoplate", "Models/Rshoulder1.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(-23, -45, 0), 0);
+    putNode("i01.rightArm.rotate", "i01.rightArm.shoulder", "Models/rotate1.j3o", new Mapper(0, 180, 40, 180), Vector3f.UNIT_Y.mult(-1), new Vector3f(-57, -55, 8), 0);
+
+    // angle = rotationMask.mult((float) Math.toRadians(30)); // additional
+    // rotate !
+    // node.rotate(angle.x, angle.y, angle.z);
+    putNode("i01.rightArm.bicep", "i01.rightArm.rotate", "Models/Rbicep1.j3o", new Mapper(0, 180, 5, 60), Vector3f.UNIT_X.mult(-1), new Vector3f(5, -225, -32), 0);
+    putNode("leftS", "i01.torso.topStom", "Models/Lomoplate1.j3o", null, Vector3f.UNIT_Z.mult(1), new Vector3f(0, 300, 0), 0);
+
+    // angle = rotationMask.mult((float) Math.toRadians(4));
+    // node.rotate(angle.x, angle.y, angle.z); <-- another rotation ...
+    putNode("i01.leftArm.omoplate", "leftS", "Models/Lomoplate1.j3o", new Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(1), new Vector3f(143, 0, -15), 0);
+    putNode("i01.leftArm.shoulder", "i01.leftArm.omoplate", "Models/Lshoulder.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(17, -45, 5), 0);
+    putNode("i01.leftArm.rotate", "i01.leftArm.shoulder", "Models/rotate1.j3o", new Mapper(0, 180, 40, 180), Vector3f.UNIT_Y.mult(1), new Vector3f(65, -58, -3), 0);
+
+    // angle = rotationMask.mult((float) Math.toRadians(27));
+    // node.rotate(angle.x, angle.y, angle.z); <-------------- additional rotate
+    // !!!
+    putNode("i01.leftArm.bicep", "i01.leftArm.rotate", "Models/Lbicep.j3o", new Mapper(0, 180, 5, 60), Vector3f.UNIT_X.mult(-1), new Vector3f(-14, -223, -28), 0);
+
+    // angle = rotationMask.mult((float) Math.toRadians(-90)); <- Ha .. and an
+    // additional rotate
+    // node.rotate(angle.x, angle.y, angle.z);
+    putNode("i01.rightHand.wrist", "i01.rightArm.bicep", "Models/RWristFinger.j3o", new Mapper(0, 180, 130, 40), Vector3f.UNIT_X.mult(-1), new Vector3f(15, -290, -10), 0);
+
+    // angle = rotationMask.mult((float) Math.toRadians(-90)); <--- HA .. and
+    // additional rotation !
+    // node.rotate(angle.x, angle.y, angle.z);
+    putNode("i01.leftHand.wrist", "i01.leftArm.bicep", "Models/LWristFinger.j3o", new Mapper(0, 180, 40, 130), Vector3f.UNIT_Y.mult(1), new Vector3f(0, -290, -20), 90);
+    putNode("i01.head.neck", "i01.torso.topStom", "Models/neck.j3o", new Mapper(0, 180, 60, 110), Vector3f.UNIT_X.mult(-1), new Vector3f(0, 452.5f, -45), 0);
+    putNode("i01.head.rollNeck", "i01.head.neck", null, new Mapper(0, 180, 60, 115), Vector3f.UNIT_Z.mult(1), new Vector3f(0, 0, 0), 90);
+    putNode("i01.head.rothead", "i01.head.rollNeck", "Models/head.j3o", new Mapper(0, 180, 150, 30), Vector3f.UNIT_Y.mult(-1), new Vector3f(0, 10, 20), 90);
+    putNode("i01.head.jaw", "i01.head.rothead", "Models/jaw.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(-5, 60, -50), 90);
+
+    save("inmoov-jme.json");
+
+    // Vector3D vector = new Vector3D(7, 3, 120);
+    load("inmoov-jme.json");
+
+    save("inmoov-jme1.json");
+  }
+
+  @Override
+  public void onAnalog(String name, float keyPressed, float tpf) {
+    control = rootNode;
+    // control = camNode;
+    if (name.equals("MouseClickL")) {
+      // rotate+= keyPressed;
+      control.rotate(0, -keyPressed, 0);
+      // log.info(rotate);
+    } else if (name.equals("MouseClickR")) {
+      // rotate+= keyPressed;
+      control.rotate(0, keyPressed, 0);
+      // log.info(rotate);
+    } else if (name.equals("MMouseUp") || name.equals("ZoomIn")) {
+      control.setLocalScale(control.getLocalScale().mult(1.0f));
+    } else if (name.equals("MMouseDown") || name.equals("ZoomOut")) {
+      control.setLocalScale(control.getLocalScale().mult(1.0f));
+    } else if (name.equals("Up")) {
+      control.move(0, keyPressed * 1, 0);
+    } else if (name.equals("Down")) {
+      control.move(0, -keyPressed * 1, 0);
+    } else if (name.equals("Left")) {
+      control.move(-keyPressed * 1, 0, 0);
+    } else if (name.equals("Right")) {
+      control.move(keyPressed * 1, 0, 0);
+    } else if (name.equals("FullScreen")) {
+      if (!fullscreen) {
+        enableFullScreen(true);
+      } /*else {
+        enableFullScreen(false);
+      }*/ // oscilatting
+    }
+  }
+
+  public void enableFullScreen(boolean fullscreen) {
+    this.fullscreen = fullscreen;
+
+    if (fullscreen) {
+      GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+      displayMode = device.getDisplayMode();
+      DisplayMode[] modes = device.getDisplayModes();
+      // displayMode = modes[i]; - FIXME - change jme size draggable and full
+      // screen resolution ..
+
+      int i = 0; // note: there are usually several, let's pick the first (LET'S
+                 // NOT !!! - cuz that's a dumb idea)
+
+      // remember last dsiplay mode
+      displayMode = device.getDisplayMode();
+      
+      settings = app.getContext().getSettings();
+      log.info("settings {}", settings);
+      settings.setResolution(displayMode.getWidth(), displayMode.getHeight());
+      settings.setFrequency(displayMode.getRefreshRate());
+      settings.setBitsPerPixel(displayMode.getBitDepth());     
+      
+      // settings.setFullscreen(device.isFullScreenSupported());
+      settings.setFullscreen(fullscreen);
+      app.setSettings(settings);
+      app.restart(); // restart the context to apply changes
+    } else {
+      settings = app.getContext().getSettings();
+      log.info("settings {}", settings);
+      /*
+      settings.setFrequency(displayMode.getRefreshRate());
+      settings.setBitsPerPixel(displayMode.getBitDepth()); 
+      */
+      settings.setFullscreen(fullscreen);
+      settings.setResolution(width, height);  
+      app.setSettings(settings);
+      app.restart();
+    }
+  }
+
+  DisplayMode displayMode = null;
+  boolean fullscreen = false;
+  DisplayMode lastDisplayMode = null;
+
+  public void simpleInitApp() {
+
+    // wtf - assetManager == null - another race condition ?!?!?
+    // after start - these are initialized as "default"
+    assetManager = app.getAssetManager();
+    inputManager = app.getInputManager();
+    flyCam = app.getFlyByCamera();
+    camera = app.getCamera();
+    // target node to attach to camera
+    personNode = new Node("person");
+
+    rootNode = app.getRootNode();
+    rootNode.attachChild(personNode);
+
+    // rootNode.attachChild(child)
+
+    viewPort = app.getViewPort();
+    // Setting the direction to Spatial to camera, this means the camera will
+    // copy the movements of the Node
+    camNode = new CameraNode("cam", camera);
+    camNode.setControlDir(ControlDirection.SpatialToCamera);
+    camNode.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
+    // rootNode.attachChild(camNode);
+    // rootNode.attachChild(cam);
+
+    // personNode.attachChild(camNode);
+
+    // cam.setFrustum(0, 1000, 0, 0, 0, 0);
+    // cam.setFrustumNear(1.0f);
+
+    inputManager.setCursorVisible(true);
+    flyCam.setEnabled(false);
+    camNode.setLocalTranslation(0, 0, 2f);
+    // camera.setLocation(new Vector3f(0f, 0f, 2f));
+    // cam.setLocation(new Vector3f(0f, 0f, 0f));
+    // cam.setLocation(new Vector3f(0f, 0f, 900f));
+    // cam.setLocation(new Vector3f(0f, 0f, 12f));
+    // cam.setClipPlan);
+    new File(getDataDir()).mkdirs();
+    new File(getResourceDir()).mkdirs();
+
+    assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
+    assetManager.registerLocator(getDataDir(), FileLocator.class);
+    assetManager.registerLocator(getResourceDir(), FileLocator.class);
+    assetManager.registerLocator("./", FileLocator.class);
+    assetManager.registerLocator(getDataDir(), FileLocator.class);
+    assetManager.registerLoader(BlenderLoader.class, "blend");
+
+    // what inputs will jme service handle ?
+
+    /**
+     * <pre>
+     * LEFT       A and left arrow 
+     * RIGHT      D and right arrow
+     * UP         W and up arrow
+     * DOWN       S and down arrow
+     * ZOOM IN    J 
+     * ZOOM OUT   K
+     * </pre>
+     */
+    inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+    inputManager.addListener(this, "MouseClickL");
+    inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+    inputManager.addListener(this, "MouseClickR");
+    inputManager.addMapping("MMouseUp", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
+    inputManager.addListener(this, "MMouseUp");
+    inputManager.addMapping("MMouseDown", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
+    inputManager.addListener(this, "MMouseDown");
+    inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT));
+    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
+    inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP));
+    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
+    inputManager.addMapping("ZoomIn", new KeyTrigger(KeyInput.KEY_J));
+    inputManager.addMapping("ZoomOut", new KeyTrigger(KeyInput.KEY_K));
+    inputManager.addListener(this, new String[] { "Left", "Right", "Up", "Down", "ZoomIn", "ZoomOut" });
+    // no worky
+    inputManager.addMapping("FullScreen", new KeyTrigger(KeyInput.KEY_F));
+    inputManager.addListener(this, "FullScreen");
+
+    viewPort.setBackgroundColor(ColorRGBA.Gray);
+
+    DirectionalLight sun = new DirectionalLight();
+    sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
+    // sun.setDirection(new Vector3f(-0.0f, -0.0f, -0.0f));
+    rootNode.addLight(sun);
+
+    // AmbientLight sun = new AmbientLight();
+    rootNode.addLight(sun);
+    // rootNode.scale(.5f);
+    // rootNode.scale(1.0f);
+    // rootNode.setLocalTranslation(0, -200, 0);
+    rootNode.setLocalTranslation(0, 0, 0);
+
+    // FIXME NOT i01 !! - if a InMoov Type has been identified
+    // the InMoov {name} is pulled
+    // FIXME - correct names of types :P
+    // FIXME - INPUT ALL THIS VIA TEXT/yaml/json config !!!
+
+    putNode("rootNode", rootNode);
+
+    // AH HAA !!! ... so JME thread can only do this :P
+    loadInMoov();
   }
 
 }
