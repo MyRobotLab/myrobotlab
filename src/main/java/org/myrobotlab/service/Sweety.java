@@ -899,6 +899,34 @@ public class Sweety extends Service {
     leftPinkyServo.setRest(leftPinky[rest]);
     neckTiltServo.setRest(neckTilt[rest]);
     neckPanServo.setRest(neckPan[rest]);
+    
+    setVelocity(75);
+  }
+  
+  void setVelocity(int value) {
+	  	rightShoulderServo.setVelocity(value);
+	    rightArmServo.setVelocity(value);
+	    rightBicepsServo.setVelocity(value);
+	    rightElbowServo.setVelocity(value);
+	    rightWristServo.setVelocity(value);
+	    leftShoulderServo.setVelocity(value);
+	    leftArmServo.setVelocity(value);
+	    leftBicepsServo.setVelocity(value);
+	    leftElbowServo.setVelocity(value);
+	    leftWristServo.setVelocity(value);
+	    rightThumbServo.setVelocity(value);
+	    rightIndexServo.setVelocity(value);
+	    rightMiddleServo.setVelocity(value);
+	    rightRingServo.setVelocity(value);
+	    rightPinkyServo.setVelocity(value);
+	    leftThumbServo.setVelocity(value);
+	    leftIndexServo.setVelocity(value);
+	    leftMiddleServo.setVelocity(value);
+	    leftRingServo.setVelocity(value);
+	    leftPinkyServo.setVelocity(value);
+	    neckTiltServo.setVelocity(value);
+	    neckPanServo.setVelocity(value);	  
+	  
   }
 
   /**
