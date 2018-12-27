@@ -86,10 +86,10 @@ public class Vision {
       instance.opencv.addFilter(filterName);
     }
     instance.opencv.setActiveFilter(filterName);
+    //temporary fix overexpand windows
     SwingGui gui = (SwingGui) Runtime.getService("gui");
-    //fix overexpand windows
     if (gui != null) {
-      gui.getFrame().setExtendedState(JFrame.MAXIMIZED_BOTH);
+      gui.maximize();
     }
     return (OpenCVFilter) instance.opencv.getFilter(filterName);
   }
