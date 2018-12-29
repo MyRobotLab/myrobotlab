@@ -119,7 +119,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     if (busAddress != lastBusAddress) {
       byte bus[] = new byte[1];
       bus[0] = (byte) (1 << busAddress);
-      log.info("setMux this.deviceBus {} this.deviceAddress {} bus[0] {}", this.deviceBus, this.deviceAddress, bus[0]);
+      log.debug("setMux this.deviceBus {} this.deviceAddress {} bus[0] {}", this.deviceBus, this.deviceAddress, bus[0]);
       controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
       lastBusAddress = busAddress;
     }
@@ -129,7 +129,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     setMuxBus(busAddress);
     String key = String.format("%d.%d", busAddress, deviceAddress);
-    log.info(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+    log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
     controller.i2cWrite(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
   }
 
@@ -141,7 +141,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     setMuxBus(busAddress);
     int bytesRead = controller.i2cRead(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
-    log.info("i2cRead. Requested {} bytes, received {} byte", size, bytesRead);
+    log.debug("i2cRead. Requested {} bytes, received {} byte", size, bytesRead);
     return bytesRead;
   }
 
