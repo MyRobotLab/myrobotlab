@@ -7,7 +7,9 @@ public class StreamIO {
 
   /**
    * general purpose stream closer for single line closing
-   * @param is the input stream
+   * 
+   * @param is
+   *          the input stream
    */
   static final public void close(InputStream is) {
     try {

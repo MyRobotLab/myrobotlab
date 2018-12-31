@@ -11,7 +11,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.BodyPart;
 import org.myrobotlab.service.interfaces.ServoControl;
 
-/** 
+/**
  * Shared some methods between bodyPart & root controller ( like inmoov service )
  */
 public abstract class AbstractBodyPart extends Service {
@@ -19,7 +19,7 @@ public abstract class AbstractBodyPart extends Service {
   private static final long serialVersionUID = 1L;
 
   public transient Index<Attachable> thisNode = new Index<Attachable>();
-  /** 
+  /**
    * System will sort servo order based first on conventional name ( if it find any off it ), then by attach order.
    */
   protected HashMap<String, Integer> servoOrder = new HashMap<String, Integer>();
@@ -58,19 +58,12 @@ public abstract class AbstractBodyPart extends Service {
     return (BodyPart) thisNode.getNode(thisNode.findNode(identifier)).getValue();
   }
 
-  /** 
-   * move a group of servo
-   * moveTo order is based on attach order !
-   * But ... If you use some dedicated conventional names for your servo,
-   * like rightHand.thumb ... This standardized order will be respected
+  /**
+   * move a group of servo moveTo order is based on attach order ! But ... If you use some dedicated conventional names for your
+   * servo, like rightHand.thumb ... This standardized order will be respected
    * 
-   * Please note syntax order for information :
-   * HAND
-   * thumb, index, majeure, ringFinger, pinky, wrist
-   * ARM
-   * bicep, rotate, shoulder, omoplate
-   * HEAD
-   * neck, rothead, rollNeck, eyeX, eyeY, jaw
+   * Please note syntax order for information : HAND thumb, index, majeure, ringFinger, pinky, wrist ARM bicep, rotate, shoulder,
+   * omoplate HEAD neck, rothead, rollNeck, eyeX, eyeY, jaw
    */
   public void moveTo(String node, Double... servoPos) {
     checkParameters(node, servoPos.length);
@@ -81,11 +74,9 @@ public abstract class AbstractBodyPart extends Service {
     }
   }
 
-  /** 
-  * move a group of servo
-  * And wait for every servo of the group
-  * reached the asked position
-  */
+  /**
+   * move a group of servo And wait for every servo of the group reached the asked position
+   */
   public void moveToBlocking(String node, Double... servoPos) {
     checkParameters(node, servoPos.length);
     log.info("init {} moveToBlocking ", node);

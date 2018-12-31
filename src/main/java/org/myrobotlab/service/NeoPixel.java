@@ -117,9 +117,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
       "Flash Random", "Ironman");
   public transient String animation = "No animation";
   public transient boolean[] animationSetting = { false, false }; // red,
-                                  // green,
-                                  // blue,
-                                  // speed
+  // green,
+  // blue,
+  // speed
   public transient boolean animationSettingColor = false;
   public transient boolean animationSettingSpeed = false;
   transient HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
@@ -276,9 +276,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -287,8 +286,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     ServiceType meta = new ServiceType(NeoPixel.class.getCanonicalName());
     meta.addDescription("Control a Neopixel hardware");
-    meta.setAvailable(true); // false if you do not want it viewable in a    
-    meta.addCategory("control","display");
+    meta.setAvailable(true); // false if you do not want it viewable in a
+    meta.addCategory("control", "display");
     return meta;
   }
 
@@ -300,31 +299,30 @@ public class NeoPixel extends Service implements NeoPixelControl {
     attach((NeoPixelController) Runtime.getService(controllerName), Integer.parseInt(pin), Integer.parseInt(numPixel));
   }
 
- 
   @Override
-  public void attach(NeoPixelController controller, int pin, int numPixel){
+  public void attach(NeoPixelController controller, int pin, int numPixel) {
     if (controller == null) {
       error("setting null as controller");
       return;
     }
-    if(isAttached) {
-    	log.info("Neopixel already attached");
-    	return;
+    if (isAttached) {
+      log.info("Neopixel already attached");
+      return;
     }
-    
+
     this.pin = pin;
     this.numPixel = numPixel;
 
     // clear the old matrix
     pixelMatrix.clear();
-    
+
     // create a new matrix
     for (int i = 1; i < numPixel + 1; i++) {
       setPixel(new PixelColor(i, 0, 0, 0));
     }
 
     controller.neoPixelAttach(this, pin, numPixel);
-    
+
     log.info("{} setController {}", getName(), controller.getName());
     this.controller = controller;
     controllerName = this.controller.getName();
@@ -355,9 +353,9 @@ public class NeoPixel extends Service implements NeoPixelControl {
     LoggingFactory.init(Level.INFO);
 
     try {
-      //WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.autoStartBrowser(false);
-      //webgui.startService();
+      // webgui.startService();
       Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -374,24 +372,23 @@ public class NeoPixel extends Service implements NeoPixelControl {
       neopixel.attach(arduino, 6, 120);
       // sleep(50);
       PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
-      //neopixel.setPixel(pix);
+      // neopixel.setPixel(pix);
       neopixel.sendPixel(pix);
-      //neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 255, 0, 0, 1);
-      //arduino.enableBoardStatus(true);
-      //neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 0, 255, 0, 1);
+      // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 255, 0, 0, 1);
+      // arduino.enableBoardStatus(true);
+      // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 0, 255, 0, 1);
       boolean done = true;
-      if (done){
+      if (done) {
         return;
       }
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       servo.attach(arduino, 5);
       servo.moveTo(180);
       sleep(2000);
-      //neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 200, 0, 0, 1);
+      // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 200, 0, 0, 1);
     } catch (Exception e) {
       Logging.logError(e);
     }
-
 
   }
 
@@ -407,29 +404,29 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   String animationIntToString(int animation) {
     switch (animation) {
-    case NEOPIXEL_ANIMATION_NO_ANIMATION:
-      return "No animation";
-    case NEOPIXEL_ANIMATION_STOP:
-      return "Stop";
-    case NEOPIXEL_ANIMATION_COLOR_WIPE:
-      return "Color Wipe";
-    case NEOPIXEL_ANIMATION_LARSON_SCANNER:
-      return "Larson Scanner";
-    case NEOPIXEL_ANIMATION_THEATER_CHASE:
-      return "Theater Chase";
-    case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
-      return "Theater Chase Rainbow";
-    case NEOPIXEL_ANIMATION_RAINBOW:
-      return "Rainbow";
-    case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
-      return "Rainbow Cycle";
-    case NEOPIXEL_ANIMATION_FLASH_RANDOM:
-      return "Flash Random";
-    case NEOPIXEL_ANIMATION_IRONMAN:
-      return "Ironman";
-    default:
-      log.error("Unknow Animation type {}", animation);
-      return "No Animation";
+      case NEOPIXEL_ANIMATION_NO_ANIMATION:
+        return "No animation";
+      case NEOPIXEL_ANIMATION_STOP:
+        return "Stop";
+      case NEOPIXEL_ANIMATION_COLOR_WIPE:
+        return "Color Wipe";
+      case NEOPIXEL_ANIMATION_LARSON_SCANNER:
+        return "Larson Scanner";
+      case NEOPIXEL_ANIMATION_THEATER_CHASE:
+        return "Theater Chase";
+      case NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW:
+        return "Theater Chase Rainbow";
+      case NEOPIXEL_ANIMATION_RAINBOW:
+        return "Rainbow";
+      case NEOPIXEL_ANIMATION_RAINBOW_CYCLE:
+        return "Rainbow Cycle";
+      case NEOPIXEL_ANIMATION_FLASH_RANDOM:
+        return "Flash Random";
+      case NEOPIXEL_ANIMATION_IRONMAN:
+        return "Ironman";
+      default:
+        log.error("Unknow Animation type {}", animation);
+        return "No Animation";
     }
   }
 
@@ -445,29 +442,29 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   int animationStringToInt(String animation) {
     switch (animation) {
-    case "No animation":
-      return NEOPIXEL_ANIMATION_STOP;
-    case "Stop":
-      return NEOPIXEL_ANIMATION_STOP;
-    case "Color Wipe":
-      return NEOPIXEL_ANIMATION_COLOR_WIPE;
-    case "Larson Scanner":
-      return NEOPIXEL_ANIMATION_LARSON_SCANNER;
-    case "Theater Chase":
-      return NEOPIXEL_ANIMATION_THEATER_CHASE;
-    case "Theater Chase Rainbow":
-      return NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW;
-    case "Rainbow":
-      return NEOPIXEL_ANIMATION_RAINBOW;
-    case "Rainbow Cycle":
-      return NEOPIXEL_ANIMATION_RAINBOW_CYCLE;
-    case "Flash Random":
-      return NEOPIXEL_ANIMATION_FLASH_RANDOM;
-    case "Ironman":
-      return NEOPIXEL_ANIMATION_IRONMAN;
-    default:
-      log.error("Unknow Animation type {}", animation);
-      return NEOPIXEL_ANIMATION_STOP;
+      case "No animation":
+        return NEOPIXEL_ANIMATION_STOP;
+      case "Stop":
+        return NEOPIXEL_ANIMATION_STOP;
+      case "Color Wipe":
+        return NEOPIXEL_ANIMATION_COLOR_WIPE;
+      case "Larson Scanner":
+        return NEOPIXEL_ANIMATION_LARSON_SCANNER;
+      case "Theater Chase":
+        return NEOPIXEL_ANIMATION_THEATER_CHASE;
+      case "Theater Chase Rainbow":
+        return NEOPIXEL_ANIMATION_THEATER_CHASE_RAINBOW;
+      case "Rainbow":
+        return NEOPIXEL_ANIMATION_RAINBOW;
+      case "Rainbow Cycle":
+        return NEOPIXEL_ANIMATION_RAINBOW_CYCLE;
+      case "Flash Random":
+        return NEOPIXEL_ANIMATION_FLASH_RANDOM;
+      case "Ironman":
+        return NEOPIXEL_ANIMATION_IRONMAN;
+      default:
+        log.error("Unknow Animation type {}", animation);
+        return NEOPIXEL_ANIMATION_STOP;
     }
 
   }
@@ -488,7 +485,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   @Override
   public void detach(String controllerName) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -499,7 +496,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   @Override
   public Set<String> getAttached() {
     Set<String> ret = new HashSet<String>();
-    if (controller != null){
+    if (controller != null) {
       ret.add(controller.getName());
     }
     return ret;

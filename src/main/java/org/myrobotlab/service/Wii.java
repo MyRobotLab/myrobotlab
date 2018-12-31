@@ -60,8 +60,7 @@ import wiiusej.wiiusejevents.wiiuseapievents.StatusEvent;
  * Wii - support for the wiimote as a controller.
  * 
  * http://diy.sickmods.net/Tutorials/Wii/Disassemble_Wiimote/
- * http://procrastineering.blogspot.com/2008/09/working-with-pixart-camera-
- * directly.html
+ * http://procrastineering.blogspot.com/2008/09/working-with-pixart-camera- directly.html
  * http://www.bot-thoughts.com/2010/12/connecting-mbed-to-wiimote-ir-camera.html
  *
  */
@@ -102,8 +101,8 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
   }
 
   /*
-   * Static list of third party dependencies for this service. The list will be
-   * consumed by Ivy to download and manage the appropriate resources
+   * Static list of third party dependencies for this service. The list will be consumed by Ivy to download and manage the
+   * appropriate resources
    */
 
   public static void main(String[] args) {
@@ -138,13 +137,11 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
 
       // add the port as a possible option for the Arduino
       /*
-       * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL,
-       * (CommDriver) new WiiDriver(wii));
+       * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL, (CommDriver) new WiiDriver(wii));
        */
       /*
-       * try { portId = CommPortIdentifier.getPortIdentifier("wiicom"); } catch
-       * (NoSuchPortException e1) { // TODO Auto-generated catch block
-       * e1.printStackTrace(); }
+       * try { portId = CommPortIdentifier.getPortIdentifier("wiicom"); } catch (NoSuchPortException e1) { // TODO Auto-generated
+       * catch block e1.printStackTrace(); }
        */
       Arduino arduino = new Arduino("arduino");
       arduino.startService();
@@ -215,7 +212,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       try {
         Thread.sleep(500);
       } catch (InterruptedException e) {
-        
+
       } // must slow down to initialize
 
       // force to correct state strobe state
@@ -399,9 +396,8 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -411,9 +407,9 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
     ServiceType meta = new ServiceType(Wii.class.getCanonicalName());
     meta.addDescription("Wii mote control and sensor info");
     meta.addCategory("control", "sensor");
-    
+
     meta.addDependency("wiiusej", "wiiusej", "wiiusej");
-    // 
+    //
     return meta;
   }
 

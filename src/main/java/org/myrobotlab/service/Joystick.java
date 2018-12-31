@@ -52,15 +52,12 @@ import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Rumbler;
 
 /**
- * Joystick - The joystick service supports reading data from buttons and
- * joysticks. It supports many joysticks, though the button mapping may vary
- * from controller to controller. Component is a general descriptor for any form
- * of "Component" from JInput. Since Component is not serializable we need to
- * move the relevant descriptive data to InputDevice and send that information
- * to describe JInput's Components
+ * Joystick - The joystick service supports reading data from buttons and joysticks. It supports many joysticks, though the button
+ * mapping may vary from controller to controller. Component is a general descriptor for any form of "Component" from JInput. Since
+ * Component is not serializable we need to move the relevant descriptive data to InputDevice and send that information to describe
+ * JInput's Components
  * 
- * To Test java -Djava.library.path="./" -cp "./*"
- * net.java.games.input.test.ControllerReadTest
+ * To Test java -Djava.library.path="./" -cp "./*" net.java.games.input.test.ControllerReadTest
  */
 public class Joystick extends Service {
 
@@ -68,9 +65,9 @@ public class Joystick extends Service {
   private static final long serialVersionUID = 1L;
 
   List<Controller> controllers;
-  
+
   List<Controller> virtualControllers = new ArrayList<Controller>();
-  
+
   /**
    * current selected controller
    */
@@ -147,18 +144,16 @@ public class Joystick extends Service {
 
           // v net.java.games.input.Component hwComp = hwComponents[i];
           Component hwComp = hwComponents[i];
-          
+
           String id = hwComp.getIdentifier().toString();
-/*          
-          if (id.equals("3")) {
-            log.info("here");
-          }
-*/          
-          
+          /*
+           * if (id.equals("3")) { log.info("here"); }
+           */
+
           float input = hwComp.getPollData();
-          
+
           // log.info("", input);
-          
+
           Component component = components.get(id);
           if (component == null) {
             log.error("{} component is not valid", id);
@@ -223,16 +218,13 @@ public class Joystick extends Service {
     components = hardwareController.getComponentMap();
 
     /*
-     * hardwareComponents = hardwareController.getComponents(); if
-     * (hardwareComponents.length == 0) {
+     * hardwareComponents = hardwareController.getComponents(); if (hardwareComponents.length == 0) {
      * error("getComponents no Components found"); return components; }
      * 
-     * info("number of components: " + hardwareComponents.length); for (int i =
-     * 0; i < hardwareComponents.length; i++) { // v
-     * net.java.games.input.Component c = hardwareComponents[i]; Component c =
-     * hardwareComponents[i]; String id = c.getIdentifier().toString(); // v
-     * Component component = new Component(getName(), i, c); // v
-     * log.info("found {}", component); // v components.put(id, component); }
+     * info("number of components: " + hardwareComponents.length); for (int i = 0; i < hardwareComponents.length; i++) { // v
+     * net.java.games.input.Component c = hardwareComponents[i]; Component c = hardwareComponents[i]; String id =
+     * c.getIdentifier().toString(); // v Component component = new Component(getName(), i, c); // v log.info("found {}",
+     * component); // v components.put(id, component); }
      */
     return components;
   }
@@ -243,12 +235,12 @@ public class Joystick extends Service {
     // v hardwareControllers =
     // ControllerEnvironment.getDefaultEnvironment().getControllers();
     controllers = getControllerList();
-    
+
     // adding virtual controllers if any are defined
     for (Controller vc : virtualControllers) {
       controllers.add(vc);
     }
-    
+
     info(String.format("found %d controllers", controllers.size()));
     controllerNames.clear();
     for (int i = 0; i < controllers.size(); i++) {
@@ -257,7 +249,7 @@ public class Joystick extends Service {
     }
     return controllerNames;
   }
-  
+
   // FIXME - clear global
   public List<Controller> getControllerList() {
     List<Controller> controllers = new ArrayList<Controller>();
@@ -347,7 +339,7 @@ public class Joystick extends Service {
       setController(controllerNames.get(s));
       return true;
     }
-    
+
     // close match
     for (String controllerName : controllerNames.keySet()) {
       if (controllerName.contains(s)) {
@@ -355,7 +347,7 @@ public class Joystick extends Service {
         return true;
       }
     }
-    
+
     error("setController - can't find %s", s);
     return false;
   }
@@ -407,9 +399,8 @@ public class Joystick extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -429,18 +420,14 @@ public class Joystick extends Service {
   }
 
   /*
-   * Map<String, Set<RelativePositionControl>> axisConsumers = new
-   * HashMap<String, Set<RelativePositionControl>>();
+   * Map<String, Set<RelativePositionControl>> axisConsumers = new HashMap<String, Set<RelativePositionControl>>();
    * 
-   * @Override public void subscribeToAxis(RelativePositionControl
-   * serviceToControl, String axisName) throws Exception {
+   * @Override public void subscribeToAxis(RelativePositionControl serviceToControl, String axisName) throws Exception {
    * 
-   * if (serviceToControl.isLocal()){ Set<RelativePositionControl> callbacks =
-   * null; if (axisConsumers.containsKey(axisName)){ callbacks =
-   * axisConsumers.get(axisName); } else { callbacks = new
-   * HashSet<RelativePositionControl>(); } callbacks.add(serviceToControl);
-   * axisConsumers.put(axisName, callbacks); } else { // FIXME - FINISH !! // i
-   * want motor to subscribe to my filtered x axis // subscribe() } }
+   * if (serviceToControl.isLocal()){ Set<RelativePositionControl> callbacks = null; if (axisConsumers.containsKey(axisName)){
+   * callbacks = axisConsumers.get(axisName); } else { callbacks = new HashSet<RelativePositionControl>(); }
+   * callbacks.add(serviceToControl); axisConsumers.put(axisName, callbacks); } else { // FIXME - FINISH !! // i want motor to
+   * subscribe to my filtered x axis // subscribe() } }
    */
   public Component getAxis(String name) {
     if (components == null) {
@@ -503,35 +490,35 @@ public class Joystick extends Service {
     pressButton(buttonName);
     releaseButton(buttonName);
   }
-  
+
   public Controller cloneController(int index) throws IOException {
     if (controllers == null) {
       log.error("controllers not set");
       return null;
     }
-    
-    Controller controller = controllers.get(index);  
+
+    Controller controller = controllers.get(index);
     String filename = String.format("%s-virtual-%s-%s.json", getName(), controller.getName(), ++index);
-    
+
     save(controller, filename);
-    
+
     // FIXME - non-symmetric save and load :(
     String fname = String.format("%s%s%s", cfgDir, File.separator, filename);
-    
-    Controller v = loadVirtualController(fname);   
+
+    Controller v = loadVirtualController(fname);
     return v;
   }
-  
-  public Controller loadVirtualController(String filename) throws IOException{
+
+  public Controller loadVirtualController(String filename) throws IOException {
     String json = FileIO.toString(filename);
     Controller controller = CodecUtils.fromJson(json, Controller.class);
-    
+
     if (controller != null) {
       // v.setName(String.format("virtual %s", controller.getName()));
       controller.reIndex(getName());
       virtualControllers.add(controller);
     }
-    
+
     return controller;
   }
 
@@ -542,9 +529,9 @@ public class Joystick extends Service {
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
       Runtime.start("gui", "SwingGui");
-      
+
       joy.setController(2);
-      
+
       // TODO - clone all
       // TODO - virtualize all
       joy.cloneController(2);
@@ -593,9 +580,9 @@ public class Joystick extends Service {
     }
 
   }
-  
+
   public void moveTo(String axisName, float value) {
-    moveTo(axisName, (double)value);
+    moveTo(axisName, (double) value);
   }
 
   public void moveTo(String axisName, double value) {

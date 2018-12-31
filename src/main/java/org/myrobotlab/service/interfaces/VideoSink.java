@@ -4,9 +4,9 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.SerializableImage;
 
 public interface VideoSink extends ServiceInterface {
-  
+
   public boolean attach(VideoSource vs);
-  
+
   public boolean attachVideoSource(String videoSource);
 
   public boolean detach(VideoSource vs);

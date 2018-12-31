@@ -53,27 +53,21 @@ import org.slf4j.Logger;
 /**
  * @author Grog &amp; Mats
  * 
- *         Servos have both input and output. Input is usually of the range of
- *         integers between 0 - 180, and output can relay those values directly
- *         to the servo's firmware (Arduino ServoLib, I2C controller, etc)
+ *         Servos have both input and output. Input is usually of the range of integers between 0 - 180, and output can relay those
+ *         values directly to the servo's firmware (Arduino ServoLib, I2C controller, etc)
  * 
- *         However there can be the occasion that the input comes from a system
- *         which does not have the same range. Such that input can vary from 0.0
- *         to 1.0. For example, OpenCV coordinates are often returned in this
- *         range. When a mapping is needed Servo.map can be used. For this
- *         mapping Servo.map(0.0, 1.0, 0, 180) might be desired. Reversing input
- *         would be done with Servo.map(180, 0, 0, 180)
+ *         However there can be the occasion that the input comes from a system which does not have the same range. Such that input
+ *         can vary from 0.0 to 1.0. For example, OpenCV coordinates are often returned in this range. When a mapping is needed
+ *         Servo.map can be used. For this mapping Servo.map(0.0, 1.0, 0, 180) might be desired. Reversing input would be done with
+ *         Servo.map(180, 0, 0, 180)
  * 
- *         outputY - is the values sent to the firmware, and should not
- *         necessarily be confused with the inputX which is the input values
- *         sent to the servo
+ *         outputY - is the values sent to the firmware, and should not necessarily be confused with the inputX which is the input
+ *         values sent to the servo
  * 
- *         This service is to be used if you have a motor without feedback and
- *         you want to use it as a Servo. So you connect the motor as a Motor
- *         and use an Aduino, Ads1115 or some other input source that can give
- *         an analog input from a potentiometer or other device that can give
- *         analog feedback.
- *         
+ *         This service is to be used if you have a motor without feedback and you want to use it as a Servo. So you connect the
+ *         motor as a Motor and use an Aduino, Ads1115 or some other input source that can give an analog input from a potentiometer
+ *         or other device that can give analog feedback.
+ * 
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
@@ -122,17 +116,15 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * MotorUpdater The control loop to update the MotorControl with new values
-   * based on the PID calculations
+   * MotorUpdater The control loop to update the MotorControl with new values based on the PID calculations
    * 
    */
   public class MotorUpdater extends Thread {
 
     double lastOutput = 0.0;
     /**
-     * In most cases TargetPos is never reached So we need to emulate it ! if
-     * currentPosInput is the same since X we guess it is reached based on
-     * targetPosAngleTolerence
+     * In most cases TargetPos is never reached So we need to emulate it ! if currentPosInput is the same since X we guess it is
+     * reached based on targetPosAngleTolerence
      */
     private int nbSamePosInputSinceX = 0;
     private double lastCurrentPosInput = 0;
@@ -212,19 +204,17 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   public class EncoderUpdater extends Thread {
-    
-    
-    
+
     public EncoderUpdater(String name) {
       super(String.format("%s.encoderUpdater", name));
     }
-    
-    // 
+
+    //
     public void run() {
       // here we want to poll the encoder control to keep our "currentPosition" value up to date..
       // effectively this replaces onPin ...
       while (true) {
-        currentPosInput = ((AbstractEncoder)encoderControl).lastPosition;
+        currentPosInput = ((AbstractEncoder) encoderControl).lastPosition;
         try {
           // someting to keep the cpu from thrashing.
           pid.setInput(pidKey, currentPosInput);
@@ -234,11 +224,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
           e.printStackTrace();
           break;
         }
-        
+
       }
-      
+
     }
-    
+
   }
 
   private static final long serialVersionUID = 1L;
@@ -260,7 +250,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    */
   transient PinArrayControl pinArrayControl;
   public String pinControlName;
-  
+
   transient EncoderControl encoderControl;
 
   /**
@@ -291,8 +281,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   double targetOutput;
 
   /**
-   * Round pos values based on this digit count useful later to compare
-   * target>pos
+   * Round pos values based on this digit count useful later to compare target>pos
    */
   int roundPos = 0;
 
@@ -314,8 +303,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   transient Thread sweeper = null;
 
   /**
-   * feedback of both incremental position and stops. would allow blocking
-   * moveTo if desired
+   * feedback of both incremental position and stops. would allow blocking moveTo if desired
    */
   boolean isEventsEnabled = false;
 
@@ -358,8 +346,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   // from
   // the
   /**
-   * AD converter needs to be remapped to 0 - 180. D1024 is the default for the
-   * Arduino
+   * AD converter needs to be remapped to 0 - 180. D1024 is the default for the Arduino
    */
   double resolution = 1024;
   /**
@@ -449,9 +436,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * Re-attach to servo's current pin. The pin must have be set previously.
-   * Equivalent to Arduino's Servo.attach(currentPin) In this service it stops
-   * the motor and PID is set to manual mode
+   * Re-attach to servo's current pin. The pin must have be set previously. Equivalent to Arduino's Servo.attach(currentPin) In this
+   * service it stops the motor and PID is set to manual mode
    */
   @Override
   public void attach() {
@@ -460,8 +446,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
-   * pulses to maintain its current position.
+   * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending pulses to maintain its current position.
    */
   @Override
   public void attach(int pin) {
@@ -542,8 +527,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * The most important method, that tells the servo what position it should
-   * move to
+   * The most important method, that tells the servo what position it should move to
    */
   public void moveTo(double pos) {
     synchronized (moveToBlocked) {
@@ -594,11 +578,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /*
-   * basic move command of the servo - usually is 0 - 180 valid range but can be
-   * adjusted and / or re-mapped with min / max and map commands
+   * basic move command of the servo - usually is 0 - 180 valid range but can be adjusted and / or re-mapped with min / max and map
+   * commands
    * 
-   * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
-   * response
+   * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION" response
    */
 
   // uber good
@@ -704,20 +687,16 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * Writes a value in microseconds (uS) to the servo, controlling the shaft
-   * accordingly. On a standard servo, this will set the angle of the shaft. On
-   * standard servos a parameter value of 1000 is fully counter-clockwise, 2000
-   * is fully clockwise, and 1500 is in the middle.
+   * Writes a value in microseconds (uS) to the servo, controlling the shaft accordingly. On a standard servo, this will set the
+   * angle of the shaft. On standard servos a parameter value of 1000 is fully counter-clockwise, 2000 is fully clockwise, and 1500
+   * is in the middle.
    * 
-   * Note that some manufactures do not follow this standard very closely so
-   * that servos often respond to values between 700 and 2300. Feel free to
-   * increase these endpoints until the servo no longer continues to increase
-   * its range. Note however that attempting to drive a servo past its endpoints
-   * (often indicated by a growling sound) is a high-current state, and should
-   * be avoided.
+   * Note that some manufactures do not follow this standard very closely so that servos often respond to values between 700 and
+   * 2300. Feel free to increase these endpoints until the servo no longer continues to increase its range. Note however that
+   * attempting to drive a servo past its endpoints (often indicated by a growling sound) is a high-current state, and should be
+   * avoided.
    * 
-   * Continuous-rotation servos will respond to the writeMicrosecond function in
-   * an analogous manner to the write function.
+   * Continuous-rotation servos will respond to the writeMicrosecond function in an analogous manner to the write function.
    * 
    * @param uS
    *          - the microseconds value
@@ -755,8 +734,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /*
-   * public void attach(String controllerName) throws Exception {
-   * attach((MotorController) Runtime.getService(controllerName)); }
+   * public void attach(String controllerName) throws Exception { attach((MotorController) Runtime.getService(controllerName)); }
    */
 
   @Override
@@ -817,7 +795,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO: do i need anything else?
     this.encoderControl = encoder;
   }
-  
+
   public void attach(String pinArrayControlName, Integer pin) throws Exception {
     // myServo = (DiyServo) Runtime.getService(boundServiceName);
     attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
@@ -853,9 +831,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * // A bunch of unimplemented methods from ServoControl. // Perhaps I should
-   * create a new // DiyServoControl interface. // I was hoping to be able to
-   * avoid that, but might be a better solution
+   * // A bunch of unimplemented methods from ServoControl. // Perhaps I should create a new // DiyServoControl interface. // I was
+   * hoping to be able to avoid that, but might be a better solution
    */
 
   @Override
@@ -866,9 +843,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -1064,8 +1040,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * getCurrentPos() - return the calculated position of the servo use
-   * lastActivityTime and velocity for the computation
+   * getCurrentPos() - return the calculated position of the servo use lastActivityTime and velocity for the computation
    * 
    * @return the current position of the servo
    */
@@ -1100,8 +1075,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * getCurrentVelocity() - return Current velocity ( realtime / based on
-   * frequency)
+   * getCurrentVelocity() - return Current velocity ( realtime / based on frequency)
    * 
    * @return degrees / second
    */
@@ -1150,8 +1124,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     // TODO Auto-generated method stub
     return null;
   }
-  
-  
+
   public static void main(String[] args) throws InterruptedException {
 
     LoggingFactory.getInstance().configure();
@@ -1159,13 +1132,13 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     try {
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
-//      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-//      virtual.connect("COM3");
-//      boolean done = false;
-//      if (done) {
-//        return;
-//      }
-      
+      // VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      // virtual.connect("COM3");
+      // boolean done = false;
+      // if (done) {
+      // return;
+      // }
+
       String port = "COM4";
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       // arduino.setBoardUno();
@@ -1183,7 +1156,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       int leftPwmPin = 6;
       int rightPwmPin = 7;
       motor.setPwmPins(leftPwmPin, rightPwmPin);
-      
+
       motor.attach(arduino);
 
       Thread.sleep(1000);
@@ -1193,8 +1166,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
       arduino.attach(encoder);
       Thread.sleep(1000);
-      
-      
+
       // Ads1115 ads = (Ads1115) Runtime.start("Ads1115", "Ads1115");
       // ads.setController(arduino, "1", "0x48");
 
@@ -1206,21 +1178,20 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       // diyServo.map(0, 180, 60, 175);
       diyServo = (DiyServo) Runtime.start("diyServo", "DiyServo");
       diyServo.pid.setPID("diyServo", 1.0, 0.2, 0.1);
-     // diyServo.pid.setOutputRange("diyServo", 1, -1);
+      // diyServo.pid.setOutputRange("diyServo", 1, -1);
       // diyServo.pid.setOutput("diyS, Output);
       // diyServo.attach((PinArrayControl) arduino, 14); // PIN 14 = A0
       // diyServo.setInverted(true);
       diyServo.attach(encoder);
-      
+
       diyServo.setMaxVelocity(-1);
-      
-      
-//      diyServo.setAutoDisable(true);
-//      diyServo.setMaxVelocity(10);
-//      diyServo.moveToBlocking(0);
-//      diyServo.moveToBlocking(180);
-//      diyServo.setMaxVelocity(-1);
-//      diyServo.moveTo(0);
+
+      // diyServo.setAutoDisable(true);
+      // diyServo.setMaxVelocity(10);
+      // diyServo.moveToBlocking(0);
+      // diyServo.moveToBlocking(180);
+      // diyServo.setMaxVelocity(-1);
+      // diyServo.moveTo(0);
 
       // Servo Servo = (Servo) Runtime.start("Servo", "Servo");
 
@@ -1236,18 +1207,18 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     isEventsEnabled = false;
     removeListener("publishServoEvent", service.getName(), "onServoEvent");
   }
-  
+
   /**
-   * unsynchronize 2 sevos.  If the servo is running in sync already,
-   * this method will stop the synchronization
+   * unsynchronize 2 sevos. If the servo is running in sync already, this method will stop the synchronization
+   * 
    * @param args
    * @throws InterruptedException
    */
   public void unsync(ServoControl sc) {
     // remove
-    this.removeServoEventListener(this);    
+    this.removeServoEventListener(this);
     sc.removeServoEventListener(sc);
-    
+
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 

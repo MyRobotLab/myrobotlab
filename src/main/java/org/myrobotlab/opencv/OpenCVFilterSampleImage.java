@@ -57,13 +57,10 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
   /*
    * http://www.csgnetwork.com/csgcolorsel4.html
    * 
-   * 255, 0, 255, 1 = fusia = HSV 255 255 150 254, 0, 0, 1 = blue = HSV 255 255
-   * 120 0, 255, 0, 1 = green = HSV 255 255 60 0, 255, 255, 1 = yellow = HSV 255
-   * 255 30 254, 254, 0, 1 = blgrn = HSV 255 255 90 0, 0, 255, 1 = red = HSV 255
-   * 255 0 255, 255, 255, 1 = white = HSV 255 0 0 0, 0, 0, 1 = black = HSV 0 0 0
-   * 128, 128, 128, 1 = grey = HSV 128 0 0 0, 128, 128, 1 = olive = HSV 128 255
-   * 30 0, 0, 128, 1 = maroon = HSV 128 255 0 128, 0, 128, 1 = purple = HSV 128
-   * 255 150 128, 0, 0, 1 = blue = HSV 128 255 150 (navy)
+   * 255, 0, 255, 1 = fusia = HSV 255 255 150 254, 0, 0, 1 = blue = HSV 255 255 120 0, 255, 0, 1 = green = HSV 255 255 60 0, 255,
+   * 255, 1 = yellow = HSV 255 255 30 254, 254, 0, 1 = blgrn = HSV 255 255 90 0, 0, 255, 1 = red = HSV 255 255 0 255, 255, 255, 1 =
+   * white = HSV 255 0 0 0, 0, 0, 1 = black = HSV 0 0 0 128, 128, 128, 1 = grey = HSV 128 0 0 0, 128, 128, 1 = olive = HSV 128 255
+   * 30 0, 0, 128, 1 = maroon = HSV 128 255 0 128, 0, 128, 1 = purple = HSV 128 255 150 128, 0, 0, 1 = blue = HSV 128 255 150 (navy)
    */
 
   public OpenCVFilterSampleImage() {
@@ -104,11 +101,9 @@ public class OpenCVFilterSampleImage extends OpenCVFilter {
     cvDrawRect(image, cvPoint(160, 120), cvPoint(164, 124), fillColor, 2, 1, 0);
 
     /*
-     * cvDrawRect(image, p0, p1, fillColor, 2, 1, 0); fillColor =
-     * cvScalar(130.0, 40.0, 120.0, 1.0); cvDrawRect(image, new
-     * CvPoint(158,140), new CvPoint(220,160), fillColor, 2, 1, 0); fillColor =
-     * cvScalar(160.0, 140.0, 20.0, 1.0); cvDrawRect(image, new CvPoint(20,200),
-     * new CvPoint(40,230), fillColor, 2, 1, 0);
+     * cvDrawRect(image, p0, p1, fillColor, 2, 1, 0); fillColor = cvScalar(130.0, 40.0, 120.0, 1.0); cvDrawRect(image, new
+     * CvPoint(158,140), new CvPoint(220,160), fillColor, 2, 1, 0); fillColor = cvScalar(160.0, 140.0, 20.0, 1.0); cvDrawRect(image,
+     * new CvPoint(20,200), new CvPoint(40,230), fillColor, 2, 1, 0);
      */
     return image;
   }

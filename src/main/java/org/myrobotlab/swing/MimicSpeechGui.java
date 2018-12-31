@@ -38,16 +38,9 @@ public class MimicSpeechGui extends AbstractSpeechSynthesisGui implements Action
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MimicSpeechGui.class);
 
-
   public MimicSpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-   
 
   }
-
-
-
-
-
 
 }

@@ -512,7 +512,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     angle = rotationMask.mult((float) Math.toRadians(0));
     node.rotate(angle.x, angle.y, angle.z);
     nodes.put("jaw", node);
-    maps.put("jaw", new Mapper(0, 180,-10, 5));
+    maps.put("jaw", new Mapper(0, 180, -10, 5));
 
     // poc monitor declaration
 
@@ -590,21 +590,19 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
   /*
    * 
-   * @param name
-   *          : name of the part
-   * @param modelPath
-   *          : path leading the the 3dmesh (null for no model)
-   * @param modelScale
-   *          : model will be scale to this parameter
-   * @param hookTo
-   *          : attach this part to the hook part (null to hook to the root)
-   * @param relativePosition
-   *          : position relative to the hook part
-   * @param rotationMask
-   *          : set Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z) for the
-   *          axe of rotation
-   * @param initialAngle
-   *          : initial angle of rotation of the part (in radian)
+   * @param name : name of the part
+   * 
+   * @param modelPath : path leading the the 3dmesh (null for no model)
+   * 
+   * @param modelScale : model will be scale to this parameter
+   * 
+   * @param hookTo : attach this part to the hook part (null to hook to the root)
+   * 
+   * @param relativePosition : position relative to the hook part
+   * 
+   * @param rotationMask : set Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z) for the axe of rotation
+   * 
+   * @param initialAngle : initial angle of rotation of the part (in radian)
    */
 
   public void updatePosition(ServoEventData event) {
@@ -614,7 +612,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   public void simpleUpdate(float tpf) {
     // start the clock on how much time we will take
     startUpdateTs = System.currentTimeMillis();
-    
+
     if (updateCollisionItem) {
       for (Node node : collisionItems) {
         if (node.getUserData("collisionItem") != null) {
@@ -720,12 +718,12 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     // update thread races through this function without pause to generating 300+ fps.
     // If this update takes deltaMs to process then we will subtract that from the initial 33ms,
     // to make total time spent in this method as close to 33ms as possible.
-    
+
     deltaMs = System.currentTimeMillis() - startUpdateTs;
     sleepMs = 33 - deltaMs;
     try {
-    Thread.sleep(sleepMs);
-    } catch(Exception e) {      
+      Thread.sleep(sleepMs);
+    } catch (Exception e) {
     }
   }
 

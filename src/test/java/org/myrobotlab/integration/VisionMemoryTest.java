@@ -27,97 +27,88 @@ public class VisionMemoryTest {
 
   @Test
   public void inboxOutboxMemoryTest() throws Exception {
-    
+
     // basic log level stuff
     Runtime.setLogLevel("INFO");
     // for debugging
     Runtime.createAndStart("gui", "SwingGui");
     // start up the embedded solr server
-    Solr solr = (Solr)Runtime.createAndStart("solr", "Solr");
+    Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
     solr.startEmbedded();
 
-    VirtualArduino va = (VirtualArduino)Runtime.createAndStart("va", "VirtualArduino");
+    VirtualArduino va = (VirtualArduino) Runtime.createAndStart("va", "VirtualArduino");
     va.connect("COM-1");
-    
-    Arduino ard = (Arduino)Runtime.createAndStart("ard", "Arduino");
-    
-    
+
+    Arduino ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
+
     solr.attachInbox(ard.getInbox());
     solr.attachOutbox(ard.getOutbox());
-    
-    
-    
+
     ard.connect("COM-1");
-    
-    
-    Servo s = (Servo)Runtime.createAndStart("s", "Servo");
-    
+
+    Servo s = (Servo) Runtime.createAndStart("s", "Servo");
+
     solr.attachInbox(s.getInbox());
     solr.attachOutbox(s.getOutbox());
-    
-    
-    ard.attach(s,7);
 
-    
+    ard.attach(s, 7);
+
     s.moveTo(90.0);
     Thread.sleep(100);
     s.moveTo(0.0);
     Thread.sleep(100);
     s.moveTo(180.0);
     Thread.sleep(100);
-    
-    for (int i = 0 ; i < 10; i++) {
+
+    for (int i = 0; i < 10; i++) {
       searchAndPrintResult(solr);
       Thread.sleep(1000);
       System.in.read();
     }
-    
-    
-    
+
   }
-  
-  
+
   public void searchAndPrintResult(Solr solr) {
-    
+
     SolrQuery query = new SolrQuery();
     query.setQuery("method:moveTo");
     query.setSort("index_date", ORDER.desc);
-    //query.setFacet(true);
-    //query.addFacetField("object");
-    QueryResponse qr = solr.search(query);    
+    // query.setFacet(true);
+    // query.addFacetField("object");
+    QueryResponse qr = solr.search(query);
 
-    long numRows=  qr.getResults().getNumFound();
+    long numRows = qr.getResults().getNumFound();
     System.out.println("Rows : " + numRows);
     if (numRows > 0) {
       for (SolrDocument doc : qr.getResults()) {
         printDoc(doc);
       }
 
-//      for (FacetField ff : qr.getFacetFields()) {
-//        for (Count c : ff.getValues()) {
-//          System.out.println(c.getName() + " " + c.getCount());
-//        }
-//      }
+      // for (FacetField ff : qr.getFacetFields()) {
+      // for (Count c : ff.getValues()) {
+      // System.out.println(c.getName() + " " + c.getCount());
+      // }
+      // }
     }
   }
-  
-  
+
   public void printDoc(SolrDocument doc) {
     System.out.println("---------------------------");
     System.out.println("DocID: " + doc.getFieldValue("id"));
     for (String field : doc.getFieldNames()) {
-      if (field.equalsIgnoreCase("id")) 
+      if (field.equalsIgnoreCase("id"))
         continue;
       System.out.print(field + ": ");
       ArrayList<String> strVals = new ArrayList<String>();
       for (Object o : doc.getFieldValues(field)) {
         strVals.add(o.toString());
       }
-      String values = StringUtils.join(",", strVals );
-      System.out.println(values);      
+      String values = StringUtils.join(",", strVals);
+      System.out.println(values);
     }
-    
+
   }
+
   // @Test
   public void testVisionMemory() throws InterruptedException, SolrServerException, IOException {
     // basic log level stuff
@@ -125,13 +116,13 @@ public class VisionMemoryTest {
     // for debugging
     Runtime.createAndStart("gui", "SwingGui");
     // start up the embedded solr server
-    Solr solr = (Solr)Runtime.createAndStart("solr", "Solr");
+    Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
     solr.startEmbedded();
     // now start up dl4j
-    Deeplearning4j dl4j = (Deeplearning4j)Runtime.createAndStart("dl4j", "Deeplearning4j");
+    Deeplearning4j dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
     dl4j.loadVGG16();
     // start up opencv
-    OpenCV opencv = (OpenCV)Runtime.createAndStart("opencv", "OpenCV");
+    OpenCV opencv = (OpenCV) Runtime.createAndStart("opencv", "OpenCV");
     // add the dl4j filter to opencv
     // TODO: add an attach pattern for the opencv filters
     OpenCVFilterDL4J dl4jfilter = new OpenCVFilterDL4J("dl4jfilter");
@@ -151,9 +142,9 @@ public class VisionMemoryTest {
       query.setQuery("*:*");
       query.setFacet(true);
       query.addFacetField("object");
-      QueryResponse qr = solr.search(query);		
+      QueryResponse qr = solr.search(query);
 
-      long numRows=  qr.getResults().getNumFound();
+      long numRows = qr.getResults().getNumFound();
       System.out.println("Rows : " + numRows);
       if (numRows > 0) {
         for (SolrDocument doc : qr.getResults()) {
@@ -167,15 +158,12 @@ public class VisionMemoryTest {
         }
       }
 
-      if(i > 100) {
+      if (i > 100) {
         System.out.println("Exiting");
         System.exit(0);
       }
       System.in.read();
     }
-
-
-
 
   }
 }

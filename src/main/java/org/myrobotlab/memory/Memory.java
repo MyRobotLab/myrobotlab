@@ -81,13 +81,10 @@ public class Memory {
     Object object = root.get(parentPath);
 
     /*
-     * AUTOBUILD - WOULD BE NICE if (object == null && autoBuildPaths) { int
-     * pos0 = 0; int pos1 = parentPath.indexOf("/"); while (pos1 != -1) { String
-     * parentKey = parentPath.substring(pos0, pos1); pos0 = pos1; pos1 =
-     * parentPath.indexOf("/", pos0 + 1); String childKey =
-     * parentPath.substring(pos0 + 1, pos1); log.info("adding {} -> new node {}"
-     * , parentKey, childKey); put(parentKey, new Node(childKey)); if (listener
-     * != null) { listener.onPut(null, node); // <-- ? needs full path? }
+     * AUTOBUILD - WOULD BE NICE if (object == null && autoBuildPaths) { int pos0 = 0; int pos1 = parentPath.indexOf("/"); while
+     * (pos1 != -1) { String parentKey = parentPath.substring(pos0, pos1); pos0 = pos1; pos1 = parentPath.indexOf("/", pos0 + 1);
+     * String childKey = parentPath.substring(pos0 + 1, pos1); log.info("adding {} -> new node {}" , parentKey, childKey);
+     * put(parentKey, new Node(childKey)); if (listener != null) { listener.onPut(null, node); // <-- ? needs full path? }
      * 
      * }
      * 

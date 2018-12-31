@@ -51,22 +51,19 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 /**
- * This class models a circular belt of range sensors : Sonar , Bumpers (future
- * : Laser, Ir). Sensors are arranged circularly around the robot. User can
- * access to the measurement and hits state of each sensor individualy or obtain
- * an average measurement in a quadrant. <br>
+ * This class models a circular belt of range sensors : Sonar , Bumpers (future : Laser, Ir). Sensors are arranged circularly around
+ * the robot. User can access to the measurement and hits state of each sensor individualy or obtain an average measurement in a
+ * quadrant. <br>
  * <br>
- * Note that the sensors are not affected by noise. however you can easily add
- * some gaussian noise with the java.util.Random class. <br>
+ * Note that the sensors are not affected by noise. however you can easily add some gaussian noise with the java.util.Random class.
+ * <br>
  * <code> Random generator = new Random(seed); </code> <br>
  * and<br>
- * <code> value = sonars.getMeasurement(0)+generator.nextGaussian()*stddev;</code>
+ * <code> value = sonars.getMeasurement(0)+generator.nextGaussian()*stddev;</code> <br>
  * <br>
  * <br>
- * <br>
- * Implementation notes : We use java 3D picking feature to emulate sensing. A
- * PickCylinderRay is used on each update to test whether there is an potential
- * obstacle. Each ray is then checked with a PickSegement.
+ * Implementation notes : We use java 3D picking feature to emulate sensing. A PickCylinderRay is used on each update to test
+ * whether there is an potential obstacle. Each ray is then checked with a PickSegement.
  */
 public class RangeSensorBelt extends PickSensor {
 
@@ -189,9 +186,8 @@ public class RangeSensorBelt extends PickSensor {
   public final static int FLAG_SHOW_FULL_SENSOR_RAY = 0X01;
 
   /**
-   * Constructs a RangeSensorBelt. The sensor type can be either
-   * TYPE_BUMPER,TYPE_SONAR,TYPE_IR or TYPE_LASER. Ranges are measured from the
-   * belt perimeter (not from the belt center).
+   * Constructs a RangeSensorBelt. The sensor type can be either TYPE_BUMPER,TYPE_SONAR,TYPE_IR or TYPE_LASER. Ranges are measured
+   * from the belt perimeter (not from the belt center).
    * 
    * @param radius
    *          - the radius of the belt.
@@ -203,7 +199,8 @@ public class RangeSensorBelt extends PickSensor {
    *          - the number of sensors in the belt (typically 4,6,12,24 or 36).
    * @param type
    *          - to specify the sensor behavior
-   * @param flags additional flags
+   * @param flags
+   *          additional flags
    */
   public RangeSensorBelt(float radius, float minRange, float maxRange, int nbsensors, int type, int flags) {
     // compute angles ,positions , directions
@@ -228,17 +225,17 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Constructs a RangeSensorBelt. The sensor type can be either
-   * TYPE_BUMPER,TYPE_SONAR,TYPE_IR or TYPE_LASER.
+   * Constructs a RangeSensorBelt. The sensor type can be either TYPE_BUMPER,TYPE_SONAR,TYPE_IR or TYPE_LASER.
    * 
    * @param positions
    *          : the position of each sensor relative to belt center.
    * @param directions
-   *          : the sensing ray direction of each sensor relative to sensor
-   *          positions. the magnitude of the vector corresponds to the max
-   *          range.
-   * @param type type
-   * @param flags flags
+   *          : the sensing ray direction of each sensor relative to sensor positions. the magnitude of the vector corresponds to
+   *          the max range.
+   * @param type
+   *          type
+   * @param flags
+   *          flags
    */
   public RangeSensorBelt(Vector3d[] positions, Vector3d[] directions, int type, int flags) {
 
@@ -316,8 +313,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the bacck left
-   * quadrant: [PI/2,PI].
+   * Returns the averaged measure of the sensors situated in the bacck left quadrant: [PI/2,PI].
    * 
    * @return the averaged measurment.
    */
@@ -335,8 +331,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the back quadrant:
-   * [3PI/4,4*PI/4].
+   * Returns the averaged measure of the sensors situated in the back quadrant: [3PI/4,4*PI/4].
    * 
    * @return the averaged measurment.
    */
@@ -354,8 +349,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the back right
-   * quadrant: [PI,3*PI/2].
+   * Returns the averaged measure of the sensors situated in the back right quadrant: [PI,3*PI/2].
    * 
    * @return the averaged measurment.
    */
@@ -373,8 +367,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the front left
-   * quadrant: [0,PI/4].
+   * Returns the averaged measure of the sensors situated in the front left quadrant: [0,PI/4].
    * 
    * @return the averaged measurment.
    */
@@ -392,8 +385,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the front quadrant:
-   * [-PI/4,PI/4].
+   * Returns the averaged measure of the sensors situated in the front quadrant: [-PI/4,PI/4].
    * 
    * @return the averaged measurment.
    */
@@ -411,8 +403,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the front right
-   * quadrant: [3PI/2,2*PI].
+   * Returns the averaged measure of the sensors situated in the front right quadrant: [3PI/2,2*PI].
    * 
    * @return the averaged measurment.
    */
@@ -430,8 +421,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the left quadrant:
-   * [PI/4,PI*3/4].
+   * Returns the averaged measure of the sensors situated in the left quadrant: [PI/4,PI*3/4].
    * 
    * @return the averaged measurment.
    */
@@ -449,8 +439,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the last measure collected for the individual sensor. Measurement
-   * is made from the circle perimeter.
+   * Returns the last measure collected for the individual sensor. Measurement is made from the circle perimeter.
    * 
    * @param sensorNum
    *          num of the sensor.
@@ -490,8 +479,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in quadrant
-   * [minAngle,maxAngle].
+   * Returns the averaged measure of the sensors situated in quadrant [minAngle,maxAngle].
    * 
    * @param minAngle
    *          in radians the right limit of the quadrant.
@@ -525,8 +513,7 @@ public class RangeSensorBelt extends PickSensor {
   }
 
   /**
-   * Returns the averaged measure of the sensors situated in the right quadrant:
-   * [5*PI/4,7*PI/4].
+   * Returns the averaged measure of the sensors situated in the right quadrant: [5*PI/4,7*PI/4].
    * 
    * @return the averaged measurment.
    */

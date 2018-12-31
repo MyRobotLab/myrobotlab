@@ -43,10 +43,9 @@ import org.myrobotlab.mapper.sim.SimpleAgent;
 import org.myrobotlab.mapper.sim.Simulator;
 
 /**
- * The AgentInspector implements a window showing agent's state. The
- * informations update is made by a thread. Due to cyclic update this class can
- * cause frequent GC. The AgentInspector can also be used without a thread. In
- * this case one must call update to refresh display.
+ * The AgentInspector implements a window showing agent's state. The informations update is made by a thread. Due to cyclic update
+ * this class can cause frequent GC. The AgentInspector can also be used without a thread. In this case one must call update to
+ * refresh display.
  */
 public class AgentInspector extends JInternalFrame implements Runnable {
 

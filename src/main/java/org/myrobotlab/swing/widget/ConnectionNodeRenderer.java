@@ -52,8 +52,7 @@ public class ConnectionNodeRenderer extends JLabel implements ListCellRenderer {
     }
 
     /*
-     * if (isSelected) { setBackground(Color.lightGray);
-     * setForeground(Color.white); } else { setBackground(Color.white);
+     * if (isSelected) { setBackground(Color.lightGray); setForeground(Color.white); } else { setBackground(Color.white);
      * setForeground(Color.black); }
      */
 

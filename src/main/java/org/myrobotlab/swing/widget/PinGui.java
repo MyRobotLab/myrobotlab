@@ -102,7 +102,7 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
   ActionListener relay;
 
   boolean isReading = false;
-  
+
   MessageSender sender;
 
   public PinGui(MessageSender service, final PinDefinition pinDef) {
@@ -168,9 +168,9 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
       slider = new JSlider(orientation, 0, 255, 0);
       slider.setOpaque(false);
       slider.addChangeListener(this);
-      
+
       sliderOutput = new JLabel("0");
-      
+
       // over one
       gc.gridy++;
       popupPanel.add(sliderOutput, gc);
@@ -186,12 +186,12 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
     display.add(popupLauncher, gc);
 
   }
-  
-  public void send(String method){
-    send(method, (Object[])null);
+
+  public void send(String method) {
+    send(method, (Object[]) null);
   }
-  
-  public void send(String method, Object... params){
+
+  public void send(String method, Object... params) {
     sender.send(boundServiceName, method, params);
   }
 
@@ -243,7 +243,7 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
       send("pinMode", pinDef.getAddress(), Arduino.OUTPUT);
       send("digitalWrite", pinDef.getAddress(), 0);
       popupLauncher.setText("0");
-      popupLauncher.setBackground(Color.LIGHT_GRAY);      
+      popupLauncher.setBackground(Color.LIGHT_GRAY);
     }
 
     if (o == digitalWrite1) {

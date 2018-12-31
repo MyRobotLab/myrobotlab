@@ -114,9 +114,8 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
     // cvMatchTemplate(iamge, arg1, arg2, arg3);
 
     /*
-     * if (res == null && template != null) // || dim size change { res =
-     * cvCreateImage( cvSize( image.width() - template.width() + 1,
-     * image.height() - template.height() + 1), IPL_DEPTH_32F, 1 ); }
+     * if (res == null && template != null) // || dim size change { res = cvCreateImage( cvSize( image.width() - template.width() +
+     * 1, image.height() - template.height() + 1), IPL_DEPTH_32F, 1 ); }
      */
 
     // CV_TM_CCOEFF_NORMED
@@ -207,11 +206,10 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
     // }
     ++clickCount;
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
-
 
 }

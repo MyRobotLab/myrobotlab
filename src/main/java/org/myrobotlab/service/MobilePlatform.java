@@ -37,24 +37,19 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         The Chassis service is for general movement control. The criteria for
- *         using this service is a 2 motor differential drive and parameters of
- *         shape / size of platform. It will probably need relative location of
- *         motors and size of wheels. A switch for metric/imperial units of
- *         measure would be nice. It will also need feedback interfaces. Some
- *         feedback devices could include webcam tracking, motor or wheel
- *         encoders, compass, gyros, or accelerometers. Possibly all these
- *         feedback devices will resolve into a RelativePosition or
- *         AbsolutePosition interface.
+ *         The Chassis service is for general movement control. The criteria for using this service is a 2 motor differential drive
+ *         and parameters of shape / size of platform. It will probably need relative location of motors and size of wheels. A
+ *         switch for metric/imperial units of measure would be nice. It will also need feedback interfaces. Some feedback devices
+ *         could include webcam tracking, motor or wheel encoders, compass, gyros, or accelerometers. Possibly all these feedback
+ *         devices will resolve into a RelativePosition or AbsolutePosition interface.
  * 
  *         Possible expectations : motors will have to be local
  * 
- *         http://en.wikipedia.org/wiki/Dead_reckoning#
- *         Differential_steer_drive_dead_reckoning
+ *         http://en.wikipedia.org/wiki/Dead_reckoning# Differential_steer_drive_dead_reckoning
  */
 @Deprecated // use Chassis
 public class MobilePlatform extends Service {
- 
+
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MobilePlatform.class);
 
@@ -63,15 +58,15 @@ public class MobilePlatform extends Service {
   public int targetX = 0;
 
   public int targetY = 0;
-  
+
   public Double headingCurrent = 0.0;
   public Double headingTarget = 0.0;
   public Double headingLast = 0.0;
   public Double headingDelta = 0.0;
-  
+
   transient MotorControl left = null;
   transient MotorControl right = null;
-  
+
   // String directionTarget = null;
 
   // TODO - determine if control needs to be serialized
@@ -110,28 +105,22 @@ public class MobilePlatform extends Service {
   public long endMotion = 0;
 
   /*
-   * This is a (first) attempt of making a Pid (PD) (P) controller for turning.
-   * This article
-   * (http://www.inpharmix.com/jps/PID_Controller_For_Lego_Mindstorms_Robots
-   * .html) was EXTREMELY helpful for someone (like me) who has never
-   * implemented a Pid controller.
+   * This is a (first) attempt of making a Pid (PD) (P) controller for turning. This article
+   * (http://www.inpharmix.com/jps/PID_Controller_For_Lego_Mindstorms_Robots .html) was EXTREMELY helpful for someone (like me) who
+   * has never implemented a Pid controller.
    * 
-   * The added complexity for Video Tracking feed back is the HUGE delay in the
-   * feedback stream (up to 1.5 seconds) TODO - encapsulate into a utility -
-   * generalize for all to use PIDUtil PIDThread Reference :
-   * http://www.arduino.cc/playground/Code/PIDLibrary - Arduino's library, would
-   * be helpful on local Pid applications http://brettbeauregard.com/blog
-   * /2011/04/improving-the-beginners-pid-introduction/ - quick and excellent
-   * explanation http://en.wikipedia.org/wiki/Lead-lag_compensator - for
-   * lead/lag compensation http://brettbeauregard.com/blog/2011/04/improving-the
-   * -beginners-pid-introduction/ - REALLY NICE FORMULA/CODE SNIPPET
+   * The added complexity for Video Tracking feed back is the HUGE delay in the feedback stream (up to 1.5 seconds) TODO -
+   * encapsulate into a utility - generalize for all to use PIDUtil PIDThread Reference :
+   * http://www.arduino.cc/playground/Code/PIDLibrary - Arduino's library, would be helpful on local Pid applications
+   * http://brettbeauregard.com/blog /2011/04/improving-the-beginners-pid-introduction/ - quick and excellent explanation
+   * http://en.wikipedia.org/wiki/Lead-lag_compensator - for lead/lag compensation
+   * http://brettbeauregard.com/blog/2011/04/improving-the -beginners-pid-introduction/ - REALLY NICE FORMULA/CODE SNIPPET
    * 
    * startHeadingPID startDistancePID ... or one Pid two errors?
    * 
    * deltaHeading ~= error
    * 
-   * offset already done will need a max power value - don't want it going at
-   * 100% power to get to anywhere (i think)
+   * offset already done will need a max power value - don't want it going at 100% power to get to anywhere (i think)
    * 
    * turn = Kp * deltaHeading | Turn = Kp*(error)
    * 
@@ -139,8 +128,7 @@ public class MobilePlatform extends Service {
    * 
    * rightPower = Tp - turn leftPower = TP + turn
    * 
-   * Turn = Kp*(error) + Ki*(integral) + Kd*(derivative) + the complexity of
-   * error being 1.5 second lag
+   * Turn = Kp*(error) + Ki*(integral) + Kd*(derivative) + the complexity of error being 1.5 second lag
    */
 
   public boolean inMotion = false;
@@ -185,8 +173,8 @@ public class MobilePlatform extends Service {
      * 
      * right.stop(); left.stop(); endMotion = System.currentTimeMillis();
      * 
-     * log.error("hc? " + heading + " hc " + headingCurrent + " hl " +
-     * headingLast); log.error("lagTime " + (endMotion - beginMotion));
+     * log.error("hc? " + heading + " hc " + headingCurrent + " hl " + headingLast); log.error("lagTime " + (endMotion -
+     * beginMotion));
      */
 
     // attempt to go 10 degrees
@@ -240,8 +228,8 @@ public class MobilePlatform extends Service {
 
   // FEEDBACK related begin ------------------------
   /*
-   * setHeading is to be used by feedback mechanisms encoders, hall effect,
-   * optical tracking It "invokes" to message the listeners of changed state.
+   * setHeading is to be used by feedback mechanisms encoders, hall effect, optical tracking It "invokes" to message the listeners
+   * of changed state.
    */
   public final void setHeading(double value) {
 
@@ -329,7 +317,6 @@ public class MobilePlatform extends Service {
     left.move(-power);
   }
 
-
   // from motor interface begin-------
   public void stop() {
     right.stop();
@@ -341,14 +328,13 @@ public class MobilePlatform extends Service {
     left.stopAndLock();
   }
 
-  
   // waitForHeadingChange will block and wait for heading change
   public final double waitForHeadingChange() {
     synchronized (lock) {
       try {
         lock.wait();
       } catch (InterruptedException e) {
-    	  log.info("lock interrupted");
+        log.info("lock interrupted");
       }
     }
 
@@ -356,9 +342,8 @@ public class MobilePlatform extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -373,7 +358,7 @@ public class MobilePlatform extends Service {
 
     return meta;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

@@ -18,237 +18,234 @@ import org.slf4j.Logger;
 @Ignore
 public class MotorDualPwmTest {
 
-	public final static Logger log = LoggerFactory.getLogger(MotorDualPwmTest.class);
+  public final static Logger log = LoggerFactory.getLogger(MotorDualPwmTest.class);
 
-	static MotorDualPwm motor01 = null;
-	static Arduino arduino = null;
+  static MotorDualPwm motor01 = null;
+  static Arduino arduino = null;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+  }
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+  }
 
-	@Before
-	public void setUp() throws Exception {
-	}
+  @Before
+  public void setUp() throws Exception {
+  }
 
-	@After
-	public void tearDown() throws Exception {
-	}
+  @After
+  public void tearDown() throws Exception {
+  }
 
-	@Test
-	public void testMotor() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testMotor() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testGetController() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testGetController() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testGetPowerLevel() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testGetPowerLevel() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testGetPowerOutput() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testGetPowerOutput() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testGetPowerMap() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testGetPowerMap() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testIsAttached() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testIsAttached() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testIsInverted() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testIsInverted() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testLock() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testLock() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testMapEncoder() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testMapEncoder() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testMapPower() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testMapPower() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testMove() throws Exception {
-		Runtime.start("webgui", "WebGui");
-		arduino = (Arduino)Runtime.start("arduino", "Arduino");
-		motor01 = (MotorDualPwm)Runtime.start("motor01", "MotorDualPwm");
-		motor01.setPwmPins(3, 4);
-		motor01.attachMotorController(arduino);
-		
-		arduino.connect("COM5"); 
+  @Test
+  public void testMove() throws Exception {
+    Runtime.start("webgui", "WebGui");
+    arduino = (Arduino) Runtime.start("arduino", "Arduino");
+    motor01 = (MotorDualPwm) Runtime.start("motor01", "MotorDualPwm");
+    motor01.setPwmPins(3, 4);
+    motor01.attachMotorController(arduino);
 
-		
-		
-		motor01.move(0.3);
-		motor01.move(0.1);
-		motor01.move(1.0);
-		motor01.move(5.0);
+    arduino.connect("COM5");
 
-		motor01.move(-0.1);
-		motor01.move(-0.2);
-		motor01.move(0.0);
-		motor01.stop();
-		
-		motor01.save();
-		motor01.load();
-		
-		motor01.detachMotorController(arduino);
-	}
+    motor01.move(0.3);
+    motor01.move(0.1);
+    motor01.move(1.0);
+    motor01.move(5.0);
 
-	@Test
-	public void testMoveToIntDouble() {
-		// fail("Not yet implemented");
-	}
+    motor01.move(-0.1);
+    motor01.move(-0.2);
+    motor01.move(0.0);
+    motor01.stop();
 
-	@Test
-	public void testMoveToInt() {
-		// fail("Not yet implemented");
-	}
+    motor01.save();
+    motor01.load();
 
-	@Test
-	public void testSetController() {
-		// fail("Not yet implemented");
-	}
+    motor01.detachMotorController(arduino);
+  }
 
-	@Test
-	public void testSetInverted() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testMoveToIntDouble() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testSetMinMax() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testMoveToInt() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testSetPowerLevel() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testSetController() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testStop() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testSetInverted() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testStopAndLock() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testSetMinMax() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testUnlock() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testSetPowerLevel() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testUpdatePosition() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testStop() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testGetMetaData() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testStopAndLock() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testGetTargetPos() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testUnlock() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testMain() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testUpdatePosition() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testOnSensorData() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testGetMetaData() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testPulse() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testGetTargetPos() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testSetEncoder() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testMain() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testDetach() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testOnSensorData() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testAttach() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testPulse() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testSetPwmPins() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testSetEncoder() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testSetPwrDirPins() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testDetach() {
+    // fail("Not yet implemented");
+  }
 
-	@Test
-	public void testGetConfig() {
-		// fail("Not yet implemented");
-	}
+  @Test
+  public void testAttach() {
+    // fail("Not yet implemented");
+  }
 
-	public static void main(String[] args) {
-		try {
+  @Test
+  public void testSetPwmPins() {
+    // fail("Not yet implemented");
+  }
 
-			      LoggingFactory.init("info");
+  @Test
+  public void testSetPwrDirPins() {
+    // fail("Not yet implemented");
+  }
 
+  @Test
+  public void testGetConfig() {
+    // fail("Not yet implemented");
+  }
 
-			MotorDualPwmTest.setUpBeforeClass();
-			MotorDualPwmTest test = new MotorDualPwmTest();
-			test.testMove();
+  public static void main(String[] args) {
+    try {
 
-			JUnitCore junit = new JUnitCore();
-			Result result = junit.run(MotorDualPwmTest.class);
-			log.info("Result was: {}", result);
-			// WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-			// ServiceInterface gui = Runtime.start("gui", "SwingGui");
+      LoggingFactory.init("info");
 
-			Runtime.dump();
+      MotorDualPwmTest.setUpBeforeClass();
+      MotorDualPwmTest test = new MotorDualPwmTest();
+      test.testMove();
 
-			log.info("here");
-			// serial.removeByteListener(gui.getName());
-			// uart.removeByteListener(gui.getName());
+      JUnitCore junit = new JUnitCore();
+      Result result = junit.run(MotorDualPwmTest.class);
+      log.info("Result was: {}", result);
+      // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
+      // ServiceInterface gui = Runtime.start("gui", "SwingGui");
 
-			Runtime.dump();
+      Runtime.dump();
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      log.info("here");
+      // serial.removeByteListener(gui.getName());
+      // uart.removeByteListener(gui.getName());
+
+      Runtime.dump();
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

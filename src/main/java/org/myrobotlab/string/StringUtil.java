@@ -142,14 +142,14 @@ public class StringUtil {
     }
     return false;
   }
-  
+
   // split a string into sub strings that are a maxlength
   // also try to be smart about text so you don't break a word in 1/2
   public static List<String> chunkText(String text, int maxLength) {
     ArrayList<String> chunks = new ArrayList<String>();
     StringBuilder line = new StringBuilder();
     // TODO: smarter tokenization!
-    // perhaps use a sentence splitter first, then 
+    // perhaps use a sentence splitter first, then
     // split the sentence into multiple parts if necessary
     // to preserve a more natural boundary on the text.
     String[] parts = text.split(" ");
@@ -163,7 +163,7 @@ public class StringUtil {
       } else {
         // accumulate the words on the string.
         line.append(p);
-        // TODO: this is currently hardcoded to be a space. not great, 
+        // TODO: this is currently hardcoded to be a space. not great,
         // in theory it should be the
         // actual from the original string...
       }
@@ -171,21 +171,17 @@ public class StringUtil {
     }
     // add the last segment.
     chunks.add(line.toString().trim());
-    return chunks; 
-    
+    return chunks;
+
   }
-  
 
   public static String removeAccents(String text) {
     if (text == null) {
       return null;
     } else {
-      String clean =  Normalizer.normalize(text, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+      String clean = Normalizer.normalize(text, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
       return clean;
     }
   }
-
-  
-  
 
 }

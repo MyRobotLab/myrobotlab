@@ -116,8 +116,7 @@ public class OpenCVTest extends AbstractTest {
     OpenCVData data = null;
 
     /**
-     * Testing default captures after a reset when the frame grabber type is not
-     * explicitly set
+     * Testing default captures after a reset when the frame grabber type is not explicitly set
      */
 
     if (hasInternet()) {
@@ -164,8 +163,7 @@ public class OpenCVTest extends AbstractTest {
   }
 
   /**
-   * minimally all filters should have the ability to load and
-   * run by themselves for a second
+   * minimally all filters should have the ability to load and run by themselves for a second
    */
   @Test
   public final void testAllFilterTypes() {
@@ -178,7 +176,7 @@ public class OpenCVTest extends AbstractTest {
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.info("trying filter {}", fn);
-      if (fn.startsWith("DL4J") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector")|| fn.startsWith("Solr")|| fn.startsWith("Split")) {
+      if (fn.startsWith("DL4J") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
         log.info("skipping {}", fn);
         continue;
       }
@@ -190,7 +188,7 @@ public class OpenCVTest extends AbstractTest {
   }
 
   // TODO test enable disable & enableDisplay
- 
+
   @Test
   public final void testGetClassifications() {
     log.info("=======OpenCVTest testGetClassifications=======");
@@ -199,7 +197,7 @@ public class OpenCVTest extends AbstractTest {
     cv.setGrabberType("ImageFile");
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     cv.addFilter("yolo");
-    Map<String, List<Classification>>  classifications = cv.getClassifications();
+    Map<String, List<Classification>> classifications = cv.getClassifications();
     assertNotNull(classifications);
     assertTrue(classifications.containsKey("person"));
   }
@@ -221,13 +219,9 @@ public class OpenCVTest extends AbstractTest {
 
       test.testAllFilterTypes();
       /*
-       * cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");// red pill
-       * // green pill cv.capture(0); cv.stopCapture();
-       * cv.setGrabberType("Sarxos"); cv.capture(0);
-       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-       * cv.capture(0);
-       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-       * cv.capture(0);
+       * cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");// red pill // green pill cv.capture(0); cv.stopCapture();
+       * cv.setGrabberType("Sarxos"); cv.capture(0); cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); cv.capture(0);
+       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); cv.capture(0);
        */
 
       test.chaosCaptureTest();

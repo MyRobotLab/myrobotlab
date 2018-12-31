@@ -7,8 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Manager that should be in charge of caches so that we have a way to clear
- * them out and keep them under control.
+ * Manager that should be in charge of caches so that we have a way to clear them out and keep them under control.
  * 
  * @author SwedaKonsult
  * 
@@ -56,8 +55,7 @@ public class CacheManager {
    * @param cache
    *          the cache to add
    * @param timeoutInterval
-   *          the interval in ms of how long items in this cache should be kept
-   *          before releasing them
+   *          the interval in ms of how long items in this cache should be kept before releasing them
    */
   public void addCache(String name, ManagedCache cache, int timeoutInterval) {
     caches.put(name, cache);

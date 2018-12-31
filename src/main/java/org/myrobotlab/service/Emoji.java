@@ -30,18 +30,18 @@ public class Emoji extends Service implements TextListener {
   transient HttpClient http = null;
 
   transient DisplayedImage view = null;
-  
+
   Map<String, EmojiData> emojis = new TreeMap<String, EmojiData>();
   Map<String, EmojiData> descriptionIndex = new TreeMap<String, EmojiData>();
   Map<String, EmojiData> emoticonIndex = new TreeMap<String, EmojiData>();
   Map<String, EmojiData> unicodeIndex = new TreeMap<String, EmojiData>();
-  
+
   static public class EmojiData {
     String name;
     String src;
     String unicode;
     String[] description;
-    String emoticon;    
+    String emoticon;
   }
 
   public Emoji(String n) {
@@ -131,9 +131,8 @@ public class Emoji extends Service implements TextListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

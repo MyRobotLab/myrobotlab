@@ -22,19 +22,15 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * ServiceData class contains all of the Services meta data. This includes : 1.
- * Dependency information - what libraries are needed to run the class 2.
- * Categories of the service 3. Peers of the service
+ * ServiceData class contains all of the Services meta data. This includes : 1. Dependency information - what libraries are needed
+ * to run the class 2. Categories of the service 3. Peers of the service
  * 
- * All this information is Service "type" related - non of it is instance
- * specific. ServiceData has to be created during "build" time since most of the
- * services contain dependencies which might not be fulfilled during runtime.
+ * All this information is Service "type" related - non of it is instance specific. ServiceData has to be created during "build"
+ * time since most of the services contain dependencies which might not be fulfilled during runtime.
  * 
- * ServiceData.generate() creates serviceData.json which is packaged by the
- * build in : /resource/framework/serviceData.json
+ * ServiceData.generate() creates serviceData.json which is packaged by the build in : /resource/framework/serviceData.json
  * 
- * When MyRobotLab runs for the first time, it will extract this file into the
- * .myrobotlab directory.
+ * When MyRobotLab runs for the first time, it will extract this file into the .myrobotlab directory.
  * 
  * @author GroG
  *
@@ -124,16 +120,13 @@ public class ServiceData implements Serializable {
   }
 
   /**
-   * This method has to check the environment first in order to tell if its
-   * Develop-Time or Run-Time because the method of generating a service list is
-   * different depending on current environment
+   * This method has to check the environment first in order to tell if its Develop-Time or Run-Time because the method of
+   * generating a service list is different depending on current environment
    * 
-   * Develop-Time can simply filter and process the files on the file system
-   * given by the code source location
+   * Develop-Time can simply filter and process the files on the file system given by the code source location
    * 
-   * Run-Time must extract itself and scan/filter zip entries which is
-   * potentially a lengthy process, and should only have to be done once for the
-   * lifetime of the version or mrl
+   * Run-Time must extract itself and scan/filter zip entries which is potentially a lengthy process, and should only have to be
+   * done once for the lifetime of the version or mrl
    * 
    * @return the service data description
    * @throws IOException
@@ -346,7 +339,7 @@ public class ServiceData implements Serializable {
       if (args.length > 0) {
         path = args[0];
       } else {
-    	  path = ".";
+        path = ".";
       }
 
       String filename = FileIO.gluePaths(path, "serviceData.json");
@@ -354,13 +347,13 @@ public class ServiceData implements Serializable {
       if (path.length() > 0) {
         new File(path).mkdirs();
       }
-      
+
       // remove pre-existing filename
       File removeExisting = new File(filename);
       removeExisting.delete();
-      
+
       // remove .myrobotlab/serviceData.json
-      removeExisting = new File(System.getProperty("user.dir") + File.separatorChar +  ".myrobotlab" + File.separatorChar + "serviceData.json");
+      removeExisting = new File(System.getProperty("user.dir") + File.separatorChar + ".myrobotlab" + File.separatorChar + "serviceData.json");
       removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
@@ -369,18 +362,14 @@ public class ServiceData implements Serializable {
       fos.write(CodecUtils.toJson(sd).getBytes());
       fos.close();
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
-      
 
     } catch (Exception e) {
       Logging.logError(e);
       System.exit(-1);
     }
-    
-    
+
     // System.exit(0);
-    
-    
-    
+
   }
 
 }

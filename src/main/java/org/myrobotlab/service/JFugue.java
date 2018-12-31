@@ -35,8 +35,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * JFugue - This service can generate tones to be played Also it can generate
- * some sounds and music based on string patterns that define the beat.
+ * JFugue - This service can generate tones to be played Also it can generate some sounds and music based on string patterns that
+ * define the beat.
  *
  */
 public class JFugue extends Service {
@@ -81,20 +81,17 @@ public class JFugue extends Service {
     rhythm.addLayer(data);
     player.play(rhythm.getPattern());
     /*
-     * rhythm.setLayer(1, "O..oO...O..oOO.."); rhythm.setLayer(2,
-     * "..*...*...*...*."); rhythm.addSubstitution('O', "[BASS_DRUM]i");
-     * rhythm.addSubstitution('o', "Rs [BASS_DRUM]s");
-     * rhythm.addSubstitution('*', "[ACOUSTIC_SNARE]i");
-     * rhythm.addSubstitution('.', "Ri");
+     * rhythm.setLayer(1, "O..oO...O..oOO.."); rhythm.setLayer(2, "..*...*...*...*."); rhythm.addSubstitution('O', "[BASS_DRUM]i");
+     * rhythm.addSubstitution('o', "Rs [BASS_DRUM]s"); rhythm.addSubstitution('*', "[ACOUSTIC_SNARE]i"); rhythm.addSubstitution('.',
+     * "Ri");
      * 
      * play(rhythm);
      */
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -108,7 +105,5 @@ public class JFugue extends Service {
     meta.addDependency("jfugue", "jfugue", "5.0.7");
     return meta;
   }
-
-
 
 }

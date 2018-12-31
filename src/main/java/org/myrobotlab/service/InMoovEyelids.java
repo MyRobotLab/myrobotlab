@@ -15,8 +15,7 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
- * InMoovEyelids - The inmoov eyelids. This will allow control of the eyelids servo 
- * common both eyelids use only one servo ( left )
+ * InMoovEyelids - The inmoov eyelids. This will allow control of the eyelids servo common both eyelids use only one servo ( left )
  */
 public class InMoovEyelids extends Service {
 
@@ -33,7 +32,7 @@ public class InMoovEyelids extends Service {
 
   public void blink() {
 
-    //TODO: clean stop autoblink if tracking ...
+    // TODO: clean stop autoblink if tracking ...
     double tmpVelo = ThreadLocalRandom.current().nextInt(40, 150 + 1);
     setVelocity(tmpVelo, tmpVelo);
     moveToBlocking(180, 180);
@@ -48,7 +47,7 @@ public class InMoovEyelids extends Service {
       blinkEyesTimer.schedule(new blinkEyesTimertask(), delay * 1000);
 
       blink();
-      //random double blink
+      // random double blink
       if (ThreadLocalRandom.current().nextInt(0, 1 + 1) == 1) {
         sleep(ThreadLocalRandom.current().nextInt(1000, 2000 + 1));
         blink();

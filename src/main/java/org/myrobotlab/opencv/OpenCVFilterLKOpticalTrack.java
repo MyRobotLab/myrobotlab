@@ -272,23 +272,18 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     /*
-     * // Make an image of the results // for (int i = 0; i < count.get(); i++)
-     * { for (int i = 0; i < count.get(); i++) { cornersA.position(i);
-     * cornersB.position(i); cornersC.position(i);
+     * // Make an image of the results // for (int i = 0; i < count.get(); i++) { for (int i = 0; i < count.get(); i++) {
+     * cornersA.position(i); cornersB.position(i); cornersC.position(i);
      * 
      * features_found.position(i); feature_errors.position(i);
      * 
-     * if (features_found.get() == 0 || feature_errors.get() > 550) { continue;
-     * }
+     * if (features_found.get() == 0 || feature_errors.get() > 550) { continue; }
      * 
-     * // line from previous frame point to current frame point CvPoint p0 =
-     * cvPoint(Math.round(cornersC.x()), Math.round(cornersC.y())); CvPoint p1 =
-     * cvPoint(Math.round(cornersB.x()), Math.round(cornersB.y()));
-     * cvLine(frame, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0); } // reset internal
-     * position // FIXME - do not reset data - this should be in "process" - use
-     * pojos or data.get to get needed data cornersA.position(0);
-     * cornersB.position(0); cornersC.position(0); features_found.position(0);
-     * feature_errors.position(0);
+     * // line from previous frame point to current frame point CvPoint p0 = cvPoint(Math.round(cornersC.x()),
+     * Math.round(cornersC.y())); CvPoint p1 = cvPoint(Math.round(cornersB.x()), Math.round(cornersB.y())); cvLine(frame, p0, p1,
+     * CV_RGB(255, 0, 0), 2, 8, 0); } // reset internal position // FIXME - do not reset data - this should be in "process" - use
+     * pojos or data.get to get needed data cornersA.position(0); cornersB.position(0); cornersC.position(0);
+     * features_found.position(0); feature_errors.position(0);
      */
     return image;
   }

@@ -148,8 +148,7 @@ public class WiiBot extends Service {
 
     // adding wiicom as an option
     /*
-     * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL,
-     * (CommDriver) new WiiDriver(wii));
+     * Arduino.addPortName("wiicom", CommPortIdentifier.PORT_SERIAL, (CommDriver) new WiiDriver(wii));
      */
 
     // gui.startService();
@@ -197,9 +196,8 @@ public class WiiBot extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

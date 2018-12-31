@@ -14,10 +14,8 @@ import org.slf4j.Logger;
 public class VideoSourceFrameGrabber extends FrameGrabber {
 
   /*
-   * excellent reference - http://www.jpegcameras.com/ foscam url
-   * http://host/videostream.cgi?user=username&pwd=password
-   * http://192.168.0.59:60/videostream.cgi?user=admin&pwd=password android ip
-   * cam http://192.168.0.57:8080/videofeed
+   * excellent reference - http://www.jpegcameras.com/ foscam url http://host/videostream.cgi?user=username&pwd=password
+   * http://192.168.0.59:60/videostream.cgi?user=admin&pwd=password android ip cam http://192.168.0.57:8080/videofeed
    */
 
   LinkedList<SerializableImage> imgq = new LinkedList<SerializableImage>();
@@ -80,7 +78,6 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
     return jconverter.convert(src);
   }
 
-  
   @Override
   public void release() throws Exception {
   }

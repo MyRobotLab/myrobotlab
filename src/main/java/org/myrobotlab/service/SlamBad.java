@@ -23,9 +23,8 @@ import org.slf4j.Logger;
  * 
  *         Dependencies : Java3D simbad-1.4.jar
  * 
- *         Reference : http://simbad.sourceforge.net/guide.php#robotapi
- *         http://www.ibm.com/developerworks/java/library/j-robots/ - simbad &amp;
- *         subsumption JMonkey
+ *         Reference : http://simbad.sourceforge.net/guide.php#robotapi http://www.ibm.com/developerworks/java/library/j-robots/ -
+ *         simbad &amp; subsumption JMonkey
  */
 public class SlamBad extends Service {
   public static class MyEnv extends EnvironmentDescription {
@@ -139,9 +138,8 @@ public class SlamBad extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -154,7 +152,7 @@ public class SlamBad extends Service {
     meta.addDependency("java3d", "j3dcore", "1.5.1");
     meta.addDependency("java3d", "j3dutils", "1.5.1");
     meta.addDependency("java3d", "vecmath", "1.5.1");
-    
+
     return meta;
   }
 

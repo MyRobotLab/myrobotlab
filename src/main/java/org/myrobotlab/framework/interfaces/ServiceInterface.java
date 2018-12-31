@@ -15,9 +15,8 @@ public interface ServiceInterface
     extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
 
   /**
-   * this is a local method which adds a request from some foreign service with
-   * address information (otherService/callback) for a topic callback Adds an
-   * entry on the notify list
+   * this is a local method which adds a request from some foreign service with address information (otherService/callback) for a
+   * topic callback Adds an entry on the notify list
    * 
    * @param localTopic
    *          l
@@ -59,16 +58,14 @@ public interface ServiceInterface
   public boolean hasPeers();
 
   /**
-   * recursive release - releases all peers and their peers etc. then releases
-   * this service
+   * recursive release - releases all peers and their peers etc. then releases this service
    */
   public void releasePeers();
 
   public void releaseService();
 
   /**
-   * called by runtime when system is shutting down
-   * a service can use this method when it has to do some "ordered" cleanup
+   * called by runtime when system is shutting down a service can use this method when it has to do some "ordered" cleanup
    */
   public void preShutdown();
 

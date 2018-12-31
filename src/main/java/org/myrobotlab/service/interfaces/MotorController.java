@@ -31,57 +31,58 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.math.interfaces.Mapper;
 
 public interface MotorController extends Attachable {
-  
-  // FIXME 
+
+  // FIXME
   // add getPortNames for "motor port" type controllers .. e.g. m1, m2 for Sabertooth & RoboClaw
 
-		
-	/**
-	 * 
-	 * request for motor to move the motor can be queried for the new powerlevel
-	 * and the controller shall appropriately change power level and direction
-	 * if necessary
-	 * @param motor the motor that will be moved
-	 */
-	public void motorMove(MotorControl motor);
+  /**
+   * 
+   * request for motor to move the motor can be queried for the new powerlevel and the controller shall appropriately change power
+   * level and direction if necessary
+   * 
+   * @param motor
+   *          the motor that will be moved
+   */
+  public void motorMove(MotorControl motor);
 
-	/**
-	 * moveTo - move the MotorControl a relative amount the amount can be
-	 * negative or positive an integer value is expected
-	 * 
-	 * param name
-	 *            - name of the MotorControl
-	 * param position
-	 *            - positive or negative absolute amount to move the
-	 *            MotorControl
-   * @param motor the motor that will be moved
-	 */
-	public void motorMoveTo(MotorControl motor);
+  /**
+   * moveTo - move the MotorControl a relative amount the amount can be negative or positive an integer value is expected
+   * 
+   * param name - name of the MotorControl param position - positive or negative absolute amount to move the MotorControl
+   * 
+   * @param motor
+   *          the motor that will be moved
+   */
+  public void motorMoveTo(MotorControl motor);
 
-	/**
-	 * stops the motor
-   * @param motor the motor that will be stopped
-	 * 
-	 */
-	public void motorStop(MotorControl motor);
+  /**
+   * stops the motor
+   * 
+   * @param motor
+   *          the motor that will be stopped
+   * 
+   */
+  public void motorStop(MotorControl motor);
 
-	/**
-	 * method for resetting all the variables of a motor this will reset
-	 * counters if the motor is a stepper and / or other variables for other
-	 * sorts of motors
-   * @param motor the motor that will be reset
-	 * 
-	 */
-	public void motorReset(MotorControl motor);
-	
-	/**
-	 * if the motor controller uses ports - this method will return a list of ports
-	 * @return
-	 */
-	List<String> getPorts();
+  /**
+   * method for resetting all the variables of a motor this will reset counters if the motor is a stepper and / or other variables
+   * for other sorts of motors
+   * 
+   * @param motor
+   *          the motor that will be reset
+   * 
+   */
+  public void motorReset(MotorControl motor);
+
+  /**
+   * if the motor controller uses ports - this method will return a list of ports
+   * 
+   * @return
+   */
+  List<String> getPorts();
 
   public Mapper getDefaultMapper();
-  
+
   public double motorCalcOutput(MotorControl mc);
 
 }

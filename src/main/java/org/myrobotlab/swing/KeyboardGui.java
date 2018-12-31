@@ -77,8 +77,8 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
     unsubscribe("publishKeyCode");
     unsubscribe("publishMouseMoved");
   }
-  
-  public void onKey(final String key){
+
+  public void onKey(final String key) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -86,8 +86,8 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
       }
     });
   }
-  
-  public void onKeyCode(final Integer code){
+
+  public void onKeyCode(final Integer code) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -95,8 +95,8 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
       }
     });
   }
-  
-  public void onMouseMoved(final MouseEvent me ){
+
+  public void onMouseMoved(final MouseEvent me) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -111,7 +111,7 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
     Object o = e.getSource();
     if (o == listen) {
       String text = listen.getText();
-      if ("start listening".equals(text)){
+      if ("start listening".equals(text)) {
         swingGui.send(boundServiceName, "startListening");
         listen.setText("stop listening");
       } else {
@@ -122,10 +122,9 @@ public class KeyboardGui extends ServiceGui implements ActionListener {
   }
 
   /*
-   * Service State change - this method will be called when a "broadcastState"
-   * method is called which triggers a publishState.  This event handler is typically
-   * used when data or state information in the service has changed, and the UI should
-   * update to reflect this changed state.
+   * Service State change - this method will be called when a "broadcastState" method is called which triggers a publishState. This
+   * event handler is typically used when data or state information in the service has changed, and the UI should update to reflect
+   * this changed state.
    */
   public void onState(Keyboard keyboard) {
     SwingUtilities.invokeLater(new Runnable() {

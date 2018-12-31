@@ -26,57 +26,57 @@ public class Osc extends Service implements OSCListener {
 
   private static final long serialVersionUID = 1L;
 
-  // Map<String, OSCPortOut> senders = new HashMap<String, OSCPortOut>(); 
+  // Map<String, OSCPortOut> senders = new HashMap<String, OSCPortOut>();
   transient OSCPortOut sender;
   String senderHost;
   Integer senderPort;
-  
+
   transient OSCPortIn receiver;
   Integer port;
 
   public final static Logger log = LoggerFactory.getLogger(Osc.class);
-  
-  public static class OscMessage {
-	long ts;
-	String address;
-	List <Object> arguments;
 
-	  public OscMessage(long ts, OSCMessage message) {
-		this.ts = ts;
-		this.address = message.getAddress();
-		this.arguments = message.getArguments();
-	  }
-	  
-	  public long getDate(){
-		  return ts;
-	  }
-				
-	  public List<Object> getArguments(){
-		  return arguments;
-	  }
-	  
-	  public String getAddress(){
-		  return address;
-	  }
-	  
-	  public String toString(){
-		  StringBuilder sb = new StringBuilder();
-		  sb.append("osc ");
-		  sb.append(ts);
-		  sb.append(" ");
-		  sb.append(address);
-		  if (arguments != null){
-			  sb.append(" [");
-			  for (int i = 0; i < arguments.size(); ++i){
-				  sb.append(arguments.get(i));
-				  if (i != arguments.size() -1){
-					  sb.append(", ");
-				  }
-			  }
-			  sb.append("]");
-		  }
-		  return sb.toString();
-	  }
+  public static class OscMessage {
+    long ts;
+    String address;
+    List<Object> arguments;
+
+    public OscMessage(long ts, OSCMessage message) {
+      this.ts = ts;
+      this.address = message.getAddress();
+      this.arguments = message.getArguments();
+    }
+
+    public long getDate() {
+      return ts;
+    }
+
+    public List<Object> getArguments() {
+      return arguments;
+    }
+
+    public String getAddress() {
+      return address;
+    }
+
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append("osc ");
+      sb.append(ts);
+      sb.append(" ");
+      sb.append(address);
+      if (arguments != null) {
+        sb.append(" [");
+        for (int i = 0; i < arguments.size(); ++i) {
+          sb.append(arguments.get(i));
+          if (i != arguments.size() - 1) {
+            sb.append(", ");
+          }
+        }
+        sb.append("]");
+      }
+      return sb.toString();
+    }
   }
 
   public Osc(String n) {
@@ -84,9 +84,8 @@ public class Osc extends Service implements OSCListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -102,8 +101,8 @@ public class Osc extends Service implements OSCListener {
     meta.addCategory("network", "music");
     return meta;
   }
-  
-  public void listen(Integer newPort) throws IOException{
+
+  public void listen(Integer newPort) throws IOException {
     listen("/*", newPort);
   }
 
@@ -116,23 +115,23 @@ public class Osc extends Service implements OSCListener {
 
     if (newPort == null) {
       newPort = 12000;
-    }   
+    }
     port = newPort;
     receiver = new OSCPortIn(newPort);
-    if (filter != null){
+    if (filter != null) {
       receiver.addListener(filter, this);
     }
     receiver.startListening();
   }
-  
-  public void stopListening(){
-    if (receiver != null){
+
+  public void stopListening() {
+    if (receiver != null) {
       receiver.stopListening();
     }
   }
-  
-  public OSCPortOut connect(String host, Integer port) throws SocketException, UnknownHostException{
-    if (!host.equals(senderHost) || port.equals(senderPort)){
+
+  public OSCPortOut connect(String host, Integer port) throws SocketException, UnknownHostException {
+    if (!host.equals(senderHost) || port.equals(senderPort)) {
       senderHost = host;
       senderPort = port;
       sender = new OSCPortOut(InetAddress.getByName(host), port);
@@ -140,9 +139,9 @@ public class Osc extends Service implements OSCListener {
     }
     return sender;
   }
-  
+
   public void sendMsg(String topic, Object... args) throws IOException {
-    if (sender == null){
+    if (sender == null) {
       error("you must connect first - osc.connect(host, port)");
     }
     List<Object> list = new ArrayList<Object>(Arrays.asList(args));
@@ -150,45 +149,42 @@ public class Osc extends Service implements OSCListener {
     sender.send(msg);
   }
 
-  
-  public OSCPortIn getReceiver(){
+  public OSCPortIn getReceiver() {
     return receiver;
   }
 
   /*
-   * convert and publish to an Mrl Osc Message
-   * adding ts to messsage as well.
+   * convert and publish to an Mrl Osc Message adding ts to messsage as well.
    */
-  public OscMessage publishOscMessage(long ts, OSCMessage message){
-	OscMessage msg = new OscMessage(ts, message);
-	log.info("{}", msg);
+  public OscMessage publishOscMessage(long ts, OSCMessage message) {
+    OscMessage msg = new OscMessage(ts, message);
+    log.info("{}", msg);
     return msg;
   }
 
   @Override
   public void acceptMessage(Date date, OSCMessage message) {
-	  // JavaOSC bug - date always comes in as null
+    // JavaOSC bug - date always comes in as null
     invoke("publishOscMessage", new Date().getTime(), message);
   }
-  
-  public void stopService(){
+
+  public void stopService() {
     stopListening();
   }
-  
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
-       
-      Osc osc = (Osc)Runtime.start("osc", "Osc");
+
+      Osc osc = (Osc) Runtime.start("osc", "Osc");
       /*
-      Python python = (Python)Runtime.start("python", "Python"); 
-      python.subscribe("osc", "publishOSCMessage");
-      */
+       * Python python = (Python)Runtime.start("python", "Python"); python.subscribe("osc", "publishOSCMessage");
+       */
       osc.listen(6000);
-      // osc.listen("/filter1", 6000);      
+      // osc.listen("/filter1", 6000);
       // osc.stopListening();
-      
+
       osc.connect("127.0.0.1", 6000);
       osc.sendMsg("/test", "to be or not to be that is the question");
       osc.sendMsg("/newTopic", 18, "hello", 4.5);

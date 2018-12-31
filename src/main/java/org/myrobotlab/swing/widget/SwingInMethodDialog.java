@@ -126,8 +126,7 @@ public class SwingInMethodDialog extends JDialog implements ActionListener {
 
       log.error("MRLListener !!! " + listener);
       /*
-       * if (parameterType != null) { listener.paramTypes = new
-       * Class[]{parameterType}; }
+       * if (parameterType != null) { listener.paramTypes = new Class[]{parameterType}; }
        */
       // send the notification of new route to the target system
       String srcService = myService.getSrcServiceName();

@@ -13,7 +13,6 @@ public class Point3df implements Serializable {
   public Point3df() {
   }
 
-
   public Point3df(float x, float y, float z) {
     this.x = x;
     this.y = y;
@@ -24,6 +23,5 @@ public class Point3df implements Serializable {
   public String toString() {
     return String.format("(%f,%f,%s)", x, y, z);
   }
-
 
 }

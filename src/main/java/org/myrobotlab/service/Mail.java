@@ -23,9 +23,7 @@ import org.slf4j.Logger;
  * 
  *         A Service for sending email
  * 
- *         References :
- *         http://www.mkyong.com/java/javamail-api-sending-email-via
- *         -gmail-smtp-example/
+ *         References : http://www.mkyong.com/java/javamail-api-sending-email-via -gmail-smtp-example/
  * 
  */
 public class Mail extends Service {
@@ -127,9 +125,8 @@ public class Mail extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

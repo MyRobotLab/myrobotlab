@@ -9,8 +9,7 @@ import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 /**
- * SpeechSynthesis - This is the interface that services that provide text to
- * speech should implement.
+ * SpeechSynthesis - This is the interface that services that provide text to speech should implement.
  * 
  */
 public interface SpeechSynthesis extends NameProvider {
@@ -95,12 +94,12 @@ public interface SpeechSynthesis extends NameProvider {
    * @return text
    */
   public String publishEndSpeaking(String utterance);
-  
+
   /**
    * silence the service
    */
   public void mute();
-  
+
   /**
    * un-silence the service
    */

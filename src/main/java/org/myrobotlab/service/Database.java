@@ -59,9 +59,8 @@ public class Database extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -80,12 +79,12 @@ public class Database extends Service {
 
   public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
-			LoggingFactory.init("INFO");
+    LoggingFactory.init("INFO");
 
-			//connect();
-			//ResultSet rs = executeQuery("SELECT * FROM uptime");
-			//while (rs.next()) {
-			//log.info(rs.getString("id"));			  
-			//}
+    // connect();
+    // ResultSet rs = executeQuery("SELECT * FROM uptime");
+    // while (rs.next()) {
+    // log.info(rs.getString("id"));
+    // }
   }
 }

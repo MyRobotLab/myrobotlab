@@ -77,7 +77,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   }
 
   public void flush() {
-    
+
     while (getInbox().size() > 0) {
       // TODO: we've gotta wait until we've consumed our inbox if we're
       // flushing?
@@ -176,9 +176,8 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -193,9 +192,9 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     // for parsing wikitext
     meta.addDependency("org.sweble.wikitext", "swc-engine", "3.1.7");
     meta.addDependency("org.sweble.wom3", "sweble-wom3-core", "3.1.7");
-    
-    meta.addDependency("com.thoughtworks.xstream", "xstream", "1.4.9");    
-    
+
+    meta.addDependency("com.thoughtworks.xstream", "xstream", "1.4.9");
+
     // FIXME - add service page, python script, give example of how to use
     meta.setAvailable(false);
     return meta;

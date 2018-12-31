@@ -17,9 +17,8 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
- * InMoovArm - This is the Arm sub-service for the InMoov Robot. It consists of
- * 4 Servos: bicep, rotate,shoulder,omoplate It uses Arduino to control the
- * servos.
+ * InMoovArm - This is the Arm sub-service for the InMoov Robot. It consists of 4 Servos: bicep, rotate,shoulder,omoplate It uses
+ * Arduino to control the servos.
  *
  */
 public class InMoovArm extends Service implements IKJointAngleListener {
@@ -63,8 +62,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   /*
-   * attach all the servos - this must be re-entrant and accomplish the
-   * re-attachment when servos are detached
+   * attach all the servos - this must be re-entrant and accomplish the re-attachment when servos are detached
    */
   @Deprecated
   public boolean attach() {
@@ -189,8 +187,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   /*
-   * public boolean load(){ super.load(); bicep.load(); rotate.load();
-   * shoulder.load(); omoplate.load(); return true; }
+   * public boolean load(){ super.load(); bicep.load(); rotate.load(); shoulder.load(); omoplate.load(); return true; }
    */
 
   public long getLastActivityTime() {
@@ -318,13 +315,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   // ------------- added set pins
   /*
-   * OLD WAY public void setpins(Integer bicep, Integer rotate, Integer
-   * shoulder, Integer omoplate) {
+   * OLD WAY public void setpins(Integer bicep, Integer rotate, Integer shoulder, Integer omoplate) {
    * 
-   * log.info(String.format("setPins %d %d %d %d %d %d", bicep, rotate,
-   * shoulder, omoplate)); // createPeers(); this.bicep.setPin(bicep);
-   * this.rotate.setPin(rotate); this.shoulder.setPin(shoulder);
-   * this.omoplate.setPin(omoplate); }
+   * log.info(String.format("setPins %d %d %d %d %d %d", bicep, rotate, shoulder, omoplate)); // createPeers();
+   * this.bicep.setPin(bicep); this.rotate.setPin(rotate); this.shoulder.setPin(shoulder); this.omoplate.setPin(omoplate); }
    */
 
   public void setRotate(Servo rotate) {
@@ -364,8 +358,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       error("arduino is null");
     }
     /*
-     * FIXME - non ServoController methods must go - or I2C needs a
-     * connect(baseAddress, address) with overloaded connect("0x48- if
+     * FIXME - non ServoController methods must go - or I2C needs a connect(baseAddress, address) with overloaded connect("0x48- if
      * (!arduino.isConnected()) { error("arduino not connected"); }
      */
     bicep.moveTo(bicep.getPos() + 2);
@@ -478,9 +471,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

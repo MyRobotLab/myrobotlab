@@ -44,7 +44,7 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
       Point p = parent.getLocation();
       setLocation(p.x + parentSize.width / 4, p.y + parentSize.height / 4);
     }
-    
+
     Platform platform = Platform.getLocalInstance();
 
     JPanel content = new JPanel(new BorderLayout());
@@ -60,13 +60,13 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
     JLabel link = new JLabel("<html><p align=center><a href=\"http://myrobotlab.org\">http://myrobotlab.org</a><html>");
     link.addMouseListener(this);
     content.add(center, BorderLayout.CENTER);
-    
+
     center.add(link);
     JPanel flow = new JPanel();
     flow.add(new JLabel("platform "));
     flow.add(new JLabel(platform.toString()));
     center.add(flow);
-    
+
     flow = new JPanel();
     flow.add(new JLabel("version "));
     flow.add(new JLabel(platform.getVersion()));
@@ -78,7 +78,6 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
     flow.setAlignmentX(LEFT_ALIGNMENT);
     center.add(flow);
 
-    
     JPanel buttonPane = new JPanel();
 
     ok = new JButton("OK");

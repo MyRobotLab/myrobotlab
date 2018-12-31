@@ -33,12 +33,12 @@ public class LidarVlp16 extends Service {
 
   public void listen() throws SocketException, UnknownHostException {
     dataSocket = new DatagramSocket(dataPort, InetAddress.getByName("0.0.0.0"));
-    dataSocket.setBroadcast(true); 
+    dataSocket.setBroadcast(true);
     positionSocket = new DatagramSocket(positionPort, InetAddress.getByName("0.0.0.0"));
     positionSocket.setBroadcast(true);
   }
 
-  public void receiveData() throws IOException {    
+  public void receiveData() throws IOException {
     byte[] recvBuf = new byte[15000];
     DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
     dataSocket.receive(receivePacket);
@@ -51,9 +51,8 @@ public class LidarVlp16 extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

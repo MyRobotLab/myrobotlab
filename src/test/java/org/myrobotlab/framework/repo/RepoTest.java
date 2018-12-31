@@ -55,8 +55,7 @@ public class RepoTest implements StatusPublisher {
   }
 
   /*
-   * public constructor only because serialization might require it - otherwise
-   * this should be private.
+   * public constructor only because serialization might require it - otherwise this should be private.
    * 
    * @Test public void testRepo() { // fail("Not yet implemented"); }
    */
@@ -69,26 +68,20 @@ public class RepoTest implements StatusPublisher {
   }
 
   /*
-   * @Test public void testErrorException() { Repo repo =
-   * Repo.getInstance(); repo.getErrors().clear(); repo.error(new
-   * IOException("io exception test")); assertTrue(repo.getErrors().size() > 0);
-   * }
+   * @Test public void testErrorException() { Repo repo = Repo.getInstance(); repo.getErrors().clear(); repo.error(new
+   * IOException("io exception test")); assertTrue(repo.getErrors().size() > 0); }
    */
 
   /*
-   * @Test public void explode(){ boolean explode = true; assertFalse(explode);
-   * }
+   * @Test public void explode(){ boolean explode = true; assertFalse(explode); }
    */
-
 
   /*
    * 
-   * @Test public void testInstall() throws ParseException, IOException { Repo
-   * repo = Repo.getInstance(); repo.install();
+   * @Test public void testInstall() throws ParseException, IOException { Repo repo = Repo.getInstance(); repo.install();
    * 
-   * ServiceData sd = ServiceData.getInstance(); String[] typeNames =
-   * sd.getServiceTypeNames(); for (int i = 0; i < typeNames.length; ++i) {
-   * assertTrue(repo.isInstalled("Arduino")); }
+   * ServiceData sd = ServiceData.getInstance(); String[] typeNames = sd.getServiceTypeNames(); for (int i = 0; i <
+   * typeNames.length; ++i) { assertTrue(repo.isInstalled("Arduino")); }
    * 
    * assertFalse(repo.hasErrors()); }
    * 
@@ -101,8 +94,6 @@ public class RepoTest implements StatusPublisher {
     File check = new File("libraries");
     assertFalse(check.exists());
   }
-
- 
 
   @Test
   public void testResolveArtifacts() {
@@ -157,7 +148,6 @@ public class RepoTest implements StatusPublisher {
     assertTrue(repo.isInstalled("Arduino"));
   }
 
-
   public static void main(String[] args) {
     try {
 
@@ -167,8 +157,7 @@ public class RepoTest implements StatusPublisher {
        * 
        * Repo repo = Repo.getInstance(); repo.clear();
        * 
-       * RepoTest.setUpBeforeClass(); RepoTest test = new RepoTest();
-       * test.testGetUnfulfilledDependencies();
+       * RepoTest.setUpBeforeClass(); RepoTest test = new RepoTest(); test.testGetUnfulfilledDependencies();
        */
 
       JUnitCore junit = new JUnitCore();

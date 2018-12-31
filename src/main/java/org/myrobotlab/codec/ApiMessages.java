@@ -19,17 +19,17 @@ public class ApiMessages extends Api {
   public Object process(MessageSender sender, OutputStream out, Message requestUri, String json) throws Exception {
 
     Object retobj = null;
-    
+
     // FIXME - consider msg.data - if its not null !!!!
-    
+
     // initial GET /api/messages - has data == null
     // ws always starts with a GET (no data)
     if (json != null) {
       // json message has precedence
       Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-      
+
       if (log.isDebugEnabled() && json != null) {
-        log.debug("data - [{}]",json);
+        log.debug("data - [{}]", json);
       }
 
       Message msg = CodecUtils.fromJson(json, Message.class);
@@ -46,10 +46,10 @@ public class ApiMessages extends Api {
 
       // FIXME - unfortunately the message comes in as msg.sender = ""
       // but we should only have to test for null (bug on client)
-      if (msg.sender == null || msg.sender.length() == 0){
+      if (msg.sender == null || msg.sender.length() == 0) {
         msg.sender = sender.getName();
       }
-      
+
       // TODO - this is a registry provider / service provider
       // get the service or service description...
       ServiceInterface si = Runtime.getService(msg.name);
@@ -57,26 +57,26 @@ public class ApiMessages extends Api {
         log.error("could not get service {} for msg {}", msg.name, msg);
         return null;
       }
-      
+
       // convert message.data from json to pojos
       // based on target's methods signature
-      
+
       // if local invoke
-      
+
       // if remote send
-      
+
       // Message Api is "double" encoded json data
-      
+
       Class<?> clazz = si.getClass();
 
       Class<?>[] paramTypes = null;
       Object[] params = null;
       // decoded array of encoded parameters
       Object[] encodedArray = null;
-      
-      if (msg.data == null){
+
+      if (msg.data == null) {
         params = new Object[0];
-        encodedArray = params;       
+        encodedArray = params;
       } else {
         params = new Object[msg.data.length];
         encodedArray = msg.data;
@@ -134,7 +134,7 @@ public class ApiMessages extends Api {
         log.debug("{} is local", si.getName());
 
         log.debug("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
-        retobj =  method.invoke(si, params);
+        retobj = method.invoke(si, params);
         // use Service.invoke since that will broadcast to any subscribers
         // Object retobj = si.invoke(msg.name, params);
 
@@ -142,7 +142,7 @@ public class ApiMessages extends Api {
         // What does this mean ?
         // respond(out, codec, method.getName(), ret);
 
-        // propagate return data to subscribers 
+        // propagate return data to subscribers
         si.out(msg.method, retobj);
       } else {
         log.debug("{} is remote", si.getName());
@@ -151,32 +151,32 @@ public class ApiMessages extends Api {
       }
 
       MethodCache.cache(clazz, method);
-      
+
     } else {
       // First GET /api/messages - has data == null !
       // use different api to process GET ?
       // return hello ?
-      // FALLBACK 
+      // FALLBACK
       ApiFactory api = ApiFactory.getInstance();
       String newUri = requestUri.uri.replace("/messages", "/service");
       // we send out = null, because we don't want service api to stream back a 'non' message response
       // but we do want the functionality of the services api
       retobj = api.process(sender, null, newUri, json);
-     
-      // FIXME - WebGui Client is expecting 
+
+      // FIXME - WebGui Client is expecting
       // FIXME - WebGui Angular FIX is needed - this IS NOT getLocalServices its getEnvironments
-      
+
       // Create msg from the return - and send it back
       // - is this correct ? should it be double encoded ?
-      Message msg = Message.createMessage(sender, sender.getName(), "onLocalServices", new Object[]{retobj});
+      Message msg = Message.createMessage(sender, sender.getName(), "onLocalServices", new Object[] { retobj });
       // apiKey == messages api uses JSON
       Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
       codec.encode(out, msg);
-      
+
     }
     return retobj;
   }
-  
+
   public static ApiDescription getDescription() {
     ApiDescription desc = new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
         "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is /api/messages data contains a json encoded Message structure");

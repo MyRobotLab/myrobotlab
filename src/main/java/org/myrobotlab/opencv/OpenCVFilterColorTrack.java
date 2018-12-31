@@ -81,10 +81,8 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
    * 
    * public void samplePoint(MouseEvent event) {
    * 
-   * frameBuffer = hsv.getBufferedImage(); int rgb =
-   * frameBuffer.getRGB(event.getX(), event.getY()); Color c = new Color(rgb);
-   * log.error(event.getX() + "," + event.getY() + " h " + c.getRed() + " s " +
-   * c.getGreen() + " v " + c.getBlue()); }
+   * frameBuffer = hsv.getBufferedImage(); int rgb = frameBuffer.getRGB(event.getX(), event.getY()); Color c = new Color(rgb);
+   * log.error(event.getX() + "," + event.getY() + " h " + c.getRed() + " s " + c.getGreen() + " v " + c.getBlue()); }
    */
 
   @Override
@@ -110,13 +108,11 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
     // / THIS BECOMES V S H !!!
 
     /****
-     * GREEN LED **** hsv_min = cvScalar(80, 0, 250, 0); hsv_max = cvScalar(90,
-     * 40, 256, 0);
+     * GREEN LED **** hsv_min = cvScalar(80, 0, 250, 0); hsv_max = cvScalar(90, 40, 256, 0);
      */
 
     /***
-     * LASER - TRY 1 hsv_min = cvScalar(8, 0, 210, 0); hsv_max = cvScalar(18,
-     * 255, 255, 0);
+     * LASER - TRY 1 hsv_min = cvScalar(8, 0, 210, 0); hsv_max = cvScalar(18, 255, 255, 0);
      * 
      * 
      * On White 481,217 h 0 s 90 v 214 481,216 h 6 s 57 v 255

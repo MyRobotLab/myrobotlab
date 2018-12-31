@@ -14,9 +14,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * This stage will convert an MRL document to a solr document. It then batches
- * those documents and sends the batches to solr. Upon a flush call any partial
- * batches will be flushed.
+ * This stage will convert an MRL document to a solr document. It then batches those documents and sends the batches to solr. Upon a
+ * flush call any partial batches will be flushed.
  * 
  * @author kwatters
  *

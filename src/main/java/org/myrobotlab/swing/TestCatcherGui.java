@@ -46,7 +46,7 @@ public class TestCatcherGui extends ServiceGui {
     display.add(new JLabel("catchInteger : "));
     display.add(catchInteger);
     display.add(getBindCatchIntegerButton());
-  
+
   }
 
   @Override
@@ -79,12 +79,9 @@ public class TestCatcherGui extends ServiceGui {
         public void actionPerformed(ActionEvent e) {
           swingGui.send(boundServiceName, "catchNothing");
           /*
-           * if (bindCatchIntegerButton.getText().compareTo("connect") == 0) {
-           * bindCatchIntegerButton.setText("disconnect");
-           * subscribe("catchInteger", "catchInteger", SerializableImage.class);
-           * } else { bindCatchIntegerButton.setText("connect");
-           * unsubscribe("catchInteger", "catchInteger",
-           * SerializableImage.class); }
+           * if (bindCatchIntegerButton.getText().compareTo("connect") == 0) { bindCatchIntegerButton.setText("disconnect");
+           * subscribe("catchInteger", "catchInteger", SerializableImage.class); } else { bindCatchIntegerButton.setText("connect");
+           * unsubscribe("catchInteger", "catchInteger", SerializableImage.class); }
            */
         }
 

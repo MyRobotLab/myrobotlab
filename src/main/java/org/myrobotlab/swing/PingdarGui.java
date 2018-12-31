@@ -82,14 +82,14 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
         camImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
         graphImage = new BufferedImage(width / scale, height / scale, BufferedImage.TYPE_INT_RGB);
 
-        g = (Graphics2D)graphImage.getGraphics();
+        g = (Graphics2D) graphImage.getGraphics();
 
         g.setColor(Color.green);
 
-       // DON'T DO THIS - IT WILL BORK THE UI !!!
-       // screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
+        // DON'T DO THIS - IT WILL BORK THE UI !!!
+        // screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
 
-       display.add(screen.display);
+        display.add(screen.display);
       }
     });
 

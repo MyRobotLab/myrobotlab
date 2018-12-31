@@ -9,24 +9,24 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer, TextPublisher {
 
   private static final long serialVersionUID = 1L;
-  
+
   String wakeWord = null;
 
   public AbstractSpeechRecognizer(String reservedKey) {
     super(reservedKey);
   }
-  
+
   public void setWakeWord(String word) {
     // FIXME IMPLEMENT !
     this.wakeWord = word;
   }
-  
+
   /**
    * routable attach handles attaching based on type info
    */
-  public void attach(Attachable attachable){
-    if (attachable instanceof SpeechSynthesis){
-      addMouth((SpeechSynthesis)attachable);
+  public void attach(Attachable attachable) {
+    if (attachable instanceof SpeechSynthesis) {
+      addMouth((SpeechSynthesis) attachable);
     } else {
       error("do not know how to attach %s", attachable.getName());
     }

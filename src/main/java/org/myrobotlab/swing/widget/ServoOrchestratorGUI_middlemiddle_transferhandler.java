@@ -25,8 +25,7 @@ public class ServoOrchestratorGUI_middlemiddle_transferhandler extends TransferH
 
   /**
    * <p>
-   * This creates the Transferable object. In our case,
-   * ServoOrchestratorGUI_middlemiddle_panel implements Transferable, so this
+   * This creates the Transferable object. In our case, ServoOrchestratorGUI_middlemiddle_panel implements Transferable, so this
    * requires only a type cast.
    * </p>
    */
@@ -48,8 +47,7 @@ public class ServoOrchestratorGUI_middlemiddle_transferhandler extends TransferH
 
   /**
    * <p>
-   * This is queried to see whether the component can be copied, moved, both or
-   * neither. We are only concerned with copying.
+   * This is queried to see whether the component can be copied, moved, both or neither. We are only concerned with copying.
    * </p>
    */
   @Override()

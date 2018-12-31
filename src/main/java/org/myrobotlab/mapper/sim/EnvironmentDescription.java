@@ -31,11 +31,9 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 /**
- * This class is intend to describe easily a the world and its components. It is
- * only used during the building process of the World and the Simulator. The
- * user may specific colors and rendering attributes and add object which should
- * be settled in the World (Arch,Box, Wall ..) It also adds the agent(s) which
- * should be simulated.
+ * This class is intend to describe easily a the world and its components. It is only used during the building process of the World
+ * and the Simulator. The user may specific colors and rendering attributes and add object which should be settled in the World
+ * (Arch,Box, Wall ..) It also adds the agent(s) which should be simulated.
  * 
  * @author Louis Hugues
  */

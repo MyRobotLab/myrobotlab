@@ -210,19 +210,17 @@ public class Lidar extends Service implements SerialDataListener {
     buffer.reset();
 
     /*
-     * 9600 is default, but just in case you ever need it... PC sends : 02 00 02
-     * 00 20 42 52 08 LMS replies: 06 02 81 03 00 A0 00 10 36 1A (success)
+     * 9600 is default, but just in case you ever need it... PC sends : 02 00 02 00 20 42 52 08 LMS replies: 06 02 81 03 00 A0 00 10
+     * 36 1A (success)
      */
     if (baudRate == 9600) {
       serial.write(new byte[] { 0x02, 0x00, 0x02, 0x00, 0x20, 0x42, 0x52, 0x08 });
     } /*
-       * 19200 PC sends : 02 00 02 00 20 41 51 08 LMS replies: 06 02 81 03 00 A0
-       * 00 10 36 1A (success)
+       * 19200 PC sends : 02 00 02 00 20 41 51 08 LMS replies: 06 02 81 03 00 A0 00 10 36 1A (success)
        */else if (baudRate == 19200) {
       serial.write(new byte[] { 0x02, 0x00, 0x02, 0x00, 0x20, 0x41, 0x52, 0x08 });
     } /*
-       * 38400 PC sends : 02 00 02 00 20 41 51 08 LMS replies: 06 02 81 03 00 A0
-       * 00 10 36 1A (success)
+       * 38400 PC sends : 02 00 02 00 20 41 51 08 LMS replies: 06 02 81 03 00 A0 00 10 36 1A (success)
        */else if (baudRate == 38400) {
       serial.write(new byte[] { 0x02, 0x00, 0x02, 0x00, 0x20, 0x40, 0x52, 0x08 });
     } else {
@@ -349,9 +347,8 @@ public class Lidar extends Service implements SerialDataListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

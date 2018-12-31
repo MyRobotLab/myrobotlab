@@ -5,14 +5,13 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
- * Represents a 3d point in space. TODO: add rotation (roll/pitch/yaw -
- * rz,rx,ry)
+ * Represents a 3d point in space. TODO: add rotation (roll/pitch/yaw - rz,rx,ry)
  * 
  * @author kwatters
  *
  */
 public class Point implements Serializable {
-  
+
   private static final long serialVersionUID = 1L;
   private double x;
   private double y;
@@ -50,7 +49,7 @@ public class Point implements Serializable {
     this.pitch = pitch;
     this.yaw = yaw;
   }
-  
+
   public Point(Point copy) {
     this.x = copy.x;
     this.y = copy.y;
@@ -172,9 +171,11 @@ public class Point implements Serializable {
   }
 
   /**
-   * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point.
-   * return a new point with the individual components summed.
-   * @param p the point to be added
+   * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point. return a new point with the individual components
+   * summed.
+   * 
+   * @param p
+   *          the point to be added
    * @return the new point
    */
   public Point add(Point p) {
@@ -186,8 +187,10 @@ public class Point implements Serializable {
 
   /**
    * return a new point with the x,y,z values multipled by the xyzScale
-   * @param xyzScale the scaling (maintain aspect ratios)
-   * @return  the point as scaled
+   * 
+   * @param xyzScale
+   *          the scaling (maintain aspect ratios)
+   * @return the point as scaled
    */
   public Point multiplyXYZ(double xyzScale) {
     // add the linear and angular parts and return the resulting sum.
@@ -200,12 +203,12 @@ public class Point implements Serializable {
     Point calcPoint = subtract(point);
     return Math.sqrt(Math.pow(calcPoint.getX(), 2) + Math.pow(calcPoint.getY(), 2) + Math.pow(calcPoint.getZ(), 2));
   }
-  
-  public Point unitVector(double unitSize){
-    if (magnitude() == 0){
-     return this;
+
+  public Point unitVector(double unitSize) {
+    if (magnitude() == 0) {
+      return this;
     }
-    Point retval = multiplyXYZ(unitSize/magnitude());
+    Point retval = multiplyXYZ(unitSize / magnitude());
     return retval;
   }
 }

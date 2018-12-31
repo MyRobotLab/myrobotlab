@@ -31,14 +31,13 @@ public class ProcParser {
   static private int processPid = -1;
 
   /*
-   * The line which the number of cpu cores is located in /proc/cpuinfo in
-   * kernel 2.6.32-34-generic.
+   * The line which the number of cpu cores is located in /proc/cpuinfo in kernel 2.6.32-34-generic.
    */
   public static final int cpucoresline = 12;
 
   /*
-   * Constant access path string. Those with 'pid' before are in /proc/[pid]/;
-   * Those with 'net' are in /proc/net/. Those without are directly in /proc/.
+   * Constant access path string. Those with 'pid' before are in /proc/[pid]/; Those with 'net' are in /proc/net/. Those without are
+   * directly in /proc/.
    */
   public static final String pidStatmPath = "/proc/#/statm";
 
@@ -103,8 +102,8 @@ public class ProcParser {
   }
 
   /**
-   * Fetch the entire contents of a text file, and return it in a String. This
-   * style of implementation does not throw Exceptions to the caller.
+   * Fetch the entire contents of a text file, and return it in a String. This style of implementation does not throw Exceptions to
+   * the caller.
    * 
    * @param path
    *          is a file which already exists and can be read.
@@ -121,9 +120,8 @@ public class ProcParser {
       try {
         String line = null; // not declared within while loop
         /*
-         * readLine is a bit quirky : it returns the content of a line MINUS the
-         * newline. it returns null only for the END of the stream. it returns
-         * an empty String if two newlines appear in a row.
+         * readLine is a bit quirky : it returns the content of a line MINUS the newline. it returns null only for the END of the
+         * stream. it returns an empty String if two newlines appear in a row.
          */
         while ((line = input.readLine()) != null) {
           contents.append(line);
@@ -195,7 +193,8 @@ public class ProcParser {
   }
 
   /**
-   * @param _processPid the process id
+   * @param _processPid
+   *          the process id
    * @return memory usage information. Files: /proc/[pid]/statm /proc/[pid]/stat
    * 
    */
@@ -252,10 +251,14 @@ public class ProcParser {
 
   /**
    * DEPRECATE - why do this? Java can do this?
+   * 
    * @return int
-   * @throws FileNotFoundException e 
-   * @throws IOException e
-   * @throws NumberFormatException e 
+   * @throws FileNotFoundException
+   *           e
+   * @throws IOException
+   *           e
+   * @throws NumberFormatException
+   *           e
    */
   public static int getNumberofCores() throws FileNotFoundException, IOException, NumberFormatException {
     String[] tempData = null;
@@ -273,8 +276,7 @@ public class ProcParser {
   }
 
   /*
-   * Create a list with the partitions name to be used to find their statistics
-   * in /proc/diskstats file
+   * Create a list with the partitions name to be used to find their statistics in /proc/diskstats file
    */
   public static ArrayList<String> getPartitionNames(ArrayList<String> data) {
 
@@ -304,8 +306,7 @@ public class ProcParser {
   }
 
   /**
-   * Opens a stream from a existing file and return it. This style of
-   * implementation does not throw Exceptions to the caller.
+   * Opens a stream from a existing file and return it. This style of implementation does not throw Exceptions to the caller.
    * 
    * @param path
    *          is a file which already exists and can be read.
@@ -326,8 +327,7 @@ public class ProcParser {
   }
 
   /*
-   * Gathers the usage statistic from the /proc file system for CPU, Memory,
-   * Disk and Network
+   * Gathers the usage statistic from the /proc file system for CPU, Memory, Disk and Network
    */
   static public ArrayList<String> getUsage(String uType) {
     if ((uType == null) || (processPid < 0)) {

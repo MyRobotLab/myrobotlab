@@ -31,187 +31,184 @@ import org.slf4j.Logger;
  */
 
 public class DockableTabPane implements ActionListener {
-	public final static Logger log = LoggerFactory.getLogger(DockableTabPane.class);
+  public final static Logger log = LoggerFactory.getLogger(DockableTabPane.class);
 
-	/**
-	 * we need 2 indexes/containers for our tabs one is the swing JTabbedPane,
-	 * but this is not useful in its serializable form so we maintain a 'custom'
-	 * map of dockable tabs - this contains size and location info which is
-	 * serializable
-	 */
-	transient JTabbedPane tabs = new JTabbedPane();
-	
-	/**
-	 * a interface / callback to preserve location, dimensions,
-	 * and other data of a desktop
-	 */
-	transient StateSaver stateSaver;
+  /**
+   * we need 2 indexes/containers for our tabs one is the swing JTabbedPane, but this is not useful in its serializable form so we
+   * maintain a 'custom' map of dockable tabs - this contains size and location info which is serializable
+   */
+  transient JTabbedPane tabs = new JTabbedPane();
 
-	/**
-	 * serializable map of dockable tabs - used for saving locations and
-	 * positions of undocked panels to preserve coordinates in saved desktops
-	 */
-	Map<String, Map<String, DockableTabData>> desktops;
-	
-	public String currentDesktop;
+  /**
+   * a interface / callback to preserve location, dimensions, and other data of a desktop
+   */
+  transient StateSaver stateSaver;
 
-	transient Map<String, DockableTab> dockableTabs = new TreeMap<String, DockableTab>();
+  /**
+   * serializable map of dockable tabs - used for saving locations and positions of undocked panels to preserve coordinates in saved
+   * desktops
+   */
+  Map<String, Map<String, DockableTabData>> desktops;
 
-	public DockableTabPane(StateSaver stateSaver) {
-		this.stateSaver = stateSaver;
-		tabs.setMinimumSize(new Dimension(0, 0));
-		
-		if (currentDesktop == null){
-			currentDesktop = "default";
-		}
-		
-		// if desktops wasn't saved  by the service
-		if (desktops == null){
-			desktops = new TreeMap<String, Map<String, DockableTabData>> ();
-		}
-		
-		if (!desktops.containsKey(currentDesktop)){
-			setDesktop(currentDesktop);
-		}
-	}
+  public String currentDesktop;
 
-	public DockableTabPane() {
-		this(null);
-	}
-	
-	public void addTab(String title, Component display){
-		addTab(title, display, null);	
-	}
-	
-	// FIXME - set preffered size ??
-	public void addTab(String title, Component display, String tip) {
-		if (dockableTabs.containsKey(title)) {
-			log.info("addTab - {} already contains tab", title);
-			return;
-		}
-		tabs.addTab(title, null, display, tip);
-		DockableTab newTab = new DockableTab(this, title, display);
-		tabs.setTabComponentAt(tabs.getTabCount() - 1, newTab.getTitleLabel());
-		dockableTabs.put(title, newTab);
-		if (desktops.get(currentDesktop).containsKey(title)){			
-			newTab.setData(desktops.get(currentDesktop).get(title));
-		} else {
-			desktops.get(currentDesktop).put(title, newTab.getData());
-		}
-		// tabs.setPreferredSize(new Dimension(300, 300));
-	}
+  transient Map<String, DockableTab> dockableTabs = new TreeMap<String, DockableTab>();
 
-	public JTabbedPane getTabs() {
-		return tabs;
-	}
+  public DockableTabPane(StateSaver stateSaver) {
+    this.stateSaver = stateSaver;
+    tabs.setMinimumSize(new Dimension(0, 0));
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-	}
+    if (currentDesktop == null) {
+      currentDesktop = "default";
+    }
 
-	public void setTabPlacementRight() {
-		tabs.setTabPlacement(SwingConstants.RIGHT);
-	}
+    // if desktops wasn't saved by the service
+    if (desktops == null) {
+      desktops = new TreeMap<String, Map<String, DockableTabData>>();
+    }
 
-	public void removeTab(String title) {
-		if (dockableTabs.containsKey(title)) {
-			DockableTab tab = dockableTabs.get(title);
-			dockableTabs.remove(title);
-			tabs.remove(tab.display);
-		}
-	}
+    if (!desktops.containsKey(currentDesktop)) {
+      setDesktop(currentDesktop);
+    }
+  }
 
-	public void setSelectedComponent(Container component) {
-		tabs.setSelectedComponent(component);
-	}
+  public DockableTabPane() {
+    this(null);
+  }
 
-	public void dockTab(String title) {
-		if (dockableTabs.containsKey(title)) {
-			dockableTabs.get(title).dockTab();
-		}
-	}
+  public void addTab(String title, Component display) {
+    addTab(title, display, null);
+  }
 
-	public void hideTab(String title) {
-		if (dockableTabs.containsKey(title)) {
-			dockableTabs.get(title).hideTab();
-		}
-	}
+  // FIXME - set preffered size ??
+  public void addTab(String title, Component display, String tip) {
+    if (dockableTabs.containsKey(title)) {
+      log.info("addTab - {} already contains tab", title);
+      return;
+    }
+    tabs.addTab(title, null, display, tip);
+    DockableTab newTab = new DockableTab(this, title, display);
+    tabs.setTabComponentAt(tabs.getTabCount() - 1, newTab.getTitleLabel());
+    dockableTabs.put(title, newTab);
+    if (desktops.get(currentDesktop).containsKey(title)) {
+      newTab.setData(desktops.get(currentDesktop).get(title));
+    } else {
+      desktops.get(currentDesktop).put(title, newTab.getData());
+    }
+    // tabs.setPreferredSize(new Dimension(300, 300));
+  }
 
-	public void undockTab(String title) {
-		if (dockableTabs.containsKey(title)) {
-			dockableTabs.get(title).undockTab();
-		}
-	}
+  public JTabbedPane getTabs() {
+    return tabs;
+  }
 
-	public void unhideTab(String title) {
-		if (dockableTabs.containsKey(title)) {
-			dockableTabs.get(title).unhideTab();
-		}
-	}
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // TODO Auto-generated method stub
+  }
 
-	public Set<String> keySet() {
-		return dockableTabs.keySet();
-	}
+  public void setTabPlacementRight() {
+    tabs.setTabPlacement(SwingConstants.RIGHT);
+  }
 
-	public DockableTab get(String title) {
-		return dockableTabs.get(title);
-	}
+  public void removeTab(String title) {
+    if (dockableTabs.containsKey(title)) {
+      DockableTab tab = dockableTabs.get(title);
+      dockableTabs.remove(title);
+      tabs.remove(tab.display);
+    }
+  }
 
-	public int size() {
-		int z = tabs.getTabCount();
-		return dockableTabs.size();
-	}
+  public void setSelectedComponent(Container component) {
+    tabs.setSelectedComponent(component);
+  }
 
-	public void setDesktop(String name) {
-		currentDesktop = name;
-		if (!desktops.containsKey(currentDesktop)) {
-			Map<String, DockableTabData> desktop = resetDesktop(currentDesktop);
-		} else {
-			
-		}
-	}
+  public void dockTab(String title) {
+    if (dockableTabs.containsKey(title)) {
+      dockableTabs.get(title).dockTab();
+    }
+  }
 
-	public Map<String, DockableTabData> resetDesktop(String name) {
-		Map<String, DockableTabData> desktop = new TreeMap<String, DockableTabData>();
-		desktops.put(name, desktop);
-		return desktop;
-	}
+  public void hideTab(String title) {
+    if (dockableTabs.containsKey(title)) {
+      dockableTabs.get(title).hideTab();
+    }
+  }
 
-	public void removeDesktop(String name) {
-		if (desktops.containsKey(name)) {
-			desktops.remove(name);
-		}
-	}
+  public void undockTab(String title) {
+    if (dockableTabs.containsKey(title)) {
+      dockableTabs.get(title).undockTab();
+    }
+  }
 
-	public void save() {
-		if (stateSaver != null){
-			stateSaver.save();
-		}
-	}
+  public void unhideTab(String title) {
+    if (dockableTabs.containsKey(title)) {
+      dockableTabs.get(title).unhideTab();
+    }
+  }
 
-	public void setStateSaver(StateSaver stateSaver) {
-		this.stateSaver = stateSaver;
-	}
+  public Set<String> keySet() {
+    return dockableTabs.keySet();
+  }
 
-	public void remove(Container display) {
-		tabs.remove(display);
-	}
+  public DockableTab get(String title) {
+    return dockableTabs.get(title);
+  }
 
-	public void explode() {
-		for (String key : dockableTabs.keySet()) {
-			undockTab(key);
-		}
-	}
-	
-	public void collapse() {
-		for (String key : dockableTabs.keySet()) {
-			dockTab(key);
-		}
-	}
-	
-	public Map<String, DockableTab> getDockableTabs(){
-	  return dockableTabs;
-	}
-	
+  public int size() {
+    int z = tabs.getTabCount();
+    return dockableTabs.size();
+  }
+
+  public void setDesktop(String name) {
+    currentDesktop = name;
+    if (!desktops.containsKey(currentDesktop)) {
+      Map<String, DockableTabData> desktop = resetDesktop(currentDesktop);
+    } else {
+
+    }
+  }
+
+  public Map<String, DockableTabData> resetDesktop(String name) {
+    Map<String, DockableTabData> desktop = new TreeMap<String, DockableTabData>();
+    desktops.put(name, desktop);
+    return desktop;
+  }
+
+  public void removeDesktop(String name) {
+    if (desktops.containsKey(name)) {
+      desktops.remove(name);
+    }
+  }
+
+  public void save() {
+    if (stateSaver != null) {
+      stateSaver.save();
+    }
+  }
+
+  public void setStateSaver(StateSaver stateSaver) {
+    this.stateSaver = stateSaver;
+  }
+
+  public void remove(Container display) {
+    tabs.remove(display);
+  }
+
+  public void explode() {
+    for (String key : dockableTabs.keySet()) {
+      undockTab(key);
+    }
+  }
+
+  public void collapse() {
+    for (String key : dockableTabs.keySet()) {
+      dockTab(key);
+    }
+  }
+
+  public Map<String, DockableTab> getDockableTabs() {
+    return dockableTabs;
+  }
+
 }

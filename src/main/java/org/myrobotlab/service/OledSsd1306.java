@@ -27,28 +27,21 @@ import org.slf4j.Logger;
 
 /**
  * 
- * OledSsd1306 - This service can be used to drive a OLED display using the i2c
- * protocol It's built for the SSD1306 driver
+ * OledSsd1306 - This service can be used to drive a OLED display using the i2c protocol It's built for the SSD1306 driver
  * 
  * @author Mats Onnerby
  * 
- *         More Info : https://www.adafruit.com/product/326 References :
- *         https://github.com/adafruit/Adafruit_SSD1306
+ *         More Info : https://www.adafruit.com/product/326 References : https://github.com/adafruit/Adafruit_SSD1306
  * 
- *         This service builds is a conversion from of the Arduino library above
- *         to Java
+ *         This service builds is a conversion from of the Arduino library above to Java
  * 
- *         Some OLED's are wired for SPI and need to be changed according to
- *         this instruction so that you can use the i2c protocol ( as
- *         implemented in this program )
+ *         Some OLED's are wired for SPI and need to be changed according to this instruction so that you can use the i2c protocol (
+ *         as implemented in this program )
  * 
- *         http://electronics.stackexchange.com/questions/164680/ssd1306-display
- *         -isp-connection-or-i2c-according-to-resistors
+ *         http://electronics.stackexchange.com/questions/164680/ssd1306-display -isp-connection-or-i2c-according-to-resistors
  * 
- *         NB. Some OLED's need a reset pulse at power on. It can be generated
- *         using one of the pin's on the Arduino or by adding a 100nF capacitor
- *         between the reset pin and GND, and a 10K resistor betwen the reset
- *         pin and VCC
+ *         NB. Some OLED's need a reset pulse at power on. It can be generated using one of the pin's on the Arduino or by adding a
+ *         100nF capacitor between the reset pin and GND, and a 10K resistor betwen the reset pin and VCC
  * 
  */
 public class OledSsd1306 extends Service implements I2CControl {
@@ -150,7 +143,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   public boolean isAttached = false;
 
   public static void main(String[] args) {
-          LoggingFactory.init("info");
+    LoggingFactory.init("info");
 
     try {
       OledSsd1306 oledSsd1306 = (OledSsd1306) Runtime.start("OledSsd1306", "OledSsd1306");
@@ -313,12 +306,11 @@ public class OledSsd1306 extends Service implements I2CControl {
   }
 
   /*
-   * draws the given image over the current image buffer. The image is
-   * automatically converted to a binary image (if it not already is).
+   * draws the given image over the current image buffer. The image is automatically converted to a binary image (if it not already
+   * is).
    * 
-   * Note that the current buffer is not cleared before, so if you want the
-   * image to completely overwrite the current display content you need to call
-   * clear() before.
+   * Note that the current buffer is not cleared before, so if you want the image to completely overwrite the current display
+   * content you need to call clear() before.
    *
    */
   public synchronized void drawImage(BufferedImage image, int x, int y) {
@@ -843,9 +835,8 @@ public class OledSsd1306 extends Service implements I2CControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -927,12 +918,12 @@ public class OledSsd1306 extends Service implements I2CControl {
 
   @Override
   public void detach(Attachable service) {
-    
-    if (service!=null)
-    if (I2CController.class.isAssignableFrom(service.getClass())) {
-      detachI2CController((I2CController) service);
-      return;
-    }
+
+    if (service != null)
+      if (I2CController.class.isAssignableFrom(service.getClass())) {
+        detachI2CController((I2CController) service);
+        return;
+      }
   }
 
   @Override
@@ -945,14 +936,12 @@ public class OledSsd1306 extends Service implements I2CControl {
     isAttached = false;
     broadcastState();
   }
-  
-  
+
   @Override
   public void stopService() {
 
-    if (isAttached(controller))
-    {
-    controller.detachI2CControl(this);
+    if (isAttached(controller)) {
+      controller.detachI2CControl(this);
     }
   }
 

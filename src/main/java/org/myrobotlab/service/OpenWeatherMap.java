@@ -10,10 +10,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * A service to query into OpenWeatherMap to get the current weather. For more
- * info check out http://openweathermap.org This service requires an API key
- * that is free to register for from Open Weather Map.
- * RECENT CHANGES BECAUSE API LIMITATION : period is 3 hours per index, 40 is maximum for free api key ( 3 hours TO 5 days forecast )
+ * A service to query into OpenWeatherMap to get the current weather. For more info check out http://openweathermap.org This service
+ * requires an API key that is free to register for from Open Weather Map. RECENT CHANGES BECAUSE API LIMITATION : period is 3 hours
+ * per index, 40 is maximum for free api key ( 3 hours TO 5 days forecast )
  * 
  */
 public class OpenWeatherMap extends HttpClient {
@@ -63,8 +62,7 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * retrieve a string list of weather for the period indicated by hourPeriod 1 >=
-   * hourPeriod is 3 hours per index -> 24 hours is 8.
+   * retrieve a string list of weather for the period indicated by hourPeriod 1 >= hourPeriod is 3 hours per index -> 24 hours is 8.
    */
   public String[] fetchForecast() {
     String[] result = new String[11];
@@ -78,7 +76,7 @@ public class OpenWeatherMap extends HttpClient {
       return null;
     } else {
 
-      //log.info(jsonObj.toString());
+      // log.info(jsonObj.toString());
       // Getting the list node
       JSONArray list = null;
       try {
@@ -150,7 +148,7 @@ public class OpenWeatherMap extends HttpClient {
     security.setKey("OPENWEATHERMAP", apiKey);
   }
 
-  //TODO use locale
+  // TODO use locale
   public void setLang(String lang) {
     this.lang = lang;
   }
@@ -168,8 +166,7 @@ public class OpenWeatherMap extends HttpClient {
 
   /**
    * @param period
-   *          period : integer from 1 to 40 
-   *          ( 1 = 3 hours )
+   *          period : integer from 1 to 40 ( 1 = 3 hours )
    */
   public void setPeriod(Integer period) {
     if ((period > 0) && (period <= 40)) {
@@ -242,9 +239,8 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -262,12 +258,12 @@ public class OpenWeatherMap extends HttpClient {
 
   public static void main(String[] args) {
     OpenWeatherMap owm = new OpenWeatherMap("weather");
-    //owm.setKey("XXX");
+    // owm.setKey("XXX");
     owm.setLocation("Paris,FR");
     owm.setPeriod(1);
     owm.startService();
 
-    //tomorrow is 8 ( 3 * 8 )
+    // tomorrow is 8 ( 3 * 8 )
     owm.setUnits("metric");
     String sentence = "( Raw code : " + owm.getWeatherCode() + "), In " + owm.getLocation() + " the weather is " + owm.getWeatherDescription() + ".  " + owm.getDegrees()
         + " degrees " + owm.getLocalUnits() + " humidity " + owm.getHumidity() + " Min Degrees " + owm.getMinDegrees() + " max Degrees " + owm.getMaxDegrees() + " pressure "

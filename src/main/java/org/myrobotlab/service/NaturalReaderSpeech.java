@@ -13,11 +13,9 @@ import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 /**
- * Natural Reader speech to text service based on naturalreaders.com This code
- * is basically all the same as AcapelaSpeech...
+ * Natural Reader speech to text service based on naturalreaders.com This code is basically all the same as AcapelaSpeech...
  * 
- * FIXME - see if voices can be pulled down from API : moz4r : it is a front
- * service for 2 tts , amazon polly + ibm
+ * FIXME - see if voices can be pulled down from API : moz4r : it is a front service for 2 tts , amazon polly + ibm
  * 
  */
 public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
@@ -46,7 +44,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   public void startService() {
     super.startService();
     if (httpClient == null) {
-      httpClient = (HttpClient) startPeer("httpClient");   
+      httpClient = (HttpClient) startPeer("httpClient");
     }
   }
 
@@ -94,33 +92,33 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
 
-      // other examples :
-      // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=de-DE_BirgitVoice&rate=100&text=test&outputFormat=mp3
-      // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=Salli&rate=100&text=test&outputFormat=mp3
-      // https://api.naturalreaders.com/v4/tts/ibmspeak?speaker=en-US_MichaelVoice&text=<prosody
-      // rate="0%">starting left arm, I am a watson voice</prosody>
-      // String url =
-      // "http://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&t="
-      // + encoded + "&r=2&s=0";
+    // other examples :
+    // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=de-DE_BirgitVoice&rate=100&text=test&outputFormat=mp3
+    // https://api.naturalreaders.com/v4/tts/awsspeak?voiceId=Salli&rate=100&text=test&outputFormat=mp3
+    // https://api.naturalreaders.com/v4/tts/ibmspeak?speaker=en-US_MichaelVoice&text=<prosody
+    // rate="0%">starting left arm, I am a watson voice</prosody>
+    // String url =
+    // "http://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&t="
+    // + encoded + "&r=2&s=0";
 
-      Voice voice = getVoice();
-      
-      String encoded = URLEncoder.encode(HtmlFilter.stripHtml(toSpeak), "UTF-8");
-      String url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId=" + voice.getVoiceProvider().toString() + "&rate=" + rate + "&text=" + encoded + "&outputFormat=mp3";
+    Voice voice = getVoice();
 
-      byte[] b = null;
+    String encoded = URLEncoder.encode(HtmlFilter.stripHtml(toSpeak), "UTF-8");
+    String url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId=" + voice.getVoiceProvider().toString() + "&rate=" + rate + "&text=" + encoded + "&outputFormat=mp3";
 
-      log.info("url {}", url);
-      // get mp3 file & save to cache
-      // cache the mp3 content
-      b = httpClient.getBytes(url);
-      if (b == null || b.length == 0) {
-        error("%s returned 0 byte file !!! - it may block you", getName());
-        b = null;
-      } else {
-        FileIO.toFile(audioData.getFileName(), b);
-      }
-      return audioData;
+    byte[] b = null;
+
+    log.info("url {}", url);
+    // get mp3 file & save to cache
+    // cache the mp3 content
+    b = httpClient.getBytes(url);
+    if (b == null || b.length == 0) {
+      error("%s returned 0 byte file !!! - it may block you", getName());
+      b = null;
+    } else {
+      FileIO.toFile(audioData.getFileName(), b);
+    }
+    return audioData;
   }
 
   @Override

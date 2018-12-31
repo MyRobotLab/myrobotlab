@@ -1,4 +1,5 @@
 package org.myrobotlab.opencv;
+
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 
@@ -18,22 +19,21 @@ public class ImageFileFrameGrabber extends FrameGrabber {
 
   // delay in ms between grabs.
   // public int delay = 31; // 32 fps is 31.5 ms per frame
-  public int delay = 16; 
+  public int delay = 16;
   private ArrayList<File> imageFiles = new ArrayList<File>();
   private int grabCount = 0;
-  
+
   protected transient IplImage image;
   transient private IplImage lastImage;
-  
+
   // transient private HashMap<String, IplImage> cache = new HashMap<String, IplImage>();
   private int frameCounter = 0;
   public String path;
   transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
-  
 
   public ImageFileFrameGrabber(String path) {
     this.path = path;
-    load();    
+    load();
   }
 
   public void load() {
@@ -41,28 +41,25 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     if (!target.isDirectory()) {
       imageFiles.add(target);
     } else {
-    File[] listOfFiles = target.listFiles();
-    for (File file : listOfFiles) {
-      if (file.isFile()) {
-        // TODO: check what formats opencv's cvLoadImage supports and add that
-        // here.
-        if (file.getName().toLowerCase().endsWith("png") || file.getName().toLowerCase().endsWith("jpg")) {
-          // It's an image file! ish...
-          imageFiles.add(file);
+      File[] listOfFiles = target.listFiles();
+      for (File file : listOfFiles) {
+        if (file.isFile()) {
+          // TODO: check what formats opencv's cvLoadImage supports and add that
+          // here.
+          if (file.getName().toLowerCase().endsWith("png") || file.getName().toLowerCase().endsWith("jpg")) {
+            // It's an image file! ish...
+            imageFiles.add(file);
+          }
         }
       }
     }
   }
-  }
 
   @Override
   public Frame grab() {
-    /* not needed as opencv can self regulat - or adjust fps
-    try {
-      // pause for the specified delay before loading the image.
-      Thread.sleep(delay);
-    } catch (InterruptedException e) {}
-    // set the file path
+    /*
+     * not needed as opencv can self regulat - or adjust fps try { // pause for the specified delay before loading the image.
+     * Thread.sleep(delay); } catch (InterruptedException e) {} // set the file path
      * 
      */
     path = imageFiles.get(grabCount).getAbsolutePath();
@@ -70,19 +67,12 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     // grab it.
     image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED);
     /*
-    if (!cache.containsKey(path)) {
-      image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED);
-      cache.put(path, image);
-    } else {
-      IplImage cachedImage = cache.get(path);
-      if (image != null) {
-        image = cachedImage.clone();
-      } else {
-        log.error("could not get cached image {}", path);
-      }
-      
-    }
-    */
+     * if (!cache.containsKey(path)) { image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED); cache.put(path, image); } else { IplImage
+     * cachedImage = cache.get(path); if (image != null) { image = cachedImage.clone(); } else {
+     * log.error("could not get cached image {}", path); }
+     * 
+     * }
+     */
 
     ++frameCounter;
 
@@ -118,25 +108,25 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   @Override
   public void start() throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void stop() throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void trigger() throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void release() throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

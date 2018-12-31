@@ -5,8 +5,7 @@ import java.util.Date;
 import org.alicebot.ab.Chat;
 
 /**
- * Pojo to wrap non-serializable Chats and provide unique data elements for each
- * Chat session
+ * Pojo to wrap non-serializable Chats and provide unique data elements for each Chat session
  * 
  * @author GroG
  *

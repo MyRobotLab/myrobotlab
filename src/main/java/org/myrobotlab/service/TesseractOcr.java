@@ -23,13 +23,10 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * FIXME - consider -
- * https://stackoverflow.com/questions/1813881/java-ocr-implementation If this
- * thing is no worky ...
+ * FIXME - consider - https://stackoverflow.com/questions/1813881/java-ocr-implementation If this thing is no worky ...
  * 
- * TesseractOCR - This service will use the open source project tesseract.
- * Tesseract will take an Image and extract any recognizable text from that
- * image as a string.
+ * TesseractOCR - This service will use the open source project tesseract. Tesseract will take an Image and extract any recognizable
+ * text from that image as a string.
  *
  */
 public class TesseractOcr extends Service {
@@ -48,8 +45,7 @@ public class TesseractOcr extends Service {
       // String found = tesseract.ocr("phototest.jpg");
       // String found = tesseract.ocr("30.speed.JPG");
       String found = tesseract.ocr("traffic.sign.jpg");
-      
-      
+
       // String found = tesseract.ocr("test.jpg");
       // String found = tesseract.ocr("test.tif");
       log.info("found {}", found);
@@ -71,7 +67,7 @@ public class TesseractOcr extends Service {
     // javacv is expecting.. so we are going to do it the "file" way :P
     File temp = File.createTempFile("tesseract", ".jpg");
     FileOutputStream fos = new FileOutputStream(temp);
-    ImageIO.write(image, "jpg", fos);    
+    ImageIO.write(image, "jpg", fos);
     temp.deleteOnExit();
     return ocr(temp.getAbsolutePath());
   }
@@ -84,7 +80,7 @@ public class TesseractOcr extends Service {
     }
     // Initialize tesseract-ocr with English, without specifying tessdata path
     // FIXME - maybe don't just dump in the root - perhaps subdirectory - and what
-    // about integrating with other /resources ? 
+    // about integrating with other /resources ?
     if (api.Init(System.getProperty("user.dir"), "eng") != 0) {
       log.error("Could not initialize tesseract.");
     }
@@ -109,9 +105,8 @@ public class TesseractOcr extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

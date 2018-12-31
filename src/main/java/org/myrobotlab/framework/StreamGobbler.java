@@ -56,14 +56,9 @@ public class StreamGobbler extends Thread {
       }
     } catch (Exception e) {
       log.error("StreamGobbler threw", e);
-    }/* finally {
-      try {
-        if (is != null) {
-          is.close();
-        }
-      } catch (Exception ex) {
-      }
-      */
-    }
-
+    } /*
+       * finally { try { if (is != null) { is.close(); } } catch (Exception ex) { }
+       */
   }
+
+}

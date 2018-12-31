@@ -25,8 +25,6 @@ public class CleverBot extends Service {
   boolean initialized = false;
   boolean continueToTalkToSelf = true;
 
-
-
   public CleverBot(String n) {
     super(n);
     init();
@@ -77,16 +75,15 @@ public class CleverBot extends Service {
         input = bot1session.think(input);
       }
     } catch (Exception e) {
-      log.error("talkToSelf threw",e);
+      log.error("talkToSelf threw", e);
     }
 
     return input;
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -104,7 +101,7 @@ public class CleverBot extends Service {
   public static void main(String[] args) {
     LoggingFactory.init();
     try {
-      CleverBot cleverbot = (CleverBot)Runtime.start("cleverbot","CleverBot");
+      CleverBot cleverbot = (CleverBot) Runtime.start("cleverbot", "CleverBot");
 
       log.info(cleverbot.chat("Hi"));
 

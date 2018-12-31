@@ -7,8 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Implementation of the Cache interface that stores information in local
- * memory.
+ * Implementation of the Cache interface that stores information in local memory.
  * 
  * @author SwedaKonsult
  * 
@@ -32,12 +31,10 @@ public class LocalCache extends BaseCache {
   private final boolean useTimeout;
 
   /**
-   * Constructor. Default load factor (0.75) and concurrencyLevel (16). Default
-   * timeout: 0 (never).
+   * Constructor. Default load factor (0.75) and concurrencyLevel (16). Default timeout: 0 (never).
    * 
    * @param initialCapacity
-   *          the initial capacity. The implementation performs internal sizing
-   *          to accommodate this many elements.
+   *          the initial capacity. The implementation performs internal sizing to accommodate this many elements.
    * @throws IllegalArgumentException
    *           if the initial capacity of elements is negative.
    */
@@ -49,21 +46,17 @@ public class LocalCache extends BaseCache {
    * Constructor.
    * 
    * @param initialSize
-   *          the initial capacity. The implementation performs internal sizing
-   *          to accommodate this many elements.
+   *          the initial capacity. The implementation performs internal sizing to accommodate this many elements.
    * @param loadFactor
-   *          the load factor threshold, used to control resizing. Resizing may
-   *          be performed when the average number of elements per bin exceeds
-   *          this threshold.
+   *          the load factor threshold, used to control resizing. Resizing may be performed when the average number of elements per
+   *          bin exceeds this threshold.
    * @param concurrencyLevel
-   *          the estimated number of concurrently updating threads. The
-   *          implementation performs internal sizing to try to accommodate this
-   *          many threads.
+   *          the estimated number of concurrently updating threads. The implementation performs internal sizing to try to
+   *          accommodate this many threads.
    * @param timeout
    *          amount of time in ms after which an item should time out.
    * @throws IllegalArgumentException
-   *           if the initial capacity is negative or the load factor or
-   *           concurrencyLevel are non-positive.
+   *           if the initial capacity is negative or the load factor or concurrencyLevel are non-positive.
    */
   public LocalCache(int initialSize, float loadFactor, int concurrencyLevel, int timeout) {
     items = new ConcurrentHashMap<String, Object>(initialSize, loadFactor, concurrencyLevel);

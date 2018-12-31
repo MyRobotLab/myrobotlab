@@ -11,8 +11,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * A service to query into Yahoo's api with a query to the current price for a
- * given ticker symbol. This requires
+ * A service to query into Yahoo's api with a query to the current price for a given ticker symbol. This requires
  */
 public class YahooFinanceStockQuote extends HttpClient {
 

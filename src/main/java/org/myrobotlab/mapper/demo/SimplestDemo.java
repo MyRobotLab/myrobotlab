@@ -29,8 +29,7 @@ import org.myrobotlab.mapper.sim.Agent;
 import org.myrobotlab.mapper.sim.Box;
 
 /**
- * This the simplest Demo. Robot has no sensors. The robot progress until it
- * reaches a box.
+ * This the simplest Demo. Robot has no sensors. The robot progress until it reaches a box.
  * 
  */
 public class SimplestDemo extends Demo {

@@ -43,8 +43,7 @@ import com.pi4j.system.*;
 
 /**
  * 
- * RasPi - This is the MyRobotLab Service for the Raspberry Pi. It should allow
- * all control offered by the great Pi4J project.
+ * RasPi - This is the MyRobotLab Service for the Raspberry Pi. It should allow all control offered by the great Pi4J project.
  * 
  * More Info : http://pi4j.com/
  * 
@@ -69,13 +68,13 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   }
 
-  private boolean wiringPi = true ; // Defined to be able to switch between
-                                    // the original pi4j
-                                    // implementation and the wiringpi
-                                    // implemenation that supports repeated
-                                    // start.
-                                    // Repeated start is used by Mpr121 and
-                                    // may be needed by other devices
+  private boolean wiringPi = true; // Defined to be able to switch between
+                                   // the original pi4j
+                                   // implementation and the wiringpi
+                                   // implemenation that supports repeated
+                                   // start.
+                                   // Repeated start is used by Mpr121 and
+                                   // may be needed by other devices
 
   transient Map<String, PinArrayListener> pinArrayListeners = new ConcurrentHashMap<String, PinArrayListener>();
 
@@ -111,10 +110,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
-
   public static void main(String[] args) {
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     /*
      * RasPi.displayString(1, 70, "1");
@@ -139,8 +136,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /*
-   * FIXME - make these methods createDigitalAndPwmPin public
-   * GpioPinDigitalOutput provisionDigitalOutputPin
+   * FIXME - make these methods createDigitalAndPwmPin public GpioPinDigitalOutput provisionDigitalOutputPin
    */
 
   public RasPi(String n) {
@@ -157,14 +153,11 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       /*
        * Removed since it seems to make MRL stop
        * 
-      log.info("Initiating GPIO");
-      gpio = GpioFactory.getInstance();
-      log.info("GPIO Initiated");
-      */
+       * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance(); log.info("GPIO Initiated");
+       */
       // TODO Check if the is correct. I don't think it is /Mats // GPIO pins
       /*
-       * should be provisioned in the CreateDevice /* gpio01
-       * =gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
+       * should be provisioned in the CreateDevice /* gpio01 =gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
        * gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
        */
     } else {
@@ -174,7 +167,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
     getPinList();
 
-}
+  }
 
   @Override
   public void startService() {
@@ -197,11 +190,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     ArrayList<Integer> list = new ArrayList<Integer>();
     try {
       /*
-       * From its name we can easily deduce that it provides a communication
-       * link between ICs (integrated circuits). I2C is multimaster and can
-       * support a maximum of 112 devices on the bus. The specification declares
-       * that 128 devices can be connected to the I2C bus, but it also defines
-       * 16 reserved addresses.
+       * From its name we can easily deduce that it provides a communication link between ICs (integrated circuits). I2C is
+       * multimaster and can support a maximum of 112 devices on the bus. The specification declares that 128 devices can be
+       * connected to the I2C bus, but it also defines 16 reserved addresses.
        */
       I2CBus bus = I2CFactory.getInstance(busAddress);
 
@@ -264,14 +255,14 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
-    
-    String key = String.format("%d.%d", busAddress, deviceAddress);    
+
+    String key = String.format("%d.%d", busAddress, deviceAddress);
     I2CDeviceMap devicedata = i2cDevices.get(key);
     if (devicedata == null) {
       createI2cDevice(busAddress, deviceAddress, control.getName());
       devicedata = i2cDevices.get(key);
-    } 
-    
+    }
+
     if (wiringPi) {
       int reg = buffer[0] & 0xFF;
       for (int i = 1; i < size; i++) {
@@ -298,7 +289,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       createI2cDevice(busAddress, deviceAddress, control.getName());
       devicedata = i2cDevices.get(key);
     }
-    
+
     if (wiringPi) {
       for (int i = 0; i < size; i++) {
         buffer[i] = (byte) (I2C.wiringPiI2CRead(devicedata.deviceHandle) & 0xFF);
@@ -326,7 +317,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       createI2cDevice(busAddress, deviceAddress, control.getName());
       devicedata = i2cDevices.get(key);
     }
-    
+
     if (wiringPi) {
       for (int i = 0; i < readSize; i++) {
         readBuffer[i] = (byte) (I2C.wiringPiI2CReadReg8(devicedata.deviceHandle, (writeBuffer[0] + i) & 0xFF));
@@ -343,9 +334,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -371,7 +361,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-    
+
     String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
 
     if (i2cDevices.containsKey(key)) {
@@ -381,9 +371,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       control.attachI2CController(this);
     }
   }
-  
-  void createI2cDevice(int bus, int address, String serviceName){
-    
+
+  void createI2cDevice(int bus, int address, String serviceName) {
+
     String key = String.format("%d.%d", bus, address);
     I2CDeviceMap devicedata = new I2CDeviceMap();
     if (!i2cDevices.containsKey(key)) {
@@ -426,8 +416,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /**
-   * Forces usage of wiringPi library (
-   * http://wiringpi.com/reference/i2c-library/ )
+   * Forces usage of wiringPi library ( http://wiringpi.com/reference/i2c-library/ )
    * 
    * @param status
    */
@@ -436,8 +425,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /**
-   * Check if wiringPi library is used. Returns true when wiringPi library is
-   * used
+   * Check if wiringPi library is used. Returns true when wiringPi library is used
    * 
    * @return
    */
@@ -529,7 +517,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void pinMode(Integer address, String mode) {
-    
+
     if (mode != null && mode.equalsIgnoreCase("INPUT")) {
       pinMode(address, INPUT);
     } else {
@@ -625,9 +613,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void disablePins() {
-    for (int i = 0; i < pinIndex.size(); i++){
+    for (int i = 0; i < pinIndex.size(); i++) {
       PinDefinition pin = pinIndex.get(i);
-      if (pin.getGpioPin() != null){
+      if (pin.getGpioPin() != null) {
         pin.getGpioPin().removeListener();
         pin.setEnabled(false);
       }
@@ -636,7 +624,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
 
   @Override
   public void enablePin(Integer address, Integer rate) {
-    
+
     PinDefinition pin = pinIndex.get(address);
     pin.getGpioPin().addListener(new GpioPinListener());
     pin.setEnabled(true);

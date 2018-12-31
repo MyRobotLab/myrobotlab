@@ -20,20 +20,17 @@ import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
- * Body spare parts for universal ServoControl gestures
- * Inspired by InMoov.java...
+ * Body spare parts for universal ServoControl gestures Inspired by InMoov.java...
  * 
  * TODO : IK moveTo(x,y,z) ?
  * 
- * Syntax to declare body part
- * Runtime.start("nodeToAttach.name", "BodyPart");
+ * Syntax to declare body part Runtime.start("nodeToAttach.name", "BodyPart");
  * 
- * Syntax to declare an actuator
- * Runtime.start("nodeToAttach.name", "Servo");
+ * Syntax to declare an actuator Runtime.start("nodeToAttach.name", "Servo");
  * 
  * 
- * Do not declare the whole path i01.rightarm.righthand.thumb... as name , just the node to attach :
- * The root will learn every nodes attached for a complete linkage
+ * Do not declare the whole path i01.rightarm.righthand.thumb... as name , just the node to attach : The root will learn every nodes
+ * attached for a complete linkage
  * 
  */
 public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
@@ -85,10 +82,10 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     rightArm.moveTo(10.0);
 
     rightArm.moveTo(90.0, 90.0, 90.0, 90.0, 90.0);
-    //log.info(rightArm.childs.toString() + "childNodes");
-    //log.info(rightArm.childs.crawlForDataStartingWith("") + "");
+    // log.info(rightArm.childs.toString() + "childNodes");
+    // log.info(rightArm.childs.crawlForDataStartingWith("") + "");
 
-    //inMoovTorso.servos = inMoovTorso.childs.crawlForDataStartingWith("rightArm");
+    // inMoovTorso.servos = inMoovTorso.childs.crawlForDataStartingWith("rightArm");
     rightArm.moveTo("rightHand", 63.0);
     rightArm.getBodyParts();
   }
@@ -158,7 +155,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     waitTargetPos(this.getIntanceName());
   }
 
-  /** 
+  /**
    * Detect if every servo of the group are attached to a controller
    */
   public boolean isAttached() {
@@ -169,7 +166,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     return attached;
   }
 
-  /** 
+  /**
    * Electrize servos group
    */
   public void enable() {
@@ -178,7 +175,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     }
   }
 
-  /** 
+  /**
    * Shutdown power of servos group
    */
   public void disable() {
@@ -227,7 +224,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     return meta;
   }
 
-  //pasted from inmoov service, for compatibility
+  // pasted from inmoov service, for compatibility
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
     // todo implement other body parts
@@ -297,7 +294,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     }
   }
 
-  //pasted from inmoov service, for compatibility
+  // pasted from inmoov service, for compatibility
   public DHRobotArm getDHRobotArm() {
     if (this.getIntanceName().toLowerCase().contains("arm")) {
       // TODO: specify this correctly and document the reference frames!
@@ -307,7 +304,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
       // TODO: the DH links should take into account the encoder offsets and
       // calibration maps
       DHLink link1 = new DHLink("omoplate", 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
-      // dh model + 90 degrees = real 
+      // dh model + 90 degrees = real
       link1.setMin(MathUtils.degToRad(-90));
       link1.setMax(MathUtils.degToRad(0));
 
@@ -319,7 +316,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
       link2.setMax(MathUtils.degToRad(90));
 
       DHLink link3 = new DHLink("rotate", 280, 0, MathUtils.degToRad(0), MathUtils.degToRad(90));
-      // TODO: check if this is inverted.  i think it is.
+      // TODO: check if this is inverted. i think it is.
       link3.setMin(MathUtils.degToRad(0));
       link3.setMax(MathUtils.degToRad(180));
 

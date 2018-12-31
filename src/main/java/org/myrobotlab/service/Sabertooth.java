@@ -25,8 +25,7 @@ import org.slf4j.Logger;
  * 
  * More Info: http://www.dimensionengineering.com/datasheets/Sabertooth2x25.pdf
  * 
- * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
- * speed) &amp; 0b01111111);
+ * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 + speed) &amp; 0b01111111);
  * 
  * @author GroG
  * 
@@ -200,7 +199,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     MotorPort motor = (MotorPort) motors.get(mc.getName());
     String port = motor.getPort();
 
-    int power = (int) motorCalcOutput(mc);    
+    int power = (int) motorCalcOutput(mc);
 
     log.error("motor {} power {}", mc.getName(), power);
 
@@ -229,9 +228,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -61,7 +61,6 @@ public class Component implements Serializable, NameProvider {
   }
 
   public void setVirtualValue(double value) {
-    this.virtualValue = (float)value; // jinput uses floats :(  bleh
+    this.virtualValue = (float) value; // jinput uses floats :( bleh
   }
 }
-

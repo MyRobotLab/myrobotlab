@@ -12,18 +12,16 @@ public class SystemResources implements Serializable {
   long maxMemory;
 
   public SystemResources() {
-	  
-	  /* GETS - 
-	   <pre>
 
-    try {
-      com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-      totalPhysicalMemory = os.getTotalPhysicalMemorySize() / 1048576;
-
-    } catch (Exception e) {
-    }
-    </pre>
-    */
+    /*
+     * GETS - <pre>
+     * 
+     * try { com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
+     * java.lang.management.ManagementFactory.getOperatingSystemMXBean(); totalPhysicalMemory = os.getTotalPhysicalMemorySize() /
+     * 1048576;
+     * 
+     * } catch (Exception e) { } </pre>
+     */
 
     freeMemory = Runtime.getRuntime().freeMemory() / 1048576;
     totalMemory = Runtime.getRuntime().totalMemory() / 1048576;
@@ -42,7 +40,7 @@ public class SystemResources implements Serializable {
     return freeMemory;
   }
 
-  public long getMaxMemory() {    
+  public long getMaxMemory() {
     return maxMemory;
   }
 

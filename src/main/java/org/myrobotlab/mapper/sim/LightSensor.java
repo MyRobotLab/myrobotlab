@@ -33,11 +33,10 @@ import java.text.DecimalFormat;
 import javax.swing.JPanel;
 
 /**
- * This class models a single light sensor. The sensor outputs a float
- * proportionnal to received light. <br>
+ * This class models a single light sensor. The sensor outputs a float proportionnal to received light. <br>
  * Implementation Note: <br>
- * We use a small camera to implement the light sensor. The camera must look
- * back at the sensor body so as to measured the light received.
+ * We use a small camera to implement the light sensor. The camera must look back at the sensor body so as to measured the light
+ * received.
  */
 public class LightSensor extends Eye {
 

@@ -72,8 +72,7 @@ public class MethodCache {
   transient private static MethodCache instance;
 
   /**
-   * Cache for Methods In fact this is a map (with classes as keys) of a map
-   * (with method-names as keys)
+   * Cache for Methods In fact this is a map (with classes as keys) of a map (with method-names as keys)
    */
   transient private static ThreadLocal cache;
 
@@ -107,8 +106,7 @@ public class MethodCache {
   }
 
   /**
-   * The <i>private</i> constructor for this class. Use getInstance to get an
-   * instance (the only one).
+   * The <i>private</i> constructor for this class. Use getInstance to get an instance (the only one).
    */
   private MethodCache() {
     cache = new ThreadLocal();
@@ -185,9 +183,8 @@ public class MethodCache {
       if (!clazz.isPrimitive() && !className.startsWith("java.") && !className.startsWith("javax.")) {
 
         /*
-         * try { // Class helper = ClassUtils.forName(className + "_Helper"); //
-         * method = helper.getMethod(methodName, parameterTypes); } catch
-         * (ClassNotFoundException e2) { }
+         * try { // Class helper = ClassUtils.forName(className + "_Helper"); // method = helper.getMethod(methodName,
+         * parameterTypes); } catch (ClassNotFoundException e2) { }
          */
       }
     }

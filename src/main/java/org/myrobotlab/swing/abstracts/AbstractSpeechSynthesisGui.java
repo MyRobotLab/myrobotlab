@@ -114,7 +114,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     addTop("generation time : ", generationTime);
     addTop("audio state : ", audioState);
     // generationTime, audioState
-    //addTop("cache file : ", purgeFile);
+    // addTop("cache file : ", purgeFile);
     addTop(2, cacheFile);
 
     addLeftLine("voices:", voices);
@@ -126,7 +126,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
     resume.setPreferredSize(new Dimension(85, 45));
     stop.setPreferredSize(new Dimension(85, 45));
     // purgeCache.setPreferredSize(new Dimension(170, 45));
-    addBottom(save, /*purgeCache, */ pause, resume, stop, speakButton);
+    addBottom(save, /* purgeCache, */ pause, resume, stop, speakButton);
     addLine(lastUtterance);
 
     // FIXME - hide status - unless cloud provider
@@ -234,8 +234,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   }
 
   /**
-   * original text requested to speak - not necessarily the same as
-   * publishStartSpeaking text since publishStartSpeaking is after a
+   * original text requested to speak - not necessarily the same as publishStartSpeaking text since publishStartSpeaking is after a
    * pre-processor/parser
    * 
    * @param toSpeak
@@ -288,17 +287,11 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           send("stop");
         }
 
-        /* wont work because AudioProcessor wont close file :(
-        <pre>
-        if (o == purgeCache) {
-          send("purgeCache");
-        }
-        
-        if (o == purgeFile) {
-          send("purgeFile", lastAudioData.getFileName());
-        }
-        </pre>
-        */
+        /*
+         * wont work because AudioProcessor wont close file :( <pre> if (o == purgeCache) { send("purgeCache"); }
+         * 
+         * if (o == purgeFile) { send("purgeFile", lastAudioData.getFileName()); } </pre>
+         */
 
         if (o == save) {
           // save keys if any

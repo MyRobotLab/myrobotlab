@@ -60,7 +60,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
           log.info("Shutting down Publisher");
         } else {
           isPublishing = false;
-          log.error("publisher threw {}",e);
+          log.error("publisher threw {}", e);
         }
       }
     }
@@ -117,8 +117,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   public boolean isAttached = false;
 
   /*
-   * =========================================================================
-   * MPR121 Registers
+   * ========================================================================= MPR121 Registers
    * -----------------------------------------------------------------------
    */
   static final int TOUCH_STATUS0 = 0x00;
@@ -286,8 +285,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   transient Map<Integer, List<PinListener>> pinListeners = new HashMap<Integer, List<PinListener>>();
 
   /**
-   * the map of pins which the pin listeners are listening too - if the set is
-   * null they are listening to "any" published pin
+   * the map of pins which the pin listeners are listening too - if the set is null they are listening to "any" published pin
    */
   Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
@@ -295,8 +293,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
                          // default // hZ.
 
   public static void main(String[] args) {
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     try {
       Mpr121 mpr121 = (Mpr121) Runtime.start("mpr121", "Mpr121");
@@ -394,8 +391,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
       sleep(1);
       config = readRegister8(AFE_CONFIGURATION_2);
       log.info(String.format("AFE Configuraiton register 0x%02X", config));
-      retries ++;
-      if (retries > 10) break;
+      retries++;
+      if (retries > 10)
+        break;
     }
 
     if (config != 0x24) {
@@ -470,9 +468,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This method starts the MPR121 measuring pins = Number of pins to use for
-   * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
-   * measuring
+   * This method starts the MPR121 measuring pins = Number of pins to use for measuring starting with ELE0 as number 1 Setting pins
+   * = 0 will stop measuring
    */
   public void setRunMode(int pins) {
     writeRegister(ELECTRODE_CONFIGURAION_REGISTER, pins + 1);
@@ -480,9 +477,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This method starts the MPR121 measuring pins = Number of pins to use for
-   * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
-   * measuring
+   * This method starts the MPR121 measuring pins = Number of pins to use for measuring starting with ELE0 as number 1 Setting pins
+   * = 0 will stop measuring
    */
   public void setStopMode() {
     setRunMode(0);
@@ -529,8 +525,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * GOOD DESIGN - this method is the same pretty much for all Services could be
-   * a Java 8 default implementation to the interface
+   * GOOD DESIGN - this method is the same pretty much for all Services could be a Java 8 default implementation to the interface
    */
   @Override
   public boolean isAttached(String name) {
@@ -717,9 +712,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -853,16 +847,16 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     ;
     return false;
   }
-  
+
   public PinDefinition getPin(String pinName) {
-    if (pinMap.containsKey(pinName)){
+    if (pinMap.containsKey(pinName)) {
       return pinMap.get(pinName);
     }
     return null;
   }
-  
+
   public PinDefinition getPin(Integer address) {
-    if (pinIndex.containsKey(address)){
+    if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
     }
     return null;

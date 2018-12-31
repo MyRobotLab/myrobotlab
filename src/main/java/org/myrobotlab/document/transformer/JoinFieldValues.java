@@ -6,8 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 
 /**
- * This stage will join together a list of values into a single string value
- * with a separator.
+ * This stage will join together a list of values into a single string value with a separator.
  * 
  * @author kwatters
  *

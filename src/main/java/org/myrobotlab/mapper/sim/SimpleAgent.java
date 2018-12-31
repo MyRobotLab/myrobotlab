@@ -38,9 +38,8 @@ import javax.vecmath.Vector3d;
 
 /**
  * This is the base class for all kinds of physical agents. <br>
- * Implementation note : the agent doesnt have synchronized methods. All thread
- * refering to the agent should do explicit synchronization with
- * synchronized(agent){...}..
+ * Implementation note : the agent doesnt have synchronized methods. All thread refering to the agent should do explicit
+ * synchronization with synchronized(agent){...}..
  */
 public class SimpleAgent extends BaseObject {
 
@@ -52,8 +51,7 @@ public class SimpleAgent extends BaseObject {
   boolean interactionDetected;
 
   /**
-   * Keeps track of agent in physical contact with this agent. null most of the
-   * time
+   * Keeps track of agent in physical contact with this agent. null most of the time
    */
   SimpleAgent veryNearAgent;
 
@@ -196,16 +194,14 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * @return true if this agent is in physical contact with an other
-   * SimpleAgent.
+   * @return true if this agent is in physical contact with an other SimpleAgent.
    */
   public boolean anOtherAgentIsVeryNear() {
     return (veryNearAgent != null);
   }
 
   /**
-   * Returns printable description of the agent. This may be multiline and
-   * complex in subclasses.
+   * Returns printable description of the agent. This may be multiline and complex in subclasses.
    * 
    * @return agent description as string.
    */
@@ -214,9 +210,8 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Checks for 3D geometrical collisions Note : this is used in case
-   * PhysicalEngine is disabled. Precondition : instantTranslation and
-   * instantRotaion are computed for the current step.
+   * Checks for 3D geometrical collisions Note : this is used in case PhysicalEngine is disabled. Precondition : instantTranslation
+   * and instantRotaion are computed for the current step.
    * 
    * @param pickableSceneBranch
    *          The scene branch containing all collidable objects.
@@ -300,9 +295,10 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Returns the actuator device designated by num. User will have to cast to
-   * the appropriate class.
-   * @param num n
+   * Returns the actuator device designated by num. User will have to cast to the appropriate class.
+   * 
+   * @param num
+   *          n
    * @return a ActuatorDevice Object.
    */
   public ActuatorDevice getActuatorDevice(int num) {
@@ -320,8 +316,7 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Returns the agent counter. Counter is incrementented at each simulation
-   * step.
+   * Returns the agent counter. Counter is incrementented at each simulation step.
    * 
    * @return agent step counter.
    */
@@ -330,8 +325,7 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Returns the number of behavior step per second, ie the nummber of time the
-   * performBehavior is called per second
+   * Returns the number of behavior step per second, ie the nummber of time the performBehavior is called per second
    * 
    * @return an int
    */
@@ -357,8 +351,8 @@ public class SimpleAgent extends BaseObject {
     return lifetime;
   }
 
-  /** 
-   * @return Gets the agent's mass. 
+  /**
+   * @return Gets the agent's mass.
    */
   public float getMass() {
     return mass;
@@ -384,9 +378,10 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Returns the sensor device designated by num. User will have to cast to the
-   * appropriate class.
-   * @param num n
+   * Returns the sensor device designated by num. User will have to cast to the appropriate class.
+   * 
+   * @param num
+   *          n
    * @return a SensorDevice Object.
    */
   public SensorDevice getSensorDevice(int num) {
@@ -441,10 +436,12 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Go to given XZ position. Y coords is left unchanged.
-   * the new position.
-   * @param x the x coord
-   * @param z the z coord
+   * Go to given XZ position. Y coords is left unchanged. the new position.
+   * 
+   * @param x
+   *          the x coord
+   * @param z
+   *          the z coord
    */
   public void moveToPosition(double x, double z) {
 
@@ -453,8 +450,7 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * Go to given position. Caution : set y coords to agent.height/2 you want the
-   * agent to touch the floor.
+   * Go to given position. Caution : set y coords to agent.height/2 you want the agent to touch the floor.
    * 
    * @param position
    *          - the new position.
@@ -607,8 +603,7 @@ public class SimpleAgent extends BaseObject {
   }
 
   /**
-   * called back by simulator when a physical interaction as occured with an
-   * other agent.
+   * called back by simulator when a physical interaction as occured with an other agent.
    */
   protected void veryNear(SimpleAgent a) {
     veryNearAgent = a;

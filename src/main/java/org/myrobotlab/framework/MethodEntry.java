@@ -52,7 +52,7 @@ public class MethodEntry implements Serializable {
    */
   transient public Class<?> returnType;
   transient public Class<?>[] parameterTypes;
-  
+
   transient Method method;
 
   /**
@@ -73,7 +73,9 @@ public class MethodEntry implements Serializable {
 
   /**
    * transfer the non serializable java.reflect.Method to a serializable object
-   * @param m method
+   * 
+   * @param m
+   *          method
    */
   public MethodEntry(Method m) {
     this.method = m;
@@ -83,28 +85,28 @@ public class MethodEntry implements Serializable {
     for (int i = 0; i < paramTypes.length; ++i) {
       parameterTypeNames[i] = paramTypes[i].getCanonicalName();
     }
-    
+
     this.parameterTypes = m.getParameterTypes();
     this.returnType = m.getReturnType();
     this.returnTypeName = returnType.getCanonicalName();
 
   }
-  
+
   public List<String> getParameterNames() {
     Parameter[] parameters = method.getParameters();
     List<String> parameterNames = new ArrayList<>();
 
     for (Parameter parameter : parameters) {
-        if(!parameter.isNamePresent()) {
-            throw new IllegalArgumentException("Parameter names are not present!");
-        }
+      if (!parameter.isNamePresent()) {
+        throw new IllegalArgumentException("Parameter names are not present!");
+      }
 
-        String parameterName = parameter.getName();
-        parameterNames.add(parameterName);
+      String parameterName = parameter.getName();
+      parameterNames.add(parameterName);
     }
 
     return parameterNames;
-}
+  }
 
   final static public String getPrettySignature(String methodName, Class<?>[] parameterTypes, Class<?> returnType) {
 
@@ -133,9 +135,9 @@ public class MethodEntry implements Serializable {
   }
 
   /**
-   * getSignature provides a way to create a stringified method signature the
-   * simplest way is to get the results from Class.getName() - this is a bit
-   * different/arbitrary from the JNA format of method signatures
+   * getSignature provides a way to create a stringified method signature the simplest way is to get the results from
+   * Class.getName() - this is a bit different/arbitrary from the JNA format of method signatures
+   * 
    * @return string
    */
   final public String getSignature() {
@@ -156,65 +158,59 @@ public class MethodEntry implements Serializable {
 
     return sb.toString();
   }
-  
-  public String getReturnType(){
+
+  public String getReturnType() {
     return returnTypeName;
   }
-  
-  public String getSimpleReturnTypeName(){
+
+  public String getSimpleReturnTypeName() {
     return returnType.getSimpleName();
   }
-  
+
   /*
-  public String getSimpleParameterNames(){
-    StringBuilder sb = new StringBuilder();
-    for (Class<?> param: parameterTypes){
-      param.get
-      sb.append(param.getSimpleName());
-    }
-    return sb.toString();
-  }
-  */
+   * public String getSimpleParameterNames(){ StringBuilder sb = new StringBuilder(); for (Class<?> param: parameterTypes){
+   * param.get sb.append(param.getSimpleName()); } return sb.toString(); }
+   */
 
   @Override
   public String toString() {
     return getSignature();
   }
 
-  public List<Map<String,Object>> getParameters() {
-    List<Map<String,Object>> params = new ArrayList<Map<String,Object>>();
-    
+  public List<Map<String, Object>> getParameters() {
+    List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
+
     Parameter[] parameters = method.getParameters();
     Class<?>[] types = method.getParameterTypes();
-    
-    for (int i = 0; i < types.length; ++i){
+
+    for (int i = 0; i < types.length; ++i) {
       Class<?> type = types[i];
       Parameter parameter = parameters[i];
-      Map<String, Object> param = new TreeMap<String,Object>();
+      Map<String, Object> param = new TreeMap<String, Object>();
       param.put("type", type.getName());
       param.put("simpleName", type.getSimpleName());
       param.put("name", parameter.getName());
       params.add(param);
     }
-   
+
     return params;
   }
 
   public String getSimpleParameterTypesAndNames() {
-    if (method.getName().equals("map")){
+    if (method.getName().equals("map")) {
       log.info("here");
     }
-    List<Map<String,Object>> params = getParameters();
+    List<Map<String, Object>> params = getParameters();
     StringBuilder sb = new StringBuilder();
     sb.append("(");
-    for (int i = 0; i < params.size(); ++i){
+    for (int i = 0; i < params.size(); ++i) {
 
-      if (i != 0){       
+      if (i != 0) {
         sb.append(" ");
       }
-      Map<String,Object> parm = params.get(i);
+      Map<String, Object> parm = params.get(i);
       sb.append(String.format("%s %s", parm.get("simpleName"), parm.get("name")));
-      if (i != params.size() - 1){
+      if (i != params.size() - 1) {
         sb.append(",");
       }
     }

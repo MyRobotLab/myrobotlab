@@ -221,9 +221,8 @@ public class JMonkeyEngine extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -367,12 +366,10 @@ public class JMonkeyEngine extends Service {
   // services !
   // the challenge is to have "both" at the same time real & virtualized
   /*
-   * @Override public VirtualServo createVirtualServo(String name) { return
-   * currentApp.createVirtualServo(name); }
+   * @Override public VirtualServo createVirtualServo(String name) { return currentApp.createVirtualServo(name); }
    */
   /*
-   * @Override public Object create(ServiceInterface service) { // TODO
-   * Auto-generated method stub return null; }
+   * @Override public Object create(ServiceInterface service) { // TODO Auto-generated method stub return null; }
    */
 
   public VirtualMotor createVirtualMotor(String name) {
@@ -531,10 +528,10 @@ public class JMonkeyEngine extends Service {
     putNode("i01.head.jaw", "i01.head.rothead", "Models/jaw.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(-5, 60, -50), 90);
 
     save("inmoov-jme.json");
-    
+
     // Vector3D vector = new Vector3D(7, 3, 120);
     load("inmoov-jme.json");
-    
+
     save("inmoov-jme1.json");
   }
 
@@ -575,7 +572,6 @@ public class JMonkeyEngine extends Service {
     }
     return nodes.put(name, new Jme3Object(this, name, parentName, assetPath, mapper, rotationMask, localTranslation, currentAngle));
   }
-  
 
   public boolean load(String jsonPath) {
     try {

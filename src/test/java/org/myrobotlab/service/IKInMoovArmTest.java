@@ -43,19 +43,15 @@ public class IKInMoovArmTest {
   }
 
   /*
-   * @Test public final void testBroadcastState() { //fail("Not yet implemented"
-   * ); }
+   * @Test public final void testBroadcastState() { //fail("Not yet implemented" ); }
    * 
-   * @Test public final void testGetCategories() { //fail("Not yet implemented"
-   * ); }
+   * @Test public final void testGetCategories() { //fail("Not yet implemented" ); }
    * 
-   * @Test public final void testGetDescription() { //fail("Not yet implemented"
-   * ); }
+   * @Test public final void testGetDescription() { //fail("Not yet implemented" ); }
    * 
    * @Test public final void testSave() { //fail("Not yet implemented"); }
    * 
-   * @Test public final void testStartService() { //fail("Not yet implemented");
-   * }
+   * @Test public final void testStartService() { //fail("Not yet implemented"); }
    * 
    * @Test public final void testGetPeers() { //fail("Not yet implemented"); }
    * 
@@ -71,18 +67,15 @@ public class IKInMoovArmTest {
    * 
    * @Test public final void testGetBicep() { //fail("Not yet implemented"); }
    * 
-   * @Test public final void testGetLastActivityTime() { //fail(
-   * "Not yet implemented"); }
+   * @Test public final void testGetLastActivityTime() { //fail( "Not yet implemented"); }
    * 
-   * @Test public final void testGetOmoplate() { //fail("Not yet implemented");
-   * }
+   * @Test public final void testGetOmoplate() { //fail("Not yet implemented"); }
    * 
    * @Test public final void testGetRotate() { //fail("Not yet implemented"); }
    * 
    * @Test public final void testGetScript() { //fail("Not yet implemented"); }
    * 
-   * @Test public final void testGetShoulder() { //fail("Not yet implemented");
-   * }
+   * @Test public final void testGetShoulder() { //fail("Not yet implemented"); }
    * 
    * @Test public final void testGetSide() { //fail("Not yet implemented"); }
    * 
@@ -100,15 +93,13 @@ public class IKInMoovArmTest {
    * 
    * @Test public final void testSetLimits() { //fail("Not yet implemented"); }
    * 
-   * @Test public final void testSetOmoplate() { //fail("Not yet implemented");
-   * }
+   * @Test public final void testSetOmoplate() { //fail("Not yet implemented"); }
    * 
    * @Test public final void testSetpins() { //fail("Not yet implemented"); }
    * 
    * @Test public final void testSetRotate() { //fail("Not yet implemented"); }
    * 
-   * @Test public final void testSetShoulder() { //fail("Not yet implemented");
-   * }
+   * @Test public final void testSetShoulder() { //fail("Not yet implemented"); }
    * 
    * @Test public final void testSetSide() { //fail("Not yet implemented"); }
    * 

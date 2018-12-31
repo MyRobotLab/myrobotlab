@@ -51,9 +51,8 @@ public class TextTransform extends Service implements TextListener, TextPublishe
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -63,7 +62,7 @@ public class TextTransform extends Service implements TextListener, TextPublishe
     ServiceType meta = new ServiceType(TextTransform.class.getCanonicalName());
     meta.addDescription("TextTransform");
     meta.addCategory("data", "filter");
-   
+
     // FIXME - this thing is at least 3 years old .. and does nothing I think :P
     meta.setAvailable(false);
     return meta;

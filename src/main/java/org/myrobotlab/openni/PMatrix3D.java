@@ -159,8 +159,8 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
   }
 
   /*
-   * Copies the matrix contents into a 16 entry float array. If target is null
-   * (or not the correct size), a new array will be created.
+   * Copies the matrix contents into a 16 entry float array. If target is null (or not the correct size), a new array will be
+   * created.
    */
   public float[] get(float[] target) {
     if ((target == null) || (target.length != 16)) {
@@ -299,8 +299,8 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
   }
 
   /*
-   * Multiply a three or four element vector against this matrix. If out is null
-   * or not length 3 or 4, a new float array (length 3) will be returned.
+   * Multiply a three or four element vector against this matrix. If out is null or not length 3 or 4, a new float array (length 3)
+   * will be returned.
    */
   public float[] mult(float[] source, float[] target) {
     if (target == null || target.length < 3) {
@@ -362,12 +362,10 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
   }
 
   /*
-   * public PVector cmult(PVector source, PVector target) { if (target == null)
-   * { target = new PVector(); } target.x = m00*source.x + m10*source.y +
-   * m20*source.z + m30; target.y = m01*source.x + m11*source.y + m21*source.z +
-   * m31; target.z = m02*source.x + m12*source.y + m22*source.z + m32; float tw
-   * = m03*source.x + m13*source.y + m23*source.z + m33; if (tw != 0 && tw != 1)
-   * { target.div(tw); } return target; }
+   * public PVector cmult(PVector source, PVector target) { if (target == null) { target = new PVector(); } target.x = m00*source.x
+   * + m10*source.y + m20*source.z + m30; target.y = m01*source.x + m11*source.y + m21*source.z + m31; target.z = m02*source.x +
+   * m12*source.y + m22*source.z + m32; float tw = m03*source.x + m13*source.y + m23*source.z + m33; if (tw != 0 && tw != 1) {
+   * target.div(tw); } return target; }
    */
 
   public float multY(float x, float y) {
@@ -444,9 +442,8 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
 
   public void print() {
     /*
-     * System.out.println(m00 + " " + m01 + " " + m02 + " " + m03 + "\n" + m10 +
-     * " " + m11 + " " + m12 + " " + m13 + "\n" + m20 + " " + m21 + " " + m22 +
-     * " " + m23 + "\n" + m30 + " " + m31 + " " + m32 + " " + m33 + "\n");
+     * System.out.println(m00 + " " + m01 + " " + m02 + " " + m03 + "\n" + m10 + " " + m11 + " " + m12 + " " + m13 + "\n" + m20 +
+     * " " + m21 + " " + m22 + " " + m23 + "\n" + m30 + " " + m31 + " " + m32 + " " + m33 + "\n");
      */
     int big = (int) Math.abs(max(max(max(max(abs(m00), abs(m01)), max(abs(m02), abs(m03))), max(max(abs(m10), abs(m11)), max(abs(m12), abs(m13)))),
         max(max(max(abs(m20), abs(m21)), max(abs(m22), abs(m23))), max(max(abs(m30), abs(m31)), max(abs(m32), abs(m33))))));
@@ -460,21 +457,17 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
     }
 
     /*
-     * System.out.println(PApplet.nfs(m00, digits, 4) + " " + PApplet.nfs(m01,
-     * digits, 4) + " " + PApplet.nfs(m02, digits, 4) + " " + PApplet.nfs(m03,
-     * digits, 4));
+     * System.out.println(PApplet.nfs(m00, digits, 4) + " " + PApplet.nfs(m01, digits, 4) + " " + PApplet.nfs(m02, digits, 4) + " "
+     * + PApplet.nfs(m03, digits, 4));
      * 
-     * System.out.println(PApplet.nfs(m10, digits, 4) + " " + PApplet.nfs(m11,
-     * digits, 4) + " " + PApplet.nfs(m12, digits, 4) + " " + PApplet.nfs(m13,
-     * digits, 4));
+     * System.out.println(PApplet.nfs(m10, digits, 4) + " " + PApplet.nfs(m11, digits, 4) + " " + PApplet.nfs(m12, digits, 4) + " "
+     * + PApplet.nfs(m13, digits, 4));
      * 
-     * System.out.println(PApplet.nfs(m20, digits, 4) + " " + PApplet.nfs(m21,
-     * digits, 4) + " " + PApplet.nfs(m22, digits, 4) + " " + PApplet.nfs(m23,
-     * digits, 4));
+     * System.out.println(PApplet.nfs(m20, digits, 4) + " " + PApplet.nfs(m21, digits, 4) + " " + PApplet.nfs(m22, digits, 4) + " "
+     * + PApplet.nfs(m23, digits, 4));
      * 
-     * System.out.println(PApplet.nfs(m30, digits, 4) + " " + PApplet.nfs(m31,
-     * digits, 4) + " " + PApplet.nfs(m32, digits, 4) + " " + PApplet.nfs(m33,
-     * digits, 4));
+     * System.out.println(PApplet.nfs(m30, digits, 4) + " " + PApplet.nfs(m31, digits, 4) + " " + PApplet.nfs(m32, digits, 4) + " "
+     * + PApplet.nfs(m33, digits, 4));
      */
     System.out.println(digits);
   }
@@ -618,17 +611,15 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
   }
 
   /*
-   * static public String[] nfs(int num[], int digits) { String formatted[] =
-   * new String[num.length]; for (int i = 0; i < formatted.length; i++) {
-   * formatted[i] = nfs(num[i], digits, 5); } return formatted; }
+   * static public String[] nfs(int num[], int digits) { String formatted[] = new String[num.length]; for (int i = 0; i <
+   * formatted.length; i++) { formatted[i] = nfs(num[i], digits, 5); } return formatted; }
    * 
    * 
-   * static public String[] nfs(float num[], int left, int right) { String
-   * formatted[] = new String[num.length]; for (int i = 0; i < formatted.length;
-   * i++) { formatted[i] = nfs(num[i], left, right); } return formatted; }
+   * static public String[] nfs(float num[], int left, int right) { String formatted[] = new String[num.length]; for (int i = 0; i <
+   * formatted.length; i++) { formatted[i] = nfs(num[i], left, right); } return formatted; }
    * 
-   * static public String nfs(float num, int left, int right) { return (num < 0)
-   * ? nf(num, left, right) : (' ' + nf(num, left, right)); }
+   * static public String nfs(float num, int left, int right) { return (num < 0) ? nf(num, left, right) : (' ' + nf(num, left,
+   * right)); }
    */
 
   // ////////////////////////////////////////////////////////////

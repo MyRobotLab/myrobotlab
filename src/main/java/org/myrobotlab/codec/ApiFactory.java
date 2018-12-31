@@ -20,20 +20,16 @@ import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 /**
- * ApiProcessor - it selects the appropriate API from the apiKey located in the
- * URI. e.g. mrl://host:port/api/{apiKey}
+ * ApiProcessor - it selects the appropriate API from the apiKey located in the URI. e.g. mrl://host:port/api/{apiKey}
  * 
  * The ApiFactory maintains all the resources to properly send and receive data
  * 
- * purpose of this class is to use as the gateway for processing incoming data
- * and requests it configures, 'simplifies', and maintains state for the long
- * many parameter (stateless) ApiProcessor.process method
+ * purpose of this class is to use as the gateway for processing incoming data and requests it configures, 'simplifies', and
+ * maintains state for the long many parameter (stateless) ApiProcessor.process method
  * 
- * FIXME - directory services - list methods/interfaces/data FIXME - add
- * configuration Map&lt;String, Object &gt; in the factory for any ApiProcessor
- * FIXME - add directory services for api/ , api/{apiKey} &amp; api/{apiKey}/
- * FIXME - you don't need a NameProvider - you just need the sender's name !
- * refactor
+ * FIXME - directory services - list methods/interfaces/data FIXME - add configuration Map&lt;String, Object &gt; in the factory for
+ * any ApiProcessor FIXME - add directory services for api/ , api/{apiKey} &amp; api/{apiKey}/ FIXME - you don't need a NameProvider
+ * - you just need the sender's name ! refactor
  * 
  * @author GroG
  *
@@ -81,24 +77,23 @@ public class ApiFactory {
   }
 
   /**
-   * Api Router - this takes requests and delegates them to the appropriate
-   * processor depending primarily on a {apiKey}
+   * Api Router - this takes requests and delegates them to the appropriate processor depending primarily on a {apiKey}
    * 
    * {scheme}://{host}:{port}/api/{apiKey}
    * 
-   * String[] parts = requestUri.split("/") "api".equals(parts[1]) apiKey =
-   * parts[2]
+   * String[] parts = requestUri.split("/") "api".equals(parts[1]) apiKey = parts[2]
    * 
    * @param sender
-   *          - MessageSender - if apiKey specifies a message based processor,
-   *          the router will convert and send
+   *          - MessageSender - if apiKey specifies a message based processor, the router will convert and send
    * @param out
-   *          - an OutputStream from the requestor, results (if any) will be
-   *          sent back to this OutputStream
-   * @param requestUri - request Uri - the original requestUri of the request
-   * @param data - request Payload data - inbound data
+   *          - an OutputStream from the requestor, results (if any) will be sent back to this OutputStream
+   * @param requestUri
+   *          - request Uri - the original requestUri of the request
+   * @param data
+   *          - request Payload data - inbound data
    * @return - return data from the invoked method
-   * @throws Exception - can throw from invalid or broken streams
+   * @throws Exception
+   *           - can throw from invalid or broken streams
    */
   // TODO public Object process(MessageSender sender, OutputStream out, String
   // requestUri, byte data) throws Exception {
@@ -113,7 +108,7 @@ public class ApiFactory {
     String apiKey = msg.apiKey;
 
     log.debug("{}", msg);
-    
+
     if (!processors.containsKey(apiKey)) {
       String className = null;
       Object p = null;
@@ -121,12 +116,12 @@ public class ApiFactory {
         className = String.format("org.myrobotlab.codec.Api%s", apiKey.substring(0, 1).toUpperCase() + apiKey.substring(1));
         Class<?> clazz = Class.forName(className);
         Constructor<?> ctor = clazz.getConstructor();
-        p = ctor.newInstance(new Object[] {});     
+        p = ctor.newInstance(new Object[] {});
         processors.put(msg.apiKey, (Api) p);
       } catch (Exception e) {
         log.error("could not create api", e);
         return null; // vs return message status error with detail or getApis ?
-      }      
+      }
     }
 
     // delegate request to process
@@ -286,13 +281,11 @@ public class ApiFactory {
   }
 
   /*
-   * public static String getServiceName(String[] parts) { if (parts == null ||
-   * parts.length < 4){ return "runtime"; // relies on singlton standard ! }
-   * else { return parts[3]; } }
+   * public static String getServiceName(String[] parts) { if (parts == null || parts.length < 4){ return "runtime"; // relies on
+   * singlton standard ! } else { return parts[3]; } }
    * 
-   * public static String getMethodName(String requestUri) { String [] parts =
-   * requestUri.split("/"); if (parts.length < 4){ return "getLocalServices"; }
-   * else if (parts.length == 4){ if (requestUri.endsWith("/")){
+   * public static String getMethodName(String requestUri) { String [] parts = requestUri.split("/"); if (parts.length < 4){ return
+   * "getLocalServices"; } else if (parts.length == 4){ if (requestUri.endsWith("/")){
    * 
    * }
    * 

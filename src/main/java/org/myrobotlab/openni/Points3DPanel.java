@@ -144,12 +144,11 @@ public class Points3DPanel extends JPanel
   }
 
   /**
-   * This is the only method different from the Checkers3D example in Chapter 15
-   * of "Killer Game Programming in Java"
+   * This is the only method different from the Checkers3D example in Chapter 15 of "Killer Game Programming in Java"
    * (http://fivedots.coe.psu.ac.th/~ad/jg/ch8/).
    * 
-   * All the hard work is done inside the PointsShape object. The transform
-   * group is used to position (and perhaps scale) the points cloud.
+   * All the hard work is done inside the PointsShape object. The transform group is used to position (and perhaps scale) the points
+   * cloud.
    */
   private void addPointsShape(PointsShape ptsShape) {
     // scale and move start position to (-4,0,0) // change later
@@ -257,8 +256,7 @@ public class Points3DPanel extends JPanel
   } // end of lightScene()
 
   /**
-   * OrbitBehaviour allows the user to rotate around the scene, and to zoom in
-   * and out.
+   * OrbitBehaviour allows the user to rotate around the scene, and to zoom in and out.
    */
   private void orbitControls(Canvas3D c) {
     OrbitBehavior orbit = new OrbitBehavior(c, OrbitBehavior.REVERSE_ALL);

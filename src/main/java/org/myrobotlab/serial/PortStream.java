@@ -12,10 +12,8 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         A necessary class to wrap references to rxtxLib in something which
- *         can be dynamically loaded. Without this abstraction any platform
- *         which did was not supported for by rxtx would not be able to use the
- *         Serial service or ports.
+ *         A necessary class to wrap references to rxtxLib in something which can be dynamically loaded. Without this abstraction
+ *         any platform which did was not supported for by rxtx would not be able to use the Serial service or ports.
  * 
  * 
  */
@@ -87,7 +85,7 @@ public class PortStream extends Port {
     // we force flushing here !
     out.flush();
   }
-  
+
   public void write(int[] data) throws IOException {
     // TODO: is there a more effecient way to do this?
     for (int i = 0; i < data.length; i++) {

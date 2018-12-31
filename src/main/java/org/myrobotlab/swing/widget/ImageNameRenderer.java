@@ -39,4 +39,3 @@ public class ImageNameRenderer extends JLabel implements ListCellRenderer {
     return this;
   }
 }
-

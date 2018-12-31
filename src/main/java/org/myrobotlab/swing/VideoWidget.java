@@ -50,13 +50,12 @@ public class VideoWidget extends ServiceGui {
     // set initial default output
     addVideoDisplayPanel("output");
   }
-  
+
   public void setTitle(String t) {
     TitledBorder title;
     title = BorderFactory.createTitledBorder(t);
     display.setBorder(title);
   }
-  
 
   public VideoDisplayPanel addVideoDisplayPanel(String source) {
     return addVideoDisplayPanel(source, null);
@@ -90,7 +89,7 @@ public class VideoWidget extends ServiceGui {
 
   @Override
   public void subscribeGui() {
-	// FIXME - should be to spec .. onDisplay no displayFrame
+    // FIXME - should be to spec .. onDisplay no displayFrame
     subscribe("publishDisplay", "displayFrame");
   }
 

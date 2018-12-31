@@ -141,9 +141,8 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
   JTextField controlURL = new JTextField("http://fostcamIp/decoder_control.cgi?user=admin&pwd=password&command=");
 
   /*
-   * JTextField host = new JTextField("192.168.0.68", 8); JTextField user = new
-   * JTextField("admin", 8); JPasswordField password = new
-   * JPasswordField("xxxxx", 8);
+   * JTextField host = new JTextField("192.168.0.68", 8); JTextField user = new JTextField("admin", 8); JPasswordField password =
+   * new JPasswordField("xxxxx", 8);
    */
 
   DirectionWidget direction = new DirectionWidget();
@@ -154,7 +153,6 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     super(boundServiceName, myService);
     myIPCamera = (IpCamera) Runtime.getService(boundServiceName);
     direction.setDirectionListener(dirEventListener);
-
 
     display.setLayout(new BorderLayout());
 
@@ -191,7 +189,7 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     /*
      * ++gc.gridy; display.add(capture, gc); ++gc.gridy; display.add(info, gc);
      */
-  
+
   }
 
   @Override
@@ -201,7 +199,6 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     subscribe("publishDisplay");
   };
 
-
   @Override
   public void unsubscribeGui() {
     video0.unsubscribeGui();
@@ -209,16 +206,13 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     unsubscribe("publishDisplay");
   }
 
-
   /*
-   * JUST STREAM THE #*%(%(*# VIDEO ! The return of IPCamera.getStatus which is
-   * used to test connectivity
+   * JUST STREAM THE #*%(%(*# VIDEO ! The return of IPCamera.getStatus which is used to test connectivity
    * 
    * @param s
    */
   /*
-   * public void getStatus(String s) { info.removeAll(); info.add(new
-   * JLabel(s)); }
+   * public void getStatus(String s) { info.removeAll(); info.add(new JLabel(s)); }
    */
 
   public void onDisplay(SerializableImage img) {

@@ -6,8 +6,7 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 
 /**
- * DropDocument - if the document contains a particular field value, drop this
- * document from the workflow. input field input value
+ * DropDocument - if the document contains a particular field value, drop this document from the workflow. input field input value
  * 
  * @author kwatters
  *

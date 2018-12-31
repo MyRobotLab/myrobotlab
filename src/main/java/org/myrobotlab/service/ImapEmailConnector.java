@@ -32,9 +32,8 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * 
- * ImapEmailConnector - This connector can crawl the folders on an IMAP email
- * server. you can provide the user/pass/email server hostname. It publishes
- * documents that represents the emails messages that were crawled.
+ * ImapEmailConnector - This connector can crawl the folders on an IMAP email server. you can provide the user/pass/email server
+ * hostname. It publishes documents that represents the emails messages that were crawled.
  *
  */
 public class ImapEmailConnector extends AbstractConnector {
@@ -97,59 +96,55 @@ public class ImapEmailConnector extends AbstractConnector {
     log.info("Fetched " + count + " messages");
   }
 
-  
   public void startListeningForEmail() throws MessagingException {
     // TODO: Implement me and have a publishEmail method.
     Store store = connect();
-    
+
     final IMAPFolder inbox = (IMAPFolder) store.getFolder("inbox");
     inbox.open(Folder.READ_ONLY);
 
-    // TODO: consider moving this into it's own class. 
+    // TODO: consider moving this into it's own class.
     inbox.addMessageCountListener(new MessageCountListener() {
 
-        @Override
-        public void messagesRemoved(MessageCountEvent event) {
-            // NoOp.
-        }
+      @Override
+      public void messagesRemoved(MessageCountEvent event) {
+        // NoOp.
+      }
 
-        @Override
-        public void messagesAdded(MessageCountEvent event) {
-            Message[] messages = event.getMessages();
-            for (Message message : messages) {
-              // a new message arrived, publish it
-              invoke("publishEmail", message);
-            }
+      @Override
+      public void messagesAdded(MessageCountEvent event) {
+        Message[] messages = event.getMessages();
+        for (Message message : messages) {
+          // a new message arrived, publish it
+          invoke("publishEmail", message);
         }
+      }
     });
 
     // a thread to keep our inbox idle open i guess? a a heartbeat perhaps?
     // TODO: rmove this elsewhere?
     new Thread(new Runnable() {
-        private static final long KEEP_ALIVE_FREQ = 10000;
+      private static final long KEEP_ALIVE_FREQ = 10000;
 
-        @Override
-        public void run() {
-            while (!Thread.interrupted()) {
-                try {
-                    inbox.idle();
-                    Thread.sleep(KEEP_ALIVE_FREQ);                                  
-                } catch (InterruptedException e) {
-                } catch (MessagingException e) {
-                }
-            }
+      @Override
+      public void run() {
+        while (!Thread.interrupted()) {
+          try {
+            inbox.idle();
+            Thread.sleep(KEEP_ALIVE_FREQ);
+          } catch (InterruptedException e) {
+          } catch (MessagingException e) {
+          }
         }
-    }).start();                 
-    
+      }
+    }).start();
+
   }
-  
+
   public Message publishEmail(Message m) {
     return m;
   }
-  
-  
-  
-  
+
   private Folder openFolder(Folder folder) {
     try {
       // Read only! lets not accidentally blow away someones email.
@@ -444,9 +439,8 @@ public class ImapEmailConnector extends AbstractConnector {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -462,23 +456,21 @@ public class ImapEmailConnector extends AbstractConnector {
     return meta;
   }
 
-  
   public static void main(String[] args) throws Exception {
     ImapEmailConnector connector = (ImapEmailConnector) Runtime.start("email", "ImapEmailConnector");
     connector.setEmailServer("imap.gmail.com");
     connector.setUsername("XX");
     connector.setPassword("YY");
     connector.setBatchSize(1);
-    //Solr solr = (Solr) Runtime.start("solr", "Solr");
+    // Solr solr = (Solr) Runtime.start("solr", "Solr");
     // for example...
-    //String solrUrl = "http://phobos:8983/solr/collection1";
-    //solr.setSolrUrl(solrUrl);
-    //connector.addDocumentListener(solr);
-    //connector.startCrawling();
-    
+    // String solrUrl = "http://phobos:8983/solr/collection1";
+    // solr.setSolrUrl(solrUrl);
+    // connector.addDocumentListener(solr);
+    // connector.startCrawling();
+
     connector.startListeningForEmail();
-    
-    
+
   }
-  
+
 }

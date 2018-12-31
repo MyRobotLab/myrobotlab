@@ -10,8 +10,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 
 /**
- * A service that will either strip out html from input text or wrap the input
- * text in html tags.
+ * A service that will either strip out html from input text or wrap the input text in html tags.
  * 
  * @author kwatters
  *
@@ -84,7 +83,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   /**
    * The string to be appended to the input text Defaults to &lt;/pre&gt;
    * 
-   * @param postHtmlTag - a string to append to the text
+   * @param postHtmlTag
+   *          - a string to append to the text
    */
   public void setPostHtmlTag(String postHtmlTag) {
     this.postHtmlTag = postHtmlTag;
@@ -93,23 +93,25 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   /**
    * The string to be prepended to the input text Defaults to &lt;pre&gt;
    * 
-   * @param preHtmlTag - a string to prepend to the text.
+   * @param preHtmlTag
+   *          - a string to prepend to the text.
    */
   public void setPreHtmlTag(String preHtmlTag) {
     this.preHtmlTag = preHtmlTag;
   }
 
   /**
-   * If this is true, the input text will be striped of html. If this is false,
-   * the input text will get the pre and post html tags added to it.
+   * If this is true, the input text will be striped of html. If this is false, the input text will get the pre and post html tags
+   * added to it.
    * 
-   * @param stripHtml - if true, all content between &lt;and &gt; will be removed.
+   * @param stripHtml
+   *          - if true, all content between &lt;and &gt; will be removed.
    */
   public void setStripHtml(boolean stripHtml) {
     this.stripHtml = stripHtml;
   }
 
-  // helper function to strip html tags. 
+  // helper function to strip html tags.
   public static String stripHtml(String text) {
     if (StringUtils.isEmpty(text))
       return text;
@@ -118,9 +120,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

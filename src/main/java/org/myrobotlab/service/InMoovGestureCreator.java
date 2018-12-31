@@ -22,9 +22,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * InMoovGestureCreator - This is a helper service to create gestures for the
- * InMoov It has a swing based gui that allows you to set servo angles on the
- * InMoov to create new gestures.
+ * InMoovGestureCreator - This is a helper service to create gestures for the InMoov It has a swing based gui that allows you to set
+ * servo angles on the InMoov to create new gestures.
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  */
@@ -700,9 +699,9 @@ public class InMoovGestureCreator extends Service {
 
   public void control_loadscri(JList control_list) {
     // Load the Python-Script (out Python-Service) (button bottom-left)
-   // Python python = (Python) Runtime.getService("python");
-   //  Script script = python.getScript();
-    pythonscript = "not supported";//script.getCode();
+    // Python python = (Python) Runtime.getService("python");
+    // Script script = python.getScript();
+    pythonscript = "not supported";// script.getCode();
 
     parsescript(control_list);
   }
@@ -1719,9 +1718,8 @@ public class InMoovGestureCreator extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

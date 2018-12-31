@@ -225,7 +225,7 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
     if (motor.isAttached()) {
       // !!!!! - This actually fires the (makes a new
       // MotorControllerPanel) !!!!!
-      MotorController mc = (MotorController)motor.getController();
+      MotorController mc = (MotorController) motor.getController();
       controllerSelect.setSelectedItem(mc.getName());
       controllerTypePanel.set(motor);
     }
@@ -256,7 +256,8 @@ public class MotorGui extends ServiceGui implements ActionListener, ChangeListen
     Object source = ce.getSource();
     if (power == source) {
       // powerValue.setText(power.getValue() + "%");
-      // powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerMap().calcOutput(power.getScaledValue())));
+      // powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(),
+      // myMotor.getPowerMap().calcOutput(power.getScaledValue())));
       powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
       swingGui.send(boundServiceName, "move", power.getScaledValue());
     }

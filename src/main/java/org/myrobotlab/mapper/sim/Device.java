@@ -27,8 +27,8 @@ package org.myrobotlab.mapper.sim;
 import javax.swing.JPanel;
 
 /**
- * A abstract device, base class for sensorDevice and ActuatorDevice. The class
- * manages an update rate which will be used by the simulator.
+ * A abstract device, base class for sensorDevice and ActuatorDevice. The class manages an update rate which will be used by the
+ * simulator.
  */
 public abstract class Device extends BaseObject {
 
@@ -50,8 +50,7 @@ public abstract class Device extends BaseObject {
   }
 
   /**
-   * Creates the panel associated to the device. This panel can be inserted in
-   * the inspector window for monitoring.
+   * Creates the panel associated to the device. This panel can be inserted in the inspector window for monitoring.
    * 
    * @return the JPanel. null if no panel can be associated
    */

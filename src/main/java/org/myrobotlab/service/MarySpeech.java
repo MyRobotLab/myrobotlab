@@ -29,9 +29,8 @@ import marytts.util.data.audio.DDSAudioInputStream;
 import marytts.util.data.audio.MaryAudioUtils;
 
 /**
- * The Mary Speech service is a wrapper for the MaryTTS project. This service
- * implements the speech synthesis interface and provides a Text To Speech
- * capability.
+ * The Mary Speech service is a wrapper for the MaryTTS project. This service implements the speech synthesis interface and provides
+ * a Text To Speech capability.
  * 
  * More info at : http://mary.dfki.de/
  * 
@@ -56,13 +55,11 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     /*
      * FIXME - standardize with SSML input <pre>
      *
-     * setEffectsList("TractScaler", "amount:1.5"); setEffectsList("F0Scale",
-     * "f0Scale:2.0"); setEffectsList("F0Add", "f0Add:50.0"); //
-     * setEffectsList("Rate", "durScale:1.5"); setEffectsList("Robot",
-     * "amount:100.0"); setEffectsList("Whisper", "amount:100.0");
-     * setEffectsList("Stadium", "amount:100.0"); setEffectsList("Chorus",
-     * "delay1:466;amp1:0.54;delay2:600;amp2:-"); setEffectsList("FIRFilter",
-     * "type:3;fc1:500.0;fc2:2000.0"); setEffectsList("JetPilot", ""); </pre>
+     * setEffectsList("TractScaler", "amount:1.5"); setEffectsList("F0Scale", "f0Scale:2.0"); setEffectsList("F0Add", "f0Add:50.0");
+     * // setEffectsList("Rate", "durScale:1.5"); setEffectsList("Robot", "amount:100.0"); setEffectsList("Whisper",
+     * "amount:100.0"); setEffectsList("Stadium", "amount:100.0"); setEffectsList("Chorus",
+     * "delay1:466;amp1:0.54;delay2:600;amp2:-"); setEffectsList("FIRFilter", "type:3;fc1:500.0;fc2:2000.0");
+     * setEffectsList("JetPilot", ""); </pre>
      */
 
     File file = new File(maryBase);
@@ -95,39 +92,27 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   /*
-   * public void installComponentsAcceptLicense(String component) {
-   * installComponentsAcceptLicense(new String[] { component }); }
+   * public void installComponentsAcceptLicense(String component) { installComponentsAcceptLicense(new String[] { component }); }
    */
 
   /*
-   * INSTALL NOW USES MAVEN public void installComponentsAcceptLicense(String[]
-   * components) { if (components == null) { return; } //
-   * log.info("Installing components from {}", maryComponentsUrl);
-   * InstallFileParser installer = new InstallFileParser(new URL(
-   * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"
-   * ));
+   * INSTALL NOW USES MAVEN public void installComponentsAcceptLicense(String[] components) { if (components == null) { return; } //
+   * log.info("Installing components from {}", maryComponentsUrl); InstallFileParser installer = new InstallFileParser(new URL(
+   * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml" ));
    * 
-   * Map<String, LanguageComponentDescription> maryLanguages =
-   * installer.getLanguages(); List<VoiceComponentDescription>voices =
+   * Map<String, LanguageComponentDescription> maryLanguages = installer.getLanguages(); List<VoiceComponentDescription>voices =
    * installer.getVoiceDescriptions();
    * 
-   * List<ComponentDescription> toInstall = new ArrayList<>(); for (String
-   * component : components) { if (component == null || component.isEmpty() ||
-   * component.trim().isEmpty()) { continue; } if
-   * (maryLanguages.containsKey(component)) {
-   * toInstall.add(maryLanguages.get(component)); } else if
-   * (voices.containsKey(component)) { toInstall.add(voices.get(component)); }
-   * else { log.warn("can't find component for installation"); } }
+   * List<ComponentDescription> toInstall = new ArrayList<>(); for (String component : components) { if (component == null ||
+   * component.isEmpty() || component.trim().isEmpty()) { continue; } if (maryLanguages.containsKey(component)) {
+   * toInstall.add(maryLanguages.get(component)); } else if (voices.containsKey(component)) { toInstall.add(voices.get(component));
+   * } else { log.warn("can't find component for installation"); } }
    * 
    * 
-   * log.info("starting marytts component installation: " + toInstall);
-   * installer.installSelectedLanguagesAndVoices(toInstall);
-   * log.info("moving files to correct places ..."); File srcDir = new
-   * File(maryBase + File.separator + "lib"); File destDir = new
-   * File("libraries" + File.separator + "jar"); try {
-   * FileUtils.copyDirectory(srcDir, destDir);
-   * log.info("finished marytts component installation");
-   * log.info("PLEASE RESTART TO APPLY CHANGES !!!"); } catch (IOException e) {
+   * log.info("starting marytts component installation: " + toInstall); installer.installSelectedLanguagesAndVoices(toInstall);
+   * log.info("moving files to correct places ..."); File srcDir = new File(maryBase + File.separator + "lib"); File destDir = new
+   * File("libraries" + File.separator + "jar"); try { FileUtils.copyDirectory(srcDir, destDir);
+   * log.info("finished marytts component installation"); log.info("PLEASE RESTART TO APPLY CHANGES !!!"); } catch (IOException e) {
    * log.error("moving files FAILED!"); } }
    */
 
@@ -139,9 +124,8 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -161,42 +145,40 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     // https://github.com/marytts/marytts-installer/blob/master/components.json
 
     /*
-     * String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm",
-     * "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm",
-     * "voice-cmu-slt-hsmm", "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm",
-     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm",
-     * "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
-     * "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm",
-     * "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm",
-     * "voice-upmc-pierre-hsmm", "voice-bits2", "voice-dfki-obadiah-hsmm",
-     * "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm",
-     * "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm",
-     * "voice-cmu-slt-hsmm", "voice-enst-camille-hsmm",
-     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm",
-     * "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
-     * "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"
-     * };
+     * String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm",
+     * "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm", "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm",
+     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
+     * "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm",
+     * "voice-upmc-pierre-hsmm", "voice-bits2", "voice-dfki-obadiah-hsmm", "voice-istc-lucia-hsmm", "voice-bits1-hsmm",
+     * "voice-cmu-rms-hsmm", "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm", "voice-cmu-slt-hsmm",
+     * "voice-enst-camille-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-cmu-bdl-hsmm",
+     * "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm", "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm" };
      */
     /*
-    Set<String> voices = new HashSet<>(Arrays.asList("voice-bits1", "voice-bits1-hsmm", "voice-bits2", "voice-bits3", "voice-bits3-hsmm", "voice-bits4", "voice-cmu-bdl",
-        "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms", "voice-cmu-rms-hsmm", "voice-cmu-slt", "voice-dfki-obadiah", "voice-dfki-obadiah-hsmm", "voice-dfki-ot",
-        "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-pavoque-styles", "voice-dfki-poppy", "voice-dfki-poppy-hsmm",
-        "voice-dfki-prudence", "voice-dfki-prudence-hsmm", "voice-dfki-spike", "voice-dfki-spike-hsmm", "voice-enst-camille", "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm",
-        "voice-istc-lucia-hsmm", /* "voice-marylux", *//* "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre", "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
-        "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm", "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm", "voice-cmu-slt-hsmm",
-        "voice-enst-camille-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
-        "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"));*/
-    
+     * Set<String> voices = new HashSet<>(Arrays.asList("voice-bits1", "voice-bits1-hsmm", "voice-bits2", "voice-bits3",
+     * "voice-bits3-hsmm", "voice-bits4", "voice-cmu-bdl", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms",
+     * "voice-cmu-rms-hsmm", "voice-cmu-slt", "voice-dfki-obadiah", "voice-dfki-obadiah-hsmm", "voice-dfki-ot",
+     * "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-pavoque-styles",
+     * "voice-dfki-poppy", "voice-dfki-poppy-hsmm", "voice-dfki-prudence", "voice-dfki-prudence-hsmm", "voice-dfki-spike",
+     * "voice-dfki-spike-hsmm", "voice-enst-camille", "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm",
+     * /* "voice-marylux",
+     *//*
+       * "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre", "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
+       * "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm", "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm",
+       * "voice-dfki-spike-hsmm", "voice-cmu-slt-hsmm", "voice-enst-camille-hsmm", "voice-dfki-pavoque-neutral-hsmm",
+       * "voice-dfki-poppy-hsmm", "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm", "voice-enst-dennys-hsmm",
+       * "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"));
+       */
+
     String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm",
         "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
         "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm", "voice-upmc-pierre-hsmm" };
 
-    
     for (String voice : voices) {
       meta.addDependency("de.dfki.mary", voice, "5.2");
       meta.exclude("org.apache.httpcomponents", "httpcore");
       meta.exclude("org.apache.httpcomponents", "httpclient");
-      
+
       if ("voice-bits1-hsmm".equals(voice) || "voice-cmu-slt-hsmm".equals(voice)) {
         meta.exclude("org.slf4j", "slf4j-log4j12");
       }
@@ -208,13 +190,13 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     meta.exclude("com.google.guava", "guava");
     meta.exclude("org.apache.opennlp", "opennlp-tools");
     meta.exclude("org.slf4j", "slf4j-log4j12");
-    
+
     // try to fix httpcore override issue
-    /* currently these dependencies are in Runtime
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
-    */
-    
+    /*
+     * currently these dependencies are in Runtime meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+     * meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
+     */
+
     return meta;
   }
 
@@ -250,11 +232,9 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     // compare against installer and config files to find more voices
     /*
      * <pre> InstallFileParser installer = new InstallFileParser(new URL(
-     * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"
-     * )); List<VoiceComponentDescription> moreVoices =
-     * installer.getVoiceDescriptions(); for (VoiceComponentDescription k :
-     * moreVoices) { System.out.println("voice-" + k.getName()); }
-     * moreVoices.size(); </pre>
+     * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml" )); List<VoiceComponentDescription>
+     * moreVoices = installer.getVoiceDescriptions(); for (VoiceComponentDescription k : moreVoices) { System.out.println("voice-" +
+     * k.getName()); } moreVoices.size(); </pre>
      */
 
     // installComponentsAcceptLicense("bits2");
@@ -283,7 +263,6 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     marytts.setAudioEffects(audioEffects);
     return audioEffects;
   }
-  
 
   public static void main(String[] args) throws IOException {
     LoggingFactory.init(Level.INFO);

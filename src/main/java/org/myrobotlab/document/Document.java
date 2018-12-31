@@ -8,8 +8,7 @@ import java.util.Set;
 /**
  * The basic class that represents a document flowing through the myrobotlab.
  * 
- * Basic idea is that a document had a unique id and a map of key to list of
- * object pairs.
+ * Basic idea is that a document had a unique id and a map of key to list of object pairs.
  * 
  * @author kwatters
  *
@@ -38,7 +37,7 @@ public class Document {
     if (value == null) {
       data.remove(fieldName);
     } else {
-      data.put(fieldName, value);  
+      data.put(fieldName, value);
     }
   }
 
@@ -52,9 +51,10 @@ public class Document {
       data.put(fieldName, values);
     }
   }
-  
+
   /**
    * helper for expected single value fields
+   * 
    * @param fieldName
    * @return
    */
@@ -65,7 +65,6 @@ public class Document {
     }
     return null;
   }
-
 
   public void renameField(String oldField, String newField) {
     if (data.containsKey(oldField)) {

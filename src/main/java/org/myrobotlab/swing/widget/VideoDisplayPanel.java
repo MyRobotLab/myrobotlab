@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 public class VideoDisplayPanel {
   public class VideoMouseListener implements MouseListener {
 
-    // FIXME addListener - relay to 
+    // FIXME addListener - relay to
     @Override
     public void mouseClicked(MouseEvent e) {
       mouseInfo.setText(String.format("clicked %d,%d", e.getX(), e.getY()));
@@ -119,7 +119,7 @@ public class VideoDisplayPanel {
 
     BufferedImage image = img.getImage();
     String source = img.getSource();
-    
+
     if (image == null) {
       return;
     }

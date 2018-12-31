@@ -18,8 +18,8 @@ import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 /**
- * Keyboard - The keyboard service will track keys that are pressed so they can
- * be used as input to other services via the addKeyListener(Service) call.
+ * Keyboard - The keyboard service will track keys that are pressed so they can be used as input to other services via the
+ * addKeyListener(Service) call.
  * 
  *
  */
@@ -33,7 +33,7 @@ public class Keyboard extends Service {
 
   transient final NativeKeyboard keyboard = new NativeKeyboard();
   transient MouseEvent mouseEvent = new MouseEvent();
-  
+
   static public class MouseEvent {
     public Point2df pos = new Point2df();
   }
@@ -99,25 +99,24 @@ public class Keyboard extends Service {
 
   public Keyboard(String n) {
     super(n);
-    
+
     java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GlobalScreen.class.getPackage().getName());
     logger.setLevel(java.util.logging.Level.WARNING);
   }
-  
-  public void startListening() throws NativeHookException{
+
+  public void startListening() throws NativeHookException {
     GlobalScreen.registerNativeHook();
     GlobalScreen.addNativeKeyListener(keyboard);
     GlobalScreen.addNativeMouseListener(keyboard);
     GlobalScreen.addNativeMouseMotionListener(keyboard);
   }
-  
-  public void stopListening() throws NativeHookException{
+
+  public void stopListening() throws NativeHookException {
     GlobalScreen.removeNativeKeyListener(keyboard);
     GlobalScreen.removeNativeMouseListener(keyboard);
     GlobalScreen.removeNativeMouseMotionListener(keyboard);
     GlobalScreen.unregisterNativeHook();
   }
-  
 
   public void startService() {
     super.startService();
@@ -138,8 +137,7 @@ public class Keyboard extends Service {
   }
 
   /*
-   * this method is what other services would use to subscribe to keyboard
-   * events
+   * this method is what other services would use to subscribe to keyboard events
    */
   public void addKeyListener(Service service) {
     addListener("publishKey", service.getName(), "onKey");
@@ -166,7 +164,7 @@ public class Keyboard extends Service {
     log.info("publishKey {}", key);
     return key;
   }
-  
+
   public Integer publishKeyCode(Integer code) {
     log.info("publishKey {}", code);
     return code;
@@ -181,13 +179,14 @@ public class Keyboard extends Service {
     log.debug("publishKeyReleased {}", key);
     return key;
   }
+
   // ========== mouse events begin ===============
   public MouseEvent publishMouse() {
     return mouseEvent;
   }
-  
+
   public MouseEvent publishMouseClicked(NativeMouseEvent me) {
-   return mouseEvent;
+    return mouseEvent;
   }
 
   public MouseEvent publishMousePressed(NativeMouseEvent me) {
@@ -218,9 +217,8 @@ public class Keyboard extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

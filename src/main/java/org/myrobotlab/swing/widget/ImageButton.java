@@ -8,9 +8,8 @@ import javax.swing.JButton;
 import org.myrobotlab.image.Util;
 
 /**
- * @author GroG .rollover are done with originals + gimp -&gt; colorize -&gt; adjust
- *         color balance -&gt; 100 green .activated are done with originals + gimp
- *         -&gt; colorize -&gt; adjust color balance -&gt; 100 red
+ * @author GroG .rollover are done with originals + gimp -&gt; colorize -&gt; adjust color balance -&gt; 100 green .activated are
+ *         done with originals + gimp -&gt; colorize -&gt; adjust color balance -&gt; 100 red
  * 
  */
 public class ImageButton extends JButton {
@@ -53,8 +52,7 @@ public class ImageButton extends JButton {
       addActionListener(listener);
     }
     /*
-     * b.setMargin(new Insets(0, 0, 0, 0)); b.setBorderPainted(false);
-     * b.setToolTipText(name); b.setBackground(new Color(0x006468));
+     * b.setMargin(new Insets(0, 0, 0, 0)); b.setBorderPainted(false); b.setToolTipText(name); b.setBackground(new Color(0x006468));
      */
   }
 

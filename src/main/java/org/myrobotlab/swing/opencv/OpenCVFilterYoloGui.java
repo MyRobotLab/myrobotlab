@@ -45,7 +45,7 @@ public class OpenCVFilterYoloGui extends OpenCVFilterGui implements ActionListen
 
   SliderWithText confidence = new SliderWithText(JSlider.HORIZONTAL, 0, 100, 25);
   JLabel confidenceText = new JLabel("25");
-  
+
   public OpenCVFilterYoloGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     JPanel north = new JPanel();
@@ -83,7 +83,7 @@ public class OpenCVFilterYoloGui extends OpenCVFilterGui implements ActionListen
       public void run() {
         OpenCVFilterYolo bf = (OpenCVFilterYolo) filterWrapper.filter;
         confidenceText.setText("" + (bf.getConfidenceThreshold() * 100));
-        confidence.setValue((int)(bf.getConfidenceThreshold() * 100));
+        confidence.setValue((int) (bf.getConfidenceThreshold() * 100));
       }
     });
   }
@@ -93,7 +93,7 @@ public class OpenCVFilterYoloGui extends OpenCVFilterGui implements ActionListen
     OpenCVFilterYolo bf = (OpenCVFilterYolo) boundFilter.filter;
     Object o = e.getSource();
     if (o == confidence) {
-      bf.setConfidenceThreshold(confidence.getValue()/100);
+      bf.setConfidenceThreshold(confidence.getValue() / 100);
     }
     // setFilterState(bf);
   }

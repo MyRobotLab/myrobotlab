@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.myrobotlab.service.Arduino;
 
-public interface SerialRelayListener {  
-	public void connect(Arduino controller, String serialPort) throws IOException;
+public interface SerialRelayListener {
+  public void connect(Arduino controller, String serialPort) throws IOException;
 }
-

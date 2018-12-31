@@ -4,10 +4,11 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+
 /**
-*This class exists as a proxy to control native MRL services connected through the web API. 
-*Methods of that native service are called through this class's {@link #exec(String, Object[])} method.
-**/
+ * This class exists as a proxy to control native MRL services connected through the web API. Methods of that native service are
+ * called through this class's {@link #exec(String, Object[])} method.
+ **/
 public class _TemplateProxy extends PythonProxy {
 
   public _TemplateProxy(String n) {
@@ -15,13 +16,12 @@ public class _TemplateProxy extends PythonProxy {
   }
 
   public Object test(String testString) {
-	return exec("test", new Object[] {(Object) testString});
+    return exec("test", new Object[] { (Object) testString });
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -31,13 +31,12 @@ public class _TemplateProxy extends PythonProxy {
     ServiceType meta = new ServiceType(_TemplateProxy.class.getCanonicalName());
     meta.addDescription("Template proxy service");
     meta.setAvailable(false);
-    return PythonProxy.addMetaData(meta); //This is used so that the dependencies and peers are automatically added
+    return PythonProxy.addMetaData(meta); // This is used so that the dependencies and peers are automatically added
   }
 
-
-  //Required because of Java reflection weirdness
+  // Required because of Java reflection weirdness
   public void handshake() {
-	super.handshake();
+    super.handshake();
   }
 
   public static void main(String[] args) {
