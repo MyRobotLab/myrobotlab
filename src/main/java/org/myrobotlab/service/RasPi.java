@@ -276,7 +276,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       int reg = buffer[0] & 0xFF;
       for (int i = 1; i < size; i++) {
         int value = buffer[i] & 0xFF;
-        log.info(String.format("Writing to register x%03X value x%03X", reg, value));
+        log.debug(String.format("Writing to register {} value {}", reg, value));
         I2C.wiringPiI2CWriteReg8(devicedata.deviceHandle, reg, value);
         reg++;
       }
@@ -302,7 +302,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     if (wiringPi) {
       for (int i = 0; i < size; i++) {
         buffer[i] = (byte) (I2C.wiringPiI2CRead(devicedata.deviceHandle) & 0xFF);
-        log.info(String.format("Read value %03X", buffer[i]));
+        log.debug("Read value {}", buffer[i]);
       }
     } else {
       try {
@@ -330,7 +330,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     if (wiringPi) {
       for (int i = 0; i < readSize; i++) {
         readBuffer[i] = (byte) (I2C.wiringPiI2CReadReg8(devicedata.deviceHandle, (writeBuffer[0] + i) & 0xFF));
-        log.info(String.format("Read register %03X value %03X", (writeBuffer[0] + i) & 0xFF, readBuffer[i]));
+        log.debug("Read register {} value {}", (writeBuffer[0] + i) & 0xFF, readBuffer[i]);
       }
     } else {
       try {
@@ -403,7 +403,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
           devicedata.deviceHandle = -1;
         }
         i2cDevices.put(key, devicedata);
-        log.info("Created device for %s key %s", serviceName, key);
+        log.info("Created device for {} key {}", serviceName, key);
       } catch (NumberFormatException | IOException e) {
         Logging.logError(e);
       }
@@ -487,7 +487,7 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
           pinList.add(pindef);
         }
       } else {
-        log.error(String.format("Unknown boardtype %s", SystemInfo.getBoardType()));
+        log.error("Unknown boardtype %{}", SystemInfo.getBoardType());
       }
     } catch (UnsupportedOperationException | IOException | InterruptedException e) {
       // TODO Auto-generated catch block
