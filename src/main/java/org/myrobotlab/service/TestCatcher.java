@@ -43,8 +43,7 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
 /**
- * test catcher is a class to be used to exercise and verify publish, subscribe
- * and other forms of message sending
+ * test catcher is a class to be used to exercise and verify publish, subscribe and other forms of message sending
  * 
  * @author GroG
  *
@@ -65,8 +64,7 @@ public class TestCatcher extends Service implements SerialDataListener {
   boolean isLocal = true;
 
   /**
-   * awesome override to simulate remote services - e.g. in
-   * Serial.addByteListener
+   * awesome override to simulate remote services - e.g. in Serial.addByteListener
    */
   public boolean isLocal() {
     return isLocal;
@@ -82,9 +80,8 @@ public class TestCatcher extends Service implements SerialDataListener {
   }
 
   /**
-   * some pub/sub interfaces do not use the Message queue to post their data -
-   * but use a callback thread from the other service as an optimization onByte
-   * is one of those methods
+   * some pub/sub interfaces do not use the Message queue to post their data - but use a callback thread from the other service as
+   * an optimization onByte is one of those methods
    */
   @Override
   public Integer onByte(Integer b) {
@@ -93,13 +90,10 @@ public class TestCatcher extends Service implements SerialDataListener {
   }
 
   /*
-   * preProcessHook is used to intercept messages and process or route them
-   * before being processed/invoked in the Service.
+   * preProcessHook is used to intercept messages and process or route them before being processed/invoked in the Service.
    * 
    * 
-   *           @see
-   *           org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
-   *           framework.Message)
+   * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab. framework.Message)
    */
   @Override
   public boolean preProcessHook(Message msg) {
@@ -241,8 +235,7 @@ public class TestCatcher extends Service implements SerialDataListener {
   }
 
   /*
-   * "unified"? way of testing direct callbacks. reconstruct the message that
-   * "would have" been created to make this direct callback
+   * "unified"? way of testing direct callbacks. reconstruct the message that "would have" been created to make this direct callback
    * 
    */
   public void addData(String method, Object... parms) {
@@ -259,15 +252,14 @@ public class TestCatcher extends Service implements SerialDataListener {
   static public ServiceType meta = null;
 
   /*
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
    */
-  
-  public double testDouble(double d){
+
+  public double testDouble(double d) {
     return d;
   }
 
@@ -280,15 +272,12 @@ public class TestCatcher extends Service implements SerialDataListener {
       Runtime.start("gui", "SwingGui");
 
       /*
-       * TestThrower thrower = new TestThrower("thrower");
-       * thrower.startService();
+       * TestThrower thrower = new TestThrower("thrower"); thrower.startService();
        * 
-       * catcher01.subscribe(thrower.getName(), "throwInteger",
-       * catcher01.getName(), "catchInteger");
+       * catcher01.subscribe(thrower.getName(), "throwInteger", catcher01.getName(), "catchInteger");
        * 
-       * for (int i = 0; i < 1000; ++i) { thrower.invoke("throwInteger", i); if
-       * (i % 100 == 0) { thrower.sendBlocking(catcher01.getName(),
-       * "catchInteger"); } }
+       * for (int i = 0; i < 1000; ++i) { thrower.invoke("throwInteger", i); if (i % 100 == 0) {
+       * thrower.sendBlocking(catcher01.getName(), "catchInteger"); } }
        */
 
       // thrower.throwInteger(count);

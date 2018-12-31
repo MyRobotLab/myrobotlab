@@ -40,43 +40,31 @@ public class Index<T> {
     // reservations.put("arm.database.config", new
     // ServiceReservation("Rotate","Servo","a servo"));
     /*
-     * reservations.put("global.database.qa.server", "Db2udb04");
-     * reservations.put("global.database.qa.port", "50005");
-     * reservations.put("global.database.qa.schema", "TESTDB2");
-     * reservations.put("global.database.qa.userid", "odcad01");
+     * reservations.put("global.database.qa.server", "Db2udb04"); reservations.put("global.database.qa.port", "50005");
+     * reservations.put("global.database.qa.schema", "TESTDB2"); reservations.put("global.database.qa.userid", "odcad01");
      * reservations.put("global.database.qa.password", "3dglasez");
      * 
-     * reservations.put("global.database.dev.server", "Db2udb03");
-     * reservations.put("global.database.dev.port", "50004");
-     * reservations.put("global.database.dev.schema", "FIM");
-     * reservations.put("global.database.dev.userid", "odcad00");
+     * reservations.put("global.database.dev.server", "Db2udb03"); reservations.put("global.database.dev.port", "50004");
+     * reservations.put("global.database.dev.schema", "FIM"); reservations.put("global.database.dev.userid", "odcad00");
      * reservations.put("global.database.dev.password", "3dglases");
      */
     /*
      * 
-     * String test = reservations.get("global.database.dev.userid", "zod");
-     * log.info(test);
+     * String test = reservations.get("global.database.dev.userid", "zod"); log.info(test);
      * 
-     * String dbConfigKey = reservations.get("global.database.config");
-     * IndexNode dbConfigNode =
-     * reservations.getNode(String.format("global.database.%s" ,dbConfigKey));
-     * HashMap<String,IndexNode> dbConfig = dbConfigNode.getBranches();
-     * 
-     * log.info(dbConfig.get("server").getValue().toString());
-     * log.info(dbConfig.get("port").getValue().toString());
-     * log.info(dbConfig.get("schema").getValue().toString());
-     * log.info(dbConfig.get("userid").getValue().toString());
-     * log.info(dbConfig.get("password").getValue().toString());
-     * 
-     * // reservations.put("global.database.config","qa"); dbConfigKey =
-     * reservations.get("global.database.config"); dbConfigNode = reservations
-     * .getNode(String.format("global.database.%s",dbConfigKey)); dbConfig =
+     * String dbConfigKey = reservations.get("global.database.config"); IndexNode dbConfigNode =
+     * reservations.getNode(String.format("global.database.%s" ,dbConfigKey)); HashMap<String,IndexNode> dbConfig =
      * dbConfigNode.getBranches();
      * 
-     * log.info(dbConfig.get("server").getValue().toString());
-     * log.info(dbConfig.get("port").getValue().toString());
-     * log.info(dbConfig.get("schema").getValue().toString());
-     * log.info(dbConfig.get("userid").getValue().toString());
+     * log.info(dbConfig.get("server").getValue().toString()); log.info(dbConfig.get("port").getValue().toString());
+     * log.info(dbConfig.get("schema").getValue().toString()); log.info(dbConfig.get("userid").getValue().toString());
+     * log.info(dbConfig.get("password").getValue().toString());
+     * 
+     * // reservations.put("global.database.config","qa"); dbConfigKey = reservations.get("global.database.config"); dbConfigNode =
+     * reservations .getNode(String.format("global.database.%s",dbConfigKey)); dbConfig = dbConfigNode.getBranches();
+     * 
+     * log.info(dbConfig.get("server").getValue().toString()); log.info(dbConfig.get("port").getValue().toString());
+     * log.info(dbConfig.get("schema").getValue().toString()); log.info(dbConfig.get("userid").getValue().toString());
      * log.info(dbConfig.get("password").getValue().toString());
      */
     HashMap<String, String> hash = new HashMap<String, String>();
@@ -115,20 +103,16 @@ public class Index<T> {
    * 
    * public void load(String path) { load(path, null); }
    * 
-   * /* public void load(String path, String propFileName) { if (path == null) {
-   * path = System.getProperty("user.dir"); }
+   * /* public void load(String path, String propFileName) { if (path == null) { path = System.getProperty("user.dir"); }
    * 
    * String configPath = propFileName;
    * 
-   * try { Properties properties = new Properties(); log.info(
-   * "loading config file " + configPath); properties.load(new
+   * try { Properties properties = new Properties(); log.info( "loading config file " + configPath); properties.load(new
    * FileInputStream(configPath));
    * 
-   * for (String key : properties.stringPropertyNames()) { root.buildTree(root,
-   * key, properties.getProperty(key)); //IndexNode.buildTree(root, key,
-   * properties.getProperty(key)); } } catch (Exception e) { log.error(
-   * "config did not load from location " + configPath);
-   * Logging.logException(e); } }
+   * for (String key : properties.stringPropertyNames()) { root.buildTree(root, key, properties.getProperty(key));
+   * //IndexNode.buildTree(root, key, properties.getProperty(key)); } } catch (Exception e) { log.error(
+   * "config did not load from location " + configPath); Logging.logException(e); } }
    */
 
   public void clear() {
@@ -138,9 +122,8 @@ public class Index<T> {
   /*
    * public static Index getInstance() { return getInstance((String) null); }
    * 
-   * public static Index getInstance(String path) { if (instance == null) {
-   * log.debug("new config"); instance = new Index(); } if (path != null) {
-   * load(path); } return instance; }
+   * public static Index getInstance(String path) { if (instance == null) { log.debug("new config"); instance = new Index(); } if
+   * (path != null) { load(path); } return instance; }
    */
 
   public ArrayList<T> crawlForDataStartingWith(String inkey) {
@@ -197,8 +180,7 @@ public class Index<T> {
   }
 
   /**
-   * find a node key, by browsing the whole tree..
-   * ( wanted to use crawlForDataStartingWith but seem nok )
+   * find a node key, by browsing the whole tree.. ( wanted to use crawlForDataStartingWith but seem nok )
    */
   public String findNode(String parent, String key) {
 
@@ -221,7 +203,7 @@ public class Index<T> {
         nextNode = entrie;
       }
 
-      //log.info(key + " key " + nextNode);
+      // log.info(key + " key " + nextNode);
       if (nextNode.toLowerCase().contains(key.toLowerCase())) {
         return nextNode;
       }
@@ -263,7 +245,7 @@ public class Index<T> {
     if (root.getNode(node) != null) {
 
       Set<String> entries = root.getNode(node).getBranches().keySet();
-      //log.info(entries+"entries");
+      // log.info(entries+"entries");
 
       for (String key : entries) {
         if (!(root.getNode(node + "." + key) == null) && root.getNode(node + "." + key).size() == 0) {

@@ -4,12 +4,12 @@ public class HardwareSerial {
 
   public void begin(int i) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void write(int data, int dataSize) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public boolean available() {
@@ -24,7 +24,7 @@ public class HardwareSerial {
 
   public void write(int[] data, int dataSize) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public boolean ready() {
@@ -34,7 +34,7 @@ public class HardwareSerial {
 
   public void flush() {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

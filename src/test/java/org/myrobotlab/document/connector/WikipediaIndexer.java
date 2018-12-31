@@ -13,20 +13,20 @@ import org.myrobotlab.service.XMLConnector;
 public class WikipediaIndexer {
 
   public static void main(String[] args) throws ClassNotFoundException {
-  //  String solrUrl = "http://phobos:8983/solr/wikipedia";
-    //String solrUrl = "http://localhost:8983/solr/wikipedia";
+    // String solrUrl = "http://phobos:8983/solr/wikipedia";
+    // String solrUrl = "http://localhost:8983/solr/wikipedia";
     String solrUrl = "http://localhost:8983/solr/wiki2";
-    //String wikipediaFilename = "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
+    // String wikipediaFilename = "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
     String wikipediaFilename = "Z:\\enwiki-20180820-pages-articles-multistream.xml";
-    
+
     int NUM_THREADS = 8;
-    
-    //TODO: why do I need this to index wikipedia from the xml dump?!  I know , it's like a 50GB xml file.. gah..
+
+    // TODO: why do I need this to index wikipedia from the xml dump?! I know , it's like a 50GB xml file.. gah..
     System.setProperty("jdk.xml.totalEntitySizeLimit", String.valueOf(Integer.MAX_VALUE));
     org.apache.log4j.BasicConfigurator.configure();
     LoggingFactory.getInstance().setLevel(Level.INFO);
-    // wikipedia xml file.  ( freely available via wiki-dumps )
-    
+    // wikipedia xml file. ( freely available via wiki-dumps )
+
     XMLConnector wikipediaConnector = (XMLConnector) Runtime.start("wikipediaConnector", "XMLConnector");
     wikipediaConnector.setFilename(wikipediaFilename);
     wikipediaConnector.setXmlRootPath("/mediawiki/page");
@@ -47,7 +47,7 @@ public class WikipediaIndexer {
     // TODO: remove the xml field.. ?!?! argh!
     StageConfiguration parseWikiTextConfig = new StageConfiguration("parseWikiText", "org.myrobotlab.document.transformer.ParseWikiText");
     StageConfiguration createTeaser = new StageConfiguration("createTeaser", "org.myrobotlab.document.transformer.CreateStaticTeaser");
-    
+
     // parseWikiTextConfig.setStringParam("fieldName", "text");
     // TODO: followed by a wiki markup parser
     // followed by a solr output stage.
@@ -77,21 +77,17 @@ public class WikipediaIndexer {
     // start crawling...
     wikipediaConnector.getOutbox().setMaxQueueSize(1);
     wikipediaConnector.startCrawling();
-    
+
     docproc.flush();
     // now we should be done?
     System.out.println("done..");
-    
-    
+
     System.out.println("Inbox connector size " + wikipediaConnector.getInbox().size());
     System.out.println("Outbox connector size " + wikipediaConnector.getOutbox().size());
     // wikipediaConnector.getInbox().size();
     System.gc();
     System.out.println("gc done..");
-  
 
   }
 
-  
-  
 }

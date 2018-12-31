@@ -20,9 +20,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 /**
- * This stage will use Apache Tika to perform text and metadata extraction on
- * many different types of documents including, but not limited to, pdf, office
- * documents, html, etc..
+ * This stage will use Apache Tika to perform text and metadata extraction on many different types of documents including, but not
+ * limited to, pdf, office documents, html, etc..
  * 
  * @author kwatters
  *
@@ -30,7 +29,7 @@ import org.xml.sax.SAXException;
 public class TextExtractor extends AbstractStage {
 
   transient public final static Logger log = LoggerFactory.getLogger(TextExtractor.class);
-  
+
   private String textField = "text";
   private String filePathField = "filepath";
 
@@ -68,7 +67,7 @@ public class TextExtractor extends AbstractStage {
       File f = new File(path);
       if (!f.exists()) {
         // TODO: log that the file path was not found
-        log.warn("File path not found {}" , path);
+        log.warn("File path not found {}", path);
         continue;
       }
 

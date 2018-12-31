@@ -25,12 +25,11 @@ public final class MapperLinear implements Serializable, Mapper {
   Boolean inverted = false;
 
   /**
-   * non-parameterized contructor for "un-set" mapper use the merge function to
-   * set "default" values from the motorcontroller
+   * non-parameterized contructor for "un-set" mapper use the merge function to set "default" values from the motorcontroller
    */
   public MapperLinear() {
   }
-  
+
   public MapperLinear(Double minX, Double maxX, Double minY, Double maxY) {
     map(minX, maxX, minY, maxY);
   }
@@ -39,7 +38,7 @@ public final class MapperLinear implements Serializable, Mapper {
   final public Double calcOutput(Double in) {
 
     double c = 0.0;
-    
+
     if (in == null) {
       log.warn("calcOutput(null)");
       return c;
@@ -57,7 +56,7 @@ public final class MapperLinear implements Serializable, Mapper {
         c = minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
       } else {
         c = minY + ((in - maxX) * (maxY - minY)) / (minX - maxX);
-      }      
+      }
     } else {
       log.error("mapping values are not set - will not calculate");
     }
@@ -127,8 +126,7 @@ public final class MapperLinear implements Serializable, Mapper {
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * org.myrobotlab.math.MapperInterface#merge(org.myrobotlab.math.MapperLinear)
+   * @see org.myrobotlab.math.MapperInterface#merge(org.myrobotlab.math.MapperLinear)
    */
   @Override
   public void merge(Mapper in) {
@@ -175,7 +173,7 @@ public final class MapperLinear implements Serializable, Mapper {
     this.maxX = maxX;
     this.minY = minY;
     this.maxY = maxY;
-    
+
     setLimits(minY, maxY);
   }
 

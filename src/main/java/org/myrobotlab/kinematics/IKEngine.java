@@ -47,7 +47,9 @@ public class IKEngine {
 
   /**
    * init variables
-   * @param nLinks number of links
+   * 
+   * @param nLinks
+   *          number of links
    */
   public IKEngine(int nLinks) {
     stopped = true;
@@ -107,8 +109,7 @@ public class IKEngine {
   }
 
   /**
-   * calculates jointLocations[] and jacobian, then updates thetas[] Makes one
-   * ik iteration.
+   * calculates jointLocations[] and jacobian, then updates thetas[] Makes one ik iteration.
    *
    * @param gl
    *          the goal point
@@ -163,9 +164,12 @@ public class IKEngine {
   }
 
   /**
-   * @param gx x components of the goal point
-   * @param gy y components of the goal point
-   * @param gz z components of the goal point
+   * @param gx
+   *          x components of the goal point
+   * @param gy
+   *          y components of the goal point
+   * @param gz
+   *          z components of the goal point
    */
   public void setGoal(double gx, double gy, double gz) {
     goal.elements[0][0] = gx;
@@ -200,8 +204,8 @@ public class IKEngine {
   }
 
   /**
-   * Changes the number of links and sets up data structrues. Waits until all ik
-   * computation is done and it is safe to change variables.
+   * Changes the number of links and sets up data structrues. Waits until all ik computation is done and it is safe to change
+   * variables.
    * 
    * @param nLinks
    *          the number of links

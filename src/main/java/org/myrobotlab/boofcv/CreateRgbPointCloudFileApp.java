@@ -18,7 +18,6 @@
 
 package org.myrobotlab.boofcv;
 
-
 import boofcv.alg.depth.VisualDepthOps;
 import boofcv.io.calibration.CalibrationIO;
 import boofcv.io.image.UtilImageIO;
@@ -41,39 +40,39 @@ import java.io.IOException;
  * @author Peter Abeles
  */
 public class CreateRgbPointCloudFileApp {
-	public static void main( String args[] ) throws IOException {
-		String baseDir = "log/";
+  public static void main(String args[]) throws IOException {
+    String baseDir = "log/";
 
-		String nameRgb = baseDir+"rgb0000000.ppm";
-		String nameDepth = baseDir+"depth0000000.depth";
-		String nameCalib = baseDir+"intrinsic.yaml";
+    String nameRgb = baseDir + "rgb0000000.ppm";
+    String nameDepth = baseDir + "depth0000000.depth";
+    String nameCalib = baseDir + "intrinsic.yaml";
 
-		CameraPinholeRadial param = CalibrationIO.load(nameCalib);
+    CameraPinholeRadial param = CalibrationIO.load(nameCalib);
 
-		GrayU16 depth = new GrayU16(1,1);
-		Planar<GrayU8> rgb = new Planar<>(GrayU8.class,1,1,3);
+    GrayU16 depth = new GrayU16(1, 1);
+    Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);
 
-		UtilImageIO.loadPPM_U8(nameRgb, rgb, null);
-		UtilOpenKinect.parseDepth(nameDepth,depth,null);
+    UtilImageIO.loadPPM_U8(nameRgb, rgb, null);
+    UtilOpenKinect.parseDepth(nameDepth, depth, null);
 
-		FastQueue<Point3D_F64> cloud = new FastQueue<Point3D_F64>(Point3D_F64.class,true);
-		FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
+    FastQueue<Point3D_F64> cloud = new FastQueue<Point3D_F64>(Point3D_F64.class, true);
+    FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
 
-		VisualDepthOps.depthTo3D(param, rgb, depth, cloud, cloudColor);
+    VisualDepthOps.depthTo3D(param, rgb, depth, cloud, cloudColor);
 
-		DataOutputStream file = new DataOutputStream(new FileOutputStream("kinect_pointcloud.txt"));
+    DataOutputStream file = new DataOutputStream(new FileOutputStream("kinect_pointcloud.txt"));
 
-		file.write("# Kinect RGB Point cloud. Units: millimeters. Format: X Y Z R G B\n".getBytes());
+    file.write("# Kinect RGB Point cloud. Units: millimeters. Format: X Y Z R G B\n".getBytes());
 
-		for( int i = 0; i < cloud.size; i++ ) {
-			Point3D_F64 p = cloud.get(i);
-			int[] color = cloudColor.get(i);
+    for (int i = 0; i < cloud.size; i++) {
+      Point3D_F64 p = cloud.get(i);
+      int[] color = cloudColor.get(i);
 
-			String line = String.format("%.10f %.10f %.10f %d %d %d\n",p.x,p.y,p.z,color[0],color[1],color[2]);
-			file.write(line.getBytes());
-		}
-		file.close();
+      String line = String.format("%.10f %.10f %.10f %d %d %d\n", p.x, p.y, p.z, color[0], color[1], color[2]);
+      file.write(line.getBytes());
+    }
+    file.close();
 
-		System.out.println("Total points = "+cloud.size);
-	}
+    System.out.println("Total points = " + cloud.size);
+  }
 }

@@ -45,10 +45,9 @@ public class Shoutbox extends Service {
   }
 
   /**
-   * POJO Shout is the most common message structure being sent from client to
-   * WSServer and from WSServer broadcasted to clients - therefore instead of a
-   * seperate system message we will have system data components of the shout -
-   * these are to display server data on the clients
+   * POJO Shout is the most common message structure being sent from client to WSServer and from WSServer broadcasted to clients -
+   * therefore instead of a seperate system message we will have system data components of the shout - these are to display server
+   * data on the clients
    */
   public static class Shout implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -71,13 +70,10 @@ public class Shoutbox extends Service {
   transient static NameProvider nameProvider = new DefaultNameProvider();
 
   /*
-   * Core to managing the connections are the keys The keys for websockets are
-   * defined as remoteIp:remotePort - unfortunately these are null on disconnect
-   * so a seperate lookup needs to be utilized The keys for xmpp "buddies" are
-   * simply their jabber ids
+   * Core to managing the connections are the keys The keys for websockets are defined as remoteIp:remotePort - unfortunately these
+   * are null on disconnect so a seperate lookup needs to be utilized The keys for xmpp "buddies" are simply their jabber ids
    * 
-   * A Connection's UserId is a "user friendly" identification of the user using
-   * that connection
+   * A Connection's UserId is a "user friendly" identification of the user using that connection
    * 
    */
 
@@ -466,8 +462,8 @@ public class Shoutbox extends Service {
   /*
    * 
    * 
-   * CONCEPTS systemBroadcast - system needs to send to all system message list
-   * - system sends to a list of users system message channel -
+   * CONCEPTS systemBroadcast - system needs to send to all system message list - system sends to a list of users system message
+   * channel -
    * 
    * channel - a group of recievers &amp; senders
    * 
@@ -475,8 +471,7 @@ public class Shoutbox extends Service {
    * 
    * DATA timezone - set time zode - use UTC for all server data
    * 
-   * // system related public int connectionCount; public int userCount; public
-   * int guestCount; public int msgCount;
+   * // system related public int connectionCount; public int userCount; public int guestCount; public int msgCount;
    * 
    * getVersion
    */
@@ -523,9 +518,8 @@ public class Shoutbox extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

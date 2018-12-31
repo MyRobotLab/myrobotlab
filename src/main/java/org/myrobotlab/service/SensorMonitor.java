@@ -43,9 +43,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * SensorMonitor - he SensorMonitor takes a variety of input data and displays
- * it to a user interface. It also has the capability of adding alerts. An alert
- * would be triggered if a sensor goes above or below some threshold.
+ * SensorMonitor - he SensorMonitor takes a variety of input data and displays it to a user interface. It also has the capability of
+ * adding alerts. An alert would be triggered if a sensor goes above or below some threshold.
  *
  */
 public class SensorMonitor extends Service {
@@ -73,12 +72,9 @@ public class SensorMonitor extends Service {
 
       /*
        * 
-       * Random rand = new Random(); for (int i = 0; i < 10000; ++i) { Message
-       * msg = new Message(); msg.name="sensors"; msg.sender="SEAR";
-       * msg.method="input"; Float[] gps = new Float[]{rand.nextFloat()*200,
-       * rand.nextFloat()*200, rand.nextFloat()*200}; msg.data = new
-       * Object[]{gps}; //msg.data = new Object[]{rand.nextFloat()*200};
-       * sm.in(msg); }
+       * Random rand = new Random(); for (int i = 0; i < 10000; ++i) { Message msg = new Message(); msg.name="sensors";
+       * msg.sender="SEAR"; msg.method="input"; Float[] gps = new Float[]{rand.nextFloat()*200, rand.nextFloat()*200,
+       * rand.nextFloat()*200}; msg.data = new Object[]{gps}; //msg.data = new Object[]{rand.nextFloat()*200}; sm.in(msg); }
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -174,10 +170,8 @@ public class SensorMonitor extends Service {
   }
 
   /*
-   * sensorInput is the destination of sensor data all types will funnel into a
-   * pinData type - this is used to standardize and simplify the display.
-   * Additionally, the source can be attached so that trace lines can be
-   * identified
+   * sensorInput is the destination of sensor data all types will funnel into a pinData type - this is used to standardize and
+   * simplify the display. Additionally, the source can be attached so that trace lines can be identified
    * 
    */
   public void sensorInput(Pin pinData) {
@@ -206,9 +200,8 @@ public class SensorMonitor extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

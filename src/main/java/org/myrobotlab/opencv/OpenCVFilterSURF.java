@@ -215,7 +215,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
     this.object = image;
     settings.setObjectImage(image);
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;

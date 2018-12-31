@@ -55,9 +55,8 @@ public class WebGuiClient extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -127,10 +126,8 @@ public class WebGuiClient extends Service {
         }).transport(Request.TRANSPORT.WEBSOCKET).transport(Request.TRANSPORT.SSE).transport(Request.TRANSPORT.LONG_POLLING);
 
     /*
-     * RequestBuilder<?> requestBuilder =
-     * client.newRequestBuilder().method(Request.METHOD.GET).uri(url)
-     * .transport(Request.TRANSPORT.WEBSOCKET).transport(Request.TRANSPORT. SSE)
-     * .transport(Request.TRANSPORT.LONG_POLLING);
+     * RequestBuilder<?> requestBuilder = client.newRequestBuilder().method(Request.METHOD.GET).uri(url)
+     * .transport(Request.TRANSPORT.WEBSOCKET).transport(Request.TRANSPORT. SSE) .transport(Request.TRANSPORT.LONG_POLLING);
      */
 
     // ================================================================
@@ -172,9 +169,9 @@ public class WebGuiClient extends Service {
         log.info("msg {}", msg);
         // if (msg.method.equals("onRegistered")) {
         if (msg.method.equals("onLocalServices")) {
-          
+
         }
-        
+
         if (msg.method.equals("onRegistered")) {
           Object[] msgData = msg.data;
           ServiceInterface si = null;
@@ -267,10 +264,10 @@ public class WebGuiClient extends Service {
 
       WebGuiClient client = (WebGuiClient) Runtime.start("webguiclient", "WebGuiClient");
       client.connect("http://localhost:8888/api/messages");
-      
-      // this returns with a bajillion registry entries .. which need to be digested and 
+
+      // this returns with a bajillion registry entries .. which need to be digested and
       // prefixed
-      
+
       // perhaps its best to specificall request
       // 1. hello
       // 2. register me
@@ -289,15 +286,15 @@ public class WebGuiClient extends Service {
        * // block <- list services (not block - but event handled)
        * 
        */
-      
+
       client.subscribe("runtime", "getUptime");
       // client.socket.fire(Message.createMessage(client, "runtime", "getUptime", null));
-      
+
       for (int i = 0; i < 100000; ++i) {
         client.socket.fire(Message.createMessage(client, "runtime", "getUptime", null));
         Message msg = Message.createMessage(client, "runtime", "getUptime", null);
       }
-      
+
       // client.socket.fire(msg);
       // client.connect("http://localhost:8888/api/messages");
       // client.sendRemote("http://localhost:8888/api/messages",

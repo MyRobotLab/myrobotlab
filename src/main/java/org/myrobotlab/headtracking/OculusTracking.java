@@ -15,8 +15,8 @@ import com.oculusvr.capi.PoseStatef;
 import com.oculusvr.capi.TrackingState;
 
 /**
- * OculusHeadTracking -This is a helper thread that will poll the oculus head
- * tracking information and it will publish the roll/pitch/yaw information.
+ * OculusHeadTracking -This is a helper thread that will poll the oculus head tracking information and it will publish the
+ * roll/pitch/yaw information.
  *
  */
 public class OculusTracking implements Runnable, Serializable {
@@ -30,10 +30,9 @@ public class OculusTracking implements Runnable, Serializable {
   transient Thread trackerThread = null;
   private int pollIntervalMS = 20;
 
-  
   private long frameCount = 0;
   private int downSample = 50;
-  
+
   public OculusTracking(Hmd hmd, HmdDesc hmdDesc) {
     // Grab a handle to the initialized hmd.
     this.hmd = hmd;
@@ -44,11 +43,10 @@ public class OculusTracking implements Runnable, Serializable {
   public void run() {
     running = true;
     while (running) {
-      
+
       frameCount++;
       TrackingState trackingState = hmd.getTrackingState(pollIntervalMS, false);
-      
-     
+
       // TODO: do we care about "w" ?
       // double w = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.w);
       // rotations about x axis (pitch)
@@ -69,10 +67,10 @@ public class OculusTracking implements Runnable, Serializable {
       ArrayList<Point> points = new ArrayList<Point>();
       points.add(new Point(x, y, z, roll, pitch, yaw));
       oculus.invoke("publishPoints", points);
-      
+
       PoseStatef[] hands = trackingState.HandPoses;
       if (hands.length > 0) {
-        //System.out.println(hands.length);
+        // System.out.println(hands.length);
         PoseStatef leftHand = hands[1];
         PoseStatef rightHand = hands[0];
 
@@ -84,8 +82,7 @@ public class OculusTracking implements Runnable, Serializable {
         yaw = Math.toDegrees(leftHand.Pose.Orientation.y);
         // rotation about z axis (roll)
         roll = Math.toDegrees(leftHand.Pose.Orientation.z);
-        
-        
+
         x = rightHand.Pose.Position.x;
         y = rightHand.Pose.Position.y;
         z = rightHand.Pose.Position.z;
@@ -95,23 +92,23 @@ public class OculusTracking implements Runnable, Serializable {
         // rotation about z axis (roll)
         roll = Math.toDegrees(rightHand.Pose.Orientation.z);
 
-        Point leftHandPoint = new Point(x,y,z,roll,pitch,yaw);
-        Point rightHandPoint = new Point(x,y,z,roll,pitch,yaw);
+        Point leftHandPoint = new Point(x, y, z, roll, pitch, yaw);
+        Point rightHandPoint = new Point(x, y, z, roll, pitch, yaw);
 
         ArrayList<Point> handPoints = new ArrayList<Point>();
         handPoints.add(leftHandPoint);
         handPoints.add(rightHandPoint);
-        // publish left and hand positions.  This is pretty much raw data
+        // publish left and hand positions. This is pretty much raw data
         // we need to scale it / translate it rotate it.. etc..
         // probably best done inside of the ik service.
-        
+
         // need to down sample this
         if (frameCount % downSample == 0) {
           oculus.invoke("publishLeftHandPosition", leftHandPoint);
           oculus.invoke("publishRightHandPosition", rightHandPoint);
         }
       }
-      
+
       try {
         // There need to be polling interval here.
         Thread.sleep(pollIntervalMS);
@@ -120,10 +117,9 @@ public class OculusTracking implements Runnable, Serializable {
         // break out ...
         break;
       }
-      
-      
+
       // TODO: can I get oculus touch tracking info?
-      
+
     }
   }
 

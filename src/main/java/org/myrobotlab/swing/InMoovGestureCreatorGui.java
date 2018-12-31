@@ -85,7 +85,6 @@ public class InMoovGestureCreatorGui extends ServiceGui implements ActionListene
   public InMoovGestureCreatorGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
 
-
     // display:
     // |--------------------|
     // |####################|
@@ -473,7 +472,7 @@ public class InMoovGestureCreatorGui extends ServiceGui implements ActionListene
     // splitpanetopbottom.setDividerLocation(300);
 
     display.add(splitpanetopbottom);
-  
+
   }
 
   @Override
@@ -586,7 +585,6 @@ public class InMoovGestureCreatorGui extends ServiceGui implements ActionListene
     gbl.setConstraints(c, gbc);
     cont.add(c);
   }
-
 
   @Override
   public void itemStateChanged(ItemEvent ie) {

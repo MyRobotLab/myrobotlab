@@ -16,14 +16,14 @@ public interface Mapper {
    *      
    * limits are also set from minY, maxY if there is an inverted mapping, the limits are still appropriately set.
    * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
+   * &#64;param minX
+   * &#64;param maxX
+   * &#64;param minY
+   * &#64;param maxY
    * </pre>
    */
   void map(Double minX, Double maxX, Double minY, Double maxY);
-  
+
   /**
    * function which "only" sets the range mapping value without setting input or output limits
    * 
@@ -35,17 +35,16 @@ public interface Mapper {
   void setMap(Double minX, Double maxX, Double minY, Double maxY);
 
   /**
-   * Merges non null values of "other" mapper with this mapper's null fields.
-   * useful for setting values in MotorControl from "default" values in MotorControllers.
-   * Since the MotorControl doesn't know what would be an appropriate mapping value e.g  -1,1 => ?,? the minY & maxY are 
-   * left null until a "merge" is done in the attach of the AbstractMotorController.  
+   * Merges non null values of "other" mapper with this mapper's null fields. useful for setting values in MotorControl from
+   * "default" values in MotorControllers. Since the MotorControl doesn't know what would be an appropriate mapping value e.g -1,1
+   * => ?,? the minY & maxY are left null until a "merge" is done in the attach of the AbstractMotorController.
    * 
    * When a Sabertooth motor controller is "attached" to a MotorControl the merge produces -1,1 => -127, 127 which is appropriate.
    * 
    * @param mapperInterface
    */
   void merge(Mapper other);
-  
+
   /**
    * <pre>
    * setLimits sets the output limits of the Mapper.  If an input is calculated
@@ -61,6 +60,7 @@ public interface Mapper {
    * 
    * 
    * </pre>
+   * 
    * @param minOutput
    * @param maxOutput
    */
@@ -75,6 +75,7 @@ public interface Mapper {
 
   /**
    * Inverts the calculation multiplies the output by -1
+   * 
    * @param invert
    */
   void setInverted(boolean invert);

@@ -52,7 +52,7 @@ public class RasPiGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-	// FIXME - spec callback would be onNode
+    // FIXME - spec callback would be onNode
     subscribe("publishNode", "publishNode");
     // FIXME - spec callback would be onPutNode
     subscribe("putNode", "putNode");

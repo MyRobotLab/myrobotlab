@@ -39,7 +39,7 @@ public class ArduinoTest implements PinArrayListener {
 
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
-  // TODO: read the value of this off a property off a config file (maybe a properties file for the mrl test framework.) 
+  // TODO: read the value of this off a property off a config file (maybe a properties file for the mrl test framework.)
   static boolean useVirtualHardware = true;
   static String port = "COM25";
 
@@ -58,7 +58,7 @@ public class ArduinoTest implements PinArrayListener {
   Map<Integer, PinData> pinData = new HashMap<Integer, PinData>();
   // FIXME - test for re-entrant !!!!
   // FIXME - single switch for virtual versus "real" hardware
-  
+
   @Before
   public void setUp() throws Exception {
     TestUtils.initEnvirionment();
@@ -71,17 +71,16 @@ public class ArduinoTest implements PinArrayListener {
       virtual.connect(port);
     }
 
-    
-    // TODO:  Initialize the arduino under test.  (potentially do this in each test method vs passing the same one around ..)
+    // TODO: Initialize the arduino under test. (potentially do this in each test method vs passing the same one around ..)
     arduino = (Arduino) Runtime.start("arduinoTest", "Arduino");
-    // TODO: have a separate unit test for testing serial.  we probably don't want to intermingle that testing here (if we can avoid it.)
+    // TODO: have a separate unit test for testing serial. we probably don't want to intermingle that testing here (if we can avoid
+    // it.)
     serial = arduino.getSerial();
     arduino.connect(port);
-    
+
     /**
-     * Arduino's expected state before each test is
-     * 'connected' with no devices, no pins enabled
-     */    
+     * Arduino's expected state before each test is 'connected' with no devices, no pins enabled
+     */
   }
 
   // TODO : broken in ANT but not in eclipse!
@@ -105,9 +104,8 @@ public class ArduinoTest implements PinArrayListener {
   public void testReleaseService() {
     arduino.releaseService();
     // better re-start it
-    arduino = (Arduino)Runtime.start("arduino", "Arduino");
+    arduino = (Arduino) Runtime.start("arduino", "Arduino");
   }
-
 
   // TODO: fix this test method.
   // @Test
@@ -130,7 +128,7 @@ public class ArduinoTest implements PinArrayListener {
   }
 
   private void assertVirtualPinValue(int address, int value) {
-    if (virtual != null){
+    if (virtual != null) {
       assertTrue(virtual.readBlocking(address, 50) == value);
       virtual.clearPinQueue(address);
     }
@@ -143,9 +141,7 @@ public class ArduinoTest implements PinArrayListener {
       // arduino.enableAck(true);
       arduino.echo(90.57F, 129, 30.123F);
       /*
-			arduino.echo(30003030L + i);
-			arduino.echo(2L);
-			arduino.echo(-1L);
+       * arduino.echo(30003030L + i); arduino.echo(2L); arduino.echo(-1L);
        */
       // arduino.disconnect();
     }
@@ -230,7 +226,6 @@ public class ArduinoTest implements PinArrayListener {
     assertTrue(boardInfo.getVersion().intValue() == Msg.MRLCOMM_VERSION);
   }
 
-
   @Test
   public final void testConnect() throws IOException {
     log.info("testConnect - begin");
@@ -263,7 +258,7 @@ public class ArduinoTest implements PinArrayListener {
   }
 
   // If we enable this test, it should assert something.
-  // @Test   
+  // @Test
   public final void testPinModeIntString() {
     log.info("testPinModeIntString");
     arduino.pinMode(8, "OUTPUT");
@@ -336,7 +331,7 @@ public class ArduinoTest implements PinArrayListener {
     }
 
     // can we attach to a different pin?
-    servo.attach(servoPin + 1);		
+    servo.attach(servoPin + 1);
     if (virtual != null) {
       sleep(100);
       assertTrue(mrlServo.pin == servoPin + 1);
@@ -394,9 +389,8 @@ public class ArduinoTest implements PinArrayListener {
 
     servo.moveTo(90);
 
-
-    // when we release a service - it should 
-    // notify and process releasing itself from attached 
+    // when we release a service - it should
+    // notify and process releasing itself from attached
     // services
     servo.releaseService();
     assertFalse(arduino.getAttached().contains(servo.getName()));
@@ -404,7 +398,6 @@ public class ArduinoTest implements PinArrayListener {
     assertFalse(servo.isAttachedServoController(arduino));
 
   }
-
 
   // TODO: re-enable when worky
   // @Test
@@ -481,83 +474,83 @@ public class ArduinoTest implements PinArrayListener {
   @Override
   public void onPinArray(PinData[] pindata) {
     log.debug("onPinArray size {}", pindata.length);
-    for (int i = 0; i < pindata.length; ++i){
-      pinData.put(pindata[i].address,pindata[i]);
+    for (int i = 0; i < pindata.length; ++i) {
+      pinData.put(pindata[i].address, pindata[i]);
     }
   }
 
-//  public static void main(String[] args) {
-//    try {
-//      LoggingFactory.init("INFO");
-//
-//      Runtime.start("webgui", "WebGui");
-//      // Runtime.start("gui", "SwingGui");
-//
-//      // test a "real" arduino
-//      useVirtualHardware = false;
-//      port = "COM5";
-//      // port = "COM4";
-//      // port = "COM99";
-//
-//      ArduinoTest test = new ArduinoTest();
-//      ArduinoTest.setUpBeforeClass();
-//
-//      Pir pir = (Pir)Runtime.start("pir","Pir");
-//      pir.attach(arduino, 7);
-//
-//      // arduino.record();
-//
-//      if (virtual != null) {
-//        virtual.connect(port);
-//      }
-//      arduino.connect(port);
-//
-//      arduino.setDebug(true);
-//      //arduino.enableAck(false);
-//
-//      test.testConnectString();
-//
-//      Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
-//      Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
-//
-//      servo01.setMinMax(10, 175);
-//      servo01.setInverted(true);
-//      servo01.setRest(157);
-//      servo02.setRest(140);
-//
-//      servo01.setInverted(true);
-//
-//      servo01.attach(arduino, 7);
-//      arduino.attach(servo01, 7);
-//      arduino.attach(servo01, 8);
-//
-//      // arduino.disconnect();
-//
-//      boolean b = true;
-//      if (b) {
-//        return;
-//      }
-//
-//      test.testGetVersion();
-//      test.testServoAttachServoInteger();
-//      test.testEnableBoardStatus();
-//      test.testEnablePinInt();
-//
-//
-//
-//      // test specific method
-//      test.testServoAttachServoInteger();
-//
-//      // run junit as java app
-//      JUnitCore junit = new JUnitCore();
-//      Result result = junit.run(ArduinoTest.class);
-//      log.info("Result was: {}", result);
-//
-//      // Runtime.dump();
-//
-//    } catch (Exception e) {
-//      Logging.logError(e);
-//    }
-//  }
+  // public static void main(String[] args) {
+  // try {
+  // LoggingFactory.init("INFO");
+  //
+  // Runtime.start("webgui", "WebGui");
+  // // Runtime.start("gui", "SwingGui");
+  //
+  // // test a "real" arduino
+  // useVirtualHardware = false;
+  // port = "COM5";
+  // // port = "COM4";
+  // // port = "COM99";
+  //
+  // ArduinoTest test = new ArduinoTest();
+  // ArduinoTest.setUpBeforeClass();
+  //
+  // Pir pir = (Pir)Runtime.start("pir","Pir");
+  // pir.attach(arduino, 7);
+  //
+  // // arduino.record();
+  //
+  // if (virtual != null) {
+  // virtual.connect(port);
+  // }
+  // arduino.connect(port);
+  //
+  // arduino.setDebug(true);
+  // //arduino.enableAck(false);
+  //
+  // test.testConnectString();
+  //
+  // Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
+  // Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
+  //
+  // servo01.setMinMax(10, 175);
+  // servo01.setInverted(true);
+  // servo01.setRest(157);
+  // servo02.setRest(140);
+  //
+  // servo01.setInverted(true);
+  //
+  // servo01.attach(arduino, 7);
+  // arduino.attach(servo01, 7);
+  // arduino.attach(servo01, 8);
+  //
+  // // arduino.disconnect();
+  //
+  // boolean b = true;
+  // if (b) {
+  // return;
+  // }
+  //
+  // test.testGetVersion();
+  // test.testServoAttachServoInteger();
+  // test.testEnableBoardStatus();
+  // test.testEnablePinInt();
+  //
+  //
+  //
+  // // test specific method
+  // test.testServoAttachServoInteger();
+  //
+  // // run junit as java app
+  // JUnitCore junit = new JUnitCore();
+  // Result result = junit.run(ArduinoTest.class);
+  // log.info("Result was: {}", result);
+  //
+  // // Runtime.dump();
+  //
+  // } catch (Exception e) {
+  // Logging.logError(e);
+  // }
+  // }
 
 }

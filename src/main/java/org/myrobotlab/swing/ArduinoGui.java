@@ -108,11 +108,11 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
    * current board type of the arduino
    */
   String board = null;
-  
+
   String pinTabBoard = null;
-  
+
   JTextArea uploadResults = new JTextArea(5, 30);
-  
+
   Arduino myArduino;
 
   public ArduinoGui(final String boundServiceName, final SwingGui myService) {
@@ -144,8 +144,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   }
 
   /**
-   * The guts of the business logic of handling all the graphical components and
-   * their relations with each other.
+   * The guts of the business logic of handling all the graphical components and their relations with each other.
    */
   @Override
   public void actionPerformed(ActionEvent e) {
@@ -172,7 +171,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
       if (port == null || port.equals("")) {
         error("please set port");
         return;
-      }      
+      }
       uploadResults.setText("Uploading Sketch");
       send("uploadSketch", path, port);
     }
@@ -209,25 +208,25 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   }
 
   public void updatePinTab(Arduino arduino) {
-    
+
     // determine board def
     // this is definition of the pins on the board
     // currently only 2 (I think they may be based on processor)
     // uno & mega
-    
+
     // ALL BOARD HAVING 20 pins 14 digital 6 analog etc..
     String pinDef = "uno";
-    
-    if(arduino.getBoard().contains("mega")){
+
+    if (arduino.getBoard().contains("mega")) {
       // ALL BOARDS HAVIN 72 pins .. blah blah blah ...
       pinDef = "mega";
     }
-    
-    if (pinDef.equals(pinTabBoard)){
+
+    if (pinDef.equals(pinTabBoard)) {
       // no changes - just return
       return;
     }
-    
+
     pinTabBoard = pinDef;
 
     JLayeredPane imageMap = new JLayeredPane();
@@ -328,7 +327,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     pane.setPreferredSize(new Dimension(500, 400));
 
     uploadPanel.add(pane, BorderLayout.CENTER);
-    
+
     JScrollPane pane2 = new JScrollPane(uploadResults);
     uploadPanel.add(pane2, BorderLayout.SOUTH);
 
@@ -345,7 +344,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        
+
         // remove listeners
         boardTypes.removeItemListener(self);
 
@@ -357,10 +356,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
             boardToBoardType.put(bt.getBoard(), bt);
           }
         }
-        
+
         boardTypes.setSelectedItem(boardToBoardType.get(arduino.getBoard()));
-        
-        
+
         // check if boardType has changed ..
         // if so - we need to recreate pins pinlists oscope views etc..
         if (!arduino.getBoard().equals(board)) {
@@ -379,7 +377,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
         // TODO - check what state the panels are to see if a
         // change is needed
         uploadResults.setText(arduino.uploadSketchResult);
-        
+
         // re-enabling listeners
         boardTypes.addItemListener(self);
       }
@@ -388,9 +386,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   }
 
   /*
-   * onState is called when the Arduino service changes state information FIXME
-   * - this method is often called by other threads so gui - updates must be
-   * done in the swing post method way
+   * onState is called when the Arduino service changes state information FIXME - this method is often called by other threads so
+   * gui - updates must be done in the swing post method way
    * 
    */
   public void onState(final Arduino arduino) {

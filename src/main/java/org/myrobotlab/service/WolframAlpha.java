@@ -18,8 +18,7 @@ import com.wolfram.alpha.WASubpod;
 
 /**
  * 
- * WolframAlpha - This service allows you to send a query to WolframAlpha and
- * get the result.
+ * WolframAlpha - This service allows you to send a query to WolframAlpha and get the result.
  *
  */
 public class WolframAlpha extends Service {
@@ -190,9 +189,8 @@ public class WolframAlpha extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -202,15 +200,15 @@ public class WolframAlpha extends Service {
     meta.addDescription("Wolfram service");
     meta.addCategory("intelligence", "data");
     // TODO http should be removed as a dependency and added as a Peer
-    
+
     meta.addDependency("WolframAlpha", "WolframAlpha", "1.1");
-    
-    // FIXME - add Mrl Service HttpClient Peer - don't include dependency directly 
-    /* - currently Runtime provides these dependencies
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6"); 
-    */
-    
+
+    // FIXME - add Mrl Service HttpClient Peer - don't include dependency directly
+    /*
+     * - currently Runtime provides these dependencies meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+     * meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
+     */
+
     meta.setCloudService(true);
     return meta;
   }

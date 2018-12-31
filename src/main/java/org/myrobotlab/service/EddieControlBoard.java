@@ -18,8 +18,8 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
- * EddieControlBoard - This service will communicate with the parallax
- * EddieControlBoard It can publish sensor data , control motors and more!
+ * EddieControlBoard - This service will communicate with the parallax EddieControlBoard It can publish sensor data , control motors
+ * and more!
  *
  */
 public class EddieControlBoard extends Service implements KeyListener, SerialDataListener, JoystickListener {
@@ -104,15 +104,12 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
       /*
        * float i = 0.94f;
        * 
-       * Map mapper = new Map(-1.0f, 1.0f, -127.0f, 127.0f); int x =
-       * mapper.calc(i); if (x > 127) { x = 128 - x; }
+       * Map mapper = new Map(-1.0f, 1.0f, -127.0f, 127.0f); int x = mapper.calc(i); if (x > 127) { x = 128 - x; }
        * 
        * log.info("{}", Integer.toHexString(x & 0xFF));
        * 
-       * String hex = Integer.toHexString(256 & 0xFF);
-       * log.info(hex.toUpperCase()); hex = Integer.toHexString(255 & 0xFF);
-       * log.info(hex.toUpperCase()); hex = Integer.toHexString(230 & 0xFF); //
-       * slow reverse log.info(hex.toUpperCase());
+       * String hex = Integer.toHexString(256 & 0xFF); log.info(hex.toUpperCase()); hex = Integer.toHexString(255 & 0xFF);
+       * log.info(hex.toUpperCase()); hex = Integer.toHexString(230 & 0xFF); // slow reverse log.info(hex.toUpperCase());
        */
 
     } catch (Exception e) {
@@ -125,7 +122,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   public void connect(String port) throws IOException {
-	  serial.open(port, 115200, 8, 1, 0);
+    serial.open(port, 115200, 8, 1, 0);
   }
 
   public String getAnalogValues() throws Exception {
@@ -353,11 +350,13 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   /**
-   * sending a command when expecting a string response in the context of
-   * blocking for response
-   * @param cmd to send
-   * @return  the string response
-   * @throws Exception e
+   * sending a command when expecting a string response in the context of blocking for response
+   * 
+   * @param cmd
+   *          to send
+   * @return the string response
+   * @throws Exception
+   *           e
    */
   public String sendCommand(String cmd) throws Exception {
     log.info("sendCommand {}", cmd);
@@ -391,8 +390,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     joystick = (Joystick) startPeer("joystick");
     joystick.addInputListener(this);
     /*
-     * joystick.addAxisListener(getName(), "onY");
-     * joystick.addAxisListener(getName(), "onRY");
+     * joystick.addAxisListener(getName(), "onY"); joystick.addAxisListener(getName(), "onRY");
      */
   }
 
@@ -456,9 +454,8 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

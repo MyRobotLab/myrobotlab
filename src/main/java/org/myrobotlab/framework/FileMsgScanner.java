@@ -31,7 +31,7 @@ public class FileMsgScanner extends Thread {
     File folder = new File(MSGS_DIR);
     folder.mkdirs();
     log.info("enabling file msgs in {}", MSGS_DIR);
-    
+
     scanning = true;
     try {
       while (scanning) {

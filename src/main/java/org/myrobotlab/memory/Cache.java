@@ -14,7 +14,8 @@ public interface Cache {
   /**
    * Expire an item in the cache.
    * 
-   * @param name the name of the item
+   * @param name
+   *          the name of the item
    */
   void expire(String name);
 
@@ -26,8 +27,10 @@ public interface Cache {
   /**
    * Cache a value.
    * 
-   * @param name the name of the item
-   * @param value the value of the item
+   * @param name
+   *          the name of the item
+   * @param value
+   *          the value of the item
    */
   void put(String name, Object value);
 }

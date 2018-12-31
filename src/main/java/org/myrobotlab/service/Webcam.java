@@ -14,7 +14,6 @@ import com.github.sarxos.webcam.WebcamEvent;
 import com.github.sarxos.webcam.WebcamListener;
 import com.github.sarxos.webcam.WebcamStreamer;
 
-
 public class Webcam extends Service implements WebcamListener {
 
   private static final long serialVersionUID = 1L;
@@ -30,11 +29,9 @@ public class Webcam extends Service implements WebcamListener {
     super(n);
   }
 
-
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -46,7 +43,6 @@ public class Webcam extends Service implements WebcamListener {
     meta.addCategory("video");
     return meta;
   }
-
 
   public void start() {
     start(null);
@@ -67,30 +63,27 @@ public class Webcam extends Service implements WebcamListener {
   @Override
   public void webcamClosed(WebcamEvent arg0) {
     // TODO Auto-generated method stub
-    
-  }
 
+  }
 
   @Override
   public void webcamDisposed(WebcamEvent arg0) {
     // TODO Auto-generated method stub
-    
-  }
 
+  }
 
   @Override
   public void webcamImageObtained(WebcamEvent arg0) {
     // TODO Auto-generated method stub
-    
-  }
 
+  }
 
   @Override
   public void webcamOpen(WebcamEvent arg0) {
     // TODO Auto-generated method stub
-    
+
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -102,12 +95,10 @@ public class Webcam extends Service implements WebcamListener {
       // webcam.startStreamServer("0.0.0.0", 22222);
       // Runtime.start("webgui", "WebGui");
       // webcam.startStreamClient("127.0.0.1", 22222);
-      
 
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
-  
 
 }

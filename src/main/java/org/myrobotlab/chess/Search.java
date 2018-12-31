@@ -54,11 +54,9 @@ final public class Search {
   }
 
   /*
-   * quiesce() is a recursive minimax search function with alpha-beta cutoffs.
-   * In other words, negamax. It basically only searches capture sequences and
-   * allows the evaluation function to cut the search off (and set alpha). The
-   * idea is to find a position where there isn't a lot going on so the static
-   * evaluation function will work.
+   * quiesce() is a recursive minimax search function with alpha-beta cutoffs. In other words, negamax. It basically only searches
+   * capture sequences and allows the evaluation function to cut the search off (and set alpha). The idea is to find a position
+   * where there isn't a lot going on so the static evaluation function will work.
    */
 
   public HMove getBest() {
@@ -66,11 +64,9 @@ final public class Search {
   }
 
   /*
-   * sortPV() is called when the search function is following the PV (Principal
-   * Variation). It looks through the current ply's move list to see if the PV
-   * move is there. If so, it adds 10,000,000 to the move's score so it's played
-   * first by the search function. If not, followPV remains FALSE and search()
-   * stops calling sortPV().
+   * sortPV() is called when the search function is following the PV (Principal Variation). It looks through the current ply's move
+   * list to see if the PV move is there. If so, it adds 10,000,000 to the move's score so it's played first by the search function.
+   * If not, followPV remains FALSE and search() stops calling sortPV().
    */
 
   public HMove getBestNext() {
@@ -144,8 +140,7 @@ final public class Search {
 
   int search(int alpha, int beta, int depth) throws StopSearchingException {
     /*
-     * we're as deep as we want to be; call quiesce() to get a reasonable score
-     * and return it.
+     * we're as deep as we want to be; call quiesce() to get a reasonable score and return it.
      */
     if (depth == 0)
       return quiesce(alpha, beta);
@@ -155,9 +150,8 @@ final public class Search {
     }
 
     /*
-     * if this isn't the root of the search tree (where we have to pick a move
-     * and can't simply return 0) then check to see if the position is a repeat.
-     * if so, we can assume that this line is a draw and return 0.
+     * if this isn't the root of the search tree (where we have to pick a move and can't simply return 0) then check to see if the
+     * position is a repeat. if so, we can assume that this line is a draw and return 0.
      */
     if ((ply > 0) && (board.reps() > 0))
       return 0;
@@ -166,8 +160,7 @@ final public class Search {
     if (ply >= MAX_PLY - 1)
       return board.eval();
     /*
-     * if (hply >= HIST_STACK - 1) return board.eval(); FIXME!!! We could in
-     * principle overflow the move history stack.
+     * if (hply >= HIST_STACK - 1) return board.eval(); FIXME!!! We could in principle overflow the move history stack.
      */
     /* are we in check? if so, we want to search deeper */
     boolean check = board.inCheck(board.side);
@@ -212,8 +205,7 @@ final public class Search {
       }
       if (betterMove) {
         /*
-         * this move caused a cutoff, so increase the history value so it gets
-         * ordered high next time we can search it
+         * this move caused a cutoff, so increase the history value so it gets ordered high next time we can search it
          */
         board.history[m.getFrom()][m.getTo()] += depth;
         if (x >= beta)
@@ -287,7 +279,7 @@ final public class Search {
       for (int i = 3; i <= MAX_PLY; ++i) {
         followPV = true;
         int x = search(-10000, 10000, i);
-        log.info("{} {} {}", i , nodes , x);
+        log.info("{} {} {}", i, nodes, x);
         StringBuffer sb = new StringBuffer("[");
         sb.append(x);
         sb.append("]");
@@ -307,7 +299,7 @@ final public class Search {
         --ply;
       }
     }
-    log.info("Nodes searched: " , nodes);
+    log.info("Nodes searched: ", nodes);
     return;
   }
 }

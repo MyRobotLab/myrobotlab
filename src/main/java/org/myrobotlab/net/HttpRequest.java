@@ -26,33 +26,23 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * Client HTTP Request class This class helps to send POST HTTP requests with
- * various form data, including files. Cookies can be added to be included in
- * the request.
+ * Client HTTP Request class This class helps to send POST HTTP requests with various form data, including files. Cookies can be
+ * added to be included in the request.
  * 
  * @author Vlad Patryshev
  * @version 1.0
  * 
- *          Modified by grog - added buffered output to increase performance in
- *          larger POSTs. In file operations buffered output is 10x faster.
- *          Currently, a POST of a large file takes ~6 seconds TODO - fill in
- *          details and result
+ *          Modified by grog - added buffered output to increase performance in larger POSTs. In file operations buffered output is
+ *          10x faster. Currently, a POST of a large file takes ~6 seconds TODO - fill in details and result
  * 
- *          References:
- *          http://www.javabeat.net/tips/36-file-upload-and-download-
- *          using-java.html http://www.java2s.com/Code/Java/File-Input-Output/
- *          ComparingBufferedandUnbufferedWritingPerformance.htm
+ *          References: http://www.javabeat.net/tips/36-file-upload-and-download- using-java.html
+ *          http://www.java2s.com/Code/Java/File-Input-Output/ ComparingBufferedandUnbufferedWritingPerformance.htm
  * 
- *          The big beautiful kahuna from stack overflow
- *          http://stackoverflow.com
- *          /questions/2793150/how-to-use-java-net-urlconnection
- *          -to-fire-and-handle-http-requests Proxy info -
- *          http://edn.embarcadero.com/article/29783 Proxy info -
- *          http://docs.oracle
- *          .com/javase/6/docs/technotes/guides/net/proxies.html Proxy info -
- *          http
- *          ://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be
- *          -used-by-the-jvm
+ *          The big beautiful kahuna from stack overflow http://stackoverflow.com
+ *          /questions/2793150/how-to-use-java-net-urlconnection -to-fire-and-handle-http-requests Proxy info -
+ *          http://edn.embarcadero.com/article/29783 Proxy info - http://docs.oracle
+ *          .com/javase/6/docs/technotes/guides/net/proxies.html Proxy info - http
+ *          ://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be -used-by-the-jvm
  * 
  */
 
@@ -81,21 +71,17 @@ public class HttpRequest {
 
     /*
      * 
-     * HTTPRequest http = new HTTPRequest(
-     * "http://www.mkyong.com/java/how-do-convert-byte-array-to-string-in-java/"
-     * ); String s = http.getString(); log.info(s);
+     * HTTPRequest http = new HTTPRequest( "http://www.mkyong.com/java/how-do-convert-byte-array-to-string-in-java/" ); String s =
+     * http.getString(); log.info(s);
      * 
-     * String language = "en"; String toSpeak = "hello"; URI uri = new
-     * URI("http", null, "translate.google.com", 80, "/translate_tts", "tl=" +
-     * language + "&q=" + toSpeak, null);
+     * String language = "en"; String toSpeak = "hello"; URI uri = new URI("http", null, "translate.google.com", 80,
+     * "/translate_tts", "tl=" + language + "&q=" + toSpeak, null);
      * 
      * URL url = uri.toURL();
      * 
-     * HttpURLConnection.setFollowRedirects(true); HttpURLConnection connection
-     * = (HttpURLConnection) url.openConnection(); System.out.println(
-     * "Response code = " + connection.getResponseCode()); String header =
-     * connection.getHeaderField("location"); if (header != null)
-     * System.out.println("Redirected to " + header);
+     * HttpURLConnection.setFollowRedirects(true); HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+     * System.out.println( "Response code = " + connection.getResponseCode()); String header =
+     * connection.getHeaderField("location"); if (header != null) System.out.println("Redirected to " + header);
      * 
      * HTTPRequest request = new HTTPRequest(uri.toURL()); request.getBinary();
      */
@@ -159,21 +145,14 @@ public class HttpRequest {
       writer.flush();
 
       /*
-       * // Send binary file. writer.append("--" + boundary).append(CRLF);
-       * writer.append(
-       * "Content-Disposition: form-data; name=\"binaryFile\"; filename=\"" +
-       * binaryFile.getName() + "\"").append(CRLF); writer.append(
-       * "Content-Type: " + URLConnection.guessContentTypeFromName
-       * (binaryFile.getName())).append(CRLF); writer.append(
-       * "Content-Transfer-Encoding: binary").append(CRLF);
-       * writer.append(CRLF).flush(); InputStream input = null; try { input =
-       * new FileInputStream(binaryFile); byte[] buffer = new byte[1024]; for
-       * (int length = 0; (length = input.read(buffer)) > 0;) {
-       * output.write(buffer, 0, length); } output.flush(); // Important! Output
-       * cannot be closed. Close of writer will close output as well. } finally
-       * { if (input != null) try { input.close(); } catch (IOException
-       * logOrIgnore) {} } writer.append(CRLF).flush(); // CRLF is important! It
-       * indicates end of binary boundary.
+       * // Send binary file. writer.append("--" + boundary).append(CRLF); writer.append(
+       * "Content-Disposition: form-data; name=\"binaryFile\"; filename=\"" + binaryFile.getName() + "\"").append(CRLF);
+       * writer.append( "Content-Type: " + URLConnection.guessContentTypeFromName (binaryFile.getName())).append(CRLF);
+       * writer.append( "Content-Transfer-Encoding: binary").append(CRLF); writer.append(CRLF).flush(); InputStream input = null;
+       * try { input = new FileInputStream(binaryFile); byte[] buffer = new byte[1024]; for (int length = 0; (length =
+       * input.read(buffer)) > 0;) { output.write(buffer, 0, length); } output.flush(); // Important! Output cannot be closed. Close
+       * of writer will close output as well. } finally { if (input != null) try { input.close(); } catch (IOException logOrIgnore)
+       * {} } writer.append(CRLF).flush(); // CRLF is important! It indicates end of binary boundary.
        */
 
       // End of multipart/form-data.
@@ -221,7 +200,8 @@ public class HttpRequest {
    * 
    * @param urlString
    *          the string representation of the URL to send request to
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public HttpRequest(String urlString) throws IOException {
     this(new URL(urlString));
@@ -232,7 +212,8 @@ public class HttpRequest {
    * 
    * @param url
    *          the URL to send request to
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public HttpRequest(URL url) throws IOException {
     this(url.openConnection());
@@ -243,7 +224,8 @@ public class HttpRequest {
    * 
    * @param connection
    *          an already open URL connection
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public HttpRequest(URLConnection connection) throws IOException {
     log.info("http request for " + connection.getURL());
@@ -307,14 +289,12 @@ public class HttpRequest {
 
     /*
      * 
-     * try { // content size sent back data = new byte[contentLength]; int
-     * bytesRead = 0; int offset = 0; while (offset < contentLength) { bytesRead
-     * = in.read(data, offset, data.length - offset); if (bytesRead == -1)
-     * break; offset += bytesRead; } in.close();
+     * try { // content size sent back data = new byte[contentLength]; int bytesRead = 0; int offset = 0; while (offset <
+     * contentLength) { bytesRead = in.read(data, offset, data.length - offset); if (bytesRead == -1) break; offset += bytesRead; }
+     * in.close();
      * 
-     * if (offset != contentLength) { throw new IOException("Only read " +
-     * offset + " bytes; Expected " + contentLength + " bytes"); } } catch
-     * (IOException e1) { Logging.logException(e1); error = e1.getMessage(); } }
+     * if (offset != contentLength) { throw new IOException("Only read " + offset + " bytes; Expected " + contentLength + " bytes");
+     * } } catch (IOException e1) { Logging.logException(e1); error = e1.getMessage(); } }
      */
 
     /*
@@ -322,9 +302,8 @@ public class HttpRequest {
      */
 
     /*
-     * FileOutputStream out; try { out = new FileOutputStream("hello.mp3");
-     * out.write(data); out.flush(); out.close(); } catch (Exception e) { //
-     * TODO Auto-generated catch block e.printStackTrace(); }
+     * FileOutputStream out; try { out = new FileOutputStream("hello.mp3"); out.write(data); out.flush(); out.close(); } catch
+     * (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); }
      */
 
     return data;
@@ -369,8 +348,7 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that
-   * were added
+   * posts the requests to the server, with all the cookies and parameters that were added
    * 
    * @return input stream with the server response
    */
@@ -387,13 +365,13 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that
-   * were added before (if any), and with parameters that are passed in the
-   * argument
+   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with parameters that
+   * are passed in the argument
    * 
    * @param parameters
    *          request parameters
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @return input stream with the server response
    * @see #setParameters
    */
@@ -403,16 +381,16 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that
-   * were added before (if any), and with cookies and parameters that are passed
-   * in the arguments
+   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with cookies and
+   * parameters that are passed in the arguments
    * 
    * @param cookies
    *          request cookies
    * @param parameters
    *          request parameters
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameters
    */
   public InputStream post(Map<String, String> cookies, Map<String, String> parameters) throws IOException {
@@ -422,14 +400,14 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that
-   * were added before (if any), and with parameters that are passed in the
-   * argument
+   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with parameters that
+   * are passed in the argument
    * 
    * @param parameters
    *          request parameters
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameters
    */
   public InputStream post(Object[] parameters) throws IOException {
@@ -445,7 +423,8 @@ public class HttpRequest {
    * @param value
    *          parameter value
    * @return input stream with the server response
-   * @throws IOException io exception
+   * @throws IOException
+   *           io exception
    * @see #setParameter
    */
   public InputStream post(String name, Object value) throws IOException {
@@ -465,7 +444,8 @@ public class HttpRequest {
    * @param value2
    *          second parameter value
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameter
    */
   public InputStream post(String name1, Object value1, String name2, Object value2) throws IOException {
@@ -489,7 +469,8 @@ public class HttpRequest {
    * @param value3
    *          third parameter value
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameter
    */
   public InputStream post(String name1, Object value1, String name2, Object value2, String name3, Object value3) throws IOException {
@@ -517,7 +498,8 @@ public class HttpRequest {
    * @param value4
    *          fourth parameter value
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameter
    */
   public InputStream post(String name1, Object value1, String name2, Object value2, String name3, Object value3, String name4, Object value4) throws IOException {
@@ -526,18 +508,17 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that
-   * were added before (if any), and with cookies and parameters that are passed
-   * in the arguments
+   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with cookies and
+   * parameters that are passed in the arguments
    * 
    * @param cookies
    *          request cookies
    * @param parameters
    *          request parameters
    * @return input stream with the server response
-   * @throws IOException e
-   * @see #setParameters
-   * see setCookies
+   * @throws IOException
+   *           e
+   * @see #setParameters see setCookies
    */
   public InputStream post(String[] cookies, Object[] parameters) throws IOException {
     setCookies(cookies);
@@ -546,13 +527,15 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with parameters that are passed in
-   * the argument
-   * @param url u
+   * posts a new request to specified URL, with parameters that are passed in the argument
+   * 
+   * @param url
+   *          u
    * @param parameters
    *          request parameters
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameters
    * 
    */
@@ -561,16 +544,17 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with cookies and parameters that are
-   * passed in the argument
+   * posts a new request to specified URL, with cookies and parameters that are passed in the argument
    * 
-   * @param url u
+   * @param url
+   *          u
    * @param cookies
    *          request cookies
    * @param parameters
    *          request parameters
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setCookies
    * @see #setParameters
    */
@@ -579,14 +563,15 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with parameters that are passed in
-   * the argument
+   * posts a new request to specified URL, with parameters that are passed in the argument
    * 
-   * @param url u
+   * @param url
+   *          u
    * @param parameters
    *          request parameters
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameters
    */
   public InputStream post(URL url, Object[] parameters) throws IOException {
@@ -595,14 +580,17 @@ public class HttpRequest {
 
   /**
    * post the POST request specified URL, with the specified parameter
-   * @param url u
    * 
-   * @param name1 
+   * @param url
+   *          u
+   * 
+   * @param name1
    *          parameter name
    * @param value1
    *          parameter value
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1) throws IOException {
@@ -611,7 +599,9 @@ public class HttpRequest {
 
   /**
    * post the POST request to specified URL, with the specified parameters
-   * @param url u
+   * 
+   * @param url
+   *          u
    * 
    * @param name1
    *          first parameter name
@@ -622,7 +612,8 @@ public class HttpRequest {
    * @param value2
    *          second parameter value
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2) throws IOException {
@@ -631,7 +622,9 @@ public class HttpRequest {
 
   /**
    * post the POST request to specified URL, with the specified parameters
-   * @param url u
+   * 
+   * @param url
+   *          u
    * 
    * @param name1
    *          first parameter name
@@ -646,7 +639,8 @@ public class HttpRequest {
    * @param value3
    *          third parameter value
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2, String name3, Object value3) throws IOException {
@@ -655,7 +649,9 @@ public class HttpRequest {
 
   /**
    * post the POST request to specified URL, with the specified parameters
-   * @param url u
+   * 
+   * @param url
+   *          u
    * 
    * @param name1
    *          first parameter name
@@ -674,7 +670,8 @@ public class HttpRequest {
    * @param value4
    *          fourth parameter value
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setParameter
    */
   public InputStream post(URL url, String name1, Object value1, String name2, Object value2, String name3, Object value3, String name4, Object value4) throws IOException {
@@ -682,16 +679,18 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with cookies and parameters that are
-   * passed in the argument
-   * @param url u
+   * posts a new request to specified URL, with cookies and parameters that are passed in the argument
+   * 
+   * @param url
+   *          u
    * 
    * @param cookies
    *          request cookies
    * @param parameters
    *          request parameters
    * @return input stream with the server response
-   * @throws IOException e
+   * @throws IOException
+   *           e
    * @see #setCookies
    * @see #setParameters
    */
@@ -722,7 +721,8 @@ public class HttpRequest {
    *          cookie name
    * @param value
    *          cookie value
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public void setCookie(String name, String value) throws IOException {
     cookies.put(name, value);
@@ -733,7 +733,8 @@ public class HttpRequest {
    * 
    * @param cookies
    *          the cookie "name-to-value" map
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public void setCookies(Map<String, String> cookies) throws IOException {
     if (cookies == null)
@@ -745,9 +746,9 @@ public class HttpRequest {
    * adds cookies to the request
    * 
    * @param cookies
-   *          array of cookie names and values (cookies[2*i] is a name,
-   *          cookies[2*i + 1] is a value)
-   * @throws IOException e
+   *          array of cookie names and values (cookies[2*i] is a name, cookies[2*i + 1] is a value)
+   * @throws IOException
+   *           e
    */
   public void setCookies(String[] cookies) throws IOException {
     if (cookies == null)
@@ -764,7 +765,8 @@ public class HttpRequest {
    *          parameter name
    * @param file
    *          the file to upload
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public void setParameter(String name, File file) throws IOException {
     Logging.logTime("pre set file");
@@ -773,15 +775,15 @@ public class HttpRequest {
   }
 
   /**
-   * adds a parameter to the request; if the parameter is a File, the file is
-   * uploaded, otherwise the string value of the parameter is passed in the
-   * request
+   * adds a parameter to the request; if the parameter is a File, the file is uploaded, otherwise the string value of the parameter
+   * is passed in the request
    * 
    * @param name
    *          parameter name
    * @param object
    *          parameter value, a File or anything else that can be stringified
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public void setParameter(String name, Object object) throws IOException {
     if (object instanceof File) {
@@ -798,7 +800,8 @@ public class HttpRequest {
    *          parameter name
    * @param value
    *          parameter value
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public void setParameter(String name, String value) throws IOException {
     boundary();
@@ -817,7 +820,8 @@ public class HttpRequest {
    *          the name of the file
    * @param is
    *          input stream to read the contents of the file from
-   * @throws IOException e
+   * @throws IOException
+   *           e
    */
   public void setParameter(String name, String filename, InputStream is) throws IOException {
     Logging.logTime("setParameter begin (after new fileinput)");
@@ -843,9 +847,10 @@ public class HttpRequest {
    * adds parameters to the request
    * 
    * @param parameters
-   *          "name-to-value" map of parameters; if a value is a file, the file
-   *          is uploaded, otherwise it is stringified and sent in the request
-   * @throws IOException e
+   *          "name-to-value" map of parameters; if a value is a file, the file is uploaded, otherwise it is stringified and sent in
+   *          the request
+   * @throws IOException
+   *           e
    */
   public void setParameters(Map<String, String> parameters) throws IOException {
     if (parameters == null)
@@ -860,10 +865,10 @@ public class HttpRequest {
    * adds parameters to the request
    * 
    * @param parameters
-   *          array of parameter names and values (parameters[2*i] is a name,
-   *          parameters[2*i + 1] is a value); if a value is a file, the file is
-   *          uploaded, otherwise it is stringified and sent in the request
-   * @throws IOException e
+   *          array of parameter names and values (parameters[2*i] is a name, parameters[2*i + 1] is a value); if a value is a file,
+   *          the file is uploaded, otherwise it is stringified and sent in the request
+   * @throws IOException
+   *           e
    */
   public void setParameters(Object[] parameters) throws IOException {
     if (parameters == null)

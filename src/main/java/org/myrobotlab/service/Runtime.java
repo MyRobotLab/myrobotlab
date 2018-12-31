@@ -69,22 +69,18 @@ import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
 
 /**
- * Runtime is responsible for the creation and removal of all Services and the
- * associated static registries It maintains state information regarding
- * possible &amp; running local Services It maintains state information
- * regarding foreign Runtimes It is a singleton and should be the only service
- * of Runtime running in a process The host and registry maps are used in
- * routing communication to the appropriate service (be it local or remote) It
- * will be the first Service created It also wraps the real JVM Runtime object.
+ * Runtime is responsible for the creation and removal of all Services and the associated static registries It maintains state
+ * information regarding possible &amp; running local Services It maintains state information regarding foreign Runtimes It is a
+ * singleton and should be the only service of Runtime running in a process The host and registry maps are used in routing
+ * communication to the appropriate service (be it local or remote) It will be the first Service created It also wraps the real JVM
+ * Runtime object.
  *
  * TODO - get last args &amp; better restart (with Agent possibly?)
  *
- * RuntimeMXBean - scares me - but the stackTrace is clever RuntimeMXBean
- * runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List&lt;String&gt;
- * arguments = runtimeMxBean.getInputArguments()
+ * RuntimeMXBean - scares me - but the stackTrace is clever RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+ * List&lt;String&gt; arguments = runtimeMxBean.getInputArguments()
  *
- * final StackTraceElement[] stackTrace =
- * Thread.currentThread().getStackTrace(); final String mainClassName =
+ * final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace(); final String mainClassName =
  * stackTrace[stackTrace.length - 1].getClassName();
  *
  * check for 64 bit OS & 32 bit JVM -> is64bit()
@@ -100,19 +96,16 @@ public class Runtime extends Service implements MessageListener {
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
 
   /**
-   * instances of MRL - keyed with an instance key URI format is
-   * mrl://gateway/(protocol key)
+   * instances of MRL - keyed with an instance key URI format is mrl://gateway/(protocol key)
    */
 
   /**
-   * environments of running mrl instances - the null environment is the current
-   * local
+   * environments of running mrl instances - the null environment is the current local
    */
   static private final Map<URI, ServiceEnvironment> environments = new HashMap<URI, ServiceEnvironment>();
 
   /**
-   * a registry of all services regardless of which environment they came from -
-   * each must have a unique name
+   * a registry of all services regardless of which environment they came from - each must have a unique name
    */
   static private final TreeMap<String, ServiceInterface> registry = new TreeMap<String, ServiceInterface>();
 
@@ -145,15 +138,14 @@ public class Runtime extends Service implements MessageListener {
   static private boolean autoAcceptLicense = true; // at the moment
 
   /**
-   * the local repo of this machine - it should not be static as other foreign
-   * repos will come in with other Runtimes from other machines.
+   * the local repo of this machine - it should not be static as other foreign repos will come in with other Runtimes from other
+   * machines.
    */
   private Repo repo = Repo.getInstance();
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
-   * the platform (local instance) for this runtime. It must be a non-static as
-   * multiple runtimes will have different platforms
+   * the platform (local instance) for this runtime. It must be a non-static as multiple runtimes will have different platforms
    */
   Platform platform = null;
 
@@ -181,22 +173,17 @@ public class Runtime extends Service implements MessageListener {
 
   /**
    *
-   * initially I thought that is would be a good idea to dynamically load
-   * Services and append their definitions to the class path. This would
-   * "theoretically" be done with ivy to get/download the appropriate dependent
-   * jars from the repo. Then use a custom ClassLoader to load the new service.
+   * initially I thought that is would be a good idea to dynamically load Services and append their definitions to the class path.
+   * This would "theoretically" be done with ivy to get/download the appropriate dependent jars from the repo. Then use a custom
+   * ClassLoader to load the new service.
    *
-   * Ivy works for downloading the appropriate jars &amp; artifacts However, the
-   * ClassLoader became very problematic
+   * Ivy works for downloading the appropriate jars &amp; artifacts However, the ClassLoader became very problematic
    *
-   * There is much mis-information around ClassLoaders. The most knowledgeable
-   * article I have found has been this one :
-   * http://blogs.oracle.com/sundararajan
-   * /entry/understanding_java_class_loading
+   * There is much mis-information around ClassLoaders. The most knowledgeable article I have found has been this one :
+   * http://blogs.oracle.com/sundararajan /entry/understanding_java_class_loading
    *
-   * Overall it became a huge PITA with really very little reward. The
-   * consequence is all Services' dependencies and categories are defined here
-   * rather than the appropriate Service class.
+   * Overall it became a huge PITA with really very little reward. The consequence is all Services' dependencies and categories are
+   * defined here rather than the appropriate Service class.
    *
    */
 
@@ -205,8 +192,7 @@ public class Runtime extends Service implements MessageListener {
   static transient Cli cli;
 
   /**
-   * global startingArgs - whatever came into main each runtime will have its
-   * individual copy
+   * global startingArgs - whatever came into main each runtime will have its individual copy
    */
   static private String[] globalArgs;
 
@@ -268,8 +254,11 @@ public class Runtime extends Service implements MessageListener {
 
   /**
    * This helper method will create, load then start a service
-   * @param name - name of instance
-   * @param type - type
+   * 
+   * @param name
+   *          - name of instance
+   * @param type
+   *          - type
    * @return returns the service in the form of a ServiceInterface
    */
   static public ServiceInterface loadAndStart(String name, String type) {
@@ -336,8 +325,7 @@ public class Runtime extends Service implements MessageListener {
     } /*
        * LIST ???
        *
-       * else if (cmdline.hasSwitch("-list")) { Runtime runtime =
-       * Runtime.getInstance(); if (runtime == null) {
+       * else if (cmdline.hasSwitch("-list")) { Runtime runtime = Runtime.getInstance(); if (runtime == null) {
        *
        * } else { log.info(getServiceTypeNames()); } return; }
        */
@@ -494,8 +482,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * although "fragile" since it relies on a external source - its useful to
-   * find the external ip address of NAT'd systems
+   * although "fragile" since it relies on a external source - its useful to find the external ip address of NAT'd systems
    *
    * @return external or routers ip
    * @throws Exception
@@ -520,8 +507,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /*
-   * Returns the amount of free memory in the Java Virtual Machine. Calling the
-   * gc method may result in increasing the value returned by freeMemory.
+   * Returns the amount of free memory in the Java Virtual Machine. Calling the gc method may result in increasing the value
+   * returned by freeMemory.
    */
   public static final long getFreeMemory() {
     return java.lang.Runtime.getRuntime().freeMemory();
@@ -640,9 +627,8 @@ public class Runtime extends Service implements MessageListener {
         log.info("mac address : {}", m);
 
         /*
-         * StringBuilder sb = new StringBuilder(); for (int i = 0; i <
-         * mac.length; i++) { sb.append(String.format("%02X%s", mac[i], (i <
-         * mac.length - 1) ? "-" : "")); }
+         * StringBuilder sb = new StringBuilder(); for (int i = 0; i < mac.length; i++) { sb.append(String.format("%02X%s", mac[i],
+         * (i < mac.length - 1) ? "-" : "")); }
          */
 
         ret.add(m);
@@ -666,17 +652,13 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /*
-   * getLocalServicesForExport returns a filtered map of Service references to
-   * export to another instance of MRL. The objective of filtering may help
-   * resolve functionality, security, or technical issues. For example, the
-   * Dalvik JVM can only run certain Services. It would be error prone to export
-   * a SwingGui to a jvm which does not support swing.
+   * getLocalServicesForExport returns a filtered map of Service references to export to another instance of MRL. The objective of
+   * filtering may help resolve functionality, security, or technical issues. For example, the Dalvik JVM can only run certain
+   * Services. It would be error prone to export a SwingGui to a jvm which does not support swing.
    *
-   * Since the map of Services is made for export - it is NOT a copy but
-   * references
+   * Since the map of Services is made for export - it is NOT a copy but references
    *
-   * The filtering is done by Service Type.. although in the future it could be
-   * extended to Service.getName()
+   * The filtering is done by Service Type.. although in the future it could be extended to Service.getName()
    *
    */
   public static ServiceEnvironment getLocalServicesForExport() {
@@ -714,8 +696,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /*
-   * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class
-   * definition info - Runtime should return based on ClassName
+   * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class definition info - Runtime should return based on ClassName
    */
   public static Map<String, MethodEntry> getMethodMap(String serviceName) {
     if (!registry.containsKey(serviceName)) {
@@ -803,10 +784,9 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /*
-   * Return the named service - - if name is not null, but service is not found
-   * - return null (for re-entrant Service creation) - if the name IS null,
-   * return Runtime - to support api/getServiceNames - if the is not null, and
-   * service is found - return the Service
+   * Return the named service - - if name is not null, but service is not found - return null (for re-entrant Service creation) - if
+   * the name IS null, return Runtime - to support api/getServiceNames - if the is not null, and service is found - return the
+   * Service
    */
   public static ServiceInterface getService(String name) {
 
@@ -932,9 +912,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * unique id's are need for sendBlocking - to uniquely identify the message
-   * this is a method to support that - it is unique within a process, but not
-   * across processes
+   * unique id's are need for sendBlocking - to uniquely identify the message this is a method to support that - it is unique within
+   * a process, but not across processes
    *
    * @return a unique id
    */
@@ -959,9 +938,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * Get version returns the current version of mrl. It must be done this way,
-   * because the version may be queried on the command line without the desire
-   * to start a "Runtime"
+   * Get version returns the current version of mrl. It must be done this way, because the version may be queried on the command
+   * line without the desire to start a "Runtime"
    * 
    * @return
    */
@@ -979,10 +957,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * Installs a single Service type. This "should" work even if there is no
-   * Runtime. It can be invoked on the command line without starting a MRL
-   * instance. If a runtime exits it will broadcast events of installation
-   * progress
+   * Installs a single Service type. This "should" work even if there is no Runtime. It can be invoked on the command line without
+   * starting a MRL instance. If a runtime exits it will broadcast events of installation progress
    *
    */
   static public void install(String serviceType) throws ParseException, IOException {
@@ -1064,8 +1040,7 @@ public class Runtime extends Service implements MessageListener {
   /*
    * Main starting method of MyRobotLab Parses command line options
    *
-   * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
-   * -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+   * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
    *
    */
   public static void main(String[] args) {
@@ -1090,9 +1065,8 @@ public class Runtime extends Service implements MessageListener {
       if (cmdline.containsKey("-id")) {
         platform.setId(cmdline.getArgument("-id", 0));
       } /*
-         * else { SimpleDateFormat formatter = new
-         * SimpleDateFormat("yyyyMMdd.HHmmssSSS"); id =
-         * String.format("runtime.%s.%s", formatter.format(startDate), pid); }
+         * else { SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmssSSS"); id = String.format("runtime.%s.%s",
+         * formatter.format(startDate), pid); }
          */
 
       if (cmdline.containsKey("-fromAgent")) {
@@ -1158,10 +1132,8 @@ public class Runtime extends Service implements MessageListener {
       if (cmdline.containsKey("--extract") || cmdline.containsKey("-e")) {
         // force all updates
         /*
-         * FIXME - do " -extract {serviceType} in future ArrayList<String>
-         * services = cmdline.getArgumentList("-extract"); Repo repo =
-         * Repo.getInstance(); if (services.size() == 0) { repo.install(); }
-         * else { for (int i = 0; i < services.size(); ++i) {
+         * FIXME - do " -extract {serviceType} in future ArrayList<String> services = cmdline.getArgumentList("-extract"); Repo repo
+         * = Repo.getInstance(); if (services.size() == 0) { repo.install(); } else { for (int i = 0; i < services.size(); ++i) {
          * repo.install(services.get(i)); } }
          */
         extract();
@@ -1213,8 +1185,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * needsRestart is set by the update process - or some othe method when a
-   * restart is needed. Used by other Services to prepare for restart
+   * needsRestart is set by the update process - or some othe method when a restart is needed. Used by other Services to prepare for
+   * restart
    *
    * @return needsRestart
    */
@@ -1247,8 +1219,7 @@ public class Runtime extends Service implements MessageListener {
     }
 
     /**
-     * register with null data is how initial communication starts between 2 mrl
-     * instances (1st msg)
+     * register with null data is how initial communication starts between 2 mrl instances (1st msg)
      */
     if (s == null) {
       return null;
@@ -1315,8 +1286,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * releases a service - stops the service, its threads, releases its
-   * resources, and removes registry entries
+   * releases a service - stops the service, its threads, releases its resources, and removes registry entries
    *
    * @param name
    *          of the service to be released
@@ -1385,17 +1355,15 @@ public class Runtime extends Service implements MessageListener {
   /**
    * This does not EXIT(1) !!! releasing just releases all services
    *
-   * FIXME FIXME FIXME - just call release on each - possibly saving runtime for
-   * last .. send prepareForRelease before releasing
+   * FIXME FIXME FIXME - just call release on each - possibly saving runtime for last .. send prepareForRelease before releasing
    *
    * release all local services
    *
-   * FIXME - there "should" be an order to releasing the correct way would be to
-   * save the Runtime for last and broadcast all the services being released
+   * FIXME - there "should" be an order to releasing the correct way would be to save the Runtime for last and broadcast all the
+   * services being released
    *
-   * FIXME - send SHUTDOWN event to all running services with a timeout period -
-   * end with System.exit() FIXME normalize with releaseAllLocal and
-   * releaseAllExcept
+   * FIXME - send SHUTDOWN event to all running services with a timeout period - end with System.exit() FIXME normalize with
+   * releaseAllLocal and releaseAllExcept
    */
   public static void releaseAll() /* local only? YES !!! LOCAL ONLY !! */
   {
@@ -1466,10 +1434,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * shutdown terminates the currently running Java virtual machine by
-   * initiating its shutdown sequence. This method never returns normally. The
-   * argument serves as a status code; by convention, a nonzero status code
-   * indicates abnormal termination
+   * shutdown terminates the currently running Java virtual machine by initiating its shutdown sequence. This method never returns
+   * normally. The argument serves as a status code; by convention, a nonzero status code indicates abnormal termination
    *
    */
   public static void shutdown() {
@@ -1540,8 +1506,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /*
-   * @param name - name of Service to be removed and whos resources will be
-   * released
+   * @param name - name of Service to be removed and whos resources will be released
    */
   static public void releaseService(String name) {
     Runtime.release(name);
@@ -1671,8 +1636,7 @@ public class Runtime extends Service implements MessageListener {
 
       Map<String, String> env = System.getenv();
       /*
-       * - remove for security for (Map.Entry<String, String> entry :
-       * env.entrySet()) { String key = entry.getKey(); String value =
+       * - remove for security for (Map.Entry<String, String> entry : env.entrySet()) { String key = entry.getKey(); String value =
        * entry.getValue(); log.info(String.format("%s=%s", key, value)); }
        */
       if (env.containsKey("PATH")) {
@@ -1774,16 +1738,14 @@ public class Runtime extends Service implements MessageListener {
 
   // ---------- Java Runtime wrapper functions begin --------
   /*
-   * Executes the specified command and arguments in a separate process. Returns
-   * the exit value for the subprocess.
+   * Executes the specified command and arguments in a separate process. Returns the exit value for the subprocess.
    */
   static public String exec(String program) {
     return execute(program, null, null, null, null);
   }
 
   /*
-   * publishing point of Ivy sub system - sends event failedDependency when the
-   * retrieve report for a Service fails
+   * publishing point of Ivy sub system - sends event failedDependency when the retrieve report for a Service fails
    */
   public String failedDependency(String dep) {
     return dep;
@@ -1827,8 +1789,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * Gets the current total number of services registered services. This is the
-   * number of services in all Service Environments
+   * Gets the current total number of services registered services. This is the number of services in all Service Environments
    *
    * @return total number of services
    */
@@ -1859,16 +1820,13 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /*
-   * Returns an array of all the simple type names of all the possible services.
-   * The data originates from the repo's serviceData.xml file https:/
-   * /code.google.com/p/myrobotlab/source/browse/trunk/myrobotlab/thirdParty
-   * /repo/serviceData.xml
+   * Returns an array of all the simple type names of all the possible services. The data originates from the repo's serviceData.xml
+   * file https:/ /code.google.com/p/myrobotlab/source/browse/trunk/myrobotlab/thirdParty /repo/serviceData.xml
    *
-   * There is a local one distributed with the install zip When a "update" is
-   * forced, MRL will try to download the latest copy from the repo.
+   * There is a local one distributed with the install zip When a "update" is forced, MRL will try to download the latest copy from
+   * the repo.
    *
-   * The serviceData.xml lists all service types, dependencies, categories and
-   * other relevant information regarding service creation
+   * The serviceData.xml lists all service types, dependencies, categories and other relevant information regarding service creation
    */
   public String[] getServiceTypeNames() {
     return getServiceTypeNames("all");
@@ -1885,8 +1843,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * returns version string of MyRobotLab instance based on uri e.g : uri
-   * mrl://10.5.3.1:7777 may be a remote instance null uri is local
+   * returns version string of MyRobotLab instance based on uri e.g : uri mrl://10.5.3.1:7777 may be a remote instance null uri is
+   * local
    *
    * @param uri
    *          - key of ServiceEnvironment
@@ -2001,13 +1959,10 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * FIXME - need to extend - communication to Agent ??? process request restart
-   * ???
+   * FIXME - need to extend - communication to Agent ??? process request restart ???
    *
-   * restart occurs after applying updates - user or config data needs to be
-   * examined and see if its an appropriate time to restart - if it is the
-   * spawnBootstrap method will be called and bootstrap.jar will go through its
-   * sequence to update myrobotlab.jar
+   * restart occurs after applying updates - user or config data needs to be examined and see if its an appropriate time to restart
+   * - if it is the spawnBootstrap method will be called and bootstrap.jar will go through its sequence to update myrobotlab.jar
    */
   public void restart() {
     try {
@@ -2055,8 +2010,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * Runtime's setLogLevel will set the root log level if its called from a
-   * service - it will only set that Service type's log level
+   * Runtime's setLogLevel will set the root log level if its called from a service - it will only set that Service type's log level
    * 
    * @param level
    *          - DEBUG | INFO | WARN | ERROR
@@ -2090,10 +2044,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * Stops all service-related running items. This releases the singleton
-   * referenced by this class, but it does not guarantee that the old service
-   * will be GC'd. FYI - if stopServices does not remove INSTANCE - it is not
-   * re-entrant in junit tests
+   * Stops all service-related running items. This releases the singleton referenced by this class, but it does not guarantee that
+   * the old service will be GC'd. FYI - if stopServices does not remove INSTANCE - it is not re-entrant in junit tests
    */
   @Override
   public void stopService() {
@@ -2182,11 +2134,9 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /*
-   * FIXME - return a POJO - because there are lots of downstream which would
-   * want different parts of the results FIXME - stream gobbler reconciled -
-   * threaded stream consumption FIXME - watchdog - a good idea FIXME - most
-   * common use case would be returning a string i would think FIXME -
-   * ProcessData &amp; ProcessData2 reconciled
+   * FIXME - return a POJO - because there are lots of downstream which would want different parts of the results FIXME - stream
+   * gobbler reconciled - threaded stream consumption FIXME - watchdog - a good idea FIXME - most common use case would be returning
+   * a string i would think FIXME - ProcessData &amp; ProcessData2 reconciled
    *
    */
   static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, Boolean block) {
@@ -2343,9 +2293,8 @@ public class Runtime extends Service implements MessageListener {
     this.locale = locale;
     Locale.setDefault(locale);
     /*
-     * I don't believe these are necessary System.setProperty("user.language",
-     * language); System.setProperty("user.country", country);
-     * System.setProperty("user.variant", variant);
+     * I don't believe these are necessary System.setProperty("user.language", language); System.setProperty("user.country",
+     * country); System.setProperty("user.variant", variant);
      */
   }
 
@@ -2369,9 +2318,8 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    *
    * @return ServiceType - returns all the data
    *

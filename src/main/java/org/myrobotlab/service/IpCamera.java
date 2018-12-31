@@ -20,9 +20,8 @@ import org.slf4j.Logger;
 /**
  * IPCamera - a service to allow streaming of video from an IP based camera.
  *
- * Android related -
- * http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage
- * Bitmap to BufferedImage - conversion once Bitmap class is serialized
+ * Android related - http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage Bitmap to BufferedImage - conversion
+ * once Bitmap class is serialized
  */
 public class IpCamera extends Service {
 
@@ -40,7 +39,7 @@ public class IpCamera extends Service {
             invoke("publishDisplay", new Object[] { getName(), bi });
           }
         }
-      } catch (Exception e) {        
+      } catch (Exception e) {
       }
     }
   }
@@ -114,29 +113,25 @@ public class IpCamera extends Service {
   }
 
   /*
-   * method to determine connectivity of a valid host, user &amp; password to a
-   * foscam camera.
+   * method to determine connectivity of a valid host, user &amp; password to a foscam camera.
    * 
    * @return
    */
   /*
    * public String getStatus() { StringBuffer ret = new StringBuffer(); try {
    * 
-   * URL url = new URL("http://" + host + "/get_status.cgi?user=" + user +
-   * "&pwd=" + password); log.debug("getStatus " + url); URLConnection con =
-   * url.openConnection(); BufferedReader in = new BufferedReader(new
-   * InputStreamReader(con.getInputStream())); String inputLine;
+   * URL url = new URL("http://" + host + "/get_status.cgi?user=" + user + "&pwd=" + password); log.debug("getStatus " + url);
+   * URLConnection con = url.openConnection(); BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+   * String inputLine;
    * 
    * // TODO - parse for good info
    * 
-   * while ((inputLine = in.readLine()) != null) { ret.append(inputLine); }
-   * in.close();
+   * while ((inputLine = in.readLine()) != null) { ret.append(inputLine); } in.close();
    * 
    * log.debug(String.format("%d",ret.indexOf("var id")));
    * 
-   * if (ret.indexOf("var id") != -1) { ret = new StringBuffer("connected"); }
-   * else { } } catch (Exception e) { ret.append(e.getMessage());
-   * logException(e); } return ret.toString(); }
+   * if (ret.indexOf("var id") != -1) { ret = new StringBuffer("connected"); } else { } } catch (Exception e) {
+   * ret.append(e.getMessage()); logException(e); } return ret.toString(); }
    */
 
   public void capture() {
@@ -157,18 +152,15 @@ public class IpCamera extends Service {
   }
 
   /*
-   * public String setAlarm(int armed, int sensitivity, int inputArmed, int
-   * ioLinkage, int mail, int uploadInterval) { StringBuffer ret = new
-   * StringBuffer(); try {
+   * public String setAlarm(int armed, int sensitivity, int inputArmed, int ioLinkage, int mail, int uploadInterval) { StringBuffer
+   * ret = new StringBuffer(); try {
    * 
-   * URL url = new URL("http://" + host + "/set_alarm.cgi?motion_armed=" + armed
-   * + "user=" + user + "&pwd=" + password); URLConnection con =
-   * url.openConnection(); BufferedReader in = new BufferedReader(new
-   * InputStreamReader(con.getInputStream())); String inputLine;
+   * URL url = new URL("http://" + host + "/set_alarm.cgi?motion_armed=" + armed + "user=" + user + "&pwd=" + password);
+   * URLConnection con = url.openConnection(); BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+   * String inputLine;
    * 
-   * while ((inputLine = in.readLine()) != null) { ret.append(inputLine); }
-   * in.close(); } catch (Exception e) { logException(e); } return
-   * ret.toString(); }
+   * while ((inputLine = in.readLine()) != null) { ret.append(inputLine); } in.close(); } catch (Exception e) { logException(e); }
+   * return ret.toString(); }
    */
 
   public String move(Integer param) {
@@ -194,7 +186,7 @@ public class IpCamera extends Service {
       }
       in.close();
     } catch (Exception e) {
-    	log.error("move threw", e);
+      log.error("move threw", e);
     }
     return ret.toString();
   }
@@ -221,9 +213,8 @@ public class IpCamera extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -235,7 +226,7 @@ public class IpCamera extends Service {
     meta.addCategory("video");
     // FIXME - should be webcam dependency not opencv !
     // meta.addDependency("org.bytedeco.javacpp","1.1");
-    
+
     // FIXME - should just add IpFrameGrabber and drop the dependency !!!
     // meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
     return meta;

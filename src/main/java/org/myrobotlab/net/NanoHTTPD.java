@@ -53,8 +53,7 @@ import org.slf4j.Logger;
  * A simple, tiny, nicely embeddable HTTP 1.0 server in Java
  * 
  * <p>
- * NanoHTTPD version 1.1, Copyright &copy; 2001,2005-2007 Jarno Elonen
- * (elonen@iki.fi, http://iki.fi/elonen/)
+ * NanoHTTPD version 1.1, Copyright &copy; 2001,2005-2007 Jarno Elonen (elonen@iki.fi, http://iki.fi/elonen/)
  * 
  * <p>
  * <b>Features + limitations: </b>
@@ -63,22 +62,19 @@ import org.slf4j.Logger;
  * <li>Only one Java file</li>
  * <li>Java 1.1 compatible</li>
  * <li>Released as open source, Modified BSD licence</li>
- * <li>No fixed config files, logging, authorization etc. (Implement yourself if
- * you need them.)</li>
+ * <li>No fixed config files, logging, authorization etc. (Implement yourself if you need them.)</li>
  * <li>Supports parameter parsing of GET and POST methods</li>
  * <li>Supports both dynamic content and file serving</li>
  * <li>Never caches anything</li>
  * <li>Doesn't limit bandwidth, request time or simultaneous connections</li>
  * <li>Default code serves files and shows all HTTP parameters and headers</li>
  * <li>File server supports directory listing, index.html and index.htm</li>
- * <li>File server does the 301 redirection trick for directories without '/'
- * </li>
+ * <li>File server does the 301 redirection trick for directories without '/'</li>
  * <li>File server supports simple skipping for files (continue download)</li>
  * <li>File server uses current directory as a web root</li>
  * <li>File server serves also very long files without memory overhead</li>
  * <li>Contains a built-in list of most common mime types</li>
- * <li>All header names are converted lowercase so they don't vary between
- * browsers/clients</li>
+ * <li>All header names are converted lowercase so they don't vary between browsers/clients</li>
  * 
  * </ul>
  * 
@@ -86,15 +82,13 @@ import org.slf4j.Logger;
  * <b>Ways to use: </b>
  * <ul>
  * 
- * <li>Run as a standalone app, serves files from current directory and shows
- * requests</li>
+ * <li>Run as a standalone app, serves files from current directory and shows requests</li>
  * <li>Subclass serve() and embed to your own program</li>
  * <li>Call serveFile() from serve() with your own base directory</li>
  * 
  * </ul>
  * 
- * See the end of the source file for distribution license (Modified BSD
- * licence)
+ * See the end of the source file for distribution license (Modified BSD licence)
  */
 public class NanoHTTPD {
   /**
@@ -111,8 +105,7 @@ public class NanoHTTPD {
     }
 
     /**
-     * Decodes parameters in percent-encoded URI-format ( e.g.
-     * "name=Jack%20Daniels&pass=Single%20Malt" ) and adds them to given
+     * Decodes parameters in percent-encoded URI-format ( e.g. "name=Jack%20Daniels&pass=Single%20Malt" ) and adds them to given
      * Properties.
      */
     private void decodeParms(String parms, Properties p) throws InterruptedException {
@@ -259,8 +252,7 @@ public class NanoHTTPD {
     }
 
     /**
-     * Returns an error message as a HTTP response and throws
-     * InterruptedException to stop furhter request processing.
+     * Returns an error message as a HTTP response and throws InterruptedException to stop furhter request processing.
      */
     private void sendError(String status, String msg) throws InterruptedException {
       sendResponse(status, MIME_PLAINTEXT, null, new ByteArrayInputStream(msg.getBytes()));
@@ -460,8 +452,7 @@ public class NanoHTTPD {
   //
 
   /*
-   * URL-encodes everything between "/"-characters. Encodes spaces as '%20'
-   * instead of '+'.
+   * URL-encodes everything between "/"-characters. Encodes spaces as '%20' instead of '+'.
    */
   static public String encodeUri(String uri) {
     String newUri = "";
@@ -525,9 +516,7 @@ public class NanoHTTPD {
   }
 
   /*
-   * Starts a HTTP server to given port.
-   * <p>
-   * Throws an IOException if the socket is already in use
+   * Starts a HTTP server to given port. <p> Throws an IOException if the socket is already in use
    */
   public NanoHTTPD(int port) {
     myTcpPort = port;
@@ -539,12 +528,16 @@ public class NanoHTTPD {
    * 
    * (By default, this delegates to serveFile() and allows directory listing.)
    * 
-   * @param uri Percent-decoded URI without parameters, for example "/index.cgi"
-   * @param method "GET", "POST" etc.
-   * @param parms Parsed, percent decoded parameters from URI and, in case of
-   *       POST, data.
-   * @param header Header entries, percent decoded
-   * @param socket the socket
+   * @param uri
+   *          Percent-decoded URI without parameters, for example "/index.cgi"
+   * @param method
+   *          "GET", "POST" etc.
+   * @param parms
+   *          Parsed, percent decoded parameters from URI and, in case of POST, data.
+   * @param header
+   *          Header entries, percent decoded
+   * @param socket
+   *          the socket
    * @return HTTP response, see class Response for details
    */
   public Response serve(String uri, String method, Properties header, Properties parms, Socket socket) {
@@ -565,12 +558,16 @@ public class NanoHTTPD {
   }
 
   /**
-   * Serves file from homeDir and its' subdirectories (only). Uses only URI,
-   * ignores all headers and HTTP parameters.
-   * @param uri u
-   * @param header h 
-   * @param homeDir h
-   * @param allowDirectoryListing a 
+   * Serves file from homeDir and its' subdirectories (only). Uses only URI, ignores all headers and HTTP parameters.
+   * 
+   * @param uri
+   *          u
+   * @param header
+   *          h
+   * @param homeDir
+   *          h
+   * @param allowDirectoryListing
+   *          a
    * @return response
    */
   public Response serveFile(String uri, Properties header, File homeDir, boolean allowDirectoryListing) {

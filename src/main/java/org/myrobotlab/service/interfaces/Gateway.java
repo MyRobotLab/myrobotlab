@@ -48,9 +48,8 @@ public interface Gateway {
   public HashMap<URI, Connection> getClients();
 
   /*
-   * important initial communication function related to discovery a broadcast
-   * goes out and replies must include details of communication so that a viable
-   * connection can be created
+   * important initial communication function related to discovery a broadcast goes out and replies must include details of
+   * communication so that a viable connection can be created
    */
   public List<Connection> getConnections(URI clientKey);
 
@@ -64,25 +63,25 @@ public interface Gateway {
   public void sendRemote(final String key, final Message msg) throws URISyntaxException;
 
   /*
-   * will send a message to the mrl key'ed uri the expectation is the uri is
-   * directly from the hosts registry in runtime therefore it has the following
-   * format
+   * will send a message to the mrl key'ed uri the expectation is the uri is directly from the hosts registry in runtime therefore
+   * it has the following format
    * 
    * mrl://[gatewayName]/proto://protohost:protoport/otherkeyinfo
    * 
-   * e.g. a tcp connection throughh a RemoteAdapter instance named "remote"
-   * would be
+   * e.g. a tcp connection throughh a RemoteAdapter instance named "remote" would be
    * 
    * mrl://remote/tcp://somehost:6767
    * 
    * @param key - the url for the message
    */
-  
+
   public void sendRemote(final URI key, final Message msg);
 
   // begin new interface methods -----------------------
   // FIXME ? - should publishConnection return a Connection object as with publishDisconnect ?
   public String publishConnect();
+
   public String publishDisconnect();
+
   public Status publishError();
 }

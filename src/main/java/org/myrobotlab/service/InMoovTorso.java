@@ -13,8 +13,7 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
- * InMoovTorso - The inmoov torso. This will allow control of the topStom,
- * midStom, and lowStom servos.
+ * InMoovTorso - The inmoov torso. This will allow control of the topStom, midStom, and lowStom servos.
  *
  */
 public class InMoovTorso extends Service {
@@ -65,8 +64,7 @@ public class InMoovTorso extends Service {
   }
 
   /*
-   * attach all the servos - this must be re-entrant and accomplish the
-   * re-attachment when servos are detached
+   * attach all the servos - this must be re-entrant and accomplish the re-attachment when servos are detached
    */
   @Deprecated
   public boolean attach() {
@@ -260,16 +258,14 @@ public class InMoovTorso extends Service {
   public void setpins(Integer topStomPin, Integer midStomPin, Integer lowStomPin) {
     // createPeers();
     /*
-     * this.topStom.setPin(topStom); this.midStom.setPin(midStom);
-     * this.lowStom.setPin(lowStom);
+     * this.topStom.setPin(topStom); this.midStom.setPin(midStom); this.lowStom.setPin(lowStom);
      */
 
     /**
      * FIXME - has to be done outside of
      * 
-     * arduino.servoAttachPin(topStom, topStomPin);
-     * arduino.servoAttachPin(topStom, midStomPin);
-     * arduino.servoAttachPin(topStom, lowStomPin);
+     * arduino.servoAttachPin(topStom, topStomPin); arduino.servoAttachPin(topStom, midStomPin); arduino.servoAttachPin(topStom,
+     * lowStomPin);
      */
   }
 
@@ -282,8 +278,7 @@ public class InMoovTorso extends Service {
   }
 
   /*
-   * public boolean load() { super.load(); topStom.load(); midStom.load();
-   * lowStom.load(); return true; }
+   * public boolean load() { super.load(); topStom.load(); midStom.load(); lowStom.load(); return true; }
    */
 
   @Override
@@ -303,8 +298,8 @@ public class InMoovTorso extends Service {
     }
 
     /*
-     * FIXME - connections need to be outside .. this must be a ServoController
-     * if (!arduino.isConnected()) { error("arduino not connected"); }
+     * FIXME - connections need to be outside .. this must be a ServoController if (!arduino.isConnected()) {
+     * error("arduino not connected"); }
      */
 
     topStom.moveTo(topStom.getPos() + 2);
@@ -317,9 +312,8 @@ public class InMoovTorso extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

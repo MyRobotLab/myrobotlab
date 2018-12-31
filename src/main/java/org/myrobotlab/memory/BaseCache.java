@@ -21,8 +21,7 @@ public abstract class BaseCache implements ManagedCache {
   private static final short DEFAULT_SHORT = 0;
 
   /**
-   * Internal method for BaseCache to actually add items to the implementing
-   * cache.
+   * Internal method for BaseCache to actually add items to the implementing cache.
    * 
    * @param name
    * @param value
@@ -37,8 +36,7 @@ public abstract class BaseCache implements ManagedCache {
   protected abstract void clearCache();
 
   /**
-   * Internal method for BaseCache to actually check if the name exists in the
-   * implementing cache.
+   * Internal method for BaseCache to actually check if the name exists in the implementing cache.
    * 
    * @param name
    * @return
@@ -60,8 +58,7 @@ public abstract class BaseCache implements ManagedCache {
    * 
    * @param name
    *          the name of the value to retrieve
-   * @return null if the name does not exist or if the type could not be cast to
-   *         T
+   * @return null if the name does not exist or if the type could not be cast to T
    */
   @Override
   @SuppressWarnings("unchecked")
@@ -106,10 +103,9 @@ public abstract class BaseCache implements ManagedCache {
   }
 
   /*
-   * Get a boolean primitive value from the cache. Tests for: Boolean, Integer,
-   * Byte, Short, String (parseBoolean)
-   * @return false if nothing is found or the cached value is not a boolean
-   *         value
+   * Get a boolean primitive value from the cache. Tests for: Boolean, Integer, Byte, Short, String (parseBoolean)
+   * 
+   * @return false if nothing is found or the cached value is not a boolean value
    */
   public boolean getBool(String name) {
     if (name == null || !contains(name)) {
@@ -142,8 +138,7 @@ public abstract class BaseCache implements ManagedCache {
   }
 
   /*
-   * Get an byte primitive value from the cache. Tests for: Byte, Short, String
-   * (parseByte)
+   * Get an byte primitive value from the cache. Tests for: Byte, Short, String (parseByte)
    * 
    * @return 0 if nothing is found or the cached value was not an byte value
    */
@@ -170,11 +165,9 @@ public abstract class BaseCache implements ManagedCache {
   }
 
   /*
-   * Get an double primitive value from the cache. Tests for: Double, Float,
-   * Integer, Byte, Short, String (parseDouble)
+   * Get an double primitive value from the cache. Tests for: Double, Float, Integer, Byte, Short, String (parseDouble)
    * 
-   * @return 0.0d if nothing is found or the cached value was not an double
-   *         value
+   * @return 0.0d if nothing is found or the cached value was not an double value
    */
   public double getDouble(String name) {
     if (name == null || !contains(name)) {
@@ -209,10 +202,9 @@ public abstract class BaseCache implements ManagedCache {
     }
     return parseWithDefault((String) value, DEFAULT_DOUBLE);
   }
-  
+
   /*
-   * Get an float primitive value from the cache. Tests for: Float, Integer,
-   * Byte, Short, String (parseDouble)
+   * Get an float primitive value from the cache. Tests for: Float, Integer, Byte, Short, String (parseDouble)
    * 
    * @return 0.0f if nothing is found or the cached value was not an float value
    */
@@ -247,16 +239,14 @@ public abstract class BaseCache implements ManagedCache {
   }
 
   /**
-   * Internal method for BaseCache to actually retrieve items from the
-   * implementing cache.
+   * Internal method for BaseCache to actually retrieve items from the implementing cache.
    * 
    * @param name
    */
   protected abstract Object getFromCache(String name);
 
   /*
-   * Get an int primitive value from the cache. Tests for: Integer, Byte, Short,
-   * String (parseInt)
+   * Get an int primitive value from the cache. Tests for: Integer, Byte, Short, String (parseInt)
    * 
    * @return 0 if nothing is found or the cached value was not an integer value
    */
@@ -287,8 +277,7 @@ public abstract class BaseCache implements ManagedCache {
   }
 
   /*
-   * Get an short primitive value from the cache. Tests for: Short, Byte, String
-   * (parseShort)
+   * Get an short primitive value from the cache. Tests for: Short, Byte, String (parseShort)
    * 
    * @return 0 if nothing is found or the cached value was not an integer value
    */
@@ -421,8 +410,7 @@ public abstract class BaseCache implements ManagedCache {
   }
 
   /**
-   * Internal method for BaseCache to actually remove items from the
-   * implementing cache.
+   * Internal method for BaseCache to actually remove items from the implementing cache.
    * 
    * @param name
    */

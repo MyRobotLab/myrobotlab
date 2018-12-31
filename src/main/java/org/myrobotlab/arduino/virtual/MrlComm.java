@@ -10,27 +10,23 @@ import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
 
-  ///////////// MrlComm.h ///////////////
-  // forward defines to break circular dependency
-  // class Device;
-  // class Msg;
-  // class MrlComm;
-  // class Pin;
+///////////// MrlComm.h ///////////////
+// forward defines to break circular dependency
+// class Device;
+// class Msg;
+// class MrlComm;
+// class Pin;
 
-  /***********************************************************************
-   * Class MrlComm - This class represents the Arduino service as a device. It
-   * can hosts devices such as Motors, Servos, Steppers, Sensors, etc. You can
-   * dynamically add or remove devices, and the deviceList should be in synch
-   * with the Java-Land deviceList. It has a list of pins which can be read from
-   * or written to. It also follows some of the same methods as the Device in
-   * Device.h It has an update() which is called each loop to do any necessary
-   * processing
-   * 
-   */
+/***********************************************************************
+ * Class MrlComm - This class represents the Arduino service as a device. It can hosts devices such as Motors, Servos, Steppers,
+ * Sensors, etc. You can dynamically add or remove devices, and the deviceList should be in synch with the Java-Land deviceList. It
+ * has a list of pins which can be read from or written to. It also follows some of the same methods as the Device in Device.h It
+ * has an update() which is called each loop to do any necessary processing
+ * 
+ */
 public class MrlComm {
 
   public final BoardInfo boardInfo = new BoardInfo();
-
 
   /**
    * "global var"
@@ -50,7 +46,7 @@ public class MrlComm {
   int byteCount;
   int msgSize;
 
- // last time board info was published
+  // last time board info was published
   long lastBoardInfoUs;
 
   boolean boardStatusEnabled;
@@ -75,104 +71,91 @@ public class MrlComm {
   // Device addDevice(Device device);
   // void update();
 
-    // Below are generated callbacks controlled by
-    // arduinoMsgs.schema
-    // <generatedCallBacks>
-	// > getBoardInfo
-	//void getBoardInfo();
-	// > enablePin/address/type/b16 rate
-	//void enablePin( byte address,  byte type,  int rate);
-	// > setDebug/bool enabled
-	//void setDebug( boolean enabled);
-	// > setSerialRate/b32 rate
-	//void setSerialRate( long rate);
-	// > softReset
-	//void softReset();
-	// > enableAck/bool enabled
-	//void enableAck( boolean enabled);
-	// > echo/f32 myFloat/myByte/f32 secondFloat
-	//void echo( float myFloat,  byte myByte,  float secondFloat);
-	// > controllerAttach/serialPort
-	//void controllerAttach( byte serialPort);
-	// > customMsg/[] msg
-	//void customMsg( byte msgSize, const byte*msg);
-	// > deviceDetach/deviceId
-	//void deviceDetach( byte deviceId);
-	// > i2cBusAttach/deviceId/i2cBus
-	//void i2cBusAttach( byte deviceId,  byte i2cBus);
-	// > i2cRead/deviceId/deviceAddress/size
-	//void i2cRead( byte deviceId,  byte deviceAddress,  byte size);
-	// > i2cWrite/deviceId/deviceAddress/[] data
-	//void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
-	// > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-	//void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
-	// > neoPixelAttach/deviceId/pin/b32 numPixels
-	//void neoPixelAttach( byte deviceId,  byte pin,  long numPixels);
-	// > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-	//void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
-	// > neoPixelWriteMatrix/deviceId/[] buffer
-	//void neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
-	// > disablePin/pin
-	//void disablePin( byte pin);
-	// > disablePins
-	//void disablePins();
-	// > setTrigger/pin/triggerValue
-	//void setTrigger( byte pin,  byte triggerValue);
-	// > setDebounce/pin/delay
-	//void setDebounce( byte pin,  byte delay);
-	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
-	//void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity);
-	// > servoAttachPin/deviceId/pin
-	//void servoAttachPin( byte deviceId,  byte pin);
-	// > servoDetachPin/deviceId
-	//void servoDetachPin( byte deviceId);
-	// > servoSetMaxVelocity/deviceId/b16 maxVelocity
-	//void servoSetMaxVelocity( byte deviceId,  int maxVelocity);
-	// > servoSetVelocity/deviceId/b16 velocity
-	//void servoSetVelocity( byte deviceId,  int velocity);
-	// > servoSweepStart/deviceId/min/max/step
-	//void servoSweepStart( byte deviceId,  byte min,  byte max,  byte step);
-	// > servoSweepStop/deviceId
-	//void servoSweepStop( byte deviceId);
-	// > servoMoveToMicroseconds/deviceId/b16 target
-	//void servoMoveToMicroseconds( byte deviceId,  int target);
-	// > servoSetAcceleration/deviceId/b16 acceleration
-	//void servoSetAcceleration( byte deviceId,  int acceleration);
-	// > serialAttach/deviceId/relayPin
-	//void serialAttach( byte deviceId,  byte relayPin);
-	// > serialRelay/deviceId/[] data
-	//void serialRelay( byte deviceId,  byte dataSize, const byte*data);
-	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-	//void ultrasonicSensorAttach( byte deviceId,  byte triggerPin,  byte echoPin);
-	// > ultrasonicSensorStartRanging/deviceId
-	//void ultrasonicSensorStartRanging( byte deviceId);
-	// > ultrasonicSensorStopRanging/deviceId
-	//void ultrasonicSensorStopRanging( byte deviceId);
-        // > setAref/b16 aref
-        //void setAref( int aref);
-    // </generatedCallBacks>
-    // end
-/*
- 
-  public:
-    unsigned long loopCount; // main loop count
-    MrlComm();
-    ~MrlComm();
-    void publishBoardStatus();
-    void publishVersion();
-    void publishBoardInfo();
-    void processCommand();
-    void processCommand(int ioType);
-    void updateDevices();
-    unsigned int getCustomMsg();
-    int getCustomMsgSize();
-    void begin(HardwareSerial& serial);
-    bool readMsg();
-};
-  
-#endif
-*/
-
+  // Below are generated callbacks controlled by
+  // arduinoMsgs.schema
+  // <generatedCallBacks>
+  // > getBoardInfo
+  // void getBoardInfo();
+  // > enablePin/address/type/b16 rate
+  // void enablePin( byte address, byte type, int rate);
+  // > setDebug/bool enabled
+  // void setDebug( boolean enabled);
+  // > setSerialRate/b32 rate
+  // void setSerialRate( long rate);
+  // > softReset
+  // void softReset();
+  // > enableAck/bool enabled
+  // void enableAck( boolean enabled);
+  // > echo/f32 myFloat/myByte/f32 secondFloat
+  // void echo( float myFloat, byte myByte, float secondFloat);
+  // > controllerAttach/serialPort
+  // void controllerAttach( byte serialPort);
+  // > customMsg/[] msg
+  // void customMsg( byte msgSize, const byte*msg);
+  // > deviceDetach/deviceId
+  // void deviceDetach( byte deviceId);
+  // > i2cBusAttach/deviceId/i2cBus
+  // void i2cBusAttach( byte deviceId, byte i2cBus);
+  // > i2cRead/deviceId/deviceAddress/size
+  // void i2cRead( byte deviceId, byte deviceAddress, byte size);
+  // > i2cWrite/deviceId/deviceAddress/[] data
+  // void i2cWrite( byte deviceId, byte deviceAddress, byte dataSize, const byte*data);
+  // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
+  // void i2cWriteRead( byte deviceId, byte deviceAddress, byte readSize, byte writeValue);
+  // > neoPixelAttach/deviceId/pin/b32 numPixels
+  // void neoPixelAttach( byte deviceId, byte pin, long numPixels);
+  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
+  // void neoPixelSetAnimation( byte deviceId, byte animation, byte red, byte green, byte blue, int speed);
+  // > neoPixelWriteMatrix/deviceId/[] buffer
+  // void neoPixelWriteMatrix( byte deviceId, byte bufferSize, const byte*buffer);
+  // > disablePin/pin
+  // void disablePin( byte pin);
+  // > disablePins
+  // void disablePins();
+  // > setTrigger/pin/triggerValue
+  // void setTrigger( byte pin, byte triggerValue);
+  // > setDebounce/pin/delay
+  // void setDebounce( byte pin, byte delay);
+  // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity
+  // void servoAttach( byte deviceId, byte pin, int initPos, int initVelocity);
+  // > servoAttachPin/deviceId/pin
+  // void servoAttachPin( byte deviceId, byte pin);
+  // > servoDetachPin/deviceId
+  // void servoDetachPin( byte deviceId);
+  // > servoSetMaxVelocity/deviceId/b16 maxVelocity
+  // void servoSetMaxVelocity( byte deviceId, int maxVelocity);
+  // > servoSetVelocity/deviceId/b16 velocity
+  // void servoSetVelocity( byte deviceId, int velocity);
+  // > servoSweepStart/deviceId/min/max/step
+  // void servoSweepStart( byte deviceId, byte min, byte max, byte step);
+  // > servoSweepStop/deviceId
+  // void servoSweepStop( byte deviceId);
+  // > servoMoveToMicroseconds/deviceId/b16 target
+  // void servoMoveToMicroseconds( byte deviceId, int target);
+  // > servoSetAcceleration/deviceId/b16 acceleration
+  // void servoSetAcceleration( byte deviceId, int acceleration);
+  // > serialAttach/deviceId/relayPin
+  // void serialAttach( byte deviceId, byte relayPin);
+  // > serialRelay/deviceId/[] data
+  // void serialRelay( byte deviceId, byte dataSize, const byte*data);
+  // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
+  // void ultrasonicSensorAttach( byte deviceId, byte triggerPin, byte echoPin);
+  // > ultrasonicSensorStartRanging/deviceId
+  // void ultrasonicSensorStartRanging( byte deviceId);
+  // > ultrasonicSensorStopRanging/deviceId
+  // void ultrasonicSensorStopRanging( byte deviceId);
+  // > setAref/b16 aref
+  // void setAref( int aref);
+  // </generatedCallBacks>
+  // end
+  /*
+   * 
+   * public: unsigned long loopCount; // main loop count MrlComm(); ~MrlComm(); void publishBoardStatus(); void publishVersion();
+   * void publishBoardInfo(); void processCommand(); void processCommand(int ioType); void updateDevices(); unsigned int
+   * getCustomMsg(); int getCustomMsgSize(); void begin(HardwareSerial& serial); bool readMsg(); };
+   * 
+   * #endif
+   */
 
   public long loopCount; // main loop count
 
@@ -214,18 +197,15 @@ public class MrlComm {
   }
 
   private int analogRead(int address) {
-    /* to simulate longer analogReads :)
-    try{
-    Thread.sleep(45);
-    } catch(Exception e){}
-    */
+    /*
+     * to simulate longer analogReads :) try{ Thread.sleep(45); } catch(Exception e){}
+     */
     return getRandom(0, 1024);
   }
 
   private long millis() {
     return System.currentTimeMillis();
   }
-  
 
   ///////////// support methods end ///////////////
 
@@ -249,7 +229,6 @@ public class MrlComm {
 
   VirtualArduino virtual;
 
-
   public MrlComm(VirtualArduino virtual) {
     // msg = VirtualMsg.getInstance();
     this.virtual = virtual;
@@ -260,7 +239,6 @@ public class MrlComm {
   // ~MrlComm() {
   // }
 
- 
   int getFreeRam() {
     // KW: In the future the arduino might have more than an 32/64k of ram. an
     // int might not be enough here to return.
@@ -273,7 +251,8 @@ public class MrlComm {
   /**
    * Get a device given it's id.
    * 
-   * @param id - the device id to fetch.  (I think this is the internal device id as it is the index into the mrl device list.
+   * @param id
+   *          - the device id to fetch. (I think this is the internal device id as it is the index into the mrl device list.
    * @return - a device
    */
   public Device getDevice(int id) {
@@ -292,15 +271,14 @@ public class MrlComm {
     // you'll still get a runtime error if any field, member or method not
     // defined is accessed
   }
+
   /**
    * This adds a device to the current set of active devices in the deviceList.
    * 
-   * FIXME - G: I think dynamic array would work better at least for the
-   * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
-   * Id leaves something to be desired - and the "index" does not spin through
-   * the deviceList to find it .. a dynamic array of pointers would only expand
-   * if it could not accomidate the current number of devices, when a device was
-   * removed - the slot could be re-used by the next device request
+   * FIXME - G: I think dynamic array would work better at least for the deviceList TODO: KW: i think it's pretty dynamic now. G:
+   * the nextDeviceId & Id leaves something to be desired - and the "index" does not spin through the deviceList to find it .. a
+   * dynamic array of pointers would only expand if it could not accomidate the current number of devices, when a device was removed
+   * - the slot could be re-used by the next device request
    */
   Device addDevice(Device device) {
     deviceList.add(device);
@@ -308,14 +286,12 @@ public class MrlComm {
   }
 
   /***********************************************************************
-   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
-   * device list depending on their type. This method processes each loop.
-   * Typically this "back-end" processing will read data from pins, or change
-   * states of non-blocking pulses, or possibly regulate a motor based on pid
-   * values read from pins
+   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the device list depending on their type. This method
+   * processes each loop. Typically this "back-end" processing will read data from pins, or change states of non-blocking pulses, or
+   * possibly regulate a motor based on pid values read from pins
    */
   public void updateDevices() {
- 
+
     // update self - the first device which
     // is type Arduino
     update();
@@ -328,15 +304,14 @@ public class MrlComm {
   }
 
   /***********************************************************************
-   * UPDATE BEGIN updates self - reads from the pinList both analog and digital
-   * sends pin data back
+   * UPDATE BEGIN updates self - reads from the pinList both analog and digital sends pin data back
    */
   public void update() {
     // this counts cycles of updates
     // until it is reset after sending publishBoardInfo
     ++loopCount;
     long now = millis();
-    if ((now - lastHeartbeatUpdate > 1000)&& heartbeatEnabled) {
+    if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
       onDisconnect();
       lastHeartbeatUpdate = now;
       heartbeatEnabled = false;
@@ -434,15 +409,14 @@ public class MrlComm {
     }
   }
 
- /***********************************************************************
-   * PUBLISH_BOARD_INFO This function updates the average time it took to run
-   * the main loop and reports it back with a publishBoardStatus MRLComm message
+  /***********************************************************************
+   * PUBLISH_BOARD_INFO This function updates the average time it took to run the main loop and reports it back with a
+   * publishBoardStatus MRLComm message
    *
    * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
    *
    * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
    */
-
 
   public void publishBoardInfo() {
 
@@ -453,16 +427,15 @@ public class MrlComm {
     }
 
     long now = micros();
-    int load = (int)((now - lastBoardInfoUs)/loopCount);
+    int load = (int) ((now - lastBoardInfoUs) / loopCount);
     msg.publishBoardInfo(MRLCOMM_VERSION, Arduino.BOARD_TYPE_ID_UNO, load, getFreeRam(), pinList.size(), deviceSummary);
     lastBoardInfoUs = now;
     loopCount = 0;
   }
 
   /****************************************************************
-   * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are
-   * controlled by arduinoMsgs.schema The implementation contains custom logic -
-   * but the signature is generated
+   * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are controlled by arduinoMsgs.schema The implementation
+   * contains custom logic - but the signature is generated
    *
    */
 
@@ -491,9 +464,10 @@ public class MrlComm {
   }
 
   /**
-   * deviceDetach - get the device if it exists delete it and remove it from the
-   * deviceList
-   * @param deviceId int for the device id
+   * deviceDetach - get the device if it exists delete it and remove it from the deviceList
+   * 
+   * @param deviceId
+   *          int for the device id
    */
   // > deviceDetach/deviceId
   public void deviceDetach(Integer deviceId) {
@@ -524,7 +498,6 @@ public class MrlComm {
     }
   }
 
-
   // > enablePin/address/type/b16 rate
   public void enablePin(int address, int type, int rate) {
     // don't add it twice
@@ -543,7 +516,6 @@ public class MrlComm {
     p.lastUpdate = 0;
     pinList.add(p);
   }
-
 
   // > i2cBusAttach/deviceId/i2cBus
   public void i2cBusAttach(int deviceId, int i2cBus) {
@@ -673,7 +645,7 @@ public class MrlComm {
   public void softReset() {
     // removing devices & pins
     deviceList.clear();
-    
+
     pinList.clear();
 
     // resetting variables to default
@@ -719,46 +691,43 @@ public class MrlComm {
     return retval;
   }
 
- void onDisconnect() {
-   Iterator<Device> i = deviceList.iterator();
-   while (i.hasNext()) {
-     Device node = i.next();
-     node.onDisconnect();
-     // node = node.next;
-   }
-  boardStatusEnabled = false;
- }
+  void onDisconnect() {
+    Iterator<Device> i = deviceList.iterator();
+    while (i.hasNext()) {
+      Device node = i.next();
+      node.onDisconnect();
+      // node = node.next;
+    }
+    boardStatusEnabled = false;
+  }
 
- void sendCustomMsg(int[] customMsg) {
-  msg.publishCustomMsg(customMsg);
- }
- 
- // > motorAttach/deviceId/type/[] pins
- public void motorAttach(Integer deviceId, Integer type, int[] pins) {
-   MrlMotor servo = new MrlMotor(deviceId, virtual);
-   addDevice(servo);
-   // not your mama's attach - this is attaching/initializing the MrlDevice
-   // servo.attach(type, initialPosUs, velocity, name);
- }
+  void sendCustomMsg(int[] customMsg) {
+    msg.publishCustomMsg(customMsg);
+  }
 
- // > motorMove/deviceId/pwr
- public void motorMove(Integer deviceId, Integer pwr) {
-   MrlMotor motor = (MrlMotor) getDevice(deviceId);
-   motor.move(pwr);
- }
+  // > motorAttach/deviceId/type/[] pins
+  public void motorAttach(Integer deviceId, Integer type, int[] pins) {
+    MrlMotor servo = new MrlMotor(deviceId, virtual);
+    addDevice(servo);
+    // not your mama's attach - this is attaching/initializing the MrlDevice
+    // servo.attach(type, initialPosUs, velocity, name);
+  }
 
- // > motorMoveTo/deviceId/pos
- public void motorMoveTo(Integer deviceId, Integer pos) {
-   MrlMotor motor = (MrlMotor) getDevice(deviceId);
-   motor.moveTo(pos);
- }
+  // > motorMove/deviceId/pwr
+  public void motorMove(Integer deviceId, Integer pwr) {
+    MrlMotor motor = (MrlMotor) getDevice(deviceId);
+    motor.move(pwr);
+  }
 
+  // > motorMoveTo/deviceId/pos
+  public void motorMoveTo(Integer deviceId, Integer pos) {
+    MrlMotor motor = (MrlMotor) getDevice(deviceId);
+    motor.moveTo(pos);
+  }
 
   /*
-  public void setBoardType(String board) {
-    boardInfo.setType(board);
-  }
-  */
+   * public void setBoardType(String board) { boardInfo.setType(board); }
+   */
 
   public void invoke(String method, Object... params) {
     virtual.invokeOn(this, method, params);
@@ -783,13 +752,13 @@ public class MrlComm {
   }
 
   public void begin(org.myrobotlab.service.Serial serial) {
-    
+
   }
-  
+
   // > enablePin/address/type/b16 rate
   public void setAref(int aref) {
     // TODO
-	 // msg.setAref(aref);
+    // msg.setAref(aref);
   }
 
   public void encoderAttach(Integer deviceId, Integer pin) {
@@ -801,8 +770,7 @@ public class MrlComm {
     // TODO Auto-generated method stub
     MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
     encoder.setZeroPoint();
-    
-  }
 
+  }
 
 }

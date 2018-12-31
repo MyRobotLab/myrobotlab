@@ -11,10 +11,8 @@ import org.slf4j.Logger;
 
 public class Http {
   /**
-   * FIXME - OFFER PROXY !!!! See Below !!! NOT APACHE HTTPCLIENT IN FACT
-   * HTTPCLIENT SHOULD ABEND TO THE ENV SET HERE !!!!
-   * http://stackoverflow.com/questions/15927079/how-to-use-httpsurlconnection-
-   * through-proxy-by-setproperty
+   * FIXME - OFFER PROXY !!!! See Below !!! NOT APACHE HTTPCLIENT IN FACT HTTPCLIENT SHOULD ABEND TO THE ENV SET HERE !!!!
+   * http://stackoverflow.com/questions/15927079/how-to-use-httpsurlconnection- through-proxy-by-setproperty
    */
 
   public final static Logger log = LoggerFactory.getLogger(Http.class);

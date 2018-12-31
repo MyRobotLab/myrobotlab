@@ -56,10 +56,9 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Tracking - This service connects to the video stream from OpenCV It then uses
- * LK tracking for a point in the video stream. As that point moves the x and y
- * servos that are attached to a camera will move to keep the point in the
- * screen. (controlling yaw and pitch.)
+ * Tracking - This service connects to the video stream from OpenCV It then uses LK tracking for a point in the video stream. As
+ * that point moves the x and y servos that are attached to a camera will move to keep the point in the screen. (controlling yaw and
+ * pitch.)
  *
  */
 public class Tracking extends Service {
@@ -122,11 +121,11 @@ public class Tracking extends Service {
    * call back of all video data video calls this whenever a frame is processed
    * 
    */
-  //TODO: should be a function of the current frame rate  for now, require at least 1.
+  // TODO: should be a function of the current frame rate for now, require at least 1.
   int faceFoundFrameCount = 0;
   int faceFoundFrameCountMin = 2;
-  //int faceLostFrameCount = 0;
-  //int faceLostFrameCountMin = 20;
+  // int faceLostFrameCount = 0;
+  // int faceLostFrameCountMin = 20;
   // -------------- System Specific Initialization End --------------
 
   boolean scan = false;
@@ -218,8 +217,7 @@ public class Tracking extends Service {
   // TODO - array of attributes expanded Object[] ... ???
   // TODO - use GEOTAG - LAT LONG ALT DIRECTION LOCATION CITY GPS TIME OFFSET
   /*
-   * public OpenCVData setLocation(OpenCVData data) {
-   * data.setX(x.getPosition()); data.setY(y.getPosition()); return data; }
+   * public OpenCVData setLocation(OpenCVData data) { data.setX(x.getPosition()); data.setY(y.getPosition()); return data; }
    */
 
   // ------------------- tracking & detecting methods end
@@ -279,7 +277,7 @@ public class Tracking extends Service {
     log.info("rest");
     for (TrackingServoData sc : servoControls.values()) {
       if (sc.servoControl.isAttached()) {
-        //avoid dangerous moves
+        // avoid dangerous moves
         double velocity = sc.servoControl.getVelocity();
         sc.servoControl.setVelocity(20);
         sc.servoControl.moveToBlocking(sc.servoControl.getRest());
@@ -316,7 +314,7 @@ public class Tracking extends Service {
           thisPoint.x = ((bb.get(0).x + bb.get(0).width / 2) / width);
           thisPoint.y = ((bb.get(0).y + bb.get(0).height / 2) / height);
 
-          //keep calm and save MORE cpu!
+          // keep calm and save MORE cpu!
           if (thisPoint != lastPoint) {
             updateTrackingPoint(thisPoint);
           }
@@ -367,7 +365,7 @@ public class Tracking extends Service {
         // different detection
         break;
 
-      //TODO: test startLKTracking -> maybe fix targetPoint.get(0) for image proportion between 0>1
+      // TODO: test startLKTracking -> maybe fix targetPoint.get(0) for image proportion between 0>1
       case STATE_LK_TRACKING_POINT:
         // extract tracking info
         // data.setSelectedFilterName(LKOpticalTrackFilterName);
@@ -375,7 +373,7 @@ public class Tracking extends Service {
         if (targetPoint != null && targetPoint.size() > 0) {
           targetPoint.get(0).x = targetPoint.get(0).x / width;
           targetPoint.get(0).y = targetPoint.get(0).y / height;
-          //keep calm and save MORE cpu!
+          // keep calm and save MORE cpu!
           if (targetPoint.get(0) != lastPoint) {
             updateTrackingPoint(targetPoint.get(0));
           }
@@ -430,7 +428,7 @@ public class Tracking extends Service {
     ++cnt;
 
     // describe this time delta
-    //latency = System.currentTimeMillis() - targetPoint.timestamp;
+    // latency = System.currentTimeMillis() - targetPoint.timestamp;
     log.info("Update Tracking Point {}", targetPoint);
 
     // pid.setInput("x", targetPoint.x);
@@ -443,7 +441,8 @@ public class Tracking extends Service {
     for (TrackingServoData tsd : servoControls.values()) {
       pid.setInput(tsd.axis, targetPoint.get(tsd.axis));
       if (pid.compute(tsd.name)) {
-        // TODO: verify this.. we want the pid output to be the input for our servo..min/max are input min/max on the servo to ensure proper scaling 
+        // TODO: verify this.. we want the pid output to be the input for our servo..min/max are input min/max on the servo to
+        // ensure proper scaling
         // of values between services.
         tsd.currentServoPos += pid.getOutput(tsd.name);
         tsd.servoControl.moveTo(tsd.currentServoPos);
@@ -456,9 +455,9 @@ public class Tracking extends Service {
     lastPoint = targetPoint;
 
     if (cnt % updateModulus == 0) {
-      //moz4r : //keep calm and save MORE cpu!
-      //broadcastState(); // update graphics ?
-      //info(String.format("computeX %f computeY %f", pid.getOutput("x"), pid.getOutput("y")));
+      // moz4r : //keep calm and save MORE cpu!
+      // broadcastState(); // update graphics ?
+      // info(String.format("computeX %f computeY %f", pid.getOutput("x"), pid.getOutput("y")));
     }
   }
 
@@ -526,9 +525,8 @@ public class Tracking extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -567,8 +565,7 @@ public class Tracking extends Service {
   }
 
   /**
-   * Routing attach - routes ServiceInterface.attach(service) to appropriate
-   * methods for this class
+   * Routing attach - routes ServiceInterface.attach(service) to appropriate methods for this class
    */
   @Override
   public void attach(Attachable service) throws Exception {
@@ -601,7 +598,7 @@ public class Tracking extends Service {
       OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
       t01.connect(opencv, rothead, neck);
       opencv.capture();
-      //t01.trackPoint();
+      // t01.trackPoint();
       t01.faceDetect();
       // tracker.getGoodFeatures();
     } catch (Exception e) {

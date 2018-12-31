@@ -74,7 +74,7 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
         filter.useDepth(false);
       }
     }
-    
+
     if (o == useColor) {
       if (useColor.isSelected()) {
         filter.useColor(true);
@@ -82,11 +82,11 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
         filter.useColor(false);
       }
     }
-    
+
     if (o == clearSamplePoints) {
       filter.clearSamplePoints();
     }
-    
+
     // send the updated filter to OpenCV service
     myGui.send(boundServiceName, "setFilterState", boundFilter);
   }

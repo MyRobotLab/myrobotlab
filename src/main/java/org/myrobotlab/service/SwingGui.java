@@ -84,27 +84,20 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 
 /**
- * SwingGui - This is the java swing based GUI for MyRobotLab. This service
- * allows other services control features to be displayed. It is the service
- * which you "see" when you start MyRobotLab. It provides a service tab for
- * other services. With its own tab it provides a map of message routes and
- * icons of currently running services.
+ * SwingGui - This is the java swing based GUI for MyRobotLab. This service allows other services control features to be displayed.
+ * It is the service which you "see" when you start MyRobotLab. It provides a service tab for other services. With its own tab it
+ * provides a map of message routes and icons of currently running services.
  * 
- * SwingGui -&gt; Look at service registry SwingGui -&gt; attempt to create a
- * panel for each registered service SwingGui -&gt; create panel SwingGui -&gt;
- * panel.init(this, serviceName); panel.send(Notify, someoutputfn, GUIName,
- * panel.inputfn, data);
+ * SwingGui -&gt; Look at service registry SwingGui -&gt; attempt to create a panel for each registered service SwingGui -&gt;
+ * create panel SwingGui -&gt; panel.init(this, serviceName); panel.send(Notify, someoutputfn, GUIName, panel.inputfn, data);
  *
- * serviceName (source) --&gt; SwingGui-&gt; msg Arduino arduino01 -&gt; post
- * message -&gt; outbox -&gt; outbound -&gt; notifyList -&gt; reference of
- * sender? (NO) will not transport across process boundry
+ * serviceName (source) --&gt; SwingGui-&gt; msg Arduino arduino01 -&gt; post message -&gt; outbox -&gt; outbound -&gt; notifyList
+ * -&gt; reference of sender? (NO) will not transport across process boundry
  * 
- * serviceGUI needs a Runtime Arduino arduin-&gt; post back (data) --&gt;
- * SwingGui - look up serviceGUI by senders name ServiceGUI-&gt;invoke(data)
+ * serviceGUI needs a Runtime Arduino arduin-&gt; post back (data) --&gt; SwingGui - look up serviceGUI by senders name
+ * ServiceGUI-&gt;invoke(data)
  * 
- * References :
- * http://www.scribd.com/doc/13122112/Java6-Rules-Adding-Components-To-The-
- * Tabs-On-JTabbedPaneI-Now-A-breeze
+ * References : http://www.scribd.com/doc/13122112/Java6-Rules-Adding-Components-To-The- Tabs-On-JTabbedPaneI-Now-A-breeze
  * 
  */
 public class SwingGui extends Service implements WindowListener, ActionListener, Serializable, DocumentListener {
@@ -126,8 +119,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   transient JPanel tabPanel;
   Map<String, String> userDefinedServiceTypeColors = new HashMap<String, String>();
   /**
-   * the all important 2nd stage routing map after the message gets back to the
-   * gui service the 'rest' of the callback is handled with this data structure
+   * the all important 2nd stage routing map after the message gets back to the gui service the 'rest' of the callback is handled
+   * with this data structure
    * 
    * <pre>
    *     "serviceName.method" --&gt; List<ServiceGui>
@@ -135,11 +128,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * 
    * </pre>
    * 
-   * The same mechanism is employed in mrl.js to handle all call-backs to
-   * ServiceGui.js derived panels.
+   * The same mechanism is employed in mrl.js to handle all call-backs to ServiceGui.js derived panels.
    * 
-   * FIXME / TODO ? - "Probably" should be Map<{name}, Map<{method}, List
-   * <ServiceGui>>>
+   * FIXME / TODO ? - "Probably" should be Map<{name}, Map<{method}, List <ServiceGui>>>
    *
    */
 
@@ -289,8 +280,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * @param sw
    *          - name of service to add
    * 
-   *          FIXME - full parameter of addTab(final String serviceName, final
-   *          String serviceType, final String lable) then overload
+   *          FIXME - full parameter of addTab(final String serviceName, final String serviceType, final String lable) then overload
    */
   synchronized public void addTab(final ServiceInterface sw) {
 
@@ -382,11 +372,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
     return frame;
   }
-  
+
   public void maximize() {
-    frame.setExtendedState( frame.getExtendedState() | JFrame.MAXIMIZED_BOTH );
+    frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
   }
-  
+
   /*
    * Build the menu for display.
    */
@@ -639,10 +629,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       // subscribeToServiceMethod("Welcome", new Welcome("welcome", this,
       // tabs));
       /**
-       * pack() repaint() works on current selected (non-hidden) tab welcome is
-       * the first panel when the UI starts - therefore this controls the
-       * initial size .. however the largest panel typically at this point is
-       * the RuntimeGui - so we set it to the rough size of that panel
+       * pack() repaint() works on current selected (non-hidden) tab welcome is the first panel when the UI starts - therefore this
+       * controls the initial size .. however the largest panel typically at this point is the RuntimeGui - so we set it to the
+       * rough size of that panel
        */
 
       Map<String, ServiceInterface> services = Runtime.getRegistry();
@@ -740,8 +729,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public void windowClosing(WindowEvent e) {
     // save all necessary serializations
     /**
-     * WRONG - USE ONLY RUNTIME TO SHUTDOWN !!! save(); Runtime.releaseAll();
-     * System.exit(1); // the Big Hamm'r
+     * WRONG - USE ONLY RUNTIME TO SHUTDOWN !!! save(); Runtime.releaseAll(); System.exit(1); // the Big Hamm'r
      */
     Runtime.shutdown(closeTimeout);
   }
@@ -803,9 +791,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -836,7 +823,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public void resetDesktop(String name) {
     tabs.resetDesktop(name);
   }
-
 
   @Override
   public void changedUpdate(DocumentEvent e) {

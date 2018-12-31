@@ -55,9 +55,8 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  *
- *         AbstractMotor - this class contains all the data necessary for
- *         MotorController to run a motor. Functions of the MotorController are
- *         proxied through this class, with itself as a parameter
+ *         AbstractMotor - this class contains all the data necessary for MotorController to run a motor. Functions of the
+ *         MotorController are proxied through this class, with itself as a parameter
  * 
  */
 
@@ -89,7 +88,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // feedback
   Double positionCurrent; // aka currentPos
-  
+
   /**
    * a new "un-set" mapper for merging with default motorcontroller
    */
@@ -375,12 +374,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
     return ret;
   }
-  
+
   // FIXME promote to interface
   public Mapper getMapper() {
     return mapper;
   }
-  
+
   // FIXME promote to interface
   public void setMapper(Mapper mapper) {
     this.mapper = mapper;

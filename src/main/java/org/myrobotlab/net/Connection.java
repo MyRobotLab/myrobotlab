@@ -9,17 +9,13 @@ import org.myrobotlab.framework.Platform;
 /**
  * @author GroG
  * 
- *         class to store connection information for Gateways this will be the
- *         data component of a MRL_URI_KEY since there are so many connection
- *         types and connection protocols on top of those types we will make a
- *         data class which has members which are common to all - then a HashMap
- *         of properties for specific elements
+ *         class to store connection information for Gateways this will be the data component of a MRL_URI_KEY since there are so
+ *         many connection types and connection protocols on top of those types we will make a data class which has members which
+ *         are common to all - then a HashMap of properties for specific elements
  * 
- *         future data might include session info, session time outs, heartbeat
- *         details, etc
+ *         future data might include session info, session time outs, heartbeat details, etc
  * 
- *         this will contain all serializable contextual data regarding the
- *         connection without containing the connection itself
+ *         this will contain all serializable contextual data regarding the connection without containing the connection itself
  *
  */
 public class Connection implements Serializable {
@@ -74,8 +70,7 @@ public class Connection implements Serializable {
     this.service = gatewayName;
     this.protocolKey = protocolKey;
     /*
-     * try { this.protocolKey = new URI(String.format("mrl://%s/%s",
-     * gatewayName, uri)); } catch (URISyntaxException e) {
+     * try { this.protocolKey = new URI(String.format("mrl://%s/%s", gatewayName, uri)); } catch (URISyntaxException e) {
      * Logging.logException(e); }
      */
   }

@@ -4,17 +4,17 @@ public class Wire {
 
   public static void beginTransmission(int writeValue) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public static void write(int writeValue) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public static void endTransmission() {
     // TODO Auto-generated method stub
-    
+
   }
 
   public static int requestFrom(int deviceAddress, int readSize) {
@@ -24,12 +24,12 @@ public class Wire {
 
   public static void begin() {
     // TODO Auto-generated method stub
-    
+
   }
 
   public static void setClock(long l) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public static int read() {

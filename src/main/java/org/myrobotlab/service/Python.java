@@ -37,8 +37,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Python - This service provides python scripting support. It uses the jython
- * integration and provides python 2.7 syntax compliance.
+ * Python - This service provides python scripting support. It uses the jython integration and provides python 2.7 syntax
+ * compliance.
  * 
  * More Info at : https://www.python.org/ http://www.jython.org/
  * 
@@ -48,8 +48,7 @@ import org.slf4j.Logger;
 public class Python extends Service {
 
   /**
-   * this thread handles all callbacks to Python process all input and sets msg
-   * handles
+   * this thread handles all callbacks to Python process all input and sets msg handles
    * 
    */
   public class InputQueueThread extends Thread {
@@ -105,8 +104,7 @@ public class Python extends Service {
               compiledObject = getCompiledMethod(msg.method, methodWithParams.toString(), interp);
             }
             /*
-             * if (compiledObject == null){ // NEVER NULL - object cache -
-             * builds cache if not there log.error(String.format(
+             * if (compiledObject == null){ // NEVER NULL - object cache - builds cache if not there log.error(String.format(
              * "%s() NOT FOUND", msg.method)); }
              */
 
@@ -198,10 +196,9 @@ public class Python extends Service {
   private static final transient HashMap<String, PyObject> objectCache;
 
   /**
-   * current working directory root there are multiple filesystems we can load
-   * scripts from github urls | jar:file /resources | /resource exploded |
-   * .myrobotlab directory | workind directory | root of file system this
-   * variable is to tell which root to begin with
+   * current working directory root there are multiple filesystems we can load scripts from github urls | jar:file /resources |
+   * /resource exploded | .myrobotlab directory | workind directory | root of file system this variable is to tell which root to
+   * begin with
    */
 
   private static final long serialVersionUID = 1L;
@@ -235,9 +232,8 @@ public class Python extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -265,14 +261,13 @@ public class Python extends Service {
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
   transient InputQueueThread inputQueueThread;
   transient PythonInterpreter interp = null;
-  //transient PIThread interpThread = null;
+  // transient PIThread interpThread = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
   int interpreterThreadCount = 0;
 
   /**
-   * local current directory of python script any new python script will get
-   * localScriptDir prefix
+   * local current directory of python script any new python script will get localScriptDir prefix
    */
   String localScriptDir = new File(getCfgDir()).getAbsolutePath();
 
@@ -355,9 +350,8 @@ public class Python extends Service {
   }
 
   /**
-   * runs the pythonConsole.py script which creates a Python Console object and
-   * redirect stdout &amp; stderr to published data - these are hooked by the
-   * SwingGui
+   * runs the pythonConsole.py script which creates a Python Console object and redirect stdout &amp; stderr to published data -
+   * these are hooked by the SwingGui
    */
   public void attachPythonConsole() {
     if (!pythonConsoleInitialized) {
@@ -387,14 +381,12 @@ public class Python extends Service {
     Properties props = new Properties();
 
     /*
-     * Used to prevent: console: Failed to install '':
-     * java.nio.charset.UnsupportedCharsetException: cp0.
+     * Used to prevent: console: Failed to install '': java.nio.charset.UnsupportedCharsetException: cp0.
      */
     props.put("python.console.encoding", "UTF-8");
 
     /*
-     * don't respect java accessibility, so that we can access protected members
-     * on subclasses
+     * don't respect java accessibility, so that we can access protected members on subclasses
      */
     props.put("python.security.respectJavaAccessibility", "false");
     props.put("python.import.site", "false");
@@ -459,19 +451,16 @@ public class Python extends Service {
   }
 
   /**
-   * This method will execute a string that represents a python script. When
-   * called with blocking=false, the return code will likely return true even if
-   * there is a syntax error because it doesn't wait for the response.
+   * This method will execute a string that represents a python script. When called with blocking=false, the return code will likely
+   * return true even if there is a syntax error because it doesn't wait for the response.
    * 
    * @param code
    *          - the script to execute
    * @param replace
    *          - not used! (should be removed.)
    * @param blocking
-   *          - if true, this method will wait until all of the code has been
-   *          evaluated.
-   * @return - returns true if execution of the code was successful. returns
-   *         false if there was an exception.
+   *          - if true, this method will wait until all of the code has been evaluated.
+   * @return - returns true if execution of the code was successful. returns false if there was an exception.
    */
   public boolean exec(String code, boolean replace, boolean blocking) {
     log.debug("exec(String) \n{}", code);
@@ -504,8 +493,7 @@ public class Python extends Service {
   }
 
   /**
-   * This method will execute and block a string that represents a python script.
-   * Python return statement as return
+   * This method will execute and block a string that represents a python script. Python return statement as return
    * 
    * @param code
    *          - the script to execute
@@ -575,11 +563,9 @@ public class Python extends Service {
   }
 
   /**
-   * DEPRECATE - use online examples only ... (possibly you can package &amp;
-   * include filename listing during build process)
+   * DEPRECATE - use online examples only ... (possibly you can package &amp; include filename listing during build process)
    * 
-   * gets the listing of current example python scripts in the myrobotlab.jar
-   * under /Python/examples
+   * gets the listing of current example python scripts in the myrobotlab.jar under /Python/examples
    * 
    * @return list of python examples
    */
@@ -595,9 +581,8 @@ public class Python extends Service {
   }
 
   /**
-   * list files from user directory user directory is located where MRL was
-   * unzipped (dot) .myrobotlab directory these are typically hidden on Linux
-   * systems
+   * list files from user directory user directory is located where MRL was unzipped (dot) .myrobotlab directory these are typically
+   * hidden on Linux systems
    * 
    * @return returns list of files with .py extension
    */
@@ -617,8 +602,7 @@ public class Python extends Service {
   }
 
   /*
-   * load a script from the myrobotlab.jar - location of example scripts are
-   * /resource/Python/examples name of file to load
+   * load a script from the myrobotlab.jar - location of example scripts are /resource/Python/examples name of file to load
    */
   public void loadPyRobotLabServiceScript(String serviceType) {
     Platform p = Platform.getLocalInstance();
@@ -627,10 +611,9 @@ public class Python extends Service {
   }
 
   /*
-   * this method can be used to load a Python script from the Python's local
-   * file system, which may not be the SwingGui's local system. Because it can
-   * be done programatically on a different machine we want to broadcast our
-   * changed state to other listeners (possibly the SwingGui)
+   * this method can be used to load a Python script from the Python's local file system, which may not be the SwingGui's local
+   * system. Because it can be done programatically on a different machine we want to broadcast our changed state to other listeners
+   * (possibly the SwingGui)
    * 
    * @param filename - name of file to load
    */
@@ -655,12 +638,10 @@ public class Python extends Service {
   }
 
   /**
-   * preProcessHook is used to intercept messages and process or route them
-   * before being processed/invoked in the Service.
+   * preProcessHook is used to intercept messages and process or route them before being processed/invoked in the Service.
    * 
-   * Here all messages allowed to go and effect the Python service will be let
-   * through. However, all messsages not found in this filter will go "into"
-   * they Python script. There they can be handled in the scripted users code.
+   * Here all messages allowed to go and effect the Python service will be let through. However, all messsages not found in this
+   * filter will go "into" they Python script. There they can be handled in the scripted users code.
    * 
    * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.framework.Message)
    */
@@ -734,8 +715,8 @@ public class Python extends Service {
   }
 
   /**
-   * stop all scripts
-   * (not sure the pros/cons of this management vs thread.interruptAllThreads())
+   * stop all scripts (not sure the pros/cons of this management vs thread.interruptAllThreads())
+   * 
    * @return
    */
   public boolean stop() {
@@ -785,12 +766,10 @@ public class Python extends Service {
       /*
        * python.load(); python.save();
        * 
-       * FileOutputStream fos = new FileOutputStream("python.dat");
-       * ObjectOutputStream out = new ObjectOutputStream(fos);
+       * FileOutputStream fos = new FileOutputStream("python.dat"); ObjectOutputStream out = new ObjectOutputStream(fos);
        * out.writeObject(python); out.close();
        * 
-       * FileInputStream fis = new FileInputStream("python.dat");
-       * ObjectInputStream in = new ObjectInputStream(fis); Object x =
+       * FileInputStream fis = new FileInputStream("python.dat"); ObjectInputStream in = new ObjectInputStream(fis); Object x =
        * in.readObject(); in.close();
        * 
        * Runtime.createAndStart("gui", "SwingGui");

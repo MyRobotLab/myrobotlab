@@ -133,7 +133,6 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
   public ChessGameGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
 
-
     // showStatus ("Please Wait; Program Loading");
     chessView = new ChessBoard();
     chessView.addPropertyChangeListener(this);
@@ -207,7 +206,6 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
 
     display.setSize(800, 600);
 
-  
   }
 
   @Override
@@ -412,10 +410,8 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
 
     // HMove h1 = new HMove(5,3,2,4,5);
     /*
-     * Move m1 = new Move(5,8); log.info(m1); log.info("user move from " +
-     * move.getFrom() + " " + move.getToRow() + "," + move.getToCol());
-     * log.info("user move to " + move.getTo() + " " + move.getToRow() + "," +
-     * move.getToCol());
+     * Move m1 = new Move(5,8); log.info(m1); log.info("user move from " + move.getFrom() + " " + move.getToRow() + "," +
+     * move.getToCol()); log.info("user move to " + move.getTo() + " " + move.getToRow() + "," + move.getToCol());
      */
 
     int promote = 0;

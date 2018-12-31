@@ -15,11 +15,10 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
- * The purpose of this class is to retrieve all the detailed information
- * regarding the details of the current platform which myrobotlab is running.
+ * The purpose of this class is to retrieve all the detailed information regarding the details of the current platform which
+ * myrobotlab is running.
  * 
- * It must NOT have references to mrl services, or Runtime, or 3rd party library
- * dependencies except perhaps for logging
+ * It must NOT have references to mrl services, or Runtime, or 3rd party library dependencies except perhaps for logging
  *
  */
 public class Platform implements Serializable {
@@ -50,8 +49,7 @@ public class Platform implements Serializable {
   String mrlVersion;
 
   /**
-   * Static identifier to identify the "instance" of myrobotlab - similar to
-   * network ip of a device and used in a similar way
+   * Static identifier to identify the "instance" of myrobotlab - similar to network ip of a device and used in a similar way
    */
   String id;
   String branch;
@@ -66,13 +64,11 @@ public class Platform implements Serializable {
   static Platform localInstance; // = getLocalInstance();
 
   /**
-   * The one big convoluted function to get all the crazy platform specific
-   * data. Potentially, it's done once and only once for a running instance.
-   * Most of the data should be immutable, although the "id"
+   * The one big convoluted function to get all the crazy platform specific data. Potentially, it's done once and only once for a
+   * running instance. Most of the data should be immutable, although the "id"
    * 
-   * All data should be accessed through public functions on the local instance.
-   * If the local instance is desired. If its from a serialized instance, the
-   * "getters" will be retrieving appropriate info for that serialized instance.
+   * All data should be accessed through public functions on the local instance. If the local instance is desired. If its from a
+   * serialized instance, the "getters" will be retrieving appropriate info for that serialized instance.
    * 
    * @return
    */
@@ -143,23 +139,16 @@ public class Platform implements Serializable {
       // logging !!
       // logging calls -> platform calls a util class -> calls logging --
       // infinite loop
-      
+
       /*
-
-      StringBuffer sb = new StringBuffer();
-
-      try {
-        BufferedReader br = new BufferedReader(new InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8"));
-        for (int c = br.read(); c != -1; c = br.read()) {
-          sb.append((char) c);
-        }
-        if (sb.length() > 0) {
-          platform.mrlVersion = sb.toString();
-        }
-      } catch (Exception e) {
-        // no logging silently die
-      }
-      */
+       * 
+       * StringBuffer sb = new StringBuffer();
+       * 
+       * try { BufferedReader br = new BufferedReader(new
+       * InputStreamReader(Platform.class.getResourceAsStream("/resource/version.txt"), "UTF-8")); for (int c = br.read(); c != -1;
+       * c = br.read()) { sb.append((char) c); } if (sb.length() > 0) { platform.mrlVersion = sb.toString(); } } catch (Exception e)
+       * { // no logging silently die }
+       */
 
       if (platform.mrlVersion == null) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");

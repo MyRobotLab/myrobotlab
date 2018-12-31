@@ -33,10 +33,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 /**
- * Manages changes of the view point view under the control of mouse movement.
- * The mouse enables to modify lattitude and longitude of the viewpoint. This
- * class is largely inspired from Sun's OrbitBehavior. It is intented to be used
- * only with the main Canvas3d object (see World class).
+ * Manages changes of the view point view under the control of mouse movement. The mouse enables to modify lattitude and longitude
+ * of the viewpoint. This class is largely inspired from Sun's OrbitBehavior. It is intented to be used only with the main Canvas3d
+ * object (see World class).
  * 
  */
 public class MouseOrbiter implements MouseInputListener {
@@ -220,8 +219,7 @@ public class MouseOrbiter implements MouseInputListener {
   }
 
   /**
-   * Reset the orientation and distance of this behavior to the current values
-   * in target Transform Group
+   * Reset the orientation and distance of this behavior to the current values in target Transform Group
    */
   public void resetView() {
     // Vector3d centerToView = new Vector3d();

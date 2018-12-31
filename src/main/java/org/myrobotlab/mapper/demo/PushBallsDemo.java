@@ -33,8 +33,7 @@ import org.myrobotlab.mapper.sim.Box;
 import org.myrobotlab.mapper.sim.SimpleAgent;
 
 /**
- * Shows a robot pushing balls. This demo shows simple physical interactions
- * between agents.
+ * Shows a robot pushing balls. This demo shows simple physical interactions between agents.
  */
 public class PushBallsDemo extends Demo {
 

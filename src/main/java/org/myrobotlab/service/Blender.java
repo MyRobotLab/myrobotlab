@@ -22,13 +22,11 @@ import com.google.gson.GsonBuilder;
 public class Blender extends Service {
 
   /**
-   * Control line - JSON over TCP/IP This is the single control communication
-   * line over which virtual objects are created - and linked with Serial
-   * connections
+   * Control line - JSON over TCP/IP This is the single control communication line over which virtual objects are created - and
+   * linked with Serial connections
    * 
-   * Typically, a virtual object is created and if it has a serial line (like an
-   * Arduino) a new TCP/IP connection is created which sends and receives the
-   * binary serial data
+   * Typically, a virtual object is created and if it has a serial line (like an Arduino) a new TCP/IP connection is created which
+   * sends and receives the binary serial data
    * 
    * @author GroG
    *
@@ -84,20 +82,17 @@ public class Blender extends Service {
   public static final String SUCCESS = "SUCCESS";
   Socket control = null;
   transient ControlHandler controlHandler = null;
-  
+
   String host = "localhost";
   Integer controlPort = 8989;
-  
 
   Integer serialPort = 9191;
   String blenderVersion;
 
   /*
-   * transient HashMap<String, VirtualPort> virtualPorts = new HashMap<String,
-   * VirtualPort>();
+   * transient HashMap<String, VirtualPort> virtualPorts = new HashMap<String, VirtualPort>();
    * 
-   * public class VirtualPort { public Serial serial; public
-   * VirtualNullModemCable cable; }
+   * public class VirtualPort { public Serial serial; public VirtualNullModemCable cable; }
    */
 
   // Socket serial = null; NO
@@ -109,8 +104,8 @@ public class Blender extends Service {
   }
 
   /*
-   * important "attach" method for Blender - this way MRL World notifies Blender
-   * to dynamically create "virtual" counterpart for device.
+   * important "attach" method for Blender - this way MRL World notifies Blender to dynamically create "virtual" counterpart for
+   * device.
    * 
    */
   public synchronized void attach(Arduino service) {
@@ -175,8 +170,7 @@ public class Blender extends Service {
 
   // call back from blender
   /*
-   * call back from Blender when python script does an attach to a virtual
-   * device - returns name of the service attached
+   * call back from Blender when python script does an attach to a virtual device - returns name of the service attached
    */
   public synchronized String onAttach(String name) {
     try {
@@ -201,13 +195,10 @@ public class Blender extends Service {
           // int vpn = virtualPorts.size();
 
           /*
-           * VIRTUAL PORT IS NOT NEEDED !!! - JUST A SERIAL OVER TCP/IP YAY !!!!
-           * :) VirtualPort vp = new VirtualPort(); vp.serial = (Serial)
-           * Runtime.start(String.format("%s.UART.%d" ,arduino.getName(), vpn),
-           * "Serial"); vp.cable =
-           * Serial.createNullModemCable(String.format("MRL.%d", vpn),
-           * String.format("BLND.%d", vpn)); virtualPorts.put(arduino.getName(),
-           * vp); vp.serial.connect(String.format("BLND.%d", vpn));
+           * VIRTUAL PORT IS NOT NEEDED !!! - JUST A SERIAL OVER TCP/IP YAY !!!! :) VirtualPort vp = new VirtualPort(); vp.serial =
+           * (Serial) Runtime.start(String.format("%s.UART.%d" ,arduino.getName(), vpn), "Serial"); vp.cable =
+           * Serial.createNullModemCable(String.format("MRL.%d", vpn), String.format("BLND.%d", vpn));
+           * virtualPorts.put(arduino.getName(), vp); vp.serial.connect(String.format("BLND.%d", vpn));
            */
           // vp.serial.addRelay(host, serialPort);
           // arduino.connect(String.format("MRL.%d", vpn));
@@ -325,16 +316,13 @@ public class Blender extends Service {
       /*
        * Servo neck = (Servo) Runtime.start("jaw2", "Servo");
        * 
-       * Service.sleep(4000); // Servo rothead = (Servo)
-       * Runtime.start("i01.head.rothead", // "Servo");
+       * Service.sleep(4000); // Servo rothead = (Servo) Runtime.start("i01.head.rothead", // "Servo");
        * 
        * neck.attach(arduino01, 7); // rothead.attach(arduino01, 9);
        * 
-       * // rothead.moveTo(90); neck.moveTo(90); sleep(100); //
-       * rothead.moveTo(120); neck.moveTo(120); sleep(100); //
-       * rothead.moveTo(0); neck.moveTo(0); sleep(100); // rothead.moveTo(90);
-       * neck.moveTo(90); sleep(100); // rothead.moveTo(120); neck.moveTo(120);
-       * sleep(100); // rothead.moveTo(0); neck.moveTo(0); sleep(100);
+       * // rothead.moveTo(90); neck.moveTo(90); sleep(100); // rothead.moveTo(120); neck.moveTo(120); sleep(100); //
+       * rothead.moveTo(0); neck.moveTo(0); sleep(100); // rothead.moveTo(90); neck.moveTo(90); sleep(100); // rothead.moveTo(120);
+       * neck.moveTo(120); sleep(100); // rothead.moveTo(0); neck.moveTo(0); sleep(100);
        * 
        * // servo01.sweep(); // servo01.stop(); neck.detach();
        * 
@@ -349,9 +337,8 @@ public class Blender extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -65,7 +65,9 @@ public class MessageTest implements NameProvider {
 
   /**
    * test to verify we can remove all message routes
-   * @throws Exception e
+   * 
+   * @throws Exception
+   *           e
    */
   // Ignoring this for now, some reason we're getting a stack overflow
   // when running this test from the ant build.
@@ -124,15 +126,12 @@ public class MessageTest implements NameProvider {
   @Test
   final public void invokeStringNotation() throws Exception {
     /*
-     * is it this test ??? try { log.info("invokeStringNotation");
-     * catcher.clear(); catcher.subscribe("thrower", "pitch");
+     * is it this test ??? try { log.info("invokeStringNotation"); catcher.clear(); catcher.subscribe("thrower", "pitch");
      * Service.sleep(100);
      * 
-     * thrower.pitchInt(1000); BlockingQueue<Message> balls =
-     * catcher.waitForMsgs(1000);
+     * thrower.pitchInt(1000); BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
      * 
-     * assertEquals(1000, balls.size()); } catch (Exception e) {
-     * Logging.logError(e); }
+     * assertEquals(1000, balls.size()); } catch (Exception e) { Logging.logError(e); }
      */
 
   }
@@ -145,7 +144,9 @@ public class MessageTest implements NameProvider {
 
   /**
    * test to excercise
-   * @throws Exception e
+   * 
+   * @throws Exception
+   *           e
    * 
    */
   @Test
@@ -175,5 +176,4 @@ public class MessageTest implements NameProvider {
     return "tester";
   }
 
-  
 }

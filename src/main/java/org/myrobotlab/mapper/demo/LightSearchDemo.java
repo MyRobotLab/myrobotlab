@@ -32,8 +32,7 @@ import org.myrobotlab.mapper.sim.RobotFactory;
 import org.myrobotlab.mapper.sim.Wall;
 
 /**
- * This demo shows how to capture the camera image , process it and display it
- * in dedicated window.
+ * This demo shows how to capture the camera image , process it and display it in dedicated window.
  * 
  */
 public class LightSearchDemo extends Demo {

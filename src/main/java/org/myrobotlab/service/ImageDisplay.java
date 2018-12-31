@@ -160,29 +160,29 @@ public class ImageDisplay extends Service {
         ;
       }
 
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+      @Override
+      public void mouseEntered(MouseEvent arg0) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+      }
 
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+      @Override
+      public void mouseExited(MouseEvent arg0) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+      }
+
+      @Override
+      public void mousePressed(MouseEvent arg0) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void mouseReleased(MouseEvent arg0) {
+        // TODO Auto-generated method stub
+
+      }
     });
     f.setBackground(Color.BLACK);
     f.getContentPane().setBackground(Color.BLACK);
@@ -230,9 +230,8 @@ public class ImageDisplay extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

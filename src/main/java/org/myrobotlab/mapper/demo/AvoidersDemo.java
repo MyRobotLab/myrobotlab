@@ -31,8 +31,7 @@ import org.myrobotlab.mapper.sim.RobotFactory;
 import org.myrobotlab.mapper.sim.Wall;
 
 /**
- * A collision avoidance demo. This demo shows several robot with sonars and
- * bumpers performing a collision avoidance behavior
+ * A collision avoidance demo. This demo shows several robot with sonars and bumpers performing a collision avoidance behavior
  */
 public class AvoidersDemo extends Demo {
 

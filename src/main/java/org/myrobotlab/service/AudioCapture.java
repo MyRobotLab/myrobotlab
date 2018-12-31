@@ -173,26 +173,20 @@ public class AudioCapture extends Service {
     }
 
     /*
-     * AudioInputStream stream = AudioSystem.getAudioInputStream(new File(
-     * "bump.wav")); // stream = AudioSystem.getAudioInputStream(new URL( //
-     * "http://hostname/audiofile"));
+     * AudioInputStream stream = AudioSystem.getAudioInputStream(new File( "bump.wav")); // stream =
+     * AudioSystem.getAudioInputStream(new URL( // "http://hostname/audiofile"));
      * 
-     * AudioFormat format = stream.getFormat(); if (format.getEncoding() !=
-     * AudioFormat.Encoding.PCM_SIGNED) { format = new
-     * AudioFormat(AudioFormat.Encoding.PCM_SIGNED, format .getSampleRate(),
-     * format.getSampleSizeInBits() * 2, format .getChannels(),
-     * format.getFrameSize() * 2, format.getFrameRate(), true); // big endian
-     * stream = AudioSystem.getAudioInputStream(format, stream); }
+     * AudioFormat format = stream.getFormat(); if (format.getEncoding() != AudioFormat.Encoding.PCM_SIGNED) { format = new
+     * AudioFormat(AudioFormat.Encoding.PCM_SIGNED, format .getSampleRate(), format.getSampleSizeInBits() * 2, format
+     * .getChannels(), format.getFrameSize() * 2, format.getFrameRate(), true); // big endian stream =
+     * AudioSystem.getAudioInputStream(format, stream); }
      * 
-     * SourceDataLine.Info info = new DataLine.Info(SourceDataLine.class, stream
-     * .getFormat(), ((int) stream.getFrameLength() * format.getFrameSize()));
-     * SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
-     * line.open(stream.getFormat()); line.start();
+     * SourceDataLine.Info info = new DataLine.Info(SourceDataLine.class, stream .getFormat(), ((int) stream.getFrameLength() *
+     * format.getFrameSize())); SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info); line.open(stream.getFormat());
+     * line.start();
      * 
-     * int numRead = 0; byte[] buf = new byte[line.getBufferSize()]; while
-     * ((numRead = stream.read(buf, 0, buf.length)) >= 0) { int offset = 0;
-     * while (offset < numRead) { offset += line.write(buf, offset, numRead -
-     * offset); } } line.drain(); line.stop(); }
+     * int numRead = 0; byte[] buf = new byte[line.getBufferSize()]; while ((numRead = stream.read(buf, 0, buf.length)) >= 0) { int
+     * offset = 0; while (offset < numRead) { offset += line.write(buf, offset, numRead - offset); } } line.drain(); line.stop(); }
      */
   }
 
@@ -204,7 +198,7 @@ public class AudioCapture extends Service {
     try {
       // Get everything set up for
       // capture
-      soundCaptured = false;  
+      soundCaptured = false;
       audioFormat = getAudioFormat();
       DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
       targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
@@ -219,7 +213,7 @@ public class AudioCapture extends Service {
       captureThread.start();
     } catch (Exception e) {
       Logging.logError(e);
-    } 
+    }
     broadcastState();
     // end catch
   }// end captureAudio method
@@ -249,37 +243,36 @@ public class AudioCapture extends Service {
   // data that has been saved in the
   // ByteArrayOutputStream
   public void playAudio() {
-	if (!soundCaptured) {
-		log.error("No sound captured yet");
-	}
-	else {
-    try {
-      // Get everything set up for
-      // playback.
-      // Get the previously-saved data
-      // into a byte array object.
-      byte audioData[] = byteArrayOutputStream.toByteArray();
-      // Get an input stream on the
-      // byte array containing the data
-      InputStream byteArrayInputStream = new ByteArrayInputStream(audioData);
-      AudioFormat audioFormat = getAudioFormat();
-      audioInputStream = new AudioInputStream(byteArrayInputStream, audioFormat, audioData.length / audioFormat.getFrameSize());
-      DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
-      sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
-      sourceDataLine.open(audioFormat);
-      sourceDataLine.start();
+    if (!soundCaptured) {
+      log.error("No sound captured yet");
+    } else {
+      try {
+        // Get everything set up for
+        // playback.
+        // Get the previously-saved data
+        // into a byte array object.
+        byte audioData[] = byteArrayOutputStream.toByteArray();
+        // Get an input stream on the
+        // byte array containing the data
+        InputStream byteArrayInputStream = new ByteArrayInputStream(audioData);
+        AudioFormat audioFormat = getAudioFormat();
+        audioInputStream = new AudioInputStream(byteArrayInputStream, audioFormat, audioData.length / audioFormat.getFrameSize());
+        DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
+        sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
+        sourceDataLine.open(audioFormat);
+        sourceDataLine.start();
 
-      // Create a thread to play back
-      // the data and start it
-      // running. It will run until
-      // all the data has been played
-      // back.
-      Thread playThread = new Thread(new PlayThread());
-      playThread.start();
-    } catch (Exception e) {
-      error(e);
-    } // end catch
-  }// end playAudio
+        // Create a thread to play back
+        // the data and start it
+        // running. It will run until
+        // all the data has been played
+        // back.
+        Thread playThread = new Thread(new PlayThread());
+        playThread.start();
+      } catch (Exception e) {
+        error(e);
+      } // end catch
+    } // end playAudio
   }
 
   public ByteArrayOutputStream publishCapture() {
@@ -300,9 +293,8 @@ public class AudioCapture extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

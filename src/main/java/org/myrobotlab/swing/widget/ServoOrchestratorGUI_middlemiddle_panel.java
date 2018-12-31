@@ -186,9 +186,8 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements T
    * In this case, we only support one: the actual JPanel.
    * </p>
    * <p>
-   * Note we could easily support more than one. For example, if supports text
-   * and drops to a JTextField, could return the label's text or any arbitrary
-   * text.
+   * Note we could easily support more than one. For example, if supports text and drops to a JTextField, could return the label's
+   * text or any arbitrary text.
    * </p>
    */
   @Override
@@ -216,8 +215,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements T
    * One of three methods defined by the Transferable interface.
    * </p>
    * <p>
-   * Returns supported DataFlavor. Again, we're only supporting this actual
-   * Object within the JVM.
+   * Returns supported DataFlavor. Again, we're only supporting this actual Object within the JVM.
    * </p>
    * <p>
    * For more information, see the JavaDoc for DataFlavor.
@@ -262,8 +260,7 @@ public class ServoOrchestratorGUI_middlemiddle_panel extends JPanel implements T
    * One of three methods defined by the Transferable interface.
    * </p>
    * <p>
-   * Determines whether this object supports the DataFlavor. In this case, only
-   * one is supported: for this object itself.
+   * Determines whether this object supports the DataFlavor. In this case, only one is supported: for this object itself.
    * </p>
    *
    * @return True if DataFlavor is supported, otherwise false.

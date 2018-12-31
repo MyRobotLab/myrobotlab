@@ -50,8 +50,7 @@ import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
 /**
- * This implements the ability to overlay data from a solr search result
- * on the opencv display
+ * This implements the ability to overlay data from a solr search result on the opencv display
  * 
  * @author kwatters
  *
@@ -60,15 +59,15 @@ public class OpenCVFilterSolr extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSolr.class);
-  
+
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
-  
+
   private String formattedSearchResult = "No Result";
-  
+
   private Solr solr = null;
   private String solrUrl = "http://localhost:8983/solr/wikipedia";
-  
+
   public OpenCVFilterSolr() {
     super();
   }
@@ -76,12 +75,12 @@ public class OpenCVFilterSolr extends OpenCVFilter {
   public OpenCVFilterSolr(String name) {
     super(name);
   }
-  
+
   public void initSolr() {
-    solr = (Solr)Runtime.createAndStart("solr", "Solr");
+    solr = (Solr) Runtime.createAndStart("solr", "Solr");
     solr.setSolrUrl(solrUrl);
   }
-  
+
   public void populateSearch(String queryString, String field) {
     QueryResponse qResp = solr.search(queryString);
     SolrDocumentList results = qResp.getResults();
@@ -91,19 +90,19 @@ public class OpenCVFilterSolr extends OpenCVFilter {
       formattedSearchResult = "No Result";
     }
   }
-  
+
   @Override
   public IplImage process(IplImage image) {
-    
-    if (solr == null) 
+
+    if (solr == null)
       initSolr();
-    
+
     cvPutText(image, formattedSearchResult, cvPoint(20, 40), font, CvScalar.GREEN);
-    // TODO: get a handle to the solr instance. 
+    // TODO: get a handle to the solr instance.
     // TODO: display the solr search result text.
     return image;
   }
-  
+
   @Override
   public void imageChanged(IplImage image) {
     // TODO Auto-generated method stub
@@ -114,6 +113,5 @@ public class OpenCVFilterSolr extends OpenCVFilter {
     // TODO Auto-generated method stub
     return null;
   }
-
 
 }

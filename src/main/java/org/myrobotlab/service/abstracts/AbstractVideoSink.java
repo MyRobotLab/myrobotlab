@@ -10,35 +10,33 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
 
   private static final long serialVersionUID = 1L;
 
-
   public AbstractVideoSink(String reservedKey) {
     super(reservedKey);
   }
 
-  public boolean attach(VideoSource vs){
+  public boolean attach(VideoSource vs) {
     subscribe(vs.getName(), "publishDisplay");
     return true;
   }
-  
+
   @Override
-  public boolean attachVideoSource(String videoSource){
+  public boolean attachVideoSource(String videoSource) {
     ServiceInterface si = org.myrobotlab.service.Runtime.getService(videoSource);
     if (si instanceof VideoSource) {
       return attach((VideoSource) si);
     }
-  
+
     error("%s is not a VideoSource", videoSource);
     return false;
   }
-  
 
-  public boolean detach(VideoSource vs){
+  public boolean detach(VideoSource vs) {
     unsubscribe(vs.getName(), "publishDisplay");
     return true;
   }
-  
+
   @Override
-  public boolean detachVideoSource(String videoSource){
+  public boolean detachVideoSource(String videoSource) {
     ServiceInterface si = org.myrobotlab.service.Runtime.getService(videoSource);
     if (si instanceof VideoSource) {
       return detach((VideoSource) si);
@@ -47,7 +45,6 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
     error("%s is not a VideoSource", videoSource);
     return false;
   }
-  
 
   abstract public void onDisplay(SerializableImage img);
 

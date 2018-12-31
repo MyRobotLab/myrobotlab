@@ -50,10 +50,8 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
 /**
- * An Xmpp service which utilizes Jive's smack client library There is smack,
- * whack, and tinder
- * http://stackoverflow.com/questions/1547599/differences-between-smack-tinder-
- * and-whack
+ * An Xmpp service which utilizes Jive's smack client library There is smack, whack, and tinder
+ * http://stackoverflow.com/questions/1547599/differences-between-smack-tinder- and-whack
  * 
  * @author GROG
  *
@@ -95,9 +93,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   public final static Logger log = LoggerFactory.getLogger(Xmpp.class);
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -132,9 +129,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   transient Roster roster = null;
 
   /**
-   * auditors chat buddies who can see what commands are being processed and by
-   * who through the Xmpp service TODO - audit full system ??? regardless of
-   * message origin?
+   * auditors chat buddies who can see what commands are being processed and by who through the Xmpp service TODO - audit full
+   * system ??? regardless of message origin?
    */
   HashSet<String> auditors = new HashSet<String>();
 
@@ -321,8 +317,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
     getContactList();
     /*
-     * if (contacts.containsKey(user)) { Contact c = contacts.get(user);
-     * c.presence = presence.toString(); invoke("publishPresenceChanged", c); }
+     * if (contacts.containsKey(user)) { Contact c = contacts.get(user); c.presence = presence.toString();
+     * invoke("publishPresenceChanged", c); }
      */
   }
 
@@ -390,8 +386,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   /*
-   * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service s)
-   * publishMsg(Object..) returns gateway specific data
+   * MRL Interface to gateways .. onMsg(GatewayData d) addMsgListener(Service s) publishMsg(Object..) returns gateway specific data
    */
   // FIXME - should be MessageXmpp along with all other message types under
   // org.myrobotlab.msg
@@ -575,22 +570,22 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   }
 
-@Override
-public String publishConnect() {
-	// TODO Auto-generated method stub
-	return null;
-}
+  @Override
+  public String publishConnect() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-@Override
-public String publishDisconnect() {
-	// TODO Auto-generated method stub
-	return null;
-}
+  @Override
+  public String publishDisconnect() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-@Override
-public Status publishError() {
-	// TODO Auto-generated method stub
-	return null;
-}
+  @Override
+  public Status publishError() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

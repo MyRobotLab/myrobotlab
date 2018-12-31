@@ -192,8 +192,7 @@ public class Simbad extends JFrame implements ActionListener {
   }
 
   /**
-   * Runs Simbad in background mode for computation intensive application.
-   * Minimize graphic display and renderer computation.
+   * Runs Simbad in background mode for computation intensive application. Minimize graphic display and renderer computation.
    */
   private void runBackgroundMode() {
     // TODO pb with collision , pb with camera in this mode.

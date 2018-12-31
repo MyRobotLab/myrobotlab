@@ -15,6 +15,7 @@ public class CodecJson extends Codec {
 
   private transient static Gson mapper = new GsonBuilder().create();// .setDateFormat("yyyy-MM-dd
                                                                     // HH:mm:ss.SSS").disableHtmlEscaping().create();
+
   static public String encode(Object obj) {
     return mapper.toJson(obj);
   }
@@ -25,7 +26,7 @@ public class CodecJson extends Codec {
     String json = mapper.toJson(obj);
 
     // if (log.isDebugEnabled()){
-    //  log.warn("<< {}", json); - great for debugging !
+    // log.warn("<< {}", json); - great for debugging !
     // }
 
     // if (recorder != null){

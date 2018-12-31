@@ -110,7 +110,7 @@ public class TwitterGui extends ServiceGui implements ActionListener {
       }
     });
   }
-  
+
   public void setState() {
     swingGui.send(boundServiceName, "setState", twitter);
   }

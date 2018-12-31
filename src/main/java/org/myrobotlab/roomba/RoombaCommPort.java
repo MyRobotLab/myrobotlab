@@ -11,26 +11,20 @@ import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 
 /**
- * The serial-port based implementation of RoombaComm. Handles both physical
- * RS-232 ports, USB adapter ports like Keyspan USA-19HS, and Bluetooth serial
- * port profiles.
+ * The serial-port based implementation of RoombaComm. Handles both physical RS-232 ports, USB adapter ports like Keyspan USA-19HS,
+ * and Bluetooth serial port profiles.
  * 
  * <p>
  * Some code taken from processing.serial.Serial. Thanks guys!
  * </p>
  * 
- * The interaction model for setting the port and protocol and WaitForDSR
- * parameters is as follows.
+ * The interaction model for setting the port and protocol and WaitForDSR parameters is as follows.
  * <p>
- * On creation, the class initializes the parameters, then tries to read
- * .roomba_config. If it can read the config file and parse out the parameters,
- * it sets the parameters to the values in the config file. Apps can read the
- * current settings for display using methods on the class. Apps can override
- * the settings by accepting user input and setting the parameters using methods
- * on the class, or the connect() method. Parameters that are changed by the app
- * are re-written in the config file, for use as defaults next run. Command-line
- * apps can make these parameters optional, by using the defaults if the user
- * doesn't specify them.
+ * On creation, the class initializes the parameters, then tries to read .roomba_config. If it can read the config file and parse
+ * out the parameters, it sets the parameters to the values in the config file. Apps can read the current settings for display using
+ * methods on the class. Apps can override the settings by accepting user input and setting the parameters using methods on the
+ * class, or the connect() method. Parameters that are changed by the app are re-written in the config file, for use as defaults
+ * next run. Command-line apps can make these parameters optional, by using the defaults if the user doesn't specify them.
  */
 public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   private int rate = 57600;
@@ -43,14 +37,12 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   Serial serial;
 
   /**
-   * contains a list of all the ports keys are port names (e.g.
-   * "/dev/usbserial1") values are Boolean in-use indicator
+   * contains a list of all the ports keys are port names (e.g. "/dev/usbserial1") values are Boolean in-use indicator
    */
   static Map<String, Boolean> ports = null;
 
   /**
-   * The time to wait in milliseconds after sending sensors command before
-   * attempting to read
+   * The time to wait in milliseconds after sending sensors command before attempting to read
    */
   public static int updateSensorsPause = 400;
 
@@ -62,19 +54,15 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   private String portname = null; // "/dev/cu.KeySerial1" for instance
 
   /**
-   * RXTX bombs when flushing output sometimes, so by default do not flush the
-   * output stream. If the output is too buffered to be useful, do:
-   * roombacomm.comm.flushOutput = true; before using it and see if it works.
+   * RXTX bombs when flushing output sometimes, so by default do not flush the output stream. If the output is too buffered to be
+   * useful, do: roombacomm.comm.flushOutput = true; before using it and see if it works.
    */
   public boolean flushOutput = false;
   /**
-   * Some "virtual" serial ports like Bluetooth serial on Windows return weird
-   * errors deep inside RXTX if an opened port is used before the virtual COM
-   * port is ready. One way to check that it is ready is to look for the DSR
-   * line going high. However, most simple, real serial ports do not do hardware
-   * handshaking so never set DSR high. Thus, if using Bluetooth serial on
-   * Windows, do: roombacomm.waitForDSR = true; before using it and see if it
-   * works.
+   * Some "virtual" serial ports like Bluetooth serial on Windows return weird errors deep inside RXTX if an opened port is used
+   * before the virtual COM port is ready. One way to check that it is ready is to look for the DSR line going high. However, most
+   * simple, real serial ports do not do hardware handshaking so never set DSR high. Thus, if using Bluetooth serial on Windows, do:
+   * roombacomm.waitForDSR = true; before using it and see if it works.
    */
   public boolean waitForDSR = false; // Warning: public attribute - setting
 
@@ -87,8 +75,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   // int bufferUntilByte;
 
   /*
-   * Let you check to see if a port is in use by another Rooomba before trying
-   * to use it.
+   * Let you check to see if a port is in use by another Rooomba before trying to use it.
    */
   public static boolean isPortInUse(String pname) {
     Boolean inuse = (Boolean) ports.get(pname);
@@ -122,7 +109,6 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     computeSafetyFault();
   }
 
-  
   public boolean connect(String portid) {
     logmsg("connecting to port '" + portid + "'");
     portname = portid;
@@ -133,10 +119,10 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     }
 
     try {
-    openPort();
-    } catch(Exception e){
-    	log.error("cannot connect", e);
-    	return false;
+      openPort();
+    } catch (Exception e) {
+      log.error("cannot connect", e);
+      return false;
     }
 
     if (connected) {
@@ -163,9 +149,8 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     ports.put(portname, new Boolean(connected));
 
     /*
-     * try { // do io streams need to be closed first? if (input != null)
-     * input.close(); if (output != null) output.close(); } catch (Exception e)
-     * { e.printStackTrace(); } input = null; output = null;
+     * try { // do io streams need to be closed first? if (input != null) input.close(); if (output != null) output.close(); } catch
+     * (Exception e) { e.printStackTrace(); } input = null; output = null;
      */
 
     serial.disconnect();
@@ -206,13 +191,10 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   }
 
   /*
-   * pause(updateSensorsPause); // take a breather to let data come back
-   * sensorsValid = false; // assume the worst, we're gothy int n = available();
-   * //logmsg("updateSensors:n="+n); if( n >= 26) { // there are enough bytes to
-   * read n = readBytes(sensor_bytes); if( n==26 ) { // did we get enough?
-   * sensorsValid = true; // then everything's good, otherwise bad
-   * computeSafetyFault(); } } else { logmsg("updateSensors:only "+n+
-   * " bytes available, not updating sensors"); }
+   * pause(updateSensorsPause); // take a breather to let data come back sensorsValid = false; // assume the worst, we're gothy int
+   * n = available(); //logmsg("updateSensors:n="+n); if( n >= 26) { // there are enough bytes to read n = readBytes(sensor_bytes);
+   * if( n==26 ) { // did we get enough? sensorsValid = true; // then everything's good, otherwise bad computeSafetyFault(); } }
+   * else { logmsg("updateSensors:only "+n+ " bytes available, not updating sensors"); }
    * 
    * //logmsg("buffer contains: "+ buffer ); return sensorsValid;
    */
@@ -220,9 +202,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * org.myrobotlab.roomba.Z#serialEvent(org.myrobotlab.serial.SerialDeviceEvent
-   * )
+   * @see org.myrobotlab.roomba.Z#serialEvent(org.myrobotlab.serial.SerialDeviceEvent )
    */
   @Override
   public Integer onByte(Integer newByte) {
@@ -239,12 +219,12 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   }
 
   /**
-   * internal method, used by connect() FIXME: make it faile more gracefully,
-   * recognize bad port
- * @throws IOException 
+   * internal method, used by connect() FIXME: make it faile more gracefully, recognize bad port
+   * 
+   * @throws IOException
    */
   private void openPort() throws IOException {
-	  serial.open(portname, rate, databits, stopbits, parity);
+    serial.open(portname, rate, databits, stopbits, parity);
   }
 
   /*

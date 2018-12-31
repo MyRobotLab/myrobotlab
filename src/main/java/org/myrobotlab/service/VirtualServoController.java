@@ -31,9 +31,8 @@ public class VirtualServoController extends Service implements ServoController {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -179,7 +178,7 @@ public class VirtualServoController extends Service implements ServoController {
         // Message msg = Message.createMessage(getName(), jme.getName(), "servoMoveTo", new Object[] { servo });
         // all translation logic should be here from the the servo data to 3d
         // a simple command to rotate is needed (with name info)
-        //  jme.addMsg(msg);
+        // jme.addMsg(msg);
         // jme.rotate();
 
         try {
@@ -222,8 +221,7 @@ public class VirtualServoController extends Service implements ServoController {
     }
     sc.start();
     /*
-     * Message msg = Message.createMessage(getName(), jme.getName(),
-     * "servoMoveTo", new Object[] { servo }); jme.addMsg(msg);
+     * Message msg = Message.createMessage(getName(), jme.getName(), "servoMoveTo", new Object[] { servo }); jme.addMsg(msg);
      */
     // jme.update
   }

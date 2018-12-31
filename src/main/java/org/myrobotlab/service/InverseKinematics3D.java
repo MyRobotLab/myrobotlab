@@ -20,14 +20,11 @@ import org.slf4j.Logger;
 
 /**
  * 
- * InverseKinematics3D - This class provides a 3D based inverse kinematics
- * implementation that allows you to specify the robot arm geometry based on DH
- * Parameters. This will use a pseudo-inverse jacobian gradient descent approach
- * to move the end affector to the desired x,y,z postions in space with respect
- * to the base frame.
+ * InverseKinematics3D - This class provides a 3D based inverse kinematics implementation that allows you to specify the robot arm
+ * geometry based on DH Parameters. This will use a pseudo-inverse jacobian gradient descent approach to move the end affector to
+ * the desired x,y,z postions in space with respect to the base frame.
  * 
- * Rotation and Orientation information is not currently supported. (but should
- * be easy to add)
+ * Rotation and Orientation information is not currently supported. (but should be easy to add)
  *
  * @author kwatters
  * 
@@ -44,7 +41,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
   private Matrix inputMatrix = null;
   private Point scale = null;
-  
+
   transient InputTrackingThread trackingThread = null;
 
   public InverseKinematics3D(String n) {
@@ -134,8 +131,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   /**
-   * This create a rotation and translation matrix that will be applied on the
-   * "moveTo" call.
+   * This create a rotation and translation matrix that will be applied on the "moveTo" call.
    * 
    * @param dx
    *          - x axis translation
@@ -161,12 +157,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     return inputMatrix;
   }
 
-  
   public Point createInputScale(double x, double y, double z) {
-    scale = new Point(x,y,z, 0,0,0);
+    scale = new Point(x, y, z, 0, 0, 0);
     return scale;
   }
-  
+
   public Point rotateAndTranslate(Point pIn) {
 
     Matrix m = new Matrix(4, 1);
@@ -191,21 +186,20 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   /**
-   * Compute the inverse kinematics to move the robot hand to the destination
-   * first scale the input point, then apply 
+   * Compute the inverse kinematics to move the robot hand to the destination first scale the input point, then apply
+   * 
    * @param p
    */
   public void moveTo(Point p) {
 
-    
     log.info("Raw Input : {}", p);
     if (scale != null) {
       // scale the x,y,z by the factors stored in the scale point. (really vector i guess?)
       double x = scale.getX() * p.getX();
       double y = scale.getY() * p.getY();
       double z = scale.getZ() * p.getZ();
-      p = new Point(x,y,z, p.getRoll(), p.getPitch(), p.getYaw());
-      log.info("Scaled Input {}", p );
+      p = new Point(x, y, z, p.getRoll(), p.getPitch(), p.getYaw());
+      log.info("Scaled Input {}", p);
     }
     if (inputMatrix != null) {
       p = rotateAndTranslate(p);
@@ -264,7 +258,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   public static void main(String[] args) throws Exception {
-     LoggingFactory.init("info");
+    LoggingFactory.init("info");
 
     Runtime.createAndStart("python", "Python");
     Runtime.createAndStart("gui", "SwingGui");
@@ -354,18 +348,17 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public Point publishTracking(Point tracking) {
     return tracking;
   }
-  
+
   public void onPoint(Point point) {
     // TODO : move input matrix translation to here? or somewhere?
     // TODO: also don't like that i'm going to just say take the first point
     // now.
     // TODO: points should probably be a map, each point should have a name ?
     log.info("Attempting to move to {}", point);
-    
+
     // TODO: scale / translate & rotate...
     moveTo(point);
   }
-  
 
   @Override
   public void onPoints(List<Point> points) {
@@ -436,9 +429,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

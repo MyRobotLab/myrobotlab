@@ -13,11 +13,11 @@ public abstract class AbstractVideoSource extends Service implements VideoSource
   }
 
   @Override
-  public boolean attach(VideoSink vs){
+  public boolean attach(VideoSink vs) {
     subscribe(vs.getName(), "publishDisplay");
     return true;
   }
-  
+
   @Override
   public boolean detach(VideoSink vs) {
     unsubscribe(vs.getName(), "publishDisplay");

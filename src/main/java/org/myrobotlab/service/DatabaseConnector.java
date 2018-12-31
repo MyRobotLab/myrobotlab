@@ -109,7 +109,7 @@ public class DatabaseConnector extends AbstractConnector {
       int idColumn = -1;
       for (int i = 0; i < columns.length; i++) {
         if (columns[i].equalsIgnoreCase(idField)) {
-          idColumn = i+1;
+          idColumn = i + 1;
           break;
         }
       }
@@ -121,7 +121,7 @@ public class DatabaseConnector extends AbstractConnector {
           Document doc = new Document(id);
           // Add each column / field name to the doc
           for (int i = 0; i < columns.length; i++) {
-            doc.addToField(columns[i], rs.getString(i+1));
+            doc.addToField(columns[i], rs.getString(i + 1));
           }
           // Process this row!
           feed(doc);
@@ -150,7 +150,7 @@ public class DatabaseConnector extends AbstractConnector {
   }
 
   private void runPreSql() {
-    if (preSql != null){
+    if (preSql != null) {
       try {
         Statement state = connection.createStatement();
         state.executeUpdate(preSql);
@@ -163,7 +163,7 @@ public class DatabaseConnector extends AbstractConnector {
   }
 
   private void runPostSql() {
-    if (postSql != null){
+    if (postSql != null) {
       try {
         Statement state = connection.createStatement();
         state.executeUpdate(postSql);
@@ -246,9 +246,8 @@ public class DatabaseConnector extends AbstractConnector {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

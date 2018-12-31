@@ -6,19 +6,17 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.MessageSender;
 
 public abstract class Api {
-  
+
   public final static String PREFIX_API = "api";
   public final static String PARAMETER_API = "/api/";
 
-
-  // because of WebGui's "bug?" of request.body().getBytes() == null - we will use String instead 
+  // because of WebGui's "bug?" of request.body().getBytes() == null - we will use String instead
   // public Object process(MessageSender sender, OutputStream out, URI uri, byte[] data) throws Exception;
- 
-  //public Object process(MessageSender sender, OutputStream out, String requestUri, String data) throws Exception;
-  
+
+  // public Object process(MessageSender sender, OutputStream out, String requestUri, String data) throws Exception;
+
   /**
-   * getRequestURI() does not decode the string. Where getPathInfo() does
-   * decode.
+   * getRequestURI() does not decode the string. Where getPathInfo() does decode.
    * 
    * <pre>
    *  Servlet is mapped as /test%3F/* and the application is deployed under /app.
@@ -57,14 +55,14 @@ public abstract class Api {
    */
 
   /**
-   * CreateMessage creates a message from a URI - this is the "default" request
-   * message which can be created from 'any' uri. Potentially, a uri could fill
-   * the data field. In the 'default' parsing decoding - the expected parameters
-   * are url encoded and json encoded where :
+   * CreateMessage creates a message from a URI - this is the "default" request message which can be created from 'any' uri.
+   * Potentially, a uri could fill the data field. In the 'default' parsing decoding - the expected parameters are url encoded and
+   * json encoded where :
    * 
    * {scheme}://{host}:{port}/api/{apiKey}/{p0}/{p1}/{p(n)}/...
    * 
-   * @param uri - inbound uri
+   * @param uri
+   *          - inbound uri
    * @return - returns message constructed from the uri
    */
   static public Message uriToMsg(String uri) {
@@ -73,20 +71,19 @@ public abstract class Api {
     msg.name = "runtime"; // default
     msg.method = "getApis"; // default
     msg.apiKey = ApiFactory.API_TYPE_SERVICE; // default
-    
+
     int pos = uri.indexOf("/api/");
-    
-    if (pos == -1) {   
+
+    if (pos == -1) {
       // FIXME - better would be runtime.listApis() ->
       // {uri}/api/service
       // {uri}/api/messages ...
-      //   throw new IllegalArgumentException("required /api/ not found in uri");
+      // throw new IllegalArgumentException("required /api/ not found in uri");
       return msg;
     }
 
     String requestUri = uri.substring(pos);
     String[] parts = requestUri.split("/");
-
 
     // FIXME - check for schema {schema}
     // {schema}://{host}:{port}{path}
@@ -139,12 +136,12 @@ public abstract class Api {
   }
 
   static public String getApiKey(String requestUri) {
-    
+
     int pos = requestUri.indexOf(Api.PARAMETER_API);
-    if (pos > -1){
+    if (pos > -1) {
       pos += Api.PARAMETER_API.length();
       int pos2 = requestUri.indexOf("/", pos);
-      if (pos2 > -1){
+      if (pos2 > -1) {
         return requestUri.substring(pos, pos2);
       } else {
         return requestUri.substring(pos);
@@ -152,7 +149,7 @@ public abstract class Api {
     }
     return null;
   }
-  
+
   abstract public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception;
 
 }

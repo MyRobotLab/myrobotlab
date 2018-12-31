@@ -7,9 +7,8 @@ import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.MotorController;
 
 /**
- * A general motor implementation with a "simple H-bridge" where 
- * one control line is power with pwm and the
- * other control line is determines direction of spin.
+ * A general motor implementation with a "simple H-bridge" where one control line is power with pwm and the other control line is
+ * determines direction of spin.
  * 
  */
 
@@ -30,7 +29,6 @@ public class Motor extends AbstractMotor {
     this.dirPin = dirPin;
     broadcastState();
   }
-  
 
   public Integer getPwrPin() {
     return pwrPin;
@@ -55,11 +53,10 @@ public class Motor extends AbstractMotor {
   public void setPwmFreq(Integer pwmfreq) {
     this.pwmFreq = pwmfreq;
   }
-  
+
   public static void main(String[] args) {
 
-          LoggingFactory.init("info");
-
+    LoggingFactory.init("info");
 
     try {
 
@@ -93,8 +90,7 @@ public class Motor extends AbstractMotor {
 
       // virtual hardware
       /*
-       * VirtualDevice virtual = (VirtualDevice)Runtime.start("virtual",
-       * "VirtualDevice"); virtual.createVirtualArduino(port);
+       * VirtualDevice virtual = (VirtualDevice)Runtime.start("virtual", "VirtualDevice"); virtual.createVirtualArduino(port);
        */
 
       // int encoderPin= 7;
@@ -115,8 +111,7 @@ public class Motor extends AbstractMotor {
       Motor m1 = (Motor) Runtime.start("m1", "Motor");
 
       /*
-       * m1.setType2Pwm(leftPwm, rightPwm); m1.setTypeStepper();
-       * m1.setTypePulseStep(pwmPin, dirPin);
+       * m1.setType2Pwm(leftPwm, rightPwm); m1.setTypeStepper(); m1.setTypePulseStep(pwmPin, dirPin);
        */
       // Runtime.start("webgui", "WebGui");
       // m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
@@ -147,8 +142,7 @@ public class Motor extends AbstractMotor {
       // arduino.setSampleRate(8000);
       // m1.setSpeed(0.95);
       /*
-       * arduino.motorAttach("m1", Motor.TYPE_FALSE_ENCODER, 8, 7);
-       * m1.moveTo(30); m1.moveTo(230); m1.moveTo(430); m1.moveTo(530);
+       * arduino.motorAttach("m1", Motor.TYPE_FALSE_ENCODER, 8, 7); m1.moveTo(30); m1.moveTo(230); m1.moveTo(430); m1.moveTo(530);
        * m1.moveTo(130); m1.moveTo(330);
        */
       // with encoder
@@ -166,7 +160,7 @@ public class Motor extends AbstractMotor {
     }
 
   }
-  
+
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Motor.class.getCanonicalName());
@@ -175,6 +169,5 @@ public class Motor extends AbstractMotor {
 
     return meta;
   }
-
 
 }

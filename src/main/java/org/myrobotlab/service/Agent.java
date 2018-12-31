@@ -41,13 +41,11 @@ import com.google.gson.internal.LinkedTreeMap;
 /**
  * @author GroG
  * 
- *         Agent is responsible for processes in the same way Runtime is
- *         responsible for Services.
+ *         Agent is responsible for processes in the same way Runtime is responsible for Services.
  * 
  *         List of responsibilities:
  * 
- *         Start an MyRobotLab process with the needed command line parameters.
- *         This includes classpath /libraries/jar/* and
+ *         Start an MyRobotLab process with the needed command line parameters. This includes classpath /libraries/jar/* and
  *         java.jni/jna.home=/libraries/native
  *
  *         Memory xms xmx should be adjusted if necessary
@@ -56,66 +54,49 @@ import com.google.gson.internal.LinkedTreeMap;
  * 
  *         Manage testing
  * 
- *         Several modes exist - normal = set env and keep process in map, with
- *         re-directed stdin stdout &amp; stderr streams envOnly = set the
- *         correct environment then terminate
+ *         Several modes exist - normal = set env and keep process in map, with re-directed stdin stdout &amp; stderr streams
+ *         envOnly = set the correct environment then terminate
  * 
  * 
- *         default is start a new process with relayed cmdline and redirect
- *         stdin stout &amp; stderr streams, terminate if no subprocesses exist
+ *         default is start a new process with relayed cmdline and redirect stdin stout &amp; stderr streams, terminate if no
+ *         subprocesses exist
  * 
- *         =================================================================== *
- *         References :
+ *         =================================================================== * References :
  *
  *         http://www.excelsior-usa.com/articles/java-to-exe.html
  *
- *         possible small wrappers mac / linux / windows
- *         http://mypomodoro.googlecode
- *         .com/svn-history/r89/trunk/src/main/java/org
+ *         possible small wrappers mac / linux / windows http://mypomodoro.googlecode .com/svn-history/r89/trunk/src/main/java/org
  *         /mypomodoro/util/Restart.java
  *
- *         http://java.dzone.com/articles/programmatically-restart-java
- *         http://stackoverflow
+ *         http://java.dzone.com/articles/programmatically-restart-java http://stackoverflow
  *         .com/questions/3468987/executing-another-application-from-java
  *
  *
- *         TODO - ARMV 6 7 8 ??? -
- *         http://www.binarytides.com/linux-cpu-information/ - lscpu
+ *         TODO - ARMV 6 7 8 ??? - http://www.binarytides.com/linux-cpu-information/ - lscpu
  *
- *         Architecture: armv7l Byte Order: Little Endian CPU(s): 4 On-line
- *         CPU(s) list: 0-3 Thread(s) per core: 1 Core(s) per socket: 1
- *         Socket(s): 4
+ *         Architecture: armv7l Byte Order: Little Endian CPU(s): 4 On-line CPU(s) list: 0-3 Thread(s) per core: 1 Core(s) per
+ *         socket: 1 Socket(s): 4
  *
  *
- *         TODO - soft floating point vs hard floating point readelf -A
- *         /proc/self/exe | grep Tag_ABI_VFP_args soft = nothing hard =
+ *         TODO - soft floating point vs hard floating point readelf -A /proc/self/exe | grep Tag_ABI_VFP_args soft = nothing hard =
  *         Tag_ABI_VFP_args: VFP registers
  *
  *         PACKAGING jsmooth - windows only javafx - 1.76u - more dependencies ?
- *         http://stackoverflow.com/questions/1967549/java-packaging-tools-
- *         alternatives-for-jsmooth-launch4j-onejar
+ *         http://stackoverflow.com/questions/1967549/java-packaging-tools- alternatives-for-jsmooth-launch4j-onejar
  *
- *         TODO classpath order - for quick bleeding edge updates? rsync
- *         exploded classpath
+ *         TODO classpath order - for quick bleeding edge updates? rsync exploded classpath
  *
- *         TODO - check for Java 1.7 or &gt; addShutdownHook check for network
- *         connectivity TODO - proxy -Dhttp.proxyHost=webproxy
- *         -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
- *         -Dhttp.proxyUserName="myusername" -Dhttp.proxyPassword="mypassword"
+ *         TODO - check for Java 1.7 or &gt; addShutdownHook check for network connectivity TODO - proxy -Dhttp.proxyHost=webproxy
+ *         -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyUserName="myusername"
+ *         -Dhttp.proxyPassword="mypassword"
  * 
- *         TODO? how to get vm args http:*
- *         stackoverflow.com/questions/1490869/how-to-get
- *         -vm-arguments-from-inside-of-java-application http:*
- *         java.dzone.com/articles/programmatically-restart-java http:*
- *         stackoverflow.com
- *         /questions/9911686/getresource-some-jar-returns-null-although
- *         -some-jar-exists-in-geturls RuntimeMXBean runtimeMxBean =
- *         ManagementFactory.getRuntimeMXBean(); List&lt;String&gt; arguments =
- *         runtimeMxBean.getInputArguments();
+ *         TODO? how to get vm args http:* stackoverflow.com/questions/1490869/how-to-get
+ *         -vm-arguments-from-inside-of-java-application http:* java.dzone.com/articles/programmatically-restart-java http:*
+ *         stackoverflow.com /questions/9911686/getresource-some-jar-returns-null-although -some-jar-exists-in-geturls RuntimeMXBean
+ *         runtimeMxBean = ManagementFactory.getRuntimeMXBean(); List&lt;String&gt; arguments = runtimeMxBean.getInputArguments();
  * 
- *         TODO - on java -jar myrobotlab.jar | make a copy if agent.jar does
- *         not exist.. if it does then spawn the Agent there ... it would make
- *         upgrading myrobotlab.jar "trivial" !!!
+ *         TODO - on java -jar myrobotlab.jar | make a copy if agent.jar does not exist.. if it does then spawn the Agent there ...
+ *         it would make upgrading myrobotlab.jar "trivial" !!!
  * 
  *         TO TEST - -agent "-test -logLevel WARN"
  */
@@ -157,7 +138,6 @@ public class Agent extends Service {
   // WebGui webmin = null; can't have a peer untile nettosphere is part of
   // base build
   // boolean updateRestartProcesses = false;
-  
 
   static String updateUrl = "http://34.201.4.170/deploy/%s";
   static String jarUrlTemplate = "http://34.201.4.170/deploy/%s/myrobotlab.jar";
@@ -398,8 +378,7 @@ public class Agent extends Service {
     log.info("{} bytes", myrobotlabjar.length);
 
     /*
-     * File archive = new File(String.format("%s/archive", branch));
-     * archive.mkdirs();
+     * File archive = new File(String.format("%s/archive", branch)); archive.mkdirs();
      */
 
     FileOutputStream fos = new FileOutputStream(String.format("%s/myrobotlab.%s.jar", branch, version));
@@ -604,8 +583,7 @@ public class Agent extends Service {
   }
 
   /*
-   * BAD IDEA - data type ambiguity is a drag public Integer kill(String name) {
-   * return kill(getId(name)); }
+   * BAD IDEA - data type ambiguity is a drag public Integer kill(String name) { return kill(getId(name)); }
    */
 
   static public void killAll() {
@@ -679,10 +657,9 @@ public class Agent extends Service {
   }
 
   /**
-   * This is a great idea &amp; test - because we want complete control over
-   * environment and dependencies - the ability to purge completely - and start
-   * from the beginning - but it should be in another service and not part of
-   * the Agent. The 'Test' service could use Agent as a peer
+   * This is a great idea &amp; test - because we want complete control over environment and dependencies - the ability to purge
+   * completely - and start from the beginning - but it should be in another service and not part of the Agent. The 'Test' service
+   * could use Agent as a peer
    * 
    * @return list of status
    * 
@@ -704,11 +681,9 @@ public class Agent extends Service {
     skipTest.add("org.myrobotlab.service.OpenNi");
 
     /*
-     * skipTest.add("org.myrobotlab.service.Agent");
-     * skipTest.add("org.myrobotlab.service.Incubator");
-     * skipTest.add("org.myrobotlab.service.InMoov"); // just too big and
-     * complicated at the moment skipTest.add("org.myrobotlab.service.Test");
-     * skipTest.add("org.myrobotlab.service.Cli"); // ?? No ?
+     * skipTest.add("org.myrobotlab.service.Agent"); skipTest.add("org.myrobotlab.service.Incubator");
+     * skipTest.add("org.myrobotlab.service.InMoov"); // just too big and complicated at the moment
+     * skipTest.add("org.myrobotlab.service.Test"); skipTest.add("org.myrobotlab.service.Cli"); // ?? No ?
      */
 
     long installTime = 0;
@@ -846,12 +821,12 @@ public class Agent extends Service {
     log.info("terminating others");
     killAll();
     log.info("terminating self ... goodbye...");
-    //Runtime.exit();
+    // Runtime.exit();
     Runtime.shutdown();
   }
-  
+
   static public synchronized Process spawn() throws IOException, URISyntaxException, InterruptedException {
-    return spawn(new String[]{});
+    return spawn(new String[] {});
   }
 
   static public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
@@ -881,8 +856,7 @@ public class Agent extends Service {
   }
 
   /**
-   * Responsibility - This method will always call Runtime. To start Runtime
-   * correctly environment must correctly be setup
+   * Responsibility - This method will always call Runtime. To start Runtime correctly environment must correctly be setup
    * 
    * @param jarPath
    *          - Absolute path to myrobotlab.jar
@@ -915,15 +889,11 @@ public class Agent extends Service {
     log.info("in args {}", Arrays.toString(in));
 
     // String jvmMemory = "-Xmx2048m -Xms256m";
-    /*<pre>
-    long totalMemory = Runtime.getTotalPhysicalMemory();
-    if (totalMemory == 0) {
-      log.info("could not get total physical memory");
-    } else {
-      log.info("total physical memory returned is {} Mb", totalMemory / 1048576);
-    }
-    </pre>
-    */
+    /*
+     * <pre> long totalMemory = Runtime.getTotalPhysicalMemory(); if (totalMemory == 0) {
+     * log.info("could not get total physical memory"); } else { log.info("total physical memory returned is {} Mb", totalMemory /
+     * 1048576); } </pre>
+     */
 
     // need to fill it out as best you can before submitting to spawn2
     return spawn2(pd);
@@ -943,9 +913,8 @@ public class Agent extends Service {
       sb.append(" ");
     }
 
-
     log.info("spawning -> [{}]", sb.toString());
-    
+
     ProcessBuilder builder = new ProcessBuilder(cmdLine);
 
     // setting working directory to wherever the jar is...
@@ -1065,9 +1034,8 @@ public class Agent extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -1079,7 +1047,7 @@ public class Agent extends Service {
     meta.addCategory("framework");
     meta.setSponsor("GroG");
     meta.setLicenseApache();
-    
+
     meta.addDependency("commons-cli", "commons-cli", "1.4");
     meta.includeServiceInOneJar(true);
 
@@ -1107,13 +1075,13 @@ public class Agent extends Service {
   // make it work if necessary prefix everything by -agent-<...>
   public static void main(String[] args) {
     try {
-      
+
       Logging logging = LoggingFactory.getInstance();
-      
+
       // -agent \"-params -service ... \" string encoded
       cmdline = new CmdLine(args);
       logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-      
+
       log.info("agent cmdline [{}] will be relayed ", cmdline);
 
       // FIXME - this could just be relayed to Runtime, right ?
@@ -1129,7 +1097,7 @@ public class Agent extends Service {
       // line
       // is relayed to the service
       // Start with the default cmdline for the agent
-      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Platform.getLocalInstance().getPid())};
+      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Platform.getLocalInstance().getPid()) };
       if (cmdline.containsKey("-agent")) {
         String str = cmdline.getArgument("-agent", 0);
         String[] tmp = str.split(" ");
@@ -1156,21 +1124,21 @@ public class Agent extends Service {
 
       if (cmdline.containsKey("-test")) {
         serviceTest();
-      } else {        
-        
+      } else {
+
         // if we aren't forking then we create an agent
         // to maintain control of all spawned processes
         if (!cmdline.containsKey("-fork")) {
           log.info("agent args [{}]", agentCmdline);
           Runtime.setLogLevel("WARN");
-          // agents runtime          
+          // agents runtime
           Runtime.main(agentArgs);
           Runtime.start("agent", "Agent");
-       
-          // FIXME - shouldn't be global, should be on a process by 
+
+          // FIXME - shouldn't be global, should be on a process by
           // process config - technically this should be triggered by an
           // -agent "-autoUpdate" .. but why trouble the user with cryptic encoding ?
-          if (cmdline.containsKey("-autoUpdate")){
+          if (cmdline.containsKey("-autoUpdate")) {
             autoUpdate(true);
           }
         }

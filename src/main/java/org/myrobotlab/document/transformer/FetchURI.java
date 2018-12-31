@@ -12,8 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.myrobotlab.document.Document;
 
 /**
- * This stage will fetch a web page defined by the uriField and store its byte
- * array in the bytesField.
+ * This stage will fetch a web page defined by the uriField and store its byte array in the bytesField.
  * 
  * @author kwatters
  *

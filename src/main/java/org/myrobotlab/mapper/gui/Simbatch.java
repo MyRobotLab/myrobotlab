@@ -12,9 +12,8 @@ import org.myrobotlab.mapper.sim.Simulator;
 import org.myrobotlab.mapper.sim.World;
 
 /**
- * Runs simbad simulator in batch mode with no user interface (only small 3d
- * window). Using the folling scenario: construct-&gt;reset-&gt;step, step ,..., step
- * -&gt; dispose-&gt; System.exit
+ * Runs simbad simulator in batch mode with no user interface (only small 3d window). Using the folling scenario:
+ * construct-&gt;reset-&gt;step, step ,..., step -&gt; dispose-&gt; System.exit
  */
 public class Simbatch {
   int counter;

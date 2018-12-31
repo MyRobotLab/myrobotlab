@@ -31,8 +31,7 @@ import org.slf4j.Logger;
  * 
  * @author Mats
  * 
- *         References :
- *         https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
+ *         References : https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
  */
 
 public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CControl {
@@ -54,8 +53,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   // Default address
   public String deviceAddress = "0x60";
   /**
-   * This address is to address all PCA9685 on the i2c bus. Don't use this
-   * address for any other device on the i2c bus since it will cause collisions.
+   * This address is to address all PCA9685 on the i2c bus. Don't use this address for any other device on the i2c bus since it will
+   * cause collisions.
    */
   public String broadcastAddress = "0x70";
 
@@ -158,8 +157,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /*
-   * Refresh the list of running services that can be selected in the GUI In
-   * this case only RasPi service can be selected
+   * Refresh the list of running services that can be selected in the GUI In this case only RasPi service can be selected
    */
   public List<String> refreshControllers() {
 
@@ -361,9 +359,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -380,8 +377,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /*
-   * @Override public boolean isAttached(String name) { return (controller !=
-   * null && controller.getName().equals(name) || servoMap.containsKey(name)); }
+   * @Override public boolean isAttached(String name) { return (controller != null && controller.getName().equals(name) ||
+   * servoMap.containsKey(name)); }
    */
 
   @Override
@@ -435,8 +432,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
       return;
     }
     /*
-     * TODO Implement attachMotorControl if
-     * (MotorControl.class.isAssignableFrom(service.getClass())) {
+     * TODO Implement attachMotorControl if (MotorControl.class.isAssignableFrom(service.getClass())) {
      * attachMotorControl((MotorControl) service); return; }
      */
   }
@@ -497,10 +493,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     /*
      * TODO Implement detachMotorControl
      * 
-     * if (MotorControl.class.isAssignableFrom(service.getClass())) { try {
-     * detachMotorControl((MotorControl) service); } catch (Exception e) { //
-     * TODO Auto-generated catch block);
-     * log.error("setController / attach throw", e); } return; }
+     * if (MotorControl.class.isAssignableFrom(service.getClass())) { try { detachMotorControl((MotorControl) service); } catch
+     * (Exception e) { // TODO Auto-generated catch block); log.error("setController / attach throw", e); } return; }
      */
   }
 
@@ -517,8 +511,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /**
-   * Returns all the currently attached services TODO Add the list of attached
-   * motors
+   * Returns all the currently attached services TODO Add the list of attached motors
    */
   @Override
   public Set<String> getAttached() {

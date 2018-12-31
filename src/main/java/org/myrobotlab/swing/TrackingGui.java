@@ -83,7 +83,7 @@ public class TrackingGui extends ServiceGui {
     display.add(video0.getDisplay(), BorderLayout.CENTER);
     display.add(p, BorderLayout.EAST);
     display.add(status, BorderLayout.SOUTH);
-  
+
   }
 
   @Override

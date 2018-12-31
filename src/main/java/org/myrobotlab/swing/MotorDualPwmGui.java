@@ -96,7 +96,7 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   String attach = "attach";
   String detach = "detach";
   JButton attachButton = new JButton(attach);
-  
+
   String setLeftPwmPin = "setLeftPwmPin";
   String setRightPwmPin = "setRightPwmPin";
 
@@ -146,24 +146,19 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
     } else if (source == stopButton) {
       power.setValue(0);
 
-    } else if (source == invert){
+    } else if (source == invert) {
       myMotor.setInverted(invert.isSelected());
-      
+
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
         swingGui.sendBlocking(boundServiceName, setLeftPwmPin, Integer.decode(leftPwmPinList.getSelectedItem().toString()));
         swingGui.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
         swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
-        myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.getSelectedItem().toString()));
-        myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-        try {
-          myMotor.attach((String) controllerList.getSelectedItem());
-        } catch (Exception e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        }
-        */
+         * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.getSelectedItem().toString()));
+         * myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.getSelectedItem().toString())); try { myMotor.attach((String)
+         * controllerList.getSelectedItem()); } catch (Exception e1) { // TODO Auto-generated catch block e1.printStackTrace(); }
+         */
       } else {
         swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
@@ -197,15 +192,15 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   }
 
   public void onState(MotorDualPwm motor) {
-    
+
     removeListeners();
     refreshControllers();
 
     setEnabled(motor.isAttached());
-    
+
     leftPwmPinList.setSelectedIndex(motor.leftPwmPin);
     rightPwmPinList.setSelectedIndex(motor.rightPwmPin);
-    
+
     if (motor.isAttached()) {
       MotorController mc = (MotorController) motor.getController();
       controllerList.setSelectedItem(mc.getName());

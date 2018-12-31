@@ -198,7 +198,7 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
 
           boxes.add(box);
 
-          //log.debug("box {}", box);
+          // log.debug("box {}", box);
 
           if (origin == null) {
             origin = new CvPoint(width / 2, 10 /* height ?? */);
@@ -227,13 +227,10 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
           // rect.height() / 2), points.total()));
 
           /*
-           * WRONG FIXME - post processing should be done in Java on the
-           * buffered image !!!!S cvPutText(display, " " + points.total() + " "
-           * + (rect.x() + rect.width() / 2) + "," + (rect.y() + rect.height() /
-           * 2) + " " + rect.width() + "x" + rect.height() + "=" + (rect.width()
-           * * rect.height()) + " " + " " + cvCheckContourConvexity(points),
-           * cvPoint(rect.x() + rect.width() / 2, rect.y()), font,
-           * CvScalar.WHITE);
+           * WRONG FIXME - post processing should be done in Java on the buffered image !!!!S cvPutText(display, " " +
+           * points.total() + " " + (rect.x() + rect.width() / 2) + "," + (rect.y() + rect.height() / 2) + " " + rect.width() + "x"
+           * + rect.height() + "=" + (rect.width() * rect.height()) + " " + " " + cvCheckContourConvexity(points), cvPoint(rect.x()
+           * + rect.width() / 2, rect.y()), font, CvScalar.WHITE);
            */
         }
 

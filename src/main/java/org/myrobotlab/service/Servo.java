@@ -59,29 +59,23 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         Servos have both input and output. Input is usually of the range of
- *         integers between 0.0 - 180.0, and output can relay those values
- *         directly to the servo's firmware (Arduino ServoLib, I2C controller,
- *         etc)
+ *         Servos have both input and output. Input is usually of the range of integers between 0.0 - 180.0, and output can relay
+ *         those values directly to the servo's firmware (Arduino ServoLib, I2C controller, etc)
  * 
- *         However there can be the occasion that the input comes from a system
- *         which does not have the same range. Such that input can vary from 0.0
- *         to 1.0. For example, OpenCV coordinates are often returned in this
- *         range. When a mapping is needed Servo.map can be used. For this
- *         mapping Servo.map(0.0, 1.0, 0, 180) might be desired. Reversing input
- *         would be done with Servo.map(180, 0, 0, 180)
+ *         However there can be the occasion that the input comes from a system which does not have the same range. Such that input
+ *         can vary from 0.0 to 1.0. For example, OpenCV coordinates are often returned in this range. When a mapping is needed
+ *         Servo.map can be used. For this mapping Servo.map(0.0, 1.0, 0, 180) might be desired. Reversing input would be done with
+ *         Servo.map(180, 0, 0, 180)
  * 
- *         outputY - is the values sent to the firmware, and should not
- *         necessarily be confused with the inputX which is the input values
- *         sent to the servo
+ *         outputY - is the values sent to the firmware, and should not necessarily be confused with the inputX which is the input
+ *         values sent to the servo
  * 
  */
 
 public class Servo extends Service implements ServoControl {
 
   /**
-   * Sweeper - TODO - should be implemented in the arduino code for smoother
-   * function
+   * Sweeper - TODO - should be implemented in the arduino code for smoother function
    * 
    * 
    */
@@ -92,9 +86,8 @@ public class Servo extends Service implements ServoControl {
     }
 
     /**
-     * Sweeping works on input, a thread is used as the "controller" (this is
-     * input) and input sweeps back and forth - the servo parameters know what
-     * to do for output
+     * Sweeping works on input, a thread is used as the "controller" (this is input) and input sweeps back and forth - the servo
+     * parameters know what to do for output
      */
 
     @Override
@@ -133,8 +126,7 @@ public class Servo extends Service implements ServoControl {
   public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
   /**
-   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
-   * methods for this class
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate methods for this class
    */
   @Override
   public void attach(Attachable service) throws Exception {
@@ -147,8 +139,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
-   * methods for this class
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate methods for this class
    */
   @Override
   public void detach(Attachable service) {
@@ -161,9 +152,8 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -194,8 +184,7 @@ public class Servo extends Service implements ServoControl {
   long lastActivityTime = 0;
 
   /**
-   * the 'pin' for this Servo - it is Integer because it can be in a state of
-   * 'not set' or null.
+   * the 'pin' for this Servo - it is Integer because it can be in a state of 'not set' or null.
    * 
    * pin is the ONLY value which cannot and will not be 'defaulted'
    */
@@ -231,8 +220,7 @@ public class Servo extends Service implements ServoControl {
   transient Thread sweeper = null;
 
   /**
-   * feedback of both incremental position and stops. would allow blocking
-   * moveTo if desired
+   * feedback of both incremental position and stops. would allow blocking moveTo if desired
    */
   boolean isEventsEnabled = true;
   boolean isIKEventEnabled = false;
@@ -251,8 +239,7 @@ public class Servo extends Service implements ServoControl {
   private boolean autoEnable = true;
 
   /**
-   * defaultDisableDelayNoVelocity this make sense if velocity == -1 a timer is
-   * launched to delay disable
+   * defaultDisableDelayNoVelocity this make sense if velocity == -1 a timer is launched to delay disable
    * 
    * @param defaultDisableDelayNoVelocity
    *          - milliSeconds
@@ -261,8 +248,7 @@ public class Servo extends Service implements ServoControl {
   public Integer disableDelayNoVelocity;
 
   /**
-   * disableDelayIfVelocity this make sense if velocity > 0 a timer is launched
-   * for an extra delay to disable
+   * disableDelayIfVelocity this make sense if velocity > 0 a timer is launched for an extra delay to disable
    * 
    * @param disableDelayIfVelocity
    *          - milliSeconds
@@ -290,15 +276,9 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
   /*
-  public static class ServoEventData {
-    public String name;
-    public Double pos;
-    public Integer state;
-    public double velocity;
-    public Double targetPos;
-    // public int type;
-  }
-  */
+   * public static class ServoEventData { public String name; public Double pos; public Integer state; public double velocity;
+   * public Double targetPos; // public int type; }
+   */
   public static class ServoEventData {
     public String name;
     public Double pos;
@@ -369,8 +349,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * Equivalent to the Arduino IDE Servo.attach(). It energizes the servo
-   * sending pulses to maintain its current position.
+   * Equivalent to the Arduino IDE Servo.attach(). It energizes the servo sending pulses to maintain its current position.
    */
   @Override
   public void enable() {
@@ -378,8 +357,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * This method will attach to the currently set controller with the specified
-   * pin. attach(pin) is deprecated use enable(pin)
+   * This method will attach to the currently set controller with the specified pin. attach(pin) is deprecated use enable(pin)
    */
   @Deprecated
   @Override
@@ -388,8 +366,8 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * Enabling PWM for the Servo. Equivalent to Arduino's Servo.attach(pin). It
-   * energizes the servo sending pulses to maintain its current position.
+   * Enabling PWM for the Servo. Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending pulses to maintain its
+   * current position.
    */
   public void enable(int pin) {
     lastActivityTime = System.currentTimeMillis();
@@ -416,8 +394,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * This method will leave the servo connected to the controller, however it
-   * will stop sending pwm messages to the servo.
+   * This method will leave the servo connected to the controller, however it will stop sending pwm messages to the servo.
    */
   @Override
   public void disable() {
@@ -793,20 +770,16 @@ public class Servo extends Service implements ServoControl {
   }
 
   /*
-   * Writes a value in microseconds (uS) to the servo, controlling the shaft
-   * accordingly. On a standard servo, this will set the angle of the shaft. On
-   * standard servos a parameter value of 1000 is fully counter-clockwise, 2000
-   * is fully clockwise, and 1500 is in the middle.
+   * Writes a value in microseconds (uS) to the servo, controlling the shaft accordingly. On a standard servo, this will set the
+   * angle of the shaft. On standard servos a parameter value of 1000 is fully counter-clockwise, 2000 is fully clockwise, and 1500
+   * is in the middle.
    * 
-   * Note that some manufactures do not follow this standard very closely so
-   * that servos often respond to values between 700 and 2300. Feel free to
-   * increase these endpoints until the servo no longer continues to increase
-   * its range. Note however that attempting to drive a servo past its endpoints
-   * (often indicated by a growling sound) is a high-current state, and should
-   * be avoided.
+   * Note that some manufactures do not follow this standard very closely so that servos often respond to values between 700 and
+   * 2300. Feel free to increase these endpoints until the servo no longer continues to increase its range. Note however that
+   * attempting to drive a servo past its endpoints (often indicated by a growling sound) is a high-current state, and should be
+   * avoided.
    * 
-   * Continuous-rotation servos will respond to the writeMicrosecond function in
-   * an analogous manner to the write function.
+   * Continuous-rotation servos will respond to the writeMicrosecond function in an analogous manner to the write function.
    * 
    */
   public void writeMicroseconds(Integer uS) {
@@ -831,13 +804,10 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * The attachServoController method is used to "attach" 2 services together,
-   * the ServoControl & the ServoController. All the necessary data needed to
-   * attach this Servo to the servo controller should be available. First we
-   * check to see if this controller is already attached. If it is we are done.
-   * If not we proceed to attach the controller and at the end of the function
-   * we call the controller.attach(this) to give the controller an opportunity
-   * to do its attach logic.
+   * The attachServoController method is used to "attach" 2 services together, the ServoControl & the ServoController. All the
+   * necessary data needed to attach this Servo to the servo controller should be available. First we check to see if this
+   * controller is already attached. If it is we are done. If not we proceed to attach the controller and at the end of the function
+   * we call the controller.attach(this) to give the controller an opportunity to do its attach logic.
    * 
    * https://www.google.com/search?q=attach+myrobotlab&oq=attach+myrobotlab
    */
@@ -910,8 +880,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * attach will default the position to a default reset position since its not
-   * specified
+   * attach will default the position to a default reset position since its not specified
    */
   @Override
   public void attach(ServoController controller, int pin) throws Exception {
@@ -1024,8 +993,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * getCurrentPos() - return the calculated position of the servo use
-   * lastActivityTime and velocity for the computation
+   * getCurrentPos() - return the calculated position of the servo use lastActivityTime and velocity for the computation
    * 
    * @return the current position of the servo
    */
@@ -1052,8 +1020,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /*
-   * Deprecated enableAutoAttach will attach a servo when ask to move and it
-   * when the move is complete
+   * Deprecated enableAutoAttach will attach a servo when ask to move and it when the move is complete
    * 
    */
   @Deprecated
@@ -1331,8 +1298,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * used to synchronize 2 servos e.g. servo1.sync(servo2) - now they move as
-   * one
+   * used to synchronize 2 servos e.g. servo1.sync(servo2) - now they move as one
    */
   public void sync(ServoControl sc) {
     this.addServoEventListener(this);
@@ -1341,8 +1307,8 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * unsynchronize 2 sevos.  If the servo is running in sync already,
-   * this method will stop the synchronization
+   * unsynchronize 2 sevos. If the servo is running in sync already, this method will stop the synchronization
+   * 
    * @param args
    * @throws InterruptedException
    */

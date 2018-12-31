@@ -5,9 +5,8 @@ import java.util.List;
 import org.myrobotlab.document.Document;
 
 /**
- * This stage will take two fields that have equal sized lists of values it will
- * then iterates the values of both fields adding them to an outputField (Like a
- * zipper!)
+ * This stage will take two fields that have equal sized lists of values it will then iterates the values of both fields adding them
+ * to an outputField (Like a zipper!)
  * 
  * @author kwatters
  *

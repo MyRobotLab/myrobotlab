@@ -14,8 +14,7 @@ import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 /**
- * TODO : show attached servoGui here to group them ( tabs ) if attached
- * just list them for now...
+ * TODO : show attached servoGui here to group them ( tabs ) if attached just list them for now...
  */
 public class BodyPartGui extends ServiceGui implements ActionListener {
 

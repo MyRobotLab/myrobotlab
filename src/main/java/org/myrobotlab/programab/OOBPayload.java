@@ -30,7 +30,7 @@ public class OOBPayload {
       jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
       jaxbMarshaller.marshal(payload, file);
       jaxbMarshaller.marshal(payload, System.out);
-      
+
       // String xml =
       // "<mrl><method>exec</method><param>bar</param><service>foo</service></mrl>";
       // StringReader xmlR = new StringReader(xml);
@@ -80,10 +80,10 @@ public class OOBPayload {
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
   }
-  
+
   public static String asOOBTag(OOBPayload payload) {
-    // TODO: this isn't really safe as XML/AIML.. but we don't want to end up double encoding things like 
-    // the important  <star/> tags...  So, for now, it's just wrapped in the tags.
+    // TODO: this isn't really safe as XML/AIML.. but we don't want to end up double encoding things like
+    // the important <star/> tags... So, for now, it's just wrapped in the tags.
     StringBuilder oobBuilder = new StringBuilder();
     oobBuilder.append("<oob>");
     oobBuilder.append("<mrl>");
@@ -105,7 +105,7 @@ public class OOBPayload {
   }
 
   public static String asBlockingOOBTag(OOBPayload oobTag) {
-    return "<sraix>"+OOBPayload.asOOBTag(oobTag)+"</sraix>";
+    return "<sraix>" + OOBPayload.asOOBTag(oobTag) + "</sraix>";
   }
 
 }

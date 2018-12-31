@@ -27,31 +27,31 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
 
   private transient TesseractOcr tesseract;
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-  
-  public String lastResult = null; 
+
+  public String lastResult = null;
   private IplImage lastImage = null;
-  
+
   public OpenCVFilterTesseract() {
     super();
     loadTesseract();
   }
-  
+
   public OpenCVFilterTesseract(String name) {
     super(name);
     loadTesseract();
   }
-  
+
   private void loadTesseract() {
-    tesseract = (TesseractOcr)Runtime.createAndStart("tesseract", "TesseractOcr");
+    tesseract = (TesseractOcr) Runtime.createAndStart("tesseract", "TesseractOcr");
     log.info("Started tesseract...");
     // start classifier thread
     Thread classifier = new Thread(this, "TesseractClassifierThread");
     classifier.start();
   }
-  
+
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-    
+
     if (lastResult != null) {
       // the thread running will be updating lastResult for it as fast as it can.
       // log.info("Display result " );
@@ -63,9 +63,9 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
   }
 
   public static String padRight(String s, int n) {
-    return String.format("%1$-" + n + "s", s);  
+    return String.format("%1$-" + n + "s", s);
   }
-  
+
   private void displayResult(IplImage image, String result) {
     cvPutText(image, result, cvPoint(20, 60), font, CvScalar.YELLOW);
   }
@@ -75,7 +75,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
     StringBuilder res = new StringBuilder();
     for (String key : result.keySet()) {
       res.append(key + " : ");
-      res.append(df2.format(result.get(key)*100) + "% , ");        
+      res.append(df2.format(result.get(key) * 100) + "% , ");
     }
     return res.toString();
   }
@@ -87,7 +87,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
 
   @Override
   public void run() {
-    
+
     log.info("Starting the Tesseract classifier thread...");
     // in a loop, grab the current image and classify it and update the result.
     while (true) {
@@ -116,7 +116,7 @@ public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
       }
     }
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;

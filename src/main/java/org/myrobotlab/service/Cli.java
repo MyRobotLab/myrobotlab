@@ -19,12 +19,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * Cli - This is a command line interface to MyRobotLab. It supports some shell
- * like commands such as "cd", and "ls" Use the command "help" to display help.
+ * Cli - This is a command line interface to MyRobotLab. It supports some shell like commands such as "cd", and "ls" Use the command
+ * "help" to display help.
  *
- * should be a singleton in a process. This does not seem to work on
- * cygwin/windows, but it does work in a command prompt. Linux/Mac can use this
- * via a Terminal / Console window.
+ * should be a singleton in a process. This does not seem to work on cygwin/windows, but it does work in a command prompt. Linux/Mac
+ * can use this via a Terminal / Console window.
  * 
  * @author GroG
  *
@@ -44,9 +43,8 @@ public class Cli extends Service {
   transient ApiFactory api = null;
 
   /**
-   * pipes from other processes - possibly added by the Agent service our stdin
-   * is attached to a pipe and when we attach to that service our stdin becomes
-   * that processes std - and its stdout links to our stdout
+   * pipes from other processes - possibly added by the Agent service our stdin is attached to a pipe and when we attach to that
+   * service our stdin becomes that processes std - and its stdout links to our stdout
    */
   Map<String, Pipe> pipes = new HashMap<String, Pipe>();
 
@@ -292,8 +290,7 @@ public class Cli extends Service {
   }
 
   /**
-   * Pipe between another process - its output stream is our input stream its
-   * input stream is our output
+   * Pipe between another process - its output stream is our input stream its input stream is our output
    * 
    * <pre>
    * Our Process ---------- Pipe -----------  Remote Process
@@ -383,14 +380,12 @@ public class Cli extends Service {
       } catch (Exception e) {
         log.error("Pipe threw", e);
       } /*
-         * finally { try { if (is != null) { is.close(); } } catch (Exception
-         * ex) { }
+         * finally { try { if (is != null) { is.close(); } } catch (Exception ex) { }
          */
     }
 
     /**
-     * attaches myOutputstream to the remote output stream relaying/piping the
-     * data back
+     * attaches myOutputstream to the remote output stream relaying/piping the data back
      * 
      * @param b
      *          - if true we will send to output stream
@@ -427,12 +422,11 @@ public class Cli extends Service {
   }
 
   /*
-   * Command Line Interpreter - used for processing encoded (default RESTful)
-   * commands from std in and returning results in (default JSON) encoded return
-   * messages.
+   * Command Line Interpreter - used for processing encoded (default RESTful) commands from std in and returning results in (default
+   * JSON) encoded return messages.
    * 
-   * Has the ability to pipe to another process - if attached to another process
-   * handle, and the ability to switch between many processes
+   * Has the ability to pipe to another process - if attached to another process handle, and the ability to switch between many
+   * processes
    * 
    */
   public Cli(String n) {
@@ -442,9 +436,8 @@ public class Cli extends Service {
   }
 
   /**
-   * add an i/o pair to this cli for the possible purpose attaching this is a
-   * remote process's input and output stream, hence from this side they are
-   * inverted - ie out is an inputstream and in is an output stream
+   * add an i/o pair to this cli for the possible purpose attaching this is a remote process's input and output stream, hence from
+   * this side they are inverted - ie out is an inputstream and in is an output stream
    *
    * @param name
    *          - name of pipe
@@ -462,8 +455,7 @@ public class Cli extends Service {
   }
 
   /**
-   * Pipe or Attach to another processes' Cli different level cli.attach(process
-   * id)
+   * Pipe or Attach to another processes' Cli different level cli.attach(process id)
    */
   public void attach(String id) {
 
@@ -505,8 +497,7 @@ public class Cli extends Service {
     // If I'm without an Agent I'll just do the logging I was directed
     // to on the command line
     /*
-     * if (myOutstream == null) { myOutstream = System.out; } else {
-     * log.info("stdout already attached"); }
+     * if (myOutstream == null) { myOutstream = System.out; } else { log.info("stdout already attached"); }
      */
   }
 
@@ -516,9 +507,8 @@ public class Cli extends Service {
   }
 
   /**
-   * unfortunate collision of names :(
-   * this detach() does not detach from services - but detaches from the 
-   * std i/o of another process
+   * unfortunate collision of names :( this detach() does not detach from services - but detaches from the std i/o of another
+   * process
    */
   public void detach() {
     try {
@@ -547,8 +537,7 @@ public class Cli extends Service {
   }
 
   /**
-   * FIXME !!! return Object[] and let Cli command processor handle encoding for
-   * return
+   * FIXME !!! return Object[] and let Cli command processor handle encoding for return
    * 
    * path is always absolute never relative
    * 
@@ -645,9 +634,8 @@ public class Cli extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -655,15 +643,15 @@ public class Cli extends Service {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Cli.class.getCanonicalName());
     meta.addDescription("command line interpreter interface for myrobotlab");
-    meta.addCategory("framework");    
+    meta.addCategory("framework");
     meta.includeServiceInOneJar(true);
-   
+
     return meta;
   }
-  
-  public void releaseService(){
+
+  public void releaseService() {
     super.releaseService();
-    if (in != null){
+    if (in != null) {
       in.isRunning = false;
       // in.interrupt();
       in = null;

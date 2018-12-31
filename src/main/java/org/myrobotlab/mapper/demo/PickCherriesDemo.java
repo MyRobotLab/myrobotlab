@@ -16,8 +16,7 @@ import org.myrobotlab.mapper.sim.CherryAgent;
 import org.myrobotlab.mapper.sim.SimpleAgent;
 
 /**
- * This demo show a robot picking cherries. When touched, the cherries are
- * either removed or repaint.
+ * This demo show a robot picking cherries. When touched, the cherries are either removed or repaint.
  */
 public class PickCherriesDemo extends Demo {
   /** The robot used in the demo. */

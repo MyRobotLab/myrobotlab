@@ -67,8 +67,8 @@ import org.slf4j.Logger;
  *
  * @author GroG
  * 
- *         https://www.codeproject.com/Articles/840823/Object-Feature-Tracking-in-Csharp
- *         (excellent artical describing sparse optical flow)
+ *         https://www.codeproject.com/Articles/840823/Object-Feature-Tracking-in-Csharp (excellent artical describing sparse
+ *         optical flow)
  *
  */
 public class OpenCVFilterOpticalFlow extends OpenCVFilter {
@@ -78,13 +78,13 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Size of an average block for computing a derivative covariation matrix over
-   * each pixel neighborhood. See cornerEigenValsAndVecs()
+   * Size of an average block for computing a derivative covariation matrix over each pixel neighborhood. See
+   * cornerEigenValsAndVecs()
    */
   int blockSize = 3;
 
   // cvGoodFeaturesToTrack
-  
+
   /**
    * default number of max corners to start with
    */
@@ -111,10 +111,8 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
 
   IplImage lastImg = null;
 
-
   /**
-   * Maximum number of corners to return. If there are more corners than are
-   * found, the strongest of them is returned.
+   * Maximum number of corners to return. If there are more corners than are found, the strongest of them is returned.
    */
   IntPointer maxCorners = new IntPointer(1).put(max);
 
@@ -126,20 +124,16 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   public ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
 
   /**
-   * Parameter characterizing the minimal accepted quality of image corners. The
-   * parameter value is multiplied by the best corner quality measure, which is
-   * the minimal eigenvalue (see cornerMinEigenVal() ) or the Harris function
-   * response (see cornerHarris() ). The corners with the quality measure less
-   * than the product are rejected. For example, if the best corner has the
-   * quality measure = 1500, and the qualityLevel=0.01 , then all the corners
-   * with the quality measure less than 15 are rejected.
+   * Parameter characterizing the minimal accepted quality of image corners. The parameter value is multiplied by the best corner
+   * quality measure, which is the minimal eigenvalue (see cornerMinEigenVal() ) or the Harris function response (see cornerHarris()
+   * ). The corners with the quality measure less than the product are rejected. For example, if the best corner has the quality
+   * measure = 1500, and the qualityLevel=0.01 , then all the corners with the quality measure less than 15 are rejected.
    */
   float qualityLevel = 0.05f;
 
   /**
-   * Optional region of interest. If the image is not empty (it needs to have
-   * the type CV_8UC1 and the same size as image ), it specifies the region in
-   * which the corners are detected.
+   * Optional region of interest. If the image is not empty (it needs to have the type CV_8UC1 and the same size as image ), it
+   * specifies the region in which the corners are detected.
    */
   CvArr roi = null;
 
@@ -149,8 +143,7 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   IplImage tmpImage = null;
 
   /**
-   * useHarrisDetector – Parameter indicating whether to use a Harris detector
-   * (see cornerHarris()) or cornerMinEigenVal().
+   * useHarrisDetector – Parameter indicating whether to use a Harris detector (see cornerHarris()) or cornerMinEigenVal().
    */
   int useHarrisDetector = 0;
 
@@ -170,7 +163,6 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   public void clearPoints() {
 
   }
-
 
   @Override
   public void imageChanged(IplImage inImage) {
@@ -225,12 +217,12 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
         cornersB.position(i);
         CvPoint p0 = cvPoint(Math.round(corners.x()), Math.round(corners.y()));
         CvPoint p1 = cvPoint(Math.round(cornersB.x()), Math.round(cornersB.y()));
-        cvLine(inImage, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0); 
+        cvLine(inImage, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0);
         cvCircle(inImage, p1, 3, CV_RGB(0, 0, 255), CV_FILLED, 8, 0);
         // FIXME - don't
-                                                             // tamper with out
-                                                             // image - change
-                                                             // only display :(
+        // tamper with out
+        // image - change
+        // only display :(
         // cvC
       }
 
@@ -257,8 +249,6 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   public void setQuality(float q) {
     qualityLevel = q;
   }
-
-  
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {

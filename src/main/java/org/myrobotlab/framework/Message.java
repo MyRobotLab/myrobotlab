@@ -38,8 +38,7 @@ import org.myrobotlab.logging.LoggingFactory;
 /**
  * @author GroG
  * 
- *         FIXME - either a structure interface or a typical java setter getter
- *         NO MIX !!
+ *         FIXME - either a structure interface or a typical java setter getter NO MIX !!
  * 
  */
 public class Message implements Serializable {
@@ -53,17 +52,17 @@ public class Message implements Serializable {
    */
 
   public long msgId;
-  
+
   /**
    * the originating uri
    */
   public String uri;
-  
+
   /**
    * apiKey related to data encoding
    */
   public String apiKey;
-  
+
   /**
    * destination name of the message
    */
@@ -79,19 +78,16 @@ public class Message implements Serializable {
   public String sendingMethod;
 
   /**
-   * history of the message, its routing stops and Services it passed through.
-   * This is important to prevent endless looping of messages. Turns out
-   * ArrayList is quicker than HashSet on small sets
-   * http://www.javacodegeeks.com
+   * history of the message, its routing stops and Services it passed through. This is important to prevent endless looping of
+   * messages. Turns out ArrayList is quicker than HashSet on small sets http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
   public HashSet<String> historyList;
   public HashMap<String, String> security;
 
   /**
-   * status is currently used for BLOCKING message calls the current valid state
-   * it can be in is null | BLOCKING | RETURN FIXME - this should be msgType not
-   * status
+   * status is currently used for BLOCKING message calls the current valid state it can be in is null | BLOCKING | RETURN FIXME -
+   * this should be msgType not status
    */
 
   public String status;
@@ -104,11 +100,10 @@ public class Message implements Serializable {
   public String method;
 
   /**
-   * the data which will be sent to the destination method data payload - if
-   * invoking a service request this would be the parameter (list) - this would
-   * the return type data if the message is outbound
+   * the data which will be sent to the destination method data payload - if invoking a service request this would be the parameter
+   * (list) - this would the return type data if the message is outbound
    */
-  public Object[] data;  
+  public Object[] data;
 
   public Message() {
     msgId = System.currentTimeMillis();
@@ -159,29 +154,27 @@ public class Message implements Serializable {
   public String toString() {
     return CodecUtils.getMsgKey(this);
   }
-  
 
   public static Message createMessage(NameProvider sender, String name, String method, Object[] data) {
     Message msg = new Message();
     msg.name = name; // destination instance name
-    msg.sender = sender.getName();//this.getName();
+    msg.sender = sender.getName();// this.getName();
     msg.data = data;
     msg.method = method;
 
     return msg;
   }
-  
+
   public static Message createMessage(String sender, String name, String method, Object[] data) {
     Message msg = new Message();
     msg.name = name; // destination instance name
-    msg.sender = sender;//this.getName();
+    msg.sender = sender;// this.getName();
     msg.data = data;
     msg.method = method;
 
     return msg;
   }
 
-  
   static public Message createMessage(NameProvider sender, String name, String method, Object data) {
     if (data == null) {
       return createMessage(sender, name, method, null);
@@ -190,9 +183,6 @@ public class Message implements Serializable {
     d[0] = data;
     return createMessage(sender, name, method, d);
   }
-
-
-
 
   public static void main(String[] args) throws InterruptedException {
     LoggingFactory.init(Level.DEBUG);
@@ -204,8 +194,7 @@ public class Message implements Serializable {
     msg.data = new Object[] { "hello" };
 
     /*
-     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
-     * Logging.logError(e); }
+     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) { Logging.logError(e); }
      */
   }
 

@@ -57,24 +57,19 @@ import com.pi4j.io.i2c.I2CFactory;
  * 
  * @author GroG
  * 
- *         C:\mrl\myrobotlab&gt;xjc -d src -p org.myrobotlab.pickToLight
- *         PickToLightTypes.xsd
+ *         C:\mrl\myrobotlab&gt;xjc -d src -p org.myrobotlab.pickToLight PickToLightTypes.xsd
  * 
- *         TODO - post report &amp; statistics TODO - update URI - meta data - make
- *         update.jar bin calls moduleList calls setAllBoxesLEDs (on off)
- *         setBoxesOn(String list) setBoxesOff(String list) getBesSwitchState()
- *         displayString(boxlist, str) ZOD update uri blinkOff TODO - automated
- *         registration Polling / Sensor - important - check sensor state FIXME
- *         - EROR is not being handled in non IP address &amp; no connectivity !!!!
- *         - read config in /boot/ - registration url including password - proxy
- *         ?
+ *         TODO - post report &amp; statistics TODO - update URI - meta data - make update.jar bin calls moduleList calls
+ *         setAllBoxesLEDs (on off) setBoxesOn(String list) setBoxesOff(String list) getBesSwitchState() displayString(boxlist, str)
+ *         ZOD update uri blinkOff TODO - automated registration Polling / Sensor - important - check sensor state FIXME - EROR is
+ *         not being handled in non IP address &amp; no connectivity !!!! - read config in /boot/ - registration url including
+ *         password - proxy ?
  * 
  */
 public class PickToLight extends Service implements GpioPinListenerDigital {
 
   /**
-   * Worker is a PickToLight level thread which operates over (potentially) all
-   * of the service modules. Displays have their own
+   * Worker is a PickToLight level thread which operates over (potentially) all of the service modules. Displays have their own
    * 
    */
   public class Worker extends Thread {
@@ -341,8 +336,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
       // String binList = pickToLight.getBoxList();
       // pickToLight.display(binList, "helo");
       /*
-       * pickToLight.display("01", "1234"); pickToLight.display(" 01 02 03 ",
-       * "1234  1"); pickToLight.display("01 03", " 1234"); //
+       * pickToLight.display("01", "1234"); pickToLight.display(" 01 02 03 ", "1234  1"); pickToLight.display("01 03", " 1234"); //
        * pickToLight.display(binList, "1234 ");
        */
 
@@ -677,13 +671,12 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     try {
       CloseableHttpClient client = HttpClients.createDefault();
       List<String> authpref = new ArrayList<String>();
-      /* ALL DEPRECATED
-      authpref.add(AuthPolicy.NTLM);
-      client.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
-      NTCredentials creds = new NTCredentials(mesUser, mesPassword, "", mesDomain);
-      client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
-	  */
-      
+      /*
+       * ALL DEPRECATED authpref.add(AuthPolicy.NTLM); client.getParams().setParameter(AuthPNames.TARGET_AUTH_PREF, authpref);
+       * NTCredentials creds = new NTCredentials(mesUser, mesPassword, "", mesDomain);
+       * client.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
+       */
+
       HttpContext localContext = new BasicHttpContext();
       HttpPost post = new HttpPost(mesEndpoint);
 
@@ -724,10 +717,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     GpioPin pin = event.getPin();
     log.info("GPIOPin: {}", pin);
     /*
-     * if (pin.getName().equals("GPIO 0")) { modules.get("01").blinkOff("ok"); }
-     * else if (pin.getName().equals("GPIO 1")) {
-     * modules.get("02").blinkOff("ok"); } else if (pin.getName().equals(
-     * "GPIO 2")) { modules.get("03").blinkOff("ok"); } else if
+     * if (pin.getName().equals("GPIO 0")) { modules.get("01").blinkOff("ok"); } else if (pin.getName().equals("GPIO 1")) {
+     * modules.get("02").blinkOff("ok"); } else if (pin.getName().equals( "GPIO 2")) { modules.get("03").blinkOff("ok"); } else if
      * (pin.getName().equals("GPIO 3")) { modules.get("04").blinkOff("ok"); }
      */
 
@@ -864,8 +855,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
   }
 
   /*
-   * single location for key generation - in case other parts are add in a
-   * composite key
+   * single location for key generation - in case other parts are add in a composite key
    */
   public String makeKey(Integer address) {
     return makeKey(rasPiBus, address);
@@ -1147,9 +1137,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 

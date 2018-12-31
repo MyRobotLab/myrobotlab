@@ -47,17 +47,14 @@ import com.sun.j3d.utils.geometry.Cylinder;
 import com.sun.j3d.utils.geometry.Primitive;
 
 /**
- * This is the base class for all robot and is considered to be a heavy agent.
- * <br>
- * When deriving a new robot's class from this class, one should override the
- * following methods:
+ * This is the base class for all robot and is considered to be a heavy agent. <br>
+ * When deriving a new robot's class from this class, one should override the following methods:
  * <ul>
  * <li>initBehavior : called by the simulator to initialize the controler.</li>
  * <li>performBehavior : called by the simulator on each simulation step.</li>
  * </ul>
- * * Implementation note : the agent doesnt have synchronized methods. All
- * thread refering to the agent should do explicit synchronization with
- * synchronized(agent){...}.
+ * * Implementation note : the agent doesnt have synchronized methods. All thread refering to the agent should do explicit
+ * synchronization with synchronized(agent){...}.
  * 
  */
 public class Agent extends SimpleAgent {
@@ -153,8 +150,7 @@ public class Agent extends SimpleAgent {
     body = new Cylinder(radius, height, flags, appear);
 
     /*
-     * // allow geom intersect on each geom of the primitive cylinder
-     * allowIntersect(body.getShape(Cylinder.BODY));
+     * // allow geom intersect on each geom of the primitive cylinder allowIntersect(body.getShape(Cylinder.BODY));
      * allowIntersect(body.getShape(Cylinder.TOP));
      */
     // we must be able to change the pick flag of the agent
@@ -189,8 +185,8 @@ public class Agent extends SimpleAgent {
   }
 
   /**
-   * Creates the UI that may be associated to the agent. If the agent has set a
-   * Panel with setUIPanel a window is created containing the panel.
+   * Creates the UI that may be associated to the agent. If the agent has set a Panel with setUIPanel a window is created containing
+   * the panel.
    */
   JInternalFrame createUIWindow() {
     JPanel panel = getUIPanel();
@@ -335,7 +331,8 @@ public class Agent extends SimpleAgent {
   }
 
   /**
-   * @param rv Sets rotational velocity in radians per second.
+   * @param rv
+   *          Sets rotational velocity in radians per second.
    */
   public final void setRotationalVelocity(double rv) {
     // because it's one of the default kinematic fucntions we provide it in
@@ -346,7 +343,8 @@ public class Agent extends SimpleAgent {
   }
 
   /**
-   * @param tv Sets translational velocity in meter per second.
+   * @param tv
+   *          Sets translational velocity in meter per second.
    */
   public final void setTranslationalVelocity(double tv) {
     // because it's one of the default kinematic fucntions we provide it in
@@ -357,10 +355,11 @@ public class Agent extends SimpleAgent {
   }
 
   /**
-   * Add a UI panel to the agent. Typically used for displaying behavior
-   * outputs. A call to this method will have for consequence the creation of a
-   * dedicated window.
-   * @param panel p
+   * Add a UI panel to the agent. Typically used for displaying behavior outputs. A call to this method will have for consequence
+   * the creation of a dedicated window.
+   * 
+   * @param panel
+   *          p
    */
   public void setUIPanel(JPanel panel) {
     this.panel = panel;

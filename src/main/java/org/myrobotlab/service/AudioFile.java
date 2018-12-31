@@ -77,11 +77,11 @@ public class AudioFile extends Service {
   // http://stackoverflow.com/questions/198679/convert-audio-stream-to-wav-byte-array-in-java-without-temp-file
   // TODO - utilize
   // http://docs.oracle.com/javase/7/docs/api/javax/sound/sampled/Clip.html
-  
+
   // FIXME - AudioProcessor is a bit weird looking not sure if the decodedFormat stream is needed
   // FIXME - https://stackoverflow.com/questions/12863081/how-do-i-get-mixer-channels-layout-in-java support multiple mixers
   // FIXME - review - https://stackoverflow.com/questions/25798200/java-record-mic-to-byte-array-and-play-sound
-  // 
+  //
 
   String currentTrack = DEFAULT_TRACK;
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
@@ -228,8 +228,8 @@ public class AudioFile extends Service {
   }
 
   /*
-   * Specify the volume for playback on the audio file value 0.0 = off 1.0 =
-   * normal volume. (values greater than 1.0 may distort the original signal)
+   * Specify the volume for playback on the audio file value 0.0 = off 1.0 = normal volume. (values greater than 1.0 may distort the
+   * original signal)
    * 
    */
   public void setVolume(float volume) {
@@ -271,8 +271,8 @@ public class AudioFile extends Service {
     // TODO Auto-generated method stub
     return null;
   }
-  
-  public List<File> getFiles(){
+
+  public List<File> getFiles() {
     return getFiles(null, true);
   }
 
@@ -474,11 +474,11 @@ public class AudioFile extends Service {
   public void deleteFiles(String subDir) {
     // TODO Auto-generated method stub
     List<File> list = getFiles(subDir, true);
-    for (File file: list) {
+    for (File file : list) {
       try {
-      file.delete();
-      } catch(Exception e) {
-        
+        file.delete();
+      } catch (Exception e) {
+
       }
     }
   }
@@ -487,12 +487,10 @@ public class AudioFile extends Service {
     File file = new File(filename);
     file.delete();
   }
-  
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -508,10 +506,8 @@ public class AudioFile extends Service {
     meta.addDependency("com.googlecode.soundlibs", "vorbisspi", "1.0.3.3"); // is this being used ?
 
     /*
-     * meta.addDependency("javazoom.spi", "1.9.5");
-     * meta.addDependency("javazoom.jl.player", "1.0.1");
-     * meta.addDependency("org.tritonus.share.sampled.floatsamplebuffer",
-     * "0.3.6");
+     * meta.addDependency("javazoom.spi", "1.9.5"); meta.addDependency("javazoom.jl.player", "1.0.1");
+     * meta.addDependency("org.tritonus.share.sampled.floatsamplebuffer", "0.3.6");
      */
     return meta;
   }

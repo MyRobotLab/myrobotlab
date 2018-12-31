@@ -20,9 +20,12 @@ public class Matrix implements Serializable {
   public double[][] elements;
 
   /**
-   * @param sx scaling in the x direction
-   * @param sy scaling in the y direction
-   * @param sz scaling in the z direction
+   * @param sx
+   *          scaling in the x direction
+   * @param sy
+   *          scaling in the y direction
+   * @param sz
+   *          scaling in the z direction
    * @return the associated scaling transformation matrix
    */
   public static Matrix scaling(double sx, double sy, double sz) {
@@ -35,9 +38,12 @@ public class Matrix implements Serializable {
   }
 
   /**
-   * @param tx translations in the x direction
-   * @param ty translations in the y direction         
-   * @param tz translations in the z direction
+   * @param tx
+   *          translations in the x direction
+   * @param ty
+   *          translations in the y direction
+   * @param tz
+   *          translations in the z direction
    * @return the associated translation transformation matrix
    */
   public static Matrix translation(double tx, double ty, double tz) {
@@ -161,8 +167,8 @@ public class Matrix implements Serializable {
   }
 
   /**
-   * Computes the dot product (or scalar product) of two matrices by multiplying
-   * corresponding elements and summing all the products.
+   * Computes the dot product (or scalar product) of two matrices by multiplying corresponding elements and summing all the
+   * products.
    * 
    * @param m
    *          A Matrix with the same dimensions
@@ -230,7 +236,6 @@ public class Matrix implements Serializable {
       return ret;
     }
 
-
     for (int r = 0; r < numRows; r++)
       for (int c = 0; c < m.numCols; c++) {
         for (int k = 0; k < numCols; k++) {
@@ -253,23 +258,23 @@ public class Matrix implements Serializable {
     Matrix ak = new Matrix(numRows, 1);
     Matrix dk, ck, bk;
     Matrix R_plus;
-    try{
+    try {
       for (r = 0; r < numRows; r++) {
         ak.elements[r][0] = this.elements[r][0];
       }
-  
+
       if (!ak.equals(0.0)) {
         R_plus = ak.transpose().multiply(1.0 / (ak.dot(ak)));
       } else {
         R_plus = new Matrix(1, numCols);
       }
-  
+
       while (k < this.numCols) {
-  
+
         for (r = 0; r < numRows; r++) {
           ak.elements[r][0] = this.elements[r][k];
         }
-  
+
         dk = R_plus.multiply(ak);
         Matrix T = new Matrix(numRows, k);
         for (r = 0; r < numRows; r++) {
@@ -278,16 +283,16 @@ public class Matrix implements Serializable {
           }
         }
         ck = ak.subtractFrom(T.multiply(dk));
-  
+
         if (!ck.equals(0.0)) {
           bk = ck.transpose().multiply(1.0 / (ck.dot(ck)));
         } else {
           bk = dk.transpose().multiply(1.0 / (1.0 + dk.dot(dk))).multiply(R_plus);
         }
-  
+
         Matrix N = R_plus.subtractFrom(dk.multiply(bk));
         R_plus = new Matrix(N.numRows + 1, N.numCols);
-  
+
         for (r = 0; r < N.numRows; r++) {
           for (c = 0; c < N.numCols; c++) {
             R_plus.elements[r][c] = N.elements[r][c];
@@ -299,8 +304,7 @@ public class Matrix implements Serializable {
         k++;
       }
       return R_plus;
-    }
-    catch (ArrayIndexOutOfBoundsException e){
+    } catch (ArrayIndexOutOfBoundsException e) {
       return null;
     }
   }

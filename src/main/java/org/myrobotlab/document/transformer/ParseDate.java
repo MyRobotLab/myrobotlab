@@ -11,10 +11,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * This stage will take the values in the inputField and attempt to parse them
- * into a date object based on the formatString. The successfully parsed values
- * will be stored in the outputField. The values will overwrite the outputField
- * values.
+ * This stage will take the values in the inputField and attempt to parse them into a date object based on the formatString. The
+ * successfully parsed values will be stored in the outputField. The values will overwrite the outputField values.
  * 
  * @author kwatters
  *

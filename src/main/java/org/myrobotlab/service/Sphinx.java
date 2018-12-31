@@ -60,15 +60,14 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 /**
  * 
- * Sphinx - Speech recognition based on CMU Sphinx. This service must be told
- * what it's listening for. It does not do free-form speech recognition.
+ * Sphinx - Speech recognition based on CMU Sphinx. This service must be told what it's listening for. It does not do free-form
+ * speech recognition.
  * 
  */
 public class Sphinx extends AbstractSpeechRecognizer {
 
   /**
-   * Commands must be created "before" startListening startListening will create
-   * a grammar file from the data
+   * Commands must be created "before" startListening startListening will create a grammar file from the data
    *
    */
   public class Command {
@@ -130,7 +129,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
         while (isRunning) {
 
           info("listening: %b", isListening);
-          invoke("listeningEvent",true);
+          invoke("listeningEvent", true);
           Result result = recognizer.recognize();
 
           if (!isListening) {
@@ -382,8 +381,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /*
-   * public void publishRecognized(String recognizedText) { invoke("recognized",
-   * recognizedText); }
+   * public void publishRecognized(String recognizedText) { invoke("recognized", recognizedText); }
    */
 
   public void clearLock() {
@@ -391,14 +389,12 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /**
-   * createGrammar must be called before the Service starts if a new grammar is
-   * needed
+   * createGrammar must be called before the Service starts if a new grammar is needed
    * 
-   * example: Sphinx.createGrammar ("ear", "stop | go | left | right | back");
-   * ear = Runtime.create("ear", "Sphinx")
+   * example: Sphinx.createGrammar ("ear", "stop | go | left | right | back"); ear = Runtime.create("ear", "Sphinx")
    * 
-   * param filename
-   *          - name of the Service which will be utilizing this grammar
+   * param filename - name of the Service which will be utilizing this grammar
+   * 
    * @param grammar
    *          - grammar content
    * @return true/false
@@ -445,9 +441,8 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /*
-   * an inbound port for Speaking Services (TTS) - which suppress listening such
-   * that a system will not listen when its talking, otherwise a feedback loop
-   * can occur
+   * an inbound port for Speaking Services (TTS) - which suppress listening such that a system will not listen when its talking,
+   * otherwise a feedback loop can occur
    * 
    * 
    */
@@ -464,8 +459,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /**
-   * Event is sent when the listening Service is actually listening. There is
-   * some delay when it initially loads.
+   * Event is sent when the listening Service is actually listening. There is some delay when it initially loads.
    */
   @Override
   public void listeningEvent(Boolean event) {
@@ -473,22 +467,18 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /*
-   * FIXME - the trunk is broke - the configuration is horrible find a way to
-   * make this work, despite Sphinx's chaos !
+   * FIXME - the trunk is broke - the configuration is horrible find a way to make this work, despite Sphinx's chaos !
    * 
-   * function to swap grammars to allow sphinx a little more capability
-   * regarding "new words"
+   * function to swap grammars to allow sphinx a little more capability regarding "new words"
    * 
    * check http://cmusphinx.sourceforge.net/wiki/sphinx4:swappinggrammars
    * 
    * @throws PropertyException
    */
   /*
-   * FIXME SPHINX IS A MESS IT CAN"T DO THIS ALTHOUGH DOCUMENTATION SAYS IT CAN
-   * void swapGrammar(String newGrammarName) throws PropertyException,
-   * InstantiationException, IOException { log.debug("Swapping to grammar " +
-   * newGrammarName); Linguist linguist = (Linguist) cm.lookup("flatLinguist");
-   * linguist.deallocate(); // TODO - bundle sphinx4-1.0beta6 //
+   * FIXME SPHINX IS A MESS IT CAN"T DO THIS ALTHOUGH DOCUMENTATION SAYS IT CAN void swapGrammar(String newGrammarName) throws
+   * PropertyException, InstantiationException, IOException { log.debug("Swapping to grammar " + newGrammarName); Linguist linguist
+   * = (Linguist) cm.lookup("flatLinguist"); linguist.deallocate(); // TODO - bundle sphinx4-1.0beta6 //
    * cm.setProperty("jsgfGrammar", "grammarName", newGrammarName);
    * 
    * linguist.allocate(); }
@@ -499,19 +489,16 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /*
-   * deprecated public void onCommand(String command, String targetName, String
-   * targetMethod, Object... data) { Message msg = new Message(); msg.name =
-   * targetName; msg.method = targetMethod; msg.data = data;
+   * deprecated public void onCommand(String command, String targetName, String targetMethod, Object... data) { Message msg = new
+   * Message(); msg.name = targetName; msg.method = targetMethod; msg.data = data;
    * 
    * commandMap.put(command, msg); }
    */
 
   /**
-   * method to suppress recognition listening events This is important when
-   * Sphinx is listening --&gt; then Speaking, typically you don't want Sphinx to
-   * listen to its own speech, it causes a feedback loop and with Sphinx not
-   * really very accurate, it leads to weirdness -- additionally it does not
-   * recreate the speech processor - so its not as heavy handed
+   * method to suppress recognition listening events This is important when Sphinx is listening --&gt; then Speaking, typically you
+   * don't want Sphinx to listen to its own speech, it causes a feedback loop and with Sphinx not really very accurate, it leads to
+   * weirdness -- additionally it does not recreate the speech processor - so its not as heavy handed
    */
   @Override
   public synchronized void pauseListening() {
@@ -613,9 +600,8 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /**
-   * stopRecording - it does "work", however, the speech recognition part seems
-   * to degrade when startRecording is called. I have worked around this by not
-   * stopping the recording, but by not processing what was recognized
+   * stopRecording - it does "work", however, the speech recognition part seems to degrade when startRecording is called. I have
+   * worked around this by not stopping the recording, but by not processing what was recognized
    */
   @Override
   public void stopMsgRecording() {
@@ -664,9 +650,8 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -681,7 +666,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
     // https://cmusphinx.github.io/wiki/tutorialsphinx4/
     // meta.addDependency("javax.speech.recognition", "1.0");
     // meta.addDependency("edu.cmu.sphinx", "4-1.0beta6");
-    meta.addDependency("edu.cmu.sphinx", "sphinx4-core", "5prealpha-SNAPSHOT");    
+    meta.addDependency("edu.cmu.sphinx", "sphinx4-core", "5prealpha-SNAPSHOT");
     meta.addDependency("edu.cmu.sphinx", "sphinx4-data", "5prealpha-SNAPSHOT");
     return meta;
   }
@@ -689,7 +674,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public void setAutoListen(boolean autoListen) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -697,6 +682,5 @@ public class Sphinx extends AbstractSpeechRecognizer {
     // TODO Auto-generated method stub
     return false;
   }
-
 
 }

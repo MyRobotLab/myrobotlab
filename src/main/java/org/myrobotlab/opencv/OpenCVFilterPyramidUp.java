@@ -51,7 +51,7 @@ public class OpenCVFilterPyramidUp extends OpenCVFilter {
   }
 
   @Override
-  public void imageChanged(IplImage image) {    
+  public void imageChanged(IplImage image) {
   }
 
   @Override

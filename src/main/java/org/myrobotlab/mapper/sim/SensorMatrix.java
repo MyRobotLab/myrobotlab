@@ -25,8 +25,7 @@
 package org.myrobotlab.mapper.sim;
 
 /**
- * A luminance Matrix : a 2d array of normalized luminances. It can be obtained
- * from a vision sensor (Eye).
+ * A luminance Matrix : a 2d array of normalized luminances. It can be obtained from a vision sensor (Eye).
  */
 public class SensorMatrix extends SensorData {
 

@@ -49,7 +49,7 @@ public class WikiDataFetcher extends Service {
       log.info(doc.toString());
 
       log.info(getData("eiffel tower", "P2048"));
-      
+
       log.info(getData("nothing to test", "P2048"));
 
     } catch (Exception e) {
@@ -261,64 +261,64 @@ public class WikiDataFetcher extends Service {
     // remove the try for dubug :
     // https://github.com/MyRobotLab/myrobotlab/issues/94
     try {
-    ArrayList<Object> al = getSnak(query, ID);
-    // TODO manage all snaks and qualifiers
-    Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
-    String dataType = (String) al.get(0);
-    String answer = "";
-    System.out.print("Datatype : " + dataType);
-    // TODO put switch in a function out of getData()
-    switch (dataType) {
-      case "wikibase-item"://
-        String info = (String) data.toString();
-        int beginIndex = info.indexOf('Q');
-        int endIndex = info.indexOf("(");
-        info = info.substring(beginIndex, endIndex - 1);
-        answer = getLabelById(info);
-        break;
-      case "time"://
-        data = (TimeValue) data;
-        answer = String.valueOf(((TimeValue) data).getDay()) + "/" + String.valueOf(((TimeValue) data).getMonth()) + "/" + String.valueOf(((TimeValue) data).getYear());
-        break;
-      case "globe-coordinate":
-        answer = ((GlobeCoordinatesValue) data).toString();
-        break;
-      case "monolingualtext"://
-        data = (MonolingualTextValue) data;
-        answer = data.toString();
-        break;
-      case "quantity"://
-        data = (QuantityValue) data;
-        String quantity = String.valueOf(((QuantityValue) data).getNumericValue());
-        String unit = String.valueOf(((QuantityValue) data).getUnit());
-        // String unit = data.toString();
-        int beginIndex2 = unit.indexOf('Q');
-        if (beginIndex2 != -1) {
-          unit = unit.substring(beginIndex2);
-          if (Long.parseLong(quantity, 16) < 2) {
-            quantity += " " + getLabelById(unit);
-          } else {
-            quantity += " " + getLabelById(unit) + "s";
+      ArrayList<Object> al = getSnak(query, ID);
+      // TODO manage all snaks and qualifiers
+      Value data = ((JacksonValueSnak) al.get(1)).getDatavalue();
+      String dataType = (String) al.get(0);
+      String answer = "";
+      System.out.print("Datatype : " + dataType);
+      // TODO put switch in a function out of getData()
+      switch (dataType) {
+        case "wikibase-item"://
+          String info = (String) data.toString();
+          int beginIndex = info.indexOf('Q');
+          int endIndex = info.indexOf("(");
+          info = info.substring(beginIndex, endIndex - 1);
+          answer = getLabelById(info);
+          break;
+        case "time"://
+          data = (TimeValue) data;
+          answer = String.valueOf(((TimeValue) data).getDay()) + "/" + String.valueOf(((TimeValue) data).getMonth()) + "/" + String.valueOf(((TimeValue) data).getYear());
+          break;
+        case "globe-coordinate":
+          answer = ((GlobeCoordinatesValue) data).toString();
+          break;
+        case "monolingualtext"://
+          data = (MonolingualTextValue) data;
+          answer = data.toString();
+          break;
+        case "quantity"://
+          data = (QuantityValue) data;
+          String quantity = String.valueOf(((QuantityValue) data).getNumericValue());
+          String unit = String.valueOf(((QuantityValue) data).getUnit());
+          // String unit = data.toString();
+          int beginIndex2 = unit.indexOf('Q');
+          if (beginIndex2 != -1) {
+            unit = unit.substring(beginIndex2);
+            if (Long.parseLong(quantity, 16) < 2) {
+              quantity += " " + getLabelById(unit);
+            } else {
+              quantity += " " + getLabelById(unit) + "s";
+            }
           }
-        }
-        answer = quantity;
-        break;
-      case "propertyId":
-        answer = ((PropertyIdValue) data).toString();
-        break;
-      case "url"://
-        answer = data.toString();
-        break;
-      case "commonsMedia":
-        answer = data.toString();
-        break;
-      default:
-        answer = "Not Found !";
-        break;
-    }
-    return answer;
+          answer = quantity;
+          break;
+        case "propertyId":
+          answer = ((PropertyIdValue) data).toString();
+          break;
+        case "url"://
+          answer = data.toString();
+          break;
+        case "commonsMedia":
+          answer = data.toString();
+          break;
+        default:
+          answer = "Not Found !";
+          break;
+      }
+      return answer;
     } catch (Exception e) {
-    return "Not Found !";
+      return "Not Found !";
     }
   }
 
@@ -414,9 +414,8 @@ public class WikiDataFetcher extends Service {
   // document ? )
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
+   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
+   * dependencies, and peer definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -441,11 +440,9 @@ public class WikiDataFetcher extends Service {
     meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.5");
     meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.5");
     /*
-    meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");
-    meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-    meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
-    meta.addDependency("com.fasterxml.jackson.core", "2.5.0");
-    */
+     * meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT"); meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+     * meta.addDependency("org.apache.commons.commons-lang3", "3.3.2"); meta.addDependency("com.fasterxml.jackson.core", "2.5.0");
+     */
     meta.setCloudService(true);
     return meta;
   }

@@ -177,17 +177,17 @@ public abstract class OpenCVFilter implements Serializable {
   static private Mat read(String filename) {
     return imread(filename, CV_LOAD_IMAGE_UNCHANGED);
   }
-  
+
   /**
    * number of channels of incoming image
    */
   int channels;
-  
+
   /**
    * converters for the filter
    */
   transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-  
+
   /**
    * converter for the filter
    */
@@ -204,9 +204,8 @@ public abstract class OpenCVFilter implements Serializable {
   transient Color displayColor;
 
   /**
-   * This allows the display method to be processed in the filter
-   * typically its a conversion from opencv-jni-land to java-land
-   * and associated processing for human consumption
+   * This allows the display method to be processed in the filter typically its a conversion from opencv-jni-land to java-land and
+   * associated processing for human consumption
    */
   boolean displayEnabled = false;
 
@@ -301,8 +300,8 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   /**
-   * This is NOT the filter's image, but really the output of the previous
-   * filter ! to be used as input for "this" filters process method
+   * This is NOT the filter's image, but really the output of the previous filter ! to be used as input for "this" filters process
+   * method
    * 
    * @return
    */
@@ -336,8 +335,7 @@ public abstract class OpenCVFilter implements Serializable {
   public abstract IplImage process(IplImage image) throws InterruptedException;
 
   /**
-   * method which determines if this filter to process its display TODO - have
-   * it also decide if its cumulative display or not
+   * method which determines if this filter to process its display TODO - have it also decide if its cumulative display or not
    */
   public BufferedImage processDisplay() {
 
@@ -384,8 +382,7 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   /**
-   * when a filter is removed from the pipeline its given a chance to return
-   * resourcs
+   * when a filter is removed from the pipeline its given a chance to return resourcs
    */
   public void release() {
   }
@@ -443,7 +440,7 @@ public abstract class OpenCVFilter implements Serializable {
   /**
    * converting IplImages to BufferedImages
    */
-  public BufferedImage toBufferedImage(IplImage image) {    
+  public BufferedImage toBufferedImage(IplImage image) {
     return jconverter.convert(converterToImage.convert(image));
   }
 
@@ -455,7 +452,7 @@ public abstract class OpenCVFilter implements Serializable {
     return converterToImage.convert(image);
   }
 
-  public Frame toFrame(Mat image) {    
+  public Frame toFrame(Mat image) {
     return converterToImage.convert(image);
   }
 
@@ -477,7 +474,7 @@ public abstract class OpenCVFilter implements Serializable {
   public Mat toMat(Frame image) {
     return converterToImage.convertToMat(image);
   }
-  
+
   public Mat toMat(IplImage image) {
     return converterToMat.convert(converterToMat.convert(image));
   }
