@@ -60,7 +60,8 @@ public class RSSConnector extends AbstractConnector {
     // System.out.println(feed);
     // try {
     // feed = FeedParser.parse(url);
-    // } catch (FeedIOException | FeedXMLParseException | UnsupportedFeedException e) {
+    // } catch (FeedIOException | FeedXMLParseException |
+    // UnsupportedFeedException e) {
     // // TODO Auto-generated catch block
     // e.printStackTrace();
     // return;
@@ -125,8 +126,9 @@ public class RSSConnector extends AbstractConnector {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

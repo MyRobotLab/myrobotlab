@@ -18,8 +18,8 @@ import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 /**
- * Keyboard - The keyboard service will track keys that are pressed so they can be used as input to other services via the
- * addKeyListener(Service) call.
+ * Keyboard - The keyboard service will track keys that are pressed so they can
+ * be used as input to other services via the addKeyListener(Service) call.
  * 
  *
  */
@@ -137,7 +137,8 @@ public class Keyboard extends Service {
   }
 
   /*
-   * this method is what other services would use to subscribe to keyboard events
+   * this method is what other services would use to subscribe to keyboard
+   * events
    */
   public void addKeyListener(Service service) {
     addListener("publishKey", service.getName(), "onKey");
@@ -217,8 +218,9 @@ public class Keyboard extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

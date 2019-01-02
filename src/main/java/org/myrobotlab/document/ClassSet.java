@@ -11,7 +11,8 @@ public class ClassSet {
 
   int countLimit = 20;
   int totalCount = 0;
-  Long purgeDeltaTimeMs = null; // NOT NEEDED if done on the query side for count
+  Long purgeDeltaTimeMs = null; // NOT NEEDED if done on the query side for
+                                // count
   float totalConfidence = 0;
 
   List<Classification> timeline = new ArrayList<>();

@@ -10,10 +10,12 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 
 /**
- * A kafka connector that can subscribe to a string/string kafka stopic and publish records as they arrive.
+ * A kafka connector that can subscribe to a string/string kafka stopic and
+ * publish records as they arrive.
  * 
- * TODO: this isn't very configurable yet.. and doesn't really support much. it's really here for a reference and we can expand upon
- * it if anyone cares to use it.
+ * TODO: this isn't very configurable yet.. and doesn't really support much.
+ * it's really here for a reference and we can expand upon it if anyone cares to
+ * use it.
  * 
  * @author kwatters
  *
@@ -34,7 +36,8 @@ public class KafkaConnector extends Service {
   }
 
   public void connect() {
-    // TODO: expose more properties. or let them just pass through to the brigade config.
+    // TODO: expose more properties. or let them just pass through to the
+    // brigade config.
     Properties props = new Properties();
     props.put("bootstrap.servers", bootstrapServers);
     props.put("group.id", groupId);

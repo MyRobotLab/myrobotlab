@@ -13,13 +13,16 @@ package org.myrobotlab.serial;
 // A good list of parameter sets for various CRC algorithms can be found at http://reveng.sourceforge.net/crc-catalogue/.
 
 /**
- * This class provides utility functions for CRC calculation using either canonical straight forward approach or using "fast"
- * table-driven implementation. Note, that even though table-driven implementation is much faster for processing large amounts of
- * data and is commonly referred as fast algorithm, sometimes it might be quicker to calculate CRC using canonical algorithm then to
- * prepare the table for table-driven implementation.
+ * This class provides utility functions for CRC calculation using either
+ * canonical straight forward approach or using "fast" table-driven
+ * implementation. Note, that even though table-driven implementation is much
+ * faster for processing large amounts of data and is commonly referred as fast
+ * algorithm, sometimes it might be quicker to calculate CRC using canonical
+ * algorithm then to prepare the table for table-driven implementation.
  * 
  * <p>
- * Using src is easy. Here is an example of calculating CCITT crc in one call using canonical approach.
+ * Using src is easy. Here is an example of calculating CCITT crc in one call
+ * using canonical approach.
  * 
  * <pre>
  * {
@@ -31,7 +34,8 @@ package org.myrobotlab.serial;
  * </pre>
  * 
  * <p>
- * For larger data, table driven implementation is faster. Here is how to use it.
+ * For larger data, table driven implementation is faster. Here is how to use
+ * it.
  * 
  * <pre>
  * {
@@ -46,16 +50,23 @@ package org.myrobotlab.serial;
  * <p>
  * You can also reuse CRC object instance for another crc calculation.
  * <p>
- * Given that the only state for a CRC calculation is the "intermediate value" and it is stored in your code, you can even use same
- * CRC instance to calculate CRC of multiple data sets in parallel. And if data is too big, you may feed it in chunks
+ * Given that the only state for a CRC calculation is the "intermediate value"
+ * and it is stored in your code, you can even use same CRC instance to
+ * calculate CRC of multiple data sets in parallel. And if data is too big, you
+ * may feed it in chunks
  * 
  * <pre>
  * {
  *   &#64;code
  *   long curValue = tableDriven.init(); // initialize intermediate value
- *   curValue = tableDriven.update(curValue, "123456789".getBytes()); // feed first chunk
- *   curValue = tableDriven.update(curValue, "01234567890".getBytes()); // feed next chunk
- *   long xmodemCrc2 = tableDriven.finalCRC(curValue); // gets CRC of whole data ("12345678901234567890")
+ *   curValue = tableDriven.update(curValue, "123456789".getBytes()); // feed
+ *                                                                    // first
+ *                                                                    // chunk
+ *   curValue = tableDriven.update(curValue, "01234567890".getBytes()); // feed
+ *                                                                      // next
+ *                                                                      // chunk
+ *   long xmodemCrc2 = tableDriven.finalCRC(curValue); // gets CRC of whole data
+ *                                                     // ("12345678901234567890")
  *   System.out.printf("CRC is 0x%04X\n", xmodemCrc2); // prints "CRC is 0x2C89"
  * }
  * </pre>
@@ -63,15 +74,19 @@ package org.myrobotlab.serial;
  */
 public class CRC {
   /**
-   * Parameters represents set of parameters defining a particular CRC algorithm.
+   * Parameters represents set of parameters defining a particular CRC
+   * algorithm.
    */
   public static class Parameters {
     private int width; // Width of the CRC expressed in bits
     private long polynomial; // Polynomial used in this CRC calculation
-    private boolean reflectIn; // Refin indicates whether input bytes should be reflected
-    private boolean reflectOut; // Refout indicates whether input bytes should be reflected
+    private boolean reflectIn; // Refin indicates whether input bytes should be
+                               // reflected
+    private boolean reflectOut; // Refout indicates whether input bytes should
+                                // be reflected
     private long init; // Init is initial value for CRC calculation
-    private long finalXor; // Xor is a value for final xor to be applied before returning result
+    private long finalXor; // Xor is a value for final xor to be applied before
+                           // returning result
 
     public Parameters(int width, long polynomial, long init, boolean reflectIn, boolean reflectOut, long finalXor) {
       this.width = width;
@@ -121,14 +136,22 @@ public class CRC {
     public static final Parameters CRC16 = new Parameters(16, 0x8005, 0x0000, true, true, 0x0);
     /** XMODEM is a set of CRC parameters commonly referred as "XMODEM" */
     public static final Parameters XMODEM = new Parameters(16, 0x1021, 0x0000, false, false, 0x0);
-    /** XMODEM2 is another set of CRC parameters commonly referred as "XMODEM" */
+    /**
+     * XMODEM2 is another set of CRC parameters commonly referred as "XMODEM"
+     */
     public static final Parameters XMODEM2 = new Parameters(16, 0x8408, 0x0000, true, true, 0x0);
 
-    /** CRC32 is by far the the most commonly used CRC-32 polynom and set of parameters */
+    /**
+     * CRC32 is by far the the most commonly used CRC-32 polynom and set of
+     * parameters
+     */
     public static final Parameters CRC32 = new Parameters(32, 0x04C11DB7, 0x00FFFFFFFFL, true, true, 0x00FFFFFFFFL);
     /** IEEE is an alias to CRC32 */
     public static final Parameters IEEE = CRC32;
-    /** Castagnoli polynomial. used in iSCSI. And also provided by hash/crc32 package. */
+    /**
+     * Castagnoli polynomial. used in iSCSI. And also provided by hash/crc32
+     * package.
+     */
     public static final Parameters Castagnoli = new Parameters(32, 0x1EDC6F41L, 0x00FFFFFFFFL, true, true, 0x00FFFFFFFFL);
     /** CRC32C is an alias to Castagnoli */
     public static final Parameters CRC32C = Castagnoli;
@@ -166,9 +189,10 @@ public class CRC {
   }
 
   /**
-   * This method implements simple straight forward bit by bit calculation. It is relatively slow for large amounts of data, but
-   * does not require any preparation steps. As a result, it might be faster in some cases then building a table required for faster
-   * calculation.
+   * This method implements simple straight forward bit by bit calculation. It
+   * is relatively slow for large amounts of data, but does not require any
+   * preparation steps. As a result, it might be faster in some cases then
+   * building a table required for faster calculation.
    * 
    * @param crcParams
    *          CRC algorithm parameters
@@ -212,8 +236,9 @@ public class CRC {
   private long mask;
 
   /**
-   * Returns initial value for this CRC intermediate value This method is used when starting a new iterative CRC calculation (using
-   * init, update and finalCRC methods, possibly supplying data in chunks).
+   * Returns initial value for this CRC intermediate value This method is used
+   * when starting a new iterative CRC calculation (using init, update and
+   * finalCRC methods, possibly supplying data in chunks).
    * 
    * @return initial value for this CRC intermediate value
    */
@@ -222,15 +247,18 @@ public class CRC {
   }
 
   /**
-   * This method is used to feed data when performing iterative CRC calculation (using init, update and finalCRC methods, possibly
-   * supplying data in chunks). It can be called multiple times per CRC calculation to feed data to be processed in chunks.
+   * This method is used to feed data when performing iterative CRC calculation
+   * (using init, update and finalCRC methods, possibly supplying data in
+   * chunks). It can be called multiple times per CRC calculation to feed data
+   * to be processed in chunks.
    * 
    * @param curValue
    *          CRC intermediate value so far
    * @param chunk
    *          data chunk to b processed by this call
    * @param offset
-   *          is 0-based offset of the data to be processed in the array supplied
+   *          is 0-based offset of the data to be processed in the array
+   *          supplied
    * @param length
    *          indicates number of bytes to be processed.
    * @return updated intermediate value for this CRC
@@ -265,7 +293,8 @@ public class CRC {
   }
 
   /**
-   * This method should be called to retrieve actual CRC for the data processed so far.
+   * This method should be called to retrieve actual CRC for the data processed
+   * so far.
    * 
    * @param curValue
    *          CRC intermediate value so far
@@ -293,7 +322,8 @@ public class CRC {
   }
 
   /**
-   * Constructs a new CRC processor for table based CRC calculations. Underneath, it just calls finalCRC() method.
+   * Constructs a new CRC processor for table based CRC calculations.
+   * Underneath, it just calls finalCRC() method.
    * 
    * @param crcParams
    *          CRC algorithm parameters
@@ -319,8 +349,9 @@ public class CRC {
   }
 
   /**
-   * Is a convenience method to spare end users from explicit type conversion every time this package is used. Underneath, it just
-   * calls finalCRC() method.
+   * Is a convenience method to spare end users from explicit type conversion
+   * every time this package is used. Underneath, it just calls finalCRC()
+   * method.
    * 
    * @param curValue
    *          current intermediate crc state value
@@ -335,8 +366,9 @@ public class CRC {
   }
 
   /**
-   * Is a convenience method to spare end users from explicit type conversion every time this package is used. Underneath, it just
-   * calls finalCRC() method.
+   * Is a convenience method to spare end users from explicit type conversion
+   * every time this package is used. Underneath, it just calls finalCRC()
+   * method.
    * 
    * @param curValue
    *          current intermediate crc state value
@@ -351,8 +383,9 @@ public class CRC {
   }
 
   /**
-   * Is a convenience method to spare end users from explicit type conversion every time this package is used. Underneath, it just
-   * calls finalCRC() method.
+   * Is a convenience method to spare end users from explicit type conversion
+   * every time this package is used. Underneath, it just calls finalCRC()
+   * method.
    * 
    * @param curValue
    *          current intermediate crc state value

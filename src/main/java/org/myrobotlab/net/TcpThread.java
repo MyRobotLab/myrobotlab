@@ -107,7 +107,8 @@ public class TcpThread extends Thread {
         data.rxName = msg.name;
         data.rxMethod = msg.method;
 
-        // creating new mrluri to represent this connection... (its specific to a single client)
+        // creating new mrluri to represent this connection... (its specific to
+        // a single client)
         if (uri == null) {
           protocolKey = new URI(String.format("tcp://%s:%d", socket.getInetAddress().getHostAddress(), socket.getPort()));
           String mrlURI = String.format("mrl://%s/%s", myService.getName(), protocolKey.toString());
@@ -115,11 +116,15 @@ public class TcpThread extends Thread {
         }
 
         /**
-         * mrl works similar to - router x-forwarded in that it re-writes names in order to provide an abstraction to a remote
-         * system. This can prevent name collision and add clarity to remote system names - msg sender / name re-write are trivial -
-         * the danger &amp; difficulty comes when names are embedded in the data payload - such as register, addListener and
-         * other(?) methods - for example - service names as parameters ! - which "should" only happen with incorrect user scripts..
-         * because registration is where all info regarding foreign service names should come from
+         * mrl works similar to - router x-forwarded in that it re-writes names
+         * in order to provide an abstraction to a remote system. This can
+         * prevent name collision and add clarity to remote system names - msg
+         * sender / name re-write are trivial - the danger &amp; difficulty
+         * comes when names are embedded in the data payload - such as register,
+         * addListener and other(?) methods - for example - service names as
+         * parameters ! - which "should" only happen with incorrect user
+         * scripts.. because registration is where all info regarding foreign
+         * service names should come from
          */
         msg.sender = String.format("%s%s", myService.getPrefix(protocolKey), msg.sender);
 
@@ -136,7 +141,9 @@ public class TcpThread extends Thread {
         // FIXME - if Encode.getMethodSignature("publishState",
         // Service.class).equals(Encode.getMethodSignature(msg));
 
-        if ("publishState".equals(msg.method)) { // this is to a specific service not runtime - msg.name != null
+        if ("publishState".equals(msg.method)) { // this is to a specific
+                                                 // service not runtime -
+                                                 // msg.name != null
           // FIXME - normalize
           // router x-forwarded inbound proxy begin
           Object[] msgData = msg.data;
@@ -156,7 +163,8 @@ public class TcpThread extends Thread {
           // router x-forwarded inbound proxy end
         }
 
-        if ("onState".equals(msg.method)) { // this is to a specific service not runtime - msg.name != null
+        if ("onState".equals(msg.method)) { // this is to a specific service not
+                                            // runtime - msg.name != null
           // FIXME - normalize
           // router x-forwarded inbound proxy begin
           Object[] msgData = msg.data;
@@ -177,7 +185,9 @@ public class TcpThread extends Thread {
         }
 
         // establishing a callback route - src needs xforward modification
-        if ("addListener".equals(msg.method)) { // this is to a specific service not runtime - msg.name != null
+        if ("addListener".equals(msg.method)) { // this is to a specific service
+                                                // not runtime - msg.name !=
+                                                // null
           MRLListener listener = (MRLListener) msg.data[0];
           listener.callbackName = msg.sender;
         }
@@ -301,8 +311,10 @@ public class TcpThread extends Thread {
       }
 
       /*
-       * also nice for debugging boolean debug = true; if (debug){ if (msg.data != null){ for (Object o : msg.data){
-       * log.info(String.format("sending %s", o.getClass().getSimpleName())); } } }
+       * also nice for debugging boolean debug = true; if (debug){ if (msg.data
+       * != null){ for (Object o : msg.data){
+       * log.info(String.format("sending %s", o.getClass().getSimpleName())); }
+       * } }
        */
 
       out.writeObject(msg);

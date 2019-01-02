@@ -43,13 +43,15 @@ import com.pi4j.system.*;
 
 /**
  * 
- * RasPi - This is the MyRobotLab Service for the Raspberry Pi. It should allow all control offered by the great Pi4J project.
+ * RasPi - This is the MyRobotLab Service for the Raspberry Pi. It should allow
+ * all control offered by the great Pi4J project.
  * 
  * More Info : http://pi4j.com/
  * 
  */
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
-// TODO pi4j implementation NOWORKY : I/O errors, dont know why, not know this enough :)
+// TODO pi4j implementation NOWORKY : I/O errors, dont know why, not know this
+// enough :)
 public class RasPi extends Service implements I2CController, PinArrayControl {
 
   public static class I2CDeviceMap {
@@ -136,7 +138,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /*
-   * FIXME - make these methods createDigitalAndPwmPin public GpioPinDigitalOutput provisionDigitalOutputPin
+   * FIXME - make these methods createDigitalAndPwmPin public
+   * GpioPinDigitalOutput provisionDigitalOutputPin
    */
 
   public RasPi(String n) {
@@ -153,11 +156,13 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
       /*
        * Removed since it seems to make MRL stop
        * 
-       * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance(); log.info("GPIO Initiated");
+       * log.info("Initiating GPIO"); gpio = GpioFactory.getInstance();
+       * log.info("GPIO Initiated");
        */
       // TODO Check if the is correct. I don't think it is /Mats // GPIO pins
       /*
-       * should be provisioned in the CreateDevice /* gpio01 =gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
+       * should be provisioned in the CreateDevice /* gpio01
+       * =gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01); gpio03 =
        * gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03);
        */
     } else {
@@ -190,9 +195,11 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
     ArrayList<Integer> list = new ArrayList<Integer>();
     try {
       /*
-       * From its name we can easily deduce that it provides a communication link between ICs (integrated circuits). I2C is
-       * multimaster and can support a maximum of 112 devices on the bus. The specification declares that 128 devices can be
-       * connected to the I2C bus, but it also defines 16 reserved addresses.
+       * From its name we can easily deduce that it provides a communication
+       * link between ICs (integrated circuits). I2C is multimaster and can
+       * support a maximum of 112 devices on the bus. The specification declares
+       * that 128 devices can be connected to the I2C bus, but it also defines
+       * 16 reserved addresses.
        */
       I2CBus bus = I2CFactory.getInstance(busAddress);
 
@@ -334,8 +341,9 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -416,7 +424,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /**
-   * Forces usage of wiringPi library ( http://wiringpi.com/reference/i2c-library/ )
+   * Forces usage of wiringPi library (
+   * http://wiringpi.com/reference/i2c-library/ )
    * 
    * @param status
    */
@@ -425,7 +434,8 @@ public class RasPi extends Service implements I2CController, PinArrayControl {
   }
 
   /**
-   * Check if wiringPi library is used. Returns true when wiringPi library is used
+   * Check if wiringPi library is used. Returns true when wiringPi library is
+   * used
    * 
    * @return
    */

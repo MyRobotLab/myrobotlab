@@ -5,7 +5,8 @@ import org.myrobotlab.framework.Message;
 public interface MessageSender extends NameProvider {
 
   /**
-   * Send invoking messages to remote location to invoke {name} instance's {method} with no parameters.
+   * Send invoking messages to remote location to invoke {name} instance's
+   * {method} with no parameters.
    * 
    * @param name
    *          - name of destination service
@@ -15,7 +16,8 @@ public interface MessageSender extends NameProvider {
   public void send(String name, String method);
 
   /**
-   * Send invoking messages to remote location to invoke {name} instance's {method} with parameters data.
+   * Send invoking messages to remote location to invoke {name} instance's
+   * {method} with parameters data.
    * 
    * @param name
    *          - name of destination service

@@ -33,7 +33,8 @@ import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
 
 /**
- * This simple agent can be used for 'pacman' expermiment. See PickCherries Demo.
+ * This simple agent can be used for 'pacman' expermiment. See PickCherries
+ * Demo.
  */
 public class CherryAgent extends SimpleAgent {
 

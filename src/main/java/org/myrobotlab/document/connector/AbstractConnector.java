@@ -12,7 +12,8 @@ import org.myrobotlab.service.interfaces.DocumentPublisher;
 
 /**
  * 
- * AbstractConnector - base class for implementing a new document connector service.
+ * AbstractConnector - base class for implementing a new document connector
+ * service.
  * 
  */
 public abstract class AbstractConnector extends Service implements DocumentPublisher, DocumentConnector {

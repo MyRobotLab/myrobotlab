@@ -6,6 +6,7 @@ public class DockableTabData {
   int y;
   int width;
   int height;
-  // FYI - isShowing is a element on the ui - but you probably need to replicated this for json
+  // FYI - isShowing is a element on the ui - but you probably need to
+  // replicated this for json
   boolean isHidden = false;
 }

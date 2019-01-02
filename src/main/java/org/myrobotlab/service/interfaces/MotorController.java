@@ -33,12 +33,14 @@ import org.myrobotlab.math.interfaces.Mapper;
 public interface MotorController extends Attachable {
 
   // FIXME
-  // add getPortNames for "motor port" type controllers .. e.g. m1, m2 for Sabertooth & RoboClaw
+  // add getPortNames for "motor port" type controllers .. e.g. m1, m2 for
+  // Sabertooth & RoboClaw
 
   /**
    * 
-   * request for motor to move the motor can be queried for the new powerlevel and the controller shall appropriately change power
-   * level and direction if necessary
+   * request for motor to move the motor can be queried for the new powerlevel
+   * and the controller shall appropriately change power level and direction if
+   * necessary
    * 
    * @param motor
    *          the motor that will be moved
@@ -46,9 +48,11 @@ public interface MotorController extends Attachable {
   public void motorMove(MotorControl motor);
 
   /**
-   * moveTo - move the MotorControl a relative amount the amount can be negative or positive an integer value is expected
+   * moveTo - move the MotorControl a relative amount the amount can be negative
+   * or positive an integer value is expected
    * 
-   * param name - name of the MotorControl param position - positive or negative absolute amount to move the MotorControl
+   * param name - name of the MotorControl param position - positive or negative
+   * absolute amount to move the MotorControl
    * 
    * @param motor
    *          the motor that will be moved
@@ -65,8 +69,9 @@ public interface MotorController extends Attachable {
   public void motorStop(MotorControl motor);
 
   /**
-   * method for resetting all the variables of a motor this will reset counters if the motor is a stepper and / or other variables
-   * for other sorts of motors
+   * method for resetting all the variables of a motor this will reset counters
+   * if the motor is a stepper and / or other variables for other sorts of
+   * motors
    * 
    * @param motor
    *          the motor that will be reset
@@ -75,7 +80,8 @@ public interface MotorController extends Attachable {
   public void motorReset(MotorControl motor);
 
   /**
-   * if the motor controller uses ports - this method will return a list of ports
+   * if the motor controller uses ports - this method will return a list of
+   * ports
    * 
    * @return
    */

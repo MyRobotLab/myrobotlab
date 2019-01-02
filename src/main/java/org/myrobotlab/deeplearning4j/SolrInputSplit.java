@@ -23,7 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An inputsplit for deeplearning that uses a solr query to provide the training and testing datasets
+ * An inputsplit for deeplearning that uses a solr query to provide the training
+ * and testing datasets
  * 
  * @author kwatters
  *
@@ -46,7 +47,8 @@ public class SolrInputSplit extends BaseInputSplit {
   public SolrInputSplit(Solr solr, SolrQuery query, List<String> labels, String labelField) {
     this.solr = solr;
     this.query = query;
-    // TODO: i guess we're going to infer this so maybe we don't need it passed in?
+    // TODO: i guess we're going to infer this so maybe we don't need it passed
+    // in?
     this.labels = labels;
     this.labelField = labelField;
     // We should execute a result set
@@ -79,7 +81,8 @@ public class SolrInputSplit extends BaseInputSplit {
 
   @Override
   public InputStream openInputStreamFor(String location) throws Exception {
-    // I guess this is supposed to fetch a document by ID and return it as a stream?
+    // I guess this is supposed to fetch a document by ID and return it as a
+    // stream?
     // in the case of an image , i guess it's the
     // log.info("Open input stream for {}", location);
     // here we want to fetch a doc by id from the result set.
@@ -87,7 +90,8 @@ public class SolrInputSplit extends BaseInputSplit {
     // need to parse the doc id out of the location
     // TODO: this sucks.
     String locationId = location.split("\\\\")[2];
-    // TODO: Ick! we need to iterate the result set to find which one is this doc
+    // TODO: Ick! we need to iterate the result set to find which one is this
+    // doc
     byte[] bytes = byteMap.get(locationId);
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
     return bais;

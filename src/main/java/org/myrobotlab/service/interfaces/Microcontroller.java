@@ -13,10 +13,12 @@ public interface Microcontroller extends PinArrayControl {
   public BoardInfo getBoardInfo();
 
   /**
-   * a static request to return all possible "BoardTypes" which this service supports. Arduino would return many, as there are many
-   * board types of arduino.
+   * a static request to return all possible "BoardTypes" which this service
+   * supports. Arduino would return many, as there are many board types of
+   * arduino.
    * 
-   * Not sure if Beagle would "need" to return different types, unless it has different pin definitions for different variations.
+   * Not sure if Beagle would "need" to return different types, unless it has
+   * different pin definitions for different variations.
    * 
    * Parallax/Prop I think has several boards
    * 

@@ -73,7 +73,8 @@ public class CliGui extends ServiceGui implements KeyListener {
         }
         input.delete(input.length() - 2, input.length() - 1);
         /*
-         * Document doc = console.getDocument(); doc.remove(doc.getLength() - 1, 1);
+         * Document doc = console.getDocument(); doc.remove(doc.getLength() - 1,
+         * 1);
          */
       } catch (Exception e2) {
         log.error("doc", e2);
@@ -104,8 +105,10 @@ public class CliGui extends ServiceGui implements KeyListener {
   @Override
   public void keyTyped(KeyEvent e) {
     /*
-     * log.info("keyTyped {} {}", e.getKeyChar(), e.getKeyCode()); if (e.getKeyCode() == KeyEvent.VK_UNDEFINED){ e.consume();
-     * return; } input.append(e.getKeyChar()); int len = console.getDocument().getLength(); console.setCaretPosition(len);
+     * log.info("keyTyped {} {}", e.getKeyChar(), e.getKeyCode()); if
+     * (e.getKeyCode() == KeyEvent.VK_UNDEFINED){ e.consume(); return; }
+     * input.append(e.getKeyChar()); int len =
+     * console.getDocument().getLength(); console.setCaretPosition(len);
      */
   }
 

@@ -21,10 +21,12 @@ import topcodes.TopCode;
 
 /**
  * 
- * TopCodes - This service allows to recognize a special codes. You can print these codes using the attached topcodes.pdf. The
- * service gives back the following information : Number of the code recognized Coordinates of the center of the code (x,y) Diameter
- * of the code (which can be used to find distance) Angular rotation of the code ​THERE ARE 99 DIFFERENT CODES. CAMERA SHOULD BE AS
- * PERPENDICULAR AS POSSIBLE TO THE CODE, IN ORDER TO WORK WELL.
+ * TopCodes - This service allows to recognize a special codes. You can print
+ * these codes using the attached topcodes.pdf. The service gives back the
+ * following information : Number of the code recognized Coordinates of the
+ * center of the code (x,y) Diameter of the code (which can be used to find
+ * distance) Angular rotation of the code ​THERE ARE 99 DIFFERENT CODES. CAMERA
+ * SHOULD BE AS PERPENDICULAR AS POSSIBLE TO THE CODE, IN ORDER TO WORK WELL.
  *
  */
 public class TopCodes extends Service {
@@ -61,8 +63,8 @@ public class TopCodes extends Service {
   }
 
   /*
-   * Static list of third party dependencies for this service. The list will be consumed by Ivy to download and manage the
-   * appropriate resources
+   * Static list of third party dependencies for this service. The list will be
+   * consumed by Ivy to download and manage the appropriate resources
    * 
    */
 
@@ -88,8 +90,9 @@ public class TopCodes extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

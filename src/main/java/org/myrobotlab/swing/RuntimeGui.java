@@ -382,7 +382,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     menuBar.add(logging);
 
     /*
-     * JMenuItem item = new JMenuItem("check for updates"); item.addActionListener(this); system.add(item);
+     * JMenuItem item = new JMenuItem("check for updates");
+     * item.addActionListener(this); system.add(item);
      */
 
     JMenuItem item = new JMenuItem("install all");
@@ -465,13 +466,17 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     } else if ("check for updates".equals(cmd)) {
       send("checkForUpdates");
     } else if (cmd.equals(Level.DEBUG) || cmd.equals(Level.INFO) || cmd.equals(Level.WARN) || cmd.equals(Level.ERROR) || cmd.equals(Level.FATAL)) {
-      send("setLogLevel", cmd);/*
-                                * Logging logging = LoggingFactory.getInstance(); logging.setLevel(cmd);
-                                */
+      send("setLogLevel",
+          cmd);/*
+                * Logging logging = LoggingFactory.getInstance();
+                * logging.setLevel(cmd);
+                */
     } /*
-       * else if (cmd.equals(Appender.FILE)) { Logging logging = LoggingFactory.getInstance(); logging.addAppender(Appender.FILE); }
-       * else if (cmd.equals(Appender.CONSOLE)) { Logging logging = LoggingFactory.getInstance();
-       * logging.addAppender(Appender.CONSOLE); } else if (cmd.equals(Appender.NONE)) { Logging logging =
+       * else if (cmd.equals(Appender.FILE)) { Logging logging =
+       * LoggingFactory.getInstance(); logging.addAppender(Appender.FILE); }
+       * else if (cmd.equals(Appender.CONSOLE)) { Logging logging =
+       * LoggingFactory.getInstance(); logging.addAppender(Appender.CONSOLE); }
+       * else if (cmd.equals(Appender.NONE)) { Logging logging =
        * LoggingFactory.getInstance(); logging.removeAllAppenders();
        * 
        * }
@@ -628,7 +633,8 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
   }
 
   /*
-   * lame - deprecate - refactor - or better yet make webgui FIXME this should rarely change .... remove getServiceTypeNames
+   * lame - deprecate - refactor - or better yet make webgui FIXME this should
+   * rarely change .... remove getServiceTypeNames
    */
   public void getPossibleServicesFromCategory(final String filter) {
     SwingUtilities.invokeLater(new Runnable() {
@@ -710,14 +716,16 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
   }
 
   /**
-   * overridden - looking specifically for a key'd status to signal install progress dialog events
+   * overridden - looking specifically for a key'd status to signal install
+   * progress dialog events
    */
   public void onStatus(Status status) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         // FIXME - infinite loop - what a mess :P
-        // self.onStatus(status); // super.onStatus - if Swing threading wasn't so
+        // self.onStatus(status); // super.onStatus - if Swing threading wasn't
+        // so
         // silly
         // inheritence is defeated by this anonymous runnable class :P
 

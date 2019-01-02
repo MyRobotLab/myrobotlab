@@ -40,7 +40,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Loads kinect data from two files and displays the cloud in a 3D simple viewer.
+ * Loads kinect data from two files and displays the cloud in a 3D simple
+ * viewer.
  *
  * @author Peter Abeles
  */
@@ -78,7 +79,8 @@ public class DisplayKinectPointCloudApp {
     ShowImages.showWindow(viewer.getComponent(), "Point Cloud", true);
     System.out.println("Total points = " + cloud.size);
 
-    // BufferedImage depthOut = VisualizeImageData.disparity(depth, null, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
+    // BufferedImage depthOut = VisualizeImageData.disparity(depth, null, 0,
+    // UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
     // ShowImages.showWindow(depthOut,"Depth Image", true);
   }
 }

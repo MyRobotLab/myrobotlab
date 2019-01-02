@@ -67,10 +67,12 @@ import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 
 /**
- * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr is the popular, blazing-fast, open source
- * enterprise search platform built on Apache Lucene.
+ * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
+ * is the popular, blazing-fast, open source enterprise search platform built on
+ * Apache Lucene.
  * 
- * This service exposes a the solrj client to be able to add documents and query a solr server that is running.
+ * This service exposes a the solrj client to be able to add documents and query
+ * a solr server that is running.
  * 
  * For More info about Solr see http://lucene.apache.org/solr/
  * 
@@ -90,7 +92,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   // EmbeddedSolrServer embeddedSolrServer = null;
   transient private EmbeddedSolrServer embeddedSolrServer = null;
   // TODO: consider moving this tagging logic into opencv..
-  // for now, we'll just set a counter that will count down how many opencv frames
+  // for now, we'll just set a counter that will count down how many opencv
+  // frames
   // will be tagged with the given label.
   public String openCvLabel = null;
   public int openCvTrainingCount = 0;
@@ -112,7 +115,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * USE WITH CAUTION!!! This will DELETE ALL OF YOUR ROBOTS MEMORIES. THERE IS NO RECOVERY FROM THIS.
+   * USE WITH CAUTION!!! This will DELETE ALL OF YOUR ROBOTS MEMORIES. THERE IS
+   * NO RECOVERY FROM THIS.
    * 
    * @throws SolrServerException
    * @throws IOException
@@ -129,8 +133,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Start the embedded Solr instance with the solr home directory provided. This expects that you ahve a valid solr.xml and
-   * configset in that directory named "core1"
+   * Start the embedded Solr instance with the solr home directory provided.
+   * This expects that you ahve a valid solr.xml and configset in that directory
+   * named "core1"
    * 
    * @param path
    * @throws SolrServerException
@@ -193,8 +198,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Commit the solr index and make documents that have been submitted become searchable. There is also a timed "autoCommit" setting
-   * in the solrconfig.xml
+   * Commit the solr index and make documents that have been submitted become
+   * searchable. There is also a timed "autoCommit" setting in the
+   * solrconfig.xml
    * 
    */
   public void commit() {
@@ -230,7 +236,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Returns a document given the doc id from the index if it exists otherwise null
+   * Returns a document given the doc id from the index if it exists otherwise
+   * null
    * 
    * @throws IOException
    * @throws SolrServerException
@@ -263,14 +270,16 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * @return The url for the solr instance you wish to query. Defaults to http://localhost:8983/solr
+   * @return The url for the solr instance you wish to query. Defaults to
+   *         http://localhost:8983/solr
    */
   public String getSolrUrl() {
     return solrUrl;
   }
 
   /**
-   * Optimize the index, if the index gets very fragmented, this helps optimize performance and helps reclaim some disk space.
+   * Optimize the index, if the index gets very fragmented, this helps optimize
+   * performance and helps reclaim some disk space.
    */
   public void optimize() {
     try {
@@ -306,7 +315,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Helper method that will run a search, and return the bytes field from the first result decoded into an IplImage
+   * Helper method that will run a search, and return the bytes field from the
+   * first result decoded into an IplImage
    * 
    * @param queryString
    * @return
@@ -332,8 +342,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * This query returns the superset of all data that will be used for training and testing of a dl4j model. This will return a
-   * query that when executed will return the number of records found for the query, as well as a facet on the label field.
+   * This query returns the superset of all data that will be used for training
+   * and testing of a dl4j model. This will return a query that when executed
+   * will return the number of records found for the query, as well as a facet
+   * on the label field.
    * 
    * @param queryString
    * @param labelField
@@ -351,9 +363,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   public void createTrainingDataDir(SolrQuery query, String directory) throws IOException {
-    // This method will iterate a result set that contains images stored in the "bytes" field of a document
+    // This method will iterate a result set that contains images stored in the
+    // "bytes" field of a document
     // It will then save these images to a directory based on the "label" field.
-    // TODO: use cursor mark for deep pagination to produce this training set and avoid large memory usage
+    // TODO: use cursor mark for deep pagination to produce this training set
+    // and avoid large memory usage
     QueryResponse qres = search(query);
     File trainingDir = new File(directory);
     if (!trainingDir.exists()) {
@@ -384,7 +398,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Helper method to serialize an IplImage into a byte array. returns a png version of the original image
+   * Helper method to serialize an IplImage into a byte array. returns a png
+   * version of the original image
    * 
    * @param image
    * @return
@@ -421,7 +436,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     IplImage iplImage = iplConverter.convert(java2dConverter.convert(bufImage));
     // now convert the buffered image to ipl image
     return iplImage;
-    // Again this could be try with resources but the original example was in Scala
+    // Again this could be try with resources but the original example was in
+    // Scala
   }
 
   // for debugging.
@@ -436,7 +452,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * Helper search function that runs a search and returns a specified field from the first result
+   * Helper search function that runs a search and returns a specified field
+   * from the first result
    * 
    * @param queryString
    * @param fieldName
@@ -458,7 +475,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   public String fetchFirstResultSentence(String queryString, String fieldName) {
     String res = fetchFirstResultField(queryString, fieldName);
-    // Now we want to sentence detect this string.. and return the first sentence..
+    // Now we want to sentence detect this string.. and return the first
+    // sentence..
     // for now.. cheating, and just pulling everything up to the first period.
     if (!StringUtils.isEmpty(res)) {
       // TODO: better sentence boundary detection
@@ -509,7 +527,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   };
 
   /**
-   * Set the url for the solr instance to communicate with. This is not used with the embedded solr server
+   * Set the url for the solr instance to communicate with. This is not used
+   * with the embedded solr server
    */
   public void setSolrUrl(String solrUrl) {
     this.solrUrl = solrUrl;
@@ -559,7 +578,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
         if (o != null) {
           solrDoc.addField(fieldName, o);
           // let's implicitly add a text_en version of the field.
-          // TODO: understand language detection on the field and dynamically specficy which field type to use.
+          // TODO: understand language detection on the field and dynamically
+          // specficy which field type to use.
           solrDoc.addField(fieldName + "_txt_en", o);
         }
       }
@@ -596,8 +616,9 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -695,7 +716,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     return yoloObjects;
   }
 
-  // subscribe to this to get a callback when a particular yolo person label finished
+  // subscribe to this to get a callback when a particular yolo person label
+  // finished
   public String publishDoneYoloLabel(String label) {
     // here we should publish
     return label;
@@ -717,7 +739,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     this.openCvTrainingCount = count;
   }
 
-  // when attached to an opencv instance this will return images and save them to solr if there is a label / count specified
+  // when attached to an opencv instance this will return images and save them
+  // to solr if there is a label / count specified
   public OpenCVData onOpenCVData(OpenCVData data) {
     // Only record if we are training.
     if (openCvLabel == null) {
@@ -767,7 +790,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // add the document we just built up to solr so we can remember it!
     log.info("Saving snapshot.. of {}.", openCvLabel);
     addDocument(doc);
-    // TODO: kw, why return anything here at all?! who would ever call this method and depend on the response?
+    // TODO: kw, why return anything here at all?! who would ever call this
+    // method and depend on the response?
     return data;
   }
 
@@ -777,7 +801,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   // TODO: index the classifications with the cvdata. not separately..
-  // o/w we need a way to relate back to the frame that this is a classification of
+  // o/w we need a way to relate back to the frame that this is a classification
+  // of
   public Map<String, Double> onClassification(Map<String, Double> data) throws SolrServerException, IOException {
     // log.info("On Classification invoked!");
     SolrInputDocument doc = new SolrInputDocument();
@@ -855,8 +880,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * This method will iterate though all services in the system (except itself.) and attach the inboxes for indexing. Any time
-   * something is added to the inbox of a service, it will also trigger that message getting indexed in solr
+   * This method will iterate though all services in the system (except itself.)
+   * and attach the inboxes for indexing. Any time something is added to the
+   * inbox of a service, it will also trigger that message getting indexed in
+   * solr
    * 
    * this method can generate huge indexes and a lot of useless data!
    */
@@ -872,9 +899,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * This method will iterate though all services in the system (except itself.) and attach the outboxes for indexing. Any time
-   * something is added to the outbox of a service, it will also trigger that message getting indexed in solr. This happens when an
-   * invoke is called in the framework
+   * This method will iterate though all services in the system (except itself.)
+   * and attach the outboxes for indexing. Any time something is added to the
+   * outbox of a service, it will also trigger that message getting indexed in
+   * solr. This happens when an invoke is called in the framework
    * 
    * this method can generate huge indexes and a lot of useless data!
    */
@@ -892,13 +920,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   // attach a specific inbox
   public void attachInbox(Inbox inbox) {
-    // TODO: refactor this to just be attach(Service) or maybe we pass the inbox / outbox?
+    // TODO: refactor this to just be attach(Service) or maybe we pass the inbox
+    // / outbox?
     inbox.addMessageListener(this);
   }
 
   // attach a specific outbox
   public void attachOutbox(Outbox outbox) {
-    // TODO: refactor this to just be attach(Service) or maybe we pass the inbox / outbox?
+    // TODO: refactor this to just be attach(Service) or maybe we pass the inbox
+    // / outbox?
     outbox.addMessageListener(this);
   }
 
@@ -931,10 +961,12 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       }
     }
     // System.out.println("Data: " + message.data);
-    // TODO: now we need to introspect the array of objects and figure out how to index them!! gah..
+    // TODO: now we need to introspect the array of objects and figure out how
+    // to index them!! gah..
     if (message.data != null) {
       for (Object o : message.data) {
-        // TODO: this will probably blow up pretty bad for different object types
+        // TODO: this will probably blow up pretty bad for different object
+        // types
         doc.addField("data", o);
       }
     }
@@ -986,7 +1018,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   /**
-   * This method will issue an atomic update to the solr index for a given document id the value will be set on the document
+   * This method will issue an atomic update to the solr index for a given
+   * document id the value will be set on the document
    * 
    * @throws IOException
    * @throws SolrServerException

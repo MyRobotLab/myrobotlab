@@ -176,9 +176,10 @@ public class WiiDar extends Service {
   private static final long serialVersionUID = 1L;
 
   /*
-   * // TODO remoe these service ----- DEBUG ONLY ------ BEGIN Wii wii = new Wii("wii"); Arduino arduino = new Arduino("arduino");
-   * Servo servo = new Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); SwingGui gui = new SwingGui("gui"); // TODO remoe
-   * these service ----- DEBUG ONLY ------ END
+   * // TODO remoe these service ----- DEBUG ONLY ------ BEGIN Wii wii = new
+   * Wii("wii"); Arduino arduino = new Arduino("arduino"); Servo servo = new
+   * Servo("servo"); // OpenCV opencv = new OpenCV("opencv"); SwingGui gui = new
+   * SwingGui("gui"); // TODO remoe these service ----- DEBUG ONLY ------ END
    */
 
   public final static Logger log = LoggerFactory.getLogger(WiiDar.class);
@@ -210,9 +211,11 @@ public class WiiDar extends Service {
   transient ArrayList<IRData> irdata = new ArrayList<IRData>();
 
   /*
-   * WiiDar point represents a piece of data for ranging. It has a synced (by multiple methods) IRData and Servo Data. The
-   * synchronization can be software technique ie. pausing the system until a the servo command to move to a location has propagated
-   * to an IREvent. Or, preferably it would be a hardware event where an motor's encoder data is paired with the appropriate
+   * WiiDar point represents a piece of data for ranging. It has a synced (by
+   * multiple methods) IRData and Servo Data. The synchronization can be
+   * software technique ie. pausing the system until a the servo command to move
+   * to a location has propagated to an IREvent. Or, preferably it would be a
+   * hardware event where an motor's encoder data is paired with the appropriate
    * IREvent.
    */
 
@@ -235,43 +238,54 @@ public class WiiDar extends Service {
    * 
    * // in calibration mode invoke("setCalibrating", true);
    * 
-   * // move servo all the way to the right // increment servo left until IRData appears servo.moveTo(60); Thread.sleep(1000);
-   * lastIRData = null; lastEncoderData = null; arduino.pinMode(4, Arduino.INPUT); // set the encoder to input mode TODO - this
-   * could be bug worthy
+   * // move servo all the way to the right // increment servo left until IRData
+   * appears servo.moveTo(60); Thread.sleep(1000); lastIRData = null;
+   * lastEncoderData = null; arduino.pinMode(4, Arduino.INPUT); // set the
+   * encoder to input mode TODO - this could be bug worthy
    * 
-   * for (int i = 60; i < 180; ++i) { servo.moveTo(i); Thread.sleep(30); if (lastIRData != null) { invoke("setServoRightMax", i);
+   * for (int i = 60; i < 180; ++i) { servo.moveTo(i); Thread.sleep(30); if
+   * (lastIRData != null) { invoke("setServoRightMax", i);
    * invoke("setIRRightMax", lastIRData); break; } }
    * 
-   * // move servo all the way to the left // scan right until IRData appears servo.moveTo(180); Thread.sleep(1000); lastIRData =
-   * null; lastEncoderData = null;
+   * // move servo all the way to the left // scan right until IRData appears
+   * servo.moveTo(180); Thread.sleep(1000); lastIRData = null; lastEncoderData =
+   * null;
    * 
-   * for (int i = 180; i > 0; --i) { servo.moveTo(i); Thread.sleep(30); if (lastIRData != null) { invoke("setServoLeftMax", i);
-   * invoke("setIRLeftMax", lastIRData); break; } }
+   * for (int i = 180; i > 0; --i) { servo.moveTo(i); Thread.sleep(30); if
+   * (lastIRData != null) { invoke("setServoLeftMax", i); invoke("setIRLeftMax",
+   * lastIRData); break; } }
    * 
    * 
-   * // right scan for (int i = servoLeftMax; i > servoRightMax; --i) { Point p = new Point(i, i, RIGHT,
-   * System.currentTimeMillis()); servo.moveTo(i); Thread.sleep(30); p.ir = lastIRData; rightCalibrated.add(p); }
+   * // right scan for (int i = servoLeftMax; i > servoRightMax; --i) { Point p
+   * = new Point(i, i, RIGHT, System.currentTimeMillis()); servo.moveTo(i);
+   * Thread.sleep(30); p.ir = lastIRData; rightCalibrated.add(p); }
    * 
    * invoke("setRightCalibrated", rightCalibrated);
    * 
-   * // left scan for (int i = servoRightMax; i < servoLeftMax; ++i) { Point p = new Point(i, i, LEFT, System.currentTimeMillis());
-   * servo.moveTo(i); Thread.sleep(30); p.ir = lastIRData; leftCalibrated.add(p); }
+   * // left scan for (int i = servoRightMax; i < servoLeftMax; ++i) { Point p =
+   * new Point(i, i, LEFT, System.currentTimeMillis()); servo.moveTo(i);
+   * Thread.sleep(30); p.ir = lastIRData; leftCalibrated.add(p); }
    * 
    * invoke("setLeftCalibrated", leftCalibrated);
    * 
-   * // out of calibration mode invoke("setCalibrating", false); while (cnt < 15000) {
+   * // out of calibration mode invoke("setCalibrating", false); while (cnt <
+   * 15000) {
    * 
-   * int servoPause = 20; // right scan for (int i = servoLeftMax; i > servoRightMax; --i) { Point p = new Point(cnt, i, RIGHT,
-   * System.currentTimeMillis()); servo.moveTo(i); Thread.sleep(servoPause); p.ir = lastIRData; points.add(p); }
-   * 
-   * invoke("publishSweepData", copy(points)); points.clear();
-   * 
-   * // left scan for (int i = servoRightMax; i < servoLeftMax; ++i) { Point p = new Point(cnt, i, LEFT,
-   * System.currentTimeMillis()); servo.moveTo(i); Thread.sleep(servoPause); p.ir = lastIRData; points.add(p); }
+   * int servoPause = 20; // right scan for (int i = servoLeftMax; i >
+   * servoRightMax; --i) { Point p = new Point(cnt, i, RIGHT,
+   * System.currentTimeMillis()); servo.moveTo(i); Thread.sleep(servoPause);
+   * p.ir = lastIRData; points.add(p); }
    * 
    * invoke("publishSweepData", copy(points)); points.clear();
    * 
-   * ++cnt; } } catch (InterruptedException e) { // TODO Auto-generated catch block logException(e); }
+   * // left scan for (int i = servoRightMax; i < servoLeftMax; ++i) { Point p =
+   * new Point(cnt, i, LEFT, System.currentTimeMillis()); servo.moveTo(i);
+   * Thread.sleep(servoPause); p.ir = lastIRData; points.add(p); }
+   * 
+   * invoke("publishSweepData", copy(points)); points.clear();
+   * 
+   * ++cnt; } } catch (InterruptedException e) { // TODO Auto-generated catch
+   * block logException(e); }
    * 
    * }
    */
@@ -348,36 +362,48 @@ public class WiiDar extends Service {
   }
 
   /*
-   * public void initialize (Wii wii, Servo servo) { this.wii = wii; this.servo = servo;
+   * public void initialize (Wii wii, Servo servo) { this.wii = wii; this.servo
+   * = servo;
    * 
-   * // setting up wii wii.getWiimotes(); wii.setSensorBarAboveScreen(); wii.activateIRTRacking(); wii.setIrSensitivity(5); // 1-5
-   * (highest) wii.activateListening();
+   * // setting up wii wii.getWiimotes(); wii.setSensorBarAboveScreen();
+   * wii.activateIRTRacking(); wii.setIrSensitivity(5); // 1-5 (highest)
+   * wii.activateListening();
    * 
-   * // send data from the wii to wiidar wii.addListener(this, "publishIR", IRData.class.getCanonicalName());
+   * // send data from the wii to wiidar wii.addListener(this, "publishIR",
+   * IRData.class.getCanonicalName());
    * 
    * }
    * 
    * 
-   * public void startRobot() { // setting up servo servo.attach(arduino.getName(), 9);
+   * public void startRobot() { // setting up servo
+   * servo.attach(arduino.getName(), 9);
    * 
-   * // setting up wii wii.getWiimotes(); wii.setSensorBarAboveScreen(); wii.activateIRTRacking(); wii.setIrSensitivity(5); // 1-5
-   * (highest) wii.activateListening();
+   * // setting up wii wii.getWiimotes(); wii.setSensorBarAboveScreen();
+   * wii.activateIRTRacking(); wii.setIrSensitivity(5); // 1-5 (highest)
+   * wii.activateListening();
    * 
-   * // starting services gui.start(); servo.start(); arduino.start(); //opencv.start(); wii.start();
+   * // starting services gui.start(); servo.start(); arduino.start();
+   * //opencv.start(); wii.start();
    * 
-   * // TODO - make note that pinMode - will get lost if not done after serial communication is establised // setting
-   * listeners/notifiers
+   * // TODO - make note that pinMode - will get lost if not done after serial
+   * communication is establised // setting listeners/notifiers
    * 
-   * // send data from the wii to wiidar wii.addListener(this, "publishIR", IRData.class.getCanonicalName()); // data from widar to
-   * the gui addListener("publishArrayofPoints", gui.getName(),"displaySweepData", Point.class.getCanonicalName());
+   * // send data from the wii to wiidar wii.addListener(this, "publishIR",
+   * IRData.class.getCanonicalName()); // data from widar to the gui
+   * addListener("publishArrayofPoints", gui.getName(),"displaySweepData",
+   * Point.class.getCanonicalName());
    * 
-   * // send the data from the wii to wiidar // wii.addListener("publishIR", this.getName(), "computeDepth",
-   * IRData.class.getCanonicalName()); // send the computed depth &amp; data to the gui // addListener("computeDepth",
-   * gui.getName(),"publishSinglePoint", Point.class.getCanonicalName()); addListener("publishSinglePoint",
-   * gui.getName(),"publishSinglePoint", Point.class.getCanonicalName()); // gui.addListener("processImage",
-   * opencv.getName(),"input", BufferedImage.class.getCanonicalName()); //wii.addListener("publishPin", this.getName(),
-   * "publishPin", IRData.class.getCanonicalName()); arduino.addListener(this, SensorData.publishPin,
-   * PinData.class.getCanonicalName()); //wii.addListener(
+   * // send the data from the wii to wiidar // wii.addListener("publishIR",
+   * this.getName(), "computeDepth", IRData.class.getCanonicalName()); // send
+   * the computed depth &amp; data to the gui // addListener("computeDepth",
+   * gui.getName(),"publishSinglePoint", Point.class.getCanonicalName());
+   * addListener("publishSinglePoint", gui.getName(),"publishSinglePoint",
+   * Point.class.getCanonicalName()); // gui.addListener("processImage",
+   * opencv.getName(),"input", BufferedImage.class.getCanonicalName());
+   * //wii.addListener("publishPin", this.getName(), "publishPin",
+   * IRData.class.getCanonicalName()); arduino.addListener(this,
+   * SensorData.publishPin, PinData.class.getCanonicalName());
+   * //wii.addListener(
    * 
    * 
    * 
@@ -465,8 +491,9 @@ public class WiiDar extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

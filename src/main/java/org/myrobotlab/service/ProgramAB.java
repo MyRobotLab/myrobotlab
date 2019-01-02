@@ -37,8 +37,8 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 /**
- * Program AB service for MyRobotLab Uses AIML 2.0 to create a ChatBot This is a reboot of the Old AIML spec to be more 21st
- * century.
+ * Program AB service for MyRobotLab Uses AIML 2.0 to create a ChatBot This is a
+ * reboot of the Old AIML spec to be more 21st century.
  *
  * More Info at http://aitools.org/ProgramAB
  * 
@@ -123,7 +123,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * We don't use csv fiiles anymore, just a check there is no more aimlIf folder Check also if there is Aiml files inside folder...
+   * We don't use csv fiiles anymore, just a check there is no more aimlIf
+   * folder Check also if there is Aiml files inside folder...
    */
   private boolean checkBrain(String botName) {
     if (botName == null || botName.isEmpty()) {
@@ -331,7 +332,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * @param text
    *          - text to get a response for
    * @param delay
-   *          - min amount of time that must have transpired since the last response.
+   *          - min amount of time that must have transpired since the last
+   *          response.
    * @return the response
    */
   public Response getResponse(String userName, String text, Long delay) {
@@ -369,7 +371,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * Return the number of milliseconds since the last response was given -1 if a response has never been given.
+   * Return the number of milliseconds since the last response was given -1 if a
+   * response has never been given.
    * 
    * @return milliseconds
    */
@@ -490,12 +493,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /*
-   * publishing method of the pub sub pair - with addResponseListener allowing subscriptions pub/sub routines have the following
-   * pattern
+   * publishing method of the pub sub pair - with addResponseListener allowing
+   * subscriptions pub/sub routines have the following pattern
    * 
-   * publishing routine -&gt; publishX - must be invoked to provide data to subscribers subscription routine -&gt; addXListener -
-   * simply adds a Service listener to the notify framework any service which subscribes must implement -&gt; onX(data) - this is
-   * where the data will be sent (the call-back)
+   * publishing routine -&gt; publishX - must be invoked to provide data to
+   * subscribers subscription routine -&gt; addXListener - simply adds a Service
+   * listener to the notify framework any service which subscribes must
+   * implement -&gt; onX(data) - this is where the data will be sent (the
+   * call-back)
    * 
    */
   public Response publishResponse(Response response) {
@@ -548,7 +553,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       for (String userName : sessions.get(botName).keySet()) {
         String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
         File sessionPredFile = new File(sessionPredicateFilename);
-        // if the file doesn't exist.. we should create it.. (and make the directories for it.)
+        // if the file doesn't exist.. we should create it.. (and make the
+        // directories for it.)
         if (!sessionPredFile.getParentFile().exists()) {
           // create the directory.
           log.info("Creating the directory {}", sessionPredFile.getParentFile());
@@ -593,7 +599,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * Load the AIML 2.0 Bot config and start a chat session. This must be called after the service is created.
+   * Load the AIML 2.0 Bot config and start a chat session. This must be called
+   * after the service is created.
    * 
    * @param username
    *          - The new user name
@@ -622,18 +629,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     this.setCurrentUserName(userName);
 
     // TODO: remove this completely!
-    // Ignore the return value, this checkBrain method doesn't work as expected for bots defined externally.
+    // Ignore the return value, this checkBrain method doesn't work as expected
+    // for bots defined externally.
     checkBrain(botName);
 
     // TODO: manage the bots in a collective pool/hash map.
-    // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside standalone jar )
+    // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside
+    // standalone jar )
     if (bot == null) {
       bot = new Bot(botName, path, locale);
     } else if (!botName.equalsIgnoreCase(bot.name)) {
       bot = new Bot(botName, path, locale);
     }
 
-    // Hijack all the SRAIX requests and implement them as a synchronous call to a service to
+    // Hijack all the SRAIX requests and implement them as a synchronous call to
+    // a service to
     // return a string response for programab...
     MrlSraixHandler sraixHandler = new MrlSraixHandler();
     bot.setSraixHandler(sraixHandler);
@@ -675,7 +685,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // it is used to know the last username...
     if (sessions.get(botName).containsKey("default") && !userName.equals("default")) {
       setPredicate("default", "lastUsername", userName);
-      // robot surname is stored inside default.predicates, not inside system.prop
+      // robot surname is stored inside default.predicates, not inside
+      // system.prop
       setPredicate(userName, "botname", getPredicate("default", "botname"));
       try {
         savePredicates();
@@ -844,8 +855,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -860,7 +872,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
     // This is for CJK support in ProgramAB.
-    // TODO: move this into the published POM for ProgramAB so they are pulled in transiently.
+    // TODO: move this into the published POM for ProgramAB so they are pulled
+    // in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
     meta.addCategory("ai", "control");
@@ -875,9 +888,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
 
-      // logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO"); //org.myrobotlab.service.ProgramAB
+      // logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO");
+      // //org.myrobotlab.service.ProgramAB
 
-      // WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
+      // WebkitSpeechRecognition ear = (WebkitSpeechRecognition)
+      // Runtime.start("ear", "WebkitSpeechRecognition");
       // MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
       // mouth.attach(ear);
@@ -885,7 +900,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // brain.attach(mouth);
 
       // brain.startSession("default", "en-US");
-      // brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
+      // brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry",
+      // "kevin", "harry");
 
       // brain.savePredicates();
     } catch (Exception e) {

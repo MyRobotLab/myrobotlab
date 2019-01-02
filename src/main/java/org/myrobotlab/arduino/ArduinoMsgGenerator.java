@@ -36,7 +36,8 @@ public class ArduinoMsgGenerator {
   static final List<String> deviceList = new ArrayList<String>();
 
   /**
-   * supresses building of MrlComm::{Name} method if method already exists in Arduino
+   * supresses building of MrlComm::{Name} method if method already exists in
+   * Arduino
    * 
    */
 
@@ -699,7 +700,8 @@ public class ArduinoMsgGenerator {
 
       // camelback to underscore
       /*
-       * String regex = "[A-Z\\d]"; String replacement = "$1_"; log.info(t.replaceAll(regex, replacement)); log.info(t);
+       * String regex = "[A-Z\\d]"; String replacement = "$1_";
+       * log.info(t.replaceAll(regex, replacement)); log.info(t);
        */
 
       // log.info(CodecUtils.toUnderScore(t));

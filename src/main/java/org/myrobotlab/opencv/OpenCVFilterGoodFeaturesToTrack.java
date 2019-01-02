@@ -115,8 +115,8 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 
     for (int i = 0; i < count[0]; ++i) {
       /*
-       * since there is no subpixel selection - we don't need to round - we can cast x = Math.round(corners.x()); y =
-       * Math.round(corners.y());
+       * since there is no subpixel selection - we don't need to round - we can
+       * cast x = Math.round(corners.x()); y = Math.round(corners.y());
        */
       corners.position(i);
       x = (int) corners.x();

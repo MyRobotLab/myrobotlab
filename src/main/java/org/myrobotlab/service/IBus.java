@@ -32,7 +32,8 @@ public class IBus extends Service implements SerialDataListener {
 
   static final int PROTOCOL_LENGTH = 0x20;
   static final int PROTOCOL_OVERHEAD = 3; // <len><cmd><data....><chkl><chkh>
-  static final int PROTOCOL_TIMEGAP = 3; // Packets are received very ~7ms so use ~half that for the gap
+  static final int PROTOCOL_TIMEGAP = 3; // Packets are received very ~7ms so
+                                         // use ~half that for the gap
   static final int PROTOCOL_CHANNELS = 10;
   static final int PROTOCOL_COMMAND40 = 0x40; // Command is always 0x40
 
@@ -58,8 +59,9 @@ public class IBus extends Service implements SerialDataListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

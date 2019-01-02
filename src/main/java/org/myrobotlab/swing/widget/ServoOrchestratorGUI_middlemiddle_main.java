@@ -45,17 +45,20 @@ public class ServoOrchestratorGUI_middlemiddle_main {
    * This represents the data that is transmitted in drag and drop.
    * </p>
    * <p>
-   * In our limited case with only 1 type of dropped item, it will be a panel object!
+   * In our limited case with only 1 type of dropped item, it will be a panel
+   * object!
    * </p>
    * <p>
-   * Note DataFlavor can represent more than classes -- easily text, images, etc.
+   * Note DataFlavor can represent more than classes -- easily text, images,
+   * etc.
    * </p>
    */
   private static DataFlavor dragAndDropPanelDataFlavor = null;
 
   /**
    * <p>
-   * Returns (creating, if necessary) the DataFlavor representing ServoOrchestratorGUI_middlemiddle_panel
+   * Returns (creating, if necessary) the DataFlavor representing
+   * ServoOrchestratorGUI_middlemiddle_panel
    * </p>
    * 
    * @return data flavor
@@ -314,7 +317,8 @@ public class ServoOrchestratorGUI_middlemiddle_main {
    * </p>
    * <ul>
    * <li>Adding a new panel (user clicks on button)</li>
-   * <li>Re-ordering panels (user drags and drops a panel to acceptable drop target region)</li>
+   * <li>Re-ordering panels (user drags and drops a panel to acceptable drop
+   * target region)</li>
    * </ul>
    */
   public void relayout() {

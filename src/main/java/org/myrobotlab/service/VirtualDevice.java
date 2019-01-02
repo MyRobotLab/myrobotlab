@@ -22,9 +22,10 @@ import org.slf4j.Logger;
 
 /**
  * 
- * VirtualDevice - This is a virtual serial port device that can be used to redirect serial data over a network for example. Blender
- * service requires this so the serial commands to an inmoov and be pumped over the network to blender, rather than over the serial
- * port to an actual arduino.
+ * VirtualDevice - This is a virtual serial port device that can be used to
+ * redirect serial data over a network for example. Blender service requires
+ * this so the serial commands to an inmoov and be pumped over the network to
+ * blender, rather than over the serial port to an actual arduino.
  *
  */
 public class VirtualDevice extends Service implements SerialDataListener {
@@ -34,7 +35,8 @@ public class VirtualDevice extends Service implements SerialDataListener {
   public final static Logger log = LoggerFactory.getLogger(VirtualDevice.class);
 
   /**
-   * uarts - the serial endpoints for thing which need testing over serial connections
+   * uarts - the serial endpoints for thing which need testing over serial
+   * connections
    */
   transient HashMap<String, Serial> uarts = new HashMap<String, Serial>();
 
@@ -83,10 +85,12 @@ public class VirtualDevice extends Service implements SerialDataListener {
   }
 
   /*
-   * connecting to a virtual UART allows a Serial service to interface with a mocked hardware. To do this a Serial service creates 2
-   * stream ports and twists the virtual cable between them.
+   * connecting to a virtual UART allows a Serial service to interface with a
+   * mocked hardware. To do this a Serial service creates 2 stream ports and
+   * twists the virtual cable between them.
    * 
-   * A virtual port is half a virtual pipe, and if unconnected - typically is not very interesting...
+   * A virtual port is half a virtual pipe, and if unconnected - typically is
+   * not very interesting...
    * 
    */
 
@@ -142,10 +146,12 @@ public class VirtualDevice extends Service implements SerialDataListener {
   }
 
   /*
-   * preProcessHook is used to intercept messages and process or route them before being processed/invoked in the Service.
+   * preProcessHook is used to intercept messages and process or route them
+   * before being processed/invoked in the Service.
    * 
    * 
-   * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab. framework.Message)
+   * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.
+   * framework.Message)
    */
   @Override
   public boolean preProcessHook(Message msg) {
@@ -203,8 +209,9 @@ public class VirtualDevice extends Service implements SerialDataListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

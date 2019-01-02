@@ -16,12 +16,14 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * list of relations from a Service type to a Dependency key the key is used to look up in the masterList - this keeps the data
- * normalized and if one Service fulfills its dependency and the dependency is shared with another Service type, it is fulfilled
- * there too
+ * list of relations from a Service type to a Dependency key the key is used to
+ * look up in the masterList - this keeps the data normalized and if one Service
+ * fulfills its dependency and the dependency is shared with another Service
+ * type, it is fulfilled there too
  * 
- * The dependency key is the "org" - no version is keyed at the moment.. this would be something to avoid anyway (complexities of
- * cross-versions - jar hell)
+ * The dependency key is the "org" - no version is keyed at the moment.. this
+ * would be something to avoid anyway (complexities of cross-versions - jar
+ * hell)
  * 
  */
 public class ServiceType implements Serializable, Comparator<ServiceType> {

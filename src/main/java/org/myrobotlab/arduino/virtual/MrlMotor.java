@@ -71,7 +71,8 @@ public class MrlMotor extends Device {
   }
 
   public void update() {
-    // it may have an imprecision of +- 1 due to the conversion of currentPosUs to int
+    // it may have an imprecision of +- 1 due to the conversion of currentPosUs
+    // to int
     if (isMoving) {
       if ((int) currentPosUs != targetPosUs) {
         long deltaTime = millis() - lastUpdate;

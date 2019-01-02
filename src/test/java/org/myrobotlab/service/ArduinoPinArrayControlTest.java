@@ -91,7 +91,8 @@ public class ArduinoPinArrayControlTest {
 
     // arduino.setDebug(true);
     /*
-     * arduino.enablePin(14); arduino.enablePin(16); arduino.enablePin(17); arduino.disablePin(14);
+     * arduino.enablePin(14); arduino.enablePin(16); arduino.enablePin(17);
+     * arduino.disablePin(14);
      */
 
     boolean skip = true;
@@ -109,9 +110,11 @@ public class ArduinoPinArrayControlTest {
     /*
      * arduino.disconnect();
      * 
-     * pins = arduino.getPinList(); log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size()); logPins(pins);
+     * pins = arduino.getPinList(); log.info("Arduino {} has {} pins",
+     * arduino.getBoardType(), pins.size()); logPins(pins);
      * 
-     * arduino.setBoardMega(); pins = arduino.getPinList(); log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
+     * arduino.setBoardMega(); pins = arduino.getPinList();
+     * log.info("Arduino {} has {} pins", arduino.getBoardType(), pins.size());
      * logPins(pins);
      */
 
@@ -180,7 +183,8 @@ public class ArduinoPinArrayControlTest {
       test.testGetPinList();
 
       /*
-       * JUnitCore junit = new JUnitCore(); Result result = junit.run(ArduinoPinArrayControlTest.class); log.info("Result: {}",
+       * JUnitCore junit = new JUnitCore(); Result result =
+       * junit.run(ArduinoPinArrayControlTest.class); log.info("Result: {}",
        * result);
        */
 

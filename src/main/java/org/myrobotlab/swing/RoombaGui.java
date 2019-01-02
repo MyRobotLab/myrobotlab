@@ -495,10 +495,12 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
   }
 
   /*
-   * Play a (MIDI) note, that is, make the Roomba a musical instrument notenums 32-127: notenum == corresponding note played thru
-   * beeper velocity == duration in number of 1/64s of a second (e.g. 64==1second) notenum 24: notenum == main vacuum velocity ==
-   * non-zero turns on, zero turns off notenum 25: blink LEDs, velcoity is color of Power LED notenum 28 &amp; 29: spin left &amp;
-   * spin right, velocity is speed
+   * Play a (MIDI) note, that is, make the Roomba a musical instrument notenums
+   * 32-127: notenum == corresponding note played thru beeper velocity ==
+   * duration in number of 1/64s of a second (e.g. 64==1second) notenum 24:
+   * notenum == main vacuum velocity == non-zero turns on, zero turns off
+   * notenum 25: blink LEDs, velcoity is color of Power LED notenum 28 &amp; 29:
+   * spin left &amp; spin right, velocity is speed
    * 
    */
   public void playMidiNote(int notenum, int velocity) {
@@ -534,10 +536,12 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
   }
 
   /**
-   * setPorts is called by onState - which is called when the Arduino changes port state is NOT called by the SwingGui component
+   * setPorts is called by onState - which is called when the Arduino changes
+   * port state is NOT called by the SwingGui component
    * 
    * @param p
-   *          FIXME - there should be a corresponding gui element for the serial.Port ie serial.PortGUI such
+   *          FIXME - there should be a corresponding gui element for the
+   *          serial.Port ie serial.PortGUI such
    */
   public void setPorts(List<String> p) {
     portChoices.removeAllItems();
@@ -553,7 +557,8 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
   }
 
   /*
-   * Set to 'false' to hide the "h/w handshake" button, which seems to be only needed on Windows
+   * Set to 'false' to hide the "h/w handshake" button, which seems to be only
+   * needed on Windows
    */
   public void setShowHardwareHandhake(boolean b) {
     handshakeButton.setVisible(b);

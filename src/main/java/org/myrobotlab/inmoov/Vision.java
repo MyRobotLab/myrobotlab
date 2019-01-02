@@ -128,12 +128,14 @@ public class Vision {
   }
 
   /**
-   * Method to a analyze a yolo filter classifier ( maybe dl4j also ? ) This will count objects on the frame and get labels +
-   * positions //TODO individual position for multiple same labels..
+   * Method to a analyze a yolo filter classifier ( maybe dl4j also ? ) This
+   * will count objects on the frame and get labels + positions //TODO
+   * individual position for multiple same labels..
    */
   public void yoloInventory(TreeMap<String, List<Classification>> classifications) {
 
-    // reset previous same classified objects ( to count same objetcs on the frame )
+    // reset previous same classified objects ( to count same objetcs on the
+    // frame )
     for (Map.Entry<String, List<Classification>> entry : classifications.entrySet()) {
       List<Classification> value = entry.getValue();
       for (Classification document : value) {

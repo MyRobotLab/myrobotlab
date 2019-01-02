@@ -23,18 +23,23 @@ import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 public class OpenCVFilterUndistort extends OpenCVFilter {
 
   /**
-   * an undistortion filter that can add/remove a fisheye distortion to the image. Based on blog post here :
-   * https://github.com/opencv/opencv/blob/master/samples/cpp/calibration.cpp and CV docs here:
+   * an undistortion filter that can add/remove a fisheye distortion to the
+   * image. Based on blog post here :
+   * https://github.com/opencv/opencv/blob/master/samples/cpp/calibration.cpp
+   * and CV docs here:
    * https://docs.opencv.org/3.4.1/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
    * 
-   * The following code and coeffiecnets are taken directly from this stack overflow post.
+   * The following code and coeffiecnets are taken directly from this stack
+   * overflow post.
    * https://stackoverflow.com/questions/40545992/opencv-how-to-provide-matrix-for-undistort-if-i-know-lens-correction-factor
    * 
-   * This one is the bomb! https://medium.com/@kennethjiang/calibrate-fisheye-lens-using-opencv-333b05afa0b0
+   * This one is the bomb!
+   * https://medium.com/@kennethjiang/calibrate-fisheye-lens-using-opencv-333b05afa0b0
    * 
    * 
-   * This filter does not implement the calibration logic.. it expects the calibration matrix is already known and its hard coded!
-   * oops.. TODO: make it configurable.
+   * This filter does not implement the calibration logic.. it expects the
+   * calibration matrix is already known and its hard coded! oops.. TODO: make
+   * it configurable.
    */
   private static final long serialVersionUID = 1L;
 
@@ -64,8 +69,10 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
 
     // Ok this is what i got from the python calibrate.py script
     // DIM=(640, 480)
-    // K=np.array([[234.58254183078603, 0.0, 320.85112106077526], [0.0, 234.4039435813954, 266.33088304372257], [0.0, 0.0, 1.0]])
-    // D=np.array([[-0.04837465365620614], [0.0026450354779336965], [-0.00479882203273576], [0.0011053843631062754]])
+    // K=np.array([[234.58254183078603, 0.0, 320.85112106077526], [0.0,
+    // 234.4039435813954, 266.33088304372257], [0.0, 0.0, 1.0]])
+    // D=np.array([[-0.04837465365620614], [0.0026450354779336965],
+    // [-0.00479882203273576], [0.0011053843631062754]])
 
     // This is a 640x480 matrix.
     double[] cameraMatrixData = new double[] { 234.58254183078603, 0.0, 320.85112106077526, 0.0, 234.4039435813954, 266.33088304372257, 0.0, 0.0, 1.0 };
@@ -83,9 +90,12 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
     // };
 
     double[] distMatrixData = new double[] { -0.04837465365620614, 0.0026450354779336965, -0.00479882203273576, 0.0011053843631062754 };
-    // double[] distMatrixData = new double[]{-0.4016824381742f, 0.04368842493074f, 0.0f, 0.0f, 0.1096412142704f};
-    // double[] distMatrixData = new double[]{-5f, 0.04368842493074f, 0.0f, 0.0f, 0.1096412142704f};
-    // double[] distMatrixData = new double[]{-0.4016824381742f, 0.04368842493074f, 1.0f, 1.0f, 0.1096412142704f};
+    // double[] distMatrixData = new double[]{-0.4016824381742f,
+    // 0.04368842493074f, 0.0f, 0.0f, 0.1096412142704f};
+    // double[] distMatrixData = new double[]{-5f, 0.04368842493074f, 0.0f,
+    // 0.0f, 0.1096412142704f};
+    // double[] distMatrixData = new double[]{-0.4016824381742f,
+    // 0.04368842493074f, 1.0f, 1.0f, 0.1096412142704f};
     camMat = new Mat(3, 3, CV_32FC1);
     // now what's the distVec?
     distVec = new Mat(1, 4, CV_32FC1);
@@ -106,7 +116,8 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-    // TODO: implement this. perhaps reference: https://github.com/opencv/opencv/blob/master/samples/cpp/calibration.cpp
+    // TODO: implement this. perhaps reference:
+    // https://github.com/opencv/opencv/blob/master/samples/cpp/calibration.cpp
     Mat matIn = new Mat(image);
     Mat matOut = new Mat();
     undistort(matIn, matOut, camMat, distVec);

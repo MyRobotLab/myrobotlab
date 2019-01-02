@@ -60,7 +60,8 @@ import com.jme3.texture.Texture;
 public class PhysicsTestHelper {
 
   /**
-   * creates a simple physics test world with a floor, an obstacle and some test boxes
+   * creates a simple physics test world with a floor, an obstacle and some test
+   * boxes
    * 
    * @param rootNode
    *          root
@@ -83,7 +84,8 @@ public class PhysicsTestHelper {
     floorGeometry.setLocalTranslation(0, -5, 0);
     // Plane plane = new Plane();
     // plane.setOriginNormal(new Vector3f(0, 0.25f, 0), Vector3f.UNIT_Y);
-    // floorGeometry.addControl(new RigidBodyControl(new PlaneCollisionShape(plane), 0));
+    // floorGeometry.addControl(new RigidBodyControl(new
+    // PlaneCollisionShape(plane), 0));
     floorGeometry.addControl(new RigidBodyControl(0));
     rootNode.attachChild(floorGeometry);
     space.add(floorGeometry);
@@ -94,7 +96,8 @@ public class PhysicsTestHelper {
       Geometry boxGeometry = new Geometry("Box", box);
       boxGeometry.setMaterial(material);
       boxGeometry.setLocalTranslation(i, 5, -3);
-      // RigidBodyControl automatically uses box collision shapes when attached to single geometry with box mesh
+      // RigidBodyControl automatically uses box collision shapes when attached
+      // to single geometry with box mesh
       boxGeometry.addControl(new RigidBodyControl(2));
       rootNode.attachChild(boxGeometry);
       space.add(boxGeometry);
@@ -125,7 +128,8 @@ public class PhysicsTestHelper {
     floorGeometry.setLocalTranslation(0, -0.25f, 0);
     // Plane plane = new Plane();
     // plane.setOriginNormal(new Vector3f(0, 0.25f, 0), Vector3f.UNIT_Y);
-    // floorGeometry.addControl(new RigidBodyControl(new PlaneCollisionShape(plane), 0));
+    // floorGeometry.addControl(new RigidBodyControl(new
+    // PlaneCollisionShape(plane), 0));
     floorGeometry.addControl(new RigidBodyControl(0));
     rootNode.attachChild(floorGeometry);
     space.add(floorGeometry);
@@ -136,7 +140,8 @@ public class PhysicsTestHelper {
       Geometry ballGeometry = new Geometry("Soccer ball", sphere);
       ballGeometry.setMaterial(material);
       ballGeometry.setLocalTranslation(i, 2, -3);
-      // RigidBodyControl automatically uses Sphere collision shapes when attached to single geometry with sphere mesh
+      // RigidBodyControl automatically uses Sphere collision shapes when
+      // attached to single geometry with sphere mesh
       ballGeometry.addControl(new RigidBodyControl(.001f));
       ballGeometry.getControl(RigidBodyControl.class).setRestitution(1);
       rootNode.attachChild(ballGeometry);
@@ -177,7 +182,8 @@ public class PhysicsTestHelper {
     Box box = new Box(0.25f, 0.25f, 0.25f);
     Geometry boxGeometry = new Geometry("Box", box);
     boxGeometry.setMaterial(material);
-    // RigidBodyControl automatically uses box collision shapes when attached to single geometry with box mesh
+    // RigidBodyControl automatically uses box collision shapes when attached to
+    // single geometry with box mesh
     boxGeometry.addControl(new RigidBodyControl(2));
     return boxGeometry;
   }
@@ -195,7 +201,8 @@ public class PhysicsTestHelper {
     Sphere sphere = new Sphere(8, 8, 0.25f);
     Geometry boxGeometry = new Geometry("Sphere", sphere);
     boxGeometry.setMaterial(material);
-    // RigidBodyControl automatically uses sphere collision shapes when attached to single geometry with sphere mesh
+    // RigidBodyControl automatically uses sphere collision shapes when attached
+    // to single geometry with sphere mesh
     boxGeometry.addControl(new RigidBodyControl(2));
     return boxGeometry;
   }
@@ -219,7 +226,8 @@ public class PhysicsTestHelper {
   }
 
   /**
-   * creates the necessary inputlistener and action to shoot balls from teh camera
+   * creates the necessary inputlistener and action to shoot balls from teh
+   * camera
    * 
    * @param app
    *          a

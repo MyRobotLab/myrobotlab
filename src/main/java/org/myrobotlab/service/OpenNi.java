@@ -30,14 +30,19 @@ import SimpleOpenNI.SimpleOpenNIConstants;
 /**
  * @author GroG
  * 
- *         Service to expose the capabilities of kinect like sensors through a modified SimpleOpenNI interface
+ *         Service to expose the capabilities of kinect like sensors through a
+ *         modified SimpleOpenNI interface
  * 
  *         References
  * 
- *         http://stackoverflow.com/questions/2676719/calculating-the-angle- between-the-line-defined-by-two-points
- *         http://stackoverflow.com/questions /9614109/how-to-calculate-an-angle-from-points http://nghiaho.com/?page_id=846
- *         https://www.youtube.com/watch?v=KKuiuctKGRQ Some snippets are taken from "Making Things See" a excellent book and I
- *         recommend buying it http://shop.oreilly.com/product/0636920020684.do
+ *         http://stackoverflow.com/questions/2676719/calculating-the-angle-
+ *         between-the-line-defined-by-two-points
+ *         http://stackoverflow.com/questions
+ *         /9614109/how-to-calculate-an-angle-from-points
+ *         http://nghiaho.com/?page_id=846
+ *         https://www.youtube.com/watch?v=KKuiuctKGRQ Some snippets are taken
+ *         from "Making Things See" a excellent book and I recommend buying it
+ *         http://shop.oreilly.com/product/0636920020684.do
  * 
  */
 public class OpenNi extends Service // implements
@@ -276,7 +281,8 @@ public class OpenNi extends Service // implements
   }
 
   /**
-   * Taken from "Making Things See" a excellent book and I recommend buying it http://shop.oreilly.com/product/0636920020684.do
+   * Taken from "Making Things See" a excellent book and I recommend buying it
+   * http://shop.oreilly.com/product/0636920020684.do
    * 
    * @param one
    * @param two
@@ -430,8 +436,8 @@ public class OpenNi extends Service // implements
     // begin angular decomposition & projections
 
     /**
-     * initially started from "Making Things See" a excellent book and I recommend buying it
-     * http://shop.oreilly.com/product/0636920020684.do
+     * initially started from "Making Things See" a excellent book and I
+     * recommend buying it http://shop.oreilly.com/product/0636920020684.do
      */
 
     // reduce our joint vectors to two dimensions
@@ -488,29 +494,39 @@ public class OpenNi extends Service // implements
     skeleton.leftShoulder.setAngleYZ(leftShoulderAngleYZ);
 
     /*
-     * leftShoulderAngleYZmin = (leftShoulderAngleYZ < leftShoulderAngleYZmin) ? leftShoulderAngleYZ : leftShoulderAngleYZmin;
-     * leftShoulderAngleYZmax = (leftShoulderAngleYZ > leftShoulderAngleYZmax) ? leftShoulderAngleYZ : leftShoulderAngleYZmax;
+     * leftShoulderAngleYZmin = (leftShoulderAngleYZ < leftShoulderAngleYZmin) ?
+     * leftShoulderAngleYZ : leftShoulderAngleYZmin; leftShoulderAngleYZmax =
+     * (leftShoulderAngleYZ > leftShoulderAngleYZmax) ? leftShoulderAngleYZ :
+     * leftShoulderAngleYZmax;
      * 
-     * leftShoulderAngleXYmin = (leftShoulderAngleXY < leftShoulderAngleXYmin) ? leftShoulderAngleXY : leftShoulderAngleXYmin;
-     * leftShoulderAngleXYmax = (leftShoulderAngleXY > leftShoulderAngleXYmax) ? leftShoulderAngleXY : leftShoulderAngleXYmax;
+     * leftShoulderAngleXYmin = (leftShoulderAngleXY < leftShoulderAngleXYmin) ?
+     * leftShoulderAngleXY : leftShoulderAngleXYmin; leftShoulderAngleXYmax =
+     * (leftShoulderAngleXY > leftShoulderAngleXYmax) ? leftShoulderAngleXY :
+     * leftShoulderAngleXYmax;
      * 
-     * leftElbowAngleXYmin = (leftElbowAngleXY < leftElbowAngleXYmin) ? leftElbowAngleXY : leftElbowAngleXYmin; leftElbowAngleXYmax
-     * = (leftElbowAngleXY > leftElbowAngleXYmax) ? leftElbowAngleXY : leftElbowAngleXYmax;
+     * leftElbowAngleXYmin = (leftElbowAngleXY < leftElbowAngleXYmin) ?
+     * leftElbowAngleXY : leftElbowAngleXYmin; leftElbowAngleXYmax =
+     * (leftElbowAngleXY > leftElbowAngleXYmax) ? leftElbowAngleXY :
+     * leftElbowAngleXYmax;
      */
 
     /*
-     * g2d.drawString(String.format("shoulder min %d max %d %d %d", Math.round(rightShoulderAngleYZ),
-     * Math.round(leftShoulderAngleYZ)), 20, 30); g2d.drawString(String.format("omoplate min %d max %d %d %d",
-     * Math.round(rightShoulderAngleXY), Math.round(leftShoulderAngleXY)), 20, 40);
-     * g2d.drawString(String.format("bicep min %d max %d %d %d", Math.round(rightElbowAngleXY), Math.round(leftElbowAngleXY)), 20,
-     * 50);
+     * g2d.drawString(String.format("shoulder min %d max %d %d %d",
+     * Math.round(rightShoulderAngleYZ), Math.round(leftShoulderAngleYZ)), 20,
+     * 30); g2d.drawString(String.format("omoplate min %d max %d %d %d",
+     * Math.round(rightShoulderAngleXY), Math.round(leftShoulderAngleXY)), 20,
+     * 40); g2d.drawString(String.format("bicep min %d max %d %d %d",
+     * Math.round(rightElbowAngleXY), Math.round(leftElbowAngleXY)), 20, 50);
      */
     /*
-     * g2d.drawString(String.format("shoulder min %d max %d cur %d", Math.round(leftShoulderAngleYZmin),
-     * Math.round(leftShoulderAngleYZmax), Math.round(leftShoulderAngleYZ)), 20, 30); g2d.drawString(String.format(
-     * "omoplate min %d max %d cur %d", Math.round(leftShoulderAngleXYmin), Math.round(leftShoulderAngleXYmax),
-     * Math.round(leftShoulderAngleXY)), 20, 40); g2d.drawString(String.format("bicep min %d max %d cur %d",
-     * Math.round(leftElbowAngleXYmin), Math.round(leftElbowAngleXYmax), Math.round(leftElbowAngleXY)), 20, 50);
+     * g2d.drawString(String.format("shoulder min %d max %d cur %d",
+     * Math.round(leftShoulderAngleYZmin), Math.round(leftShoulderAngleYZmax),
+     * Math.round(leftShoulderAngleYZ)), 20, 30); g2d.drawString(String.format(
+     * "omoplate min %d max %d cur %d", Math.round(leftShoulderAngleXYmin),
+     * Math.round(leftShoulderAngleXYmax), Math.round(leftShoulderAngleXY)), 20,
+     * 40); g2d.drawString(String.format("bicep min %d max %d cur %d",
+     * Math.round(leftElbowAngleXYmin), Math.round(leftElbowAngleXYmax),
+     * Math.round(leftElbowAngleXY)), 20, 50);
      */
 
     // invoke("publish", skeleton);
@@ -930,8 +946,9 @@ public class OpenNi extends Service // implements
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

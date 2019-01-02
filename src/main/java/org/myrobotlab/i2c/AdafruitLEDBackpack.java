@@ -43,13 +43,14 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 /**
  * <p>
- * This GPIO provider implements the PCF8574 I2C GPIO expansion board as native Pi4J GPIO pins. More information about the board can
- * be found here: * http://www.ti.com/lit/ds/symlink/pcf8574.pdf
+ * This GPIO provider implements the PCF8574 I2C GPIO expansion board as native
+ * Pi4J GPIO pins. More information about the board can be found here: *
+ * http://www.ti.com/lit/ds/symlink/pcf8574.pdf
  * </p>
  * 
  * <p>
- * The PCF8574 is connected via I2C connection to the Raspberry Pi and provides 8 GPIO pins that can be used for either digital
- * input or digital output pins.
+ * The PCF8574 is connected via I2C connection to the Raspberry Pi and provides
+ * 8 GPIO pins that can be used for either digital input or digital output pins.
  * </p>
  * 
  * @author Robert Savage

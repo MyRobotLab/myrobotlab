@@ -23,8 +23,8 @@ import org.tensorflow.Tensor;
 import org.tensorflow.TensorFlow;
 
 /**
- * Tensorflow - More info at : https://www.tensorflow.org/install/install_java Currently only supported on windows / linux 64 /
- * macosx no ARM support. (yet)
+ * Tensorflow - More info at : https://www.tensorflow.org/install/install_java
+ * Currently only supported on windows / linux 64 / macosx no ARM support. (yet)
  * 
  * @author kwatters
  *
@@ -45,7 +45,8 @@ public class Tensorflow extends Service {
      */
     meta.addDescription("Tensorflow machine learning library from Google");
     meta.addCategory("ai");
-    // TODO: what happens when you try to install this on an ARM processor like RasPI or the Jetson TX2 ?
+    // TODO: what happens when you try to install this on an ARM processor like
+    // RasPI or the Jetson TX2 ?
     meta.addDependency("org.tensorflow", "tensorflow", "1.8.0");
 
     // enable GPU support ?
@@ -60,14 +61,16 @@ public class Tensorflow extends Service {
   }
 
   public static void main(String[] args) throws Exception {
-    // Test code taken directly from the tensorflow webpage to verify that the libraries have loaded as expected.
+    // Test code taken directly from the tensorflow webpage to verify that the
+    // libraries have loaded as expected.
     try (Graph g = new Graph()) {
       final String value = "Hello from " + TensorFlow.version();
 
       // Construct the computation graph with a single operation, a constant
       // named "MyConst" with a value "value".
       try (Tensor t = Tensor.create(value.getBytes("UTF-8"))) {
-        // The Java API doesn't yet include convenience functions for adding operations.
+        // The Java API doesn't yet include convenience functions for adding
+        // operations.
         g.opBuilder("Const", "MyConst").setAttr("dtype", t.dataType()).setAttr("value", t).build();
       }
 

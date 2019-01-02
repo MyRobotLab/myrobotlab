@@ -173,20 +173,26 @@ public class AudioCapture extends Service {
     }
 
     /*
-     * AudioInputStream stream = AudioSystem.getAudioInputStream(new File( "bump.wav")); // stream =
-     * AudioSystem.getAudioInputStream(new URL( // "http://hostname/audiofile"));
+     * AudioInputStream stream = AudioSystem.getAudioInputStream(new File(
+     * "bump.wav")); // stream = AudioSystem.getAudioInputStream(new URL( //
+     * "http://hostname/audiofile"));
      * 
-     * AudioFormat format = stream.getFormat(); if (format.getEncoding() != AudioFormat.Encoding.PCM_SIGNED) { format = new
-     * AudioFormat(AudioFormat.Encoding.PCM_SIGNED, format .getSampleRate(), format.getSampleSizeInBits() * 2, format
-     * .getChannels(), format.getFrameSize() * 2, format.getFrameRate(), true); // big endian stream =
-     * AudioSystem.getAudioInputStream(format, stream); }
+     * AudioFormat format = stream.getFormat(); if (format.getEncoding() !=
+     * AudioFormat.Encoding.PCM_SIGNED) { format = new
+     * AudioFormat(AudioFormat.Encoding.PCM_SIGNED, format .getSampleRate(),
+     * format.getSampleSizeInBits() * 2, format .getChannels(),
+     * format.getFrameSize() * 2, format.getFrameRate(), true); // big endian
+     * stream = AudioSystem.getAudioInputStream(format, stream); }
      * 
-     * SourceDataLine.Info info = new DataLine.Info(SourceDataLine.class, stream .getFormat(), ((int) stream.getFrameLength() *
-     * format.getFrameSize())); SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info); line.open(stream.getFormat());
-     * line.start();
+     * SourceDataLine.Info info = new DataLine.Info(SourceDataLine.class, stream
+     * .getFormat(), ((int) stream.getFrameLength() * format.getFrameSize()));
+     * SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+     * line.open(stream.getFormat()); line.start();
      * 
-     * int numRead = 0; byte[] buf = new byte[line.getBufferSize()]; while ((numRead = stream.read(buf, 0, buf.length)) >= 0) { int
-     * offset = 0; while (offset < numRead) { offset += line.write(buf, offset, numRead - offset); } } line.drain(); line.stop(); }
+     * int numRead = 0; byte[] buf = new byte[line.getBufferSize()]; while
+     * ((numRead = stream.read(buf, 0, buf.length)) >= 0) { int offset = 0;
+     * while (offset < numRead) { offset += line.write(buf, offset, numRead -
+     * offset); } } line.drain(); line.stop(); }
      */
   }
 
@@ -293,8 +299,9 @@ public class AudioCapture extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

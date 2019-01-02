@@ -26,11 +26,14 @@ import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
 /**
- * PCF8574 / PCF8574A Remote I/O expander for i2c bus with interrupt ( interrupt not yet implemented )
+ * PCF8574 / PCF8574A Remote I/O expander for i2c bus with interrupt ( interrupt
+ * not yet implemented )
  * 
  * @author Mats
  * 
- *         References: http://www.digikey.com/product-detail/en/nxp-semiconductors /PCF8574T-3,518/568-1077-1-ND/735791
+ *         References:
+ *         http://www.digikey.com/product-detail/en/nxp-semiconductors
+ *         /PCF8574T-3,518/568-1077-1-ND/735791
  * 
  */
 
@@ -107,7 +110,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   public transient I2CController controller;
 
   /*
-   * 0x20 - 0x27 for PCF8574 0c38 - 0x3F for PCF8574A Only difference between to two IC circuits is the address range
+   * 0x20 - 0x27 for PCF8574 0c38 - 0x3F for PCF8574A Only difference between to
+   * two IC circuits is the address range
    */
   public List<String> deviceAddressList = Arrays.asList("0x20", "0x21", "0x22", "0x23", "0x24", "0x25", "0x26", "0x27", "0x38", "0x39", "0x3A", "0x3B", "0x3C", "0x3D", "0x3E",
       "0x3F", "0x49", "0x4A", "0x4B"); // Max9744
@@ -142,7 +146,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   transient Map<Integer, List<PinListener>> pinListeners = new HashMap<Integer, List<PinListener>>();
 
   /**
-   * the map of pins which the pin listeners are listening too - if the set is null they are listening to "any" published pin
+   * the map of pins which the pin listeners are listening too - if the set is
+   * null they are listening to "any" published pin
    */
   Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
@@ -452,8 +457,9 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

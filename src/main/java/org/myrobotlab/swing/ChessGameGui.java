@@ -210,7 +210,8 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
 
   @Override
   public void subscribeGui() {
-    subscribe("inputMove", "inputMove"); // FIXME - out of spec - should be onMove
+    subscribe("inputMove", "inputMove"); // FIXME - out of spec - should be
+                                         // onMove
     subscribe("inputHMove", "inputHMove");
   }
 
@@ -410,8 +411,10 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
 
     // HMove h1 = new HMove(5,3,2,4,5);
     /*
-     * Move m1 = new Move(5,8); log.info(m1); log.info("user move from " + move.getFrom() + " " + move.getToRow() + "," +
-     * move.getToCol()); log.info("user move to " + move.getTo() + " " + move.getToRow() + "," + move.getToCol());
+     * Move m1 = new Move(5,8); log.info(m1); log.info("user move from " +
+     * move.getFrom() + " " + move.getToRow() + "," + move.getToCol());
+     * log.info("user move to " + move.getTo() + " " + move.getToRow() + "," +
+     * move.getToCol());
      */
 
     int promote = 0;

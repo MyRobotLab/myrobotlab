@@ -57,13 +57,16 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.OpenCV;
 
 /**
- * This is the OpenCV Face Recognition. It must be trained with a set of images and their labels. These images should be of people
- * faces and their names are the labels.
+ * This is the OpenCV Face Recognition. It must be trained with a set of images
+ * and their labels. These images should be of people faces and their names are
+ * the labels.
  * 
- * It computes the "distance" from the reference new image to existing images that it's been trained on and provides a prediction of
- * what label applies
+ * It computes the "distance" from the reference new image to existing images
+ * that it's been trained on and provides a prediction of what label applies
  * 
- * Based on: https://github.com/bytedeco/javacv/blob/master/samples/OpenCVFaceRecognizer. java
+ * Based on:
+ * https://github.com/bytedeco/javacv/blob/master/samples/OpenCVFaceRecognizer.
+ * java
  * 
  * @author kwatters
  * @author scruffy-bob
@@ -137,15 +140,18 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public void initHaarCas() {
     faceCascade = new CascadeClassifier(cascadeDir + "/haarcascade_frontalface_default.xml");
     eyeCascade = new CascadeClassifier(cascadeDir + "/haarcascade_eye.xml");
-    // This mouth classifier isn't that great.. so if we can find a better one, cool
+    // This mouth classifier isn't that great.. so if we can find a better one,
+    // cool
     mouthCascade = new CascadeClassifier(cascadeDir + "/haarcascade_mcs_mouth.xml");
-    // mouthCascade = new CascadeClassifier(cascadeDir+"/haarcascade_mouth.xml");
+    // mouthCascade = new
+    // CascadeClassifier(cascadeDir+"/haarcascade_mouth.xml");
     // noseCascade = new CascadeClassifier(cascadeDir+"/haarcascade_nose.xml");
   }
 
   /**
-   * This method will load all of the image files in a directory. The filename will be parsed for the label to apply to the image.
-   * At least 2 different labels must exist in the training set.
+   * This method will load all of the image files in a directory. The filename
+   * will be parsed for the label to apply to the image. At least 2 different
+   * labels must exist in the training set.
    * 
    * @return true if the training was successful.
    * @throws IOException
@@ -171,7 +177,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
         log.warn("No image filter file found.  {}", filterfile.getAbsolutePath());
       } else {
         // Read the filter and rescale it to the current image size
-        // BytePointer fbp = new BytePointer(FileUtils.getFileAsBytes(filterfile.getAbsolutePath()));
+        // BytePointer fbp = new
+        // BytePointer(FileUtils.getFileAsBytes(filterfile.getAbsolutePath()));
         // Mat incomingfacemask = imread(fbp, CV_LOAD_IMAGE_GRAYSCALE);
         Mat incomingfacemask = imread(filterfile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
         facemask = resizeImage(incomingfacemask);
@@ -210,8 +217,10 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       // load the image
       log.info("Loading training image file: {}", image.getAbsolutePath());
 
-      // we know that imread doesn't work with non-ascii file paths.. so we want to use a different
-      // so, load the image into memory, warp it in a byte pointer and pass it to imdecode to load the image from memory, instead of
+      // we know that imread doesn't work with non-ascii file paths.. so we want
+      // to use a different
+      // so, load the image into memory, warp it in a byte pointer and pass it
+      // to imdecode to load the image from memory, instead of
       // from disk
       byte[] tmpImg = FileIO.toByteArray(image);
       Mat img = imdecode(new Mat(new BytePointer(tmpImg)), CV_LOAD_IMAGE_GRAYSCALE);
@@ -220,9 +229,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
       String personName = image.getParentFile().getName();
       // String personName = UnicodeFolder.get(image.getParentFile().getName());
 
-      // TODO: we need an integer to represent this string .. for now we're using a hashcode here.
+      // TODO: we need an integer to represent this string .. for now we're
+      // using a hashcode here.
       // this can definitely have a collision!
-      // we really need a better metadata store for these images. (atleast this is deterministic.)
+      // we really need a better metadata store for these images. (atleast this
+      // is deterministic.)
       int label = personName.hashCode();
       // make sure all our test images are resized
       Mat resized = resizeImage(img);
@@ -373,7 +384,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // faceCascade.detectMultiScale(mat, vec);
     // int minSize = 10;
     // int maxSize = 10;
-    // faceCascade.detectMultiScale(mat, vec,1.1,5,CV_HAAR_DO_ROUGH_SEARCH|CV_HAAR_DO_CANNY_PRUNING|CV_HAAR_FIND_BIGGEST_OBJECT ,
+    // faceCascade.detectMultiScale(mat,
+    // vec,1.1,5,CV_HAAR_DO_ROUGH_SEARCH|CV_HAAR_DO_CANNY_PRUNING|CV_HAAR_FIND_BIGGEST_OBJECT
+    // ,
     // new Size(minSize), new Size(maxSize));
     faceCascade.detectMultiScale(mat, vec);
     return vec;
@@ -521,9 +534,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
     // TODO: I think this is a png file ? not sure.
     // TODO: we need to be able to write a unicode filename with a path here..
-    // we probably just need to get the image as a byte array png encoded, and write that out ourselves..
+    // we probably just need to get the image as a byte array png encoded, and
+    // write that out ourselves..
     // a work around because imwrite doesn't support unicode in the filename.
-    // so we'll convert the image to something like a byte array, and write it out ourselves.
+    // so we'll convert the image to something like a byte array, and write it
+    // out ourselves.
     // imwrite(filename, dFaceMat);
     BufferedImage buffImg = toBufferedImage(dFaceMat);
     ImageIO.write(buffImg, "png", new File(filename));
@@ -548,7 +563,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
         Mat croppedFace = new Mat(bwImgMat, face);
         show(croppedFace, "Face Area");
       }
-      // The eyes will only be located in the top half of the image. Even with a tilted
+      // The eyes will only be located in the top half of the image. Even with a
+      // tilted
       // image, the face detector won't recognize the face if the eyes aren't in
       // the upper half of the image.
       Rect eyesRect = new Rect(face.x(), face.y(), face.width(), face.height() / 2);
@@ -600,7 +616,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
         if (dePicaso) {
           dFace.dePicaso();
         }
-        // At this point, we've found the complete face and everything appears normal.
+        // At this point, we've found the complete face and everything appears
+        // normal.
         // Add this to the list of recognized faces
         dFaces.add(dFace);
         if (debug) {

@@ -33,11 +33,14 @@ public class TestJmeIntegratedMovement extends SimpleApplication {
     // if (true) {
     // Cylinder c= new Cylinder(8,50,50,10,true,false);
     // Geometry geom = new Geometry("Cylinder",c);
-    // //Vector3f ori = new Vector3f((float)ci.getOrigin().getX(), (float)ci.getOrigin().getZ(), (float)ci.getOrigin().getY());
-    // //Vector3f end = new Vector3f((float)ci.getEnd().getX(), (float)ci.getEnd().getZ(), (float)ci.getEnd().getY());
+    // //Vector3f ori = new Vector3f((float)ci.getOrigin().getX(),
+    // (float)ci.getOrigin().getZ(), (float)ci.getOrigin().getY());
+    // //Vector3f end = new Vector3f((float)ci.getEnd().getX(),
+    // (float)ci.getEnd().getZ(), (float)ci.getEnd().getY());
     // //geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, ori, end));
     // //geom.lookAt(end, Vector3f.UNIT_Y);
-    // Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+    // Material mat = new
+    // Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
     // mat.setColor("Color", ColorRGBA.Blue);
     // geom.setMaterial(mat);
     // Node pivot = new Node("pivot");
@@ -115,7 +118,8 @@ public class TestJmeIntegratedMovement extends SimpleApplication {
     camLoc.x += 50 * tpf * camXDir;
     camLoc.z += 50 * tpf * camZDir;
     // this.cam.setLocation(camLoc);
-    // cam.lookAtDirection(new Vector3f(camLoc.x*-1,0,camLoc.z*-1), cam.getUp());
+    // cam.lookAtDirection(new Vector3f(camLoc.x*-1,0,camLoc.z*-1),
+    // cam.getUp());
     if (updateShape) {
       for (CollisionItem ci : objects.values()) {
         if (!ci.isFromKinect()) {

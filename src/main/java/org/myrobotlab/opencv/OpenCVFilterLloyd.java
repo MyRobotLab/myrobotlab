@@ -49,7 +49,8 @@ import org.myrobotlab.service.Deeplearning4j;
 import org.slf4j.Logger;
 
 /**
- * Experimental filter to be used with Lloyd. All behaviors of this filter are subject to change.
+ * Experimental filter to be used with Lloyd. All behaviors of this filter are
+ * subject to change.
  * 
  * @author kwatters
  *
@@ -59,12 +60,14 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterLloyd.class.getCanonicalName());
 
-  // zero offset to where the confidence level is in the output matrix of the darknet.
+  // zero offset to where the confidence level is in the output matrix of the
+  // darknet.
   private static final int CONFIDENCE_INDEX = 4;
   private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
 
   private float confidenceThreshold = 0.25F;
-  // the column in the detection matrix that contains the confidence level. (I think?)
+  // the column in the detection matrix that contains the confidence level. (I
+  // think?)
   // int probability_index = 5;
   // yolo file locations
   // private String darknetHome = "c:/dev/workspace/darknet/";
@@ -213,10 +216,12 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
     if (lastResult != null) {
-      // the thread running will be updating lastResult for it as fast as it can.
+      // the thread running will be updating lastResult for it as fast as it
+      // can.
       displayResult(image, lastResult);
     }
-    // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
+    // ok now we just need to update the image that the current thread is
+    // processing (if the current thread is idle i guess?)
     lastImage = image;
     pending = true;
     return image;
@@ -289,7 +294,8 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
       } else {
         log.info("No Image to classify...");
       }
-      // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
+      // TODO: see why there's a race condition. i seem to need a little delay
+      // here o/w the recognition never seems to start.
       // maybe lastImage needs to be marked as volatile ?
       try {
         Thread.sleep(1);
@@ -310,17 +316,23 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
     // log.info("Yolo frame start");
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
     // log.info("Input mat created");
-    // TODO: I think yolo expects RGB color (which is inverted in the next step) so if the input image isn't in RGB color, we might
+    // TODO: I think yolo expects RGB color (which is inverted in the next step)
+    // so if the input image isn't in RGB color, we might
     // need a cvCutColor
-    Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false, CV_32F); // Convert Mat to
-                                                                                                               // batch of images
+    Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false, CV_32F); // Convert
+                                                                                                               // Mat
+                                                                                                               // to
+                                                                                                               // batch
+                                                                                                               // of
+                                                                                                               // images
     // put our frame/input blob into the model.
     // log.info("input blob created");
     net.setInput(inputBlob);
 
     // log.info("Feed forward!");
     // log.info("Input blob set on network.");
-    // ask for the detection_out layer i guess? not sure the details of the forward method, but this computes everything like magic!
+    // ask for the detection_out layer i guess? not sure the details of the
+    // forward method, but this computes everything like magic!
     Mat detectionMat = net.forward("detection_out");
     // log.info("output detection matrix produced");
     // log.info("detection matrix computed");
@@ -333,19 +345,22 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
         continue;
       }
 
-      // System.out.println("\nCurrent row has " + currentRow.size().width() + "=width " + currentRow.size().height() + "=height.");
+      // System.out.println("\nCurrent row has " + currentRow.size().width() +
+      // "=width " + currentRow.size().height() + "=height.");
       // currentRow.position(probability_index);
       // int probability_size = detectionMat.cols() - probability_index;
       // detectionMat;
 
       // String className = getWithDefault(classNames, i);
-      // System.out.print("\nROW (" + className + "): " + currentRow.getFloatBuffer().get(4) + " -- \t\t");
+      // System.out.print("\nROW (" + className + "): " +
+      // currentRow.getFloatBuffer().get(4) + " -- \t\t");
       for (int c = CONFIDENCE_INDEX + 1; c < currentRow.size().get(); c++) {
         float val = currentRow.getFloatBuffer().get(c);
         // TODO: this filtering logic is probably wrong.
         if (val > 0.0) {
           String label = classNames.get(c - CONFIDENCE_INDEX - 1);
-          // System.out.println("Index : " + c + "->" + val + " label : " + classNames.get(c-probability_index) );
+          // System.out.println("Index : " + c + "->" + val + " label : " +
+          // classNames.get(c-probability_index) );
           // let's just say this is something we've detected..
           // ok. in theory this is something we think it might actually be.
           float x = currentRow.getFloatBuffer().get(0);
@@ -385,7 +400,8 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
           }
           YoloDetectedObject obj = new YoloDetectedObject(boundingBox, confidence, label, getOpenCV().getFrameIndex(), cropped, null);
           yoloObjects.add(obj);
-          // if the label is a person.. we want to look up the model for further classificatoin of a person
+          // if the label is a person.. we want to look up the model for further
+          // classificatoin of a person
           // then add that info to disambiguate who that person is.
           // followed by a solr search for the current recognized person.
           if (obj.label.equals("person")) {
@@ -404,7 +420,8 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
                 double dlVal = dl4JResult.get(key);
                 if (dlVal > 0.9) {
                   obj.sublabel = key + "(" + dlVal + ")";
-                  // System.out.println("PERSON RECOGNITION RESULT : " + key + " val " + dlVal);
+                  // System.out.println("PERSON RECOGNITION RESULT : " + key + "
+                  // val " + dlVal);
                   // show(cropped,key);
                 }
               }
@@ -418,9 +435,11 @@ public class OpenCVFilterLloyd extends OpenCVFilter implements Runnable {
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
     //
-    // System.out.println(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
+    // System.out.println(boundingBox.x() + " " + boundingBox.y() + " " +
+    // boundingBox.width() + " " + boundingBox.height());
 
-    // TODO: figure out if the width/height is too large! don't want to go array out of bounds
+    // TODO: figure out if the width/height is too large! don't want to go array
+    // out of bounds
     Mat cropped = new Mat(inputMat, boundingBox);
 
     IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));

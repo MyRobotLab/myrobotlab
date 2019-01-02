@@ -63,12 +63,13 @@ import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
 
 /**
- * Represents a 3d world - this class use intensively JAVA3D. It creates the scenegraph and the view platform. The building process
- * uses a EnvironmentDescription object containing colors , objects and attributes given by the user. This class is thighly coupled
- * with Simulator Class.
+ * Represents a 3d world - this class use intensively JAVA3D. It creates the
+ * scenegraph and the view platform. The building process uses a
+ * EnvironmentDescription object containing colors , objects and attributes
+ * given by the user. This class is thighly coupled with Simulator Class.
  * 
- * Remember to call System.setProperty("j3d.implicitAntialiasing", "true") at the very beginning of your program in order to enable
- * antialiasing.
+ * Remember to call System.setProperty("j3d.implicitAntialiasing", "true") at
+ * the very beginning of your program in order to enable antialiasing.
  * 
  */
 public class World {
@@ -83,7 +84,8 @@ public class World {
   private TransformGroup sceneRot;
 
   /**
-   * All the pickable/collidable objects should be attached under this sub-branch
+   * All the pickable/collidable objects should be attached under this
+   * sub-branch
    */
   private BranchGroup pickableSceneBranch;
   /** The view branch */
@@ -171,14 +173,16 @@ public class World {
   }
 
   /**
-   * Change the user view Point . Note that we modify the ViewBranch transform not the scene transform.
+   * Change the user view Point . Note that we modify the ViewBranch transform
+   * not the scene transform.
    * 
    * @param type
    *          can be VIEW_FROM_TOP,VIEW_FROM_EAST,VIEW_BEHIND_AGENT
    * @param agent
    *          : specify the agent if VIEW_BEHIND_AGENT
    * 
-   *          The VIEW_BEHIND_AGENT case has to be called regularly because of the agent displacement.
+   *          The VIEW_BEHIND_AGENT case has to be called regularly because of
+   *          the agent displacement.
    */
 
   public void changeViewPoint(int type, SimpleAgent agent) {
@@ -251,7 +255,8 @@ public class World {
   }
 
   /**
-   * Creates the world from the given environement Description. Used only in the creation phase.
+   * Creates the world from the given environement Description. Used only in the
+   * creation phase.
    * 
    * @param ed
    *          the environment description.
@@ -263,7 +268,8 @@ public class World {
   }
 
   /**
-   * Creates a representation of the 3 axis of the 3d world. Used only in the creation phase.
+   * Creates a representation of the 3 axis of the 3d world. Used only in the
+   * creation phase.
    */
   private void createAxis() {
     Point3f[] axisCoords = {
@@ -311,7 +317,8 @@ public class World {
   }
 
   /**
-   * Creates the Canvas3D to visualize the 3D World. Used only in the creation phase.
+   * Creates the Canvas3D to visualize the 3D World. Used only in the creation
+   * phase.
    */
   private void createCanvas3D() {
     GraphicsConfigTemplate3D template = new GraphicsConfigTemplate3D();
@@ -375,7 +382,8 @@ public class World {
   }
 
   /**
-   * Creates the branch for the visible content of the scenegraph. Used only in the creation phase.
+   * Creates the branch for the visible content of the scenegraph. Used only in
+   * the creation phase.
    */
   private void createSceneBranch(EnvironmentDescription wd) {
 
@@ -428,7 +436,8 @@ public class World {
   }
 
   /**
-   * Creates the universe to attach the scenegraph. Used only in the creation phase.
+   * Creates the universe to attach the scenegraph. Used only in the creation
+   * phase.
    * 
    * @param ed
    *          the environment description.
@@ -480,7 +489,8 @@ public class World {
     template.setSceneAntialiasing(GraphicsConfigTemplate.REQUIRED);
     template.setDoubleBuffer(GraphicsConfigTemplate.PREFERRED);
     /*
-     * GraphicsConfiguration config = GraphicsEnvironment .getLocalGraphicsEnvironment().getDefaultScreenDevice()
+     * GraphicsConfiguration config = GraphicsEnvironment
+     * .getLocalGraphicsEnvironment().getDefaultScreenDevice()
      * .getBestConfiguration(template);
      */
     // request antialiasing
@@ -524,7 +534,8 @@ public class World {
   }
 
   /**
-   * @return the scene branchgroup containing the world's object which can be picked
+   * @return the scene branchgroup containing the world's object which can be
+   *         picked
    */
   BranchGroup getPickableSceneBranch() {
     return pickableSceneBranch;

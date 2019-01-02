@@ -86,11 +86,13 @@ import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
- * Deeplearning4j wrapper service to expose the deep learning. This is basically derived from the AnimialClassifier example in the
- * dl4j examples. More info at:
+ * Deeplearning4j wrapper service to expose the deep learning. This is basically
+ * derived from the AnimialClassifier example in the dl4j examples. More info
+ * at:
  * https://github.com/deeplearning4j/dl4j-examples/blob/master/dl4j-examples/src/main/java/org/deeplearning4j/examples/convolution/AnimalsClassification.java
  * 
- * DO NOT USE THIS SERVICE. IT DOESN'T REALLY WORK YET. This is a work in progress and is very very far from being done.
+ * DO NOT USE THIS SERVICE. IT DOESN'T REALLY WORK YET. This is a work in
+ * progress and is very very far from being done.
  * 
  * @author kwatters
  *
@@ -113,7 +115,8 @@ public class Deeplearning4j extends Service {
   // protected static int epochs = 50;
   public static int epochs = 2;
   protected static int nCores = 8;
-  protected static String modelType = "AlexNet"; // LeNet, AlexNet or Custom but you need to fill it out
+  protected static String modelType = "AlexNet"; // LeNet, AlexNet or Custom but
+                                                 // you need to fill it out
   public String modelDir = "models";
   public String modelFilename = "model.bin";
   // This is the "model" to be trained and used
@@ -122,7 +125,8 @@ public class Deeplearning4j extends Service {
   private List<String> networkLabels;
 
   // TODO: clean all of this up! for now
-  // we're just going to hack in the deeplearning4j zoo , in particular vgg16 model
+  // we're just going to hack in the deeplearning4j zoo , in particular vgg16
+  // model
   // pretrained from imagenet.
 
   private ComputationGraph vgg16 = null;
@@ -147,8 +151,9 @@ public class Deeplearning4j extends Service {
   }
 
   /**
-   * Train a model based on a directory of training data. Each subdirectory is named for it's label the files in that subdirectory
-   * are examples of that label. Normally a directory will contain a bunch of training images.
+   * Train a model based on a directory of training data. Each subdirectory is
+   * named for it's label the files in that subdirectory are examples of that
+   * label. Normally a directory will contain a bunch of training images.
    * 
    * @param trainingDataDir
    *          the directory that contains the subdirectories of labels.
@@ -158,8 +163,10 @@ public class Deeplearning4j extends Service {
   public void trainModel(String trainingDataDir) throws IOException {
     log.info("Load data....");
     /**
-     * Data Setup -&gt; organize and limit data file paths: - mainPath = path to image files - fileSplit = define basic dataset
-     * split with limits on format - pathFilter = define additional file load filter to limit size and balance batch content
+     * Data Setup -&gt; organize and limit data file paths: - mainPath = path to
+     * image files - fileSplit = define basic dataset split with limits on
+     * format - pathFilter = define additional file load filter to limit size
+     * and balance batch content
      **/
     ParentPathLabelGenerator labelMaker = new MRLLabelGenerator();
     // load up the path where the training data lives.
@@ -169,15 +176,19 @@ public class Deeplearning4j extends Service {
     DataSetIterator dataIter;
 
     /**
-     * Data Setup -&gt; transformation - Transform = how to tranform images and generate large dataset to train on
+     * Data Setup -&gt; transformation - Transform = how to tranform images and
+     * generate large dataset to train on
      **/
     List<ImageTransform> transforms = createImageTransformList();
 
     /**
-     * Data Setup -&gt; normalization - how to normalize images and generate large dataset to train on Data Setup -&gt; define how
-     * to load data into net: - recordReader = the reader that loads and converts image data pass in inputSplit to initialize -
-     * dataIter = a generator that only loads one batch at a time into memory to save memory - trainIter = uses
-     * MultipleEpochsIterator to ensure model runs through the data for all epochs
+     * Data Setup -&gt; normalization - how to normalize images and generate
+     * large dataset to train on Data Setup -&gt; define how to load data into
+     * net: - recordReader = the reader that loads and converts image data pass
+     * in inputSplit to initialize - dataIter = a generator that only loads one
+     * batch at a time into memory to save memory - trainIter = uses
+     * MultipleEpochsIterator to ensure model runs through the data for all
+     * epochs
      **/
     MultipleEpochsIterator trainIter;
 
@@ -213,7 +224,8 @@ public class Deeplearning4j extends Service {
       scaler.fit(dataIter);
       dataIter.setPreProcessor(scaler);
       trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores);
-      // train the model even more with some transpositions of the original image.
+      // train the model even more with some transpositions of the original
+      // image.
       network.fit(trainIter);
     }
     log.info("Done training model..");
@@ -224,9 +236,10 @@ public class Deeplearning4j extends Service {
   }
 
   /*
-   * This provides a list of various transforms to attempt on the image as part of the training process this synthetically generates
-   * a larger training set. I think it's typically used to train in rotational and scale invariance in the matching of the network.
-   * But, that's just a guess :)
+   * This provides a list of various transforms to attempt on the image as part
+   * of the training process this synthetically generates a larger training set.
+   * I think it's typically used to train in rotational and scale invariance in
+   * the matching of the network. But, that's just a guess :)
    */
   private List<ImageTransform> createImageTransformList() {
     // TODO: consider a bunch of opencv filter based transforms here!
@@ -305,7 +318,8 @@ public class Deeplearning4j extends Service {
     loadModel(modelDir + File.separator + modelFilename);
   }
 
-  // load a model based on its filename and the labels from an associated filename.labels file..
+  // load a model based on its filename and the labels from an associated
+  // filename.labels file..
   public void loadModel(String filename) throws IOException {
     File f = new File(filename);
     log.info("Loading network from : {}", f.getAbsolutePath());
@@ -342,7 +356,8 @@ public class Deeplearning4j extends Service {
   public void evaluateModel(File file) throws IOException {
     log.info("Evaluate model....");
     NativeImageLoader nativeImageLoader = new NativeImageLoader(height, width, channels);
-    INDArray image = nativeImageLoader.asMatrix(file); // testImage is of Mat format
+    INDArray image = nativeImageLoader.asMatrix(file); // testImage is of Mat
+                                                       // format
     // 0-255 to 0-1
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
@@ -350,17 +365,21 @@ public class Deeplearning4j extends Service {
     INDArray output = network.output(image);
     System.out.println(output);
     System.out.println(networkLabels);
-    // TODO: I suppose we could create a map of probabilities and return that ...
+    // TODO: I suppose we could create a map of probabilities and return that
+    // ...
     // this map could be large
   }
 
   /* From the animals classification example */
   public MultiLayerNetwork lenetModel(int numLabels) {
     /**
-     * Revisde Lenet Model approach developed by ramgo2 achieves slightly above random Reference:
+     * Revisde Lenet Model approach developed by ramgo2 achieves slightly above
+     * random Reference:
      * https://gist.github.com/ramgo2/833f12e92359a2da9e5c2fb6333351c5
      **/
-    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).l2(0.005) // tried 0.0001, 0.0005
+    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).l2(0.005) // tried
+                                                                                             // 0.0001,
+                                                                                             // 0.0005
         .activation(Activation.RELU).weightInit(WeightInit.XAVIER).optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).updater(Updater.RMSPROP).list()
         .layer(0, convInit("cnn1", channels, 50, new int[] { 5, 5 }, new int[] { 1, 1 }, new int[] { 0, 0 }, 0)).layer(1, maxPool("maxpool1", new int[] { 2, 2 }))
         .layer(2, conv5x5("cnn2", 100, new int[] { 5, 5 }, new int[] { 1, 1 }, 0)).layer(3, maxPool("maxool2", new int[] { 2, 2 }))
@@ -374,8 +393,9 @@ public class Deeplearning4j extends Service {
   /* From the animals classification example */
   public MultiLayerNetwork alexnetModel(int numLabels) {
     /**
-     * AlexNet model interpretation based on the original paper ImageNet Classification with Deep Convolutional Neural Networks and
-     * the imagenetExample code referenced.
+     * AlexNet model interpretation based on the original paper ImageNet
+     * Classification with Deep Convolutional Neural Networks and the
+     * imagenetExample code referenced.
      * http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
      **/
     double nonZeroBias = 1;
@@ -383,7 +403,13 @@ public class Deeplearning4j extends Service {
     MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).weightInit(WeightInit.DISTRIBUTION).dist(new NormalDistribution(0.0, 0.01))
         .activation(Activation.RELU).updater(Updater.NESTEROVS)
 
-        .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize to prevent vanishing or exploding gradients
+        .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize
+                                                                            // to
+                                                                            // prevent
+                                                                            // vanishing
+                                                                            // or
+                                                                            // exploding
+                                                                            // gradients
         .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 
         .l2(5 * 1e-4).miniBatch(false).list().layer(0, convInit("cnn1", channels, 96, new int[] { 11, 11 }, new int[] { 4, 4 }, new int[] { 3, 3 }, 0))
@@ -456,7 +482,9 @@ public class Deeplearning4j extends Service {
   }
 
   public void loadTinyYOLO() throws IOException {
-    tinyYOLOModel = TinyYOLO.builder().build(); // num labels doesn't matter since we're getting pretrained imagenet
+    tinyYOLOModel = TinyYOLO.builder().build(); // num labels doesn't matter
+                                                // since we're getting
+                                                // pretrained imagenet
     tinyyolo = (ComputationGraph) tinyYOLOModel.initPretrained();
   }
 
@@ -489,7 +517,9 @@ public class Deeplearning4j extends Service {
     INDArray outputs = tinyyolo.outputSingle(image);
 
     List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(((TinyYOLO) tinyYOLOModel).getPriorBoxes()), outputs, 0.6, 0.4);
-    // List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs, 0.6, 0.4);
+    // List<DetectedObject> objs =
+    // YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs,
+    // 0.6, 0.4);
     // check output labels of result
     Labels labels = new VOCLabels();
     ArrayList<YoloDetectedObject> results = new ArrayList<YoloDetectedObject>();
@@ -543,7 +573,8 @@ public class Deeplearning4j extends Service {
 
   public DataSetIterator makeSolrInputSplitIterator(Solr solr, SolrQuery datasetQuery, long numFound, List<String> labels, int batch, int height, int width, int channels,
       String labelField) throws IOException {
-    // TODO: don't depend on the solr service, but rather some datasource that can produce input splits...
+    // TODO: don't depend on the solr service, but rather some datasource that
+    // can produce input splits...
     // TODO: pass in the record reader and the preprocessor
     // training set iterator
     SolrInputSplit split = new SolrInputSplit(solr, datasetQuery, labels, labelField);
@@ -551,7 +582,8 @@ public class Deeplearning4j extends Service {
     labelMaker.setSolrInputSplit(split);
     SolrImageRecordReader recordReader = new SolrImageRecordReader(height, width, channels, labelMaker);
     recordReader.setLabels(labels);
-    // TODO: This initializes the locations?! ouch. avoid that.. just use an iterator!
+    // TODO: This initializes the locations?! ouch. avoid that.. just use an
+    // iterator!
     recordReader.initialize(split);
     DataSetIterator iter = new RecordReaderDataSetIterator(recordReader, batch, 1, labels.size());
     iter.setPreProcessor(new VGG16ImagePreProcessor());
@@ -649,7 +681,8 @@ public class Deeplearning4j extends Service {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
     BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
     INDArray image = loader.asMatrix(buffImg);
-    // TODO: we should consider the model as not only the model, but also the input transforms
+    // TODO: we should consider the model as not only the model, but also the
+    // input transforms
     // for that model.
     DataNormalization scaler = new VGG16ImagePreProcessor();
     scaler.transform(image);
@@ -665,7 +698,8 @@ public class Deeplearning4j extends Service {
     File file = new File(filename);
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
     INDArray image = loader.asMatrix(file);
-    // TODO: we should consider the model as not only the model, but also the input transforms
+    // TODO: we should consider the model as not only the model, but also the
+    // input transforms
     // for that model.
     DataNormalization scaler = new VGG16ImagePreProcessor();
     scaler.transform(image);
@@ -729,9 +763,10 @@ public class Deeplearning4j extends Service {
   }
 
   /**
-   * Create a transfer learning representation of VGG16 Imagenet model. Choose where to freeze the pretrained model. To freeze all
-   * layers except for the output layer, choose "fc2" The numClasses property will specify the size of the new output layer of the
-   * transfer learned model
+   * Create a transfer learning representation of VGG16 Imagenet model. Choose
+   * where to freeze the pretrained model. To freeze all layers except for the
+   * output layer, choose "fc2" The numClasses property will specify the size of
+   * the new output layer of the transfer learned model
    * 
    * @param featureExtractionLayer
    *          specifies the frozen layer of the model
@@ -757,11 +792,19 @@ public class Deeplearning4j extends Service {
                                                                                                                                                               // below
                                                                                                                                                               // are
                                                                                                                                                               // "frozen"
-        .removeVertexKeepConnections("predictions") // replace the functionality of the final vertex
+        .removeVertexKeepConnections("predictions") // replace the functionality
+                                                    // of the final vertex
         .addLayer("predictions",
             new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nIn(4096).nOut(numClasses).weightInit(WeightInit.DISTRIBUTION)
-                .dist(new NormalDistribution(0, 0.2 * (2.0 / (4096 + numClasses)))) // This weight init dist gave better results
-                                                                                    // than Xavier
+                .dist(new NormalDistribution(0, 0.2 * (2.0 / (4096 + numClasses)))) // This
+                                                                                    // weight
+                                                                                    // init
+                                                                                    // dist
+                                                                                    // gave
+                                                                                    // better
+                                                                                    // results
+                                                                                    // than
+                                                                                    // Xavier
                 .activation(Activation.SOFTMAX).build(),
             "fc2")
         .build();
@@ -783,7 +826,8 @@ public class Deeplearning4j extends Service {
   }
 
   /**
-   * Evaluate a model against a given testing dataset Note iterator is reset before evaluating.
+   * Evaluate a model against a given testing dataset Note iterator is reset
+   * before evaluating.
    * 
    * @param testIter
    * @param model
@@ -825,20 +869,23 @@ public class Deeplearning4j extends Service {
       meta.addDependency("org.nd4j", "nd4j-cuda-9.2-platform", dl4jVersion);
       meta.addDependency("org.nd4j", "deeplearning4j-cuda-9.2", dl4jVersion);
     }
-    // The default build of 1.0.0-alpha does not support the raspi, we built & host the following dependencies.
+    // The default build of 1.0.0-alpha does not support the raspi, we built &
+    // host the following dependencies.
     // to support native cpu execution on the raspi.
     if (supportRasPi) {
       meta.addDependency("org.nd4j", "nd4j-native-pi-mrl", dl4jVersion);
       meta.addDependency("org.nd4j", "nd4j-native-platform-pi-mrl", dl4jVersion);
     }
-    // due to this bug https://github.com/haraldk/TwelveMonkeys/issues/167 seems we need to explicitly include imageio-core
+    // due to this bug https://github.com/haraldk/TwelveMonkeys/issues/167 seems
+    // we need to explicitly include imageio-core
     meta.addDependency("com.twelvemonkeys.imageio", "imageio-core", "3.1.1");
     return meta;
   }
 
   public static void main(String[] args) throws IOException {
     Deeplearning4j dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
-    // this is how many generations to iterate on training the dataset. larger number means longer training time.
+    // this is how many generations to iterate on training the dataset. larger
+    // number means longer training time.
     // dl4j.loadDarknet();
     dl4j.loadTinyYOLO();
     // dl4j.classifyImageTinyYolo(iplImage);
@@ -848,9 +895,12 @@ public class Deeplearning4j extends Service {
     // // save the model out
     // dl4j.saveModel();
     // dl4j.loadModel();
-    // //File testIm = new File("test/resources/animals/turtle/Baby_sea_turtle.jpg");
-    // // File testIm = new File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
-    // File testIm = new File("test/resources/animals/turtle/Western_Painted_Turtle.jpg");
+    // //File testIm = new
+    // File("test/resources/animals/turtle/Baby_sea_turtle.jpg");
+    // // File testIm = new
+    // File("test/resources/animals/deer/BlackTailed_Deer_Doe.jpg");
+    // File testIm = new
+    // File("test/resources/animals/turtle/Western_Painted_Turtle.jpg");
     // // BufferedImage img = ImageIO.read(testIm);
     // // Frame frame = grabberConverter.convert(img);
     // dl4j.evaluateModel(testIm);

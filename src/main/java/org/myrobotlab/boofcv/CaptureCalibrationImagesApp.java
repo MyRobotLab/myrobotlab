@@ -43,14 +43,16 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Displays RGB image from the kinect and then pauses after a set period of time. At which point the user can press 'y' or 'n' to
- * indicate yes or no for saving the RGB and depth images. Useful when collecting calibration images
+ * Displays RGB image from the kinect and then pauses after a set period of
+ * time. At which point the user can press 'y' or 'n' to indicate yes or no for
+ * saving the RGB and depth images. Useful when collecting calibration images
  *
  * @author Peter Abeles
  */
 public class CaptureCalibrationImagesApp implements KeyListener, StreamOpenKinectRgbDepth.Listener {
   {
-    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the location of your shared library!
+    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
+    // location of your shared library!
     NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
   }
 

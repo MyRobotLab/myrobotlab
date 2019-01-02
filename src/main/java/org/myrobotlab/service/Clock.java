@@ -38,8 +38,9 @@ import org.myrobotlab.service.data.ClockEvent;
 import org.slf4j.Logger;
 
 /**
- * Clock - This is a simple clock service that can be started and stopped. It generates a pulse with a timestamp on a regular
- * interval defined by the setInterval(Integer) method. Interval is in milliseconds.
+ * Clock - This is a simple clock service that can be started and stopped. It
+ * generates a pulse with a timestamp on a regular interval defined by the
+ * setInterval(Integer) method. Interval is in milliseconds.
  */
 public class Clock extends Service {
 
@@ -202,8 +203,9 @@ public class Clock extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

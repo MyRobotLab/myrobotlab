@@ -41,7 +41,8 @@ public class SpeechSynthesisTest {
         Class<?> clazz = Class.forName(service);
         AbstractSpeechSynthesis speech = null;
         // FIXME - TEST ALL WITH AND WITHOUT CLOUD
-        // REQUIREMENTS SHOULD BE ALWAYS ATTEMPT CACHE FIRST e.g. POLLY SHOULD WORK AFTER CACHE AND NO INTERNET !!!
+        // REQUIREMENTS SHOULD BE ALWAYS ATTEMPT CACHE FIRST e.g. POLLY SHOULD
+        // WORK AFTER CACHE AND NO INTERNET !!!
         // FIXME - CACHE VOICES TO FILESYSTEM TOO !
         // FIXME - test multi-platform
         // FIXME - test publish speaking & publish audio
@@ -53,7 +54,8 @@ public class SpeechSynthesisTest {
             speech = (AbstractSpeechSynthesis) Runtime.start(clazz.getSimpleName().toLowerCase(), clazz.getSimpleName());
             String toSpeak = String.format("hello my friend, I will be testing speech synthesis service called %s", clazz.getSimpleName());
             speech.speak(toSpeak);
-            // FIXME - test begin middle and end files - multiple files too in same text
+            // FIXME - test begin middle and end files - multiple files too in
+            // same text
             speech.speak("I can sound like a robot #R2D2# that is soooo cool");
             Voice voice = speech.getVoice();
             if (voice != null) {
@@ -68,11 +70,13 @@ public class SpeechSynthesisTest {
             List<Voice> voices = speech.getVoices();
             speech.speak(String.format("this speech service has %d voices", voices.size()));
             // FIXME - speakBlocking
-            // FIXME - test sound files #LAUGH# - really a AudioFile detail - getFileList
+            // FIXME - test sound files #LAUGH# - really a AudioFile detail -
+            // getFileList
 
             // FIXME - shouldn't this be done in abstract base class ?????
             // String encoded = URLEncoder.encode(toSpeak, "UTF-8");
-            // एक ट्वीट मे उन्होने यह भी कहा था कि उन्हे सनी के साथ काम करने मे कोई परेशानी नही है
+            // एक ट्वीट मे उन्होने यह भी कहा था कि उन्हे सनी के साथ काम करने मे
+            // कोई परेशानी नही है
 
             // FIXME - look at "main()" tests
 
@@ -80,7 +84,8 @@ public class SpeechSynthesisTest {
 
             // FIXME - gui tests ...
 
-            // FIXME - after release -> Exception in thread "AWT-EventQueue-0" java.lang.IndexOutOfBoundsException: Index: 9, Size:
+            // FIXME - after release -> Exception in thread "AWT-EventQueue-0"
+            // java.lang.IndexOutOfBoundsException: Index: 9, Size:
             // 8
             // Runtime.release(clazz.getSimpleName().toLowerCase());
             // FIXME test - restarting same name service
@@ -101,11 +106,13 @@ public class SpeechSynthesisTest {
     // TODO Auto-generated method stub
     Locale locale = Locale.getDefault();
     /*
-     * Method[] methods = locale.getClass().getMethods(); for (Method method : methods) { Class<?>[] paramTypes =
-     * method.getParameterTypes(); if (paramTypes.length == 0) {
-     * System.out.println(String.format("log.info(\"locale.%s() [{}]\", locale.%s());", method.getName(),method.getName())); } else
-     * { System.out.println(String.format("log.info(\"locale.%s(xxx) [{}]\", locale.%s(xxx));", method.getName(),method.getName()));
-     * } }
+     * Method[] methods = locale.getClass().getMethods(); for (Method method :
+     * methods) { Class<?>[] paramTypes = method.getParameterTypes(); if
+     * (paramTypes.length == 0) { System.out.println(String.
+     * format("log.info(\"locale.%s() [{}]\", locale.%s());",
+     * method.getName(),method.getName())); } else { System.out.println(String.
+     * format("log.info(\"locale.%s(xxx) [{}]\", locale.%s(xxx));",
+     * method.getName(),method.getName())); } }
      */
 
     Locale def = Locale.getDefault();
@@ -188,7 +195,8 @@ public class SpeechSynthesisTest {
     log.info("locale.getScript() [{}]", locale.getScript());
     log.info("locale.getUnicodeLocaleAttributes() [{}]", locale.getUnicodeLocaleAttributes());
     log.info("locale.getUnicodeLocaleKeys() [{}]", locale.getUnicodeLocaleKeys());
-    // log.info("locale.getUnicodeLocaleType(xxx) [{}]", locale.getUnicodeLocaleType(xxx));
+    // log.info("locale.getUnicodeLocaleType(xxx) [{}]",
+    // locale.getUnicodeLocaleType(xxx));
     log.info("locale.getVariant() [{}]", locale.getVariant());
     log.info("locale.hasExtensions() [{}]", locale.hasExtensions());
 

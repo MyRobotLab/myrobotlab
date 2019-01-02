@@ -69,11 +69,12 @@ public class KeyboardSim extends Service {
   }
 
   /**
-   * simulate pressing and releasing several keyboard keys after the desired duration The keys are released in reverse order they
-   * were pressed.
+   * simulate pressing and releasing several keyboard keys after the desired
+   * duration The keys are released in reverse order they were pressed.
    * 
    * @param keycode
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your key)
+   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
+   *          key)
    * @param duration
    *          key press duration in milliseconds
    */
@@ -87,7 +88,8 @@ public class KeyboardSim extends Service {
    * simulate pressing several keyboard keys (does NOT release the keys!)
    * 
    * @param keycode
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your key)
+   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
+   *          key)
    */
   public void press(int[] keycodes) {
     for (int keycode : keycodes) {
@@ -99,7 +101,8 @@ public class KeyboardSim extends Service {
    * simulate releasing several keyboard keys (does NOT press the keys!)
    * 
    * @param keycode
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your key)
+   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
+   *          key)
    */
   public void release(int[] keycodes) {
     for (int keycode : keycodes) {
@@ -108,10 +111,12 @@ public class KeyboardSim extends Service {
   }
 
   /**
-   * simulate releasing several keyboard keys (does NOT press the keys!) Releases keys in reversed order they were specified.
+   * simulate releasing several keyboard keys (does NOT press the keys!)
+   * Releases keys in reversed order they were specified.
    * 
    * @param keycode
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your key)
+   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
+   *          key)
    */
   public void releaseReversed(int[] keycodes) {
     for (int i = keycodes.length - 1; i >= 0; i--) {
@@ -131,8 +136,9 @@ public class KeyboardSim extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -32,8 +32,9 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * 
- * ImapEmailConnector - This connector can crawl the folders on an IMAP email server. you can provide the user/pass/email server
- * hostname. It publishes documents that represents the emails messages that were crawled.
+ * ImapEmailConnector - This connector can crawl the folders on an IMAP email
+ * server. you can provide the user/pass/email server hostname. It publishes
+ * documents that represents the emails messages that were crawled.
  *
  */
 public class ImapEmailConnector extends AbstractConnector {
@@ -439,8 +440,9 @@ public class ImapEmailConnector extends AbstractConnector {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

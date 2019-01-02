@@ -15,8 +15,9 @@ import net.sf.jipcam.axis.MjpegFrame;
 import net.sf.jipcam.axis.MjpegInputStream;
 
 /**
- * This is an MJpeg stream frame grabber. This grabber will drop frames to minimize video latency. This frame grabber takes a url to
- * an mjpeg video stream.
+ * This is an MJpeg stream frame grabber. This grabber will drop frames to
+ * minimize video latency. This frame grabber takes a url to an mjpeg video
+ * stream.
  * 
  * @author kwatters
  *
@@ -27,10 +28,12 @@ public class MJpegFrameGrabber extends FrameGrabber {
   private URL url;
   private MjpegInputStream mStream;
   transient private Java2DFrameConverter converter = new Java2DFrameConverter();
-  // This tracks the largest frame that has been seen for this grabber to determine how
+  // This tracks the largest frame that has been seen for this grabber to
+  // determine how
   // far behind we are, so we can drop frames adaptively.
   private int maxFrameSize = 0;
-  // the max number of sequential frames to skip before returning at least 1 frame.
+  // the max number of sequential frames to skip before returning at least 1
+  // frame.
   public int maxSkippedFrames = 5;
   // the percentage of bytes available with respect to the max frame size that
   // determines if we have the most recent frame.
@@ -93,8 +96,10 @@ public class MJpegFrameGrabber extends FrameGrabber {
         maxFrameSize = Math.max(mf.getBytes().length, maxFrameSize);
         // this is buffer size after reading a frame.
         int numAvailable = mStream.available();
-        // log.info("Bytes Available: {} Max FrameSize: {}", numAvailable, maxFrameSize);
-        // if there's less than 25% a frame available, we're good. let's break out of the loop
+        // log.info("Bytes Available: {} Max FrameSize: {}", numAvailable,
+        // maxFrameSize);
+        // if there's less than 25% a frame available, we're good. let's break
+        // out of the loop
         // this is a recent frame.
         if (numAvailable < maxFrameSize * MAX_BUFFER_RATIO || numSkipped >= maxSkippedFrames) {
           if (numSkipped == 1) {

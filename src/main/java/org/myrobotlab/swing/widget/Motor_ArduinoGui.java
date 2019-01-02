@@ -46,9 +46,10 @@ public class Motor_ArduinoGui extends MotorControllerPanel implements ActionList
     for (int i = 0; i < pinList.size(); ++i) {
       PinDefinition pindef = pinList.get(i);
       /*
-       * nice green coloring - but impossible to match ;P if (pin.type == Pin.PWM_VALUE) { powerPin.addItem(String.format(
-       * "<html><font color=white bgcolor=green>%d</font></html>", pin.pin)); } else { powerPin.addItem(String.format("%d",
-       * pin.pin)); }
+       * nice green coloring - but impossible to match ;P if (pin.type ==
+       * Pin.PWM_VALUE) { powerPin.addItem(String.format(
+       * "<html><font color=white bgcolor=green>%d</font></html>", pin.pin)); }
+       * else { powerPin.addItem(String.format("%d", pin.pin)); }
        */
       powerPin.addItem(String.format("%d", pindef.getAddress()));
     }
@@ -89,7 +90,8 @@ public class Motor_ArduinoGui extends MotorControllerPanel implements ActionList
   @Override
   public void set(Motor motor) {
     /*
-     * powerPin.setSelectedItem(String.format("%d", motor.pwmPin)); directionPin.setSelectedItem(String.format("%d", motor.dirPin));
+     * powerPin.setSelectedItem(String.format("%d", motor.pwmPin));
+     * directionPin.setSelectedItem(String.format("%d", motor.dirPin));
      */
   }
 

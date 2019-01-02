@@ -20,8 +20,9 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 /**
- * This stage will use Apache Tika to perform text and metadata extraction on many different types of documents including, but not
- * limited to, pdf, office documents, html, etc..
+ * This stage will use Apache Tika to perform text and metadata extraction on
+ * many different types of documents including, but not limited to, pdf, office
+ * documents, html, etc..
  * 
  * @author kwatters
  *

@@ -60,7 +60,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * class of useful utility functions we do not use nio - for portability reasons e.g. Android
+ * class of useful utility functions we do not use nio - for portability reasons
+ * e.g. Android
  * 
  * @author GroG
  *
@@ -78,7 +79,8 @@ public class FileIO {
   static public final Logger log = LoggerFactory.getLogger(FileIO.class);
 
   /**
-   * compares two files - throws if they are not identical, good to use in testing
+   * compares two files - throws if they are not identical, good to use in
+   * testing
    * 
    * @param filename1
    *          f
@@ -170,19 +172,25 @@ public class FileIO {
   }
 
   /**
-   * extract needs 3 parameters - a root file source, which could be a file directory or jar file, a src location, and a
-   * destination. During runtime this method will extract contents from a jar specified, during build time it will copy from a
-   * folder location. It could probably be improved, and simplified to take only 2 parameters, but that would mean calling methods
-   * would need to be 'smart' enough to use full getURI notation .. e.g. jar:file:/C:/proj/parser/jar/parser.jar!/test.xml
+   * extract needs 3 parameters - a root file source, which could be a file
+   * directory or jar file, a src location, and a destination. During runtime
+   * this method will extract contents from a jar specified, during build time
+   * it will copy from a folder location. It could probably be improved, and
+   * simplified to take only 2 parameters, but that would mean calling methods
+   * would need to be 'smart' enough to use full getURI notation .. e.g.
+   * jar:file:/C:/proj/parser/jar/parser.jar!/test.xml
    * 
-   * e.g http://stackoverflow.com/questions/402683/how-do-i-get-just-the-jar-url-
-   * from-a-jar-url-containing-a-and-a-specific-fi/402771#402771 final URL jarUrl = new
-   * URL("jar:file:/C:/proj/parser/jar/parser.jar!/test.xml"); final JarURLConnection connection = (JarURLConnection)
+   * e.g
+   * http://stackoverflow.com/questions/402683/how-do-i-get-just-the-jar-url-
+   * from-a-jar-url-containing-a-and-a-specific-fi/402771#402771 final URL
+   * jarUrl = new URL("jar:file:/C:/proj/parser/jar/parser.jar!/test.xml");
+   * final JarURLConnection connection = (JarURLConnection)
    * jarUrl.openConnection(); final URL url = connection.getJarFileURL();
    * 
    * 
    * @param root
-   *          - the jar file / or absolute file location .. e.g. file:/c:/somedir/myrobotlab.jar or file:/c:/somdir/bin
+   *          - the jar file / or absolute file location .. e.g.
+   *          file:/c:/somedir/myrobotlab.jar or file:/c:/somdir/bin
    * @param src
    *          - the folder or file to extract from the root
    * @param dst
@@ -343,8 +351,9 @@ public class FileIO {
   }
 
   /**
-   * copies a resource file or directory from the myrobotlab.jar and extracts it onto the file system at a destination supplied.
-   * This method works during dev, build, and runtime
+   * copies a resource file or directory from the myrobotlab.jar and extracts it
+   * onto the file system at a destination supplied. This method works during
+   * dev, build, and runtime
    * 
    * @param src
    *          s
@@ -358,9 +367,11 @@ public class FileIO {
   }
 
   /**
-   * extractResources will extract the entire /resource directory out unless it already exist
+   * extractResources will extract the entire /resource directory out unless it
+   * already exist
    * 
-   * this process is important to the webgui, as it accesses the AngularJS files from the file system and not within the jar
+   * this process is important to the webgui, as it accesses the AngularJS files
+   * from the file system and not within the jar
    * 
    * @return true/false
    */
@@ -374,7 +385,8 @@ public class FileIO {
   }
 
   /**
-   * same as extractResources except with an ability to force overwriting an already existing directory
+   * same as extractResources except with an ability to force overwriting an
+   * already existing directory
    * 
    * @param overwrite
    *          true/false
@@ -430,12 +442,15 @@ public class FileIO {
   }
 
   /**
-   * Method to universally get the root location of where mrl is currently running form. It could be from Eclipse's bin directory, a
-   * build directory, or inside a jar.
+   * Method to universally get the root location of where mrl is currently
+   * running form. It could be from Eclipse's bin directory, a build directory,
+   * or inside a jar.
    * 
-   * There are 100 rabbit holes, with the different ways you can 'attempt' to get a path to where mrl is running. Some work during
-   * Develop-Time, and return null during Runtime. Some encode or decode the path into something which can not be used. Some appear
-   * simple superficially. This currently is the best pratical solution I have found.
+   * There are 100 rabbit holes, with the different ways you can 'attempt' to
+   * get a path to where mrl is running. Some work during Develop-Time, and
+   * return null during Runtime. Some encode or decode the path into something
+   * which can not be used. Some appear simple superficially. This currently is
+   * the best pratical solution I have found.
    * 
    * 2 Step process: 1. get URL of code executing 2. convert to a File
    * 
@@ -443,10 +458,13 @@ public class FileIO {
    * 
    * == Develop-Time Windows Eclipse == [/C:/mrlDevelop/myrobotlab/bin/]
    * 
-   * == Run-Time Windows Jar == [/C:/mrl.test/current 10/develop/myrobotlab.1.0.${env.TRAVIS_BUILD_NUMBER}.jar]
+   * == Run-Time Windows Jar == [/C:/mrl.test/current
+   * 10/develop/myrobotlab.1.0.${env.TRAVIS_BUILD_NUMBER}.jar]
    * 
-   * http://stackoverflow.com/questions/9729197/getting-current-class-name- including-package
-   * https://community.oracle.com/blogs/kohsuke/2007/04/25/how-convert- javaneturl-javaiofile
+   * http://stackoverflow.com/questions/9729197/getting-current-class-name-
+   * including-package
+   * https://community.oracle.com/blogs/kohsuke/2007/04/25/how-convert-
+   * javaneturl-javaiofile
    * 
    * @return string
    */
@@ -466,7 +484,8 @@ public class FileIO {
   static public final List<String> getServiceList() throws IOException {
 
     List<URL> urls = listContents(getRoot(), "org/myrobotlab/service", false, new String[] { ".*\\.class" },
-        new String[] {} /* { ".*Test\\.class", ".*\\$.*" } */); // allowing all services
+        new String[] {} /* { ".*Test\\.class", ".*\\$.*" } */); // allowing all
+                                                                // services
     ArrayList<String> classes = new ArrayList<String>();
     log.info("found {} service files in {}", urls.size(), getRoot());
     // String path = packageName.replace('.', '/');
@@ -518,17 +537,22 @@ public class FileIO {
   }
 
   /*
-   * FIXME FIXME - make this a more general implementation of getServiceList static public final List<File> getPackageContent(String
-   * packageName) throws IOException { return getPackageContent(packageName, false, null, null); }
+   * FIXME FIXME - make this a more general implementation of getServiceList
+   * static public final List<File> getPackageContent(String packageName) throws
+   * IOException { return getPackageContent(packageName, false, null, null); }
    */
 
   /**
-   * The "goal" of this method is to get the list of contents from a package REGARDLESS of the packaging :P Regrettably, the
-   * implementation depends greatly on if the classes are on the file system vs if they are in a jar file
+   * The "goal" of this method is to get the list of contents from a package
+   * REGARDLESS of the packaging :P Regrettably, the implementation depends
+   * greatly on if the classes are on the file system vs if they are in a jar
+   * file
    * 
-   * Step 1: find out if our application is running in a jar (runtime release) or running on classes on the file system (debug)
+   * Step 1: find out if our application is running in a jar (runtime release)
+   * or running on classes on the file system (debug)
    * 
-   * Step 2: if we are running from the file system with .class files - it becomes very simple file operations
+   * Step 2: if we are running from the file system with .class files - it
+   * becomes very simple file operations
    * 
    * @param packageName
    * @param recurse
@@ -539,29 +563,34 @@ public class FileIO {
    */
   // FIXME reconcile with listPackage - No Files ! use URL returns ?!?!?
   /*
-   * static public final List<File> getPackageContent(String packageName, boolean recurse, String[] include, String[] exclude)
-   * throws IOException {
+   * static public final List<File> getPackageContent(String packageName,
+   * boolean recurse, String[] include, String[] exclude) throws IOException {
    * 
    * ArrayList<File> files = new ArrayList<File>();
    * 
    * if (!isJar()) {
    * 
-   * ClassLoader classLoader = Thread.currentThread().getContextClassLoader(); assert classLoader != null; String path =
-   * packageName.replace('.', '/'); Enumeration<URL> resources = classLoader.getResources(path); List<File> dirs = new
-   * ArrayList<File>(); log.info("resources.hasMoreElements {}", resources.hasMoreElements());
+   * ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+   * assert classLoader != null; String path = packageName.replace('.', '/');
+   * Enumeration<URL> resources = classLoader.getResources(path); List<File>
+   * dirs = new ArrayList<File>(); log.info("resources.hasMoreElements {}",
+   * resources.hasMoreElements());
    * 
-   * while (resources.hasMoreElements()) { URL resource = resources.nextElement(); log.info("resources.nextElement {}", resource);
+   * while (resources.hasMoreElements()) { URL resource =
+   * resources.nextElement(); log.info("resources.nextElement {}", resource);
    * dirs.add(new File(resource.getFile())); }
    * 
-   * // if (recurse) { for (File directory : dirs) { // FIXME files.addAll(findPackageContents(directory, // packageName, recurse,
+   * // if (recurse) { for (File directory : dirs) { // FIXME
+   * files.addAll(findPackageContents(directory, // packageName, recurse,
    * include, exclude)); } } else { // sdf }
    * 
    * // } return files;// .toArray(new Class[classes.size()]); }
    */
 
   /*
-   * public static String getJarName() { String nm = getRoot(); if (!nm.endsWith(".jar")) { log.error("mrl is not in a jar!");
-   * return null; } return nm; }
+   * public static String getJarName() { String nm = getRoot(); if
+   * (!nm.endsWith(".jar")) { log.error("mrl is not in a jar!"); return null; }
+   * return nm; }
    */
 
   /**
@@ -582,7 +611,8 @@ public class FileIO {
   }
 
   /**
-   * list the contents of a file system directory or list the contents of a jar file directory
+   * list the contents of a file system directory or list the contents of a jar
+   * file directory
    * 
    * @param root
    *          r
@@ -674,9 +704,12 @@ public class FileIO {
       Enumeration<JarEntry> enumEntries = jar.entries();
 
       /**
-       * jar access requires a linear spin through all the entries :( and unfortunately the paths are not ordered as a depth first
-       * ordering, instead they are breadth first, so a 'group of files' in a 'directory' can not be optimized in access - you are
-       * required to look through 'all' entries because there is no order guarantee you will find them all in one spot
+       * jar access requires a linear spin through all the entries :( and
+       * unfortunately the paths are not ordered as a depth first ordering,
+       * instead they are breadth first, so a 'group of files' in a 'directory'
+       * can not be optimized in access - you are required to look through 'all'
+       * entries because there is no order guarantee you will find them all in
+       * one spot
        */
       while (enumEntries.hasMoreElements()) {
         JarEntry jarEntry = (JarEntry) enumEntries.nextElement();
@@ -715,7 +748,8 @@ public class FileIO {
   static public final List<File> getFileList(String directory, boolean recurse, String[] include, String[] exclude) throws IOException {
     List<File> list = new ArrayList<File>();
 
-    // FIXME - security - filter out ../../.. prevent scanning of directories not
+    // FIXME - security - filter out ../../.. prevent scanning of directories
+    // not
     // sub to user.dir ?
     // String directory = gluePaths(System.getProperty("user.dir"), directory);
 
@@ -772,16 +806,19 @@ public class FileIO {
     return list;
   }
   /*
-   * static public final void addFiles(List<File> allFiles, String directory, boolean recurse, String[] include, String[] exclude)
-   * throws IOException {
+   * static public final void addFiles(List<File> allFiles, String directory,
+   * boolean recurse, String[] include, String[] exclude) throws IOException {
    * 
-   * File srcFile = new File(directory); if (!srcFile.exists()) { log.error("{} does not exist"); }
+   * File srcFile = new File(directory); if (!srcFile.exists()) {
+   * log.error("{} does not exist"); }
    * 
-   * // MUST BE DIRECTORY ! if (!srcFile.isDirectory()) { log.error("{} is not a directory"); }
+   * // MUST BE DIRECTORY ! if (!srcFile.isDirectory()) {
+   * log.error("{} is not a directory"); }
    * 
-   * File[] files = srcFile.listFiles(); for (File file : files) { if (file.isDirectory() && recurse) { // TODO - add if include
-   * empty directores .... List<File> subFiles = listFiles(directory, recurse, include, exclude) if (subFiles.size() > 0) {
-   * allFiles.addAll(c) } list.addAll(); } }
+   * File[] files = srcFile.listFiles(); for (File file : files) { if
+   * (file.isDirectory() && recurse) { // TODO - add if include empty directores
+   * .... List<File> subFiles = listFiles(directory, recurse, include, exclude)
+   * if (subFiles.size() > 0) { allFiles.addAll(c) } list.addAll(); } }
    * 
    * }
    * 
@@ -795,8 +832,10 @@ public class FileIO {
   }
 
   /**
-   * inter process file communication - default is to wait and attempt to load a file in the next second - it comes from
-   * savePartFile - then the writing of the file from a different process should be an atomic move regardless of file size
+   * inter process file communication - default is to wait and attempt to load a
+   * file in the next second - it comes from savePartFile - then the writing of
+   * the file from a different process should be an atomic move regardless of
+   * file size
    * 
    * @param filename
    *          f
@@ -859,10 +898,13 @@ public class FileIO {
     // assert /a/b/
 
     /*
-     * URI ?? full circle URL url = new URL("jar:file:/C:/Program%20Files/test.jar!/foo/bar"); JarURLConnection connection =
-     * (JarURLConnection) url.openConnection(); File file = new File(connection.getJarFileURL().toURI())
+     * URI ?? full circle URL url = new
+     * URL("jar:file:/C:/Program%20Files/test.jar!/foo/bar"); JarURLConnection
+     * connection = (JarURLConnection) url.openConnection(); File file = new
+     * File(connection.getJarFileURL().toURI())
      * 
-     * getResource ! takes string - returns url URL url = FileIO.class.getResource("/com"); =>
+     * getResource ! takes string - returns url URL url =
+     * FileIO.class.getResource("/com"); =>
      * jar:file:/C:/mrlDevelop/repo/org.alicebot.ab/0.0.6.26/Ab.jar!/com
      * 
      * 
@@ -936,7 +978,8 @@ public class FileIO {
       log.info("{} exists {}", uri, f.exists());
 
       /*
-       * URI uri = new URI("file://c:/windows"); File f = new File(uri); log.info("{} exists {}", uri, f.exists());
+       * URI uri = new URI("file://c:/windows"); File f = new File(uri);
+       * log.info("{} exists {}", uri, f.exists());
        */
 
       // info part
@@ -958,7 +1001,8 @@ public class FileIO {
       log.info("findPackageContents resource/Python/examples {}", urls.size());
 
       /*
-       * for (int i = 0; i < urls.size(); ++i) { File test = new File(urls.get(i).getPath()); String x = FileIO.toString(test);
+       * for (int i = 0; i < urls.size(); ++i) { File test = new
+       * File(urls.get(i).getPath()); String x = FileIO.toString(test);
        * log.info("{}", test); }
        */
 
@@ -998,8 +1042,10 @@ public class FileIO {
       // /, test)
 
       /*
-       * final URL jarUrl = new URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource"); final JarURLConnection connection
-       * = (JarURLConnection) jarUrl.openConnection(); final URL url = connection.getJarFileURL();
+       * final URL jarUrl = new
+       * URL("jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource"); final
+       * JarURLConnection connection = (JarURLConnection)
+       * jarUrl.openConnection(); final URL url = connection.getJarFileURL();
        * 
        * System.out.println(url.getFile());
        */
@@ -1016,33 +1062,43 @@ public class FileIO {
       // extract("dist/myrobotlab.jar", "resource", "");
       // extractResources();
       /*
-       * // extract directory to a non existent directory // result should be test7 extract("dist/myrobotlab.jar",
-       * "resource/AdafruitMotorShield/*", "test66");
+       * // extract directory to a non existent directory // result should be
+       * test7 extract("dist/myrobotlab.jar", "resource/AdafruitMotorShield/*",
+       * "test66");
        * 
-       * // file to file extract("dist/myrobotlab.jar", "module.properties", "module.txt");
+       * // file to file extract("dist/myrobotlab.jar", "module.properties",
+       * "module.txt");
        * 
-       * // file to file extract("dist/myrobotlab.jar", "resource/ACEduinoMotorShield.png", "ACEduinoMotorShield.png");
+       * // file to file extract("dist/myrobotlab.jar",
+       * "resource/ACEduinoMotorShield.png", "ACEduinoMotorShield.png");
        * 
-       * // file to file extract("dist/myrobotlab.jar", "resource/ACEduinoMotorShield.png", "test2/deeper/ACEduinoMotorShield.png");
+       * // file to file extract("dist/myrobotlab.jar",
+       * "resource/ACEduinoMotorShield.png",
+       * "test2/deeper/ACEduinoMotorShield.png");
        * 
-       * // extract directory to a non existent directory // result should be test7 extract("dist/myrobotlab.jar", "resource/*",
-       * "test7");
+       * // extract directory to a non existent directory // result should be
+       * test7 extract("dist/myrobotlab.jar", "resource/*", "test7");
        * 
-       * // extract directory to a non existent directory // result should be test8/testdeeper/(contents of resource)
-       * extract("dist/myrobotlab.jar", "resource/", "test8/testdeeper");
+       * // extract directory to a non existent directory // result should be
+       * test8/testdeeper/(contents of resource) extract("dist/myrobotlab.jar",
+       * "resource/", "test8/testdeeper");
        * 
-       * // extract directory to a non existent directory // result should be test3/deep/deeper/resource
-       * extract("dist/myrobotlab.jar", "resource", "test3/deep/deeper");
+       * // extract directory to a non existent directory // result should be
+       * test3/deep/deeper/resource extract("dist/myrobotlab.jar", "resource",
+       * "test3/deep/deeper");
        * 
-       * String t = "this is a test"; FileIO.savePartFile("save.txt", t.getBytes()); byte[] data = FileIO.loadPartFile("save.txt",
-       * 10000); if (data != null) { log.info(new String(data)); }
+       * String t = "this is a test"; FileIO.savePartFile("save.txt",
+       * t.getBytes()); byte[] data = FileIO.loadPartFile("save.txt", 10000); if
+       * (data != null) { log.info(new String(data)); }
        */
 
       /*
-       * String data = resourceToString("version.txt"); data = resourceToString("framework/ivychain.xml"); data =
+       * String data = resourceToString("version.txt"); data =
+       * resourceToString("framework/ivychain.xml"); data =
        * resourceToString("framework/serviceData.xml");
        * 
-       * byte[] ba = resourceToByteArray("version.txt"); ba = resourceToByteArray("framework/version.txt"); ba =
+       * byte[] ba = resourceToByteArray("version.txt"); ba =
+       * resourceToByteArray("framework/version.txt"); ba =
        * resourceToByteArray("framework/serviceData.xml");
        * 
        * String hello = resourceToString("blah.txt");
@@ -1069,7 +1125,8 @@ public class FileIO {
    * resource directory resource contents read into a byte array
    * 
    * @param src
-   *          - location - (root is /resource) - e.g. src = Python/examples/someFile.py
+   *          - location - (root is /resource) - e.g. src =
+   *          Python/examples/someFile.py
    * @return byte array
    */
   static public final byte[] resourceToByteArray(String src) {
@@ -1111,7 +1168,8 @@ public class FileIO {
    * resource directory resource contents read into a string
    * 
    * @param src
-   *          - location - (root is /resource) - e.g. src = Python/examples/someFile.py
+   *          - location - (root is /resource) - e.g. src =
+   *          Python/examples/someFile.py
    * @return string
    */
   static public final String resourceToString(String src) {

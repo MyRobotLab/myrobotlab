@@ -105,11 +105,14 @@ public class Map3D {
             }
           }
         }
-        // for (int x = (int)point.point.getX() - distanceBetweenPoints; x < (int)point.point.getX() + distanceBetweenPoints &&
+        // for (int x = (int)point.point.getX() - distanceBetweenPoints; x <
+        // (int)point.point.getX() + distanceBetweenPoints &&
         // !found; x++) {
-        // for (int y = (int)point.point.getY() - distanceBetweenPoints; y < (int)point.point.getY() + distanceBetweenPoints &&
+        // for (int y = (int)point.point.getY() - distanceBetweenPoints; y <
+        // (int)point.point.getY() + distanceBetweenPoints &&
         // !found; y++) {
-        // for (int z = (int)point.point.getZ() - distanceBetweenPoints; z < (int)point.point.getZ() + distanceBetweenPoints &&
+        // for (int z = (int)point.point.getZ() - distanceBetweenPoints; z <
+        // (int)point.point.getZ() + distanceBetweenPoints &&
         // !found; z++) {
         // Integer[] index = new Integer[]{x, y, z};
         // if (cloudMapGroup.get(i).containsKey(index)) {
@@ -167,7 +170,8 @@ public class Map3D {
   }
 
   private void addCoordValue(int xpos, int ypos, int zpos, CoordStateValue value) {
-    // need to rotate and translate the location depending on the position of the kinect
+    // need to rotate and translate the location depending on the position of
+    // the kinect
     // rotate
     // must change the x axis so the coordinate are in the right orientation
     // xpos *= -1;
@@ -208,7 +212,8 @@ public class Map3D {
       }
     }
 
-    // HashMap<Integer,HashMap<Integer,Map3DPoint>> y = coordValue.get((int)posx);
+    // HashMap<Integer,HashMap<Integer,Map3DPoint>> y =
+    // coordValue.get((int)posx);
     // if (y == null) {
     // y = new HashMap<Integer,HashMap<Integer,Map3DPoint>>();
     // }
@@ -262,7 +267,8 @@ public class Map3D {
     // if (z == null) {
     // return CoordStateValue.EMPTY;
     // }
-    // return CoordStateValue.FILL; //return FILL even if it's undefined (we don't know if it's fill or not, better not go.
+    // return CoordStateValue.FILL; //return FILL even if it's undefined (we
+    // don't know if it's fill or not, better not go.
     // //return z.get(posz);
   }
 

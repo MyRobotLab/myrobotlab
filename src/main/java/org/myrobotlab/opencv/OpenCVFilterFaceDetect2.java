@@ -36,13 +36,16 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
 /**
- * This is the OpenCV Face Recognition. It must be trained with a set of images and their labels. These images should be of people
- * faces and their names are the labels.
+ * This is the OpenCV Face Recognition. It must be trained with a set of images
+ * and their labels. These images should be of people faces and their names are
+ * the labels.
  * 
- * It computes the "distance" from the reference new image to existing images that it's been trained on and provides a prediction of
- * what label applies
+ * It computes the "distance" from the reference new image to existing images
+ * that it's been trained on and provides a prediction of what label applies
  * 
- * Based on: https://github.com/bytedeco/javacv/blob/master/samples/OpenCVFaceRecognizer. java
+ * Based on:
+ * https://github.com/bytedeco/javacv/blob/master/samples/OpenCVFaceRecognizer.
+ * java
  * 
  * @author kwatters
  * @author scruffy-bob modified by alessandruino
@@ -111,8 +114,9 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
   }
 
   /**
-   * This method will load all of the image files in a directory. The filename will be parsed for the label to apply to the image.
-   * At least 2 different labels must exist in the training set.
+   * This method will load all of the image files in a directory. The filename
+   * will be parsed for the label to apply to the image. At least 2 different
+   * labels must exist in the training set.
    * 
    * @return
    */

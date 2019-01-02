@@ -13,7 +13,8 @@ import org.slf4j.Logger;
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
- * A singleton class to load a dictionary into the jvm that can be used across multiple instances of a pipeline sage.
+ * A singleton class to load a dictionary into the jvm that can be used across
+ * multiple instances of a pipeline sage.
  * 
  * @author kwatters
  *

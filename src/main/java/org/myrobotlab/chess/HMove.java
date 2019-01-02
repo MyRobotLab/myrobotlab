@@ -20,9 +20,10 @@ public final class HMove extends org.op.chess.Move implements Comparable<HMove>,
   }
 
   /**
-   * Compares this move to another move. The implementation is strictly defective - it ought to do something other than throw a
-   * ClassCastException if o is not a Move, but for optimization reasons it doesn't. This class is only partially ordered. That is,
-   * the ordering is incompatible with equals.
+   * Compares this move to another move. The implementation is strictly
+   * defective - it ought to do something other than throw a ClassCastException
+   * if o is not a Move, but for optimization reasons it doesn't. This class is
+   * only partially ordered. That is, the ordering is incompatible with equals.
    */
 
   @Override

@@ -18,8 +18,9 @@ import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.slf4j.Logger;
 
 /**
- * FIXME - make abstract class Server with abstract connection info &amp; serializers stop &amp; start are all the same (between
- * UdpServer &amp; TcpServer)
+ * FIXME - make abstract class Server with abstract connection info &amp;
+ * serializers stop &amp; start are all the same (between UdpServer &amp;
+ * TcpServer)
  * 
  * @author grperry
  *
@@ -84,12 +85,17 @@ public class UdpServer implements Runnable {
           /*
            * if ("getConnections".equals(msg.method)) {
            * 
-           * // get connections List<Connection> conn = getConnections(new URI(String.format("tcp:/%s:%d", dgram.getAddress(),
-           * dgram.getPort()))); // send them back for (int i = 0; i < conn.size(); ++i) { Message newConnMsg = createMessage(null,
-           * "publishConnection", conn); byte[] msgBuf = org.myrobotlab.codec.CodecUtils.getBytes(newConnMsg); DatagramPacket dgp =
-           * new DatagramPacket(msgBuf, msgBuf.length, dgram.getAddress(), dgram.getPort()); socket.send(dgp); }
+           * // get connections List<Connection> conn = getConnections(new
+           * URI(String.format("tcp:/%s:%d", dgram.getAddress(),
+           * dgram.getPort()))); // send them back for (int i = 0; i <
+           * conn.size(); ++i) { Message newConnMsg = createMessage(null,
+           * "publishConnection", conn); byte[] msgBuf =
+           * org.myrobotlab.codec.CodecUtils.getBytes(newConnMsg);
+           * DatagramPacket dgp = new DatagramPacket(msgBuf, msgBuf.length,
+           * dgram.getAddress(), dgram.getPort()); socket.send(dgp); }
            * 
-           * // we will have to search for them again } else if ("publishConnection".equals(msg.method)) {
+           * // we will have to search for them again } else if
+           * ("publishConnection".equals(msg.method)) {
            * myService.invoke("onCommOptions", msg.data[0]); } else
            */
 

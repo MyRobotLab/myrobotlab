@@ -35,7 +35,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- * Loads kinect observations and saves a point cloud with rgb information to a file in a simple CSV format
+ * Loads kinect observations and saves a point cloud with rgb information to a
+ * file in a simple CSV format
  *
  * @author Peter Abeles
  */

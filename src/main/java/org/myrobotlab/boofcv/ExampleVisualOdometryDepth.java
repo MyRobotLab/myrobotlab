@@ -64,8 +64,9 @@ import org.openkinect.freenect.Resolution;
 import org.python.jline.internal.Log;
 
 /**
- * Bare bones example showing how to estimate the camera's ego-motion using a depth camera system, e.g. Kinect. Additional
- * information on the scene can be optionally extracted from the algorithm if it implements AccessPointTracks3D.
+ * Bare bones example showing how to estimate the camera's ego-motion using a
+ * depth camera system, e.g. Kinect. Additional information on the scene can be
+ * optionally extracted from the algorithm if it implements AccessPointTracks3D.
  *
  * @author Peter Abeles
  */
@@ -109,7 +110,8 @@ public class ExampleVisualOdometryDepth {
     // declares the algorithm
     DepthVisualOdometry<GrayU8, GrayU16> visualOdometry = FactoryVisualOdometry.depthDepthPnP(1.5, 120, 2, 200, 50, true, sparseDepth, tracker, GrayU8.class, GrayU16.class);
 
-    // Pass in intrinsic/extrinsic calibration. This can be changed in the future.
+    // Pass in intrinsic/extrinsic calibration. This can be changed in the
+    // future.
     visualOdometry.setCalibration(param.visualParam, new DoNothing2Transform2_F32());
 
     // Process the video sequence and output the location plus number of inliers
@@ -166,7 +168,8 @@ public class ExampleVisualOdometryDepth {
       xTot = xTot + T.x;
       yTot = yTot + T.y;
       zTot = zTot + T.z;
-      // System.out.printf("xT, yT, Zt, %8.2f %8.2f %8.2f \n ", xTot, yTot, zTot);
+      // System.out.printf("xT, yT, Zt, %8.2f %8.2f %8.2f \n ", xTot, yTot,
+      // zTot);
 
     }
   }
@@ -182,7 +185,8 @@ public class ExampleVisualOdometryDepth {
   }
 
   /**
-   * If the algorithm implements AccessPointTracks3D, then count the number of inlier features and return a string.
+   * If the algorithm implements AccessPointTracks3D, then count the number of
+   * inlier features and return a string.
    */
   public static String inlierPercent(VisualOdometry alg) {
     if (!(alg instanceof AccessPointTracks3D))

@@ -14,7 +14,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * WorkflowWorker : this is a list of stages that will poll the workflow queue and process documents through that list of stages.
+ * WorkflowWorker : this is a list of stages that will poll the workflow queue
+ * and process documents through that list of stages.
  */
 public class WorkflowWorker extends Thread {
   public final static Logger log = LoggerFactory.getLogger(WorkflowWorker.class);
@@ -64,7 +65,8 @@ public class WorkflowWorker extends Thread {
           processing = false;
         }
       } catch (Exception e) {
-        // TODO: Why didn't I see this message before? because the exception was a runtime exception
+        // TODO: Why didn't I see this message before? because the exception was
+        // a runtime exception
         // and this was previously only catching interrupted.
         log.warn("Workflow Worker Died! {}", e.getMessage());
         e.printStackTrace();

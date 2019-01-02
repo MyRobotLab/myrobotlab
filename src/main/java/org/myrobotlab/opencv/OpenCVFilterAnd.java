@@ -75,7 +75,8 @@ public class OpenCVFilterAnd extends OpenCVFilter {
     try {
       and = cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE);
       /*
-       * BufferedImage img = ImageIO.read(new File(filename)); mask = IplImage.createFrom(img);
+       * BufferedImage img = ImageIO.read(new File(filename)); mask =
+       * IplImage.createFrom(img);
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -103,9 +104,11 @@ public class OpenCVFilterAnd extends OpenCVFilter {
       cvResetImageROI(image);
 
       /*
-       * CanvasFrame canvas = new CanvasFrame("My Image", 1); canvas.showImage(and);
+       * CanvasFrame canvas = new CanvasFrame("My Image", 1);
+       * canvas.showImage(and);
        * 
-       * CanvasFrame canvas2 = new CanvasFrame("My Image 2", 1); canvas2.showImage(buffer);
+       * CanvasFrame canvas2 = new CanvasFrame("My Image 2", 1);
+       * canvas2.showImage(buffer);
        */
       // working example
       // cvAnd(image, negativeImage, buffer, null); - both were clones of

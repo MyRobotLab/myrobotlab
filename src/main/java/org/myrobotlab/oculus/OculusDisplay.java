@@ -87,8 +87,10 @@ import com.oculusvr.capi.ViewScaleDesc;
 
 /**
  * 
- * OculusDisplay - This call will start up a lwjgl instance that will display the rift image in a side by side fashion in the oculus
- * rift display. This is largely adapted from jocular-examples https://github.com/OculusRiftInAction/jocular-examples
+ * OculusDisplay - This call will start up a lwjgl instance that will display
+ * the rift image in a side by side fashion in the oculus rift display. This is
+ * largely adapted from jocular-examples
+ * https://github.com/OculusRiftInAction/jocular-examples
  * 
  * @author kwatters
  */
@@ -180,7 +182,8 @@ public class OculusDisplay implements Runnable {
   }
 
   public void updateOrientation(Orientation orientation) {
-    // TODO: we can probably remove this , the orientation info is known when we're rendering.
+    // TODO: we can probably remove this , the orientation info is known when
+    // we're rendering.
     this.orientationInfo = orientation;
   }
 
@@ -220,7 +223,8 @@ public class OculusDisplay implements Runnable {
     recenterView();
   }
 
-  // oculus device initialization, assumes that oculus runtime is up and running on the server.
+  // oculus device initialization, assumes that oculus runtime is up and running
+  // on the server.
   private void initHmd() {
     if (hmd == null) {
       Hmd.initialize();
@@ -229,7 +233,8 @@ public class OculusDisplay implements Runnable {
       } catch (InterruptedException e) {
         throw new IllegalStateException(e);
       }
-      // create it (this should be owned by the Oculus service i think? and passed in with setHmd(hmd)
+      // create it (this should be owned by the Oculus service i think? and
+      // passed in with setHmd(hmd)
       hmd = Hmd.create();
     }
     if (null == hmd) {
@@ -246,7 +251,8 @@ public class OculusDisplay implements Runnable {
     }
     // TODO: maybe ipd and eyeHeight go away?
     ipd = hmd.getFloat(OvrLibrary.OVR_KEY_IPD, OVR_DEFAULT_IPD);
-    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT, OVR_DEFAULT_EYE_HEIGHT);
+    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT,
+    // OVR_DEFAULT_EYE_HEIGHT);
     eyeHeight = 0;
   }
 

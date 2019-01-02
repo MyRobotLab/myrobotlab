@@ -25,8 +25,9 @@ import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
 /**
- * Virtual Arduino Simulator... It emulates the Arduino, but we also try to maintain the internal state the Arduino would (at least
- * on a software level)...
+ * Virtual Arduino Simulator... It emulates the Arduino, but we also try to
+ * maintain the internal state the Arduino would (at least on a software
+ * level)...
  * 
  * @author GroG
  *
@@ -88,8 +89,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   transient FileOutputStream record = null;
 
   /**
-   * This class is a thread which runs a (port) of MrlComm.ino. It does what the Arduino "OS" does .. It runs the "loop()" method
-   * forever..
+   * This class is a thread which runs a (port) of MrlComm.ino. It does what the
+   * Arduino "OS" does .. It runs the "loop()" method forever..
    * 
    * @author GroG
    *
@@ -382,10 +383,12 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   /*
-   * public void setAref(String aref) { int arefInt = 1; switch (aref) { case "EXTERNAL": arefInt = 0; break; case "DEFAULT":
-   * arefInt = 1; break; case "INTERNAL1V1": arefInt = 2; break; case "INTERNAL": arefInt = 3; break; case "INTERNAL2V56": arefInt =
-   * 3; break; default: error("Aref " + aref.toUpperCase() + " is unknown"); } log.info("set aref to " + aref); this.aref = aref;
-   * msg.setAref(arefInt); }
+   * public void setAref(String aref) { int arefInt = 1; switch (aref) { case
+   * "EXTERNAL": arefInt = 0; break; case "DEFAULT": arefInt = 1; break; case
+   * "INTERNAL1V1": arefInt = 2; break; case "INTERNAL": arefInt = 3; break;
+   * case "INTERNAL2V56": arefInt = 3; break; default: error("Aref " +
+   * aref.toUpperCase() + " is unknown"); } log.info("set aref to " + aref);
+   * this.aref = aref; msg.setAref(arefInt); }
    */
 
   public String getAref() {

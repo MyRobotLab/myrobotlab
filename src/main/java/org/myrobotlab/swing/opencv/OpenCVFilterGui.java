@@ -72,8 +72,9 @@ public abstract class OpenCVFilterGui implements ActionListener {
     display.setBorder(title);
 
     /*
-     * JPanel input = new JPanel(); title = BorderFactory.createTitledBorder("input"); input.setBorder(title); input.add(sources);
-     * main.add(input, BorderLayout.NORTH);
+     * JPanel input = new JPanel(); title =
+     * BorderFactory.createTitledBorder("input"); input.setBorder(title);
+     * input.add(sources); main.add(input, BorderLayout.NORTH);
      */
     main.add(display, BorderLayout.CENTER);
     self = this;

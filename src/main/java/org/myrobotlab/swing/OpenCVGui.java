@@ -299,11 +299,14 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       String type = (String) grabberTypeSelect.getSelectedItem();
       /**
        * <pre>
-       * ALL FRAME GRABBER LOGIC IS DONE IN OpenCV.getGrabber() !!! 1 place of chaotic logic to rule them all !
+       * ALL FRAME GRABBER LOGIC IS DONE IN OpenCV.getGrabber() !!! 1 place of
+       * chaotic logic to rule them all !
        * 
-       * if (type != null && type.startsWith("OpenKinect") || type.equals("PS3Eye") || type.equals("Sarxos") ||
-       * type.equals("VideoInput")|| type.equals("FlyCapture")) { // cuz these are all cameras ... log.warn("setting as camera as
-       * source"); send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA); }
+       * if (type != null && type.startsWith("OpenKinect") ||
+       * type.equals("PS3Eye") || type.equals("Sarxos") ||
+       * type.equals("VideoInput")|| type.equals("FlyCapture")) { // cuz these
+       * are all cameras ... log.warn("setting as camera as source");
+       * send("setInputSource", OpenCV.INPUT_SOURCE_CAMERA); }
        */
       send("setGrabberType", type);
     } else if (o == recordFrameButton) {
@@ -431,15 +434,18 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
   }
 
   /**
-   * onState is an interface function which allow the interface of the SwingGui Bound service to update graphical portions of the
-   * SwingGui based on data changes.
+   * onState is an interface function which allow the interface of the SwingGui
+   * Bound service to update graphical portions of the SwingGui based on data
+   * changes.
    * 
-   * The entire service is sent and it is this functions responsibility to update all of the gui components based on data elements
-   * and/or method of the service.
+   * The entire service is sent and it is this functions responsibility to
+   * update all of the gui components based on data elements and/or method of
+   * the service.
    * 
-   * onState get's its Service directly if the gui is operating "in process". If the gui is operating "out of process" a serialized
-   * (zombie) process is sent to provide the updated state information. Typically "publishState" is the function which provides the
-   * event for onState.
+   * onState get's its Service directly if the gui is operating "in process". If
+   * the gui is operating "out of process" a serialized (zombie) process is sent
+   * to provide the updated state information. Typically "publishState" is the
+   * function which provides the event for onState.
    */
   public void onState(final OpenCV opencv) {
     SwingUtilities.invokeLater(new Runnable() {

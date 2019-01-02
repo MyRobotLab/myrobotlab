@@ -194,7 +194,8 @@ public abstract class OpenCVFilter implements Serializable {
   transient OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 
   /**
-   * reference to the last OpenCVData processed and the one this filter will modify
+   * reference to the last OpenCVData processed and the one this filter will
+   * modify
    */
   OpenCVData data;
 
@@ -204,8 +205,9 @@ public abstract class OpenCVFilter implements Serializable {
   transient Color displayColor;
 
   /**
-   * This allows the display method to be processed in the filter typically its a conversion from opencv-jni-land to java-land and
-   * associated processing for human consumption
+   * This allows the display method to be processed in the filter typically its
+   * a conversion from opencv-jni-land to java-land and associated processing
+   * for human consumption
    */
   boolean displayEnabled = false;
 
@@ -300,8 +302,8 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   /**
-   * This is NOT the filter's image, but really the output of the previous filter ! to be used as input for "this" filters process
-   * method
+   * This is NOT the filter's image, but really the output of the previous
+   * filter ! to be used as input for "this" filters process method
    * 
    * @return
    */
@@ -335,7 +337,8 @@ public abstract class OpenCVFilter implements Serializable {
   public abstract IplImage process(IplImage image) throws InterruptedException;
 
   /**
-   * method which determines if this filter to process its display TODO - have it also decide if its cumulative display or not
+   * method which determines if this filter to process its display TODO - have
+   * it also decide if its cumulative display or not
    */
   public BufferedImage processDisplay() {
 
@@ -382,7 +385,8 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   /**
-   * when a filter is removed from the pipeline its given a chance to return resourcs
+   * when a filter is removed from the pipeline its given a chance to return
+   * resourcs
    */
   public void release() {
   }

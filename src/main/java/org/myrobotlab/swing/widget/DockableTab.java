@@ -117,10 +117,14 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
   public void actionPerformed(ActionEvent e) {
     String cmd = e.getActionCommand();
     /*
-     * if ("prevent export".equals(cmd)) { allowExportMenuItem.setIcon(Util.getImageIcon("allowExport.png"));
-     * allowExportMenuItem.setActionCommand("allow export"); allowExportMenuItem.setText("allow export"); } else if (
-     * "allow export".equals(cmd)) { allowExportMenuItem.setIcon(Util.getImageIcon("preventExport.png"));
-     * allowExportMenuItem.setActionCommand("prevent export"); allowExportMenuItem.setText("prevent export"); } else
+     * if ("prevent export".equals(cmd)) {
+     * allowExportMenuItem.setIcon(Util.getImageIcon("allowExport.png"));
+     * allowExportMenuItem.setActionCommand("allow export");
+     * allowExportMenuItem.setText("allow export"); } else if (
+     * "allow export".equals(cmd)) {
+     * allowExportMenuItem.setIcon(Util.getImageIcon("preventExport.png"));
+     * allowExportMenuItem.setActionCommand("prevent export");
+     * allowExportMenuItem.setText("prevent export"); } else
      */
 
     if ("undock".equals(cmd)) {
@@ -204,8 +208,9 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
   }
 
   /**
-   * undocks a tabbed panel into a JFrame FIXME - NORMALIZE - there are similar methods in SwingGui FIXME - there needs to be clear
-   * pattern replacement - this is a decorator - I think... (also it will always be SwingGui)
+   * undocks a tabbed panel into a JFrame FIXME - NORMALIZE - there are similar
+   * methods in SwingGui FIXME - there needs to be clear pattern replacement -
+   * this is a decorator - I think... (also it will always be SwingGui)
    * 
    */
   // can't return JFrame referrence since its in a invokeLater..

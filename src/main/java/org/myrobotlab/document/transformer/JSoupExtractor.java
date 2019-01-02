@@ -8,7 +8,8 @@ import org.jsoup.select.Elements;
 import org.myrobotlab.document.Document;
 
 /**
- * This stage will use a jsoup selection string on html and store the resulting data int the output field
+ * This stage will use a jsoup selection string on html and store the resulting
+ * data int the output field
  * 
  * @author kwatters
  *

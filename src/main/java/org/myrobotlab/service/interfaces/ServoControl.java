@@ -41,8 +41,10 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   // !!!!
 
   /**
-   * The point of the 'attach' is a concept to the user of the Servo. A simple concept across all services where the "minimal"
-   * amount of complexity/parameters are needed to 'attach' position shall be default to rest/90 if not specified
+   * The point of the 'attach' is a concept to the user of the Servo. A simple
+   * concept across all services where the "minimal" amount of
+   * complexity/parameters are needed to 'attach' position shall be default to
+   * rest/90 if not specified
    *
    * 
    * speed/velocity shall be defaulted to 'max' ie - no speed control
@@ -57,7 +59,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    */
 
   /**
-   * The one and only one attach which does the work we expect attaching a ServoControl to a ServoController
+   * The one and only one attach which does the work we expect attaching a
+   * ServoControl to a ServoController
    * 
    * @param controller
    *          c
@@ -67,7 +70,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void attachServoController(ServoController controller) throws Exception;
 
   /**
-   * the one and only one which detaches a 'specific' ServoControl from ServoController
+   * the one and only one which detaches a 'specific' ServoControl from
+   * ServoController
    * 
    * @param controller
    *          e
@@ -87,8 +91,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public boolean isAttachedServoController(ServoController controller);
 
   /**
-   * attach with different parameters - it should set fields then call the "one and only" single parameter
-   * attachServoController(controller)
+   * attach with different parameters - it should set fields then call the "one
+   * and only" single parameter attachServoController(controller)
    * 
    * if no controller is provided, last used is set from json related.
    * 
@@ -106,8 +110,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
 
   /**
-   * attach with different parameters - it should set fields then call the "one and only" single parameter
-   * attachServoController(controller)
+   * attach with different parameters - it should set fields then call the "one
+   * and only" single parameter attachServoController(controller)
    * 
    * if no controller is provided, last used is set from json related.
    * 
@@ -118,13 +122,15 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   /**
    * @param degreesPerSecond
-   *          degrees per second rotational velocity cm per second linear velocity ?
+   *          degrees per second rotational velocity cm per second linear
+   *          velocity ?
    * 
    */
   public void setVelocity(double degreesPerSecond);
 
   /*
-   * Re-attaches (re-energizes) the servo on its current pin NOT RELATED TO CONTROLLER ATTACH/DETACH !
+   * Re-attaches (re-energizes) the servo on its current pin NOT RELATED TO
+   * CONTROLLER ATTACH/DETACH !
    * 
    * Deprecated - use enable(pin)
    */
@@ -139,7 +145,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public void detach();
 
   /**
-   * limits input of servo - to prevent damage or problems if servos should not move their full range
+   * limits input of servo - to prevent damage or problems if servos should not
+   * move their full range
    * 
    * @param min
    *          min value
@@ -171,16 +178,20 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public void setSpeed(double speed);
 
   /**
-   * stops the servo if currently in motion servo must be moving at incremental speed for a stop to work (setSpeed &lt; 1.0)
+   * stops the servo if currently in motion servo must be moving at incremental
+   * speed for a stop to work (setSpeed &lt; 1.0)
    */
   public void stop();
 
   /**
-   * configuration method - a method the controller will call when the servo is attached.
+   * configuration method - a method the controller will call when the servo is
+   * attached.
    * 
-   * What should happen is if (controller != null) { pin = controller.servoGetPin(); } return pin; This returns the pin info the
-   * controller has - updates the Servo's pin and returns the refreshed data. Not worth it. What will happen is the pin which was
-   * set on the servo will simply be returned
+   * What should happen is if (controller != null) { pin =
+   * controller.servoGetPin(); } return pin; This returns the pin info the
+   * controller has - updates the Servo's pin and returns the refreshed data.
+   * Not worth it. What will happen is the pin which was set on the servo will
+   * simply be returned
    * 
    * @return the pin as an integer
    */
@@ -192,19 +203,23 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   public void rest();
 
   /**
-   * Unmapped current position of last input. ie. equivalent to the last position from moveTo(pos)
+   * Unmapped current position of last input. ie. equivalent to the last
+   * position from moveTo(pos)
    * 
-   * A possible better solution might be to use ServoEvent(s) to get the position through time which a controller with speed control
-   * can provide, so as the servo is told incrementally where to go - it sends that command back as an event which sets the
-   * "current" position.
+   * A possible better solution might be to use ServoEvent(s) to get the
+   * position through time which a controller with speed control can provide, so
+   * as the servo is told incrementally where to go - it sends that command back
+   * as an event which sets the "current" position.
    * 
    * @return the current position as a double
    */
   public double getPos();
 
   /**
-   * the calculated mapper output for the servo - this is <b> ALWAYS ALWAYS in DEGREES !</b> because this method is used by the
-   * controller - and the controller needs a stable method &amp; a stable unit FIXME - not sure if this is a good thing to expose
+   * the calculated mapper output for the servo - this is <b> ALWAYS ALWAYS in
+   * DEGREES !</b> because this method is used by the controller - and the
+   * controller needs a stable method &amp; a stable unit FIXME - not sure if
+   * this is a good thing to expose
    * 
    * @return the target output position
    */
@@ -215,7 +230,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   double getVelocity();
 
   /**
-   * set the pin of the servo this does not 'attach' energize the pin only set the pin value
+   * set the pin of the servo this does not 'attach' energize the pin only set
+   * the pin value
    * 
    * @param pin
    *          the pin number for the servo
@@ -241,7 +257,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   /**
    * @param rest
-   *          A default position for the servo. Defaulted to 90 unless explicitly set. Position the servo will move to when method
+   *          A default position for the servo. Defaulted to 90 unless
+   *          explicitly set. Position the servo will move to when method
    *          servo.rest() is called
    */
   public void setRest(double rest);
@@ -254,7 +271,8 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   boolean isInverted();
 
   /**
-   * invert the map so a servo will go in reverse direction 0 == 180, 90 == 90, 180 == 0
+   * invert the map so a servo will go in reverse direction 0 == 180, 90 == 90,
+   * 180 == 0
    * 
    * @param invert
    *          - true is to invert
@@ -265,8 +283,9 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void addIKServoEventListener(NameProvider service);
 
   /**
-   * setAutoDisable tell the servo to disable when position reached this make sense only if velocity > 0 if velocity == -1 : a timer
-   * is launched to delay disable
+   * setAutoDisable tell the servo to disable when position reached this make
+   * sense only if velocity > 0 if velocity == -1 : a timer is launched to delay
+   * disable
    * 
    * @param autoDisable
    *          - boolean
@@ -281,8 +300,9 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   boolean getAutoDisable();
 
   /**
-   * waitTargetPos is used by a global moveToBlocking command - pos usually is 0 - 180 a global moveToBlocking is a method that use
-   * multiple servo at same time and wait every servo for last position arrived
+   * waitTargetPos is used by a global moveToBlocking command - pos usually is 0
+   * - 180 a global moveToBlocking is a method that use multiple servo at same
+   * time and wait every servo for last position arrived
    * 
    * @param pos
    *          - position to move to
@@ -290,10 +310,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void waitTargetPos();
 
   /**
-   * moveToBlocking is a basic move command of the servo - usually is 0 - 180 valid range but can be adjusted and / or re-mapped
-   * with min / max and map commands
+   * moveToBlocking is a basic move command of the servo - usually is 0 - 180
+   * valid range but can be adjusted and / or re-mapped with min / max and map
+   * commands
    * 
-   * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION" response
+   * TODO - moveToBlocking - blocks until servo sends "ARRIVED_TO_POSITION"
+   * response
    * 
    * @param pos
    *          - position to move to
@@ -302,9 +324,11 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   boolean moveToBlocking(double pos);
 
   /**
-   * Sometime we need to override autoDisable : servoGui slider / tracking / gestures that leave your arms in the air ... so if
-   * overrideautoDisable(true) servo will never autoDisable until overrideautoDisable(false) ( we need to keep original autoDisable
-   * status, that is the reason )
+   * Sometime we need to override autoDisable : servoGui slider / tracking /
+   * gestures that leave your arms in the air ... so if
+   * overrideautoDisable(true) servo will never autoDisable until
+   * overrideautoDisable(false) ( we need to keep original autoDisable status,
+   * that is the reason )
    */
   void setOverrideAutoDisable(boolean overrideAutoDisable);
 

@@ -6,8 +6,9 @@ import java.util.List;
 import org.myrobotlab.document.Document;
 
 /**
- * This stage will iterate the values of the inputField and attempt to cast them to an integer. The values will be stored in the
- * outputField. Values in the output field will be overwritten.
+ * This stage will iterate the values of the inputField and attempt to cast them
+ * to an integer. The values will be stored in the outputField. Values in the
+ * output field will be overwritten.
  * 
  * @author kwatters
  *

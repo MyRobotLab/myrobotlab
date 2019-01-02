@@ -33,18 +33,23 @@ public class Elasticsearch extends Service {
     // version[5.0.0]
     // [z3SpE04] version[5.0.0], pid[19688], <= can i get process handle ?
 
-    // mkdirs Elasticsearch/elastic/<- mabye not name as its a server port (single instance)
+    // mkdirs Elasticsearch/elastic/<- mabye not name as its a server port
+    // (single instance)
 
     elastic = EmbeddedElastic.builder().withElasticVersion(version).withSetting(PopularProperties.TRANSPORT_TCP_PORT, 9350)
         .withSetting(PopularProperties.CLUSTER_NAME, "my_cluster")
         // .withPlugin("analysis-stempel")
         .withIndex("index")
         /*
-         * .withIndex("cars", IndexSettings.builder() .withType("car", getSystemResourceAsStream("car-mapping.json")) .build())
+         * .withIndex("cars", IndexSettings.builder() .withType("car",
+         * getSystemResourceAsStream("car-mapping.json")) .build())
          * 
-         * .withIndex("books", IndexSettings.builder() .withType(PAPER_BOOK_INDEX_TYPE,
-         * getSystemResourceAsStream("paper-book-mapping.json")) .withType("audio_book",
-         * getSystemResourceAsStream("audio-book-mapping.json")) .withSettings(getSystemResourceAsStream("elastic-settings.json"))
+         * .withIndex("books", IndexSettings.builder()
+         * .withType(PAPER_BOOK_INDEX_TYPE,
+         * getSystemResourceAsStream("paper-book-mapping.json"))
+         * .withType("audio_book",
+         * getSystemResourceAsStream("audio-book-mapping.json"))
+         * .withSettings(getSystemResourceAsStream("elastic-settings.json"))
          * .build())
          */
         .build().start();
@@ -56,8 +61,9 @@ public class Elasticsearch extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -71,8 +77,10 @@ public class Elasticsearch extends Service {
 
     // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
     // meta.addDependency("orgId", "artifactId", "2.4.0");
-    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus", "2.3.1-1.4");
-    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus-platform", "2.3.1-1.4");
+    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus",
+    // "2.3.1-1.4");
+    // meta.addDependency("org.bytedeco.javacpp-presets",
+    // "artoolkitplus-platform", "2.3.1-1.4");
 
     // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
 

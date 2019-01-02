@@ -75,10 +75,13 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Service is the base of the MyRobotLab Service Oriented Architecture. All meaningful Services derive from the Service class. There
- * is a _TemplateService.java in the org.myrobotlab.service package. This can be used as a very fast template for creating new
- * Services. Each Service begins with two threads One is for the "OutBox" this delivers messages out of the Service. The other is
- * the "InBox" thread which processes all incoming messages.
+ * Service is the base of the MyRobotLab Service Oriented Architecture. All
+ * meaningful Services derive from the Service class. There is a
+ * _TemplateService.java in the org.myrobotlab.service package. This can be used
+ * as a very fast template for creating new Services. Each Service begins with
+ * two threads One is for the "OutBox" this delivers messages out of the
+ * Service. The other is the "InBox" thread which processes all incoming
+ * messages.
  * 
  */
 public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
@@ -87,26 +90,32 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
 
   /**
-   * contains all the meta data about the service - pulled from the static method getMetaData() each instance will call the method
-   * and populate the data for an instance
+   * contains all the meta data about the service - pulled from the static
+   * method getMetaData() each instance will call the method and populate the
+   * data for an instance
    * 
    */
   ServiceType serviceType;
 
   /**
-   * a radix-tree of data -"DNA" Description of Neighboring Automata ;) this is a 'master build plan' for the service
+   * a radix-tree of data -"DNA" Description of Neighboring Automata ;) this is
+   * a 'master build plan' for the service
    * 
-   * TODO - when a service is created - a copy of this (RNA) is made and the instance of the service creates and starts its peers
-   * according to its definition
+   * TODO - when a service is created - a copy of this (RNA) is made and the
+   * instance of the service creates and starts its peers according to its
+   * definition
    * 
    * For mutations - the master build plan is changed - then a copy is made
    * 
    * Each Service instance contains its own (possibly mutated) version
    * 
-   * Peer references should probably always be transient - as the cross-reference of names from remotes will get the wrong name
+   * Peer references should probably always be transient - as the
+   * cross-reference of names from remotes will get the wrong name
    * 
-   * You call this peer "Bob" .. but in Chicago there is more than one Bob - and your "Bob" needs to be referenced as "Cincinnati
-   * Bob" - if your remote instance is in Chicago and you just say "Bob" I will think your talking about "Chicago Bob" :)
+   * You call this peer "Bob" .. but in Chicago there is more than one Bob - and
+   * your "Bob" needs to be referenced as "Cincinnati Bob" - if your remote
+   * instance is in Chicago and you just say "Bob" I will think your talking
+   * about "Chicago Bob" :)
    */
   transient static public final TreeMap<String, ServiceReservation> dnaPool = new TreeMap<String, ServiceReservation>();
 
@@ -118,8 +127,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public static final String RESOURCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName();
 
   /**
-   * key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway name]/scheme://key for gateway
-   * mrl://gateway/xmpp://incubator incubator if host == null the service is local
+   * key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway
+   * name]/scheme://key for gateway mrl://gateway/xmpp://incubator incubator if
+   * host == null the service is local
    */
   private URI instanceId = null;
 
@@ -183,13 +193,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
   protected boolean isVirtual = false;
 
   /**
-   * overload this if your service needs other environmental or dependencies to be ready
+   * overload this if your service needs other environmental or dependencies to
+   * be ready
    */
   protected boolean ready = true;
 
   /**
-   * Recursively builds Peer type information - which is not instance specific. Which means it will not prefix any of the branches
-   * with a instance name
+   * Recursively builds Peer type information - which is not instance specific.
+   * Which means it will not prefix any of the branches with a instance name
    * 
    * @param myKey
    *          m
@@ -220,11 +231,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /*
-   * public static Set<String> getPeerNames (String myKey){ // goes to dnaPool TreeSet<String> set = new TreeSet<String>(); return
-   * set; }
+   * public static Set<String> getPeerNames (String myKey){ // goes to dnaPool
+   * TreeSet<String> set = new TreeSet<String>(); return set; }
    * 
-   * public static Set<String> getPeerKeys (String myKey){ // goes to template TreeSet<String> set = new TreeSet<String>(); return
-   * set; }
+   * public static Set<String> getPeerKeys (String myKey){ // goes to template
+   * TreeSet<String> set = new TreeSet<String>(); return set; }
    */
 
   public String getPeerName(String fullKey) {
@@ -277,7 +288,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * this method returns the current build strucutre for which name &amp; type is specified
+   * this method returns the current build strucutre for which name &amp; type
+   * is specified
    * 
    * @param dna
    *          - a.k.a myDna which information will be added to
@@ -433,7 +445,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
           // to this
           String fname = f.getName();
           /*
-           * if (fname.equals("desktops") || fname.equals("useLocalResources") ){ log.info("here"); }
+           * if (fname.equals("desktops") || fname.equals("useLocalResources")
+           * ){ log.info("here"); }
            */
 
           if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
@@ -446,7 +459,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
           // log.info(String.format("setting %s", f.getName()));
           /*
-           * if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) { continue; }
+           * if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+           * continue; }
            */
 
           // GroG - this is new 1/26/2017 - needed to get webgui data to
@@ -549,8 +563,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * This method will merge in the requested peer dna into the final global dna - from which it will be accessible for create
-   * methods
+   * This method will merge in the requested peer dna into the final global dna
+   * - from which it will be accessible for create methods
    * 
    * template merge with existing dna
    * 
@@ -666,7 +680,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * Reserves a name for a root level Service. allows modifications to the reservation map at the highest level
+   * Reserves a name for a root level Service. allows modifications to the
+   * reservation map at the highest level
    * 
    * @param key
    *          the key
@@ -701,8 +716,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * This method re-binds the key to another name. An example of where this would be used is within Tracking there is an Servo
-   * service named "x", however it may be desired to bind this to an already existing service named "pan" in a pan/tilt system
+   * This method re-binds the key to another name. An example of where this
+   * would be used is within Tracking there is an Servo service named "x",
+   * however it may be desired to bind this to an already existing service named
+   * "pan" in a pan/tilt system
    * 
    * @param key
    *          key internal name
@@ -826,7 +843,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * new overload - mqtt uses this for json encoded MrlListener to process subscriptions
+   * new overload - mqtt uses this for json encoded MrlListener to process
+   * subscriptions
    * 
    * @param data
    */
@@ -849,11 +867,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * adds a MRL message listener to this service this is the result of a "subscribe" from a different service FIXME !! - implement
-   * with HashMap or HashSet .. WHY ArrayList ???
+   * adds a MRL message listener to this service this is the result of a
+   * "subscribe" from a different service FIXME !! - implement with HashMap or
+   * HashSet .. WHY ArrayList ???
    * 
    * @param topicMethod
-   *          - method when called, it's return will be sent to the callbackName/calbackMethod
+   *          - method when called, it's return will be sent to the
+   *          callbackName/calbackMethod
    * @param callbackName
    *          - name of the service to send return message to
    * @param callbackMethod
@@ -1019,18 +1039,22 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * method for getting actual name from a service of its peer based on a 'key' - the return value would change depending on if the
-   * service is local or not.
+   * method for getting actual name from a service of its peer based on a 'key'
+   * - the return value would change depending on if the service is local or
+   * not.
    * 
-   * FIXME - if not local - it needs to be prefixed by the gateway e.g. {remote}.arduino.serial
+   * FIXME - if not local - it needs to be prefixed by the gateway e.g.
+   * {remote}.arduino.serial
    * 
    * @param reservedKey
    *          r
    * @return service interface
    */
   /*
-   * public String getPeerName(String key){ if (!serviceType.peers.containsKey(key)){ return null; } else { ServiceReservation sr =
-   * serviceType.peers.get(key); // TODO !isLocal(){ return gw.getPrefix() + actualName return sr.actualName; } }
+   * public String getPeerName(String key){ if
+   * (!serviceType.peers.containsKey(key)){ return null; } else {
+   * ServiceReservation sr = serviceType.peers.get(key); // TODO !isLocal(){
+   * return gw.getPrefix() + actualName return sr.actualName; } }
    */
 
   public synchronized ServiceInterface createPeer(String reservedKey) {
@@ -1052,13 +1076,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * called typically from a remote system When 2 MRL instances are connected they contain serialized non running Service in a
-   * registry, which is maintained by the Runtime. The data can be stale.
+   * called typically from a remote system When 2 MRL instances are connected
+   * they contain serialized non running Service in a registry, which is
+   * maintained by the Runtime. The data can be stale.
    * 
-   * Messages are sometimes sent (often in the gui) which prompt the remote service to "broadcastState" a new serialized snapshot is
-   * broadcast to all subscribed methods, but there is no guarantee that the registry is updated
+   * Messages are sometimes sent (often in the gui) which prompt the remote
+   * service to "broadcastState" a new serialized snapshot is broadcast to all
+   * subscribed methods, but there is no guarantee that the registry is updated
    * 
-   * This method will update the registry, additionally it will block until the refresh response comes back
+   * This method will update the registry, additionally it will block until the
+   * refresh response comes back
    * 
    * @param pulse
    *          p
@@ -1206,12 +1233,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * a default way to attach Services to other Services An example would be attaching a Motor to a MotorControl or a Speaking
-   * service (TTS) to a Listening service (STT) such that when the system is speaking it does not try to listen &amp; act on its own
-   * speech (feedback loop)
+   * a default way to attach Services to other Services An example would be
+   * attaching a Motor to a MotorControl or a Speaking service (TTS) to a
+   * Listening service (STT) such that when the system is speaking it does not
+   * try to listen &amp; act on its own speech (feedback loop)
    * 
-   * FIXME - the SwingGui currently has attachGUI() and detachGUI() - these are to bind Services with their swing views/tab panels.
-   * It should be generalized to this attach method
+   * FIXME - the SwingGui currently has attachGUI() and detachGUI() - these are
+   * to bind Services with their swing views/tab panels. It should be
+   * generalized to this attach method
    * 
    * @param subpath
    *          s
@@ -1250,14 +1279,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // WebGui (remote in genera) - user / group ALLOW
 
   /*
-   * private boolean hasAccess(Message msg) { // turn into single key ??? // type.name.method
+   * private boolean hasAccess(Message msg) { // turn into single key ??? //
+   * type.name.method
    * 
    * // check this type <-- not sure i want to support this
    * 
-   * // check this name &amp; method // if any access limitations exist which might be applicable if
-   * (accessRules.containsKey(msg.name) || accessRules.containsKey(String.format("%s.%s", msg.name, msg.method))) { // restricted
-   * service - check for authorization // Security service only provides authorization ? if (security == null) { return false; }
-   * else { return security.isAuthorized(msg); }
+   * // check this name &amp; method // if any access limitations exist which
+   * might be applicable if (accessRules.containsKey(msg.name) ||
+   * accessRules.containsKey(String.format("%s.%s", msg.name, msg.method))) { //
+   * restricted service - check for authorization // Security service only
+   * provides authorization ? if (security == null) { return false; } else {
+   * return security.isAuthorized(msg); }
    * 
    * }
    * 
@@ -1562,9 +1594,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * Creating a message function call - without specifying the recipients - static routes will be applied this is good for Motor
-   * drivers - you can swap motor drivers by creating a different static route The motor is not "Aware" of the driver - only that it
-   * wants to method="write" data to the driver
+   * Creating a message function call - without specifying the recipients -
+   * static routes will be applied this is good for Motor drivers - you can swap
+   * motor drivers by creating a different static route The motor is not "Aware"
+   * of the driver - only that it wants to method="write" data to the driver
    */
   public void out(String method, Object o) {
     Message m = Message.createMessage(this, null, method, o); // create a
@@ -1596,7 +1629,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * framework diagnostic publishing method for examining load, capacity, and throughput of Inbox &amp; Outbox queues
+   * framework diagnostic publishing method for examining load, capacity, and
+   * throughput of Inbox &amp; Outbox queues
    * 
    * @param stats
    *          s
@@ -1616,11 +1650,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * FIXME - implement This SHOULD NOT be called by the framework - since - the framework does not know about dna mutation - or
-   * customizations which have been applied such that Arduinos are shared between services or peers of services
+   * FIXME - implement This SHOULD NOT be called by the framework - since - the
+   * framework does not know about dna mutation - or customizations which have
+   * been applied such that Arduinos are shared between services or peers of
+   * services
    * 
-   * It SHOULD shutdown all the peers of a service - but it SHOULD NOT be automatically called by the framework. If the 'user' wants
-   * to release all peers - it should fufill the request
+   * It SHOULD shutdown all the peers of a service - but it SHOULD NOT be
+   * automatically called by the framework. If the 'user' wants to release all
+   * peers - it should fufill the request
    */
   @Override
   public void releasePeers() {
@@ -1701,8 +1738,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * Reserves a name for a Peer Service. This is important for services which control other services. Internally composite services
-   * will use a key so the name of the peer service can change, effectively binding a new peer to the composite
+   * Reserves a name for a Peer Service. This is important for services which
+   * control other services. Internally composite services will use a key so the
+   * name of the peer service can change, effectively binding a new peer to the
+   * composite
    * 
    * @param key
    *          internal key name of peer service
@@ -1926,7 +1965,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * rarely should this be used. Gateways use it to provide x-route natting services by re-writing names with prefixes
+   * rarely should this be used. Gateways use it to provide x-route natting
+   * services by re-writing names with prefixes
    */
 
   @Override
@@ -2135,7 +2175,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * error only channel publishing point versus publishStatus which handles info, warn &amp; error
+   * error only channel publishing point versus publishStatus which handles
+   * info, warn &amp; error
    * 
    * @param status
    *          status
@@ -2174,12 +2215,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /*
-   * static public ArrayList<ServiceReservation> getPeerMetaData(String serviceType) { ArrayList<ServiceReservation> peerList = new
+   * static public ArrayList<ServiceReservation> getPeerMetaData(String
+   * serviceType) { ArrayList<ServiceReservation> peerList = new
    * ArrayList<ServiceReservation>(); try {
    * 
-   * Class<?> theClass = Class.forName(serviceType); Method method = theClass.getMethod("getPeers", String.class); Peers peers =
-   * (Peers) method.invoke(null, new Object[] { "" }); if (peers != null) { log.info( "has peers"); peerList =
-   * peers.getDNA().flatten();
+   * Class<?> theClass = Class.forName(serviceType); Method method =
+   * theClass.getMethod("getPeers", String.class); Peers peers = (Peers)
+   * method.invoke(null, new Object[] { "" }); if (peers != null) { log.info(
+   * "has peers"); peerList = peers.getDNA().flatten();
    * 
    * // add peers to serviceData serviceType }
    * 
@@ -2189,8 +2232,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
 
   /**
-   * Calls the static method getMetaData on the appropriate class. The class static data is passed back as a template to be merged
-   * in with the global static dna
+   * Calls the static method getMetaData on the appropriate class. The class
+   * static data is passed back as a template to be merged in with the global
+   * static dna
    * 
    * @param serviceClass
    *          sc
@@ -2227,7 +2271,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * Attachable.detach(serviceName) - routes to reference parameter Attachable.detach(Attachable)
+   * Attachable.detach(serviceName) - routes to reference parameter
+   * Attachable.detach(Attachable)
    */
   public void detach(String serviceName) {
     detach(Runtime.getService(serviceName));
@@ -2244,7 +2289,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * Attachable.attach(serviceName) - routes to reference parameter Attachable.attach(Attachable)
+   * Attachable.attach(serviceName) - routes to reference parameter
+   * Attachable.attach(Attachable)
    */
   public void attach(String serviceName) throws Exception {
     attach(Runtime.getService(serviceName));
@@ -2255,13 +2301,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * This detach when overriden "routes" to the appropriately typed parameterized detach within a service.
+   * This detach when overriden "routes" to the appropriately typed
+   * parameterized detach within a service.
    * 
-   * When overriden, the first thing it should do is check to see if the referenced service is already detached. If it is already
-   * detached it should simply return.
+   * When overriden, the first thing it should do is check to see if the
+   * referenced service is already detached. If it is already detached it should
+   * simply return.
    * 
-   * If its detached to this service, it should first detach itself, modifying its own data if necessary. The last thing it should
-   * do is call the parameterized service's detach. This gives the other service an opportunity to detach. e.g.
+   * If its detached to this service, it should first detach itself, modifying
+   * its own data if necessary. The last thing it should do is call the
+   * parameterized service's detach. This gives the other service an opportunity
+   * to detach. e.g.
    * 
    * <pre>
    * 
@@ -2299,7 +2349,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * the "routing" isAttached - when overridden by a service this "routes" to the appropriate typed isAttached
+   * the "routing" isAttached - when overridden by a service this "routes" to
+   * the appropriate typed isAttached
    */
   @Override
   public boolean isAttached(Attachable instance) {
@@ -2315,13 +2366,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * This attach when overriden "routes" to the appropriately typed parameterized attach within a service.
+   * This attach when overriden "routes" to the appropriately typed
+   * parameterized attach within a service.
    * 
-   * When overriden, the first thing it should do is check to see if the referenced service is already attached. If it is already
-   * attached it should simply return.
+   * When overriden, the first thing it should do is check to see if the
+   * referenced service is already attached. If it is already attached it should
+   * simply return.
    * 
-   * If its attached to this service, it should first attach itself, modifying its own data if necessary. The last thing it should
-   * do is call the parameterized service's attach. This gives the other service an opportunity to attach. e.g.
+   * If its attached to this service, it should first attach itself, modifying
+   * its own data if necessary. The last thing it should do is call the
+   * parameterized service's attach. This gives the other service an opportunity
+   * to attach. e.g.
    * 
    * <pre>
    * 
@@ -2368,7 +2423,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   /**
-   * Called by Runtime when system is shutting down a service can use this method when it has to do some "ordered" cleanup.
+   * Called by Runtime when system is shutting down a service can use this
+   * method when it has to do some "ordered" cleanup.
    */
   public void preShutdown() {
   }

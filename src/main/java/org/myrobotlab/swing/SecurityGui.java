@@ -89,9 +89,10 @@ public class SecurityGui extends ServiceGui implements ActionListener {
   }
 
   /**
-   * Service State change - this method will be called when a "broadcastState" method is called which triggers a publishState. This
-   * event handler is typically used when data or state information in the service has changed, and the UI should update to reflect
-   * this changed state.
+   * Service State change - this method will be called when a "broadcastState"
+   * method is called which triggers a publishState. This event handler is
+   * typically used when data or state information in the service has changed,
+   * and the UI should update to reflect this changed state.
    * 
    * @param security
    *          the security service

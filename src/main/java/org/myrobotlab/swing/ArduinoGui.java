@@ -144,7 +144,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   }
 
   /**
-   * The guts of the business logic of handling all the graphical components and their relations with each other.
+   * The guts of the business logic of handling all the graphical components and
+   * their relations with each other.
    */
   @Override
   public void actionPerformed(ActionEvent e) {
@@ -386,8 +387,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   }
 
   /*
-   * onState is called when the Arduino service changes state information FIXME - this method is often called by other threads so
-   * gui - updates must be done in the swing post method way
+   * onState is called when the Arduino service changes state information FIXME
+   * - this method is often called by other threads so gui - updates must be
+   * done in the swing post method way
    * 
    */
   public void onState(final Arduino arduino) {

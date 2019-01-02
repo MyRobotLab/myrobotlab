@@ -9,8 +9,9 @@ import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
 
 /**
- * InMoov system test. given an inmoov script location, it will load that script. This is useful for developers to be able to launch
- * the inmoov scripts from inside of an IDE like eclipse or other.
+ * InMoov system test. given an inmoov script location, it will load that
+ * script. This is useful for developers to be able to launch the inmoov scripts
+ * from inside of an IDE like eclipse or other.
  *
  */
 @Ignore

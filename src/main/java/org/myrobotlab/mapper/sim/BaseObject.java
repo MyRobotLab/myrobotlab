@@ -38,8 +38,9 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 /**
- * Base class for all objects added in the environment. It mainly contains the translation and rotation transform groups-
- * Descendants should override create3D and call super.create3D().
+ * Base class for all objects added in the environment. It mainly contains the
+ * translation and rotation transform groups- Descendants should override
+ * create3D and call super.create3D().
  * 
  */
 public abstract class BaseObject {
@@ -73,7 +74,8 @@ public abstract class BaseObject {
   static Color3f white = new Color3f(1.0f, 1.0f, 1.0f);
 
   /**
-   * Indicates that the wall object branch can be compiled to optimize sceneGraph
+   * Indicates that the wall object branch can be compiled to optimize
+   * sceneGraph
    */
   boolean compilable;
 

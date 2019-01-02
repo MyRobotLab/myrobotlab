@@ -57,7 +57,8 @@ public class BlockWorldCompositeObject extends BlockWorldObject {
   }
 
   /**
-   * Returns true if the object intersect with the given bounding sphere. This can be overriden.
+   * Returns true if the object intersect with the given bounding sphere. This
+   * can be overriden.
    * 
    * @param bs
    *          the boundingsphere to intersect with.

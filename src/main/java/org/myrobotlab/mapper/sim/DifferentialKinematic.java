@@ -8,7 +8,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 /**
- * This class models the differential drive kinematic common. The two control parameters are left and right velocity.
+ * This class models the differential drive kinematic common. The two control
+ * parameters are left and right velocity.
  */
 public class DifferentialKinematic extends KinematicModel {
 

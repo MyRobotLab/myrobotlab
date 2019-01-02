@@ -32,7 +32,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 /**
- * Centralize resources and algorithms related to physical interactions. Most of this is experimental for the time being.
+ * Centralize resources and algorithms related to physical interactions. Most of
+ * this is experimental for the time being.
  */
 public class PhysicalEngine {
 
@@ -69,7 +70,8 @@ public class PhysicalEngine {
   }
 
   /**
-   * Check all agents/agent pairs and verify physical interactions and/or collision.
+   * Check all agents/agent pairs and verify physical interactions and/or
+   * collision.
    * 
    * Complexity is O(n^2).
    */
@@ -156,7 +158,8 @@ public class PhysicalEngine {
   }
 
   /**
-   * Check all agents/static objetc pairs and verify physical interactions and/or collision.
+   * Check all agents/static objetc pairs and verify physical interactions
+   * and/or collision.
    */
   protected void checkAgentObjectPairs(ArrayList<SimpleAgent> agents, ArrayList<Object> objects, boolean computeInteraction, boolean checkCollision) {
 
@@ -293,14 +296,17 @@ public class PhysicalEngine {
       n.set(v3);
     }
     /*
-     * p = projNormal(p2.x,p1.y,p2.z, p2.x,p2.y,p2.z, p1.x,p1.y,p2.z); if (p < min) { min = p; n.set(v3);}
+     * p = projNormal(p2.x,p1.y,p2.z, p2.x,p2.y,p2.z, p1.x,p1.y,p2.z); if (p <
+     * min) { min = p; n.set(v3);}
      */
     /*
-     * p = projNormal(p1.x,p1.y,p2.z, p1.x,p2.y,p2.z, p1.x,p1.y,p1.z); if (p < min) { min = p; n.set(v3);}
+     * p = projNormal(p1.x,p1.y,p2.z, p1.x,p2.y,p2.z, p1.x,p1.y,p1.z); if (p <
+     * min) { min = p; n.set(v3);}
      */
     /*
-     * p = projNormal(p1.x,p2.y,p1.z, p1.x,p2.y,p2.z, p2.x,p2.y,p1.z); if (p < min) { min = p; n.set(v3);} p =
-     * projNormal(p1.x,p1.y,p2.z, p1.x,p1.y,p1.z, p2.x,p1.y,p2.z); if (p < min) { min = p; n.set(v3);}
+     * p = projNormal(p1.x,p2.y,p1.z, p1.x,p2.y,p2.z, p2.x,p2.y,p1.z); if (p <
+     * min) { min = p; n.set(v3);} p = projNormal(p1.x,p1.y,p2.z,
+     * p1.x,p1.y,p1.z, p2.x,p1.y,p2.z); if (p < min) { min = p; n.set(v3);}
      */
 
   }
@@ -341,16 +347,20 @@ public class PhysicalEngine {
     return (bb.intersect(bs));
 
     /*
-     * double radiussq = bs.getRadius()*bs.getRadius(); bb.getLower(p1); bb.getUpper(p2); bs.getCenter(p3); double xmin =
-     * Math.min(p1.x,p2.x); double ymin = Math.min(p1.y,p2.y); double zmin = Math.min(p1.z,p2.z); double xmax = Math.max(p1.x,p2.x);
-     * double ymax = Math.max(p1.y,p2.y); double zmax = Math.max(p1.z,p2.z);
+     * double radiussq = bs.getRadius()*bs.getRadius(); bb.getLower(p1);
+     * bb.getUpper(p2); bs.getCenter(p3); double xmin = Math.min(p1.x,p2.x);
+     * double ymin = Math.min(p1.y,p2.y); double zmin = Math.min(p1.z,p2.z);
+     * double xmax = Math.max(p1.x,p2.x); double ymax = Math.max(p1.y,p2.y);
+     * double zmax = Math.max(p1.z,p2.z);
      * 
-     * double dmin = 0; if (p3.x < xmin) dmin += (p3.x - xmin)*(p3.x - xmin); else if (p3.x >xmax ) dmin += (p3.x - xmax)*(p3.x -
-     * xmax);
+     * double dmin = 0; if (p3.x < xmin) dmin += (p3.x - xmin)*(p3.x - xmin);
+     * else if (p3.x >xmax ) dmin += (p3.x - xmax)*(p3.x - xmax);
      * 
-     * if (p3.y < ymin) dmin += (p3.y - ymin)*(p3.y - ymin); else if (p3.y >ymax ) dmin += (p3.y - ymax)*(p3.y - ymax);
+     * if (p3.y < ymin) dmin += (p3.y - ymin)*(p3.y - ymin); else if (p3.y >ymax
+     * ) dmin += (p3.y - ymax)*(p3.y - ymax);
      * 
-     * if (p3.z < zmin) dmin += (p3.z - zmin)*(p3.z - zmin); else if (p3.z >zmax ) dmin += (p3.z - zmax)*(p3.z - zmax);
+     * if (p3.z < zmin) dmin += (p3.z - zmin)*(p3.z - zmin); else if (p3.z >zmax
+     * ) dmin += (p3.z - zmax)*(p3.z - zmax);
      * 
      * return ( dmin <= radiussq );
      */

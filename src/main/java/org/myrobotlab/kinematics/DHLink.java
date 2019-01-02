@@ -10,11 +10,14 @@ import org.slf4j.Logger;
 //import marytts.util.math.MathUtils;
 
 /**
- * A link class to encapsulate the D-H parameters for a given link in a robotic arm.
+ * A link class to encapsulate the D-H parameters for a given link in a robotic
+ * arm.
  * 
- * d - the "depth" along the previous joint's z axis theta - the rotation about the previous z (the angle between the common normal
- * and the previous x axis) r - the radius of the new origin about the previous z (the length of the common normal) alpha - the
- * rotation about the new x axis (the common normal) to align the old z to the new z.
+ * d - the "depth" along the previous joint's z axis theta - the rotation about
+ * the previous z (the angle between the common normal and the previous x axis)
+ * r - the radius of the new origin about the previous z (the length of the
+ * common normal) alpha - the rotation about the new x axis (the common normal)
+ * to align the old z to the new z.
  * 
  * @author kwatters
  *
@@ -38,7 +41,8 @@ public class DHLink implements Serializable {
 
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
 
-  private double velocity; // FIXME - is this set by IK being dp/dt ? .. it should be
+  private double velocity; // FIXME - is this set by IK being dp/dt ? .. it
+                           // should be
   private int state = Servo.SERVO_EVENT_STOPPED; // FIXME - no servo info
   private double targetPos;
   public boolean hasServo = false; // FIXME - no servo info

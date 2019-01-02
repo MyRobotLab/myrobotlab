@@ -414,8 +414,9 @@ public class WikiDataFetcher extends Service {
   // document ? )
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -440,8 +441,10 @@ public class WikiDataFetcher extends Service {
     meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.5");
     meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.5");
     /*
-     * meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT"); meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-     * meta.addDependency("org.apache.commons.commons-lang3", "3.3.2"); meta.addDependency("com.fasterxml.jackson.core", "2.5.0");
+     * meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");
+     * meta.addDependency("org.apache.commons.httpclient", "4.5.2");
+     * meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
+     * meta.addDependency("com.fasterxml.jackson.core", "2.5.0");
      */
     meta.setCloudService(true);
     return meta;

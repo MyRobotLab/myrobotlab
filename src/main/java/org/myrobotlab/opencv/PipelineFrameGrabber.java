@@ -13,8 +13,9 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         A pipeline frame grabber can attach to another OpenCV's output and perform its own processing. They can be stacked
- *         creating much more complex image pipelines.
+ *         A pipeline frame grabber can attach to another OpenCV's output and
+ *         perform its own processing. They can be stacked creating much more
+ *         complex image pipelines.
  *
  */
 public class PipelineFrameGrabber extends FrameGrabber {

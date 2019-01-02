@@ -38,7 +38,8 @@ import org.myrobotlab.logging.LoggingFactory;
 /**
  * @author GroG
  * 
- *         FIXME - either a structure interface or a typical java setter getter NO MIX !!
+ *         FIXME - either a structure interface or a typical java setter getter
+ *         NO MIX !!
  * 
  */
 public class Message implements Serializable {
@@ -78,16 +79,19 @@ public class Message implements Serializable {
   public String sendingMethod;
 
   /**
-   * history of the message, its routing stops and Services it passed through. This is important to prevent endless looping of
-   * messages. Turns out ArrayList is quicker than HashSet on small sets http://www.javacodegeeks.com
+   * history of the message, its routing stops and Services it passed through.
+   * This is important to prevent endless looping of messages. Turns out
+   * ArrayList is quicker than HashSet on small sets
+   * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
   public HashSet<String> historyList;
   public HashMap<String, String> security;
 
   /**
-   * status is currently used for BLOCKING message calls the current valid state it can be in is null | BLOCKING | RETURN FIXME -
-   * this should be msgType not status
+   * status is currently used for BLOCKING message calls the current valid state
+   * it can be in is null | BLOCKING | RETURN FIXME - this should be msgType not
+   * status
    */
 
   public String status;
@@ -100,8 +104,9 @@ public class Message implements Serializable {
   public String method;
 
   /**
-   * the data which will be sent to the destination method data payload - if invoking a service request this would be the parameter
-   * (list) - this would the return type data if the message is outbound
+   * the data which will be sent to the destination method data payload - if
+   * invoking a service request this would be the parameter (list) - this would
+   * the return type data if the message is outbound
    */
   public Object[] data;
 
@@ -194,7 +199,8 @@ public class Message implements Serializable {
     msg.data = new Object[] { "hello" };
 
     /*
-     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) { Logging.logError(e); }
+     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
+     * Logging.logError(e); }
      */
   }
 

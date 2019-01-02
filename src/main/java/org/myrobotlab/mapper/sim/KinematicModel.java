@@ -31,8 +31,9 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 /**
- * This is the base class for all agent's kinematic. A Kinematic performs the translation and rotation of the agent under the
- * control of specific parameter.
+ * This is the base class for all agent's kinematic. A Kinematic performs the
+ * translation and rotation of the agent under the control of specific
+ * parameter.
  * 
  */
 public abstract class KinematicModel {

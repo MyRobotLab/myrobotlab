@@ -12,8 +12,8 @@ import org.myrobotlab.string.StringUtil;
 
 /**
  * 
- * WebkitSpeechRecognition - uses the speech recognition that is built into the chrome web browser this service requires the webgui
- * to be running.
+ * WebkitSpeechRecognition - uses the speech recognition that is built into the
+ * chrome web browser this service requires the webgui to be running.
  *
  */
 public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
@@ -22,7 +22,8 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   public String currentWebkitLanguage;
 
   /**
-   * TODO: make it's own class. TODO: merge this data structure with the programab oob stuff?
+   * TODO: make it's own class. TODO: merge this data structure with the
+   * programab oob stuff?
    *
    */
   public class Command {
@@ -230,8 +231,8 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   }
 
   /**
-   * If setContinuous is False, this speedup recognition processing If setContinuous is True, you have some time to speak again, in
-   * case of error
+   * If setContinuous is False, this speedup recognition processing If
+   * setContinuous is True, you have some time to speak again, in case of error
    */
   public void setContinuous(boolean continuous) {
     this.continuous = continuous;
@@ -288,8 +289,9 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -10,11 +10,13 @@ import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 /**
- * This class exists as a proxy to control native MRL services connected through the web API. Methods of that native service are
- * called through this class's {@link #exec(String, Object[])} method.
+ * This class exists as a proxy to control native MRL services connected through
+ * the web API. Methods of that native service are called through this class's
+ * {@link #exec(String, Object[])} method.
  *
- * FIXME - although this is a great idea & implementation, something more general needs to exist in order to interoperate between
- * processes - it will be coming as a network overlay & addressing system in the next release
+ * FIXME - although this is a great idea & implementation, something more
+ * general needs to exist in order to interoperate between processes - it will
+ * be coming as a network overlay & addressing system in the next release
  *
  **/
 public class PythonProxy extends Service {
@@ -40,9 +42,13 @@ public class PythonProxy extends Service {
 
   private transient InputQueueThread inputQueueThread;
 
-  private transient volatile Object retObj; // Used for storing the return value of a native method call
+  private transient volatile Object retObj; // Used for storing the return value
+                                            // of a native method call
 
-  private transient volatile boolean returned = false; // Used for determining whether the data in retObj is from the last method
+  private transient volatile boolean returned = false; // Used for determining
+                                                       // whether the data in
+                                                       // retObj is from the
+                                                       // last method
                                                        // call or a previous one
 
   public class InputQueueThread extends Thread {
@@ -78,7 +84,8 @@ public class PythonProxy extends Service {
             } else {
               data = (Object[]) null;
             }
-            proxy.exec(method, data); // We do this instead of exec(msg) because preprocessing of strings is required
+            proxy.exec(method, data); // We do this instead of exec(msg) because
+                                      // preprocessing of strings is required
 
           } catch (Exception e) {
             Logging.logError(e);
@@ -101,10 +108,13 @@ public class PythonProxy extends Service {
   }
 
   /**
-   * preProcessHook is used to intercept messages and process or route them before being processed/invoked in the Service.
+   * preProcessHook is used to intercept messages and process or route them
+   * before being processed/invoked in the Service.
    * 
-   * Here all messages allowed to go and effect the Python service will be let through. However, all messsages not found in this
-   * filter will go "into" the native service, if the proxy is connected. There they can be handled in the native service.
+   * Here all messages allowed to go and effect the Python service will be let
+   * through. However, all messsages not found in this filter will go "into" the
+   * native service, if the proxy is connected. There they can be handled in the
+   * native service.
    * 
    * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.framework.Message)
    */
@@ -137,8 +147,9 @@ public class PythonProxy extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -147,7 +158,8 @@ public class PythonProxy extends Service {
 
     ServiceType meta = new ServiceType(PythonProxy.class.getCanonicalName());
     meta.addDescription("Provides an API hook point to services written in native Python.");
-    // Is a python service script can be written to test ? and some documentation ?
+    // Is a python service script can be written to test ? and some
+    // documentation ?
     meta.setAvailable(false); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
@@ -246,7 +258,8 @@ public class PythonProxy extends Service {
           // Process p = new ProcessBuilder(
           // "lxterminal",
           // "-e",
-          // "virtualenv python && source " + activateLocation + " && python native-mrl-services/python/services/" +
+          // "virtualenv python && source " + activateLocation + " && python
+          // native-mrl-services/python/services/" +
           // this.getClass().getSimpleName() + ".py " + getName()).start();
           // }
         }
@@ -259,15 +272,17 @@ public class PythonProxy extends Service {
   }
 
   /**
-   * This is called by the native service to start the handshake sequence. After the handshake is completed, both this class and the
-   * native service should remain in sync
+   * This is called by the native service to start the handshake sequence. After
+   * the handshake is completed, both this class and the native service should
+   * remain in sync
    **/
   public void handshake() {
     // if (!connected) {
     connected = true;
     exec("handshake", (Object[]) null);
     // } else {
-    // log.error("Another native service is attempting connection, but already connected. Perhaps a name conflict?");
+    // log.error("Another native service is attempting connection, but already
+    // connected. Perhaps a name conflict?");
     // }
   }
 

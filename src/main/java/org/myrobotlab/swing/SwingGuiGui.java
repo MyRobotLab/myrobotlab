@@ -255,10 +255,13 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
 
         /*
-         * protected void mouseLocationChanged(MouseEvent e) { log.debug(e.getX() + ", " + e.getY()); }
+         * protected void mouseLocationChanged(MouseEvent e) {
+         * log.debug(e.getX() + ", " + e.getY()); }
          * 
-         * public void mouseDragged(MouseEvent e) { // http://forum.jgraph .com/questions/1343/mouse-coordinates-at-drop-event
-         * Object cell = graphComponent.getCellAt(e.getX(), e.getY()); log.debug(e.getX() + "," + e.getY()); }
+         * public void mouseDragged(MouseEvent e) { // http://forum.jgraph
+         * .com/questions/1343/mouse-coordinates-at-drop-event Object cell =
+         * graphComponent.getCellAt(e.getX(), e.getY()); log.debug(e.getX() +
+         * "," + e.getY()); }
          */
 
         @Override
@@ -477,9 +480,10 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
   }
 
   /*
-   * Service State change - this method will be called when a "broadcastState" method is called which triggers a publishState. This
-   * event handler is typically used when data or state information in the service has changed, and the UI should update to reflect
-   * this changed state.
+   * Service State change - this method will be called when a "broadcastState"
+   * method is called which triggers a publishState. This event handler is
+   * typically used when data or state information in the service has changed,
+   * and the UI should update to reflect this changed state.
    */
   public void onState(SwingGui gui) {
     SwingUtilities.invokeLater(new Runnable() {

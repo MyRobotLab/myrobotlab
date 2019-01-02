@@ -17,8 +17,10 @@ public class MrlAmt203Encoder extends Device {
   }
 
   public boolean attach(Integer pin) {
-    // TODO: attach the encoder here.. i guess? what does the virtual encoder want to simulate?
-    // Ultimately it'd be awesome to actually measure the virtual inmoov encoder positions... wow.. that'd be cool.
+    // TODO: attach the encoder here.. i guess? what does the virtual encoder
+    // want to simulate?
+    // Ultimately it'd be awesome to actually measure the virtual inmoov encoder
+    // positions... wow.. that'd be cool.
     this.pin = pin;
     return true;
   }

@@ -106,7 +106,8 @@ public abstract class Repo {
       remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
 
       // DO NOT INCLUDE - messed up repo !
-      // remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2", "for
+      // remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2",
+      // "for
       // jai_imageio")); - do not use
       remotes.add(new RemoteRepo("eclipse-release", "https://repo.eclipse.org/content/groups/releases"));
 
@@ -114,7 +115,8 @@ public abstract class Repo {
 
       remotes.add(new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
       remotes.add(new RemoteRepo("tudelft", "http://simulation.tudelft.nl/maven", "for j3d core, utils and vector"));
-      // remotes.add(new RemoteRepo("jitpack", "https://jitpack.io", "microsoft azure
+      // remotes.add(new RemoteRepo("jitpack", "https://jitpack.io", "microsoft
+      // azure
       // translate"));
       remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public", "swinggui mxgraph"));
 
@@ -347,8 +349,9 @@ public abstract class Repo {
   }
 
   /**
-   * searches through dependencies directly defined by the service and all Peers - recursively searches for their dependencies if
-   * any are not found - returns false
+   * searches through dependencies directly defined by the service and all Peers
+   * - recursively searches for their dependencies if any are not found -
+   * returns false
    * 
    * @param fullTypeName
    *          f

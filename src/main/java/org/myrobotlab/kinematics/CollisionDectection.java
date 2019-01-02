@@ -87,7 +87,8 @@ public class CollisionDectection {
         // // vectT1/vectT2 = imposing perpendicularity with the item vector
         // double[] vectT1 = calcPerpendicularity(vectT, vect1);
         // double[] vectT2 = calcPerpendicularity(vectT, vect2);
-        // // resolve the formulas (vectT1[0] + vectT1[1]*t + vectT1[2]*k = 0 and vectT2[0] + vectT2[1]*t + vectT2[2]*k = 0) we need
+        // // resolve the formulas (vectT1[0] + vectT1[1]*t + vectT1[2]*k = 0
+        // and vectT2[0] + vectT2[1]*t + vectT2[2]*k = 0) we need
         // to know value of t and k
         // double[] tTemp = new double[3];
         // tTemp[0] = vectT1[0]/(vectT1[1]*-1);
@@ -103,16 +104,22 @@ public class CollisionDectection {
         // if(tk[0] > 1) tk[0] = 1;
         // if(tk[1] < 0) tk[1] = 0;
         // if(tk[1] > 1) tk[1] = 1;
-        //// get the equation of the line of the shortest distance between the center line of the items (Vt = (x, y, z))
+        //// get the equation of the line of the shortest distance between the
+        // center line of the items (Vt = (x, y, z))
         // double[] vectTFinal = new double[3];
-        // vectTFinal[0] = vectT[0][0] + (vectT[0][1] * tk[0]) + (vectT[0][2] * tk[1]);
-        // vectTFinal[1] = vectT[1][0] + (vectT[1][1] * tk[0]) + (vectT[1][2] * tk[1]);
-        // vectTFinal[2] = vectT[2][0] + (vectT[2][1] * tk[0]) + (vectT[2][2] * tk[1]);
+        // vectTFinal[0] = vectT[0][0] + (vectT[0][1] * tk[0]) + (vectT[0][2] *
+        // tk[1]);
+        // vectTFinal[1] = vectT[1][0] + (vectT[1][1] * tk[0]) + (vectT[1][2] *
+        // tk[1]);
+        // vectTFinal[2] = vectT[2][0] + (vectT[2][1] * tk[0]) + (vectT[2][2] *
+        // tk[1]);
         // //get the intersection point between Vt and V1;
-        // Point point1 = new Point(par1[0][0] + par1[0][1]*tk[0] + par1[0][2] * tk[1], par1[1][0] + par1[1][1]*tk[0] + par1[1][2] *
+        // Point point1 = new Point(par1[0][0] + par1[0][1]*tk[0] + par1[0][2] *
+        // tk[1], par1[1][0] + par1[1][1]*tk[0] + par1[1][2] *
         // tk[1], par1[2][0] + par1[2][1]*tk[0] + par1[2][2] * tk[1], 0, 0, 0);
         // //get the intersection point between Vt and V2;
-        // Point point2 = new Point(par2[0][0] + par2[0][1]*tk[0] + par2[0][2] * tk[1], par2[1][0] + par2[1][1]*tk[0] + par2[1][2] *
+        // Point point2 = new Point(par2[0][0] + par2[0][1]*tk[0] + par2[0][2] *
+        // tk[1], par2[1][0] + par2[1][1]*tk[0] + par2[1][2] *
         // tk[1], par2[2][0] + par2[2][1]*tk[0] + par2[2][2] * tk[1], 0, 0, 0);
         Point[] points = getClosestPoint(item, citem, tk, new Double[3]);
         Point point1 = points[0];
@@ -120,7 +127,8 @@ public class CollisionDectection {
         // calculate the distance between these two points
         double d = Math.sqrt(((point2.getX() - point1.getX()) * (point2.getX() - point1.getX())) + ((point2.getY() - point1.getY()) * (point2.getY() - point1.getY()))
             + ((point2.getZ() - point1.getZ()) * (point2.getZ() - point1.getZ())));
-        // if d < radius item 1 + radius item 2 then there is a possible collision
+        // if d < radius item 1 + radius item 2 then there is a possible
+        // collision
         double rad1 = item.getRadius();
         if (tk[0] <= (double) 0.0 || tk[0] >= (double) 1.0) {
           rad1 = 0;
@@ -130,7 +138,10 @@ public class CollisionDectection {
           rad2 = 0;
         }
         item.haveDone(citem.getName());
-        if (d <= rad1 + rad2 /* && ((tk[0] != 0 && tk[0] != 1.0) || (tk[1] != 0 && tk[1] != 1)) */) {
+        if (d <= rad1 + rad2 /*
+                              * && ((tk[0] != 0 && tk[0] != 1.0) || (tk[1] != 0
+                              * && tk[1] != 1))
+                              */) {
           // we got a potential collision
           collision = true;
           collisionPoint[0] = point1;
@@ -220,7 +231,8 @@ public class CollisionDectection {
     // vectT1/vectT2 = imposing perpendicularity with the item vector
     double[] vectT1 = calcPerpendicularity(vectT, vect1);
     double[] vectT2 = calcPerpendicularity(vectT, vect2);
-    // resolve the formulas (vectT1[0] + vectT1[1]*t + vectT1[2]*k = 0 and vectT2[0] + vectT2[1]*t + vectT2[2]*k = 0) we need to
+    // resolve the formulas (vectT1[0] + vectT1[1]*t + vectT1[2]*k = 0 and
+    // vectT2[0] + vectT2[1]*t + vectT2[2]*k = 0) we need to
     // know value of t and k
     double[] tTemp = new double[3];
     tTemp[0] = vectT1[0] / (vectT1[1] * -1);
@@ -242,7 +254,8 @@ public class CollisionDectection {
       tk[1] = 0.0;
     if (tk[1] > 1)
       tk[1] = 1.0;
-    // get the equation of the line of the shortest distance between the center line of the items (Vt = (x, y, z))
+    // get the equation of the line of the shortest distance between the center
+    // line of the items (Vt = (x, y, z))
     // double[] vectTFinal = new double[3];
     vector[0] = vectT[0][0] + (vectT[0][1] * tk[0]) + (vectT[0][2] * tk[1]);
     vector[1] = vectT[1][0] + (vectT[1][1] * tk[0]) + (vectT[1][2] * tk[1]);

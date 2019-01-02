@@ -13,13 +13,14 @@ import org.slf4j.Logger;
 
 /**
  * 
- * MouthControl - This service will animate a jaw servo to move as its speaking It's peers are the jaw servo, speech service and an
- * arduino.
+ * MouthControl - This service will animate a jaw servo to move as its speaking
+ * It's peers are the jaw servo, speech service and an arduino.
  *
  */
 public class MouthControl extends Service {
 
-  // TODO: remove Peer & Make it attachable between generic servoControl & SpeechSynthesis
+  // TODO: remove Peer & Make it attachable between generic servoControl &
+  // SpeechSynthesis
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
@@ -109,7 +110,8 @@ public class MouthControl extends Service {
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
     // TODO: consider a jaw move to closed position
-    // this will only work if the mouth animation ends before it end playing the voice.
+    // this will only work if the mouth animation ends before it end playing the
+    // voice.
     jaw.moveTo(mouthClosedPos);
   }
 
@@ -138,8 +140,9 @@ public class MouthControl extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

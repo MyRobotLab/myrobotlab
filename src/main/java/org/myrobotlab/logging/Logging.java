@@ -79,11 +79,14 @@ public abstract class Logging {
    * @param tag
    */
   /*
-   * static public void logTime(String timerName, String tag) { if (timerMap == null) { timerMap = new HashMap<String, Long>(); }
+   * static public void logTime(String timerName, String tag) { if (timerMap ==
+   * null) { timerMap = new HashMap<String, Long>(); }
    * 
-   * if (!timerMap.containsKey(timerName) || "start".equals(tag)) { timerMap.put(timerName, System.currentTimeMillis()); }
+   * if (!timerMap.containsKey(timerName) || "start".equals(tag)) {
+   * timerMap.put(timerName, System.currentTimeMillis()); }
    * 
-   * StringBuffer sb = new StringBuffer(40).append("timer ").append(timerName). append(" ").append(System.currentTimeMillis() -
+   * StringBuffer sb = new StringBuffer(40).append("timer ").append(timerName).
+   * append(" ").append(System.currentTimeMillis() -
    * timerMap.get(timerName)).append(" ms ") .append(tag);
    * 
    * log.info(sb.toString()); }

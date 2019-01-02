@@ -121,8 +121,9 @@ public class Inbox implements Serializable {
   }
 
   /**
-   * Blocks and waits on a message put on the queue of the InBox. Service default behavior will wait on getMsg for a message, when
-   * they recieve a message they invoke it.
+   * Blocks and waits on a message put on the queue of the InBox. Service
+   * default behavior will wait on getMsg for a message, when they recieve a
+   * message they invoke it.
    * 
    * @return the Message on the queue
    * @throws InterruptedException
@@ -131,9 +132,11 @@ public class Inbox implements Serializable {
    */
   public Message getMsg() throws InterruptedException {
     /*
-     * TODO - remove below - Inbox will call switchboards serializer/deserializer &amp; communicator send/recieve interface
-     * switchboard has references to serializer and communicator - also all configuration needed At this level ALL details on where
-     * the Message / Message came from should be hidden and interfaces should be exposed only-
+     * TODO - remove below - Inbox will call switchboards
+     * serializer/deserializer &amp; communicator send/recieve interface
+     * switchboard has references to serializer and communicator - also all
+     * configuration needed At this level ALL details on where the Message /
+     * Message came from should be hidden and interfaces should be exposed only-
      */
 
     Message msg = null;

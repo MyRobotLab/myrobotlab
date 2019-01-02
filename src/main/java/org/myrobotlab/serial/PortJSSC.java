@@ -18,8 +18,10 @@ import jssc.SerialPortList;
 /**
  * @author GroG
  * 
- *         A necessary class to wrap references to rxtxLib in something which can be dynamically loaded. Without this abstraction
- *         any platform which did was not supported for by rxtx would not be able to use the Serial service or ports.
+ *         A necessary class to wrap references to rxtxLib in something which
+ *         can be dynamically loaded. Without this abstraction any platform
+ *         which did was not supported for by rxtx would not be able to use the
+ *         Serial service or ports.
  * 
  */
 public class PortJSSC extends Port implements SerialControl, SerialPortEventListener, Serializable {
@@ -198,7 +200,8 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   }
 
   /**
-   * rxtxlib's "serial event handling" - would be more simple if they just implemented InputStream correctly :P
+   * rxtxlib's "serial event handling" - would be more simple if they just
+   * implemented InputStream correctly :P
    */
   @Override
   public void serialEvent(SerialPortEvent event) {

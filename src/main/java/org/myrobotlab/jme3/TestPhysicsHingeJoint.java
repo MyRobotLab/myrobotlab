@@ -43,7 +43,8 @@ public class TestPhysicsHingeJoint extends SimpleApplication implements AnalogLi
   public void simpleInitApp() {
     bulletAppState = new BulletAppState();
     stateManager.attach(bulletAppState);
-    // TODO: this was commented out due to version 3.1.0-stable of jme (in maven update)
+    // TODO: this was commented out due to version 3.1.0-stable of jme (in maven
+    // update)
     // bulletAppState.getPhysicsSpace().enableDebug(assetManager);
     setupKeys();
     setupJoint();

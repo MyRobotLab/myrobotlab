@@ -159,12 +159,14 @@ public class ApiMessages extends Api {
       // FALLBACK
       ApiFactory api = ApiFactory.getInstance();
       String newUri = requestUri.uri.replace("/messages", "/service");
-      // we send out = null, because we don't want service api to stream back a 'non' message response
+      // we send out = null, because we don't want service api to stream back a
+      // 'non' message response
       // but we do want the functionality of the services api
       retobj = api.process(sender, null, newUri, json);
 
       // FIXME - WebGui Client is expecting
-      // FIXME - WebGui Angular FIX is needed - this IS NOT getLocalServices its getEnvironments
+      // FIXME - WebGui Angular FIX is needed - this IS NOT getLocalServices its
+      // getEnvironments
 
       // Create msg from the return - and send it back
       // - is this correct ? should it be double encoded ?

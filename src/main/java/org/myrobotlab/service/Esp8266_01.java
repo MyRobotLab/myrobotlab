@@ -27,8 +27,9 @@ import com.google.gson.Gson;
 
 /**
  * 
- * Esp8266_01 - This is the MyRobotLab Service for the ESP8266-01. The ESP8266-01 is a small WiFi enabled device with limited number
- * of i/o pins This service makes it possible to use the ESP8266-01 and i2c devices
+ * Esp8266_01 - This is the MyRobotLab Service for the ESP8266-01. The
+ * ESP8266-01 is a small WiFi enabled device with limited number of i/o pins
+ * This service makes it possible to use the ESP8266-01 and i2c devices
  * 
  */
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
@@ -268,11 +269,12 @@ public class Esp8266_01 extends Service implements I2CController {
   }
 
   /*
-   * @Override public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize,
-   * byte[] readBuffer, int readSize) {
+   * @Override public int i2cWriteRead(I2CControl control, int busAddress, int
+   * deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int
+   * readSize) {
    * 
-   * i2cWrite(control, busAddress, deviceAddress, writeBuffer, writeSize); return i2cRead(control, busAddress, deviceAddress,
-   * readBuffer, readSize); }
+   * i2cWrite(control, busAddress, deviceAddress, writeBuffer, writeSize);
+   * return i2cRead(control, busAddress, deviceAddress, readBuffer, readSize); }
    */
 
   @Override
@@ -397,8 +399,9 @@ public class Esp8266_01 extends Service implements I2CController {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -414,7 +417,8 @@ public class Esp8266_01 extends Service implements I2CController {
     // then remove direct dependencies to httpcomponents ...
     // One HttpClient to Rule them all !!
     /*
-     * Runtime currently includes these dependencies meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+     * Runtime currently includes these dependencies
+     * meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
      * meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
      */
 

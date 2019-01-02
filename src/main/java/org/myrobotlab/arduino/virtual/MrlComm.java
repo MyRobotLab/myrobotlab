@@ -18,10 +18,13 @@ import org.myrobotlab.service.VirtualArduino;
 // class Pin;
 
 /***********************************************************************
- * Class MrlComm - This class represents the Arduino service as a device. It can hosts devices such as Motors, Servos, Steppers,
- * Sensors, etc. You can dynamically add or remove devices, and the deviceList should be in synch with the Java-Land deviceList. It
- * has a list of pins which can be read from or written to. It also follows some of the same methods as the Device in Device.h It
- * has an update() which is called each loop to do any necessary processing
+ * Class MrlComm - This class represents the Arduino service as a device. It can
+ * hosts devices such as Motors, Servos, Steppers, Sensors, etc. You can
+ * dynamically add or remove devices, and the deviceList should be in synch with
+ * the Java-Land deviceList. It has a list of pins which can be read from or
+ * written to. It also follows some of the same methods as the Device in
+ * Device.h It has an update() which is called each loop to do any necessary
+ * processing
  * 
  */
 public class MrlComm {
@@ -99,15 +102,19 @@ public class MrlComm {
   // > i2cRead/deviceId/deviceAddress/size
   // void i2cRead( byte deviceId, byte deviceAddress, byte size);
   // > i2cWrite/deviceId/deviceAddress/[] data
-  // void i2cWrite( byte deviceId, byte deviceAddress, byte dataSize, const byte*data);
+  // void i2cWrite( byte deviceId, byte deviceAddress, byte dataSize, const
+  // byte*data);
   // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-  // void i2cWriteRead( byte deviceId, byte deviceAddress, byte readSize, byte writeValue);
+  // void i2cWriteRead( byte deviceId, byte deviceAddress, byte readSize, byte
+  // writeValue);
   // > neoPixelAttach/deviceId/pin/b32 numPixels
   // void neoPixelAttach( byte deviceId, byte pin, long numPixels);
   // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-  // void neoPixelSetAnimation( byte deviceId, byte animation, byte red, byte green, byte blue, int speed);
+  // void neoPixelSetAnimation( byte deviceId, byte animation, byte red, byte
+  // green, byte blue, int speed);
   // > neoPixelWriteMatrix/deviceId/[] buffer
-  // void neoPixelWriteMatrix( byte deviceId, byte bufferSize, const byte*buffer);
+  // void neoPixelWriteMatrix( byte deviceId, byte bufferSize, const
+  // byte*buffer);
   // > disablePin/pin
   // void disablePin( byte pin);
   // > disablePins
@@ -150,9 +157,11 @@ public class MrlComm {
   // end
   /*
    * 
-   * public: unsigned long loopCount; // main loop count MrlComm(); ~MrlComm(); void publishBoardStatus(); void publishVersion();
-   * void publishBoardInfo(); void processCommand(); void processCommand(int ioType); void updateDevices(); unsigned int
-   * getCustomMsg(); int getCustomMsgSize(); void begin(HardwareSerial& serial); bool readMsg(); };
+   * public: unsigned long loopCount; // main loop count MrlComm(); ~MrlComm();
+   * void publishBoardStatus(); void publishVersion(); void publishBoardInfo();
+   * void processCommand(); void processCommand(int ioType); void
+   * updateDevices(); unsigned int getCustomMsg(); int getCustomMsgSize(); void
+   * begin(HardwareSerial& serial); bool readMsg(); };
    * 
    * #endif
    */
@@ -198,7 +207,8 @@ public class MrlComm {
 
   private int analogRead(int address) {
     /*
-     * to simulate longer analogReads :) try{ Thread.sleep(45); } catch(Exception e){}
+     * to simulate longer analogReads :) try{ Thread.sleep(45); }
+     * catch(Exception e){}
      */
     return getRandom(0, 1024);
   }
@@ -245,14 +255,16 @@ public class MrlComm {
     // extern int __heap_start, *__brkval;
     // int v;
     // return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-    return 940 - (deviceList.size() * 20) - getRandom(0, 20); // TODO add size of device list
+    return 940 - (deviceList.size() * 20) - getRandom(0, 20); // TODO add size
+                                                              // of device list
   }
 
   /**
    * Get a device given it's id.
    * 
    * @param id
-   *          - the device id to fetch. (I think this is the internal device id as it is the index into the mrl device list.
+   *          - the device id to fetch. (I think this is the internal device id
+   *          as it is the index into the mrl device list.
    * @return - a device
    */
   public Device getDevice(int id) {
@@ -275,10 +287,12 @@ public class MrlComm {
   /**
    * This adds a device to the current set of active devices in the deviceList.
    * 
-   * FIXME - G: I think dynamic array would work better at least for the deviceList TODO: KW: i think it's pretty dynamic now. G:
-   * the nextDeviceId & Id leaves something to be desired - and the "index" does not spin through the deviceList to find it .. a
-   * dynamic array of pointers would only expand if it could not accomidate the current number of devices, when a device was removed
-   * - the slot could be re-used by the next device request
+   * FIXME - G: I think dynamic array would work better at least for the
+   * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
+   * Id leaves something to be desired - and the "index" does not spin through
+   * the deviceList to find it .. a dynamic array of pointers would only expand
+   * if it could not accomidate the current number of devices, when a device was
+   * removed - the slot could be re-used by the next device request
    */
   Device addDevice(Device device) {
     deviceList.add(device);
@@ -286,9 +300,11 @@ public class MrlComm {
   }
 
   /***********************************************************************
-   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the device list depending on their type. This method
-   * processes each loop. Typically this "back-end" processing will read data from pins, or change states of non-blocking pulses, or
-   * possibly regulate a motor based on pid values read from pins
+   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
+   * device list depending on their type. This method processes each loop.
+   * Typically this "back-end" processing will read data from pins, or change
+   * states of non-blocking pulses, or possibly regulate a motor based on pid
+   * values read from pins
    */
   public void updateDevices() {
 
@@ -304,7 +320,8 @@ public class MrlComm {
   }
 
   /***********************************************************************
-   * UPDATE BEGIN updates self - reads from the pinList both analog and digital sends pin data back
+   * UPDATE BEGIN updates self - reads from the pinList both analog and digital
+   * sends pin data back
    */
   public void update() {
     // this counts cycles of updates
@@ -410,8 +427,8 @@ public class MrlComm {
   }
 
   /***********************************************************************
-   * PUBLISH_BOARD_INFO This function updates the average time it took to run the main loop and reports it back with a
-   * publishBoardStatus MRLComm message
+   * PUBLISH_BOARD_INFO This function updates the average time it took to run
+   * the main loop and reports it back with a publishBoardStatus MRLComm message
    *
    * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
    *
@@ -434,8 +451,9 @@ public class MrlComm {
   }
 
   /****************************************************************
-   * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are controlled by arduinoMsgs.schema The implementation
-   * contains custom logic - but the signature is generated
+   * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are
+   * controlled by arduinoMsgs.schema The implementation contains custom logic -
+   * but the signature is generated
    *
    */
 
@@ -464,7 +482,8 @@ public class MrlComm {
   }
 
   /**
-   * deviceDetach - get the device if it exists delete it and remove it from the deviceList
+   * deviceDetach - get the device if it exists delete it and remove it from the
+   * deviceList
    * 
    * @param deviceId
    *          int for the device id

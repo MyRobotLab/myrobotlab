@@ -75,7 +75,8 @@ public class OpenCVFilterFaceDetectGui extends OpenCVFilterGui {
     b.add(scaleObject);
 
     /*
-     * center.add(doCannyPruning); center.add(doRoughSearch); center.add(featureMax); center.add(biggestObject);
+     * center.add(doCannyPruning); center.add(doRoughSearch);
+     * center.add(featureMax); center.add(biggestObject);
      * center.add(magicValue); center.add(scaleObject);
      */
     center.add(b);

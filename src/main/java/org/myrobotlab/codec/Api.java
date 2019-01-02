@@ -10,13 +10,17 @@ public abstract class Api {
   public final static String PREFIX_API = "api";
   public final static String PARAMETER_API = "/api/";
 
-  // because of WebGui's "bug?" of request.body().getBytes() == null - we will use String instead
-  // public Object process(MessageSender sender, OutputStream out, URI uri, byte[] data) throws Exception;
+  // because of WebGui's "bug?" of request.body().getBytes() == null - we will
+  // use String instead
+  // public Object process(MessageSender sender, OutputStream out, URI uri,
+  // byte[] data) throws Exception;
 
-  // public Object process(MessageSender sender, OutputStream out, String requestUri, String data) throws Exception;
+  // public Object process(MessageSender sender, OutputStream out, String
+  // requestUri, String data) throws Exception;
 
   /**
-   * getRequestURI() does not decode the string. Where getPathInfo() does decode.
+   * getRequestURI() does not decode the string. Where getPathInfo() does
+   * decode.
    * 
    * <pre>
    *  Servlet is mapped as /test%3F/* and the application is deployed under /app.
@@ -55,9 +59,10 @@ public abstract class Api {
    */
 
   /**
-   * CreateMessage creates a message from a URI - this is the "default" request message which can be created from 'any' uri.
-   * Potentially, a uri could fill the data field. In the 'default' parsing decoding - the expected parameters are url encoded and
-   * json encoded where :
+   * CreateMessage creates a message from a URI - this is the "default" request
+   * message which can be created from 'any' uri. Potentially, a uri could fill
+   * the data field. In the 'default' parsing decoding - the expected parameters
+   * are url encoded and json encoded where :
    * 
    * {scheme}://{host}:{port}/api/{apiKey}/{p0}/{p1}/{p(n)}/...
    * 

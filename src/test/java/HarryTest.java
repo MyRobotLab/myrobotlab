@@ -92,9 +92,12 @@ public class HarryTest {
         // get the title of the result.
         templateBuilder.append(title.toString().trim());
         templateBuilder.append("</li>");
-        // if the last reponse was title.. the tell me more should return the description.
+        // if the last reponse was title.. the tell me more should return the
+        // description.
         if (d.getFirstValue("description") != null) {
-          // ab.addCategory("TELL ME MORE", d.getFirstValue("description").toString().trim(), preamble + title.toString());
+          // ab.addCategory("TELL ME MORE",
+          // d.getFirstValue("description").toString().trim(), preamble +
+          // title.toString());
         }
       }
     }
@@ -158,7 +161,8 @@ public class HarryTest {
 
     HtmlFilter htmlfilter = (HtmlFilter) Runtime.createAndStart("htmlfilter", "HtmlFilter");
     // #####################################################################
-    // # MRL Routing webkitspeechrecognition/ear -> program ab -> htmlfilter -> mouth
+    // # MRL Routing webkitspeechrecognition/ear -> program ab -> htmlfilter ->
+    // mouth
     // ######################################################################
     ear.addTextListener(harry);
     harry.addTextListener(htmlfilter);

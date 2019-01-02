@@ -20,7 +20,8 @@ public class ServoTest {
 
   @Before
   public void setup() throws Exception {
-    // setup the test environment , and create an arduino with a virtual backend for it.
+    // setup the test environment , and create an arduino with a virtual backend
+    // for it.
     TestUtils.initEnvirionment();
     // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
@@ -95,9 +96,11 @@ public class ServoTest {
 
   // @Test
   public void testAttach() throws Exception {
-    // FIXME - test state change - mrl gets restarted arduino doesn't what happens - how to handle gracefully
+    // FIXME - test state change - mrl gets restarted arduino doesn't what
+    // happens - how to handle gracefully
     // FIXME - test enabled Events
-    // FIXME - make abstract class from interfaces to attempt to do Java 8 interfaces with default
+    // FIXME - make abstract class from interfaces to attempt to do Java 8
+    // interfaces with default
     // creation ...
     Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
     Runtime.start("gui", "WebGui");
@@ -157,8 +160,10 @@ public class ServoTest {
     arduino.setDebug(true);
 
     // detaching the device
-    servo01.detachServoController(arduino); // test servo02.detach(arduino); error ?
-    // servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED DID SPLIT BRAIN FIXME
+    servo01.detachServoController(arduino); // test servo02.detach(arduino);
+                                            // error ?
+    // servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED
+    // DID SPLIT BRAIN FIXME
     servo02.detachServoController(arduino);
 
     // errors / boundary cases
@@ -239,7 +244,8 @@ public class ServoTest {
     servo02.moveTo(130);
 
     /*
-     * servo01.moveTo(30); servo02.moveTo(30); servo01.moveTo(130); servo02.moveTo(130); servo01.moveTo(30); servo02.moveTo(30);
+     * servo01.moveTo(30); servo02.moveTo(30); servo01.moveTo(130);
+     * servo02.moveTo(130); servo01.moveTo(30); servo02.moveTo(30);
      * servo01.moveTo(130); servo02.moveTo(130);
      */
 

@@ -28,12 +28,15 @@ import com.thalmic.myo.enums.XDirection;
 
 /**
  * 
- * MyoThalmic - This service provides connectivity to the Myo band. https://www.myo.com/ It provides orientation tracking
- * infromation such as roll,pitch and yaw. In addition it can detect a "pose" or gesture made by the hand while it's worn.
+ * MyoThalmic - This service provides connectivity to the Myo band.
+ * https://www.myo.com/ It provides orientation tracking infromation such as
+ * roll,pitch and yaw. In addition it can detect a "pose" or gesture made by the
+ * hand while it's worn.
  * 
  * REST, FIST, WAVE_IN, WAVE_OUT, FINGERS_SPREAD, DOUBLE_TAP, UNKNOWN
  * 
- * The addPoseListener will wire data the orientation and pose data to another service.
+ * The addPoseListener will wire data the orientation and pose data to another
+ * service.
  * 
  * https://developer.thalmic.com/downloads
  * 
@@ -247,7 +250,8 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
   }
 
   /*
-   * @Override public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection) { whichArm = arm; }
+   * @Override public void onArmSync(Myo myo, long timestamp, Arm arm,
+   * XDirection xDirection) { whichArm = arm; }
    */
 
   @Override
@@ -359,7 +363,8 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
   }
 
   /*
-   * public void setLockingPolicy(String policy){ myo.setL myo.setLockingPolicy("none") ; }
+   * public void setLockingPolicy(String policy){ myo.setL
+   * myo.setLockingPolicy("none") ; }
    */
 
   // //
@@ -380,8 +385,9 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
   }
 
   /*
-   * @Override public void onArmSync(Myo myo, long arg1, Arm arm, XDirection direction, WarmupState warmUpState) {
-   * log.info("onArmSync {}", arm); whichArm = arm; invoke("publishArmSync", arm); }
+   * @Override public void onArmSync(Myo myo, long arg1, Arm arm, XDirection
+   * direction, WarmupState warmUpState) { log.info("onArmSync {}", arm);
+   * whichArm = arm; invoke("publishArmSync", arm); }
    */
 
   public Arm publishArmSync(Arm arm) {
@@ -405,8 +411,9 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -434,15 +441,19 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
       /*
        * Hub hub = new Hub("com.example.hello-myo");
        * 
-       * log.info("Attempting to find a Myo..."); log.info( "Attempting to find a Myo");
+       * log.info("Attempting to find a Myo..."); log.info(
+       * "Attempting to find a Myo");
        * 
        * Myo myodevice = hub.waitForMyo(10000);
        * 
-       * if (myodevice == null) { throw new RuntimeException( "Unable to find a Myo!"); }
+       * if (myodevice == null) { throw new RuntimeException(
+       * "Unable to find a Myo!"); }
        * 
-       * log.info("Connected to a Myo armband!"); log.info( "Connected to a Myo armband");
+       * log.info("Connected to a Myo armband!"); log.info(
+       * "Connected to a Myo armband");
        * 
-       * //DeviceListener dataCollector = new DataCollector(); //hub.addListener(myo);
+       * //DeviceListener dataCollector = new DataCollector();
+       * //hub.addListener(myo);
        * 
        * while (true) { hub.run(1000 / 20); //System.out.print(dataCollector);
        * 

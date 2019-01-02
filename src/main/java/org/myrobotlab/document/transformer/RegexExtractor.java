@@ -8,10 +8,11 @@ import java.util.regex.Pattern;
 import org.myrobotlab.document.Document;
 
 /**
- * This stage will use a regex to find a pattern in a string field and store the matched text into the output field.
+ * This stage will use a regex to find a pattern in a string field and store the
+ * matched text into the output field.
  *
- * The list of keepGroups tells the RegexEtractor which groups from the regular expression to keep. Groups are concatenated to form
- * the output value.
+ * The list of keepGroups tells the RegexEtractor which groups from the regular
+ * expression to keep. Groups are concatenated to form the output value.
  *
  * @author kwatters, dmeehl
  *

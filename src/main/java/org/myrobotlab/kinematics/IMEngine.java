@@ -97,7 +97,8 @@ public class IMEngine extends Thread implements Genetic {
           target = null;
         }
       }
-      if (target != null && currentPosition.distanceTo(target) > maxDistance /** && !isWaitingForServo() **/
+      if (target != null && currentPosition
+          .distanceTo(target) > maxDistance /** && !isWaitingForServo() **/
       ) {
         log.info("distance to target {}", currentPosition.distanceTo(target));
         log.info(currentPosition.toString());
@@ -198,15 +199,18 @@ public class IMEngine extends Thread implements Genetic {
       // double geneticMutationRate = 0.01;
       // int geneticGeneration = 50;
       // calcFitnessType = CalcFitnessType.POSITION;
-      // GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, arm.getNumLinks(), 12, geneticRecombinationRate,
+      // GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize,
+      // arm.getNumLinks(), 12, geneticRecombinationRate,
       // geneticMutationRate );
-      // Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be
+      // Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the
+      // number of time the chromosome pool will be
       // recombined and mutate
       // for (int i = 0; i < computeArm.getNumLinks(); i++) {
       // if (bestFit.getDecodedGenome().get(i) != null) {
       // DHLink link = computeArm.getLink(i);
       // double degrees = link.getPositionValueDeg();
-      // double deltaDegree = java.lang.Math.abs(degrees - (double)bestFit.getDecodedGenome().get(i));
+      // double deltaDegree = java.lang.Math.abs(degrees -
+      // (double)bestFit.getDecodedGenome().get(i));
       // if (degrees > ((double)bestFit.getDecodedGenome().get(i))) {
       // degrees -= deltaDegree;
       // }
@@ -218,7 +222,8 @@ public class IMEngine extends Thread implements Genetic {
       // }
       // double[][] jp = computeArm.createJointPositionMap();
       // for (int k = 0; k < computeArm.getNumLinks(); k++) {
-      // CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1], jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1],
+      // CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1],
+      // jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1],
       // jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
       // if (k != computeArm.getNumLinks()-1) {
       // ci.addIgnore(computeArm.getLink(k+1).getName());
@@ -228,7 +233,8 @@ public class IMEngine extends Thread implements Genetic {
       // Point deltaCoG = service.cog.computeCoG(cd);
       // deltaCoG.setZ(0.0);
       // //deltaCoG.setY(0.0);
-      // if (deltaCoG.distanceTo(service.cog.getCoGTarget()) < service.cog.getMaxDistanceToCog()) {
+      // if (deltaCoG.distanceTo(service.cog.getCoGTarget()) <
+      // service.cog.getMaxDistanceToCog()) {
       // Point pos = computeArm.getPalmPosition();
       // log.info("Moving to " + getName() + pos.toString());
       // //publishAngles();
@@ -300,8 +306,13 @@ public class IMEngine extends Thread implements Genetic {
         // log.info(computeArm.getPalmPosition().toString() + "genetic");
         calcFitnessType = CalcFitnessType.POSITION;
         GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, arm.getNumLinks(), 12, geneticRecombinationRate, geneticMutationRate);
-        Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the number of time the chromosome pool will be
-                                                                 // recombined and mutate
+        Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the
+                                                                 // number of
+                                                                 // time the
+                                                                 // chromosome
+                                                                 // pool will be
+                                                                 // recombined
+                                                                 // and mutate
         for (int i = 0; i < computeArm.getNumLinks(); i++) {
           if (bestFit.getDecodedGenome().get(i) != null) {
             DHLink link = computeArm.getLink(i);
@@ -428,14 +439,16 @@ public class IMEngine extends Thread implements Genetic {
           break; // we have the item to watch
       }
       if (ci == null) {
-        // log.info("Collision between static item {} and {} detected", collisionResult.collisionItems[0].getName(),
+        // log.info("Collision between static item {} and {} detected",
+        // collisionResult.collisionItems[0].getName(),
         // collisionResult.collisionItems[1].getName());
         return null;
       }
       Point armPos = checkArm.getPalmPosition();
       Point newPos = checkArm.getPalmPosition();
       Point vCollItem = collisionResult.collisionPoints[itemIndex].subtract(collisionResult.collisionPoints[1 - itemIndex]);
-      // if (vCollItem.magnitude() > 100){ // scale vector so the avoiding point is not too far
+      // if (vCollItem.magnitude() > 100){ // scale vector so the avoiding point
+      // is not too far
       vCollItem = vCollItem.unitVector(100);
       // }
       newPos = newPos.add(vCollItem);
@@ -449,7 +462,10 @@ public class IMEngine extends Thread implements Genetic {
                                                                                                                               // of
                                                                                                                               // item
         Point vToEndOfObject;
-        if (collisionResult.collisionLocation[1 - itemIndex] < 0.5) { // collision near the origin
+        if (collisionResult.collisionLocation[1 - itemIndex] < 0.5) { // collision
+                                                                      // near
+                                                                      // the
+                                                                      // origin
           vToEndOfObject = ori.subtract(colPoint);
           // newPos = newPos.add(ori).subtract(colPoint);
         } else { // collision near the end
@@ -460,13 +476,17 @@ public class IMEngine extends Thread implements Genetic {
         newPos = newPos.add(vToEndOfObject);
       }
       // move away of the part
-      // double length = collisionResult.collisionItems[1-itemIndex].getLength();
-      // double ratio = collisionResult.collisionItems[itemIndex].getRadius() / length;
-      // double[] vector = collisionResult.collisionItems[1-itemIndex].getVector();
+      // double length =
+      // collisionResult.collisionItems[1-itemIndex].getLength();
+      // double ratio = collisionResult.collisionItems[itemIndex].getRadius() /
+      // length;
+      // double[] vector =
+      // collisionResult.collisionItems[1-itemIndex].getVector();
       // for (int i=0; i<3; i++){
       // vector[i] *= ratio;
       // }
-      // if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision near the origin
+      // if (collisionResult.collisionLocation[1-itemIndex] < 0.5) { //collision
+      // near the origin
       // newPos.setX(newPos.getX() - vector[0]);
       // newPos.setY(newPos.getY() - vector[1]);
       // newPos.setZ(newPos.getZ() - vector[2]);
@@ -604,8 +624,10 @@ public class IMEngine extends Thread implements Genetic {
         if (fitnessTime < 0.1) {
           fitnessTime = 0.1;
         }
-        // fitness is the score showing how close the results is to the target position
-        Double fitness = (fitnessMult / distance * 1000);// + (1/fitnessTime*.01);
+        // fitness is the score showing how close the results is to the target
+        // position
+        Double fitness = (fitnessMult / distance * 1000);// +
+                                                         // (1/fitnessTime*.01);
         if (fitness < 0)
           fitness *= -1;
         chromosome.setFitness(fitness);
@@ -640,7 +662,8 @@ public class IMEngine extends Thread implements Genetic {
         // project the COG point to the X/Y plane
         cog.setZ(0.0);
         // cog.setY(0.0);
-        // find a value that put the COG into the target area while minimizing deltaCoG
+        // find a value that put the COG into the target area while minimizing
+        // deltaCoG
         Double fitness = 0.0;
         double deltaCog = cog.distanceTo(service.cog.getCoGTarget());
         if (deltaCog == 0) {
@@ -693,8 +716,10 @@ public class IMEngine extends Thread implements Genetic {
         if (value.isNaN()) {
           value = link.getPositionValueDeg();
         }
-        // if (value < MathUtils.radToDeg(link.getMin()-link.getInitialTheta())) value = link.getPositionValueDeg();
-        // if (value > MathUtils.radToDeg(link.getMax()-link.getInitialTheta())) value = link.getPositionValueDeg();
+        // if (value < MathUtils.radToDeg(link.getMin()-link.getInitialTheta()))
+        // value = link.getPositionValueDeg();
+        // if (value > MathUtils.radToDeg(link.getMax()-link.getInitialTheta()))
+        // value = link.getPositionValueDeg();
         decodedGenome.add(value);
       }
       chromosome.setDecodedGenome(decodedGenome);

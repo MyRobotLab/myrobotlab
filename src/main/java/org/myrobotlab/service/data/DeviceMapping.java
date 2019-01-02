@@ -16,7 +16,8 @@ public class DeviceMapping implements Serializable {
   // to itself as a device
   // transient DeviceControl device;
   // Changed by Mats to use an AnnotationExclusionStrategy
-  // See http://stackoverflow.com/questions/4802887/gson-how-to-exclude-specific-fields-from-serialization-without-annotations?rq=1
+  // See
+  // http://stackoverflow.com/questions/4802887/gson-how-to-exclude-specific-fields-from-serialization-without-annotations?rq=1
   // for reference
   transient Attachable device;
 

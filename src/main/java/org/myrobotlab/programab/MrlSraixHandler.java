@@ -21,14 +21,16 @@ public class MrlSraixHandler implements SraixHandler {
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
     log.debug("MRL Sraix handler! Input {}");
-    // the INPUT has the string we care about. if this is an OOB tag, let's evaluate it and return the result.
+    // the INPUT has the string we care about. if this is an OOB tag, let's
+    // evaluate it and return the result.
     if (containsOOB(input)) {
       String response = processInlineOOB(input);
       return response;
     } else {
       // fall back to default behavior of pannous / pandorabots?
       // TODO: expose pandora bots here if botid is set?
-      // TODO: enable call out to an official MRL hosted NLU service/ knowedge service.
+      // TODO: enable call out to an official MRL hosted NLU service/ knowedge
+      // service.
 
       String response = Sraix.sraixPannous(input, hint, chatSession, locale);
       if (StringUtil.isEmpty(response)) {
@@ -88,7 +90,8 @@ public class MrlSraixHandler implements SraixHandler {
         responseBuilder.append(result);
       }
     }
-    // append the last part. (assume the start is set to the end of the last match..
+    // append the last part. (assume the start is set to the end of the last
+    // match..
     // or zero if no matches found.
     responseBuilder.append(text.substring(start));
     return responseBuilder.toString();

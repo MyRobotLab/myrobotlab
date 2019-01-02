@@ -15,10 +15,11 @@ import org.slf4j.Logger;
 import it.sauronsoftware.cron4j.Scheduler;
 
 /**
- * Cron - This is a cron based service that can execute a "task" at some point in the future such as "invoke this method on that
- * service"
+ * Cron - This is a cron based service that can execute a "task" at some point
+ * in the future such as "invoke this method on that service"
  * 
- * FIXME - the common cron notation is kind of nice - but this thing doesn't do more than Service.addTask
+ * FIXME - the common cron notation is kind of nice - but this thing doesn't do
+ * more than Service.addTask
  * 
  * FIXME - make a purge &amp; delete DUH !
  *
@@ -76,8 +77,9 @@ public class Cron extends Service {
       cron.startService();
 
       /*
-       * cron.addScheduledEvent("0 6 * * 1,3,5","arduino","digitalWrite", 13, 1);
-       * cron.addScheduledEvent("0 7 * * 1,3,5","arduino","digitalWrite", 12, 1); cron.addScheduledEvent("0 8 * * 1,3,5"
+       * cron.addScheduledEvent("0 6 * * 1,3,5","arduino","digitalWrite", 13,
+       * 1); cron.addScheduledEvent("0 7 * * 1,3,5","arduino","digitalWrite",
+       * 12, 1); cron.addScheduledEvent("0 8 * * 1,3,5"
        * ,"arduino","digitalWrite", 11, 1);
        * 
        * cron.addScheduledEvent("59 * * * *","arduino","digitalWrite", 13, 0);
@@ -114,7 +116,8 @@ public class Cron extends Service {
   }
 
   /*
-   * addTask - Add a task to the cron service to invoke a method on a service on some schedule.
+   * addTask - Add a task to the cron service to invoke a method on a service on
+   * some schedule.
    * 
    * @param cron - The cron string to define the schedule
    * 
@@ -127,7 +130,8 @@ public class Cron extends Service {
   }
 
   /*
-   * addTask - Add a task to the cron service to invoke a method on a service on some schedule.
+   * addTask - Add a task to the cron service to invoke a method on a service on
+   * some schedule.
    * 
    * @param cron - The cron string to define the schedule
    * 
@@ -169,8 +173,9 @@ public class Cron extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 
 /**
  * 
- * MultiWii - this is a skeleton service intended as a place holder to support controling the MultiWii
+ * MultiWii - this is a skeleton service intended as a place holder to support
+ * controling the MultiWii
  *
- * MultiWii is a general purpose software to control a multirotor RC model. http://www.multiwii.com/
+ * MultiWii is a general purpose software to control a multirotor RC model.
+ * http://www.multiwii.com/
  */
 public class MultiWii extends Service {
 
@@ -43,8 +45,9 @@ public class MultiWii extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

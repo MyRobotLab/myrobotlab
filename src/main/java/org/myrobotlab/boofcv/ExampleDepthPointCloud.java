@@ -64,8 +64,8 @@ import boofcv.io.calibration.CalibrationIO;
  * @author Peter Abeles
  */
 /**
- * Example of how to create a point cloud from a RGB-D (Kinect) sensor. Data is loaded from two files, one for the visual image and
- * one for the depth image.
+ * Example of how to create a point cloud from a RGB-D (Kinect) sensor. Data is
+ * loaded from two files, one for the visual image and one for the depth image.
  *
  * @author Peter Abeles
  */

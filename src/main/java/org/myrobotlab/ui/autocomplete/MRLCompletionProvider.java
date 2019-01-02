@@ -84,8 +84,9 @@ public class MRLCompletionProvider extends JavaCompletionProvider {
   }
 
   /**
-   * Load all constants/static fields available and set them up with the class name prefixing the variable name in order to be able
-   * to suggest when the class name is typed in.
+   * Load all constants/static fields available and set them up with the class
+   * name prefixing the variable name in order to be able to suggest when the
+   * class name is typed in.
    * 
    * @param implementation
    */
@@ -125,7 +126,8 @@ public class MRLCompletionProvider extends JavaCompletionProvider {
   }
 
   /**
-   * Helper method that recurses implementation to find all public methods declared.
+   * Helper method that recurses implementation to find all public methods
+   * declared.
    * 
    * @param implementation
    *          the class to analyze
@@ -180,7 +182,8 @@ public class MRLCompletionProvider extends JavaCompletionProvider {
         matchString = String.format("%s.%s(", getClassName(fullClassName), m.getName());
         extraString = shortParamsString.toString();
         /*
-         * } else { matchString = String.format(".%s(", m.getName()); extraString = m.getName(); }
+         * } else { matchString = String.format(".%s(", m.getName());
+         * extraString = m.getName(); }
          */
         // TODO: grab the generics for this method
         completer = new BasicCompletion(this, matchString, extraString,
@@ -193,8 +196,9 @@ public class MRLCompletionProvider extends JavaCompletionProvider {
   }
 
   /**
-   * Overriding base class declaration in order to load methods that should be easy to find and use in Python. Still calls out the
-   * base class in order to load the Java keywords.
+   * Overriding base class declaration in order to load methods that should be
+   * easy to find and use in Python. Still calls out the base class in order to
+   * load the Java keywords.
    */
   @Override
   protected void loadCompletions() {

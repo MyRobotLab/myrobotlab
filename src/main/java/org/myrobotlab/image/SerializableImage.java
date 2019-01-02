@@ -48,8 +48,9 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         This class is a serializable image - depending on constuctor and source the image info can come from a variety of sources
- *         converting between return types "should" cache the resultant type
+ *         This class is a serializable image - depending on constuctor and
+ *         source the image info can come from a variety of sources converting
+ *         between return types "should" cache the resultant type
  * 
  */
 public class SerializableImage implements Serializable {
@@ -64,7 +65,8 @@ public class SerializableImage implements Serializable {
   transient private BufferedImage image;
 
   /**
-   * png encoded byte buffer - TODO offer type png tff etc? TODO - consider hashmap cache similar to the OpenCVData ???
+   * png encoded byte buffer - TODO offer type png tff etc? TODO - consider
+   * hashmap cache similar to the OpenCVData ???
    */
   private ByteBuffer buffer;
 

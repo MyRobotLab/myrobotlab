@@ -71,7 +71,8 @@ public class SolrDataSetIteratorTest {
     // start solr and dl4j service.
     initServices();
     // consider increasing this if there's enough training data.
-    // Phase 1 . get the metadata from the solr query about how many classes there are, and how many results there are.
+    // Phase 1 . get the metadata from the solr query about how many classes
+    // there are, and how many results there are.
     String queryString = "+has_bytes:true -label:unknown";
     String labelField = "label";
     SolrQuery datasetQuery = solr.makeDatasetQuery(queryString, labelField);

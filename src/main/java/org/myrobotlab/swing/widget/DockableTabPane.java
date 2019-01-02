@@ -34,19 +34,22 @@ public class DockableTabPane implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(DockableTabPane.class);
 
   /**
-   * we need 2 indexes/containers for our tabs one is the swing JTabbedPane, but this is not useful in its serializable form so we
-   * maintain a 'custom' map of dockable tabs - this contains size and location info which is serializable
+   * we need 2 indexes/containers for our tabs one is the swing JTabbedPane, but
+   * this is not useful in its serializable form so we maintain a 'custom' map
+   * of dockable tabs - this contains size and location info which is
+   * serializable
    */
   transient JTabbedPane tabs = new JTabbedPane();
 
   /**
-   * a interface / callback to preserve location, dimensions, and other data of a desktop
+   * a interface / callback to preserve location, dimensions, and other data of
+   * a desktop
    */
   transient StateSaver stateSaver;
 
   /**
-   * serializable map of dockable tabs - used for saving locations and positions of undocked panels to preserve coordinates in saved
-   * desktops
+   * serializable map of dockable tabs - used for saving locations and positions
+   * of undocked panels to preserve coordinates in saved desktops
    */
   Map<String, Map<String, DockableTabData>> desktops;
 

@@ -6,7 +6,8 @@ import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;
 
 /**
- * This label generator just asks the solr input split for the lable given a docId
+ * This label generator just asks the solr input split for the lable given a
+ * docId
  * 
  * @author kwatters
  *

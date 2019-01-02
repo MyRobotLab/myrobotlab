@@ -16,9 +16,10 @@ public class SystemResources implements Serializable {
     /*
      * GETS - <pre>
      * 
-     * try { com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
-     * java.lang.management.ManagementFactory.getOperatingSystemMXBean(); totalPhysicalMemory = os.getTotalPhysicalMemorySize() /
-     * 1048576;
+     * try { com.sun.management.OperatingSystemMXBean os =
+     * (com.sun.management.OperatingSystemMXBean)
+     * java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+     * totalPhysicalMemory = os.getTotalPhysicalMemorySize() / 1048576;
      * 
      * } catch (Exception e) { } </pre>
      */

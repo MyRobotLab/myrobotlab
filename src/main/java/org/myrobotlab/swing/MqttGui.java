@@ -77,8 +77,8 @@ public class MqttGui extends ServiceGui implements ActionListener {
     addTopLine(" subscriptions ", subscriptions);
     addTopLine(" messages", "");
     /*
-     * JPanel sendToTopicPanel = new JPanel(); sendToTopicPanel.add(send); sendToTopicPanel.add(topic);
-     * sendToTopicPanel.add(subscribe);
+     * JPanel sendToTopicPanel = new JPanel(); sendToTopicPanel.add(send);
+     * sendToTopicPanel.add(topic); sendToTopicPanel.add(subscribe);
      */
     addLine(onMsg);
     addLine(sendMsg);

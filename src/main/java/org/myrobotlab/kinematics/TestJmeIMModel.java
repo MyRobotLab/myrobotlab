@@ -91,10 +91,22 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
     inputManager.addListener(analogListener, "MMouseUp");
     inputManager.addMapping("MMouseDown", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
     inputManager.addListener(analogListener, "MMouseDown");
-    inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT)); // A and left arrow
-    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT)); // D and right arrow
-    inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP)); // A and left arrow
-    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN)); // D and right arrow
+    inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT)); // A
+                                                                                                        // and
+                                                                                                        // left
+                                                                                                        // arrow
+    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT)); // D
+                                                                                                          // and
+                                                                                                          // right
+                                                                                                          // arrow
+    inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP)); // A
+                                                                                                    // and
+                                                                                                    // left
+                                                                                                    // arrow
+    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN)); // D
+                                                                                                        // and
+                                                                                                        // right
+                                                                                                        // arrow
     inputManager.addListener(analogListener, new String[] { "Left", "Right", "Up", "Down" });
   }
 
@@ -111,7 +123,8 @@ public class TestJmeIMModel extends SimpleApplication implements IntegratedMovem
    * @param relativePosition
    *          : position relative to the hook part
    * @param rotationMask
-   *          : set Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z) for the axe of rotation
+   *          : set Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z) for the
+   *          axe of rotation
    * @param initialAngle
    *          : initial angle of rotation of the part (in radian)
    */

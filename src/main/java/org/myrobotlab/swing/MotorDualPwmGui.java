@@ -155,9 +155,12 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
         swingGui.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
         swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
-         * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.getSelectedItem().toString()));
-         * myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.getSelectedItem().toString())); try { myMotor.attach((String)
-         * controllerList.getSelectedItem()); } catch (Exception e1) { // TODO Auto-generated catch block e1.printStackTrace(); }
+         * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.
+         * getSelectedItem().toString()));
+         * myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.
+         * getSelectedItem().toString())); try { myMotor.attach((String)
+         * controllerList.getSelectedItem()); } catch (Exception e1) { // TODO
+         * Auto-generated catch block e1.printStackTrace(); }
          */
       } else {
         swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());

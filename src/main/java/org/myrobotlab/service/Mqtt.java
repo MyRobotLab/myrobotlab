@@ -29,13 +29,17 @@ import org.slf4j.Logger;
 
 /**
  *
- * Mqtt - Mqtt is a machine-to-machine (M2M)/"Internet of Things" connectivity protocol. It was designed as an extremely lightweight
- * publish/subscribe messaging transport. It is useful for connections with remote locations where a small code footprint is
- * required and/or network bandwidth is at a premium. http://mqtt.org/
+ * Mqtt - Mqtt is a machine-to-machine (M2M)/"Internet of Things" connectivity
+ * protocol. It was designed as an extremely lightweight publish/subscribe
+ * messaging transport. It is useful for connections with remote locations where
+ * a small code footprint is required and/or network bandwidth is at a premium.
+ * http://mqtt.org/
  * 
- * Much of this code was copied from the sample program provided by the Paho project
+ * Much of this code was copied from the sample program provided by the Paho
+ * project
  * http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.java.git/tree/org.eclipse
- * .paho.sample.mqttv3app/src/main/java/org/eclipse/paho/sample/mqttv3app/ SampleAsyncCallBack.java
+ * .paho.sample.mqttv3app/src/main/java/org/eclipse/paho/sample/mqttv3app/
+ * SampleAsyncCallBack.java
  * 
  * @author kmcgerald
  *
@@ -60,7 +64,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   }
 
   /**
-   * for persistence of message if not sent immediately types include memory & file persistence
+   * for persistence of message if not sent immediately types include memory &
+   * file persistence
    */
   transient MemoryPersistence persistence;
 
@@ -76,7 +81,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   int qos = 2;
 
   /**
-   * not sure what this is supposed to be - perhaps a back-end id to identify the transaction on the listener
+   * not sure what this is supposed to be - perhaps a back-end id to identify
+   * the transaction on the listener
    */
   String userContext = "context";
 
@@ -95,8 +101,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   // String url = "tcp://iot.eclipse.org:1883";
 
   /**
-   * Two types of connection are supported tcp:// for a TCP connection and ssl:// , which is weird, that its not mqtt:// & mqtts://
-   * :P
+   * Two types of connection are supported tcp:// for a TCP connection and
+   * ssl:// , which is weird, that its not mqtt:// & mqtts:// :P
    */
   // String url = "tcp://iot.eclipse.org:1883";
   String url = "tcp://broker.hivemq.com:1883";
@@ -271,7 +277,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       // COMMON GATEWAY REGISTERATION AND X-FORWARDED BEGIN --------------
 
       // make a mrl key and protocol uri begin ------
-      // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as this is
+      // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as
+      // this is
       // a detail for tcp
 
       // String clientKey = String.format("mqtt://%s:%d", this.url);
@@ -376,14 +383,16 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   }
 
   /**
-   * Subscribe to a topic on an Mqtt server Once subscribed this method waits for the messages to arrive from the server that match
-   * the subscription. It continues listening for messages until the enter key is pressed. {
+   * Subscribe to a topic on an Mqtt server Once subscribed this method waits
+   * for the messages to arrive from the server that match the subscription. It
+   * continues listening for messages until the enter key is pressed. {
    * 
    * @param topic
    *          to subscribe to (can be wild carded)
    * 
    * @param qos
-   *          the maximum quality of service to receive messages at for this subscription
+   *          the maximum quality of service to receive messages at for this
+   *          subscription
    */
   public void subscribe(String topic, int qos) throws MqttException {
     client.subscribe(topic, qos, userContext, this);
@@ -409,8 +418,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -422,8 +432,10 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
     meta.addCategory("connectivity", "cloud");
     /*
-     * <!-- https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client. mqttv3 --> <dependency
-     * org="org.eclipse.paho" name="org.eclipse.paho.client.mqttv3" rev="1.2.0"/>
+     * <!--
+     * https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.
+     * client. mqttv3 --> <dependency org="org.eclipse.paho"
+     * name="org.eclipse.paho.client.mqttv3" rev="1.2.0"/>
      */
     meta.addDependency("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0");
     meta.setCloudService(true);
@@ -468,7 +480,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       Runtime.start("gui", "SwingGui");
       Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
 
-      // Message msg = Message.createMessage("mqtt", "servo01", "moveTo", new Object[] { 20.0 });
+      // Message msg = Message.createMessage("mqtt", "servo01", "moveTo", new
+      // Object[] { 20.0 });
       // log.info("json [{}]", CodecUtils.toJson(msg));
 
       // | mrl gateway uri | protocol key
@@ -527,7 +540,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       // mqtt.publish("mrl/#", 2, "Greetings from MRL !!!");
 
       /*
-       * mqtt.subscribe("mrl", 2); mqtt.publish("mrl", 2, "Greetings from MRL !!!");
+       * mqtt.subscribe("mrl", 2); mqtt.publish("mrl", 2,
+       * "Greetings from MRL !!!");
        */
       mqtt01.publish("Hello and Greetings from MRL !!!!");
 

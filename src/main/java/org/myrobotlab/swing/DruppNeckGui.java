@@ -12,7 +12,8 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 
 /**
- * Super simplistic GUI for controlling the roll, pitch, and yaw for the drupp neck.
+ * Super simplistic GUI for controlling the roll, pitch, and yaw for the drupp
+ * neck.
  * 
  * @author kwatters
  *
@@ -24,7 +25,8 @@ public class DruppNeckGui extends ServiceGui implements ChangeListener {
   JLabel pitchLabel = new JLabel("Pitch");
   JLabel yawLabel = new JLabel("Yaw");
 
-  // These seem to be the limits where the IK algorithm blows up and goes negative!
+  // These seem to be the limits where the IK algorithm blows up and goes
+  // negative!
   JSlider rollSlider = new JSlider(JSlider.HORIZONTAL, -90, 90, 0);
   JSlider pitchSlider = new JSlider(JSlider.HORIZONTAL, -90, 90, 0);
   JSlider yawSlider = new JSlider(JSlider.HORIZONTAL, -90, 90, 0);

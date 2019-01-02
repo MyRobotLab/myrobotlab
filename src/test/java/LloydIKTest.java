@@ -21,7 +21,8 @@ public class LloydIKTest {
     LoggingFactory.init("INFO");
 
     // Ok.,., i want to start an IK service.. and play around with it.
-    // and then compare a mock output from controller position / orientation to how the arm reacts.
+    // and then compare a mock output from controller position / orientation to
+    // how the arm reacts.
     InverseKinematics3D leftIK = (InverseKinematics3D) Runtime.start("leftIK", "InverseKinematics3D");
     leftIK.setCurrentArm(InMoovArm.getDHRobotArm());
     leftIK.centerAllJoints();
@@ -29,7 +30,8 @@ public class LloydIKTest {
     log.info("Left IK center position is : {}", position);
 
     int numLinks = leftIK.getCurrentArm().getNumLinks();
-    // let's iterate the joints. set the approproate angles.. and validate the position to make sure our math is right.
+    // let's iterate the joints. set the approproate angles.. and validate the
+    // position to make sure our math is right.
     // test angles
     // IK "rest" input angles
     double omoplate = MathUtils.degrees2radian(-90);

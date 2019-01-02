@@ -10,7 +10,8 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 
 /**
- * A service that will either strip out html from input text or wrap the input text in html tags.
+ * A service that will either strip out html from input text or wrap the input
+ * text in html tags.
  * 
  * @author kwatters
  *
@@ -101,8 +102,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * If this is true, the input text will be striped of html. If this is false, the input text will get the pre and post html tags
-   * added to it.
+   * If this is true, the input text will be striped of html. If this is false,
+   * the input text will get the pre and post html tags added to it.
    * 
    * @param stripHtml
    *          - if true, all content between &lt;and &gt; will be removed.
@@ -120,8 +121,9 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

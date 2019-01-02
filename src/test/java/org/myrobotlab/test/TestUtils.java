@@ -9,7 +9,8 @@ import org.myrobotlab.logging.LoggingFactory;
 public class TestUtils {
 
   public static void initEnvirionment() {
-    // TODO: there might be other "frameworky" sort of things to init. but for now, we
+    // TODO: there might be other "frameworky" sort of things to init. but for
+    // now, we
     // will just initialize the logger
     LoggingFactory.getInstance().configure();
     LoggingFactory.getInstance().setLevel(Level.INFO);

@@ -20,7 +20,8 @@ public class Database extends Service {
   public final static Logger log = LoggerFactory.getLogger(Database.class);
 
   public static String driver = "com.mysql.jdbc.Driver";
-  public static String connectionString = ""; // e.g.// "jdbc:mysql://HOST/DATABASE"
+  public static String connectionString = ""; // e.g.//
+                                              // "jdbc:mysql://HOST/DATABASE"
   public static String jdbcUser = "user";
   public static String jdbcPassword = "password";
   static Connection connection = null;
@@ -59,8 +60,9 @@ public class Database extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

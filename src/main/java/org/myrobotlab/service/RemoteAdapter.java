@@ -67,8 +67,10 @@ import org.slf4j.Logger;
  * 
  * RemoteAdapter - Multi-node / distributed myrobotlab support.
  * 
- * A RemoteAdapter allows other instances of MyRobotLab to connect. Services and resources can be shared by 2 or more joined
- * instances. The default communication listener is a UDP server listening on all addresses on port 6767.
+ * A RemoteAdapter allows other instances of MyRobotLab to connect. Services and
+ * resources can be shared by 2 or more joined instances. The default
+ * communication listener is a UDP server listening on all addresses on port
+ * 6767.
  * 
  * 
  */
@@ -98,12 +100,14 @@ public class RemoteAdapter extends Service implements Gateway {
   boolean isScanning = false;
 
   /**
-   * scanners to scan for other mrl instances TODO - multiple scanners for parallel port/broadcast scanning
+   * scanners to scan for other mrl instances TODO - multiple scanners for
+   * parallel port/broadcast scanning
    */
   transient Scanner scanner;
 
   /**
-   * used as a data interface to all the non-serializable network objects - it will report stats and states
+   * used as a data interface to all the non-serializable network objects - it
+   * will report stats and states
    */
   public HashMap<URI, Connection> connections = new HashMap<URI, Connection>();
 
@@ -124,7 +128,8 @@ public class RemoteAdapter extends Service implements Gateway {
   // TODO refactor with boolean - lower level error(problem) to put into
   // framework
   /**
-   * connects and sends register message to remote system connection depends on url schema
+   * connects and sends register message to remote system connection depends on
+   * url schema
    */
   public void connect(String uri) throws URISyntaxException {
     log.info("{}.connecting {}", getName(), uri);
@@ -138,8 +143,9 @@ public class RemoteAdapter extends Service implements Gateway {
   }
 
   /*
-   * important initial communication function related to discovery a broadcast goes out and replies must include details of
-   * communication so that a viable connection can be created
+   * important initial communication function related to discovery a broadcast
+   * goes out and replies must include details of communication so that a viable
+   * connection can be created
    * 
    * @param client
    */
@@ -233,7 +239,8 @@ public class RemoteAdapter extends Service implements Gateway {
   }
 
   /*
-   * NOT USED - just left as an example of a consumer asynchronous return of access key request
+   * NOT USED - just left as an example of a consumer asynchronous return of
+   * access key request
    */
   public Connection onNewConnection(Connection conn) {
     return conn;
@@ -422,8 +429,9 @@ public class RemoteAdapter extends Service implements Gateway {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

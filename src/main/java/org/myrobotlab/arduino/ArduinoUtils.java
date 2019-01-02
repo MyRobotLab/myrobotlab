@@ -40,8 +40,8 @@ public class ArduinoUtils {
   }
 
   /**
-   * Upload the MrlComm.ino with an arduino ide (version 1.6.8) installed in the default windows location of C:\Program Files
-   * (x86)\Arduino\
+   * Upload the MrlComm.ino with an arduino ide (version 1.6.8) installed in the
+   * default windows location of C:\Program Files (x86)\Arduino\
    * 
    * @param port
    *          - the com port for the arduino
@@ -58,7 +58,8 @@ public class ArduinoUtils {
   }
 
   /**
-   * Upload the MrlComm.ino sketch to the using an arduino IDE (only version 1.6.8 has been tested for this method.)
+   * Upload the MrlComm.ino sketch to the using an arduino IDE (only version
+   * 1.6.8 has been tested for this method.)
    * 
    * @param port
    *          the com port (COM4, /dev/ttyAMA0 ...)
@@ -68,7 +69,8 @@ public class ArduinoUtils {
    *          - path to the arduino ide installation
    * @return true if successful, false otherwise
    * @throws IOException
-   *           - if there's a problem reading the source ino sketch or talking to the com port
+   *           - if there's a problem reading the source ino sketch or talking
+   *           to the com port
    * @throws InterruptedException
    *           - if interrupted.
    */
@@ -125,7 +127,8 @@ public class ArduinoUtils {
   }
 
   /**
-   * Helper function to run a system command and return the stdout / stderr as a string
+   * Helper function to run a system command and return the stdout / stderr as a
+   * string
    * 
    * @param program
    *          - the path to the executible to run
@@ -216,7 +219,8 @@ public class ArduinoUtils {
   }
 
   /**
-   * Helper function to run a program , return the stderr / stdout as a string and to catch any exceptions that occur
+   * Helper function to run a program , return the stderr / stdout as a string
+   * and to catch any exceptions that occur
    * 
    * @param cmd
    *          - the path to the program to run

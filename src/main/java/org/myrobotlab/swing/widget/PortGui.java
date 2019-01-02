@@ -32,8 +32,9 @@ public class PortGui extends ServiceGui implements ActionListener, PortListener 
   }
 
   /**
-   * make note !!! - this can 'conflict' with other UI subscribed to the same boundServiceName !! - if one UI makes mapping which
-   * who's callback does not match the other UI
+   * make note !!! - this can 'conflict' with other UI subscribed to the same
+   * boundServiceName !! - if one UI makes mapping which who's callback does not
+   * match the other UI
    */
   @Override
   public void subscribeGui() {

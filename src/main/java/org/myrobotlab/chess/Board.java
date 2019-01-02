@@ -74,8 +74,8 @@ final public class Board implements Constants {
   private final static int pieceValue[] = { 100, 300, 300, 500, 900, 0 };
 
   /*
-   * The "pcsq" arrays are piece/square tables. They're values added to the material value of the piece based on the location of the
-   * piece.
+   * The "pcsq" arrays are piece/square tables. They're values added to the
+   * material value of the piece based on the location of the piece.
    */
 
   private final static int pawnPcsq[] = { 0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 15, 20, 20, 15, 10, 5, 4, 8, 12, 16, 16, 12, 8, 4, 3, 6, 9, 12, 12, 9, 6, 3, 2, 4, 6, 8, 8, 6, 4, 2, 1, 2,
@@ -95,8 +95,9 @@ final public class Board implements Constants {
       40, 50, 60, 60, 50, 40, 30, 20, 30, 40, 50, 50, 40, 30, 20, 10, 20, 30, 40, 40, 30, 20, 10, 0, 10, 20, 30, 30, 20, 10, 0 };
 
   /*
-   * The flip array is used to calculate the piece/square values for DARK pieces. The piece/square value of a LIGHT pawn is
-   * pawnPcsq[sq] and the value of a DARK pawn is pawnPcsq[flip[sq]]
+   * The flip array is used to calculate the piece/square values for DARK
+   * pieces. The piece/square value of a LIGHT pawn is pawnPcsq[sq] and the
+   * value of a DARK pawn is pawnPcsq[flip[sq]]
    */
   private final static int flip[] = { 56, 57, 58, 59, 60, 61, 62, 63, 48, 49, 50, 51, 52, 53, 54, 55, 40, 41, 42, 43, 44, 45, 46, 47, 32, 33, 34, 35, 36, 37, 38, 39, 24, 25, 26,
       27, 28, 29, 30, 31, 16, 17, 18, 19, 20, 21, 22, 23, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7 };
@@ -155,8 +156,9 @@ final public class Board implements Constants {
   }
 
   /*
-   * inCheck() returns true if side s is in check and false otherwise. It just scans the board to find side s's king and calls
-   * attack() to see if it's being attacked.
+   * inCheck() returns true if side s is in check and false otherwise. It just
+   * scans the board to find side s's king and calls attack() to see if it's
+   * being attacked.
    */
 
   int eval() {
@@ -260,7 +262,8 @@ final public class Board implements Constants {
     }
 
     /*
-     * the score[] array is set, now return the score relative to the side to move
+     * the score[] array is set, now return the score relative to the side to
+     * move
      */
     if (side == LIGHT)
       return score[LIGHT] - score[DARK];
@@ -268,7 +271,8 @@ final public class Board implements Constants {
   }
 
   /*
-   * attack() returns true if square sq is being attacked by side s and false otherwise.
+   * attack() returns true if square sq is being attacked by side s and false
+   * otherwise.
    */
 
   int evalDarkKing(int sq) {
@@ -295,8 +299,10 @@ final public class Board implements Constants {
   }
 
   /*
-   * gen() generates pseudo-legal moves for the current position. It scans the board to find friendly pieces and then determines
-   * what squares they attack. When it finds a piece/square combination, it calls genPush to put the move on the "move stack."
+   * gen() generates pseudo-legal moves for the current position. It scans the
+   * board to find friendly pieces and then determines what squares they attack.
+   * When it finds a piece/square combination, it calls genPush to put the move
+   * on the "move stack."
    */
 
   int evalDarkPawn(int sq) {
@@ -310,7 +316,8 @@ final public class Board implements Constants {
       r -= DOUBLED_PAWN_PENALTY;
 
     /*
-     * if there aren't any friendly pawns on either side of this one, it's isolated
+     * if there aren't any friendly pawns on either side of this one, it's
+     * isolated
      */
     if ((pawnRank[DARK][f - 1] == 7) && (pawnRank[DARK][f + 1] == 7))
       r -= ISOLATED_PAWN_PENALTY;
@@ -327,8 +334,8 @@ final public class Board implements Constants {
   }
 
   /*
-   * genCaps() is basically a copy of gen() that's modified to only generate capture and promote moves. It's used by the quiescence
-   * search.
+   * genCaps() is basically a copy of gen() that's modified to only generate
+   * capture and promote moves. It's used by the quiescence search.
    */
 
   int evalDkp(int f) {
@@ -354,24 +361,28 @@ final public class Board implements Constants {
   }
 
   /*
-   * genPush() puts a move on the move stack, unless it's a pawn promotion that needs to be handled by genPromote(). It also assigns
-   * a score to the move for alpha-beta move ordering. If the move is a capture, it uses MVV/LVA (Most Valuable Victim/Least
-   * Valuable Attacker). Otherwise, it uses the move's history heuristic value. Note that 1,000,000 is added to a capture move's
-   * score, so it always gets ordered above a "normal" move.
+   * genPush() puts a move on the move stack, unless it's a pawn promotion that
+   * needs to be handled by genPromote(). It also assigns a score to the move
+   * for alpha-beta move ordering. If the move is a capture, it uses MVV/LVA
+   * (Most Valuable Victim/Least Valuable Attacker). Otherwise, it uses the
+   * move's history heuristic value. Note that 1,000,000 is added to a capture
+   * move's score, so it always gets ordered above a "normal" move.
    */
 
   int evalLightKing(int sq) {
     int r = kingPcsq[sq]; /* return value */
 
     /*
-     * if the king is castled, use a special function to evaluate the pawns on the appropriate side
+     * if the king is castled, use a special function to evaluate the pawns on
+     * the appropriate side
      */
     if (COL(sq) < 3) {
       r += evalLkp(1);
       r += evalLkp(2);
-      r += evalLkp(3) / 2; /*
-                            * problems with pawns on the c &amp; f files are not as severe
-                            */
+      r += evalLkp(3)
+          / 2; /*
+                * problems with pawns on the c &amp; f files are not as severe
+                */
     } else if (COL(sq) > 4) {
       r += evalLkp(8);
       r += evalLkp(7);
@@ -388,8 +399,9 @@ final public class Board implements Constants {
     }
 
     /*
-     * scale the king safety value according to the opponent's material; the premise is that your king safety can only be bad if the
-     * opponent has enough pieces to attack you
+     * scale the king safety value according to the opponent's material; the
+     * premise is that your king safety can only be bad if the opponent has
+     * enough pieces to attack you
      */
     r *= pieceMat[DARK];
     r /= 3100;
@@ -398,7 +410,8 @@ final public class Board implements Constants {
   }
 
   /*
-   * genPromote() is just like genPush(), only it puts 4 moves on the move stack, one for each possible promotion piece
+   * genPromote() is just like genPush(), only it puts 4 moves on the move
+   * stack, one for each possible promotion piece
    */
 
   int evalLightPawn(int sq) {
@@ -412,7 +425,8 @@ final public class Board implements Constants {
       r -= DOUBLED_PAWN_PENALTY;
 
     /*
-     * if there aren't any friendly pawns on either side of this one, it's isolated
+     * if there aren't any friendly pawns on either side of this one, it's
+     * isolated
      */
     if ((pawnRank[LIGHT][f - 1] == 0) && (pawnRank[LIGHT][f + 1] == 0))
       r -= ISOLATED_PAWN_PENALTY;
@@ -429,7 +443,8 @@ final public class Board implements Constants {
   }
 
   /*
-   * makemove() makes a move. If the move is illegal, it undoes whatever it did and returns false. Otherwise, it returns true.
+   * makemove() makes a move. If the move is illegal, it undoes whatever it did
+   * and returns false. Otherwise, it returns true.
    */
 
   int evalLkp(int f) {
@@ -629,8 +644,8 @@ final public class Board implements Constants {
   }
 
   /*
-   * reps() returns the number of times that the current position has been repeated. Thanks to John Stanback for this clever
-   * algorithm.
+   * reps() returns the number of times that the current position has been
+   * repeated. Thanks to John Stanback for this clever algorithm.
    */
 
   void genPromote(Collection<HMove> ret, int from, int to, int bits) {
@@ -714,7 +729,8 @@ final public class Board implements Constants {
 
     int from, to;
     /*
-     * test to see if a castle move is legal and move the rook (the king is moved with the usual move code later)
+     * test to see if a castle move is legal and move the rook (the king is
+     * moved with the usual move code later)
      */
     if ((m.bits & 2) != 0) {
 
@@ -831,8 +847,8 @@ final public class Board implements Constants {
     }
 
     /*
-     * switch sides and test for legality (if we can capture the other guy's king, it's an illegal position and we need to take the
-     * move back)
+     * switch sides and test for legality (if we can capture the other guy's
+     * king, it's an illegal position and we need to take the move back)
      */
     side ^= 1;
     xside ^= 1;

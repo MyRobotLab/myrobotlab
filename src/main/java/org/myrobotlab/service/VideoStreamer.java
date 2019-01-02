@@ -20,13 +20,16 @@ import org.slf4j.Logger;
  * 
  *         Refeences of cool code snippets etc :
  * 
- *         http://www.java2s.com/Code/Java/Network-Protocol/ AsimpletinynicelyembeddableHTTP10serverinJava.htm
+ *         http://www.java2s.com/Code/Java/Network-Protocol/
+ *         AsimpletinynicelyembeddableHTTP10serverinJava.htm
  * 
- *         and most importantly Wireshark !!! cuz it ROCKS for getting the truth !!!
+ *         and most importantly Wireshark !!! cuz it ROCKS for getting the truth
+ *         !!!
  * 
  */
 
-public class VideoStreamer extends AbstractVideoSink /* extends Service implements VideoSink */ {
+public class VideoStreamer
+    extends AbstractVideoSink /* extends Service implements VideoSink */ {
 
   private static final long serialVersionUID = 1L;
 
@@ -141,8 +144,9 @@ public class VideoStreamer extends AbstractVideoSink /* extends Service implemen
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

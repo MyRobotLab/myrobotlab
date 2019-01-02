@@ -20,8 +20,9 @@ public class WatchDogTimer extends Service {
   List<Message> globalActions = new ArrayList<Message>();
 
   /**
-   * the timer class is a named watchdog timer which will look for resets at a certain interval. If no checkpoint has been sent
-   * within a certain amount of time, it will do a "corrective" action.
+   * the timer class is a named watchdog timer which will look for resets at a
+   * certain interval. If no checkpoint has been sent within a certain amount of
+   * time, it will do a "corrective" action.
    *
    */
   public class Timer implements Runnable {
@@ -40,7 +41,8 @@ public class WatchDogTimer extends Service {
     List<Message> actions = new ArrayList<Message>();
 
     /**
-     * the default intereval which checkpoints are sent to the watchdog must be < defaultIntervalMs
+     * the default intereval which checkpoints are sent to the watchdog must be
+     * < defaultIntervalMs
      */
     int sleepIntervalMs = 200;
     private boolean autoDeactivate = false;
@@ -129,8 +131,9 @@ public class WatchDogTimer extends Service {
   }
 
   /**
-   * A check point worker sends messages to a timer to keep the watch dog from doing the corrective action. Fully configurable for
-   * any rate, to be called manually or in auto mode.
+   * A check point worker sends messages to a timer to keep the watch dog from
+   * doing the corrective action. Fully configurable for any rate, to be called
+   * manually or in auto mode.
    *
    */
   public class CheckPointWorker implements Runnable {
@@ -140,7 +143,8 @@ public class WatchDogTimer extends Service {
     transient Thread myThread = null;
 
     /**
-     * interval to "send" a reset, reset includes how much to push (futureMs) the timer for next reset
+     * interval to "send" a reset, reset includes how much to push (futureMs)
+     * the timer for next reset
      */
     Integer checkPointIntervalMs = 200; // default
     String watchDogTimerName;
@@ -252,7 +256,8 @@ public class WatchDogTimer extends Service {
   }
 
   /**
-   * default method to "check-in" - a service calls this function to say "everything is ok"
+   * default method to "check-in" - a service calls this function to say
+   * "everything is ok"
    * 
    * @watchDogName
    * 
@@ -263,7 +268,8 @@ public class WatchDogTimer extends Service {
   }
 
   /**
-   * default method to "check-in" - a service calls this function to say "everything is ok"
+   * default method to "check-in" - a service calls this function to say
+   * "everything is ok"
    * 
    * @watchDogName
    * 
@@ -274,7 +280,8 @@ public class WatchDogTimer extends Service {
   }
 
   /**
-   * named method to "check-in" - a service calls this function to say "everything is ok"
+   * named method to "check-in" - a service calls this function to say
+   * "everything is ok"
    * 
    * @param checkPointName
    * @return
@@ -285,8 +292,9 @@ public class WatchDogTimer extends Service {
   }
 
   /**
-   * named method to "check-in" - a service calls this function to say "everything is ok" the next time it will "check-in" is in
-   * future milliseconds
+   * named method to "check-in" - a service calls this function to say
+   * "everything is ok" the next time it will "check-in" is in future
+   * milliseconds
    * 
    * @param timerName
    * @param future
@@ -345,8 +353,9 @@ public class WatchDogTimer extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -469,8 +478,10 @@ public class WatchDogTimer extends Service {
         // 2 second default - under two seconds is ok
         // not needed - have "auto" now
         /*
-         * for (int i = 0; i < 100; ++i) { // "manual" checkpoints can be sent by specifying // the name of the timer...
-         * joystickCheck.checkPoint("watchdog"); // motorCheck.checkPoint("watchdog"); sleep(100); }
+         * for (int i = 0; i < 100; ++i) { // "manual" checkpoints can be sent
+         * by specifying // the name of the timer...
+         * joystickCheck.checkPoint("watchdog"); //
+         * motorCheck.checkPoint("watchdog"); sleep(100); }
          */
       }
 

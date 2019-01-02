@@ -20,10 +20,11 @@ import org.slf4j.Logger;
 
 /**
  * 
- * UltrasonicSensor - This will read data from an ultrasonic sensor module connected to an android.
+ * UltrasonicSensor - This will read data from an ultrasonic sensor module
+ * connected to an android.
  * 
- * A device which uses the UltrasonicSensor would implement RangeListener. UltrasonicSensor implements RangeListener just for
- * testing purposes
+ * A device which uses the UltrasonicSensor would implement RangeListener.
+ * UltrasonicSensor implements RangeListener just for testing purposes
  *
  */
 public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
@@ -198,8 +199,9 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

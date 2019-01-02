@@ -13,9 +13,11 @@ import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 /**
- * Natural Reader speech to text service based on naturalreaders.com This code is basically all the same as AcapelaSpeech...
+ * Natural Reader speech to text service based on naturalreaders.com This code
+ * is basically all the same as AcapelaSpeech...
  * 
- * FIXME - see if voices can be pulled down from API : moz4r : it is a front service for 2 tts , amazon polly + ibm
+ * FIXME - see if voices can be pulled down from API : moz4r : it is a front
+ * service for 2 tts , amazon polly + ibm
  * 
  */
 public class NaturalReaderSpeech extends AbstractSpeechSynthesis {

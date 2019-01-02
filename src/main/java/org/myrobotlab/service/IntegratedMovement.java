@@ -39,11 +39,14 @@ import com.jme3.system.AppSettings;
 
 /**
  * 
- * IntegratedMovement - This class provides a 3D based inverse kinematics implementation that allows you to specify the robot arm
- * geometry based on DH Parameters. The work is based on InversedKinematics3D by kwatters with different computation and goal,
- * including collision detection and moveToObject
+ * IntegratedMovement - This class provides a 3D based inverse kinematics
+ * implementation that allows you to specify the robot arm geometry based on DH
+ * Parameters. The work is based on InversedKinematics3D by kwatters with
+ * different computation and goal, including collision detection and
+ * moveToObject
  * 
- * Rotation and Orientation information is not currently supported. (but should be easy to add)
+ * Rotation and Orientation information is not currently supported. (but should
+ * be easy to add)
  *
  * @author Christian/Calamity
  * 
@@ -53,7 +56,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(IntegratedMovement.class);
 
-  // private HashMap<String, DHRobotArm> arms = new HashMap<String, DHRobotArm>();
+  // private HashMap<String, DHRobotArm> arms = new HashMap<String,
+  // DHRobotArm>();
   private transient HashMap<String, IMEngine> engines = new HashMap<String, IMEngine>();
 
   private Matrix inputMatrix = null;
@@ -152,7 +156,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   /**
-   * This create a rotation and translation matrix that will be applied on the "moveTo" call.
+   * This create a rotation and translation matrix that will be applied on the
+   * "moveTo" call.
    * 
    * @param dx
    *          - x axis translation
@@ -348,7 +353,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.startEngine("kinect");
 
     // #define object, each dh link are set as an object, but the
-    // #start point and end point will be update by the ik service, but still need
+    // #start point and end point will be update by the ik service, but still
+    // need
     // #a name and a radius
     // #static object need a start point, an end point, a name and a radius
     ik.clearObject();
@@ -424,7 +430,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ((TestJmeIMModel) ik.jmeApp).addPart("neckroll", null, 1f, "neck", new Vector3f(0, 0, 0), Vector3f.UNIT_Z.mult(1), (float) Math.toRadians(2));
     ((TestJmeIMModel) ik.jmeApp).addPart("head", "Models/head.j3o", 1f, "neckroll", new Vector3f(0, 10, 20), Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(0));
     ((TestJmeIMModel) ik.jmeApp).addPart("jaw", "Models/jaw.j3o", 1f, "head", new Vector3f(-5, 63, -50), Vector3f.UNIT_X.mult(-1), (float) Math.toRadians(0));
-    // ((TestJmeIMModel) ik.jmeApp).addPart("finger", null, 10f, "wrist", new Vector3f(0,205,0), Vector3f.UNIT_X.mult(-1),
+    // ((TestJmeIMModel) ik.jmeApp).addPart("finger", null, 10f, "wrist", new
+    // Vector3f(0,205,0), Vector3f.UNIT_X.mult(-1),
     // (float)Math.toRadians(0));
 
     // TODO add the object that can collide with the model
@@ -459,8 +466,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
     // sleep(3000);
     // double[][] jp = ik.createJointPositionMap("leftArm");
-    // Point x = new Point(jp[jp.length-2][0],jp[jp.length-2][1],jp[jp.length-2][2],0,0,0);
-    // Point y = new Point(jp[jp.length-1][0],jp[jp.length-1][1],jp[jp.length-1][2],0,0,0);
+    // Point x = new
+    // Point(jp[jp.length-2][0],jp[jp.length-2][1],jp[jp.length-2][2],0,0,0);
+    // Point y = new
+    // Point(jp[jp.length-1][0],jp[jp.length-1][1],jp[jp.length-1][2],0,0,0);
     // ik.addObject(x,y,"finger",100.0, false);
 
     // ik.startOpenNI();
@@ -510,8 +519,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -661,7 +671,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       openni = (OpenNi) startPeer("openni");
       openni.start3DData();
       map3d.updateKinectPosition(currentPosition(kinectName));
-      // this.subscribe(openni.getName(), "publishOpenNIData", this.getName(), "onOpenNiData");
+      // this.subscribe(openni.getName(), "publishOpenNIData", this.getName(),
+      // "onOpenNiData");
     }
     return openni;
   }

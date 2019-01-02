@@ -23,8 +23,8 @@ import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * 
- * Twitter - a service that allows you to send a tweet from MRL assuming you have a consumerKey and accessToken from a twitter
- * account.
+ * Twitter - a service that allows you to send a tweet from MRL assuming you
+ * have a consumerKey and accessToken from a twitter account.
  *
  */
 public class Twitter extends Service {
@@ -58,8 +58,10 @@ public class Twitter extends Service {
       // , "here is the pic");
 
       /*
-       * OpenCV opencv = new OpenCV("opencv"); opencv.startService(); opencv.capture(); Service.sleep(4000);// wait for an image
-       * SerializableImage img = opencv.getDisplay(); twitter.uploadImage(img, "ME TOO!");
+       * OpenCV opencv = new OpenCV("opencv"); opencv.startService();
+       * opencv.capture(); Service.sleep(4000);// wait for an image
+       * SerializableImage img = opencv.getDisplay(); twitter.uploadImage(img,
+       * "ME TOO!");
        */
       // twitter.subscribe("publishDisplay", opencv.getName(),
       // "uploadImage",
@@ -75,8 +77,8 @@ public class Twitter extends Service {
   }
 
   /*
-   * Static list of third party dependencies for this service. The list will be consumed by Ivy to download and manage the
-   * appropriate resources
+   * Static list of third party dependencies for this service. The list will be
+   * consumed by Ivy to download and manage the appropriate resources
    */
 
   public Twitter(String n) {
@@ -157,8 +159,9 @@ public class Twitter extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

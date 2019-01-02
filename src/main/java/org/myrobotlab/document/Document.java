@@ -8,7 +8,8 @@ import java.util.Set;
 /**
  * The basic class that represents a document flowing through the myrobotlab.
  * 
- * Basic idea is that a document had a unique id and a map of key to list of object pairs.
+ * Basic idea is that a document had a unique id and a map of key to list of
+ * object pairs.
  * 
  * @author kwatters
  *

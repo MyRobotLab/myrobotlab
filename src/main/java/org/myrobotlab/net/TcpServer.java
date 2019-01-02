@@ -18,8 +18,9 @@ public class TcpServer implements Runnable {
   public final static Logger log = LoggerFactory.getLogger(TcpServer.class);
 
   /**
-   * list of active tcp connections tcp connections need a new thread for a listener - to recv messages and maintain the connection
-   * udp does not - it requires a single server on a single port
+   * list of active tcp connections tcp connections need a new thread for a
+   * listener - to recv messages and maintain the connection udp does not - it
+   * requires a single server on a single port
    */
   transient private HashMap<URI, TcpThread> tcpClientList = new HashMap<URI, TcpThread>();
 
@@ -71,7 +72,8 @@ public class TcpServer implements Runnable {
         // TODO reduce these 2 methods to an interface
         // addTcpClient(clientSocket, myService);
 
-        // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as this is a detail for tcp
+        // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as
+        // this is a detail for tcp
 
         String clientKey = String.format("tcp://%s:%d", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
         URI uri = new URI(clientKey);
@@ -80,7 +82,8 @@ public class TcpServer implements Runnable {
         tcpClientList.put(uri, tcp);
         myService.connections.put(uri, tcp.data);
 
-        // ADD TCP CLIENT END ! - probably should not be in RemoteAdapter - as this is a detail for tcp
+        // ADD TCP CLIENT END ! - probably should not be in RemoteAdapter - as
+        // this is a detail for tcp
 
         myService.broadcastState();
       }

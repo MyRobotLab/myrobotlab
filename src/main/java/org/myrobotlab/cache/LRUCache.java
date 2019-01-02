@@ -4,7 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * LRUCache - ultra simplistic LRU cache http://chriswu.me/blog/a-lru-cache-in-10-lines-of-java/
+ * LRUCache - ultra simplistic LRU cache
+ * http://chriswu.me/blog/a-lru-cache-in-10-lines-of-java/
  * 
  * @param <K>
  *          - the key for the cache

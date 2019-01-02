@@ -5,7 +5,8 @@ import java.util.List;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 
 /**
- * This is a simple POJO that contains a DL4J computation graph and it's associated output labels
+ * This is a simple POJO that contains a DL4J computation graph and it's
+ * associated output labels
  * 
  * @author kwatters
  *

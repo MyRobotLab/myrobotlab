@@ -58,7 +58,8 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       // TODO: create a better single servo control panel here.
 
       JPanel servoMiniControl = new JPanel();
-      // servoMiniControl.setLayout(new BoxLayout(servoMiniControl, BoxLayout.Y_AXIS));
+      // servoMiniControl.setLayout(new BoxLayout(servoMiniControl,
+      // BoxLayout.Y_AXIS));
       servoMiniControl.setLayout(new BorderLayout());
       // TODO: make this lable render vertically
       JideLabel servoLabel = new JideLabel(sc.getName());

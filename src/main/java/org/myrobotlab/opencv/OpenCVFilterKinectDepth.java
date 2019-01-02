@@ -68,7 +68,8 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   boolean clearSamplePoints = false;
 
   /**
-   * default return colored 3x256(rgb) depth / false is a lossy 1x(256) grey scale
+   * default return colored 3x256(rgb) depth / false is a lossy 1x(256) grey
+   * scale
    */
   boolean useColor = true;
 

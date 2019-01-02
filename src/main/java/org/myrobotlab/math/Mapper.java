@@ -82,7 +82,8 @@ public final class Mapper implements Serializable {
 
   public void setInverted(boolean invert) {
     // change state ONLY if needed
-    // we need only 1 logic : inverted=output inverted / output inverted=inverted
+    // we need only 1 logic : inverted=output inverted / output
+    // inverted=inverted
 
     this.minOutput = minY;
     this.maxOutput = maxY;

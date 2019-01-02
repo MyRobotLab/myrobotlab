@@ -22,8 +22,10 @@ import org.slf4j.Logger;
 
 /**
  * 
- * I2CMux - This is the MyRobotLab Service that can be used if you have several i2c devices that share the same address. Create one
- * I2CMux for each of the i2c buses that you want to use. It can be used with tca9548a and possibly other devices.
+ * I2CMux - This is the MyRobotLab Service that can be used if you have several
+ * i2c devices that share the same address. Create one I2CMux for each of the
+ * i2c buses that you want to use. It can be used with tca9548a and possibly
+ * other devices.
  * 
  * 
  * @author Mats Onnerby
@@ -132,8 +134,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   /**
-   * TODO Add demuxing. i.e the route back to the caller The i2c will receive data that neeeds to be returned syncronous or
-   * asycncronus
+   * TODO Add demuxing. i.e the route back to the caller The i2c will receive
+   * data that neeeds to be returned syncronous or asycncronus
    */
   @Override
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
@@ -144,8 +146,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   /**
-   * TODO Add demuxing. i.e the route back to the caller The i2c will receive data that neeeds to be returned syncronous or
-   * asycncronus
+   * TODO Add demuxing. i.e the route back to the caller The i2c will receive
+   * data that neeeds to be returned syncronous or asycncronus
    */
   @Override
   public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
@@ -155,8 +157,9 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

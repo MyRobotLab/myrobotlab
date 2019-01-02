@@ -20,7 +20,8 @@ import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
- * Body spare parts for universal ServoControl gestures Inspired by InMoov.java...
+ * Body spare parts for universal ServoControl gestures Inspired by
+ * InMoov.java...
  * 
  * TODO : IK moveTo(x,y,z) ?
  * 
@@ -29,8 +30,9 @@ import org.myrobotlab.service.interfaces.ServoControl;
  * Syntax to declare an actuator Runtime.start("nodeToAttach.name", "Servo");
  * 
  * 
- * Do not declare the whole path i01.rightarm.righthand.thumb... as name , just the node to attach : The root will learn every nodes
- * attached for a complete linkage
+ * Do not declare the whole path i01.rightarm.righthand.thumb... as name , just
+ * the node to attach : The root will learn every nodes attached for a complete
+ * linkage
  * 
  */
 public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
@@ -85,7 +87,8 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     // log.info(rightArm.childs.toString() + "childNodes");
     // log.info(rightArm.childs.crawlForDataStartingWith("") + "");
 
-    // inMoovTorso.servos = inMoovTorso.childs.crawlForDataStartingWith("rightArm");
+    // inMoovTorso.servos =
+    // inMoovTorso.childs.crawlForDataStartingWith("rightArm");
     rightArm.moveTo("rightHand", 63.0);
     rightArm.getBodyParts();
   }
@@ -239,7 +242,8 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
       // phaseShiftMap.put("omoplate", 90);
       // Harry's omoplate is +90 degrees from Gaels InMoov..
       // These are for the encoder offsets.
-      // these map between the reference frames of the dh model & the actual arm.
+      // these map between the reference frames of the dh model & the actual
+      // arm.
       // (calibration)
       phaseShiftMap.put("omoplate", 90.0);
       phaseShiftMap.put("shoulder", 90.0);

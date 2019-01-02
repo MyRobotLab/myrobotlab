@@ -34,8 +34,9 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -92,7 +93,8 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
 
   @Override
   public void write(int data) throws Exception {
-    // controller.msg.serialRelay(controller.getDeviceId(this), new byte[] {(byte)data});
+    // controller.msg.serialRelay(controller.getDeviceId(this), new byte[]
+    // {(byte)data});
     controller.msg.serialRelay(controller.getDeviceId(this), new int[] { data });
   }
 

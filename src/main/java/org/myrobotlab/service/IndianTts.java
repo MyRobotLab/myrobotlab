@@ -14,8 +14,8 @@ import org.myrobotlab.service.data.HttpData;
 import org.slf4j.Logger;
 
 /**
- * Indian TTS speech to text service based on http://indiantts.com This code is basically all the same as NaturalReaderSpeech by
- * Kwatters...
+ * Indian TTS speech to text service based on http://indiantts.com This code is
+ * basically all the same as NaturalReaderSpeech by Kwatters...
  * 
  * http://indiantts.com/
  */

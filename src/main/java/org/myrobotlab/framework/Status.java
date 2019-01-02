@@ -19,8 +19,9 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * Goal is to have a very simple Pojo with only a few (native Java helper methods) WARNING !!! - this class used to extend Exception
- * or Throwable - but the gson serializer would stack overflow with self reference issue
+ * Goal is to have a very simple Pojo with only a few (native Java helper
+ * methods) WARNING !!! - this class used to extend Exception or Throwable - but
+ * the gson serializer would stack overflow with self reference issue
  * 
  * TODO - allow radix tree searches for "keys" ???
  * 
@@ -128,7 +129,8 @@ public class Status implements Serializable {// extends Exception {
   }
 
   /**
-   * for minimal amount of information error is assumed, and info is detail of an ERROR
+   * for minimal amount of information error is assumed, and info is detail of
+   * an ERROR
    * 
    * @param detail
    *          d

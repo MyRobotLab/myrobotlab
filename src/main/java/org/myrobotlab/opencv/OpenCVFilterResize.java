@@ -142,25 +142,29 @@ public class OpenCVFilterResize extends OpenCVFilter {
     // Imgproc.INTER_CUBIC
 
     cvResize(img, ret, Imgproc.INTER_AREA);
-    // IplImage img2 = IplImage.create(maxWidth, maxHeight, img.depth(), img.nChannels());
+    // IplImage img2 = IplImage.create(maxWidth, maxHeight, img.depth(),
+    // img.nChannels());
 
     // copy into the center
 
     return ret;
   }
   /*
-   * public IplImage resizeWithAspect(IplImage img, int maxWidth, int maxHeight) { int maxArea = maxWidth * maxHeight;
+   * public IplImage resizeWithAspect(IplImage img, int maxWidth, int maxHeight)
+   * { int maxArea = maxWidth * maxHeight;
    * 
-   * // find the dimension (w or h) where when the original image is scaled // the first dimension which "fits" determines the
-   * percentage of what // the image should scale to int dw = Math.abs(maxWidth - img.width()); int dh = Math.abs(maxHeight -
-   * img.height());
+   * // find the dimension (w or h) where when the original image is scaled //
+   * the first dimension which "fits" determines the percentage of what // the
+   * image should scale to int dw = Math.abs(maxWidth - img.width()); int dh =
+   * Math.abs(maxHeight - img.height());
    * 
    * boolean alignToWidth = (dw )
    * 
    * // if the maxWidth &
    * 
-   * int newWidth = (int)(img.width() * percent); int newHeight = (int)(img.height() * percent); IplImage ret = IplImage.create(800,
-   * 60, img.depth(), img.nChannels()); cvResize(img, ret, Imgproc.INTER_AREA);
+   * int newWidth = (int)(img.width() * percent); int newHeight =
+   * (int)(img.height() * percent); IplImage ret = IplImage.create(800, 60,
+   * img.depth(), img.nChannels()); cvResize(img, ret, Imgproc.INTER_AREA);
    * 
    * // resize with black padding ....
    * 

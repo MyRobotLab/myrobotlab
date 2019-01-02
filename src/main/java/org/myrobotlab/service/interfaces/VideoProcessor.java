@@ -9,7 +9,8 @@ public interface VideoProcessor extends ServiceInterface {
   }
 
   /**
-   * This is where video is processed. In OpenCV a frame is grabbed and sent through a series of filters
+   * This is where video is processed. In OpenCV a frame is grabbed and sent
+   * through a series of filters
    */
   public void processVideo();
 

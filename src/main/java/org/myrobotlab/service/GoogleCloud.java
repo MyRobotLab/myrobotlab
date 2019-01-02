@@ -46,8 +46,9 @@ public class GoogleCloud extends Service {
   private static final long serialVersionUID = 1L;
   final static Logger log = LoggerFactory.getLogger(GoogleCloud.class);
   /**
-   * Be sure to specify the name of your application. If the application name is {@code null} or blank, the application will log a
-   * warning. Suggested format is "MyCompany-ProductName/1.0".
+   * Be sure to specify the name of your application. If the application name is
+   * {@code null} or blank, the application will log a warning. Suggested format
+   * is "MyCompany-ProductName/1.0".
    */
   private static final String APPLICATION_NAME = "Google-VisionFaceDetectSample/1.0";
   int maxResults = 32;
@@ -58,8 +59,9 @@ public class GoogleCloud extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -70,7 +72,8 @@ public class GoogleCloud extends Service {
     meta.addDescription("google api client service");
     meta.setAvailable(true);
     // add dependency if necessary
-    // meta.addDependency("com.google.api-client", "google-api-client", "1.23.0");
+    // meta.addDependency("com.google.api-client", "google-api-client",
+    // "1.23.0");
     meta.addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
     meta.addCategory("cloud", "vision");
     meta.setCloudService(true);
@@ -205,7 +208,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (FaceAnnotation annotation : res.getFaceAnnotationsList()) {
           out.printf("anger: %s\njoy: %s\nsurprise: %s\nposition: %s", annotation.getAngerLikelihood(), annotation.getJoyLikelihood(), annotation.getSurpriseLikelihood(),
               annotation.getBoundingPoly());
@@ -218,7 +222,8 @@ public class GoogleCloud extends Service {
    * Detects faces in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform face detection on.
+   *          The path to the remote file on Google Cloud Storage to perform
+   *          face detection on.
    * @param out
    *          A {@link PrintStream} to write detected features to.
    * @throws Exception
@@ -246,7 +251,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (FaceAnnotation annotation : res.getFaceAnnotationsList()) {
           out.printf("anger: %s\njoy: %s\nsurprise: %s\nposition: %s", annotation.getAngerLikelihood(), annotation.getJoyLikelihood(), annotation.getSurpriseLikelihood(),
               annotation.getBoundingPoly());
@@ -287,7 +293,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getLabelAnnotationsList()) {
           annotation.getAllFields().forEach((k, v) -> out.printf("%s : %s\n", k, v.toString()));
         }
@@ -299,7 +306,8 @@ public class GoogleCloud extends Service {
    * Detects labels in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform label detection on.
+   *          The path to the remote file on Google Cloud Storage to perform
+   *          label detection on.
    * @param out
    *          A {@link PrintStream} to write detected features to.
    * @throws Exception
@@ -326,7 +334,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getLabelAnnotationsList()) {
           annotation.getAllFields().forEach((k, v) -> out.printf("%s : %s\n", k, v.toString()));
         }
@@ -365,7 +374,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getLandmarkAnnotationsList()) {
           LocationInfo info = annotation.getLocationsList().listIterator().next();
           out.printf("Landmark: %s\n %s\n", annotation.getDescription(), info.getLatLng());
@@ -405,7 +415,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getLandmarkAnnotationsList()) {
           LocationInfo info = annotation.getLocationsList().listIterator().next();
           out.printf("Landmark: %s\n %s\n", annotation.getDescription(), info.getLatLng());
@@ -418,7 +429,8 @@ public class GoogleCloud extends Service {
    * Detects landmarks in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform landmark detection on.
+   *          The path to the remote file on Google Cloud Storage to perform
+   *          landmark detection on.
    * @param out
    *          A {@link PrintStream} to write detected landmarks to.
    * @throws Exception
@@ -445,7 +457,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getLandmarkAnnotationsList()) {
           LocationInfo info = annotation.getLocationsList().listIterator().next();
           out.printf("Landmark: %s\n %s\n", annotation.getDescription(), info.getLatLng());
@@ -486,7 +499,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getLogoAnnotationsList()) {
           out.println(annotation.getDescription());
         }
@@ -498,7 +512,8 @@ public class GoogleCloud extends Service {
    * Detects logos in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform logo detection on.
+   *          The path to the remote file on Google Cloud Storage to perform
+   *          logo detection on.
    * @param out
    *          A {@link PrintStream} to write detected logos to.
    * @throws Exception
@@ -525,7 +540,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getLogoAnnotationsList()) {
           out.println(annotation.getDescription());
         }
@@ -565,7 +581,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
           out.printf("Text: %s\n", annotation.getDescription());
           out.printf("Position : %s\n", annotation.getBoundingPoly());
@@ -578,7 +595,8 @@ public class GoogleCloud extends Service {
    * Detects text in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect text in.
+   *          The path to the remote file on Google Cloud Storage to detect text
+   *          in.
    * @param out
    *          A {@link PrintStream} to write the detected text to.
    * @throws Exception
@@ -605,7 +623,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
           out.printf("Text: %s\n", annotation.getDescription());
           out.printf("Position : %s\n", annotation.getBoundingPoly());
@@ -615,7 +634,8 @@ public class GoogleCloud extends Service {
   }
 
   /**
-   * Detects image properties such as color frequency from the specified local image.
+   * Detects image properties such as color frequency from the specified local
+   * image.
    *
    * @param filePath
    *          The path to the file to detect properties.
@@ -646,7 +666,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         DominantColorsAnnotation colors = res.getImagePropertiesAnnotation().getDominantColors();
         for (ColorInfo color : colors.getColorsList()) {
           out.printf("fraction: %f\nr: %f, g: %f, b: %f\n", color.getPixelFraction(), color.getColor().getRed(), color.getColor().getGreen(), color.getColor().getBlue());
@@ -656,10 +677,12 @@ public class GoogleCloud extends Service {
   }
 
   /**
-   * Detects image properties such as color frequency from the specified remote image on Google Cloud Storage.
+   * Detects image properties such as color frequency from the specified remote
+   * image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect properties on.
+   *          The path to the remote file on Google Cloud Storage to detect
+   *          properties on.
    * @param out
    *          A {@link PrintStream} to write
    * @throws Exception
@@ -686,7 +709,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         DominantColorsAnnotation colors = res.getImagePropertiesAnnotation().getDominantColors();
         for (ColorInfo color : colors.getColorsList()) {
           out.printf("fraction: %f\nr: %f, g: %f, b: %f\n", color.getPixelFraction(), color.getColor().getRed(), color.getColor().getGreen(), color.getColor().getBlue());
@@ -696,7 +720,8 @@ public class GoogleCloud extends Service {
   }
 
   /**
-   * Detects whether the specified image has features you would want to moderate.
+   * Detects whether the specified image has features you would want to
+   * moderate.
    *
    * @param filePath
    *          The path to the local file used for safe search detection.
@@ -727,7 +752,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
         out.printf("adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n", annotation.getAdult(), annotation.getMedical(), annotation.getSpoof(), annotation.getViolence());
       }
@@ -735,10 +761,12 @@ public class GoogleCloud extends Service {
   }
 
   /**
-   * Detects whether the specified remote image on Google Cloud Storage has features you would want to moderate.
+   * Detects whether the specified remote image on Google Cloud Storage has
+   * features you would want to moderate.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect safe-search on.
+   *          The path to the remote file on Google Cloud Storage to detect
+   *          safe-search on.
    * @param out
    *          A {@link PrintStream} to write the results to.
    * @throws Exception
@@ -765,7 +793,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
         out.printf("adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n", annotation.getAdult(), annotation.getMedical(), annotation.getSpoof(), annotation.getViolence());
       }
@@ -804,9 +833,11 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // Search the web for usages of the image. You could use these signals later
+        // Search the web for usages of the image. You could use these signals
+        // later
         // for user input moderation or linking external references.
-        // For a full list of available annotations, see http://g.co/cloud/vision/docs
+        // For a full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         WebDetection annotation = res.getWebDetection();
         out.println("Entity:Id:Score");
         out.println("===============");
@@ -830,10 +861,12 @@ public class GoogleCloud extends Service {
   }
 
   /**
-   * Detects whether the specified remote image on Google Cloud Storage has features you would want to moderate.
+   * Detects whether the specified remote image on Google Cloud Storage has
+   * features you would want to moderate.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect safe-search on.
+   *          The path to the remote file on Google Cloud Storage to detect
+   *          safe-search on.
    * @param out
    *          A {@link PrintStream} to write the results to.
    * @throws Exception
@@ -860,9 +893,11 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // Search the web for usages of the image. You could use these signals later
+        // Search the web for usages of the image. You could use these signals
+        // later
         // for user input moderation or linking external references.
-        // For a full list of available annotations, see http://g.co/cloud/vision/docs
+        // For a full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         WebDetection annotation = res.getWebDetection();
         out.println("Entity:Id:Score");
         out.println("===============");
@@ -917,7 +952,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         CropHintsAnnotation annotation = res.getCropHintsAnnotation();
         for (CropHint hint : annotation.getCropHintsList()) {
           out.println(hint.getBoundingPoly());
@@ -930,7 +966,8 @@ public class GoogleCloud extends Service {
    * Suggests a region to crop to for a remote file on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect safe-search on.
+   *          The path to the remote file on Google Cloud Storage to detect
+   *          safe-search on.
    * @param out
    *          A {@link PrintStream} to write the results to.
    * @throws Exception
@@ -957,7 +994,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         CropHintsAnnotation annotation = res.getCropHintsAnnotation();
         for (CropHint hint : annotation.getCropHintsList()) {
           out.println(hint.getBoundingPoly());
@@ -999,7 +1037,8 @@ public class GoogleCloud extends Service {
           return;
         }
 
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         TextAnnotation annotation = res.getFullTextAnnotation();
         for (Page page : annotation.getPagesList()) {
           String pageText = "";
@@ -1028,10 +1067,12 @@ public class GoogleCloud extends Service {
   }
 
   /**
-   * Performs document text detection on a local image file on Google Cloud Storage.
+   * Performs document text detection on a local image file on Google Cloud
+   * Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect document text on.
+   *          The path to the remote file on Google Cloud Storage to detect
+   *          document text on.
    * @param out
    *          A {@link PrintStream} to write the results to.
    * @throws Exception
@@ -1058,7 +1099,8 @@ public class GoogleCloud extends Service {
           out.printf("Error: %s\n", res.getError().getMessage());
           return;
         }
-        // For full list of available annotations, see http://g.co/cloud/vision/docs
+        // For full list of available annotations, see
+        // http://g.co/cloud/vision/docs
         TextAnnotation annotation = res.getFullTextAnnotation();
         for (Page page : annotation.getPagesList()) {
           String pageText = "";
@@ -1093,27 +1135,33 @@ public class GoogleCloud extends Service {
    * LoggingFactory.init("info");
    * 
    * 
-   * GoogleCloud google = (GoogleCloud) Runtime.start("google", "GoogleCloud"); // Runtime.start("gui", "SwingGui");
+   * GoogleCloud google = (GoogleCloud) Runtime.start("google", "GoogleCloud");
+   * // Runtime.start("gui", "SwingGui");
    * 
-   * if (args.length != 2) { System.err.println("Usage:"); System.err.printf("\tjava %s inputImagePath outputImagePath\n",
+   * if (args.length != 2) { System.err.println("Usage:");
+   * System.err.printf("\tjava %s inputImagePath outputImagePath\n",
    * GoogleCloud.class.getCanonicalName()); System.exit(1); }
    * 
    * Path inputPath = Paths.get(args[0]); Path outputPath = Paths.get(args[1]);
    * 
    * if (!outputPath.toString().toLowerCase().endsWith(".jpg")) {
-   * System.err.println("outputImagePath must have the file extension 'jpg'."); System.exit(1); }
+   * System.err.println("outputImagePath must have the file extension 'jpg'.");
+   * System.exit(1); }
    * 
    * // "API Project-c90c3d12e7d3.json"
    * 
-   * // GoogleCloudService app = new // GoogleCloudService(getVisionService()); google.connect("../API Project-c90c3d12e7d3.json");
+   * // GoogleCloudService app = new // GoogleCloudService(getVisionService());
+   * google.connect("../API Project-c90c3d12e7d3.json");
    * 
    * long ts = System.currentTimeMillis();
    * 
-   * List<FaceAnnotation> faces = google.detectFaces(inputPath); System.out.printf("Found %d face%s\n", faces.size(), faces.size()
-   * == 1 ? "" : "s"); System.out.printf("Writing to file %s\n", outputPath); google.writeWithFaces(inputPath, outputPath, faces);
+   * List<FaceAnnotation> faces = google.detectFaces(inputPath);
+   * System.out.printf("Found %d face%s\n", faces.size(), faces.size() == 1 ? ""
+   * : "s"); System.out.printf("Writing to file %s\n", outputPath);
+   * google.writeWithFaces(inputPath, outputPath, faces);
    * 
-   * google.getLabels("kitchen.jpg"); google.getLabels("plumbing.jpg"); google.getLabels("ship.jpg");
-   * google.getLabels("greenball.jpg");
+   * google.getLabels("kitchen.jpg"); google.getLabels("plumbing.jpg");
+   * google.getLabels("ship.jpg"); google.getLabels("greenball.jpg");
    * 
    * log.info("{} total ms", System.currentTimeMillis() - ts);
    * 

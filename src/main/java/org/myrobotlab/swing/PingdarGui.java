@@ -87,7 +87,8 @@ public class PingdarGui extends ServiceGui implements ListSelectionListener, Vid
         g.setColor(Color.green);
 
         // DON'T DO THIS - IT WILL BORK THE UI !!!
-        // screen.displayFrame(new SerializableImage(graphImage, boundServiceName));
+        // screen.displayFrame(new SerializableImage(graphImage,
+        // boundServiceName));
 
         display.add(screen.display);
       }

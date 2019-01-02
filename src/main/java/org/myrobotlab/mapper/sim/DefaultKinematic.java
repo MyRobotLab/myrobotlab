@@ -31,7 +31,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 /**
- * This is the standard kinematic with two control parameters : translation and rotation. Each agent use this kinematic by default.
+ * This is the standard kinematic with two control parameters : translation and
+ * rotation. Each agent use this kinematic by default.
  */
 public class DefaultKinematic extends KinematicModel {
 

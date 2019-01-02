@@ -35,7 +35,8 @@ public class MouseSim extends Service {
    * simulate pressing and releasing a mouse button after the desired duration
    * 
    * @param keycode
-   *          buttoncode of button (use InputEvent.VK_XXX, where XXX is your button)
+   *          buttoncode of button (use InputEvent.VK_XXX, where XXX is your
+   *          button)
    * @param duration
    *          key press duration in milliseconds
    */
@@ -49,7 +50,8 @@ public class MouseSim extends Service {
    * simulate pressing a mouse button (does NOT release the button!)
    * 
    * @param keycode
-   *          buttoncode of button (use InputEvent.VK_XXX, where XXX is your button)
+   *          buttoncode of button (use InputEvent.VK_XXX, where XXX is your
+   *          button)
    */
   public void press(int keycode) {
     robot.mousePress(keycode);
@@ -59,18 +61,20 @@ public class MouseSim extends Service {
    * simulate releasing a mouse button (does NOT press the button!)
    * 
    * @param keycode
-   *          buttoncode of button (use InputEvent.VK_XXX, where XXX is your button)
+   *          buttoncode of button (use InputEvent.VK_XXX, where XXX is your
+   *          button)
    */
   public void release(int keycode) {
     robot.mouseRelease(keycode);
   }
 
   /**
-   * simulate pressing and releasing several mouse buttns after the desired duration The buttons are released in reverse order they
-   * were pressed.
+   * simulate pressing and releasing several mouse buttns after the desired
+   * duration The buttons are released in reverse order they were pressed.
    * 
    * @param keycode
-   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX is your button)
+   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
+   *          is your button)
    * @param duration
    *          key press duration in milliseconds
    */
@@ -84,7 +88,8 @@ public class MouseSim extends Service {
    * simulate pressing several mouse buttons (does NOT release the buttons!)
    * 
    * @param keycode
-   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX is your button)
+   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
+   *          is your button)
    */
   public void press(int[] keycodes) {
     for (int keycode : keycodes) {
@@ -96,7 +101,8 @@ public class MouseSim extends Service {
    * simulate releasing several mouse buttons (does NOT press the buttons!)
    * 
    * @param keycode
-   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX is your button)
+   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
+   *          is your button)
    */
   public void release(int[] keycodes) {
     for (int keycode : keycodes) {
@@ -105,10 +111,12 @@ public class MouseSim extends Service {
   }
 
   /**
-   * simulate releasing several mouse buttons (does NOT press the buttons!) Releases buttons in reversed order they were specified.
+   * simulate releasing several mouse buttons (does NOT press the buttons!)
+   * Releases buttons in reversed order they were specified.
    * 
    * @param keycode
-   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX is your button)
+   *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
+   *          is your button)
    */
   public void releaseReversed(int[] keycodes) {
     for (int i = keycodes.length - 1; i >= 0; i--) {
@@ -152,8 +160,9 @@ public class MouseSim extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

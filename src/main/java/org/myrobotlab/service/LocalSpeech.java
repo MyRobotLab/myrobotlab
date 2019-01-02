@@ -19,9 +19,11 @@ import org.slf4j.Logger;
  *
  * @author moz4r
  *
- *         FIXME - use sapi/creatObject if necessary Say - https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
+ *         FIXME - use sapi/creatObject if necessary Say -
+ *         https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
  * 
- *         Linux possibilities https://launchpad.net/ubuntu/precise/+source/svox/
+ *         Linux possibilities
+ *         https://launchpad.net/ubuntu/precise/+source/svox/
  * 
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
@@ -72,8 +74,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       Runtime.execute(cmd);
     } else if (platform.isLinux()) {
       // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
-      String furtherFiltered = toSpeak.replace("\"", "");// .replace("\'", "").replace("|", "");
-      // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival --tts");
+      String furtherFiltered = toSpeak.replace("\"", "");// .replace("\'",
+                                                         // "").replace("|",
+                                                         // "");
+      // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival
+      // --tts");
       Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
       // TODO : use (!p.waitFor(10, TimeUnit.SECONDS)) for security ?
       p.waitFor();
@@ -95,7 +100,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * overridden because mac is silly for not being mp3 & ms tts is a mess because it appends 0.mp3 :P
+   * overridden because mac is silly for not being mp3 & ms tts is a mess
+   * because it appends 0.mp3 :P
    */
   public String getAudioCacheExtension() {
     if (Platform.getLocalInstance().isMac()) {
@@ -107,10 +113,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * one of the few methods a SpeechSynthesis service must implement if derived from AbstractSpeechSynthesis -
+   * one of the few methods a SpeechSynthesis service must implement if derived
+   * from AbstractSpeechSynthesis -
    * 
-   * Use protected addVoice(name, gender, lang, voiceProvider) to add voices Voice.voiceProvider allows a serializable key to map
-   * MRL's Voice to a implementation of a voice
+   * Use protected addVoice(name, gender, lang, voiceProvider) to add voices
+   * Voice.voiceProvider allows a serializable key to map MRL's Voice to a
+   * implementation of a voice
    */
   @Override
   protected void loadVoices() {
@@ -137,7 +145,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
         // is line start with a number ? yes it's ( maybe ) a voice...
         try {
           int isItaVoice = Integer.parseInt(voiceProvider);
-          // voice name cause issues because of spaces or (null), let's just use original number as name...
+          // voice name cause issues because of spaces or (null), let's just use
+          // original number as name...
           addVoice(voiceProvider, gender, lang, voiceProvider);
         } catch (Exception e) {
           break;
@@ -158,7 +167,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * override default tts.exe path
    * 
    * @param ttsPath
-   *          - full path to windows tts.exe executable TODO - override also other os
+   *          - full path to windows tts.exe executable TODO - override also
+   *          other os
    */
   public void setTtsPath(String ttsPath) {
     this.ttsPath = ttsPath;
@@ -179,8 +189,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     // speech.getVoices();
     // speech.setVoice("1");
     /*
-     * speech.speak(String.format("hello yes yes yes, my voice name is %s", speech.getVoice().getName()));
-     * speech.speakBlocking("I am your R 2 D 2 here me speak #R2D2#"); speech.speak("unicode éléphant");
+     * speech.speak(String.format("hello yes yes yes, my voice name is %s",
+     * speech.getVoice().getName()));
+     * speech.speakBlocking("I am your R 2 D 2 here me speak #R2D2#");
+     * speech.speak("unicode éléphant");
      */
 
   }

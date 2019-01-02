@@ -107,13 +107,15 @@ public class ArduinoMotorPotTest {
     pid.setMode(key, 1);
     // clip the output values from the pid control to a range between -1 and 1.
     pid.setOutputRange(key, -1.0, 1.0);
-    // This is the desired sample value from the potentiometer 512 = ~ 90 degrees
+    // This is the desired sample value from the potentiometer 512 = ~ 90
+    // degrees
     int desiredValue = 512;
     pid.setSetpoint(key, desiredValue);
     pid.setSampleTime(key, 40);
     // Start the arduino and the feedback potentiometer polling
     arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
-    // make arduino connect blocking (or at least as long as "getVersion()" takes.
+    // make arduino connect blocking (or at least as long as "getVersion()"
+    // takes.
     arduino.connect(port);
     // wait for the arduino to actually connect!
     // Start the motor and attach it to the arduino.
@@ -172,7 +174,8 @@ public class ArduinoMotorPotTest {
   }
 
   /**
-   * Helper function to run a system command and return the stdout / stderr as a string
+   * Helper function to run a system command and return the stdout / stderr as a
+   * string
    * 
    * @param program
    * @param args
@@ -244,7 +247,8 @@ public class ArduinoMotorPotTest {
   }
 
   /**
-   * Helper function to run a program , return the stderr / stdout as a string and to catch any exceptions that occur
+   * Helper function to run a program , return the stderr / stdout as a string
+   * and to catch any exceptions that occur
    * 
    * @param cmd
    * @param args

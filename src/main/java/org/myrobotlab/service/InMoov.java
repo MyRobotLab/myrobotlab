@@ -47,10 +47,13 @@ import com.jme3.system.AppSettings;
 /**
  * InMoov - The InMoov Service.
  * 
- * The InMoov service allows control of the InMoov robot. This robot was created by Gael Langevin. It's an open source 3D printable
- * robot. All of the parts and instructions to build are on his blog (http://inmoov.blogspot.com/ and http://www.inmoov.fr/). InMoov
- * is a composite of servos, Arduinos, microphone, camera, kinect and computer. The InMoov service is composed of many other peer
- * services, and allows easy initialization and control of these sub systems.
+ * The InMoov service allows control of the InMoov robot. This robot was created
+ * by Gael Langevin. It's an open source 3D printable robot. All of the parts
+ * and instructions to build are on his blog (http://inmoov.blogspot.com/ and
+ * http://www.inmoov.fr/). InMoov is a composite of servos, Arduinos,
+ * microphone, camera, kinect and computer. The InMoov service is composed of
+ * many other peer services, and allows easy initialization and control of these
+ * sub systems.
  *
  */
 
@@ -409,8 +412,9 @@ public class InMoov extends Service {
   }
 
   /**
-   * This blocking method will look at all of the .py files in a directory. One by one it will load the files into the python
-   * interpreter. A gesture python file should contain 1 method definition that is the same as the filename.
+   * This blocking method will look at all of the .py files in a directory. One
+   * by one it will load the files into the python interpreter. A gesture python
+   * file should contain 1 method definition that is the same as the filename.
    * 
    * @param directory
    *          - the directory that contains the gesture python files.
@@ -1332,12 +1336,14 @@ public class InMoov extends Service {
       // Calendar now = Calendar.getInstance();
 
       /*
-       * FIXME - make a getSalutation String salutation = "hello "; if (now.get(Calendar.HOUR_OF_DAY) < 12) { salutation =
-       * "good morning "; } else if (now.get(Calendar.HOUR_OF_DAY) < 16) { salutation = "good afternoon "; } else { salutation =
-       * "good evening "; }
+       * FIXME - make a getSalutation String salutation = "hello "; if
+       * (now.get(Calendar.HOUR_OF_DAY) < 12) { salutation = "good morning "; }
+       * else if (now.get(Calendar.HOUR_OF_DAY) < 16) { salutation =
+       * "good afternoon "; } else { salutation = "good evening "; }
        * 
        * 
-       * speakBlocking(String.format("%s. i was sleeping but now i am awake" , salutation));
+       * speakBlocking(String.format("%s. i was sleeping but now i am awake" ,
+       * salutation));
        */
     }
   }
@@ -1455,7 +1461,8 @@ public class InMoov extends Service {
   }
 
   /**
-   * Start InMoov brain engine And extra stuffs, like "what is you name" ( TODO finish migration )
+   * Start InMoov brain engine And extra stuffs, like "what is you name" ( TODO
+   * finish migration )
    * 
    * @return started ProgramAB service
    */
@@ -1709,8 +1716,10 @@ public class InMoov extends Service {
       pirArduino = null;
     }
     /*
-     * if (arduinos.containsKey(port)) { Arduino arduino = arduinos.get(port); arduino.connect(port); arduino.setSampleRate(8000);
-     * arduino.digitalReadPollStart(pin); pirPin = pin; arduino.addListener("publishPin", this.getName(), "publishPin"); }
+     * if (arduinos.containsKey(port)) { Arduino arduino = arduinos.get(port);
+     * arduino.connect(port); arduino.setSampleRate(8000);
+     * arduino.digitalReadPollStart(pin); pirPin = pin;
+     * arduino.addListener("publishPin", this.getName(), "publishPin"); }
      */
 
   }
@@ -1914,7 +1923,8 @@ public class InMoov extends Service {
       vinMoovApp.start();
       // Grog Says ... WTH ?? - there should be a callback how do we know its
       // not 6.5 seconds ?
-      // Moz4r says : I think it's a security timeout n=to not wait forever, not really a sleep
+      // Moz4r says : I think it's a security timeout n=to not wait forever, not
+      // really a sleep
       synchronized (this) {
         wait(6000);
       }
@@ -2154,7 +2164,8 @@ public class InMoov extends Service {
   }
 
   /**
-   * TODO : use system locale set language for InMoov service used by chatbot + ear + mouth
+   * TODO : use system locale set language for InMoov service used by chatbot +
+   * ear + mouth
    * 
    * @param i
    *          - format : java Locale
@@ -2205,8 +2216,9 @@ public class InMoov extends Service {
   // ---------------------------------------------------------------
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -2291,7 +2303,8 @@ public class InMoov extends Service {
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
-    // i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear", "AndroidSpeechRecognition");
+    // i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear",
+    // "AndroidSpeechRecognition");
     i01.startEar();
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);

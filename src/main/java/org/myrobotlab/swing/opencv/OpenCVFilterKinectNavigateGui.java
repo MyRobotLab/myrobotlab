@@ -65,7 +65,8 @@ public class OpenCVFilterKinectNavigateGui extends OpenCVFilterGui implements Ac
     OpenCVFilterKinectNavigate filter = (OpenCVFilterKinectNavigate) boundFilter.filter;
 
     /*
-     * if (o == getFeatures) { filter.needTrackingPoints = true; } else if (o == clearPoints) { filter.clearPoints = true; }
+     * if (o == getFeatures) { filter.needTrackingPoints = true; } else if (o ==
+     * clearPoints) { filter.clearPoints = true; }
      */
 
     // send the updated filter to OpenCV service

@@ -80,7 +80,8 @@ public class TaskTest {
       // test.doSomething();
 
       /*
-       * JUnitCore junit = new JUnitCore(); Result result = junit.run(TaskTest.class); log.info("Result: {}", result);
+       * JUnitCore junit = new JUnitCore(); Result result =
+       * junit.run(TaskTest.class); log.info("Result: {}", result);
        */
 
       // Runtime.dump();

@@ -41,7 +41,8 @@ public class MethodCache {
               Class<?> type = pTypes[i];
 
               /*
-               * BAD ASSUMPTION - SOME CODECs have a default class they serialize from for List Map HashSet etc..
+               * BAD ASSUMPTION - SOME CODECs have a default class they
+               * serialize from for List Map HashSet etc..
                */
               /*
                * if (type.isInterface()) { interfaceInParamList = true; break; }

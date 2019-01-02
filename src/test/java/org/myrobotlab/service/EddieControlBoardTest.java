@@ -215,21 +215,36 @@ public class EddieControlBoardTest {
 
     // Runtime.start("gui", "SwingGui");
     /*
-     * need virtual Arduino Serial uart = ecb.serial.createVirtualUART(); uart.write("011 011 011 004 004 004 004 CBB\r");
-     * uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 00A CCE\r"); ecb.startSensors(); //
-     * ecb.connect(port) uart.write("011 011 011 004 004 004 004 CBB\r"); uart.write("011 011 011 004 004 004 004 CBB\r");
-     * uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); uart.write(
-     * "011 011 011 004 004 004 004 CBB\r"); uart.write( "011 011 011 004 004 004 004 CBB\r"); // ecb.go(1, 1);
+     * need virtual Arduino Serial uart = ecb.serial.createVirtualUART();
+     * uart.write("011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 00A CCE\r"); ecb.startSensors(); //
+     * ecb.connect(port) uart.write("011 011 011 004 004 004 004 CBB\r");
+     * uart.write("011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); uart.write(
+     * "011 011 011 004 004 004 004 CBB\r"); // ecb.go(1, 1);
      * 
      */
 

@@ -63,14 +63,17 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- *         TODO - asynchronous call back similar to AngularJS promise - or at least a callback method is called .. onHttpResponse
+ *         TODO - asynchronous call back similar to AngularJS promise - or at
+ *         least a callback method is called .. onHttpResponse
  * 
- *         Synchronous or Asynchronous - Synchronous by default, Asynchronous if a callback method is supplied or Non-Blocking
- *         method is called
+ *         Synchronous or Asynchronous - Synchronous by default, Asynchronous if
+ *         a callback method is supplied or Non-Blocking method is called
  * 
- *         Check out - Fluent interface - https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
+ *         Check out - Fluent interface -
+ *         https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
  * 
- *         - Proxies proxies proxies ! - https://memorynotfound.com/configure-http-proxy-settings-java/
+ *         - Proxies proxies proxies ! -
+ *         https://memorynotfound.com/configure-http-proxy-settings-java/
  */
 public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
 
@@ -79,8 +82,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -91,7 +95,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     meta.addDescription("a general purpose http client, used to fetch information on the web");
     meta.addCategory("network");
     /*
-     * Runtime currently includes these dependencies meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+     * Runtime currently includes these dependencies
+     * meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
      * meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
      */
     meta.setCloudService(false);
@@ -112,10 +117,13 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
 
   public void addHttpDataListener(ServiceInterface listener) {
     /*
-     * TODO - finish this thought out .. it would mean a Map of method signatures to interface methods .. and direct callbacks Pro -
-     * is an optimization Con - is potentially blocking the callback thread for "too" long
+     * TODO - finish this thought out .. it would mean a Map of method
+     * signatures to interface methods .. and direct callbacks Pro - is an
+     * optimization Con - is potentially blocking the callback thread for "too"
+     * long
      * 
-     * if (SerialDataListener.class.isAssignableFrom(listener.getClass()) && listener.isLocal()) { // direct callback
+     * if (SerialDataListener.class.isAssignableFrom(listener.getClass()) &&
+     * listener.isLocal()) { // direct callback
      * listeners.put(si.getName(),(SerialDataListener) si); } else {
      */
 
@@ -150,8 +158,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   }
 
   /**
-   * publishHttpData contains more information content type, response code, etc... need to subscribe to it manually for testing
-   * purposes
+   * publishHttpData contains more information content type, response code,
+   * etc... need to subscribe to it manually for testing purposes
    * 
    */
   @Override
@@ -235,9 +243,11 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   }
 
   /**
-   * publishing point for any http request this is the asynchronous callback which will arrive typically at publishHttpData(data)
+   * publishing point for any http request this is the asynchronous callback
+   * which will arrive typically at publishHttpData(data)
    * 
-   * contains more data than just the text, can be used for any content type too, since the payload is in a byte[]
+   * contains more data than just the text, can be used for any content type
+   * too, since the payload is in a byte[]
    * 
    * @param data
    *          the http data
@@ -249,7 +259,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   }
 
   /**
-   * publishing point for any http request this is the asynchronous callback which will arrive typically at onHttpRespone(data)
+   * publishing point for any http request this is the asynchronous callback
+   * which will arrive typically at onHttpRespone(data)
    * 
    * @param data
    *          the data
@@ -264,7 +275,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     super.startService();
     if (client == null) {
       // new MultiThreadedHttpConnectionManager()
-      client = HttpClients.createSystem(); // modded by GroG to support system proxies
+      client = HttpClients.createSystem(); // modded by GroG to support system
+                                           // proxies
       // client = HttpClientBuilder.create().useSystemProperties();
       // client = HttpClients.createDefault();
     }

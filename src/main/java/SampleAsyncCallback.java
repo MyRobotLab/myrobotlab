@@ -25,21 +25,27 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 /**
- * A sample application that demonstrates how to use the MQTT v3 Client api in non-blocking callback/notification mode.
+ * A sample application that demonstrates how to use the MQTT v3 Client api in
+ * non-blocking callback/notification mode.
  * 
- * It can be run from the command line in one of two modes: - as a publisher, sending a single message to a topic on the server - as
- * a subscriber, listening for messages from the server
+ * It can be run from the command line in one of two modes: - as a publisher,
+ * sending a single message to a topic on the server - as a subscriber,
+ * listening for messages from the server
  * 
- * There are three versions of the sample that implement the same features but do so using using different programming styles:
+ * There are three versions of the sample that implement the same features but
+ * do so using using different programming styles:
  * <ol>
- * <li>Sample (this one) which uses the API which blocks until the operation completes</li>
- * <li>SampleAsyncWait shows how to use the asynchronous API with waiters that block until an action completes</li>
- * <li>SampleAsyncCallBack shows how to use the asynchronous API where events are used to notify the application when an action
- * completes
+ * <li>Sample (this one) which uses the API which blocks until the operation
+ * completes</li>
+ * <li>SampleAsyncWait shows how to use the asynchronous API with waiters that
+ * block until an action completes</li>
+ * <li>SampleAsyncCallBack shows how to use the asynchronous API where events
+ * are used to notify the application when an action completes
  * <li>
  * </ol>
  * 
- * If the application is run with the -h parameter then info is displayed that describes all of the options / parameters.
+ * If the application is run with the -h parameter then info is displayed that
+ * describes all of the options / parameters.
  */
 public class SampleAsyncCallback implements MqttCallback {
 
@@ -74,7 +80,8 @@ public class SampleAsyncCallback implements MqttCallback {
    * @param clientId
    *          the client id to connect with
    * @param cleanSession
-   *          clear state at end of connection or not (durable or non-durable subscriptions)
+   *          clear state at end of connection or not (durable or non-durable
+   *          subscriptions)
    * @param quietMode
    *          whether debug should be printed to standard out
    * @param userName
@@ -189,13 +196,15 @@ public class SampleAsyncCallback implements MqttCallback {
   }
 
   /**
-   * Subscribe to a topic on an MQTT server Once subscribed this method waits for the messages to arrive from the server that match
-   * the subscription. It continues listening for messages until the enter key is pressed.
+   * Subscribe to a topic on an MQTT server Once subscribed this method waits
+   * for the messages to arrive from the server that match the subscription. It
+   * continues listening for messages until the enter key is pressed.
    * 
    * @param topicName
    *          to subscribe to (can be wild carded)
    * @param qos
-   *          the maximum quality of service to receive messages at for this subscription
+   *          the maximum quality of service to receive messages at for this
+   *          subscription
    * @throws Throwable
    *           t
    */
@@ -232,7 +241,8 @@ public class SampleAsyncCallback implements MqttCallback {
   }
 
   /**
-   * Utility method to handle logging. If 'quietMode' is set, this method does nothing
+   * Utility method to handle logging. If 'quietMode' is set, this method does
+   * nothing
    * 
    * @param message
    *          the message to log
@@ -305,7 +315,8 @@ public class SampleAsyncCallback implements MqttCallback {
   }
 
   /**
-   * Connect in a non blocking way and then sit back and wait to be notified that the action has completed.
+   * Connect in a non blocking way and then sit back and wait to be notified
+   * that the action has completed.
    */
   public class MqttConnector {
 
@@ -355,7 +366,8 @@ public class SampleAsyncCallback implements MqttCallback {
   }
 
   /**
-   * Publish in a non blocking way and then sit back and wait to be notified that the action has completed.
+   * Publish in a non blocking way and then sit back and wait to be notified
+   * that the action has completed.
    */
   public class Publisher {
     public void doPublish(String topicName, int qos, byte[] payload) {
@@ -403,7 +415,8 @@ public class SampleAsyncCallback implements MqttCallback {
   }
 
   /**
-   * Subscribe in a non blocking way and then sit back and wait to be notified that the action has completed.
+   * Subscribe in a non blocking way and then sit back and wait to be notified
+   * that the action has completed.
    */
   public class Subscriber {
     public void doSubscribe(String topicName, int qos) {
@@ -445,7 +458,8 @@ public class SampleAsyncCallback implements MqttCallback {
   }
 
   /**
-   * Disconnect in a non blocking way and then sit back and wait to be notified that the action has completed.
+   * Disconnect in a non blocking way and then sit back and wait to be notified
+   * that the action has completed.
    */
   public class Disconnector {
     public void doDisconnect() {

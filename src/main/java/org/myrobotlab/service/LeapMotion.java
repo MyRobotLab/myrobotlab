@@ -63,8 +63,9 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   }
 
   /**
-   * Return the angle of the finger for the hand specified This computes the angle based on the dot product of the palmNormal and
-   * the fingerDirection Theta = arccos( (V1.V2) / ( |V1| * |V2| )
+   * Return the angle of the finger for the hand specified This computes the
+   * angle based on the dot product of the palmNormal and the fingerDirection
+   * Theta = arccos( (V1.V2) / ( |V1| * |V2| )
    * 
    * @param hand
    *          - "left" or "right"
@@ -196,8 +197,9 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
