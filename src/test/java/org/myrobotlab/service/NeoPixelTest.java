@@ -22,7 +22,8 @@ public class NeoPixelTest {
 
   @Before
   public void setUp() throws Exception {
-    // setup the test environment , and create an arduino with a virtual backend for it.
+    // setup the test environment , and create an arduino with a virtual backend
+    // for it.
     TestUtils.initEnvirionment();
     VirtualArduino va1 = (VirtualArduino) Runtime.createAndStart("va1", "VirtualArduino");
     va1.connect(V_PORT_1);
@@ -34,7 +35,8 @@ public class NeoPixelTest {
   }
 
   /**
-   * Test method for {@link org.myrobotlab.service.NeoPixel#setPixel(int, int, int, int)}.
+   * Test method for
+   * {@link org.myrobotlab.service.NeoPixel#setPixel(int, int, int, int)}.
    */
   @Test
   public void testSetPixelIntIntIntInt() {
@@ -43,7 +45,8 @@ public class NeoPixelTest {
   }
 
   /**
-   * Test method for {@link org.myrobotlab.service.NeoPixel#sendPixel(int, int, int, int)}.
+   * Test method for
+   * {@link org.myrobotlab.service.NeoPixel#sendPixel(int, int, int, int)}.
    */
   @Test
   public void testSendPixelIntIntIntInt() {
@@ -70,7 +73,8 @@ public class NeoPixelTest {
   }
 
   /**
-   * Test method for {@link org.myrobotlab.service.NeoPixel#attach(org.myrobotlab.service.interfaces.NeoPixelController, int, int)}.
+   * Test method for
+   * {@link org.myrobotlab.service.NeoPixel#attach(org.myrobotlab.service.interfaces.NeoPixelController, int, int)}.
    */
   @Test
   public void testAttachNeoPixelControllerIntInt() {
@@ -78,7 +82,8 @@ public class NeoPixelTest {
   }
 
   /**
-   * Test method for {@link org.myrobotlab.service.NeoPixel#detach(org.myrobotlab.service.interfaces.NeoPixelController)}.
+   * Test method for
+   * {@link org.myrobotlab.service.NeoPixel#detach(org.myrobotlab.service.interfaces.NeoPixelController)}.
    */
   @Test
   public void testDetachNeoPixelController() {
@@ -89,7 +94,8 @@ public class NeoPixelTest {
   }
 
   /**
-   * Test method for {@link org.myrobotlab.service.NeoPixel#setAnimation(java.lang.String, int, int, int, int)}.
+   * Test method for
+   * {@link org.myrobotlab.service.NeoPixel#setAnimation(java.lang.String, int, int, int, int)}.
    */
   @Test
   public void testSetAnimationStringIntIntIntInt() {

@@ -107,7 +107,8 @@ public class Msg {
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
   public final static int GET_BOARD_INFO = 2;
-  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
+  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16
+  // sram/activePins/[] deviceSummary
   public final static int PUBLISH_BOARD_INFO = 3;
   // > enablePin/address/type/b16 rate
   public final static int ENABLE_PIN = 4;
@@ -217,19 +218,24 @@ public class Msg {
    */
 
   // public void publishMRLCommError(String errorMsg/*str*/){}
-  // public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer
+  // public void publishBoardInfo(Integer version/*byte*/, Integer
+  // boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer
   // sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/){}
   // public void publishAck(Integer function/*byte*/){}
-  // public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
+  // public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float
+  // secondFloat/*f32*/){}
   // public void publishCustomMsg(int[] msg/*[]*/){}
   // public void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/){}
   // public void publishDebug(String debugMsg/*str*/){}
   // public void publishPinArray(int[] data/*[]*/){}
-  // public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer
+  // public void publishServoEvent(Integer deviceId/*byte*/, Integer
+  // eventType/*byte*/, Integer currentPos/*b16*/, Integer
   // targetPos/*b16*/){}
   // public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/){}
-  // public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
-  // public void publishEncoderPosition(Integer deviceId/*byte*/, Integer position/*b16*/){}
+  // public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer
+  // echoTime/*b16*/){}
+  // public void publishEncoderPosition(Integer deviceId/*byte*/, Integer
+  // position/*b16*/){}
 
   public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
 
@@ -256,8 +262,8 @@ public class Msg {
    * @return
    */
   /*
-   * static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) { if (instance == null) { instance = new
-   * Msg(); }
+   * static public synchronized Msg getInstance(Arduino arduino, SerialDevice
+   * serial) { if (instance == null) { instance = new Msg(); }
    * 
    * instance.arduino = arduino; instance.serial = serial;
    * 
@@ -2166,7 +2172,8 @@ public class Msg {
     int bytesAvailable = serial.available();
     if (bytesAvailable > 0) {
       // publishDebug("RXBUFF:" + String(bytesAvailable));
-      // now we should loop over the available bytes .. not just read one by one.
+      // now we should loop over the available bytes .. not just read one by
+      // one.
       for (int i = 0; i < bytesAvailable; i++) {
         // read the incoming byte:
         int newByte = serial.read();
@@ -2185,7 +2192,8 @@ public class Msg {
           if (newByte > 64) {
             // TODO - send error back
             byteCount = 0;
-            continue; // GroG - I guess we continue now vs return false on error conditions?
+            continue; // GroG - I guess we continue now vs return false on error
+                      // conditions?
           }
           msgSize = newByte;
         }
@@ -2195,7 +2203,8 @@ public class Msg {
         }
         // if received header + msg
         if (byteCount == 2 + msgSize) {
-          // we've reach the end of the command, just return true .. we've got it
+          // we've reach the end of the command, just return true .. we've got
+          // it
           byteCount = 0;
           return true;
         }
@@ -2379,12 +2388,14 @@ public class Msg {
         long ts = System.currentTimeMillis();
         // log.info("***** starting wait *****");
         ackRecievedLock.wait(2000);
-        // log.info("***** waited {} ms *****", (System.currentTimeMillis() - ts));
+        // log.info("***** waited {} ms *****", (System.currentTimeMillis() -
+        // ts));
       } catch (InterruptedException e) {// don't care}
       }
 
       if (!ackRecievedLock.acknowledged) {
-        // log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
+        // log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]),
+        // numAck);
         log.error("Ack not received");
       }
     }
@@ -2426,7 +2437,8 @@ public class Msg {
       LoggingFactory.init(Level.INFO);
 
       /*
-       * Runtime.start("gui","SwingGui"); VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
+       * Runtime.start("gui","SwingGui"); VirtualArduino virtual =
+       * (VirtualArduino)Runtime.start("varduino","VirtualArduino");
        * virtual.connectVirtualUart(port, port + "UART");
        */
 

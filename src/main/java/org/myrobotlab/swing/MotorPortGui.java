@@ -165,9 +165,12 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
 
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
-        // myService.sendBlocking(boundServiceName, setPort, Integer.decode(portList.getSelectedItem().toString()));
-        // myService.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-        // myService.send(boundServiceName, attach, controllerList.getSelectedItem());
+        // myService.sendBlocking(boundServiceName, setPort,
+        // Integer.decode(portList.getSelectedItem().toString()));
+        // myService.sendBlocking(boundServiceName, setRightPwmPin,
+        // Integer.decode(rightPwmPinList.getSelectedItem().toString()));
+        // myService.send(boundServiceName, attach,
+        // controllerList.getSelectedItem());
         myMotor.setPort(portList.getSelectedItem().toString());
 
         try {

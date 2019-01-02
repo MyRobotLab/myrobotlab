@@ -35,23 +35,29 @@ import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**
- * This is the data returned from a single pass of an OpenCV pipeline of filters. The amount of data can be changed depending on
- * individual configuration of the filters. The filters have the ability to add a copy of the image and add other data structures
- * such as arrays of point, bounding boxes, masks, classifications and other information.
+ * This is the data returned from a single pass of an OpenCV pipeline of
+ * filters. The amount of data can be changed depending on individual
+ * configuration of the filters. The filters have the ability to add a copy of
+ * the image and add other data structures such as arrays of point, bounding
+ * boxes, masks, classifications and other information.
  * 
- * The default behavior is to return the data from the LAST FILTER ON THE PIPELINE
+ * The default behavior is to return the data from the LAST FILTER ON THE
+ * PIPELINE
  * 
- * Some optimizations are done by saving the results of type conversions. For example if a JPG is asked for it is saved back into
- * the data map, so that if its asked again, the cached copy will be returned
+ * Some optimizations are done by saving the results of type conversions. For
+ * example if a JPG is asked for it is saved back into the data map, so that if
+ * its asked again, the cached copy will be returned
  * 
- * All data is put in with keys with the following format [ServiceName].[FilterName].[Data Type] - e.g.
+ * All data is put in with keys with the following format
+ * [ServiceName].[FilterName].[Data Type] - e.g.
  * <b><i>opencv.pyramidDown.Frame</i></b>
  * 
- * input and output are key "FilterName"s which represent the beginning and end of pipeline data. The input Frame for example will
- * have the key <b><i>opencv.input.Frame</i></b>
+ * input and output are key "FilterName"s which represent the beginning and end
+ * of pipeline data. The input Frame for example will have the key
+ * <b><i>opencv.input.Frame</i></b>
  * 
- * Data from the filters is captured typically in non-graphic form, then for a display it is added to the Java Graphics2D of the
- * display BufferedImage.
+ * Data from the filters is captured typically in non-graphic form, then for a
+ * display it is added to the Java Graphics2D of the display BufferedImage.
  * 
  * 
  * <pre>
@@ -131,13 +137,15 @@ public class OpenCVData implements Serializable {
   private String name;
 
   /**
-   * the filter's name - used as a key to get or put data associated with a specific filter
+   * the filter's name - used as a key to get or put data associated with a
+   * specific filter
    */
 
   private String selectedFilter = INPUT_KEY;
 
   /**
-   * all non-serializable data including frames an IplImages It will also contain a global source set of keys
+   * all non-serializable data including frames an IplImages It will also
+   * contain a global source set of keys
    */
   transient final Map<String, Object> sources = new TreeMap<>();
 
@@ -184,7 +192,8 @@ public class OpenCVData implements Serializable {
   }
 
   /**
-   * Order of fetching a display try => displayFilterName try => output try => input
+   * Order of fetching a display try => displayFilterName try => output try =>
+   * input
    * 
    * @return
    */
@@ -206,14 +215,16 @@ public class OpenCVData implements Serializable {
   }
 
   /**
-   * getDisplay will attempt to get whatever was put into the {name}.display If that doesn't exist - the assumption is that no
-   * filter exported nor created any display - if that's the case, we get the original input and create the display
+   * getDisplay will attempt to get whatever was put into the {name}.display If
+   * that doesn't exist - the assumption is that no filter exported nor created
+   * any display - if that's the case, we get the original input and create the
+   * display
    * 
-   * This is an "optimization" because real robots don't need displays, and if a display is really really needed for a human delay
-   * it until the very end...
+   * This is an "optimization" because real robots don't need displays, and if a
+   * display is really really needed for a human delay it until the very end...
    * 
-   * FIXME - logic to convert from selected or convert from input should probably NOT be here, but be controlled by the filters more
-   * directly
+   * FIXME - logic to convert from selected or convert from input should
+   * probably NOT be here, but be controlled by the filters more directly
    * 
    * @return
    */
@@ -266,8 +277,9 @@ public class OpenCVData implements Serializable {
   }
 
   /**
-   * the generalized getImage returns the 'latest' output - if that does not exist it return the original input - most other type
-   * converters should use this method
+   * the generalized getImage returns the 'latest' output - if that does not
+   * exist it return the original input - most other type converters should use
+   * this method
    * 
    * @return
    */
@@ -390,8 +402,8 @@ public class OpenCVData implements Serializable {
   }
 
   /**
-   * This is the typical method filters will use to store their output, it has a key with their filter's name and an "output"
-   * reference.
+   * This is the typical method filters will use to store their output, it has a
+   * key with their filter's name and an "output" reference.
    * 
    * @param keyPart
    * @param object
@@ -410,8 +422,8 @@ public class OpenCVData implements Serializable {
   }
 
   /**
-   * pushes a reference to both images from a kinect grabber default "input" image is depth - but both can be accessed from any
-   * filter
+   * pushes a reference to both images from a kinect grabber default "input"
+   * image is depth - but both can be accessed from any filter
    * 
    * @param depth
    *          - depth image

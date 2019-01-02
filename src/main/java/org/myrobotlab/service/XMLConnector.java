@@ -20,8 +20,10 @@ import org.xml.sax.XMLReader;
 
 /**
  * 
- * XMLConnector - This will parse a large xml file into many sub documents based on the XMLRoot path. All of the xml under that path
- * will be created as a document that can be published to the doc pipeline, or other DocumentListener.
+ * XMLConnector - This will parse a large xml file into many sub documents based
+ * on the XMLRoot path. All of the xml under that path will be created as a
+ * document that can be published to the doc pipeline, or other
+ * DocumentListener.
  */
 public class XMLConnector extends AbstractConnector {
 
@@ -129,8 +131,9 @@ public class XMLConnector extends AbstractConnector {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -113,7 +113,11 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
       lastDepthImage = depth;
 
-      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1 channel for grey rgb
+      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1
+                                                                                        // channel
+                                                                                        // for
+                                                                                        // grey
+                                                                                        // rgb
 
       ByteBuffer colorBuffer = color.getByteBuffer();
       // it may be deprecated but the "new" function .asByteBuffer() does not

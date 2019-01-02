@@ -152,9 +152,11 @@ public class Sweety extends Service {
   int neckPan[] = { 7, 20, 130, 75 };
 
   /**
-   * Replace the values of an array , if a value == -1 the old value is keep Exemple if rightArm[]={35,1,2,3} and user ask to change
-   * by {-1,1,2,3}, this method will return {35,1,2,3} This method must receive an array of ten arrays. If one of these arrays is
-   * less or more than four numbers length , it doesn't will be changed.
+   * Replace the values of an array , if a value == -1 the old value is keep
+   * Exemple if rightArm[]={35,1,2,3} and user ask to change by {-1,1,2,3}, this
+   * method will return {35,1,2,3} This method must receive an array of ten
+   * arrays. If one of these arrays is less or more than four numbers length ,
+   * it doesn't will be changed.
    */
   int[][] changeArrayValues(int[][] valuesArray) {
     // valuesArray contain first the news values and after, the old values
@@ -173,8 +175,10 @@ public class Sweety extends Service {
   }
 
   /**
-   * Set pin, min, max, and rest for each servos. -1 in an array mean "no change" Exemple
-   * setRightArm({39,1,2,3},{40,1,2,3},{41,1,2,3},{-1,1,2,3},{-1,1,2,3}) Python exemple :
+   * Set pin, min, max, and rest for each servos. -1 in an array mean "no
+   * change" Exemple
+   * setRightArm({39,1,2,3},{40,1,2,3},{41,1,2,3},{-1,1,2,3},{-1,1,2,3}) Python
+   * exemple :
    * sweety.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
    */
   public void setRightArm(int[] shoulder, int[] arm, int[] biceps, int[] elbow, int[] wrist) {
@@ -227,8 +231,9 @@ public class Sweety extends Service {
   }
 
   /**
-   * Set pin, min, max, and rest for head tilt and pan . -1 in an array mean "no change" Exemple setHead({39,1,2,3},{40,1,2,3})
-   * Python exemple : sweety.setHead([1,0,180,90],[2,0,180,0])
+   * Set pin, min, max, and rest for head tilt and pan . -1 in an array mean "no
+   * change" Exemple setHead({39,1,2,3},{40,1,2,3}) Python exemple :
+   * sweety.setHead([1,0,180,90],[2,0,180,0])
    */
   public void setHead(int[] tilt, int[] pan) {
     int[][] valuesArray = new int[][] { tilt, pan, neckTilt, neckPan };
@@ -398,7 +403,8 @@ public class Sweety extends Service {
   }
 
   /**
-   * Move the right arm . Use : setRightArm(shoulder angle, arm angle, biceps angle, Elbow angle, wrist angle) -1 mean "no change"
+   * Move the right arm . Use : setRightArm(shoulder angle, arm angle, biceps
+   * angle, Elbow angle, wrist angle) -1 mean "no change"
    * 
    * @param shoulderAngle
    *          s
@@ -438,8 +444,8 @@ public class Sweety extends Service {
   }
 
   /*
-   * Move the left arm . Use : setLeftArm(shoulder angle, arm angle, biceps angle, Elbow angle, Elbow angle,wrist angle) -1 mean
-   * "no change"
+   * Move the left arm . Use : setLeftArm(shoulder angle, arm angle, biceps
+   * angle, Elbow angle, Elbow angle,wrist angle) -1 mean "no change"
    * 
    * @param shoulderAngle s
    * 
@@ -477,7 +483,8 @@ public class Sweety extends Service {
   }
 
   /*
-   * Move the left hand . Use : setLeftHand(thumb angle, index angle, middle angle, ring angle, pinky angle) -1 mean "no change"
+   * Move the left hand . Use : setLeftHand(thumb angle, index angle, middle
+   * angle, ring angle, pinky angle) -1 mean "no change"
    */
   public void setLeftHandPosition(double thumbAngle, double indexAngle, double middleAngle, double ringAngle, double pinkyAngle) {
     if (thumbAngle == -1) {
@@ -504,7 +511,8 @@ public class Sweety extends Service {
   }
 
   /*
-   * Move the right hand . Use : setrightHand(thumb angle, index angle, middle angle, ring angle, pinky angle) -1 mean "no change"
+   * Move the right hand . Use : setrightHand(thumb angle, index angle, middle
+   * angle, ring angle, pinky angle) -1 mean "no change"
    */
   public void setRightHandPosition(double thumbAngle, double indexAngle, double middleAngle, double ringAngle, double pinkyAngle) {
     if (thumbAngle == -1) {
@@ -547,7 +555,8 @@ public class Sweety extends Service {
   }
 
   /*
-   * drive the motors . Speed &gt; 0 go forward . Speed &lt; 0 go backward . Direction &gt; 0 go right . Direction &lt; 0 go left
+   * drive the motors . Speed &gt; 0 go forward . Speed &lt; 0 go backward .
+   * Direction &gt; 0 go right . Direction &lt; 0 go left
    */
   public void moveMotors(int speed, int direction) {
     int speedMin = 50; // min PWM needed for the motors
@@ -678,8 +687,8 @@ public class Sweety extends Service {
       setHeadPosition(neckTilt[rest], neckPan[rest]);
     }
     /*
-     * Template else if (pos == ""){ setLeftArmPosition(, , , 85, 150); setRightArmPosition(, , , 116, 10); setHeadPosition(75, 127,
-     * 75); }
+     * Template else if (pos == ""){ setLeftArmPosition(, , , 85, 150);
+     * setRightArmPosition(, , , 116, 10); setHeadPosition(75, 127, 75); }
      */
     // TODO correct angles for posture
     else if (pos == "yes") {
@@ -1118,8 +1127,9 @@ public class Sweety extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * and dependencies definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, and dependencies
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

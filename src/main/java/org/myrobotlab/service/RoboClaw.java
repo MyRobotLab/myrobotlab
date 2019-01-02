@@ -48,11 +48,13 @@ import org.slf4j.Logger;
  * PACKET ACK = 0xFF
  * </pre>
  * 
- * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 + speed) &amp; 0b01111111);
+ * Packet PseudoCode Putc(address); Putc(0); Putc(speed); Putc((address + 0 +
+ * speed) &amp; 0b01111111);
  * 
  * @author GroG
  * 
- *         FIXME - crc validation check - ie do not set any local fields unless this value IS correct
+ *         FIXME - crc validation check - ie do not set any local fields unless
+ *         this value IS correct
  * 
  */
 public class RoboClaw extends AbstractMotorController implements EncoderPublisher, PortConnector, MotorController, SerialDataListener {
@@ -159,7 +161,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       // 9600
       /*
-       * if (!setRoboClawBaud) { serial.write(170); sleep(500); setRoboClawBaud = true; }
+       * if (!setRoboClawBaud) { serial.write(170); sleep(500); setRoboClawBaud
+       * = true; }
        */
 
       long xmodemcrc16 = CRC.calculateCRC(CRC.Parameters.XMODEM, Arrays.copyOfRange(packet, 0, d.length));
@@ -376,8 +379,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -425,7 +429,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   /**
-   * Routing Attach - routes ServiceInterface.attach(service) to appropriate methods for this class
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
    */
   @Override
   public void attach(Attachable service) throws Exception {
@@ -462,7 +467,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       // this works well - the user controls all config
       // but the attach can check and report on it
       /*
-       * if (serial.getRate() != 9600) { warn("default rate for RoboClaw is 9600 serial is currently at %s", serial.getRate()); }
+       * if (serial.getRate() != 9600) {
+       * warn("default rate for RoboClaw is 9600 serial is currently at %s",
+       * serial.getRate()); }
        */
 
       // serial.attach(this); - not needed since the serial service is very
@@ -472,7 +479,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
       serial.addByteListener(this);
 
       /*
-       * if (serial.isConnected()) { if (!setRoboClawBaud) { serial.write(170); sleep(500); setRoboClawBaud = true; } }
+       * if (serial.isConnected()) { if (!setRoboClawBaud) { serial.write(170);
+       * sleep(500); setRoboClawBaud = true; } }
        */
 
       // made changes broadcast it
@@ -1473,8 +1481,10 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   /**
-   * synchronous send and receive - if not enough bytes, or a timeout is reached a null byte buffer will be returned. If the same
-   * number of bytes are returned as requested then the byte array is returned. Synchronized on the single serial resource.
+   * synchronous send and receive - if not enough bytes, or a timeout is reached
+   * a null byte buffer will be returned. If the same number of bytes are
+   * returned as requested then the byte array is returned. Synchronized on the
+   * single serial resource.
    * 
    * @param readDataSize
    * @param sendData
@@ -2543,12 +2553,14 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
       // stop and reset
       /*
-       * log.info("stopping motors reseting encoders"); rc.driveForwardM1(0); sleep(500); rc.resetQuadratureEncoderCounters();
-       * log.info("encoder {}", rc.readEncoderM1());
+       * log.info("stopping motors reseting encoders"); rc.driveForwardM1(0);
+       * sleep(500); rc.resetQuadratureEncoderCounters(); log.info("encoder {}",
+       * rc.readEncoderM1());
        * 
        * log.info("encoder {}", rc.readEncoderM1());
        * 
-       * // try drive command rc.bufferedM1DriveSpeedDistance(60900, 80000); log.info("encoder m1 {}", rc.readEncoderM1());
+       * // try drive command rc.bufferedM1DriveSpeedDistance(60900, 80000);
+       * log.info("encoder m1 {}", rc.readEncoderM1());
        */
 
       // stop and reset

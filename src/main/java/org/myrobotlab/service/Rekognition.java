@@ -60,8 +60,9 @@ public class Rekognition extends Service {
   }
 
   /**
-   * This sets the aws credentials, this only needs to be done once! It encrypts and saves the credentials in the .myrobotlab/store
-   * file. Once this is run once
+   * This sets the aws credentials, this only needs to be done once! It encrypts
+   * and saves the credentials in the .myrobotlab/store file. Once this is run
+   * once
    * 
    * @param accessKey
    * @param secretKey
@@ -145,7 +146,8 @@ public class Rekognition extends Service {
   }
 
   /**
-   * Hopefully, Label is serializable, otherwise it needs to return a list of POJOs.
+   * Hopefully, Label is serializable, otherwise it needs to return a list of
+   * POJOs.
    * 
    * @return
    */
@@ -221,8 +223,9 @@ public class Rekognition extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -244,7 +247,8 @@ public class Rekognition extends Service {
     Rekognition recog = (Rekognition) Runtime.start("recog", "Rekognition");
 
     /*
-     * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV"); opencv.capture();
+     * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+     * opencv.capture();
      * 
      * sleep(1000); String photo = opencv.recordFrame();
      * 

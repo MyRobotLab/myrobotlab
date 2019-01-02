@@ -10,9 +10,11 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * A service to query into OpenWeatherMap to get the current weather. For more info check out http://openweathermap.org This service
- * requires an API key that is free to register for from Open Weather Map. RECENT CHANGES BECAUSE API LIMITATION : period is 3 hours
- * per index, 40 is maximum for free api key ( 3 hours TO 5 days forecast )
+ * A service to query into OpenWeatherMap to get the current weather. For more
+ * info check out http://openweathermap.org This service requires an API key
+ * that is free to register for from Open Weather Map. RECENT CHANGES BECAUSE
+ * API LIMITATION : period is 3 hours per index, 40 is maximum for free api key
+ * ( 3 hours TO 5 days forecast )
  * 
  */
 public class OpenWeatherMap extends HttpClient {
@@ -62,7 +64,8 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * retrieve a string list of weather for the period indicated by hourPeriod 1 >= hourPeriod is 3 hours per index -> 24 hours is 8.
+   * retrieve a string list of weather for the period indicated by hourPeriod 1
+   * >= hourPeriod is 3 hours per index -> 24 hours is 8.
    */
   public String[] fetchForecast() {
     String[] result = new String[11];
@@ -239,8 +242,9 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

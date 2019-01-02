@@ -135,8 +135,9 @@ public class MethodEntry implements Serializable {
   }
 
   /**
-   * getSignature provides a way to create a stringified method signature the simplest way is to get the results from
-   * Class.getName() - this is a bit different/arbitrary from the JNA format of method signatures
+   * getSignature provides a way to create a stringified method signature the
+   * simplest way is to get the results from Class.getName() - this is a bit
+   * different/arbitrary from the JNA format of method signatures
    * 
    * @return string
    */
@@ -168,8 +169,9 @@ public class MethodEntry implements Serializable {
   }
 
   /*
-   * public String getSimpleParameterNames(){ StringBuilder sb = new StringBuilder(); for (Class<?> param: parameterTypes){
-   * param.get sb.append(param.getSimpleName()); } return sb.toString(); }
+   * public String getSimpleParameterNames(){ StringBuilder sb = new
+   * StringBuilder(); for (Class<?> param: parameterTypes){ param.get
+   * sb.append(param.getSimpleName()); } return sb.toString(); }
    */
 
   @Override

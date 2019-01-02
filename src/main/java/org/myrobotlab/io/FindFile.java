@@ -18,8 +18,9 @@ import org.slf4j.Logger;
 
 public final class FindFile { // implements FilenameFilter
   /*
-   * private String root = "."; // the starting point for the search; private Boolean recurse = true; private Boolean
-   * includeDirsInResult = false; private Pattern pattern = null;
+   * private String root = "."; // the starting point for the search; private
+   * Boolean recurse = true; private Boolean includeDirsInResult = false;
+   * private Pattern pattern = null;
    */
 
   class RegexFilter implements FilenameFilter {
@@ -79,7 +80,8 @@ public final class FindFile { // implements FilenameFilter
     List<File> ret = process(new File(root), criteria, recurse, true, true);
     /// List<File> ret = find(root, criteria, true, true);
     /*
-     * List<File> ret2 = new ArrayList<File>(); for (File file : ret) { if (file.isDirectory()) { ret2.add(file); } } return ret2;
+     * List<File> ret2 = new ArrayList<File>(); for (File file : ret) { if
+     * (file.isDirectory()) { ret2.add(file); } } return ret2;
      */
     return ret;
   }

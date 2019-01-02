@@ -20,11 +20,13 @@ public class LocaleTest {
     // TODO Auto-generated method stub
     Locale locale = Locale.getDefault();
     /*
-     * Method[] methods = locale.getClass().getMethods(); for (Method method : methods) { Class<?>[] paramTypes =
-     * method.getParameterTypes(); if (paramTypes.length == 0) {
-     * System.out.println(String.format("log.info(\"locale.%s() [{}]\", locale.%s());", method.getName(),method.getName())); } else
-     * { System.out.println(String.format("log.info(\"locale.%s(xxx) [{}]\", locale.%s(xxx));", method.getName(),method.getName()));
-     * } }
+     * Method[] methods = locale.getClass().getMethods(); for (Method method :
+     * methods) { Class<?>[] paramTypes = method.getParameterTypes(); if
+     * (paramTypes.length == 0) { System.out.println(String.
+     * format("log.info(\"locale.%s() [{}]\", locale.%s());",
+     * method.getName(),method.getName())); } else { System.out.println(String.
+     * format("log.info(\"locale.%s(xxx) [{}]\", locale.%s(xxx));",
+     * method.getName(),method.getName())); } }
      */
 
     Locale def = Locale.getDefault();
@@ -107,7 +109,8 @@ public class LocaleTest {
     log.info("locale.getScript() [{}]", locale.getScript());
     log.info("locale.getUnicodeLocaleAttributes() [{}]", locale.getUnicodeLocaleAttributes());
     log.info("locale.getUnicodeLocaleKeys() [{}]", locale.getUnicodeLocaleKeys());
-    // log.info("locale.getUnicodeLocaleType(xxx) [{}]", locale.getUnicodeLocaleType(xxx));
+    // log.info("locale.getUnicodeLocaleType(xxx) [{}]",
+    // locale.getUnicodeLocaleType(xxx));
     log.info("locale.getVariant() [{}]", locale.getVariant());
     log.info("locale.hasExtensions() [{}]", locale.hasExtensions());
 

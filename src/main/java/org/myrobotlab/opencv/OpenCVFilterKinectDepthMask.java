@@ -138,8 +138,9 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
         if (video.nChannels() == 3) {
           /*
-           * do nothing video.put(colorIndex, (byte) c.getBlue()); video.put(colorIndex + 1, (byte) c.getRed());
-           * video.put(colorIndex + 2, (byte) c.getGreen());
+           * do nothing video.put(colorIndex, (byte) c.getBlue());
+           * video.put(colorIndex + 1, (byte) c.getRed()); video.put(colorIndex
+           * + 2, (byte) c.getGreen());
            */
           if (value > minDepth && value < maxDepth) {
             // maskBuffer.put(colorIndex, (byte) 255); - do nothing

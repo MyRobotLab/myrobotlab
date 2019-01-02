@@ -42,8 +42,9 @@ public class LoggingFactory {
   }
 
   /**
-   * at the moment "myrobotlab.log" - although it could be based on runtime name - if its different from default and multiple
-   * processes are running from the same directory or "myrobotlab.{ts}.log"
+   * at the moment "myrobotlab.log" - although it could be based on runtime name
+   * - if its different from default and multiple processes are running from the
+   * same directory or "myrobotlab.{ts}.log"
    * 
    * @return the log filename
    */

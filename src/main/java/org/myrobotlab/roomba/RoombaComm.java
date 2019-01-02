@@ -28,9 +28,10 @@ import org.slf4j.Logger;
 /**
  * The abstract base for all Roomba communications.
  * 
- * <h2>Overview</h2> This class contains the communications layer-independent parts of how to communicate with a Roomba. It does
- * assume a very serial port-like interaction, as the only working subclass is for serial ports. Thus, this objects form may change
- * in the future.
+ * <h2>Overview</h2> This class contains the communications layer-independent
+ * parts of how to communicate with a Roomba. It does assume a very serial
+ * port-like interaction, as the only working subclass is for serial ports.
+ * Thus, this objects form may change in the future.
  * 
  * Standard lifecyle of this object (and its subclasses)
  * 
@@ -333,7 +334,8 @@ public abstract class RoombaComm {
   }
 
   /*
-   * Angle traveled since last requested units: mm, diff in distance traveled by two drive wheels range: -32768 - 32767
+   * Angle traveled since last requested units: mm, diff in distance traveled by
+   * two drive wheels range: -32768 - 32767
    */
   public short angle() {
     return toShort(sensor_bytes[ANGLE_HI], sensor_bytes[ANGLE_LO]);
@@ -463,10 +465,11 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Compute possible safety fault. Called on every successful updateSensors(). In normal use, call updateSensors() then check
-   * safetyFault().
+   * Compute possible safety fault. Called on every successful updateSensors().
+   * In normal use, call updateSensors() then check safetyFault().
    * 
-   * @return true if indicates we had an event that took the Roomba out of safe mode
+   * @return true if indicates we had an event that took the Roomba out of safe
+   *         mode
    * @see #updateSensors()
    */
   public boolean computeSafetyFault() {
@@ -480,7 +483,8 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Connect to a port (for serial, portid is serial port name, for net, portid is url?)
+   * Connect to a port (for serial, portid is serial port name, for net, portid
+   * is url?)
    * 
    * @param portid
    *          port
@@ -489,7 +493,8 @@ public abstract class RoombaComm {
   public abstract boolean connect(String portid);
 
   /**
-   * Returns current connected state. It's up to subclasses to ensure this variable is correct.
+   * Returns current connected state. It's up to subclasses to ensure this
+   * variable is correct.
    * 
    * @return current connected state
    */
@@ -514,7 +519,8 @@ public abstract class RoombaComm {
    * @param songnum
    *          number of song to define
    * @param song
-   *          array of songnotes, even entries are notenums, odd are duration of 1/6ths
+   *          array of songnotes, even entries are notenums, odd are duration of
+   *          1/6ths
    */
   public void createSong(int songnum, int song[]) {
     int len = song.length;
@@ -554,7 +560,8 @@ public abstract class RoombaComm {
   }
 
   /**
-   * @return Current flowing in or out of battery units: mA range: -332768 - 32767
+   * @return Current flowing in or out of battery units: mA range: -332768 -
+   *         32767
    */
   public short current() {
     return toShort(sensor_bytes[CURRENT_HI], sensor_bytes[CURRENT_LO]);
@@ -607,15 +614,16 @@ public abstract class RoombaComm {
   public abstract void disconnect();
 
   /**
-   * @return Distance traveled since last requested units: mm range: -32768 - 32767
+   * @return Distance traveled since last requested units: mm range: -32768 -
+   *         32767
    */
   public short distance() {
     return toShort(sensor_bytes[DISTANCE_HI], sensor_bytes[DISTANCE_LO]);
   }
 
   /**
-   * Move the Roomba via the low-level velocity + radius method. See the 'Drive' section of the Roomba ROI spec for more details.
-   * Low-level command.
+   * Move the Roomba via the low-level velocity + radius method. See the 'Drive'
+   * section of the Roomba ROI spec for more details. Low-level command.
    * 
    * @param velocity
    *          speed in millimeters/second, positive forward, negative backward
@@ -629,7 +637,8 @@ public abstract class RoombaComm {
   }
 
   /*
-   * General error reporting, all corraled here just in case I think of something slightly more intelligent to do.
+   * General error reporting, all corraled here just in case I think of
+   * something slightly more intelligent to do.
    */
   public void errorMessage(String where, Throwable e) {
     e.printStackTrace();
@@ -701,8 +710,9 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Go straight at the current speed for a specified distance. Positive distance moves forward, negative distance moves backward.
-   * This method blocks until the action is finished.
+   * Go straight at the current speed for a specified distance. Positive
+   * distance moves forward, negative distance moves backward. This method
+   * blocks until the action is finished.
    * 
    * @param distance
    *          distance in millimeters, positive or negative
@@ -743,7 +753,8 @@ public abstract class RoombaComm {
   /*
    * List available ports
    * 
-   * @return a list available portids, if applicable or empty set if no ports, or return null if list is not enumerable
+   * @return a list available portids, if applicable or empty set if no ports,
+   * or return null if list is not enumerable
    */
   public abstract String[] listPorts();
 
@@ -838,8 +849,9 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Play a musical note Does it via the hacky method of defining a one-note song &amp; playing it Uses up song slot 15. If another
-   * note is played before one is finished, the new note cuts off the old one.
+   * Play a musical note Does it via the hacky method of defining a one-note
+   * song &amp; playing it Uses up song slot 15. If another note is played
+   * before one is finished, the new note cuts off the old one.
    * 
    * @param note
    *          a note number from 31 (G0) to 127 (G8)
@@ -865,8 +877,8 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Power off the Roomba. Once powered off, the only way to wake it is via wakeup() (if implemented) or via a physically pressing
-   * the Power button
+   * Power off the Roomba. Once powered off, the only way to wake it is via
+   * wakeup() (if implemented) or via a physically pressing the Power button
    * 
    * @see #wakeup()
    */
@@ -905,8 +917,9 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Reset Roomba after a fault. This takes it out of whatever mode it was in and puts it into safe mode. This command also syncs
-   * the object's sensor state with the Roomba's by calling updateSensors()
+   * Reset Roomba after a fault. This takes it out of whatever mode it was in
+   * and puts it into safe mode. This command also syncs the object's sensor
+   * state with the Roomba's by calling updateSensors()
    * 
    * @see #startup()
    * @see #updateSensors()
@@ -940,7 +953,8 @@ public abstract class RoombaComm {
   public abstract boolean send(byte[] bytes);
 
   /**
-   * Send a single byte to the Roomba (defined as int because of stupid java signed bytes)
+   * Send a single byte to the Roomba (defined as int because of stupid java
+   * signed bytes)
    * 
    * @param b
    *          byte of an ROI command to send
@@ -957,11 +971,13 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Send the SENSORS command with one of the SENSORS_ arguments Typically, one does "sensors(SENSORS_ALL)" to get all sensor data
+   * Send the SENSORS command with one of the SENSORS_ arguments Typically, one
+   * does "sensors(SENSORS_ALL)" to get all sensor data
    * 
    * @param packetcode
-   *          one of SENSORS_ALL, SENSORS_PHYSICAL, SENSORS_INTERNAL, or SENSORS_POWER, or for roomba 5xx, it is the sensor packet
-   *          number (from the spec)
+   *          one of SENSORS_ALL, SENSORS_PHYSICAL, SENSORS_INTERNAL, or
+   *          SENSORS_POWER, or for roomba 5xx, it is the sensor packet number
+   *          (from the spec)
    */
   public void sensors(int packetcode) {
     logmsg("sensors:" + packetcode);
@@ -1074,7 +1090,8 @@ public abstract class RoombaComm {
   }
 
   /*
-   * Turns on/off the various LEDs. Low-level command. FIXME: this is too complex
+   * Turns on/off the various LEDs. Low-level command. FIXME: this is too
+   * complex
    */
   public void setLEDs(boolean status_green, boolean status_red, boolean spot, boolean clean, boolean max, boolean dirt, int power_color, int power_intensity) {
     int v = (status_green ? 0x20 : 0) | (status_red ? 0x10 : 0) | (spot ? 0x08 : 0) | (clean ? 0x04 : 0) | (max ? 0x02 : 0) | (dirt ? 0x01 : 0);
@@ -1084,7 +1101,8 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Turns on/off the non-drive motors (main brush, vacuum, sidebrush). Sort of low-level.
+   * Turns on/off the non-drive motors (main brush, vacuum, sidebrush). Sort of
+   * low-level.
    * 
    * @param mainbrush
    *          mainbrush motor on/off state
@@ -1228,9 +1246,10 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Put Roomba in safe mode. As opposed to full mode. Safe mode is the preferred working state when playing with the Roomba as it
-   * provides some measure of autonomous self-preservation if it encounters a cliff or is picked up If that happens it goes into
-   * passive mode and must be 'reset()'.
+   * Put Roomba in safe mode. As opposed to full mode. Safe mode is the
+   * preferred working state when playing with the Roomba as it provides some
+   * measure of autonomous self-preservation if it encounters a cliff or is
+   * picked up If that happens it goes into passive mode and must be 'reset()'.
    * 
    * @see #reset()
    */
@@ -1271,17 +1290,20 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Query Roomba for sensor status and sync its state with this object's Subclasses should query Roomba and fill up 'sensor_bytes'
-   * with the full sensor data set If a RooombaComm object is constructed with 'autoUpdate' true, calling this method is not
-   * required because a separate thread is created to do sensor updating.
+   * Query Roomba for sensor status and sync its state with this object's
+   * Subclasses should query Roomba and fill up 'sensor_bytes' with the full
+   * sensor data set If a RooombaComm object is constructed with 'autoUpdate'
+   * true, calling this method is not required because a separate thread is
+   * created to do sensor updating.
    * 
    * @return true on successful sensor update, false otherwise
    */
   public abstract boolean updateSensors();
 
   /*
-   * no button = -1 power = -118 8a pause = -119 89 clean = -120 88 max = -123 85 spot = -124 84 spinleft = -125 81 (8d keyup?)
-   * forward = -126 82 (8c?) spinright = -127 83
+   * no button = -1 power = -118 8a pause = -119 89 clean = -120 88 max = -123
+   * 85 spot = -124 84 spinleft = -125 81 (8d keyup?) forward = -126 82 (8c?)
+   * spinright = -127 83
    */
 
   //
@@ -1312,8 +1334,9 @@ public abstract class RoombaComm {
   }
 
   /**
-   * Wake's Roomba up, if possible, thus optional To wake up the Roomba requires twiddling its DD line, often hooked up to the
-   * RS-232 DTR line, which may not be available in some implementations
+   * Wake's Roomba up, if possible, thus optional To wake up the Roomba requires
+   * twiddling its DD line, often hooked up to the RS-232 DTR line, which may
+   * not be available in some implementations
    */
   public void wakeup() {
     logmsg("subclass has not implemented");

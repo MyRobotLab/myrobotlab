@@ -122,7 +122,8 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
   }
 
   /**
-   * This method sets the shunt resistance in ohms Default value is .1 Ohms ( R100 )
+   * This method sets the shunt resistance in ohms Default value is .1 Ohms (
+   * R100 )
    */
   // @Override
   public void setShuntResistance(double shuntResistance) {
@@ -196,8 +197,9 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -106,8 +106,10 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     // TODO: cv2.resize(image, (300, 300))
     Mat srcMat = grabberConverter.convertToMat(grabberConverter.convert(image));
     Mat inputMat = new Mat();
-    resize(srcMat, inputMat, new Size(300, 300));// resize the image to match the input size of the model
-    // create a 4-dimensional blob from image with NCHW (Number of images in the batch -for training only-, Channel, Height, Width)
+    resize(srcMat, inputMat, new Size(300, 300));// resize the image to match
+                                                 // the input size of the model
+    // create a 4-dimensional blob from image with NCHW (Number of images in the
+    // batch -for training only-, Channel, Height, Width)
     // dimensions order,
     // for more details read the official docs at
     // https://docs.opencv.org/trunk/d6/d0f/group__dnn.html#gabd0e76da3c6ad15c08b01ef21ad55dd8
@@ -120,9 +122,24 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     net.setInput(blob);
     // feed forward the input to the network to get the output matrix
     Mat output = net.forward();
-    Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));// extract a 2d matrix for 4d output matrix
-                                                                                         // with form of (number of detections x 7)
-    FloatIndexer srcIndexer = ne.createIndexer(); // create indexer to access elements of the matrix
+    Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));// extract
+                                                                                         // a
+                                                                                         // 2d
+                                                                                         // matrix
+                                                                                         // for
+                                                                                         // 4d
+                                                                                         // output
+                                                                                         // matrix
+                                                                                         // with
+                                                                                         // form
+                                                                                         // of
+                                                                                         // (number
+                                                                                         // of
+                                                                                         // detections
+                                                                                         // x
+                                                                                         // 7)
+    FloatIndexer srcIndexer = ne.createIndexer(); // create indexer to access
+                                                  // elements of the matrix
     // log.info("Output Size: {}", output.size(3));
     bb.clear();
     classifications.clear();

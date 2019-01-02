@@ -27,7 +27,8 @@ public class VideoDisplayPanel {
       params[0] = e.getX();
       params[1] = e.getY();
 
-      // FIXME - to OpenCV specific ! - should just relay the event back - or send a more
+      // FIXME - to OpenCV specific ! - should just relay the event back - or
+      // send a more
       // generalized message or message specific to the Panel not to OpenCv
       myService.send(boundServiceName, "invokeFilterMethod", sourceNameLabel.getText(), "samplePoint", params);
     }

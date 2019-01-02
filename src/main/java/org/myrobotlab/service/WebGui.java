@@ -65,14 +65,15 @@ import org.slf4j.Logger;
 
 /**
  * 
- * WebGui - This service is the AngularJS based GUI TODO - messages &amp; services are already APIs - perhaps a data API - same as
- * service without the message wrapper
+ * WebGui - This service is the AngularJS based GUI TODO - messages &amp;
+ * services are already APIs - perhaps a data API - same as service without the
+ * message wrapper
  */
 public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler {
 
   /**
-   * Static list of third party dependencies for this service. The list will be consumed by Ivy to download and manage the
-   * appropriate resources
+   * Static list of third party dependencies for this service. The list will be
+   * consumed by Ivy to download and manage the appropriate resources
    */
 
   public static class LiveVideoStreamHandler implements Handler {
@@ -83,8 +84,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       try {
 
         /*
-         * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV"); OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
-         * opencv.addFilter(ffmpeg); opencv.capture(); sleep(1000); opencv.removeFilters(); ffmpeg.stopRecording();
+         * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+         * OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
+         * opencv.addFilter(ffmpeg); opencv.capture(); sleep(1000);
+         * opencv.removeFilters(); ffmpeg.stopRecording();
          */
 
         AtmosphereResponse response = r.getResponse();
@@ -193,8 +196,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -372,7 +376,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     configBuilder
         /*
-         * did not work :( .resource( "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource") .resource(
+         * did not work :( .resource(
+         * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource")
+         * .resource(
          * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGui" )
          */
 
@@ -421,8 +427,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     Map<String, String> map = new HashMap<String, String>();
 
     /**
-     * Atmosphere (nearly) always gives a ConcurrentModificationException its supposed to be fixed in later versions - but later
-     * version have proven very unstable
+     * Atmosphere (nearly) always gives a ConcurrentModificationException its
+     * supposed to be fixed in later versions - but later version have proven
+     * very unstable
      */
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
@@ -454,18 +461,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   /*
-   * SSLContext createSSLContext() { try { if (sslPort != null) { return SSLContext.getInstance("TLS"); } } catch (Exception e) {
+   * SSLContext createSSLContext() { try { if (sslPort != null) { return
+   * SSLContext.getInstance("TLS"); } } catch (Exception e) {
    * log.warn("can not make ssl context", e); } return null; }
    */
 
   /**
-   * With a single method Atmosphere does so much !!! It sets up the connection, possibly gets a session, turns the request into
-   * something like a HTTPServletRequest, provides us with input &amp; output streams - and manages all the "long polling" or
-   * websocket upgrades on its own !
+   * With a single method Atmosphere does so much !!! It sets up the connection,
+   * possibly gets a session, turns the request into something like a
+   * HTTPServletRequest, provides us with input &amp; output streams - and
+   * manages all the "long polling" or websocket upgrades on its own !
    * 
    * Atmosphere Rocks !
    * 
-   * common to all apis is handled here - then delegated to the appropriate api handler
+   * common to all apis is handled here - then delegated to the appropriate api
+   * handler
    */
   @Override
   public void handle(AtmosphereResource r) {
@@ -559,11 +569,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   /**
-   * handleMessagesApi handles all requests sent to /api/messages It suspends/upgrades the connection to a websocket It is a
-   * asynchronous protocol - and all messages are wrapped in a message wrapper.
+   * handleMessagesApi handles all requests sent to /api/messages It
+   * suspends/upgrades the connection to a websocket It is a asynchronous
+   * protocol - and all messages are wrapped in a message wrapper.
    * 
-   * The ApiFactory will handle the details of de-serializing but its necessary to setup some protocol details here for websockets
-   * and session management which the ApiFactory should not be concerned with.
+   * The ApiFactory will handle the details of de-serializing but its necessary
+   * to setup some protocol details here for websockets and session management
+   * which the ApiFactory should not be concerned with.
    * 
    * @param r
    *          - request and response objects from Atmosphere server
@@ -582,11 +594,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       api.process(this, out, r.getRequest().getRequestURI(), request.body().asString());
 
       /*
-       * // FIXME - GET or POST should work - so this "should" be unnecessary .. if ("GET".equals(httpMethod)) { // if post and
-       * parts.length < 3 ?? // respond(r, apiKey, "getPlatform", new Hello(Runtime.getId())); HashMap<URI, ServiceEnvironment> env
-       * = Runtime.getEnvironments(); respond(r, apiKey, "getLocalServices", env); } else { doNotUseThisProcessMessageAPI(codec,
-       * request.body()); // FIXME data is double encoded .. can't put '1st' encoded json // api.process(this, out,
-       * r.getRequest().getRequestURI(), request.body().asString()); }
+       * // FIXME - GET or POST should work - so this "should" be unnecessary ..
+       * if ("GET".equals(httpMethod)) { // if post and parts.length < 3 ?? //
+       * respond(r, apiKey, "getPlatform", new Hello(Runtime.getId()));
+       * HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments();
+       * respond(r, apiKey, "getLocalServices", env); } else {
+       * doNotUseThisProcessMessageAPI(codec, request.body()); // FIXME data is
+       * double encoded .. can't put '1st' encoded json // api.process(this,
+       * out, r.getRequest().getRequestURI(), request.body().asString()); }
        */
 
     } catch (Exception e) {
@@ -595,8 +610,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   /**
-   * This is a middle level method to handle the details of Atmosphere and http/ws level of processing request. It will eventually
-   * call ApiFactory.process which handles the "pure" Jvm Java only processing
+   * This is a middle level method to handle the details of Atmosphere and
+   * http/ws level of processing request. It will eventually call
+   * ApiFactory.process which handles the "pure" Jvm Java only processing
    * 
    * @param r
    *          r
@@ -615,7 +631,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     if (request.body() != null) {
       hack = request.body().asString();
       // data = request.body().asBytes();
-      if (hack != null) { // FIXME - hack because request.body().asBytes() ALWAYS returns null !!
+      if (hack != null) { // FIXME - hack because request.body().asBytes()
+                          // ALWAYS returns null !!
         data = hack.getBytes();
       }
     }
@@ -662,13 +679,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   /*
-   * FIXME - needs to be LogListener interface with LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
+   * FIXME - needs to be LogListener interface with
+   * LogListener.onLogEvent(String logEntry) !!!! THIS SHALL LOG NO ENTRIES OR
    * ABANDON ALL HOPE !!!
    * 
-   * This is completely out of band - it does not use the regular queues inbox or outbox
+   * This is completely out of band - it does not use the regular queues inbox
+   * or outbox
    * 
-   * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error etc !!!! or there will be an infinite loop and you
-   * will be at the gates of hell !
+   * We want to broadcast this - but THERE CAN NOT BE ANY log.info/warn/error
+   * etc !!!! or there will be an infinite loop and you will be at the gates of
+   * hell !
    * 
    */
   public void onLogEvent(Message msg) {
@@ -701,8 +721,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // broadcast it too
     // repackage message
     /*
-     * don't need to do this :) Message m = createMessage(getName(), "onRegistered", si); m.sender =
-     * Runtime.getInstance().getName(); broadcast(m);
+     * don't need to do this :) Message m = createMessage(getName(),
+     * "onRegistered", si); m.sender = Runtime.getInstance().getName();
+     * broadcast(m);
      */
   }
 
@@ -798,10 +819,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   /**
-   * From UI events --to--&gt; MRL request to save panel data typically done after user has changed or updated the UI in position,
-   * height, width, zIndex etc.
+   * From UI events --to--&gt; MRL request to save panel data typically done
+   * after user has changed or updated the UI in position, height, width, zIndex
+   * etc.
    * 
-   * If you need MRL changes of position or UI changes use publishPanel to remotely control UI
+   * If you need MRL changes of position or UI changes use publishPanel to
+   * remotely control UI
    * 
    * @param panel
    *          - the panel which has been moved or resized
@@ -939,7 +962,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       (new Thread("stopping nettophere") {
         public void run() {
           /*
-           * nettosphere.framework().removeAllAtmosphereHandler(); nettosphere.framework().resetStates();
+           * nettosphere.framework().removeAllAtmosphereHandler();
+           * nettosphere.framework().resetStates();
            * nettosphere.framework().destroy();
            */
           nettosphere.stop();
@@ -957,8 +981,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // FIXME
 
   /**
-   * UseLocalResources determines if references to JQuery JavaScript library are local or if the library is linked to using content
-   * delivery network. Default (false) is to use the CDN
+   * UseLocalResources determines if references to JQuery JavaScript library are
+   * local or if the library is linked to using content delivery network.
+   * Default (false) is to use the CDN
    *
    * @param useLocalResources
    *          - true uses local resources fals uses cdn
@@ -976,7 +1001,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // log.info("" + level);
 
       /*
-       * VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino"); virtual.connect("COM5");
+       * VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual",
+       * "VirtualArduino"); virtual.connect("COM5");
        * 
        * Runtime.start("python", "Python");
        */

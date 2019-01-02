@@ -76,7 +76,8 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   // public int boxWidth = 224;
   // public int boxHeight = 224;
 
-  // TODO: is there a way to dynamically adjust what this should be?! That'd be cool..
+  // TODO: is there a way to dynamically adjust what this should be?! That'd be
+  // cool..
   public int boxWidth = 25;
   public int boxHeight = 25;
 
@@ -118,7 +119,8 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     }
     mat = converterToMat.convert(frame);
     if (boundingBox != null && tracker != null) {
-      // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(), boundingBox.y(), boundingBox.width()
+      // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(),
+      // boundingBox.y(), boundingBox.width()
       // ,boundingBox.height());
       tracker.update(mat, boundingBox);
       // boundingBox.x()
@@ -171,12 +173,14 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   }
 
   public void samplePoint(Integer x, Integer y) {
-    // TODO: implement a state machine where you select the first corner. then you select the second corner
+    // TODO: implement a state machine where you select the first corner. then
+    // you select the second corner
     // that would define the size of the bounding box also.
     boundingBox = new Rect2d(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight);
     log.info("Create bounding box for tracking x:{} y:{} w:{} h:{}", boundingBox.x(), boundingBox.y(), boundingBox.width(), boundingBox.height());
     // TODO: start tracking multiple points ?
-    // the tracker will initialize on the next frame.. (I know , I know. it'd be better to have the current frame and do the
+    // the tracker will initialize on the next frame.. (I know , I know. it'd be
+    // better to have the current frame and do the
     // initialization here.)
     tracker = createTracker(trackerType);
     // log.info("Init tracker");

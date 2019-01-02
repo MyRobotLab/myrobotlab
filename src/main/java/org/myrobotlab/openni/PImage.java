@@ -78,8 +78,9 @@ import java.io.OutputStream;
 public class PImage implements PConstants, Cloneable {
 
   /**
-   * Format for this image, one of RGB, ARGB or ALPHA. note that RGB images still require 0xff in the high byte because of how
-   * they'll be manipulated by other functions
+   * Format for this image, one of RGB, ARGB or ALPHA. note that RGB images
+   * still require 0xff in the high byte because of how they'll be manipulated
+   * by other functions
    */
   public int format;
 
@@ -121,30 +122,42 @@ public class PImage implements PConstants, Cloneable {
   static final int PRECISIONF = 1 << PRECISIONB;
   static final int PREC_MAXVAL = PRECISIONF - 1;
   /**
-   * Note that when using imageMode(CORNERS), the x2 and y2 positions are non-inclusive.
+   * Note that when using imageMode(CORNERS), the x2 and y2 positions are
+   * non-inclusive.
    */
   /*
-   * public int[] loadPixels(int x1, int y1, int x2, int y2) { if (modified) { // have to set the modified region to include the
-   * min/max // of the coordinates coming in. // also, mustn't get the pixels for the section that's // already been marked as
-   * modified. gah. // too complicated, just throw an error String msg = "getPixels(x, y, w, h) cannot be used multiple times. " +
-   * "Use getPixels() once to get the entire image instead."; throw new RuntimeException(msg); }
+   * public int[] loadPixels(int x1, int y1, int x2, int y2) { if (modified) {
+   * // have to set the modified region to include the min/max // of the
+   * coordinates coming in. // also, mustn't get the pixels for the section
+   * that's // already been marked as modified. gah. // too complicated, just
+   * throw an error String msg =
+   * "getPixels(x, y, w, h) cannot be used multiple times. " +
+   * "Use getPixels() once to get the entire image instead."; throw new
+   * RuntimeException(msg); }
    * 
    * if (imageMode == CORNER) { // x2, y2 are w/h x2 += x1; y2 += y1; }
    * 
-   * if (pixels == null) { // this is a java 1.3 buffered image if (image == null) { // this is just an error throw new
-   * RuntimeException( "PImage not properly setup for getPixels()"); } else { pixels = new int[width*height]; } }
+   * if (pixels == null) { // this is a java 1.3 buffered image if (image ==
+   * null) { // this is just an error throw new RuntimeException(
+   * "PImage not properly setup for getPixels()"); } else { pixels = new
+   * int[width*height]; } }
    * 
-   * if (image == null) { // this happens when using just the 1.1 library // no need to do anything, since the pixels have already
-   * been grabbed
+   * if (image == null) { // this happens when using just the 1.1 library // no
+   * need to do anything, since the pixels have already been grabbed
    * 
-   * } else { // copy the contents of the buffered image to pixels[] //((BufferedImage) image).getRGB(x, y, w, h, output.pixels, 0,
-   * width); try { //System.out.println("running getrgb..."); Class bufferedImageClass =
-   * Class.forName("java.awt.image.BufferedImage"); // getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int
-   * scansize) Method getRgbMethod = bufferedImageClass.getMethod("getRGB", new Class[] { Integer.TYPE, Integer.TYPE, Integer.TYPE,
-   * Integer.TYPE, int[].class, Integer.TYPE, Integer.TYPE }); getRgbMethod.invoke(image, new Object[] { new Integer(x1), new
-   * Integer(y1), new Integer(x2 - x1 + 1), new Integer(y2 - y1 + 1), pixels, new Integer(0), new Integer(width) });
+   * } else { // copy the contents of the buffered image to pixels[]
+   * //((BufferedImage) image).getRGB(x, y, w, h, output.pixels, 0, width); try
+   * { //System.out.println("running getrgb..."); Class bufferedImageClass =
+   * Class.forName("java.awt.image.BufferedImage"); // getRGB(int startX, int
+   * startY, int w, int h, int[] rgbArray, int offset, int scansize) Method
+   * getRgbMethod = bufferedImageClass.getMethod("getRGB", new Class[] {
+   * Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, int[].class,
+   * Integer.TYPE, Integer.TYPE }); getRgbMethod.invoke(image, new Object[] {
+   * new Integer(x1), new Integer(y1), new Integer(x2 - x1 + 1), new Integer(y2
+   * - y1 + 1), pixels, new Integer(0), new Integer(width) });
    * 
-   * } catch (Exception e) { e.printStackTrace(); } } return pixels; // just to be nice }
+   * } catch (Exception e) { e.printStackTrace(); } } return pixels; // just to
+   * be nice }
    */
 
   static final int PREC_ALPHA_SHIFT = 24 - PRECISIONB;
@@ -273,9 +286,11 @@ public class PImage implements PConstants, Cloneable {
   // GET/SET PIXELS
 
   /*
-   * [toxi 030902] Creates a Targa32 formatted byte sequence of specified pixel buffer
+   * [toxi 030902] Creates a Targa32 formatted byte sequence of specified pixel
+   * buffer
    *
-   * [fry 030917] Modified to write directly to OutputStream, because of memory issues with first making an array of the data.
+   * [fry 030917] Modified to write directly to OutputStream, because of memory
+   * issues with first making an array of the data.
    *
    * tga spec: http://organicbit.com/closecombat/formats/tga.html
    */
@@ -373,23 +388,29 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /*
-   * // properly debugged version from copy() // in case the below one doesn't work
+   * // properly debugged version from copy() // in case the below one doesn't
+   * work
    * 
-   * public void set(int dx, int dy, PImage src) { // source int sx = 0; int sy = 0; int sw = src.width; int sh = src.height;
+   * public void set(int dx, int dy, PImage src) { // source int sx = 0; int sy
+   * = 0; int sw = src.width; int sh = src.height;
    * 
-   * // target int tx = dx; // < 0 ? 0 : x; int ty = dy; // < 0 ? 0 : y; int tw = width; int th = height;
+   * // target int tx = dx; // < 0 ? 0 : x; int ty = dy; // < 0 ? 0 : y; int tw
+   * = width; int th = height;
    * 
-   * if (tx < 0) { // say if target x were -3 sx -= tx; // source x -(-3) (or add 3) sw += tx; // source width -3 tw += tx; //
-   * target width -3 tx = 0; // target x is zero (upper corner) } if (ty < 0) { sy -= ty; sh += ty; th += ty; ty = 0; } if (tx + tw
-   * > width) { int extra = (tx + tw) - width; sw -= extra; tw -= extra; } if (ty + th > height) { int extra = (ty + th) - height;
-   * sh -= extra; sw -= extra; }
+   * if (tx < 0) { // say if target x were -3 sx -= tx; // source x -(-3) (or
+   * add 3) sw += tx; // source width -3 tw += tx; // target width -3 tx = 0; //
+   * target x is zero (upper corner) } if (ty < 0) { sy -= ty; sh += ty; th +=
+   * ty; ty = 0; } if (tx + tw > width) { int extra = (tx + tw) - width; sw -=
+   * extra; tw -= extra; } if (ty + th > height) { int extra = (ty + th) -
+   * height; sh -= extra; sw -= extra; }
    * 
-   * for (int row = sy; row < sy + sh; row++) { System.arraycopy(src.pixels, row*src.width + sx, pixels, (dy+row)*width + tx, sw); }
-   * }
+   * for (int row = sy; row < sy + sh; row++) { System.arraycopy(src.pixels,
+   * row*src.width + sx, pixels, (dy+row)*width + tx, sw); } }
    */
 
   /**
-   * Create an empty image object, set its format to RGB. The pixel array is not allocated.
+   * Create an empty image object, set its format to RGB. The pixel array is not
+   * allocated.
    */
   public PImage() {
     format = RGB; // makes sure that this guy is useful
@@ -401,8 +422,9 @@ public class PImage implements PConstants, Cloneable {
   // ALPHA CHANNEL
 
   /*
-   * Create a new RGB (alpha ignored) image of a specific size. All pixels are set to zero, meaning black, but since the alpha is
-   * zero, it will be transparent.
+   * Create a new RGB (alpha ignored) image of a specific size. All pixels are
+   * set to zero, meaning black, but since the alpha is zero, it will be
+   * transparent.
    */
   public PImage(int width, int height) {
     init(width, height, RGB);
@@ -428,8 +450,9 @@ public class PImage implements PConstants, Cloneable {
   /*
    * Construct a new PImage from a java.awt.Image
    *
-   * this constructor assumes that you've done the work of making sure a MediaTracker has been used to fully download the data and
-   * that the img is valid.
+   * this constructor assumes that you've done the work of making sure a
+   * MediaTracker has been used to fully download the data and that the img is
+   * valid.
    */
   public PImage(java.awt.Image img) {
     width = img.getWidth(null);
@@ -498,8 +521,9 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /**
-   * Internal blitter/resizer/copier from toxi. Uses bilinear filtering if smooth() has been enabled 'mode' determines the blending
-   * mode used in the process.
+   * Internal blitter/resizer/copier from toxi. Uses bilinear filtering if
+   * smooth() has been enabled 'mode' determines the blending mode used in the
+   * process.
    */
   private void blit_resize(PImage img, int srcX1, int srcY1, int srcX2, int srcY2, int[] destPixels, int screenW, int screenH, int destX1, int destY1, int destX2, int destY2,
       int mode) {
@@ -824,8 +848,8 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /**
-   * Duplicate an image, returns new PImage object. The pixels[] array for the new object will be unique and recopied from the
-   * source image.
+   * Duplicate an image, returns new PImage object. The pixels[] array for the
+   * new object will be unique and recopied from the source image.
    */
   @Override
   public Object clone() throws CloneNotSupportedException { // ignore
@@ -871,10 +895,12 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /*
-   * Method to apply a variety of basic filters to this image. <P> <UL> <LI>filter(BLUR) provides a basic blur. <LI>filter(GRAY)
-   * converts the image to grayscale based on luminance. <LI>filter(INVERT) will invert the color components in the image.
-   * <LI>filter(OPAQUE) set all the high bits in the image to opaque <LI>filter(THRESHOLD) converts the image to black and white.
-   * </UL>
+   * Method to apply a variety of basic filters to this image. <P> <UL>
+   * <LI>filter(BLUR) provides a basic blur. <LI>filter(GRAY) converts the image
+   * to grayscale based on luminance. <LI>filter(INVERT) will invert the color
+   * components in the image. <LI>filter(OPAQUE) set all the high bits in the
+   * image to opaque <LI>filter(THRESHOLD) converts the image to black and
+   * white. </UL>
    */
   public void filter(int kind) {
     switch (kind) {
@@ -930,10 +956,12 @@ public class PImage implements PConstants, Cloneable {
   // COPYING IMAGE DATA
 
   /*
-   * Method to apply a variety of basic filters to this image. These filters all take a parameter. <P> <UL> <LI>filter(BLUR, int
-   * radius) performs a gaussian blur of the specified radius. <LI>filter(POSTERIZE, int levels) will posterize the image to between
-   * 2 and 255 levels. <LI>filter(THRESHOLD, float center) allows you to set the center point for the threshold. It takes a value
-   * from 0 to 1.0. </UL>
+   * Method to apply a variety of basic filters to this image. These filters all
+   * take a parameter. <P> <UL> <LI>filter(BLUR, int radius) performs a gaussian
+   * blur of the specified radius. <LI>filter(POSTERIZE, int levels) will
+   * posterize the image to between 2 and 255 levels. <LI>filter(THRESHOLD,
+   * float center) allows you to set the center point for the threshold. It
+   * takes a value from 0 to 1.0. </UL>
    */
   public void filter(int kind, float param) {
     switch (kind) {
@@ -1037,12 +1065,16 @@ public class PImage implements PConstants, Cloneable {
   // internal blending methods
 
   /*
-   * Returns an ARGB "color" type (a packed 32 bit int with the color. If the coordinate is outside the image, zero is returned
-   * (black, but completely transparent). <P> If the image is in RGB format (i.e. on a PVideo object), the value will get its high
-   * bits set, just to avoid cases where they haven't been set already. <P> If the image is in ALPHA format, this returns a white
-   * color that has its alpha value set. <P> This function is included primarily for beginners. It is quite slow because it has to
-   * check to see if the x, y that was provided is inside the bounds, and then has to check to see what image type it is. If you
-   * want things to be more efficient, access the pixels[] array directly.
+   * Returns an ARGB "color" type (a packed 32 bit int with the color. If the
+   * coordinate is outside the image, zero is returned (black, but completely
+   * transparent). <P> If the image is in RGB format (i.e. on a PVideo object),
+   * the value will get its high bits set, just to avoid cases where they
+   * haven't been set already. <P> If the image is in ALPHA format, this returns
+   * a white color that has its alpha value set. <P> This function is included
+   * primarily for beginners. It is quite slow because it has to check to see if
+   * the x, y that was provided is inside the bounds, and then has to check to
+   * see what image type it is. If you want things to be more efficient, access
+   * the pixels[] array directly.
    */
   public int get(int x, int y) {
     if ((x < 0) || (y < 0) || (x >= width) || (y >= height))
@@ -1062,7 +1094,8 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /*
-   * Grab a subsection of a PImage, and copy it into a fresh PImage. This honors imageMode() for the coordinates.
+   * Grab a subsection of a PImage, and copy it into a fresh PImage. This honors
+   * imageMode() for the coordinates.
    */
   public PImage get(int x, int y, int w, int h) {
     if (imageMode == CORNERS) { // if CORNER, do nothing
@@ -1108,7 +1141,8 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /*
-   * mode is one of CORNERS or CORNER, because the others are just too weird for the other functions
+   * mode is one of CORNERS or CORNER, because the others are just too weird for
+   * the other functions
    */
   public void imageMode(int mode) {
     if ((mode == CORNER) || (mode == CORNERS)) {
@@ -1168,17 +1202,21 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /**
-   * For subclasses where the pixels[] buffer isn't set by default, this should copy all data into the pixels[] array
+   * For subclasses where the pixels[] buffer isn't set by default, this should
+   * copy all data into the pixels[] array
    */
   public void loadPixels() { // ignore
   }
 
   /*
-   * Set alpha channel for an image. Black colors in the source image will make the destination image completely transparent, and
-   * white will make things fully opaque. Gray values will be in-between steps. <P> Strictly speaking the "blue" value from the
-   * source image is used as the alpha color. For a fully grayscale image, this is correct, but for a color image it's not 100%
-   * accurate. For a more accurate conversion, first use filter(GRAY) which will make the image into a "correct" grayscake by
-   * performing a proper luminance-based conversion.
+   * Set alpha channel for an image. Black colors in the source image will make
+   * the destination image completely transparent, and white will make things
+   * fully opaque. Gray values will be in-between steps. <P> Strictly speaking
+   * the "blue" value from the source image is used as the alpha color. For a
+   * fully grayscale image, this is correct, but for a color image it's not 100%
+   * accurate. For a more accurate conversion, first use filter(GRAY) which will
+   * make the image into a "correct" grayscake by performing a proper
+   * luminance-based conversion.
    */
   public void mask(int alpha[]) {
     // don't execute if mask image is different size
@@ -1285,7 +1323,8 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /**
-   * If true in PImage, use bilinear interpolation for copy() operations. When inherited by PGraphics, also controls shapes.
+   * If true in PImage, use bilinear interpolation for copy() operations. When
+   * inherited by PGraphics, also controls shapes.
    */
   public void smooth() {
     smooth = true;
@@ -1299,7 +1338,8 @@ public class PImage implements PConstants, Cloneable {
   }
 
   /*
-   * Note that when using imageMode(CORNERS), the x2 and y2 positions are non-inclusive.
+   * Note that when using imageMode(CORNERS), the x2 and y2 positions are
+   * non-inclusive.
    */
   public void updatePixels(int x1, int y1, int x2, int y2) { // ignore
     // if (!modified) { // could just set directly, but..

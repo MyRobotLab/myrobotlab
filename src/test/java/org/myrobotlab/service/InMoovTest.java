@@ -57,7 +57,8 @@ public class InMoovTest implements PinArrayListener {
   public void setUp() throws Exception {
 
     /**
-     * Arduino's expected state before each test is 'connected' with no devices, no pins enabled
+     * Arduino's expected state before each test is 'connected' with no devices,
+     * no pins enabled
      */
 
     uart.clear();

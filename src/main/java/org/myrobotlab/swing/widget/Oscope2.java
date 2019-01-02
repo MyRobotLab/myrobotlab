@@ -170,8 +170,9 @@ public class Oscope2 extends ServiceGui implements ActionListener {
 
       b0Xpos += timeDivisor;
       /*
-       * g2d.drawLine(x, y + h / 2, xpos,pinData.value * 20 + h / 2); log.info("{},{} - {},{}", x, y + h / 2, xpos,pinData.value *
-       * 20 + h / 2); if (xpos % (w*timeDivisor) == 0) { xpos = 0; }
+       * g2d.drawLine(x, y + h / 2, xpos,pinData.value * 20 + h / 2);
+       * log.info("{},{} - {},{}", x, y + h / 2, xpos,pinData.value * 20 + h /
+       * 2); if (xpos % (w*timeDivisor) == 0) { xpos = 0; }
        */
       // x = xpos;
       // y = pinData.value;
@@ -196,8 +197,10 @@ public class Oscope2 extends ServiceGui implements ActionListener {
       pinDisplay.repaint();
       // repaint(new Rectangle(30,30));
       /*
-       * SwingUtilities.invokeLater(new Runnable() { public void run() { // Here, we can safely update the GUI // because we'll be
-       * called from the // event dispatch thread pinDisplay.repaint();//("Query: " + queryNo); } });
+       * SwingUtilities.invokeLater(new Runnable() { public void run() { //
+       * Here, we can safely update the GUI // because we'll be called from the
+       * // event dispatch thread pinDisplay.repaint();//("Query: " + queryNo);
+       * } });
        */
     }
   } // end Trace class

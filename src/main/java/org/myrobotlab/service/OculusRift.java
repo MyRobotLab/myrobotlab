@@ -26,9 +26,10 @@ import com.oculusvr.capi.TrackingState;
 /**
  * The OculusRift service for MyRobotLab.
  * 
- * Currently this service only exposed the head tracking information from the rift. The Yaw, Pitch and Roll are exposed. Yaw - twist
- * around vertical axis (look left/right) Pitch - twist around horizontal axis (look up/down) Roll - twist around axis in front of
- * you (tilt head left/right)
+ * Currently this service only exposed the head tracking information from the
+ * rift. The Yaw, Pitch and Roll are exposed. Yaw - twist around vertical axis
+ * (look left/right) Pitch - twist around horizontal axis (look up/down) Roll -
+ * twist around axis in front of you (tilt head left/right)
  * 
  * Coming soon, lots of great stuff...
  * 
@@ -289,7 +290,8 @@ public class OculusRift extends Service implements PointPublisher {
   }
 
   public void updateAffine() {
-    // this method will update the angle / dx / dy settings on the affine filters.
+    // this method will update the angle / dx / dy settings on the affine
+    // filters.
     log.info("Update left affine");
     leftAffine.setDx(leftCameraDx);
     leftAffine.setDy(leftCameraDy);
@@ -364,8 +366,8 @@ public class OculusRift extends Service implements PointPublisher {
   }
 
   /**
-   * Resets orientation of the head tracking Makes the current orientation the straight ahead orientation. Use this to align your
-   * perspective.
+   * Resets orientation of the head tracking Makes the current orientation the
+   * straight ahead orientation. Use this to align your perspective.
    */
   public void resetSensor() {
     // hmd.
@@ -461,7 +463,8 @@ public class OculusRift extends Service implements PointPublisher {
     return points;
   }
 
-  // This publishes the hand position and orientation from the oculus touch controllers.
+  // This publishes the hand position and orientation from the oculus touch
+  // controllers.
   public Point publishLeftHandPosition(Point point) {
     //
     return point;
@@ -473,8 +476,9 @@ public class OculusRift extends Service implements PointPublisher {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -491,7 +495,8 @@ public class OculusRift extends Service implements PointPublisher {
     // "shared right streamer");
 
     meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
-    // meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing left eye camera");
+    // meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing
+    // left eye camera");
     meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
     // compile(group: 'org.saintandreas', name: 'jovr', version: '0.7.0.0')
 

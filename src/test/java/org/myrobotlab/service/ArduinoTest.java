@@ -39,7 +39,8 @@ public class ArduinoTest implements PinArrayListener {
 
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
-  // TODO: read the value of this off a property off a config file (maybe a properties file for the mrl test framework.)
+  // TODO: read the value of this off a property off a config file (maybe a
+  // properties file for the mrl test framework.)
   static boolean useVirtualHardware = true;
   static String port = "COM25";
 
@@ -71,15 +72,18 @@ public class ArduinoTest implements PinArrayListener {
       virtual.connect(port);
     }
 
-    // TODO: Initialize the arduino under test. (potentially do this in each test method vs passing the same one around ..)
+    // TODO: Initialize the arduino under test. (potentially do this in each
+    // test method vs passing the same one around ..)
     arduino = (Arduino) Runtime.start("arduinoTest", "Arduino");
-    // TODO: have a separate unit test for testing serial. we probably don't want to intermingle that testing here (if we can avoid
+    // TODO: have a separate unit test for testing serial. we probably don't
+    // want to intermingle that testing here (if we can avoid
     // it.)
     serial = arduino.getSerial();
     arduino.connect(port);
 
     /**
-     * Arduino's expected state before each test is 'connected' with no devices, no pins enabled
+     * Arduino's expected state before each test is 'connected' with no devices,
+     * no pins enabled
      */
   }
 

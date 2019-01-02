@@ -9,7 +9,8 @@ import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 /**
- * SpeechSynthesis - This is the interface that services that provide text to speech should implement.
+ * SpeechSynthesis - This is the interface that services that provide text to
+ * speech should implement.
  * 
  */
 public interface SpeechSynthesis extends NameProvider {

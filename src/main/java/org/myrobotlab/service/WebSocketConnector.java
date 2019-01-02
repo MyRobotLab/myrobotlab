@@ -73,8 +73,9 @@ public class WebSocketConnector extends Service implements TextPublisher {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -130,7 +131,8 @@ public class WebSocketConnector extends Service implements TextPublisher {
     }
 
     /**
-     * Callback hook for Message Events. This method will be invoked when a client send a message.
+     * Callback hook for Message Events. This method will be invoked when a
+     * client send a message.
      *
      * @param message
      *          The text message

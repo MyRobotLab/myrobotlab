@@ -194,7 +194,8 @@ public class ChessGame extends Service {
       hmoveMsg += ("" + columnLetter) + row;
 
       /*
-       * arduinoPort.write(columnLetter); arduinoPort.write(row); print(columnLetter); print(row);
+       * arduinoPort.write(columnLetter); arduinoPort.write(row);
+       * print(columnLetter); print(row);
        */
 
       if (pressedAmount == 3) {
@@ -213,8 +214,9 @@ public class ChessGame extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -31,7 +31,8 @@ import org.slf4j.Logger;
  * 
  * @author Mats
  * 
- *         References : https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
+ *         References :
+ *         https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
  */
 
 public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CControl {
@@ -53,8 +54,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   // Default address
   public String deviceAddress = "0x60";
   /**
-   * This address is to address all PCA9685 on the i2c bus. Don't use this address for any other device on the i2c bus since it will
-   * cause collisions.
+   * This address is to address all PCA9685 on the i2c bus. Don't use this
+   * address for any other device on the i2c bus since it will cause collisions.
    */
   public String broadcastAddress = "0x70";
 
@@ -157,7 +158,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /*
-   * Refresh the list of running services that can be selected in the GUI In this case only RasPi service can be selected
+   * Refresh the list of running services that can be selected in the GUI In
+   * this case only RasPi service can be selected
    */
   public List<String> refreshControllers() {
 
@@ -178,7 +180,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
 
     byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
         (byte) (pulseWidthOff >> 8) };
-    // log.info(String.format("Writing pin %s, pulesWidthOn %s, pulseWidthOff %s", pin, pulseWidthOn, pulseWidthOff));
+    // log.info(String.format("Writing pin %s, pulesWidthOn %s, pulseWidthOff
+    // %s", pin, pulseWidthOn, pulseWidthOff));
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
@@ -206,7 +209,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
       prescale_value = Math.round(0.9 * osc_clock / precision / hz) - 1;
     }
 
-    // log.info(String.format("PWMFreq %s hz, prescale_value calculated to %s", hz, prescale_value));
+    // log.info(String.format("PWMFreq %s hz, prescale_value calculated to %s",
+    // hz, prescale_value));
     // Set sleep mode before changing PWM freqency
     byte[] writeBuffer = { PCA9685_MODE1, PCA9685_SLEEP };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
@@ -249,7 +253,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   public void stopPwm() {
 
     byte[] buffer = { (byte) (PCA9685_ALL_LED_OFF_H), (byte) PCA9685_TURN_ALL_LED_OFF };
-    // log.info(String.format("Writing shutdown command to %s", this.getName()));
+    // log.info(String.format("Writing shutdown command to %s",
+    // this.getName()));
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
@@ -278,7 +283,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
         motor.setPwmFreq(defaultMotorPwmFreq);
         setPWMFreq(motor.getPwmPin(), motor.getPwmFreq());
       }
-      // log.info(String.format("AdafruitMotorHat4Pi, powerOutput = %s", powerOutput));
+      // log.info(String.format("AdafruitMotorHat4Pi, powerOutput = %s",
+      // powerOutput));
       if (powerOutput < 0) {
         setPinValue(motor.getLeftDirPin(), 0);
         setPinValue(motor.getRightDirPin(), 1);
@@ -296,7 +302,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   public void setPinValue(int pin, double powerOutput) {
-    // log.info(String.format("setPinValue, pin = %s, powerOutput = %s", pin, powerOutput));
+    // log.info(String.format("setPinValue, pin = %s, powerOutput = %s", pin,
+    // powerOutput));
     if (powerOutput < 0) {
       log.error("setPinValue. Value below zero ({}). Defaulting to 0.", powerOutput);
       powerOutput = 0;
@@ -318,7 +325,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
       powerOn = 0;
       powerOff = (int) (powerOutput * 4096);
     }
-    // log.info(String.format("powerOutput = %s, powerOn = %s, powerOff = %s", powerOutput, powerOn, powerOff));
+    // log.info(String.format("powerOutput = %s, powerOn = %s, powerOff = %s",
+    // powerOutput, powerOn, powerOff));
     setPWM(pin, powerOn, powerOff);
   }
 
@@ -359,8 +367,9 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -377,8 +386,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /*
-   * @Override public boolean isAttached(String name) { return (controller != null && controller.getName().equals(name) ||
-   * servoMap.containsKey(name)); }
+   * @Override public boolean isAttached(String name) { return (controller !=
+   * null && controller.getName().equals(name) || servoMap.containsKey(name)); }
    */
 
   @Override
@@ -432,7 +441,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
       return;
     }
     /*
-     * TODO Implement attachMotorControl if (MotorControl.class.isAssignableFrom(service.getClass())) {
+     * TODO Implement attachMotorControl if
+     * (MotorControl.class.isAssignableFrom(service.getClass())) {
      * attachMotorControl((MotorControl) service); return; }
      */
   }
@@ -493,8 +503,10 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     /*
      * TODO Implement detachMotorControl
      * 
-     * if (MotorControl.class.isAssignableFrom(service.getClass())) { try { detachMotorControl((MotorControl) service); } catch
-     * (Exception e) { // TODO Auto-generated catch block); log.error("setController / attach throw", e); } return; }
+     * if (MotorControl.class.isAssignableFrom(service.getClass())) { try {
+     * detachMotorControl((MotorControl) service); } catch (Exception e) { //
+     * TODO Auto-generated catch block);
+     * log.error("setController / attach throw", e); } return; }
      */
   }
 
@@ -511,7 +523,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   /**
-   * Returns all the currently attached services TODO Add the list of attached motors
+   * Returns all the currently attached services TODO Add the list of attached
+   * motors
    */
   @Override
   public Set<String> getAttached() {

@@ -94,7 +94,8 @@ public class OpenCVFilterBoundingBoxToFile extends OpenCVFilter {
         cvCopy(image, copy, null); // roi vs mask ?
 
         saveToFile(String.format("%s" + File.separator + "%07d-%03d.png", targetDir, opencv.getFrameIndex(), i), copy);
-        // cvSaveImage(String.format("%s"+File.separator+"%07d-%03d.png", targetDir, opencv.getFrameIndex(), i), copy);
+        // cvSaveImage(String.format("%s"+File.separator+"%07d-%03d.png",
+        // targetDir, opencv.getFrameIndex(), i), copy);
         roiRect.close();
         roiRect = new CvRect(0, 0, image.width(), image.width());
         cvSetImageROI(image, roiRect);

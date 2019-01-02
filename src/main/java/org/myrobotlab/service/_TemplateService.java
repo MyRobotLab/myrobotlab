@@ -18,8 +18,9 @@ public class _TemplateService extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -33,8 +34,10 @@ public class _TemplateService extends Service {
 
     // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
     // meta.addDependency("orgId", "artifactId", "2.4.0");
-    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus", "2.3.1-1.4");
-    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus-platform", "2.3.1-1.4");
+    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus",
+    // "2.3.1-1.4");
+    // meta.addDependency("org.bytedeco.javacpp-presets",
+    // "artoolkitplus-platform", "2.3.1-1.4");
 
     // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
 

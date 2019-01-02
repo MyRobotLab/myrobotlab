@@ -67,7 +67,8 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     toSpeak = toSpeak.replace("\"", "\"\"");
     String fileName = getLocalFileName(toSpeak);
 
-    // String fileName = mimicOutputFilePath + UUID.randomUUID().toString() + "." + getAudioCacheExtension();
+    // String fileName = mimicOutputFilePath + UUID.randomUUID().toString() +
+    // "." + getAudioCacheExtension();
     String command = System.getProperty("user.dir") + File.separator + mimicExecutable + " -voice " + getVoice() + " -o \"" + fileName + "\" -t \"" + toSpeak + "\"";
     String cmd = "null";
 

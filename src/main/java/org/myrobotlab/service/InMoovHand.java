@@ -15,7 +15,8 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
- * InMoovHand - The Hand sub service for the InMoov Robot. This service has 6 servos controlled by an ServoController.
+ * InMoovHand - The Hand sub service for the InMoov Robot. This service has 6
+ * servos controlled by an ServoController.
  * thumb,index,majeure,ringFinger,pinky, and wrist
  * 
  * There is also leap motion support.
@@ -94,7 +95,8 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   /*
-   * attach all the servos - this must be re-entrant and accomplish the re-attachment when servos are detached
+   * attach all the servos - this must be re-entrant and accomplish the
+   * re-attachment when servos are detached
    */
   @Deprecated
   public boolean attach() {
@@ -479,7 +481,8 @@ public class InMoovHand extends Service implements LeapDataListener {
   public void setPins(int thumbPin, int indexPin, int majeurePin, int ringFingerPin, int pinkyPin, int wristPin) {
     log.info("setPins {} {} {} {} {} {}", thumbPin, indexPin, majeurePin, ringFingerPin, pinkyPin, wristPin);
     /*
-     * OLD WAY this.thumb.setPin(thumb); this.index.setPin(index); this.majeure.setPin(majeure); this.ringFinger.setPin(ringFinger);
+     * OLD WAY this.thumb.setPin(thumb); this.index.setPin(index);
+     * this.majeure.setPin(majeure); this.ringFinger.setPin(ringFinger);
      * this.pinky.setPin(pinky); this.wrist.setPin(wrist);
      */
 
@@ -602,8 +605,9 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -38,10 +38,12 @@ import org.slf4j.Logger;
  * 
  * http://www.picaxe.com/
  * 
- * Currently supports: Arduino Duemilanove - http://arduino.cc/en/Main/ArduinoBoardDuemilanove
+ * Currently supports: Arduino Duemilanove -
+ * http://arduino.cc/en/Main/ArduinoBoardDuemilanove
  * 
- * - Find Arduino Message set - DigitalWrite (pin, data?) - ArduinoProgram HashMap&lt;Key, Program&gt; - loadProgram (Key) - key -
- * default key &amp; program
+ * - Find Arduino Message set - DigitalWrite (pin, data?) - ArduinoProgram
+ * HashMap&lt;Key, Program&gt; - loadProgram (Key) - key - default key &amp;
+ * program
  * 
  * References: http://www.arduino.cc/playground/Main/RotaryEncoders
  * 
@@ -122,7 +124,8 @@ public class Picaxe extends Service // implements SerialPortEventListener,
     /*
      * FileOutputStream fos = null; ObjectOutputStream out = null; try {
      * 
-     * fos = new FileOutputStream("test.backup"); out = new ObjectOutputStream(fos); out.writeObject(remote); out.writeObject(log);
+     * fos = new FileOutputStream("test.backup"); out = new
+     * ObjectOutputStream(fos); out.writeObject(remote); out.writeObject(log);
      * out.writeObject(PICAXE); out.writeObject(gui); out.close();
      * 
      * 
@@ -133,7 +136,8 @@ public class Picaxe extends Service // implements SerialPortEventListener,
      * gui.startService();
      * 
      * 
-     * } catch (Exception e) { log.error(e.getMessage()); log.error(stackToString(e)); }
+     * } catch (Exception e) { log.error(e.getMessage());
+     * log.error(stackToString(e)); }
      */
 
   }
@@ -245,8 +249,9 @@ public class Picaxe extends Service // implements SerialPortEventListener,
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

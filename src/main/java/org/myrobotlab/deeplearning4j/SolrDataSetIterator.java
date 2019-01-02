@@ -29,11 +29,14 @@ import org.slf4j.LoggerFactory;
 // import lombok.Getter;
 
 /**
- * A {@link DataSetIterator} which uses a Solr to search for data that is used as a training dataset
+ * A {@link DataSetIterator} which uses a Solr to search for data that is used
+ * as a training dataset
  * 
- * This class will run a search against a solr instance (in myrobotlab) and provide a dataset iterator on the results. It's expected
- * that the solr index has a field called "label" that contains the label for the document in addition, it is also expected that the
- * documents have a field called "bytes" that contains a binary image.
+ * This class will run a search against a solr instance (in myrobotlab) and
+ * provide a dataset iterator on the results. It's expected that the solr index
+ * has a field called "label" that contains the label for the document in
+ * addition, it is also expected that the documents have a field called "bytes"
+ * that contains a binary image.
  * 
  */
 public class SolrDataSetIterator implements DataSetIterator {
@@ -48,7 +51,8 @@ public class SolrDataSetIterator implements DataSetIterator {
   private Solr solr = null;
   private String queryString;
   private String labelField;
-  // TODO: we should derive this from the training dataset automagically? maybe not. (it's really more a function of the model...)
+  // TODO: we should derive this from the training dataset automagically? maybe
+  // not. (it's really more a function of the model...)
   final private int height;
   final private int width;
   final private int channels;
@@ -175,10 +179,12 @@ public class SolrDataSetIterator implements DataSetIterator {
       // solr.show(iplImage, label + " " + trainingDoc.getFirstValue("id"));
       // TODO: just get the buffered image directly.
       BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
-      // I think i'm supposed to get an array of these images and lump them together.
+      // I think i'm supposed to get an array of these images and lump them
+      // together.
       INDArray image = loader.asMatrix(buffImg);
       // Frame f = loader.asFrame(buffImg);
-      // OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
+      // OpenCVFrameConverter.ToIplImage grabberConverter = new
+      // OpenCVFrameConverter.ToIplImage();
       // IplImage resImage = grabberConverter.convert(f);
       // solr.show(resImage, "Converted");
 
@@ -226,14 +232,19 @@ public class SolrDataSetIterator implements DataSetIterator {
       if (preProcessor != null) {
         preProcessor.preProcess(dataSet);
       }
-      // TODO: I'm not sure this is correct.. but it does get the array into the right "shape"
+      // TODO: I'm not sure this is correct.. but it does get the array into the
+      // right "shape"
       INDArray arr = null;
-      // arr = dataSet.getFeatures().getRow(0).getRow(0).reshape(channels, height, width);
-      // System.out.println("Dataset feature length: " +dataSet.getFeatures().length());
+      // arr = dataSet.getFeatures().getRow(0).getRow(0).reshape(channels,
+      // height, width);
+      // System.out.println("Dataset feature length: "
+      // +dataSet.getFeatures().length());
       arr = dataSet.getFeatures().getRow(0).reshape(channels, height, width);
 
       // System.out.println("ARR feature length: " +arr.length());
-      // INDArray arr = dataSet.getFeatures().getRow(0).getRow(0).reshape(channels, height, width);
+      // INDArray arr =
+      // dataSet.getFeatures().getRow(0).getRow(0).reshape(channels, height,
+      // width);
       // INDArray arr = dataSet.getFeatures().getRow(0).getRow(0);
       // inputArr.add(arr);
       inputs.putRow(i, arr);

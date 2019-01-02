@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * OculusDIY - This service is the DIY oculus service. It might need a custom build of MRLComm to work. Check with \@Alessandruino
- * for questions.
+ * OculusDIY - This service is the DIY oculus service. It might need a custom
+ * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
 public class OculusDiy extends Service implements OrientationListener {
@@ -171,8 +171,9 @@ public class OculusDiy extends Service implements OrientationListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

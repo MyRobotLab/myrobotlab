@@ -114,8 +114,8 @@ public class Security extends Service implements AuthorizationProvider {
   private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
 
   /**
-   * I think it might be easier concept to use a singleton for this service ... Almost "always" better to have a singleton instance
-   * vs static methods !!!
+   * I think it might be easier concept to use a singleton for this service ...
+   * Almost "always" better to have a singleton instance vs static methods !!!
    * 
    * @return
    */
@@ -166,7 +166,8 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * encrypt a value and generate a keyfile if the keyfile is not found then a new one is created
+   * encrypt a value and generate a keyfile if the keyfile is not found then a
+   * new one is created
    * 
    * @param passphrase
    *          p
@@ -224,8 +225,9 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * Set a key with a keyname .. e.g. AWS_SECRET with a value e.g. ERM23!933-df3j2l4kjfu Once a key is set its in an encrypted store
-   * and the code which sets the key can be removed
+   * Set a key with a keyname .. e.g. AWS_SECRET with a value e.g.
+   * ERM23!933-df3j2l4kjfu Once a key is set its in an encrypted store and the
+   * code which sets the key can be removed
    * 
    * @param keyName
    * @param keyValue
@@ -326,13 +328,17 @@ public class Security extends Service implements AuthorizationProvider {
     createDefaultGroups();
 
     /*
-     * FIXME - set predefined levels - high security medium low allowExportByType.put("Xmpp", false);
-     * allowExportByType.put("RemoteAdapter", false); allowExportByType.put("WebGui", false); allowExportByType.put("SwingGui",
+     * FIXME - set predefined levels - high security medium low
+     * allowExportByType.put("Xmpp", false);
+     * allowExportByType.put("RemoteAdapter", false);
+     * allowExportByType.put("WebGui", false); allowExportByType.put("SwingGui",
      * false);
      * 
-     * allowExportByType.put("Java", false); allowExportByType.put("Python", false);
+     * allowExportByType.put("Java", false); allowExportByType.put("Python",
+     * false);
      * 
-     * allowExportByType.put("Security", false); allowExportByType.put("Runtime", false);
+     * allowExportByType.put("Security", false);
+     * allowExportByType.put("Runtime", false);
      */
 
     allowExportByType.put("Security", false);
@@ -428,7 +434,8 @@ public class Security extends Service implements AuthorizationProvider {
   public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
 
     /*
-     * check not needed if (security == null) { // internal messaging return defaultAccess; }
+     * check not needed if (security == null) { // internal messaging return
+     * defaultAccess; }
      */
 
     // TODO - super cache Radix Tree ??? super key -- uri
@@ -521,8 +528,9 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * This method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This method returns all the details of the class without it having to be
+   * constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -615,13 +623,15 @@ public class Security extends Service implements AuthorizationProvider {
     }
 
     /*
-     * System.out. println("Enter certificate to add to trusted keystore or 'q' to quit: [1]" ); String line =
-     * reader.readLine().trim();
+     * System.out.
+     * println("Enter certificate to add to trusted keystore or 'q' to quit: [1]"
+     * ); String line = reader.readLine().trim();
      */
     int k = 1;
     /*
-     * try { k = (line.length() == 0) ? 0 : Integer.parseInt(line) - 1; } catch (NumberFormatException e) {
-     * System.out.println("KeyStore not changed"); return; }
+     * try { k = (line.length() == 0) ? 0 : Integer.parseInt(line) - 1; } catch
+     * (NumberFormatException e) { System.out.println("KeyStore not changed");
+     * return; }
      */
 
     X509Certificate cert = chain[1];
@@ -661,7 +671,8 @@ public class Security extends Service implements AuthorizationProvider {
     public X509Certificate[] getAcceptedIssuers() {
 
       /**
-       * This change has been done due to the following resolution advised for Java 1.7+
+       * This change has been done due to the following resolution advised for
+       * Java 1.7+
        * http://infposs.blogspot.kr/2013/06/installcert-and-java-7.html
        **/
 
@@ -711,13 +722,15 @@ public class Security extends Service implements AuthorizationProvider {
      * 
      * Properties p1 = new Properties();
      * 
-     * p1.put("webgui.user", "supertick@gmail.com"); p1.put("webgui.pwd", "zd7"); p1.put("xmpp.user", "supertick@gmail.com"); String
-     * encryptedPwd = Security.encrypt(clearPwd, new File(KEY_FILE)); p1.put("xmpp.pwd", encryptedPwd); p1.store(new
-     * FileWriter(PWD_FILE), "");
+     * p1.put("webgui.user", "supertick@gmail.com"); p1.put("webgui.pwd",
+     * "zd7"); p1.put("xmpp.user", "supertick@gmail.com"); String encryptedPwd =
+     * Security.encrypt(clearPwd, new File(KEY_FILE)); p1.put("xmpp.pwd",
+     * encryptedPwd); p1.store(new FileWriter(PWD_FILE), "");
      * 
      * // ================== Properties p2 = new Properties();
      * 
-     * p2.load(new FileReader(PWD_FILE)); encryptedPwd = p2.getProperty("xmpp.pwd"); System.out.println(encryptedPwd);
+     * p2.load(new FileReader(PWD_FILE)); encryptedPwd =
+     * p2.getProperty("xmpp.pwd"); System.out.println(encryptedPwd);
      * System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
      */
 

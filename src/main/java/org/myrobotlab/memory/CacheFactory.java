@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentMap;
 import org.myrobotlab.reflection.Reflector;
 
 /**
- * Creates a cache based on configuration for the specified package and class. Singleton.
+ * Creates a cache based on configuration for the specified package and class.
+ * Singleton.
  * 
  * @author SwedaKonsult
  * 
@@ -46,7 +47,8 @@ public class CacheFactory {
   }
 
   /*
-   * Create a cache using a specific class. This assumes that the constructor does not take any parameters.
+   * Create a cache using a specific class. This assumes that the constructor
+   * does not take any parameters.
    * 
    * @param forClass the cache class that should be used
    */

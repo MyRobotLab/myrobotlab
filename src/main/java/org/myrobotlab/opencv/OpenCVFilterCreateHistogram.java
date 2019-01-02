@@ -55,7 +55,8 @@ public class OpenCVFilterCreateHistogram extends OpenCVFilter {
   IplImage channel2 = null;
 
   /**
-   * creates a histogram in seperate channels TODO - display different channels TODO -
+   * creates a histogram in seperate channels TODO - display different channels
+   * TODO -
    * 
    * @param name
    */

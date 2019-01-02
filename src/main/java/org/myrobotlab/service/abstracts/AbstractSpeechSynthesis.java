@@ -37,7 +37,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public static final String journalFilename = "journal.txt";
 
   /**
-   * substitutions are phonetic substitutions for a specific instance of speech synthesis service
+   * substitutions are phonetic substitutions for a specific instance of speech
+   * synthesis service
    */
   Map<String, String> substitutions = new HashMap<String, String>();
 
@@ -77,7 +78,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     boolean installed = true;
 
     /**
-     * Serializable key of voice implementation - to be used to map this MRL Voice to a voice implementation
+     * Serializable key of voice implementation - to be used to map this MRL
+     * Voice to a voice implementation
      */
     Object voiceProvider;
 
@@ -103,7 +105,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
 
     public String toString() {
-      // return String.format("%s %s %s %s", name, gender, locale, voiceProvider);
+      // return String.format("%s %s %s %s", name, gender, locale,
+      // voiceProvider);
       return String.format("%s %s %s", name, gender, locale);
     }
 
@@ -180,7 +183,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   protected Map<String, Voice> voices = new TreeMap<String, Voice>();
   // reset TreeMap :
-  // we shoul'd writeIn voices from the json, voices need a refresh at every startup
+  // we shoul'd writeIn voices from the json, voices need a refresh at every
+  // startup
   // useful if service change voices...
 
   protected Map<String, List<Voice>> langIndex;
@@ -202,9 +206,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   // implementing service
 
   /**
-   * NOT NEEDED AS KEY PROBLEMS ARE AUTO-HANDLED Is the SpeechSynthesis service ready .. ? Several speech synthesis services require
-   * cloud api keys or in some cases, only certain operating systems are supported. We are going to be pessimistic - MarySpeech is
-   * "always" ready :)
+   * NOT NEEDED AS KEY PROBLEMS ARE AUTO-HANDLED Is the SpeechSynthesis service
+   * ready .. ? Several speech synthesis services require cloud api keys or in
+   * some cases, only certain operating systems are supported. We are going to
+   * be pessimistic - MarySpeech is "always" ready :)
    */
   // protected boolean isReady = false;
 
@@ -233,8 +238,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * Set a key & value for some required key info, can be both user as a key and key secret - required keys are returned by
-   * getKeyNames() For Cloud Speech Synthesis systems which typically require keys
+   * Set a key & value for some required key info, can be both user as a key and
+   * key secret - required keys are returned by getKeyNames() For Cloud Speech
+   * Synthesis systems which typically require keys
    * 
    * @param keyId
    * @param keyIdSecret
@@ -265,7 +271,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * Because all AbstractSpeechSynthesis derived classes use audioFile it is also an AudioData publisher.
+   * Because all AbstractSpeechSynthesis derived classes use audioFile it is
+   * also an AudioData publisher.
    * 
    * @param data
    * @return
@@ -275,7 +282,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * Because all AbstractSpeechSynthesis derived classes use audioFile it is also an AudioData publisher.
+   * Because all AbstractSpeechSynthesis derived classes use audioFile it is
+   * also an AudioData publisher.
    * 
    * @param data
    * @return
@@ -285,7 +293,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * attach method responsible for routing to type-mangled attach FIXME - add AudioFile for caching ..
+   * attach method responsible for routing to type-mangled attach FIXME - add
+   * AudioFile for caching ..
    */
   @Override
   public void attach(Attachable attachable) {
@@ -327,9 +336,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * These methods are callback events from the AudioFile service which is a peer of this service. The speech service sends its own
-   * event based on textual data, in addition it re-broadcasts the events from audiofile which were used with this text to speak,
-   * including the sound file info
+   * These methods are callback events from the AudioFile service which is a
+   * peer of this service. The speech service sends its own event based on
+   * textual data, in addition it re-broadcasts the events from audiofile which
+   * were used with this text to speak, including the sound file info
    */
   public void onAudioStart(AudioData data) {
     log.info("onAudioStart {} {}", getName(), data.toString());
@@ -352,7 +362,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
   }
 
-  // FIXME - too anthropomorphic should just be more descriptive e.g. addSpeechRecognizer or simply use attach(ear) !!!
+  // FIXME - too anthropomorphic should just be more descriptive e.g.
+  // addSpeechRecognizer or simply use attach(ear) !!!
   @Deprecated
   public void addEar(SpeechRecognizer ear) {
     attachSpeechRecognizer(ear);
@@ -364,7 +375,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * set the volume of the speech synthesis - default is to set the audio caching system's volume - override if necessary
+   * set the volume of the speech synthesis - default is to set the audio
+   * caching system's volume - override if necessary
    */
   @Override
   public void setVolume(double volume) {
@@ -403,7 +415,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       String filename = System.getProperty("user.dir") + File.separator + globalFileCacheDir + File.separator;
 
-      // FIXME - I don't under why URLEncoder is here ... URLEncoder.encode(getVoice().getName(), "UTF-8")
+      // FIXME - I don't under why URLEncoder is here ...
+      // URLEncoder.encode(getVoice().getName(), "UTF-8")
       filename += getClass().getSimpleName() + File.separator + getVoice().getName() + File.separator + MathUtils.md5(toSpeak) + getAudioCacheExtension();
 
       // create subdirectories if necessary
@@ -449,8 +462,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * the textual info originally requested - this may not be the same as publishStartSpeaking text because the pre-processor/parser
-   * may need to break it up into pieces to handle effects and other details
+   * the textual info originally requested - this may not be the same as
+   * publishStartSpeaking text because the pre-processor/parser may need to
+   * break it up into pieces to handle effects and other details
    * 
    * @param toSpeak
    * @return
@@ -460,8 +474,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * responsible for all parsing and pre-processing for the audio. Sound effect, sound files, SSML, TarsosDsp would all be prepared
-   * here before the audio data is generated
+   * responsible for all parsing and pre-processing for the audio. Sound effect,
+   * sound files, SSML, TarsosDsp would all be prepared here before the audio
+   * data is generated
    * 
    * @param toSpeak
    * @param block
@@ -522,8 +537,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * substitutions for example : worke could get substituted to worky or work-ee or "something" that phonetically works for the
-   * current speech synthesis service
+   * substitutions for example : worke could get substituted to worky or work-ee
+   * or "something" that phonetically works for the current speech synthesis
+   * service
    * 
    * @param key
    * @param replace
@@ -537,7 +553,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * process speaking - generate the text to be spoken or play a cache file if appropriate
+   * process speaking - generate the text to be spoken or play a cache file if
+   * appropriate
    * 
    * @param toSpeak
    * @param block
@@ -728,8 +745,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * This method will be called by when AbstractSpeechSynthesis realizes it has no voices. Its the responsibility of the subclass to
-   * addVoice("name", "gender", "lang", impl) all the voices it provides
+   * This method will be called by when AbstractSpeechSynthesis realizes it has
+   * no voices. Its the responsibility of the subclass to addVoice("name",
+   * "gender", "lang", impl) all the voices it provides
    */
   abstract protected void loadVoices() throws Exception;
 
@@ -738,8 +756,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * default is no keys are necessary, but if this is a cloud provider, it will probably need keys and this is where the cloud
-   * provider returns the key names it needs.
+   * default is no keys are necessary, but if this is a cloud provider, it will
+   * probably need keys and this is where the cloud provider returns the key
+   * names it needs.
    * 
    * Required keys can be set with setKey(keyname, value)
    */
@@ -784,7 +803,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * attempt to set language with tag, display and/or runtime Locale ??? - ie no param
+   * attempt to set language with tag, display and/or runtime Locale ??? - ie no
+   * param
    * 
    * @param lang
    * @return
@@ -882,16 +902,22 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /*
-   * public boolean cacheContains(String filename) { File file = new File(globalFileCacheDir + File.separator + filename); return
-   * file.exists(); }
+   * public boolean cacheContains(String filename) { File file = new
+   * File(globalFileCacheDir + File.separator + filename); return file.exists();
+   * }
    * 
-   * public AudioData playCachedFile(String filename) { return audioFile.play(globalFileCacheDir + File.separator + filename); }
+   * public AudioData playCachedFile(String filename) { return
+   * audioFile.play(globalFileCacheDir + File.separator + filename); }
    * 
-   * public void cache(String filename, byte[] data, String toSpeak) throws IOException { File file = new File(globalFileCacheDir +
-   * File.separator + filename); File parentDir = new File(file.getParent()); if (!parentDir.exists()) { parentDir.mkdirs(); }
-   * FileOutputStream fos = new FileOutputStream(globalFileCacheDir + File.separator + filename); fos.write(data); fos.close(); //
-   * Now append the journal entry to the journal.txt file FileWriter journal = new FileWriter(globalFileCacheDir + File.separator +
-   * journalFilename, true); journal.append(filename + "," + toSpeak + "\r\n"); journal.close(); }
+   * public void cache(String filename, byte[] data, String toSpeak) throws
+   * IOException { File file = new File(globalFileCacheDir + File.separator +
+   * filename); File parentDir = new File(file.getParent()); if
+   * (!parentDir.exists()) { parentDir.mkdirs(); } FileOutputStream fos = new
+   * FileOutputStream(globalFileCacheDir + File.separator + filename);
+   * fos.write(data); fos.close(); // Now append the journal entry to the
+   * journal.txt file FileWriter journal = new FileWriter(globalFileCacheDir +
+   * File.separator + journalFilename, true); journal.append(filename + "," +
+   * toSpeak + "\r\n"); journal.close(); }
    * 
    * public static String getGlobalFileCacheDir() { return globalFileCacheDir; }
    */

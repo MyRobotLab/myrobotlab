@@ -16,12 +16,14 @@ public class WikipediaIndexer {
     // String solrUrl = "http://phobos:8983/solr/wikipedia";
     // String solrUrl = "http://localhost:8983/solr/wikipedia";
     String solrUrl = "http://localhost:8983/solr/wiki2";
-    // String wikipediaFilename = "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
+    // String wikipediaFilename =
+    // "Z:\\freeagent\\Wikipedia\\wikipedia\\enwiki-20160113-pages-articles-multistream.xml";
     String wikipediaFilename = "Z:\\enwiki-20180820-pages-articles-multistream.xml";
 
     int NUM_THREADS = 8;
 
-    // TODO: why do I need this to index wikipedia from the xml dump?! I know , it's like a 50GB xml file.. gah..
+    // TODO: why do I need this to index wikipedia from the xml dump?! I know ,
+    // it's like a 50GB xml file.. gah..
     System.setProperty("jdk.xml.totalEntitySizeLimit", String.valueOf(Integer.MAX_VALUE));
     org.apache.log4j.BasicConfigurator.configure();
     LoggingFactory.getInstance().setLevel(Level.INFO);

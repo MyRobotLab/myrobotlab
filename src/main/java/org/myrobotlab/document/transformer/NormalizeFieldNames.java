@@ -6,8 +6,9 @@ import java.util.Set;
 import org.myrobotlab.document.Document;
 
 /**
- * This stage will rename fields on a document to lowercase them, and replace punctuation with underscores This is useful to make
- * the field names search engine(solr) friendly.
+ * This stage will rename fields on a document to lowercase them, and replace
+ * punctuation with underscores This is useful to make the field names search
+ * engine(solr) friendly.
  *
  * @author kwatters
  *

@@ -109,7 +109,8 @@ public class IKEngine {
   }
 
   /**
-   * calculates jointLocations[] and jacobian, then updates thetas[] Makes one ik iteration.
+   * calculates jointLocations[] and jacobian, then updates thetas[] Makes one
+   * ik iteration.
    *
    * @param gl
    *          the goal point
@@ -204,8 +205,8 @@ public class IKEngine {
   }
 
   /**
-   * Changes the number of links and sets up data structrues. Waits until all ik computation is done and it is safe to change
-   * variables.
+   * Changes the number of links and sets up data structrues. Waits until all ik
+   * computation is done and it is safe to change variables.
    * 
    * @param nLinks
    *          the number of links

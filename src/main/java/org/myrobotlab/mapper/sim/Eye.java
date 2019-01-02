@@ -86,7 +86,8 @@ public class Eye extends SensorDevice {
   }
 
   /**
-   * An off screen Canvas3D for offscreen rendering of a 3D scene - call render to ask rendering
+   * An off screen Canvas3D for offscreen rendering of a 3D scene - call render
+   * to ask rendering
    */
   private class OffScreenCanvas3D extends Canvas3D {
 
@@ -229,7 +230,8 @@ public class Eye extends SensorDevice {
     // antialiasing
     view.setSceneAntialiasingEnable(true);
     /*
-     * to add a onscreen canvas canvas3d = new Canvas3D(config); view.addCanvas3D(canvas3d);
+     * to add a onscreen canvas canvas3d = new Canvas3D(config);
+     * view.addCanvas3D(canvas3d);
      */
     // attach offscreen canvas to the view
     offscreenCanvas3D = new OffScreenCanvas3D(config);

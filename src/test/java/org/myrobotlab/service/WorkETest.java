@@ -34,7 +34,8 @@ public class WorkETest {
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
-    // Runtime.shutdown(); - this shuts down junit which will be considered a "failure"
+    // Runtime.shutdown(); - this shuts down junit which will be considered a
+    // "failure"
   }
 
   @Before

@@ -126,12 +126,15 @@ public class MessageTest implements NameProvider {
   @Test
   final public void invokeStringNotation() throws Exception {
     /*
-     * is it this test ??? try { log.info("invokeStringNotation"); catcher.clear(); catcher.subscribe("thrower", "pitch");
+     * is it this test ??? try { log.info("invokeStringNotation");
+     * catcher.clear(); catcher.subscribe("thrower", "pitch");
      * Service.sleep(100);
      * 
-     * thrower.pitchInt(1000); BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
+     * thrower.pitchInt(1000); BlockingQueue<Message> balls =
+     * catcher.waitForMsgs(1000);
      * 
-     * assertEquals(1000, balls.size()); } catch (Exception e) { Logging.logError(e); }
+     * assertEquals(1000, balls.size()); } catch (Exception e) {
+     * Logging.logError(e); }
      */
 
   }

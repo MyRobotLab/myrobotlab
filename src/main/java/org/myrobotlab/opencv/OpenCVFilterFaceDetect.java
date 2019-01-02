@@ -121,7 +121,8 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   }
 
   /**
-   * tells the detector to return the biggest - hence # of objects will be 1 or none
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
    */
   public void addOptionFindBiggestObject() {
     option |= CV_HAAR_FIND_BIGGEST_OBJECT;
@@ -155,7 +156,8 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   }
 
   /**
-   * tells the detector to return the biggest - hence # of objects will be 1 or none
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
    */
   public void removeOptionFindBiggestObject() {
     option &= 0xFF ^ CV_HAAR_FIND_BIGGEST_OBJECT;

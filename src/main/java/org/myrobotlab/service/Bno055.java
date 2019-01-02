@@ -30,16 +30,22 @@ import org.slf4j.Logger;
  * 
  */
 /**
- * ============================================ I2Cdev device library code is placed under the MIT license Copyright (c) 2012 Jeff
- * Rowberg Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall
- * be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE. ===============================================
+ * ============================================ I2Cdev device library code is
+ * placed under the MIT license Copyright (c) 2012 Jeff Rowberg Permission is
+ * hereby granted, free of charge, to any person obtaining a copy of this
+ * software and associated documentation files (the "Software"), to deal in the
+ * Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions: The above copyright notice and this
+ * permission notice shall be included in all copies or substantial portions of
+ * the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE. ===============================================
  */
 
 public class Bno055 extends Service implements I2CControl, PinListener {
@@ -169,7 +175,10 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum OperationMode {
-    CONFIG((byte) 0x00, "Configuration Mode"), ACCONLY((byte) 0x01, "Accelerometer Only"), // raw accelerometer data only
+    CONFIG((byte) 0x00, "Configuration Mode"), ACCONLY((byte) 0x01, "Accelerometer Only"), // raw
+                                                                                           // accelerometer
+                                                                                           // data
+                                                                                           // only
     MAGONLY((byte) 0x02, "Magnetometer Only"), // raw magnetometer only
     GYROONLY((byte) 0x03, "Gyroscope Only"), ACCMAG((byte) 0x04, "Accelerometer and Magnetometer"), ACCGYRO((byte) 0x05, "Accelerometer and Gyroscope"), MAGGYRO((byte) 0x06,
         "Magnetometer and Gyroscope"), AMG((byte) 0x07, "Accelerometer, Magnetometer, Gyroscope"), IMU((byte) 0x08, "IMU"), COMPASS((byte) 0x09,
@@ -414,19 +423,22 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   /**
-   * This method reads all the 7 raw values in one go accelX accelY accelZ temperature ( In degrees Celcius ) gyroX gyroY gyroZ
+   * This method reads all the 7 raw values in one go accelX accelY accelZ
+   * temperature ( In degrees Celcius ) gyroX gyroY gyroZ
    * 
    */
   /**
-   * TODO Make the way it should be Currently only used for test of data binding to the webgui
+   * TODO Make the way it should be Currently only used for test of data binding
+   * to the webgui
    */
   public void refresh() {
     broadcastState();
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -645,8 +657,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     setMode(modeback);
   }
   /*
-   * AxisRemap : The device mounting position should not limit the data output of the BNO055 device. The axis of the device can be
-   * re-configured to the new reference axis.
+   * AxisRemap : The device mounting position should not limit the data output
+   * of the BNO055 device. The axis of the device can be re-configured to the
+   * new reference axis.
    */
 
   public void axisRemap(AxisMapConfig xAxis, AxisMapConfig yAxis, AxisMapConfig zAxis) {
@@ -1549,7 +1562,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   /**
-   * GOOD DESIGN - this method is the same pretty much for all Services could be a Java 8 default implementation to the interface
+   * GOOD DESIGN - this method is the same pretty much for all Services could be
+   * a Java 8 default implementation to the interface
    */
   @Override
   public boolean isAttached(String name) {

@@ -87,7 +87,8 @@ public class Locator {
   }
 
   /**
-   * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
+   * Scans all classes accessible from the context class loader which belong to
+   * the given package and subpackages.
    * 
    * @param packageName
    *          The package to scan

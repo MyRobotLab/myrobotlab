@@ -64,7 +64,8 @@ public class TestSimplePhysics extends SimpleApplication {
   public void simpleInitApp() {
     bulletAppState = new BulletAppState();
     stateManager.attach(bulletAppState);
-    // TODO: this was commented out due to version 3.1.0-stable of jme (in maven update)
+    // TODO: this was commented out due to version 3.1.0-stable of jme (in maven
+    // update)
     // bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 
     // Add a physics sphere to the world
@@ -73,7 +74,8 @@ public class TestSimplePhysics extends SimpleApplication {
     rootNode.attachChild(physicsSphere);
     getPhysicsSpace().add(physicsSphere);
 
-    // Add a physics sphere to the world using the collision shape from sphere one
+    // Add a physics sphere to the world using the collision shape from sphere
+    // one
     Node physicsSphere2 = PhysicsTestHelper.createPhysicsTestNode(assetManager, physicsSphere.getControl(RigidBodyControl.class).getCollisionShape(), 1);
     physicsSphere2.getControl(RigidBodyControl.class).setPhysicsLocation(new Vector3f(4, 8, 0));
     rootNode.attachChild(physicsSphere2);
@@ -105,9 +107,11 @@ public class TestSimplePhysics extends SimpleApplication {
     getPhysicsSpace().add(node3);
 
     // Join the physics objects with a Point2Point joint
-    // PhysicsPoint2PointJoint joint=new PhysicsPoint2PointJoint(physicsSphere, physicsBox, new Vector3f(-2,0,0), new
+    // PhysicsPoint2PointJoint joint=new PhysicsPoint2PointJoint(physicsSphere,
+    // physicsBox, new Vector3f(-2,0,0), new
     // Vector3f(2,0,0));
-    // PhysicsHingeJoint joint=new PhysicsHingeJoint(physicsSphere, physicsBox, new Vector3f(-2,0,0), new Vector3f(2,0,0),
+    // PhysicsHingeJoint joint=new PhysicsHingeJoint(physicsSphere, physicsBox,
+    // new Vector3f(-2,0,0), new Vector3f(2,0,0),
     // Vector3f.UNIT_Z,Vector3f.UNIT_Z);
     // getPhysicsSpace().add(joint);
 

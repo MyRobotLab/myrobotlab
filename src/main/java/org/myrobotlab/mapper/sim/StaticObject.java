@@ -31,7 +31,8 @@ import javax.media.j3d.Bounds;
 import javax.media.j3d.Transform3D;
 
 /**
- * Base Object for all block world objects (box,wall,arch ...). All object which doesnt move.
+ * Base Object for all block world objects (box,wall,arch ...). All object which
+ * doesnt move.
  */
 public class StaticObject extends BaseObject {
   /** Transformed bounds is the bound object in global coordinates. */
@@ -56,7 +57,8 @@ public class StaticObject extends BaseObject {
   }
 
   /**
-   * Create and pre Compute the transformed bound of the objects. Needs localtoVWorld.
+   * Create and pre Compute the transformed bound of the objects. Needs
+   * localtoVWorld.
    */
   protected void createTransformedBounds() {
 
@@ -71,7 +73,8 @@ public class StaticObject extends BaseObject {
   }
 
   /**
-   * Returns true if the object intersect with the given bounding sphere. This can be overriden.
+   * Returns true if the object intersect with the given bounding sphere. This
+   * can be overriden.
    * 
    * @param bs
    *          the boundingsphere to intersect with.

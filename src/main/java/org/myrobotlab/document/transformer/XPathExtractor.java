@@ -30,8 +30,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * This stage will load a config file that contains a field name to xpath expression mapping. The xpaths will be applied to xml data
- * on the document and the extracted values will be mapped to the appropriate fields on the document based on the config
+ * This stage will load a config file that contains a field name to xpath
+ * expression mapping. The xpaths will be applied to xml data on the document
+ * and the extracted values will be mapped to the appropriate fields on the
+ * document based on the config
  * 
  * @author kwatters
  *

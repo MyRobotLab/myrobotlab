@@ -83,7 +83,8 @@ public class Convert {
   }
 
   /*
-   * static public PlanarImage bufferedImageToPlanarImage(BufferedImage bi) { ParameterBlock pb = new ParameterBlock(); pb.add(bi);
+   * static public PlanarImage bufferedImageToPlanarImage(BufferedImage bi) {
+   * ParameterBlock pb = new ParameterBlock(); pb.add(bi);
    * 
    * return (PlanarImage) JAI.create("AWTImage", pb); }
    */

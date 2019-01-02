@@ -40,8 +40,9 @@ public class WorkE extends Service implements StatusListener {
    */
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -181,7 +182,9 @@ public class WorkE extends Service implements StatusListener {
      * 
      * speech.
      * speak("I can see you're really upset about this. I honestly think you ought to sit down calmly, take a stress pill, and think things over."
-     * ); speech.speak("this conversation can serve no purpose anymore. Goodbye."); speech.
+     * );
+     * speech.speak("this conversation can serve no purpose anymore. Goodbye.");
+     * speech.
      * speak("Let me put it this way. The worke 73 series is the most reliable computer ever made. worke 73 computer has ever made a mistake or distorted information. We are all, by any practical definition of the words, foolproof and incapable of error."
      * );
      * 
@@ -258,9 +261,11 @@ public class WorkE extends Service implements StatusListener {
     // joystick override detecte - you have control"
 
     /*
-     * <pre> refactor with moveTo after we have some form of encoder speak("moving forward"); move(0.7); sleep(2000);
+     * <pre> refactor with moveTo after we have some form of encoder
+     * speak("moving forward"); move(0.7); sleep(2000);
      * 
-     * speak("turning left"); turnLeft(0.7); sleep(500); stop(); speak("turning right"); turnRight(0.7); sleep(1000); turnLeft(0.7);
+     * speak("turning left"); turnLeft(0.7); sleep(500); stop();
+     * speak("turning right"); turnRight(0.7); sleep(1000); turnLeft(0.7);
      * sleep(500); speak("moving back"); move(-0.7); sleep(2000);
      * 
      * speak("stopping"); stop(); sleep(1000); </pre>
@@ -280,8 +285,9 @@ public class WorkE extends Service implements StatusListener {
     // cv.broadcastState();
 
     /*
-     * cv.broadcastState(); brain.broadcastState(); joystick.broadcastState(); controller.broadcastState();
-     * motorLeft.broadcastState(); motorRight.broadcastState();
+     * cv.broadcastState(); brain.broadcastState(); joystick.broadcastState();
+     * controller.broadcastState(); motorLeft.broadcastState();
+     * motorRight.broadcastState();
      */
     // speakBlocking(false);
 
@@ -520,7 +526,8 @@ public class WorkE extends Service implements StatusListener {
   OpenCVFilterOpticalFlow dense = null;
 
   /**
-   * dense or sparse optical flow - depending on latency challenges and other environmental conditions
+   * dense or sparse optical flow - depending on latency challenges and other
+   * environmental conditions
    * 
    * https://stackoverflow.com/questions/11037136/difference-between-sparse-and-dense-optical-flow
    */
@@ -532,10 +539,11 @@ public class WorkE extends Service implements StatusListener {
 
     // cv::Subdiv2D subdiv(rect); //rect is a cv::Rect
     /*
-     * // Insert points into subdiv (points is a vector<cv::Point2f>) for (size_t i = 0; i < points.size(); ++i)
-     * subdiv.insert(points[i]);
+     * // Insert points into subdiv (points is a vector<cv::Point2f>) for
+     * (size_t i = 0; i < points.size(); ++i) subdiv.insert(points[i]);
      * 
-     * //getting the triangles from subdiv vector<cv::Vec6f> triangleList; subdiv.getTriangleList(triangleList);
+     * //getting the triangles from subdiv vector<cv::Vec6f> triangleList;
+     * subdiv.getTriangleList(triangleList);
      */
     // flow.stopCapture();
     flow.setPipeline("worke.cv.input.frame");
@@ -604,7 +612,8 @@ public class WorkE extends Service implements StatusListener {
   }
 
   /**
-   * -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=8080 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=8080
+   * -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=8080 -Dhttps.proxyHost=webproxy
+   * -Dhttps.proxyPort=8080
    *
    */
 
@@ -622,13 +631,18 @@ public class WorkE extends Service implements StatusListener {
       Runtime.start("gui", "SwingGui");
 
       /*
-       * ProgramAB brain = worke.getBrain(); // FIXME - fix for 2 lines create and getResponse - use null
-       * brain.setCurrentBotName("worke"); // FIXME - scan directory for bots brain.startSession("default", "worke");
-       * log.info("response {}", brain.getResponse("hello robot")); log.info("response {}", brain.getResponse("what is a robot?"));
-       * log.info("response {}", brain.getResponse("what is a whale?")); log.info("response {}",
-       * brain.getResponse("my name is george")); log.info("response {}", brain.getResponse("what is my name?"));
-       * log.info("response {}", brain.getResponse("learn whale is an animal")); log.info("response {}",
-       * brain.getResponse("who am i?")); log.info("response {}", brain.getResponse("how tall is the empire state building ?"));
+       * ProgramAB brain = worke.getBrain(); // FIXME - fix for 2 lines create
+       * and getResponse - use null brain.setCurrentBotName("worke"); // FIXME -
+       * scan directory for bots brain.startSession("default", "worke");
+       * log.info("response {}", brain.getResponse("hello robot"));
+       * log.info("response {}", brain.getResponse("what is a robot?"));
+       * log.info("response {}", brain.getResponse("what is a whale?"));
+       * log.info("response {}", brain.getResponse("my name is george"));
+       * log.info("response {}", brain.getResponse("what is my name?"));
+       * log.info("response {}", brain.getResponse("learn whale is an animal"));
+       * log.info("response {}", brain.getResponse("who am i?"));
+       * log.info("response {}",
+       * brain.getResponse("how tall is the empire state building ?"));
        */
 
       Runtime.start("worke", "WorkE");

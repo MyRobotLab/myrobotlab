@@ -32,8 +32,8 @@ import org.myrobotlab.mapper.sim.DifferentialKinematic;
 import org.myrobotlab.mapper.sim.RobotFactory;
 
 /**
- * A differential drive (two wheels) kinematic demo. This demo demonstrates the usage of the DifferentialKinematic instead of the
- * standard one.
+ * A differential drive (two wheels) kinematic demo. This demo demonstrates the
+ * usage of the DifferentialKinematic instead of the standard one.
  * 
  **/
 public class DifferentialKinematicDemo extends Demo {

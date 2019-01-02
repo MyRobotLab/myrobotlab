@@ -39,7 +39,8 @@ public class MrlI2CBus extends Device {
   // DATA_SIZE = The number of bytes to read from the i2c device
   void i2cRead(int deviceAddress, int size) {
 
-    int answer = Wire.requestFrom(deviceAddress, size); // reqest a number of bytes to read
+    int answer = Wire.requestFrom(deviceAddress, size); // reqest a number of
+                                                        // bytes to read
 
     for (int i = 0; i < answer; i++) {
       msg.add(Wire.read());
@@ -58,7 +59,8 @@ public class MrlI2CBus extends Device {
     Wire.beginTransmission(deviceAddress); // address to the i2c device
     Wire.write(writeValue); // device memory address to read from
     Wire.endTransmission();
-    int answer = Wire.requestFrom(deviceAddress, readSize); // reqest a number of bytes to read
+    int answer = Wire.requestFrom(deviceAddress, readSize); // reqest a number
+                                                            // of bytes to read
 
     for (int i = 0; i < answer; i++) {
       msg.add(Wire.read());

@@ -26,23 +26,33 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * Client HTTP Request class This class helps to send POST HTTP requests with various form data, including files. Cookies can be
- * added to be included in the request.
+ * Client HTTP Request class This class helps to send POST HTTP requests with
+ * various form data, including files. Cookies can be added to be included in
+ * the request.
  * 
  * @author Vlad Patryshev
  * @version 1.0
  * 
- *          Modified by grog - added buffered output to increase performance in larger POSTs. In file operations buffered output is
- *          10x faster. Currently, a POST of a large file takes ~6 seconds TODO - fill in details and result
+ *          Modified by grog - added buffered output to increase performance in
+ *          larger POSTs. In file operations buffered output is 10x faster.
+ *          Currently, a POST of a large file takes ~6 seconds TODO - fill in
+ *          details and result
  * 
- *          References: http://www.javabeat.net/tips/36-file-upload-and-download- using-java.html
- *          http://www.java2s.com/Code/Java/File-Input-Output/ ComparingBufferedandUnbufferedWritingPerformance.htm
+ *          References:
+ *          http://www.javabeat.net/tips/36-file-upload-and-download-
+ *          using-java.html http://www.java2s.com/Code/Java/File-Input-Output/
+ *          ComparingBufferedandUnbufferedWritingPerformance.htm
  * 
- *          The big beautiful kahuna from stack overflow http://stackoverflow.com
- *          /questions/2793150/how-to-use-java-net-urlconnection -to-fire-and-handle-http-requests Proxy info -
- *          http://edn.embarcadero.com/article/29783 Proxy info - http://docs.oracle
- *          .com/javase/6/docs/technotes/guides/net/proxies.html Proxy info - http
- *          ://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be -used-by-the-jvm
+ *          The big beautiful kahuna from stack overflow
+ *          http://stackoverflow.com
+ *          /questions/2793150/how-to-use-java-net-urlconnection
+ *          -to-fire-and-handle-http-requests Proxy info -
+ *          http://edn.embarcadero.com/article/29783 Proxy info -
+ *          http://docs.oracle
+ *          .com/javase/6/docs/technotes/guides/net/proxies.html Proxy info -
+ *          http
+ *          ://stackoverflow.com/questions/120797/how-do-i-set-the-proxy-to-be
+ *          -used-by-the-jvm
  * 
  */
 
@@ -71,17 +81,21 @@ public class HttpRequest {
 
     /*
      * 
-     * HTTPRequest http = new HTTPRequest( "http://www.mkyong.com/java/how-do-convert-byte-array-to-string-in-java/" ); String s =
-     * http.getString(); log.info(s);
+     * HTTPRequest http = new HTTPRequest(
+     * "http://www.mkyong.com/java/how-do-convert-byte-array-to-string-in-java/"
+     * ); String s = http.getString(); log.info(s);
      * 
-     * String language = "en"; String toSpeak = "hello"; URI uri = new URI("http", null, "translate.google.com", 80,
-     * "/translate_tts", "tl=" + language + "&q=" + toSpeak, null);
+     * String language = "en"; String toSpeak = "hello"; URI uri = new
+     * URI("http", null, "translate.google.com", 80, "/translate_tts", "tl=" +
+     * language + "&q=" + toSpeak, null);
      * 
      * URL url = uri.toURL();
      * 
-     * HttpURLConnection.setFollowRedirects(true); HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-     * System.out.println( "Response code = " + connection.getResponseCode()); String header =
-     * connection.getHeaderField("location"); if (header != null) System.out.println("Redirected to " + header);
+     * HttpURLConnection.setFollowRedirects(true); HttpURLConnection connection
+     * = (HttpURLConnection) url.openConnection(); System.out.println(
+     * "Response code = " + connection.getResponseCode()); String header =
+     * connection.getHeaderField("location"); if (header != null)
+     * System.out.println("Redirected to " + header);
      * 
      * HTTPRequest request = new HTTPRequest(uri.toURL()); request.getBinary();
      */
@@ -145,14 +159,21 @@ public class HttpRequest {
       writer.flush();
 
       /*
-       * // Send binary file. writer.append("--" + boundary).append(CRLF); writer.append(
-       * "Content-Disposition: form-data; name=\"binaryFile\"; filename=\"" + binaryFile.getName() + "\"").append(CRLF);
-       * writer.append( "Content-Type: " + URLConnection.guessContentTypeFromName (binaryFile.getName())).append(CRLF);
-       * writer.append( "Content-Transfer-Encoding: binary").append(CRLF); writer.append(CRLF).flush(); InputStream input = null;
-       * try { input = new FileInputStream(binaryFile); byte[] buffer = new byte[1024]; for (int length = 0; (length =
-       * input.read(buffer)) > 0;) { output.write(buffer, 0, length); } output.flush(); // Important! Output cannot be closed. Close
-       * of writer will close output as well. } finally { if (input != null) try { input.close(); } catch (IOException logOrIgnore)
-       * {} } writer.append(CRLF).flush(); // CRLF is important! It indicates end of binary boundary.
+       * // Send binary file. writer.append("--" + boundary).append(CRLF);
+       * writer.append(
+       * "Content-Disposition: form-data; name=\"binaryFile\"; filename=\"" +
+       * binaryFile.getName() + "\"").append(CRLF); writer.append(
+       * "Content-Type: " + URLConnection.guessContentTypeFromName
+       * (binaryFile.getName())).append(CRLF); writer.append(
+       * "Content-Transfer-Encoding: binary").append(CRLF);
+       * writer.append(CRLF).flush(); InputStream input = null; try { input =
+       * new FileInputStream(binaryFile); byte[] buffer = new byte[1024]; for
+       * (int length = 0; (length = input.read(buffer)) > 0;) {
+       * output.write(buffer, 0, length); } output.flush(); // Important! Output
+       * cannot be closed. Close of writer will close output as well. } finally
+       * { if (input != null) try { input.close(); } catch (IOException
+       * logOrIgnore) {} } writer.append(CRLF).flush(); // CRLF is important! It
+       * indicates end of binary boundary.
        */
 
       // End of multipart/form-data.
@@ -289,12 +310,14 @@ public class HttpRequest {
 
     /*
      * 
-     * try { // content size sent back data = new byte[contentLength]; int bytesRead = 0; int offset = 0; while (offset <
-     * contentLength) { bytesRead = in.read(data, offset, data.length - offset); if (bytesRead == -1) break; offset += bytesRead; }
-     * in.close();
+     * try { // content size sent back data = new byte[contentLength]; int
+     * bytesRead = 0; int offset = 0; while (offset < contentLength) { bytesRead
+     * = in.read(data, offset, data.length - offset); if (bytesRead == -1)
+     * break; offset += bytesRead; } in.close();
      * 
-     * if (offset != contentLength) { throw new IOException("Only read " + offset + " bytes; Expected " + contentLength + " bytes");
-     * } } catch (IOException e1) { Logging.logException(e1); error = e1.getMessage(); } }
+     * if (offset != contentLength) { throw new IOException("Only read " +
+     * offset + " bytes; Expected " + contentLength + " bytes"); } } catch
+     * (IOException e1) { Logging.logException(e1); error = e1.getMessage(); } }
      */
 
     /*
@@ -302,8 +325,9 @@ public class HttpRequest {
      */
 
     /*
-     * FileOutputStream out; try { out = new FileOutputStream("hello.mp3"); out.write(data); out.flush(); out.close(); } catch
-     * (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); }
+     * FileOutputStream out; try { out = new FileOutputStream("hello.mp3");
+     * out.write(data); out.flush(); out.close(); } catch (Exception e) { //
+     * TODO Auto-generated catch block e.printStackTrace(); }
      */
 
     return data;
@@ -348,7 +372,8 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that were added
+   * posts the requests to the server, with all the cookies and parameters that
+   * were added
    * 
    * @return input stream with the server response
    */
@@ -365,8 +390,9 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with parameters that
-   * are passed in the argument
+   * posts the requests to the server, with all the cookies and parameters that
+   * were added before (if any), and with parameters that are passed in the
+   * argument
    * 
    * @param parameters
    *          request parameters
@@ -381,8 +407,9 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with cookies and
-   * parameters that are passed in the arguments
+   * posts the requests to the server, with all the cookies and parameters that
+   * were added before (if any), and with cookies and parameters that are passed
+   * in the arguments
    * 
    * @param cookies
    *          request cookies
@@ -400,8 +427,9 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with parameters that
-   * are passed in the argument
+   * posts the requests to the server, with all the cookies and parameters that
+   * were added before (if any), and with parameters that are passed in the
+   * argument
    * 
    * @param parameters
    *          request parameters
@@ -508,8 +536,9 @@ public class HttpRequest {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that were added before (if any), and with cookies and
-   * parameters that are passed in the arguments
+   * posts the requests to the server, with all the cookies and parameters that
+   * were added before (if any), and with cookies and parameters that are passed
+   * in the arguments
    * 
    * @param cookies
    *          request cookies
@@ -527,7 +556,8 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with parameters that are passed in the argument
+   * posts a new request to specified URL, with parameters that are passed in
+   * the argument
    * 
    * @param url
    *          u
@@ -544,7 +574,8 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with cookies and parameters that are passed in the argument
+   * posts a new request to specified URL, with cookies and parameters that are
+   * passed in the argument
    * 
    * @param url
    *          u
@@ -563,7 +594,8 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with parameters that are passed in the argument
+   * posts a new request to specified URL, with parameters that are passed in
+   * the argument
    * 
    * @param url
    *          u
@@ -679,7 +711,8 @@ public class HttpRequest {
   }
 
   /**
-   * posts a new request to specified URL, with cookies and parameters that are passed in the argument
+   * posts a new request to specified URL, with cookies and parameters that are
+   * passed in the argument
    * 
    * @param url
    *          u
@@ -746,7 +779,8 @@ public class HttpRequest {
    * adds cookies to the request
    * 
    * @param cookies
-   *          array of cookie names and values (cookies[2*i] is a name, cookies[2*i + 1] is a value)
+   *          array of cookie names and values (cookies[2*i] is a name,
+   *          cookies[2*i + 1] is a value)
    * @throws IOException
    *           e
    */
@@ -775,8 +809,9 @@ public class HttpRequest {
   }
 
   /**
-   * adds a parameter to the request; if the parameter is a File, the file is uploaded, otherwise the string value of the parameter
-   * is passed in the request
+   * adds a parameter to the request; if the parameter is a File, the file is
+   * uploaded, otherwise the string value of the parameter is passed in the
+   * request
    * 
    * @param name
    *          parameter name
@@ -847,8 +882,8 @@ public class HttpRequest {
    * adds parameters to the request
    * 
    * @param parameters
-   *          "name-to-value" map of parameters; if a value is a file, the file is uploaded, otherwise it is stringified and sent in
-   *          the request
+   *          "name-to-value" map of parameters; if a value is a file, the file
+   *          is uploaded, otherwise it is stringified and sent in the request
    * @throws IOException
    *           e
    */
@@ -865,8 +900,9 @@ public class HttpRequest {
    * adds parameters to the request
    * 
    * @param parameters
-   *          array of parameter names and values (parameters[2*i] is a name, parameters[2*i + 1] is a value); if a value is a file,
-   *          the file is uploaded, otherwise it is stringified and sent in the request
+   *          array of parameter names and values (parameters[2*i] is a name,
+   *          parameters[2*i + 1] is a value); if a value is a file, the file is
+   *          uploaded, otherwise it is stringified and sent in the request
    * @throws IOException
    *           e
    */

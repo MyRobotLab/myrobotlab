@@ -30,7 +30,8 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.slf4j.Logger;
 
 /**
- * This is a reference implementation of Harry. Harry is an InMoov. (Harry / Lloyd.. it's all the same.)
+ * This is a reference implementation of Harry. Harry is an InMoov. (Harry /
+ * Lloyd.. it's all the same.)
  * 
  * Very much a WIP
  * 
@@ -48,7 +49,8 @@ public class Lloyd extends Service {
   private Solr memory;
   private Solr cloudMemory;
 
-  // the cortex is the part of the brain responsible for image recognition.. this seems like a fitting name
+  // the cortex is the part of the brain responsible for image recognition..
+  // this seems like a fitting name
   private Deeplearning4j visualCortex;
 
   // speech recognition (the ear!)
@@ -72,7 +74,8 @@ public class Lloyd extends Service {
 
   private transient WebGui webgui;
 
-  // Ok.. let's create 2 ik solvers one for the left hand, one for the right hand.
+  // Ok.. let's create 2 ik solvers one for the left hand, one for the right
+  // hand.
   // "motor control"
   private InverseKinematics3D leftIK;
   private InverseKinematics3D rightIK;
@@ -245,7 +248,8 @@ public class Lloyd extends Service {
     ArrayList<String> params = new ArrayList<String>();
     // TODO: add the "qf" parameter to improve precision/recall
     // TODO: add the has infobox as a filter query
-    // params.add("title:<star/> text:<star/> +" + fieldName + ":* +has_infobox:true");
+    // params.add("title:<star/> text:<star/> +" + fieldName + ":*
+    // +has_infobox:true");
     params.add("infobox_name_ss:<star/> title:<star/> text:<star/> +" + fieldName + ":* +has_infobox:true");
     params.add(fieldName);
     OOBPayload oobTag = new OOBPayload(serviceName, methodName, params);
@@ -272,7 +276,8 @@ public class Lloyd extends Service {
 
   public void startCortex() {
     visualCortex = (Deeplearning4j) Runtime.start("visualCortex", "Deeplearning4j");
-    // TODO: ?? any other initialization? load the current image recognition model?
+    // TODO: ?? any other initialization? load the current image recognition
+    // model?
   }
 
   public void updatePersonRecognitionModel() throws IOException {
@@ -325,7 +330,8 @@ public class Lloyd extends Service {
     //
     // String filename = "my_new_model.bin";
     // TODO: make this runnable?
-    // At this point we should null out the current model so it stops classifying.
+    // At this point we should null out the current model so it stops
+    // classifying.
     // ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
 
     // before we do this. let's disable the yolo stuff
@@ -343,7 +349,8 @@ public class Lloyd extends Service {
   //
   public void updateRecognitionModel() throws IOException {
     // Here we should train a new image recognition model..
-    // when that's done.. have it update the current model in use by the dl4jtranfer filter.
+    // when that's done.. have it update the current model in use by the
+    // dl4jtranfer filter.
     int seed = 42;
     double trainPerc = 0.5;
     // vgg16 specific values
@@ -387,7 +394,8 @@ public class Lloyd extends Service {
     //
     // String filename = "my_new_model.bin";
     // TODO: make this runnable?
-    // At this point we should null out the current model so it stops classifying.
+    // At this point we should null out the current model so it stops
+    // classifying.
     ((OpenCVFilterDL4JTransfer) leftEye.getFilter("dl4jTransfer")).unloadModel();
 
     CustomModel imageRecognizer = visualCortex.trainModel(labels, trainIter, testIter, imageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
@@ -463,7 +471,8 @@ public class Lloyd extends Service {
     leftIK.centerAllJoints();
     rightIK.centerAllJoints();
 
-    // TODO: our palm position when we're centered.. probably could be calibration for input translate/rotate / scale matrix?
+    // TODO: our palm position when we're centered.. probably could be
+    // calibration for input translate/rotate / scale matrix?
     Point leftHandPos = leftIK.getCurrentArm().getPalmPosition();
     Point rightHandPos = rightIK.getCurrentArm().getPalmPosition();
 
@@ -473,7 +482,8 @@ public class Lloyd extends Service {
 
     oculusRift.addListener("publishLeftHandPosition", leftIK.getName(), "onPoint");
     // TODO: re-enable me.. for now .. just left hand as we're debugging.
-    // oculusRift.addListener("publishRightHandPosition", rightIK.getName(), "onPoint");
+    // oculusRift.addListener("publishRightHandPosition", rightIK.getName(),
+    // "onPoint");
 
     leftIK.addListener("publishJointAngles", getName(), "onLeftJointAngles");
     rightIK.addListener("publishJointAngles", getName(), "onRightJointAngles");
@@ -500,7 +510,8 @@ public class Lloyd extends Service {
     brain.addTextListener(mouth);
   }
 
-  // TODO: similar approach for sending the oculus head tracking info to the remote !
+  // TODO: similar approach for sending the oculus head tracking info to the
+  // remote !
 
   public void onLeftJointAngles(Map<String, Double> angleMap) {
     // This is our callback for the IK stuff!
@@ -575,7 +586,8 @@ public class Lloyd extends Service {
     }
   }
 
-  /// Ok so we want a helper method to create an entity metadata record in the memory
+  /// Ok so we want a helper method to create an entity metadata record in the
+  /// memory
   public void createEntity(String entityName, String entityType) {
     SolrInputDocument entityDocument = new SolrInputDocument();
     // entity id (should be) deterministic.

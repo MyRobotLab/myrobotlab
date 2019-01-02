@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * InverseKinematics provides basic 2D inverse kinematics features. This class will be replaced with the DH parameter based
- * InverseKinematics3D service.
+ * InverseKinematics provides basic 2D inverse kinematics features. This class
+ * will be replaced with the DH parameter based InverseKinematics3D service.
  *
  */
 public class InverseKinematics extends Service {
@@ -81,8 +81,9 @@ public class InverseKinematics extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

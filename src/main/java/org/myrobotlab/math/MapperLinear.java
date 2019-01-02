@@ -25,7 +25,8 @@ public final class MapperLinear implements Serializable, Mapper {
   Boolean inverted = false;
 
   /**
-   * non-parameterized contructor for "un-set" mapper use the merge function to set "default" values from the motorcontroller
+   * non-parameterized contructor for "un-set" mapper use the merge function to
+   * set "default" values from the motorcontroller
    */
   public MapperLinear() {
   }
@@ -126,7 +127,8 @@ public final class MapperLinear implements Serializable, Mapper {
   /*
    * (non-Javadoc)
    * 
-   * @see org.myrobotlab.math.MapperInterface#merge(org.myrobotlab.math.MapperLinear)
+   * @see
+   * org.myrobotlab.math.MapperInterface#merge(org.myrobotlab.math.MapperLinear)
    */
   @Override
   public void merge(Mapper in) {

@@ -144,19 +144,26 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   /**
    * Begin Recognition - which is just a sub-classification of "face"(detection)
    * 
-   * This is 'supervised' or semi-supervised training done with directories on the filesystem and "help/supervision" from someone
-   * moving files into the correct sub-directories
+   * This is 'supervised' or semi-supervised training done with directories on
+   * the filesystem and "help/supervision" from someone moving files into the
+   * correct sub-directories
    * 
-   * the sub-directories are sub-classes and would be indication of this filter creating a new sub-class classifier..
+   * the sub-directories are sub-classes and would be indication of this filter
+   * creating a new sub-class classifier..
    * 
-   * e.g. if their is a directory of "fruit" a person can quickly make subdirectories of apples, banannas, & oranges
+   * e.g. if their is a directory of "fruit" a person can quickly make
+   * subdirectories of apples, banannas, & oranges
    * 
-   * the filter will see these subdirectores - make and train a classifier then dump incoming classified data back into the
-   * directory with an underscore '_' at the begining of the file.
+   * the filter will see these subdirectores - make and train a classifier then
+   * dump incoming classified data back into the directory with an underscore
+   * '_' at the begining of the file.
    * 
-   * The underscore will always be the machine guessing/classifying, while files without underscored are put their by a human. The
-   * distinction is important, as the human un-mangled named files are "always" considered correct. And directories with _{label}
-   * are the machines guess. This allows the supervisor to quickly assist in moving correct and incorrect machine guesses
+   * The underscore will always be the machine guessing/classifying, while files
+   * without underscored are put their by a human. The distinction is important,
+   * as the human un-mangled named files are "always" considered correct. And
+   * directories with _{label} are the machines guess. This allows the
+   * supervisor to quickly assist in moving correct and incorrect machine
+   * guesses
    * 
    */
 
@@ -167,18 +174,21 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   public boolean saveFaces = true;
 
   /**
-   * our set of classifiers for all (sub directories) or (sub classes) its OpenCVClassifier vs BoofCv its "really" a FaceRecognizer
-   * - (I wish it was more 'general')
+   * our set of classifiers for all (sub directories) or (sub classes) its
+   * OpenCVClassifier vs BoofCv its "really" a FaceRecognizer - (I wish it was
+   * more 'general')
    */
   public Map<File, OpenCVClassifier> classifiers = new TreeMap<File, OpenCVClassifier>();
 
   /**
-   * root is the location on the file system where this classifier is supposed to work and classify into sub directories.
+   * root is the location on the file system where this classifier is supposed
+   * to work and classify into sub directories.
    * 
    * A subclass is the same as a directory who's name is a "label"
    * 
-   * it keeps track of the set of subdirectories and the number of image files to train from. If the number of files change, or the
-   * number of directories without underscore - it will likely cause a 're-train'
+   * it keeps track of the set of subdirectories and the number of image files
+   * to train from. If the number of files change, or the number of directories
+   * without underscore - it will likely cause a 're-train'
    */
   public class OpenCVClassifier {
     File root;
@@ -318,16 +328,19 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
           int z0 = Math.abs(width - w);
 
           // FIXME - have the resize filter do the resize (with options)
-          // IplImage resizedImage = IplImage.create(800, 60, ipImg.depth(), ipImg.nChannels());
+          // IplImage resizedImage = IplImage.create(800, 60, ipImg.depth(),
+          // ipImg.nChannels());
 
           // cvSmooth(origImg, origImg);
           // cvResize(ipImg, resizedImage);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_CUBIC);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_MAX);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_NEAREST);
-          // resize(convertToMat(ipImg), convertToMat(resizedImage), new Size(0,0), 1.0, 1.0, Imgproc.INTER_CUBIC);
+          // resize(convertToMat(ipImg), convertToMat(resizedImage), new
+          // Size(0,0), 1.0, 1.0, Imgproc.INTER_CUBIC);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_AREA);
-          // saveToFile("stretched", resizer.resizeNoAspect(ipImg, templateWidth, templateHeight));
+          // saveToFile("stretched", resizer.resizeNoAspect(ipImg,
+          // templateWidth, templateHeight));
 
           // BEGIN STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
           IplImage resizedImage = OpenCVFilterResize.resizeImageMaintainAspect(ipImg, templateWidth, templateHeight);
@@ -371,9 +384,11 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   };
 
   /**
-   * a class to look for new directories created by the "supervisor" and retrain classifiers or create new ones.
+   * a class to look for new directories created by the "supervisor" and retrain
+   * classifiers or create new ones.
    * 
-   * it might also examine if files have been added and if classifiers need to be re-trained
+   * it might also examine if files have been added and if classifiers need to
+   * be re-trained
    */
   class ScanTimer extends TimerTask {
     File rootDir = null;
@@ -406,8 +421,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   Timer timer = new Timer(String.format("%s-training-timer", name));
 
   /**
-   * FIXME - haarcascade face finder "works" but should be put in a interface/framework which treats it like a "generalized"
-   * classifier
+   * FIXME - haarcascade face finder "works" but should be put in a
+   * interface/framework which treats it like a "generalized" classifier
    * 
    * @param name
    */
@@ -464,7 +479,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   }
 
   /**
-   * tells the detector to return the biggest - hence # of objects will be 1 or none
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
    */
   public void addOptionFindBiggestObject() {
     option |= CV_HAAR_FIND_BIGGEST_OBJECT;
@@ -498,7 +514,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   }
 
   /**
-   * tells the detector to return the biggest - hence # of objects will be 1 or none
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
    */
   public void removeOptionFindBiggestObject() {
     option &= 0xFF ^ CV_HAAR_FIND_BIGGEST_OBJECT;
@@ -521,8 +538,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   }
 
   /**
-   * TODO - face classifier should be handled in the same way as other "sub"-classifiers - e.g. classifier = new
-   * Classifier(subclass)
+   * TODO - face classifier should be handled in the same way as other
+   * "sub"-classifiers - e.g. classifier = new Classifier(subclass)
    */
   @Override
   public void imageChanged(IplImage image) {
@@ -574,7 +591,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               // requirements
               // pre-process / isolate detected face
 
-              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING BOXES
+              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING
+              // BOXES
               // this is the full data copy (color - original size - etc...)
               cvSetImageROI(image, r);
               IplImage origBB = cvCreateImage(new CvSize(r.width(), r.height()), image.depth(), image.nChannels());
@@ -600,7 +618,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               r = new CvRect(0, 0, image.width(), image.width());
               cvSetImageROI(image, r);
 
-              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING BOXES
+              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING
+              // BOXES
 
               // ====== BEGIN STANDARD TEMPLATE
               // BEGIN STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
@@ -614,7 +633,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               cvSetZero(template);
               IplImage merged = copier.copy(resizedImage, template);
 
-              // TODO- COMPARE - IF A LABEL WITH ENOUGH CONFIDENCE COMES UP IT GOES TO _{label} directory !
+              // TODO- COMPARE - IF A LABEL WITH ENOUGH CONFIDENCE COMES UP IT
+              // GOES TO _{label} directory !
 
               // END STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
               // ====== BEGIN STANDARD TEMPLATE
@@ -629,15 +649,19 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               if (confidence.get() > 50) {
                 String labelStr = idToLabelMap.get(label.get());
                 // we're making "confidence" guess of a person
-                // FIXME - REFACTOR - THIS NEEDS TO BE ABLE TO RECURSE ... we're at faces level - but it may be arbitrarily deeper
-                // We've already traveled to the depth of faces .. future may be deeper
+                // FIXME - REFACTOR - THIS NEEDS TO BE ABLE TO RECURSE ... we're
+                // at faces level - but it may be arbitrarily deeper
+                // We've already traveled to the depth of faces .. future may be
+                // deeper
                 File dir = new File(facesSubclass + File.separator + labelStr);
                 dir.mkdirs();
 
-                // saving the "original" non-pre-processed image to the _{class} "guess" directory - prolly should encode confidence
+                // saving the "original" non-pre-processed image to the _{class}
+                // "guess" directory - prolly should encode confidence
                 // in
                 // filename ?
-                // this needs to be fixed to recursively build all classifiers and key/directory paths
+                // this needs to be fixed to recursively build all classifiers
+                // and key/directory paths
                 String faceGuess = getMachineFileName(dir, opencv.getFrameIndex(), i);
                 File faceGuessFile = new File(faceGuess);
                 faceGuessFile.getParentFile().mkdirs();
@@ -645,7 +669,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
                 saveToFile(faceGuess, origBB);
 
                 // TODO saved the pre-processed guess to the cache file
-                // saveToFile(imageFile.getParent() + File.separator + CACHE_DIR + File.separator + imageFile.getName(), merged);
+                // saveToFile(imageFile.getParent() + File.separator + CACHE_DIR
+                // + File.separator + imageFile.getName(), merged);
               }
 
               // int predictedLabel =

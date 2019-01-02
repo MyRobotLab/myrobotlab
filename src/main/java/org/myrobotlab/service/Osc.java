@@ -84,8 +84,9 @@ public class Osc extends Service implements OSCListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -179,7 +180,8 @@ public class Osc extends Service implements OSCListener {
 
       Osc osc = (Osc) Runtime.start("osc", "Osc");
       /*
-       * Python python = (Python)Runtime.start("python", "Python"); python.subscribe("osc", "publishOSCMessage");
+       * Python python = (Python)Runtime.start("python", "Python");
+       * python.subscribe("osc", "publishOSCMessage");
        */
       osc.listen(6000);
       // osc.listen("/filter1", 6000);

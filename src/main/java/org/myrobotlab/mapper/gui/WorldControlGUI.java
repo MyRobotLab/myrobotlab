@@ -87,7 +87,8 @@ public class WorldControlGUI extends JPanel implements ActionListener {
 
   void createGUI() {
     /*
-     * setBorder(BorderFactory.createCompoundBorder( BorderFactory.createTitledBorder("World"),
+     * setBorder(BorderFactory.createCompoundBorder(
+     * BorderFactory.createTitledBorder("World"),
      * BorderFactory.createEmptyBorder(5,5,5,5)));
      */
     setLayout(new BoxLayout(this, BoxLayout.X_AXIS));

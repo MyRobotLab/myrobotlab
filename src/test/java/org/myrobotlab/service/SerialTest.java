@@ -158,7 +158,8 @@ public class SerialTest {
     assertEquals(16777216, x);
 
     /*
-     * TODO DO RANGE TESTS :P x = Serial.bytesToInt(new int[]{1, 0, 1, 0}, 1, 3); assertEquals(1, x);
+     * TODO DO RANGE TESTS :P x = Serial.bytesToInt(new int[]{1, 0, 1, 0}, 1,
+     * 3); assertEquals(1, x);
      */
 
   }
@@ -347,8 +348,8 @@ public class SerialTest {
     assertEquals(-1, x);
 
     /*
-     * WTH? test = new int[]{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE}; x = Serial.bytesToLong(test, 0, 8);
-     * assertEquals(-1, x);
+     * WTH? test = new int[]{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+     * 0xFE}; x = Serial.bytesToLong(test, 0, 8); assertEquals(-1, x);
      */
 
     log.info("here");

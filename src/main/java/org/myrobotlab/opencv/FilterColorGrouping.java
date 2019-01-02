@@ -178,11 +178,15 @@ public final class FilterColorGrouping {
         // to blue
 
         /*
-         * if (lastColor != colorInt) { log.info("group size " + groupList.size() + " @ (" + x + "," + y + ") color red " +
-         * ((colorInt >> 16) & 0xFF) + " green " + ((colorInt >> 8) & 0xFF) + " blue " + ((colorInt) & 0xFF)); for (int i = 0; i <
-         * groupList.size(); ++i) { Group group = groupList.get(i); log.info("number " + group.number); log.info("color red " +
-         * ((group.intColor >> 16) & 0xFF) + " green " + ((group.intColor >> 8) & 0xFF) + " blue " + ((group.intColor) & 0xFF));
-         * log.info("bounding box " + group.boundingBox); log.info( "points " +group.points.size()); }
+         * if (lastColor != colorInt) { log.info("group size " +
+         * groupList.size() + " @ (" + x + "," + y + ") color red " + ((colorInt
+         * >> 16) & 0xFF) + " green " + ((colorInt >> 8) & 0xFF) + " blue " +
+         * ((colorInt) & 0xFF)); for (int i = 0; i < groupList.size(); ++i) {
+         * Group group = groupList.get(i); log.info("number " + group.number);
+         * log.info("color red " + ((group.intColor >> 16) & 0xFF) + " green " +
+         * ((group.intColor >> 8) & 0xFF) + " blue " + ((group.intColor) &
+         * 0xFF)); log.info("bounding box " + group.boundingBox); log.info(
+         * "points " +group.points.size()); }
          * 
          * }
          */
@@ -396,9 +400,10 @@ public final class FilterColorGrouping {
     for (int i = 0; i < groupList.size(); ++i) {
       Group group = groupList.get(i);
       /*
-       * log.info("number " + group.number); log.info("color red " + ((group.intColor >> 16) & 0xFF) + " green " + ((group.intColor
-       * >> 8) & 0xFF) + " blue " + ((group.intColor) & 0xFF)); log.info("bounding box " + group.boundingBox); log.info("points "
-       * +group.points.size());
+       * log.info("number " + group.number); log.info("color red " +
+       * ((group.intColor >> 16) & 0xFF) + " green " + ((group.intColor >> 8) &
+       * 0xFF) + " blue " + ((group.intColor) & 0xFF)); log.info("bounding box "
+       * + group.boundingBox); log.info("points " +group.points.size());
        */
       g.setColor(Color.yellow);
       g.drawRect(group.boundingBox.x, group.boundingBox.y, group.boundingBox.width, group.boundingBox.height);

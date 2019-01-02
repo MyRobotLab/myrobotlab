@@ -59,7 +59,8 @@ public class OpenCVFilterCopy extends OpenCVFilter {
    * 
    * void getSubImg(IplImage* img, IplImage* subImg, CvRect roiRect) {
    * 
-   * cvSetImageROI(img, roiRect); subImg = cvCreateImage(cvGetSize(img), img->depth, img->nChannels); cvCopy(img, subImg, NULL);
+   * cvSetImageROI(img, roiRect); subImg = cvCreateImage(cvGetSize(img),
+   * img->depth, img->nChannels); cvCopy(img, subImg, NULL);
    * cvResetImageROI(img); }
    */
 

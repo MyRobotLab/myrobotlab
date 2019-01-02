@@ -35,13 +35,15 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * MRLListner is a data object used to set up routes of messages within the framework. It is sent to the service which a
- * subscription to a Topic is desired For details please refer to :
+ * MRLListner is a data object used to set up routes of messages within the
+ * framework. It is sent to the service which a subscription to a Topic is
+ * desired For details please refer to :
  * 
  * http://myrobotlab.org/content/myrobotlab-api
  * 
- * Typically this data class is used to send to a service on behalf of a subscriptions. Its a subscription request data to add a
- * message route from a topic.
+ * Typically this data class is used to send to a service on behalf of a
+ * subscriptions. Its a subscription request data to add a message route from a
+ * topic.
  * 
  * @author GroG
  *
@@ -54,7 +56,8 @@ public final class MRLListener implements Serializable {
   int _hashCode;
 
   /**
-   * the keyed topic Method - when this method is invoked listeners are sent messages with return data
+   * the keyed topic Method - when this method is invoked listeners are sent
+   * messages with return data
    */
   public String topicMethod;
 

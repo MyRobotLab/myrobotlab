@@ -117,7 +117,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   public boolean isAttached = false;
 
   /*
-   * ========================================================================= MPR121 Registers
+   * =========================================================================
+   * MPR121 Registers
    * -----------------------------------------------------------------------
    */
   static final int TOUCH_STATUS0 = 0x00;
@@ -285,7 +286,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   transient Map<Integer, List<PinListener>> pinListeners = new HashMap<Integer, List<PinListener>>();
 
   /**
-   * the map of pins which the pin listeners are listening too - if the set is null they are listening to "any" published pin
+   * the map of pins which the pin listeners are listening too - if the set is
+   * null they are listening to "any" published pin
    */
   Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
@@ -468,8 +470,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This method starts the MPR121 measuring pins = Number of pins to use for measuring starting with ELE0 as number 1 Setting pins
-   * = 0 will stop measuring
+   * This method starts the MPR121 measuring pins = Number of pins to use for
+   * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
+   * measuring
    */
   public void setRunMode(int pins) {
     writeRegister(ELECTRODE_CONFIGURAION_REGISTER, pins + 1);
@@ -477,8 +480,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This method starts the MPR121 measuring pins = Number of pins to use for measuring starting with ELE0 as number 1 Setting pins
-   * = 0 will stop measuring
+   * This method starts the MPR121 measuring pins = Number of pins to use for
+   * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
+   * measuring
    */
   public void setStopMode() {
     setRunMode(0);
@@ -525,7 +529,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * GOOD DESIGN - this method is the same pretty much for all Services could be a Java 8 default implementation to the interface
+   * GOOD DESIGN - this method is the same pretty much for all Services could be
+   * a Java 8 default implementation to the interface
    */
   @Override
   public boolean isAttached(String name) {
@@ -712,8 +717,9 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         A necessary class to wrap references to rxtxLib in something which can be dynamically loaded. Without this abstraction
- *         any platform which did was not supported for by rxtx would not be able to use the Serial service or ports.
+ *         A necessary class to wrap references to rxtxLib in something which
+ *         can be dynamically loaded. Without this abstraction any platform
+ *         which did was not supported for by rxtx would not be able to use the
+ *         Serial service or ports.
  * 
  * 
  */

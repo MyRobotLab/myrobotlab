@@ -27,7 +27,8 @@ import boofcv.struct.calib.VisualDepthParameters;
 import java.io.File;
 
 /**
- * Loads an intrinsic parameters file for the RGB camera and creates a VisualDepthParameters for the Kinect.
+ * Loads an intrinsic parameters file for the RGB camera and creates a
+ * VisualDepthParameters for the Kinect.
  *
  * @author Peter Abeles
  */

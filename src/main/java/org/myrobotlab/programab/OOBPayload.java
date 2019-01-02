@@ -82,7 +82,8 @@ public class OOBPayload {
   }
 
   public static String asOOBTag(OOBPayload payload) {
-    // TODO: this isn't really safe as XML/AIML.. but we don't want to end up double encoding things like
+    // TODO: this isn't really safe as XML/AIML.. but we don't want to end up
+    // double encoding things like
     // the important <star/> tags... So, for now, it's just wrapped in the tags.
     StringBuilder oobBuilder = new StringBuilder();
     oobBuilder.append("<oob>");
@@ -95,7 +96,8 @@ public class OOBPayload {
     oobBuilder.append("</method>");
     for (String param : payload.params) {
       oobBuilder.append("<param>");
-      // TODO: this could be problematic if the param contains XML chars that are not AIML ...
+      // TODO: this could be problematic if the param contains XML chars that
+      // are not AIML ...
       oobBuilder.append(param);
       oobBuilder.append("</param>");
     }

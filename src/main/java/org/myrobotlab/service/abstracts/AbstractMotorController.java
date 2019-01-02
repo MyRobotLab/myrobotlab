@@ -108,7 +108,8 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   }
 
   /**
-   * Routing Attach - routes ServiceInterface.attach(service) to appropriate methods for this class
+   * Routing Attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
    */
   @Override
   public void attach(Attachable service) throws Exception {
@@ -123,10 +124,12 @@ public abstract class AbstractMotorController extends Service implements MotorCo
     // motorAttach( ?? ) to be overloaded by subclass - default methods produce
     // "not implemented error"
     /*
-     * <pre> FIXME - test AbstractMotor(Control) - if (MotorControl.class.isAssignableFrom(service.getClass())) { MotorControl motor
-     * = (MotorControl) service; String port = motor.getPort();
+     * <pre> FIXME - test AbstractMotor(Control) - if
+     * (MotorControl.class.isAssignableFrom(service.getClass())) { MotorControl
+     * motor = (MotorControl) service; String port = motor.getPort();
      * 
-     * if (port == null || (!ports.contains(port))) { throw new IOException("port number in motor must be set to m1 or m2"); }
+     * if (port == null || (!ports.contains(port))) { throw new
+     * IOException("port number in motor must be set to m1 or m2"); }
      * 
      * motors.put(motor.getName(), motor);
      * 
@@ -134,7 +137,8 @@ public abstract class AbstractMotorController extends Service implements MotorCo
      * 
      * // made changes broadcast it broadcastState(); return; } </pre>
      */
-    // FIXME - decide what unit AbstractMotorController will use (probably AbstractMotor)
+    // FIXME - decide what unit AbstractMotorController will use (probably
+    // AbstractMotor)
     if (MotorControl.class.isAssignableFrom(service.getClass())) {
       MotorControl motor = (MotorControl) service;
       // add motor to set of current motors this controller is attached to

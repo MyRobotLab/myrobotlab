@@ -167,7 +167,8 @@ public class ProcessData implements Serializable {
         continue;
       }
 
-      // if (inCmdLine.containsKey("-jvm") && inCmdLine.getArgumentCount("-jvm") > 0) {
+      // if (inCmdLine.containsKey("-jvm") && inCmdLine.getArgumentCount("-jvm")
+      // > 0) {
       if (cmd.equals("-jvm")) {
         String tmp = inCmdLine.getArgument("-jvm", 0);
         jvm = tmp.split(" ");
@@ -253,7 +254,8 @@ public class ProcessData implements Serializable {
       cmd.add("-id");
       SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmssSSS");
       this.id = String.format("runtime.%s.%s", formatter.format(new Date()), nextPid);
-      // this.id = String.format("%s.%d", org.myrobotlab.service.Runtime.getId(), nextPid);
+      // this.id = String.format("%s.%d",
+      // org.myrobotlab.service.Runtime.getId(), nextPid);
       ++nextPid;
       cmd.add(this.id);
     } else {

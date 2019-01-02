@@ -29,8 +29,9 @@ package org.myrobotlab.openni;
 /**
  * Numbers shared throughout processing.core.
  * <P>
- * An attempt is made to keep the constants as short/non-verbose as possible. For instance, the constant is TIFF instead of
- * FILE_TYPE_TIFF. We'll do this as long as we can get away with it.
+ * An attempt is made to keep the constants as short/non-verbose as possible.
+ * For instance, the constant is TIFF instead of FILE_TYPE_TIFF. We'll do this
+ * as long as we can get away with it.
  */
 public interface PConstants {
 
@@ -136,13 +137,15 @@ public interface PConstants {
   // max/min values for numbers
 
   /**
-   * Same as Float.MAX_VALUE, but included for parity with MIN_VALUE, and to avoid teaching static methods on the first day.
+   * Same as Float.MAX_VALUE, but included for parity with MIN_VALUE, and to
+   * avoid teaching static methods on the first day.
    */
   static final float MAX_FLOAT = Float.MAX_VALUE;
   /**
-   * Note that Float.MIN_VALUE is the smallest <EM>positive</EM> value for a floating point number, not actually the minimum
-   * (negative) value for a float. This constant equals 0xFF7FFFFF, the smallest (farthest negative) value a float can have before
-   * it hits NaN.
+   * Note that Float.MIN_VALUE is the smallest <EM>positive</EM> value for a
+   * floating point number, not actually the minimum (negative) value for a
+   * float. This constant equals 0xFF7FFFFF, the smallest (farthest negative)
+   * value a float can have before it hits NaN.
    */
   static final float MIN_FLOAT = -Float.MAX_VALUE;
   /** Largest possible (positive) integer value */
@@ -288,11 +291,13 @@ public interface PConstants {
   @Deprecated
   static final int CENTER_RADIUS = 2;
   /**
-   * Draw from the center, using second pair of values as the diameter. Formerly called CENTER_DIAMETER in alpha releases.
+   * Draw from the center, using second pair of values as the diameter. Formerly
+   * called CENTER_DIAMETER in alpha releases.
    */
   static final int CENTER = 3;
   /**
-   * Synonym for the CENTER constant. Draw from the center, using second pair of values as the diameter.
+   * Synonym for the CENTER constant. Draw from the center, using second pair of
+   * values as the diameter.
    */
   static final int DIAMETER = 3;
   /** @deprecated Use DIAMETER instead. */
@@ -318,17 +323,21 @@ public interface PConstants {
   // text placement modes
 
   /**
-   * textMode(MODEL) is the default, meaning that characters will be affected by transformations like any other shapes. Changed
-   * value in 0093 to not interfere with LEFT, CENTER, and RIGHT.
+   * textMode(MODEL) is the default, meaning that characters will be affected by
+   * transformations like any other shapes. Changed value in 0093 to not
+   * interfere with LEFT, CENTER, and RIGHT.
    */
   static final int MODEL = 4;
 
   /**
-   * textMode(SHAPE) draws text using the the glyph outlines of individual characters rather than as textures. If the outlines are
-   * not available, then textMode(SHAPE) will be ignored and textMode(MODEL) will be used instead. For this reason, be sure to call
-   * textMode() <EM>after</EM> calling textFont().
+   * textMode(SHAPE) draws text using the the glyph outlines of individual
+   * characters rather than as textures. If the outlines are not available, then
+   * textMode(SHAPE) will be ignored and textMode(MODEL) will be used instead.
+   * For this reason, be sure to call textMode() <EM>after</EM> calling
+   * textFont().
    * 
-   * Currently, textMode(SHAPE) is only supported by OPENGL mode. It also requires Java 1.2 or higher (OPENGL requires 1.4 anyway)
+   * Currently, textMode(SHAPE) is only supported by OPENGL mode. It also
+   * requires Java 1.2 or higher (OPENGL requires 1.4 anyway)
    */
   static final int SHAPE = 5;
 
@@ -338,7 +347,8 @@ public interface PConstants {
   // PTexture
 
   /**
-   * This constant identifies the texture target GL_TEXTURE_2D, that is, textures with normalized coordinates
+   * This constant identifies the texture target GL_TEXTURE_2D, that is,
+   * textures with normalized coordinates
    */
   public static final int TEXTURE2D = 0;
 
@@ -367,7 +377,8 @@ public interface PConstants {
   public static final int DYNAMIC = 1;
 
   /**
-   * Elements handled by PShape3D (vertices, normals, color, texture coordinates and groups).
+   * Elements handled by PShape3D (vertices, normals, color, texture coordinates
+   * and groups).
    */
   public static final int VERTICES = 0;
   public static final int NORMALS = 1;
@@ -411,13 +422,18 @@ public interface PConstants {
   static final int CODED = 0xffff;
 
   /*
-   * // key will be CODED and keyCode will be this value static final int UP = KeyEvent.KEYCODE_DPAD_UP; static final int DOWN =
-   * KeyEvent.KEYCODE_DPAD_DOWN; static final int LEFT = KeyEvent.KEYCODE_DPAD_LEFT; static final int RIGHT =
+   * // key will be CODED and keyCode will be this value static final int UP =
+   * KeyEvent.KEYCODE_DPAD_UP; static final int DOWN =
+   * KeyEvent.KEYCODE_DPAD_DOWN; static final int LEFT =
+   * KeyEvent.KEYCODE_DPAD_LEFT; static final int RIGHT =
    * KeyEvent.KEYCODE_DPAD_RIGHT;
    * 
-   * // These seem essential for most sketches, so they're included. // Others can be found in the KeyEvent reference: //
-   * http://developer.android.com/reference/android/view/KeyEvent.html static final int BACK = KeyEvent.KEYCODE_BACK; static final
-   * int MENU = KeyEvent.KEYCODE_MENU; static final int DPAD = KeyEvent.KEYCODE_DPAD_CENTER;
+   * // These seem essential for most sketches, so they're included. // Others
+   * can be found in the KeyEvent reference: //
+   * http://developer.android.com/reference/android/view/KeyEvent.html static
+   * final int BACK = KeyEvent.KEYCODE_BACK; static final int MENU =
+   * KeyEvent.KEYCODE_MENU; static final int DPAD =
+   * KeyEvent.KEYCODE_DPAD_CENTER;
    */
 
   // key will be CODED and keyCode will be this value

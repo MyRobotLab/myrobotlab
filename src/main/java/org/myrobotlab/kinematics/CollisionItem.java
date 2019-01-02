@@ -201,13 +201,17 @@ public class CollisionItem {
       }
     }
     // List<Integer> backpoint = Arrays.asList(0,3,4,7);
-    if (closestPointToCornerType[0] == (closestPointToCornerType[1] + 6) % 8) { // cylinder seen at angle
+    if (closestPointToCornerType[0] == (closestPointToCornerType[1] + 6) % 8) { // cylinder
+                                                                                // seen
+                                                                                // at
+                                                                                // angle
       // make a vector from the opposite point
       origin = pointCloserToCorner[closestPointToCornerType[0]].point;
       end = pointCloserToCorner[closestPointToCornerType[1]].point;
       double[] vector = getVector();
       PVector vectorOE = new PVector((float) vector[0], (float) vector[1], (float) vector[2]);
-      // radius will be equal to half the biggest distance between points and the vector
+      // radius will be equal to half the biggest distance between points and
+      // the vector
       double distance = 0;
       for (Map3DPoint m : cloudMap.values()) {
         PVector vectorPO = new PVector((float) origin.getX(), (float) origin.getY(), (float) origin.getZ());
@@ -295,9 +299,11 @@ public class CollisionItem {
         this.radius = radius[2];
 
       }
-      // else if (backpoint.contains(closestPointToCornerType[0]) && backpoint.contains(closestPointToCornerType[1]) &&
+      // else if (backpoint.contains(closestPointToCornerType[0]) &&
+      // backpoint.contains(closestPointToCornerType[1]) &&
       // backpoint.contains(closestPointToCornerType[2])){
-      // cylinder seen from the side (both end and origin at similar distance from the kinect
+      // cylinder seen from the side (both end and origin at similar distance
+      // from the kinect
       // can be horizontal or vertical need to test wich fit the best
       // if (distanceToCorner[8] < distanceToCorner[9]) {
       // origin = pointCloserToCorner[8].point;
@@ -311,9 +317,12 @@ public class CollisionItem {
       // }
     }
     // else { //other shape... for now doing cylinder seen from end side
-    // //origin is in the front (minY), radius = max(maxX-minX, maxZ-minZ), end = maxY
-    // origin = new Point((double)((max[0]-min[0])/2)+min[0],(double)min[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
-    // end = new Point((double)((max[0]-min[0])/2)+min[0],(double)max[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
+    // //origin is in the front (minY), radius = max(maxX-minX, maxZ-minZ), end
+    // = maxY
+    // origin = new
+    // Point((double)((max[0]-min[0])/2)+min[0],(double)min[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
+    // end = new
+    // Point((double)((max[0]-min[0])/2)+min[0],(double)max[1],(double)((max[2]-min[2])/2)+min[2],0,0,0);
     // radius = Math.max(((max[0]-min[0])/2), (max[2]-min[2])/2);
     // }
     fromKinect = true;

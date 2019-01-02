@@ -33,10 +33,12 @@ import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 
 /**
- * The Simulator class. It manages the list of agents and performs the simulation steps. For each agent a simulation step is is as
- * follow: update sensors call agent performBehavior update position In normal operation the steps are triggered by a timer event.
- * The Simulator class also provides a Background Mode with limited rendering. This mode is mainly useful for batch simulation ( ie
- * genetic algorithms). See Also Simbatch class.
+ * The Simulator class. It manages the list of agents and performs the
+ * simulation steps. For each agent a simulation step is is as follow: update
+ * sensors call agent performBehavior update position In normal operation the
+ * steps are triggered by a timer event. The Simulator class also provides a
+ * Background Mode with limited rendering. This mode is mainly useful for batch
+ * simulation ( ie genetic algorithms). See Also Simbatch class.
  * 
  * Cooperates with: World, PhysicalEngine
  * 
@@ -100,7 +102,8 @@ public class Simulator {
   }
 
   /**
-   * Used for mutual exclusion. all methods accessing agents shoud use this lock.
+   * Used for mutual exclusion. all methods accessing agents shoud use this
+   * lock.
    */
   private Lock lock;
   /** Keeps track of application's main component -- can be null */
@@ -184,8 +187,9 @@ public class Simulator {
   }
 
   /**
-   * Creates the UI that may be associated to each agent. If the agent has set a Panel with setUIPanel a window is created
-   * containing the panel. Only called once.
+   * Creates the UI that may be associated to each agent. If the agent has set a
+   * Panel with setUIPanel a window is created containing the panel. Only called
+   * once.
    **/
   private void createAgentsUI() {
     for (int i = 0; i < agents.size(); i++) {
@@ -321,7 +325,8 @@ public class Simulator {
   }
 
   /**
-   * The main simulator method. It is called cyclicaly or step by step. (see startSimulation).
+   * The main simulator method. It is called cyclicaly or step by step. (see
+   * startSimulation).
    */
   public synchronized void simulateOneStep() {
     // start critical section. only one thread.
@@ -395,7 +400,8 @@ public class Simulator {
   }
 
   /**
-   * This class runs the simulator in a background process. It is only used for simulator background mode.
+   * This class runs the simulator in a background process. It is only used for
+   * simulator background mode.
    */
 
   // ///////////////////////////////////////////////////////////////////////////////////

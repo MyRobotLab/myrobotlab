@@ -100,7 +100,8 @@ public class AudioProcessor extends Thread {
           return data;
         }
         /*
-         * fis = new FileInputStream(file); bis = new BufferedInputStream(fis); in = AudioSystem.getAudioInputStream(bis);
+         * fis = new FileInputStream(file); bis = new BufferedInputStream(fis);
+         * in = AudioSystem.getAudioInputStream(bis);
          */
 
         in = AudioSystem.getAudioInputStream(file);
@@ -132,8 +133,10 @@ public class AudioProcessor extends Thread {
         while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
           // byte[] goofy = new byte[4096];
           /*
-           * HEE HEE .. if you want to make something sound "bad" i'm sure its clipping as 130 pushes some of the values over the
-           * high range for (int i = 0; i < data.length; ++i){ data[i] = (byte)(data[i] + 130); }
+           * HEE HEE .. if you want to make something sound "bad" i'm sure its
+           * clipping as 130 pushes some of the values over the high range for
+           * (int i = 0; i < data.length; ++i){ data[i] = (byte)(data[i] + 130);
+           * }
            */
 
           if (data.waitForLock != null) {
@@ -258,7 +261,8 @@ public class AudioProcessor extends Thread {
         // check to see if we should be waiting for another track to finish
         // FIXME - REMOVE ! NO KEYS JUST LOCK ON OBJECT !!!!
         /*
-         * if (waitForKey != null) { Object waitForLock = audioFile.getWaitForLock(waitForKey); synchronized (waitForLock) {
+         * if (waitForKey != null) { Object waitForLock =
+         * audioFile.getWaitForLock(waitForKey); synchronized (waitForLock) {
          * waitForLock.wait(); } }
          */
 
@@ -268,9 +272,10 @@ public class AudioProcessor extends Thread {
         // FIXME - DONT USE KEYS !! DONT USE AUDIOFILE !! LOCK ON OBJECT IN DATA
         // !!!
         /*
-         * if (currentTrackCount != lastTrackPlayed) { String key = String.format("%s:%s", queueName, currentTrackCount); Object
-         * waitForLock = audioFile.getWaitForLock(key); if (waitForLock != null) { synchronized (waitForLock) {
-         * waitForLock.notify(); } } }
+         * if (currentTrackCount != lastTrackPlayed) { String key =
+         * String.format("%s:%s", queueName, currentTrackCount); Object
+         * waitForLock = audioFile.getWaitForLock(key); if (waitForLock != null)
+         * { synchronized (waitForLock) { waitForLock.notify(); } } }
          */
 
         data.stopTs = System.currentTimeMillis();
@@ -292,8 +297,9 @@ public class AudioProcessor extends Thread {
    * 
    * AudioPlayer player = new AudioPlayer();
    * 
-   * // jlp.play("NeroSoundTrax_test1_PCM_Stereo_CBR_16SS_6000Hz.wav"); AudioData data = new AudioData("aaa.mp3"); // data.volume =
-   * 120.0f; data.balance = -1;
+   * // jlp.play("NeroSoundTrax_test1_PCM_Stereo_CBR_16SS_6000Hz.wav");
+   * AudioData data = new AudioData("aaa.mp3"); // data.volume = 120.0f;
+   * data.balance = -1;
    * 
    * player.play(data);
    * 

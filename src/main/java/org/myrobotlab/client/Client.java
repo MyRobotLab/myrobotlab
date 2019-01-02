@@ -95,8 +95,9 @@ public class Client extends MessageService implements NameProvider {
 
   // FIXME - should be in messenger service
   /*
-   * public Message createMessage(String name, String method, Object data) { if (data == null) { return createMessage(name, method,
-   * null); } Object[] d = new Object[1]; d[0] = data; return createMessage(name, method, d); }
+   * public Message createMessage(String name, String method, Object data) { if
+   * (data == null) { return createMessage(name, method, null); } Object[] d =
+   * new Object[1]; d[0] = data; return createMessage(name, method, d); }
    */
 
   // TODO - remove or reconcile - RemoteAdapter and Service are the only ones

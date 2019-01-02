@@ -33,7 +33,8 @@ public class KeyInputSensor extends SensorDevice implements KeyListener {
       /*
        * // receive key event in parent this.addKeyListener(parent);
        * 
-       * // this.requestFocusInWindow(true); this.requestFocus(); setFocusable(true);
+       * // this.requestFocusInWindow(true); this.requestFocus();
+       * setFocusable(true);
        */
       Simbad.getSimbadInstance().getDesktopPane().addKeyListener(listener);
 

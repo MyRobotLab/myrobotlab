@@ -47,9 +47,11 @@ public class Scanner extends Thread {
         DatagramPacket sendPacket;
         // Try the 255.255.255.255 first
         /*
-         * try { sendPacket = new DatagramPacket(msgBuf, msgBuf.length, InetAddress.getByName("255.255.255.255"), 6767);
-         * dsocket.send(sendPacket); myService.info( ">>> Request packet sent to: 255.255.255.255 (DEFAULT)"); } catch (Exception e)
-         * { Logging.logException(e); }
+         * try { sendPacket = new DatagramPacket(msgBuf, msgBuf.length,
+         * InetAddress.getByName("255.255.255.255"), 6767);
+         * dsocket.send(sendPacket); myService.info(
+         * ">>> Request packet sent to: 255.255.255.255 (DEFAULT)"); } catch
+         * (Exception e) { Logging.logException(e); }
          */
 
         // NEEDED ?? WE ALREADY DID BROADCAST // Broadcast the
@@ -142,9 +144,12 @@ public class Scanner extends Thread {
               }
             }
             /*
-             * String message = new String(receivePacket.getData()).trim(); if (message.equals("DISCOVER_FUIFSERVER_RESPONSE")) { //
-             * DO SOMETHING WITH THE SERVER'S IP (for example, store it in // your controller) // Controller_Base
-             * .setServerIp(receivePacket.getAddress()); log.info( String.format( "+++++++++++++FOUND MRL INSTANCE++++++++++++ %s" ,
+             * String message = new String(receivePacket.getData()).trim(); if
+             * (message.equals("DISCOVER_FUIFSERVER_RESPONSE")) { // DO
+             * SOMETHING WITH THE SERVER'S IP (for example, store it in // your
+             * controller) // Controller_Base
+             * .setServerIp(receivePacket.getAddress()); log.info(
+             * String.format( "+++++++++++++FOUND MRL INSTANCE++++++++++++ %s" ,
              * receivePacket.getAddress())); }
              */
           }

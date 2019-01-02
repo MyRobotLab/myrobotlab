@@ -76,11 +76,13 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
     if (lastResult != null) {
-      // the thread running will be updating lastResult for it as fast as it can.
+      // the thread running will be updating lastResult for it as fast as it
+      // can.
       // log.info("Display result " );
       displayResult(image, lastResult);
     }
-    // ok now we just need to update the image that the current thread is processing (if the current thread is idle i guess?)
+    // ok now we just need to update the image that the current thread is
+    // processing (if the current thread is idle i guess?)
     lastImage = image;
     return image;
   }
@@ -146,7 +148,8 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
     while (running) {
       // log.info("Running!!!");
       // now we need to know which image we should classify
-      // there likely needs to be some synchronization on this too.. o/w the main thread will
+      // there likely needs to be some synchronization on this too.. o/w the
+      // main thread will
       // be updating it while it's being classified maybe?!
       if (lastImage != null && model != null) {
         try {
@@ -172,10 +175,12 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
       } else {
         // log.info("No Image to classify...");
       }
-      // TODO: see why there's a race condition. i seem to need a little delay here o/w the recognition never seems to start.
+      // TODO: see why there's a race condition. i seem to need a little delay
+      // here o/w the recognition never seems to start.
       // maybe lastImage needs to be marked as volatile ?
       try {
-        // Let's limit the speed at which we try to classify at most 2 fps should be fine
+        // Let's limit the speed at which we try to classify at most 2 fps
+        // should be fine
         Thread.sleep(500);
       } catch (InterruptedException e) {
         // TODO Auto-generated catch block
@@ -184,7 +189,8 @@ public class OpenCVFilterDL4JTransfer extends OpenCVFilter implements Runnable {
     }
   }
   /*
-   * public Map<String, Double> publishClassification(Map<String, Double> classification) { return classification; }
+   * public Map<String, Double> publishClassification(Map<String, Double>
+   * classification) { return classification; }
    */
 
   public void attach(Solr solr) {

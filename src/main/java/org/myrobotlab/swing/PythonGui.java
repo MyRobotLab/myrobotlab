@@ -70,7 +70,8 @@ import org.myrobotlab.swing.widget.ImageButton;
  * 
  * @author SwedaKonsult
  * 
- *         use - http://famfamfam.com/lab/icons/silk/previews/index_abc.png - SILK ICONS
+ *         use - http://famfamfam.com/lab/icons/silk/previews/index_abc.png -
+ *         SILK ICONS
  */
 public class PythonGui extends ServiceGui implements ActionListener, MouseListener {
 
@@ -207,7 +208,8 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 
       // BareBonesBrowserLaunch.openURL("https://github.com/MyRobotLab/pyrobotlab");
       /*
-       * String filename = String.format("Python/examples/%1$s", m.getText()); Script script = new Script(filename,
+       * String filename = String.format("Python/examples/%1$s", m.getText());
+       * Script script = new Script(filename,
        * FileIO.resourceToString(filename)); addNewEditorPanel(script);
        */
     }
@@ -361,8 +363,9 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
       public void run() {
         // merge state with view
         /*
-         * Script script = python.getScript(); if (script != null) { if (!scripts.containsKey(script.getName())) {
-         * addNewEditorPanel(script); } }
+         * Script script = python.getScript(); if (script != null) { if
+         * (!scripts.containsKey(script.getName())) { addNewEditorPanel(script);
+         * } }
          */
 
       }
@@ -383,7 +386,8 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
   /*
    * (non-Javadoc)
    * 
-   * @see org.myrobotlab.swing.widget.ServiceGUI#makeReadyForRelease() Shutting down - check for dirty script and offer to save
+   * @see org.myrobotlab.swing.widget.ServiceGUI#makeReadyForRelease() Shutting
+   * down - check for dirty script and offer to save
    */
   @Override
   public void makeReadyForRelease() {
@@ -406,10 +410,12 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
           Logging.logError(ex);
         }
         /*
-         * FileLocation fl = FileLocation.create(e.getFileFullPath()); String filename =
-         * JOptionPane.showInputDialog(myService.getFrame(), "Save File?", name); if (filename != null) { fl =
-         * FileLocation.create(filename); try { e.saveAs(fl); } catch (IOException e1) { Logging.logException(e1); // TODO
-         * Auto-generated catch block } }
+         * FileLocation fl = FileLocation.create(e.getFileFullPath()); String
+         * filename = JOptionPane.showInputDialog(myService.getFrame(),
+         * "Save File?", name); if (filename != null) { fl =
+         * FileLocation.create(filename); try { e.saveAs(fl); } catch
+         * (IOException e1) { Logging.logException(e1); // TODO Auto-generated
+         * catch block } }
          */
       }
     }
@@ -487,11 +493,13 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     EditorPanel p = scripts.get(oldName);
     FileUtil.save(jframe, p.getText(), oldName);
     /*
-     * if (scripts.containsKey(oldName)) { EditorPanel p = scripts.get(oldName); if (FileUtil.save(jframe, p.getText(), oldName)) {
+     * if (scripts.containsKey(oldName)) { EditorPanel p = scripts.get(oldName);
+     * if (FileUtil.save(jframe, p.getText(), oldName)) {
      * 
-     * String currentScriptName = FileUtil.getLastFileSaved(); scripts.remove(p); editorTabs.remove(p.getDisplay()); EditorPanel np
-     * = addNewEditorPanel(new Script(currentScriptName, p.getText())); editorTabs.setSelectedComponent(np.getDisplay());
-     * log.info("here");
+     * String currentScriptName = FileUtil.getLastFileSaved();
+     * scripts.remove(p); editorTabs.remove(p.getDisplay()); EditorPanel np =
+     * addNewEditorPanel(new Script(currentScriptName, p.getText()));
+     * editorTabs.setSelectedComponent(np.getDisplay()); log.info("here");
      * 
      * } } else { log.error(String.format("cant saveFile %s", oldName)); }
      */

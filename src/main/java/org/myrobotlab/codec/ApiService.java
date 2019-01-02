@@ -40,8 +40,8 @@ import org.slf4j.Logger;
  *         </pre>
  * 
  * 
- *         FIXME !!! - this is wrong .. needs to call a "framework" invoke - when a method is called, the notify lists need to be
- *         "notified" !
+ *         FIXME !!! - this is wrong .. needs to call a "framework" invoke -
+ *         when a method is called, the notify lists need to be "notified" !
  *
  */
 public class ApiService extends Api {
@@ -51,9 +51,11 @@ public class ApiService extends Api {
   /**
    * A message could be encoded in the requestUri ... or it could be in data
    * 
-   * The precedence is to decode addressing and all data associated with the requestUri over the data.
+   * The precedence is to decode addressing and all data associated with the
+   * requestUri over the data.
    * 
-   * FIXME - beyond ApiFactory -&gt; a 'initial' message would be formed - which is the results of the request URI being parsed
+   * FIXME - beyond ApiFactory -&gt; a 'initial' message would be formed - which
+   * is the results of the request URI being parsed
    * 
    */
 

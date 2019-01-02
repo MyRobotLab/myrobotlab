@@ -12,8 +12,8 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
- * InMoovHead - This is the inmoov head service. This service controls the servos for the following: jaw, eyeX, eyeY, rothead and
- * neck.
+ * InMoovHead - This is the inmoov head service. This service controls the
+ * servos for the following: jaw, eyeX, eyeY, rothead and neck.
  * 
  */
 public class InMoovHead extends Service {
@@ -59,7 +59,8 @@ public class InMoovHead extends Service {
   }
 
   /*
-   * attach all the servos - this must be re-entrant and accomplish the re-attachment when servos are detached
+   * attach all the servos - this must be re-entrant and accomplish the
+   * re-attachment when servos are detached
    */
   @Deprecated
   public boolean attach() {
@@ -393,8 +394,8 @@ public class InMoovHead extends Service {
     log.info("setPins {} {} {} {} {} {}", headXPin, headYPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
 
     /*
-     * rothead.setPin(headXPin); neck.setPin(headYPin); eyeX.setPin(eyeXPin); eyeY.setPin(eyeYPin); jaw.setPin(jawPin);
-     * rollNeck.setPin(rollNeckPin);
+     * rothead.setPin(headXPin); neck.setPin(headYPin); eyeX.setPin(eyeXPin);
+     * eyeY.setPin(eyeYPin); jaw.setPin(jawPin); rollNeck.setPin(rollNeckPin);
      */
 
     // Calamity: not sure it should be called in the Arduino, should be on the
@@ -451,7 +452,8 @@ public class InMoovHead extends Service {
   }
 
   /*
-   * public boolean load(){ super.load(); rothead.load(); neck.load(); eyeX.load(); eyeY.load(); jaw.load(); return true; }
+   * public boolean load(){ super.load(); rothead.load(); neck.load();
+   * eyeX.load(); eyeY.load(); jaw.load(); return true; }
    */
 
   public void test() {
@@ -461,7 +463,8 @@ public class InMoovHead extends Service {
     }
 
     /*
-     * FIXME - !!! => cannot do this "here" ??? if (!arduino.isConnected()) { error("arduino not connected"); }
+     * FIXME - !!! => cannot do this "here" ??? if (!arduino.isConnected()) {
+     * error("arduino not connected"); }
      */
 
     rothead.moveTo(rothead.getPos() + 2);
@@ -473,8 +476,9 @@ public class InMoovHead extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

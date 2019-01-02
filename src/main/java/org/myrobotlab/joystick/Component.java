@@ -41,7 +41,8 @@ public class Component implements Serializable, NameProvider {
   public float getPollData() {
     // FIXME getDeadZone ??
     if (jinputComponent != null) {
-      // value = jinputComponent.getPollData(); <- heh - this borked everything ! :) cuz abs(value - component.value) :P
+      // value = jinputComponent.getPollData(); <- heh - this borked everything
+      // ! :) cuz abs(value - component.value) :P
       return jinputComponent.getPollData();
     } // else
     // FIXME - handle virtual input

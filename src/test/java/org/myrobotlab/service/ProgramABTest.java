@@ -177,7 +177,8 @@ public class ProgramABTest extends AbstractServiceTest {
   }
 
   // the pannous service seems borked at the moment due to bad ssl, and maybe
-  // other stuff.. kwatters: I recommend we build our own service that does this stuff
+  // other stuff.. kwatters: I recommend we build our own service that does this
+  // stuff
   // @Test
   public void pannousTest() {
     Response resp = testService.getResponse(username, "SHOW ME INMOOV");
@@ -200,7 +201,8 @@ public class ProgramABTest extends AbstractServiceTest {
   public void sraixTest() {
     Response resp = testService.getResponse(username, "MRLSRAIX");
     System.out.println(resp);
-    // Response resp = testService.getResponse(username, "Why is the sky blue?");
+    // Response resp = testService.getResponse(username, "Why is the sky
+    // blue?");
     // System.out.println(resp);
     boolean contains = resp.msg.contains("atmosphere");
     assertTrue(contains);

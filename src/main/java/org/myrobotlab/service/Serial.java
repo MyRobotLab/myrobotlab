@@ -47,8 +47,10 @@ import org.slf4j.Logger;
 public class Serial extends Service implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher, PortConnector {
 
   /**
-   * general read timeout - 0 is infinite &gt; 0 is number of milliseconds to wait up to, until data is returned timeout = null:
-   * wait forever timeout = 0: non-blocking mode (return immediately on read) timeout = x: set timeout to x milliseconds
+   * general read timeout - 0 is infinite &gt; 0 is number of milliseconds to
+   * wait up to, until data is returned timeout = null: wait forever timeout =
+   * 0: non-blocking mode (return immediately on read) timeout = x: set timeout
+   * to x milliseconds
    */
 
   private Integer timeoutMS = null;
@@ -87,8 +89,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   static HashSet<String> portNames = new HashSet<String>();
 
   /**
-   * blocking and non-blocking publish/subscribe reading is possible at the same time. If blocking is not used then the internal
-   * buffer will fill to the BUFFER_SIZE and just be left - overrun data will be lost
+   * blocking and non-blocking publish/subscribe reading is possible at the same
+   * time. If blocking is not used then the internal buffer will fill to the
+   * BUFFER_SIZE and just be left - overrun data will be lost
    */
   int BUFFER_SIZE = 1024;
 
@@ -98,44 +101,53 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   transient BlockingQueue<Integer> blockingRX = new LinkedBlockingQueue<Integer>();
 
   /**
-   * our set of ports we have access to. This is a shared resource between ALL serial services. It should be possible simply to
-   * iterate through this list to get all (cached) names .. operating system ports may have changed and need re-querying
+   * our set of ports we have access to. This is a shared resource between ALL
+   * serial services. It should be possible simply to iterate through this list
+   * to get all (cached) names .. operating system ports may have changed and
+   * need re-querying
    * 
-   * it also might be worthwhile to keep a "static" list for remote and virtual ports so that remote and other services can have
-   * access to that list
+   * it also might be worthwhile to keep a "static" list for remote and virtual
+   * ports so that remote and other services can have access to that list
    * 
    * has to be transient because many Ports are not serializable
    * 
-   * remote manipulations and identification should always be done through portNames
+   * remote manipulations and identification should always be done through
+   * portNames
    */
   transient static HashMap<String, Port> ports = new HashMap<String, Port>();
 
   /**
-   * all the ports we are currently connected to typically there is 0 to 1 connected ports - however the serial service has the
-   * ability to "fork" ports where it is connected to 2 or more ports simultaneously
+   * all the ports we are currently connected to typically there is 0 to 1
+   * connected ports - however the serial service has the ability to "fork"
+   * ports where it is connected to 2 or more ports simultaneously
    */
   transient HashMap<String, Port> connectedPorts = new HashMap<String, Port>();
 
   /**
-   * used as the "default" port - now that Serial can multiplex with multiple ports - the default is used for methods which are not
-   * explicit ... e.g. connect(), disconnect() etc.. are now equivalent to connect(portName), disconnect(portName)
+   * used as the "default" port - now that Serial can multiplex with multiple
+   * ports - the default is used for methods which are not explicit ... e.g.
+   * connect(), disconnect() etc.. are now equivalent to connect(portName),
+   * disconnect(portName)
    */
   String portName = null;
 
   /**
-   * last port name which was connected to - still has name when portName is null and disconnected
+   * last port name which was connected to - still has name when portName is
+   * null and disconnected
    */
   public String lastPortName;
 
   /**
-   * "the" port - there is only one although we can fork and multiplex others. This is the port which we determine if this Serial
-   * service is connected or not
+   * "the" port - there is only one although we can fork and multiplex others.
+   * This is the port which we determine if this Serial service is connected or
+   * not
    */
   transient Port port = null;
 
   /**
-   * we need to dynamically load our preferred hardware type, because we may want to change it or possibly the platform does not
-   * support it. When it is null - we will let MRL figure out what is best.
+   * we need to dynamically load our preferred hardware type, because we may
+   * want to change it or possibly the platform does not support it. When it is
+   * null - we will let MRL figure out what is best.
    */
   String hardwareLibrary = null;
 
@@ -188,9 +200,10 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /**
-   * list of RX listeners - if "local" they will be immediately called back by the serial device's thread when data arrives, if they
-   * are "remote" they should be published to. They can subscribe to the publishRX method when a lister is added. Serial is the
-   * first listener added to this map
+   * list of RX listeners - if "local" they will be immediately called back by
+   * the serial device's thread when data arrives, if they are "remote" they
+   * should be published to. They can subscribe to the publishRX method when a
+   * lister is added. Serial is the first listener added to this map
    */
   transient HashMap<String, SerialDataListener> listeners = new HashMap<String, SerialDataListener>();
 
@@ -221,8 +234,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /*
-   * Static list of third party dependencies for this service. The list will be consumed by Ivy to download and manage the
-   * appropriate resources
+   * Static list of third party dependencies for this service. The list will be
+   * consumed by Ivy to download and manage the appropriate resources
    */
 
   public Serial(String n) {
@@ -245,10 +258,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /*
-   * awesome method - which either sets up the pub/sub remote or assigns a local reference from the publishing thread
+   * awesome method - which either sets up the pub/sub remote or assigns a local
+   * reference from the publishing thread
    * 
-   * good pattern in that all logic is in this method which uses a string "name" parameter - addByteListener(SerialDataListener
-   * listener) will call this method too rather than implementing its own local logic
+   * good pattern in that all logic is in this method which uses a string "name"
+   * parameter - addByteListener(SerialDataListener listener) will call this
+   * method too rather than implementing its own local logic
    * 
    * FIXME - DO THIS STUFF (AND THE PUBLISHING/TESTING) IN THE FRAMEWORK
    * 
@@ -332,12 +347,13 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /*
-   * The main simple connect - it attempts to connect to one of the known ports in memory if that fails it will try to connect to a
-   * hardware port
+   * The main simple connect - it attempts to connect to one of the known ports
+   * in memory if that fails it will try to connect to a hardware port
    * 
    * TODO - make "connecting" to pre-existing ports re-entrant !!!
    * 
-   * connect - optimized to have a SerialDataListener passed in - which will optimize data streaming back from the port.
+   * connect - optimized to have a SerialDataListener passed in - which will
+   * optimize data streaming back from the port.
    * 
    * preference is to have this local optimizaton
    * 
@@ -410,8 +426,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /*
-   * FIXME - implement Baddass loopback null/modem cable - auto creates a new Serial service and connects to it FIXME - no need for
-   * null/modem cable virtual port ?
+   * FIXME - implement Baddass loopback null/modem cable - auto creates a new
+   * Serial service and connects to it FIXME - no need for null/modem cable
+   * virtual port ?
    * 
    */
   public boolean connectLoopback(String name) {
@@ -466,12 +483,15 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /*
-   * Dynamically create a hardware port - this method is needed to abtract away the specific hardware library. Its advantageous to
-   * have abstraction when interfacing with a specific implementation (JNI/JNA - other?). The abstraction allows the service to
-   * attempt to choose the correct library depending on platform or personal user choice.
+   * Dynamically create a hardware port - this method is needed to abtract away
+   * the specific hardware library. Its advantageous to have abstraction when
+   * interfacing with a specific implementation (JNI/JNA - other?). The
+   * abstraction allows the service to attempt to choose the correct library
+   * depending on platform or personal user choice.
    * 
-   * We don't want the whole Serial service to explode because of an Import of an implementation which does not exist on a specific
-   * platform. I know this from experience :)
+   * We don't want the whole Serial service to explode because of an Import of
+   * an implementation which does not exist on a specific platform. I know this
+   * from experience :)
    */
 
   public Port createHardwarePort(String name, int rate, int dataBits, int stopBits, int parity) {
@@ -624,7 +644,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /**
-   * "all" currently known ports - if something is missing refresh ports should be called to force hardware search
+   * "all" currently known ports - if something is missing refresh ports should
+   * be called to force hardware search
    */
   @Override
   public List<String> getPortNames() {
@@ -680,7 +701,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /**
-   * onByte is typically the functions clients of the Serial service use when they want to consume serial data.
+   * onByte is typically the functions clients of the Serial service use when
+   * they want to consume serial data.
    * 
    * The serial service implements this function primarily so it can test itself
    * 
@@ -788,8 +810,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /**
-   * Read size bytes from the serial port. If a timeout is set it may return less characters as requested. With no timeout it will
-   * block until the requested number of bytes is read.
+   * Read size bytes from the serial port. If a timeout is set it may return
+   * less characters as requested. With no timeout it will block until the
+   * requested number of bytes is read.
    * 
    * @param length
    *          l
@@ -878,8 +901,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * read a string back from the serial port
    * 
    * @param length
-   *          - the number of bytes to read back - the amount of time to wait blocking until we return. 0 ms means the reading
-   *          thread will potentially block forever.
+   *          - the number of bytes to read back - the amount of time to wait
+   *          blocking until we return. 0 ms means the reading thread will
+   *          potentially block forever.
    * @return String form of the bytes read
    * @throws InterruptedException
    *           e
@@ -919,11 +943,14 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * 
    * // all current ports portNames.addAll(ports.keySet());
    * 
-   * // plus hardware ports SerialControl portSource = getPortSource(); if (portSource != null) { List<String> osPortNames =
-   * portSource.getPortNames(); for (int i = 0; i < osPortNames.size(); ++i) { portNames.add(osPortNames.get(i)); } } List<String>
-   * ports = new ArrayList<String>(portNames);
+   * // plus hardware ports SerialControl portSource = getPortSource(); if
+   * (portSource != null) { List<String> osPortNames =
+   * portSource.getPortNames(); for (int i = 0; i < osPortNames.size(); ++i) {
+   * portNames.add(osPortNames.get(i)); } } List<String> ports = new
+   * ArrayList<String>(portNames);
    * 
-   * invoke("publishPortNames", ports); broadcastState(); // FIXME - REMOVE !!! publishPortNames should be used ! return ports; }
+   * invoke("publishPortNames", ports); broadcastState(); // FIXME - REMOVE !!!
+   * publishPortNames should be used ! return ports; }
    */
 
   public void removeByteListener(SerialDataListener listener) {
@@ -966,8 +993,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /**
-   * default timeout for all reads 0 = infinity &gt; 0 - will wait for the number in milliseconds if the data has not arrived then
-   * an IOError will be thrown
+   * default timeout for all reads 0 = infinity &gt; 0 - will wait for the
+   * number in milliseconds if the data has not arrived then an IOError will be
+   * thrown
    */
   @Override
   public void setTimeout(int timeout) {
@@ -1078,8 +1106,10 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       byte[] fileData = FileIO.toByteArray(new File(filename));
 
       /*
-       * TODO - ENCODING !!! if (txCodec != null) { // FIXME parse the incoming file for (int i = 0; i < fileData.length; ++i) { //
-       * FIXME - determine what is needed / expected to parse // write(txFormatter.parse(fileData[i])); } } else {
+       * TODO - ENCODING !!! if (txCodec != null) { // FIXME parse the incoming
+       * file for (int i = 0; i < fileData.length; ++i) { // FIXME - determine
+       * what is needed / expected to parse //
+       * write(txFormatter.parse(fileData[i])); } } else {
        */
       for (int i = 0; i < fileData.length; ++i) {
         write(fileData[i]);
@@ -1092,8 +1122,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

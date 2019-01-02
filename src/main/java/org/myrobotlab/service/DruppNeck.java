@@ -9,8 +9,9 @@ import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
  * 
- * This is the drup neck service. It takes 3 servos, Up, Middle, and Down This service uses the DruppIKSolver to compute the servo
- * angles to move the head to a specified roll, pitch and yaw orientation.
+ * This is the drup neck service. It takes 3 servos, Up, Middle, and Down This
+ * service uses the DruppIKSolver to compute the servo angles to move the head
+ * to a specified roll, pitch and yaw orientation.
  * 
  * This is based on: https://github.com/parloma/penguin_wrist
  * 
@@ -37,8 +38,9 @@ public class DruppNeck extends Service {
   private DruppIKSolver solver = new DruppIKSolver();
 
   /**
-   * Specify the roll, pitch and yaw in degrees to move the drupp neck to. this will use the drupp ik solver to compute the angle
-   * for the up, middle, and down servos.
+   * Specify the roll, pitch and yaw in degrees to move the drupp neck to. this
+   * will use the drupp ik solver to compute the angle for the up, middle, and
+   * down servos.
    * 
    * @param roll
    * @param pitch
@@ -57,9 +59,11 @@ public class DruppNeck extends Service {
     double upDeg = MathUtils.radToDeg(result[0]) + upOffset;
     double middleDeg = MathUtils.radToDeg(result[1]) + middleOffset;
     double downDeg = MathUtils.radToDeg(result[2]) + downOffset;
-    // Ok, servos can only (typically) move from 0 to 180.. if any of the angles are negative... we can't move there.. let's log a
+    // Ok, servos can only (typically) move from 0 to 180.. if any of the angles
+    // are negative... we can't move there.. let's log a
     // warning
-    // TODO: use the actual min/max .. and if we're out of range.. then log this. but for the drupp neck, if you've installed it
+    // TODO: use the actual min/max .. and if we're out of range.. then log
+    // this. but for the drupp neck, if you've installed it
     // correctly,
     // all servos can go from 0 to 180...
     if (upDeg < 0 || middleDeg < 0 || downDeg < 0 || upDeg > 180 || middleDeg > 180 || downDeg > 180) {
@@ -118,7 +122,8 @@ public class DruppNeck extends Service {
     this.down = down;
   }
 
-  // not really sure what sort of "attach" method we should have here.. this is really the same as setServos
+  // not really sure what sort of "attach" method we should have here.. this is
+  // really the same as setServos
   // this assumes the servos are already attached to a servo controller
   public void attach(ServoControl up, ServoControl middle, ServoControl down) {
     this.up = up;

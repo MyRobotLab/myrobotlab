@@ -43,8 +43,10 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
   double getPowerLevel();
 
   /**
-   * grog says, BAD METHOD - needs to be a solid range interface between MotorControl & MotorControllers where the range can be
-   * guaranteed -1.0 --to-- 1.0 it's MotorControllers job to change this if needed into specific values (not MotorControl's job)
+   * grog says, BAD METHOD - needs to be a solid range interface between
+   * MotorControl & MotorControllers where the range can be guaranteed -1.0
+   * --to-- 1.0 it's MotorControllers job to change this if needed into specific
+   * values (not MotorControl's job)
    * 
    * the 'computed' power output range can be anything ?
    * 
@@ -55,7 +57,8 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
   double getTargetPos();
 
   /**
-   * general test if the motor is ready without having to supply the specific motor controller
+   * general test if the motor is ready without having to supply the specific
+   * motor controller
    * 
    * @return true/false
    */
@@ -76,14 +79,16 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
   boolean isInverted();
 
   /**
-   * locks the motor so no other commands will affect it until it becomes unlocked
+   * locks the motor so no other commands will affect it until it becomes
+   * unlocked
    */
   void lock();
 
   boolean isLocked();
 
   /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is needed in order to provide feedback data
+   * moveTo moves the motor to a specific location. Typically, an encoder is
+   * needed in order to provide feedback data
    * 
    * FIXME - part of AbsolutePosition interface
    * 
@@ -93,7 +98,8 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
   void moveTo(double newPos);
 
   /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is needed in order to provide feedback data
+   * moveTo moves the motor to a specific location. Typically, an encoder is
+   * needed in order to provide feedback data
    * 
    * @param newPos
    *          new position
@@ -105,8 +111,9 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
   void setEncoder(EncoderPublisher encoder);
 
   /**
-   * change the motors direction such that negative power levels become clockwise if previous levels were counter clockwise and
-   * positive power levels would become counter clockwise
+   * change the motors direction such that negative power levels become
+   * clockwise if previous levels were counter clockwise and positive power
+   * levels would become counter clockwise
    * 
    * @param invert
    *          true or false
@@ -121,7 +128,8 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
   void stop();
 
   /**
-   * a safety mechanism - stop and lock will stop and lock the motor no other commands will affect the motor until it is "unlocked"
+   * a safety mechanism - stop and lock will stop and lock the motor no other
+   * commands will affect the motor until it is "unlocked"
    */
   void stopAndLock();
 

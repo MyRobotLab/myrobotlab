@@ -3,10 +3,13 @@ package org.myrobotlab.framework;
 import java.io.Serializable;
 
 /**
- * ServiceRegistration is a data object containing information regarding a "peer" service within a "composite" service. The
- * Composite service utilizes or controls multiple peer services. In order to do so it needs an internal key used only by the
- * composite service. With this key the composite gets a reference to the peer. In some situations it will be necessary to use a
- * peer with a different name. reserveAs is a method which will re-bind the composite to a differently named peer service.
+ * ServiceRegistration is a data object containing information regarding a
+ * "peer" service within a "composite" service. The Composite service utilizes
+ * or controls multiple peer services. In order to do so it needs an internal
+ * key used only by the composite service. With this key the composite gets a
+ * reference to the peer. In some situations it will be necessary to use a peer
+ * with a different name. reserveAs is a method which will re-bind the composite
+ * to a differently named peer service.
  * 
  */
 public class ServiceReservation implements Serializable {
@@ -69,11 +72,13 @@ public class ServiceReservation implements Serializable {
     StringBuffer sb = new StringBuffer();
 
     /*
-     * if (!key.equals(actualName)){ sb.append("("); sb.append(key); sb.append(")"); }
+     * if (!key.equals(actualName)){ sb.append("("); sb.append(key);
+     * sb.append(")"); }
      */
 
     /*
-     * if (!key.equals(actualName)) { sb.append("["); sb.append(actualName); sb.append("] "); }
+     * if (!key.equals(actualName)) { sb.append("["); sb.append(actualName);
+     * sb.append("] "); }
      */
     sb.append("[");
     sb.append(actualName);

@@ -28,8 +28,8 @@ import org.myrobotlab.mapper.sim.SimpleAgent;
 import org.myrobotlab.mapper.sim.World;
 
 /**
- * The AgentFollower class is a helper class for the AgentInspector. It updates cyclically the world view point. in order to follow
- * agent movements.
+ * The AgentFollower class is a helper class for the AgentInspector. It updates
+ * cyclically the world view point. in order to follow agent movements.
  * 
  */
 class AgentFollower implements Runnable {

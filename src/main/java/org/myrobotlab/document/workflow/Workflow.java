@@ -9,7 +9,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Workflow : top level workflow class that controls the thread that do the work of processing documents on each stage.
+ * Workflow : top level workflow class that controls the thread that do the work
+ * of processing documents on each stage.
  *
  */
 public class Workflow {

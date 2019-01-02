@@ -67,7 +67,8 @@ public class Lm75aGui extends ServiceGui implements ActionListener {
     super(boundServiceName, myService);
     boundService = (Lm75a) Runtime.getService(boundServiceName);
 
-    // addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList,
+    // addTopLine(controllerLabel, controllerList, deviceBusLabel,
+    // deviceBusList, deviceAddressLabel, deviceAddressList,
     // attachButton, refresh);
     addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList, refresh));
 

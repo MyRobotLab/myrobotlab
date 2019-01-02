@@ -23,9 +23,12 @@ import org.slf4j.Logger;
  * 
  * # &lt;ch&gt; P &lt;pw&gt; ​S&lt;spd&gt;​​T&lt;time&gt; &lt;cr&gt;
  * 
- * &lt;ch&gt;: pin / channel to which the servo is connected (0 to 31) in decimal &lt;pw&gt;: desired pulse width (normally 500 to
- * 2500) in microseconds &lt;spd&gt;: servo movement speed in microseconds per second* &lt;time&gt;: time in microseconds to travel
- * from the current position to the desired position. This affects all servos (65535 max) * &lt;cr&gt;: carriage return (ASCII 13)**
+ * &lt;ch&gt;: pin / channel to which the servo is connected (0 to 31) in
+ * decimal &lt;pw&gt;: desired pulse width (normally 500 to 2500) in
+ * microseconds &lt;spd&gt;: servo movement speed in microseconds per second*
+ * &lt;time&gt;: time in microseconds to travel from the current position to the
+ * desired position. This affects all servos (65535 max) * &lt;cr&gt;: carriage
+ * return (ASCII 13)**
  * 
  * &lt;/pre&gt;
  *
@@ -68,8 +71,9 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   /**
    * connect - default connection speed is 9600
    * 
-   * Press and hold the button. At first the LEDs will glow to indicate the current Baud rate. 9600 (green) 38400 (red) 115200 (both
-   * green and red) Press the button to cycle through baud rates
+   * Press and hold the button. At first the LEDs will glow to indicate the
+   * current Baud rate. 9600 (green) 38400 (red) 115200 (both green and red)
+   * Press the button to cycle through baud rates
    */
   public void connect(String port) throws IOException {
     connect(port, defaultBaud, 8, 1, 0);
@@ -104,8 +108,9 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -216,7 +221,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   /**
-   * attach with parameters which will set all necessary attributes on ServoControl before calling the single parameter typed attach
+   * attach with parameters which will set all necessary attributes on
+   * ServoControl before calling the single parameter typed attach
    * 
    * @param servo
    *          the servo
@@ -240,7 +246,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   /**
-   * Routing attach - routes ServiceInterface.attach(service) to appropriate methods for this class
+   * Routing attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
    */
   @Override
   public void attach(Attachable service) throws Exception {
@@ -253,7 +260,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   /**
-   * Single parameter attach{type}({type}) - this is where the "real" attach logic is for this service.
+   * Single parameter attach{type}({type}) - this is where the "real" attach
+   * logic is for this service.
    */
   @Override
   public void attachServoControl(ServoControl servo) throws Exception {
@@ -265,7 +273,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   /**
-   * Routing detach - routes ServiceInterface.detach(service) to appropriate methods for this class
+   * Routing detach - routes ServiceInterface.detach(service) to appropriate
+   * methods for this class
    */
   public void detach(Attachable service) {
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
@@ -384,7 +393,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   /*
    * (non-Javadoc)
    * 
-   * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.Integer, java.lang.Integer)
+   * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.
+   * Integer, java.lang.Integer)
    */
   @Override
   public void enablePin(Integer sensorPin, Integer i) {
@@ -395,7 +405,9 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   /*
    * (non-Javadoc)
    * 
-   * @see org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.Integer)
+   * @see
+   * org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.
+   * Integer)
    */
   @Override
   public void disablePin(Integer i) {

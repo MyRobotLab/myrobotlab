@@ -117,11 +117,14 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
 
 /**
  * 
- * OpenCV - This service provides webcam support and video image processing It uses the JavaCV binding to the OpenCV library. OpenCV
- * is a computer vision library. You can create an OpenCV service and then add a pipeline of OpenCVFilters to it to provide things
- * like facial recognition, and KLOpticalTracking
+ * OpenCV - This service provides webcam support and video image processing It
+ * uses the JavaCV binding to the OpenCV library. OpenCV is a computer vision
+ * library. You can create an OpenCV service and then add a pipeline of
+ * OpenCVFilters to it to provide things like facial recognition, and
+ * KLOpticalTracking
  * 
- * More Info about OpenCV : http://opencv.org/ JavaCV is maintained by Samuel Audet : https://github.com/bytedeco/javacv
+ * More Info about OpenCV : http://opencv.org/ JavaCV is maintained by Samuel
+ * Audet : https://github.com/bytedeco/javacv
  * 
  */
 public class OpenCV extends AbstractVideoSource {
@@ -361,8 +364,9 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -467,7 +471,8 @@ public class OpenCV extends AbstractVideoSource {
     cv.setStreamerEnabled(true);
     // cv.setGrabberType("OpenCV");
     /*
-     * OpenCVFilter yoloFilter = new OpenCVFilterYolo("yolo");//cv.addFilter("Yolo"); yoloFilter.disable();
+     * OpenCVFilter yoloFilter = new
+     * OpenCVFilterYolo("yolo");//cv.addFilter("Yolo"); yoloFilter.disable();
      * cv.addFilter(yoloFilter);
      */
 
@@ -892,10 +897,12 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * The capture(filename) method is a very general capture function. "filename" can be a local avi, mp4, or remote e.g.
-   * http://somewhere/movie.avi, or it can be a jpeg, mjpeg, pdf, tif or many other filetypes. If a frame grabber type is not
-   * specifically selected, it will attempt to select the "best" frame grabber for the job. Typically this will the the FFmpeg
-   * grabber since its the most capable of decoding different filetypes.
+   * The capture(filename) method is a very general capture function. "filename"
+   * can be a local avi, mp4, or remote e.g. http://somewhere/movie.avi, or it
+   * can be a jpeg, mjpeg, pdf, tif or many other filetypes. If a frame grabber
+   * type is not specifically selected, it will attempt to select the "best"
+   * frame grabber for the job. Typically this will the the FFmpeg grabber since
+   * its the most capable of decoding different filetypes.
    * 
    * @param filename
    */
@@ -1023,7 +1030,8 @@ public class OpenCV extends AbstractVideoSource {
       }
     } else if (inputFile != null && (inputFile.startsWith("http"))) {
       // get and cache image file
-      // FIXME - perhaps "test" stream to try to determine what "type" it is - mjpeg/jpg/gif/ octet-stream :( ???
+      // FIXME - perhaps "test" stream to try to determine what "type" it is -
+      // mjpeg/jpg/gif/ octet-stream :( ???
       if (grabberType == null || (grabberType != null && (!grabberType.equals("MJpeg") && !grabberType.equals("IPCamera")))) {
         inputFile = getImageFromUrl(inputFile);
       }
@@ -1134,13 +1142,16 @@ public class OpenCV extends AbstractVideoSource {
     }
 
     /*
-     * if (grabber.getClass() == OpenKinectFrameGrabber.class) { OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber) grabber;
+     * if (grabber.getClass() == OpenKinectFrameGrabber.class) {
+     * OpenKinectFrameGrabber kinect = (OpenKinectFrameGrabber) grabber;
      * 
-     * // kinect.grab(); // kinect.grabVideo(); // kinect.grabDepth(); // kinect.grabIR();
+     * // kinect.grab(); // kinect.grabVideo(); // kinect.grabDepth(); //
+     * kinect.grabIR();
      * 
-     * // what is the behavior of (kinect.grabDepth(), kinect.grabVideo(), kinect.grabIR()) all at once - do these calls block ? //
-     * or just return null ? how much time do they block ? is it worth getting IR ? // data.putKinect(kinect.grabDepth(),
-     * kinect.grabVideo()); }
+     * // what is the behavior of (kinect.grabDepth(), kinect.grabVideo(),
+     * kinect.grabIR()) all at once - do these calls block ? // or just return
+     * null ? how much time do they block ? is it worth getting IR ? //
+     * data.putKinect(kinect.grabDepth(), kinect.grabVideo()); }
      */
 
     log.info(String.format("using %s", grabber.getClass().getCanonicalName()));
@@ -1266,7 +1277,8 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * Callback from the SwingGui (e.g. clicking on the display) routes to the appropriate filter through this method.
+   * Callback from the SwingGui (e.g. clicking on the display) routes to the
+   * appropriate filter through this method.
    */
   public void invokeFilterMethod(String filterName, String method, Object... params) {
     OpenCVFilter filter = getFilter(filterName);
@@ -1440,7 +1452,8 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * FIXME - input needs to be OpenCVData THIS IS NOT USED ! VideoProcessor NOW DOES OpenCVData - this will return NULL REMOVE !!
+   * FIXME - input needs to be OpenCVData THIS IS NOT USED ! VideoProcessor NOW
+   * DOES OpenCVData - this will return NULL REMOVE !!
    */
   public final SerializableImage publishDisplay(SerializableImage img) {
     return img;
@@ -1449,7 +1462,8 @@ public class OpenCV extends AbstractVideoSource {
   /*
    * publishing method for filters - used internally
    * 
-   * @return FilterWrapper solves the problem of multiple types being resolved in the setFilterState(FilterWrapper data) method
+   * @return FilterWrapper solves the problem of multiple types being resolved
+   * in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(FilterWrapper filterWrapper) {
     return filterWrapper;
@@ -1458,7 +1472,8 @@ public class OpenCV extends AbstractVideoSource {
   /*
    * publishing method for filters - uses string parameter for remote invocation
    * 
-   * @return FilterWrapper solves the problem of multiple types being resolved in the setFilterState(FilterWrapper data) method
+   * @return FilterWrapper solves the problem of multiple types being resolved
+   * in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(String name) {
     OpenCVFilter filter = getFilter(name);
@@ -1487,7 +1502,8 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * the publishing point of all OpenCV goodies ! type conversion is held off until asked for - then its cached SMART ! :)
+   * the publishing point of all OpenCV goodies ! type conversion is held off
+   * until asked for - then its cached SMART ! :)
    * 
    */
   public final OpenCVData publishOpenCVData(OpenCVData data) {
@@ -1661,8 +1677,9 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * a resume is the same as a capture - the only difference is if the capture was "stopped" or "paused" - stop will cause the
-   * FrameGrabber to re-initialize with frame 0
+   * a resume is the same as a capture - the only difference is if the capture
+   * was "stopped" or "paused" - stop will cause the FrameGrabber to
+   * re-initialize with frame 0
    */
   synchronized public void resumeCapture() {
     capture();
@@ -1734,8 +1751,10 @@ public class OpenCV extends AbstractVideoSource {
    * @param otherFilter
    *          - data from remote source
    * 
-   *          This updates the filter with all the non-transient data in a remote copy through a reflective field update. If your
-   *          filter has JNI members or pointer references it will break, mark all of these.
+   *          This updates the filter with all the non-transient data in a
+   *          remote copy through a reflective field update. If your filter has
+   *          JNI members or pointer references it will break, mark all of
+   *          these.
    */
   public void setFilterState(FilterWrapper otherFilter) {
     OpenCVFilter filter = getFilter(otherFilter.name);
@@ -1868,7 +1887,8 @@ public class OpenCV extends AbstractVideoSource {
   }
 
   /**
-   * method used to inspect details of grabber configuration and capture request to determine if a single frame is to be returned
+   * method used to inspect details of grabber configuration and capture request
+   * to determine if a single frame is to be returned
    * 
    * @return
    */

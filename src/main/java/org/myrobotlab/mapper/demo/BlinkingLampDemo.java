@@ -34,8 +34,9 @@ import org.myrobotlab.mapper.sim.RobotFactory;
 import org.myrobotlab.mapper.sim.Wall;
 
 /**
- * A Lamp actuator demo. The lamp blinks when the robot is approaching an obstacle. The lamp is on when the robot is avoiding an
- * obstacle. The demo also demonstrates the use of quadrants reading for sonar belt.
+ * A Lamp actuator demo. The lamp blinks when the robot is approaching an
+ * obstacle. The lamp is on when the robot is avoiding an obstacle. The demo
+ * also demonstrates the use of quadrants reading for sonar belt.
  */
 public class BlinkingLampDemo extends Demo {
 

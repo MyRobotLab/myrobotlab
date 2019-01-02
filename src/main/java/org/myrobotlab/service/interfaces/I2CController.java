@@ -39,7 +39,8 @@ public interface I2CController extends Attachable {
    * This method reads bytes from the i2c device to given buffer.
    * 
    * 
-   * /** This method writes and reads bytes to/from the i2c device in a single method call
+   * /** This method writes and reads bytes to/from the i2c device in a single
+   * method call
    * 
    * @param control
    *          c
@@ -58,7 +59,8 @@ public interface I2CController extends Attachable {
    *
    * @return number of bytes read
    *
-   *         IOException thrown in case byte cannot be read from the i2c device or i2c bus
+   *         IOException thrown in case byte cannot be read from the i2c device
+   *         or i2c bus
    */
   int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize);
 

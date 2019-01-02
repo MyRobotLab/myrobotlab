@@ -14,8 +14,9 @@ public class GitHub {
   public static final String BRANCHES = "https://api.github.com/repos/MyRobotLab/myrobotlab/branches";
 
   /*
-   * public static String getPyRobotLabScript(String serviceType) { Platform p = Platform.getLocalInstance(); return
-   * getPyRobotLabScript(p.getBranch(), serviceType); }
+   * public static String getPyRobotLabScript(String serviceType) { Platform p =
+   * Platform.getLocalInstance(); return getPyRobotLabScript(p.getBranch(),
+   * serviceType); }
    */
   public static String getPyRobotLabScript(String branch, String serviceType) {
     byte[] script = Http.get(String.format("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/%s/service/%s.py", branch, serviceType));

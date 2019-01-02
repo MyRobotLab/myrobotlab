@@ -12,10 +12,11 @@ import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 /**
- * a class which decodes bytes as an output stream, puts the decoded strings on a queue and relays the stream of bytes to another
- * output stream if available
+ * a class which decodes bytes as an output stream, puts the decoded strings on
+ * a queue and relays the stream of bytes to another output stream if available
  * 
- * another thread can wait on the blocking decode method for new decoded messages
+ * another thread can wait on the blocking decode method for new decoded
+ * messages
  * 
  * @author GroG
  *

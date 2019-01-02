@@ -29,13 +29,17 @@ import java.io.Serializable;
 /**
  * A class to describe a two or three dimensional vector.
  * <p>
- * The result of all functions are applied to the vector itself, with the exception of cross(), which returns a new PVector (or
- * writes to a specified 'target' PVector). That is, add() will add the contents of one vector to this one. Using add() with
- * additional parameters allows you to put the result into a new PVector. Functions that act on multiple vectors also include static
- * versions. Because creating new objects can be computationally expensive, most functions include an optional 'target' PVector, so
- * that a new PVector object is not created with each operation.
+ * The result of all functions are applied to the vector itself, with the
+ * exception of cross(), which returns a new PVector (or writes to a specified
+ * 'target' PVector). That is, add() will add the contents of one vector to this
+ * one. Using add() with additional parameters allows you to put the result into
+ * a new PVector. Functions that act on multiple vectors also include static
+ * versions. Because creating new objects can be computationally expensive, most
+ * functions include an optional 'target' PVector, so that a new PVector object
+ * is not created with each operation.
  * <p>
- * Initially based on the Vector3D class by <a href="http://www.shiffman.net">Dan Shiffman</a>.
+ * Initially based on the Vector3D class by
+ * <a href="http://www.shiffman.net">Dan Shiffman</a>.
  */
 public class PVector implements Serializable {
 
@@ -148,7 +152,8 @@ public class PVector implements Serializable {
   }
 
   /**
-   * Calculate the Euclidean distance between two points (considering a point as a vector object)
+   * Calculate the Euclidean distance between two points (considering a point as
+   * a vector object)
    * 
    * @param v1
    *          a vector
@@ -186,14 +191,16 @@ public class PVector implements Serializable {
   }
 
   /*
-   * Multiply each element of one vector by the individual elements of another vector, and return the result as a new PVector.
+   * Multiply each element of one vector by the individual elements of another
+   * vector, and return the result as a new PVector.
    */
   static public PVector div(PVector v1, PVector v2) {
     return div(v1, v2, null);
   }
 
   /*
-   * Divide each element of one vector by the individual elements of another vector, and write the result into a target vector.
+   * Divide each element of one vector by the individual elements of another
+   * vector, and write the result into a target vector.
    * 
    * @param v1 the first vector
    * 
@@ -248,14 +255,16 @@ public class PVector implements Serializable {
   }
 
   /*
-   * Multiply each element of one vector by the individual elements of another vector, and return the result as a new PVector.
+   * Multiply each element of one vector by the individual elements of another
+   * vector, and return the result as a new PVector.
    */
   static public PVector mult(PVector v1, PVector v2) {
     return mult(v1, v2, null);
   }
 
   /*
-   * Multiply each element of one vector by the individual elements of another vector, and write the result into a target vector.
+   * Multiply each element of one vector by the individual elements of another
+   * vector, and write the result into a target vector.
    * 
    * @param v1 the first vector
    * 
@@ -349,8 +358,9 @@ public class PVector implements Serializable {
   }
 
   /**
-   * @return a representation of this vector as a float array. This is only for temporary use. If used in any other fashion, the
-   *         contents should be copied by using the get() command to copy into your own array.
+   * @return a representation of this vector as a float array. This is only for
+   *         temporary use. If used in any other fashion, the contents should be
+   *         copied by using the get() command to copy into your own array.
    */
   public float[] array() {
     if (array == null) {
@@ -372,8 +382,8 @@ public class PVector implements Serializable {
   }
 
   /*
-   * Perform cross product between this and another vector, and store the result in 'target'. If target is null, a new vector is
-   * created.
+   * Perform cross product between this and another vector, and store the result
+   * in 'target'. If target is null, a new vector is created.
    */
   public PVector cross(PVector v, PVector target) {
     float crossX = y * v.z - v.y * z;
@@ -389,7 +399,8 @@ public class PVector implements Serializable {
   }
 
   /**
-   * Calculate the Euclidean distance between two points (considering a point as a vector object)
+   * Calculate the Euclidean distance between two points (considering a point as
+   * a vector object)
    * 
    * @param v
    *          another vector

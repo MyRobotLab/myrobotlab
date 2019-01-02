@@ -41,7 +41,8 @@ import org.myrobotlab.mapper.sim.SensorMatrix;
 import org.myrobotlab.mapper.sim.Wall;
 
 /**
- * An image processing demo. This demo shows how to capture the camera image , process it and display it in a dedicated window.
+ * An image processing demo. This demo shows how to capture the camera image ,
+ * process it and display it in a dedicated window.
  * 
  */
 public class ImagerDemo extends Demo {

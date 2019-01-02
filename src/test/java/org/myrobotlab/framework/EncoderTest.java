@@ -38,8 +38,9 @@ public class EncoderTest {
 
     // Runtime.showMethods(foo) (TYPE)
     /*
-     * msg = Encoder.decodeURI(new URI("http://www.myrobotlab.org:7777/api/foo/")); assertNotNull(msg); assertEquals("foo",
-     * msg.getName());
+     * msg = Encoder.decodeURI(new
+     * URI("http://www.myrobotlab.org:7777/api/foo/")); assertNotNull(msg);
+     * assertEquals("foo", msg.getName());
      */
 
   }

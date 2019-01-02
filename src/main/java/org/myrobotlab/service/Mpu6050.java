@@ -55,16 +55,22 @@ import org.slf4j.Logger;
  * 
  */
 /**
- * ============================================ I2Cdev device library code is placed under the MIT license Copyright (c) 2012 Jeff
- * Rowberg Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall
- * be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE. ===============================================
+ * ============================================ I2Cdev device library code is
+ * placed under the MIT license Copyright (c) 2012 Jeff Rowberg Permission is
+ * hereby granted, free of charge, to any person obtaining a copy of this
+ * software and associated documentation files (the "Software"), to deal in the
+ * Software without restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions: The above copyright notice and this
+ * permission notice shall be included in all copies or substantial portions of
+ * the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE. ===============================================
  */
 
 public class Mpu6050 extends Service implements I2CControl, OrientationPublisher {
@@ -541,15 +547,18 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     try {
 
       /*
-       * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050"); Runtime.start("gui", "SwingGui");
+       * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
+       * Runtime.start("gui", "SwingGui");
        */
 
       /*
-       * Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino"); arduino.connect("COM4"); mpu6050.setController(arduino);
+       * Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
+       * arduino.connect("COM4"); mpu6050.setController(arduino);
        */
 
       /*
-       * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi"); mpu6050.setController(raspi); mpu6050.dmpInitialize();
+       * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
+       * mpu6050.setController(raspi); mpu6050.dmpInitialize();
        */
       int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
       int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
@@ -598,11 +607,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * This method reads all the 7 raw values in one go accelX accelY accelZ temperature ( In degrees Celcius ) gyroX gyroY gyroZ
+   * This method reads all the 7 raw values in one go accelX accelY accelZ
+   * temperature ( In degrees Celcius ) gyroX gyroY gyroZ
    * 
    */
   /**
-   * TODO Make the way it should be Currently only used for test of data binding to the webgui
+   * TODO Make the way it should be Currently only used for test of data binding
+   * to the webgui
    */
   public void refresh() {
     getRaw();
@@ -642,9 +653,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Complementary filter using the raw values Calclations here are based on the information from
-   * https://www.youtube.com/watch?v=qmd6CVrlHOM http://www.geekmomprojects.com/gyroscopes-and-accelerometers-on-a-chip/ Thank's
-   * Debra
+   * Complementary filter using the raw values Calclations here are based on the
+   * information from https://www.youtube.com/watch?v=qmd6CVrlHOM
+   * http://www.geekmomprojects.com/gyroscopes-and-accelerometers-on-a-chip/
+   * Thank's Debra
    */
   double lastnow = 0;
 
@@ -866,7 +878,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
         log.info("Setting up internal 42-byte (default) DMP packet buffer...");
         // int dmpPacketSize = 42;
         /*
-         * if ((dmpPacketBuffer = (int *)malloc(42)) == 0) { return 3; // TODO: proper error code for no memory }
+         * if ((dmpPacketBuffer = (int *)malloc(42)) == 0) { return 3; // TODO:
+         * proper error code for no memory }
          */
 
         log.info("Resetting FIFO and clearing INT status one last time...");
@@ -901,7 +914,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Verify the I2C connection. Make sure the device is connected and responds as expected.
+   * Verify the I2C connection. Make sure the device is connected and responds
+   * as expected.
    * 
    * @return True if connection is valid, false otherwise
    */
@@ -912,8 +926,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // AUX_VDDIO register (InvenSense demo code calls this RA_*G_OFFS_TC)
 
   /**
-   * Get the auxiliary I2C supply voltage level. When set to 1, the auxiliary I2C bus high logic level is VDD. When cleared to 0,
-   * the auxiliary I2C bus high logic level is VLOGIC. This does not apply to the MPU-6000, which does not have a VLOGIC pin.
+   * Get the auxiliary I2C supply voltage level. When set to 1, the auxiliary
+   * I2C bus high logic level is VDD. When cleared to 0, the auxiliary I2C bus
+   * high logic level is VLOGIC. This does not apply to the MPU-6000, which does
+   * not have a VLOGIC pin.
    * 
    * @return I2C supply voltage level (0=VLOGIC, 1=VDD)
    */
@@ -922,8 +938,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set the auxiliary I2C supply voltage level. When set to 1, the auxiliary I2C bus high logic level is VDD. When cleared to 0,
-   * the auxiliary I2C bus high logic level is VLOGIC. This does not apply to the MPU-6000, which does not have a VLOGIC pin.
+   * Set the auxiliary I2C supply voltage level. When set to 1, the auxiliary
+   * I2C bus high logic level is VDD. When cleared to 0, the auxiliary I2C bus
+   * high logic level is VLOGIC. This does not apply to the MPU-6000, which does
+   * not have a VLOGIC pin.
    * 
    * @param level
    *          I2C supply voltage level (0=VLOGIC, 1=VDD)
@@ -936,20 +954,22 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // SMPLRT_DIV register
 
   /**
-   * Get gyroscope output rate divider. The sensor register output, FIFO output, DMP sampling, Motion detection, Zero Motion
-   * detection, and Free Fall detection are all based on the Sample Rate. The Sample Rate is generated by dividing the gyroscope
-   * output rate by SMPLRT_DIV:
+   * Get gyroscope output rate divider. The sensor register output, FIFO output,
+   * DMP sampling, Motion detection, Zero Motion detection, and Free Fall
+   * detection are all based on the Sample Rate. The Sample Rate is generated by
+   * dividing the gyroscope output rate by SMPLRT_DIV:
    *
    * Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
    *
-   * where Gyroscope Output Rate = 8kHz when the DLPF is disabled (DLPF_CFG = 0 or 7), and 1kHz when the DLPF is enabled (see
-   * Register 26).
+   * where Gyroscope Output Rate = 8kHz when the DLPF is disabled (DLPF_CFG = 0
+   * or 7), and 1kHz when the DLPF is enabled (see Register 26).
    *
-   * Note: The accelerometer output rate is 1kHz. This means that for a Sample Rate greater than 1kHz, the same accelerometer sample
-   * may be output to the FIFO, DMP, and sensor registers more than once.
+   * Note: The accelerometer output rate is 1kHz. This means that for a Sample
+   * Rate greater than 1kHz, the same accelerometer sample may be output to the
+   * FIFO, DMP, and sensor registers more than once.
    *
-   * For a diagram of the gyroscope and accelerometer signal paths, see Section 8 of the MPU-6000/MPU-6050 Product Specification
-   * document.
+   * For a diagram of the gyroscope and accelerometer signal paths, see Section
+   * 8 of the MPU-6000/MPU-6050 Product Specification document.
    *
    * @return Current sample rate
    * @see MPU6050_RA_SMPLRT_DIV
@@ -972,13 +992,16 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // CONFIG register
 
   /**
-   * Get external FSYNC configuration. Configures the external Frame Synchronization (FSYNC) pin sampling. An external signal
-   * connected to the FSYNC pin can be sampled by configuring EXT_SYNC_SET. Signal changes to the FSYNC pin are latched so that
-   * short strobes may be captured. The latched FSYNC signal will be sampled at the Sampling Rate, as defined in register 25. After
-   * sampling, the latch will reset to the current FSYNC signal state.
+   * Get external FSYNC configuration. Configures the external Frame
+   * Synchronization (FSYNC) pin sampling. An external signal connected to the
+   * FSYNC pin can be sampled by configuring EXT_SYNC_SET. Signal changes to the
+   * FSYNC pin are latched so that short strobes may be captured. The latched
+   * FSYNC signal will be sampled at the Sampling Rate, as defined in register
+   * 25. After sampling, the latch will reset to the current FSYNC signal state.
    *
-   * The sampled value will be reported in place of the least significant bit in a sensor data register determined by the value of
-   * EXT_SYNC_SET according to the following table.
+   * The sampled value will be reported in place of the least significant bit in
+   * a sensor data register determined by the value of EXT_SYNC_SET according to
+   * the following table.
    *
    * <pre>
    * EXT_SYNC_SET | FSYNC Bit Location
@@ -1013,11 +1036,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get digital low-pass filter configuration. The DLPF_CFG parameter sets the digital low pass filter configuration. It also
-   * determines the internal sampling rate used by the device as shown in the table below.
+   * Get digital low-pass filter configuration. The DLPF_CFG parameter sets the
+   * digital low pass filter configuration. It also determines the internal
+   * sampling rate used by the device as shown in the table below.
    *
-   * Note: The accelerometer output rate is 1kHz. This means that for a Sample Rate greater than 1kHz, the same accelerometer sample
-   * may be output to the FIFO, DMP, and sensor registers more than once.
+   * Note: The accelerometer output rate is 1kHz. This means that for a Sample
+   * Rate greater than 1kHz, the same accelerometer sample may be output to the
+   * FIFO, DMP, and sensor registers more than once.
    *
    * <pre>
    *          |   ACCELEROMETER    |           GYROSCOPE
@@ -1059,8 +1084,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // GYRO_CONFIG register
 
   /**
-   * Get full-scale gyroscope range. The FS_SEL parameter allows setting the full-scale range of the gyro sensors, as described in
-   * the table below.
+   * Get full-scale gyroscope range. The FS_SEL parameter allows setting the
+   * full-scale range of the gyro sensors, as described in the table below.
    *
    * <pre>
    * 0 = +/- 250 degrees/sec
@@ -1227,8 +1252,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get full-scale accelerometer range. The FS_SEL parameter allows setting the full-scale range of the accelerometer sensors, as
-   * described in the table below.
+   * Get full-scale accelerometer range. The FS_SEL parameter allows setting the
+   * full-scale range of the accelerometer sensors, as described in the table
+   * below.
    *
    * <pre>
    * 0 = +/- 2g
@@ -1251,16 +1277,19 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set full-scale accelerometer range.
    * 
    * @param range
-   *          New full-scale accelerometer range setting see getFullScaleAccelRange()
+   *          New full-scale accelerometer range setting see
+   *          getFullScaleAccelRange()
    */
   void setFullScaleAccelRange(int range) {
     I2CdevWriteBits(Integer.decode(deviceAddress), MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range);
   }
 
   /**
-   * Get the high-pass filter configuration. The DHPF is a filter module in the path leading to motion detectors (Free Fall, Motion
-   * threshold, and Zero Motion). The high pass filter output is not available to the data registers (see Figure in Section 8 of the
-   * MPU-6000/ MPU-6050 Product Specification document).
+   * Get the high-pass filter configuration. The DHPF is a filter module in the
+   * path leading to motion detectors (Free Fall, Motion threshold, and Zero
+   * Motion). The high pass filter output is not available to the data registers
+   * (see Figure in Section 8 of the MPU-6000/ MPU-6050 Product Specification
+   * document).
    *
    * The high pass filter has three modes:
    *
@@ -1310,13 +1339,17 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // FF_THR register
 
   /**
-   * Get free-fall event acceleration threshold. This register configures the detection threshold for Free Fall event detection. The
-   * unit of FF_THR is 1LSB = 2mg. Free Fall is detected when the absolute value of the accelerometer measurements for the three
-   * axes are each less than the detection threshold. This condition increments the Free Fall duration counter (Register 30). The
-   * Free Fall interrupt is triggered when the Free Fall duration counter reaches the time specified in FF_DUR.
+   * Get free-fall event acceleration threshold. This register configures the
+   * detection threshold for Free Fall event detection. The unit of FF_THR is
+   * 1LSB = 2mg. Free Fall is detected when the absolute value of the
+   * accelerometer measurements for the three axes are each less than the
+   * detection threshold. This condition increments the Free Fall duration
+   * counter (Register 30). The Free Fall interrupt is triggered when the Free
+   * Fall duration counter reaches the time specified in FF_DUR.
    *
-   * For more details on the Free Fall detection interrupt, see Section 8.2 of the MPU-6000/MPU-6050 Product Specification document
-   * as well as Registers 56 and 58 of this document.
+   * For more details on the Free Fall detection interrupt, see Section 8.2 of
+   * the MPU-6000/MPU-6050 Product Specification document as well as Registers
+   * 56 and 58 of this document.
    *
    * @return Current free-fall acceleration threshold value (LSB = 2mg)
    * @see MPU6050_RA_FF_THR
@@ -1329,7 +1362,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get free-fall event acceleration threshold.
    * 
    * @param threshold
-   *          New free-fall acceleration threshold value (LSB = 2mg) see getFreefallDetectionThreshold()
+   *          New free-fall acceleration threshold value (LSB = 2mg) see
+   *          getFreefallDetectionThreshold()
    * @see MPU6050_RA_FF_THR
    */
   void setFreefallDetectionThreshold(int threshold) {
@@ -1339,15 +1373,18 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // FF_DUR register
 
   /**
-   * Get free-fall event duration threshold. This register configures the duration counter threshold for Free Fall event detection.
-   * The duration counter ticks at 1kHz, therefore FF_DUR has a unit of 1 LSB = 1 ms.
+   * Get free-fall event duration threshold. This register configures the
+   * duration counter threshold for Free Fall event detection. The duration
+   * counter ticks at 1kHz, therefore FF_DUR has a unit of 1 LSB = 1 ms.
    *
-   * The Free Fall duration counter increments while the absolute value of the accelerometer measurements are each less than the
-   * detection threshold (Register 29). The Free Fall interrupt is triggered when the Free Fall duration counter reaches the time
-   * specified in this register.
+   * The Free Fall duration counter increments while the absolute value of the
+   * accelerometer measurements are each less than the detection threshold
+   * (Register 29). The Free Fall interrupt is triggered when the Free Fall
+   * duration counter reaches the time specified in this register.
    *
-   * For more details on the Free Fall detection interrupt, see Section 8.2 of the MPU-6000/MPU-6050 Product Specification document
-   * as well as Registers 56 and 58 of this document.
+   * For more details on the Free Fall detection interrupt, see Section 8.2 of
+   * the MPU-6000/MPU-6050 Product Specification document as well as Registers
+   * 56 and 58 of this document.
    *
    * @return Current free-fall duration threshold value (LSB = 1ms)
    * @see MPU6050_RA_FF_DUR
@@ -1360,7 +1397,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Get free-fall event duration threshold.
    * 
    * @param duration
-   *          New free-fall duration threshold value (LSB = 1ms) see getFreefallDetectionDuration()
+   *          New free-fall duration threshold value (LSB = 1ms) see
+   *          getFreefallDetectionDuration()
    * @see MPU6050_RA_FF_DUR
    */
   void setFreefallDetectionDuration(int duration) {
@@ -1370,16 +1408,20 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // MOT_THR register
 
   /**
-   * Get motion detection event acceleration threshold. This register configures the detection threshold for Motion interrupt
-   * generation. The unit of MOT_THR is 1LSB = 2mg. Motion is detected when the absolute value of any of the accelerometer
-   * measurements exceeds this Motion detection threshold. This condition increments the Motion detection duration counter (Register
-   * 32). The Motion detection interrupt is triggered when the Motion Detection counter reaches the time count specified in MOT_DUR
-   * (Register 32).
+   * Get motion detection event acceleration threshold. This register configures
+   * the detection threshold for Motion interrupt generation. The unit of
+   * MOT_THR is 1LSB = 2mg. Motion is detected when the absolute value of any of
+   * the accelerometer measurements exceeds this Motion detection threshold.
+   * This condition increments the Motion detection duration counter (Register
+   * 32). The Motion detection interrupt is triggered when the Motion Detection
+   * counter reaches the time count specified in MOT_DUR (Register 32).
    *
-   * The Motion interrupt will indicate the axis and polarity of detected motion in MOT_DETECT_STATUS (Register 97).
+   * The Motion interrupt will indicate the axis and polarity of detected motion
+   * in MOT_DETECT_STATUS (Register 97).
    *
-   * For more details on the Motion detection interrupt, see Section 8.3 of the MPU-6000/MPU-6050 Product Specification document as
-   * well as Registers 56 and 58 of this document.
+   * For more details on the Motion detection interrupt, see Section 8.3 of the
+   * MPU-6000/MPU-6050 Product Specification document as well as Registers 56
+   * and 58 of this document.
    *
    * @return Current motion detection acceleration threshold value (LSB = 2mg)
    * @see MPU6050_RA_MOT_THR
@@ -1392,7 +1434,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set motion detection event acceleration threshold.
    * 
    * @param threshold
-   *          New motion detection acceleration threshold value (LSB = 2mg) see getMotionDetectionThreshold()
+   *          New motion detection acceleration threshold value (LSB = 2mg) see
+   *          getMotionDetectionThreshold()
    * @see MPU6050_RA_MOT_THR
    */
   void setMotionDetectionThreshold(int threshold) {
@@ -1402,13 +1445,16 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // MOT_DUR register
 
   /**
-   * Get motion detection event duration threshold. This register configures the duration counter threshold for Motion interrupt
-   * generation. The duration counter ticks at 1 kHz, therefore MOT_DUR has a unit of 1LSB = 1ms. The Motion detection duration
-   * counter increments when the absolute value of any of the accelerometer measurements exceeds the Motion detection threshold
-   * (Register 31). The Motion detection interrupt is triggered when the Motion detection counter reaches the time count specified
-   * in this register.
+   * Get motion detection event duration threshold. This register configures the
+   * duration counter threshold for Motion interrupt generation. The duration
+   * counter ticks at 1 kHz, therefore MOT_DUR has a unit of 1LSB = 1ms. The
+   * Motion detection duration counter increments when the absolute value of any
+   * of the accelerometer measurements exceeds the Motion detection threshold
+   * (Register 31). The Motion detection interrupt is triggered when the Motion
+   * detection counter reaches the time count specified in this register.
    *
-   * For more details on the Motion detection interrupt, see Section 8.3 of the MPU-6000/MPU-6050 Product Specification document.
+   * For more details on the Motion detection interrupt, see Section 8.3 of the
+   * MPU-6000/MPU-6050 Product Specification document.
    *
    * @return Current motion detection duration threshold value (LSB = 1ms)
    * @see MPU6050_RA_MOT_DUR
@@ -1421,7 +1467,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set motion detection event duration threshold.
    * 
    * @param duration
-   *          New motion detection duration threshold value (LSB = 1ms) see getMotionDetectionDuration()
+   *          New motion detection duration threshold value (LSB = 1ms) see
+   *          getMotionDetectionDuration()
    * @see MPU6050_RA_MOT_DUR
    */
   void setMotionDetectionDuration(int duration) {
@@ -1431,23 +1478,31 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // ZRMOT_THR register
 
   /**
-   * Get zero motion detection event acceleration threshold. This register configures the detection threshold for Zero Motion
-   * interrupt generation. The unit of ZRMOT_THR is 1LSB = 2mg. Zero Motion is detected when the absolute value of the accelerometer
-   * measurements for the 3 axes are each less than the detection threshold. This condition increments the Zero Motion duration
-   * counter (Register 34). The Zero Motion interrupt is triggered when the Zero Motion duration counter reaches the time count
+   * Get zero motion detection event acceleration threshold. This register
+   * configures the detection threshold for Zero Motion interrupt generation.
+   * The unit of ZRMOT_THR is 1LSB = 2mg. Zero Motion is detected when the
+   * absolute value of the accelerometer measurements for the 3 axes are each
+   * less than the detection threshold. This condition increments the Zero
+   * Motion duration counter (Register 34). The Zero Motion interrupt is
+   * triggered when the Zero Motion duration counter reaches the time count
    * specified in ZRMOT_DUR (Register 34).
    *
-   * Unlike Free Fall or Motion detection, Zero Motion detection triggers an interrupt both when Zero Motion is first detected and
-   * when Zero Motion is no longer detected.
+   * Unlike Free Fall or Motion detection, Zero Motion detection triggers an
+   * interrupt both when Zero Motion is first detected and when Zero Motion is
+   * no longer detected.
    *
-   * When a zero motion event is detected, a Zero Motion Status will be indicated in the MOT_DETECT_STATUS register (Register 97).
-   * When a motion-to-zero-motion condition is detected, the status bit is set to 1. When a zero-motion-to- motion condition is
-   * detected, the status bit is set to 0.
+   * When a zero motion event is detected, a Zero Motion Status will be
+   * indicated in the MOT_DETECT_STATUS register (Register 97). When a
+   * motion-to-zero-motion condition is detected, the status bit is set to 1.
+   * When a zero-motion-to- motion condition is detected, the status bit is set
+   * to 0.
    *
-   * For more details on the Zero Motion detection interrupt, see Section 8.4 of the MPU-6000/MPU-6050 Product Specification
-   * document as well as Registers 56 and 58 of this document.
+   * For more details on the Zero Motion detection interrupt, see Section 8.4 of
+   * the MPU-6000/MPU-6050 Product Specification document as well as Registers
+   * 56 and 58 of this document.
    *
-   * @return Current zero motion detection acceleration threshold value (LSB = 2mg)
+   * @return Current zero motion detection acceleration threshold value (LSB =
+   *         2mg)
    * @see MPU6050_RA_ZRMOT_THR
    */
   int getZeroMotionDetectionThreshold() {
@@ -1458,7 +1513,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set zero motion detection event acceleration threshold.
    * 
    * @param threshold
-   *          New zero motion detection acceleration threshold value (LSB = 2mg) see getZeroMotionDetectionThreshold()
+   *          New zero motion detection acceleration threshold value (LSB = 2mg)
+   *          see getZeroMotionDetectionThreshold()
    * @see MPU6050_RA_ZRMOT_THR
    */
   void setZeroMotionDetectionThreshold(int threshold) {
@@ -1468,14 +1524,18 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // ZRMOT_DUR register
 
   /**
-   * Get zero motion detection event duration threshold. This register configures the duration counter threshold for Zero Motion
-   * interrupt generation. The duration counter ticks at 16 Hz, therefore ZRMOT_DUR has a unit of 1 LSB = 64 ms. The Zero Motion
-   * duration counter increments while the absolute value of the accelerometer measurements are each less than the detection
-   * threshold (Register 33). The Zero Motion interrupt is triggered when the Zero Motion duration counter reaches the time count
-   * specified in this register.
+   * Get zero motion detection event duration threshold. This register
+   * configures the duration counter threshold for Zero Motion interrupt
+   * generation. The duration counter ticks at 16 Hz, therefore ZRMOT_DUR has a
+   * unit of 1 LSB = 64 ms. The Zero Motion duration counter increments while
+   * the absolute value of the accelerometer measurements are each less than the
+   * detection threshold (Register 33). The Zero Motion interrupt is triggered
+   * when the Zero Motion duration counter reaches the time count specified in
+   * this register.
    *
-   * For more details on the Zero Motion detection interrupt, see Section 8.4 of the MPU-6000/MPU-6050 Product Specification
-   * document, as well as Registers 56 and 58 of this document.
+   * For more details on the Zero Motion detection interrupt, see Section 8.4 of
+   * the MPU-6000/MPU-6050 Product Specification document, as well as Registers
+   * 56 and 58 of this document.
    *
    * @return Current zero motion detection duration threshold value (LSB = 64ms)
    * @see MPU6050_RA_ZRMOT_DUR
@@ -1488,7 +1548,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set zero motion detection event duration threshold.
    * 
    * @param duration
-   *          New zero motion detection duration threshold value (LSB = 1ms) see getZeroMotionDetectionDuration()
+   *          New zero motion detection duration threshold value (LSB = 1ms) see
+   *          getZeroMotionDetectionDuration()
    * @see MPU6050_RA_ZRMOT_DUR
    */
   void setZeroMotionDetectionDuration(int duration) {
@@ -1498,8 +1559,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // FIFO_EN register
 
   /**
-   * Get temperature FIFO enabled value. When set to 1, this bit enables TEMP_OUT_H and TEMP_OUT_L (Registers 65 and 66) to be
-   * written into the FIFO buffer.
+   * Get temperature FIFO enabled value. When set to 1, this bit enables
+   * TEMP_OUT_H and TEMP_OUT_L (Registers 65 and 66) to be written into the FIFO
+   * buffer.
    * 
    * @return Current temperature FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1520,8 +1582,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get gyroscope X-axis FIFO enabled value. When set to 1, this bit enables GYRO_XOUT_H and GYRO_XOUT_L (Registers 67 and 68) to
-   * be written into the FIFO buffer.
+   * Get gyroscope X-axis FIFO enabled value. When set to 1, this bit enables
+   * GYRO_XOUT_H and GYRO_XOUT_L (Registers 67 and 68) to be written into the
+   * FIFO buffer.
    * 
    * @return Current gyroscope X-axis FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1542,8 +1605,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get gyroscope Y-axis FIFO enabled value. When set to 1, this bit enables GYRO_YOUT_H and GYRO_YOUT_L (Registers 69 and 70) to
-   * be written into the FIFO buffer.
+   * Get gyroscope Y-axis FIFO enabled value. When set to 1, this bit enables
+   * GYRO_YOUT_H and GYRO_YOUT_L (Registers 69 and 70) to be written into the
+   * FIFO buffer.
    * 
    * @return Current gyroscope Y-axis FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1564,8 +1628,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get gyroscope Z-axis FIFO enabled value. When set to 1, this bit enables GYRO_ZOUT_H and GYRO_ZOUT_L (Registers 71 and 72) to
-   * be written into the FIFO buffer.
+   * Get gyroscope Z-axis FIFO enabled value. When set to 1, this bit enables
+   * GYRO_ZOUT_H and GYRO_ZOUT_L (Registers 71 and 72) to be written into the
+   * FIFO buffer.
    * 
    * @return Current gyroscope Z-axis FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1586,8 +1651,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get accelerometer FIFO enabled value. When set to 1, this bit enables ACCEL_XOUT_H, ACCEL_XOUT_L, ACCEL_YOUT_H, ACCEL_YOUT_L,
-   * ACCEL_ZOUT_H, and ACCEL_ZOUT_L (Registers 59 to 64) to be written into the FIFO buffer.
+   * Get accelerometer FIFO enabled value. When set to 1, this bit enables
+   * ACCEL_XOUT_H, ACCEL_XOUT_L, ACCEL_YOUT_H, ACCEL_YOUT_L, ACCEL_ZOUT_H, and
+   * ACCEL_ZOUT_L (Registers 59 to 64) to be written into the FIFO buffer.
    * 
    * @return Current accelerometer FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1608,8 +1674,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 2 FIFO enabled value. When set to 1, this bit enables EXT_SENS_DATA registers (Registers 73 to 96) associated with
-   * Slave 2 to be written into the FIFO buffer.
+   * Get Slave 2 FIFO enabled value. When set to 1, this bit enables
+   * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 2 to be
+   * written into the FIFO buffer.
    * 
    * @return Current Slave 2 FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1630,8 +1697,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 1 FIFO enabled value. When set to 1, this bit enables EXT_SENS_DATA registers (Registers 73 to 96) associated with
-   * Slave 1 to be written into the FIFO buffer.
+   * Get Slave 1 FIFO enabled value. When set to 1, this bit enables
+   * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 1 to be
+   * written into the FIFO buffer.
    * 
    * @return Current Slave 1 FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1652,8 +1720,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 0 FIFO enabled value. When set to 1, this bit enables EXT_SENS_DATA registers (Registers 73 to 96) associated with
-   * Slave 0 to be written into the FIFO buffer.
+   * Get Slave 0 FIFO enabled value. When set to 1, this bit enables
+   * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 0 to be
+   * written into the FIFO buffer.
    * 
    * @return Current Slave 0 FIFO enabled value
    * @see MPU6050_RA_FIFO_EN
@@ -1676,13 +1745,17 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // I2C_MST_CTRL register
 
   /**
-   * Get multi-master enabled value. Multi-master capability allows multiple I2C masters to operate on the same bus. In circuits
-   * where multi-master capability is required, set MULT_MST_EN to 1. This will increase current drawn by approximately 30uA.
+   * Get multi-master enabled value. Multi-master capability allows multiple I2C
+   * masters to operate on the same bus. In circuits where multi-master
+   * capability is required, set MULT_MST_EN to 1. This will increase current
+   * drawn by approximately 30uA.
    *
-   * In circuits where multi-master capability is required, the state of the I2C bus must always be monitored by each separate I2C
-   * Master. Before an I2C Master can assume arbitration of the bus, it must first confirm that no other I2C Master has arbitration
-   * of the bus. When MULT_MST_EN is set to 1, the MPU-60X0's bus arbitration detection logic is turned on, enabling it to detect
-   * when the bus is available.
+   * In circuits where multi-master capability is required, the state of the I2C
+   * bus must always be monitored by each separate I2C Master. Before an I2C
+   * Master can assume arbitration of the bus, it must first confirm that no
+   * other I2C Master has arbitration of the bus. When MULT_MST_EN is set to 1,
+   * the MPU-60X0's bus arbitration detection logic is turned on, enabling it to
+   * detect when the bus is available.
    *
    * @return Current multi-master enabled value
    * @see MPU6050_RA_I2C_MST_CTRL
@@ -1703,10 +1776,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get wait-for-external-sensor-data enabled value. When the WAIT_FOR_ES bit is set to 1, the Data Ready interrupt will be delayed
-   * until External Sensor data from the Slave Devices are loaded into the EXT_SENS_DATA registers. This is used to ensure that both
-   * the internal sensor data (i.e. from gyro and accel) and external sensor data have been loaded to their respective data
-   * registers (i.e. the data is synced) when the Data Ready interrupt is triggered.
+   * Get wait-for-external-sensor-data enabled value. When the WAIT_FOR_ES bit
+   * is set to 1, the Data Ready interrupt will be delayed until External Sensor
+   * data from the Slave Devices are loaded into the EXT_SENS_DATA registers.
+   * This is used to ensure that both the internal sensor data (i.e. from gyro
+   * and accel) and external sensor data have been loaded to their respective
+   * data registers (i.e. the data is synced) when the Data Ready interrupt is
+   * triggered.
    *
    * @return Current wait-for-external-sensor-data enabled value
    * @see MPU6050_RA_I2C_MST_CTRL
@@ -1719,7 +1795,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set wait-for-external-sensor-data enabled value.
    * 
    * @param enabled
-   *          New wait-for-external-sensor-data enabled value see getWaitForExternalSensorEnabled()
+   *          New wait-for-external-sensor-data enabled value see
+   *          getWaitForExternalSensorEnabled()
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   void setWaitForExternalSensorEnabled(boolean enabled) {
@@ -1727,8 +1804,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 3 FIFO enabled value. When set to 1, this bit enables EXT_SENS_DATA registers (Registers 73 to 96) associated with
-   * Slave 3 to be written into the FIFO buffer.
+   * Get Slave 3 FIFO enabled value. When set to 1, this bit enables
+   * EXT_SENS_DATA registers (Registers 73 to 96) associated with Slave 3 to be
+   * written into the FIFO buffer.
    * 
    * @return Current Slave 3 FIFO enabled value
    * @see MPU6050_RA_MST_CTRL
@@ -1749,10 +1827,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get slave read/write transition enabled value. The I2C_MST_P_NSR bit configures the I2C Master's transition from one slave read
-   * to the next slave read. If the bit equals 0, there will be a restart between reads. If the bit equals 1, there will be a stop
-   * followed by a start of the following read. When a write transaction follows a read transaction, the stop followed by a start of
-   * the successive write will be always used.
+   * Get slave read/write transition enabled value. The I2C_MST_P_NSR bit
+   * configures the I2C Master's transition from one slave read to the next
+   * slave read. If the bit equals 0, there will be a restart between reads. If
+   * the bit equals 1, there will be a stop followed by a start of the following
+   * read. When a write transaction follows a read transaction, the stop
+   * followed by a start of the successive write will be always used.
    *
    * @return Current slave read/write transition enabled value
    * @see MPU6050_RA_I2C_MST_CTRL
@@ -1765,7 +1845,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set slave read/write transition enabled value.
    * 
    * @param enabled
-   *          New slave read/write transition enabled value see getSlaveReadWriteTransitionEnabled()
+   *          New slave read/write transition enabled value see
+   *          getSlaveReadWriteTransitionEnabled()
    * @see MPU6050_RA_I2C_MST_CTRL
    */
   void setSlaveReadWriteTransitionEnabled(boolean enabled) {
@@ -1773,8 +1854,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get I2C master clock speed. I2C_MST_CLK is a 4 bit unsigned value which configures a divider on the MPU-60X0 internal 8MHz
-   * clock. It sets the I2C master clock speed according to the following table:
+   * Get I2C master clock speed. I2C_MST_CLK is a 4 bit unsigned value which
+   * configures a divider on the MPU-60X0 internal 8MHz clock. It sets the I2C
+   * master clock speed according to the following table:
    *
    * <pre>
    * I2C_MST_CLK | I2C Master Clock Speed | 8MHz Clock Divider
@@ -1817,31 +1899,43 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // I2C_SLV* registers (Slave 0-3)
 
   /**
-   * Get the I2C address of the specified slave (0-3). Note that Bit 7 (MSB) controls read/write mode. If Bit 7 is set, it's a read
-   * operation, and if it is cleared, then it's a write operation. The remaining bits (6-0) are the 7-bit device address of the
-   * slave device.
+   * Get the I2C address of the specified slave (0-3). Note that Bit 7 (MSB)
+   * controls read/write mode. If Bit 7 is set, it's a read operation, and if it
+   * is cleared, then it's a write operation. The remaining bits (6-0) are the
+   * 7-bit device address of the slave device.
    *
-   * In read mode, the result of the read is placed in the lowest available EXT_SENS_DATA register. For further information
-   * regarding the allocation of read results, please refer to the EXT_SENS_DATA register description (Registers 73 - 96).
+   * In read mode, the result of the read is placed in the lowest available
+   * EXT_SENS_DATA register. For further information regarding the allocation of
+   * read results, please refer to the EXT_SENS_DATA register description
+   * (Registers 73 - 96).
    *
-   * The MPU-6050 supports a total of five slaves, but Slave 4 has unique characteristics, and so it has its own functions
-   * (getSlave4* and setSlave4*).
+   * The MPU-6050 supports a total of five slaves, but Slave 4 has unique
+   * characteristics, and so it has its own functions (getSlave4* and
+   * setSlave4*).
    *
-   * I2C data transactions are performed at the Sample Rate, as defined in Register 25. The user is responsible for ensuring that
-   * I2C data transactions to and from each enabled Slave can be completed within a single period of the Sample Rate.
+   * I2C data transactions are performed at the Sample Rate, as defined in
+   * Register 25. The user is responsible for ensuring that I2C data
+   * transactions to and from each enabled Slave can be completed within a
+   * single period of the Sample Rate.
    *
-   * The I2C slave access rate can be reduced relative to the Sample Rate. This reduced access rate is determined by I2C_MST_DLY
-   * (Register 52). Whether a slave's access rate is reduced relative to the Sample Rate is determined by I2C_MST_DELAY_CTRL
-   * (Register 103).
+   * The I2C slave access rate can be reduced relative to the Sample Rate. This
+   * reduced access rate is determined by I2C_MST_DLY (Register 52). Whether a
+   * slave's access rate is reduced relative to the Sample Rate is determined by
+   * I2C_MST_DELAY_CTRL (Register 103).
    *
-   * The processing order for the slaves is fixed. The sequence followed for processing the slaves is Slave 0, Slave 1, Slave 2,
-   * Slave 3 and Slave 4. If a particular Slave is disabled it will be skipped.
+   * The processing order for the slaves is fixed. The sequence followed for
+   * processing the slaves is Slave 0, Slave 1, Slave 2, Slave 3 and Slave 4. If
+   * a particular Slave is disabled it will be skipped.
    *
-   * Each slave can either be accessed at the sample rate or at a reduced sample rate. In a case where some slaves are accessed at
-   * the Sample Rate and some slaves are accessed at the reduced rate, the sequence of accessing the slaves (Slave 0 to Slave 4) is
-   * still followed. However, the reduced rate slaves will be skipped if their access rate dictates that they should not be accessed
-   * during that particular cycle. For further information regarding the reduced access rate, please refer to Register 52. Whether a
-   * slave is accessed at the Sample Rate or at the reduced rate is determined by the Delay Enable bits in Register 103.
+   * Each slave can either be accessed at the sample rate or at a reduced sample
+   * rate. In a case where some slaves are accessed at the Sample Rate and some
+   * slaves are accessed at the reduced rate, the sequence of accessing the
+   * slaves (Slave 0 to Slave 4) is still followed. However, the reduced rate
+   * slaves will be skipped if their access rate dictates that they should not
+   * be accessed during that particular cycle. For further information regarding
+   * the reduced access rate, please refer to Register 52. Whether a slave is
+   * accessed at the Sample Rate or at the reduced rate is determined by the
+   * Delay Enable bits in Register 103.
    *
    * @param num
    *          Slave number (0-3)
@@ -1870,10 +1964,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get the active internal register for the specified slave (0-3). Read/write operations for this slave will be done to whatever
-   * internal register address is stored in this MPU register.
+   * Get the active internal register for the specified slave (0-3). Read/write
+   * operations for this slave will be done to whatever internal register
+   * address is stored in this MPU register.
    *
-   * The MPU-6050 supports a total of five slaves, but Slave 4 has unique characteristics, and so it has its own functions.
+   * The MPU-6050 supports a total of five slaves, but Slave 4 has unique
+   * characteristics, and so it has its own functions.
    *
    * @param num
    *          Slave number (0-3)
@@ -1902,8 +1998,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get the enabled value for the specified slave (0-3). When set to 1, this bit enables Slave 0 for data transfer operations. When
-   * cleared to 0, this bit disables Slave 0 from data transfer operations.
+   * Get the enabled value for the specified slave (0-3). When set to 1, this
+   * bit enables Slave 0 for data transfer operations. When cleared to 0, this
+   * bit disables Slave 0 from data transfer operations.
    * 
    * @param num
    *          Slave number (0-3)
@@ -1932,10 +2029,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get word pair byte-swapping enabled for the specified slave (0-3). When set to 1, this bit enables byte swapping. When byte
-   * swapping is enabled, the high and low bytes of a word pair are swapped. Please refer to I2C_SLV0_GRP for the pairing convention
-   * of the word pairs. When cleared to 0, bytes transferred to and from Slave 0 will be written to EXT_SENS_DATA registers in the
-   * order they were transferred.
+   * Get word pair byte-swapping enabled for the specified slave (0-3). When set
+   * to 1, this bit enables byte swapping. When byte swapping is enabled, the
+   * high and low bytes of a word pair are swapped. Please refer to I2C_SLV0_GRP
+   * for the pairing convention of the word pairs. When cleared to 0, bytes
+   * transferred to and from Slave 0 will be written to EXT_SENS_DATA registers
+   * in the order they were transferred.
    *
    * @param num
    *          Slave number (0-3)
@@ -1954,7 +2053,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @param enabled
-   *          New word pair byte-swapping enabled value for specified slave see getSlaveWordByteSwap()
+   *          New word pair byte-swapping enabled value for specified slave see
+   *          getSlaveWordByteSwap()
    * @see MPU6050_RA_I2C_SLV0_CTRL
    */
   void setSlaveWordByteSwap(int num, boolean enabled) {
@@ -1964,13 +2064,16 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get write mode for the specified slave (0-3). When set to 1, the transaction will read or write data only. When cleared to 0,
-   * the transaction will write a register address prior to reading or writing data. This should equal 0 when specifying the
-   * register address within the Slave device to/from which the ensuing data transaction will take place.
+   * Get write mode for the specified slave (0-3). When set to 1, the
+   * transaction will read or write data only. When cleared to 0, the
+   * transaction will write a register address prior to reading or writing data.
+   * This should equal 0 when specifying the register address within the Slave
+   * device to/from which the ensuing data transaction will take place.
    *
    * @param num
    *          Slave number (0-3)
-   * @return Current write mode for specified slave (0 = register address + data, 1 = data only)
+   * @return Current write mode for specified slave (0 = register address +
+   *         data, 1 = data only)
    * @see MPU6050_RA_I2C_SLV0_CTRL
    */
   boolean getSlaveWriteMode(int num) {
@@ -1985,7 +2088,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @param mode
-   *          New write mode for specified slave (0 = register address + data, 1 = data only) see getSlaveWriteMode()
+   *          New write mode for specified slave (0 = register address + data, 1
+   *          = data only) see getSlaveWriteMode()
    * @see MPU6050_RA_I2C_SLV0_CTRL
    */
   void setSlaveWriteMode(int num, boolean mode) {
@@ -1995,10 +2099,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get word pair grouping order offset for the specified slave (0-3). This sets specifies the grouping order of word pairs
-   * received from registers. When cleared to 0, bytes from register addresses 0 and 1, 2 and 3, etc (even, then odd register
-   * addresses) are paired to form a word. When set to 1, bytes from register addresses are paired 1 and 2, 3 and 4, etc. (odd, then
-   * even register addresses) are paired to form a word.
+   * Get word pair grouping order offset for the specified slave (0-3). This
+   * sets specifies the grouping order of word pairs received from registers.
+   * When cleared to 0, bytes from register addresses 0 and 1, 2 and 3, etc
+   * (even, then odd register addresses) are paired to form a word. When set to
+   * 1, bytes from register addresses are paired 1 and 2, 3 and 4, etc. (odd,
+   * then even register addresses) are paired to form a word.
    *
    * @param num
    *          Slave number (0-3)
@@ -2017,7 +2123,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @param enabled
-   *          New word pair grouping order offset for specified slave see getSlaveWordGroupOffset()
+   *          New word pair grouping order offset for specified slave see
+   *          getSlaveWordGroupOffset()
    * @see MPU6050_RA_I2C_SLV0_CTRL
    */
   void setSlaveWordGroupOffset(int num, boolean enabled) {
@@ -2027,8 +2134,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get number of bytes to read for the specified slave (0-3). Specifies the number of bytes transferred to and from Slave 0.
-   * Clearing this bit to 0 is equivalent to disabling the register by writing 0 to I2C_SLV0_EN.
+   * Get number of bytes to read for the specified slave (0-3). Specifies the
+   * number of bytes transferred to and from Slave 0. Clearing this bit to 0 is
+   * equivalent to disabling the register by writing 0 to I2C_SLV0_EN.
    * 
    * @param num
    *          Slave number (0-3)
@@ -2047,7 +2155,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param num
    *          Slave number (0-3)
    * @param length
-   *          Number of bytes to read for specified slave see getSlaveDataLength()
+   *          Number of bytes to read for specified slave see
+   *          getSlaveDataLength()
    * @see MPU6050_RA_I2C_SLV0_CTRL
    */
   void setSlaveDataLength(int num, int length) {
@@ -2059,8 +2168,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // I2C_SLV* registers (Slave 4)
 
   /**
-   * Get the I2C address of Slave 4. Note that Bit 7 (MSB) controls read/write mode. If Bit 7 is set, it's a read operation, and if
-   * it is cleared, then it's a write operation. The remaining bits (6-0) are the 7-bit device address of the slave device.
+   * Get the I2C address of Slave 4. Note that Bit 7 (MSB) controls read/write
+   * mode. If Bit 7 is set, it's a read operation, and if it is cleared, then
+   * it's a write operation. The remaining bits (6-0) are the 7-bit device
+   * address of the slave device.
    *
    * @return Current address for Slave 4 see getSlaveAddress()
    * @see MPU6050_RA_I2C_SLV4_ADDR
@@ -2081,8 +2192,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get the active internal register for the Slave 4. Read/write operations for this slave will be done to whatever internal
-   * register address is stored in this MPU register.
+   * Get the active internal register for the Slave 4. Read/write operations for
+   * this slave will be done to whatever internal register address is stored in
+   * this MPU register.
    *
    * @return Current active register for Slave 4
    * @see MPU6050_RA_I2C_SLV4_REG
@@ -2103,8 +2215,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set new byte to write to Slave 4. This register stores the data to be written into the Slave 4. If I2C_SLV4_RW is set 1 (set to
-   * read), this register has no effect.
+   * Set new byte to write to Slave 4. This register stores the data to be
+   * written into the Slave 4. If I2C_SLV4_RW is set 1 (set to read), this
+   * register has no effect.
    * 
    * @param data
    *          New byte to write to Slave 4
@@ -2115,8 +2228,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get the enabled value for the Slave 4. When set to 1, this bit enables Slave 4 for data transfer operations. When cleared to 0,
-   * this bit disables Slave 4 from data transfer operations.
+   * Get the enabled value for the Slave 4. When set to 1, this bit enables
+   * Slave 4 for data transfer operations. When cleared to 0, this bit disables
+   * Slave 4 from data transfer operations.
    * 
    * @return Current enabled value for Slave 4
    * @see MPU6050_RA_I2C_SLV4_CTRL
@@ -2137,9 +2251,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get the enabled value for Slave 4 transaction interrupts. When set to 1, this bit enables the generation of an interrupt signal
-   * upon completion of a Slave 4 transaction. When cleared to 0, this bit disables the generation of an interrupt signal upon
-   * completion of a Slave 4 transaction. The interrupt status can be observed in Register 54.
+   * Get the enabled value for Slave 4 transaction interrupts. When set to 1,
+   * this bit enables the generation of an interrupt signal upon completion of a
+   * Slave 4 transaction. When cleared to 0, this bit disables the generation of
+   * an interrupt signal upon completion of a Slave 4 transaction. The interrupt
+   * status can be observed in Register 54.
    *
    * @return Current enabled value for Slave 4 transaction interrupts.
    * @see MPU6050_RA_I2C_SLV4_CTRL
@@ -2152,7 +2268,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set the enabled value for Slave 4 transaction interrupts.
    * 
    * @param enabled
-   *          New enabled value for Slave 4 transaction interrupts. see getSlave4InterruptEnabled()
+   *          New enabled value for Slave 4 transaction interrupts. see
+   *          getSlave4InterruptEnabled()
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   void setSlave4InterruptEnabled(boolean enabled) {
@@ -2160,11 +2277,14 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get write mode for Slave 4. When set to 1, the transaction will read or write data only. When cleared to 0, the transaction
-   * will write a register address prior to reading or writing data. This should equal 0 when specifying the register address within
-   * the Slave device to/from which the ensuing data transaction will take place.
+   * Get write mode for Slave 4. When set to 1, the transaction will read or
+   * write data only. When cleared to 0, the transaction will write a register
+   * address prior to reading or writing data. This should equal 0 when
+   * specifying the register address within the Slave device to/from which the
+   * ensuing data transaction will take place.
    *
-   * @return Current write mode for Slave 4 (0 = register address + data, 1 = data only)
+   * @return Current write mode for Slave 4 (0 = register address + data, 1 =
+   *         data only)
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   boolean getSlave4WriteMode() {
@@ -2175,7 +2295,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set write mode for the Slave 4.
    * 
    * @param mode
-   *          New write mode for Slave 4 (0 = register address + data, 1 = data only) see getSlave4WriteMode()
+   *          New write mode for Slave 4 (0 = register address + data, 1 = data
+   *          only) see getSlave4WriteMode()
    * @see MPU6050_RA_I2C_SLV4_CTRL
    */
   void setSlave4WriteMode(boolean mode) {
@@ -2183,14 +2304,16 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 4 master delay value. This configures the reduced access rate of I2C slaves relative to the Sample Rate. When a
-   * slave's access rate is decreased relative to the Sample Rate, the slave is accessed every:
+   * Get Slave 4 master delay value. This configures the reduced access rate of
+   * I2C slaves relative to the Sample Rate. When a slave's access rate is
+   * decreased relative to the Sample Rate, the slave is accessed every:
    *
    * 1 / (1 + I2C_MST_DLY) samples
    *
-   * This base Sample Rate in turn is determined by SMPLRT_DIV (register 25) and DLPF_CFG (register 26). Whether a slave's access
-   * rate is reduced relative to the Sample Rate is determined by I2C_MST_DELAY_CTRL (register 103). For further information
-   * regarding the Sample Rate, please refer to register 25.
+   * This base Sample Rate in turn is determined by SMPLRT_DIV (register 25) and
+   * DLPF_CFG (register 26). Whether a slave's access rate is reduced relative
+   * to the Sample Rate is determined by I2C_MST_DELAY_CTRL (register 103). For
+   * further information regarding the Sample Rate, please refer to register 25.
    *
    * @return Current Slave 4 master delay value
    * @see MPU6050_RA_I2C_SLV4_CTRL
@@ -2211,8 +2334,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get last available byte read from Slave 4. This register stores the data read from Slave 4. This field is populated after a
-   * read transaction.
+   * Get last available byte read from Slave 4. This register stores the data
+   * read from Slave 4. This field is populated after a read transaction.
    * 
    * @return Last available byte read from to Slave 4
    * @see MPU6050_RA_I2C_SLV4_DI
@@ -2224,9 +2347,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // I2C_MST_STATUS register
 
   /**
-   * Get FSYNC interrupt status. This bit reflects the status of the FSYNC interrupt from an external device into the MPU-60X0. This
-   * is used as a way to pass an external interrupt through the MPU-60X0 to the host application processor. When set to 1, this bit
-   * will cause an interrupt if FSYNC_INT_EN is asserted in INT_PIN_CFG (Register 55).
+   * Get FSYNC interrupt status. This bit reflects the status of the FSYNC
+   * interrupt from an external device into the MPU-60X0. This is used as a way
+   * to pass an external interrupt through the MPU-60X0 to the host application
+   * processor. When set to 1, this bit will cause an interrupt if FSYNC_INT_EN
+   * is asserted in INT_PIN_CFG (Register 55).
    * 
    * @return FSYNC interrupt status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2236,9 +2361,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 4 transaction done status. Automatically sets to 1 when a Slave 4 transaction has completed. This triggers an
-   * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register 56) is asserted and if the SLV_4_DONE_INT bit is
-   * asserted in the I2C_SLV4_CTRL register (Register 52).
+   * Get Slave 4 transaction done status. Automatically sets to 1 when a Slave 4
+   * transaction has completed. This triggers an interrupt if the I2C_MST_INT_EN
+   * bit in the INT_ENABLE register (Register 56) is asserted and if the
+   * SLV_4_DONE_INT bit is asserted in the I2C_SLV4_CTRL register (Register 52).
    * 
    * @return Slave 4 transaction done status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2248,9 +2374,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get master arbitration lost status. This bit automatically sets to 1 when the I2C Master has lost arbitration of the auxiliary
-   * I2C bus (an error condition). This triggers an interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register 56) is
-   * asserted.
+   * Get master arbitration lost status. This bit automatically sets to 1 when
+   * the I2C Master has lost arbitration of the auxiliary I2C bus (an error
+   * condition). This triggers an interrupt if the I2C_MST_INT_EN bit in the
+   * INT_ENABLE register (Register 56) is asserted.
    * 
    * @return Master arbitration lost status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2260,8 +2387,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 4 NACK status. This bit automatically sets to 1 when the I2C Master receives a NACK in a transaction with Slave 4.
-   * This triggers an interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register 56) is asserted.
+   * Get Slave 4 NACK status. This bit automatically sets to 1 when the I2C
+   * Master receives a NACK in a transaction with Slave 4. This triggers an
+   * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
+   * 56) is asserted.
    * 
    * @return Slave 4 NACK interrupt status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2271,8 +2400,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 3 NACK status. This bit automatically sets to 1 when the I2C Master receives a NACK in a transaction with Slave 3.
-   * This triggers an interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register 56) is asserted.
+   * Get Slave 3 NACK status. This bit automatically sets to 1 when the I2C
+   * Master receives a NACK in a transaction with Slave 3. This triggers an
+   * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
+   * 56) is asserted.
    * 
    * @return Slave 3 NACK interrupt status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2282,8 +2413,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 2 NACK status. This bit automatically sets to 1 when the I2C Master receives a NACK in a transaction with Slave 2.
-   * This triggers an interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register 56) is asserted.
+   * Get Slave 2 NACK status. This bit automatically sets to 1 when the I2C
+   * Master receives a NACK in a transaction with Slave 2. This triggers an
+   * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
+   * 56) is asserted.
    * 
    * @return Slave 2 NACK interrupt status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2293,8 +2426,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 1 NACK status. This bit automatically sets to 1 when the I2C Master receives a NACK in a transaction with Slave 1.
-   * This triggers an interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register 56) is asserted.
+   * Get Slave 1 NACK status. This bit automatically sets to 1 when the I2C
+   * Master receives a NACK in a transaction with Slave 1. This triggers an
+   * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
+   * 56) is asserted.
    * 
    * @return Slave 1 NACK interrupt status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2304,8 +2439,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Slave 0 NACK status. This bit automatically sets to 1 when the I2C Master receives a NACK in a transaction with Slave 0.
-   * This triggers an interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register 56) is asserted.
+   * Get Slave 0 NACK status. This bit automatically sets to 1 when the I2C
+   * Master receives a NACK in a transaction with Slave 0. This triggers an
+   * interrupt if the I2C_MST_INT_EN bit in the INT_ENABLE register (Register
+   * 56) is asserted.
    * 
    * @return Slave 0 NACK interrupt status
    * @see MPU6050_RA_I2C_MST_STATUS
@@ -2317,7 +2454,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // INT_PIN_CFG register
 
   /**
-   * Get interrupt logic level mode. Will be set 0 for active-high, 1 for active-low.
+   * Get interrupt logic level mode. Will be set 0 for active-high, 1 for
+   * active-low.
    * 
    * @return Current interrupt mode (0=active-high, 1=active-low)
    * @see MPU6050_RA_INT_PIN_CFG
@@ -2331,7 +2469,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set interrupt logic level mode.
    * 
    * @param mode
-   *          New interrupt mode (0=active-high, 1=active-low) see getInterruptMode()
+   *          New interrupt mode (0=active-high, 1=active-low) see
+   *          getInterruptMode()
    * @see MPU6050_RA_INT_PIN_CFG
    * @see MPU6050_INTCFG_INT_LEVEL_BIT
    */
@@ -2354,7 +2493,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set interrupt drive mode.
    * 
    * @param drive
-   *          New interrupt drive mode (0=push-pull, 1=open-drain) see getInterruptDrive()
+   *          New interrupt drive mode (0=push-pull, 1=open-drain) see
+   *          getInterruptDrive()
    * @see MPU6050_RA_INT_PIN_CFG
    * @see MPU6050_INTCFG_INT_OPEN_BIT
    */
@@ -2363,7 +2503,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get interrupt latch mode. Will be set 0 for 50us-pulse, 1 for latch-until-int-cleared.
+   * Get interrupt latch mode. Will be set 0 for 50us-pulse, 1 for
+   * latch-until-int-cleared.
    * 
    * @return Current latch mode (0=50us-pulse, 1=latch-until-int-cleared)
    * @see MPU6050_RA_INT_PIN_CFG
@@ -2377,7 +2518,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set interrupt latch mode.
    * 
    * @param latch
-   *          New latch mode (0=50us-pulse, 1=latch-until-int-cleared) see getInterruptLatch()
+   *          New latch mode (0=50us-pulse, 1=latch-until-int-cleared) see
+   *          getInterruptLatch()
    * @see MPU6050_RA_INT_PIN_CFG
    * @see MPU6050_INTCFG_LATCH_INT_EN_BIT
    */
@@ -2386,7 +2528,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get interrupt latch clear mode. Will be set 0 for status-read-only, 1 for any-register-read.
+   * Get interrupt latch clear mode. Will be set 0 for status-read-only, 1 for
+   * any-register-read.
    * 
    * @return Current latch clear mode (0=status-read-only, 1=any-register-read)
    * @see MPU6050_RA_INT_PIN_CFG
@@ -2400,7 +2543,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set interrupt latch clear mode.
    * 
    * @param clear
-   *          New latch clear mode (0=status-read-only, 1=any-register-read) see getInterruptLatchClear()
+   *          New latch clear mode (0=status-read-only, 1=any-register-read) see
+   *          getInterruptLatchClear()
    * @see MPU6050_RA_INT_PIN_CFG
    * @see MPU6050_INTCFG_INT_RD_CLEAR_BIT
    */
@@ -2411,7 +2555,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get FSYNC interrupt logic level mode.
    * 
-   * @return Current FSYNC interrupt mode (0=active-high, 1=active-low) see getFSyncInterruptMode()
+   * @return Current FSYNC interrupt mode (0=active-high, 1=active-low) see
+   *         getFSyncInterruptMode()
    * @see MPU6050_RA_INT_PIN_CFG
    * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
@@ -2423,7 +2568,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set FSYNC interrupt logic level mode.
    * 
    * @param mode
-   *          New FSYNC interrupt mode (0=active-high, 1=active-low) see getFSyncInterruptMode()
+   *          New FSYNC interrupt mode (0=active-high, 1=active-low) see
+   *          getFSyncInterruptMode()
    * @see MPU6050_RA_INT_PIN_CFG
    * @see MPU6050_INTCFG_FSYNC_INT_LEVEL_BIT
    */
@@ -2432,7 +2578,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get FSYNC pin interrupt enabled setting. Will be set 0 for disabled, 1 for enabled.
+   * Get FSYNC pin interrupt enabled setting. Will be set 0 for disabled, 1 for
+   * enabled.
    * 
    * @return Current interrupt enabled setting
    * @see MPU6050_RA_INT_PIN_CFG
@@ -2446,7 +2593,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set FSYNC pin interrupt enabled setting.
    * 
    * @param enabled
-   *          New FSYNC pin interrupt enabled setting see getFSyncInterruptEnabled()
+   *          New FSYNC pin interrupt enabled setting see
+   *          getFSyncInterruptEnabled()
    * @see MPU6050_RA_INT_PIN_CFG
    * @see MPU6050_INTCFG_FSYNC_INT_EN_BIT
    */
@@ -2455,10 +2603,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get I2C bypass enabled status. When this bit is equal to 1 and I2C_MST_EN (Register 106 bit[5]) is equal to 0, the host
-   * application processor will be able to directly access the auxiliary I2C bus of the MPU-60X0. When this bit is equal to 0, the
-   * host application processor will not be able to directly access the auxiliary I2C bus of the MPU-60X0 regardless of the state of
-   * I2C_MST_EN (Register 106 bit[5]).
+   * Get I2C bypass enabled status. When this bit is equal to 1 and I2C_MST_EN
+   * (Register 106 bit[5]) is equal to 0, the host application processor will be
+   * able to directly access the auxiliary I2C bus of the MPU-60X0. When this
+   * bit is equal to 0, the host application processor will not be able to
+   * directly access the auxiliary I2C bus of the MPU-60X0 regardless of the
+   * state of I2C_MST_EN (Register 106 bit[5]).
    * 
    * @return Current I2C bypass enabled status
    * @see MPU6050_RA_INT_PIN_CFG
@@ -2469,10 +2619,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set I2C bypass enabled status. When this bit is equal to 1 and I2C_MST_EN (Register 106 bit[5]) is equal to 0, the host
-   * application processor will be able to directly access the auxiliary I2C bus of the MPU-60X0. When this bit is equal to 0, the
-   * host application processor will not be able to directly access the auxiliary I2C bus of the MPU-60X0 regardless of the state of
-   * I2C_MST_EN (Register 106 bit[5]).
+   * Set I2C bypass enabled status. When this bit is equal to 1 and I2C_MST_EN
+   * (Register 106 bit[5]) is equal to 0, the host application processor will be
+   * able to directly access the auxiliary I2C bus of the MPU-60X0. When this
+   * bit is equal to 0, the host application processor will not be able to
+   * directly access the auxiliary I2C bus of the MPU-60X0 regardless of the
+   * state of I2C_MST_EN (Register 106 bit[5]).
    * 
    * @param enabled
    *          New I2C bypass enabled status
@@ -2484,9 +2636,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get reference clock output enabled status. When this bit is equal to 1, a reference clock output is provided at the CLKOUT pin.
-   * When this bit is equal to 0, the clock output is disabled. For further information regarding CLKOUT, please refer to the
-   * MPU-60X0 Product Specification document.
+   * Get reference clock output enabled status. When this bit is equal to 1, a
+   * reference clock output is provided at the CLKOUT pin. When this bit is
+   * equal to 0, the clock output is disabled. For further information regarding
+   * CLKOUT, please refer to the MPU-60X0 Product Specification document.
    * 
    * @return Current reference clock output enabled status
    * @see MPU6050_RA_INT_PIN_CFG
@@ -2497,9 +2650,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set reference clock output enabled status. When this bit is equal to 1, a reference clock output is provided at the CLKOUT pin.
-   * When this bit is equal to 0, the clock output is disabled. For further information regarding CLKOUT, please refer to the
-   * MPU-60X0 Product Specification document.
+   * Set reference clock output enabled status. When this bit is equal to 1, a
+   * reference clock output is provided at the CLKOUT pin. When this bit is
+   * equal to 0, the clock output is disabled. For further information regarding
+   * CLKOUT, please refer to the MPU-60X0 Product Specification document.
    * 
    * @param enabled
    *          New reference clock output enabled status
@@ -2513,8 +2667,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // INT_ENABLE register
 
   /**
-   * Get full interrupt enabled status. Full register byte for all interrupts, for quick reading. Each bit will be set 0 for
-   * disabled, 1 for enabled.
+   * Get full interrupt enabled status. Full register byte for all interrupts,
+   * for quick reading. Each bit will be set 0 for disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
    * @see MPU6050_RA_INT_ENABLE
@@ -2525,8 +2679,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set full interrupt enabled status. Full register byte for all interrupts, for quick reading. Each bit should be set 0 for
-   * disabled, 1 for enabled.
+   * Set full interrupt enabled status. Full register byte for all interrupts,
+   * for quick reading. Each bit should be set 0 for disabled, 1 for enabled.
    * 
    * @param enabled
    *          New interrupt enabled status see getIntFreefallEnabled()
@@ -2538,7 +2692,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Free Fall interrupt enabled status. Will be set 0 for disabled, 1 for enabled.
+   * Get Free Fall interrupt enabled status. Will be set 0 for disabled, 1 for
+   * enabled.
    * 
    * @return Current interrupt enabled status
    * @see MPU6050_RA_INT_ENABLE
@@ -2561,7 +2716,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Motion Detection interrupt enabled status. Will be set 0 for disabled, 1 for enabled.
+   * Get Motion Detection interrupt enabled status. Will be set 0 for disabled,
+   * 1 for enabled.
    * 
    * @return Current interrupt enabled status
    * @see MPU6050_RA_INT_ENABLE
@@ -2584,7 +2740,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Zero Motion Detection interrupt enabled status. Will be set 0 for disabled, 1 for enabled.
+   * Get Zero Motion Detection interrupt enabled status. Will be set 0 for
+   * disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
    * @see MPU6050_RA_INT_ENABLE
@@ -2607,7 +2764,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get FIFO Buffer Overflow interrupt enabled status. Will be set 0 for disabled, 1 for enabled.
+   * Get FIFO Buffer Overflow interrupt enabled status. Will be set 0 for
+   * disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
    * @see MPU6050_RA_INT_ENABLE
@@ -2630,8 +2788,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get I2C Master interrupt enabled status. This enables any of the I2C Master interrupt sources to generate an interrupt. Will be
-   * set 0 for disabled, 1 for enabled.
+   * Get I2C Master interrupt enabled status. This enables any of the I2C Master
+   * interrupt sources to generate an interrupt. Will be set 0 for disabled, 1
+   * for enabled.
    * 
    * @return Current interrupt enabled status
    * @see MPU6050_RA_INT_ENABLE
@@ -2654,8 +2813,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Data Ready interrupt enabled setting. This event occurs each time a write operation to all of the sensor registers has been
-   * completed. Will be set 0 for disabled, 1 for enabled.
+   * Get Data Ready interrupt enabled setting. This event occurs each time a
+   * write operation to all of the sensor registers has been completed. Will be
+   * set 0 for disabled, 1 for enabled.
    * 
    * @return Current interrupt enabled status
    * @see MPU6050_RA_INT_ENABLE
@@ -2680,8 +2840,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // INT_STATUS register
 
   /**
-   * Get full set of interrupt status bits. These bits clear to 0 after the register has been read. Very useful for getting multiple
-   * INT statuses, since each single bit read clears all of them because it has to read the whole byte.
+   * Get full set of interrupt status bits. These bits clear to 0 after the
+   * register has been read. Very useful for getting multiple INT statuses,
+   * since each single bit read clears all of them because it has to read the
+   * whole byte.
    * 
    * @return Current interrupt status
    * @see MPU6050_RA_INT_STATUS
@@ -2691,8 +2853,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Free Fall interrupt status. This bit automatically sets to 1 when a Free Fall interrupt has been generated. The bit clears
-   * to 0 after the register has been read.
+   * Get Free Fall interrupt status. This bit automatically sets to 1 when a
+   * Free Fall interrupt has been generated. The bit clears to 0 after the
+   * register has been read.
    * 
    * @return Current interrupt status
    * @see MPU6050_RA_INT_STATUS
@@ -2703,8 +2866,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Motion Detection interrupt status. This bit automatically sets to 1 when a Motion Detection interrupt has been generated.
-   * The bit clears to 0 after the register has been read.
+   * Get Motion Detection interrupt status. This bit automatically sets to 1
+   * when a Motion Detection interrupt has been generated. The bit clears to 0
+   * after the register has been read.
    * 
    * @return Current interrupt status
    * @see MPU6050_RA_INT_STATUS
@@ -2715,8 +2879,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Zero Motion Detection interrupt status. This bit automatically sets to 1 when a Zero Motion Detection interrupt has been
-   * generated. The bit clears to 0 after the register has been read.
+   * Get Zero Motion Detection interrupt status. This bit automatically sets to
+   * 1 when a Zero Motion Detection interrupt has been generated. The bit clears
+   * to 0 after the register has been read.
    * 
    * @return Current interrupt status
    * @see MPU6050_RA_INT_STATUS
@@ -2727,8 +2892,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get FIFO Buffer Overflow interrupt status. This bit automatically sets to 1 when a Free Fall interrupt has been generated. The
-   * bit clears to 0 after the register has been read.
+   * Get FIFO Buffer Overflow interrupt status. This bit automatically sets to 1
+   * when a Free Fall interrupt has been generated. The bit clears to 0 after
+   * the register has been read.
    * 
    * @return Current interrupt status
    * @see MPU6050_RA_INT_STATUS
@@ -2739,8 +2905,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get I2C Master interrupt status. This bit automatically sets to 1 when an I2C Master interrupt has been generated. For a list
-   * of I2C Master interrupts, please refer to Register 54. The bit clears to 0 after the register has been read.
+   * Get I2C Master interrupt status. This bit automatically sets to 1 when an
+   * I2C Master interrupt has been generated. For a list of I2C Master
+   * interrupts, please refer to Register 54. The bit clears to 0 after the
+   * register has been read.
    * 
    * @return Current interrupt status
    * @see MPU6050_RA_INT_STATUS
@@ -2751,8 +2919,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Data Ready interrupt status. This bit automatically sets to 1 when a Data Ready interrupt has been generated. The bit
-   * clears to 0 after the register has been read.
+   * Get Data Ready interrupt status. This bit automatically sets to 1 when a
+   * Data Ready interrupt has been generated. The bit clears to 0 after the
+   * register has been read.
    * 
    * @return Current interrupt status
    * @see MPU6050_RA_INT_STATUS
@@ -2763,21 +2932,27 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get 3-axis accelerometer readings. These registers store the most recent accelerometer measurements. Accelerometer measurements
-   * are written to these registers at the Sample Rate as defined in Register 25.
+   * Get 3-axis accelerometer readings. These registers store the most recent
+   * accelerometer measurements. Accelerometer measurements are written to these
+   * registers at the Sample Rate as defined in Register 25.
    *
-   * The accelerometer measurement registers, along with the temperature measurement registers, gyroscope measurement registers, and
-   * external sensor data registers, are composed of two sets of registers: an internal register set and a user-facing read register
-   * set.
+   * The accelerometer measurement registers, along with the temperature
+   * measurement registers, gyroscope measurement registers, and external sensor
+   * data registers, are composed of two sets of registers: an internal register
+   * set and a user-facing read register set.
    *
-   * The data within the accelerometer sensors' internal register set is always updated at the Sample Rate. Meanwhile, the
-   * user-facing read register set duplicates the internal register set's data values whenever the serial interface is idle. This
-   * guarantees that a burst read of sensor registers will read measurements from the same sampling instant. Note that if burst
-   * reads are not used, the user is responsible for ensuring a set of single byte reads correspond to a single sampling instant by
-   * checking the Data Ready interrupt.
+   * The data within the accelerometer sensors' internal register set is always
+   * updated at the Sample Rate. Meanwhile, the user-facing read register set
+   * duplicates the internal register set's data values whenever the serial
+   * interface is idle. This guarantees that a burst read of sensor registers
+   * will read measurements from the same sampling instant. Note that if burst
+   * reads are not used, the user is responsible for ensuring a set of single
+   * byte reads correspond to a single sampling instant by checking the Data
+   * Ready interrupt.
    *
-   * Each 16-bit accelerometer measurement has a full scale defined in ACCEL_FS (Register 28). For each full scale setting, the
-   * accelerometers' sensitivity per LSB in ACCEL_xOUT is shown in the table below:
+   * Each 16-bit accelerometer measurement has a full scale defined in ACCEL_FS
+   * (Register 28). For each full scale setting, the accelerometers' sensitivity
+   * per LSB in ACCEL_xOUT is shown in the table below:
    *
    * <pre>
    * AFS_SEL | Full Scale Range | LSB Sensitivity
@@ -2807,7 +2982,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get X-axis accelerometer reading.
    * 
-   * @return X-axis acceleration measurement in 16-bit 2's complement format see getMotion6()
+   * @return X-axis acceleration measurement in 16-bit 2's complement format see
+   *         getMotion6()
    * @see MPU6050_RA_ACCEL_XOUT_H
    */
   int getAccelerationX() {
@@ -2819,7 +2995,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get Y-axis accelerometer reading.
    * 
-   * @return Y-axis acceleration measurement in 16-bit 2's complement format see getMotion6()
+   * @return Y-axis acceleration measurement in 16-bit 2's complement format see
+   *         getMotion6()
    * @see MPU6050_RA_ACCEL_YOUT_H
    */
   int getAccelerationY() {
@@ -2831,7 +3008,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get Z-axis accelerometer reading.
    * 
-   * @return Z-axis acceleration measurement in 16-bit 2's complement format see getMotion6()
+   * @return Z-axis acceleration measurement in 16-bit 2's complement format see
+   *         getMotion6()
    * @see MPU6050_RA_ACCEL_ZOUT_H
    */
   int getAccelerationZ() {
@@ -2869,16 +3047,22 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // GYRO_*OUT_* registers
 
   /**
-   * Get 3-axis gyroscope readings. These gyroscope measurement registers, along with the accelerometer measurement registers,
-   * temperature measurement registers, and external sensor data registers, are composed of two sets of registers: an internal
-   * register set and a user-facing read register set. The data within the gyroscope sensors' internal register set is always
-   * updated at the Sample Rate. Meanwhile, the user-facing read register set duplicates the internal register set's data values
-   * whenever the serial interface is idle. This guarantees that a burst read of sensor registers will read measurements from the
-   * same sampling instant. Note that if burst reads are not used, the user is responsible for ensuring a set of single byte reads
-   * correspond to a single sampling instant by checking the Data Ready interrupt.
+   * Get 3-axis gyroscope readings. These gyroscope measurement registers, along
+   * with the accelerometer measurement registers, temperature measurement
+   * registers, and external sensor data registers, are composed of two sets of
+   * registers: an internal register set and a user-facing read register set.
+   * The data within the gyroscope sensors' internal register set is always
+   * updated at the Sample Rate. Meanwhile, the user-facing read register set
+   * duplicates the internal register set's data values whenever the serial
+   * interface is idle. This guarantees that a burst read of sensor registers
+   * will read measurements from the same sampling instant. Note that if burst
+   * reads are not used, the user is responsible for ensuring a set of single
+   * byte reads correspond to a single sampling instant by checking the Data
+   * Ready interrupt.
    *
-   * Each 16-bit gyroscope measurement has a full scale defined in FS_SEL (Register 27). For each full scale setting, the
-   * gyroscopes' sensitivity per LSB in GYRO_xOUT is shown in the table below:
+   * Each 16-bit gyroscope measurement has a full scale defined in FS_SEL
+   * (Register 27). For each full scale setting, the gyroscopes' sensitivity per
+   * LSB in GYRO_xOUT is shown in the table below:
    *
    * <pre>
    * FS_SEL | Full Scale Range   | LSB Sensitivity
@@ -2894,7 +3078,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * @param y
    *          16-bit signed integer container for Y-axis rotation
    * @param z
-   *          16-bit signed integer container for Z-axis rotation see getMotion6()
+   *          16-bit signed integer container for Z-axis rotation see
+   *          getMotion6()
    * @see MPU6050_RA_GYRO_XOUT_H
    */
   void getRotation(int x[], int y[], int z[]) {
@@ -2908,7 +3093,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get X-axis gyroscope reading.
    * 
-   * @return X-axis rotation measurement in 16-bit 2's complement format see getMotion6()
+   * @return X-axis rotation measurement in 16-bit 2's complement format see
+   *         getMotion6()
    * @see MPU6050_RA_GYRO_XOUT_H
    */
   int getRotationX() {
@@ -2920,7 +3106,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get Y-axis gyroscope reading.
    * 
-   * @return Y-axis rotation measurement in 16-bit 2's complement format see getMotion6()
+   * @return Y-axis rotation measurement in 16-bit 2's complement format see
+   *         getMotion6()
    * @see MPU6050_RA_GYRO_YOUT_H
    */
   int getRotationY() {
@@ -2932,7 +3119,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   /**
    * Get Z-axis gyroscope reading.
    * 
-   * @return Z-axis rotation measurement in 16-bit 2's complement format see getMotion6()
+   * @return Z-axis rotation measurement in 16-bit 2's complement format see
+   *         getMotion6()
    * @see MPU6050_RA_GYRO_ZOUT_H
    */
   int getRotationZ() {
@@ -2944,56 +3132,78 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // EXT_SENS_DATA_* registers
 
   /**
-   * Read single byte from external sensor data register. These registers store data read from external sensors by the Slave 0, 1,
-   * 2, and 3 on the auxiliary I2C interface. Data read by Slave 4 is stored in I2C_SLV4_DI (Register 53).
+   * Read single byte from external sensor data register. These registers store
+   * data read from external sensors by the Slave 0, 1, 2, and 3 on the
+   * auxiliary I2C interface. Data read by Slave 4 is stored in I2C_SLV4_DI
+   * (Register 53).
    *
-   * External sensor data is written to these registers at the Sample Rate as defined in Register 25. This access rate can be
-   * reduced by using the Slave Delay Enable registers (Register 103).
+   * External sensor data is written to these registers at the Sample Rate as
+   * defined in Register 25. This access rate can be reduced by using the Slave
+   * Delay Enable registers (Register 103).
    *
-   * External sensor data registers, along with the gyroscope measurement registers, accelerometer measurement registers, and
-   * temperature measurement registers, are composed of two sets of registers: an internal register set and a user-facing read
-   * register set.
+   * External sensor data registers, along with the gyroscope measurement
+   * registers, accelerometer measurement registers, and temperature measurement
+   * registers, are composed of two sets of registers: an internal register set
+   * and a user-facing read register set.
    *
-   * The data within the external sensors' internal register set is always updated at the Sample Rate (or the reduced access rate)
-   * whenever the serial interface is idle. This guarantees that a burst read of sensor registers will read measurements from the
-   * same sampling instant. Note that if burst reads are not used, the user is responsible for ensuring a set of single byte reads
-   * correspond to a single sampling instant by checking the Data Ready interrupt.
+   * The data within the external sensors' internal register set is always
+   * updated at the Sample Rate (or the reduced access rate) whenever the serial
+   * interface is idle. This guarantees that a burst read of sensor registers
+   * will read measurements from the same sampling instant. Note that if burst
+   * reads are not used, the user is responsible for ensuring a set of single
+   * byte reads correspond to a single sampling instant by checking the Data
+   * Ready interrupt.
    *
-   * Data is placed in these external sensor data registers according to I2C_SLV0_CTRL, I2C_SLV1_CTRL, I2C_SLV2_CTRL, and
-   * I2C_SLV3_CTRL (Registers 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN > 0) from an enabled slave
-   * (I2C_SLVx_EN = 1), the slave is read at the Sample Rate (as defined in Register 25) or delayed rate (if specified in Register
-   * 52 and 103). During each Sample cycle, slave reads are performed in order of Slave number. If all slaves are enabled with more
-   * than zero bytes to be read, the order will be Slave 0, followed by Slave 1, Slave 2, and Slave 3.
+   * Data is placed in these external sensor data registers according to
+   * I2C_SLV0_CTRL, I2C_SLV1_CTRL, I2C_SLV2_CTRL, and I2C_SLV3_CTRL (Registers
+   * 39, 42, 45, and 48). When more than zero bytes are read (I2C_SLVx_LEN > 0)
+   * from an enabled slave (I2C_SLVx_EN = 1), the slave is read at the Sample
+   * Rate (as defined in Register 25) or delayed rate (if specified in Register
+   * 52 and 103). During each Sample cycle, slave reads are performed in order
+   * of Slave number. If all slaves are enabled with more than zero bytes to be
+   * read, the order will be Slave 0, followed by Slave 1, Slave 2, and Slave 3.
    *
-   * Each enabled slave will have EXT_SENS_DATA registers associated with it by number of bytes read (I2C_SLVx_LEN) in order of
-   * slave number, starting from EXT_SENS_DATA_00. Note that this means enabling or disabling a slave may change the higher numbered
-   * slaves' associated registers. Furthermore, if fewer total bytes are being read from the external sensors as a result of such a
-   * change, then the data remaining in the registers which no longer have an associated slave device (i.e. high numbered registers)
-   * will remain in these previously allocated registers unless reset.
+   * Each enabled slave will have EXT_SENS_DATA registers associated with it by
+   * number of bytes read (I2C_SLVx_LEN) in order of slave number, starting from
+   * EXT_SENS_DATA_00. Note that this means enabling or disabling a slave may
+   * change the higher numbered slaves' associated registers. Furthermore, if
+   * fewer total bytes are being read from the external sensors as a result of
+   * such a change, then the data remaining in the registers which no longer
+   * have an associated slave device (i.e. high numbered registers) will remain
+   * in these previously allocated registers unless reset.
    *
-   * If the sum of the read lengths of all SLVx transactions exceed the number of available EXT_SENS_DATA registers, the excess
-   * bytes will be dropped. There are 24 EXT_SENS_DATA registers and hence the total read lengths between all the slaves cannot be
-   * greater than 24 or some bytes will be lost.
+   * If the sum of the read lengths of all SLVx transactions exceed the number
+   * of available EXT_SENS_DATA registers, the excess bytes will be dropped.
+   * There are 24 EXT_SENS_DATA registers and hence the total read lengths
+   * between all the slaves cannot be greater than 24 or some bytes will be
+   * lost.
    *
-   * Note: Slave 4's behavior is distinct from that of Slaves 0-3. For further information regarding the characteristics of Slave 4,
-   * please refer to Registers 49 to 53.
+   * Note: Slave 4's behavior is distinct from that of Slaves 0-3. For further
+   * information regarding the characteristics of Slave 4, please refer to
+   * Registers 49 to 53.
    *
-   * EXAMPLE: Suppose that Slave 0 is enabled with 4 bytes to be read (I2C_SLV0_EN = 1 and I2C_SLV0_LEN = 4) while Slave 1 is
-   * enabled with 2 bytes to be read so that I2C_SLV1_EN = 1 and I2C_SLV1_LEN = 2. In such a situation, EXT_SENS_DATA _00 through
-   * _03 will be associated with Slave 0, while EXT_SENS_DATA _04 and 05 will be associated with Slave 1. If Slave 2 is enabled as
-   * well, registers starting from EXT_SENS_DATA_06 will be allocated to Slave 2.
+   * EXAMPLE: Suppose that Slave 0 is enabled with 4 bytes to be read
+   * (I2C_SLV0_EN = 1 and I2C_SLV0_LEN = 4) while Slave 1 is enabled with 2
+   * bytes to be read so that I2C_SLV1_EN = 1 and I2C_SLV1_LEN = 2. In such a
+   * situation, EXT_SENS_DATA _00 through _03 will be associated with Slave 0,
+   * while EXT_SENS_DATA _04 and 05 will be associated with Slave 1. If Slave 2
+   * is enabled as well, registers starting from EXT_SENS_DATA_06 will be
+   * allocated to Slave 2.
    *
-   * If Slave 2 is disabled while Slave 3 is enabled in this same situation, then registers starting from EXT_SENS_DATA_06 will be
-   * allocated to Slave 3 instead.
+   * If Slave 2 is disabled while Slave 3 is enabled in this same situation,
+   * then registers starting from EXT_SENS_DATA_06 will be allocated to Slave 3
+   * instead.
    *
-   * REGISTER ALLOCATION FOR DYNAMIC DISABLE VS. NORMAL DISABLE: If a slave is disabled at any time, the space initially allocated
-   * to the slave in the EXT_SENS_DATA register, will remain associated with that slave. This is to avoid dynamic adjustment of the
-   * register allocation.
+   * REGISTER ALLOCATION FOR DYNAMIC DISABLE VS. NORMAL DISABLE: If a slave is
+   * disabled at any time, the space initially allocated to the slave in the
+   * EXT_SENS_DATA register, will remain associated with that slave. This is to
+   * avoid dynamic adjustment of the register allocation.
    *
-   * The allocation of the EXT_SENS_DATA registers is recomputed only when (1) all slaves are disabled, or (2) the I2C_MST_RST bit
-   * is set (Register 106).
+   * The allocation of the EXT_SENS_DATA registers is recomputed only when (1)
+   * all slaves are disabled, or (2) the I2C_MST_RST bit is set (Register 106).
    *
-   * This above is also true if one of the slaves gets NACKed and stops functioning.
+   * This above is also true if one of the slaves gets NACKed and stops
+   * functioning.
    *
    * @param position
    *          Starting position (0-23)
@@ -3121,9 +3331,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // I2C_SLV*_DO register
 
   /**
-   * Write byte to Data Output container for specified slave. This register holds the output data written into Slave when Slave is
-   * set to write mode. For further information regarding Slave control, please refer to Registers 37 to 39 and immediately
-   * following.
+   * Write byte to Data Output container for specified slave. This register
+   * holds the output data written into Slave when Slave is set to write mode.
+   * For further information regarding Slave control, please refer to Registers
+   * 37 to 39 and immediately following.
    * 
    * @param num
    *          Slave number (0-3)
@@ -3140,8 +3351,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // I2C_MST_DELAY_CTRL register
 
   /**
-   * Get external data shadow delay enabled status. This register is used to specify the timing of external sensor data shadowing.
-   * When DELAY_ES_SHADOW is set to 1, shadowing of external sensor data is delayed until all data has been received.
+   * Get external data shadow delay enabled status. This register is used to
+   * specify the timing of external sensor data shadowing. When DELAY_ES_SHADOW
+   * is set to 1, shadowing of external sensor data is delayed until all data
+   * has been received.
    * 
    * @return Current external data shadow delay enabled status.
    * @see MPU6050_RA_I2C_MST_DELAY_CTRL
@@ -3155,7 +3368,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set external data shadow delay enabled status.
    * 
    * @param enabled
-   *          New external data shadow delay enabled status. see getExternalShadowDelayEnabled()
+   *          New external data shadow delay enabled status. see
+   *          getExternalShadowDelayEnabled()
    * @see MPU6050_RA_I2C_MST_DELAY_CTRL
    * @see MPU6050_DELAYCTRL_DELAY_ES_SHADOW_BIT
    */
@@ -3164,15 +3378,19 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get slave delay enabled status. When a particular slave delay is enabled, the rate of access for the that slave device is
-   * reduced. When a slave's access rate is decreased relative to the Sample Rate, the slave is accessed every:
+   * Get slave delay enabled status. When a particular slave delay is enabled,
+   * the rate of access for the that slave device is reduced. When a slave's
+   * access rate is decreased relative to the Sample Rate, the slave is accessed
+   * every:
    *
    * 1 / (1 + I2C_MST_DLY) Samples
    *
-   * This base Sample Rate in turn is determined by SMPLRT_DIV (register * 25) and DLPF_CFG (register 26).
+   * This base Sample Rate in turn is determined by SMPLRT_DIV (register * 25)
+   * and DLPF_CFG (register 26).
    *
-   * For further information regarding I2C_MST_DLY, please refer to register 52. For further information regarding the Sample Rate,
-   * please refer to register 25.
+   * For further information regarding I2C_MST_DLY, please refer to register 52.
+   * For further information regarding the Sample Rate, please refer to register
+   * 25.
    *
    * @param num
    *          Slave number (0-4)
@@ -3204,8 +3422,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // SIGNAL_PATH_RESET register
 
   /**
-   * Reset gyroscope signal path. The reset will revert the signal path analog to digital converters and filters to their power up
-   * configurations.
+   * Reset gyroscope signal path. The reset will revert the signal path analog
+   * to digital converters and filters to their power up configurations.
    * 
    * @see MPU6050_RA_SIGNAL_PATH_RESET
    * @see MPU6050_PATHRESET_GYRO_RESET_BIT
@@ -3215,8 +3433,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Reset accelerometer signal path. The reset will revert the signal path analog to digital converters and filters to their power
-   * up configurations.
+   * Reset accelerometer signal path. The reset will revert the signal path
+   * analog to digital converters and filters to their power up configurations.
    * 
    * @see MPU6050_RA_SIGNAL_PATH_RESET
    * @see MPU6050_PATHRESET_ACCEL_RESET_BIT
@@ -3226,8 +3444,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Reset temperature sensor signal path. The reset will revert the signal path analog to digital converters and filters to their
-   * power up configurations.
+   * Reset temperature sensor signal path. The reset will revert the signal path
+   * analog to digital converters and filters to their power up configurations.
    * 
    * @see MPU6050_RA_SIGNAL_PATH_RESET
    * @see MPU6050_PATHRESET_TEMP_RESET_BIT
@@ -3239,12 +3457,16 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // MOT_DETECT_CTRL register
 
   /**
-   * Get accelerometer power-on delay. The accelerometer data path provides samples to the sensor registers, Motion detection, Zero
-   * Motion detection, and Free Fall detection modules. The signal path contains filters which must be flushed on wake-up with new
-   * samples before the detection modules begin operations. The default wake-up delay, of 4ms can be lengthened by up to 3ms. This
-   * additional delay is specified in ACCEL_ON_DELAY in units of 1 LSB = 1 ms. The user may select any value above zero unless
-   * instructed otherwise by InvenSense. Please refer to Section 8 of the MPU-6000/MPU-6050 Product Specification document for
-   * further information regarding the detection modules.
+   * Get accelerometer power-on delay. The accelerometer data path provides
+   * samples to the sensor registers, Motion detection, Zero Motion detection,
+   * and Free Fall detection modules. The signal path contains filters which
+   * must be flushed on wake-up with new samples before the detection modules
+   * begin operations. The default wake-up delay, of 4ms can be lengthened by up
+   * to 3ms. This additional delay is specified in ACCEL_ON_DELAY in units of 1
+   * LSB = 1 ms. The user may select any value above zero unless instructed
+   * otherwise by InvenSense. Please refer to Section 8 of the MPU-6000/MPU-6050
+   * Product Specification document for further information regarding the
+   * detection modules.
    * 
    * @return Current accelerometer power-on delay
    * @see MPU6050_RA_MOT_DETECT_CTRL
@@ -3258,7 +3480,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set accelerometer power-on delay.
    * 
    * @param delay
-   *          New accelerometer power-on delay (0-3) see getAccelerometerPowerOnDelay()
+   *          New accelerometer power-on delay (0-3) see
+   *          getAccelerometerPowerOnDelay()
    * @see MPU6050_RA_MOT_DETECT_CTRL
    * @see MPU6050_DETECT_ACCEL_ON_DELAY_BIT
    */
@@ -3267,11 +3490,14 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Free Fall detection counter decrement configuration. Detection is registered by the Free Fall detection module after
-   * accelerometer measurements meet their respective threshold conditions over a specified number of samples. When the threshold
-   * conditions are met, the corresponding detection counter increments by 1. The user may control the rate at which the detection
-   * counter decrements when the threshold condition is not met by configuring FF_COUNT. The decrement rate can be set according to
-   * the following table:
+   * Get Free Fall detection counter decrement configuration. Detection is
+   * registered by the Free Fall detection module after accelerometer
+   * measurements meet their respective threshold conditions over a specified
+   * number of samples. When the threshold conditions are met, the corresponding
+   * detection counter increments by 1. The user may control the rate at which
+   * the detection counter decrements when the threshold condition is not met by
+   * configuring FF_COUNT. The decrement rate can be set according to the
+   * following table:
    *
    * <pre>
    * FF_COUNT | Counter Decrement
@@ -3282,8 +3508,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 3        | 4
    * </pre>
    *
-   * When FF_COUNT is configured to 0 (reset), any non-qualifying sample will reset the counter to 0. For further information on
-   * Free Fall detection, please refer to Registers 29 to 32.
+   * When FF_COUNT is configured to 0 (reset), any non-qualifying sample will
+   * reset the counter to 0. For further information on Free Fall detection,
+   * please refer to Registers 29 to 32.
    *
    * @return Current decrement configuration
    * @see MPU6050_RA_MOT_DETECT_CTRL
@@ -3297,7 +3524,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set Free Fall detection counter decrement configuration.
    * 
    * @param decrement
-   *          New decrement configuration value see getFreefallDetectionCounterDecrement()
+   *          New decrement configuration value see
+   *          getFreefallDetectionCounterDecrement()
    * @see MPU6050_RA_MOT_DETECT_CTRL
    * @see MPU6050_DETECT_FF_COUNT_BIT
    */
@@ -3306,11 +3534,14 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Motion detection counter decrement configuration. Detection is registered by the Motion detection module after
-   * accelerometer measurements meet their respective threshold conditions over a specified number of samples. When the threshold
-   * conditions are met, the corresponding detection counter increments by 1. The user may control the rate at which the detection
-   * counter decrements when the threshold condition is not met by configuring MOT_COUNT. The decrement rate can be set according to
-   * the following table:
+   * Get Motion detection counter decrement configuration. Detection is
+   * registered by the Motion detection module after accelerometer measurements
+   * meet their respective threshold conditions over a specified number of
+   * samples. When the threshold conditions are met, the corresponding detection
+   * counter increments by 1. The user may control the rate at which the
+   * detection counter decrements when the threshold condition is not met by
+   * configuring MOT_COUNT. The decrement rate can be set according to the
+   * following table:
    *
    * <pre>
    * MOT_COUNT | Counter Decrement
@@ -3321,8 +3552,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 3         | 4
    * </pre>
    *
-   * When MOT_COUNT is configured to 0 (reset), any non-qualifying sample will reset the counter to 0. For further information on
-   * Motion detection, please refer to Registers 29 to 32.
+   * When MOT_COUNT is configured to 0 (reset), any non-qualifying sample will
+   * reset the counter to 0. For further information on Motion detection, please
+   * refer to Registers 29 to 32.
    *
    */
   int getMotionDetectionCounterDecrement() {
@@ -3333,7 +3565,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * Set Motion detection counter decrement configuration.
    * 
    * @param decrement
-   *          New decrement configuration value see getMotionDetectionCounterDecrement()
+   *          New decrement configuration value see
+   *          getMotionDetectionCounterDecrement()
    * @see MPU6050_RA_MOT_DETECT_CTRL
    * @see MPU6050_DETECT_MOT_COUNT_BIT
    */
@@ -3344,8 +3577,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // USER_CTRL register
 
   /**
-   * Get FIFO enabled status. When this bit is set to 0, the FIFO buffer is disabled. The FIFO buffer cannot be written to or read
-   * from while disabled. The FIFO buffer's state does not change unless the MPU-60X0 is power cycled.
+   * Get FIFO enabled status. When this bit is set to 0, the FIFO buffer is
+   * disabled. The FIFO buffer cannot be written to or read from while disabled.
+   * The FIFO buffer's state does not change unless the MPU-60X0 is power
+   * cycled.
    * 
    * @return Current FIFO enabled status
    * @see MPU6050_RA_USER_CTRL
@@ -3368,10 +3603,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get I2C Master Mode enabled status. When this mode is enabled, the MPU-60X0 acts as the I2C Master to the external sensor slave
-   * devices on the auxiliary I2C bus. When this bit is cleared to 0, the auxiliary I2C bus lines (AUX_DA and AUX_CL) are logically
-   * driven by the primary I2C bus (SDA and SCL). This is a precondition to enabling Bypass Mode. For further information regarding
-   * Bypass Mode, please refer to Register 55.
+   * Get I2C Master Mode enabled status. When this mode is enabled, the MPU-60X0
+   * acts as the I2C Master to the external sensor slave devices on the
+   * auxiliary I2C bus. When this bit is cleared to 0, the auxiliary I2C bus
+   * lines (AUX_DA and AUX_CL) are logically driven by the primary I2C bus (SDA
+   * and SCL). This is a precondition to enabling Bypass Mode. For further
+   * information regarding Bypass Mode, please refer to Register 55.
    * 
    * @return Current I2C Master Mode enabled status
    * @see MPU6050_RA_USER_CTRL
@@ -3394,16 +3631,17 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Switch from I2C to SPI mode (MPU-6000 only) If this is set, the primary SPI interface will be enabled in place of the disabled
-   * primary I2C interface.
+   * Switch from I2C to SPI mode (MPU-6000 only) If this is set, the primary SPI
+   * interface will be enabled in place of the disabled primary I2C interface.
    */
   void switchSPIEnabled(boolean enabled) {
     I2CdevWriteBit(Integer.decode(deviceAddress), MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_I2C_IF_DIS_BIT, enabled);
   }
 
   /**
-   * Reset the FIFO. This bit resets the FIFO buffer when set to 1 while FIFO_EN equals 0. This bit automatically clears to 0 after
-   * the reset has been triggered.
+   * Reset the FIFO. This bit resets the FIFO buffer when set to 1 while FIFO_EN
+   * equals 0. This bit automatically clears to 0 after the reset has been
+   * triggered.
    * 
    * @see MPU6050_RA_USER_CTRL
    * @see MPU6050_USERCTRL_FIFO_RESET_BIT
@@ -3413,8 +3651,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Reset the I2C Master. This bit resets the I2C Master when set to 1 while I2C_MST_EN equals 0. This bit automatically clears to
-   * 0 after the reset has been triggered.
+   * Reset the I2C Master. This bit resets the I2C Master when set to 1 while
+   * I2C_MST_EN equals 0. This bit automatically clears to 0 after the reset has
+   * been triggered.
    * 
    * @see MPU6050_RA_USER_CTRL
    * @see MPU6050_USERCTRL_I2C_MST_RESET_BIT
@@ -3424,11 +3663,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Reset all sensor registers and signal paths. When set to 1, this bit resets the signal paths for all sensors (gyroscopes,
-   * accelerometers, and temperature sensor). This operation will also clear the sensor registers. This bit automatically clears to
-   * 0 after the reset has been triggered.
+   * Reset all sensor registers and signal paths. When set to 1, this bit resets
+   * the signal paths for all sensors (gyroscopes, accelerometers, and
+   * temperature sensor). This operation will also clear the sensor registers.
+   * This bit automatically clears to 0 after the reset has been triggered.
    *
-   * When resetting only the signal path (and not the sensor registers), please use Register 104, SIGNAL_PATH_RESET.
+   * When resetting only the signal path (and not the sensor registers), please
+   * use Register 104, SIGNAL_PATH_RESET.
    *
    * @see MPU6050_RA_USER_CTRL
    * @see MPU6050_USERCTRL_SIG_COND_RESET_BIT
@@ -3440,7 +3681,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // PWR_MGMT_1 register
 
   /**
-   * Trigger a full device reset. A small delay of ~50ms may be desirable after triggering a reset.
+   * Trigger a full device reset. A small delay of ~50ms may be desirable after
+   * triggering a reset.
    * 
    * @see MPU6050_RA_PWR_MGMT_1
    * @see MPU6050_PWR1_DEVICE_RESET_BIT
@@ -3450,10 +3692,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get sleep mode status. Setting the SLEEP bit in the register puts the device into very low power sleep mode. In this mode, only
-   * the serial interface and internal registers remain active, allowing for a very low standby current. Clearing this bit puts the
-   * device back into normal mode. To save power, the individual standby selections for each of the gyros should be used if any gyro
-   * axis is not used by the application.
+   * Get sleep mode status. Setting the SLEEP bit in the register puts the
+   * device into very low power sleep mode. In this mode, only the serial
+   * interface and internal registers remain active, allowing for a very low
+   * standby current. Clearing this bit puts the device back into normal mode.
+   * To save power, the individual standby selections for each of the gyros
+   * should be used if any gyro axis is not used by the application.
    * 
    * @return Current sleep mode enabled status
    * @see MPU6050_RA_PWR_MGMT_1
@@ -3476,8 +3720,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get wake cycle enabled status. When this bit is set to 1 and SLEEP is disabled, the MPU-60X0 will cycle between sleep mode and
-   * waking up to take a single sample of data from active sensors at a rate determined by LP_WAKE_CTRL (register 108).
+   * Get wake cycle enabled status. When this bit is set to 1 and SLEEP is
+   * disabled, the MPU-60X0 will cycle between sleep mode and waking up to take
+   * a single sample of data from active sensors at a rate determined by
+   * LP_WAKE_CTRL (register 108).
    * 
    * @return Current sleep mode enabled status
    * @see MPU6050_RA_PWR_MGMT_1
@@ -3500,10 +3746,13 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get temperature sensor enabled status. Control the usage of the internal temperature sensor.
+   * Get temperature sensor enabled status. Control the usage of the internal
+   * temperature sensor.
    *
-   * Note: this register stores the *disabled* value, but for consistency with the rest of the code, the function is named and used
-   * with standard true/false values to indicate whether the sensor is enabled or disabled, respectively.
+   * Note: this register stores the *disabled* value, but for consistency with
+   * the rest of the code, the function is named and used with standard
+   * true/false values to indicate whether the sensor is enabled or disabled,
+   * respectively.
    *
    * @return Current temperature sensor enabled status
    * @see MPU6050_RA_PWR_MGMT_1
@@ -3515,9 +3764,10 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set temperature sensor enabled status. Note: this register stores the *disabled* value, but for consistency with the rest of
-   * the code, the function is named and used with standard true/false values to indicate whether the sensor is enabled or disabled,
-   * respectively.
+   * Set temperature sensor enabled status. Note: this register stores the
+   * *disabled* value, but for consistency with the rest of the code, the
+   * function is named and used with standard true/false values to indicate
+   * whether the sensor is enabled or disabled, respectively.
    *
    * @param enabled
    *          New temperature sensor enabled status see getTempSensorEnabled()
@@ -3542,13 +3792,17 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set clock source setting. An internal 8MHz oscillator, gyroscope based clock, or external sources can be selected as the
-   * MPU-60X0 clock source. When the internal 8 MHz oscillator or an external source is chosen as the clock source, the MPU-60X0 can
-   * operate in low power modes with the gyroscopes disabled.
+   * Set clock source setting. An internal 8MHz oscillator, gyroscope based
+   * clock, or external sources can be selected as the MPU-60X0 clock source.
+   * When the internal 8 MHz oscillator or an external source is chosen as the
+   * clock source, the MPU-60X0 can operate in low power modes with the
+   * gyroscopes disabled.
    *
-   * Upon power up, the MPU-60X0 clock source defaults to the internal oscillator. However, it is highly recommended that the device
-   * be configured to use one of the gyroscopes (or an external clock source) as the clock reference for improved stability. The
-   * clock source can be selected according to the following table:
+   * Upon power up, the MPU-60X0 clock source defaults to the internal
+   * oscillator. However, it is highly recommended that the device be configured
+   * to use one of the gyroscopes (or an external clock source) as the clock
+   * reference for improved stability. The clock source can be selected
+   * according to the following table:
    *
    * <pre>
    * CLK_SEL | Clock Source
@@ -3576,10 +3830,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // PWR_MGMT_2 register
 
   /**
-   * Get wake frequency in Accel-Only Low Power Mode. The MPU-60X0 can be put into Accerlerometer Only Low Power Mode by setting
-   * PWRSEL to 1 in the Power Management 1 register (Register 107). In this mode, the device will power off all devices except for
-   * the primary I2C interface, waking only the accelerometer at fixed intervals to take a single measurement. The frequency of
-   * wake-ups can be configured with LP_WAKE_CTRL as shown below:
+   * Get wake frequency in Accel-Only Low Power Mode. The MPU-60X0 can be put
+   * into Accerlerometer Only Low Power Mode by setting PWRSEL to 1 in the Power
+   * Management 1 register (Register 107). In this mode, the device will power
+   * off all devices except for the primary I2C interface, waking only the
+   * accelerometer at fixed intervals to take a single measurement. The
+   * frequency of wake-ups can be configured with LP_WAKE_CTRL as shown below:
    *
    * <pre>
    * LP_WAKE_CTRL | Wake-up Frequency
@@ -3590,7 +3846,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * 3            | 10 Hz
    * </pre>
    *
-   * For further information regarding the MPU-60X0's power modes, please refer to Register 107.
+   * For further information regarding the MPU-60X0's power modes, please refer
+   * to Register 107.
    *
    * @return Current wake frequency
    * @see MPU6050_RA_PWR_MGMT_2
@@ -3611,7 +3868,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get X-axis accelerometer standby enabled status. If enabled, the X-axis will not gather or report data (or use power).
+   * Get X-axis accelerometer standby enabled status. If enabled, the X-axis
+   * will not gather or report data (or use power).
    * 
    * @return Current X-axis standby enabled status
    * @see MPU6050_RA_PWR_MGMT_2
@@ -3634,7 +3892,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Y-axis accelerometer standby enabled status. If enabled, the Y-axis will not gather or report data (or use power).
+   * Get Y-axis accelerometer standby enabled status. If enabled, the Y-axis
+   * will not gather or report data (or use power).
    * 
    * @return Current Y-axis standby enabled status
    * @see MPU6050_RA_PWR_MGMT_2
@@ -3657,7 +3916,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Z-axis accelerometer standby enabled status. If enabled, the Z-axis will not gather or report data (or use power).
+   * Get Z-axis accelerometer standby enabled status. If enabled, the Z-axis
+   * will not gather or report data (or use power).
    * 
    * @return Current Z-axis standby enabled status
    * @see MPU6050_RA_PWR_MGMT_2
@@ -3680,7 +3940,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get X-axis gyroscope standby enabled status. If enabled, the X-axis will not gather or report data (or use power).
+   * Get X-axis gyroscope standby enabled status. If enabled, the X-axis will
+   * not gather or report data (or use power).
    * 
    * @return Current X-axis standby enabled status
    * @see MPU6050_RA_PWR_MGMT_2
@@ -3703,7 +3964,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Y-axis gyroscope standby enabled status. If enabled, the Y-axis will not gather or report data (or use power).
+   * Get Y-axis gyroscope standby enabled status. If enabled, the Y-axis will
+   * not gather or report data (or use power).
    * 
    * @return Current Y-axis standby enabled status
    * @see MPU6050_RA_PWR_MGMT_2
@@ -3726,7 +3988,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Get Z-axis gyroscope standby enabled status. If enabled, the Z-axis will not gather or report data (or use power).
+   * Get Z-axis gyroscope standby enabled status. If enabled, the Z-axis will
+   * not gather or report data (or use power).
    * 
    * @return Current Z-axis standby enabled status
    * @see MPU6050_RA_PWR_MGMT_2
@@ -3751,9 +4014,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // FIFO_COUNT* registers
 
   /**
-   * Get current FIFO buffer size. This value indicates the number of bytes stored in the FIFO buffer. This number is in turn the
-   * number of bytes that can be read from the FIFO buffer and it is directly proportional to the number of samples available given
-   * the set of sensor data bound to be stored in the FIFO (register 35 and 36).
+   * Get current FIFO buffer size. This value indicates the number of bytes
+   * stored in the FIFO buffer. This number is in turn the number of bytes that
+   * can be read from the FIFO buffer and it is directly proportional to the
+   * number of samples available given the set of sensor data bound to be stored
+   * in the FIFO (register 35 and 36).
    * 
    * @return Current FIFO buffer size
    */
@@ -3766,20 +4031,28 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // FIFO_R_W register
 
   /**
-   * Get byte from FIFO buffer. This register is used to read and write data from the FIFO buffer. Data is written to the FIFO in
-   * order of register number (from lowest to highest). If all the FIFO enable flags (see below) are enabled and all External Sensor
-   * Data registers (Registers 73 to 96) are associated with a Slave device, the contents of registers 59 through 96 will be written
-   * in order at the Sample Rate.
+   * Get byte from FIFO buffer. This register is used to read and write data
+   * from the FIFO buffer. Data is written to the FIFO in order of register
+   * number (from lowest to highest). If all the FIFO enable flags (see below)
+   * are enabled and all External Sensor Data registers (Registers 73 to 96) are
+   * associated with a Slave device, the contents of registers 59 through 96
+   * will be written in order at the Sample Rate.
    *
-   * The contents of the sensor data registers (Registers 59 to 96) are written into the FIFO buffer when their corresponding FIFO
-   * enable flags are set to 1 in FIFO_EN (Register 35). An additional flag for the sensor data registers associated with I2C Slave
-   * 3 can be found in I2C_MST_CTRL (Register 36).
+   * The contents of the sensor data registers (Registers 59 to 96) are written
+   * into the FIFO buffer when their corresponding FIFO enable flags are set to
+   * 1 in FIFO_EN (Register 35). An additional flag for the sensor data
+   * registers associated with I2C Slave 3 can be found in I2C_MST_CTRL
+   * (Register 36).
    *
-   * If the FIFO buffer has overflowed, the status bit FIFO_OFLOW_INT is automatically set to 1. This bit is located in INT_STATUS
-   * (Register 58). When the FIFO buffer has overflowed, the oldest data will be lost and new data will be written to the FIFO.
+   * If the FIFO buffer has overflowed, the status bit FIFO_OFLOW_INT is
+   * automatically set to 1. This bit is located in INT_STATUS (Register 58).
+   * When the FIFO buffer has overflowed, the oldest data will be lost and new
+   * data will be written to the FIFO.
    *
-   * If the FIFO buffer is empty, reading this register will return the last byte that was previously read from the FIFO until new
-   * data is available. The user should check FIFO_COUNT to ensure that the FIFO buffer is not read when empty.
+   * If the FIFO buffer is empty, reading this register will return the last
+   * byte that was previously read from the FIFO until new data is available.
+   * The user should check FIFO_COUNT to ensure that the FIFO buffer is not read
+   * when empty.
    *
    * @return Byte from FIFO buffer
    */
@@ -3809,7 +4082,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   // WHO_AM_I register
 
   /**
-   * Get Device ID. This register is used to verify the identity of the device (0b110100, 0x34).
+   * Get Device ID. This register is used to verify the identity of the device
+   * (0b110100, 0x34).
    * 
    * @return Device ID (6 bits only! should be 0x34)
    * @see MPU6050_RA_WHO_AM_I
@@ -3821,7 +4095,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /**
-   * Set Device ID. Write a new ID into the WHO_AM_I register (no idea why this should ever be necessary though).
+   * Set Device ID. Write a new ID into the WHO_AM_I register (no idea why this
+   * should ever be necessary though).
    * 
    * @param id
    *          New device ID to set. see getDeviceID()
@@ -4163,11 +4438,15 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
         I2CdevReadBytes(Integer.decode(deviceAddress), MPU6050_RA_MEM_R_W, chunkSize, verifyBuffer);
         if (memcmp(progBuffer, verifyBuffer, chunkSize) != 0) {
           /*
-           * Serial.print("Block write verification error, bank "); Serial.print(bank, DEC); Serial.print(", address ");
-           * Serial.print(address, DEC); Serial.print("!\nExpected:"); for (j = 0; j < chunkSize; j++) { Serial.print(" 0x"); if
-           * (progBuffer[j] < 16) Serial.print("0"); Serial.print(progBuffer[j], HEX); } Serial.print("\nReceived:"); for (int j =
-           * 0; j < chunkSize; j++) { Serial.print(" 0x"); if (verifyBuffer[i + j] < 16) Serial.print("0");
-           * Serial.print(verifyBuffer[i + j], HEX); } Serial.print("\n");
+           * Serial.print("Block write verification error, bank ");
+           * Serial.print(bank, DEC); Serial.print(", address ");
+           * Serial.print(address, DEC); Serial.print("!\nExpected:"); for (j =
+           * 0; j < chunkSize; j++) { Serial.print(" 0x"); if (progBuffer[j] <
+           * 16) Serial.print("0"); Serial.print(progBuffer[j], HEX); }
+           * Serial.print("\nReceived:"); for (int j = 0; j < chunkSize; j++) {
+           * Serial.print(" 0x"); if (verifyBuffer[i + j] < 16)
+           * Serial.print("0"); Serial.print(verifyBuffer[i + j], HEX); }
+           * Serial.print("\n");
            */
           // * free(verifyBuffer);
           return false; // uh oh.
@@ -4219,8 +4498,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
       if (length > 0) {
         // regular block of data to write
         /*
-         * Serial.print("Writing config block to bank "); Serial.print(bank); Serial.print(", offset "); Serial.print(offset);
-         * Serial.print( ", length="); Serial.println(length);
+         * Serial.print("Writing config block to bank "); Serial.print(bank);
+         * Serial.print(", offset "); Serial.print(offset); Serial.print(
+         * ", length="); Serial.println(length);
          */
         // progBuffer = (int *)data + i;
         progBuffer = new int[length];
@@ -4240,7 +4520,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
         // is anybody's guess for now.
         special = data[i++];
         /*
-         * Serial.print("Special command code "); Serial.print(special, HEX); Serial.println(" found...");
+         * Serial.print("Special command code "); Serial.print(special, HEX);
+         * Serial.println(" found...");
          */
         if (special == 0x01) {
           // enable DMP-related interrupts
@@ -4306,7 +4587,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   }
 
   /*
-   * Start of I2CDEV section. Most of this code could be moved to and implemented in the I2CControl interface.
+   * Start of I2CDEV section. Most of this code could be moved to and
+   * implemented in the I2CControl interface.
    */
 
   /**
@@ -4338,7 +4620,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    *          First bit position to read (0-7)
    * @param length
    *          Number of bits to read (not more than 8)
-   * @return right-aligned value (i.e. '101' read from any bitStart position will equal 0x05)
+   * @return right-aligned value (i.e. '101' read from any bitStart position
+   *         will equal 0x05)
    */
   int I2CdevReadBits(int devAddr, int regAddr, int bitStart, int length) {
     // 01101001 read byte
@@ -4588,8 +4871,9 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    */
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

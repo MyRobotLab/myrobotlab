@@ -26,7 +26,8 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   protected transient IplImage image;
   transient private IplImage lastImage;
 
-  // transient private HashMap<String, IplImage> cache = new HashMap<String, IplImage>();
+  // transient private HashMap<String, IplImage> cache = new HashMap<String,
+  // IplImage>();
   private int frameCounter = 0;
   public String path;
   transient OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
@@ -58,8 +59,9 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   @Override
   public Frame grab() {
     /*
-     * not needed as opencv can self regulat - or adjust fps try { // pause for the specified delay before loading the image.
-     * Thread.sleep(delay); } catch (InterruptedException e) {} // set the file path
+     * not needed as opencv can self regulat - or adjust fps try { // pause for
+     * the specified delay before loading the image. Thread.sleep(delay); }
+     * catch (InterruptedException e) {} // set the file path
      * 
      */
     path = imageFiles.get(grabCount).getAbsolutePath();
@@ -67,9 +69,11 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     // grab it.
     image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED);
     /*
-     * if (!cache.containsKey(path)) { image = cvLoadImage(path, CV_LOAD_IMAGE_UNCHANGED); cache.put(path, image); } else { IplImage
-     * cachedImage = cache.get(path); if (image != null) { image = cachedImage.clone(); } else {
-     * log.error("could not get cached image {}", path); }
+     * if (!cache.containsKey(path)) { image = cvLoadImage(path,
+     * CV_LOAD_IMAGE_UNCHANGED); cache.put(path, image); } else { IplImage
+     * cachedImage = cache.get(path); if (image != null) { image =
+     * cachedImage.clone(); } else { log.error("could not get cached image {}",
+     * path); }
      * 
      * }
      */

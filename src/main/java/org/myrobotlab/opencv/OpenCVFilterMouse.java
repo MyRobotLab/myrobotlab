@@ -132,8 +132,9 @@ public class OpenCVFilterMouse extends OpenCVFilter {
       cvDrawLine(image, p0, p1, pathColor, 1, 1, 0);
     }
     /*
-     * Iterator<String> sgi = path.keySet().iterator(); while (sgi.hasNext()) { Node n = path.get(sgi.next()); p0.x() = n.x();
-     * p0.y() = n.y(); p1.x() = n.x(); p1.y() = n.y(); cvDrawLine(image, p0, p1, pathColor, 1, 1, 0); }
+     * Iterator<String> sgi = path.keySet().iterator(); while (sgi.hasNext()) {
+     * Node n = path.get(sgi.next()); p0.x() = n.x(); p0.y() = n.y(); p1.x() =
+     * n.x(); p1.y() = n.y(); cvDrawLine(image, p0, p1, pathColor, 1, 1, 0); }
      */
     return image;
   }

@@ -32,8 +32,8 @@ public class GravityCenter extends Thread {
    * @param mass
    *          mass
    * @param centerOfMass
-   *          (0.0 - 1.0) representing where the center of mass is located, from the origin point. If you don't know, it's safe to
-   *          put 0.5
+   *          (0.0 - 1.0) representing where the center of mass is located, from
+   *          the origin point. If you don't know, it's safe to put 0.5
    */
   public void setLinkMass(String name, double mass, double centerOfMass) {
     masses.put(name, mass);

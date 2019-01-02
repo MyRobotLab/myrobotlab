@@ -29,16 +29,20 @@ public class CodecUri {
   }
 
   /**
-   * FIXME - this method requires the class to be loaded for type conversions !!! Decoding a URI or path can depend on Context &amp;
-   * Environment part of decoding relies on the method signature of an object - therefore it has to be loaded in memory, but if the
-   * ability to send messages from outside this system is desired - then the Message must be able to SPECIFY THE DECODING IT NEEDS
-   * !!! - without the clazz available !!!
+   * FIXME - this method requires the class to be loaded for type conversions
+   * !!! Decoding a URI or path can depend on Context &amp; Environment part of
+   * decoding relies on the method signature of an object - therefore it has to
+   * be loaded in memory, but if the ability to send messages from outside this
+   * system is desired - then the Message must be able to SPECIFY THE DECODING
+   * IT NEEDS !!! - without the clazz available !!!
    * 
-   * URI path decoder - decodes a path into a MRL Message. Details are here http://myrobotlab.org/content/myrobotlab-api JSON is the
-   * default encoding
+   * URI path decoder - decodes a path into a MRL Message. Details are here
+   * http://myrobotlab.org/content/myrobotlab-api JSON is the default encoding
    * 
    * @param pathInfo
-   *          - input path in the format - /{api-type}(/encoding=json/decoding=json/)/{method}/{param0}/{ param1}/...
+   *          - input path in the format -
+   *          /{api-type}(/encoding=json/decoding=json/)/{method}/{param0}/{
+   *          param1}/...
    * @return message
    * @throws IOException
    *           e

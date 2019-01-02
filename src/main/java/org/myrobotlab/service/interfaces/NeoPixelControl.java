@@ -30,13 +30,15 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 public interface NeoPixelControl extends NameProvider {
 
   /**
-   * high level "attach" which internally will call attachDevice(Device device, int[] config)
+   * high level "attach" which internally will call attachDevice(Device device,
+   * int[] config)
    * 
    * @param controller
    *          c
    * 
    * @param numPixel
-   *          - All of the config needed for the device -numPixel=number of pixel of the neopixel hardware
+   *          - All of the config needed for the device -numPixel=number of
+   *          pixel of the neopixel hardware
    * @param pin
    *          p -
    * @throws Exception
@@ -50,8 +52,9 @@ public interface NeoPixelControl extends NameProvider {
   public void detach(NeoPixelController controller);
 
   /**
-   * SetPixel: defining the pixels of the pixel matrix. Setting pixels are not send directly to the Neopixel Hardware but send with
-   * the sendPixelMatrix() method
+   * SetPixel: defining the pixels of the pixel matrix. Setting pixels are not
+   * send directly to the Neopixel Hardware but send with the sendPixelMatrix()
+   * method
    * 
    * @param address
    *          - value 1 to numPixel
@@ -78,10 +81,12 @@ public interface NeoPixelControl extends NameProvider {
   public void turnOn();
 
   /*
-   * <pre> setAnimation &#64;param animation - preprogramed animation &#64;param red - value 0-255 - set base color for the
-   * animation &#64;param green - value 0-255 - set base color for the animation &#64;param blue - value 0-255 - set base color for
-   * the animation &#64;param speed - set speed of the animation 1 = fastest (update every ~30ms), 100 = 100 times slower than 1
-   * value </pre>
+   * <pre> setAnimation &#64;param animation - preprogramed animation &#64;param
+   * red - value 0-255 - set base color for the animation &#64;param green -
+   * value 0-255 - set base color for the animation &#64;param blue - value
+   * 0-255 - set base color for the animation &#64;param speed - set speed of
+   * the animation 1 = fastest (update every ~30ms), 100 = 100 times slower than
+   * 1 value </pre>
    */
   public void setAnimation(int animation, int red, int green, int blue, int speed);
 

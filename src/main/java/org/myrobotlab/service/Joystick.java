@@ -52,12 +52,15 @@ import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Rumbler;
 
 /**
- * Joystick - The joystick service supports reading data from buttons and joysticks. It supports many joysticks, though the button
- * mapping may vary from controller to controller. Component is a general descriptor for any form of "Component" from JInput. Since
- * Component is not serializable we need to move the relevant descriptive data to InputDevice and send that information to describe
- * JInput's Components
+ * Joystick - The joystick service supports reading data from buttons and
+ * joysticks. It supports many joysticks, though the button mapping may vary
+ * from controller to controller. Component is a general descriptor for any form
+ * of "Component" from JInput. Since Component is not serializable we need to
+ * move the relevant descriptive data to InputDevice and send that information
+ * to describe JInput's Components
  * 
- * To Test java -Djava.library.path="./" -cp "./*" net.java.games.input.test.ControllerReadTest
+ * To Test java -Djava.library.path="./" -cp "./*"
+ * net.java.games.input.test.ControllerReadTest
  */
 public class Joystick extends Service {
 
@@ -218,13 +221,16 @@ public class Joystick extends Service {
     components = hardwareController.getComponentMap();
 
     /*
-     * hardwareComponents = hardwareController.getComponents(); if (hardwareComponents.length == 0) {
+     * hardwareComponents = hardwareController.getComponents(); if
+     * (hardwareComponents.length == 0) {
      * error("getComponents no Components found"); return components; }
      * 
-     * info("number of components: " + hardwareComponents.length); for (int i = 0; i < hardwareComponents.length; i++) { // v
-     * net.java.games.input.Component c = hardwareComponents[i]; Component c = hardwareComponents[i]; String id =
-     * c.getIdentifier().toString(); // v Component component = new Component(getName(), i, c); // v log.info("found {}",
-     * component); // v components.put(id, component); }
+     * info("number of components: " + hardwareComponents.length); for (int i =
+     * 0; i < hardwareComponents.length; i++) { // v
+     * net.java.games.input.Component c = hardwareComponents[i]; Component c =
+     * hardwareComponents[i]; String id = c.getIdentifier().toString(); // v
+     * Component component = new Component(getName(), i, c); // v
+     * log.info("found {}", component); // v components.put(id, component); }
      */
     return components;
   }
@@ -399,8 +405,9 @@ public class Joystick extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -420,14 +427,18 @@ public class Joystick extends Service {
   }
 
   /*
-   * Map<String, Set<RelativePositionControl>> axisConsumers = new HashMap<String, Set<RelativePositionControl>>();
+   * Map<String, Set<RelativePositionControl>> axisConsumers = new
+   * HashMap<String, Set<RelativePositionControl>>();
    * 
-   * @Override public void subscribeToAxis(RelativePositionControl serviceToControl, String axisName) throws Exception {
+   * @Override public void subscribeToAxis(RelativePositionControl
+   * serviceToControl, String axisName) throws Exception {
    * 
-   * if (serviceToControl.isLocal()){ Set<RelativePositionControl> callbacks = null; if (axisConsumers.containsKey(axisName)){
-   * callbacks = axisConsumers.get(axisName); } else { callbacks = new HashSet<RelativePositionControl>(); }
-   * callbacks.add(serviceToControl); axisConsumers.put(axisName, callbacks); } else { // FIXME - FINISH !! // i want motor to
-   * subscribe to my filtered x axis // subscribe() } }
+   * if (serviceToControl.isLocal()){ Set<RelativePositionControl> callbacks =
+   * null; if (axisConsumers.containsKey(axisName)){ callbacks =
+   * axisConsumers.get(axisName); } else { callbacks = new
+   * HashSet<RelativePositionControl>(); } callbacks.add(serviceToControl);
+   * axisConsumers.put(axisName, callbacks); } else { // FIXME - FINISH !! // i
+   * want motor to subscribe to my filtered x axis // subscribe() } }
    */
   public Component getAxis(String name) {
     if (components == null) {

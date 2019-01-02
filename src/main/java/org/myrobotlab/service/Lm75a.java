@@ -59,8 +59,10 @@ public class Lm75a extends Service implements I2CControl {
       Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
       /*
-       * byte msb = (byte) 0x83; byte lsb = (byte) 0x00; double test = (double) ((((int) msb) << 8 | (int) lsb & 0xff)) * .01;
-       * log.info(String.format("msb = %s, lsb = %s, test = %s", msb, lsb, test));
+       * byte msb = (byte) 0x83; byte lsb = (byte) 0x00; double test = (double)
+       * ((((int) msb) << 8 | (int) lsb & 0xff)) * .01;
+       * log.info(String.format("msb = %s, lsb = %s, test = %s", msb, lsb,
+       * test));
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -109,8 +111,9 @@ public class Lm75a extends Service implements I2CControl {
   }
 
   /**
-   * This method reads and returns the raw temperature as two bytes where the MSB is the integer part of the temperature ( + sign )
-   * and the LSB is the decimals. Used in two complement form.
+   * This method reads and returns the raw temperature as two bytes where the
+   * MSB is the integer part of the temperature ( + sign ) and the LSB is the
+   * decimals. Used in two complement form.
    * 
    * @return - temperature in celsius .. i think .
    */
@@ -180,8 +183,9 @@ public class Lm75a extends Service implements I2CControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -196,7 +200,8 @@ public class Lm75a extends Service implements I2CControl {
   }
 
   /**
-   * valid for a control or controller which can only have a single other service attached
+   * valid for a control or controller which can only have a single other
+   * service attached
    * 
    * @return true if the controller is attached. false otherwise
    */

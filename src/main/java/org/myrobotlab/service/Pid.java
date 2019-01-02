@@ -51,10 +51,11 @@ import org.slf4j.Logger;
  * 
  * Pid - control service from
  * 
- * http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid- introduction/ This will likely get merged/replaced with Pid
- * service.
+ * http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-
+ * introduction/ This will likely get merged/replaced with Pid service.
  * 
- * TODO - handle integral windup - https://en.wikipedia.org/wiki/PID_controller#Integral_windup
+ * TODO - handle integral windup -
+ * https://en.wikipedia.org/wiki/PID_controller#Integral_windup
  * 
  */
 public class Pid extends Service {
@@ -139,9 +140,12 @@ public class Pid extends Service {
   }
 
   /*
-   * compute() ********************************************************************** This, as they say, is where the magic happens.
-   * this function should be called every time "void loop()" executes. the function will decide for itself whether a new pid Output
-   * needs to be computed. returns true when the output is computed, false when nothing has been done. *****************
+   * compute()
+   * **********************************************************************
+   * This, as they say, is where the magic happens. this function should be
+   * called every time "void loop()" executes. the function will decide for
+   * itself whether a new pid Output needs to be computed. returns true when the
+   * output is computed, false when nothing has been done. *****************
    * ***************************************************************
    */
   public boolean compute(String key) {
@@ -230,7 +234,8 @@ public class Pid extends Service {
   }
 
   /**
-   * does all the things that need to happen to ensure a bumpless transfer from manual to automatic mode.
+   * does all the things that need to happen to ensure a bumpless transfer from
+   * manual to automatic mode.
    */
   public void init(String key) {
     PidData piddata = data.get(key);
@@ -255,9 +260,11 @@ public class Pid extends Service {
   }
 
   /*
-   * SetControllerDirection(...)*********************************************** ** The Pid will either be connected to a DIRECT
-   * acting process (+Output leads to +Input) or a REVERSE acting process(+Output leads to -Input.) we need to know which one,
-   * because otherwise we may increase the output when we should be decreasing. This is called from the constructor. *************
+   * SetControllerDirection(...)***********************************************
+   * ** The Pid will either be connected to a DIRECT acting process (+Output
+   * leads to +Input) or a REVERSE acting process(+Output leads to -Input.) we
+   * need to know which one, because otherwise we may increase the output when
+   * we should be decreasing. This is called from the constructor. *************
    * ***************************************************************
    */
   public void setControllerDirection(String key, Integer direction) {
@@ -277,13 +284,15 @@ public class Pid extends Service {
   }
 
   /**
-   * Allows the controller Mode to be set to manual (0) or Automatic (non-zero) when the transition from manual to auto occurs, the
-   * controller is automatically initialized
+   * Allows the controller Mode to be set to manual (0) or Automatic (non-zero)
+   * when the transition from manual to auto occurs, the controller is
+   * automatically initialized
    */
   public void setMode(String key, int Mode) {
     PidData piddata = data.get(key);
     boolean newAuto = (Mode == MODE_AUTOMATIC);
-    if ((newAuto == !piddata.inAuto) && (Mode == MODE_AUTOMATIC)) { /* we just went from manual to auto */
+    if ((newAuto == !piddata.inAuto)
+        && (Mode == MODE_AUTOMATIC)) { /* we just went from manual to auto */
       init(key);
     }
     piddata.inAuto = newAuto;
@@ -291,12 +300,16 @@ public class Pid extends Service {
   }
 
   /**
-   * This function will be used far more often than SetInputLimits. while the input to the controller will generally be in the
-   * 0-1023 range (which is the default already,) the output will be a little different. maybe they'll be doing a time window and
-   * will need 0-8000 or something. or maybe they'll want to clamp it from 0-125. who knows. at any rate, that can all be done here.
+   * This function will be used far more often than SetInputLimits. while the
+   * input to the controller will generally be in the 0-1023 range (which is the
+   * default already,) the output will be a little different. maybe they'll be
+   * doing a time window and will need 0-8000 or something. or maybe they'll
+   * want to clamp it from 0-125. who knows. at any rate, that can all be done
+   * here.
    * 
    * @param key
-   *          - named pid compute instance, so the Pid "service" can manage pid systems
+   *          - named pid compute instance, so the Pid "service" can manage pid
+   *          systems
    * @param min
    * @param max
    * 
@@ -327,11 +340,13 @@ public class Pid extends Service {
   }
 
   /**
-   * This function allows the controller's dynamic performance to be adjusted. it's called automatically from the constructor, but
-   * tunings can also be adjusted on the fly during normal operation
+   * This function allows the controller's dynamic performance to be adjusted.
+   * it's called automatically from the constructor, but tunings can also be
+   * adjusted on the fly during normal operation
    * 
    * @param key
-   *          - named pid compute instance, so the Pid "service" can manage pid systems
+   *          - named pid compute instance, so the Pid "service" can manage pid
+   *          systems
    * @param Kp
    *          - constant proportional value
    * @param Ki
@@ -371,8 +386,10 @@ public class Pid extends Service {
   }
 
   /*
-   * setSampleTime(...) ********************************************************* sets the period, in Milliseconds, at which the
-   * calculation is performed ************ ****************************************************************
+   * setSampleTime(...)
+   * ********************************************************* sets the period,
+   * in Milliseconds, at which the calculation is performed ************
+   * ****************************************************************
    */
   public void setSampleTime(String key, int NewSampleTime) {
     PidData piddata = data.get(key);
@@ -397,8 +414,9 @@ public class Pid extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

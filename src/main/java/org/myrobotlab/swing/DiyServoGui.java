@@ -62,10 +62,12 @@ import org.slf4j.Logger;
 import com.jidesoft.swing.RangeSlider;
 
 /**
- * DiyServo SwingGui - displays details of Servo state Lesson learned ! Servos to properly function need to be attached to a
- * controller This gui previously sent messages to the controller. To simplify things its important to send messages only to the
- * bound Servo - and let it attach to the controller versus sending messages directly to the controller. 1 display - 1 service -
- * keep it simple
+ * DiyServo SwingGui - displays details of Servo state Lesson learned ! Servos
+ * to properly function need to be attached to a controller This gui previously
+ * sent messages to the controller. To simplify things its important to send
+ * messages only to the bound Servo - and let it attach to the controller versus
+ * sending messages directly to the controller. 1 display - 1 service - keep it
+ * simple
  *
  */
 public class DiyServoGui extends ServiceGui implements ActionListener {

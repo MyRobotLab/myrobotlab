@@ -5,8 +5,10 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 /**
- * AudioData - represents all of the meta data concerning a sample and the playing of that sample. Items not set (ie null) will be
- * filled by a default in the AudioProcessor. Items which are set here will always take precedence over the AudioProcessor
+ * AudioData - represents all of the meta data concerning a sample and the
+ * playing of that sample. Items not set (ie null) will be filled by a default
+ * in the AudioProcessor. Items which are set here will always take precedence
+ * over the AudioProcessor
  * 
  * @author GroG
  *
@@ -16,7 +18,8 @@ public class AudioData implements Serializable {
   private static final long serialVersionUID = 1L;
 
   // FIXME STREAM (InputStream) & AND ENCODING TYPE mp3 wav aiff etc...
-  // FIXME USE INPUTSTREAM - filename is just a reference & byte[] can be put in an InputStream
+  // FIXME USE INPUTSTREAM - filename is just a reference & byte[] can be put in
+  // an InputStream
 
   public transient static final String MODE_BLOCKING = "blocking";
   public transient static final String MODE_QUEUED = "queued";
@@ -24,8 +27,8 @@ public class AudioData implements Serializable {
   private transient static long subId = 0;
 
   /**
-   * unique identifier - most significant part will be timestamp - least significant will be atomic(is) nano-precision(ish) static
-   * increment
+   * unique identifier - most significant part will be timestamp - least
+   * significant will be atomic(is) nano-precision(ish) static increment
    */
   public long trackId = System.currentTimeMillis() * 1000 + (++subId);
 
@@ -35,7 +38,8 @@ public class AudioData implements Serializable {
   public String mode = AudioData.MODE_QUEUED;
 
   /**
-   * String uri reference of audio stream FIXME - nice idea it was uri .. but its not :P
+   * String uri reference of audio stream FIXME - nice idea it was uri .. but
+   * its not :P
    */
   String filename = null;
 
@@ -61,7 +65,8 @@ public class AudioData implements Serializable {
 
   // public String state =
 
-  public Double volume = null; // null == take processor volume | != null == specify own volume
+  public Double volume = null; // null == take processor volume | != null ==
+                               // specify own volume
 
   // public float volume = 1.0f; DONE ON TRACK
   // public float balance = 0.0f; SHOULD BE DONE ON TRACK
@@ -89,7 +94,8 @@ public class AudioData implements Serializable {
   }
 
   /**
-   * returns the length of the file in milliseconds currently only works "AFTER" its been played
+   * returns the length of the file in milliseconds currently only works "AFTER"
+   * its been played
    * 
    * @return
    */

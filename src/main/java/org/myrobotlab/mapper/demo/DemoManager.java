@@ -30,7 +30,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 /**
- * Manages (simply) a list of demonstrations and is used by Simbad main class. This class is used statically only.
+ * Manages (simply) a list of demonstrations and is used by Simbad main class.
+ * This class is used statically only.
  */
 public class DemoManager {
 

@@ -63,7 +63,8 @@ public class Adafruit16CServoDriverGui extends ServiceGui implements ActionListe
     super(boundServiceName, myService);
     boundService = (Adafruit16CServoDriver) Runtime.getService(boundServiceName);
 
-    // addTopLine(controllerLabel, controllerList, deviceBusLabel, deviceBusList, deviceAddressLabel, deviceAddressList,
+    // addTopLine(controllerLabel, controllerList, deviceBusLabel,
+    // deviceBusList, deviceAddressLabel, deviceAddressList,
     // attachButton);
     addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 

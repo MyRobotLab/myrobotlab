@@ -50,7 +50,8 @@ public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements Actio
 
   public OpenCVFilterKinectDepthGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
-    // updateState((OpenCVFilterKinectDepth) boundFilter.filter); noWorky - would be nice to have a good reference
+    // updateState((OpenCVFilterKinectDepth) boundFilter.filter); noWorky -
+    // would be nice to have a good reference
     useDepth.setSelected(true);
     useColor.setSelected(true);
     enableListeners();

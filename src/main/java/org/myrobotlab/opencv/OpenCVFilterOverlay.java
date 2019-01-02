@@ -59,7 +59,8 @@ public class OpenCVFilterOverlay extends OpenCVFilter {
 
     public ImageOverlay(String imageFilename, double alpha) {
       this.image = cvLoadImage(imageFilename, CV_LOAD_IMAGE_UNCHANGED);
-      // this.image = cvLoadImage(imageFilename, -1); // -1 == unchanged which supports 4 channel transparencies
+      // this.image = cvLoadImage(imageFilename, -1); // -1 == unchanged which
+      // supports 4 channel transparencies
       // this.image = cvLoadImage(imageFilename);
       this.alpha = alpha;
     }
@@ -122,12 +123,16 @@ public class OpenCVFilterOverlay extends OpenCVFilter {
     cvMixChannels(image, 1, channel4, 1, from_to, 4);
 
     /*
-     * for (int i = 0; i < imageOverlays.size(); ++i) { ImageOverlay overlay = imageOverlays.get(i); // cvAddWeighted(image,
-     * overlay.alpha, overlay.image, 1 - overlay.alpha, 0.0, image); // cvAddWeighted(overlay.image, overlay.alpha, channel4, 1 -
-     * overlay.alpha, 0.0, channel4); cvAddWeighted(channel4, overlay.alpha, overlay.image, 1 - overlay.alpha, 0.0, channel4); }
+     * for (int i = 0; i < imageOverlays.size(); ++i) { ImageOverlay overlay =
+     * imageOverlays.get(i); // cvAddWeighted(image, overlay.alpha,
+     * overlay.image, 1 - overlay.alpha, 0.0, image); //
+     * cvAddWeighted(overlay.image, overlay.alpha, channel4, 1 - overlay.alpha,
+     * 0.0, channel4); cvAddWeighted(channel4, overlay.alpha, overlay.image, 1 -
+     * overlay.alpha, 0.0, channel4); }
      * 
-     * for (TextOverlay overlay : textOverlays.values()){ cvPutText(image, overlay.text, cvPoint(overlay.x, overlay.y),
-     * overlay.font, overlay.color); }
+     * for (TextOverlay overlay : textOverlays.values()){ cvPutText(image,
+     * overlay.text, cvPoint(overlay.x, overlay.y), overlay.font,
+     * overlay.color); }
      */
     if (imageOverlays.size() > 0) {
       return imageOverlays.get(0).image;

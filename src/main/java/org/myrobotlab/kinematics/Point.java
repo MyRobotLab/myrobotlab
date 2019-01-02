@@ -5,7 +5,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
- * Represents a 3d point in space. TODO: add rotation (roll/pitch/yaw - rz,rx,ry)
+ * Represents a 3d point in space. TODO: add rotation (roll/pitch/yaw -
+ * rz,rx,ry)
  * 
  * @author kwatters
  *
@@ -171,8 +172,8 @@ public class Point implements Serializable {
   }
 
   /**
-   * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point. return a new point with the individual components
-   * summed.
+   * add the x,y,z,roll,pitch,yaw of the point passed in, to the current point.
+   * return a new point with the individual components summed.
    * 
    * @param p
    *          the point to be added

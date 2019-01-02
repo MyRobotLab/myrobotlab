@@ -21,8 +21,9 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
 /**
- * A simple example showing how to do search and replace in a RSyntaxTextArea. The toolbar isn't very user-friendly, but this is
- * just to show you how to use the API.
+ * A simple example showing how to do search and replace in a RSyntaxTextArea.
+ * The toolbar isn't very user-friendly, but this is just to show you how to use
+ * the API.
  * <p>
  * 
  * This example uses RSyntaxTextArea 2.0.1.

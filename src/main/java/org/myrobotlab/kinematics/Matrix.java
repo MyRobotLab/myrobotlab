@@ -167,8 +167,8 @@ public class Matrix implements Serializable {
   }
 
   /**
-   * Computes the dot product (or scalar product) of two matrices by multiplying corresponding elements and summing all the
-   * products.
+   * Computes the dot product (or scalar product) of two matrices by multiplying
+   * corresponding elements and summing all the products.
    * 
    * @param m
    *          A Matrix with the same dimensions

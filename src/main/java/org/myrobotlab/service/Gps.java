@@ -19,24 +19,34 @@ import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
- * GPS - Global Positioning System for MyRobotLab. It will read data from a GPS sensor through a serial connection and parse it into
- * its appropriate fields The service is able to parse NMEA sentences coming in over Serial (including Bluetooth Serial). One
- * important note is that the Lat and Lon in NMEA are in the format ddmm.mmmm which means that they have to be converted to Degrees
- * (d) from Degrees(d) Minutes(m) to be used with some of the other functions in the service. The service automatically does the
- * conversion when it parses the sentences into GPSData objects. If you capture the raw GPS data coming out of the device to a file,
- * it won't be the converted version. It will be the raw NMEA value. some Geo Fence capabilities have been added. The most basic of
- * these is the Point based radius. You define a Lat/Lon point and a radius around it in meters and then you can test to see if
- * other points are inside or outside the fence. A more complicated/flexible version is created by sending an array of GPS points to
- * form a polygon. The last point will be connected back to the first point automatically to close the fence. So if your robot is
- * sending you it's current GPS coordinates, you can see if has wandered into our out of a fenced area.
+ * GPS - Global Positioning System for MyRobotLab. It will read data from a GPS
+ * sensor through a serial connection and parse it into its appropriate fields
+ * The service is able to parse NMEA sentences coming in over Serial (including
+ * Bluetooth Serial). One important note is that the Lat and Lon in NMEA are in
+ * the format ddmm.mmmm which means that they have to be converted to Degrees
+ * (d) from Degrees(d) Minutes(m) to be used with some of the other functions in
+ * the service. The service automatically does the conversion when it parses the
+ * sentences into GPSData objects. If you capture the raw GPS data coming out of
+ * the device to a file, it won't be the converted version. It will be the raw
+ * NMEA value. some Geo Fence capabilities have been added. The most basic of
+ * these is the Point based radius. You define a Lat/Lon point and a radius
+ * around it in meters and then you can test to see if other points are inside
+ * or outside the fence. A more complicated/flexible version is created by
+ * sending an array of GPS points to form a polygon. The last point will be
+ * connected back to the first point automatically to close the fence. So if
+ * your robot is sending you it's current GPS coordinates, you can see if has
+ * wandered into our out of a fenced area.
  *
  */
 public class Gps extends Service implements SerialDataListener {
 
   /***********************************************************************************
-   * This block of methods will be used to GeoFencing This code is based on the examples on the following blog
-   * http://stefanbangels.blogspot.be/2012/12 /for-several-years-now-i-have-been.html http://stefanbangels.blogspot.be/2014
-   * /03/point-geo-fencing-sample-code.html http://stefanbangels.blogspot.nl/2013/10/geo-fencing-sample-code.html
+   * This block of methods will be used to GeoFencing This code is based on the
+   * examples on the following blog http://stefanbangels.blogspot.be/2012/12
+   * /for-several-years-now-i-have-been.html
+   * http://stefanbangels.blogspot.be/2014
+   * /03/point-geo-fencing-sample-code.html
+   * http://stefanbangels.blogspot.nl/2013/10/geo-fencing-sample-code.html
    *********************************************************************************/
   // We need a circle object to build a point/radius geofence
   class Circle {
@@ -409,10 +419,12 @@ public class Gps extends Service implements SerialDataListener {
   }
 
   /**
-   * The FV-M8 module skips one of the latter elements in the string, leaving only 0-14 elements. GGA Global Positioning System
-   * Fixed Data GLL Geographic Position - Latitude/Longitude GSV GNSS Satellites in View RMC Recommended Minimum Specific GNSS Data
-   * VTG Course Over Ground and Ground Speed GSA GNSS DOP and Active Satellites MSS MSK Receiver Signal kmc - so the data you have
-   * doesn't have two (GLL and MSK)
+   * The FV-M8 module skips one of the latter elements in the string, leaving
+   * only 0-14 elements. GGA Global Positioning System Fixed Data GLL Geographic
+   * Position - Latitude/Longitude GSV GNSS Satellites in View RMC Recommended
+   * Minimum Specific GNSS Data VTG Course Over Ground and Ground Speed GSA GNSS
+   * DOP and Active Satellites MSS MSK Receiver Signal kmc - so the data you
+   * have doesn't have two (GLL and MSK)
    * 
    * @return string array of data
    */
@@ -864,8 +876,9 @@ public class Gps extends Service implements SerialDataListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

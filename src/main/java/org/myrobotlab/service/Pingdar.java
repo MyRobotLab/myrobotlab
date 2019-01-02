@@ -11,7 +11,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Pingdar - this service will control a sweeping servo and an ultrasonic sensor module. The result is a sonar style range finding.
+ * Pingdar - this service will control a sweeping servo and an ultrasonic sensor
+ * module. The result is a sonar style range finding.
  *
  */
 public class Pingdar extends Service implements RangingControl, RangeListener {
@@ -88,7 +89,8 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
   public Double onServoEvent(Double pos) {
     info("pos %d", pos.intValue());
     /*
-     * lastPos = pos; if (rangeCount > 0) { Point p = new Point(lastPos, rangeAvg / rangeCount); rangeAvg = 0; rangeCount = 0;
+     * lastPos = pos; if (rangeCount > 0) { Point p = new Point(lastPos,
+     * rangeAvg / rangeCount); rangeAvg = 0; rangeCount = 0;
      * invoke("publishPingdar", p); }
      */
 
@@ -138,8 +140,9 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -156,7 +159,8 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
 
     meta.sharePeer("sensor.controller", "controller", "Arduino", "shared arduino");
     // theoretically - Servo should follow the same share config
-    // meta.sharePeer("servo.controller", "controller", "Arduino", "shared arduino");
+    // meta.sharePeer("servo.controller", "controller", "Arduino", "shared
+    // arduino");
 
     return meta;
   }

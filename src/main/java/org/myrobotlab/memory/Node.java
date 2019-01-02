@@ -11,15 +11,16 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
- * @author GroG a "very" generalized memory node - potentially used to grow associations with other nodes uses the concept of
- *         attributes and free-form associations
+ * @author GroG a "very" generalized memory node - potentially used to grow
+ *         associations with other nodes uses the concept of attributes and
+ *         free-form associations
  * 
  */
 public class Node implements Serializable {
 
   /**
-   * NodeContext is used with messaging to publish updates of nodes. A location parentPath is needed since the node is not aware of
-   * its location.
+   * NodeContext is used with messaging to publish updates of nodes. A location
+   * parentPath is needed since the node is not aware of its location.
    */
   public static class NodeContext {
     public String parentPath;
@@ -79,12 +80,15 @@ public class Node implements Serializable {
   }
 
   /*
-   * the most important method get is the effective "search" method of memory. It has an XPath like syntax the "/" means "data of" a
-   * node, so when the path is /k1/k2/ - would mean get the hashmap of k2 /k1/k2 - means get the key value of k2 in the hashmap of
-   * k1
+   * the most important method get is the effective "search" method of memory.
+   * It has an XPath like syntax the "/" means "data of" a node, so when the
+   * path is /k1/k2/ - would mean get the hashmap of k2 /k1/k2 - means get the
+   * key value of k2 in the hashmap of k1
    * 
-   * other examples /background /background/position/x /background/position/y /foreground /known/ball/red /known/ball/yellow
-   * /known/cup /unknown/object1 /positions/x/ &lt;map&gt; /positions/y/ &lt;map&gt; /positions/time/ &lt;map&gt; /tracking
+   * other examples /background /background/position/x /background/position/y
+   * /foreground /known/ball/red /known/ball/yellow /known/cup /unknown/object1
+   * /positions/x/ &lt;map&gt; /positions/y/ &lt;map&gt; /positions/time/
+   * &lt;map&gt; /tracking
    * 
    * @return - an object found at the given path
    */

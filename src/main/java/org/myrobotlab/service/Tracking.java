@@ -56,9 +56,10 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Tracking - This service connects to the video stream from OpenCV It then uses LK tracking for a point in the video stream. As
- * that point moves the x and y servos that are attached to a camera will move to keep the point in the screen. (controlling yaw and
- * pitch.)
+ * Tracking - This service connects to the video stream from OpenCV It then uses
+ * LK tracking for a point in the video stream. As that point moves the x and y
+ * servos that are attached to a camera will move to keep the point in the
+ * screen. (controlling yaw and pitch.)
  *
  */
 public class Tracking extends Service {
@@ -121,7 +122,8 @@ public class Tracking extends Service {
    * call back of all video data video calls this whenever a frame is processed
    * 
    */
-  // TODO: should be a function of the current frame rate for now, require at least 1.
+  // TODO: should be a function of the current frame rate for now, require at
+  // least 1.
   int faceFoundFrameCount = 0;
   int faceFoundFrameCountMin = 2;
   // int faceLostFrameCount = 0;
@@ -143,7 +145,8 @@ public class Tracking extends Service {
     super(n);
 
     pid = (Pid) createPeer("pid");
-    // the kp should be proportional to the input min/max of the servo.. for now we'll go with 45 for now.
+    // the kp should be proportional to the input min/max of the servo.. for now
+    // we'll go with 45 for now.
     pid.setPID("x", 3.0, 1.0, 0.1);
     pid.setControllerDirection("x", Pid.DIRECTION_DIRECT);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
@@ -217,7 +220,8 @@ public class Tracking extends Service {
   // TODO - array of attributes expanded Object[] ... ???
   // TODO - use GEOTAG - LAT LONG ALT DIRECTION LOCATION CITY GPS TIME OFFSET
   /*
-   * public OpenCVData setLocation(OpenCVData data) { data.setX(x.getPosition()); data.setY(y.getPosition()); return data; }
+   * public OpenCVData setLocation(OpenCVData data) {
+   * data.setX(x.getPosition()); data.setY(y.getPosition()); return data; }
    */
 
   // ------------------- tracking & detecting methods end
@@ -365,7 +369,8 @@ public class Tracking extends Service {
         // different detection
         break;
 
-      // TODO: test startLKTracking -> maybe fix targetPoint.get(0) for image proportion between 0>1
+      // TODO: test startLKTracking -> maybe fix targetPoint.get(0) for image
+      // proportion between 0>1
       case STATE_LK_TRACKING_POINT:
         // extract tracking info
         // data.setSelectedFilterName(LKOpticalTrackFilterName);
@@ -441,7 +446,8 @@ public class Tracking extends Service {
     for (TrackingServoData tsd : servoControls.values()) {
       pid.setInput(tsd.axis, targetPoint.get(tsd.axis));
       if (pid.compute(tsd.name)) {
-        // TODO: verify this.. we want the pid output to be the input for our servo..min/max are input min/max on the servo to
+        // TODO: verify this.. we want the pid output to be the input for our
+        // servo..min/max are input min/max on the servo to
         // ensure proper scaling
         // of values between services.
         tsd.currentServoPos += pid.getOutput(tsd.name);
@@ -457,7 +463,8 @@ public class Tracking extends Service {
     if (cnt % updateModulus == 0) {
       // moz4r : //keep calm and save MORE cpu!
       // broadcastState(); // update graphics ?
-      // info(String.format("computeX %f computeY %f", pid.getOutput("x"), pid.getOutput("y")));
+      // info(String.format("computeX %f computeY %f", pid.getOutput("x"),
+      // pid.getOutput("y")));
     }
   }
 
@@ -513,7 +520,8 @@ public class Tracking extends Service {
     log.info("Connect 2 servos for head tracking!... aye aye captain.  Also.. an open cv instance.");
     attach(opencv);
     attach(x, y);
-    // don't understand this, it should be getMinInput and getMaxInput, no ? but seem worky..
+    // don't understand this, it should be getMinInput and getMaxInput, no ? but
+    // seem worky..
     pid.setOutputRange("x", -x.getMaxInput(), x.getMaxInput());
     pid.setOutputRange("y", -y.getMaxInput(), y.getMaxInput());
     // target the center !
@@ -525,8 +533,9 @@ public class Tracking extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -565,7 +574,8 @@ public class Tracking extends Service {
   }
 
   /**
-   * Routing attach - routes ServiceInterface.attach(service) to appropriate methods for this class
+   * Routing attach - routes ServiceInterface.attach(service) to appropriate
+   * methods for this class
    */
   @Override
   public void attach(Attachable service) throws Exception {

@@ -37,8 +37,9 @@ public class MavenWrapper extends Repo implements Serializable {
   static private synchronized void init() {
     if (localInstance == null) {
       /*
-       * ClassWorld classWorld = new ClassWorld(); ClassRealm classRealm = (ClassRealm)
-       * Thread.currentThread().getContextClassLoader(); mavenCli = new MavenCli(classRealm.getWorld());
+       * ClassWorld classWorld = new ClassWorld(); ClassRealm classRealm =
+       * (ClassRealm) Thread.currentThread().getContextClassLoader(); mavenCli =
+       * new MavenCli(classRealm.getWorld());
        */
       // mavenCli = new MavenCli();
       localInstance = new MavenWrapper();

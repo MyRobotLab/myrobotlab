@@ -91,7 +91,8 @@ public class Reflector {
   }
 
   /**
-   * Parse the Class out of the passed-in objects. If an object is null, null will be used.
+   * Parse the Class out of the passed-in objects. If an object is null, null
+   * will be used.
    * 
    * @param params
    * @return
@@ -116,7 +117,8 @@ public class Reflector {
   /**
    * @param cls
    *          class
-   * @return an empty/default boxed primitive. This is somewhat heavy since it creates a boxed instance of the primitive.
+   * @return an empty/default boxed primitive. This is somewhat heavy since it
+   *         creates a boxed instance of the primitive.
    */
   public static Object getPrimitive(Class<?> cls) {
     if (cls.isAssignableFrom(Integer.class)) {
@@ -146,9 +148,11 @@ public class Reflector {
   }
 
   /*
-   * Invoke in the context of this Service. It is suggested to use one of the primitive overload methods when the expected result is
-   * a primitive. This is for 2 reasons: (1) the primitive will be boxed in this case which means more overhead (2) if something
-   * fails a NULL is returned which results in an exception on the calling end
+   * Invoke in the context of this Service. It is suggested to use one of the
+   * primitive overload methods when the expected result is a primitive. This is
+   * for 2 reasons: (1) the primitive will be boxed in this case which means
+   * more overhead (2) if something fails a NULL is returned which results in an
+   * exception on the calling end
    * 
    * @param object object
    * 

@@ -48,8 +48,9 @@ import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 /**
- * @author GroG ServiceGUI - is owned immediately or through a routing map to ultimately a Service it has the capability of
- *         undocking and docking itself
+ * @author GroG ServiceGUI - is owned immediately or through a routing map to
+ *         ultimately a Service it has the capability of undocking and docking
+ *         itself
  * 
  */
 
@@ -60,8 +61,10 @@ public abstract class ServiceGui implements WindowListener {
   transient public final SwingGui swingGui; // FIXME - rename gui
 
   /**
-   * display is the panel to be added to the JTabbedPane it has border layout similar to how a default frame its a good paradigm to
-   * think of the JTabbedPane as its own frame since when it become undocked - it is within a frame
+   * display is the panel to be added to the JTabbedPane it has border layout
+   * similar to how a default frame its a good paradigm to think of the
+   * JTabbedPane as its own frame since when it become undocked - it is within a
+   * frame
    */
   transient JPanel display = new JPanel(new BorderLayout());
 
@@ -127,7 +130,8 @@ public abstract class ServiceGui implements WindowListener {
   }
 
   /**
-   * stub for unsubscribing all service specific/gui events from desired callbacks
+   * stub for unsubscribing all service specific/gui events from desired
+   * callbacks
    */
   public void unsubscribeGui() {
   }
@@ -145,7 +149,8 @@ public abstract class ServiceGui implements WindowListener {
   }
 
   /*
-   * hook for SwingGui framework to query each panel before release checking if any panel needs user input before shutdown
+   * hook for SwingGui framework to query each panel before release checking if
+   * any panel needs user input before shutdown
    */
   public boolean isReadyForRelease() {
     return true;
@@ -174,8 +179,10 @@ public abstract class ServiceGui implements WindowListener {
 
     // here is the new magic secret sauce !!!
     // this is in mrl.js / panelSvc.js too
-    // add that method in SwingGui's message routing to get the callback to 'this'
-    // tab panel, or widget - in mrl.js too along with other subscriptions to types
+    // add that method in SwingGui's message routing to get the callback to
+    // 'this'
+    // tab panel, or widget - in mrl.js too along with other subscriptions to
+    // types
     swingGui.subscribeToServiceMethod(String.format("%s.%s", boundServiceName, callback), this);
   }
 

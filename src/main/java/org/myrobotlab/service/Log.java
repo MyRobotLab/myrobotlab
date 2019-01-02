@@ -54,7 +54,8 @@ import ch.qos.logback.core.status.Status;
 
 /**
  * 
- * Log - This service should allow you to record and play back messages. for testing purposes only.
+ * Log - This service should allow you to record and play back messages. for
+ * testing purposes only.
  *
  */
 
@@ -75,7 +76,8 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
   String logLevel = "info";
 
   /*
-   * TODO - allow options to record and playback message log - serialize to disk etc
+   * TODO - allow options to record and playback message log - serialize to disk
+   * etc
    */
 
   // TODO - do in Service
@@ -228,7 +230,8 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
   }
 
   /**
-   * Main interface through which slf4j sends logging. This method in turn publishes the events to a MRL publishLogEvent topic.
+   * Main interface through which slf4j sends logging. This method in turn
+   * publishes the events to a MRL publishLogEvent topic.
    */
   @Override
   public void doAppend(ILoggingEvent event) throws LogbackException {
@@ -377,8 +380,9 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

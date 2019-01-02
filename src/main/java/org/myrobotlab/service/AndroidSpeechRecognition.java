@@ -25,7 +25,8 @@ import org.slf4j.Logger;
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
  * @author Moz4r Client temporary build :
- *         https://github.com/moz4r/SpeechRecognitionMRL/blob/master/app/release/app-release.apk?raw=true Client temporary sources :
+ *         https://github.com/moz4r/SpeechRecognitionMRL/blob/master/app/release/app-release.apk?raw=true
+ *         Client temporary sources :
  *         https://github.com/moz4r/SpeechRecognitionMRL
  */
 public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
@@ -385,8 +386,9 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

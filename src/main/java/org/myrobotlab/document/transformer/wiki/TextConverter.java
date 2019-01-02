@@ -63,23 +63,31 @@ import de.fau.cs.osr.ptk.common.AstVisitor;
 import de.fau.cs.osr.utils.StringTools;
 
 /**
- * A visitor to convert an article AST into a pure text representation. To better understand the visitor pattern as implemented by
- * the Visitor class, please take a look at the following resources:
+ * A visitor to convert an article AST into a pure text representation. To
+ * better understand the visitor pattern as implemented by the Visitor class,
+ * please take a look at the following resources:
  * <ul>
- * <li><a href= "http://en.wikipedia.org/wiki/Visitor_pattern">http://en.wikipedia .org/wiki/Visitor_pattern</a> (classic
- * pattern)</li>
- * <li><a href= "http://www.javaworld.com/javaworld/javatips/jw-javatip98.html">http
- * ://www.javaworld.com/javaworld/javatips/jw-javatip98.html</a> (the version we use here)</li>
+ * <li><a href=
+ * "http://en.wikipedia.org/wiki/Visitor_pattern">http://en.wikipedia
+ * .org/wiki/Visitor_pattern</a> (classic pattern)</li>
+ * <li><a href=
+ * "http://www.javaworld.com/javaworld/javatips/jw-javatip98.html">http
+ * ://www.javaworld.com/javaworld/javatips/jw-javatip98.html</a> (the version we
+ * use here)</li>
  * </ul>
  * 
- * The methods needed to descend into an AST and visit the children of a given node <code>n</code> are
+ * The methods needed to descend into an AST and visit the children of a given
+ * node <code>n</code> are
  * <ul>
  * <li><code>dispatch(n)</code> - visit node <code>n</code>,</li>
- * <li><code>iterate(n)</code> - visit the <b>children</b> of node <code>n</code>,</li>
- * <li><code>map(n)</code> - visit the <b>children</b> of node <code>n</code> and gather the return values of the
- * <code>visit()</code> calls in a list,</li>
- * <li><code>mapInPlace(n)</code> - visit the <b>children</b> of node <code>n</code> and replace each child node <code>c</code> with
- * the return value of the call to <code>visit(c)</code>.</li>
+ * <li><code>iterate(n)</code> - visit the <b>children</b> of node
+ * <code>n</code>,</li>
+ * <li><code>map(n)</code> - visit the <b>children</b> of node <code>n</code>
+ * and gather the return values of the <code>visit()</code> calls in a
+ * list,</li>
+ * <li><code>mapInPlace(n)</code> - visit the <b>children</b> of node
+ * <code>n</code> and replace each child node <code>c</code> with the return
+ * value of the call to <code>visit(c)</code>.</li>
  * </ul>
  */
 public class TextConverter extends AstVisitor<WtNode> {
@@ -379,7 +387,8 @@ public class TextConverter extends AstVisitor<WtNode> {
       doc.setField("has_infobox", true);
       doc.addToField("infobox_type", cleanInfoBoxType);
       childDoc.addToField("infobox_type", cleanInfoBoxType);
-      // log.info("Doc ID: {} Template Name : {} -- Infobox Type: {}" , doc.getId(), templateName, infoBoxType);
+      // log.info("Doc ID: {} Template Name : {} -- Infobox Type: {}" ,
+      // doc.getId(), templateName, infoBoxType);
       if (n.size() == 2) {
         WtNode a = n.get(0);
         // B is the infobox data
@@ -413,14 +422,16 @@ public class TextConverter extends AstVisitor<WtNode> {
                   if (tv.getContent() == null || tv.getContent().trim().length() == 0)
                     continue;
                   String payload = tv.getContent().trim();
-                  // log.info("Doc ID : {} Field: {} Value: {}" , doc.getId(), fieldName, payload);
+                  // log.info("Doc ID : {} Field: {} Value: {}" , doc.getId(),
+                  // fieldName, payload);
                   // doc.addToField(fieldName, payload);
                   childDoc.addToField(fieldName, payload);
                 } else if (vn instanceof WtTemplate) {
                   WtTemplate wt = (WtTemplate) vn;
                   // TODO: parse me!
                 } else if (vn instanceof WtXmlComment) {
-                  // TODO: this gives us a label or logical grouping of the infobox attributes below.
+                  // TODO: this gives us a label or logical grouping of the
+                  // infobox attributes below.
                 } else if (vn instanceof WtTagExtension) {
                   // TODO: parse this stuff?
                 } else {

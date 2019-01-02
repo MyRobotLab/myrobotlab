@@ -15,7 +15,8 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
- * InMoovEyelids - The inmoov eyelids. This will allow control of the eyelids servo common both eyelids use only one servo ( left )
+ * InMoovEyelids - The inmoov eyelids. This will allow control of the eyelids
+ * servo common both eyelids use only one servo ( left )
  */
 public class InMoovEyelids extends Service {
 

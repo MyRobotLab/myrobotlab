@@ -22,8 +22,10 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- *         mjpeg server - allows multiple jpeg streams to be sent to multiple clients extends the most excellent NanoHTTPD server -
- *         multi-part mime was done with little parts borg'd in from - http://www.servlets.com/cos/
+ *         mjpeg server - allows multiple jpeg streams to be sent to multiple
+ *         clients extends the most excellent NanoHTTPD server - multi-part mime
+ *         was done with little parts borg'd in from -
+ *         http://www.servlets.com/cos/
  *         http://www.damonkohler.com/2010/10/mjpeg-streaming-protocol.html
  * 
  */

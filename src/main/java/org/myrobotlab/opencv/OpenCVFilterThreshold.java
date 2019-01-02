@@ -75,7 +75,8 @@ public class OpenCVFilterThreshold extends OpenCVFilter {
 
     // must be gray for adaptive
     /*
-     * cv.cvCvtColor( image, gray, cv.CV_BGR2GRAY ); cv.cvAdaptiveThreshold(gray, gray, 255, cv.CV_ADAPTIVE_THRESH_MEAN_C,
+     * cv.cvCvtColor( image, gray, cv.CV_BGR2GRAY );
+     * cv.cvAdaptiveThreshold(gray, gray, 255, cv.CV_ADAPTIVE_THRESH_MEAN_C,
      * CV_THRESH_BINARY, 7,30);
      */
     return image;

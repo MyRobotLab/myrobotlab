@@ -221,8 +221,9 @@ public class JMonkeyEngine extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -277,7 +278,8 @@ public class JMonkeyEngine extends Service {
   public static void main(String[] args) {
     try {
 
-      // FIXME - ADD DEFAULT ROTATION !!! ... default"move" & default"rotate" & default rotationalMask !!!
+      // FIXME - ADD DEFAULT ROTATION !!! ... default"move" & default"rotate" &
+      // default rotationalMask !!!
       // FIXME - something to autoAttach ! ... even at origin position
 
       LoggingFactory.init(Level.INFO);
@@ -366,10 +368,12 @@ public class JMonkeyEngine extends Service {
   // services !
   // the challenge is to have "both" at the same time real & virtualized
   /*
-   * @Override public VirtualServo createVirtualServo(String name) { return currentApp.createVirtualServo(name); }
+   * @Override public VirtualServo createVirtualServo(String name) { return
+   * currentApp.createVirtualServo(name); }
    */
   /*
-   * @Override public Object create(ServiceInterface service) { // TODO Auto-generated method stub return null; }
+   * @Override public Object create(ServiceInterface service) { // TODO
+   * Auto-generated method stub return null; }
    */
 
   public VirtualMotor createVirtualMotor(String name) {

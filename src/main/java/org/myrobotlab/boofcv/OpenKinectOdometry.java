@@ -74,10 +74,14 @@ import javax.swing.JComponent;
  *
  * @author Peter Abeles & Mats Önnerby
  * 
- *         This program currently calculates the Odometry ( how much the camera has moved as translations and rotations ). Second
- *         stage is to recalculate the second pointcloud to have the same origin as the first. Third stage is to update the original
- *         pointcloud with information from the new pointcloud to make the world pointcloud larger Do we need to keep track of the
- *         probability for each point in the pointcloud ? Can we transform the pointcloud to larger objects ? Like meshes ?
+ *         This program currently calculates the Odometry ( how much the camera
+ *         has moved as translations and rotations ). Second stage is to
+ *         recalculate the second pointcloud to have the same origin as the
+ *         first. Third stage is to update the original pointcloud with
+ *         information from the new pointcloud to make the world pointcloud
+ *         larger Do we need to keep track of the probability for each point in
+ *         the pointcloud ? Can we transform the pointcloud to larger objects ?
+ *         Like meshes ?
  *         https://www.mathworks.com/help/vision/examples/3-d-point-cloud-registration-and-stitching.html
  * 
  */
@@ -243,7 +247,8 @@ public class OpenKinectOdometry {
     // declares the algorithm
     visualOdometry = FactoryVisualOdometry.depthDepthPnP(1.5, 120, 2, 200, 50, true, sparseDepth, tracker, GrayU8.class, GrayU16.class);
 
-    // Pass in intrinsic/extrinsic calibration. This can be changed in the future.
+    // Pass in intrinsic/extrinsic calibration. This can be changed in the
+    // future.
     visualOdometry.setCalibration(depthParam.visualParam, new DoNothing2Transform2_F32());
 
     viewerFixed = VisualizeData.createPointCloudViewer();
@@ -278,7 +283,8 @@ public class OpenKinectOdometry {
     pointsFixed.clear();
     // Rotate and transform
 
-    // Load the (4*4) Transformation matrix from Rotations (3*3) and Translations (3*1)
+    // Load the (4*4) Transformation matrix from Rotations (3*3) and
+    // Translations (3*1)
     // From the Odometry
     transMat.set(0, 0, R.get(0, 0));
     transMat.set(1, 0, R.get(1, 0));
@@ -297,7 +303,8 @@ public class OpenKinectOdometry {
     transMat.set(2, 3, 0.0);
     transMat.set(3, 3, 1.0);
 
-    // Load the (4*4) Transformation matrix from Rotations (3*3) and Translations (3*1)
+    // Load the (4*4) Transformation matrix from Rotations (3*3) and
+    // Translations (3*1)
     // No rotation or transformation (unit matrix)
     // 1 0 0 0
     // 0 1 0 0
@@ -329,10 +336,12 @@ public class OpenKinectOdometry {
       pointMatIn.set(2, 0, p.getZ());
       pointMatIn.set(3, 0, 1.0);
       // This statement executes the Matrix multiplication defined in transform
-      // Log.info("Points in ", pointMatIn.get(0, 0), " ", pointMatIn.get(1, 0), " ", pointMatIn.get(2, 0), " ", pointMatIn.get(3,
+      // Log.info("Points in ", pointMatIn.get(0, 0), " ", pointMatIn.get(1, 0),
+      // " ", pointMatIn.get(2, 0), " ", pointMatIn.get(3,
       // 0));
       transform.perform();
-      // Log.info("Points out ", pointMatOut.get(0, 0), " ", pointMatOut.get(1, 0), " ", pointMatOut.get(2, 0), " ",
+      // Log.info("Points out ", pointMatOut.get(0, 0), " ", pointMatOut.get(1,
+      // 0), " ", pointMatOut.get(2, 0), " ",
       // pointMatOut.get(3, 0));
       Point3D_F64 pFixed = new Point3D_F64(pointMatOut.get(0, 0) / pointMatOut.get(3, 0), pointMatOut.get(1, 0) / pointMatOut.get(3, 0),
           pointMatOut.get(2, 0) / pointMatOut.get(3, 0));
@@ -394,7 +403,8 @@ public class OpenKinectOdometry {
   }
 
   /**
-   * If the algorithm implements AccessPointTracks3D, then count the number of inlier features and return a string.
+   * If the algorithm implements AccessPointTracks3D, then count the number of
+   * inlier features and return a string.
    */
   public static String inlierPercent(VisualOdometry alg) {
     if (!(alg instanceof AccessPointTracks3D))

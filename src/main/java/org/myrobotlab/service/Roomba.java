@@ -37,7 +37,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Roomba - This service allows MRL to connect to a Roomba. The GUI Service provides the RoombaComm for manual control and testing.
+ * Roomba - This service allows MRL to connect to a Roomba. The GUI Service
+ * provides the RoombaComm for manual control and testing.
  * 
  * More Info: http://hackingroomba.com/code/roombacomm/
  */
@@ -75,24 +76,30 @@ public class Roomba extends Service {
        */
       // roomba.pause(30);
       /*
-       * System.out.println("Checking for Roomba... "); if( roomba.updateSensors() ) System.out.println("Roomba found!"); else
+       * System.out.println("Checking for Roomba... "); if(
+       * roomba.updateSensors() ) System.out.println("Roomba found!"); else
        * System.out.println("No Roomba. :(  Is it turned on?");
        * 
        * //roomba.updateSensors();
        * 
-       * System.out.println("Playing some notes"); roomba.playNote( 72, 10 ); // C roomba.pause( 200 ); roomba.playNote( 79, 10 );
-       * // G roomba.pause( 200 ); roomba.playNote( 76, 10 ); // E roomba.pause( 200 );
+       * System.out.println("Playing some notes"); roomba.playNote( 72, 10 ); //
+       * C roomba.pause( 200 ); roomba.playNote( 79, 10 ); // G roomba.pause(
+       * 200 ); roomba.playNote( 76, 10 ); // E roomba.pause( 200 );
        * 
-       * System.out.println("Spinning left, then right"); roomba.spinLeft(); roomba.pause(1000); roomba.spinRight();
+       * System.out.println("Spinning left, then right"); roomba.spinLeft();
+       * roomba.pause(1000); roomba.spinRight(); roomba.pause(1000);
+       * roomba.stop();
+       * 
+       * System.out.println("Going forward, then backward"); roomba.goForward();
+       * roomba.pause(1000); roomba.goBackward(); roomba.pause(1000);
+       * roomba.stop();
+       * 
+       * 
+       * System.out.println("Moving via send()"); byte cmd[] =
+       * {(byte)RoombaComm.DRIVE, (byte)0x00,(byte)0xfa, (byte)0x00,(byte)0x00};
+       * roomba.send( cmd ) ; roomba.pause(1000); roomba.stop(); cmd[1] =
+       * (byte)0xff; cmd[2] = (byte)0x05; roomba.send( cmd ) ;
        * roomba.pause(1000); roomba.stop();
-       * 
-       * System.out.println("Going forward, then backward"); roomba.goForward(); roomba.pause(1000); roomba.goBackward();
-       * roomba.pause(1000); roomba.stop();
-       * 
-       * 
-       * System.out.println("Moving via send()"); byte cmd[] = {(byte)RoombaComm.DRIVE, (byte)0x00,(byte)0xfa,
-       * (byte)0x00,(byte)0x00}; roomba.send( cmd ) ; roomba.pause(1000); roomba.stop(); cmd[1] = (byte)0xff; cmd[2] = (byte)0x05;
-       * roomba.send( cmd ) ; roomba.pause(1000); roomba.stop();
        * 
        * System.out.println("Disconnecting"); roomba.disconnect();
        * 
@@ -175,7 +182,8 @@ public class Roomba extends Service {
   }
 
   /**
-   * Connect to a serial port specified by portid doesn't guarantee connection to Roomba, just to serial port
+   * Connect to a serial port specified by portid doesn't guarantee connection
+   * to Roomba, just to serial port
    * 
    * @param portName
    *          name of port, e.g. "/dev/cu.KeySerial1" or "COM3"
@@ -214,8 +222,8 @@ public class Roomba extends Service {
   }
 
   /**
-   * Move the Roomba via the low-level velocity + radius method. See the 'Drive' section of the Roomba ROI spec for more details.
-   * Low-level command.
+   * Move the Roomba via the low-level velocity + radius method. See the 'Drive'
+   * section of the Roomba ROI spec for more details. Low-level command.
    * 
    * @param velocity
    *          speed in millimeters/second, positive forward, negative backward
@@ -298,8 +306,9 @@ public class Roomba extends Service {
   }
 
   /**
-   * Go straight at the current speed for a specified distance. Positive distance moves forward, negative distance moves backward.
-   * This method blocks until the action is finished.
+   * Go straight at the current speed for a specified distance. Positive
+   * distance moves forward, negative distance moves backward. This method
+   * blocks until the action is finished.
    * 
    * @param distance
    *          distance in millimeters, positive or negative
@@ -353,8 +362,9 @@ public class Roomba extends Service {
   }
 
   /**
-   * Reset Roomba after a fault. This takes it out of whatever mode it was in and puts it into safe mode. This command also syncs
-   * the object's sensor state with the Roomba's by calling updateSensors()
+   * Reset Roomba after a fault. This takes it out of whatever mode it was in
+   * and puts it into safe mode. This command also syncs the object's sensor
+   * state with the Roomba's by calling updateSensors()
    * 
    * @see #startup()
    * @see #updateSensors()
@@ -383,7 +393,8 @@ public class Roomba extends Service {
   }
 
   /*
-   * Turns on/off the various LEDs. Low-level command. FIXME: this is too complex
+   * Turns on/off the various LEDs. Low-level command. FIXME: this is too
+   * complex
    */
   public void setLEDs(boolean status_green, boolean status_red, boolean spot, boolean clean, boolean max, boolean dirt, int power_color, int power_intensity) {
     roombacomm.setLEDs(status_green, status_red, spot, clean, max, dirt, power_color, power_intensity);
@@ -477,10 +488,13 @@ public class Roomba extends Service {
   /*
    * A Spirograph-like example <p> Run it with something like:
    * 
-   * <pre> java roombacomm.Spiro1 /dev/cu.KeySerial1 velocity radius waittime<br> Usage: \n"+ roombacomm.Spiro1
-   * &lt;serialportname&gt; [protocol] &lt;velocity&gt; &lt;radius&gt; &lt;waittime&gt; [options]<br> where: protocol (optional) is
-   * SCI or OI velocity and radius in mm, waittime in milliseconds [options] can be one or more of: -debug -- turn on debug output
-   * -hwhandshake -- use hardware-handshaking, for Windows Bluetooth -nohwhandshake -- don't use hardware-handshaking </pre>
+   * <pre> java roombacomm.Spiro1 /dev/cu.KeySerial1 velocity radius
+   * waittime<br> Usage: \n"+ roombacomm.Spiro1 &lt;serialportname&gt;
+   * [protocol] &lt;velocity&gt; &lt;radius&gt; &lt;waittime&gt; [options]<br>
+   * where: protocol (optional) is SCI or OI velocity and radius in mm, waittime
+   * in milliseconds [options] can be one or more of: -debug -- turn on debug
+   * output -hwhandshake -- use hardware-handshaking, for Windows Bluetooth
+   * -nohwhandshake -- don't use hardware-handshaking </pre>
    */
   public void spiro1(int velocity, int radius, int waittime) {
 
@@ -602,7 +616,8 @@ public class Roomba extends Service {
   }
 
   /**
-   * Make a square with a Roomba. Leaves Roomba in same place it began (theoretically)
+   * Make a square with a Roomba. Leaves Roomba in same place it began
+   * (theoretically)
    * 
    * @param rc
    *          RoombaComm object connected to a Roomba
@@ -675,7 +690,8 @@ public class Roomba extends Service {
   }
 
   /*
-   * Update sensors. Block for up to 1000 ms waiting for update To use non-blocking, call sensors() and then poll sensorsValid()
+   * Update sensors. Block for up to 1000 ms waiting for update To use
+   * non-blocking, call sensors() and then poll sensorsValid()
    */
   public boolean updateSensors(int packetcode) {
     return roombacomm.updateSensors(packetcode);
@@ -708,8 +724,9 @@ public class Roomba extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

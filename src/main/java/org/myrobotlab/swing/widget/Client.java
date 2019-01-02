@@ -77,8 +77,10 @@ public class Client extends JApplet {
       appletHostAddress = appletAddress.getHostAddress();
 
       /*
-       * ConfigurationManager cfg = new ConfigurationManager(null); cfg.set("hostname", appletAddress.getHostName());
-       * cfg.setRoot(appletAddress.getHostName()); cfg.set("servicePort", 0); // Applet - can not have a service port
+       * ConfigurationManager cfg = new ConfigurationManager(null);
+       * cfg.set("hostname", appletAddress.getHostName());
+       * cfg.setRoot(appletAddress.getHostName()); cfg.set("servicePort", 0); //
+       * Applet - can not have a service port
        */
       // TODO - hardcode set SwingGui to display only appropriate
       // components !!!

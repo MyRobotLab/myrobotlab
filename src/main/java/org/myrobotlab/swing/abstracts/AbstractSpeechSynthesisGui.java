@@ -234,7 +234,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   }
 
   /**
-   * original text requested to speak - not necessarily the same as publishStartSpeaking text since publishStartSpeaking is after a
+   * original text requested to speak - not necessarily the same as
+   * publishStartSpeaking text since publishStartSpeaking is after a
    * pre-processor/parser
    * 
    * @param toSpeak
@@ -288,9 +289,11 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
         }
 
         /*
-         * wont work because AudioProcessor wont close file :( <pre> if (o == purgeCache) { send("purgeCache"); }
+         * wont work because AudioProcessor wont close file :( <pre> if (o ==
+         * purgeCache) { send("purgeCache"); }
          * 
-         * if (o == purgeFile) { send("purgeFile", lastAudioData.getFileName()); } </pre>
+         * if (o == purgeFile) { send("purgeFile", lastAudioData.getFileName());
+         * } </pre>
          */
 
         if (o == save) {

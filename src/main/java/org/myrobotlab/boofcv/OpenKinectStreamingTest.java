@@ -40,7 +40,8 @@ import java.nio.ByteBuffer;
 public class OpenKinectStreamingTest {
 
   {
-    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the location of your shared library!
+    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
+    // location of your shared library!
     NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
   }
 

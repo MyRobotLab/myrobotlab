@@ -596,11 +596,13 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
    * 
    * @param modelScale : model will be scale to this parameter
    * 
-   * @param hookTo : attach this part to the hook part (null to hook to the root)
+   * @param hookTo : attach this part to the hook part (null to hook to the
+   * root)
    * 
    * @param relativePosition : position relative to the hook part
    * 
-   * @param rotationMask : set Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z) for the axe of rotation
+   * @param rotationMask : set Vector3f.UNIT_X, Vector3f.UNIT_Y,
+   * Vector3f.UNIT_Z) for the axe of rotation
    * 
    * @param initialAngle : initial angle of rotation of the part (in radian)
    */
@@ -715,8 +717,10 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
 
     // To achieve ~30 fps, the thread will need to sleep for 33ms otherwise the
-    // update thread races through this function without pause to generating 300+ fps.
-    // If this update takes deltaMs to process then we will subtract that from the initial 33ms,
+    // update thread races through this function without pause to generating
+    // 300+ fps.
+    // If this update takes deltaMs to process then we will subtract that from
+    // the initial 33ms,
     // to make total time spent in this method as close to 33ms as possible.
 
     deltaMs = System.currentTimeMillis() - startUpdateTs;
@@ -727,7 +731,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
   }
 
-  // FIXME - race condition, if this method is called before JME is fully initialized :(
+  // FIXME - race condition, if this method is called before JME is fully
+  // initialized :(
   // the result is no servos are successfully added
   public void addServo(String partName, Servo servo) {
     if (nodes.containsKey(partName)) {

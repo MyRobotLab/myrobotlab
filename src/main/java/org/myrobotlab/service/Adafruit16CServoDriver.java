@@ -40,13 +40,15 @@ import org.slf4j.Logger;
  * 
  * @author GroG and Mats
  * 
- *         References : http://www.ladyada.net/make/mshield/use.html https://learn.adafruit.com/16-channel-pwm-servo-driver
+ *         References : http://www.ladyada.net/make/mshield/use.html
+ *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 
 public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController {
 
   /**
-   * SpeedControl, calculates the next position at regular intervals to make the servo move at the desired speed
+   * SpeedControl, calculates the next position at regular intervals to make the
+   * servo move at the desired speed
    * 
    */
   public class SpeedControl extends Thread {
@@ -182,8 +184,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   // Default address
   public String deviceAddress = "0x40";
   /**
-   * This address is to address all Adafruit16CServoDrivers on the i2c bus Don't use this address for any other device on the i2c
-   * bus since it will cause collisions.
+   * This address is to address all Adafruit16CServoDrivers on the i2c bus Don't
+   * use this address for any other device on the i2c bus since it will cause
+   * collisions.
    */
   public String broadcastAddress = "0x70";
 
@@ -234,8 +237,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public boolean isAttached = false;
 
   /**
-   * @Mats - added by GroG - was wondering if this would help, probably you need a reverse index too ?
-   * @GroG - I only need servoNameToPin yet. To be able to move at a set speed a few extra values are needed
+   * @Mats - added by GroG - was wondering if this would help, probably you need
+   *       a reverse index too ?
+   * @GroG - I only need servoNameToPin yet. To be able to move at a set speed a
+   *       few extra values are needed
    */
 
   class ServoData implements Serializable {
@@ -284,8 +289,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     createPinList();
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real" motor controller because
-    // it doesn't inherit from AbstractMotorController & Servo's aren't merged with Motors
+    // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real"
+    // motor controller because
+    // it doesn't inherit from AbstractMotorController & Servo's aren't merged
+    // with Motors
     // it will need to wait for the grand unification of Servos & Motors
   }
 
@@ -388,16 +395,20 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     // since pulseWidthOff can be larger than > 256 it needs to be
     // sent as 2 bytes
     /*
-     * log.debug( String.format("setServo %s deviceAddress %s pin %s pulse %s", pin, deviceAddress, pin, pulseWidthOff)); byte[]
-     * buffer = { (byte) (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte) (pulseWidthOff >> 8) };
-     * controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+     * log.debug( String.format("setServo %s deviceAddress %s pin %s pulse %s",
+     * pin, deviceAddress, pin, pulseWidthOff)); byte[] buffer = { (byte)
+     * (PCA9685_LED0_OFF_L + (pin * 4)), (byte) (pulseWidthOff & 0xff), (byte)
+     * (pulseWidthOff >> 8) }; controller.i2cWrite(this,
+     * Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer,
+     * buffer.length);
      */
     setPWM(pin, 0, pulseWidthOff);
   }
 
   /**
-   * this would have been nice to have Java 8 and a default implementation in this interface which does Servo sweeping in the Servo
-   * (already implemented) and only if the controller can does it do sweeping on the "controller"
+   * this would have been nice to have Java 8 and a default implementation in
+   * this interface which does Servo sweeping in the Servo (already implemented)
+   * and only if the controller can does it do sweeping on the "controller"
    * 
    * For example MrlComm can sweep internally (or it used to be implemented)
    */
@@ -637,8 +648,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
@@ -651,7 +663,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     meta.setSponsor("Mats");
     // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
     /*
-     * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi", "RasPi", "our RasPi");
+     * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
+     * "RasPi", "our RasPi");
      */
     return meta;
   }
@@ -693,8 +706,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return list;
   }
   /*
-   * @Override public boolean isAttached(String name) { return (controller != null && controller.getName().equals(name) ||
-   * servoMap.containsKey(name)); }
+   * @Override public boolean isAttached(String name) { return (controller !=
+   * null && controller.getName().equals(name) || servoMap.containsKey(name)); }
    */
 
   @Override
@@ -907,7 +920,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   /**
-   * Returns all the currently attached services TODO Add the list of attached motors
+   * Returns all the currently attached services TODO Add the list of attached
+   * motors
    */
   @Override
   public Set<String> getAttached() {
@@ -932,7 +946,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /*
    * (non-Javadoc)
    * 
-   * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang. Integer, java.lang.Integer)
+   * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.
+   * Integer, java.lang.Integer)
    */
   @Override
   public void enablePin(Integer sensorPin, Integer i) {
@@ -943,7 +958,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /*
    * (non-Javadoc)
    * 
-   * @see org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang. Integer)
+   * @see
+   * org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.
+   * Integer)
    */
   @Override
   public void disablePin(Integer i) {
@@ -951,7 +968,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-  // currently not a "real" motor control - it has to wait for merging of Servo & Motor
+  // currently not a "real" motor control - it has to wait for merging of Servo
+  // & Motor
   @Override
   public List<String> getPorts() {
     // we use pins not ports
@@ -959,7 +977,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return ret;
   }
 
-  // currently not a "real" motor control - it has to wait for merging of Servo & Motor
+  // currently not a "real" motor control - it has to wait for merging of Servo
+  // & Motor
   @Override
   public Mapper getDefaultMapper() {
     // best guess :P
@@ -968,7 +987,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return mapper;
   }
 
-  // not used currently - should be refactored to use these methods for motor control
+  // not used currently - should be refactored to use these methods for motor
+  // control
   @Override
   public double motorCalcOutput(MotorControl mc) {
     double value = mc.calcControllerOutput();

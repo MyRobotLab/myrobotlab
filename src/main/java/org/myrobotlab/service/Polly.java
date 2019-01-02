@@ -32,10 +32,11 @@ import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
 /**
  * Amazon's cloud speech service
  * 
- * Free Tier The Amazon Polly free tier includes 5 million characters per month, for the first 12 months, starting from the first
- * request for speech.
+ * Free Tier The Amazon Polly free tier includes 5 million characters per month,
+ * for the first 12 months, starting from the first request for speech.
  * 
- * Polly Pricing Pay-as-you-go $4.00 per 1 million characters (when outside the free tier).
+ * Polly Pricing Pay-as-you-go $4.00 per 1 million characters (when outside the
+ * free tier).
  *
  * @author GroG
  *
@@ -59,7 +60,8 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /**
-   * for the user's convenience for amazon other cloud providers have single keys or different details
+   * for the user's convenience for amazon other cloud providers have single
+   * keys or different details
    * 
    * @param keyId
    * @param keyIdSecret
@@ -70,7 +72,8 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /**
-   * loadVoices - must be loaded by SpeechSynthesis class - contract of AbstractSpeechSynthesis
+   * loadVoices - must be loaded by SpeechSynthesis class - contract of
+   * AbstractSpeechSynthesis
    */
   protected void loadVoices() {
     getPolly();
@@ -103,8 +106,9 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /**
-   * For a cloud provider we have to make sure certain dependencies are met, inter-net connect, keys, and the population of
-   * AbstractSpeechSynthesis voices.
+   * For a cloud provider we have to make sure certain dependencies are met,
+   * inter-net connect, keys, and the population of AbstractSpeechSynthesis
+   * voices.
    * 
    * @return polly client
    */
@@ -163,16 +167,19 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /*
-   * Proxy works in 3 modes client - consumer of mrl services relay - proxy (running as cloud service) direct - goes direct to
-   * service In Polly's case - client - would be an end user using a client key relay - is the mrl proxy service direct would be
-   * from a users, by-passing mrl and going directly to Amazon with amazon keys cache file - caches file locally (both client or
+   * Proxy works in 3 modes client - consumer of mrl services relay - proxy
+   * (running as cloud service) direct - goes direct to service In Polly's case
+   * - client - would be an end user using a client key relay - is the mrl proxy
+   * service direct would be from a users, by-passing mrl and going directly to
+   * Amazon with amazon keys cache file - caches file locally (both client or
    * relay)
    */
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
     getPolly();
     Voice voice = getVoice();
-    // com.amazonaws.services.polly.model.Voice awsVoice = ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
+    // com.amazonaws.services.polly.model.Voice awsVoice =
+    // ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
     SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName()).withOutputFormat("mp3");
     SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
     InputStream data = synthRes.getAudioStream();
@@ -184,8 +191,9 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

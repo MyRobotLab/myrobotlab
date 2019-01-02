@@ -255,7 +255,8 @@ public class IvyWrapper extends Repo implements Serializable {
       }
       log.info("cmd {}", sb);
 
-      // TODO: this breaks for me! please review why this needed to be commented out.
+      // TODO: this breaks for me! please review why this needed to be commented
+      // out.
       Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
       ResolveReport report = Main.run(cmd);
 
@@ -316,7 +317,8 @@ public class IvyWrapper extends Repo implements Serializable {
   private void publishStatus(String msg, int level) {
     // if (level <= this.level) {
     Status status = Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_PROGRESS, msg);
-    // FIXME - set it to the instance of IvyWrapper - really this method should just call IvyWrapper.publishStatus(String msg, int
+    // FIXME - set it to the instance of IvyWrapper - really this method should
+    // just call IvyWrapper.publishStatus(String msg, int
     // level)
     status.source = this;
     if (level == Message.MSG_ERR) {

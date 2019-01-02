@@ -7,8 +7,8 @@ import java.util.HashMap;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 
 /**
- * ServiceEnvironment represents a instance of MRL with a null URI it will be the local instance any !null instance represents a
- * foreign instance
+ * ServiceEnvironment represents a instance of MRL with a null URI it will be
+ * the local instance any !null instance represents a foreign instance
  * 
  */
 public class ServiceEnvironment implements Serializable {
@@ -20,7 +20,8 @@ public class ServiceEnvironment implements Serializable {
   // public
   // & concurrent
   /**
-   * platform of the environment - this can be used to implement proxy rules depending on what Services will work on which platform
+   * platform of the environment - this can be used to implement proxy rules
+   * depending on what Services will work on which platform
    */
   public Platform platform;
 

@@ -113,8 +113,10 @@ public class Oscope extends ServiceGui implements ActionListener {
       trace.b0Xpos += timeDivisor;
       trace.b1Xpos += timeDivisor;
       /*
-       * g2d.drawLine(trace.x, trace.y + h / 2, trace.xpos,trace.pinData.value * 20 + h / 2); log.info("{},{} - {},{}", trace.x,
-       * trace.y + h / 2, trace.xpos,trace.pinData.value * 20 + h / 2); if (trace.xpos % (w*timeDivisor) == 0) { trace.xpos = 0; }
+       * g2d.drawLine(trace.x, trace.y + h / 2, trace.xpos,trace.pinData.value *
+       * 20 + h / 2); log.info("{},{} - {},{}", trace.x, trace.y + h / 2,
+       * trace.xpos,trace.pinData.value * 20 + h / 2); if (trace.xpos %
+       * (w*timeDivisor) == 0) { trace.xpos = 0; }
        */
       // trace.x = trace.xpos;
       // trace.y = trace.pinData.value;
@@ -141,8 +143,10 @@ public class Oscope extends ServiceGui implements ActionListener {
       repaint();
       // repaint(new Rectangle(30,30));
       /*
-       * SwingUtilities.invokeLater(new Runnable() { public void run() { // Here, we can safely update the GUI // because we'll be
-       * called from the // event dispatch thread trace.pinDisplay.repaint();//("Query: " + queryNo); } });
+       * SwingUtilities.invokeLater(new Runnable() { public void run() { //
+       * Here, we can safely update the GUI // because we'll be called from the
+       * // event dispatch thread trace.pinDisplay.repaint();//("Query: " +
+       * queryNo); } });
        */
     }
 

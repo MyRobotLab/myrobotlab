@@ -15,8 +15,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * This test will iterate all possible services (execpt for the blacklisted ones) it will create an instance of that service and
- * pass the service to the json serializer to ensure it doesn't blow up.
+ * This test will iterate all possible services (execpt for the blacklisted
+ * ones) it will create an instance of that service and pass the service to the
+ * json serializer to ensure it doesn't blow up.
  * 
  * @author kwatters
  *
@@ -28,7 +29,8 @@ public class ServiceSmokeTest {
   @Test
   public void testAllServiceSerialization() throws IOException {
 
-    // known problematic services?! TODO: fix them and remove from the following list.
+    // known problematic services?! TODO: fix them and remove from the following
+    // list.
     ArrayList<String> blacklist = new ArrayList<String>();
     // kills test if library not found! eek.
     blacklist.add("org.myrobotlab.service.LeapMotion");

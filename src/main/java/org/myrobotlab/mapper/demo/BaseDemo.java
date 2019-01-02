@@ -33,7 +33,8 @@ import org.myrobotlab.mapper.sim.RobotFactory;
 import org.myrobotlab.mapper.sim.Wall;
 
 /**
- * A Basic demo with camera sensor, sonars and bumpers. The robot wanders and stops when it collides.
+ * A Basic demo with camera sensor, sonars and bumpers. The robot wanders and
+ * stops when it collides.
  * 
  */
 public class BaseDemo extends Demo {

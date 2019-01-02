@@ -25,7 +25,8 @@ public interface Mapper {
   void map(Double minX, Double maxX, Double minY, Double maxY);
 
   /**
-   * function which "only" sets the range mapping value without setting input or output limits
+   * function which "only" sets the range mapping value without setting input or
+   * output limits
    * 
    * @param minX
    * @param maxX
@@ -35,11 +36,14 @@ public interface Mapper {
   void setMap(Double minX, Double maxX, Double minY, Double maxY);
 
   /**
-   * Merges non null values of "other" mapper with this mapper's null fields. useful for setting values in MotorControl from
-   * "default" values in MotorControllers. Since the MotorControl doesn't know what would be an appropriate mapping value e.g -1,1
-   * => ?,? the minY & maxY are left null until a "merge" is done in the attach of the AbstractMotorController.
+   * Merges non null values of "other" mapper with this mapper's null fields.
+   * useful for setting values in MotorControl from "default" values in
+   * MotorControllers. Since the MotorControl doesn't know what would be an
+   * appropriate mapping value e.g -1,1 => ?,? the minY & maxY are left null
+   * until a "merge" is done in the attach of the AbstractMotorController.
    * 
-   * When a Sabertooth motor controller is "attached" to a MotorControl the merge produces -1,1 => -127, 127 which is appropriate.
+   * When a Sabertooth motor controller is "attached" to a MotorControl the
+   * merge produces -1,1 => -127, 127 which is appropriate.
    * 
    * @param mapperInterface
    */

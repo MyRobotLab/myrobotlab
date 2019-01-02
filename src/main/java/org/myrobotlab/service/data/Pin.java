@@ -36,7 +36,8 @@ import org.myrobotlab.logging.LoggingFactory;
  * 
  * consider definition being separate from data
  * 
- * interestingly - at the moment gson does not serialize statics - e.g. - {"pin":5,"type":0,"value":1,"source":"here"}
+ * interestingly - at the moment gson does not serialize statics - e.g. -
+ * {"pin":5,"type":0,"value":1,"source":"here"}
  *
  */
 public class Pin implements Serializable {

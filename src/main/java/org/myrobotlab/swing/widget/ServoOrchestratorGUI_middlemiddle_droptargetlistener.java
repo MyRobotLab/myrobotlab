@@ -31,7 +31,8 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements Dro
    * <li>Cursor for non-droppable consition</li>
    * </ul>
    * <p>
-   * After drop, we manually change the cursor back to default, though does this anyhow -- just to be complete.
+   * After drop, we manually change the cursor back to default, though does this
+   * anyhow -- just to be complete.
    * </p>
    */
   private static final Cursor droppableCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), notDroppableCursor = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
@@ -59,7 +60,8 @@ public class ServoOrchestratorGUI_middlemiddle_droptargetlistener implements Dro
 
   /**
    * <p>
-   * The user drops the item. Performs the drag and drop calculations and layout.
+   * The user drops the item. Performs the drag and drop calculations and
+   * layout.
    * </p>
    */
   @Override

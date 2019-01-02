@@ -43,7 +43,8 @@ public class I2CBus implements Attachable, I2CBusControl {
   }
 
   /**
-   * GOOD DESIGN - this method is the same pretty much for all Services could be a Java 8 default implementation to the interface
+   * GOOD DESIGN - this method is the same pretty much for all Services could be
+   * a Java 8 default implementation to the interface
    */
   @Override
   public boolean isAttached(Attachable service) {

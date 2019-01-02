@@ -15,8 +15,8 @@ import com.oculusvr.capi.PoseStatef;
 import com.oculusvr.capi.TrackingState;
 
 /**
- * OculusHeadTracking -This is a helper thread that will poll the oculus head tracking information and it will publish the
- * roll/pitch/yaw information.
+ * OculusHeadTracking -This is a helper thread that will poll the oculus head
+ * tracking information and it will publish the roll/pitch/yaw information.
  *
  */
 public class OculusTracking implements Runnable, Serializable {

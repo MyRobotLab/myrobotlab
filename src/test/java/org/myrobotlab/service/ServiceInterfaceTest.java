@@ -330,7 +330,8 @@ public class ServiceInterfaceTest {
   }
 
   /**
-   * Attempts to list all the classes in the specified package as determined by the context class loader
+   * Attempts to list all the classes in the specified package as determined by
+   * the context class loader
    * 
    * @param pckgname
    *          the package name to search
@@ -338,7 +339,9 @@ public class ServiceInterfaceTest {
    * @throws ClassNotFoundException
    *           if something went wrong
    * 
-   *           Ref: http://stackoverflow.com/questions/1498122/java-loop-on-all-the- classes-in-the-classpath
+   *           Ref:
+   *           http://stackoverflow.com/questions/1498122/java-loop-on-all-the-
+   *           classes-in-the-classpath
    */
   private static List<Class<?>> getClassesForPackage(String pckgname) throws ClassNotFoundException {
     // This will hold a list of directories matching the pckgname. There may be

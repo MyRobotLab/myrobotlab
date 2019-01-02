@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import com.google.gson.Gson;
 
 /**
- * JSON TypeConverter - used in general REST api to convert url JSON parameters appropriately to hard types for method invoking used
- * in WebGui and Cli
+ * JSON TypeConverter - used in general REST api to convert url JSON parameters
+ * appropriately to hard types for method invoking used in WebGui and Cli
  * 
  * @author GroG
  *
@@ -36,8 +36,9 @@ public class TypeConverter {
   // Method>();
 
   /**
-   * this method tries to get the appropriate 'Typed parameter array for a specific method It "converts" parameters of strings into
-   * typed parameters which can then be used to reflectively invoke the appropriate method
+   * this method tries to get the appropriate 'Typed parameter array for a
+   * specific method It "converts" parameters of strings into typed parameters
+   * which can then be used to reflectively invoke the appropriate method
    * 
    * @param clazz
    *          c
@@ -111,12 +112,15 @@ public class TypeConverter {
       LoggingFactory.init(Level.DEBUG);
 
       /*
-       * FIXME PUT IN JUNIT TEST !! org.myrobotlab.service.Runtime.createAndStart("clock", "Clock");
+       * FIXME PUT IN JUNIT TEST !!
+       * org.myrobotlab.service.Runtime.createAndStart("clock", "Clock");
        * 
-       * ServiceInterface si = org.myrobotlab.service.Runtime.getService("clock");
+       * ServiceInterface si =
+       * org.myrobotlab.service.Runtime.getService("clock");
        * 
        * 
-       * String stringParams[] = new String[] { "13", "1" }; String method = "digitalWrite"; Class<?> clazz = si.getClass();
+       * String stringParams[] = new String[] { "13", "1" }; String method =
+       * "digitalWrite"; Class<?> clazz = si.getClass();
        * 
        * Object[] params = getTypedParamsFromJson(clazz, method, stringParams);
        * 
@@ -124,7 +128,8 @@ public class TypeConverter {
        * 
        * log.info("here");
        * 
-       * Object[] params2 = getTypedParamsFromJson(clazz, method, stringParams); log.info("here");
+       * Object[] params2 = getTypedParamsFromJson(clazz, method, stringParams);
+       * log.info("here");
        */
     } catch (Exception e) {
       Logging.logError(e);
@@ -167,9 +172,11 @@ public class TypeConverter {
   }
 
   /*
-   * static public Object[] convert(String[] stringParams, Method[] converter) { try { Object[] newTypedParams = new
-   * Object[stringParams.length]; for (int i = 0; i < stringParams.length; ++i) { // static calls on conversion - probably not
-   * thread safe newTypedParams[0] = converter[i].invoke(null, stringParams[i]); }
+   * static public Object[] convert(String[] stringParams, Method[] converter) {
+   * try { Object[] newTypedParams = new Object[stringParams.length]; for (int i
+   * = 0; i < stringParams.length; ++i) { // static calls on conversion -
+   * probably not thread safe newTypedParams[0] = converter[i].invoke(null,
+   * stringParams[i]); }
    * 
    * return newTypedParams; } catch (Exception e) { Logging.logException(e); }
    * 

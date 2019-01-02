@@ -50,7 +50,8 @@ import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
 /**
- * This implements the ability to overlay data from a solr search result on the opencv display
+ * This implements the ability to overlay data from a solr search result on the
+ * opencv display
  * 
  * @author kwatters
  *

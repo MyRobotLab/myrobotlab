@@ -123,7 +123,8 @@ public class MapperLinearTest {
     MapperLinear control = new MapperLinear();
 
     // the "preferred" default of a motor control
-    // it has no idea what controller it will interface with - but "wants" to have a standard
+    // it has no idea what controller it will interface with - but "wants" to
+    // have a standard
     // front end map of -1.0 to 1.0
     control.map(-1.0, 1.0, null, null);
 

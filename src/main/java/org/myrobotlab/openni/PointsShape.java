@@ -59,20 +59,23 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
   public final static Logger log = LoggerFactory.getLogger(PointsShape.class.getCanonicalName());
 
   /**
-   * resolution of depth image; change to match setting in DepthReader the resolution of a kinect IR camera is always 640x480
+   * resolution of depth image; change to match setting in DepthReader the
+   * resolution of a kinect IR camera is always 640x480
    */
   private static final int IM_WIDTH = 640;
   private static final int IM_HEIGHT = 480;
 
   /**
-   * display volume for particles inside the 3D scene; arrived at by trial-and-error testing to see what looked 'good' in the scene
+   * display volume for particles inside the 3D scene; arrived at by
+   * trial-and-error testing to see what looked 'good' in the scene
    */
   // private static final int X_WIDTH = 12;
   // private static final int Y_WIDTH = 12;
   // private static final int Z_WIDTH = 50;
 
   /**
-   * the gap between depth positions being sampled this is an optimization of only sampling modulus SAMPLE_FREQ on the X axis data
+   * the gap between depth positions being sampled this is an optimization of
+   * only sampling modulus SAMPLE_FREQ on the X axis data
    */
   // private static final int SAMPLE_FREQ = 1;
 
@@ -85,8 +88,8 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
   // for the 11bit
   // res?
   /*
-   * make sure that MAX_POINTS*SAMPLE_FREQ >= IM_WIDTH*IM_HEIGHT otherwise the coords[] array will not be big enough for all the
-   * sampled points
+   * make sure that MAX_POINTS*SAMPLE_FREQ >= IM_WIDTH*IM_HEIGHT otherwise the
+   * coords[] array will not be big enough for all the sampled points
    */
 
   private final static int POINT_SIZE = 1;
@@ -101,19 +104,25 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
   private TriangleArray mesh;
 
   /**
-   * used to make updateDepthCoords() wait until GeometryUpdater.updateData() has finished an update
+   * used to make updateDepthCoords() wait until GeometryUpdater.updateData()
+   * has finished an update
    */
   private Semaphore sem;
   private KinectSensorData kinectData;
 
   /**
-   * This method is called by the system some (short) time after pointParts.updateData(this) is called in updateDepthCoords(). An
-   * update of the geometry is carried out: the z-coord is changed in coords[], and the point's corresponding colour is updated
+   * This method is called by the system some (short) time after
+   * pointParts.updateData(this) is called in updateDepthCoords(). An update of
+   * the geometry is carried out: the z-coord is changed in coords[], and the
+   * point's corresponding colour is updated
    * 
-   * Understand there is a distinction between depth data - and the display array the pure depth data is always 640 X 480 resolution
-   * - but display area expands and the resolution per fixed area decreases as an inverse to the distance from the sensor
+   * Understand there is a distinction between depth data - and the display
+   * array the pure depth data is always 640 X 480 resolution - but display area
+   * expands and the resolution per fixed area decreases as an inverse to the
+   * distance from the sensor
    * 
-   * References : http://openkinect.org/wiki/Imaging_Information depthInMeters = 1.0 / (rawDepth * -0.0030711016 + 3.3309495161);
+   * References : http://openkinect.org/wiki/Imaging_Information depthInMeters =
+   * 1.0 / (rawDepth * -0.0030711016 + 3.3309495161);
    */
   int w = 640;
 
@@ -174,10 +183,13 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
   } // end of createAppearance()
 
   /**
-   * Create and initialize coords and colors arrays for the depth points. Only sample every SAMPLE_FREQ point to reduce the arrays
-   * size. Each point requires 3 floats in the coords array (x, y, z) and 3 floats in the colours array (R, G, B) + Alpha
+   * Create and initialize coords and colors arrays for the depth points. Only
+   * sample every SAMPLE_FREQ point to reduce the arrays size. Each point
+   * requires 3 floats in the coords array (x, y, z) and 3 floats in the colours
+   * array (R, G, B) + Alpha
    * 
-   * The z-coordinates will change as the depths change, which will cause the points colors to change as well.
+   * The z-coordinates will change as the depths change, which will cause the
+   * points colors to change as well.
    */
   private void createGeometry() {
     // TODO - make a XModulus X YModulus - to limit the number of array
@@ -190,15 +202,20 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
     /*
      * int pointsCount = IM_WIDTH * IM_HEIGHT;
      * 
-     * for (int index = 0; index < pointsCount*3; index+=3) { // if (dpIdx % SAMPLE_FREQ == 0) { // only look at depth index that is
-     * // to be sampled // int ptIdx = (dpIdx / SAMPLE_FREQ) * 3; // calc point index // if (ptIdx < MAX_POINTS * 3) { // is there
-     * enough space? coords[index] = index%IM_WIDTH * 0.01f;// * xScale; // x coord coords[index + 1] = (index/3)/IM_WIDTH *
-     * 0.01f;// * yScale; // y coord coords[index + 2] = 1f; // z coord (will change later)
+     * for (int index = 0; index < pointsCount*3; index+=3) { // if (dpIdx %
+     * SAMPLE_FREQ == 0) { // only look at depth index that is // to be sampled
+     * // int ptIdx = (dpIdx / SAMPLE_FREQ) * 3; // calc point index // if
+     * (ptIdx < MAX_POINTS * 3) { // is there enough space? coords[index] =
+     * index%IM_WIDTH * 0.01f;// * xScale; // x coord coords[index + 1] =
+     * (index/3)/IM_WIDTH * 0.01f;// * yScale; // y coord coords[index + 2] =
+     * 1f; // z coord (will change later)
      * 
-     * // initial point colour is white (will change later) colors[index] = 1.0f; colors[index + 1] = 1.0f; colors[index + 2] =
-     * 1.0f; // colors[index + 3] = 1.0f;
+     * // initial point colour is white (will change later) colors[index] =
+     * 1.0f; colors[index + 1] = 1.0f; colors[index + 2] = 1.0f; // colors[index
+     * + 3] = 1.0f;
      * 
-     * // } // } } System.out.println("Initialized " + pointsCount + " points"); System.out.println("min  " + min + " max " + max);
+     * // } // } } System.out.println("Initialized " + pointsCount + " points");
+     * System.out.println("min  " + min + " max " + max);
      */
     // store the coordinates and colours in the PointArray
     cloud.setCoordRefFloat(coords); // use BY_REFERENCE
@@ -207,7 +224,8 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
     // mesh.setCoordRefFloat(coords); // use BY_REFERENCE
     // mesh.setColorRefFloat(colors);
     /*
-     * PointsShape is drawn as the collection of colored points stored in the PointsArray.
+     * PointsShape is drawn as the collection of colored points stored in the
+     * PointsArray.
      */
     setGeometry(cloud);
     // setGeometry(mesh);
@@ -218,8 +236,10 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
   }
 
   /**
-   * map z-coord to colormap key between 0 and 255, and store its color as the point's new color; similar to the depth coloring in
-   * version 5 of the ViewerPanel example: red in forground (and for no depth), changing to violet in the background
+   * map z-coord to colormap key between 0 and 255, and store its color as the
+   * point's new color; similar to the depth coloring in version 5 of the
+   * ViewerPanel example: red in forground (and for no depth), changing to
+   * violet in the background
    */
   private void updateColour(int xCoordIdx, float zCoord) {
 
@@ -308,8 +328,9 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
         log.warn("midpoint ijr ({},{},{}) => xyz ({},{},{})  ({},{},{}) ", i, j, r, x, y, z, 39.3701 * x, 39.3701 * y, 39.3701 * z);
       }
       /*
-       * if (depthDataIndex == 306081) { log.warn(String.format( "br       ijr (%d,%d,%d) => xyz (%f,%f,%f)  (%f,%f,%f) ", i,j,r,
-       * x,y,z, 39.3701 * x, 39.3701 * y, 39.3701 * z)); }
+       * if (depthDataIndex == 306081) { log.warn(String.format(
+       * "br       ijr (%d,%d,%d) => xyz (%f,%f,%f)  (%f,%f,%f) ", i,j,r, x,y,z,
+       * 39.3701 * x, 39.3701 * y, 39.3701 * z)); }
        */
 
     }
@@ -317,10 +338,13 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
     out.close();
     log.warn("min {} max {}", min, max);
     /*
-     * for (int i = 0; i < data.length; ++i) { float zCoord = ((float) data[i]) * zScale; // convert to 3D scene //float zCoord =
-     * zScale * (float) (1.0 / ((float) data[i] * -0.0030711016 + 3.3309495161));; // coord if (i % SAMPLE_FREQ == 0) { // save this
-     * z-coord int zCoordIdx = (i / SAMPLE_FREQ) * 3 + 2; if (zCoordIdx < coords.length) { coords[zCoordIdx] = -zCoord; // negate so
-     * depths are spread out along -z axis, away from // camera // printCoord(coords, zCoordIdx-2); updateColour(zCoordIdx - 2,
+     * for (int i = 0; i < data.length; ++i) { float zCoord = ((float) data[i])
+     * * zScale; // convert to 3D scene //float zCoord = zScale * (float) (1.0 /
+     * ((float) data[i] * -0.0030711016 + 3.3309495161));; // coord if (i %
+     * SAMPLE_FREQ == 0) { // save this z-coord int zCoordIdx = (i /
+     * SAMPLE_FREQ) * 3 + 2; if (zCoordIdx < coords.length) { coords[zCoordIdx]
+     * = -zCoord; // negate so depths are spread out along -z axis, away from //
+     * camera // printCoord(coords, zCoordIdx-2); updateColour(zCoordIdx - 2,
      * zCoord); } } }
      */
 
@@ -329,8 +353,9 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
   } // end of updateData()
 
   /*
-   * Use new depth buffer data to update the PointsArray inside the Java 3D scene. This method is repeatedly called by DepthReader
-   * as the depth buffer changes. This method will not return until the 3D scene has been updated.
+   * Use new depth buffer data to update the PointsArray inside the Java 3D
+   * scene. This method is repeatedly called by DepthReader as the depth buffer
+   * changes. This method will not return until the 3D scene has been updated.
    */
   public void updateDepthCoords(KinectSensorData kd) {
 

@@ -28,14 +28,18 @@ public abstract class Device {
     this.id = deviceId & 0xFF;
   }
 
-  public int id; // the all important id of the sensor - equivalent to the "name" - used in callbacks
+  public int id; // the all important id of the sensor - equivalent to the
+                 // "name" - used in callbacks
   public int type; // what type of device is this?
-  int state; // state - single at the moment to handle all the finite states of the sensors (todo maybe this moves into the
+  int state; // state - single at the moment to handle all the finite states of
+             // the sensors (todo maybe this moves into the
              // subclasses?)
 
-  abstract void update(); // all devices must implement this to update their state.
+  abstract void update(); // all devices must implement this to update their
+                          // state.
 
   void onDisconnect() {
-  }; // all devices must implement this to react when the communication with MRL is broken
+  }; // all devices must implement this to react when the communication with MRL
+     // is broken
 
 }

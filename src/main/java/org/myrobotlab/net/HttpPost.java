@@ -18,15 +18,16 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * FIXME - Buffer the post with ByteArrayOutputStream so you dont need to write to the real output stream until you call the method
- * post(new URL("http://blah/blah));
+ * FIXME - Buffer the post with ByteArrayOutputStream so you dont need to write
+ * to the real output stream until you call the method post(new
+ * URL("http://blah/blah));
  * 
  * and move to the Http class
  * 
  * 
  * 
- * Description: this class helps to send POST HTTP requests with various form data, * including files. Cookies can be added to be
- * included in the request.
+ * Description: this class helps to send POST HTTP requests with various form
+ * data, * including files. Cookies can be added to be included in the request.
  * 
  * 
  * @author Vlad Patryshev
@@ -93,7 +94,8 @@ public class HttpPost {
   }
 
   /**
-   * posts the requests to the server, with all the cookies and parameters that were added
+   * posts the requests to the server, with all the cookies and parameters that
+   * were added
    * 
    * @return input stream with the server response
    * @throws IOException
@@ -141,8 +143,9 @@ public class HttpPost {
   }
 
   /**
-   * adds a parameter to the request; if the parameter is a File, the file is uploaded, otherwise the string value of the parameter
-   * is passed in the request
+   * adds a parameter to the request; if the parameter is a File, the file is
+   * uploaded, otherwise the string value of the parameter is passed in the
+   * request
    * 
    * @param name
    *          parameter name
@@ -157,8 +160,8 @@ public class HttpPost {
    * adds parameters to the request
    * 
    * @param parameters
-   *          "name-to-value" map of parameters; if a value is a file, the file is uploaded, otherwise it is stringified and sent in
-   *          the request
+   *          "name-to-value" map of parameters; if a value is a file, the file
+   *          is uploaded, otherwise it is stringified and sent in the request
    */
   public void setParameters(Map parameters) {
     if (parameters == null)

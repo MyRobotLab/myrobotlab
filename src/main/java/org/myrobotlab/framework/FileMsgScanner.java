@@ -50,7 +50,8 @@ public class FileMsgScanner extends Thread {
     for (int i = 0; i < listOfFiles.length; i++) {
       File json = listOfFiles[i];
       if (json.isFile() && json.getName().endsWith(".json") && json.getName().startsWith(id)) {
-        // FIXME - more accurate is to split file from .json and compare for exact match
+        // FIXME - more accurate is to split file from .json and compare for
+        // exact match
         try {
           String data = new String(toByteArray(json));
           log.info("%s - %s", json, data);

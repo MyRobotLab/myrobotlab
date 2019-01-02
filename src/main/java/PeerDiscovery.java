@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Performs broadcast and multicast peer detection. How well this works depends on your network configuration
+ * Performs broadcast and multicast peer detection. How well this works depends
+ * on your network configuration
  * 
  * @author ryanm
  */
@@ -23,7 +24,8 @@ public class PeerDiscovery {
   private static final byte RESPONSE_PACKET = 81;
 
   /**
-   * The group identifier. Determines the set of peers that are able to discover each other
+   * The group identifier. Determines the set of peers that are able to discover
+   * each other
    */
   public final int group;
 
@@ -46,15 +48,16 @@ public class PeerDiscovery {
   private List<Peer> responseList = null;
 
   /**
-   * Used to detect and ignore this peers response to it's own query. When we send a response packet, we set this to the
-   * destination. When we receive a response, if this matches the source, we know that we're talking to ourselves and we can ignore
-   * the response.
+   * Used to detect and ignore this peers response to it's own query. When we
+   * send a response packet, we set this to the destination. When we receive a
+   * response, if this matches the source, we know that we're talking to
+   * ourselves and we can ignore the response.
    */
   private InetAddress lastResponseDestination = null;
 
   /**
-   * Redefine this to be notified of exceptions on the listen thread. Default behaviour is to print to stdout. Can be left as null
-   * for no-op
+   * Redefine this to be notified of exceptions on the listen thread. Default
+   * behaviour is to print to stdout. Can be left as null for no-op
    */
   public ExceptionHandler rxExceptionHandler = new ExceptionHandler();
 
@@ -128,7 +131,8 @@ public class PeerDiscovery {
   }
 
   /**
-   * Signals this {@link PeerDiscovery} to shut down. This call will block until everything's timed out and closed etc.
+   * Signals this {@link PeerDiscovery} to shut down. This call will block until
+   * everything's timed out and closed etc.
    */
   public void disconnect() {
     shouldStop = true;
@@ -144,11 +148,13 @@ public class PeerDiscovery {
   }
 
   /**
-   * Queries the network and finds the addresses of other peers in the same group
+   * Queries the network and finds the addresses of other peers in the same
+   * group
    * 
    * @param timeout
-   *          How long to wait for responses, in milliseconds. Call will block for this long, although you can
-   *          {@link Thread#interrupt()} to cut the wait short
+   *          How long to wait for responses, in milliseconds. Call will block
+   *          for this long, although you can {@link Thread#interrupt()} to cut
+   *          the wait short
    * @param peerType
    *          The type flag of the peers to look for
    * @return The addresses of other peers in the group
@@ -217,7 +223,8 @@ public class PeerDiscovery {
    */
   public class ExceptionHandler {
     /**
-     * Called whenever an exception is thrown from the listen thread. The listen thread should now be dead
+     * Called whenever an exception is thrown from the listen thread. The listen
+     * thread should now be dead
      * 
      * @param e
      *          e

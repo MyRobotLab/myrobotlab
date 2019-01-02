@@ -30,29 +30,40 @@ import org.slf4j.Logger;
  * 
  * @author Mats
  * 
- *         https://learn.adafruit.com/adafruit-4-channel-adc-breakouts /programming The code here is to a large extent based on the
- *         Adafruit C++ libraries here: https://github.com/adafruit/Adafruit_ADS1X15
+ *         https://learn.adafruit.com/adafruit-4-channel-adc-breakouts
+ *         /programming The code here is to a large extent based on the Adafruit
+ *         C++ libraries here: https://github.com/adafruit/Adafruit_ADS1X15
  * 
- *         Next follows the license agreement from Adafruit that this service is based on. It has been converted fron C++ to Java.
+ *         Next follows the license agreement from Adafruit that this service is
+ *         based on. It has been converted fron C++ to Java.
  * 
  *         Software License Agreement (BSD License)
  * 
  *         Copyright (c) 2012, Adafruit Industries All rights reserved.
  * 
- *         Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- *         following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of
- *         conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- *         this list of conditions and the following disclaimer in the documentation and/or other materials provided with the
- *         distribution. 3. Neither the name of the copyright holders nor the names of its contributors may be used to endorse or
- *         promote products derived from this software without specific prior written permission.
+ *         Redistribution and use in source and binary forms, with or without
+ *         modification, are permitted provided that the following conditions
+ *         are met: 1. Redistributions of source code must retain the above
+ *         copyright notice, this list of conditions and the following
+ *         disclaimer. 2. Redistributions in binary form must reproduce the
+ *         above copyright notice, this list of conditions and the following
+ *         disclaimer in the documentation and/or other materials provided with
+ *         the distribution. 3. Neither the name of the copyright holders nor
+ *         the names of its contributors may be used to endorse or promote
+ *         products derived from this software without specific prior written
+ *         permission.
  * 
- *         THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *         LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- *         SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *         (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *         INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- *         NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
- *         DAMAGE.
+ *         THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
+ *         EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *         IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ *         PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
+ *         LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *         CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *         SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ *         BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ *         WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ *         OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ *         EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 public class Ads1115 extends Service implements I2CControl, PinArrayControl {
@@ -128,7 +139,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   public transient I2CController controller;
 
   /*
-   * public static final byte INA219_SHUNTVOLTAGE = 0x01; public static final byte INA219_BUSVOLTAGE = 0x02;
+   * public static final byte INA219_SHUNTVOLTAGE = 0x01; public static final
+   * byte INA219_BUSVOLTAGE = 0x02;
    */
   public List<String> deviceAddressList = Arrays.asList("0x48", "0x49", "0x4A", "0x4B");
 
@@ -157,7 +169,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   public boolean isAttached = false;
 
   /*
-   * ========================================================================= CONVERSION DELAY (in mS)
+   * =========================================================================
+   * CONVERSION DELAY (in mS)
    * -----------------------------------------------------------------------
    */
   static byte ADS1015_CONVERSIONDELAY = 1;
@@ -167,7 +180,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
    */
 
   /*
-   * ========================================================================= POINTER REGISTER
+   * =========================================================================
+   * POINTER REGISTER
    * -----------------------------------------------------------------------
    */
   static byte ADS1015_REG_POINTER_MASK = 0x03;
@@ -180,7 +194,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
    */
 
   /*
-   * ========================================================================= CONFIG REGISTER
+   * =========================================================================
+   * CONFIG REGISTER
    * -----------------------------------------------------------------------
    */
   static int ADS1015_REG_CONFIG_OS_MASK = 0x8000;
@@ -378,7 +393,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   transient Map<Integer, List<PinListener>> pinListeners = new HashMap<Integer, List<PinListener>>();
 
   /**
-   * the map of pins which the pin listeners are listening too - if the set is null they are listening to "any" published pin
+   * the map of pins which the pin listeners are listening too - if the set is
+   * null they are listening to "any" published pin
    */
   Map<String, Set<Integer>> pinSets = new HashMap<String, Set<Integer>>();
 
@@ -588,8 +604,9 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   /*
    * /* !
    * 
-   * @brief Reads the conversion results, measuring the voltage difference between the P (AIN0) and N (AIN1) input. Generates a
-   * signed value since the difference can be either positive or negative.
+   * @brief Reads the conversion results, measuring the voltage difference
+   * between the P (AIN0) and N (AIN1) input. Generates a signed value since the
+   * difference can be either positive or negative.
    */
   /* */
   public int readADC_Differential_0_1() {
@@ -634,8 +651,9 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   /*
    * !
    * 
-   * @brief Reads the conversion results, measuring the voltage difference between the P (AIN2) and N (AIN3) input. Generates a
-   * signed value since the difference can be either positive or negative.
+   * @brief Reads the conversion results, measuring the voltage difference
+   * between the P (AIN2) and N (AIN3) input. Generates a signed value since the
+   * difference can be either positive or negative.
    */
   public int readADC_Differential_2_3() {
     // Start with default values
@@ -679,8 +697,10 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   /*
    * !
    * 
-   * @brief Sets up the comparator to operate in basic mode, causing the ALERT/RDY pin to assert (go from high to low) when the ADC
-   * value exceeds the specified threshold. This will also set the ADC in continuous conversion mode.
+   * @brief Sets up the comparator to operate in basic mode, causing the
+   * ALERT/RDY pin to assert (go from high to low) when the ADC value exceeds
+   * the specified threshold. This will also set the ADC in continuous
+   * conversion mode.
    */
   public void startComparator_SingleEnded(int channel, int threshold) {
     // Start with default values
@@ -726,8 +746,9 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   /*
    * !
    * 
-   * @brief In order to clear the comparator, we need to read the conversion results. This function reads the last conversion
-   * results without changing the config value.
+   * @brief In order to clear the comparator, we need to read the conversion
+   * results. This function reads the last conversion results without changing
+   * the config value.
    */
   public int getLastConversionResults() {
     // Wait for the conversion to complete
@@ -762,7 +783,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * GOOD DESIGN - this method is the same pretty much for all Services could be a Java 8 default implementation to the interface
+   * GOOD DESIGN - this method is the same pretty much for all Services could be
+   * a Java 8 default implementation to the interface
    */
   @Override
   public boolean isAttached(String name) {
@@ -942,8 +964,9 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 

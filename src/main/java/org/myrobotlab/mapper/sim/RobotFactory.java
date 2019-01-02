@@ -28,8 +28,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 /**
- * A helper class to aid building robot bodies and sensors. It only contains only static methods and thus should not be
- * instanciated.
+ * A helper class to aid building robot bodies and sensors. It only contains
+ * only static methods and thus should not be instanciated.
  * 
  * 
  * 
@@ -56,7 +56,8 @@ public class RobotFactory extends Factory {
   }
 
   /**
-   * Adds a prebuild belt of bumpers sensor to the agent. Specify the number of sensors.
+   * Adds a prebuild belt of bumpers sensor to the agent. Specify the number of
+   * sensors.
    * 
    * @param agent
    *          a
@@ -77,7 +78,8 @@ public class RobotFactory extends Factory {
   }
 
   /**
-   * Adds a prebuild camera sensor to the agent. Image resolution is 100x100 pixels. Camera is situated on the top of the agent.
+   * Adds a prebuild camera sensor to the agent. Image resolution is 100x100
+   * pixels. Camera is situated on the top of the agent.
    * 
    * @param agent
    *          a
@@ -251,7 +253,8 @@ public class RobotFactory extends Factory {
   // Prebuild KinelaticModels
 
   /**
-   * Sets the kinematic model to be DifferentialDrive (instead of DefaultKinematic)
+   * Sets the kinematic model to be DifferentialDrive (instead of
+   * DefaultKinematic)
    * 
    * @param agent
    *          a

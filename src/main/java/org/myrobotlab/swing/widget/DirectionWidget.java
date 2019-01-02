@@ -32,7 +32,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
     }
 
     /*
-     * TODO - replaceListener public ComponentListener[] getListeners() { return getComponentListeners(); }
+     * TODO - replaceListener public ComponentListener[] getListeners() { return
+     * getComponentListeners(); }
      */
   }
 
@@ -59,9 +60,10 @@ public class DirectionWidget extends JPanel implements KeyListener {
   public DirectionWidget() {
     // setForeground(Color.GREEN);
     /*
-     * BevelBorder widgetTitle; widgetTitle = (BevelBorder) BorderFactory.createBevelBorder(BevelBorder.RAISED);
-     * this.setBorder(widgetTitle); TitledBorder title; title = BorderFactory.createTitledBorder("direction");
-     * this.setBorder(title);
+     * BevelBorder widgetTitle; widgetTitle = (BevelBorder)
+     * BorderFactory.createBevelBorder(BevelBorder.RAISED);
+     * this.setBorder(widgetTitle); TitledBorder title; title =
+     * BorderFactory.createTitledBorder("direction"); this.setBorder(title);
      */
 
     GridBagLayout gridBagLayout = new GridBagLayout();
@@ -193,9 +195,11 @@ public class DirectionWidget extends JPanel implements KeyListener {
     btnSe.setVisible(false);
 
     /*
-     * JToggleButton tglbtnT = new JToggleButton("use keyboard"); tglbtnT.setBackground(new Color(173, 255, 47)); GridBagConstraints
-     * gbc_tglbtnT = new GridBagConstraints(); gbc_tglbtnT.gridwidth = 2; gbc_tglbtnT.insets = new Insets(0, 0, 0, 0);
-     * gbc_tglbtnT.gridx = 0; gbc_tglbtnT.gridy = 3; add(tglbtnT, gbc_tglbtnT);
+     * JToggleButton tglbtnT = new JToggleButton("use keyboard");
+     * tglbtnT.setBackground(new Color(173, 255, 47)); GridBagConstraints
+     * gbc_tglbtnT = new GridBagConstraints(); gbc_tglbtnT.gridwidth = 2;
+     * gbc_tglbtnT.insets = new Insets(0, 0, 0, 0); gbc_tglbtnT.gridx = 0;
+     * gbc_tglbtnT.gridy = 3; add(tglbtnT, gbc_tglbtnT);
      */
     // this.addKeyListener(this);
     //
@@ -242,7 +246,7 @@ public class DirectionWidget extends JPanel implements KeyListener {
   }
 
   /*
-   * public void replaceListener(ActionListener al) { ComponentListener[] b = bal.getListeners(); for (int i = 0; i < b.length; ++i)
-   * { b[i]. } }
+   * public void replaceListener(ActionListener al) { ComponentListener[] b =
+   * bal.getListeners(); for (int i = 0; i < b.length; ++i) { b[i]. } }
    */
 }

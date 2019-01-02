@@ -6,8 +6,9 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 
 /**
- * This class exists as a proxy to control native MRL services connected through the web API. Methods of that native service are
- * called through this class's {@link #exec(String, Object[])} method.
+ * This class exists as a proxy to control native MRL services connected through
+ * the web API. Methods of that native service are called through this class's
+ * {@link #exec(String, Object[])} method.
  **/
 public class GoogleAssistant extends PythonProxy {
 
@@ -25,8 +26,9 @@ public class GoogleAssistant extends PythonProxy {
   }
 
   /**
-   * This static method returns all the details of the class without it having to be constructed. It has description, categories,
-   * dependencies, and peer definitions.
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
    * 
    * @return ServiceType - returns all the data
    * 
