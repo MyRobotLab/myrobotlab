@@ -1,7 +1,11 @@
 package org.myrobotlab.document.transformer;
 
+import java.util.List;
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 
+@Ignore
 public class ParseWikiTextTest extends AbstractStageTest {
 
   @Override
@@ -23,7 +27,15 @@ public class ParseWikiTextTest extends AbstractStageTest {
   @Override
   public void validate(Document doc) {
     // TODO Auto-generated method stub
-    System.out.println(doc);
+    Assert.assertNotNull(doc.getField("text"));
   }
+  
+  @Override
+  public void validateChildren(List<Document> docs) {
+    // NoOp most stages don't return children docs.
+    for (Document d:  docs) {
+      System.out.println(d);
+    }
+  };
 
 }

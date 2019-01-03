@@ -21,12 +21,12 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.virtual.MrlServo;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
 /**
@@ -61,7 +61,7 @@ public class ArduinoTest implements PinArrayListener {
   
   @Before
   public void setUp() throws Exception {
-    TestUtils.initEnvirionment();
+    LoggingFactory.init("WARN");
     // setup the virtual port (if enabled)
     // FIXME - needs a seemless switch
     if (useVirtualHardware) {

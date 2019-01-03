@@ -29,7 +29,6 @@ public class XPathExtractorTest extends AbstractStageTest {
   public void validate(Document doc) {
     System.out.println(doc);
     Assert.assertEquals(doc.getField("title").get(0).toString(), "baz");
-
   }
 
 }

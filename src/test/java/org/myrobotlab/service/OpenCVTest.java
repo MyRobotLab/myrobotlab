@@ -16,10 +16,14 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.slf4j.Logger;
 
+// TODO: re-enable this unit test.. but for now it's just too slow ..
+// it also opens a swing gui which isn't good.
+@Ignore
 public class OpenCVTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
@@ -38,8 +42,9 @@ public class OpenCVTest extends AbstractTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+    LoggingFactory.init("WARN");
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    Runtime.setLogLevel("info");
+    //Runtime.setLogLevel("info");
     if (!isHeadless()) {
       swing = (SwingGui) Runtime.start("gui", "SwingGui");
     }

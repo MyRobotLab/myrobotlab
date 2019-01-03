@@ -8,8 +8,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.NeoPixelController;
-import org.myrobotlab.test.TestUtils;
 
 /**
  * @author chris
@@ -24,7 +24,7 @@ public class NeoPixelTest {
   @Before
   public void setUp() throws Exception {
     // setup the test environment , and create an arduino with a virtual backend for it.
-    TestUtils.initEnvirionment();
+    LoggingFactory.init("WARN");
     VirtualArduino va1 = (VirtualArduino)Runtime.createAndStart("va1", "VirtualArduino");
     va1.connect(V_PORT_1);
     ard = (Arduino) Runtime.createAndStart("ard", "Arduino");

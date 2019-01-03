@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -25,6 +26,11 @@ import java.util.ArrayList;
 public class ServiceSmokeTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
+  
+  @Before
+  public void setUp() {
+    LoggingFactory.init("WARN");
+  }
   
   @Test
   public void testAllServiceSerialization() throws IOException {
@@ -57,7 +63,6 @@ public class ServiceSmokeTest {
     // just don't want a swing gui opening up in the unit test.
     blacklist.add("org.myrobotlab.service.SwingGui");
     
-    LoggingFactory.init("WARN");
     
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();

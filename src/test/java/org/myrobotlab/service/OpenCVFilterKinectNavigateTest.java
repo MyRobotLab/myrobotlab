@@ -1,36 +1,21 @@
 package org.myrobotlab.service;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterKinectNavigate;
 import org.slf4j.Logger;
 
+@Ignore
 public class OpenCVFilterKinectNavigateTest {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectNavigateTest.class);
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
-
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
   @Before
   public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
+    LoggingFactory.init("WARN");
   }
 
   @Test
@@ -65,19 +50,6 @@ public class OpenCVFilterKinectNavigateTest {
     // cv.setGrabberType("OpenCV");
     // cv.capture();
     // cv.setGrabberType(grabberType);
-  }
-
-  public static void main(String[] args) {
-    try {
-      LoggingFactory.init("WARN");
-
-      // run junit as java app
-      JUnitCore junit = new JUnitCore();
-      Result result = junit.run(OpenCVFilterKinectNavigateTest.class);
-      log.info("Result failures: {}", result.getFailureCount());
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
   }
 
 }

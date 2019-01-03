@@ -6,10 +6,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.test.TestUtils;
+import org.myrobotlab.logging.LoggingFactory;
 
 // Grr.. TODO: too hard a test for our weak jenkins oven in the cloud :(
 
@@ -26,7 +25,7 @@ public class InMoovScriptTest {
   @Before
   public void setup() throws Exception {
     // setup the test environment ,and create an arduino with a virtual backend for it.
-    TestUtils.initEnvirionment();
+    LoggingFactory.init("WARN");
     // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino)Runtime.createAndStart("va1", "VirtualArduino");
     VirtualArduino va2 = (VirtualArduino)Runtime.createAndStart("va2", "VirtualArduino");

@@ -8,31 +8,22 @@ import java.util.List;
 import java.util.Locale;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class RuntimeTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(RuntimeTest.class);
 
-  @Test
-  public void testRuntime() throws Exception {
-    System.out.println("This is a junit test... woot!");
-    // no longer valid Runtime is a singleton with name "runtime"
-    // Runtime testService = new Runtime("testruntime");
-    // try to start the service
-    // testService.startService();
-
-    // make sure the service knows it's name...
-    // assertEquals("testruntime", testService.getIntanceName());
-
-    // try to stop the service.
-    // testService.stopService();
-    // we assume we get here. if not runtime didn't start...
+  @Before
+  public void setUp() {
+    LoggingFactory.init("WARN");
   }
-
+  
   @Test
   public void testGetUptime() {
     String res = Runtime.getUptime();
