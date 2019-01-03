@@ -3,6 +3,7 @@ package org.myrobotlab.jme3;
 import java.util.Set;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.service.JMonkeyEngine;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 
@@ -10,8 +11,8 @@ import com.jme3.scene.Node;
 
 public class Jme3ServoController extends Jme3Object implements ServoController {
 
-  public Jme3ServoController(Node node) {
-    super(node);
+  public Jme3ServoController(JMonkeyEngine jme, Node node) {
+    super(jme, node);
     // TODO Auto-generated constructor stub
   }
 

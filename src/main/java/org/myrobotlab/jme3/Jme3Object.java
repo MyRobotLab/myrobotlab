@@ -1,5 +1,7 @@
 package org.myrobotlab.jme3;
 
+import java.io.IOException;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
@@ -7,62 +9,67 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.JMonkeyEngine;
 import org.slf4j.Logger;
 
+import com.jme3.bounding.BoundingBox;
+import com.jme3.export.JmeExporter;
+import com.jme3.export.JmeImporter;
+import com.jme3.export.Savable;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
+import com.jme3.scene.debug.WireBox;
 
-public class Jme3Object {
+public class Jme3Object implements Savable {
   public final static Logger log = LoggerFactory.getLogger(Jme3Object.class);
 
-  String name;
+  public String name;
 
-  String parentName;
+  public String parentName;
 
-  transient JMonkeyEngine jme;
+  public transient JMonkeyEngine jme;
 
-  transient ServiceInterface service;
+  public transient ServiceInterface service;
 
-  transient Node node;
+  public transient Node node;
 
-  transient Spatial spatial;
-
-  Mapper mapper;
-
-  Vector3f rotationMask;
-  Vector3f localTranslation;
+  public transient Spatial spatial;
 
   /**
-   * current angle of default rotation in degrees - 3? X,Y,Z ???
+   * bounding box
    */
-  Double currentAngle;
+  public transient Geometry bb;
 
-  String assetPath;
+  public Mapper mapper;
 
-  public Jme3Object(String name) {
+  public Vector3f rotationMask;
+  public Vector3f localTranslation; // transitory ? init only ?
+
+  public Double currentAngle;
+
+  public String assetPath;
+
+  public Jme3Object(JMonkeyEngine jme, String name) {
+    this.jme = jme;
     this.name = name;
+    this.node = new Node(spatial.getName());
+    node.setUserData("data", this);
   }
 
-  public Jme3Object(Node node) {
-    this.node = node;
+  public Jme3Object(JMonkeyEngine jme, Spatial spatial) {
+    this.jme = jme;
+    name = spatial.getName();
+    this.spatial = spatial;
+    node = new Node(spatial.getName());
+    node.attachChild(spatial); // spatial.setUserData ????
+    node.setUserData("data", this);    
   }
 
-  public Jme3Object(Node node, Mapper mapper) {
-    this.node = node;
-    this.mapper = mapper;
-  }
-
-  // FIXME - this is to be the m
-  public Jme3Object(Jme3App jme, String name, String parentName, Service service, Node node, Mapper mapper, Vector3f rotationMask, Float currentAngle, Spatial spatial) {
-    this.node = node;
-    this.mapper = mapper;
-    this.rotationMask = rotationMask;
-    this.currentAngle = (double) currentAngle;
-  }
-
-  public Jme3Object(Node node2, Mapper mapper2, Vector3f defaultRotationAxis) {
-    // TODO Auto-generated constructor stub
-  }
-
+  // FIXME - defaultRotation is ok - init rotation IS NOT !!!
+  // FIXME - DEPRECATE
   public Jme3Object(JMonkeyEngine jme, String name, String parentName, String assetPath, Mapper mapper, Vector3f rotationMask, Vector3f localTranslation, double currentAngle) {
     this.jme = jme;
     this.name = name;
@@ -74,31 +81,77 @@ public class Jme3Object {
 
     node = new Node(name);
     this.parentName = parentName;
-    
-    float scaleFactor = 400f;
-    
-    Node parentNode = jme.getNode(parentName);
-    if (parentNode != null) {
-      parentNode.attachChild(node);
+
+    float scaleFactor = 1;
+
+    Jme3Object po = jme.getJme3Object(parentName);
+    if (po != null) {
+      po.attachChild(node);
     }
+
+    /*
+     * Node parentNode = jme.getNode(parentName); if (parentNode != null) {
+     * parentNode.attachChild(node); }
+     */
+
     if (assetPath != null) {
       try {
         spatial = jme.loadModel(assetPath);
+        spatial.setUserData("data", this);
+        node.attachChild(spatial);
       } catch (Exception e) {
         log.error("could not load model {}", assetPath);
       }
-      spatial.setName(name);
-      spatial.scale(1/scaleFactor); // FIXME - import 1000 scale data 
-      node.attachChild(spatial);
+      // spatial.setName(String.format("%s-geometry", name));
+      // spatial.scale(1 / scaleFactor); // FIXME - import 1000 scale data      
     }
-    localTranslation.x = localTranslation.x/scaleFactor; // FIXME scale 1000
-    localTranslation.y = localTranslation.y/scaleFactor;
-    localTranslation.z = localTranslation.z/scaleFactor;
-    node.setLocalTranslation(localTranslation);
+
+    if (localTranslation != null) {
+      localTranslation.x = localTranslation.x / scaleFactor; // FIXME scale 1000
+      localTranslation.y = localTranslation.y / scaleFactor;
+      localTranslation.z = localTranslation.z / scaleFactor;
+      node.setLocalTranslation(localTranslation);
+    }
+    node.setUserData("data", this);
+    
+  }
+
+  public void attachChild(Node node2) {
+    node.attachChild(node);
+  }
+
+  public void enableBoundingBox(boolean b) {
+
+    if (b && bb == null) {
+      // Geometry bb = WireBox.makeGeometry((BoundingBox)
+      // spatial.getWorldBound());
+      // spatial.getWorldBound();
+      Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
+      // Geometry newBb = WireBox.makeGeometry((BoundingBox) node.getWorldBound());
+      // Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Light/PBRLighting.j3md");
+      
+      Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      mat.setColor("Color", ColorRGBA.Green);
+      mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+      
+      // mat1.setMode(Mesh.Mode.Lines);
+      // newBb.setLineWidth(2.0f);
+      newBb.setMaterial(mat);
+      bb = newBb;
+      if (node != null) {
+        node.attachChild(bb);
+        // jme.getRootNode().attachChild(bb);
+      }
+    } else if (b && bb != null) {
+      bb.setCullHint(CullHint.Never);
+    } else if (!b && bb != null) {
+      bb.setCullHint(CullHint.Always);
+    }
+
   }
 
   public String getName() {
-    return service.getName();
+    return name;
   }
 
   public Node getNode() {
@@ -138,5 +191,39 @@ public class Jme3Object {
 
   public void setService(Service service) {
     this.service = service;
+  }
+
+  @Override
+  public void write(JmeExporter ex) throws IOException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void read(JmeImporter im) throws IOException {
+    // TODO Auto-generated method stub
+
+  }
+
+  public Spatial getSpatial() {
+    return spatial;
+  }
+
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(name);
+    return sb.toString();
+  }
+
+  // scales a node and all its children
+  public void scale(float scale) {
+    // node.getChildren();
+    node.scale(scale);
+    node.updateGeometricState();
+  }
+
+  public void loadModel(String assetPath) {
+    // TODO Auto-generated method stub
+
   }
 }

@@ -416,7 +416,7 @@ public abstract class Repo {
 			log.error("loading threw", e);
 		}
 
-		log.info("here");
+		log.info("loaded repo.json");
 	}
 
 	/**
