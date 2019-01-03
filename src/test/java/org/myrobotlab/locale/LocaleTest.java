@@ -1,23 +1,23 @@
 package org.myrobotlab.locale;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Locale.LanguageRange;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+@Ignore
 public class LocaleTest {
 	
 	public final static Logger log = LoggerFactory.getLogger(LocaleTest.class);
-	
 
-	public static void main(String[] args) {
+	@Test
+	public void testLocale() {
 		// TODO Auto-generated method stub
 		Locale locale = Locale.getDefault();
 		/*

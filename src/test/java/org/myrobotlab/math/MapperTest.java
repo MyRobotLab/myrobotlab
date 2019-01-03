@@ -25,16 +25,6 @@ public class MapperTest {
   }
 
   @Test
-  public void testCalcIntInt() {
-
-  }
-
-  @Test
-  public void testCalcIntDouble() {
-
-  }
-
-  @Test
   public void testGetMaxX() {
     double testValue = 18;
     Mapper myMapper = new Mapper(10, testValue, 100, 180);

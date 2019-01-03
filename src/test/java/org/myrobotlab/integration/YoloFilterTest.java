@@ -3,14 +3,18 @@ package org.myrobotlab.integration;
 import java.io.IOException;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Solr;
 
+@Ignore
 public class YoloFilterTest {
 
-  public static void main(String[] args) throws SolrServerException, IOException {
+  @Test
+  public void testYolo() throws SolrServerException, IOException {
     
     Runtime.start("gui", "SwingGui");
     

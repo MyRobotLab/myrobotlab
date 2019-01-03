@@ -10,7 +10,6 @@ public class MathValuesTest extends AbstractStageTest {
 
   @Override
   public Document createDocument() {
-    // TODO Auto-generated method stub
     Document d = new Document("doc_1");
     d.setField("title", "MRL Cookbook.");
     d.setField("x", 2);

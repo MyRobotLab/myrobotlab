@@ -1,8 +1,10 @@
 package org.myrobotlab.opencv;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.OpenCV;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
@@ -15,6 +17,11 @@ import java.io.IOException;
 public class OpenCVFilterFaceDetectDNNTest {
 
   boolean debug = false; 
+  
+  @Before
+  public void setUp() {
+    LoggingFactory.init("WARN");
+  }
   
   @Test
   public void testFaceFilterDNN() throws IOException {
