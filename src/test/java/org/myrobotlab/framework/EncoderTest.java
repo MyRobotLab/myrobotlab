@@ -8,12 +8,13 @@ import java.net.URI;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUri;
+import org.myrobotlab.logging.LoggingFactory;
 
 public class EncoderTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    // LoggingFactory.init(Level.INFO);
+    LoggingFactory.init("WARN");
   }
 
   @Test
