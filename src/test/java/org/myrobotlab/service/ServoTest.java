@@ -3,12 +3,10 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.myrobotlab.test.TestUtils;
+import org.myrobotlab.logging.LoggingFactory;
 
 public class ServoTest {
 
@@ -21,7 +19,7 @@ public class ServoTest {
 	@Before
 	public void setup() throws Exception {
 	  // setup the test environment , and create an arduino with a virtual backend for it.
-    TestUtils.initEnvirionment();
+    LoggingFactory.init("WARN");
     // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino)Runtime.start("va1", "VirtualArduino");
     VirtualArduino va2 = (VirtualArduino)Runtime.start("va2", "VirtualArduino");

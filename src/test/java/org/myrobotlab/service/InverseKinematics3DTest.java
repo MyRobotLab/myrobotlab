@@ -1,11 +1,23 @@
 package org.myrobotlab.service;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.slf4j.Logger;
 
-// @Ignore
+
 public class InverseKinematics3DTest {
 
+  public final static Logger log = LoggerFactory.getLogger(InverseKinematics3DTest.class);
+  
+  @Before
+  public void setUp() {
+    LoggingFactory.init("WARN");
+  }
+  
   @Test
   public void testForwardKinematics() {
     InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
@@ -31,13 +43,14 @@ public class InverseKinematics3DTest {
     int y = positions.length;
     for (int j = 0; j < y; j++) {
       for (int i = 0; i < x; i++) {
-        System.out.print(positions[j][i] + " ");
+        log.info(positions[j][i] + " ");
       }
-      System.out.println();
+
     }
-
     // Last point:
-    System.out.println("Last Point: " + p.toString());
-
+    log.warn("Last Point: " + p.toString());
+    // TODO: this doesn't actually assert the position was reached! ouch.
+    Assert.assertNotNull(p);
   }
+  
 }

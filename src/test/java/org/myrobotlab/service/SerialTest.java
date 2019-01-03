@@ -46,7 +46,7 @@ public class SerialTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    // LoggingFactory.init(Level.INFO);
+    LoggingFactory.init("WARN");
 
     log.info("setUpBeforeClass");
 
@@ -101,30 +101,10 @@ public class SerialTest {
     serial.addByteListener(catcher);
   }
 
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  @Test
-  public final void testGetCategories() {
-    // assertTrue(serial.getCategories().length > 0);
-  }
 
   @Test
   public final void testGetDescription() {
     assertTrue(serial.getDescription().length() > 0);
-  }
-
-  @Test
-  public final void testStopService() {
-    // fail("Not yet implemented"); // TODO
-    // TODO thread count
-  }
-
-  // FIXME - remove
-  @Test
-  public final void testTest() {
-    // fail("Not yet implemented"); // TODO
   }
 
   @Test
@@ -356,90 +336,6 @@ public class SerialTest {
     log.info("here");
   }
 
-  @Test
-  public final void testSerial() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testAddByteListenerSerialDataListener() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testAddByteListenerString() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testSetParams() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testConnectStringIntIntIntInt() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testConnectStringSerialDataListener() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testConnectFilePlayer() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testConnectLoopback() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testConnectPort() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testConnectTCP() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testCreateHardwarePort() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testCreateTCPPort() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testCreateVirtualPort() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testCreateVirtualUART() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testDisconnect() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetHardwareLibrary() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetListeners() {
-    // fail("Not yet implemented"); // TODO
-  }
 
   @Test
   public final void testGetPort() {
@@ -471,51 +367,6 @@ public class SerialTest {
   }
 
   @Test
-  public final void testGetPortSource() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetQueue() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetRXCodec() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetRXCodecKey() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetRXCount() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetTimeout() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetTXCodec() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testGetTXCodecKey() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testIsConnected() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
   public final void testIsRecording() throws Exception {
     serial.record();
     assertTrue(serial.isRecording());
@@ -531,139 +382,9 @@ public class SerialTest {
   }
 
   @Test
-  public final void testOnByte() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testOnConnect() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testOnDisconnect() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testPublishConnect() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testPublishDisconnect() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testPublishPortNames() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testPublishRX() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testPublishTX() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRead() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadByteArray() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadInt() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadIntArray() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadLine() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadLineChar() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadString() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadStringChar() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadStringInt() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testReadToDelimiter() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRecord() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRecordString() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRecordRX() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRecordTX() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRefresh() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRemoveByteListenerSerialDataListener() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testRemoveByteListenerString() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
   public final void testReset() {
     serial.reset();
     assertEquals(0, serial.available());
-  }
-
-  @Test
-  public final void testSetBufferSize() {
-    // fail("Not yet implemented"); // TODO
   }
 
   @Test
@@ -675,110 +396,14 @@ public class SerialTest {
     if (notready) {
       return;
     }
-
- 
-
     testReadAndWrite();
-
     // ==== decimal codec test ===
     // serial.setCodec("decimal");
-
-  
     testReadAndWrite();
-
     // ==== hex codec test ===
- 
-
     testReadAndWrite();
-
     // ==== ascii codec test ===
-   
-
     testReadAndWrite();
-  }
-
-  @Test
-  public final void testSetDTR() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testSetHardwareLibrary() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testSetRXCodec() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testSetTimeout() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testSetTXCodec() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testStopRecording() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testWriteByteArray() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testWriteInt() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testWriteIntArray() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testWriteString() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testWriteFile() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  public static void main(String[] args) {
-    try {
-
-      // LoggingFactory.init(Level.DEBUG);
-
-      SerialTest.setUpBeforeClass();
-      SerialTest test = new SerialTest();
-      test.testBytesToLong();
-      test.testConnectString();
-
-      JUnitCore junit = new JUnitCore();
-      Result result = junit.run(SerialTest.class);
-      log.info("Result: {}", result);
-      // WebGui gui = (WebGui) Runtime.start("webgui", "WebGui");
-      // ServiceInterface gui = Runtime.start("gui", "SwingGui");
-
-      Runtime.dump();
-
-      log.info("here");
-      // serial.removeByteListener(gui.getName());
-      // uart.removeByteListener(gui.getName());
-
-      Runtime.dump();
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
   }
 
 }
