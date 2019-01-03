@@ -173,7 +173,7 @@ public class VirtualServoController extends Service implements ServoController {
         pos = startPos + deltaTime * velocity;
 
         log.info("incremental move {} from {} to {} position at deta time {} ms is {}", servo.getName(), startPos, targetPos, deltaTime, pos / 1000);
-        jme.updatePosition(servo.getName(), lastPos - (pos / 1000));
+        jme.rotateTo(servo.getName(), lastPos - (pos / 1000));
         // eventQueue.add()
         // servo.writeMicroseconds(uS);
         // Message msg = Message.createMessage(getName(), jme.getName(), "servoMoveTo", new Object[] { servo });

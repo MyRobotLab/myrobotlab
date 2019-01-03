@@ -798,18 +798,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     
-    // make class specific data & resource directories for this service
-    File dir = new File(getDataDir());
-    dir.mkdirs();
     /**
      * <pre>
      * necessary ?
      *
+    File dir = new File(getDataDir());
+    dir.mkdirs();
     dir = new File(getResourceDir());
     dir.mkdirs();
     */
     
-    // xxx
     try {// FIXME !!! AFTER MERGE !!!
       serviceType = getMetaData(this.getClass().getCanonicalName());
     } catch (Exception e) {
@@ -1495,8 +1493,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
           // return
           return retobj;
         } catch (Exception e1) {
-          log.error("boom goes method {}", mC.getName());
-          Logging.logError(e1);
+          log.error("boom goes method {}", mC.getName(), e1);
         }
 
       }

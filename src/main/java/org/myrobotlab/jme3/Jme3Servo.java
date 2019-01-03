@@ -1,5 +1,6 @@
 package org.myrobotlab.jme3;
 
+import org.myrobotlab.service.JMonkeyEngine;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualServo;
 import org.python.jline.internal.Log;
@@ -15,8 +16,8 @@ import com.jme3.scene.shape.Box;
  */
 public class Jme3Servo extends Jme3Object implements VirtualServo {
 
-  public Jme3Servo(Node node) {
-    super(node);
+  public Jme3Servo(JMonkeyEngine jme, Node node) {
+    super(jme, node);
     // TODO Auto-generated constructor stub
   }
 
