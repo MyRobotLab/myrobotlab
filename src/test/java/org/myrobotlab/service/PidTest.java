@@ -3,10 +3,17 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.logging.LoggingFactory;
 
 public class PidTest {
 
+  @Before
+  public void setUp() throws Exception {
+    LoggingFactory.init("WARN");
+  }
+  
   @Test
   public void testCompute() {
     Pid pid = (Pid) Runtime.start("pid", "Pid");

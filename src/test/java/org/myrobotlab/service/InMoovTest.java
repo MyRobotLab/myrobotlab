@@ -38,9 +38,8 @@ public class InMoovTest implements PinArrayListener {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+	  LoggingFactory.init("WARN");
 		log.info("setUpBeforeClass");
-
-
 		// FIXME - needs a seemless switch
 		if (useVirtualHardware) {
 			virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
@@ -50,27 +49,16 @@ public class InMoovTest implements PinArrayListener {
 		}
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
 
 	@Before
 	public void setUp() throws Exception {
-
 		/**
 		 * Arduino's expected state before each test is
 		 * 'connected' with no devices, no pins enabled
 		 */
-
-
 		uart.clear();
 		uart.setTimeout(100);
 	}
-
-	@Test
-	public void testReleaseService() {
-	}
-
 
   @Override
   public boolean isLocal() {
@@ -90,7 +78,6 @@ public class InMoovTest implements PinArrayListener {
     
   }
   
-
   @Test
   public void testMinimalScript() throws ClientProtocolException, IOException {
     Python python = (Python)Runtime.start("python", "Python");
@@ -100,48 +87,6 @@ public class InMoovTest implements PinArrayListener {
   }
   
 
-  public static void main(String[] args) {
-    try {
-      
-      boolean runMainOnly = true;
-      
-      // LoggingFactory.init("INFO");
-      InMoovTest.setUpBeforeClass();
-      
-     // Runtime.start("webgui", "WebGui");
-     //  Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
-
-      
-      
-      if (virtual != null) {
-        virtual.connect(port);
-      }
-      
-      
-      InMoovTest test = new InMoovTest();
-      
-      
-      test.testMinimalScript();
-    
-      // test something specific
-      // test.testConnectString();
-      
-      if (runMainOnly){
-        return;
-      }
-
-      // run junit as java app
-      JUnitCore junit = new JUnitCore();
-      Result result = junit.run(InMoovTest.class);
-      log.info("Result was: {}", result);
-
-      // Runtime.dump();
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
 
 
 }
