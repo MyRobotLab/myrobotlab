@@ -275,14 +275,15 @@ public class JMonkeyEngine extends Service implements ActionListener,
       
       jme.setRotation("i01.torso.midStom", "-y");
       // jme.setMapper("i01.torso.midStom", 0, 180, 120, 60);
-      jme.rotateOnAxis("i01.torso.midStom", "x", 180);
+      jme.rotateOnAxis("i01.torso.midStom", "y", 180);
       jme.bind("i01.torso.midStom", "i01.torso.lowStom");
-/*
+
       jme.setRotation("i01.torso.topStom", "z");
       jme.setMapper("i01.torso.topStom", 0, 180, 80, 100);
+      jme.rotateOnAxis("i01.torso.topStom", "x", 90);
       jme.moveTo("i01.torso.topStom", 0, 0.2625f, 0.025f); // this is a translation to an initial position
-//      jme.bind("i01.torso.topStom", "i01.torso.midStom");
-      
+      jme.bind("i01.torso.topStom", "i01.torso.midStom");
+  /*    
       jme.putNode("rightS");
       jme.moveTo("rightS", 0, 0.75f, 0);
       jme.setRotation("rightS", "z");
@@ -1573,8 +1574,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
     putNode(rootNode);
 
     // AH HAA !!! ... so JME thread can only do this :P
-    loadInMoov();
-    //loadModels();
+    // loadInMoov();
+    loadModels();
   }
 
   public void putNode(Spatial spatial) {

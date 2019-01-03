@@ -126,8 +126,8 @@ public class Jme3Object implements Savable {
       // Geometry bb = WireBox.makeGeometry((BoundingBox)
       // spatial.getWorldBound());
       // spatial.getWorldBound();
-      Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
-      // Geometry newBb = WireBox.makeGeometry((BoundingBox) node.getWorldBound());
+      // Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
+      Geometry newBb = WireBox.makeGeometry((BoundingBox) node.getWorldBound());
       // Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Light/PBRLighting.j3md");
       
       Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
