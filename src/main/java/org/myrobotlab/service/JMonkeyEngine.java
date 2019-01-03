@@ -278,7 +278,8 @@ public class JMonkeyEngine extends Service {
   public static void main(String[] args) {
     try {
 
-      // FIXME - ADD DEFAULT ROTATION !!! ... default"move" & default"rotate" & default rotationalMask !!!
+      // FIXME - ADD DEFAULT ROTATION !!! ... default"move" & default"rotate" &
+      // default rotationalMask !!!
       // FIXME - something to autoAttach ! ... even at origin position
 
       LoggingFactory.init(Level.INFO);
@@ -531,10 +532,10 @@ public class JMonkeyEngine extends Service {
     putNode("i01.head.jaw", "i01.head.rothead", "Models/jaw.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1), new Vector3f(-5, 60, -50), 90);
 
     save("inmoov-jme.json");
-    
+
     // Vector3D vector = new Vector3D(7, 3, 120);
     load("inmoov-jme.json");
-    
+
     save("inmoov-jme1.json");
   }
 
@@ -575,7 +576,6 @@ public class JMonkeyEngine extends Service {
     }
     return nodes.put(name, new Jme3Object(this, name, parentName, assetPath, mapper, rotationMask, localTranslation, currentAngle));
   }
-  
 
   public boolean load(String jsonPath) {
     try {

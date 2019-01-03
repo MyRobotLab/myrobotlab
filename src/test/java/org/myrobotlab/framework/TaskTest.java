@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 public class TaskTest {
 
   public final static Logger log = LoggerFactory.getLogger(TaskTest.class);
-  
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     LoggingFactory.init("WARN");
@@ -32,23 +32,23 @@ public class TaskTest {
     catcher.subscribe("runtime", "getUptime");
     Runtime runtime = Runtime.getInstance();
     runtime.addTask(500, "getUptime");
-    
+
     BlockingQueue<Message> msgs = catcher.waitForMsgs(2, 1100);
-    
+
     log.info("responded task events - expecting 2 got {}", msgs.size());
     assertTrue(msgs.size() == 2);
-    
+
     runtime.purgeTask("getUptime");
     catcher.clear();
-    
+
     Service.sleep(1000);
-    
+
     log.info("responded task events - expecting 0 got {}", msgs.size());
     assertTrue(msgs.size() == 0);
-    
+
     catcher.clear();
   }
-  
+
   public void onUptime(String data){
     log.info("uptime {}", data);
   }

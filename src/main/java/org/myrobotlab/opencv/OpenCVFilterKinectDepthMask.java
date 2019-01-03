@@ -77,7 +77,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepthMask.class);
-  
+
   IplImage mask = null;
 
   public OpenCVFilterKinectDepthMask(String name) {
@@ -107,8 +107,7 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
   private IplImage getDepthMask(int minDepth, int maxDepth, IplImage depth, IplImage video) {
 
-    if (video == null) 
-    {
+    if (video == null) {
       // create a 1 channel mask
       video = cvCreateImage(cvSize(depth.width(), depth.height()), 8, 1);
     }
@@ -136,14 +135,13 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
 
         minDepth = 6000;
         maxDepth = 20000;
-                
-        
+
         if (video.nChannels() == 3) {
-          /* do nothing
-          video.put(colorIndex, (byte) c.getBlue());
-          video.put(colorIndex + 1, (byte) c.getRed());
-          video.put(colorIndex + 2, (byte) c.getGreen());
-          */ 
+          /*
+           * do nothing video.put(colorIndex, (byte) c.getBlue());
+           * video.put(colorIndex + 1, (byte) c.getRed()); video.put(colorIndex
+           * + 2, (byte) c.getGreen());
+           */
           if (value > minDepth && value < maxDepth) {
             // maskBuffer.put(colorIndex, (byte) 255); - do nothing
           } else {
@@ -152,16 +150,15 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
             maskBuffer.put(colorIndex + 1, (byte) 0);
             maskBuffer.put(colorIndex + 2, (byte) 0);
           }
-          
+
         } else if (video.nChannels() == 1) {
-          
+
           if (value > minDepth && value < maxDepth) {
             maskBuffer.put(colorIndex, (byte) 255);
           } else {
             maskBuffer.put(colorIndex, (byte) 0);
           }
         }
-
 
         // Sets the pixel to a value (greyscale).
         // maskBuffer.put(index, (byte)hsv);

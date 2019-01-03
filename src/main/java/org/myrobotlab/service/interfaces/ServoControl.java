@@ -114,10 +114,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * and only" single parameter attachServoController(controller)
    * 
    * if no controller is provided, last used is set from json related.
+   * 
    * @throws Exception
    *           e
    */
   void attach() throws Exception;
+
   /**
    * @param degreesPerSecond
    *          degrees per second rotational velocity cm per second linear
@@ -245,9 +247,10 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * synchronizing servos together e.g. leftEye.sync(rightEye)
    */
   public void sync(ServoControl sc);
-  
+
   /**
    * unsync a servo
+   * 
    * @param sc
    */
   public void unsync(ServoControl sc);
@@ -344,9 +347,9 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   String getControllerName();
 
   boolean isAttached();
-  
+
   ServoControl publishMoveTo(ServoControl sc);
 
   Double getLastPos();
-  
+
 }

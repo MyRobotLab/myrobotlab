@@ -99,15 +99,15 @@ public class OpenCVFilterResize extends OpenCVFilter {
     Mat res = resizeImage(resizedMat, destWidth, destHeight);
     return converterToMat.convertToIplImage(converterToIpl.convert(res));
   }
-  
+
   public static IplImage resizeImage(final IplImage img, float percent) {
-    int newWidth = (int)(img.width() * percent);
-    int newHeight = (int)(img.height() * percent);
+    int newWidth = (int) (img.width() * percent);
+    int newHeight = (int) (img.height() * percent);
     IplImage ret = IplImage.create(newWidth, newHeight, img.depth(), img.nChannels());
     cvResize(img, ret, Imgproc.INTER_AREA);
     return ret;
   }
-  
+
   public IplImage resizeNoAspect(final IplImage image, int width, int height) {
     destWidth = width;
     destHeight = height;
@@ -115,66 +115,63 @@ public class OpenCVFilterResize extends OpenCVFilter {
     Mat res = resizeImage(resizedMat, destWidth, destHeight);
     return converterToMat.convertToIplImage(converterToIpl.convert(res));
   }
-  
-  
+
   public static IplImage resizeImageMaintainAspect(final IplImage img, int maxWidth, int maxHeight) {
-  
+
     int scaledWidth = img.width();
     int scaledHeight = img.height();
-    
+
     int deltaWidth = maxWidth - img.width();
     int deltaHeight = maxHeight - img.height();
-    
+
     boolean widthConstrained = (deltaWidth <= deltaHeight);
     boolean heightConstrained = (deltaWidth >= deltaHeight);
-    
+
     if (widthConstrained) {
-        scaledWidth = maxWidth;
-        scaledHeight = (scaledWidth * img.height()) / img.width();
+      scaledWidth = maxWidth;
+      scaledHeight = (scaledWidth * img.height()) / img.width();
     }
 
     if (heightConstrained) {
-        scaledHeight = maxHeight;
-        scaledWidth = (scaledHeight * img.width()) / img.height();
+      scaledHeight = maxHeight;
+      scaledWidth = (scaledHeight * img.width()) / img.height();
     }
-    
+
     IplImage ret = IplImage.create(scaledWidth, scaledHeight, img.depth(), img.nChannels());
-    
+
     // Imgproc.INTER_CUBIC
-    
+
     cvResize(img, ret, Imgproc.INTER_AREA);
-    // IplImage img2 = IplImage.create(maxWidth, maxHeight, img.depth(), img.nChannels());
-    
+    // IplImage img2 = IplImage.create(maxWidth, maxHeight, img.depth(),
+    // img.nChannels());
+
     // copy into the center
-    
-    return ret;
-}
-  /*
-  public IplImage resizeWithAspect(IplImage img, int maxWidth, int maxHeight) {
-    int maxArea = maxWidth * maxHeight;
-    
-    // find the dimension (w or h) where when the original image is scaled
-    // the first dimension which "fits" determines the percentage of what
-    // the image should scale to
-    int dw = Math.abs(maxWidth - img.width());
-    int dh = Math.abs(maxHeight - img.height());
-    
-    boolean alignToWidth = (dw )
-    
-    // if the maxWidth & 
-    
-    int newWidth = (int)(img.width() * percent);
-    int newHeight = (int)(img.height() * percent);
-    IplImage ret = IplImage.create(800, 60, img.depth(), img.nChannels());
-    cvResize(img, ret, Imgproc.INTER_AREA);
-    
-    // resize with black padding ....
-    
-    // then center & copy the image
-    
+
     return ret;
   }
-  */
+  /*
+   * public IplImage resizeWithAspect(IplImage img, int maxWidth, int maxHeight)
+   * { int maxArea = maxWidth * maxHeight;
+   * 
+   * // find the dimension (w or h) where when the original image is scaled //
+   * the first dimension which "fits" determines the percentage of what // the
+   * image should scale to int dw = Math.abs(maxWidth - img.width()); int dh =
+   * Math.abs(maxHeight - img.height());
+   * 
+   * boolean alignToWidth = (dw )
+   * 
+   * // if the maxWidth &
+   * 
+   * int newWidth = (int)(img.width() * percent); int newHeight =
+   * (int)(img.height() * percent); IplImage ret = IplImage.create(800, 60,
+   * img.depth(), img.nChannels()); cvResize(img, ret, Imgproc.INTER_AREA);
+   * 
+   * // resize with black padding ....
+   * 
+   * // then center & copy the image
+   * 
+   * return ret; }
+   */
 
   public int getDestWidth() {
     return destWidth;

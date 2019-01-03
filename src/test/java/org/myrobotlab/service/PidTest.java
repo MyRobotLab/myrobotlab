@@ -13,13 +13,13 @@ public class PidTest {
   public void setUp() throws Exception {
     LoggingFactory.init("WARN");
   }
-  
+
   @Test
   public void testCompute() {
     Pid pid = (Pid) Runtime.start("pid", "Pid");
-    
+
     // pid.init("x");
-    
+
     pid.setPID("x", 10.0, 0.0, 0.0);
     pid.setMode("x", Pid.MODE_AUTOMATIC);
     pid.setOutputRange("x", 10.0, 50.0);

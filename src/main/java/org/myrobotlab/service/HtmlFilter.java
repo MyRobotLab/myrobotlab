@@ -84,7 +84,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   /**
    * The string to be appended to the input text Defaults to &lt;/pre&gt;
    * 
-   * @param postHtmlTag - a string to append to the text
+   * @param postHtmlTag
+   *          - a string to append to the text
    */
   public void setPostHtmlTag(String postHtmlTag) {
     this.postHtmlTag = postHtmlTag;
@@ -93,7 +94,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   /**
    * The string to be prepended to the input text Defaults to &lt;pre&gt;
    * 
-   * @param preHtmlTag - a string to prepend to the text.
+   * @param preHtmlTag
+   *          - a string to prepend to the text.
    */
   public void setPreHtmlTag(String preHtmlTag) {
     this.preHtmlTag = preHtmlTag;
@@ -103,13 +105,14 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
    * If this is true, the input text will be striped of html. If this is false,
    * the input text will get the pre and post html tags added to it.
    * 
-   * @param stripHtml - if true, all content between &lt;and &gt; will be removed.
+   * @param stripHtml
+   *          - if true, all content between &lt;and &gt; will be removed.
    */
   public void setStripHtml(boolean stripHtml) {
     this.stripHtml = stripHtml;
   }
 
-  // helper function to strip html tags. 
+  // helper function to strip html tags.
   public static String stripHtml(String text) {
     if (StringUtils.isEmpty(text))
       return text;

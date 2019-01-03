@@ -119,12 +119,11 @@ public class Cron extends Service {
    * addTask - Add a task to the cron service to invoke a method on a service on
    * some schedule.
    * 
-   * @param cron
-   *          - The cron string to define the schedule
-   * @param serviceName
-   *          - The name of the service to invoke
-   * @param method
-   *          - the method on the service to invoke when the task starts.
+   * @param cron - The cron string to define the schedule
+   * 
+   * @param serviceName - The name of the service to invoke
+   * 
+   * @param method - the method on the service to invoke when the task starts.
    */
   public String addTask(String cron, String serviceName, String method) {
     return addTask(cron, serviceName, method, (Object[]) null);
@@ -134,14 +133,13 @@ public class Cron extends Service {
    * addTask - Add a task to the cron service to invoke a method on a service on
    * some schedule.
    * 
-   * @param cron
-   *          - The cron string to define the schedule
-   * @param serviceName
-   *          - The name of the service to invoke
-   * @param method
-   *          - the method on the service to invoke when the task starts.
-   * @param data
-   *          - additional objects/varags to pass to the method
+   * @param cron - The cron string to define the schedule
+   * 
+   * @param serviceName - The name of the service to invoke
+   * 
+   * @param method - the method on the service to invoke when the task starts.
+   * 
+   * @param data - additional objects/varags to pass to the method
    */
   public String addTask(String cron, String serviceName, String method, Object... data) {
     Task task = new Task(this, cron, serviceName, method, data);

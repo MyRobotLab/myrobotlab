@@ -22,7 +22,7 @@ public class FrameFileRecorder extends FrameRecorder {
     timestamp = System.currentTimeMillis();
     framesDir = rootDir + File.separator + timestamp;
     File dir = new File(framesDir);
-    dir.mkdirs();    
+    dir.mkdirs();
     if (format == null) {
       format = "png";
     }
@@ -33,17 +33,14 @@ public class FrameFileRecorder extends FrameRecorder {
   }
 
   @Override
-  public void record(Frame frame) throws Exception {  
+  public void record(Frame frame) throws Exception {
     String filename = String.format(framesDir + File.separator + "%08d.%s", frameIndex, format);
     OpenCV.saveToFile(filename, OpenCV.toImage(frame));
     ++frameIndex;
   }
 
   @Override
-  public void release() throws Exception {   
+  public void release() throws Exception {
   }
-  
-  
-  
 
 }

@@ -389,7 +389,7 @@ public class SerialTest {
 
   @Test
   public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
-      IllegalArgumentException, InvocationTargetException, Exception, InterruptedException {
+  IllegalArgumentException, InvocationTargetException, Exception, InterruptedException {
     log.info("testSetCodec");
 
     boolean notready = true;

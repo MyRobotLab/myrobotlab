@@ -31,5 +31,5 @@ import org.myrobotlab.framework.Message;
 public interface MessageListener {
 
   public void onMessage(Message msg);
-  
+
 }

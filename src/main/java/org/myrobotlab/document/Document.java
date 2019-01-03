@@ -38,7 +38,7 @@ public class Document {
     if (value == null) {
       data.remove(fieldName);
     } else {
-      data.put(fieldName, value);  
+      data.put(fieldName, value);
     }
   }
 
@@ -52,9 +52,10 @@ public class Document {
       data.put(fieldName, values);
     }
   }
-  
+
   /**
    * helper for expected single value fields
+   * 
    * @param fieldName
    * @return
    */
@@ -65,7 +66,6 @@ public class Document {
     }
     return null;
   }
-
 
   public void renameField(String oldField, String newField) {
     if (data.containsKey(oldField)) {

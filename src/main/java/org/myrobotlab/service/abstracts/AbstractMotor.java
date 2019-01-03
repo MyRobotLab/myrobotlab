@@ -67,7 +67,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   public final static Logger log = LoggerFactory.getLogger(AbstractMotor.class);
 
-  // my motor controller - TODO support multiple controllers ??? would virtual benefit ?
+  // my motor controller - TODO support multiple controllers ??? would virtual
+  // benefit ?
   protected transient MotorController controller = null;
   /**
    * list of names of possible controllers
@@ -89,7 +90,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // feedback
   Double positionCurrent; // aka currentPos
-  
+
   /**
    * a new "un-set" mapper for merging with default motorcontroller
    */
@@ -108,7 +109,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     super(n);
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     // "top" half of the mapper is set by the control
-    // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same input limits
+    // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
+    // input limits
     // "bottom" half of the mapper will be set by the controller
     mapper.map(-1.0, 1.0, null, null);
   }
@@ -375,12 +377,12 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     }
     return ret;
   }
-  
+
   // FIXME promote to interface
   public Mapper getMapper() {
     return mapper;
   }
-  
+
   // FIXME promote to interface
   public void setMapper(Mapper mapper) {
     this.mapper = mapper;

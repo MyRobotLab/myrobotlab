@@ -25,7 +25,7 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-	static final Integer MRLCOMM_VERSION = 58;
+  static final Integer MRLCOMM_VERSION = 58;
 
   public void generateDefinitions() throws IOException {
     generateDefinitions(new File("src/main/resources/resource/Arduino/generate/arduinoMsgs.schema"));
@@ -189,7 +189,7 @@ public class ArduinoMsgGenerator {
     br.close();
 
     fileSnr.put("%enableAck%", "enableAck(b);");
-    
+
     // file templates
     fileSnr.put("%MRLCOMM_VERSION%", MRLCOMM_VERSION.toString());
     fileSnr.put("%defines%", defines.toString());
@@ -627,7 +627,7 @@ public class ArduinoMsgGenerator {
 
     snr.put("%cppWrite%", cppWrite.toString());
     snr.put("%javaWrite%", javaWrite.toString());
-    snr.put("%javaSendRecord%", javaSendRecord.toString());    
+    snr.put("%javaSendRecord%", javaSendRecord.toString());
 
     javaSendRecord.append("\t\t\t\trecord.write(txBuffer.toString().getBytes());\n");
 
@@ -662,8 +662,6 @@ public class ArduinoMsgGenerator {
       methodSnr.put("vJavaHandleCase", "");
       methodSnr.put("vJavaGeneratedCallBack", "");
 
-      
-      
     } else {
       // cpp recv methods
       methodSnr.put("hMethod", "");
@@ -681,8 +679,8 @@ public class ArduinoMsgGenerator {
           javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n\t\t\t}" + javaCaseFooter);
       methodSnr.put("vJavaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("vJavaMethod", "");
-      
-     // snr.put("%enableAck%", "enableAck(b);");
+
+      // snr.put("%enableAck%", "enableAck(b);");
     }
 
     log.info("\n\n{}", hMethod);

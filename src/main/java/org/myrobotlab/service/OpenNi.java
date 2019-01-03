@@ -50,8 +50,9 @@ public class OpenNi extends Service // implements
 // HandTracker.NewFrameListener
 {
 
-	public boolean capturing = false;
-	public class Worker extends Thread {
+  public boolean capturing = false;
+
+  public class Worker extends Thread {
     public boolean isRunning = false;
     public String type = null;
 
@@ -69,12 +70,10 @@ public class OpenNi extends Service // implements
             getData();
           } else if ("hands".equals(type)) {
             drawHand();
-            
-          } 
-          else if ("map3D".equals(type)) {
-          	get3DData();
-          }
-          else {
+
+          } else if ("map3D".equals(type)) {
+            get3DData();
+          } else {
             error("unknown worker %s", type);
             isRunning = false;
           }
@@ -639,12 +638,12 @@ public class OpenNi extends Service // implements
   public String format(PVector v) {
     return String.format("%d %d %d", Math.round(v.x), Math.round(v.y), Math.round(v.z));
   }
-  
+
   public OpenNiData get3DData() {
-  	OpenNiData data = new OpenNiData();
-  	context.update();
-  	data.depthPImage = context.depthImage();
-  	data.depthMapRW = context.depthMapRealWorld();
+    OpenNiData data = new OpenNiData();
+    context.update();
+    data.depthPImage = context.depthImage();
+    data.depthMapRW = context.depthMapRealWorld();
     data.depth = data.depthPImage.getImage();
     frame = data.depth;
     ++frameNumber;
@@ -667,7 +666,7 @@ public class OpenNi extends Service // implements
     // we should be able to use this to compute the depth for each pixel in
     // the RGB image.
     data.depthMap = context.depthMap();
-    //data.depthMapRW = context.depthMapRealWorld();
+    // data.depthMapRW = context.depthMapRealWorld();
 
     if (enableRGB) {
       data.rbgPImage = context.rgbImage();
@@ -815,14 +814,11 @@ public class OpenNi extends Service // implements
 
   // publishing the big kahuna <output>
   public final OpenNiData publishOpenNIData(OpenNiData data) {
-	if (data!=null)
-		{
-		capturing = true;
-		}
-	else
-		{
-			capturing = false;	
-		}
+    if (data != null) {
+      capturing = true;
+    } else {
+      capturing = false;
+    }
     return data;
   }
 
@@ -916,10 +912,9 @@ public class OpenNi extends Service // implements
     }
     worker = new Worker("map3D");
     worker.start();
-  	
+
   }
-  
-  
+
   // shutdown worker
   public void stopCapture() {
     if (worker != null) {
@@ -965,11 +960,10 @@ public class OpenNi extends Service // implements
     meta.addCategory("video", "vision", "sensor", "telerobotics");
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "video streaming service for webgui.");
     // meta.addDependency("com.googlecode.simpleopenni", "1.96");
-    
-    meta.addDependency("simpleopenni",  "openni", "1.96");
-    meta.addDependency("org.myrobotlab.openni",  "openni-deps", "0.1", "zip");
+
+    meta.addDependency("simpleopenni", "openni", "1.96");
+    meta.addDependency("org.myrobotlab.openni", "openni-deps", "0.1", "zip");
     return meta;
   }
-
 
 }

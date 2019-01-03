@@ -81,9 +81,9 @@ public class InMoovGui extends ServiceGui implements ActionListener {
     inmoovPane.addTab("General", generalIcon, generalPanel);
     generalPanel.setLayout(new GridLayout(3, 2, 0, 0));
     notReadyLabel1.setForeground(Color.RED);
-    
+
     generalPanel.add(notReadyLabel1);
-    
+
     generalPanel.add(notReadyLabel2);
 
     JLabel lblNewLabel = new JLabel(" Language : ");

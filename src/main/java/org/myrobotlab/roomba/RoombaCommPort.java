@@ -122,7 +122,6 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     computeSafetyFault();
   }
 
-  
   public boolean connect(String portid) {
     logmsg("connecting to port '" + portid + "'");
     portname = portid;
@@ -133,10 +132,10 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     }
 
     try {
-    openPort();
-    } catch(Exception e){
-    	log.error("cannot connect", e);
-    	return false;
+      openPort();
+    } catch (Exception e) {
+      log.error("cannot connect", e);
+      return false;
     }
 
     if (connected) {
@@ -241,10 +240,11 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   /**
    * internal method, used by connect() FIXME: make it faile more gracefully,
    * recognize bad port
- * @throws IOException 
+   * 
+   * @throws IOException
    */
   private void openPort() throws IOException {
-	  serial.open(portname, rate, databits, stopbits, parity);
+    serial.open(portname, rate, databits, stopbits, parity);
   }
 
   /*

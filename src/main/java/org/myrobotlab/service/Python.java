@@ -265,7 +265,7 @@ public class Python extends Service {
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
   transient InputQueueThread inputQueueThread;
   transient PythonInterpreter interp = null;
-  //transient PIThread interpThread = null;
+  // transient PIThread interpThread = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
   int interpreterThreadCount = 0;
@@ -504,15 +504,16 @@ public class Python extends Service {
   }
 
   /**
-   * This method will execute and block a string that represents a python script.
-   * Python return statement as return
+   * This method will execute and block a string that represents a python
+   * script. Python return statement as return
    * 
    * @param code
    *          - the script to execute
    * @return - returns String of python return statement
    */
   public String evalAndWait(String code) {
-    // moz4r : eval() no worky for what I want, don't want to mod it & break things
+    // moz4r : eval() no worky for what I want, don't want to mod it & break
+    // things
     String pyOutput = null;
     log.info("eval(String) \n{}", code);
     if (interp == null) {
@@ -734,8 +735,9 @@ public class Python extends Service {
   }
 
   /**
-   * stop all scripts
-   * (not sure the pros/cons of this management vs thread.interruptAllThreads())
+   * stop all scripts (not sure the pros/cons of this management vs
+   * thread.interruptAllThreads())
+   * 
    * @return
    */
   public boolean stop() {

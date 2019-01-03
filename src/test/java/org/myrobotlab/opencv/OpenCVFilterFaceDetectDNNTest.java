@@ -17,26 +17,26 @@ import java.io.IOException;
 public class OpenCVFilterFaceDetectDNNTest {
 
   boolean debug = false; 
-  
+
   @Before
   public void setUp() {
     LoggingFactory.init("WARN");
   }
-  
+
   @Test
   public void testFaceFilterDNN() throws IOException {
-    
+
     // opencv needs to be installed if it's not
     if (!Repo.getInstance().isInstalled("OpenCV")) 
       Repo.getInstance().install("OpenCV");
-    
+
     OpenCVFilterFaceDetectDNN filter = new OpenCVFilterFaceDetectDNN("filter");
     String filename = "src/test/resources/OpenCV/multipleFaces.jpg";
     //String filename = "pose.jpg";
     //String filename = "pose2.jpg";
     //String filename = "pose3.jpg";
     //String filename = "pose4.jpg";
-   
+
     IplImage image = cvLoadImage(filename);
     filter.setData(new OpenCVData(filename, 0, 0, OpenCV.toFrame(image)));
     assertNotNull(image);
@@ -54,9 +54,9 @@ public class OpenCVFilterFaceDetectDNNTest {
     }
     int numFound = filter.bb.size();
     assertEquals(numFound, 5);
-    
+
   }
-  
- 
-    
+
+
+
 }

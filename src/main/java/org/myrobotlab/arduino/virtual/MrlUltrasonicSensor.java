@@ -21,8 +21,8 @@ public class MrlUltrasonicSensor extends Device {
   public int getRandom(int min, int max) {
     return min + (int) (Math.random() * ((max - min) + 1));
   }
-  
-  String F(String x){
+
+  String F(String x) {
     return x;
   }
 

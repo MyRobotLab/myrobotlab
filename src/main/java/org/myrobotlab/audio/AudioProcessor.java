@@ -100,15 +100,14 @@ public class AudioProcessor extends Thread {
           return data;
         }
         /*
-        fis = new FileInputStream(file);
-        bis = new BufferedInputStream(fis);
-        in = AudioSystem.getAudioInputStream(bis);
-        */
-        
+         * fis = new FileInputStream(file); bis = new BufferedInputStream(fis);
+         * in = AudioSystem.getAudioInputStream(bis);
+         */
+
         in = AudioSystem.getAudioInputStream(file);
-        
+
       } else if (data.inputStream != null) {
-        in =  AudioSystem.getAudioInputStream(data.inputStream);
+        in = AudioSystem.getAudioInputStream(data.inputStream);
       }
 
       AudioFormat baseFormat = in.getFormat();
@@ -197,19 +196,16 @@ public class AudioProcessor extends Thread {
 
         }
         // Stop
-        
+
         line.drain();
         line.stop();
         line.close();
         din.close();
         in.close();
         /*
-        if (bis != null)
-        bis.close();
-        if (fis != null)
-        fis.close();
-        */
-        
+         * if (bis != null) bis.close(); if (fis != null) fis.close();
+         */
+
         // System.gc();
 
         audioFile.invoke("publishAudioEnd", data);
@@ -297,20 +293,18 @@ public class AudioProcessor extends Thread {
   }
 
   /*
-   * <pre>
-  public static void main(String[] args) {
-    
-   AudioPlayer player = new AudioPlayer();
-   
-   // jlp.play("NeroSoundTrax_test1_PCM_Stereo_CBR_16SS_6000Hz.wav");
-   AudioData data = new AudioData("aaa.mp3"); // data.volume = 120.0f;
-   data.balance = -1;
-   
-   player.play(data);
-   
-  }
-  </pre>
-*/
+   * <pre> public static void main(String[] args) {
+   * 
+   * AudioPlayer player = new AudioPlayer();
+   * 
+   * // jlp.play("NeroSoundTrax_test1_PCM_Stereo_CBR_16SS_6000Hz.wav");
+   * AudioData data = new AudioData("aaa.mp3"); // data.volume = 120.0f;
+   * data.balance = -1;
+   * 
+   * player.play(data);
+   * 
+   * } </pre>
+   */
 
   public double getVolume() {
     return volume;

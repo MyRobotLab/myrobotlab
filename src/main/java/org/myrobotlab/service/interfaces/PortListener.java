@@ -4,8 +4,8 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface PortListener extends NameProvider {
 
-	  public void onConnect(String portName);
+  public void onConnect(String portName);
 
-	  public void onDisconnect(String portName);
-	  
+  public void onDisconnect(String portName);
+
 }

@@ -25,8 +25,6 @@ public class CleverBot extends Service {
   boolean initialized = false;
   boolean continueToTalkToSelf = true;
 
-
-
   public CleverBot(String n) {
     super(n);
     init();
@@ -77,7 +75,7 @@ public class CleverBot extends Service {
         input = bot1session.think(input);
       }
     } catch (Exception e) {
-      log.error("talkToSelf threw",e);
+      log.error("talkToSelf threw", e);
     }
 
     return input;
@@ -104,7 +102,7 @@ public class CleverBot extends Service {
   public static void main(String[] args) {
     LoggingFactory.init();
     try {
-      CleverBot cleverbot = (CleverBot)Runtime.start("cleverbot","CleverBot");
+      CleverBot cleverbot = (CleverBot) Runtime.start("cleverbot", "CleverBot");
 
       log.info(cleverbot.chat("Hi"));
 

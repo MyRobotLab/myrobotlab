@@ -575,22 +575,22 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   }
 
-@Override
-public String publishConnect() {
-	// TODO Auto-generated method stub
-	return null;
-}
+  @Override
+  public String publishConnect() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-@Override
-public String publishDisconnect() {
-	// TODO Auto-generated method stub
-	return null;
-}
+  @Override
+  public String publishDisconnect() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-@Override
-public Status publishError() {
-	// TODO Auto-generated method stub
-	return null;
-}
+  @Override
+  public Status publishError() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

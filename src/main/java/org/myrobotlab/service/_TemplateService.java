@@ -31,15 +31,16 @@ public class _TemplateService extends Service {
     meta.addDescription("used as a general template");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
-    
+
     // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
     // meta.addDependency("orgId", "artifactId", "2.4.0");
-    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus", "2.3.1-1.4");
-    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus-platform", "2.3.1-1.4");
-    
+    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus",
+    // "2.3.1-1.4");
+    // meta.addDependency("org.bytedeco.javacpp-presets",
+    // "artoolkitplus-platform", "2.3.1-1.4");
+
     // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
-    
-    
+
     meta.setAvailable(false);
     meta.addCategory("general");
     return meta;

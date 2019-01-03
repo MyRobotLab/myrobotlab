@@ -87,7 +87,7 @@ public class PortStream extends Port {
     // we force flushing here !
     out.flush();
   }
-  
+
   public void write(int[] data) throws IOException {
     // TODO: is there a more effecient way to do this?
     for (int i = 0; i < data.length; i++) {

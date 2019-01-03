@@ -20,7 +20,8 @@ public class Database extends Service {
   public final static Logger log = LoggerFactory.getLogger(Database.class);
 
   public static String driver = "com.mysql.jdbc.Driver";
-  public static String connectionString = ""; // e.g.// "jdbc:mysql://HOST/DATABASE"
+  public static String connectionString = ""; // e.g.//
+                                              // "jdbc:mysql://HOST/DATABASE"
   public static String jdbcUser = "user";
   public static String jdbcPassword = "password";
   static Connection connection = null;
@@ -80,12 +81,12 @@ public class Database extends Service {
 
   public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
-			LoggingFactory.init("INFO");
+    LoggingFactory.init("INFO");
 
-			//connect();
-			//ResultSet rs = executeQuery("SELECT * FROM uptime");
-			//while (rs.next()) {
-			//log.info(rs.getString("id"));			  
-			//}
+    // connect();
+    // ResultSet rs = executeQuery("SELECT * FROM uptime");
+    // while (rs.next()) {
+    // log.info(rs.getString("id"));
+    // }
   }
 }

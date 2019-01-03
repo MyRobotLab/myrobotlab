@@ -26,12 +26,12 @@ import java.util.ArrayList;
 public class ServiceSmokeTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
-  
+
   @Before
   public void setUp() {
     LoggingFactory.init("WARN");
   }
-  
+
   @Test
   public void testAllServiceSerialization() throws IOException {
 
@@ -47,7 +47,7 @@ public class ServiceSmokeTest {
     blacklist.add("org.myrobotlab.service.SlamBad");
     // why the heck does this one fail?!
     // blacklist.add("org.myrobotlab.service._TemplateService");
-    
+
     // TODO: lets skip a few painful services to test additionally.
     blacklist.add("org.myrobotlab.service.Cli");
     blacklist.add("org.myrobotlab.service.WebGui");
@@ -59,29 +59,29 @@ public class ServiceSmokeTest {
     blacklist.add("org.myrobotlab.service.PythonProxy");
     blacklist.add("org.myrobotlab.service.Sprinkler");
     blacklist.add("org.myrobotlab.service._TemplateProxy");
-    
+
     // just don't want a swing gui opening up in the unit test.
     blacklist.add("org.myrobotlab.service.SwingGui");
-    
-    
+
+
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();
-    
-    
-    
+
+
+
     // we need to load a service for each service type we have.
     String[] x = serviceData.getServiceTypeNames();
-    
-    
+
+
     for (String serviceType : x) {
       log.info("Service Type: {}", serviceType);
     }
     log.info("Press any key to continue");
     //System.in.read();
     for (String serviceType : x) {
-      
+
       long start = System.currentTimeMillis();
-      
+
       log.info("Testing service type {}", serviceType);
       if (blacklist.contains(serviceType)) {
         log.info("Skipping known problematic service {}", serviceType);
@@ -97,25 +97,25 @@ public class ServiceSmokeTest {
       long delta = System.currentTimeMillis() - start;
       log.info("Done testing serialization of {} in {} ms", serviceType, delta);
       //System.in.read();
-      
+
     }
-    
-    
+
+
     Runtime.releaseAll();
-    
+
     log.info("Done with tests..");
-    
+
     assertTrue(true);
   }
-  
+
   public void testSerialization(ServiceInterface s) {
-    
+
     // TODO: perhaps some extra service type specific initialization?!
     String res = CodecUtils.toJson(s);
     assertNotNull(res);
     log.info("Serialization successful for {}", s.getType());
-   
-    
+
+
     // ServiceInterface s = CodecUtils.fromJson(res, clazz)
     // assertNotNull(res);
   }

@@ -5,7 +5,6 @@ package org.myrobotlab.genetic;
 
 import java.util.ArrayList;
 
-
 /**
  * @author Christian/Calamity
  *

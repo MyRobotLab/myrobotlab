@@ -289,8 +289,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     createPinList();
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real" motor controller because
-    // it doesn't inherit from AbstractMotorController & Servo's aren't merged with Motors
+    // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real"
+    // motor controller because
+    // it doesn't inherit from AbstractMotorController & Servo's aren't merged
+    // with Motors
     // it will need to wait for the grand unification of Servos & Motors
   }
 
@@ -510,7 +512,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     // this is guaranteed to be between -1.0 and 1.0
     // double powerLevel = mc.getPowerLevel();
-    
+
     double powerLevel = motorCalcOutput(mc);
 
     if (Motor.class == type) {
@@ -880,9 +882,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       try {
         // detachServoControl already call servoDetachPin
         // servoDetachPin((ServoControl) service);
-        if (service.isAttached(this))
-        {
-        detachServoControl((ServoControl) service);
+        if (service.isAttached(this)) {
+          detachServoControl((ServoControl) service);
         }
       } catch (Exception e) {
         // TODO Auto-generated catch block);
@@ -967,7 +968,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-  // currently not a "real" motor control - it has to wait for merging of Servo & Motor
+  // currently not a "real" motor control - it has to wait for merging of Servo
+  // & Motor
   @Override
   public List<String> getPorts() {
     // we use pins not ports
@@ -975,7 +977,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return ret;
   }
 
-  // currently not a "real" motor control - it has to wait for merging of Servo & Motor
+  // currently not a "real" motor control - it has to wait for merging of Servo
+  // & Motor
   @Override
   public Mapper getDefaultMapper() {
     // best guess :P
@@ -984,11 +987,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return mapper;
   }
 
-  // not used currently - should be refactored to use these methods for motor control
+  // not used currently - should be refactored to use these methods for motor
+  // control
   @Override
   public double motorCalcOutput(MotorControl mc) {
     double value = mc.calcControllerOutput();
     return value;
   }
-  
+
 }

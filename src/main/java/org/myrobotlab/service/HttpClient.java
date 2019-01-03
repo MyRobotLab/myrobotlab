@@ -66,12 +66,14 @@ import org.slf4j.Logger;
  *         TODO - asynchronous call back similar to AngularJS promise - or at
  *         least a callback method is called .. onHttpResponse
  * 
- *         Synchronous or Asynchronous - Synchronous by default, Asynchronous
- *         if a callback method is supplied or Non-Blocking method is called
- *         
- *         Check out - Fluent interface - https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
- *         
- *         - Proxies proxies proxies ! - https://memorynotfound.com/configure-http-proxy-settings-java/
+ *         Synchronous or Asynchronous - Synchronous by default, Asynchronous if
+ *         a callback method is supplied or Non-Blocking method is called
+ * 
+ *         Check out - Fluent interface -
+ *         https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
+ * 
+ *         - Proxies proxies proxies ! -
+ *         https://memorynotfound.com/configure-http-proxy-settings-java/
  */
 public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
 
@@ -92,10 +94,11 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
     meta.addDescription("a general purpose http client, used to fetch information on the web");
     meta.addCategory("network");
-    /* Runtime currently includes these dependencies
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");    
-    */
+    /*
+     * Runtime currently includes these dependencies
+     * meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+     * meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
+     */
     meta.setCloudService(false);
     return meta;
   }
@@ -148,7 +151,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       return new String(response.data);
     }
     return null;
-  } 
+  }
 
   public byte[] getBytes(String uri) throws ClientProtocolException, IOException {
     return processResponse((HttpUriRequest) new HttpGet(uri), null).data;
@@ -192,7 +195,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   public byte[] postBytes(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
     return processResponse((HttpUriRequest) new HttpPost(uri), fields).data;
   }
-  
+
   public HttpData getResponse(String uri) throws IOException {
     HttpData response = processResponse((HttpUriRequest) new HttpGet(uri), null);
     return response;
@@ -205,7 +208,7 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       fields = formFields;
     }
 
-    // Mats changed 2017-01-03. I think it was a bug 
+    // Mats changed 2017-01-03. I think it was a bug
     // if (request.getClass().equals(HttpPost.class) && formFields.size() > 0)
     if (request.getClass().equals(HttpPost.class) && fields.size() > 0) {
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(fields.size());
@@ -214,9 +217,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
         ((HttpPost) request).setEntity(new UrlEncodedFormEntity(nameValuePairs));
       }
     }
-    
+
     log.info("uri [{}]", request.getURI());
-    
+
     HttpResponse response = client.execute(request);
     StatusLine statusLine = response.getStatusLine();
     data.responseCode = statusLine.getStatusCode();
@@ -245,7 +248,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
    * 
    * contains more data than just the text, can be used for any content type
    * too, since the payload is in a byte[]
-   * @param data the http data
+   * 
+   * @param data
+   *          the http data
    * @return the http data
    * 
    */
@@ -256,7 +261,9 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   /**
    * publishing point for any http request this is the asynchronous callback
    * which will arrive typically at onHttpRespone(data)
-   * @param data the data
+   * 
+   * @param data
+   *          the data
    * @return the data
    * 
    */
@@ -268,7 +275,8 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     super.startService();
     if (client == null) {
       // new MultiThreadedHttpConnectionManager()
-      client = HttpClients.createSystem(); // modded by GroG to support system proxies
+      client = HttpClients.createSystem(); // modded by GroG to support system
+                                           // proxies
       // client = HttpClientBuilder.create().useSystemProperties();
       // client = HttpClients.createDefault();
     }
@@ -289,19 +297,18 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     try {
 
       HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
-      
+
       // <host>[:port] [passphrase]
-      
-      
-      InstallCert.main(new String[]{"searx.laquadrature.net:443"});
-      
+
+      InstallCert.main(new String[] { "searx.laquadrature.net:443" });
+
       String json = client.get("https://searx.laquadrature.net/?q=cat&format=json");
       log.info(json);
-      
+
       // Runtime.start("gui", "SwingGui");
       boolean done = true;
-      
-      if (done){
+
+      if (done) {
         return;
       }
       // this is how a listener might subscribe
@@ -309,9 +316,6 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       // with interface inspection ??
       client.addHttpResponseListener(client);
       client.addHttpDataListener(client);
-      
-      
-      
 
       // TODO - getByteArray(...)
       String index = client.get("https://www.cs.tut.fi/~jkorpela/forms/testing.html");

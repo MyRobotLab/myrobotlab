@@ -23,13 +23,8 @@ import io.github.firemaples.detect.Detect;
 import io.github.firemaples.language.Language;
 import io.github.firemaples.translate.Translate;
 
-
-
 public class AzureTranslator extends Service implements TextListener, TextPublisher {
 
-	
-
-	
   private static final long serialVersionUID = 1L;
 
   String toLanguage = "it";
@@ -69,10 +64,10 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
   }
 
   public void setCredentials(String clientSecret) {
-	
-    //Translate.setKey(clientID);
+
+    // Translate.setKey(clientID);
     Translate.setSubscriptionKey(clientSecret);
-    //Detect.setKey(clientID);
+    // Detect.setKey(clientID);
     Detect.setSubscriptionKey(clientSecret);
   }
 
@@ -114,13 +109,13 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
 
   @Override
   public void onText(String text) {
-      String cleanText;
-      try {
-        cleanText = translate(text);
-        invoke("publishText", cleanText);
-      } catch (Exception e) {
-        log.error("Unable to translate text! {} {}", text, e);
-      }
+    String cleanText;
+    try {
+      cleanText = translate(text);
+      invoke("publishText", cleanText);
+    } catch (Exception e) {
+      log.error("Unable to translate text! {} {}", text, e);
+    }
   }
 
 }

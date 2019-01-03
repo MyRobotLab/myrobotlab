@@ -38,16 +38,9 @@ public class LocalSpeechGui extends AbstractSpeechSynthesisGui implements Action
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(LocalSpeechGui.class);
 
-
   public LocalSpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-   
 
   }
-
-
-
-
-
 
 }

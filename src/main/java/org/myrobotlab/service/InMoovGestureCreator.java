@@ -700,9 +700,9 @@ public class InMoovGestureCreator extends Service {
 
   public void control_loadscri(JList control_list) {
     // Load the Python-Script (out Python-Service) (button bottom-left)
-   // Python python = (Python) Runtime.getService("python");
-   //  Script script = python.getScript();
-    pythonscript = "not supported";//script.getCode();
+    // Python python = (Python) Runtime.getService("python");
+    // Script script = python.getScript();
+    pythonscript = "not supported";// script.getCode();
 
     parsescript(control_list);
   }

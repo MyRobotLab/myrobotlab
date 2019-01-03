@@ -141,7 +141,6 @@ public class TestThrowerGui extends ServiceGui {
 
     // ---------------------------------------------------
 
-  
   }
 
   @Override

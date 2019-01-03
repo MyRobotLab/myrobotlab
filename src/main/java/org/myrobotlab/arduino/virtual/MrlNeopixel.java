@@ -15,30 +15,30 @@ public class MrlNeopixel extends Device {
   }
 
   /*
-  public void attach(int pin, int numPixels) {
-    
-  }
-  */
+   * public void attach(int pin, int numPixels) {
+   * 
+   * }
+   */
 
   public void setAnimation(int animation, int red, int green, int blue, int speed) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   void update() {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void neopixelWriteMatrix(int bufferSize, int[] buffer) {
     // TODO Auto-generated method stub
-    
+
   }
 
   public void attach(int pin, long numPixels) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

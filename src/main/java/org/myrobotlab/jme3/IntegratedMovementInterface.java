@@ -18,12 +18,20 @@ import com.jme3.system.AppSettings;
  */
 public interface IntegratedMovementInterface {
   public void updatePosition(ServoEventData event);
+
   public void setService(Service service);
+
   public void addObject(CollisionItem item);
+
   public void addObject(ConcurrentHashMap<String, CollisionItem> items);
+
   public void addPoint(Point point);
+
   public void setSettings(AppSettings settings);
+
   public void setShowSettings(boolean b);
+
   public void setPauseOnLostFocus(boolean b);
+
   public void start();
 }

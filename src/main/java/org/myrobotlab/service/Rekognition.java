@@ -36,243 +36,240 @@ import com.amazonaws.util.IOUtils;
 
 public class Rekognition extends Service {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	transient private AWSCredentials credentials;
-	transient private AmazonRekognition rekognitionClient;
+  transient private AWSCredentials credentials;
+  transient private AmazonRekognition rekognitionClient;
 
-	Regions region = Regions.US_WEST_2;
+  Regions region = Regions.US_WEST_2;
 
-	ByteBuffer lastImage;
-	List<Label> lastLabels;
+  ByteBuffer lastImage;
+  List<Label> lastLabels;
 
-	int maxLabels = 10;
-	float minConfidence = 77F;
+  int maxLabels = 10;
+  float minConfidence = 77F;
 
-	public final static Logger log = LoggerFactory.getLogger(Rekognition.class);
+  public final static Logger log = LoggerFactory.getLogger(Rekognition.class);
 
-	public Rekognition(String n) {
-		super(n);
-	}
+  public Rekognition(String n) {
+    super(n);
+  }
 
-	public void setMinConfidence(float confidence) {
+  public void setMinConfidence(float confidence) {
 
-	}
+  }
 
-	/**
-	 * This sets the aws credentials, this only needs to be done once! It encrypts
-	 * and saves the credentials in the .myrobotlab/store file. Once this is run
-	 * once
-	 * 
-	 * @param accessKey
-	 * @param secretKey
-	 */
-	public void setCredentials(String accessKey, String secretKey) {
-		Security security = Runtime.getSecurity();
-		security.setKey(String.format("%s.aws.accessKey", getName()), accessKey);
-		security.setKey(String.format("%s.aws.secretKey", getName()), secretKey);
-	}
+  /**
+   * This sets the aws credentials, this only needs to be done once! It encrypts
+   * and saves the credentials in the .myrobotlab/store file. Once this is run
+   * once
+   * 
+   * @param accessKey
+   * @param secretKey
+   */
+  public void setCredentials(String accessKey, String secretKey) {
+    Security security = Runtime.getSecurity();
+    security.setKey(String.format("%s.aws.accessKey", getName()), accessKey);
+    security.setKey(String.format("%s.aws.secretKey", getName()), secretKey);
+  }
 
-	/**
-	 * loads pre-saved encrypted credentials into the aws credential provider
-	 */
-	public void loadCredentials() {
-		Security security = Runtime.getSecurity();
-		String accessKey = security.getKey(String.format("%s.aws.accessKey", getName()));
-		String secretKey = security.getKey(String.format("%s.aws.secretKey", getName()));
+  /**
+   * loads pre-saved encrypted credentials into the aws credential provider
+   */
+  public void loadCredentials() {
+    Security security = Runtime.getSecurity();
+    String accessKey = security.getKey(String.format("%s.aws.accessKey", getName()));
+    String secretKey = security.getKey(String.format("%s.aws.secretKey", getName()));
 
-		credentials = new BasicAWSCredentials(accessKey, secretKey);
-	}
+    credentials = new BasicAWSCredentials(accessKey, secretKey);
+  }
 
-	/**
-	 * set the region - not sure which ones are supported
-	 * 
-	 * @param region
-	 */
-	public void setRegion(Regions region) {
-		this.region = region;
-	}
+  /**
+   * set the region - not sure which ones are supported
+   * 
+   * @param region
+   */
+  public void setRegion(Regions region) {
+    this.region = region;
+  }
 
-	/**
-	 * returns an initialized client or throws with an error
-	 * 
-	 * @return
-	 */
-	public AmazonRekognition getClient() {
-		if (rekognitionClient == null) {
-			rekognitionClient = AmazonRekognitionClientBuilder.standard().withRegion(region)
-					.withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
-		}
-		return rekognitionClient;
-	}
+  /**
+   * returns an initialized client or throws with an error
+   * 
+   * @return
+   */
+  public AmazonRekognition getClient() {
+    if (rekognitionClient == null) {
+      rekognitionClient = AmazonRekognitionClientBuilder.standard().withRegion(region).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+    }
+    return rekognitionClient;
+  }
 
-	/**
-	 * returns label from file
-	 * 
-	 * @param filename
-	 * @return
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 */
-	public List<Label> getLabels(String path) throws FileNotFoundException, IOException, URISyntaxException {
-		if (path == null) {
-			return getLabels();
-		}
+  /**
+   * returns label from file
+   * 
+   * @param filename
+   * @return
+   * @throws FileNotFoundException
+   * @throws IOException
+   * @throws URISyntaxException
+   */
+  public List<Label> getLabels(String path) throws FileNotFoundException, IOException, URISyntaxException {
+    if (path == null) {
+      return getLabels();
+    }
 
-		InputStream inputStream = null;
-		if (path.contains("://")) {
-			inputStream = new URL(path).openStream();
-		} else {
-			inputStream = new FileInputStream(path);
-		}
-		return getLabels(inputStream);
-	}
+    InputStream inputStream = null;
+    if (path.contains("://")) {
+      inputStream = new URL(path).openStream();
+    } else {
+      inputStream = new FileInputStream(path);
+    }
+    return getLabels(inputStream);
+  }
 
-	public List<Label> getLabels() {
-		return getLabels(lastImage);
-	}
+  public List<Label> getLabels() {
+    return getLabels(lastImage);
+  }
 
-	/**
-	 * 
-	 * @param file
-	 *            - image file
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public List<Label> getLabels(InputStream inputStream) throws FileNotFoundException, IOException {
-		ByteBuffer imageBytes;
-		imageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
-		return getLabels(imageBytes);
-	}
+  /**
+   * 
+   * @param file
+   *          - image file
+   * @throws IOException
+   * @throws FileNotFoundException
+   */
+  public List<Label> getLabels(InputStream inputStream) throws FileNotFoundException, IOException {
+    ByteBuffer imageBytes;
+    imageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
+    return getLabels(imageBytes);
+  }
 
-	/**
-	 * Hopefully, Label is serializable, otherwise it needs to return a list of
-	 * POJOs.
-	 * 
-	 * @return
-	 */
-	public List<Label> getLabels(ByteBuffer imageBytes) {
-		AmazonRekognition client = getClient();
-		DetectLabelsRequest request = new DetectLabelsRequest().withImage(new Image().withBytes(imageBytes))
-				.withMaxLabels(maxLabels).withMinConfidence(minConfidence);
-		DetectLabelsResult result = client.detectLabels(request);
-		List<Label> labels = result.getLabels();
-		lastImage = imageBytes;
-		lastLabels = labels;
-		return labels;
-	}
+  /**
+   * Hopefully, Label is serializable, otherwise it needs to return a list of
+   * POJOs.
+   * 
+   * @return
+   */
+  public List<Label> getLabels(ByteBuffer imageBytes) {
+    AmazonRekognition client = getClient();
+    DetectLabelsRequest request = new DetectLabelsRequest().withImage(new Image().withBytes(imageBytes)).withMaxLabels(maxLabels).withMinConfidence(minConfidence);
+    DetectLabelsResult result = client.detectLabels(request);
+    List<Label> labels = result.getLabels();
+    lastImage = imageBytes;
+    lastLabels = labels;
+    return labels;
+  }
 
-	// FIXME make BufferedImage translations...
-	public List<FaceDetail> getFaces(ByteBuffer imageBytes, Integer width, Integer height) {
+  // FIXME make BufferedImage translations...
+  public List<FaceDetail> getFaces(ByteBuffer imageBytes, Integer width, Integer height) {
 
-		DetectFacesRequest request = new DetectFacesRequest().withImage(new Image().withBytes((imageBytes)))
-				.withAttributes(Attribute.ALL);
+    DetectFacesRequest request = new DetectFacesRequest().withImage(new Image().withBytes((imageBytes))).withAttributes(Attribute.ALL);
 
-		DetectFacesResult result = getClient().detectFaces(request);
-		System.out.println("Orientation: " + result.getOrientationCorrection() + "\n");
-		List<FaceDetail> faceDetails = result.getFaceDetails();
+    DetectFacesResult result = getClient().detectFaces(request);
+    System.out.println("Orientation: " + result.getOrientationCorrection() + "\n");
+    List<FaceDetail> faceDetails = result.getFaceDetails();
 
-		for (FaceDetail face : faceDetails) {
-			System.out.println("Face:");
-			ShowBoundingBoxPositions(height, width, face.getBoundingBox(), result.getOrientationCorrection());
-			AgeRange ageRange = face.getAgeRange();
-			System.out.println("The detected face is estimated to be between " + ageRange.getLow().toString() + " and "
-					+ ageRange.getHigh().toString() + " years old.");
-			System.out.println();
-		}
+    for (FaceDetail face : faceDetails) {
+      System.out.println("Face:");
+      ShowBoundingBoxPositions(height, width, face.getBoundingBox(), result.getOrientationCorrection());
+      AgeRange ageRange = face.getAgeRange();
+      System.out.println("The detected face is estimated to be between " + ageRange.getLow().toString() + " and " + ageRange.getHigh().toString() + " years old.");
+      System.out.println();
+    }
 
-		return faceDetails;
+    return faceDetails;
 
-	}
+  }
 
-	public static void ShowBoundingBoxPositions(int imageHeight, int imageWidth, BoundingBox box, String rotation) {
+  public static void ShowBoundingBoxPositions(int imageHeight, int imageWidth, BoundingBox box, String rotation) {
 
-		float left = 0;
-		float top = 0;
+    float left = 0;
+    float top = 0;
 
-		if (rotation == null) {
-			System.out.println("No estimated estimated orientation. Check Exif data.");
-			return;
-		}
-		// Calculate face position based on image orientation.
-		switch (rotation) {
-		case "ROTATE_0":
-			left = imageWidth * box.getLeft();
-			top = imageHeight * box.getTop();
-			break;
-		case "ROTATE_90":
-			left = imageHeight * (1 - (box.getTop() + box.getHeight()));
-			top = imageWidth * box.getLeft();
-			break;
-		case "ROTATE_180":
-			left = imageWidth - (imageWidth * (box.getLeft() + box.getWidth()));
-			top = imageHeight * (1 - (box.getTop() + box.getHeight()));
-			break;
-		case "ROTATE_270":
-			left = imageHeight * box.getTop();
-			top = imageWidth * (1 - box.getLeft() - box.getWidth());
-			break;
-		default:
-			System.out.println("No estimated orientation information. Check Exif data.");
-			return;
-		}
+    if (rotation == null) {
+      System.out.println("No estimated estimated orientation. Check Exif data.");
+      return;
+    }
+    // Calculate face position based on image orientation.
+    switch (rotation) {
+      case "ROTATE_0":
+        left = imageWidth * box.getLeft();
+        top = imageHeight * box.getTop();
+        break;
+      case "ROTATE_90":
+        left = imageHeight * (1 - (box.getTop() + box.getHeight()));
+        top = imageWidth * box.getLeft();
+        break;
+      case "ROTATE_180":
+        left = imageWidth - (imageWidth * (box.getLeft() + box.getWidth()));
+        top = imageHeight * (1 - (box.getTop() + box.getHeight()));
+        break;
+      case "ROTATE_270":
+        left = imageHeight * box.getTop();
+        top = imageWidth * (1 - box.getLeft() - box.getWidth());
+        break;
+      default:
+        System.out.println("No estimated orientation information. Check Exif data.");
+        return;
+    }
 
-		// Display face location information.
-		System.out.println("Left: " + String.valueOf((int) left));
-		System.out.println("Top: " + String.valueOf((int) top));
-		System.out.println("Face Width: " + String.valueOf((int) (imageWidth * box.getWidth())));
-		System.out.println("Face Height: " + String.valueOf((int) (imageHeight * box.getHeight())));
+    // Display face location information.
+    System.out.println("Left: " + String.valueOf((int) left));
+    System.out.println("Top: " + String.valueOf((int) top));
+    System.out.println("Face Width: " + String.valueOf((int) (imageWidth * box.getWidth())));
+    System.out.println("Face Height: " + String.valueOf((int) (imageHeight * box.getHeight())));
 
-	}
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(Rekognition.class);
-		meta.addDescription("Amazon visual recognition cloud service");
-		meta.setAvailable(true); // false if you do not want it viewable in a gui
-		// add dependency if necessary
-		meta.addDependency("com.amazonaws", "aws-java-sdk-rekognition", "1.11.263");
-		meta.setCloudService(true);
-		meta.addCategory("general");
-		return meta;
-	}
+    ServiceType meta = new ServiceType(Rekognition.class);
+    meta.addDescription("Amazon visual recognition cloud service");
+    meta.setAvailable(true); // false if you do not want it viewable in a gui
+    // add dependency if necessary
+    meta.addDependency("com.amazonaws", "aws-java-sdk-rekognition", "1.11.263");
+    meta.setCloudService(true);
+    meta.addCategory("general");
+    return meta;
+  }
 
-	public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
 
-		Rekognition recog = (Rekognition) Runtime.start("recog", "Rekognition");
+    Rekognition recog = (Rekognition) Runtime.start("recog", "Rekognition");
 
-		/*
-		 * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV"); opencv.capture();
-		 * 
-		 * sleep(1000); String photo = opencv.recordFrame();
-		 * 
-		 * 
-		 * System.out.println("Detected labels for " + photo);
-		 */
+    /*
+     * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
+     * opencv.capture();
+     * 
+     * sleep(1000); String photo = opencv.recordFrame();
+     * 
+     * 
+     * System.out.println("Detected labels for " + photo);
+     */
 
-		// set your credentials once - then comment out this line and remove the
-		// sensitive info
-		// the credentials will be saved to .myrobotlab/store
-		// recog.setCredentials("XXXXXXXXXXXXXXXX",
-		// "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-		recog.loadCredentials();
-		List<Label> labels = null;
-		// labels = recog.getLabels("opencv.input.48.jpg");
-		labels = recog.getLabels("http://animals.sandiegozoo.org/sites/default/files/2016-08/hero_zebra_animals.jpg");
-		for (Label label : labels) {
+    // set your credentials once - then comment out this line and remove the
+    // sensitive info
+    // the credentials will be saved to .myrobotlab/store
+    // recog.setCredentials("XXXXXXXXXXXXXXXX",
+    // "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    recog.loadCredentials();
+    List<Label> labels = null;
+    // labels = recog.getLabels("opencv.input.48.jpg");
+    labels = recog.getLabels("http://animals.sandiegozoo.org/sites/default/files/2016-08/hero_zebra_animals.jpg");
+    for (Label label : labels) {
 
-			System.out.println(label.getName() + ": " + label.getConfidence().toString());
-		}
+      System.out.println(label.getName() + ": " + label.getConfidence().toString());
+    }
 
-	}
+  }
 
 }

@@ -55,11 +55,10 @@ public class OpenCVFilterInput extends OpenCVFilter {
   public IplImage process(IplImage image) {
     return image;
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
-
 
 }

@@ -40,18 +40,18 @@ public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionLis
   private boolean listeningStatus = false;
   private JLabel serverStatus = new JLabel("- Server : not listening");
   private JLabel clientStatus = new JLabel("- Client : not connected");
-  
+
   public AndroidSpeechRecognitionGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
 
     display.setLayout(new BorderLayout());
-    
+
     JPanel panNetwork = new JPanel();
     panNetwork.setLayout(new BoxLayout(panNetwork, BoxLayout.Y_AXIS));
     panNetwork.setBorder(BorderFactory.createTitledBorder("Network"));
     panNetwork.add(serverStatus);
     panNetwork.add(clientStatus);
-    
+
     JPanel pan1 = new JPanel();
     pan1.setBorder(BorderFactory.createTitledBorder("Control"));
 
@@ -99,7 +99,6 @@ public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionLis
           return;
         }
 
-
         if (o == micro) {
           if (listeningStatus) {
             send("pauseListening");
@@ -138,9 +137,9 @@ public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionLis
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        onRecognized.setText(AndroidSpeechRecognition.lastThingRecognized);        
+        onRecognized.setText(AndroidSpeechRecognition.lastThingRecognized);
         clientStatus.setText(AndroidSpeechRecognition.getClientAddress());
-       
+
         if (AndroidSpeechRecognition.getAutoListen()) {
           autoListen.setText("Auto Listening ON");
           autoListen.setBackground(Color.green);
@@ -148,12 +147,12 @@ public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionLis
           autoListen.setText("Auto Listening OFF");
           autoListen.setBackground(Color.RED);
         }
-        
+
         if (AndroidSpeechRecognition.runningserver) {
           startServer.setText("Stop Server");
           startServer.setBackground(Color.green);
-          serverStatus.setText("- Server : Listening > "+AndroidSpeechRecognition.getServerAddress()+":"+AndroidSpeechRecognition.port);
-          
+          serverStatus.setText("- Server : Listening > " + AndroidSpeechRecognition.getServerAddress() + ":" + AndroidSpeechRecognition.port);
+
         } else {
           startServer.setText("Start Server");
           startServer.setBackground(Color.RED);

@@ -48,7 +48,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
 
   public String deviceAddress = "0x70";
 
-  public List<String> deviceBusList = Arrays.asList("0","1", "2", "3", "4", "5", "6", "7");
+  public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
   public String deviceBus = "1";
 
   public boolean isAttached = false;
@@ -59,7 +59,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     public String busAddress;
     public String deviceAddress;
   }
-  
+
   public HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   public static void main(String[] args) {
@@ -200,14 +200,14 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     // The order of the detach is important because the higher level service may
     // want to execute something that
     // needs this service to still be availabe
-    log.info("detachI2CControl {}",control.getName());
+    log.info("detachI2CControl {}", control.getName());
     String key = control.getName();
     if (i2cDevices.containsKey(key)) {
       i2cDevices.remove(key);
       control.detachI2CController(this);
       log.info("Detached");
     } else {
-      log.info("Detach failed. Not found in list of i2cDevices"); 
+      log.info("Detach failed. Not found in list of i2cDevices");
     }
     broadcastState();
   }
@@ -273,7 +273,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   public HashMap<String, I2CDeviceMap> geti2cDevices() {
     return i2cDevices;
   }
-  
+
   // This section contains all the new detach logic
   // TODO: This default code could be in Attachable
   @Override
@@ -333,5 +333,5 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     ;
     return false;
   }
-  
+
 }

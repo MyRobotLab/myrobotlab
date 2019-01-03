@@ -83,10 +83,10 @@ public class XMLConnector extends AbstractConnector {
       // TODO Auto-generated catch block
       log.warn("SAX Parser Error", e);
     }
-    
+
     // flush now that we're done.
     flush();
-    
+
     state = ConnectorState.STOPPED;
 
   }

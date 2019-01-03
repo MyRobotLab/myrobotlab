@@ -10,19 +10,19 @@ public class CreateStaticTeaser extends AbstractStage {
   private String textField = "text";
   private String teaserField = "teaser";
   private int maxLength = 1024;
-  
+
   @Override
   public void startStage(StageConfiguration config) {
     // TODO: support processing a byte array on a document.
     // rather than just a reference for on disk
-      textField = config.getProperty("textField", "text");
-      teaserField = config.getProperty("teaserField", "teaser");
-      maxLength = config.getIntegerParam("maxLength", maxLength);
+    textField = config.getProperty("textField", "text");
+    teaserField = config.getProperty("teaserField", "teaser");
+    maxLength = config.getIntegerParam("maxLength", maxLength);
   }
 
   @Override
   public List<Document> processDocument(Document doc) {
-    // for now, we'll just grab the first sentence?  
+    // for now, we'll just grab the first sentence?
     // TODO: better sentence detection
     // Also. only pull the first value from the text field
     if (!doc.hasField(textField)) {
@@ -39,7 +39,7 @@ public class CreateStaticTeaser extends AbstractStage {
 
   private String createTeaser(String text) {
     // TODO : something much better than this !!
-    
+
     String[] parts = text.split("\\.");
     if (parts.length == 0) {
       // Really?! how the f did this happen?
@@ -47,8 +47,8 @@ public class CreateStaticTeaser extends AbstractStage {
     }
     String teaser = parts[0];
     if (teaser.length() > maxLength) {
-      return teaser.substring(0,  maxLength-1);
-    } else { 
+      return teaser.substring(0, maxLength - 1);
+    } else {
       return teaser;
     }
   }
@@ -61,10 +61,7 @@ public class CreateStaticTeaser extends AbstractStage {
   @Override
   public void flush() {
     // TODO Auto-generated method stub
-    
+
   }
 
-  
-  
-  
 }

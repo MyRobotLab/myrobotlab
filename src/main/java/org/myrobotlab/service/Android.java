@@ -88,7 +88,7 @@ public class Android extends Service {
     meta.addDescription("re-publishes Android proximity and position information");
     meta.addCategory("sensor");
     meta.setLicenseApache();
-    
+
     return meta;
   }
 

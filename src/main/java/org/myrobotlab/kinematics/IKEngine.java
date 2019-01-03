@@ -47,7 +47,9 @@ public class IKEngine {
 
   /**
    * init variables
-   * @param nLinks number of links
+   * 
+   * @param nLinks
+   *          number of links
    */
   public IKEngine(int nLinks) {
     stopped = true;
@@ -163,9 +165,12 @@ public class IKEngine {
   }
 
   /**
-   * @param gx x components of the goal point
-   * @param gy y components of the goal point
-   * @param gz z components of the goal point
+   * @param gx
+   *          x components of the goal point
+   * @param gy
+   *          y components of the goal point
+   * @param gz
+   *          z components of the goal point
    */
   public void setGoal(double gx, double gy, double gz) {
     goal.elements[0][0] = gx;

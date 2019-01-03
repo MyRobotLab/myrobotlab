@@ -18,7 +18,6 @@
 
 package org.myrobotlab.boofcv;
 
-
 /**
  * Common parameter used in example code
  *
@@ -26,6 +25,6 @@ package org.myrobotlab.boofcv;
  */
 public class OpenKinectExampleParam {
 
-	// Modify this link to be where you store your shared library
-	public static String PATH_TO_SHARED_LIBRARY = "/home/pja/projects/thirdparty/libfreenect/build/lib";
+  // Modify this link to be where you store your shared library
+  public static String PATH_TO_SHARED_LIBRARY = "/home/pja/projects/thirdparty/libfreenect/build/lib";
 }

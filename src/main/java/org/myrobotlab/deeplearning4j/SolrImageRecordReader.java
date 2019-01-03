@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 /**
- * This class will load an image file by using a solr input document and wrapping the bytes field in an input stream.
- * This reads one record for solr , wraps the value in the bytes field in an input stream and converts it to an NDArray
+ * This class will load an image file by using a solr input document and
+ * wrapping the bytes field in an input stream. This reads one record for solr ,
+ * wraps the value in the bytes field in an input stream and converts it to an
+ * NDArray
  * 
  * @author kwatters
  *
@@ -44,19 +46,20 @@ import com.google.common.base.Preconditions;
 public class SolrImageRecordReader extends ImageRecordReader {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  
+
   private static final long serialVersionUID = 1L;
 
   @Override
   public void initialize(InputSplit split) throws IOException {
-    
+
     // Ok. this seems reasonable create the native image loader.
     if (imageLoader == null) {
       imageLoader = new NativeImageLoader(height, width, channels, imageTransform);
     }
 
-    // TODO: maybe solr is an input stream split?! we should be going down this path?
-    if(split instanceof InputStreamInputSplit) {
+    // TODO: maybe solr is an input stream split?! we should be going down this
+    // path?
+    if (split instanceof InputStreamInputSplit) {
       this.inputSplit = split;
       this.finishedInputStreamSplit = false;
       return;
@@ -64,11 +67,11 @@ public class SolrImageRecordReader extends ImageRecordReader {
 
     inputSplit = split;
     // TODO: don't call locations!!!
-    // This totally sucks and is handled by solr by returning the labels with a facet
-    
+    // This totally sucks and is handled by solr by returning the labels with a
+    // facet
+
     // we really just need a sorted list of labels for this split. right?
-    
-    
+
     URI[] locations = split.locations();
     if (locations != null && locations.length >= 1) {
       if (appendLabel && labelGenerator != null && labelGenerator.inferLabelClasses()) {
@@ -84,25 +87,30 @@ public class SolrImageRecordReader extends ImageRecordReader {
         }
         labels.clear();
         labels.addAll(labelsSet);
-        if(logLabelCountOnInit) {
+        if (logLabelCountOnInit) {
           log.info("ImageRecordReader: {} label classes inferred using label generator {}", labelsSet.size(), labelGenerator.getClass().getSimpleName());
         }
       }
-      iter = new FileFromPathIterator(inputSplit.locationsPathIterator()); //This handles randomization internally if necessary
+      iter = new FileFromPathIterator(inputSplit.locationsPathIterator()); // This
+                                                                           // handles
+                                                                           // randomization
+                                                                           // internally
+                                                                           // if
+                                                                           // necessary
     } else
       throw new IllegalArgumentException("No path locations found in the split.");
 
     if (split instanceof FileSplit) {
-      //remove the root directory
+      // remove the root directory
       FileSplit split1 = (FileSplit) split;
       labels.remove(split1.getRootDir());
     }
 
-    //To ensure consistent order for label assignment (irrespective of file iteration order), we want to sort the list of labels
+    // To ensure consistent order for label assignment (irrespective of file
+    // iteration order), we want to sort the list of labels
     Collections.sort(labels);
   }
 
- 
   public SolrImageRecordReader(int height, int width, int channels, ParentPathLabelGenerator labelMaker) {
     super(height, width, channels, labelMaker);
   }
@@ -110,12 +118,12 @@ public class SolrImageRecordReader extends ImageRecordReader {
   @Override
   public List<Writable> next() {
     // TODO maybe we can use the input stream input split?
-    if(inputSplit instanceof InputStreamInputSplit) {
+    if (inputSplit instanceof InputStreamInputSplit) {
       InputStreamInputSplit inputStreamInputSplit = (InputStreamInputSplit) inputSplit;
       try {
-        NDArrayWritable ndArrayWritable =  new NDArrayWritable(imageLoader.asMatrix(inputStreamInputSplit.getIs()));
+        NDArrayWritable ndArrayWritable = new NDArrayWritable(imageLoader.asMatrix(inputStreamInputSplit.getIs()));
         finishedInputStreamSplit = true;
-        return Arrays.<Writable>asList(ndArrayWritable);
+        return Arrays.<Writable> asList(ndArrayWritable);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -139,15 +147,17 @@ public class SolrImageRecordReader extends ImageRecordReader {
         INDArray row = imageLoader.asMatrix(is);
         Nd4j.getAffinityManager().ensureLocation(row, AffinityManager.Location.DEVICE);
         ret = RecordConverter.toRecord(row);
-        if (appendLabel || writeLabel){
-          if(labelMultiGenerator != null){
+        if (appendLabel || writeLabel) {
+          if (labelMultiGenerator != null) {
             ret.addAll(labelMultiGenerator.getLabels(image.getPath()));
           } else {
             if (labelGenerator.inferLabelClasses()) {
-              //Standard classification use case (i.e., handle String -> integer conversion
+              // Standard classification use case (i.e., handle String ->
+              // integer conversion
               ret.add(new IntWritable(labels.indexOf(getLabel(image.getPath()))));
             } else {
-              //Regression use cases, and PathLabelGenerator instances that already map to integers
+              // Regression use cases, and PathLabelGenerator instances that
+              // already map to integers
               ret.add(labelGenerator.getLabelForPath(image.getPath()));
             }
           }
@@ -163,7 +173,6 @@ public class SolrImageRecordReader extends ImageRecordReader {
     }
     throw new IllegalStateException("No more elements");
   }
-
 
   @Override
   public List<List<Writable>> next(int num) {
@@ -186,9 +195,9 @@ public class SolrImageRecordReader extends ImageRecordReader {
       currBatch.add(currentFile);
       invokeListeners(currentFile);
       if (appendLabel || writeLabel) {
-        //Collect the label Writables from the label generators
-        if(labelMultiGenerator != null){
-          if(multiGenLabels == null)
+        // Collect the label Writables from the label generators
+        if (labelMultiGenerator != null) {
+          if (multiGenLabels == null)
             multiGenLabels = new ArrayList<>();
 
           multiGenLabels.add(labelMultiGenerator.getLabels(currentFile.getPath()));
@@ -207,13 +216,12 @@ public class SolrImageRecordReader extends ImageRecordReader {
       cnt++;
     }
 
-    INDArray features = Nd4j.createUninitialized(new long[] {cnt, channels, height, width}, 'c');
+    INDArray features = Nd4j.createUninitialized(new long[] { cnt, channels, height, width }, 'c');
     Nd4j.getAffinityManager().tagLocation(features, AffinityManager.Location.HOST);
     for (int i = 0; i < cnt; i++) {
       try {
         InputStream is = inputSplit.openInputStreamFor(currBatch.get(i).getAbsolutePath());
-        ((NativeImageLoader) imageLoader).asMatrixView(is,
-            features.tensorAlongDimension(i, 1, 2, 3));
+        ((NativeImageLoader) imageLoader).asMatrixView(is, features.tensorAlongDimension(i, 1, 2, 3));
       } catch (Exception e) {
         log.info("Image file failed during load: {}", currBatch.get(i).getAbsolutePath());
         throw new RuntimeException(e);
@@ -221,15 +229,15 @@ public class SolrImageRecordReader extends ImageRecordReader {
     }
     Nd4j.getAffinityManager().ensureLocation(features, AffinityManager.Location.DEVICE);
 
-
     List<INDArray> ret = new ArrayList<>();
     ret.add(features);
     if (appendLabel || writeLabel) {
-      //And convert the previously collected label Writables from the label generators
-      if(labelMultiGenerator != null){
+      // And convert the previously collected label Writables from the label
+      // generators
+      if (labelMultiGenerator != null) {
         List<Writable> temp = new ArrayList<>();
         List<Writable> first = multiGenLabels.get(0);
-        for(int col=0; col<first.size(); col++ ){
+        for (int col = 0; col < first.size(); col++) {
           temp.clear();
           for (List<Writable> multiGenLabel : multiGenLabels) {
             temp.add(multiGenLabel.get(col));
@@ -240,14 +248,16 @@ public class SolrImageRecordReader extends ImageRecordReader {
       } else {
         INDArray labels;
         if (labelGenerator.inferLabelClasses()) {
-          //Standard classification use case (i.e., handle String -> integer conversion)
+          // Standard classification use case (i.e., handle String -> integer
+          // conversion)
           labels = Nd4j.create(cnt, numCategories, 'c');
           Nd4j.getAffinityManager().tagLocation(labels, AffinityManager.Location.HOST);
           for (int i = 0; i < currLabels.size(); i++) {
             labels.putScalar(i, currLabels.get(i), 1.0f);
           }
         } else {
-          //Regression use cases, and PathLabelGenerator instances that already map to integers
+          // Regression use cases, and PathLabelGenerator instances that already
+          // map to integers
           if (currLabelsWritable.get(0) instanceof NDArrayWritable) {
             List<INDArray> arr = new ArrayList<>();
             for (Writable w : currLabelsWritable) {
@@ -265,7 +275,5 @@ public class SolrImageRecordReader extends ImageRecordReader {
 
     return new NDArrayRecordBatch(ret);
   }
-
-
 
 }

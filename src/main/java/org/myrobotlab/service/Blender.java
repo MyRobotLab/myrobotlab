@@ -84,10 +84,9 @@ public class Blender extends Service {
   public static final String SUCCESS = "SUCCESS";
   Socket control = null;
   transient ControlHandler controlHandler = null;
-  
+
   String host = "localhost";
   Integer controlPort = 8989;
-  
 
   Integer serialPort = 9191;
   String blenderVersion;

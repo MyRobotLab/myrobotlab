@@ -79,7 +79,6 @@ public class OpenNiGui extends ServiceGui implements ActionListener {
     recordButton.addActionListener(this);
     playbackButton.addActionListener(this);
 
-  
   }
 
   @Override

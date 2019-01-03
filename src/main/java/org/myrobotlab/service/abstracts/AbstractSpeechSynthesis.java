@@ -37,19 +37,20 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public static final String journalFilename = "journal.txt";
 
   /**
-   * substitutions are phonetic substitutions for a specific instance of speech synthesis service
+   * substitutions are phonetic substitutions for a specific instance of speech
+   * synthesis service
    */
   Map<String, String> substitutions = new HashMap<String, String>();
-  
+
   /**
    * mute or unmute service
    */
   boolean mute = false;
 
   public static class Voice implements Serializable {
-	  
-	private static final long serialVersionUID = 1L;  
-	
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * unique name of the voice
      */
@@ -75,7 +76,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
      * Installed means the voice is ready without any additional components
      */
     boolean installed = true;
-    
+
     /**
      * Serializable key of voice implementation - to be used to map this MRL
      * Voice to a voice implementation
@@ -104,7 +105,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
 
     public String toString() {
-      // return String.format("%s %s %s %s", name, gender, locale, voiceProvider);
+      // return String.format("%s %s %s %s", name, gender, locale,
+      // voiceProvider);
       return String.format("%s %s %s", name, gender, locale);
     }
 
@@ -181,7 +183,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   protected Map<String, Voice> voices = new TreeMap<String, Voice>();
   // reset TreeMap :
-  // we shoul'd writeIn voices from the json, voices need a refresh at every startup
+  // we shoul'd writeIn voices from the json, voices need a refresh at every
+  // startup
   // useful if service change voices...
 
   protected Map<String, List<Voice>> langIndex;
@@ -217,9 +220,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
     // for json loading
 
-    //if (voices == null) {
-    //  voices = new TreeMap<String, Voice>();
-    //}
+    // if (voices == null) {
+    // voices = new TreeMap<String, Voice>();
+    // }
 
     if (langIndex == null) {
       langIndex = new HashMap<String, List<Voice>>();
@@ -359,7 +362,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
   }
 
-  // FIXME - too anthropomorphic should just be more descriptive e.g. addSpeechRecognizer or simply use attach(ear) !!!
+  // FIXME - too anthropomorphic should just be more descriptive e.g.
+  // addSpeechRecognizer or simply use attach(ear) !!!
   @Deprecated
   public void addEar(SpeechRecognizer ear) {
     attachSpeechRecognizer(ear);
@@ -411,7 +415,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       String filename = System.getProperty("user.dir") + File.separator + globalFileCacheDir + File.separator;
 
-      // FIXME - I don't under why URLEncoder is here ... URLEncoder.encode(getVoice().getName(), "UTF-8")
+      // FIXME - I don't under why URLEncoder is here ...
+      // URLEncoder.encode(getVoice().getName(), "UTF-8")
       filename += getClass().getSimpleName() + File.separator + getVoice().getName() + File.separator + MathUtils.md5(toSpeak) + getAudioCacheExtension();
 
       // create subdirectories if necessary
@@ -458,8 +463,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   /**
    * the textual info originally requested - this may not be the same as
-   * publishStartSpeaking text because the pre-processor/parser may need to break
-   * it up into pieces to handle effects and other details
+   * publishStartSpeaking text because the pre-processor/parser may need to
+   * break it up into pieces to handle effects and other details
    * 
    * @param toSpeak
    * @return
@@ -469,8 +474,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * responsible for all parsing and pre-processing for the audio.  Sound effect, sound files,
-   * SSML, TarsosDsp would all be prepared here before the audio data is generated
+   * responsible for all parsing and pre-processing for the audio. Sound effect,
+   * sound files, SSML, TarsosDsp would all be prepared here before the audio
+   * data is generated
    * 
    * @param toSpeak
    * @param block
@@ -479,7 +485,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public List<AudioData> parse(String toSpeak, boolean block) {
 
     // TODO - not sure if we want to support this notation
-    // but at the moment it seems useful 
+    // but at the moment it seems useful
     // splitting on sound effects ...
     // TODO - use SSML speech synthesis markup language
 
@@ -531,10 +537,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * substitutions for example :
-   *  worke could get substituted to worky or work-ee or "something" that phonetically works for the current
-   *  speech synthesis service
-   *   
+   * substitutions for example : worke could get substituted to worky or work-ee
+   * or "something" that phonetically works for the current speech synthesis
+   * service
+   * 
    * @param key
    * @param replace
    */
@@ -547,11 +553,13 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * process speaking - generate the text to be spoken or play a cache file if appropriate
+   * process speaking - generate the text to be spoken or play a cache file if
+   * appropriate
+   * 
    * @param toSpeak
    * @param block
    * @return
-   * @throws UnsupportedEncodingException 
+   * @throws UnsupportedEncodingException
    */
   public AudioData process(AudioData audioData, String speak, boolean block) {
 
@@ -687,7 +695,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       invoke("publishVoices", vs);
 
-      //save();
+      // save();
       return vs;
     } catch (Exception e) {
       error("%s", e.getMessage());
@@ -922,7 +930,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   @Override
   public boolean isReady() {
     String[] kn = getKeyNames();
-    if (kn != null && kn.length>0) {
+    if (kn != null && kn.length > 0) {
       for (String keyName : kn) {
         String key = getKey(keyName);
         if (key == null || key.isEmpty()) {
@@ -934,11 +942,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     }
     return super.isReady();
   }
-  
+
   public void mute() {
     this.mute = true;
   }
-  
+
   public void unmute() {
     this.mute = false;
   }
