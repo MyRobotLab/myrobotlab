@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 public class ServiceDataTest {
 
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
-  
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     LoggingFactory.init("WARN");

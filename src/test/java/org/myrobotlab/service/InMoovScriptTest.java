@@ -19,9 +19,9 @@ public class InMoovScriptTest {
 
   public Arduino ard1;
   public Arduino ard2;
-  
+
   private String scriptRoot = "src/test/resources/InMoov";
-  
+
   @Before
   public void setup() throws Exception {
     // setup the test environment ,and create an arduino with a virtual backend for it.
@@ -38,7 +38,7 @@ public class InMoovScriptTest {
   // Test the inmoov minimal script.
   @Test
   public void testInMoovMinimal() throws IOException {
-	  // TODO: move these scripts to test resources
+    // TODO: move these scripts to test resources
     String inmoovScript = scriptRoot + "/InMoov.minimal.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
@@ -53,8 +53,8 @@ public class InMoovScriptTest {
     // Assert something
     assertNotNull(i01);   
   }
-  
-  
+
+
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalArm() throws IOException {
@@ -72,7 +72,7 @@ public class InMoovScriptTest {
     // Assert something
     assertNotNull(i01);   
   }
-    
+
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalFingerStarter() throws IOException {
@@ -90,7 +90,7 @@ public class InMoovScriptTest {
     // Assert something
     assertNotNull(i01);   
   }
-  
+
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalHead() throws IOException {
@@ -108,7 +108,7 @@ public class InMoovScriptTest {
     // Assert something
     assertNotNull(i01);   
   }
-  
+
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalTorso() throws IOException {
@@ -126,7 +126,6 @@ public class InMoovScriptTest {
     // Assert something
     assertNotNull(i01);   
   }
-  
-  
-}
 
+
+}

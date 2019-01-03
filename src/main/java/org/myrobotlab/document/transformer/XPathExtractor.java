@@ -89,7 +89,7 @@ public class XPathExtractor extends AbstractStage {
       log.info("No XML Field on doc {}", doc.getId());
       return null;
     }
-    
+
     for (Object o : doc.getField(xmlField)) {
       // TODO: this is bad , lets cast
       String xml = (String) o;
@@ -130,7 +130,7 @@ public class XPathExtractor extends AbstractStage {
     try {
       fstream = new FileInputStream(filename);
     } catch (FileNotFoundException e) {
-      log.warn("XPATH Extractor config file not found: {}" , filename, e);
+      log.warn("XPATH Extractor config file not found: {}", filename, e);
       return null;
     }
     DataInputStream in = new DataInputStream(fstream);
@@ -157,7 +157,7 @@ public class XPathExtractor extends AbstractStage {
         XPathExpression xPath = xpath.compile(strXPath);
 
         if (debug) {
-          log.info("Adding XPATH {} Maps To : {}",strXPath , fieldName);
+          log.info("Adding XPATH {} Maps To : {}", strXPath, fieldName);
         }
 
         if (configMap.containsKey(xPath)) {
@@ -169,7 +169,7 @@ public class XPathExtractor extends AbstractStage {
         }
       }
     } catch (IOException e) {
-      log.warn("IO Exception reading from file {}" , filename, e);
+      log.warn("IO Exception reading from file {}", filename, e);
       // return what we can...
       return configMap;
     }

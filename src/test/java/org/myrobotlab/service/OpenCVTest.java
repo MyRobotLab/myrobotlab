@@ -195,7 +195,7 @@ public class OpenCVTest extends AbstractTest {
   }
 
   // TODO test enable disable & enableDisplay
- 
+
   @Test
   public final void testGetClassifications() {
     log.info("=======OpenCVTest testGetClassifications=======");

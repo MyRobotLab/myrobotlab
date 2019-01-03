@@ -158,7 +158,7 @@ public class InMoov extends Service {
   // ---------------------------------------------------------------
 
   public void attach(Attachable attachable) {
-    //opencv
+    // opencv
     if (attachable instanceof OpenCV) {
       opencv = (OpenCV) attachable;
       subscribe(opencv.getName(), "publishClassification");
@@ -190,7 +190,7 @@ public class InMoov extends Service {
       opencv.stopCapture();
       opencv.disableAll();
     }
-    //temporary fix overexpand windows
+    // temporary fix overexpand windows
     SwingGui gui = (SwingGui) Runtime.getService("gui");
     if (gui != null) {
       gui.maximize();
@@ -276,10 +276,10 @@ public class InMoov extends Service {
   }
 
   public void trackHumans() {
-    //FIXME can't have 2 PID for tracking
-    //if (eyesTracking != null) {
-    //  eyesTracking.faceDetect();
-    //}
+    // FIXME can't have 2 PID for tracking
+    // if (eyesTracking != null) {
+    // eyesTracking.faceDetect();
+    // }
     vision.enablePreFilters();
     startHeadTracking();
     if (headTracking != null) {
@@ -287,7 +287,7 @@ public class InMoov extends Service {
     }
   }
 
-  //FIXME check / test lk tracking..
+  // FIXME check / test lk tracking..
   public void trackPoint() {
     vision.enablePreFilters();
     startHeadTracking();
@@ -309,7 +309,7 @@ public class InMoov extends Service {
   // OPENNI methods
   // ---------------------------------------------------------------
 
-  //TODO:change -> isOpenNiCapturing
+  // TODO:change -> isOpenNiCapturing
   public boolean RobotIsOpenNiCapturing() {
     if (openni != null) {
       if (openni.capturing) {
@@ -390,8 +390,7 @@ public class InMoov extends Service {
   }
 
   /**
-   * This method will try to launch a python command
-   * with error handling
+   * This method will try to launch a python command with error handling
    */
   public String execGesture(String gesture) {
     lastGestureExecuted = gesture;
@@ -413,9 +412,9 @@ public class InMoov extends Service {
   }
 
   /**
-   * This blocking method will look at all of the .py files in a directory. One by one it
-   * will load the files into the python interpreter. A gesture python file
-   * should contain 1 method definition that is the same as the filename.
+   * This blocking method will look at all of the .py files in a directory. One
+   * by one it will load the files into the python interpreter. A gesture python
+   * file should contain 1 method definition that is the same as the filename.
    * 
    * @param directory
    *          - the directory that contains the gesture python files.
@@ -1013,7 +1012,7 @@ public class InMoov extends Service {
   }
 
   public InMoovArm startArm(String side, String port, String type) throws Exception {
-    //TODO rework this...
+    // TODO rework this...
     if (type == "left") {
       speakBlocking(languagePack.get("STARTINGLEFTARM") + " " + port);
     } else {
@@ -1036,7 +1035,7 @@ public class InMoov extends Service {
   }
 
   public InMoovHand startHand(String side, String port, String type) throws Exception {
-    //TODO rework this...
+    // TODO rework this...
     if (type == "left") {
       speakBlocking(languagePack.get("STARTINGLEFTHAND") + " " + port);
     } else {
@@ -1295,7 +1294,7 @@ public class InMoov extends Service {
     return mute;
   }
 
-  //TODO FIX/CHECK this, migrate from python land
+  // TODO FIX/CHECK this, migrate from python land
   public void powerDown() {
 
     rest();
@@ -1310,7 +1309,7 @@ public class InMoov extends Service {
     python.execMethod("power_down");
   }
 
-  //TODO FIX/CHECK this, migrate from python land
+  // TODO FIX/CHECK this, migrate from python land
   public void powerUp() {
     startSleep = null;
     enable();
@@ -1324,7 +1323,7 @@ public class InMoov extends Service {
     python.execMethod("power_up");
   }
 
-  //TODO FIX/CHECK this, migrate from python land
+  // TODO FIX/CHECK this, migrate from python land
   public void publishPin(Pin pin) {
     log.info("{} - {}", pin.pin, pin.value);
     if (pin.value == 1) {
@@ -1442,7 +1441,7 @@ public class InMoov extends Service {
    * 
    ************************/
 
-  //FIXME , later ... attach things !
+  // FIXME , later ... attach things !
   public void startAll(String leftPort, String rightPort) throws Exception {
     startMouth();
     startHead(leftPort);
@@ -1451,19 +1450,19 @@ public class InMoov extends Service {
     startMouthControl(head.jaw, mouth);
     startLeftHand(leftPort);
     startRightHand(rightPort);
-    //startEyelids(rightPort);
+    // startEyelids(rightPort);
     startLeftArm(leftPort);
     startRightArm(rightPort);
     startTorso(leftPort);
     startHeadTracking();
     startEyesTracking();
-    //TODO LP
+    // TODO LP
     speakBlocking("startup sequence completed");
   }
 
   /**
-   * Start InMoov brain engine
-   * And extra stuffs, like "what is you name" ( TODO finish migration )
+   * Start InMoov brain engine And extra stuffs, like "what is you name" ( TODO
+   * finish migration )
    * 
    * @return started ProgramAB service
    */
@@ -1476,12 +1475,12 @@ public class InMoov extends Service {
     chatBot.repetition_count(10);
     chatBot.setPath("InMoov/chatBot");
     chatBot.startSession("default", getLanguage());
-    //reset some parameters to default...
+    // reset some parameters to default...
     chatBot.setPredicate("topic", "default");
     chatBot.setPredicate("questionfirstinit", "");
     chatBot.setPredicate("tmpname", "");
     chatBot.setPredicate("null", "");
-    //load last user session
+    // load last user session
     if (!chatBot.getPredicate("name").isEmpty()) {
       if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")) {
         chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
@@ -1494,7 +1493,7 @@ public class InMoov extends Service {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    //start session based on last recognized person
+    // start session based on last recognized person
     if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
       chatBot.startSession(chatBot.getPredicate("lastUsername"));
     }
@@ -1924,7 +1923,8 @@ public class InMoov extends Service {
       vinMoovApp.start();
       // Grog Says ... WTH ?? - there should be a callback how do we know its
       // not 6.5 seconds ?
-      // Moz4r says : I think it's a security timeout n=to not wait forever, not really a sleep
+      // Moz4r says : I think it's a security timeout n=to not wait forever, not
+      // really a sleep
       synchronized (this) {
         wait(6000);
       }
@@ -2164,8 +2164,8 @@ public class InMoov extends Service {
   }
 
   /**
-   * TODO : use system locale
-   * set language for InMoov service used by chatbot + ear + mouth
+   * TODO : use system locale set language for InMoov service used by chatbot +
+   * ear + mouth
    * 
    * @param i
    *          - format : java Locale
@@ -2178,7 +2178,7 @@ public class InMoov extends Service {
       runtime.setLocale(l);
       languagePack.load(language);
       return true;
-      //this.broadcastState();
+      // this.broadcastState();
     } else {
       error("InMoov not yet support {}", l);
       return false;
@@ -2190,7 +2190,7 @@ public class InMoov extends Service {
    */
   public String getLanguage() {
     if (this.language == null) {
-      //check if default locale supported by inmoov
+      // check if default locale supported by inmoov
       if (languages.containsKey(Locale.getDefault().toLanguageTag())) {
         this.language = Locale.getDefault().toLanguageTag();
       } else {
@@ -2211,9 +2211,9 @@ public class InMoov extends Service {
     return mute;
   }
 
-  //---------------------------------------------------------------
-  //END GENERAL METHODS / TO SORT
-  //---------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // END GENERAL METHODS / TO SORT
+  // ---------------------------------------------------------------
 
   /**
    * This static method returns all the details of the class without it having
@@ -2303,7 +2303,8 @@ public class InMoov extends Service {
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
-    //i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear", "AndroidSpeechRecognition");
+    // i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear",
+    // "AndroidSpeechRecognition");
     i01.startEar();
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);

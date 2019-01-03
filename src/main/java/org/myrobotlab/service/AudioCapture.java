@@ -204,7 +204,7 @@ public class AudioCapture extends Service {
     try {
       // Get everything set up for
       // capture
-      soundCaptured = false;  
+      soundCaptured = false;
       audioFormat = getAudioFormat();
       DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
       targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
@@ -219,7 +219,7 @@ public class AudioCapture extends Service {
       captureThread.start();
     } catch (Exception e) {
       Logging.logError(e);
-    } 
+    }
     broadcastState();
     // end catch
   }// end captureAudio method
@@ -249,37 +249,36 @@ public class AudioCapture extends Service {
   // data that has been saved in the
   // ByteArrayOutputStream
   public void playAudio() {
-	if (!soundCaptured) {
-		log.error("No sound captured yet");
-	}
-	else {
-    try {
-      // Get everything set up for
-      // playback.
-      // Get the previously-saved data
-      // into a byte array object.
-      byte audioData[] = byteArrayOutputStream.toByteArray();
-      // Get an input stream on the
-      // byte array containing the data
-      InputStream byteArrayInputStream = new ByteArrayInputStream(audioData);
-      AudioFormat audioFormat = getAudioFormat();
-      audioInputStream = new AudioInputStream(byteArrayInputStream, audioFormat, audioData.length / audioFormat.getFrameSize());
-      DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
-      sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
-      sourceDataLine.open(audioFormat);
-      sourceDataLine.start();
+    if (!soundCaptured) {
+      log.error("No sound captured yet");
+    } else {
+      try {
+        // Get everything set up for
+        // playback.
+        // Get the previously-saved data
+        // into a byte array object.
+        byte audioData[] = byteArrayOutputStream.toByteArray();
+        // Get an input stream on the
+        // byte array containing the data
+        InputStream byteArrayInputStream = new ByteArrayInputStream(audioData);
+        AudioFormat audioFormat = getAudioFormat();
+        audioInputStream = new AudioInputStream(byteArrayInputStream, audioFormat, audioData.length / audioFormat.getFrameSize());
+        DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
+        sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
+        sourceDataLine.open(audioFormat);
+        sourceDataLine.start();
 
-      // Create a thread to play back
-      // the data and start it
-      // running. It will run until
-      // all the data has been played
-      // back.
-      Thread playThread = new Thread(new PlayThread());
-      playThread.start();
-    } catch (Exception e) {
-      error(e);
-    } // end catch
-  }// end playAudio
+        // Create a thread to play back
+        // the data and start it
+        // running. It will run until
+        // all the data has been played
+        // back.
+        Thread playThread = new Thread(new PlayThread());
+        playThread.start();
+      } catch (Exception e) {
+        error(e);
+      } // end catch
+    } // end playAudio
   }
 
   public ByteArrayOutputStream publishCapture() {

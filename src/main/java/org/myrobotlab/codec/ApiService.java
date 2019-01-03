@@ -54,8 +54,8 @@ public class ApiService extends Api {
    * The precedence is to decode addressing and all data associated with the
    * requestUri over the data.
    * 
-   * FIXME - beyond ApiFactory -&gt; a 'initial' message would be formed - which is
-   * the results of the request URI being parsed
+   * FIXME - beyond ApiFactory -&gt; a 'initial' message would be formed - which
+   * is the results of the request URI being parsed
    * 
    */
 
@@ -141,9 +141,9 @@ public class ApiService extends Api {
     }
 
     if (out != null) {
-      if (ret == null){
+      if (ret == null) {
         codec.encode(out, ret);
-      } else if (Serializable.class.isAssignableFrom(ret.getClass())){
+      } else if (Serializable.class.isAssignableFrom(ret.getClass())) {
         codec.encode(out, ret);
       } else {
         log.error("could not serialize return from {} class {}", method, ret.getClass());
@@ -155,7 +155,7 @@ public class ApiService extends Api {
     return ret;
 
   }
-  
+
   public static ApiDescription getDescription() {
     ApiDescription desc = new ApiDescription("message", "{scheme}://{host}:{port}/api/service", "http://localhost:8888/api/service/runtime/getUptime",
         "An synchronous api useful for simple REST responses");

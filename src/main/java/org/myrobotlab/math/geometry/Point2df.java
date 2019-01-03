@@ -13,18 +13,18 @@ public class Point2df implements Serializable {
   public Point2df() {
   }
 
-  public Point2df(float x, float y) {    
+  public Point2df(float x, float y) {
     this.x = x;
     this.y = y;
   }
 
-  public Point2df(float x, float y, float value) {    
+  public Point2df(float x, float y, float value) {
     this.x = x;
     this.y = y;
     this.value = value;
   }
 
-  public Point2df(float x, float y, int value) {    
+  public Point2df(float x, float y, int value) {
     this.x = x;
     this.y = y;
     this.value = value;
@@ -34,12 +34,12 @@ public class Point2df implements Serializable {
   public String toString() {
     return String.format("(%f,%f)", x, y);
   }
-  
-  public float get(String coord){
-    if (coord.equals("x")){
+
+  public float get(String coord) {
+    if (coord.equals("x")) {
       return x;
     }
-    if (coord.equals("y")){
+    if (coord.equals("y")) {
       return y;
     }
     return 0;

@@ -12,7 +12,8 @@ public class CodecFactory {
 
   static public synchronized void init() {
     if (!initialized) {
-      mimeTypeMap.put("application/json", "org.myrobotlab.codec.CodecJson"); // vs application/mrl-json
+      mimeTypeMap.put("application/json", "org.myrobotlab.codec.CodecJson"); // vs
+                                                                             // application/mrl-json
       initialized = true;
     }
 

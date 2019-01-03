@@ -176,10 +176,11 @@ public class VirtualServoController extends Service implements ServoController {
         jme.updatePosition(servo.getName(), lastPos - (pos / 1000));
         // eventQueue.add()
         // servo.writeMicroseconds(uS);
-        // Message msg = Message.createMessage(getName(), jme.getName(), "servoMoveTo", new Object[] { servo });
+        // Message msg = Message.createMessage(getName(), jme.getName(),
+        // "servoMoveTo", new Object[] { servo });
         // all translation logic should be here from the the servo data to 3d
         // a simple command to rotate is needed (with name info)
-        //  jme.addMsg(msg);
+        // jme.addMsg(msg);
         // jme.rotate();
 
         try {

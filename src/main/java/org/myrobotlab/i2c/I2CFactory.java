@@ -11,18 +11,21 @@ import com.pi4j.io.i2c.I2CFactoryProvider;
 import com.pi4j.io.i2c.impl.I2CProviderImpl;
 
 public class I2CFactory {
-  
+
   public static final long DEFAULT_LOCKAQUIRE_TIMEOUT = 1000;
   public static final TimeUnit DEFAULT_LOCKAQUIRE_TIMEOUT_UNITS = TimeUnit.MILLISECONDS;
-  
+
   volatile static I2CFactoryProvider provider = new I2CProviderImpl();
 
   /**
    * Create new I2CBus instance
-   * @param busNumber b
+   * 
+   * @param busNumber
+   *          b
    * 
    * @return Return a new I2CBus impl instance.
-   * @throws IOException e 
+   * @throws IOException
+   *           e
    */
   public static I2CBus getInstance(int busNumber) throws IOException {
 
@@ -49,9 +52,10 @@ public class I2CFactory {
     if (platform.isArm()) {
       // raspi
       // TODO: fix this!!!
-      //log.warn("This probable doesn't work for ARM / RasPI now.. update the code!");
-      //return I2CBusImpl.getBus(busNumber);
-      //return null;
+      // log.warn("This probable doesn't work for ARM / RasPI now.. update the
+      // code!");
+      // return I2CBusImpl.getBus(busNumber);
+      // return null;
       try {
         return provider.getBus(busNumber, DEFAULT_LOCKAQUIRE_TIMEOUT, DEFAULT_LOCKAQUIRE_TIMEOUT_UNITS);
       } catch (UnsupportedBusNumberException e) {

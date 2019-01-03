@@ -63,11 +63,11 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
   JLabel controllerLabel = new JLabel("Controller");
   JLabel deviceBusLabel = new JLabel("Bus");
   JLabel deviceAddressLabel = new JLabel("Address");
-  
-  JTable deviceJtable = new JTable(new DefaultTableModel(new Object[]{"Service", "i2cBus", "i2cAddress"},0));
+
+  JTable deviceJtable = new JTable(new DefaultTableModel(new Object[] { "Service", "i2cBus", "i2cAddress" }, 0));
 
   JScrollPane scrollPane = new JScrollPane(deviceJtable);
-  
+
   I2cMux boundService = null;
 
   public I2cMuxGui(final String boundServiceName, final SwingGui myService) {
@@ -153,12 +153,12 @@ public class I2cMuxGui extends ServiceGui implements ActionListener {
     DefaultTableModel model = (DefaultTableModel) deviceJtable.getModel();
     model.setRowCount(0);
     for (Map.Entry<String, I2CDeviceMap> entry : devices.entrySet()) {
-      I2CDeviceMap device = (I2CDeviceMap)entry.getValue();
-      String columns[] = {device.serviceName, device.busAddress, device.deviceAddress}; 
+      I2CDeviceMap device = (I2CDeviceMap) entry.getValue();
+      String columns[] = { device.serviceName, device.busAddress, device.deviceAddress };
       model.addRow(columns);
     }
   }
-  
+
   public void refreshControllers() {
     List<String> v = boundService.refreshControllers();
     controllerList.removeAllItems();

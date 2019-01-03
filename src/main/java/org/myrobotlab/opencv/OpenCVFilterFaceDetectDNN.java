@@ -55,7 +55,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetectDNN.class.getCanonicalName());
   // int x0, y0, x1, y1;
-  
+
   private String FACE_LABEL = "face";
   private Net net;
   /**
@@ -66,7 +66,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   public String model = "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
   public String protoTxt = "models/facedetectdnn/deploy.prototxt.txt";
   double threshold = .2;
-  
+
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
@@ -80,9 +80,8 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     loadModel();
   }
 
-
   public void loadModel() {
-    //log.info("loading DNN caffee model for face recogntion..");
+    // log.info("loading DNN caffee model for face recogntion..");
     if (!new File(protoTxt).exists()) {
       log.warn("Caffe DNN Face Detector ProtoTxt not found {}", protoTxt);
       return;
@@ -94,6 +93,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     net = readNetFromCaffe(protoTxt, model);
     log.info("Caffe DNN Face Detector model loaded.");
   }
+
   @Override
   public void imageChanged(IplImage image) {
     // TODO: noOp?
@@ -103,55 +103,75 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   public IplImage process(IplImage image) {
     int h = image.height();
     int w = image.width();
-    // TODO:  cv2.resize(image, (300, 300))
+    // TODO: cv2.resize(image, (300, 300))
     Mat srcMat = grabberConverter.convertToMat(grabberConverter.convert(image));
     Mat inputMat = new Mat();
-    resize(srcMat, inputMat, new Size(300, 300));//resize the image to match the input size of the model
-    //create a 4-dimensional blob from image with NCHW (Number of images in the batch -for training only-, Channel, Height, Width) dimensions order,
-    //for more details read the official docs at https://docs.opencv.org/trunk/d6/d0f/group__dnn.html#gabd0e76da3c6ad15c08b01ef21ad55dd8
+    resize(srcMat, inputMat, new Size(300, 300));// resize the image to match
+                                                 // the input size of the model
+    // create a 4-dimensional blob from image with NCHW (Number of images in the
+    // batch -for training only-, Channel, Height, Width)
+    // dimensions order,
+    // for more details read the official docs at
+    // https://docs.opencv.org/trunk/d6/d0f/group__dnn.html#gabd0e76da3c6ad15c08b01ef21ad55dd8
     Mat blob = blobFromImage(inputMat, 1.0, new Size(300, 300), new Scalar(104.0, 177.0, 123.0, 0), false, false, CV_32F);
-  //  log.info("Input Blob : {}", blob);
-    //set the input to network model  
+    // log.info("Input Blob : {}", blob);
+    // set the input to network model
     if (blob == null) {
       return image;
     }
     net.setInput(blob);
-    //feed forward the input to the network to get the output matrix
+    // feed forward the input to the network to get the output matrix
     Mat output = net.forward();
-    Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));//extract a 2d matrix for 4d output matrix with form of (number of detections x 7)
-    FloatIndexer srcIndexer = ne.createIndexer(); // create indexer to access elements of the matrix
+    Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));// extract
+                                                                                         // a
+                                                                                         // 2d
+                                                                                         // matrix
+                                                                                         // for
+                                                                                         // 4d
+                                                                                         // output
+                                                                                         // matrix
+                                                                                         // with
+                                                                                         // form
+                                                                                         // of
+                                                                                         // (number
+                                                                                         // of
+                                                                                         // detections
+                                                                                         // x
+                                                                                         // 7)
+    FloatIndexer srcIndexer = ne.createIndexer(); // create indexer to access
+                                                  // elements of the matrix
     // log.info("Output Size: {}", output.size(3));
     bb.clear();
     classifications.clear();
-    for (int i = 0; i < output.size(3); i++) {//iterate to extract elements
+    for (int i = 0; i < output.size(3); i++) {// iterate to extract elements
       float confidence = srcIndexer.get(i, 2);
       // log.info("Getting element {} confidence {}", i, confidence);
       float f1 = srcIndexer.get(i, 3);
       float f2 = srcIndexer.get(i, 4);
       float f3 = srcIndexer.get(i, 5);
       float f4 = srcIndexer.get(i, 6);
-      
+
       if (confidence > threshold) {
         // log.info("Passes the threshold test.");
-        float tx = f1 * w;//top left point's x
-        float ty = f2 * h;//top left point's y
-        float bx = f3 * w;//bottom right point's x
-        float by = f4 * h;//bottom right point's y
-        Rectangle rect = new Rectangle(tx,ty,bx-tx,by-ty);
+        float tx = f1 * w;// top left point's x
+        float ty = f2 * h;// top left point's y
+        float bx = f3 * w;// bottom right point's x
+        float by = f4 * h;// bottom right point's y
+        Rectangle rect = new Rectangle(tx, ty, bx - tx, by - ty);
         List<Classification> cl = null;
-        Classification classification = new Classification(FACE_LABEL, confidence, rect);    
+        Classification classification = new Classification(FACE_LABEL, confidence, rect);
         if (classifications.containsKey(FACE_LABEL)) {
           classifications.get(FACE_LABEL).add(classification);
         } else {
           cl = new ArrayList<>();
           cl.add(classification);
-          classifications.put(FACE_LABEL, cl);          
+          classifications.put(FACE_LABEL, cl);
         }
         bb.add(rect);
 
       }
     }
-    
+
     publishClassification(classifications);
     IplImage result = grabberConverter.convert(converterToIpl.convert(srcMat));
     ne.close();
@@ -164,7 +184,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
       List<Classification> cl = classifications.get(label);
       for (Classification c : cl) {
         Rectangle rect = c.getBoundingBox();
-        graphics.drawString(String.format("%s %.3f",c.getLabel(), c.getConfidence()), (int) rect.x, (int) rect.y);
+        graphics.drawString(String.format("%s %.3f", c.getLabel(), c.getConfidence()), (int) rect.x, (int) rect.y);
         graphics.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
       }
     }

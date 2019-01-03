@@ -12,12 +12,12 @@ import org.slf4j.Logger;
 public class InverseKinematics3DTest {
 
   public final static Logger log = LoggerFactory.getLogger(InverseKinematics3DTest.class);
-  
+
   @Before
   public void setUp() {
     LoggingFactory.init("WARN");
   }
-  
+
   @Test
   public void testForwardKinematics() {
     InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
@@ -52,5 +52,5 @@ public class InverseKinematics3DTest {
     // TODO: this doesn't actually assert the position was reached! ouch.
     Assert.assertNotNull(p);
   }
-  
+
 }

@@ -35,7 +35,7 @@ public class LogGui extends ServiceGui implements ActionListener {
     JScrollPane scrollPane = new JScrollPane(log);
 
     display.add(scrollPane, BorderLayout.CENTER);
-  
+
   }
 
   @Override
@@ -77,17 +77,15 @@ public class LogGui extends ServiceGui implements ActionListener {
     // the new Java
     // 1.6 way
   }
-  
-  
-	public void onState(final Log log) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				// TODO - state update for the log service 
-			}
-		});
 
-	}
+  public void onState(final Log log) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        // TODO - state update for the log service
+      }
+    });
 
+  }
 
 }

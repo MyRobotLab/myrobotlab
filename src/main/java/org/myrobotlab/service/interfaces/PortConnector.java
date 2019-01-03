@@ -13,5 +13,5 @@ public interface PortConnector {
   public void disconnect() throws IOException;
 
   public boolean isConnected();
-  
+
 }

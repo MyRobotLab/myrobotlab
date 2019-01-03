@@ -58,7 +58,7 @@ public class ArduinoTest implements PinArrayListener {
   Map<Integer, PinData> pinData = new HashMap<Integer, PinData>();
   // FIXME - test for re-entrant !!!!
   // FIXME - single switch for virtual versus "real" hardware
-  
+
   @Before
   public void setUp() throws Exception {
     LoggingFactory.init("WARN");
@@ -71,13 +71,13 @@ public class ArduinoTest implements PinArrayListener {
       virtual.connect(port);
     }
 
-    
+
     // TODO:  Initialize the arduino under test.  (potentially do this in each test method vs passing the same one around ..)
     arduino = (Arduino) Runtime.start("arduinoTest", "Arduino");
     // TODO: have a separate unit test for testing serial.  we probably don't want to intermingle that testing here (if we can avoid it.)
     serial = arduino.getSerial();
     arduino.connect(port);
-    
+
     /**
      * Arduino's expected state before each test is
      * 'connected' with no devices, no pins enabled
@@ -486,78 +486,78 @@ public class ArduinoTest implements PinArrayListener {
     }
   }
 
-//  public static void main(String[] args) {
-//    try {
-//      LoggingFactory.init("INFO");
-//
-//      Runtime.start("webgui", "WebGui");
-//      // Runtime.start("gui", "SwingGui");
-//
-//      // test a "real" arduino
-//      useVirtualHardware = false;
-//      port = "COM5";
-//      // port = "COM4";
-//      // port = "COM99";
-//
-//      ArduinoTest test = new ArduinoTest();
-//      ArduinoTest.setUpBeforeClass();
-//
-//      Pir pir = (Pir)Runtime.start("pir","Pir");
-//      pir.attach(arduino, 7);
-//
-//      // arduino.record();
-//
-//      if (virtual != null) {
-//        virtual.connect(port);
-//      }
-//      arduino.connect(port);
-//
-//      arduino.setDebug(true);
-//      //arduino.enableAck(false);
-//
-//      test.testConnectString();
-//
-//      Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
-//      Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
-//
-//      servo01.setMinMax(10, 175);
-//      servo01.setInverted(true);
-//      servo01.setRest(157);
-//      servo02.setRest(140);
-//
-//      servo01.setInverted(true);
-//
-//      servo01.attach(arduino, 7);
-//      arduino.attach(servo01, 7);
-//      arduino.attach(servo01, 8);
-//
-//      // arduino.disconnect();
-//
-//      boolean b = true;
-//      if (b) {
-//        return;
-//      }
-//
-//      test.testGetVersion();
-//      test.testServoAttachServoInteger();
-//      test.testEnableBoardStatus();
-//      test.testEnablePinInt();
-//
-//
-//
-//      // test specific method
-//      test.testServoAttachServoInteger();
-//
-//      // run junit as java app
-//      JUnitCore junit = new JUnitCore();
-//      Result result = junit.run(ArduinoTest.class);
-//      log.info("Result was: {}", result);
-//
-//      // Runtime.dump();
-//
-//    } catch (Exception e) {
-//      Logging.logError(e);
-//    }
-//  }
+  //  public static void main(String[] args) {
+  //    try {
+  //      LoggingFactory.init("INFO");
+  //
+  //      Runtime.start("webgui", "WebGui");
+  //      // Runtime.start("gui", "SwingGui");
+  //
+  //      // test a "real" arduino
+  //      useVirtualHardware = false;
+  //      port = "COM5";
+  //      // port = "COM4";
+  //      // port = "COM99";
+  //
+  //      ArduinoTest test = new ArduinoTest();
+  //      ArduinoTest.setUpBeforeClass();
+  //
+  //      Pir pir = (Pir)Runtime.start("pir","Pir");
+  //      pir.attach(arduino, 7);
+  //
+  //      // arduino.record();
+  //
+  //      if (virtual != null) {
+  //        virtual.connect(port);
+  //      }
+  //      arduino.connect(port);
+  //
+  //      arduino.setDebug(true);
+  //      //arduino.enableAck(false);
+  //
+  //      test.testConnectString();
+  //
+  //      Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
+  //      Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
+  //
+  //      servo01.setMinMax(10, 175);
+  //      servo01.setInverted(true);
+  //      servo01.setRest(157);
+  //      servo02.setRest(140);
+  //
+  //      servo01.setInverted(true);
+  //
+  //      servo01.attach(arduino, 7);
+  //      arduino.attach(servo01, 7);
+  //      arduino.attach(servo01, 8);
+  //
+  //      // arduino.disconnect();
+  //
+  //      boolean b = true;
+  //      if (b) {
+  //        return;
+  //      }
+  //
+  //      test.testGetVersion();
+  //      test.testServoAttachServoInteger();
+  //      test.testEnableBoardStatus();
+  //      test.testEnablePinInt();
+  //
+  //
+  //
+  //      // test specific method
+  //      test.testServoAttachServoInteger();
+  //
+  //      // run junit as java app
+  //      JUnitCore junit = new JUnitCore();
+  //      Result result = junit.run(ArduinoTest.class);
+  //      log.info("Result was: {}", result);
+  //
+  //      // Runtime.dump();
+  //
+  //    } catch (Exception e) {
+  //      Logging.logError(e);
+  //    }
+  //  }
 
 }

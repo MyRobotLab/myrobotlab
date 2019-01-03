@@ -1,5 +1,5 @@
 package org.myrobotlab.swagger;
 
-public class Delete extends Verb  {
+public class Delete extends Verb {
 
 }

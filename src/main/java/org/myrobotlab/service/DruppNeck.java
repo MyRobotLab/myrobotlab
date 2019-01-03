@@ -30,7 +30,7 @@ public class DruppNeck extends Service {
   public double upOffset = 90;
   public double middleOffset = 120+90;
   public double downOffset = -120+90;
-  
+
   public DruppNeck(String name) {
     super(name);
   }
@@ -48,7 +48,7 @@ public class DruppNeck extends Service {
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
     // convert to radians
-    
+
     double rollRad = MathUtils.degToRad(roll);
     double pitchRad = MathUtils.degToRad(pitch);
     double yawRad = MathUtils.degToRad(yaw);
@@ -91,7 +91,7 @@ public class DruppNeck extends Service {
     middle.disable();
     down.disable();
   }
-  
+
   public ServoControl getUp() {
     return up;
   }
@@ -127,7 +127,7 @@ public class DruppNeck extends Service {
   public void setServos(ServoControl up, ServoControl middle, ServoControl down) {
     attach(up,middle,down);
   }
-  
+
   public double getUpOffset() {
     return upOffset;
   }
@@ -163,7 +163,7 @@ public class DruppNeck extends Service {
     meta.addPeer("down", "Servo", "Down servo");
 
     meta.setAvailable(true);
-    
+
     return meta;
   }
   public static void main(String[] args) throws Exception {

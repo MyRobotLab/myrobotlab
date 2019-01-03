@@ -24,8 +24,7 @@ import org.slf4j.Logger;
 /**
  *
  * @author LunDev (github), Ma. Vo. (MyRobotlab)
- * @author Moz4r 
- *         Client temporary build :
+ * @author Moz4r Client temporary build :
  *         https://github.com/moz4r/SpeechRecognitionMRL/blob/master/app/release/app-release.apk?raw=true
  *         Client temporary sources :
  *         https://github.com/moz4r/SpeechRecognitionMRL
@@ -428,16 +427,14 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
 
   @Override
   public void onStartSpeaking(String utterance) {
-    if (getAutoListen())
-    {
-    pauseListening();
+    if (getAutoListen()) {
+      pauseListening();
     }
   }
 
   @Override
   public void onEndSpeaking(String utterance) {
-    if (getAutoListen())
-    {
+    if (getAutoListen()) {
       resumeListening();
     }
   }
@@ -491,7 +488,5 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
     }
     commands.put(actionPhrase, new Command(name, method, params));
   }
-
-
 
 }

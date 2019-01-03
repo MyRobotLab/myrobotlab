@@ -49,7 +49,7 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
 
   private JButton saveButton = new JButton("Save");
   private JButton loadButton = new JButton("Load");
-  
+
   public OpenCVFilterFaceRecognizerGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
     // build the config for this filter.
@@ -72,13 +72,13 @@ public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements Ac
     jp.add(new JLabel("Name:"));
     jp.add(trainName);
     display.add(jp, gc);
-    
+
     saveButton.addActionListener(this);
     loadButton.addActionListener(this);
     JPanel jp2 = new JPanel(new GridBagLayout());
     jp2.add(saveButton);
     jp2.add(loadButton);
-    
+
     display.add(jp2, gc);
   }
 

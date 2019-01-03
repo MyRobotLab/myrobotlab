@@ -108,8 +108,9 @@ public abstract class BaseCache implements ManagedCache {
   /*
    * Get a boolean primitive value from the cache. Tests for: Boolean, Integer,
    * Byte, Short, String (parseBoolean)
+   * 
    * @return false if nothing is found or the cached value is not a boolean
-   *         value
+   * value
    */
   public boolean getBool(String name) {
     if (name == null || !contains(name)) {
@@ -174,7 +175,7 @@ public abstract class BaseCache implements ManagedCache {
    * Integer, Byte, Short, String (parseDouble)
    * 
    * @return 0.0d if nothing is found or the cached value was not an double
-   *         value
+   * value
    */
   public double getDouble(String name) {
     if (name == null || !contains(name)) {
@@ -209,7 +210,7 @@ public abstract class BaseCache implements ManagedCache {
     }
     return parseWithDefault((String) value, DEFAULT_DOUBLE);
   }
-  
+
   /*
    * Get an float primitive value from the cache. Tests for: Float, Integer,
    * Byte, Short, String (parseDouble)

@@ -39,7 +39,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
   public int step = 1;
   transient private Servo servo;
   transient private UltrasonicSensor sensor;
-  
+
   // TODO - changed to XDar - make RangeSensor interface -> publishRange
   // TODO - set default sample rate
   // private boolean isAttached = false;
@@ -89,14 +89,10 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
   public Double onServoEvent(Double pos) {
     info("pos %d", pos.intValue());
     /*
-    lastPos = pos;
-    if (rangeCount > 0) {
-      Point p = new Point(lastPos, rangeAvg / rangeCount);
-      rangeAvg = 0;
-      rangeCount = 0;
-      invoke("publishPingdar", p);
-    }
-    */
+     * lastPos = pos; if (rangeCount > 0) { Point p = new Point(lastPos,
+     * rangeAvg / rangeCount); rangeAvg = 0; rangeCount = 0;
+     * invoke("publishPingdar", p); }
+     */
 
     invoke("publishPingdar", new Point(pos, lastRange));
     lastPos = pos;
@@ -137,7 +133,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     // servo.setSpeed(60);
     servo.setVelocity(30);
     servo.eventsEnabled(true);
-    
+
     sensor.startRanging();
     // STEP ???
     servo.sweep(sweepMin, sweepMax, 100, step);
@@ -160,17 +156,18 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     meta.addPeer("controller", "Arduino", "controller for servo and sensor");
     meta.addPeer("sensor", "UltrasonicSensor", "sensor");
     meta.addPeer("servo", "Servo", "servo");
-    
+
     meta.sharePeer("sensor.controller", "controller", "Arduino", "shared arduino");
     // theoretically - Servo should follow the same share config
-    // meta.sharePeer("servo.controller", "controller", "Arduino", "shared arduino");
+    // meta.sharePeer("servo.controller", "controller", "Arduino", "shared
+    // arduino");
 
     return meta;
   }
 
   @Override
   public void startRanging() {
-    if (sensor != null){
+    if (sensor != null) {
       sensor.startRanging();
     } else {
       error("null sensor");
@@ -179,23 +176,22 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
 
   @Override
   public void stopRanging() {
-    if (sensor != null){
+    if (sensor != null) {
       sensor.stopRanging();
     } else {
       error("null sensor");
-    } 
+    }
   }
-  
 
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("gui", "SwingGui");
-      
-      VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual","VirtualArduino");
-      Servo servo = (Servo)Runtime.start("servo","Servo");
-      UltrasonicSensor sr04 = (UltrasonicSensor)Runtime.start("sr04", "UltrasonicSensor");
+
+      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      UltrasonicSensor sr04 = (UltrasonicSensor) Runtime.start("sr04", "UltrasonicSensor");
       sleep(1000);
       virtual.connect("COM5");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");

@@ -77,7 +77,7 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
   // controller
   JPanel controllerPanel = new JPanel(new BorderLayout());
   JComboBox<String> controllerList = new JComboBox<String>();
-  
+
   MotorController controller = null;
 
   JCheckBox invert = new JCheckBox("invert");
@@ -90,9 +90,9 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
   ImageButton counterclockwiseButton;
 
   // FIXME - order of operation ...
-  //      0. on contruction - query through for all mcs
-  //      1. register for registered & released - as this is when mc info is updated
-  // 
+  // 0. on contruction - query through for all mcs
+  // 1. register for registered & released - as this is when mc info is updated
+  //
   // TODO - make MotorPanel - for 1 motor - for shared embedded widget
   // TODO - stop sign button for panic stop
   // TODO - tighten up interfaces
@@ -103,7 +103,7 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
   String attach = "attach";
   String detach = "detach";
   JButton attachButton = new JButton(attach);
-  
+
   String setPort = "setPort";
 
   JComboBox<String> portList = new JComboBox<String>();
@@ -150,9 +150,9 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
       // do you have pins ?
       // do you have ports ?
       // and fill the appropriate ui
-      
+
       if (newController != null && newController.length() > 0) {
-        refreshPortList(newController);        
+        refreshPortList(newController);
       } else {
         portList.removeAllItems();
       }
@@ -160,16 +160,19 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
     } else if (source == stopButton) {
       power.setValue(0);
 
-    } else if (source == invert){
+    } else if (source == invert) {
       myMotor.setInverted(invert.isSelected());
-      
+
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
-        // myService.sendBlocking(boundServiceName, setPort, Integer.decode(portList.getSelectedItem().toString()));
-        // myService.sendBlocking(boundServiceName, setRightPwmPin, Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-        // myService.send(boundServiceName, attach, controllerList.getSelectedItem());
+        // myService.sendBlocking(boundServiceName, setPort,
+        // Integer.decode(portList.getSelectedItem().toString()));
+        // myService.sendBlocking(boundServiceName, setRightPwmPin,
+        // Integer.decode(rightPwmPinList.getSelectedItem().toString()));
+        // myService.send(boundServiceName, attach,
+        // controllerList.getSelectedItem());
         myMotor.setPort(portList.getSelectedItem().toString());
-        
+
         try {
           myMotor.attach((String) controllerList.getSelectedItem());
         } catch (Exception e1) {
@@ -183,16 +186,14 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
 
   }
 
-  
   void refreshPortList(String controllerName) {
-    MotorController mpc = (MotorController)Runtime.getService(controllerName);
+    MotorController mpc = (MotorController) Runtime.getService(controllerName);
     List<String> mbl = mpc.getPorts();
     portList.removeAllItems();
     for (int i = 0; i < mbl.size(); i++) {
       portList.addItem(mbl.get(i));
     }
   }
-  
 
   @Override
   public void subscribeGui() {
@@ -205,30 +206,30 @@ public class MotorPortGui extends ServiceGui implements ActionListener, ChangeLi
     // change pos
     unsubscribe("publishChangePos");
   }
-  
-  public void onRegistered(ServiceInterface si){
+
+  public void onRegistered(ServiceInterface si) {
     log.info("new service {}", si);
   }
 
   public void onState(MotorPort motor) {
-    
+
     // disable ui events
     removeListeners();
-    
+
     // refresh controller list
     refreshControllers();
 
     // enable control ui components if motor is attached
     setControlEnabled(motor.isAttached());
-    
+
     // if a controller is currently set
     // we need its portList
     // if (selectedController != null){
-      
+
     // }
-    
+
     portList.setSelectedItem(motor.getPort());
-    
+
     if (motor.isAttached()) {
       MotorController mc = (MotorController) motor.getController();
       controllerList.setSelectedItem(mc.getName());

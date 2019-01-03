@@ -48,8 +48,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
  * java
  * 
  * @author kwatters
- * @author scruffy-bob
- * modified by alessandruino
+ * @author scruffy-bob modified by alessandruino
  */
 public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
@@ -57,7 +56,6 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
   public RecognizerType recognizerType = RecognizerType.FISHER;
   private int modelSizeX = 256;
   private int modelSizeY = 256;
-
 
   private String cascadeDir = "haarcascades";
   private CascadeClassifier faceCascade;
@@ -123,7 +121,6 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
    * @return
    */
 
-
   private Mat resizeImage(Mat img, int width, int height) {
     Mat resizedMat = new Mat();
     // IplImage resizedImage = IplImage.create(modelSizeX, modelSizeY,
@@ -175,8 +172,7 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
   }
 
   @Override
-  public IplImage process(IplImage image) 
-		  throws InterruptedException {
+  public IplImage process(IplImage image) throws InterruptedException {
     // convert to grayscale
     Frame grayFrame = makeGrayScale(image);
     // TODO: this seems super wonky! isn't there an easy way to go from IplImage
@@ -185,7 +181,6 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
     int rows = grayFrame.imageHeight;
     // convert to a Mat
     Mat bwImgMat = converterToIpl.convertToMat(grayFrame);
-
 
     //
     // Find a bunch of faces and their features
@@ -223,11 +218,12 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
           log.warn("Error releasing some OpenCV memory, you shouldn't see this!", e);
           // should we continue ?!
         }
-          
-      // highlight each of the faces we find.
-      drawFaceRects(image, dF);
-     //  data.setEyesDifference(dF.getRightEye().y() - dF.getLeftEye().y());
-    }}
+
+        // highlight each of the faces we find.
+        drawFaceRects(image, dF);
+        // data.setEyesDifference(dF.getRightEye().y() - dF.getLeftEye().y());
+      }
+    }
     // pass through/return the original image marked up.
     return image;
   }
@@ -349,9 +345,9 @@ public class OpenCVFilterFaceDetect2 extends OpenCVFilter {
           dFace.getRightEye().height());
       drawRect(image, offset, CvScalar.BLUE);
       String positionY = "Y of Right Eye is: " + dFace.getRightEye().y();
-      String difference = "Difference between eyes is " + (dFace.getRightEye().y() - dFace.getLeftEye().y()) ; 
+      String difference = "Difference between eyes is " + (dFace.getRightEye().y() - dFace.getLeftEye().y());
       cvPutText(image, positionY, cvPoint(20, 80), font, CvScalar.BLACK);
-      cvPutText(image, difference , cvPoint(20, 100), font, CvScalar.BLACK);
+      cvPutText(image, difference, cvPoint(20, 100), font, CvScalar.BLACK);
     }
     if (dFace.getMouth() != null) {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getMouth().x(), dFace.getFace().y() + dFace.getMouth().y(), dFace.getMouth().width(), dFace.getMouth().height());

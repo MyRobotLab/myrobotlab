@@ -65,7 +65,8 @@ public class WorkflowWorker extends Thread {
           processing = false;
         }
       } catch (Exception e) {
-        // TODO: Why didn't I see this message before? because the exception was a runtime exception
+        // TODO: Why didn't I see this message before? because the exception was
+        // a runtime exception
         // and this was previously only catching interrupted.
         log.warn("Workflow Worker Died! {}", e.getMessage());
         e.printStackTrace();

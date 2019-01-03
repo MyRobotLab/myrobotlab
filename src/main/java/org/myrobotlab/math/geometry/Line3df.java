@@ -11,14 +11,14 @@ public class Line3df {
     p0 = new Point3df(x0, y0, z0);
     p1 = new Point3df(x1, y1, z1);
   }
-  
+
   public Line3df(Point3df p0, Point3df p1) {
     this.p0 = p0;
     this.p1 = p1;
   }
 
-  public String toString(){
+  public String toString() {
     return String.format("(%s,%s)", p0, p1);
   }
-  
+
 }

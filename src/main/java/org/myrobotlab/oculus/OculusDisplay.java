@@ -88,9 +88,9 @@ import com.oculusvr.capi.ViewScaleDesc;
 /**
  * 
  * OculusDisplay - This call will start up a lwjgl instance that will display
- * the rift image in a side by side fashion in the oculus rift display.
- * This is largely adapted from jocular-examples
- * https://github.com/OculusRiftInAction/jocular-examples 
+ * the rift image in a side by side fashion in the oculus rift display. This is
+ * largely adapted from jocular-examples
+ * https://github.com/OculusRiftInAction/jocular-examples
  * 
  * @author kwatters
  */
@@ -148,7 +148,7 @@ public class OculusDisplay implements Runnable {
   private float screenSize = 1.0f;
 
   public volatile boolean trackHead = true;
-  
+
   static {
     try {
       UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.vs"), Charsets.UTF_8);
@@ -162,20 +162,14 @@ public class OculusDisplay implements Runnable {
     }
   }
 
-  private static final Resource SKYBOX[] = {
-      IMAGES_SKY_CITY_XPOS_PNG,
-      IMAGES_SKY_CITY_XNEG_PNG,
-      IMAGES_SKY_CITY_YPOS_PNG,
-      IMAGES_SKY_CITY_YNEG_PNG,
-      IMAGES_SKY_CITY_ZPOS_PNG,
-      IMAGES_SKY_CITY_ZNEG_PNG,
-  };
+  private static final Resource SKYBOX[] = { IMAGES_SKY_CITY_XPOS_PNG, IMAGES_SKY_CITY_XNEG_PNG, IMAGES_SKY_CITY_YPOS_PNG, IMAGES_SKY_CITY_YNEG_PNG, IMAGES_SKY_CITY_ZPOS_PNG,
+      IMAGES_SKY_CITY_ZNEG_PNG, };
 
   public Orientation orientationInfo;
 
   // textures for the screen one for the left eye, one for the right eye.
   private Texture leftTexture;
-  private Texture rightTexture; 
+  private Texture rightTexture;
 
   public OculusDisplay() {
   }
@@ -188,13 +182,14 @@ public class OculusDisplay implements Runnable {
   }
 
   public void updateOrientation(Orientation orientation) {
-    // TODO: we can probably remove this , the orientation info is known when we're rendering.
+    // TODO: we can probably remove this , the orientation info is known when
+    // we're rendering.
     this.orientationInfo = orientation;
   }
 
   // sets up the opengl display for rendering the mirror texture.
   protected final void setupDisplay() {
-    // our size. / resolution?  is this configurable? maybe not?
+    // our size. / resolution? is this configurable? maybe not?
     width = hmdDesc.Resolution.w / 4;
     height = hmdDesc.Resolution.h / 4;
     int left = 100;
@@ -228,7 +223,8 @@ public class OculusDisplay implements Runnable {
     recenterView();
   }
 
-  // oculus device initialization, assumes that oculus runtime is up and running on the server.
+  // oculus device initialization, assumes that oculus runtime is up and running
+  // on the server.
   private void initHmd() {
     if (hmd == null) {
       Hmd.initialize();
@@ -237,7 +233,8 @@ public class OculusDisplay implements Runnable {
       } catch (InterruptedException e) {
         throw new IllegalStateException(e);
       }
-      // create it  (this should be owned by the Oculus service i think? and passed in with setHmd(hmd)
+      // create it (this should be owned by the Oculus service i think? and
+      // passed in with setHmd(hmd)
       hmd = Hmd.create();
     }
     if (null == hmd) {
@@ -254,7 +251,8 @@ public class OculusDisplay implements Runnable {
     }
     // TODO: maybe ipd and eyeHeight go away?
     ipd = hmd.getFloat(OvrLibrary.OVR_KEY_IPD, OVR_DEFAULT_IPD);
-    //eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT, OVR_DEFAULT_EYE_HEIGHT);
+    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT,
+    // OVR_DEFAULT_EYE_HEIGHT);
     eyeHeight = 0;
   }
 
@@ -286,7 +284,7 @@ public class OculusDisplay implements Runnable {
     if (newFrame) {
       loadRiftFrameTextures();
       newFrame = false;
-    } 
+    }
 
     width = hmdDesc.Resolution.w / 4;
     height = hmdDesc.Resolution.h / 4;
@@ -311,7 +309,7 @@ public class OculusDisplay implements Runnable {
       poses[eye].Position = pose.Position;
       if (trackHead)
         mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1)).preRotate(toQuaternion(poses[eye].Orientation).inverse());
-      // TODO: is there a way to render both of these are the same time? 
+      // TODO: is there a way to render both of these are the same time?
       if (eye == 0 && currentFrame.left != null) {
         renderScreen(leftTexture, orientationInfo);
       } else if (eye == 1 && currentFrame.right != null) {
@@ -331,31 +329,31 @@ public class OculusDisplay implements Runnable {
     glViewport(0, 0, width, height);
     glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //SceneHelpers.renderTexturedQuad(mirrorTexture.getTextureId());
-    
+    // SceneHelpers.renderTexturedQuad(mirrorTexture.getTextureId());
+
     // I think this renders the mirror window
     renderTexturedQuad(mirrorTexture.getTextureId());
 
   }
 
   private void loadRiftFrameTextures() {
-    
+
     // if the left & right texture are already loaded, let's delete them
     if (leftTexture != null)
       glDeleteTextures(leftTexture.id);
     if (rightTexture != null)
       glDeleteTextures(rightTexture.id);
-    
+
     // here we can just update the textures that we're using
     leftTexture = Texture.loadImage(currentFrame.left.getImage());
     rightTexture = Texture.loadImage(currentFrame.right.getImage());
-    
+
     leftTexture.bind();
     leftTexture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     leftTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
     leftTexture.unbind();
-    
+
     rightTexture.bind();
     rightTexture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     rightTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
@@ -389,7 +387,7 @@ public class OculusDisplay implements Runnable {
     } catch (LWJGLException e) {
       throw new RuntimeException(e);
     }
-    
+
     Display.setVSyncEnabled(false);
     TextureSwapChainDesc desc = new TextureSwapChainDesc();
     desc.Type = OvrLibrary.ovrTextureType.ovrTexture_2D;
@@ -413,7 +411,7 @@ public class OculusDisplay implements Runnable {
     layer.RenderPose = poses;
     for (int eye = 0; eye < 2; ++eye) {
       layer.Viewport[eye].Size = textureSizes[eye];
-      layer.Viewport[eye].Pos = new OvrVector2i(0,0); 
+      layer.Viewport[eye].Pos = new OvrVector2i(0, 0);
     }
     layer.Viewport[1].Pos.x = layer.Viewport[1].Size.w;
     frameBuffer = new FrameBuffer(desc.Width, desc.Height);
@@ -503,17 +501,16 @@ public class OculusDisplay implements Runnable {
     mv.pop();
   }
 
-
   /*
    * helper function to render an image on the current bound texture.
    */
   public void renderScreen(Texture screenTexture, Orientation orientation) {
-    // clean up 
+    // clean up
     glClear(GL_DEPTH_BUFFER_BIT);
     renderSkybox();
-    // TODO: don't lazy create this. 
+    // TODO: don't lazy create this.
     if (null == screenGeometry) {
-      screenGeometry = OpenGL.makeTexturedQuad(new Vector2f(-screenSize,-screenSize), new Vector2f(screenSize,screenSize));
+      screenGeometry = OpenGL.makeTexturedQuad(new Vector2f(-screenSize, -screenSize), new Vector2f(screenSize, screenSize));
     }
     if (null == screenProgram) {
       screenProgram = new Program(SHADERS_TEXTURED_VS, SHADERS_TEXTURED_FS);
@@ -560,12 +557,15 @@ public class OculusDisplay implements Runnable {
   public static Vector3f toVector3f(OvrVector3f v) {
     return new Vector3f(v.x, v.y, v.z);
   }
+
   public static Quaternion toQuaternion(OvrQuaternionf q) {
     return new Quaternion(q.x, q.y, q.z, q.w);
   }
+
   public static Matrix4f toMatrix4f(Posef p) {
     return new Matrix4f().rotate(toQuaternion(p.Orientation)).mult(new Matrix4f().translate(toVector3f(p.Position)));
   }
+
   public static Matrix4f toMatrix4f(OvrMatrix4f m) {
     if (null == m) {
       return new Matrix4f();
@@ -575,4 +575,3 @@ public class OculusDisplay implements Runnable {
   // End methods from saintandreas
 
 }
-

@@ -28,9 +28,9 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
   RuntimeGui parent;
   private JTextArea traceArea = null;
   private JButton refresh = null;
-  
+
   JScrollPane scrollPane = null;
-  
+
   public StackTraceDialog(RuntimeGui parent) {
     super(parent.swingGui.getFrame(), "stack traces");
     this.parent = parent;
@@ -51,12 +51,11 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
     display.add(scrollPane, BorderLayout.CENTER);
     // south
     JPanel south = new JPanel();
-    
-    
+
     refresh = new JButton("Refresh");
     south.add(refresh);
     refresh.addActionListener(this);
-    
+
     display.add(south, BorderLayout.SOUTH);
     // TODO: add a button to refresh..
     setSize(600, 600);
@@ -64,11 +63,12 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
   }
 
   private void refreshStackTraces() {
-    // TODO: skip some of the stack traces.. for example the one that is generating this result.
+    // TODO: skip some of the stack traces.. for example the one that is
+    // generating this result.
     Set<Thread> threads = Thread.getAllStackTraces().keySet();
     StringBuilder traceBuilder = new StringBuilder();
     for (Thread t : threads) {
-      traceBuilder.append("Thread:" + t.getId() + " " + t.getName() + " Status:" + t.getState() +"\n");
+      traceBuilder.append("Thread:" + t.getId() + " " + t.getName() + " Status:" + t.getState() + "\n");
       for (StackTraceElement ele : t.getStackTrace()) {
         traceBuilder.append("  " + ele.getClassName() + " " + ele.getFileName() + ":" + ele.getLineNumber() + "\n");
       }
@@ -81,31 +81,31 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
   @Override
   public void mouseClicked(MouseEvent e) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void mousePressed(MouseEvent e) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void mouseReleased(MouseEvent e) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void mouseEntered(MouseEvent e) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void mouseExited(MouseEvent e) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -115,9 +115,8 @@ public class StackTraceDialog extends JDialog implements ActionListener, MouseLi
 
     if (source == refresh) {
       refreshStackTraces();
-    } 
+    }
 
-    
   }
 
 }

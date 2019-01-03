@@ -123,8 +123,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * We don't use csv fiiles anymore, just a check there is no more aimlIf folder
-   * Check also if there is Aiml files inside folder...
+   * We don't use csv fiiles anymore, just a check there is no more aimlIf
+   * folder Check also if there is Aiml files inside folder...
    */
   private boolean checkBrain(String botName) {
     if (botName == null || botName.isEmpty()) {
@@ -553,7 +553,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       for (String userName : sessions.get(botName).keySet()) {
         String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
         File sessionPredFile = new File(sessionPredicateFilename);
-        // if the file doesn't exist.. we should create it..  (and make the directories for it.)
+        // if the file doesn't exist.. we should create it.. (and make the
+        // directories for it.)
         if (!sessionPredFile.getParentFile().exists()) {
           // create the directory.
           log.info("Creating the directory {}", sessionPredFile.getParentFile());
@@ -628,18 +629,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     this.setCurrentUserName(userName);
 
     // TODO: remove this completely!
-    // Ignore the return value, this checkBrain method doesn't work as expected for bots defined externally.
+    // Ignore the return value, this checkBrain method doesn't work as expected
+    // for bots defined externally.
     checkBrain(botName);
 
     // TODO: manage the bots in a collective pool/hash map.
-    // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside standalone jar )
+    // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside
+    // standalone jar )
     if (bot == null) {
       bot = new Bot(botName, path, locale);
     } else if (!botName.equalsIgnoreCase(bot.name)) {
       bot = new Bot(botName, path, locale);
     }
 
-    // Hijack all the SRAIX requests and implement them as a synchronous call to a service to 
+    // Hijack all the SRAIX requests and implement them as a synchronous call to
+    // a service to
     // return a string response for programab...
     MrlSraixHandler sraixHandler = new MrlSraixHandler();
     bot.setSraixHandler(sraixHandler);
@@ -681,7 +685,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // it is used to know the last username...
     if (sessions.get(botName).containsKey("default") && !userName.equals("default")) {
       setPredicate("default", "lastUsername", userName);
-      // robot surname is stored inside default.predicates, not inside system.prop
+      // robot surname is stored inside default.predicates, not inside
+      // system.prop
       setPredicate(userName, "botname", getPredicate("default", "botname"));
       try {
         savePredicates();
@@ -745,8 +750,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * writeAndQuit will write brain to disk
-   * For learn.aiml is concerned
+   * writeAndQuit will write brain to disk For learn.aiml is concerned
    */
   public void writeAndQuit() {
     if (bot == null) {
@@ -755,7 +759,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
     try {
       savePredicates();
-      //important to save learnf.aiml
+      // important to save learnf.aiml
       writeAIML();
     } catch (IOException e1) {
       // TODO Auto-generated catch block
@@ -865,13 +869,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
     meta.addDependency("program-ab", "program-ab-kw", "0.0.8.4");
     meta.addDependency("org.json", "json", "20090211");
-    //used by FileIO
+    // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
-    // This is for CJK support in ProgramAB. 
-    // TODO: move this into the published POM for ProgramAB so they are pulled in transiently.
+    // This is for CJK support in ProgramAB.
+    // TODO: move this into the published POM for ProgramAB so they are pulled
+    // in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
-    meta.addCategory("ai","control");
+    meta.addCategory("ai", "control");
     return meta;
   }
 
@@ -879,23 +884,26 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     try {
       LoggingFactory.init(Level.INFO);
       Runtime.start("gui", "SwingGui");
-      //Runtime.start("webgui", "WebGui");
+      // Runtime.start("webgui", "WebGui");
 
       ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
 
-      //logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO"); //org.myrobotlab.service.ProgramAB
+      // logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO");
+      // //org.myrobotlab.service.ProgramAB
 
-      //WebkitSpeechRecognition ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-      //MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+      // WebkitSpeechRecognition ear = (WebkitSpeechRecognition)
+      // Runtime.start("ear", "WebkitSpeechRecognition");
+      // MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
 
       // mouth.attach(ear);
       // brain.attach(ear);
-      //brain.attach(mouth);
+      // brain.attach(mouth);
 
-      //brain.startSession("default", "en-US");
-      //brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry", "kevin", "harry");
+      // brain.startSession("default", "en-US");
+      // brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry",
+      // "kevin", "harry");
 
-      //brain.savePredicates();
+      // brain.savePredicates();
     } catch (Exception e) {
       log.error("main threw", e);
     }

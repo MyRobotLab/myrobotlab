@@ -486,22 +486,15 @@ public class Roomba extends Service {
   }
 
   /*
-   * A Spirograph-like example
-   * <p>
-   * Run it with something like:
+   * A Spirograph-like example <p> Run it with something like:
    * 
-   * <pre>
-   *    java roombacomm.Spiro1 /dev/cu.KeySerial1 velocity radius waittime<br>
-   *   Usage: \n"+
-   *     roombacomm.Spiro1 &lt;serialportname&gt; [protocol] &lt;velocity&gt; &lt;radius&gt; &lt;waittime&gt; [options]<br>
-   *   where: 
-   *   protocol (optional) is SCI or OI
-   *   velocity and radius in mm, waittime in milliseconds
-   *   [options] can be one or more of:
-   *    -debug       -- turn on debug output
-   *    -hwhandshake -- use hardware-handshaking, for Windows Bluetooth
-   *    -nohwhandshake -- don't use hardware-handshaking
-   * </pre>
+   * <pre> java roombacomm.Spiro1 /dev/cu.KeySerial1 velocity radius
+   * waittime<br> Usage: \n"+ roombacomm.Spiro1 &lt;serialportname&gt;
+   * [protocol] &lt;velocity&gt; &lt;radius&gt; &lt;waittime&gt; [options]<br>
+   * where: protocol (optional) is SCI or OI velocity and radius in mm, waittime
+   * in milliseconds [options] can be one or more of: -debug -- turn on debug
+   * output -hwhandshake -- use hardware-handshaking, for Windows Bluetooth
+   * -nohwhandshake -- don't use hardware-handshaking </pre>
    */
   public void spiro1(int velocity, int radius, int waittime) {
 

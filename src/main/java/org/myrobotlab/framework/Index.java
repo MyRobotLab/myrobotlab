@@ -197,8 +197,8 @@ public class Index<T> {
   }
 
   /**
-   * find a node key, by browsing the whole tree..
-   * ( wanted to use crawlForDataStartingWith but seem nok )
+   * find a node key, by browsing the whole tree.. ( wanted to use
+   * crawlForDataStartingWith but seem nok )
    */
   public String findNode(String parent, String key) {
 
@@ -221,7 +221,7 @@ public class Index<T> {
         nextNode = entrie;
       }
 
-      //log.info(key + " key " + nextNode);
+      // log.info(key + " key " + nextNode);
       if (nextNode.toLowerCase().contains(key.toLowerCase())) {
         return nextNode;
       }
@@ -263,7 +263,7 @@ public class Index<T> {
     if (root.getNode(node) != null) {
 
       Set<String> entries = root.getNode(node).getBranches().keySet();
-      //log.info(entries+"entries");
+      // log.info(entries+"entries");
 
       for (String key : entries) {
         if (!(root.getNode(node + "." + key) == null) && root.getNode(node + "." + key).size() == 0) {

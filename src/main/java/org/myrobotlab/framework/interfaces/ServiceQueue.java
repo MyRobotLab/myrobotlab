@@ -9,7 +9,9 @@ public interface ServiceQueue {
 
   /**
    * put message in inbox, so it will be processed by this service
-   * @param msg m
+   * 
+   * @param msg
+   *          m
    */
 
   public void in(Message msg);

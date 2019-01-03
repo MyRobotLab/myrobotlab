@@ -18,7 +18,7 @@ public class Category implements Comparator<Category>, Serializable, NameTypePro
   }
 
   @Override
-  public String getName() {    
+  public String getName() {
     return name;
   }
 

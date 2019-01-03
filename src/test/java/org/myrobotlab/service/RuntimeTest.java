@@ -23,7 +23,7 @@ public class RuntimeTest extends AbstractTest {
   public void setUp() {
     LoggingFactory.init("WARN");
   }
-  
+
   @Test
   public void testGetUptime() {
     String res = Runtime.getUptime();

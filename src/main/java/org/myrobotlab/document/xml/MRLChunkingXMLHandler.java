@@ -67,8 +67,7 @@ public class MRLChunkingXMLHandler implements ContentHandler {
       // something interrupted us.. we are not running.
       throw new SAXException("Connector is not running.. aborting!");
     }
-    
-    
+
     // push on the stack.
     currentPath.push(qName);
     // log.info("Start element: {}",qName);

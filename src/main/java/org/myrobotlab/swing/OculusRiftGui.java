@@ -39,7 +39,6 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
     display.add(leftVideoPanel);
     display.add(rightVideoPanel);
 
-  
   }
 
   @Override
@@ -53,7 +52,6 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
     return null;
   }
 
-  
   public void onRiftFrame(RiftFrame frame) {
     if (frame.left != null && frame.right != null) {
       leftEye.displayFrame(frame.left);
@@ -68,7 +66,7 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
 
   @Override
   public void unsubscribeGui() {
-	  unsubscribe("publishRiftFrame");
+    unsubscribe("publishRiftFrame");
   }
 
 }

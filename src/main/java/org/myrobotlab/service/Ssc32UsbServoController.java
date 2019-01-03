@@ -219,15 +219,17 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     // probably a noop - as it can be pulled from the
     // servo controller when the servo is moved.
   }
-  
-  
+
   /**
-   * attach with parameters which will set all necessary attributes on ServoControl
-   * before calling the single parameter typed attach
+   * attach with parameters which will set all necessary attributes on
+   * ServoControl before calling the single parameter typed attach
    * 
-   * @param servo the servo
-   * @param pin the pin number 
-   * @throws Exception e
+   * @param servo
+   *          the servo
+   * @param pin
+   *          the pin number
+   * @throws Exception
+   *           e
    */
   @Override
   public void attach(ServoControl servo, int pin) throws Exception {
@@ -274,7 +276,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Routing detach - routes ServiceInterface.detach(service) to appropriate
    * methods for this class
    */
-  public void detach(Attachable service){
+  public void detach(Attachable service) {
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       detachServoControl((ServoControl) service);
       return;
@@ -285,7 +287,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   /**
    * This is a typed detach for the one interface it knows how to attach to
    * 
-   * @param servo - servo control service
+   * @param servo
+   *          - servo control service
    */
   public void detachServoControl(ServoControl servo) {
     if (isAttached(servo.getName())) {
@@ -387,22 +390,29 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     connect(port, rate, 8, 1, 0);
   }
 
-/* (non-Javadoc)
- * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.Integer, java.lang.Integer)
- */
-@Override
-public void enablePin(Integer sensorPin, Integer i) {
-	// TODO Auto-generated method stub
-	
-}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.
+   * Integer, java.lang.Integer)
+   */
+  @Override
+  public void enablePin(Integer sensorPin, Integer i) {
+    // TODO Auto-generated method stub
 
-/* (non-Javadoc)
- * @see org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.Integer)
- */
-@Override
-public void disablePin(Integer i) {
-	// TODO Auto-generated method stub
-	
-}
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.
+   * Integer)
+   */
+  @Override
+  public void disablePin(Integer i) {
+    // TODO Auto-generated method stub
+
+  }
 
 }

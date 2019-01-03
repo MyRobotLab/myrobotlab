@@ -180,7 +180,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
 
     byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
         (byte) (pulseWidthOff >> 8) };
-    // log.info(String.format("Writing pin %s, pulesWidthOn %s, pulseWidthOff %s", pin, pulseWidthOn, pulseWidthOff));
+    // log.info(String.format("Writing pin %s, pulesWidthOn %s, pulseWidthOff
+    // %s", pin, pulseWidthOn, pulseWidthOff));
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
@@ -208,7 +209,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
       prescale_value = Math.round(0.9 * osc_clock / precision / hz) - 1;
     }
 
-    // log.info(String.format("PWMFreq %s hz, prescale_value calculated to %s", hz, prescale_value));
+    // log.info(String.format("PWMFreq %s hz, prescale_value calculated to %s",
+    // hz, prescale_value));
     // Set sleep mode before changing PWM freqency
     byte[] writeBuffer = { PCA9685_MODE1, PCA9685_SLEEP };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
@@ -251,7 +253,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   public void stopPwm() {
 
     byte[] buffer = { (byte) (PCA9685_ALL_LED_OFF_H), (byte) PCA9685_TURN_ALL_LED_OFF };
-    // log.info(String.format("Writing shutdown command to %s", this.getName()));
+    // log.info(String.format("Writing shutdown command to %s",
+    // this.getName()));
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
@@ -280,7 +283,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
         motor.setPwmFreq(defaultMotorPwmFreq);
         setPWMFreq(motor.getPwmPin(), motor.getPwmFreq());
       }
-      // log.info(String.format("AdafruitMotorHat4Pi, powerOutput = %s", powerOutput));
+      // log.info(String.format("AdafruitMotorHat4Pi, powerOutput = %s",
+      // powerOutput));
       if (powerOutput < 0) {
         setPinValue(motor.getLeftDirPin(), 0);
         setPinValue(motor.getRightDirPin(), 1);
@@ -298,7 +302,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   public void setPinValue(int pin, double powerOutput) {
-    // log.info(String.format("setPinValue, pin = %s, powerOutput = %s", pin, powerOutput));
+    // log.info(String.format("setPinValue, pin = %s, powerOutput = %s", pin,
+    // powerOutput));
     if (powerOutput < 0) {
       log.error("setPinValue. Value below zero ({}). Defaulting to 0.", powerOutput);
       powerOutput = 0;
@@ -320,7 +325,8 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
       powerOn = 0;
       powerOff = (int) (powerOutput * 4096);
     }
-    // log.info(String.format("powerOutput = %s, powerOn = %s, powerOff = %s", powerOutput, powerOn, powerOff));
+    // log.info(String.format("powerOutput = %s, powerOn = %s, powerOff = %s",
+    // powerOutput, powerOn, powerOff));
     setPWM(pin, powerOn, powerOff);
   }
 

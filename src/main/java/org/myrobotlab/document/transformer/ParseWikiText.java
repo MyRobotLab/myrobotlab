@@ -25,6 +25,7 @@ public class ParseWikiText extends AbstractStage {
   String output = "text";
   WikiConfig wikiConfig = null;
   WtEngineImpl engine = null;
+
   @Override
   public void startStage(StageConfiguration config) {
     // TODO Auto-generated method stub
@@ -35,7 +36,6 @@ public class ParseWikiText extends AbstractStage {
     // Instantiate a compiler for wiki pages
     engine = new WtEngineImpl(wikiConfig);
 
-    
   }
 
   @Override
@@ -48,7 +48,7 @@ public class ParseWikiText extends AbstractStage {
     }
     String wikiText = doc.getField(input).get(0).toString();
     try {
-      
+
       // Retrieve a page
       PageTitle pageTitle = PageTitle.make(wikiConfig, title);
       PageId pageId = new PageId(pageTitle, -1);
@@ -56,19 +56,19 @@ public class ParseWikiText extends AbstractStage {
       EngProcessedPage cp = engine.postprocess(pageId, wikiText, null);
       // This compiled page i think has all the mojo i seek!
       TextConverter p = new TextConverter(wikiConfig, 132, doc);
-      String result = (String)p.go(cp.getPage());
+      String result = (String) p.go(cp.getPage());
       doc.setField(output, result);
       // how many children docs are there.
       List<Document> children = p.getChildrenDocs();
       // System.gc();
       int i = 0;
       for (Document d : children) {
-        String childId = doc.getId() + "_infobox_"+ i;
+        String childId = doc.getId() + "_infobox_" + i;
         d.setId(childId);
         i++;
         // let's fix the doc ids so they're deterministic
       }
-      //log.info("######### CHILDREN : {}", children.size());
+      // log.info("######### CHILDREN : {}", children.size());
       p = null;
       // emit the children docs from this method.
       return children;

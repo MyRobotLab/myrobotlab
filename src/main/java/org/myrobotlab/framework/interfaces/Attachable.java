@@ -17,8 +17,8 @@ import java.util.Set;
 public interface Attachable extends NameProvider {
 
   /**
-   * This attach when overriden "routes" to the appropriately typed parameterized
-   * attach within a service.
+   * This attach when overriden "routes" to the appropriately typed
+   * parameterized attach within a service.
    * 
    * When overriden, the first thing it should do is check to see if the
    * referenced service is already attached. If it is already attached it should
@@ -54,26 +54,29 @@ public interface Attachable extends NameProvider {
    * 
    *       // call to attaching service
    *       service.attach(this);  
-   * }  
+   * }
    * </pre>
    * 
    * @param service
    *          - the service to attach from this service
-   * @throws Exception - throws on error and cannot attach
+   * @throws Exception
+   *           - throws on error and cannot attach
    */
   public void attach(Attachable service) throws Exception;
 
   /**
    * calls attach(Attachable)
    * 
-   * @param serviceName - service name
-   * @throws Exception - thrown if error
+   * @param serviceName
+   *          - service name
+   * @throws Exception
+   *           - thrown if error
    */
   public void attach(String serviceName) throws Exception;
 
   /**
-   * This detach when overriden "routes" to the appropriately typed parameterized
-   * detach within a service.
+   * This detach when overriden "routes" to the appropriately typed
+   * parameterized detach within a service.
    * 
    * When overriden, the first thing it should do is check to see if the
    * referenced service is already detached. If it is already detached it should
@@ -109,7 +112,7 @@ public interface Attachable extends NameProvider {
    * 
    *       // call to detaching service
    *       service.detach(this);  
-   * }  
+   * }
    * </pre>
    * 
    * @param service
@@ -124,7 +127,7 @@ public interface Attachable extends NameProvider {
    *          - name of service
    */
   public void detach(String serviceName);
-  
+
   /**
    * detach which detaches ALL other services from this service.
    */
@@ -136,7 +139,8 @@ public interface Attachable extends NameProvider {
   public Set<String> getAttached();
 
   /**
-   * @param instance - referenced service to test
+   * @param instance
+   *          - referenced service to test
    * @return true if service is already attached false otherwise
    */
   public boolean isAttached(Attachable instance);
@@ -144,11 +148,12 @@ public interface Attachable extends NameProvider {
   /**
    * returns if the Attachable has been set or not - name interface
    * 
-   * @param name - name of service
+   * @param name
+   *          - name of service
    * @return True or False depending if service is attached
    */
   public boolean isAttached(String name);
-  
+
   public boolean isLocal();
 
 }

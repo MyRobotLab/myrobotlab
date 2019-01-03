@@ -215,7 +215,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       try {
         Thread.sleep(500);
       } catch (InterruptedException e) {
-        
+
       } // must slow down to initialize
 
       // force to correct state strobe state
@@ -411,9 +411,9 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
     ServiceType meta = new ServiceType(Wii.class.getCanonicalName());
     meta.addDescription("Wii mote control and sensor info");
     meta.addCategory("control", "sensor");
-    
+
     meta.addDependency("wiiusej", "wiiusej", "wiiusej");
-    // 
+    //
     return meta;
   }
 

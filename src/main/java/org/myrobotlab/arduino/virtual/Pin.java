@@ -1,15 +1,15 @@
 package org.myrobotlab.arduino.virtual;
 
 public class Pin {
-  
-//Pin Types must be in sync
-//with Arduino.getMrlPinType
 
-public final static int DIGITAL =        0;
-public final static int ANALOG  =        1;
-// pin mode
-public final static int INPUT =  0;
-public final static int OUTPUT = 1;
+  // Pin Types must be in sync
+  // with Arduino.getMrlPinType
+
+  public final static int DIGITAL = 0;
+  public final static int ANALOG = 1;
+  // pin mode
+  public final static int INPUT = 0;
+  public final static int OUTPUT = 1;
 
   public Pin(int address, int type, Integer rate) {
     this.address = address;
@@ -29,4 +29,3 @@ public final static int OUTPUT = 1;
   public int value;
   public int address;
 }
-

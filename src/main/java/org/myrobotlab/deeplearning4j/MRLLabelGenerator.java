@@ -10,14 +10,14 @@ public class MRLLabelGenerator extends ParentPathLabelGenerator {
   @Override
   public Writable getLabelForPath(String path) {
     Writable w = super.getLabelForPath(path);
-    //System.out.println("Path:" + path);
+    // System.out.println("Path:" + path);
     return w;
   }
 
   @Override
   public Writable getLabelForPath(URI uri) {
     Writable w = super.getLabelForPath(uri);
-    //System.out.println("URL: " + uri.toString());
+    // System.out.println("URL: " + uri.toString());
     return w;
   }
 

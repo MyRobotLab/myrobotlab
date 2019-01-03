@@ -40,8 +40,11 @@ public class DemoManager {
       "simbad.demo.LightSearchDemo", "simbad.demo.SimplestDemo", "simbad.demo.BlinkingLampDemo", "simbad.demo.DifferentialKinematicDemo", "simbad.demo.KheperaDemo",
       "simbad.demo.PickCherriesDemo", "simbad.demo.PushBallsDemo" };
 
-  /** Creates a menu corresponding to the demo set. 
-   * @param actionListener listener
+  /**
+   * Creates a menu corresponding to the demo set.
+   * 
+   * @param actionListener
+   *          listener
    * @return a jmenu
    */
   public final static JMenu createMenu(ActionListener actionListener) {
@@ -55,8 +58,11 @@ public class DemoManager {
     return menu;
   }
 
-  /** Creates a demo corresponding to the menu item. 
-   * @param event e
+  /**
+   * Creates a demo corresponding to the menu item.
+   * 
+   * @param event
+   *          e
    * @return demo
    */
   public static Demo getDemoFromActionEvent(ActionEvent event) {

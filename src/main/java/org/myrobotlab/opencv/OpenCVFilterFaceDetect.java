@@ -64,13 +64,13 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   CvMemStorage storage = null;
   public CvHaarClassifierCascade cascade = null; // TODO - was static
-  
+
   /**
-   * our default classifier - pre-trained 
+   * our default classifier - pre-trained
    */
   public String cascadeDir = "haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
-  
+
   /**
    * bounding boxes of faces
    */
@@ -91,15 +91,15 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   public static final String STATE_LOSING_TRACKING = "STATE_LOSING_TRACKING";
   public static final String STATE_DETECTING_FACE = "STATE_DETECTING_FACE";
   public static final String STATE_DETECTED_FACE = "STATE_DETECTED_FACE";
-  
+
   /**
    * Begin Recognition - which is just a sub-classification of "face"(detection)
    */
   public String trainingDir = "training" + File.separator + "_faces";
 
   private String state = STATE_LOST_TRACKING;
-  int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default 
-  // int option = 0; // default 
+  int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default
+  // int option = 0; // default
 
   public OpenCVFilterFaceDetect(String name) {
     super(name);
@@ -192,7 +192,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
       log.info("Starting new classifier {}", cascadeFile);
       cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
-  
+
       if (cascade == null) {
         log.error("Could not load classifier cascade");
       }
@@ -219,10 +219,10 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
             CvRect r = new CvRect(cvGetSeqElem(faces, i));
             bb.add(new Rectangle(r.x(), r.y(), r.width(), r.height()));
             data.putBoundingBoxArray(bb);
-            r.close();            
+            r.close();
           } catch (Exception e) {
           }
-        }        
+        }
       }
     } else {
       log.info("Creating and loading new classifier instance {}", cascadeFile);
