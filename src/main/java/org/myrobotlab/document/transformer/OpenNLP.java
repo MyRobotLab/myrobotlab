@@ -98,7 +98,7 @@ public class OpenNLP extends AbstractStage {
           String tokens[] = tokenizer.tokenize(sentence);
           Span[] spans = nameFinder.find(tokens);
           // part of speech tagging
-          String[] posText = posTagger.tag(new String[] {sentence});
+          String[] posText = posTagger.tag(new String[] { sentence });
           // extract a triple from the sentence.
           children.addAll(createTripleDocuments(doc.getId(), posText[0]));
           doc.addToField(posTextField, posText[0]);

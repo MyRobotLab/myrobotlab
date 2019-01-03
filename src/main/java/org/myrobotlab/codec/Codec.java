@@ -17,14 +17,12 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 public abstract class Codec {
 
   /*
-  OutputStream recorder = null;
-  
-  public void setRecorder(OutputStream recorder){
-    this.recorder = recorder;
-  }
-  */
-  
-  public byte[] encode(NameProvider sender, String name, String method, Object...data) throws Exception{
+   * OutputStream recorder = null;
+   * 
+   * public void setRecorder(OutputStream recorder){ this.recorder = recorder; }
+   */
+
+  public byte[] encode(NameProvider sender, String name, String method, Object... data) throws Exception {
     Message msg = Message.createMessage(sender, name, method, data);
     ByteArrayOutputStream encoded = new ByteArrayOutputStream();
     encode(encoded, msg);
@@ -39,10 +37,13 @@ public abstract class Codec {
    * so this method exists to handle that detail.
    * 
    * e.g. URI POST --to--&gt; Message
-   * @param data the data to decode 
+   * 
+   * @param data
+   *          the data to decode
    * 
    * @return decoded object
-   * @throws Exception e
+   * @throws Exception
+   *           e
    */
   abstract public Object[] decodeArray(Object data) throws Exception;
 
@@ -56,7 +57,8 @@ public abstract class Codec {
    * @param type
    *          - the expected type we want to decode into
    * @return decoded object
-   * @throws Exception e
+   * @throws Exception
+   *           e
    */
   abstract public Object decode(Object data, Class<?> type) throws Exception;
 
@@ -68,8 +70,8 @@ public abstract class Codec {
   abstract public String getMimeType();
 
   /**
-   * @return different strategies of encoding may in the end have the same mime type so
-   * a key is needed to identify the exact type
+   * @return different strategies of encoding may in the end have the same mime
+   *         type so a key is needed to identify the exact type
    */
 
   abstract public String getKey();

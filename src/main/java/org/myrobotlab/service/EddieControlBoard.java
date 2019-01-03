@@ -125,7 +125,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   public void connect(String port) throws IOException {
-	  serial.open(port, 115200, 8, 1, 0);
+    serial.open(port, 115200, 8, 1, 0);
   }
 
   public String getAnalogValues() throws Exception {
@@ -355,9 +355,12 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   /**
    * sending a command when expecting a string response in the context of
    * blocking for response
-   * @param cmd to send
-   * @return  the string response
-   * @throws Exception e
+   * 
+   * @param cmd
+   *          to send
+   * @return the string response
+   * @throws Exception
+   *           e
    */
   public String sendCommand(String cmd) throws Exception {
     log.info("sendCommand {}", cmd);

@@ -44,7 +44,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
   private Matrix inputMatrix = null;
   private Point scale = null;
-  
+
   transient InputTrackingThread trackingThread = null;
 
   public InverseKinematics3D(String n) {
@@ -161,12 +161,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     return inputMatrix;
   }
 
-  
   public Point createInputScale(double x, double y, double z) {
-    scale = new Point(x,y,z, 0,0,0);
+    scale = new Point(x, y, z, 0, 0, 0);
     return scale;
   }
-  
+
   public Point rotateAndTranslate(Point pIn) {
 
     Matrix m = new Matrix(4, 1);
@@ -192,20 +191,21 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
   /**
    * Compute the inverse kinematics to move the robot hand to the destination
-   * first scale the input point, then apply 
+   * first scale the input point, then apply
+   * 
    * @param p
    */
   public void moveTo(Point p) {
 
-    
     log.info("Raw Input : {}", p);
     if (scale != null) {
-      // scale the x,y,z by the factors stored in the scale point. (really vector i guess?)
+      // scale the x,y,z by the factors stored in the scale point. (really
+      // vector i guess?)
       double x = scale.getX() * p.getX();
       double y = scale.getY() * p.getY();
       double z = scale.getZ() * p.getZ();
-      p = new Point(x,y,z, p.getRoll(), p.getPitch(), p.getYaw());
-      log.info("Scaled Input {}", p );
+      p = new Point(x, y, z, p.getRoll(), p.getPitch(), p.getYaw());
+      log.info("Scaled Input {}", p);
     }
     if (inputMatrix != null) {
       p = rotateAndTranslate(p);
@@ -264,7 +264,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   public static void main(String[] args) throws Exception {
-     LoggingFactory.init("info");
+    LoggingFactory.init("info");
 
     Runtime.createAndStart("python", "Python");
     Runtime.createAndStart("gui", "SwingGui");
@@ -354,18 +354,17 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   public Point publishTracking(Point tracking) {
     return tracking;
   }
-  
+
   public void onPoint(Point point) {
     // TODO : move input matrix translation to here? or somewhere?
     // TODO: also don't like that i'm going to just say take the first point
     // now.
     // TODO: points should probably be a map, each point should have a name ?
     log.info("Attempting to move to {}", point);
-    
+
     // TODO: scale / translate & rotate...
     moveTo(point);
   }
-  
 
   @Override
   public void onPoints(List<Point> points) {

@@ -126,8 +126,11 @@ public class Peers {
   // won't override !!!
   /*
    * @param key
+   * 
    * @param actualName
+   * 
    * @param type
+   * 
    * @param comment
    */
   public boolean suggestAs(String key, String actualName, String type, String comment) {

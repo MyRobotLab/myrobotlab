@@ -177,24 +177,25 @@ public abstract class OpenCVFilter implements Serializable {
   static private Mat read(String filename) {
     return imread(filename, CV_LOAD_IMAGE_UNCHANGED);
   }
-  
+
   /**
    * number of channels of incoming image
    */
   int channels;
-  
+
   /**
    * converters for the filter
    */
   transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-  
+
   /**
    * converter for the filter
    */
   transient OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 
   /**
-   * reference to the last OpenCVData processed and the one this filter will modify
+   * reference to the last OpenCVData processed and the one this filter will
+   * modify
    */
   OpenCVData data;
 
@@ -204,9 +205,9 @@ public abstract class OpenCVFilter implements Serializable {
   transient Color displayColor;
 
   /**
-   * This allows the display method to be processed in the filter
-   * typically its a conversion from opencv-jni-land to java-land
-   * and associated processing for human consumption
+   * This allows the display method to be processed in the filter typically its
+   * a conversion from opencv-jni-land to java-land and associated processing
+   * for human consumption
    */
   boolean displayEnabled = false;
 
@@ -443,7 +444,7 @@ public abstract class OpenCVFilter implements Serializable {
   /**
    * converting IplImages to BufferedImages
    */
-  public BufferedImage toBufferedImage(IplImage image) {    
+  public BufferedImage toBufferedImage(IplImage image) {
     return jconverter.convert(converterToImage.convert(image));
   }
 
@@ -455,7 +456,7 @@ public abstract class OpenCVFilter implements Serializable {
     return converterToImage.convert(image);
   }
 
-  public Frame toFrame(Mat image) {    
+  public Frame toFrame(Mat image) {
     return converterToImage.convert(image);
   }
 
@@ -477,7 +478,7 @@ public abstract class OpenCVFilter implements Serializable {
   public Mat toMat(Frame image) {
     return converterToImage.convertToMat(image);
   }
-  
+
   public Mat toMat(IplImage image) {
     return converterToMat.convert(converterToMat.convert(image));
   }

@@ -335,7 +335,8 @@ public class Agent extends SimpleAgent {
   }
 
   /**
-   * @param rv Sets rotational velocity in radians per second.
+   * @param rv
+   *          Sets rotational velocity in radians per second.
    */
   public final void setRotationalVelocity(double rv) {
     // because it's one of the default kinematic fucntions we provide it in
@@ -346,7 +347,8 @@ public class Agent extends SimpleAgent {
   }
 
   /**
-   * @param tv Sets translational velocity in meter per second.
+   * @param tv
+   *          Sets translational velocity in meter per second.
    */
   public final void setTranslationalVelocity(double tv) {
     // because it's one of the default kinematic fucntions we provide it in
@@ -360,7 +362,9 @@ public class Agent extends SimpleAgent {
    * Add a UI panel to the agent. Typically used for displaying behavior
    * outputs. A call to this method will have for consequence the creation of a
    * dedicated window.
-   * @param panel p
+   * 
+   * @param panel
+   *          p
    */
   public void setUIPanel(JPanel panel) {
     this.panel = panel;

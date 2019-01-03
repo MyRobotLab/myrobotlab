@@ -96,7 +96,7 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
   String attach = "attach";
   String detach = "detach";
   JButton attachButton = new JButton(attach);
-  
+
   String setMotor = "setMotor";
 
   JComboBox<String> motorList = new JComboBox<String>();
@@ -142,23 +142,21 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
     } else if (source == stopButton) {
       power.setValue(0);
 
-    } else if (source == invert){
+    } else if (source == invert) {
       myMotor.setInverted(invert.isSelected());
-      
+
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
         swingGui.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
         swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
-        myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.getSelectedItem().toString()));
-        myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-        try {
-          myMotor.attach((String) controllerList.getSelectedItem());
-        } catch (Exception e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        }
-        */
+         * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.
+         * getSelectedItem().toString()));
+         * myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.
+         * getSelectedItem().toString())); try { myMotor.attach((String)
+         * controllerList.getSelectedItem()); } catch (Exception e1) { // TODO
+         * Auto-generated catch block e1.printStackTrace(); }
+         */
       } else {
         swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
       }
@@ -185,14 +183,14 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
   }
 
   public void onState(MotorHat4Pi motor) {
-    
+
     removeListeners();
     refreshControllers();
 
     setEnabled(motor.isAttached());
-    
+
     motorList.setSelectedItem(motor.getMotorId());
-    
+
     if (motor.isAttached()) {
       MotorController mc = (MotorController) motor.getController();
       controllerList.setSelectedItem(mc.getName());
@@ -226,7 +224,8 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
     if (power == source) {
       powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
       swingGui.send(boundServiceName, "move", power.getScaledValue());
-      // log.info(String.format("send %s, move, %s", boundServiceName, power.getScaledValue()));
+      // log.info(String.format("send %s, move, %s", boundServiceName,
+      // power.getScaledValue()));
     }
   }
 

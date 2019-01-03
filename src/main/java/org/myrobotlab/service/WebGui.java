@@ -169,6 +169,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       return new X509Certificate[0];
     }
   };
+
   private static SSLContext createSSLContext2() {
     try {
       InputStream keyStoreStream = Security.class.getResourceAsStream("resource/keys/selfsigned.jks");
@@ -207,7 +208,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     ServiceType meta = new ServiceType(WebGui.class.getCanonicalName());
     meta.addDescription("web display");
     meta.addCategory("connectivity", "display");
-    
+
     meta.includeServiceInOneJar(true);
     meta.addDependency("org.atmosphere", "nettosphere", "2.3.0");
 
@@ -482,10 +483,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     String apiKey = Api.getApiKey(r.getRequest().getRequestURI());
 
     AtmosphereRequest request = r.getRequest();
-    
-    
+
     log.debug(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
-    
 
     try {
 
@@ -578,7 +577,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * to setup some protocol details here for websockets and session management
    * which the ApiFactory should not be concerned with.
    * 
-   * @param r - request and response objects from Atmosphere server
+   * @param r
+   *          - request and response objects from Atmosphere server
    */
   public void handleMessagesApi(AtmosphereResource r) {
     try {
@@ -625,13 +625,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     AtmosphereResponse response = r.getResponse();
     OutputStream out = response.getOutputStream();
     response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
-    
+
     String hack = null;
     byte[] data = null;
     if (request.body() != null) {
       hack = request.body().asString();
       // data = request.body().asBytes();
-      if (hack != null){ // FIXME - hack because request.body().asBytes() ALWAYS returns null !!
+      if (hack != null) { // FIXME - hack because request.body().asBytes()
+                          // ALWAYS returns null !!
         data = hack.getBytes();
       }
     }
@@ -825,7 +826,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * If you need MRL changes of position or UI changes use publishPanel to
    * remotely control UI
    * 
-   * @param panel - the panel which has been moved or resized
+   * @param panel
+   *          - the panel which has been moved or resized
    */
   public void savePanel(Panel panel) {
     if (panel.name == null) {
@@ -983,12 +985,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * local or if the library is linked to using content delivery network.
    * Default (false) is to use the CDN
    *
-   * @param useLocalResources - true uses local resources fals uses cdn
+   * @param useLocalResources
+   *          - true uses local resources fals uses cdn
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
 
@@ -1006,7 +1009,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("arduino", "Arduino");
       // Runtime.start("srf05", "UltrasonicSensor");
       // Runtime.setRuntimeName("george");
-      WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
       webgui.autoStartBrowser(true);
       Runtime.start("mary", "MarySpeech");
 

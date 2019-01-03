@@ -14,31 +14,31 @@ import java.io.IOException;
 
 public class OpenCVFilterFaceDetectDNNTest {
 
-  boolean debug = false; 
-  
+  boolean debug = false;
+
   @Test
   public void testFaceFilterDNN() throws IOException {
-    
+
     // opencv needs to be installed if it's not
-    if (!Repo.getInstance().isInstalled("OpenCV")) 
+    if (!Repo.getInstance().isInstalled("OpenCV"))
       Repo.getInstance().install("OpenCV");
-    
+
     OpenCVFilterFaceDetectDNN filter = new OpenCVFilterFaceDetectDNN("filter");
     String filename = "src/test/resources/OpenCV/multipleFaces.jpg";
-    //String filename = "pose.jpg";
-    //String filename = "pose2.jpg";
-    //String filename = "pose3.jpg";
-    //String filename = "pose4.jpg";
-   
+    // String filename = "pose.jpg";
+    // String filename = "pose2.jpg";
+    // String filename = "pose3.jpg";
+    // String filename = "pose4.jpg";
+
     IplImage image = cvLoadImage(filename);
     filter.setData(new OpenCVData(filename, 0, 0, OpenCV.toFrame(image)));
     assertNotNull(image);
     if (debug)
       filter.show(image, "Image");
-    IplImage result =  filter.process(image);
+    IplImage result = filter.process(image);
     if (debug) {
-      filter.enabled=true;
-      filter.displayEnabled=true;
+      filter.enabled = true;
+      filter.displayEnabled = true;
       BufferedImage bi = filter.processDisplay();
       IplImage displayVal = OpenCV.toImage(bi);
       filter.show(displayVal, "Resulting image");
@@ -47,9 +47,7 @@ public class OpenCVFilterFaceDetectDNNTest {
     }
     int numFound = filter.bb.size();
     assertEquals(numFound, 5);
-    
+
   }
-  
- 
-    
+
 }

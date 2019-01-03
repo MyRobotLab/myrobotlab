@@ -21,11 +21,11 @@ public class YoloDetectedObject {
     this.image = cropped;
     this.sublabel = sublabel;
   }
-    
+
   @Override
   public String toString() {
-    String box = "X:" + boundingBox.x() + ",Y:" + boundingBox.y() + " W:" + boundingBox.width() + " H:"+ boundingBox.height();
-    return "YoloDetectedObject [boundingBox=" + box + ", confidence=" + confidence + ", label=" + label + ", subLabel= "+sublabel+", frameIndex= "+frameIndex+"]";
+    String box = "X:" + boundingBox.x() + ",Y:" + boundingBox.y() + " W:" + boundingBox.width() + " H:" + boundingBox.height();
+    return "YoloDetectedObject [boundingBox=" + box + ", confidence=" + confidence + ", label=" + label + ", subLabel= " + sublabel + ", frameIndex= " + frameIndex + "]";
   }
-  
+
 }

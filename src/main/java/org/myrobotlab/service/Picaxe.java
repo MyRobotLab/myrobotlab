@@ -42,7 +42,8 @@ import org.slf4j.Logger;
  * http://arduino.cc/en/Main/ArduinoBoardDuemilanove
  * 
  * - Find Arduino Message set - DigitalWrite (pin, data?) - ArduinoProgram
- * HashMap&lt;Key, Program&gt; - loadProgram (Key) - key - default key &amp; program
+ * HashMap&lt;Key, Program&gt; - loadProgram (Key) - key - default key &amp;
+ * program
  * 
  * References: http://www.arduino.cc/playground/Main/RotaryEncoders
  * 

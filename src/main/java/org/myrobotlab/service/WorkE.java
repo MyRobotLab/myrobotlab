@@ -31,12 +31,11 @@ public class WorkE extends Service implements StatusListener {
 
   final public static String MOTOR_RIGHT = "motorRight";
   private static final long serialVersionUID = 1L;
-  
+
   /**
    * <pre>
-   * FOSCAM 
-   * WORKY !!! - for IPCamera frame grabber
-   *  
+   * FOSCAM WORKY !!! - for IPCamera frame grabber
+   * 
    * http://admin:admin@192.168.0.37/videostream.cgi?user=admin&pwd=admin
    */
 
@@ -144,7 +143,7 @@ public class WorkE extends Service implements StatusListener {
   // - in this particular case it was "randomly" decided that 2 parameters
   // FIXME - no defaults ?
   public void attach() throws Exception {
-    
+
     // speakBlocking = true; FIXME - promote to Abstract
 
     // mute();
@@ -278,7 +277,7 @@ public class WorkE extends Service implements StatusListener {
     } else {
       speak("not all systems are fully functional");
     }
-    
+
     clearErrors();
 
     // speak("i am ready");
@@ -525,7 +524,7 @@ public class WorkE extends Service implements StatusListener {
   }
 
   OpenCVFilterOpticalFlow dense = null;
-  
+
   /**
    * dense or sparse optical flow - depending on latency challenges and other
    * environmental conditions
@@ -534,7 +533,6 @@ public class WorkE extends Service implements StatusListener {
    */
   public void startFlow() {
 
- 
     // TODO - setup dense optical (on 3x cameras?)
     ////////////////// TODO MESH /////////////////////////
     // FIXME DO MESH Subdiv2D subdiv = new Subdiv2D();
@@ -552,13 +550,12 @@ public class WorkE extends Service implements StatusListener {
     flow.setGrabberType("Pipeline");
     // flow.setInputFileName("worke.cv.input.frame");
     flow.setInputSource("pipeline");
-    
-    
+
     if (dense == null) {
       dense = new OpenCVFilterOpticalFlow("dense");
     }
-    flow.addFilter(dense);    
-    
+    flow.addFilter(dense);
+
     flow.capture();
 
     // flow = (OpenCV)startPeer("flow");
@@ -684,6 +681,5 @@ public class WorkE extends Service implements StatusListener {
       log.error("worke no worky !", e);
     }
   }
-
 
 }

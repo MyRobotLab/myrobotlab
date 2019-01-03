@@ -122,7 +122,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
-  
+
   public static final String DATA_DIR = "data" + File.separator + OpenCV.class.getSimpleName();
   public static final String RESOURCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName();
 
@@ -152,7 +152,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public final String DATA_INSTANCE_DIR = "data" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
   public final String RESOURCE_INSTANCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
-  
+
   /**
    * a more capable task handler
    */
@@ -201,8 +201,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
-   * @param myKey m
-   * @param serviceClass class 
+   * 
+   * @param myKey
+   *          m
+   * @param serviceClass
+   *          class
    * @return a map of string to service reservation
    * 
    */
@@ -1581,7 +1584,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       }
       log.info("cfg file {} does not exist", filename);
     } catch (Exception e) {
-      log.error("failed loading {}", filename,e);
+      log.error("failed loading {}", filename, e);
     }
     return false;
   }
@@ -1902,9 +1905,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * this send forces remote connect - for registering services
-   * @param url u
-   * @param method m 
-   * @param param1 the param
+   * 
+   * @param url
+   *          u
+   * @param method
+   *          m
+   * @param param1
+   *          the param
    */
   public void send(URI url, String method, Object param1) {
     Object[] params = new Object[1];
@@ -2015,7 +2022,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void startRecording() {
     invoke("startRecording", new Object[] { null });
   }
-  
+
   @Override
   public void loadAndStart() {
     load();
@@ -2089,9 +2096,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
         cm.send(Message.createMessage(this, serviceName, "addListener", listener));
       }
     } else {
-    MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-    cm.send(Message.createMessage(this, topicName, "addListener", listener));
-  }
+      MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+      cm.send(Message.createMessage(this, topicName, "addListener", listener));
+    }
   }
 
   public void sendPeer(String peerKey, String method, Object... params) {

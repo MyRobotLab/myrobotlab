@@ -3,10 +3,10 @@ package org.myrobotlab.jme3;
 import com.jme3.math.ColorRGBA;
 
 public class Jme3Utils {
-  
+
   static public ColorRGBA getColor(String c) {
     ColorRGBA color = ColorRGBA.Gray;
-    
+
     switch (c) {
       case "gray":
         color = ColorRGBA.Gray;

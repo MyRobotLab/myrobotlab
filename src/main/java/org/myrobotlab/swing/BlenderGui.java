@@ -52,7 +52,7 @@ public class BlenderGui extends ServiceGui implements ActionListener {
     JPanel north = new JPanel();
     north.add(connect);
     connect.addActionListener(this);
-  
+
   }
 
   @Override

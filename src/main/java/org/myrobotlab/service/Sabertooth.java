@@ -200,7 +200,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     MotorPort motor = (MotorPort) motors.get(mc.getName());
     String port = motor.getPort();
 
-    int power = (int) motorCalcOutput(mc);    
+    int power = (int) motorCalcOutput(mc);
 
     log.error("motor {} power {}", mc.getName(), power);
 

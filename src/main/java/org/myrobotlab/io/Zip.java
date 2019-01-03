@@ -58,9 +58,9 @@ public class Zip {
 
     if (FILE.equals(resourceType)) {
       File check = new File(resourcePath);
-      if (!check.exists() || check.isDirectory()){
-    	  log.error("cannot extract self [{}]", resourcePath);
-    	  return;
+      if (!check.exists() || check.isDirectory()) {
+        log.error("cannot extract self [{}]", resourcePath);
+        return;
       }
       source = new FileInputStream(resourcePath);
     } else {
@@ -83,7 +83,7 @@ public class Zip {
 
         if (filter == null || entry.getName().startsWith(filter)) {
 
-          String filename = (filter==null)?entry.getName():entry.getName().substring(filter.length());
+          String filename = (filter == null) ? entry.getName() : entry.getName().substring(filter.length());
           // File file = new File(target, entry.getName());
           File file = new File(target, filename);
 
@@ -187,7 +187,7 @@ public class Zip {
         if (rest.length() > 0) {
           // not subfiles of sub directories
           if ((!(rest.contains("/") && rest.charAt(rest.length() - 1) != '/')) &&
-              // and not sub directories of sub directories
+          // and not sub directories of sub directories
               (countOccurrences(rest, '/') < 2)) {
             // log.info(currentEntry);
             children.add(currentEntry.substring(dir.length()));

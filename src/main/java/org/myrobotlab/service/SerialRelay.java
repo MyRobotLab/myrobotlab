@@ -17,14 +17,12 @@ import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.service.interfaces.SerialRelayListener;
 import org.slf4j.Logger;
 
-
 public class SerialRelay extends Service implements SerialDevice, Attachable {
-
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(SerialRelay.class);
-  
+
   transient Arduino controller = null;
 
   private transient SerialRelayListener listener;
@@ -62,7 +60,7 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
       Runtime.start("template", "SerialRelay");
       Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
-      
+
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("COM15");
       Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
@@ -74,29 +72,30 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
 
   @Override
   public void open(String name) throws IOException {
-  	// TODO Auto-generated method stub
-  	
+    // TODO Auto-generated method stub
+
   }
-  
+
   @Override
   public int read() throws Exception {
-  	// TODO Auto-generated method stub
-  	return 0;
+    // TODO Auto-generated method stub
+    return 0;
   }
-  
+
   @Override
   public void write(byte[] data) throws Exception {
     int[] cdata = new int[data.length];
-    for (int i=0; i<data.length; i++){
+    for (int i = 0; i < data.length; i++) {
       cdata[i] = data[i];
     }
-  	controller.msg.serialRelay(controller.getDeviceId(this), cdata);
+    controller.msg.serialRelay(controller.getDeviceId(this), cdata);
   }
-  
+
   @Override
   public void write(int data) throws Exception {
-//    controller.msg.serialRelay(controller.getDeviceId(this), new byte[] {(byte)data});
-    controller.msg.serialRelay(controller.getDeviceId(this), new int[] {data});
+    // controller.msg.serialRelay(controller.getDeviceId(this), new byte[]
+    // {(byte)data});
+    controller.msg.serialRelay(controller.getDeviceId(this), new int[] { data });
   }
 
   public void attach(Arduino controller, SerialRelayListener listener, int controllerAttachAs) {
@@ -104,11 +103,10 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
     this.listener = listener;
     this.controllerAttachAs = controllerAttachAs;
     if (controller != null) {
-      subscribe(controller.getName(),"publishSerialData");
+      subscribe(controller.getName(), "publishSerialData");
       controller.serialAttach(this, controllerAttachAs);
     }
   }
-
 
   // @Override
   public Attachable getController() {
@@ -123,25 +121,24 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
   @Override
   public Set<String> getAttached() {
     HashSet<String> ret = new HashSet<String>();
-    if (controller != null){
+    if (controller != null) {
       ret.add(controller.getName());
     }
     return ret;
   }
 
-
   public int[] onSerialData(SerialRelayData data) {
-    if (data.deviceId == controller.getDeviceId(this)){
-      if (listener instanceof Arduino){
-        for(int newByte:data.data){
+    if (data.deviceId == controller.getDeviceId(this)) {
+      if (listener instanceof Arduino) {
+        for (int newByte : data.data) {
           ((Arduino) listener).onByte(((int) newByte & 0xFF));
         }
       }
       return data.data;
     }
-    return new int[0];//new byte[] {0};
+    return new int[0];// new byte[] {0};
   }
-  
+
   // TODO - this could be Java 8 default interface implementation
   @Override
   public void detach(String controllerName) {
@@ -155,19 +152,19 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
   @Override
   public void clear() {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setTimeout(int timeoutMs) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void flush() {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -176,70 +173,70 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
     return 0;
   }
 
-@Override
-public String publishConnect(String portName) {
-	return portName;
-}
+  @Override
+  public String publishConnect(String portName) {
+    return portName;
+  }
 
-@Override
-public String publishDisconnect(String portName) {
-	return portName;
-}
+  @Override
+  public String publishDisconnect(String portName) {
+    return portName;
+  }
 
-@Override
-public boolean isConnected() {
-	return controller != null;
-}
+  @Override
+  public boolean isConnected() {
+    return controller != null;
+  }
 
-@Override
-public String getPortName() {
-	return controller.getSerial().getPortName();
-}
+  @Override
+  public String getPortName() {
+    return controller.getSerial().getPortName();
+  }
 
-@Override
-public List<String> getPortNames() {
-	return controller.getSerial().getPortNames();
-}
+  @Override
+  public List<String> getPortNames() {
+    return controller.getSerial().getPortNames();
+  }
 
-@Override
-public void write(String data) throws Exception {
-  write(data.getBytes());
-}
+  @Override
+  public void write(String data) throws Exception {
+    write(data.getBytes());
+  }
 
-@Override
-public void open(String portname, int rate, int dataBits, int stopBits, int parity) throws IOException {
-  // TODO Auto-generated method stub
-  
-}
+  @Override
+  public void open(String portname, int rate, int dataBits, int stopBits, int parity) throws IOException {
+    // TODO Auto-generated method stub
 
-@Override
-public void close() throws IOException {
-  // TODO Auto-generated method stub
-  
-}
+  }
 
-@Override
-public int getRate() {
-  // TODO Auto-generated method stub
-  return 0;
-}
+  @Override
+  public void close() throws IOException {
+    // TODO Auto-generated method stub
 
-@Override
-public int getDataBits() {
-  // TODO Auto-generated method stub
-  return 0;
-}
+  }
 
-@Override
-public int getStopBits() {
-  // TODO Auto-generated method stub
-  return 0;
-}
+  @Override
+  public int getRate() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 
-@Override
-public int parity() {
-  // TODO Auto-generated method stub
-  return 0;
-}
+  @Override
+  public int getDataBits() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public int getStopBits() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public int parity() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
 
 }

@@ -86,7 +86,7 @@ public class Vision {
       instance.opencv.addFilter(filterName);
     }
     instance.opencv.setActiveFilter(filterName);
-    //temporary fix overexpand windows
+    // temporary fix overexpand windows
     SwingGui gui = (SwingGui) Runtime.getService("gui");
     if (gui != null) {
       gui.maximize();
@@ -128,13 +128,14 @@ public class Vision {
   }
 
   /**
-   * Method to a analyze a yolo filter classifier ( maybe dl4j also ? )
-   * This will count objects on the frame and get labels + positions
-   * //TODO individual position for multiple same labels.. 
+   * Method to a analyze a yolo filter classifier ( maybe dl4j also ? ) This
+   * will count objects on the frame and get labels + positions //TODO
+   * individual position for multiple same labels..
    */
   public void yoloInventory(TreeMap<String, List<Classification>> classifications) {
-    
-    //reset previous same classified objects ( to count same objetcs on the frame )
+
+    // reset previous same classified objects ( to count same objetcs on the
+    // frame )
     for (Map.Entry<String, List<Classification>> entry : classifications.entrySet()) {
       List<Classification> value = entry.getValue();
       for (Classification document : value) {
@@ -144,7 +145,7 @@ public class Vision {
       }
     }
 
-    //add now labels and positions to collection
+    // add now labels and positions to collection
     for (Map.Entry<String, List<Classification>> entry : classifications.entrySet()) {
       List<Classification> value = entry.getValue();
       for (Classification document : value) {
@@ -159,7 +160,7 @@ public class Vision {
         }
       }
     }
-    //Sort result based on position
+    // Sort result based on position
     collectionTemp.clear();
     collectionPositions.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(key -> collectionTemp.put(key.getKey(), collectionCount.get(key.getKey())));
     collectionCount.clear();

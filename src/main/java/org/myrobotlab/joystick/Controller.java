@@ -13,7 +13,7 @@ import net.java.games.input.ControllerEnvironment;
 public class Controller {
 
   public final static Logger log = LoggerFactory.getLogger(Controller.class);
-  
+
   String name;
   int portNumber;
   String portType;
@@ -76,7 +76,7 @@ public class Controller {
     // clear the index
     componentMap.clear();
     // rebuild map
-    for (Component c: components) {
+    for (Component c : components) {
       c.serviceName = serviceName;
       componentMap.put(c.getIdentifier(), c);
     }

@@ -26,10 +26,10 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
   private Integer feedCount = 0;
   private long lastUpdate = System.currentTimeMillis();
   private long start = System.currentTimeMillis();
-  
+
   // private long maxFeedCount = 10000;
   private long maxFeedCount = -1;
-  
+
   public AbstractConnector(String name) {
     super(name);
     // no overruns!
@@ -51,28 +51,27 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
       batch.add(doc);
       if (batch.size() >= batchSize) {
         feedCount += batch.size();
-        // 
-        synchronized(batch) {
+        //
+        synchronized (batch) {
           invoke("publishDocuments", batch);
           batch = Collections.synchronizedList(new ArrayList<Document>());
         }
         // flush();
       }
     }
-    
+
     // update and report timing metrics
     long now = System.currentTimeMillis();
     long lastReport = now - lastUpdate;
     // every 10 seconds
     if (lastReport > 10000) {
       // log the throughput
-      double speed = feedCount / (double)(now - start) * 1000;
+      double speed = feedCount / (double) (now - start) * 1000;
       log.info("Feed {} docs.  Current rate {}", feedCount, speed);
       lastUpdate = now;
     }
-    
-    
-//    // test the max feed count
+
+    // // test the max feed count
     if (feedCount > maxFeedCount && maxFeedCount >= 0) {
       // stop this connector.
       setState(ConnectorState.INTERRUPTED);
@@ -89,7 +88,7 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
     // TODO: make this thread safe!
     // invoke("publishFlush");
     // reset/clear the batch.
-    synchronized(batch) {
+    synchronized (batch) {
       invoke("publishDocuments", batch);
       batch = Collections.synchronizedList(new ArrayList<Document>());
     }

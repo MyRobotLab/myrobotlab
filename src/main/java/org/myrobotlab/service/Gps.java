@@ -354,12 +354,12 @@ public class Gps extends Service implements SerialDataListener {
   }
 
   public void connect(String port) throws IOException {
-	  serial.open(port, 38400, 8, 1, 0);
+    serial.open(port, 38400, 8, 1, 0);
     // serial.publishType(PUBLISH_STRING); // GPS units publish strings
   }
 
   public void connect(String port, int baud) throws IOException {
-	  serial.open(port, baud, 8, 1, 0);
+    serial.open(port, baud, 8, 1, 0);
   }
 
   /***********************************************************************************
@@ -370,7 +370,8 @@ public class Gps extends Service implements SerialDataListener {
   // be converted
   /**
    * 
-   * @param nmea huh?
+   * @param nmea
+   *          huh?
    * @return no idea
    */
   public double convertNMEAToDegrees(String nmea) {
@@ -424,6 +425,7 @@ public class Gps extends Service implements SerialDataListener {
    * Minimum Specific GNSS Data VTG Course Over Ground and Ground Speed GSA GNSS
    * DOP and Active Satellites MSS MSK Receiver Signal kmc - so the data you
    * have doesn't have two (GLL and MSK)
+   * 
    * @return string array of data
    */
   public String[] publishGGAData() {
@@ -798,8 +800,10 @@ public class Gps extends Service implements SerialDataListener {
   // This is how you create a Point
   /**
    * 
-   * @param lat latitude
-   * @param lon longitude
+   * @param lat
+   *          latitude
+   * @param lon
+   *          longitude
    * @return the point
    */
   public Point setPoint(double lat, double lon) {

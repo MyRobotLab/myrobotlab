@@ -53,7 +53,8 @@ public interface ServiceInterface
   public String getSimpleName();
 
   // important to maintain a method to return canonical type
-  // important in the future when other services are expressed differently e.g.(node js services)
+  // important in the future when other services are expressed differently
+  // e.g.(node js services)
   public String getType();
 
   public boolean hasPeers();
@@ -67,8 +68,8 @@ public interface ServiceInterface
   public void releaseService();
 
   /**
-   * called by runtime when system is shutting down
-   * a service can use this method when it has to do some "ordered" cleanup
+   * called by runtime when system is shutting down a service can use this
+   * method when it has to do some "ordered" cleanup
    */
   public void preShutdown();
 

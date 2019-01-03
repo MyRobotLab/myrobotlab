@@ -71,8 +71,8 @@ import org.slf4j.Logger;
  * <li>Doesn't limit bandwidth, request time or simultaneous connections</li>
  * <li>Default code serves files and shows all HTTP parameters and headers</li>
  * <li>File server supports directory listing, index.html and index.htm</li>
- * <li>File server does the 301 redirection trick for directories without '/'
- * </li>
+ * <li>File server does the 301 redirection trick for directories without
+ * '/'</li>
  * <li>File server supports simple skipping for files (continue download)</li>
  * <li>File server uses current directory as a web root</li>
  * <li>File server serves also very long files without memory overhead</li>
@@ -525,9 +525,8 @@ public class NanoHTTPD {
   }
 
   /*
-   * Starts a HTTP server to given port.
-   * <p>
-   * Throws an IOException if the socket is already in use
+   * Starts a HTTP server to given port. <p> Throws an IOException if the socket
+   * is already in use
    */
   public NanoHTTPD(int port) {
     myTcpPort = port;
@@ -539,12 +538,17 @@ public class NanoHTTPD {
    * 
    * (By default, this delegates to serveFile() and allows directory listing.)
    * 
-   * @param uri Percent-decoded URI without parameters, for example "/index.cgi"
-   * @param method "GET", "POST" etc.
-   * @param parms Parsed, percent decoded parameters from URI and, in case of
-   *       POST, data.
-   * @param header Header entries, percent decoded
-   * @param socket the socket
+   * @param uri
+   *          Percent-decoded URI without parameters, for example "/index.cgi"
+   * @param method
+   *          "GET", "POST" etc.
+   * @param parms
+   *          Parsed, percent decoded parameters from URI and, in case of POST,
+   *          data.
+   * @param header
+   *          Header entries, percent decoded
+   * @param socket
+   *          the socket
    * @return HTTP response, see class Response for details
    */
   public Response serve(String uri, String method, Properties header, Properties parms, Socket socket) {
@@ -567,10 +571,15 @@ public class NanoHTTPD {
   /**
    * Serves file from homeDir and its' subdirectories (only). Uses only URI,
    * ignores all headers and HTTP parameters.
-   * @param uri u
-   * @param header h 
-   * @param homeDir h
-   * @param allowDirectoryListing a 
+   * 
+   * @param uri
+   *          u
+   * @param header
+   *          h
+   * @param homeDir
+   *          h
+   * @param allowDirectoryListing
+   *          a
    * @return response
    */
   public Response serveFile(String uri, Properties header, File homeDir, boolean allowDirectoryListing) {

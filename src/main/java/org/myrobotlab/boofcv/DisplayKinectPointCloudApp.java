@@ -18,7 +18,6 @@
 
 package org.myrobotlab.boofcv;
 
-
 import boofcv.alg.depth.VisualDepthOps;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.gui.image.ShowImages;
@@ -41,46 +40,47 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Loads kinect data from two files and displays the cloud in a 3D simple viewer.
+ * Loads kinect data from two files and displays the cloud in a 3D simple
+ * viewer.
  *
  * @author Peter Abeles
  */
 public class DisplayKinectPointCloudApp {
 
-	public static void main( String args[] ) throws IOException {
-		// String baseDir = UtilIO.pathExample("kinect/basket");
-		String baseDir = "src/main/resources/resource/BoofCv";
-		String nameRgb = "basket_rgb.png";
-		String nameDepth = "basket_depth.png";
-		String nameCalib = "intrinsic.yaml";
+  public static void main(String args[]) throws IOException {
+    // String baseDir = UtilIO.pathExample("kinect/basket");
+    String baseDir = "src/main/resources/resource/BoofCv";
+    String nameRgb = "basket_rgb.png";
+    String nameDepth = "basket_depth.png";
+    String nameCalib = "intrinsic.yaml";
 
-		CameraPinholeRadial param = CalibrationIO.load(new File(baseDir,nameCalib));
+    CameraPinholeRadial param = CalibrationIO.load(new File(baseDir, nameCalib));
 
-		GrayU16 depth = UtilImageIO.loadImage(new File(baseDir,nameDepth),false, ImageType.single(GrayU16.class));
-		Planar<GrayU8> rgb = UtilImageIO.loadImage(new File(baseDir,nameRgb),true, ImageType.pl(3, GrayU8.class));
+    GrayU16 depth = UtilImageIO.loadImage(new File(baseDir, nameDepth), false, ImageType.single(GrayU16.class));
+    Planar<GrayU8> rgb = UtilImageIO.loadImage(new File(baseDir, nameRgb), true, ImageType.pl(3, GrayU8.class));
 
+    FastQueue<Point3D_F64> cloud = new FastQueue<Point3D_F64>(Point3D_F64.class, true);
+    FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
 
-		FastQueue<Point3D_F64> cloud = new FastQueue<Point3D_F64>(Point3D_F64.class,true);
-		FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
+    VisualDepthOps.depthTo3D(param, rgb, depth, cloud, cloudColor);
 
-		VisualDepthOps.depthTo3D(param, rgb, depth, cloud, cloudColor);
+    PointCloudViewer viewer = VisualizeData.createPointCloudViewer();
+    viewer.setCameraHFov(PerspectiveOps.computeHFov(param));
+    viewer.setTranslationStep(10.0);
+    viewer.getComponent().setPreferredSize(new Dimension(rgb.width, rgb.height));
 
-		PointCloudViewer viewer = VisualizeData.createPointCloudViewer();
-		viewer.setCameraHFov(PerspectiveOps.computeHFov(param));
-		viewer.setTranslationStep(10.0);
-		viewer.getComponent().setPreferredSize(new Dimension(rgb.width,rgb.height));
+    for (int i = 0; i < cloud.size; i++) {
+      Point3D_F64 p = cloud.get(i);
+      int[] color = cloudColor.get(i);
+      int c = (color[0] << 16) | (color[1] << 8) | color[2];
+      viewer.addPoint(p.x, p.y, p.z, c);
+    }
 
-		for( int i = 0; i < cloud.size; i++ ) {
-			Point3D_F64 p = cloud.get(i);
-			int[] color = cloudColor.get(i);
-			int c = (color[0] << 16 ) | (color[1] << 8) | color[2];
-			viewer.addPoint(p.x,p.y,p.z,c);
-		}
+    ShowImages.showWindow(viewer.getComponent(), "Point Cloud", true);
+    System.out.println("Total points = " + cloud.size);
 
-		ShowImages.showWindow(viewer.getComponent(),"Point Cloud", true);
-		System.out.println("Total points = "+cloud.size);
-
-//		BufferedImage depthOut = VisualizeImageData.disparity(depth, null, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
-//		ShowImages.showWindow(depthOut,"Depth Image", true);
-	}
+    // BufferedImage depthOut = VisualizeImageData.disparity(depth, null, 0,
+    // UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
+    // ShowImages.showWindow(depthOut,"Depth Image", true);
+  }
 }

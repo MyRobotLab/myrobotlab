@@ -150,7 +150,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   public boolean isAttached = false;
 
   public static void main(String[] args) {
-          LoggingFactory.init("info");
+    LoggingFactory.init("info");
 
     try {
       OledSsd1306 oledSsd1306 = (OledSsd1306) Runtime.start("OledSsd1306", "OledSsd1306");
@@ -927,12 +927,12 @@ public class OledSsd1306 extends Service implements I2CControl {
 
   @Override
   public void detach(Attachable service) {
-    
-    if (service!=null)
-    if (I2CController.class.isAssignableFrom(service.getClass())) {
-      detachI2CController((I2CController) service);
-      return;
-    }
+
+    if (service != null)
+      if (I2CController.class.isAssignableFrom(service.getClass())) {
+        detachI2CController((I2CController) service);
+        return;
+      }
   }
 
   @Override
@@ -945,14 +945,12 @@ public class OledSsd1306 extends Service implements I2CControl {
     isAttached = false;
     broadcastState();
   }
-  
-  
+
   @Override
   public void stopService() {
 
-    if (isAttached(controller))
-    {
-    controller.detachI2CControl(this);
+    if (isAttached(controller)) {
+      controller.detachI2CControl(this);
     }
   }
 

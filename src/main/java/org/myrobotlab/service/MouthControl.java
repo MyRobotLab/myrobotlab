@@ -19,7 +19,8 @@ import org.slf4j.Logger;
  */
 public class MouthControl extends Service {
 
-  // TODO: remove Peer & Make it attachable between generic servoControl & SpeechSynthesis
+  // TODO: remove Peer & Make it attachable between generic servoControl &
+  // SpeechSynthesis
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
@@ -109,7 +110,8 @@ public class MouthControl extends Service {
   public synchronized void onEndSpeaking(String utterance) {
     log.info("Mouth control recognized end speaking.");
     // TODO: consider a jaw move to closed position
-    //this will only work if the mouth animation ends before it end playing the voice.
+    // this will only work if the mouth animation ends before it end playing the
+    // voice.
     jaw.moveTo(mouthClosedPos);
   }
 
@@ -125,11 +127,11 @@ public class MouthControl extends Service {
     mouthOpenedPos = opened;
 
     // jaw.setMinMax(closed, opened);
-    //    if (closed < opened) {
-    //      jaw.map(closed, opened, closed, opened);
-    //    } else {
-    //      jaw.map(opened, closed, opened, closed);
-    //    }
+    // if (closed < opened) {
+    // jaw.map(closed, opened, closed, opened);
+    // } else {
+    // jaw.map(opened, closed, opened, closed);
+    // }
   }
 
   @Override

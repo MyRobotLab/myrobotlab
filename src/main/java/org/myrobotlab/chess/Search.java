@@ -287,7 +287,7 @@ final public class Search {
       for (int i = 3; i <= MAX_PLY; ++i) {
         followPV = true;
         int x = search(-10000, 10000, i);
-        log.info("{} {} {}", i , nodes , x);
+        log.info("{} {} {}", i, nodes, x);
         StringBuffer sb = new StringBuffer("[");
         sb.append(x);
         sb.append("]");
@@ -307,7 +307,7 @@ final public class Search {
         --ply;
       }
     }
-    log.info("Nodes searched: " , nodes);
+    log.info("Nodes searched: ", nodes);
     return;
   }
 }

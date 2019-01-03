@@ -44,7 +44,8 @@ public class CodecUri {
    *          /{api-type}(/encoding=json/decoding=json/)/{method}/{param0}/{
    *          param1}/...
    * @return message
-   * @throws IOException e 
+   * @throws IOException
+   *           e
    */
 
   // FIXME - reconcile with WebGUIServlet
@@ -109,8 +110,8 @@ public class CodecUri {
       }
 
       ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.name);
-      if (si == null){
-    	  si = org.myrobotlab.service.Runtime.getInstance();
+      if (si == null) {
+        si = org.myrobotlab.service.Runtime.getInstance();
       }
       // FIXME - this is a huge assumption of type of encoding ! - needs to be
       // dynamic !

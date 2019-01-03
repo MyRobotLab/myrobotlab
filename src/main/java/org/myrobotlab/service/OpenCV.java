@@ -799,7 +799,7 @@ public class OpenCV extends AbstractVideoSource {
     File cacheDir = new File(DATA_DIR);
     cacheDir.mkdirs();
 
-    //Init default config
+    // Init default config
     if (cameraIndex == null) {
       cameraIndex = 0;
     }
@@ -1030,7 +1030,8 @@ public class OpenCV extends AbstractVideoSource {
       }
     } else if (inputFile != null && (inputFile.startsWith("http"))) {
       // get and cache image file
-      // FIXME - perhaps "test" stream to try to determine what "type" it is - mjpeg/jpg/gif/  octet-stream :( ???
+      // FIXME - perhaps "test" stream to try to determine what "type" it is -
+      // mjpeg/jpg/gif/ octet-stream :( ???
       if (grabberType == null || (grabberType != null && (!grabberType.equals("MJpeg") && !grabberType.equals("IPCamera")))) {
         inputFile = getImageFromUrl(inputFile);
       }

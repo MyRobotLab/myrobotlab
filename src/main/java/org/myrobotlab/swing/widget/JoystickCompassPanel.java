@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 public class JoystickCompassPanel extends JPanel {
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(JoystickCompassPanel.class);
-  
+
   static final int PANEL_SIZE = 80;
 
   int x, y;
@@ -64,8 +64,7 @@ public class JoystickCompassPanel extends JPanel {
   }
 
   @Override
-  public void paintComponent(Graphics g)
-  {
+  public void paintComponent(Graphics g) {
     super.paintComponent(g);
 
     g.drawRect(1, 1, PANEL_SIZE - 2, PANEL_SIZE - 2); // a black border
@@ -108,15 +107,15 @@ public class JoystickCompassPanel extends JPanel {
       y = 0 + MARKER;
     }
   }
-  
-  public void setXid(String xId){
-	  this.xId = xId;
-	  xLabel.setText(xId + ":");
+
+  public void setXid(String xId) {
+    this.xId = xId;
+    xLabel.setText(xId + ":");
   }
-  
-  public void setYid(String yId){
-	  this.yId = yId;
-	  yLabel.setText(yId + ":");
+
+  public void setYid(String yId) {
+    this.yId = yId;
+    yLabel.setText(yId + ":");
   }
 
   public void setX(Float value) {
@@ -131,14 +130,14 @@ public class JoystickCompassPanel extends JPanel {
     repaint();
   }
 
-public void set(String id, Float value) {
-	if (id.equals(yId)){
-		setY(value);
-	} else if (id.equals(xId)) {
-		setX(value);
-	} else {
-		log.error("{} is not found", id);
-	}
-}
+  public void set(String id, Float value) {
+    if (id.equals(yId)) {
+      setY(value);
+    } else if (id.equals(xId)) {
+      setX(value);
+    } else {
+      log.error("{} is not found", id);
+    }
+  }
 
 } // end of CompassPanel class

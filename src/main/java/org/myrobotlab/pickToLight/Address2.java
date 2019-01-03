@@ -54,7 +54,7 @@ public class Address2 {
   }
 
   /**
-   * @return  the value of the i2CBus property.
+   * @return the value of the i2CBus property.
    * 
    */
   public int getI2CBus() {

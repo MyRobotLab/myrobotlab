@@ -22,20 +22,22 @@ public class Jme3App extends SimpleApplication {
 
   // FIXME NECESSARY ?!!?
   public void attach(Attachable service) {
-    
+
   }
 
   @Override
   public void simpleInitApp() {
     // callbacks to Service - since it cannot "extend" from SimpleApplication
-    // jme service provides the "default app" - if you really need something different
+    // jme service provides the "default app" - if you really need something
+    // different
     // you should derive from this class and write your own init...
     jme.simpleInitApp();
   }
-  
+
   public void simpleUpdate(float tpf) {
- // callbacks to Service - since it cannot "extend" from SimpleApplication
-    // jme service provides the "default app" - if you really need something different
+    // callbacks to Service - since it cannot "extend" from SimpleApplication
+    // jme service provides the "default app" - if you really need something
+    // different
     // you should derive from this class and write your own simpleUpdate...
     jme.simpleUpdate(tpf);
   }

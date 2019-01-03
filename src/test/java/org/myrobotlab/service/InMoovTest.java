@@ -24,53 +24,50 @@ import org.slf4j.Logger;
  */
 public class InMoovTest implements PinArrayListener {
 
-	public final static Logger log = LoggerFactory.getLogger(InMoovTest.class);
+  public final static Logger log = LoggerFactory.getLogger(InMoovTest.class);
 
-	static boolean useVirtualHardware = true;
-	static String port = "COM7";
+  static boolean useVirtualHardware = true;
+  static String port = "COM7";
 
-	// things to test
-	static InMoov i01 = null;
+  // things to test
+  static InMoov i01 = null;
 
-	// virtual hardware
-	static VirtualArduino virtual = null;
-	static SerialDevice uart = null;
+  // virtual hardware
+  static VirtualArduino virtual = null;
+  static SerialDevice uart = null;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		log.info("setUpBeforeClass");
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    log.info("setUpBeforeClass");
 
+    // FIXME - needs a seemless switch
+    if (useVirtualHardware) {
+      virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      uart = virtual.getSerial();
+      uart.setTimeout(100); // don't want to hang when decoding results...
+      virtual.connect(port);
+    }
+  }
 
-		// FIXME - needs a seemless switch
-		if (useVirtualHardware) {
-			virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-			uart = virtual.getSerial();
-			uart.setTimeout(100); // don't want to hang when decoding results...
-			virtual.connect(port);
-		}
-	}
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+  }
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
+  @Before
+  public void setUp() throws Exception {
 
-	@Before
-	public void setUp() throws Exception {
+    /**
+     * Arduino's expected state before each test is 'connected' with no devices,
+     * no pins enabled
+     */
 
-		/**
-		 * Arduino's expected state before each test is
-		 * 'connected' with no devices, no pins enabled
-		 */
+    uart.clear();
+    uart.setTimeout(100);
+  }
 
-
-		uart.clear();
-		uart.setTimeout(100);
-	}
-
-	@Test
-	public void testReleaseService() {
-	}
-
+  @Test
+  public void testReleaseService() {
+  }
 
   @Override
   public boolean isLocal() {
@@ -87,47 +84,41 @@ public class InMoovTest implements PinArrayListener {
   @Override
   public void onPinArray(PinData[] pindata) {
     // TODO Auto-generated method stub
-    
+
   }
-  
 
   @Test
   public void testMinimalScript() throws ClientProtocolException, IOException {
-    Python python = (Python)Runtime.start("python", "Python");
-    HttpClient http = (HttpClient)Runtime.start("http", "HttpClient");
+    Python python = (Python) Runtime.start("python", "Python");
+    HttpClient http = (HttpClient) Runtime.start("http", "HttpClient");
     String code = http.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov3.minimal.py");
     python.exec(code);
   }
-  
 
   public static void main(String[] args) {
     try {
-      
+
       boolean runMainOnly = true;
-      
+
       // LoggingFactory.init("INFO");
       InMoovTest.setUpBeforeClass();
-      
-     // Runtime.start("webgui", "WebGui");
-     //  Runtime.start("gui", "SwingGui");
+
+      // Runtime.start("webgui", "WebGui");
+      // Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
 
-      
-      
       if (virtual != null) {
         virtual.connect(port);
       }
-      
-      
+
       InMoovTest test = new InMoovTest();
-      
-      
+
       test.testMinimalScript();
-    
+
       // test something specific
       // test.testConnectString();
-      
-      if (runMainOnly){
+
+      if (runMainOnly) {
         return;
       }
 
@@ -142,6 +133,5 @@ public class InMoovTest implements PinArrayListener {
       Logging.logError(e);
     }
   }
-
 
 }

@@ -80,7 +80,6 @@ public class VideoSourceFrameGrabber extends FrameGrabber {
     return jconverter.convert(src);
   }
 
-  
   @Override
   public void release() throws Exception {
   }
