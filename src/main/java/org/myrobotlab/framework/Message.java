@@ -53,17 +53,17 @@ public class Message implements Serializable {
    */
 
   public long msgId;
-  
+
   /**
    * the originating uri
    */
   public String uri;
-  
+
   /**
    * apiKey related to data encoding
    */
   public String apiKey;
-  
+
   /**
    * destination name of the message
    */
@@ -108,7 +108,7 @@ public class Message implements Serializable {
    * invoking a service request this would be the parameter (list) - this would
    * the return type data if the message is outbound
    */
-  public Object[] data;  
+  public Object[] data;
 
   public Message() {
     msgId = System.currentTimeMillis();
@@ -159,29 +159,27 @@ public class Message implements Serializable {
   public String toString() {
     return CodecUtils.getMsgKey(this);
   }
-  
 
   public static Message createMessage(NameProvider sender, String name, String method, Object[] data) {
     Message msg = new Message();
     msg.name = name; // destination instance name
-    msg.sender = sender.getName();//this.getName();
+    msg.sender = sender.getName();// this.getName();
     msg.data = data;
     msg.method = method;
 
     return msg;
   }
-  
+
   public static Message createMessage(String sender, String name, String method, Object[] data) {
     Message msg = new Message();
     msg.name = name; // destination instance name
-    msg.sender = sender;//this.getName();
+    msg.sender = sender;// this.getName();
     msg.data = data;
     msg.method = method;
 
     return msg;
   }
 
-  
   static public Message createMessage(NameProvider sender, String name, String method, Object data) {
     if (data == null) {
       return createMessage(sender, name, method, null);
@@ -190,9 +188,6 @@ public class Message implements Serializable {
     d[0] = data;
     return createMessage(sender, name, method, d);
   }
-
-
-
 
   public static void main(String[] args) throws InterruptedException {
     LoggingFactory.init(Level.DEBUG);

@@ -157,7 +157,6 @@ public class Agent extends Service {
   // WebGui webmin = null; can't have a peer untile nettosphere is part of
   // base build
   // boolean updateRestartProcesses = false;
-  
 
   static String updateUrl = "http://34.201.4.170/deploy/%s";
   static String jarUrlTemplate = "http://34.201.4.170/deploy/%s/myrobotlab.jar";
@@ -569,7 +568,8 @@ public class Agent extends Service {
 
   // by id (or by pid?)
   static public String kill(String id) {
-    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs !!
+    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
+    // !!
     if (processes.containsKey(id)) {
       if (agent != null) {
         agent.info("terminating %s", id);
@@ -609,7 +609,8 @@ public class Agent extends Service {
    */
 
   static public void killAll() {
-    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs !!
+    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
+    // !!
     for (String id : processes.keySet()) {
       kill(id);
     }
@@ -842,16 +843,17 @@ public class Agent extends Service {
   }
 
   static public void shutdown() {
-    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs !!
+    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
+    // !!
     log.info("terminating others");
     killAll();
     log.info("terminating self ... goodbye...");
-    //Runtime.exit();
+    // Runtime.exit();
     Runtime.shutdown();
   }
-  
+
   static public synchronized Process spawn() throws IOException, URISyntaxException, InterruptedException {
-    return spawn(new String[]{});
+    return spawn(new String[] {});
   }
 
   static public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
@@ -915,15 +917,12 @@ public class Agent extends Service {
     log.info("in args {}", Arrays.toString(in));
 
     // String jvmMemory = "-Xmx2048m -Xms256m";
-    /*<pre>
-    long totalMemory = Runtime.getTotalPhysicalMemory();
-    if (totalMemory == 0) {
-      log.info("could not get total physical memory");
-    } else {
-      log.info("total physical memory returned is {} Mb", totalMemory / 1048576);
-    }
-    </pre>
-    */
+    /*
+     * <pre> long totalMemory = Runtime.getTotalPhysicalMemory(); if
+     * (totalMemory == 0) { log.info("could not get total physical memory"); }
+     * else { log.info("total physical memory returned is {} Mb", totalMemory /
+     * 1048576); } </pre>
+     */
 
     // need to fill it out as best you can before submitting to spawn2
     return spawn2(pd);
@@ -943,9 +942,8 @@ public class Agent extends Service {
       sb.append(" ");
     }
 
-
     log.info("spawning -> [{}]", sb.toString());
-    
+
     ProcessBuilder builder = new ProcessBuilder(cmdLine);
 
     // setting working directory to wherever the jar is...
@@ -1079,7 +1077,7 @@ public class Agent extends Service {
     meta.addCategory("framework");
     meta.setSponsor("GroG");
     meta.setLicenseApache();
-    
+
     meta.addDependency("commons-cli", "commons-cli", "1.4");
     meta.includeServiceInOneJar(true);
 
@@ -1107,13 +1105,13 @@ public class Agent extends Service {
   // make it work if necessary prefix everything by -agent-<...>
   public static void main(String[] args) {
     try {
-      
+
       Logging logging = LoggingFactory.getInstance();
-      
+
       // -agent \"-params -service ... \" string encoded
       cmdline = new CmdLine(args);
       logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-      
+
       log.info("agent cmdline [{}] will be relayed ", cmdline);
 
       // FIXME - this could just be relayed to Runtime, right ?
@@ -1129,7 +1127,7 @@ public class Agent extends Service {
       // line
       // is relayed to the service
       // Start with the default cmdline for the agent
-      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Platform.getLocalInstance().getPid())};
+      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Platform.getLocalInstance().getPid()) };
       if (cmdline.containsKey("-agent")) {
         String str = cmdline.getArgument("-agent", 0);
         String[] tmp = str.split(" ");
@@ -1156,21 +1154,22 @@ public class Agent extends Service {
 
       if (cmdline.containsKey("-test")) {
         serviceTest();
-      } else {        
-        
+      } else {
+
         // if we aren't forking then we create an agent
         // to maintain control of all spawned processes
         if (!cmdline.containsKey("-fork")) {
           log.info("agent args [{}]", agentCmdline);
           Runtime.setLogLevel("WARN");
-          // agents runtime          
+          // agents runtime
           Runtime.main(agentArgs);
           Runtime.start("agent", "Agent");
-       
-          // FIXME - shouldn't be global, should be on a process by 
+
+          // FIXME - shouldn't be global, should be on a process by
           // process config - technically this should be triggered by an
-          // -agent "-autoUpdate" .. but why trouble the user with cryptic encoding ?
-          if (cmdline.containsKey("-autoUpdate")){
+          // -agent "-autoUpdate" .. but why trouble the user with cryptic
+          // encoding ?
+          if (cmdline.containsKey("-autoUpdate")) {
             autoUpdate(true);
           }
         }

@@ -95,12 +95,12 @@ public interface SpeechSynthesis extends NameProvider {
    * @return text
    */
   public String publishEndSpeaking(String utterance);
-  
+
   /**
    * silence the service
    */
   public void mute();
-  
+
   /**
    * un-silence the service
    */

@@ -4,10 +4,12 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+
 /**
-*This class exists as a proxy to control native MRL services connected through the web API. 
-*Methods of that native service are called through this class's {@link #exec(String, Object[])} method.
-**/
+ * This class exists as a proxy to control native MRL services connected through
+ * the web API. Methods of that native service are called through this class's
+ * {@link #exec(String, Object[])} method.
+ **/
 public class GoogleAssistant extends PythonProxy {
 
   /**
@@ -20,7 +22,7 @@ public class GoogleAssistant extends PythonProxy {
   }
 
   public Object test(String testString) {
-	return exec("test", new Object[] {(Object) testString});
+    return exec("test", new Object[] { (Object) testString });
   }
 
   /**
@@ -42,22 +44,21 @@ public class GoogleAssistant extends PythonProxy {
   }
 
   public void startService() {
-	super.startService();
-	start();
+    super.startService();
+    start();
   }
 
   public void start() {
-	exec("start", (Object[]) null);
+    exec("start", (Object[]) null);
   }
 
   public void stop() {
-	exec("stop", (Object[]) null);
+    exec("stop", (Object[]) null);
   }
 
-
-  //Required because of Java reflection weirdness
+  // Required because of Java reflection weirdness
   public void handshake() {
-	super.handshake();
+    super.handshake();
   }
 
   public static void main(String[] args) {

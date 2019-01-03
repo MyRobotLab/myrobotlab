@@ -39,9 +39,9 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     meta.addDependency("org.boofcv", "boofcv-openkinect", "0.31");
     meta.addCategory("vision", "video");
     /*
-    meta.exclude("org.bytedeco", "javacv");
-    meta.exclude("org.bytedeco.javacpp-presets", "opencv");    
-    */
+     * meta.exclude("org.bytedeco", "javacv");
+     * meta.exclude("org.bytedeco.javacpp-presets", "opencv");
+     */
     return meta;
   }
 
@@ -53,15 +53,15 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     System.out.println("Receinvig");
     return point;
   }
-  
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
 
       // ImageType<Planar<GrayU8>> colorType = ImageType.pl(3,GrayU8.class);
-      BoofCv boofcv = (BoofCv)Runtime.start("boofcv", "BoofCv");
-     
+      BoofCv boofcv = (BoofCv) Runtime.start("boofcv", "BoofCv");
+
       // BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
       // Runtime.start("gui", "SwingGui");
     } catch (Exception e) {

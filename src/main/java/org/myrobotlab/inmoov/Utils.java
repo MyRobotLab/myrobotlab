@@ -14,7 +14,7 @@ public class Utils {
   public final static Logger log = LoggerFactory.getLogger(Utils.class);
 
   /**
-   * This method will load a python file into the python interpreter. 
+   * This method will load a python file into the python interpreter.
    */
   public static boolean loadFile(String file) {
     File f = new File(file);
@@ -41,7 +41,7 @@ public class Utils {
     }
     return true;
   }
-  
+
   public static File makeDirectory(String directory) {
     File dir = new File(directory);
     dir.mkdirs();

@@ -20,8 +20,8 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(PossibleServicesRenderer.class);
   Runtime runtime;
-  
-  public PossibleServicesRenderer(Runtime runtime){
+
+  public PossibleServicesRenderer(Runtime runtime) {
     this.runtime = runtime;
   }
 
@@ -35,7 +35,7 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
     boolean upgradeAvailable = false;
 
     String upgradeString = "<html><h6>upgrade<br>";
-    
+
     if (value == null) {
       return this;
     }

@@ -18,7 +18,6 @@
 
 package org.myrobotlab.boofcv;
 
-
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
@@ -40,92 +39,94 @@ import java.nio.ByteBuffer;
  */
 public class OpenKinectStreamingTest {
 
-	{
-		// be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the location of your shared library!
-		NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
-	}
+  {
+    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
+    // location of your shared library!
+    NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
+  }
 
-	Planar<GrayU8> rgb = new Planar<>(GrayU8.class,1,1,3);
-	GrayU16 depth = new GrayU16(1,1);
+  Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);
+  GrayU16 depth = new GrayU16(1, 1);
 
-	BufferedImage outRgb;
-	ImagePanel guiRgb;
+  BufferedImage outRgb;
+  ImagePanel guiRgb;
 
-	BufferedImage outDepth;
-	ImagePanel guiDepth;
+  BufferedImage outDepth;
+  ImagePanel guiDepth;
 
-	public void process() {
-		Context kinect = Freenect.createContext();
+  public void process() {
+    Context kinect = Freenect.createContext();
 
-		if( kinect.numDevices() < 0 )
-			throw new RuntimeException("No kinect found!");
+    if (kinect.numDevices() < 0)
+      throw new RuntimeException("No kinect found!");
 
-		Device device = kinect.openDevice(0);
+    Device device = kinect.openDevice(0);
 
-		device.setDepthFormat(DepthFormat.REGISTERED);
-		device.setVideoFormat(VideoFormat.RGB);
+    device.setDepthFormat(DepthFormat.REGISTERED);
+    device.setVideoFormat(VideoFormat.RGB);
 
-		device.startDepth(new DepthHandler() {
-			@Override
-			public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
-				processDepth(mode,frame,timestamp);
-			}
-		});
-		device.startVideo(new VideoHandler() {
-			@Override
-			public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
-				processRgb(mode,frame,timestamp);
-			}
-		});
+    device.startDepth(new DepthHandler() {
+      @Override
+      public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
+        processDepth(mode, frame, timestamp);
+      }
+    });
+    device.startVideo(new VideoHandler() {
+      @Override
+      public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
+        processRgb(mode, frame, timestamp);
+      }
+    });
 
-		long starTime = System.currentTimeMillis();
-		while( starTime+100000 > System.currentTimeMillis() ) {}
-		System.out.println("100 Seconds elapsed");
+    long starTime = System.currentTimeMillis();
+    while (starTime + 100000 > System.currentTimeMillis()) {
+    }
+    System.out.println("100 Seconds elapsed");
 
-		device.stopDepth();
-		device.stopVideo();
-		device.close();
+    device.stopDepth();
+    device.stopVideo();
+    device.close();
 
-	}
+  }
 
-	protected void processDepth( FrameMode mode, ByteBuffer frame, int timestamp ) {
-		System.out.println("Got depth! "+timestamp);
+  protected void processDepth(FrameMode mode, ByteBuffer frame, int timestamp) {
+    System.out.println("Got depth! " + timestamp);
 
-		if( outDepth == null ) {
-			depth.reshape(mode.getWidth(),mode.getHeight());
-			outDepth = new BufferedImage(depth.width,depth.height,BufferedImage.TYPE_INT_RGB);
-			guiDepth = ShowImages.showWindow(outDepth,"Depth Image");
-		}
+    if (outDepth == null) {
+      depth.reshape(mode.getWidth(), mode.getHeight());
+      outDepth = new BufferedImage(depth.width, depth.height, BufferedImage.TYPE_INT_RGB);
+      guiDepth = ShowImages.showWindow(outDepth, "Depth Image");
+    }
 
-		UtilOpenKinect.bufferDepthToU16(frame, depth);
+    UtilOpenKinect.bufferDepthToU16(frame, depth);
 
-//		VisualizeImageData.grayUnsigned(depth,outDepth,UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE);
-		VisualizeImageData.disparity(depth, outDepth, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE,0);
-		guiDepth.repaint();
-	}
+    // VisualizeImageData.grayUnsigned(depth,outDepth,UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE);
+    VisualizeImageData.disparity(depth, outDepth, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
+    guiDepth.repaint();
+  }
 
-	protected void processRgb( FrameMode mode, ByteBuffer frame, int timestamp ) {
-		if( mode.getVideoFormat() != VideoFormat.RGB ) {
-			System.out.println("Bad rgb format!");
-		}
+  protected void processRgb(FrameMode mode, ByteBuffer frame, int timestamp) {
+    if (mode.getVideoFormat() != VideoFormat.RGB) {
+      System.out.println("Bad rgb format!");
+    }
 
-		System.out.println("Got rgb!   "+timestamp);
+    System.out.println("Got rgb!   " + timestamp);
 
-		if( outRgb == null ) {
-			rgb.reshape(mode.getWidth(),mode.getHeight());
-			outRgb = new BufferedImage(rgb.width,rgb.height,BufferedImage.TYPE_INT_RGB);
-			guiRgb = ShowImages.showWindow(outRgb,"RGB Image");
-		}
+    if (outRgb == null) {
+      rgb.reshape(mode.getWidth(), mode.getHeight());
+      outRgb = new BufferedImage(rgb.width, rgb.height, BufferedImage.TYPE_INT_RGB);
+      guiRgb = ShowImages.showWindow(outRgb, "RGB Image");
+    }
 
-		UtilOpenKinect.bufferRgbToMsU8(frame, rgb);
-		ConvertBufferedImage.convertTo_U8(rgb,outRgb,true);
+    UtilOpenKinect.bufferRgbToMsU8(frame, rgb);
+    ConvertBufferedImage.convertTo_U8(rgb, outRgb, true);
 
-		guiRgb.repaint();
-	}
+    guiRgb.repaint();
+  }
 
-	public static void main( String args[] ) {
-		OpenKinectStreamingTest app = new OpenKinectStreamingTest();
+  public static void main(String args[]) {
+    OpenKinectStreamingTest app = new OpenKinectStreamingTest();
 
-		app.process();
-	}
+    app.process();
+  }
 }

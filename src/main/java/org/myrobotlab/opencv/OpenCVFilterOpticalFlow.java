@@ -84,7 +84,7 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   int blockSize = 3;
 
   // cvGoodFeaturesToTrack
-  
+
   /**
    * default number of max corners to start with
    */
@@ -110,7 +110,6 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   float harrisDetectorK = 0.04f;
 
   IplImage lastImg = null;
-
 
   /**
    * Maximum number of corners to return. If there are more corners than are
@@ -171,7 +170,6 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
 
   }
 
-
   @Override
   public void imageChanged(IplImage inImage) {
     currentImg = IplImage.create(imageSize, 8, 1);
@@ -225,12 +223,12 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
         cornersB.position(i);
         CvPoint p0 = cvPoint(Math.round(corners.x()), Math.round(corners.y()));
         CvPoint p1 = cvPoint(Math.round(cornersB.x()), Math.round(cornersB.y()));
-        cvLine(inImage, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0); 
+        cvLine(inImage, p0, p1, CV_RGB(255, 0, 0), 2, 8, 0);
         cvCircle(inImage, p1, 3, CV_RGB(0, 0, 255), CV_FILLED, 8, 0);
         // FIXME - don't
-                                                             // tamper with out
-                                                             // image - change
-                                                             // only display :(
+        // tamper with out
+        // image - change
+        // only display :(
         // cvC
       }
 
@@ -257,8 +255,6 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
   public void setQuality(float q) {
     qualityLevel = q;
   }
-
-  
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {

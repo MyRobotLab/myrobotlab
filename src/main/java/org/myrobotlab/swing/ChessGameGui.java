@@ -133,7 +133,6 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
   public ChessGameGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
 
-
     // showStatus ("Please Wait; Program Loading");
     chessView = new ChessBoard();
     chessView.addPropertyChangeListener(this);
@@ -207,12 +206,12 @@ public class ChessGameGui extends ServiceGui implements Constants, VetoableChang
 
     display.setSize(800, 600);
 
-  
   }
 
   @Override
   public void subscribeGui() {
-    subscribe("inputMove", "inputMove"); // FIXME - out of spec - should be onMove
+    subscribe("inputMove", "inputMove"); // FIXME - out of spec - should be
+                                         // onMove
     subscribe("inputHMove", "inputHMove");
   }
 

@@ -103,8 +103,6 @@ public class PhotoReelWidget extends ServiceGui {
 
   public PhotoReelWidget(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
-    
-
 
     ImageIcon icon = Util.getResourceIcon("photoreel.1.png");
     if (icon != null) {
@@ -114,7 +112,7 @@ public class PhotoReelWidget extends ServiceGui {
     screen.addMouseListener(vml);
     myIcon.setImageObserver(screen); // WWOOAH - THIS MAY BE A BIG
     // OPTIMIZATION !
-    
+
     setTitle(boundServiceName + " " + boundFilterName + " photo reel widget");
     addLine(screen, mouseInfo, resolutionInfo, deltaTime);
   }

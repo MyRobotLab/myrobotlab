@@ -106,14 +106,18 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-    
+
     // INFO - This filter has 2 sources !!!
     IplImage depth = data.getKinectDepth();
     if (depth != null) {
 
       lastDepthImage = depth;
 
-      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1 channel for grey rgb
+      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1
+                                                                                        // channel
+                                                                                        // for
+                                                                                        // grey
+                                                                                        // rgb
 
       ByteBuffer colorBuffer = color.getByteBuffer();
       // it may be deprecated but the "new" function .asByteBuffer() does not
@@ -121,7 +125,7 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
       ByteBuffer depthBuffer = depth.getByteBuffer();
 
       int depthBytesPerChannel = lastDepthImage.depth() / 8;
-      
+
       // iterate through the depth bytes bytes and convert to HSV / RGB format
       // map depth gray (0,65535) => 3 x (0,255) HSV :P
       for (int y = 0; y < depth.height(); y++) { // 480
@@ -134,7 +138,7 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
           // int value = depthBuffer.get(depthIndex);// << 8 & 0xFF +
           // buffer.get(depthIndex+1)& 0xFF;
           // this is 16 bit depth - I switched the MSB !!!!
-          int value = (depthBuffer.get(depthIndex+1) & 0xFF) << 8 | (depthBuffer.get(depthIndex ) & 0xFF);
+          int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
           double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
 
           Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
@@ -170,8 +174,6 @@ public class OpenCVFilterKinectNavigate extends OpenCVFilter {
       // BufferedImage image = OpenCV.IplImageToBufferedImage(img);
 
       // SerializableImage.writeToFile(image, "test.png");
-
-     
 
       return depth;
 

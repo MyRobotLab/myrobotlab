@@ -37,15 +37,14 @@ public class LRUMethodCache {
     return instance;
   }
 
-  
-  private String makeKey(Object obj, String method, Class<?>[] paramTypes){
+  private String makeKey(Object obj, String method, Class<?>[] paramTypes) {
     String key = String.format("%s.%s.%s", obj.toString(), method, Arrays.toString(paramTypes));
     return key;
   }
 
   public Method getCacheEntry(Object obj, String method, Class<?>[] paramTypes) {
     String key = makeKey(obj, method, paramTypes);
-    if (cacheMap.containsKey(key)){
+    if (cacheMap.containsKey(key)) {
       return cacheMap.get(key);
     }
     return null;

@@ -41,14 +41,14 @@ import org.myrobotlab.opencv.OpenCVFilterKinectNavigate;
 import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterKinectNavigateGui extends OpenCVFilterGui implements ActionListener, ChangeListener {
-  
+
   JLabel selectedPoint = new JLabel("here xxxxxxxxxxxxxxxxx");
 
   public OpenCVFilterKinectNavigateGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
-    
+
     // display.add(input, BorderLayout.NORTH);
-    
+
     // set the hook
     MRLListener listener = new MRLListener("publishFilterState", myService.getName(), "setFilterState");
     myService.send(boundServiceName, "addListener", listener);

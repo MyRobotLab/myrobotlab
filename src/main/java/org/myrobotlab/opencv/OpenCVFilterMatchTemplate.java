@@ -207,11 +207,10 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
     // }
     ++clickCount;
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
   }
-
 
 }

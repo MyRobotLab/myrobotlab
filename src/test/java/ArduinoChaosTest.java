@@ -22,7 +22,7 @@ public class ArduinoChaosTest {
   public void testArduino() throws IOException, MRLException, InterruptedException {
 
     boolean upload = false;
-    
+
     // // LoggingFactory.init(Level.INFO);
 
     String port = "COM30";
@@ -31,19 +31,18 @@ public class ArduinoChaosTest {
       boolean success = ArduinoUtils.uploadSketch(port, board);
       assertTrue(success);
     }
-    
+
     //
     Arduino arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
-    //Serial serial = (Serial) arduino.getSerial();
+    // Serial serial = (Serial) arduino.getSerial();
 
     arduino.setBoardUno();
     // arduino.boardType= board;
     arduino.connect("COM30");
-   
 
     // let the board connect
     Thread.sleep(2000);
-    
+
     // digital PWM pins for hbrdige/motor control.
     int leftPwm = 6;
     int rightPwm = 7;
@@ -52,35 +51,33 @@ public class ArduinoChaosTest {
     boolean testMotor = true;
     boolean testServo = true;
     boolean startAnalogPolling = true;
-    
+
     // Start testing the functions one by one to make sure we're worky!
-    
+
     // debug enable/disable first.
     arduino.setDebug(true);
     Thread.sleep(1000);
     arduino.setDebug(false);
     Thread.sleep(1000);
     // Now iterate all of the possible commands
-    
+
     arduino.digitalWrite(0, 0);
     Thread.sleep(1000);
     arduino.analogWrite(0, 110);
     Thread.sleep(1000);
-    
-    
+
     // TODO: is this a digital or analog pin?
     arduino.pinMode(2, "INPUT");
     Thread.sleep(1000);
     arduino.pinMode(2, "OUTPUT");
     Thread.sleep(1000);
-    Servo servo = (Servo)Runtime.createAndStart("servo", "Servo");
+    Servo servo = (Servo) Runtime.createAndStart("servo", "Servo");
     // servo.setPin(13);
     // arduino.servoAttach(servo);
     Thread.sleep(1000);
     arduino.servoSweepStart(servo);
     Thread.sleep(1000);
     arduino.servoSweepStop(servo);
-
 
     Thread.sleep(1000);
     // TODO : this blows up
@@ -102,14 +99,14 @@ public class ArduinoChaosTest {
     arduino.enableBoardInfo(true);
     Thread.sleep(1000);
     arduino.enableBoardInfo(false);
-    
+
     Thread.sleep(1000);
- 
+
     // int analogReadPin = 2;
     // arduino.analogReadPollingStart(analogReadPin);
-    //  Thread.sleep(1000);
-    //Thread.sleep(1000);
-    //arduino.analogReadPollingStop(analogReadPin);
+    // Thread.sleep(1000);
+    // Thread.sleep(1000);
+    // arduino.analogReadPollingStop(analogReadPin);
 
     Thread.sleep(1000);
     int digitalPin = 3;
@@ -133,30 +130,28 @@ public class ArduinoChaosTest {
     // arduino.setDigitalTriggerOnly(true);
     Thread.sleep(1000);
     // arduino.setDigitalTriggerOnly(false);
-    
+
     Thread.sleep(1000);
     arduino.setSerialRate(Serial.BAUD_RATE_57600);
     Thread.sleep(1000);
     arduino.setSerialRate(Serial.BAUD_RATE_115200);
-    
+
     Thread.sleep(1000);
     arduino.getBoardInfo();
-    
+
     Thread.sleep(1000);
-    // TODO: what does "12" mean?  12 hertz?!
+    // TODO: what does "12" mean? 12 hertz?!
     // arduino.setSampleRate(12);
-    
-    
+
     Thread.sleep(1000);
     arduino.softReset();
-    
-    
+
     Thread.sleep(1000);
     // ?!
     // arduino.sensorPollingStart("A0", 123);
     Thread.sleep(1000);
     // arduino.sensorPollingStop("A0");
-    
+
     // TODO: add the
     // AF_BEGIN
     // AF_SET_PWM_FREQ
@@ -165,44 +160,29 @@ public class ArduinoChaosTest {
     // NOP
     // DEBUG_ENABLE
     // DEBUG_DISABLE
-    
+
     // unknown command should return an error!
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    //    arduino.digitalWrite(0, 1);
-//    if (startAnalogPolling) {
-//      arduino.analogReadPollingStart(potPin);
-//    }
-    
+    // arduino.digitalWrite(0, 1);
+    // if (startAnalogPolling) {
+    // arduino.analogReadPollingStart(potPin);
+    // }
+
     // 5 second pause ?
-    
+
     // Thread.sleep(5000);
-    
+
     System.out.println("Press the any key to continue.");
     System.in.read();
-    
+
     arduino.enableBoardInfo(true);
-    
-    
-    Motor motor = (Motor)Runtime.createAndStart("motor", "Motor");
+
+    Motor motor = (Motor) Runtime.createAndStart("motor", "Motor");
     // motor.setType2Pwm(leftPwm, rightPwm);
     // motor.attach(arduino);
-    // arduino.attachDevice(motor); // null  config is this right ?
+    // arduino.attachDevice(motor); // null config is this right ?
 
-
-//    servo.attach();
+    // servo.attach();
 
     int angle = 0;
     int max = 5000;
@@ -211,13 +191,13 @@ public class ArduinoChaosTest {
       // try to overrun?
       // rand between -1 and 1.
       if (testMotor) {
-        double rand = (Math.random() - 0.5)*2;
+        double rand = (Math.random() - 0.5) * 2;
         motor.move(rand);
       }
 
       if (testServo) {
         angle++;
-        servo.moveTo(angle %180);
+        servo.moveTo(angle % 180);
       }
     }
 

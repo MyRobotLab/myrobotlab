@@ -32,7 +32,6 @@ public class IvyWrapper extends Repo implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-
   class IvyWrapperLogger extends AbstractMessageLogger {
 
     private int level = Message.MSG_INFO;
@@ -48,7 +47,6 @@ public class IvyWrapper extends Repo implements Serializable {
     public void doEndProgress(String msg) {
       log.info(msg);
     }
-
 
     @Override
     public void doProgress() {
@@ -93,7 +91,6 @@ public class IvyWrapper extends Repo implements Serializable {
       ivysettingsXmlTemplate = FileIO.resourceToString("framework/ivysettings.xml.template");
     }
   }
-
 
   /**
    * <pre>
@@ -224,7 +221,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
     createFilteredFile(snr, location, "ivysettings", "xml");
   }
-  
+
   @Override
   synchronized public void install(String location, String[] serviceTypes) {
 
@@ -258,8 +255,9 @@ public class IvyWrapper extends Repo implements Serializable {
       }
       log.info("cmd {}", sb);
 
-      // TODO: this breaks for me!  please review why this needed to be commented out.
-      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));    
+      // TODO: this breaks for me! please review why this needed to be commented
+      // out.
+      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
       ResolveReport report = Main.run(cmd);
 
       // if no errors -
@@ -318,35 +316,35 @@ public class IvyWrapper extends Repo implements Serializable {
 
   private void publishStatus(String msg, int level) {
     // if (level <= this.level) {
-      Status status = Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_PROGRESS, msg);
-      // FIXME - set it to the instance of IvyWrapper - really this method should just call IvyWrapper.publishStatus(String msg, int level)
-      status.source = this;
-      if (level == Message.MSG_ERR) {
-        status.level = StatusLevel.ERROR;
-      } else if (level == Message.MSG_WARN) {
-        status.level = StatusLevel.WARN;
-      }
-      publishStatus(status);
-    
+    Status status = Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_PROGRESS, msg);
+    // FIXME - set it to the instance of IvyWrapper - really this method should
+    // just call IvyWrapper.publishStatus(String msg, int
+    // level)
+    status.source = this;
+    if (level == Message.MSG_ERR) {
+      status.level = StatusLevel.ERROR;
+    } else if (level == Message.MSG_WARN) {
+      status.level = StatusLevel.WARN;
+    }
+    publishStatus(status);
+
   }
-  
 
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
-      
+
       Repo repo = Repo.getInstance("IvyWrapper");
 
       String serviceType = "all";
-      long ts = System.currentTimeMillis();      
+      long ts = System.currentTimeMillis();
       String dir = String.format("install.ivy.%s.%d", serviceType, ts);
-      
-      
+
       // repo.createBuildFiles(dir, serviceType);
       repo.installTo("install.ivy");
       // repo.install(dir, serviceType);
-      
+
       // repo.install("install.dl4j.maven", "Deeplearning4j");
       // repo.install("install.opencv.maven","OpenCV");
       // repo.createBuildFiles(dir, "Arm");

@@ -15,7 +15,7 @@ public abstract class MotorControllerPanel extends JPanel {
 
   MotorControllerPanel() {
     setBorder(BorderFactory.createTitledBorder("type"));
-  } 
+  }
 
   abstract public void set(Motor motor);
 

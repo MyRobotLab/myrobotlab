@@ -5,7 +5,9 @@ import java.util.List;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 
 /**
- * This is a simple POJO that contains a DL4J computation graph and it's associated output labels
+ * This is a simple POJO that contains a DL4J computation graph and it's
+ * associated output labels
+ * 
  * @author kwatters
  *
  */
@@ -13,7 +15,7 @@ public class CustomModel {
 
   public ComputationGraph model;
   public List<String> labels;
-  
+
   public CustomModel(ComputationGraph model, List<String> labels) {
     super();
     this.model = model;

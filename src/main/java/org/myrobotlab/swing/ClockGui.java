@@ -47,9 +47,9 @@ public class ClockGui extends ServiceGui implements ActionListener {
   String displayFormat = "<html><p style=\"font-size:15px\">%s</p></html>";
   DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
   JTextField interval = new JTextField("1000", 8);
- 
+
   public ClockGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);  
+    super(boundServiceName, myService);
     addTop(3, clockDisplay);
     addTop(startClock, interval, "ms");
     clockDisplay.setText(String.format(displayFormat, dateFormat.format(new Date())));

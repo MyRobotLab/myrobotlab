@@ -13,22 +13,20 @@ public class Point implements Serializable {
   public Point() {
   }
 
-  public Point(int x, int y) {    
+  public Point(int x, int y) {
     this.x = x;
     this.y = y;
   }
 
-  public Point(int x, int y, int value) {    
+  public Point(int x, int y, int value) {
     this.x = x;
     this.y = y;
     this.value = value;
   }
 
-
   @Override
   public String toString() {
     return String.format("(%f,%f)", x, y);
   }
-  
 
 }

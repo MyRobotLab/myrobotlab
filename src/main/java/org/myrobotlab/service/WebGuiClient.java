@@ -70,7 +70,8 @@ public class WebGuiClient extends Service {
     // gui
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
-    // FIXME - not quite ready for prime-time, need good network overlay which won't
+    // FIXME - not quite ready for prime-time, need good network overlay which
+    // won't
     // happen until post-manticore release
     meta.addCategory("general");
     return meta;
@@ -92,7 +93,8 @@ public class WebGuiClient extends Service {
         // websockets ?
         .uri(url) // the url
         .trackMessageLength(false) // Atmosphere feature of max frame size ?
-        .header("id", Platform.getLocalInstance().getId()) // should be MRL.id static field value
+        .header("id", Platform.getLocalInstance().getId()) // should be MRL.id
+                                                           // static field value
         .encoder(new Encoder<Message, String>() {
 
           @Override
@@ -172,9 +174,9 @@ public class WebGuiClient extends Service {
         log.info("msg {}", msg);
         // if (msg.method.equals("onRegistered")) {
         if (msg.method.equals("onLocalServices")) {
-          
+
         }
-        
+
         if (msg.method.equals("onRegistered")) {
           Object[] msgData = msg.data;
           ServiceInterface si = null;
@@ -267,10 +269,11 @@ public class WebGuiClient extends Service {
 
       WebGuiClient client = (WebGuiClient) Runtime.start("webguiclient", "WebGuiClient");
       client.connect("http://localhost:8888/api/messages");
-      
-      // this returns with a bajillion registry entries .. which need to be digested and 
+
+      // this returns with a bajillion registry entries .. which need to be
+      // digested and
       // prefixed
-      
+
       // perhaps its best to specificall request
       // 1. hello
       // 2. register me
@@ -289,15 +292,16 @@ public class WebGuiClient extends Service {
        * // block <- list services (not block - but event handled)
        * 
        */
-      
+
       client.subscribe("runtime", "getUptime");
-      // client.socket.fire(Message.createMessage(client, "runtime", "getUptime", null));
-      
+      // client.socket.fire(Message.createMessage(client, "runtime",
+      // "getUptime", null));
+
       for (int i = 0; i < 100000; ++i) {
         client.socket.fire(Message.createMessage(client, "runtime", "getUptime", null));
         Message msg = Message.createMessage(client, "runtime", "getUptime", null);
       }
-      
+
       // client.socket.fire(msg);
       // client.connect("http://localhost:8888/api/messages");
       // client.sendRemote("http://localhost:8888/api/messages",

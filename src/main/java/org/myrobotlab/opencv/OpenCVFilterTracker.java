@@ -71,27 +71,27 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   // The current tracker and it's associated boundingBox
   private Tracker tracker;
   private Rect2d boundingBox;
-  
+
   // configure these to set the initial box size.
-  //  public int boxWidth = 224;
-  //  public int boxHeight = 224;
-  
-  // TODO: is there a way to dynamically adjust what this should be?!  That'd be cool..
+  // public int boxWidth = 224;
+  // public int boxHeight = 224;
+
+  // TODO: is there a way to dynamically adjust what this should be?! That'd be
+  // cool..
   public int boxWidth = 25;
   public int boxHeight = 25;
 
-  // TODO: i'm not sure there is really a performance difference here.. 
+  // TODO: i'm not sure there is really a performance difference here..
   public boolean blackAndWhite = false;
   // Boosting,CSRT,GOTURN,KCF,MedianFlow,MIL,MOSSE,TLD
   public String trackerType = "TLD";
-  
+
   // The current mat that is being processed.
   private Mat mat = null;
-  
-  // To hold x,y,w,h 
+
+  // To hold x,y,w,h
   int[] points = new int[4];
-  
-  
+
   public OpenCVFilterTracker() {
     super();
   }
@@ -105,10 +105,10 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
     return converterToMat.convert(imageBW);
   }
-  
+
   @Override
   public IplImage process(IplImage image) {
-    
+
     // TODO: I suspect this would be faster if we cut color first.
     // cvCutColor()
     Frame frame = null;
@@ -119,24 +119,25 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     }
     mat = converterToMat.convert(frame);
     if (boundingBox != null && tracker != null) {
-      // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(), boundingBox.y(), boundingBox.width() ,boundingBox.height());
+      // log.info("Yes ! Bounding box : {} {} {} {} " , boundingBox.x(),
+      // boundingBox.y(), boundingBox.width()
+      // ,boundingBox.height());
       tracker.update(mat, boundingBox);
       // boundingBox.x()
       int x0 = (int) (boundingBox.x());
       int y0 = (int) (boundingBox.y());
-      int x1 = x0 + (int) (boundingBox.width() );
-      int y1 = y0 + (int) (boundingBox.height() );
+      int x1 = x0 + (int) (boundingBox.width());
+      int y1 = y0 + (int) (boundingBox.height());
       // log.info("Drawing {} {} -- {} {}", x0,y0,x1,y1);
       cvDrawRect(image, cvPoint(x0, y0), cvPoint(x1, y1), CvScalar.RED, 1, 1, 0);
-      
-      
-        ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
-        float xC = (float) (boundingBox.x() + boundingBox.width()/2);
-        float yC = (float) (boundingBox.y() + boundingBox.height()/2);
-        Point2df center = new Point2df(xC, yC);
-        pointsToPublish.add(center);
-        data.put("TrackingPoints",pointsToPublish);
-      
+
+      ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
+      float xC = (float) (boundingBox.x() + boundingBox.width() / 2);
+      float yC = (float) (boundingBox.y() + boundingBox.height() / 2);
+      Point2df center = new Point2df(xC, yC);
+      pointsToPublish.add(center);
+      data.put("TrackingPoints", pointsToPublish);
+
     }
     return image;
   }
@@ -158,13 +159,13 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     } else if (trackerType.equalsIgnoreCase("MOSSE")) {
       return TrackerMOSSE.create();
     } else if (trackerType.equalsIgnoreCase("TLD")) {
-      return TrackerTLD.create();  
+      return TrackerTLD.create();
     } else {
       log.warn("Unknown Tracker Algorithm {} defaulting to TLD", trackerType);
       // default to TLD..
       return TrackerTLD.create();
     }
-    
+
   }
 
   public void samplePoint(Float x, Float y) {
@@ -172,17 +173,20 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   }
 
   public void samplePoint(Integer x, Integer y) {
-    // TODO: implement a state machine where you select the first corner. then you select the second corner
+    // TODO: implement a state machine where you select the first corner. then
+    // you select the second corner
     // that would define the size of the bounding box also.
-    boundingBox = new Rect2d(x-boxWidth/2, y-boxHeight/2, boxWidth, boxHeight);
-    log.info("Create bounding box for tracking x:{} y:{} w:{} h:{}" , boundingBox.x() , boundingBox.y(), boundingBox.width(), boundingBox.height());
-    // TODO: start tracking multiple points ? 
-    // the tracker will initialize on the next frame..  (I know , I know. it'd be better to have the current frame and do the initialization here.)
+    boundingBox = new Rect2d(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight);
+    log.info("Create bounding box for tracking x:{} y:{} w:{} h:{}", boundingBox.x(), boundingBox.y(), boundingBox.width(), boundingBox.height());
+    // TODO: start tracking multiple points ?
+    // the tracker will initialize on the next frame.. (I know , I know. it'd be
+    // better to have the current frame and do the
+    // initialization here.)
     tracker = createTracker(trackerType);
     // log.info("Init tracker");
     // TODO: I'm worried about thread safety with the "mat" object.
-    synchronized(mat) {
-      tracker.init(mat,boundingBox);
+    synchronized (mat) {
+      tracker.init(mat, boundingBox);
     }
   }
 

@@ -86,13 +86,13 @@ public class I2CProxyDeviceImpl implements I2CDevice {
   @Override
   public void ioctl(long arg0, int arg1) throws IOException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void ioctl(long arg0, ByteBuffer arg1, IntBuffer arg2) throws IOException {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

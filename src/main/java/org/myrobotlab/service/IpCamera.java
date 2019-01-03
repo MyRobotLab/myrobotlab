@@ -40,7 +40,7 @@ public class IpCamera extends Service {
             invoke("publishDisplay", new Object[] { getName(), bi });
           }
         }
-      } catch (Exception e) {        
+      } catch (Exception e) {
       }
     }
   }
@@ -194,7 +194,7 @@ public class IpCamera extends Service {
       }
       in.close();
     } catch (Exception e) {
-    	log.error("move threw", e);
+      log.error("move threw", e);
     }
     return ret.toString();
   }
@@ -235,7 +235,7 @@ public class IpCamera extends Service {
     meta.addCategory("video");
     // FIXME - should be webcam dependency not opencv !
     // meta.addDependency("org.bytedeco.javacpp","1.1");
-    
+
     // FIXME - should just add IpFrameGrabber and drop the dependency !!!
     // meta.addDependency("org.bytedeco", "javacv-platform", "1.3.3");
     return meta;

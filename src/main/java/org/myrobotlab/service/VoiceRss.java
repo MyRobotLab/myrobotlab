@@ -112,19 +112,18 @@ public class VoiceRss extends AbstractSpeechSynthesis {
 
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception {
-    if (isReady())
-    {
-    VoiceProvider tts = new VoiceProvider(getKey(VOICERSS_API_KEY));
-    String fileName = getLocalFileName(toSpeak);
-    VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice().getVoiceProvider().toString()); // Languages.English_UnitedStates
-    params.setCodec(AudioCodec.MP3);
-    params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
-    params.setBase64(false);
-    params.setSSML(false); // FIXME - make true
-    params.setRate(rate);
-    byte[] b = tts.speech(params);
-    FileIO.toFile(fileName, b);
-    return new AudioData(fileName);
+    if (isReady()) {
+      VoiceProvider tts = new VoiceProvider(getKey(VOICERSS_API_KEY));
+      String fileName = getLocalFileName(toSpeak);
+      VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice().getVoiceProvider().toString()); // Languages.English_UnitedStates
+      params.setCodec(AudioCodec.MP3);
+      params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
+      params.setBase64(false);
+      params.setSSML(false); // FIXME - make true
+      params.setRate(rate);
+      byte[] b = tts.speech(params);
+      FileIO.toFile(fileName, b);
+      return new AudioData(fileName);
     }
     return null;
   }

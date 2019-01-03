@@ -268,8 +268,11 @@ public class Runtime extends Service implements MessageListener {
 
   /**
    * This helper method will create, load then start a service
-   * @param name - name of instance
-   * @param type - type
+   * 
+   * @param name
+   *          - name of instance
+   * @param type
+   *          - type
    * @return returns the service in the form of a ServiceInterface
    */
   static public ServiceInterface loadAndStart(String name, String type) {
@@ -1158,11 +1161,11 @@ public class Runtime extends Service implements MessageListener {
       if (cmdline.containsKey("--extract") || cmdline.containsKey("-e")) {
         // force all updates
         /*
-         * FIXME - do " -extract {serviceType} in future ArrayList<String>
-         * services = cmdline.getArgumentList("-extract"); Repo repo =
-         * Repo.getInstance(); if (services.size() == 0) { repo.install(); }
-         * else { for (int i = 0; i < services.size(); ++i) {
-         * repo.install(services.get(i)); } }
+         * FIXME - do
+         * " -extract {serviceType} in future ArrayList<String> services = cmdline.getArgumentList("
+         * -extract"); Repo repo = Repo.getInstance(); if (services.size() == 0)
+         * { repo.install(); } else { for (int i = 0; i < services.size(); ++i)
+         * { repo.install(services.get(i)); } }
          */
         extract();
         shutdown();

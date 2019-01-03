@@ -9,11 +9,11 @@ public abstract class SensorDefinition implements NameProvider, Serializable {
   private static final long serialVersionUID = 1L;
   Mapper outputMapper;
   String serviceName;
-  
-  public SensorDefinition(String SensorDefinition){
-    this.serviceName = SensorDefinition;    
+
+  public SensorDefinition(String SensorDefinition) {
+    this.serviceName = SensorDefinition;
   }
-  
+
   public String getName() {
     return serviceName;
   }

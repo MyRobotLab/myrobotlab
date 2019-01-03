@@ -67,6 +67,7 @@ public class OpenCVFilterSmooth extends OpenCVFilter {
     return image;
 
   }
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;

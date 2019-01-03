@@ -108,7 +108,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     }
 
     lastDepth = depth;
-    
+
     if (clearSamplePoints) {
       samplePoints.clear();
       clearSamplePoints = false;
@@ -119,14 +119,14 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     }
 
     if (useColor) {
-      
+
       // parallel indexers !
       // https://github.com/bytedeco/bytedeco.github.io/blob/master/_posts/2014-12-23-third-release.md
-      
+
       if (color == null) {
         color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
       }
-      
+
       final UShortRawIndexer depthIdx = (UShortRawIndexer) depth.createIndexer();
       final UByteIndexer colorIdx = color.createIndexer();
 
@@ -134,7 +134,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
         public void loop(int from, int to, int looperID) {
           for (int i = from; i < to; i++) {
             for (int j = 0; j < depth.width(); j++) {
-              
+
               int value = depthIdx.get(i, j);
               double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
               Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);

@@ -41,7 +41,8 @@ public class Component implements Serializable, NameProvider {
   public float getPollData() {
     // FIXME getDeadZone ??
     if (jinputComponent != null) {
-      // value = jinputComponent.getPollData(); <- heh - this borked everything ! :) cuz abs(value - component.value) :P
+      // value = jinputComponent.getPollData(); <- heh - this borked everything
+      // ! :) cuz abs(value - component.value) :P
       return jinputComponent.getPollData();
     } // else
     // FIXME - handle virtual input
@@ -61,7 +62,6 @@ public class Component implements Serializable, NameProvider {
   }
 
   public void setVirtualValue(double value) {
-    this.virtualValue = (float)value; // jinput uses floats :(  bleh
+    this.virtualValue = (float) value; // jinput uses floats :( bleh
   }
 }
-

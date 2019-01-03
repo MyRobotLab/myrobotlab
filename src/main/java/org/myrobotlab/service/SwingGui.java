@@ -382,11 +382,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     }
     return frame;
   }
-  
+
   public void maximize() {
-    frame.setExtendedState( frame.getExtendedState() | JFrame.MAXIMIZED_BOTH );
+    frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
   }
-  
+
   /*
    * Build the menu for display.
    */
@@ -836,7 +836,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public void resetDesktop(String name) {
     tabs.resetDesktop(name);
   }
-
 
   @Override
   public void changedUpdate(DocumentEvent e) {

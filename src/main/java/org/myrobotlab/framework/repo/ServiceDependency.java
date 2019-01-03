@@ -17,9 +17,9 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
   private String artifactId;
   private String version;
   private String ext; // ext
-  
+
   private boolean installed = false;
-  
+
   private List<ServiceExclude> excludes = new ArrayList<ServiceExclude>();
   private List<ServiceArtifact> artifacts = new ArrayList<ServiceArtifact>();
 
@@ -29,12 +29,14 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   /**
    * constructor with key - of form [org/version]
-   * @param key k
+   * 
+   * @param key
+   *          k
    */
   public ServiceDependency(String key) {
     String[] split = key.split("/");
-    
-    if (split.length == 2){
+
+    if (split.length == 2) {
       this.groupId = split[0];
       this.version = split[1];
     } else if (split.length == 3) {
@@ -45,7 +47,7 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
       this.groupId = split[0];
       this.artifactId = split[1];
       this.version = split[2];
-      if (!split[3].equals("null")){
+      if (!split[3].equals("null")) {
         this.ext = split[3];
       }
     } else {
@@ -60,14 +62,13 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
     this.artifactId = artifactId;
     this.version = version;
   }
-  
+
   public ServiceDependency(String groubId, String artifactId, String version, String ext) {
     this.groupId = groubId;
     this.artifactId = artifactId;
     this.version = version;
     this.ext = ext;
   }
-
 
   @Override
   public int compare(ServiceDependency o1, ServiceDependency o2) {
@@ -77,7 +78,7 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
   public String getOrgId() {
     return groupId;
   }
-  
+
   public String getArtifactId() {
     return artifactId;
   }
@@ -85,11 +86,10 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
   public String getVersion() {
     return version;
   }
-  
+
   public String getExt() {
     return ext;
   }
-
 
   public boolean isInstalled() {
     return installed;
@@ -101,7 +101,7 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   @Override
   public String toString() {
-    //  return String.format("%s %b", getKey(), installed);
+    // return String.format("%s %b", getKey(), installed);
     return getKey();
   }
 

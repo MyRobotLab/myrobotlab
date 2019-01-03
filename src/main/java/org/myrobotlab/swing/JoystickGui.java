@@ -88,7 +88,7 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
   public JoystickGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
     self = this;
-    myJoy = (Joystick)Runtime.getService(boundServiceName);
+    myJoy = (Joystick) Runtime.getService(boundServiceName);
     addTop(controllers, refresh);
     add(buttonPanel);
     add(axisPanel);
@@ -142,9 +142,9 @@ public class JoystickGui extends ServiceGui implements ActionListener, ItemListe
           String name = it.next();
           controllers.addItem(name);
         }
-        
+
         String controller = myJoy.getController();
-        if (controller != null){
+        if (controller != null) {
           controllers.setSelectedItem(controller);
         }
         // controllers.addActionListener(self);

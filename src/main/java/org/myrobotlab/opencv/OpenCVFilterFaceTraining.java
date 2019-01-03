@@ -107,10 +107,10 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
    */
   public String cascadeDir = "haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
-  
+
   // a map between the hashcode and the string label
   HashMap<Integer, String> idToLabelMap = new HashMap<>();
-  
+
   /**
    * bounding boxes of faces
    */
@@ -131,12 +131,11 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   public static final String STATE_LOSING_TRACKING = "STATE_LOSING_TRACKING";
   public static final String STATE_DETECTING_FACE = "STATE_DETECTING_FACE";
   public static final String STATE_DETECTED_FACE = "STATE_DETECTED_FACE";
-  
+
   public static final String CACHE_DIR = "_cache-resized-template";
   int templateWidth = 256;
   int templateHeight = 256;
   OpenCVFilterCopy copier = new OpenCVFilterCopy("copier");
-
 
   private String state = STATE_LOST_TRACKING;
   int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default
@@ -232,7 +231,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
       resizer.height = 200;
       resizer.width = 200;
       // resizer.setPad(0)
-      
+
     }
 
     public boolean retrain() {
@@ -292,26 +291,26 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
       for (File subclass : subclassDirs) {
         String label = subclass.getName();
         intToLabel.put(label.hashCode(), label);
-        
-        new File(subclass + File.separator +  CACHE_DIR).mkdirs();
+
+        new File(subclass + File.separator + CACHE_DIR).mkdirs();
 
         for (File imageFile : imgFiles.get(subclass)) {
           Mat img = imread(imageFile.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
 
           int w = img.rows();
           int h = img.cols();
-          
-          // we'll need width/height info 
+
+          // we'll need width/height info
           IplImage ipImg = new IplImage(img);
-          
+
           if (debug) {
-            show(ipImg, subclass.getName() + " " +  ipImg.width() + "x" + ipImg.height() + " " + imageFile.getName());
+            show(ipImg, subclass.getName() + " " + ipImg.width() + "x" + ipImg.height() + " " + imageFile.getName());
           }
-          
+
           w = ipImg.width();
           h = ipImg.height();
           // ipImg.close(); ???
-          
+
           // int label = Integer.parseInt(image.getName().split("\\-")[0]);
 
           // TODO - pre-process here !!!
@@ -319,38 +318,39 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
           // resizing, and other adjustmets ? masking ? feedback ?
           int wDelta = Math.abs(resizer.width - w);
           int hDelta = Math.abs(resizer.height - h);
-          boolean widthClosestDimension = (wDelta < hDelta)?true:false;
+          boolean widthClosestDimension = (wDelta < hDelta) ? true : false;
           if (widthClosestDimension) {
-            // scale to width proportionally 
-            
+            // scale to width proportionally
+
           } else {
-            
+
           }
           int z0 = Math.abs(width - w);
-          
+
           // FIXME - have the resize filter do the resize (with options)
-          // IplImage resizedImage = IplImage.create(800, 60, ipImg.depth(), ipImg.nChannels());
-          
- 
+          // IplImage resizedImage = IplImage.create(800, 60, ipImg.depth(),
+          // ipImg.nChannels());
+
           // cvSmooth(origImg, origImg);
           // cvResize(ipImg, resizedImage);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_CUBIC);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_MAX);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_NEAREST);
-          // resize(convertToMat(ipImg), convertToMat(resizedImage), new Size(0,0), 1.0, 1.0, Imgproc.INTER_CUBIC);
+          // resize(convertToMat(ipImg), convertToMat(resizedImage), new
+          // Size(0,0), 1.0, 1.0, Imgproc.INTER_CUBIC);
           // cvResize(ipImg, resizedImage, Imgproc.INTER_AREA);
-          // saveToFile("stretched", resizer.resizeNoAspect(ipImg, templateWidth, templateHeight));
+          // saveToFile("stretched", resizer.resizeNoAspect(ipImg,
+          // templateWidth, templateHeight));
 
           // BEGIN STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
           IplImage resizedImage = OpenCVFilterResize.resizeImageMaintainAspect(ipImg, templateWidth, templateHeight);
-          
-          
+
           IplImage copy = cvCreateImage(new CvSize(templateWidth, templateHeight), ipImg.depth(), ipImg.nChannels());
           // cvCopy(resizedImage, copy, null);
           cvSetZero(copy);
           IplImage merged = copier.copy(resizedImage, copy);
-                    
-          saveToFile(imageFile.getParent() + File.separator +  CACHE_DIR  + File.separator + imageFile.getName(), merged);
+
+          saveToFile(imageFile.getParent() + File.separator + CACHE_DIR + File.separator + imageFile.getName(), merged);
 
           // END STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
 
@@ -407,7 +407,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
       classifiers.get(rootDir).scanAndProcess();
     }
   }
-  
+
   @Override
   public void release() {
     if (scanTimer != null) {
@@ -591,7 +591,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               // requirements
               // pre-process / isolate detected face
 
-              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING BOXES
+              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING
+              // BOXES
               // this is the full data copy (color - original size - etc...)
               cvSetImageROI(image, r);
               IplImage origBB = cvCreateImage(new CvSize(r.width(), r.height()), image.depth(), image.nChannels());
@@ -616,55 +617,62 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               // subsequent searches
               r = new CvRect(0, 0, image.width(), image.width());
               cvSetImageROI(image, r);
-              
-              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING BOXES
-              
-              // ====== BEGIN STANDARD TEMPLATE 
+
+              // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING
+              // BOXES
+
+              // ====== BEGIN STANDARD TEMPLATE
               // BEGIN STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
               // convert to grey !
               IplImage gray = cvCreateImage(cvGetSize(origBB), 8, 1);
-              
+
               IplImage resizedImage = OpenCVFilterResize.resizeImageMaintainAspect(gray, templateWidth, templateHeight);
-              
-              
+
               IplImage template = cvCreateImage(new CvSize(templateWidth, templateHeight), gray.depth(), gray.nChannels());
               // cvCopy(resizedImage, copy, null);
               cvSetZero(template);
               IplImage merged = copier.copy(resizedImage, template);
-                        
-              // TODO- COMPARE - IF A LABEL WITH ENOUGH CONFIDENCE COMES UP IT GOES TO _{label} directory !
+
+              // TODO- COMPARE - IF A LABEL WITH ENOUGH CONFIDENCE COMES UP IT
+              // GOES TO _{label} directory !
 
               // END STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
-              // ====== BEGIN STANDARD TEMPLATE 
+              // ====== BEGIN STANDARD TEMPLATE
 
               /// *<pre> predict !!
               IntPointer label = new IntPointer(1);
               DoublePointer confidence = new DoublePointer(1);
               OpenCVClassifier classifier = classifiers.get(facesSubclass);
               classifier.recognizer.predict(toMat(merged), label, confidence);
-              
+
               // IF HIGH ENOUGH CONFIDENCE GO TO APPROPRIATE DIRECTORIES
               if (confidence.get() > 50) {
                 String labelStr = idToLabelMap.get(label.get());
                 // we're making "confidence" guess of a person
-                // FIXME - REFACTOR - THIS NEEDS TO BE ABLE TO RECURSE ... we're at faces level - but it may be arbitrarily deeper
-                // We've already traveled to the depth of faces .. future may be deeper
-                File dir = new File(facesSubclass + File.separator + labelStr );
+                // FIXME - REFACTOR - THIS NEEDS TO BE ABLE TO RECURSE ... we're
+                // at faces level - but it may be arbitrarily deeper
+                // We've already traveled to the depth of faces .. future may be
+                // deeper
+                File dir = new File(facesSubclass + File.separator + labelStr);
                 dir.mkdirs();
-                
-                // saving the "original" non-pre-processed image to the _{class} "guess" directory - prolly should encode confidence in 
+
+                // saving the "original" non-pre-processed image to the _{class}
+                // "guess" directory - prolly should encode confidence
+                // in
                 // filename ?
-                // this needs to be fixed to recursively build all classifiers and key/directory paths
+                // this needs to be fixed to recursively build all classifiers
+                // and key/directory paths
                 String faceGuess = getMachineFileName(dir, opencv.getFrameIndex(), i);
                 File faceGuessFile = new File(faceGuess);
                 faceGuessFile.getParentFile().mkdirs();
                 // File guessFace = dir.getParent() + File.separator +
                 saveToFile(faceGuess, origBB);
-                
-                // TODO saved the pre-processed guess to the cache file 
-                // saveToFile(imageFile.getParent() + File.separator +  CACHE_DIR  + File.separator + imageFile.getName(), merged);
+
+                // TODO saved the pre-processed guess to the cache file
+                // saveToFile(imageFile.getParent() + File.separator + CACHE_DIR
+                // + File.separator + imageFile.getName(), merged);
               }
-              
+
               // int predictedLabel =
               // classifier.recognizer.predict_label(convertToMat(copy));
               // BytePointer bp =

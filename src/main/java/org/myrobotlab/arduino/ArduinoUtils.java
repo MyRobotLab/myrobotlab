@@ -40,29 +40,39 @@ public class ArduinoUtils {
   }
 
   /**
-   * Upload the MrlComm.ino with an arduino ide (version 1.6.8) installed in the default windows location of 
-   * C:\Program Files (x86)\Arduino\
+   * Upload the MrlComm.ino with an arduino ide (version 1.6.8) installed in the
+   * default windows location of C:\Program Files (x86)\Arduino\
    * 
-   * @param port - the com port for the arduino
-   * @param boardKey - the board type mega/uno
+   * @param port
+   *          - the com port for the arduino
+   * @param boardKey
+   *          - the board type mega/uno
    * @return true if the upload was successful, otherwise false.
-   * @throws IOException - if there is an error talking to the com port
-   * @throws InterruptedException - if interrupted by a thread
+   * @throws IOException
+   *           - if there is an error talking to the com port
+   * @throws InterruptedException
+   *           - if interrupted by a thread
    */
   public static boolean uploadSketch(String port, String boardKey) throws IOException, InterruptedException {
     return uploadSketch(port, boardKey, arduinoPath);
   }
-  
-  
+
   /**
-   * Upload the MrlComm.ino sketch to the using an arduino IDE  (only version 1.6.8 has been tested for this method.)
+   * Upload the MrlComm.ino sketch to the using an arduino IDE (only version
+   * 1.6.8 has been tested for this method.)
    * 
-   * @param port the com port  (COM4,  /dev/ttyAMA0  ...)
-   * @param boardKey - the board type mega / uno
-   * @param arduinoPath - path to the arduino ide installation
+   * @param port
+   *          the com port (COM4, /dev/ttyAMA0 ...)
+   * @param boardKey
+   *          - the board type mega / uno
+   * @param arduinoPath
+   *          - path to the arduino ide installation
    * @return true if successful, false otherwise
-   * @throws IOException - if there's a problem reading the source ino sketch or talking to the com port
-   * @throws InterruptedException - if interrupted.
+   * @throws IOException
+   *           - if there's a problem reading the source ino sketch or talking
+   *           to the com port
+   * @throws InterruptedException
+   *           - if interrupted.
    */
   public static boolean uploadSketch(String port, String boardKey, String arduinoPath) throws IOException, InterruptedException {
     FileIO.extractResources();
@@ -82,14 +92,14 @@ public class ArduinoUtils {
     args.add("--port");
     args.add(port);
     args.add("--board");
-    
+
     String[] parts = boardKey.split("\\.");
     if (parts.length > 1) {
       args.add("arduino:avr:" + parts[0] + ":cpu=" + parts[1]);
     } else {
       args.add("arduino:avr:" + parts[0]);
     }
-    
+
     args.add(sketch.getAbsolutePath());
     // args.add("--verbose-upload");
     // args.add("--preserve-temp-files");
@@ -108,7 +118,7 @@ public class ArduinoUtils {
     // if it correctly compiles but fails to upload
 
     // if (result.trim().endsWith(" bytes.")) {
-    if (result.contains("Sketch uses")){
+    if (result.contains("Sketch uses")) {
       return true;
     } else {
       return false;
@@ -120,10 +130,13 @@ public class ArduinoUtils {
    * Helper function to run a system command and return the stdout / stderr as a
    * string
    * 
-   * @param program - the path to the executible to run
-   * @param args - the list of arguments to be passed to the program
+   * @param program
+   *          - the path to the executible to run
+   * @param args
+   *          - the list of arguments to be passed to the program
    * @return - returns the stdout and stderr as a string
-   * @throws InterruptedException - if interrupted
+   * @throws InterruptedException
+   *           - if interrupted
    */
   public static String runCommand(String program, ArrayList<String> args) throws InterruptedException {
 
@@ -134,8 +147,8 @@ public class ArduinoUtils {
         command.add(arg);
       }
     }
-    log.info("RUNNING COMMAND : {}" , StringUtils.join(command, " "));
-    
+    log.info("RUNNING COMMAND : {}", StringUtils.join(command, " "));
+
     ProcessBuilder builder = new ProcessBuilder(command);
     // we need to specify environment variables
     Map<String, String> environment = builder.environment();
@@ -195,7 +208,7 @@ public class ArduinoUtils {
       exitValue = handle.exitValue();
       // print the output from the command
       log.info(outputBuilder.toString());
-      log.info("Exit Value : {}" , exitValue);
+      log.info("Exit Value : {}", exitValue);
       outputBuilder.append("Exit Value : " + exitValue);
       return outputBuilder.toString();
     } catch (IOException e) {
@@ -209,8 +222,10 @@ public class ArduinoUtils {
    * Helper function to run a program , return the stderr / stdout as a string
    * and to catch any exceptions that occur
    * 
-   * @param cmd - the path to the program to run
-   * @param args - a list of args to pass in
+   * @param cmd
+   *          - the path to the program to run
+   * @param args
+   *          - a list of args to pass in
    * @return - the stdout/stderr from the underlying process
    */
   public static String RunAndCatch(String cmd, ArrayList<String> args) {
