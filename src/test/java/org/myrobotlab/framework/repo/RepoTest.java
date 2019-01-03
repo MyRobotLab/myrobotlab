@@ -30,22 +30,11 @@ public class RepoTest implements StatusPublisher {
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
-
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
   @Before
   public void setUp() throws Exception {
+    LoggingFactory.init("WARN");
     Repo repo = Repo.getInstance();
     repo.clear();
-  }
-
-  @After
-  public void tearDown() throws Exception {
   }
 
   @Test
@@ -102,12 +91,6 @@ public class RepoTest implements StatusPublisher {
     assertFalse(check.exists());
   }
 
- 
-
-  @Test
-  public void testResolveArtifacts() {
-    // fail("Not yet implemented");
-  }
 
   @Test
   public void testSave() {
@@ -117,26 +100,6 @@ public class RepoTest implements StatusPublisher {
     // Repo repo = Repo.getInstance();
     repo.save();
     assertTrue(new File(Repo.REPO_STATE_FILE_NAME).exists());
-  }
-
-  @Test
-  public void testAddDependency() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public void testGenerateLibrariesFromRepo() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public void testSetInstalled() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public void testGetKey() {
-    // fail("Not yet implemented");
   }
 
   @Test
@@ -155,29 +118,6 @@ public class RepoTest implements StatusPublisher {
     repo.clear();
     repo.install("Arduino");
     assertTrue(repo.isInstalled("Arduino"));
-  }
-
-
-  public static void main(String[] args) {
-    try {
-
-      // LoggingFactory.init(Level.INFO);
-
-      /*
-       * 
-       * Repo repo = Repo.getInstance(); repo.clear();
-       * 
-       * RepoTest.setUpBeforeClass(); RepoTest test = new RepoTest();
-       * test.testGetUnfulfilledDependencies();
-       */
-
-      JUnitCore junit = new JUnitCore();
-      Result result = junit.run(RepoTest.class);
-      log.info("Result: {}", result);
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
   }
 
   @Override

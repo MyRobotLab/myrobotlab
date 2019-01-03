@@ -1,16 +1,13 @@
 package org.myrobotlab.service;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
+@Ignore
 public class JFugueTest {
   public final static Logger log = LoggerFactory.getLogger(JFugueTest.class);
   static JFugue jfugue;
@@ -25,59 +22,6 @@ public class JFugueTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     jfugue.releaseService();
-  }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  @Test
-  public final void testGetCategories() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testGetDescription() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testStopService() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testMain() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testJFugue() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testPlayInteger() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testPlayRhythm() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testPlayString() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public final void testPlayRythm() {
-    // fail("Not yet implemented");
   }
 
   @Test
@@ -111,16 +55,5 @@ public class JFugueTest {
 
   }
 
-  public static void main(String[] args) {
-    try {
-
-      setUpBeforeClass();
-
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-
-    System.exit(0);
-  }
 
 }

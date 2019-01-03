@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
 import org.junit.Test;
@@ -25,6 +27,11 @@ public class ProgramABTest extends AbstractServiceTest {
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
 
+  @Before
+  public void setUp() {
+    LoggingFactory.init("WARN");
+  }
+  
   public Service createService() {
     
     log.info("Setting up the Program AB Service ########################################");

@@ -10,9 +10,12 @@ import org.slf4j.Logger;
 
 import marytts.util.math.MathUtils;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class LloydIKTest {
+  
   public final static Logger log = LoggerFactory.getLogger(InMoovArm.class);
   
   @Test

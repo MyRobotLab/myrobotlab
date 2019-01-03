@@ -154,7 +154,7 @@ public class DruppNeck extends Service {
 
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(InMoovHead.class.getCanonicalName());
+    ServiceType meta = new ServiceType(DruppNeck.class.getCanonicalName());
     meta.addDescription("InMoov Drupp Neck Service");
     meta.addCategory("robot");
 

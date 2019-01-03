@@ -13,8 +13,8 @@ import org.junit.Test;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
-import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
 public class Arduino2Test {
@@ -26,7 +26,7 @@ public class Arduino2Test {
   
   @Before
   public void setup() throws IOException {
-    TestUtils.initEnvirionment();
+    LoggingFactory.init("WARN");
     VirtualArduino va01 = (VirtualArduino)Runtime.start("va01", "VirtualArduino");
     VirtualArduino va02 = (VirtualArduino)Runtime.start("va02", "VirtualArduino");
     
