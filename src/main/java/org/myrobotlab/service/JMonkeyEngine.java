@@ -280,15 +280,15 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
       jme.setRotation("i01.torso.topStom", "z");
       jme.setMapper("i01.torso.topStom", 0, 180, 80, 100);
-      jme.rotateOnAxis("i01.torso.topStom", "x", 90);
+      //jme.rotateOnAxis("i01.torso.topStom", "x", 90);
       jme.moveTo("i01.torso.topStom", 0, 0.2625f, 0.025f); // this is a translation to an initial position
       jme.bind("i01.torso.topStom", "i01.torso.midStom");
-  /*    
+      
       jme.putNode("rightS");
       jme.moveTo("rightS", 0, 0.75f, 0);
       jme.setRotation("rightS", "z");
-//      jme.bind("rightS", "i01.torso.topStom");
-      
+      jme.bind("rightS", "i01.torso.topStom");
+/*      
       // putNode("i01.rightArm.omoplate", "rightS", "Models/Romoplate1.j3o", new Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(-1), new Vector3f(-143, 0, -17), 0);
       jme.setMapper("i01.rightArm.omoplate", 0, 180, 10, 70);
       jme.moveTo("i01.rightArm.omoplate", -0.3575f, 0, -0.0425f);
@@ -745,6 +745,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
     if (selected != null && selected != rootNode) {
       Jme3Object s = selected.getUserData("data");
       if (s != null) {
+        // camNode.attachChild(s.getSpatial());
+        // camNode.setLocalTranslation(new Vector3f(0, 1, -1));
         s.enableBoundingBox(false);
       } else {
         log.warn("{} does not have \"data\"", selected);
@@ -1285,8 +1287,35 @@ public class JMonkeyEngine extends Service implements ActionListener,
     Quaternion q = spatial.getLocalRotation();
     float[] angles = new float[3]; // yaw, roll, pitch
     q.toAngles(angles);
-    putText(String.format("%s\n  x:%.3f y:%.3f z:%.3f\n yaw:%.2f roll:%.2f pitch:%.2f", spatial.getName(), xyz.x, xyz.y, xyz.z, angles[0] * 180 / FastMath.PI,
-        angles[1] * 180 / FastMath.PI, angles[2] * 180 / FastMath.PI), 10, 10);
+    
+    boolean isNode = (spatial instanceof Node);
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append(String.format("%s-%s\n", (isNode)?"node":"geom", spatial.getName()));
+    sb.append(String.format("x:%.3f y:%.3f z:%.3f\n", xyz.x, xyz.y, xyz.z));
+    sb.append(String.format("yaw:%.2f roll:%.2f pitch:%.2f\n", angles[0] * 180 / FastMath.PI, angles[1] * 180 / FastMath.PI, angles[2] * 180 / FastMath.PI));
+    
+    if (isNode) {
+      sb.append(format((Node)spatial, 0));
+    }
+    
+    putText(sb.toString(), 10, 10);
+  }
+  
+  public String format(Node node, Integer selected) {
+    StringBuilder sb = new StringBuilder();
+    int nodes = 0;
+    int geometries = 0;
+    List<Spatial> children = node.getChildren();
+    sb.append("[");
+    for (int i = 0; i < children.size(); ++i) {
+      if (i != 0) {
+        sb.append(", ");
+      }
+      sb.append(node.getChild(i).getName());
+    }
+    sb.append("]");
+    return sb.toString();
   }
 
   public void putText(String text, int x, int y) {
@@ -1480,6 +1509,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // copy the movements of the Node
     camNode = new CameraNode("cam", camera);
     camNode.setControlDir(ControlDirection.SpatialToCamera);
+    // rootNode.attachChild(camNode);
+    // camNode.attachChild(child)
+    // camera.setLocation(new Vector3f(0, 1, -1));
+    camNode.setLocalTranslation(-1, 1, -1);
+    // camNode.setLocalTranslation(new Vector3f(1f, 1f, 1f));    
     camNode.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
     // rootNode.attachChild(camNode);
     // rootNode.attachChild(cam);
