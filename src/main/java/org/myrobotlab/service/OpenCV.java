@@ -277,6 +277,7 @@ public class OpenCV extends AbstractVideoSource {
       grabberTypes.add("Sarxos");
       grabberTypes.add("MJpeg");
 
+      videoFileExt.add("mjpeg");
       videoFileExt.add("mpeg");
       videoFileExt.add("mp4");
       videoFileExt.add("avi");
@@ -1895,7 +1896,7 @@ public class OpenCV extends AbstractVideoSource {
   private boolean isSingleFrame() {
     if (inputSource.equals(INPUT_SOURCE_FILE) && inputFile != null) {
       String testExt = inputFile.toLowerCase();
-      if (testExt.endsWith("jpg") || testExt.endsWith("jpeg") || testExt.endsWith("png") || testExt.endsWith("gif") || testExt.endsWith("tiff") || testExt.endsWith("tif")) {
+      if (testExt.endsWith(".jpg") || testExt.endsWith(".jpeg") || testExt.endsWith(".png") || testExt.endsWith(".gif") || testExt.endsWith(".tiff") || testExt.endsWith(".tif")) {
         return true;
       }
     }
