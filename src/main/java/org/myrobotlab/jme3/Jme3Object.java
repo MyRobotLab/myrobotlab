@@ -36,7 +36,7 @@ public class Jme3Object implements Savable {
 
   public transient Node node;
 
-  public transient Spatial spatial;
+  // public transient Spatial spatial;
 
   /**
    * bounding box
@@ -51,96 +51,59 @@ public class Jme3Object implements Savable {
   public Double currentAngle;
 
   public String assetPath;
+  
 
+  String bbColor;
+
+  
+  // FIXME !!! MAKE POJO !!
+  // FIXME !!! NO CREATION OF NODES IN THIS CLASS !!! ONLY IN JME OR UTIL
   public Jme3Object(JMonkeyEngine jme, String name) {
     this.jme = jme;
     this.name = name;
-    this.node = new Node(spatial.getName());
+    this.node = new Node(name);
     node.setUserData("data", this);
   }
 
-  public Jme3Object(JMonkeyEngine jme, Spatial spatial) {
+  public Jme3Object(JMonkeyEngine jme, Node node) {
     this.jme = jme;
-    name = spatial.getName();
-    this.spatial = spatial;
-    node = new Node(spatial.getName());
-    node.attachChild(spatial); // spatial.setUserData ????
-    node.setUserData("data", this);    
-  }
-
-  // FIXME - defaultRotation is ok - init rotation IS NOT !!!
-  // FIXME - DEPRECATE
-  public Jme3Object(JMonkeyEngine jme, String name, String parentName, String assetPath, Mapper mapper, Vector3f rotationMask, Vector3f localTranslation, double currentAngle) {
-    this.jme = jme;
-    this.name = name;
-    this.rotationMask = rotationMask;
-    this.localTranslation = localTranslation;
-    this.currentAngle = currentAngle;
-    this.mapper = mapper;
-    this.assetPath = assetPath;
-
-    node = new Node(name);
-    this.parentName = parentName;
-
-    float scaleFactor = 1;
-
-    Jme3Object po = jme.getJme3Object(parentName);
-    if (po != null) {
-      po.attachChild(node);
-    }
-
-    /*
-     * Node parentNode = jme.getNode(parentName); if (parentNode != null) {
-     * parentNode.attachChild(node); }
-     */
-
-    if (assetPath != null) {
-      try {
-        spatial = jme.loadModel(assetPath);
-        spatial.setUserData("data", this);
-        node.attachChild(spatial);
-      } catch (Exception e) {
-        log.error("could not load model {}", assetPath);
-      }
-      // spatial.setName(String.format("%s-geometry", name));
-      // spatial.scale(1 / scaleFactor); // FIXME - import 1000 scale data      
-    }
-
-    if (localTranslation != null) {
-      localTranslation.x = localTranslation.x / scaleFactor; // FIXME scale 1000
-      localTranslation.y = localTranslation.y / scaleFactor;
-      localTranslation.z = localTranslation.z / scaleFactor;
-      node.setLocalTranslation(localTranslation);
-    }
+    name = node.getName();
+    this.node = node;
     node.setUserData("data", this);
-    
-  }
-
-  public void attachChild(Node node2) {
-    node.attachChild(node);
   }
 
   public void enableBoundingBox(boolean b) {
+    enableBoundingBox(b, null);
+  }
 
-    if (b && bb == null) {
-      // Geometry bb = WireBox.makeGeometry((BoundingBox)
+  public void enableBoundingBox(boolean b, String color) {
+    boolean test = true;
+    if (test) {
+      return;
+    }
+    
+    
+    ColorRGBA c = Jme3Util.toColor(color);
+
+    if (b && (bb == null || bbColor == null || !bbColor.equals(color))) {
+      // Geometry newBb = WireBox.makeGeometry((BoundingBox)
       // spatial.getWorldBound());
-      // spatial.getWorldBound();
-      // Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
       Geometry newBb = WireBox.makeGeometry((BoundingBox) node.getWorldBound());
-      // Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Light/PBRLighting.j3md");
-      
+      // Material mat = new Material(jme.getAssetManager(),
+      // "Common/MatDefs/Light/PBRLighting.j3md");
+
       Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-      mat.setColor("Color", ColorRGBA.Green);
+      mat.setColor("Color", c);
       mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-      
+
       // mat1.setMode(Mesh.Mode.Lines);
       // newBb.setLineWidth(2.0f);
       newBb.setMaterial(mat);
       bb = newBb;
+      bbColor = color;
       if (node != null) {
-        node.attachChild(bb);
-        // jme.getRootNode().attachChild(bb);
+        // node.attachChild(bb);
+        jme.getRootNode().attachChild(bb);// <- ??? should it be root ???
       }
     } else if (b && bb != null) {
       bb.setCullHint(CullHint.Never);
@@ -203,10 +166,6 @@ public class Jme3Object implements Savable {
   public void read(JmeImporter im) throws IOException {
     // TODO Auto-generated method stub
 
-  }
-
-  public Spatial getSpatial() {
-    return spatial;
   }
 
   public String toString() {
