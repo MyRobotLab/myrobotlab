@@ -77,15 +77,19 @@ public class Jme3Object implements Savable {
   }
 
   public void enableBoundingBox(boolean b, String color) {
-    boolean test = true;
+    /*boolean test = true;
     if (test) {
       return;
     }
+    */
     
+    if (color == null) {
+      color = Jme3Util.defaultColor;
+    }
     
     ColorRGBA c = Jme3Util.toColor(color);
 
-    if (b && (bb == null || bbColor == null || !bbColor.equals(color))) {
+    if (b && bb == null) {
       // Geometry newBb = WireBox.makeGeometry((BoundingBox)
       // spatial.getWorldBound());
       Geometry newBb = WireBox.makeGeometry((BoundingBox) node.getWorldBound());
@@ -99,16 +103,24 @@ public class Jme3Object implements Savable {
       // mat1.setMode(Mesh.Mode.Lines);
       // newBb.setLineWidth(2.0f);
       newBb.setMaterial(mat);
+      
       bb = newBb;
       bbColor = color;
       if (node != null) {
-        // node.attachChild(bb);
-        jme.getRootNode().attachChild(bb);// <- ??? should it be root ???
+        node.attachChild(bb);
+        // jme.getRootNode().attachChild(bb);// <- ??? should it be root ???
       }
     } else if (b && bb != null) {
       bb.setCullHint(CullHint.Never);
     } else if (!b && bb != null) {
       bb.setCullHint(CullHint.Always);
+    }
+    
+    if (bb != null && !color.equals(bbColor)) {
+      Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      mat.setColor("Color", c);
+      mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+      bb.setMaterial(mat);
     }
 
   }

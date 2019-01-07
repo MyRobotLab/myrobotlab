@@ -890,6 +890,7 @@ public class JMonkeyEngine extends Service
       // if this is a mesh only - it needs a node
       Jme3Object o = null;
       if (spatial instanceof Node) {
+        Node n = (Node)spatial;
         /*
         Node loadedNode = (Node)spatial;        
         Node n = new Node(simpleName);
@@ -898,7 +899,8 @@ public class JMonkeyEngine extends Service
         }
         o = new Jme3Object(this, n);
         */
-        o = new Jme3Object(this, (Node)spatial);
+        // n.scale(0.0025f);
+        o = new Jme3Object(this, n);
         
       } else {
         Node n = new Node(spatial.getName());
