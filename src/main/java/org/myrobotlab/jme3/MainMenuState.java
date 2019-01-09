@@ -1,5 +1,7 @@
 package org.myrobotlab.jme3;
 
+import java.util.List;
+
 import org.myrobotlab.service.JMonkeyEngine;
 
 import com.jme3.app.Application;
@@ -44,7 +46,9 @@ public class MainMenuState extends BaseAppState {
   TextField roll;
   TextField pitch;
   TextField yaw;
-  
+
+  Label children;
+
   Button update;
 
   /**
@@ -73,16 +77,16 @@ public class MainMenuState extends BaseAppState {
     contents.addChild(x, 0, 1);
     contents.addChild(new Label("y:"), 0, 2);
     contents.addChild(y, 0, 3);
-    contents.addChild(new Label("y:"), 0, 4);
+    contents.addChild(new Label("z:"), 0, 4);
     contents.addChild(z, 0, 5);
 
-    contents.addChild(new Label("pitch:"), 1, 0);
+    contents.addChild(new Label("yaw:"), 1, 0);
     contents.addChild(new Label("roll:"), 1, 2);
-    contents.addChild(new Label("yaw:"), 1, 4);
-    contents.addChild(pitch, 1, 1);
+    contents.addChild(new Label("pitch:"), 1, 4);
+    contents.addChild(yaw, 1, 1);
     contents.addChild(roll, 1, 3);
-    contents.addChild(yaw, 1, 5);
-    
+    contents.addChild(pitch, 1, 5);
+
     contents.addChild(update, 2, 5);
 
     // Label label = contents.addChild(new Label("children"));
@@ -166,7 +170,7 @@ public class MainMenuState extends BaseAppState {
 
     // Put it somewhere that we will see it
     // Note: Lemur GUI elements grow down from the upper left corner.
-    main.setLocalTranslation(10, 300, 0);
+    main.setLocalTranslation(10, 100, 0);
 
     Container north = new Container();
     Container center = new Container();
@@ -196,7 +200,7 @@ public class MainMenuState extends BaseAppState {
     tabs = south.addChild(new TabbedPanel());
     tabs.setInsets(new Insets3f(5, 5, 5, 5));
     selectionRef = tabs.getSelectionModel().createReference();
-    
+
     x = new TextField("0.000");
     y = new TextField("0.000");
     z = new TextField("0.000");
@@ -209,6 +213,10 @@ public class MainMenuState extends BaseAppState {
 
     addInfoTab();
     addNavTab();
+
+    south.addChild(new Label("Children"));
+    children = south.addChild(new Label(""));
+    children.setMaxWidth(400);
 
     statusLabel = south.addChild(new Label("Status"));
     statusLabel.setInsets(new Insets3f(2, 5, 2, 5));
@@ -243,16 +251,20 @@ public class MainMenuState extends BaseAppState {
     Quaternion q = spatial.getLocalRotation();
     float[] angles = new float[3]; // yaw, roll, pitch
     q.toAngles(angles);
-    
+
     x.setText(String.format("%.3f", xyz.x));
     y.setText(String.format("%.3f", xyz.y));
     z.setText(String.format("%.3f", xyz.z));
-   
-    // pitch.setText("%.3f", angles[0] * 180);
-    
-    String type = (spatial instanceof Node) ? "Node" : "Geometry";
 
-    title.setText(String.format("%s : %s", type, spatial.getName()));
+    yaw.setText(String.format("%.3f", angles[0] * 180));
+    roll.setText(String.format("%.3f", angles[1] * 180));
+    pitch.setText(String.format("%.3f", angles[2] * 180));
+
+    boolean isNode = (spatial instanceof Node);
+
+    // String type = (spatial instanceof Node) ? "Node" : "Geometry";
+
+    title.setText(spatial.toString());
 
     Spatial rootChild = jme.getRootChild(spatial);
 
@@ -267,6 +279,21 @@ public class MainMenuState extends BaseAppState {
       sb.append(spatial.getName());
     }
     breadCrumbs.setText(sb.toString());
+
+    if (isNode) {
+      Node node = (Node) spatial;
+      sb = new StringBuilder();
+      List<Spatial> c = node.getChildren();
+      sb.append("[");
+      for (int i = 0; i < c.size(); ++i) {
+        if (i != 0) {
+          sb.append(", ");
+        }
+        sb.append(node.getChild(i).getName());
+      }
+      sb.append("]");
+      children.setText(sb.toString());
+    }
   }
 
   public void setBreadCrumb(Spatial spatial) {
