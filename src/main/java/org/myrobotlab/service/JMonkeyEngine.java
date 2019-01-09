@@ -515,7 +515,7 @@ public class JMonkeyEngine extends Service
   boolean autoAttachAll = true;
   transient Camera camera;
   transient CameraNode camNode;
-  transient Spatial control = null;
+  // transient Spatial control = null;
   String defaultAppType = "Jme3App";
 
   long deltaMs;
@@ -1118,7 +1118,7 @@ public class JMonkeyEngine extends Service
       selected = rootNode;
     }
 
-    control = selected;
+    selected = selected;
 
     if (name.equals("mouse-click-left")) {
       // alt + ctrl + lmb = zoom in / zoom out
@@ -1130,47 +1130,47 @@ public class JMonkeyEngine extends Service
 
       if (altLeftPressed && ctrlLeftPressed) {
         log.info("here");
-        control.move(0, 0, keyPressed * -1);
+        selected.move(0, 0, keyPressed * -1);
       } else {
-        control.rotate(0, -keyPressed, 0);
+        selected.rotate(0, -keyPressed, 0);
       }
 
       // else SELECT !!!
 
     } else if (name.equals("mouse-click-right")) {
       // rotate+= keyPressed;
-      control.rotate(0, keyPressed, 0);
+      selected.rotate(0, keyPressed, 0);
       // log.info(rotate);
     } else if (name.equals("mouse-wheel-up") || name.equals("forward")) {
-      // control.setLocalScale(control.getLocalScale().mult(1.0f));
-      control.move(0, 0, keyPressed * -1);
+      // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
+      selected.move(0, 0, keyPressed * -1);
     } else if (name.equals("mouse-where-down") || name.equals("backward")) {
-      // control.setLocalScale(control.getLocalScale().mult(1.0f));
-      control.move(0, 0, keyPressed * 1);
+      // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
+      selected.move(0, 0, keyPressed * 1);
     } else if (name.equals("up")) {
       if (ctrlLeftPressed) {
-        control.move(0, 0, keyPressed * 1);
+        selected.move(0, 0, keyPressed * 1);
       } else {
-        control.move(0, keyPressed * 1, 0);
+        selected.move(0, keyPressed * 1, 0);
       }
     } else if (name.equals("down")) {
 
       if (ctrlLeftPressed) {
-        control.move(0, 0, keyPressed * -1);
+        selected.move(0, 0, keyPressed * -1);
       } else {
-        control.move(0, -keyPressed * 1, 0);
+        selected.move(0, -keyPressed * 1, 0);
       }
     } else if (name.equals("left")) {
       if (ctrlLeftPressed) {
-        control.rotate(0, -keyPressed, 0);
+        selected.rotate(0, -keyPressed, 0);
       } else {
-        control.move(-keyPressed * 1, 0, 0);
+        selected.move(-keyPressed * 1, 0, 0);
       }
     } else if (name.equals("right")) {
       if (ctrlLeftPressed) {
-        control.rotate(0, keyPressed, 0);
+        selected.rotate(0, keyPressed, 0);
       } else {
-        control.move(keyPressed * 1, 0, 0);
+        selected.move(keyPressed * 1, 0, 0);
       }
     }
 
@@ -1215,18 +1215,19 @@ public class JMonkeyEngine extends Service
             p.enableBoundingBox(true, "ffcc00"); // orange parent
           }
         }
-
+        // TODO never give selected a geometry ??? strange behavior
         if (target.getName().equals("Red Box")) {
           // target.rotate(0, -intensity, 0);
         } else if (target.getName().equals("Blue Box")) {
           // target.rotate(0, intensity, 0);
         }
-
+        selected = parent;
       }
     } // else if ...
 
-    if (control != null) {
-      putText(control, 10, 10);
+    if (selected != null) {
+      menu.putText(selected);
+      putText(selected, 10, 10);
     }
   }
 
@@ -1316,8 +1317,6 @@ public class JMonkeyEngine extends Service
 
   public String format(Node node, Integer selected) {
     StringBuilder sb = new StringBuilder();
-    int nodes = 0;
-    int geometries = 0;
     List<Spatial> children = node.getChildren();
     sb.append("[");
     for (int i = 0; i < children.size(); ++i) {
