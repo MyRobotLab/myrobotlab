@@ -743,7 +743,7 @@ public class JMonkeyEngine extends Service
         s.enableBoundingBox(true);
       }
     }
-
+    menu.putText(selected);
     putText(selected, 10, 10);
   }
 
@@ -1124,19 +1124,19 @@ public class JMonkeyEngine extends Service
       // alt + ctrl + lmb = zoom in / zoom out
       // alt + lmb = orbit
       // shift + alt + lmb = pan
-      
+
       // arrow up/down/left/right = pan
       // shift + up/down = zoom in / zoom out
-      
+
       if (altLeftPressed && ctrlLeftPressed) {
         log.info("here");
         control.move(0, 0, keyPressed * -1);
       } else {
         control.rotate(0, -keyPressed, 0);
       }
-      
+
       // else SELECT !!!
-      
+
     } else if (name.equals("mouse-click-right")) {
       // rotate+= keyPressed;
       control.rotate(0, keyPressed, 0);
@@ -1148,13 +1148,30 @@ public class JMonkeyEngine extends Service
       // control.setLocalScale(control.getLocalScale().mult(1.0f));
       control.move(0, 0, keyPressed * 1);
     } else if (name.equals("up")) {
-      control.move(0, keyPressed * 1, 0);
+      if (ctrlLeftPressed) {
+        control.move(0, 0, keyPressed * 1);
+      } else {
+        control.move(0, keyPressed * 1, 0);
+      }
     } else if (name.equals("down")) {
-      control.move(0, -keyPressed * 1, 0);
+
+      if (ctrlLeftPressed) {
+        control.move(0, 0, keyPressed * -1);
+      } else {
+        control.move(0, -keyPressed * 1, 0);
+      }
     } else if (name.equals("left")) {
-      control.move(-keyPressed * 1, 0, 0);
+      if (ctrlLeftPressed) {
+        control.rotate(0, -keyPressed, 0);
+      } else {
+        control.move(-keyPressed * 1, 0, 0);
+      }
     } else if (name.equals("right")) {
-      control.move(keyPressed * 1, 0, 0);
+      if (ctrlLeftPressed) {
+        control.rotate(0, keyPressed, 0);
+      } else {
+        control.move(keyPressed * 1, 0, 0);
+      }
     }
 
     if (name.equals("pick-target")) {
@@ -1183,7 +1200,7 @@ public class JMonkeyEngine extends Service
         // Here comes the action:
         log.info("you clicked " + target.getName());
         // menu.setBreadCrumb("you clicked " + target.getName());
-        menu.setBreadCrumb(target);
+        menu.putText(target);
         Spatial rootChild = getRootChild(target);
         Jme3Object rco = rootChild.getUserData("data");
         if (rco != null) {
@@ -1573,11 +1590,11 @@ public class JMonkeyEngine extends Service
      * </pre>
      */
 
-    inputManager.addMapping("mouse-click-left", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    inputManager.addListener(analog, "mouse-click-left");
-    // inputManager.addMapping("pick-target", new
+    // inputManager.addMapping("mouse-click-left", new
     // MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    // inputManager.addListener(analog, "pick-target");
+    // inputManager.addListener(analog, "mouse-click-left");
+    inputManager.addMapping("pick-target", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+    inputManager.addListener(analog, "pick-target");
 
     inputManager.addMapping("mouse-click-right", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
     inputManager.addListener(analog, "mouse-click-right");
@@ -1592,7 +1609,7 @@ public class JMonkeyEngine extends Service
     inputManager.addMapping("down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
     inputManager.addMapping("forward", new KeyTrigger(KeyInput.KEY_J));
     inputManager.addMapping("backward", new KeyTrigger(KeyInput.KEY_K));
-    
+
     inputManager.addListener(analog, new String[] { "left", "right", "up", "down", "forward", "backward" });
 
     inputManager.addMapping("full-screen", new KeyTrigger(KeyInput.KEY_F));
@@ -1865,6 +1882,10 @@ public class JMonkeyEngine extends Service
     Spatial c = spatial;
     Spatial p = c.getParent();
 
+    if (spatial == rootNode) {
+      return null;
+    }
+    
     while (p != null && p != rootNode) {
       c = p;
       p = c.getParent();
