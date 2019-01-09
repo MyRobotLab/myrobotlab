@@ -25,7 +25,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3Object;
 import org.myrobotlab.jme3.Jme3Util;
-import org.myrobotlab.jme3.MenuControl;
+import org.myrobotlab.jme3.MainMenuState;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
@@ -160,7 +160,7 @@ public class JMonkeyEngine extends Service
       }
     }
   }
-  
+
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
   private static final long serialVersionUID = 1L;
 
@@ -187,7 +187,7 @@ public class JMonkeyEngine extends Service
     // ! bye bye
     meta.addDependency("com.simsilica", "lemur", "1.11.0");
     meta.addDependency("com.simsilica", "lemur-proto", "1.10.0");
-    
+
     meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
 
@@ -246,7 +246,7 @@ public class JMonkeyEngine extends Service
       jme.rotateOnAxis("i01.torso.midStom", "y", 180);
       jme.bind("i01.torso.midStom", "i01.torso.lowStom");
       // jme.bind("i01.torso.midStom", "root");
-      
+
       boolean done = true;
       if (done) {
         return;
@@ -365,7 +365,6 @@ public class JMonkeyEngine extends Service
       // h.enableBoundingBox(true);
       // jme.scale("head", 1/400f);
 
-
       // final scale ..
       // jme.scale("i01.torso.lowStom", 1/400f);
 
@@ -457,7 +456,7 @@ public class JMonkeyEngine extends Service
     Node n = new Node(name);
     Jme3Object o = new Jme3Object(this, n);
     // putNode(name, null, null, null, null, null, 0);
-    rootNode.attachChild(o.getNode());    
+    rootNode.attachChild(o.getNode());
     nodes.put(name, o);
   }
 
@@ -487,25 +486,28 @@ public class JMonkeyEngine extends Service
     }
   }
 
-  /**<pre> FIXME - IMPLEMENT
-  public void scaleModels(String dirPath, float scale) {
-    File dir = new File(dirPath);
-    assetManager.registerLocator(dirPath, FileLocator.class);
-    File[] files = dir.listFiles();
-    for (File file : files) {
-      Jme3Object o = load(file.getAbsolutePath());
-      o.getSpatial().scale(scale);
-      saveNode(o.getName());
-    }
-  }
-  </pre>*/
+  /**
+   * <pre>
+   *  FIXME - IMPLEMENT
+   public void scaleModels(String dirPath, float scale) {
+     File dir = new File(dirPath);
+     assetManager.registerLocator(dirPath, FileLocator.class);
+     File[] files = dir.listFiles();
+     for (File file : files) {
+       Jme3Object o = load(file.getAbsolutePath());
+       o.getSpatial().scale(scale);
+       saveNode(o.getName());
+     }
+   }
+   * </pre>
+   */
 
   transient AnalogListener analog = null;
   // TODO - make intermediate class - which has common interface to grab
   // shapes/boxes
   transient Jme3App app;
 
-  transient MenuControl menu;
+  transient MainMenuState menu;
   // real JMonkeyEngine parts ...
   transient AssetManager assetManager;
 
@@ -639,7 +641,7 @@ public class JMonkeyEngine extends Service
       mat1 = new Material(assetManager, "Common/MatDefs/Light/PBRLighting.j3md");
       box.setMode(Mesh.Mode.Lines);
     } else {
-      mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");     
+      mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
       mat1.setColor("Color", Jme3Util.toColor(color));
     }
 
@@ -745,6 +747,10 @@ public class JMonkeyEngine extends Service
     putText(selected, 10, 10);
   }
 
+  public void setSelected(Spatial selected) {
+
+  }
+
   public void enableFlyCam(boolean b) {
     flyCam.setEnabled(b);
   }
@@ -755,18 +761,15 @@ public class JMonkeyEngine extends Service
     if (fullscreen) {
       GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
       displayMode = device.getDisplayMode();
-      DisplayMode[] modes = device.getDisplayModes();
-      // displayMode = modes[i]; - FIXME - change jme size draggable and full
-      // screen resolution ..
+      // DisplayMode[] modes = device.getDisplayModes(); list of possible diplay
+      // modes
 
-      int i = 0; // note: there are usually several, let's pick the first (LET'S
-                 // NOT !!! - cuz that's a dumb idea)
-
-      // remember last dsiplay mode
+      // remember last display mode
       displayMode = device.getDisplayMode();
 
       settings = app.getContext().getSettings();
       log.info("settings {}", settings);
+      settings.setTitle(getName());
       settings.setResolution(displayMode.getWidth(), displayMode.getHeight());
       settings.setFrequency(displayMode.getRefreshRate());
       settings.setBitsPerPixel(displayMode.getBitDepth());
@@ -788,7 +791,6 @@ public class JMonkeyEngine extends Service
       settings.setResolution(width, height);
       app.setSettings(settings);
       app.restart();
-
     }
   }
 
@@ -807,11 +809,6 @@ public class JMonkeyEngine extends Service
     }
     return null;
   }
-
-  /*
-   * OMG !!!! HORRIBLE !!! public Node getNode(String name) { Jme3Object o =
-   * getJme3Object(name); if (o != null) { return o.getNode(); } return null; }
-   */
 
   public void initPointCloud(PointCloud pc) {
 
@@ -856,96 +853,79 @@ public class JMonkeyEngine extends Service
   // FIXME - more parameters - location & rotation (new function "move")
   // FIXME - scale should not be in this - scale as one of 3 methods rotate !!!!
   // translate
+  // TODO - must be re-entrant - perhaps even on a schedule ?
+  // TODO - removeNode
   public Jme3Object load(String inFileName) {
-    if (inFileName == null) {
-      error("file name cannot be null");
-      return null;
-    }
-
-    File file = getFile(inFileName);
-
-    if (!file.exists()) {
-      error(String.format("file %s does not exits", inFileName));
-      return null;
-    }
-
-    String filename = file.getName();
-
-    String ext = getExt(filename);
-    String simpleName = getNameNoExt(filename);
-
-    if (nodes.containsKey(simpleName)) {
-      warn("already %s in nodes", simpleName);
-      return nodes.get(simpleName);
-    }
-
-    if (!ext.equals("json")) {
-
-      // FIXME needs a "name" !!! & try/catch ?
-      Spatial spatial = assetManager.loadModel(filename);
-      spatial.getName();
-      spatial.setName(simpleName);
-      
-      // we only deal with Nodes !!!
-      // if this is a mesh only - it needs a node
-      Jme3Object o = null;
-      if (spatial instanceof Node) {
-        Node n = (Node)spatial;
-        /*
-        Node loadedNode = (Node)spatial;        
-        Node n = new Node(simpleName);
-        for (Spatial child : loadedNode.getChildren()) {
-          n.attachChild(child);
-        }
-        o = new Jme3Object(this, n);
-        */
-        // n.scale(0.0025f);
-        o = new Jme3Object(this, n);
-        
-      } else {
-        Node n = new Node(spatial.getName());
-        n.attachChild(spatial);
-        o = new Jme3Object(this, n);
-      }
-
-      // FIXME FIXME FIXME - assetManager needs to be moved into jme.loadModel
-      // !!!! ! Jme3Object needs to be a POJO !!!
-      
-
-      // spatial.setName
-      // spatial.scale(0.05f, 0.05f, 0.05f);
-      // spatial.rotate(0.0f, -3.0f, 0.0f);
-      // spatial.setLocalTranslation(0.0f, -0.0f, -0.0f);
-      // spatial.setLocalTranslation(0.0f, -1.0f, -0.0f);
-      // spatial.setLocalScale(scale);// FIXME !!!!
-      // spatial.scale(scale, scale, scale);
-      putText(spatial, 10, 10);
-
-      rootNode.attachChild(o.getNode());
-      selected = spatial;
-      nodes.put(simpleName, o);
-
-      return o;
-    }
-
-    // now for the json meta data ....
+    log.info("load({})", inFileName);
+    Jme3Object o = null;
     try {
-      String json = FileIO.toString(inFileName);
-      Map<String, Object> list = CodecUtils.fromJson(json, nodes.getClass());
-      for (String name : list.keySet()) {
-        String nodePart = CodecUtils.toJson(list.get(name));
-        Jme3Object node = CodecUtils.fromJson(nodePart, Jme3Object.class);
-        // get/create transient parts
-        // node.setService(Runtime.getService(name));
-        // node.setJme(this);
-        // putN
-        // nodes.put(node.getName(), node);
+
+      if (inFileName == null) {
+        error("file name cannot be null");
+        return null;
       }
-      return null;
+
+      File file = getFile(inFileName);
+
+      if (!file.exists()) {
+        error(String.format("file %s does not exits", inFileName));
+        return null;
+      }
+
+      String filename = file.getName();
+
+      String ext = getExt(filename);
+      String simpleName = getNameNoExt(filename);
+
+      if (nodes.containsKey(simpleName)) {
+        warn("already %s in nodes", simpleName);
+        return nodes.get(simpleName);
+      }
+
+      if (!ext.equals("json")) {
+
+        Spatial spatial = assetManager.loadModel(filename);
+        spatial.setName(simpleName);
+
+        // we only deal with Nodes !!!
+        // if this is a mesh only - it needs a node
+
+        if (spatial instanceof Node) {
+          Node n = (Node) spatial;
+          o = new Jme3Object(this, n);
+        } else {
+          Node n = new Node(spatial.getName());
+          n.attachChild(spatial);
+          o = new Jme3Object(this, n);
+        }
+
+        // use lemur gui.... "loaded xxx " 3 nodes 5 geometries
+        // putText(spatial, 10, 10);
+
+        rootNode.attachChild(o.getNode());
+        // selected = spatial;
+        nodes.put(simpleName, o); // deprecate ...
+      } else {
+
+        // now for the json meta data ....
+
+        String json = FileIO.toString(inFileName);
+        Map<String, Object> list = CodecUtils.fromJson(json, nodes.getClass());
+        for (String name : list.keySet()) {
+          String nodePart = CodecUtils.toJson(list.get(name));
+          Jme3Object node = CodecUtils.fromJson(nodePart, Jme3Object.class);
+          // get/create transient parts
+          // node.setService(Runtime.getService(name));
+          // node.setJme(this);
+          // putN
+          // nodes.put(node.getName(), node);
+        }
+      }
+
     } catch (Exception e) {
       error(e);
     }
-    return null;
+    return o;
   }
 
   private String getExt(String name) {
@@ -1099,6 +1079,8 @@ public class JMonkeyEngine extends Service
   }
 
   boolean shiftLeftPressed = false;
+  boolean altLeftPressed = false;
+  boolean ctrlLeftPressed = false;
 
   @Override
   public void onAction(String name, boolean keyPressed, float tpf) {
@@ -1111,6 +1093,10 @@ public class JMonkeyEngine extends Service
       cycle();
     } else if (name.equals("shift-left")) {
       shiftLeftPressed = keyPressed;
+    } else if (name.equals("ctrl-left")) {
+      ctrlLeftPressed = keyPressed;
+    } else if (name.equals("alt-left")) {
+      altLeftPressed = keyPressed;
     } else if ("export".equals(name) && keyPressed) {
       saveNode(selected.getName());
     } else {
@@ -1126,7 +1112,7 @@ public class JMonkeyEngine extends Service
    * @param tpf
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
-    // log.debug("onAnalog {} {} {}", name, keyPressed, tpf);
+    log.info("onAnalog {} {} {}", name, keyPressed, tpf);
 
     if (selected == null) {
       selected = rootNode;
@@ -1134,11 +1120,23 @@ public class JMonkeyEngine extends Service
 
     control = selected;
 
-    // control = camNode;
     if (name.equals("mouse-click-left")) {
-      // rotate+= keyPressed;
-      control.rotate(0, -keyPressed, 0);
-      // log.info(rotate);
+      // alt + ctrl + lmb = zoom in / zoom out
+      // alt + lmb = orbit
+      // shift + alt + lmb = pan
+      
+      // arrow up/down/left/right = pan
+      // shift + up/down = zoom in / zoom out
+      
+      if (altLeftPressed && ctrlLeftPressed) {
+        log.info("here");
+        control.move(0, 0, keyPressed * -1);
+      } else {
+        control.rotate(0, -keyPressed, 0);
+      }
+      
+      // else SELECT !!!
+      
     } else if (name.equals("mouse-click-right")) {
       // rotate+= keyPressed;
       control.rotate(0, keyPressed, 0);
@@ -1191,16 +1189,16 @@ public class JMonkeyEngine extends Service
         if (rco != null) {
           rco.enableBoundingBox(true, "00ff00"); // green root child
         }
-        
+
         Node parent = target.getParent();
         if (parent != null & parent != rootNode) {
-          
+
           Jme3Object p = parent.getUserData("data");
           if (p != null) {
             p.enableBoundingBox(true, "ffcc00"); // orange parent
           }
         }
-        
+
         if (target.getName().equals("Red Box")) {
           // target.rotate(0, -intensity, 0);
         } else if (target.getName().equals("Blue Box")) {
@@ -1273,7 +1271,8 @@ public class JMonkeyEngine extends Service
       log.warn("there is already a node named {}", name);
       return nodes.get(name);
     }
-    // Jme3Object jmeNode = new Jme3Object(this, name, parentName, assetPath, mapper, rotationMask, localTranslation, currentAngle);
+    // Jme3Object jmeNode = new Jme3Object(this, name, parentName, assetPath,
+    // mapper, rotationMask, localTranslation, currentAngle);
     // nodes.put(name, jmeNode);
     return null;
   }
@@ -1518,8 +1517,6 @@ public class JMonkeyEngine extends Service
     rootNode = app.getRootNode();
     rootNode.setName("root");
 
-    // loadGui();
-
     viewPort = app.getViewPort();
     // Setting the direction to Spatial to camera, this means the camera will
     // copy the movements of the Node
@@ -1543,7 +1540,9 @@ public class JMonkeyEngine extends Service
     // cam.setFrustumNear(1.0f);
 
     inputManager.setCursorVisible(true);
-    flyCam.setEnabled(false);
+    if (flyCam != null) {
+      flyCam.setEnabled(false);
+    }
     // camNode.setLocalTranslation(0, 0, 2f);
     // camera.setLocation(new Vector3f(0f, 0f, 2f));
     // cam.setLocation(new Vector3f(0f, 0f, 0f));
@@ -1574,11 +1573,11 @@ public class JMonkeyEngine extends Service
      * </pre>
      */
 
-    // inputManager.addMapping("mouse-click-left", new
+    inputManager.addMapping("mouse-click-left", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+    inputManager.addListener(analog, "mouse-click-left");
+    // inputManager.addMapping("pick-target", new
     // MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    // inputManager.addListener(analog, "mouse-click-left");
-    inputManager.addMapping("pick-target", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    inputManager.addListener(analog, "pick-target");
+    // inputManager.addListener(analog, "pick-target");
 
     inputManager.addMapping("mouse-click-right", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
     inputManager.addListener(analog, "mouse-click-right");
@@ -1593,6 +1592,7 @@ public class JMonkeyEngine extends Service
     inputManager.addMapping("down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
     inputManager.addMapping("forward", new KeyTrigger(KeyInput.KEY_J));
     inputManager.addMapping("backward", new KeyTrigger(KeyInput.KEY_K));
+    
     inputManager.addListener(analog, new String[] { "left", "right", "up", "down", "forward", "backward" });
 
     inputManager.addMapping("full-screen", new KeyTrigger(KeyInput.KEY_F));
@@ -1603,6 +1603,10 @@ public class JMonkeyEngine extends Service
     inputManager.addListener(this, "cycle");
     inputManager.addMapping("shift-left", new KeyTrigger(KeyInput.KEY_LSHIFT));
     inputManager.addListener(this, "shift-left");
+    inputManager.addMapping("ctrl-left", new KeyTrigger(KeyInput.KEY_LCONTROL));
+    inputManager.addListener(this, "ctrl-left");
+    inputManager.addMapping("alt-left", new KeyTrigger(KeyInput.KEY_LMENU));
+    inputManager.addListener(this, "alt-left");
 
     inputManager.addMapping("export", new KeyTrigger(KeyInput.KEY_E));
     inputManager.addListener(this, "export");
@@ -1627,8 +1631,9 @@ public class JMonkeyEngine extends Service
 
     putNode(rootNode);
 
-    menu = new MenuControl(this);
+    menu = new MainMenuState(this);
     menu.loadGui();
+    // menu.initialize(stateManager, app);
 
     // AH HAA !!! ... so JME thread can only do this :P
     // loadInMoov();
@@ -1870,30 +1875,30 @@ public class JMonkeyEngine extends Service
     }
     return spatial;
   }
-  
-  public TreeMap<String,Spatial> buildTree(){
-    TreeMap<String,Spatial> tree = new TreeMap<String,Spatial>(); 
+
+  public TreeMap<String, Spatial> buildTree() {
+    TreeMap<String, Spatial> tree = new TreeMap<String, Spatial>();
     return buildTree(tree, "", rootNode);
   }
-  
+
   final public String KEY_SEPERATOR = " > ";
-  
-  public TreeMap<String,Spatial> buildTree(TreeMap<String,Spatial> tree, String path, Spatial spatial) {
-   
+
+  public TreeMap<String, Spatial> buildTree(TreeMap<String, Spatial> tree, String path, Spatial spatial) {
+
     path = path + KEY_SEPERATOR + spatial.getName();
-    
+
     StringBuilder ret = new StringBuilder();
     ret.append(spatial);
-    
+
     if (spatial instanceof Node) {
       List<Spatial> children = ((Node) spatial).getChildren();
-          for(int i = 0; i < children.size(); ++i){
-            
-          }
+      for (int i = 0; i < children.size(); ++i) {
+
+      }
     } else {
-      // 
+      //
     }
-    
+
     return tree;
   }
 

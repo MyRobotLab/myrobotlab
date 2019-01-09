@@ -462,13 +462,7 @@
   <artifactId>lemur-proto</artifactId>
   <version>1.10.0</version>
   <type>pom</type>
-</dependency>
-  <dependency>
-    <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-niftygui</artifactId>
-    <version>3.2.0-stable</version>
-    <scope>provided</scope>
-  </dependency>
+</dependency>  
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-bullet</artifactId>
@@ -480,13 +474,7 @@
     <artifactId>jme3-bullet-native</artifactId>
     <version>3.2.0-stable</version>
     <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-niftygui</artifactId>
-    <version>3.2.0-stable</version>
-    <scope>provided</scope>
-  </dependency>
+  </dependency>  
   <dependency>
     <groupId>de.jarnbjo</groupId>
     <artifactId>j-ogg-all</artifactId>
