@@ -6,6 +6,7 @@ import org.myrobotlab.service.JMonkeyEngine;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -46,10 +47,13 @@ public class MainMenuState extends BaseAppState {
   TextField roll;
   TextField pitch;
   TextField yaw;
+  
+  TextField search;
 
   Label children;
 
   Button update;
+  private Button searchButton;
 
   /**
    * FYI - this is all initialized JMEMain thread ..
@@ -61,37 +65,50 @@ public class MainMenuState extends BaseAppState {
     // Initialize the globals access so that the default
     // components can find what they need.
     GuiGlobals.initialize(app);
-
     // Load the 'glass' style
     BaseStyles.loadGlassStyle();
-
     // Set 'glass' as the default style when not specified
     GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
   }
 
   protected void addInfoTab() {
+    
+    x = new TextField("0.000");
+    y = new TextField("0.000");
+    z = new TextField("0.000");
 
+    roll = new TextField("0.000");
+    pitch = new TextField("0.000");
+    yaw = new TextField("0.000");
+
+    update = new Button("update");
+    
+    search = new TextField("             ");
+    searchButton = new Button("search");
+    
     Container contents = new Container();
 
-    contents.addChild(new Label("x:"), 0, 0);
-    contents.addChild(x, 0, 1);
-    contents.addChild(new Label("y:"), 0, 2);
-    contents.addChild(y, 0, 3);
-    contents.addChild(new Label("z:"), 0, 4);
-    contents.addChild(z, 0, 5);
+    Container sub = new Container();
+    sub.addChild(new Label("x:"), 0, 0);
+    sub.addChild(new Label("y:"), 0, 2);
+    sub.addChild(new Label("z:"), 0, 4);
+    sub.addChild(x, 0, 1);
+    sub.addChild(y, 0, 3);
+    sub.addChild(z, 0, 5);
 
-    contents.addChild(new Label("yaw:"), 1, 0);
-    contents.addChild(new Label("roll:"), 1, 2);
-    contents.addChild(new Label("pitch:"), 1, 4);
-    contents.addChild(yaw, 1, 1);
-    contents.addChild(roll, 1, 3);
-    contents.addChild(pitch, 1, 5);
-
-    contents.addChild(update, 2, 5);
-
-    // Label label = contents.addChild(new Label("children"));
-
-    // label.setInsets(new Insets3f(5, 5, 5, 5));
+    sub.addChild(new Label("yaw:"), 1, 0);
+    sub.addChild(new Label("roll:"), 1, 2);
+    sub.addChild(new Label("pitch:"), 1, 4);
+    sub.addChild(yaw, 1, 1);
+    sub.addChild(roll, 1, 3);
+    sub.addChild(pitch, 1, 5);
+    sub.addChild(update, 2, 5);
+    contents.addChild(sub);
+    contents.addChild(search);
+    contents.addChild(searchButton);
+    contents.addChild(new Label("Children"));
+    children = contents.addChild(new Label(""));
+    children.setMaxWidth(400);
 
     tabs.addTab("info", contents);
   }
@@ -100,9 +117,8 @@ public class MainMenuState extends BaseAppState {
 
     Container contents = new Container();
     Label label = contents.addChild(new Label("children"));
-    contents.addChild(new Label("x:"));
     label.setInsets(new Insets3f(5, 5, 5, 5));
-
+    contents.addChild(new Label("x:"));
     tabs.addTab("nav", contents);
   }
 
@@ -112,14 +128,7 @@ public class MainMenuState extends BaseAppState {
 
   }
 
-  protected Container createTabContents(String name) {
-    Container contents = new Container();
-    Label label = contents.addChild(new Label("A test label for tab:" + name + ".\nThere are others like it.\nBut this one is mine."));
-    label.setInsets(new Insets3f(5, 5, 5, 5));
-    return contents;
-  }
-
-  @Override
+  @Override // part of Lemur "standard"
   protected void initialize(Application appx) {
     main = new Container();
     main.setLayout(new BorderLayout());
@@ -131,46 +140,7 @@ public class MainMenuState extends BaseAppState {
 
     // Put it somewhere that we will see it
     // Note: Lemur GUI elements grow down from the upper left corner.
-    main.setLocalTranslation(10, 300, 0);
-
-    Container north = new Container();
-    Container center = new Container();
-    Container south = new Container();
-
-    main.addChild(north, Position.North);
-    main.addChild(center, Position.Center);
-    main.addChild(south, Position.South);
-
-    Label title = north.addChild(new Label("selected"));
-    title.setFontSize(16);
-    title.setInsets(new Insets3f(10, 10, 0, 10));
-
-    breadCrumbs = new Label("                                        ");
-    north.addChild(breadCrumbs);
-
-    Button nav = center.addChild(new Button("nav"));
-    Button floor = center.addChild(new Button("floor"));
-
-    nav.addClickCommands(new Command<Button>() {
-      @Override
-      public void execute(Button source) {
-        System.out.println("nav mode");
-      }
-    });
-
-  }
-
-  public void loadGui() {
-    main = new Container();
-    main.setLayout(new BorderLayout());
-
-    guiNode.attachChild(main);
-    // main.setPreferredSize(new Vector3f(300, jme.getSettings().getWidth(),
-    // 30));
-
-    // Put it somewhere that we will see it
-    // Note: Lemur GUI elements grow down from the upper left corner.
-    main.setLocalTranslation(10, 100, 0);
+    main.setLocalTranslation(10, jme.getSettings().getHeight()/2, 0);
 
     Container north = new Container();
     Container center = new Container();
@@ -201,23 +171,9 @@ public class MainMenuState extends BaseAppState {
     tabs.setInsets(new Insets3f(5, 5, 5, 5));
     selectionRef = tabs.getSelectionModel().createReference();
 
-    x = new TextField("0.000");
-    y = new TextField("0.000");
-    z = new TextField("0.000");
-
-    roll = new TextField("0.000");
-    pitch = new TextField("0.000");
-    yaw = new TextField("0.000");
-
-    update = new Button("update");
-
     addInfoTab();
     addNavTab();
-
-    south.addChild(new Label("Children"));
-    children = south.addChild(new Label(""));
-    children.setMaxWidth(400);
-
+    
     statusLabel = south.addChild(new Label("Status"));
     statusLabel.setInsets(new Insets3f(2, 5, 2, 5));
 
@@ -230,7 +186,10 @@ public class MainMenuState extends BaseAppState {
     buttons.addChild(new Button("insert"));
     buttons.addChild(new Button("remove"));
     buttons.addChild(new Button("last"));
+  }
 
+  public void loadGui() {
+    initialize(app);
   }
 
   @Override
@@ -256,9 +215,10 @@ public class MainMenuState extends BaseAppState {
     y.setText(String.format("%.3f", xyz.y));
     z.setText(String.format("%.3f", xyz.z));
 
-    yaw.setText(String.format("%.3f", angles[0] * 180));
-    roll.setText(String.format("%.3f", angles[1] * 180));
-    pitch.setText(String.format("%.3f", angles[2] * 180));
+    // 2012 and the javadoc is still wrong ?
+    yaw.setText(String.format("%.3f", angles[0] * FastMath.RAD_TO_DEG));
+    roll.setText(String.format("%.3f", angles[1] * FastMath.RAD_TO_DEG));
+    pitch.setText(String.format("%.3f", angles[2] * FastMath.RAD_TO_DEG));
 
     boolean isNode = (spatial instanceof Node);
 
@@ -270,13 +230,13 @@ public class MainMenuState extends BaseAppState {
 
     StringBuilder sb = new StringBuilder();
     if (rootChild != null) {
-      sb.append(rootChild.getName());
+      sb.append(rootChild);
       sb.append(" > ");
-      sb.append(spatial.getParent().getName());
+      sb.append(spatial.getParent());
       sb.append(" > ");
-      sb.append(spatial.getName());
+      sb.append(spatial);
     } else {
-      sb.append(spatial.getName());
+      sb.append(spatial);
     }
     breadCrumbs.setText(sb.toString());
 
