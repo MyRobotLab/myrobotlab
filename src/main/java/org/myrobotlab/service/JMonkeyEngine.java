@@ -709,14 +709,9 @@ public class JMonkeyEngine extends Service
       }
     }
 
-    /*
-     * if (!iterator.hasNext()) { iterator = nodes.keySet().iterator(); } else {
-     * selectedNode = iterator.next(); }
-     */
-
     List<Spatial> children = rootNode.getChildren();
     if (children.size() == 0) {
-      selected = rootNode;
+      setSelected(rootNode);
       return; // root ?
     }
 
@@ -731,9 +726,9 @@ public class JMonkeyEngine extends Service
     }
 
     if (selectIndex == children.size()) {
-      selected = rootNode;
+      setSelected(rootNode);
     } else {
-      selected = children.get(selectIndex);
+      setSelected(children.get(selectIndex));
     }
 
     // enable bounding box
@@ -742,13 +737,13 @@ public class JMonkeyEngine extends Service
       if (s != null) {
         s.enableBoundingBox(true);
       }
-    }
-    menu.putText(selected);
-    putText(selected, 10, 10);
+    }    
+    // putText(selected, 10, 10);
   }
 
   public void setSelected(Spatial selected) {
-
+    this.selected = selected; 
+    menu.putText(selected);
   }
 
   public void enableFlyCam(boolean b) {
@@ -1087,6 +1082,8 @@ public class JMonkeyEngine extends Service
     log.info("onAction {} {} {}", name, keyPressed, tpf);
     if ("full-screen".equals(name)) {
       enableFullScreen(true);
+    } else if ("select-root".equals(name)) {
+      setSelected(rootNode);
     } else if ("exit-full-screen".equals(name)) {
       enableFullScreen(false);
     } else if ("cycle".equals(name) && keyPressed) {
@@ -1115,10 +1112,8 @@ public class JMonkeyEngine extends Service
     log.info("onAnalog {} {} {}", name, keyPressed, tpf);
 
     if (selected == null) {
-      selected = rootNode;
+      setSelected(rootNode);
     }
-
-    selected = selected;
 
     if (name.equals("mouse-click-left")) {
       // alt + ctrl + lmb = zoom in / zoom out
@@ -1221,7 +1216,7 @@ public class JMonkeyEngine extends Service
         } else if (target.getName().equals("Blue Box")) {
           // target.rotate(0, intensity, 0);
         }
-        selected = parent;
+        setSelected(parent);
       }
     } // else if ...
 
@@ -1611,6 +1606,9 @@ public class JMonkeyEngine extends Service
 
     inputManager.addListener(analog, new String[] { "left", "right", "up", "down", "forward", "backward" });
 
+    inputManager.addMapping("select-root", new KeyTrigger(KeyInput.KEY_R));
+    inputManager.addListener(this, "select-root");
+    
     inputManager.addMapping("full-screen", new KeyTrigger(KeyInput.KEY_F));
     inputManager.addListener(this, "full-screen");
     inputManager.addMapping("exit-full-screen", new KeyTrigger(KeyInput.KEY_G));
@@ -1920,6 +1918,10 @@ public class JMonkeyEngine extends Service
     }
 
     return tree;
+  }
+
+  public Spatial getSelected() {
+    return selected;
   }
 
 }
