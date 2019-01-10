@@ -1,8 +1,12 @@
 package org.myrobotlab.jme3;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
+import org.slf4j.Logger;
 
 import com.google.common.base.Function;
 import com.jme3.app.Application;
@@ -43,6 +47,8 @@ public class MainMenuState extends BaseAppState {
 
   TabbedPanel tabs;
 
+  Button parentButton;
+
   Label title;
 
   TextField x;
@@ -54,11 +60,17 @@ public class MainMenuState extends BaseAppState {
   TextField yaw;
 
   TextField search;
+  Label scale;
 
-  Label children;
+  // Label children;
 
   Button update;
-  private Button searchButton;
+  Button searchButton;
+
+  Container childrenContainer;
+  Map<String, Button> children = new TreeMap<String, Button>();
+
+  final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
   /**
    * FYI - this is all initialized JMEMain thread ..
@@ -90,6 +102,7 @@ public class MainMenuState extends BaseAppState {
 
     search = new TextField("             ");
     searchButton = new Button("search");
+    childrenContainer = new Container();
 
     Container contents = new Container();
 
@@ -100,6 +113,9 @@ public class MainMenuState extends BaseAppState {
     sub.addChild(x, 0, 1);
     sub.addChild(y, 0, 3);
     sub.addChild(z, 0, 5);
+    
+    
+    scale = new Label("");
 
     sub.addChild(new Label("yaw:"), 1, 0);
     sub.addChild(new Label("roll:"), 1, 2);
@@ -107,24 +123,37 @@ public class MainMenuState extends BaseAppState {
     sub.addChild(yaw, 1, 1);
     sub.addChild(roll, 1, 3);
     sub.addChild(pitch, 1, 5);
-    sub.addChild(update, 2, 5);
+    sub.addChild(new Label("scale:"), 2,0);
+    sub.addChild(scale, 2,1);
+    sub.addChild(update, 3, 5);
     contents.addChild(sub);
+    
     contents.addChild(search);
     contents.addChild(searchButton);
-    contents.addChild(new Label("Children"));
-    children = contents.addChild(new Label(""));
-    children.setMaxWidth(400);
+    contents.addChild(new Label("children"));
+    contents.addChild(childrenContainer);
+    // children = contents.addChild(new Label(""));
+    // children.setMaxWidth(400);
 
     tabs.addTab("info", contents);
   }
 
-  protected void addNavTab() {
+  protected void addHelpTab() {
 
     Container contents = new Container();
-    Label label = contents.addChild(new Label("children"));
-    label.setInsets(new Insets3f(5, 5, 5, 5));
-    contents.addChild(new Label("x:"));
-    tabs.addTab("nav", contents);
+    contents.addChild(new Label("Control Keys:"));
+    contents.addChild(new Label("forward      ctrl + ↑"));
+    contents.addChild(new Label("back         ctrl + ↓"));
+    contents.addChild(new Label("pan up              ↑"));
+    contents.addChild(new Label("pan down            ↓"));
+    contents.addChild(new Label("pan left            ←"));
+    contents.addChild(new Label("pan right           →"));
+    contents.addChild(new Label("rotate left  ctrl + ←"));
+    contents.addChild(new Label("rotate right ctrl + →"));
+    contents.addChild(new Label("select root node  - R"));
+    // label.setInsets(new Insets3f(5, 5, 5, 5));
+
+    tabs.addTab("help", contents);
   }
 
   @Override
@@ -133,21 +162,18 @@ public class MainMenuState extends BaseAppState {
 
   }
 
+  @SuppressWarnings("unchecked")
   @Override // part of Lemur "standard"
   protected void initialize(Application appx) {
 
     main = new Container();
-    MouseEventControl.addListenersToSpatial(main, ConsumingMouseListener.INSTANCE);
-
-    main.setLayout(new BorderLayout());
     guiNode = app.getGuiNode();
-
     guiNode.attachChild(main);
     // main.setPreferredSize(new Vector3f(300, jme.getSettings().getWidth(),
     // 30));
 
-    // Put it somewhere that we will see it
-    // Note: Lemur GUI elements grow down from the upper left corner.
+    MouseEventControl.addListenersToSpatial(main, ConsumingMouseListener.INSTANCE);
+    main.setLayout(new BorderLayout());
     main.setLocalTranslation(10, jme.getSettings().getHeight() / 2, 0);
 
     Container north = new Container();
@@ -172,24 +198,28 @@ public class MainMenuState extends BaseAppState {
     breadCrumbs = new Label("                                        ");
     north.addChild(breadCrumbs);
 
-    Button nav = center.addChild(new Button("nav"));
+    parentButton = center.addChild(new Button("parent:"));
     Button floor = center.addChild(new Button("floor"));
 
-    nav.addClickCommands(new Command<Button>() {
+    parentButton.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
         System.out.println("nav mode");
+        Spatial selected = jme.getSelected();
+        if (selected != null) {
+          jme.setSelected(selected.getParent());
+        }
       }
     });
-    CursorEventControl.addListenersToSpatial(main, dragHandler);
-    
+
+    CursorEventControl.addListenersToSpatial(north, dragHandler);
 
     tabs = south.addChild(new TabbedPanel());
     tabs.setInsets(new Insets3f(5, 5, 5, 5));
     selectionRef = tabs.getSelectionModel().createReference();
 
     addInfoTab();
-    addNavTab();
+    addHelpTab();
 
     statusLabel = south.addChild(new Label("Status"));
     statusLabel.setInsets(new Insets3f(2, 5, 2, 5));
@@ -198,8 +228,8 @@ public class MainMenuState extends BaseAppState {
     // of the text field
     Container buttons = south.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
     buttons.setInsets(new Insets3f(5, 5, 5, 5));
-    buttons.addChild(new Button("first"));
-    buttons.addChild(new Button("add"));
+    buttons.addChild(new Button("close"));
+    buttons.addChild(new Button("dump"));
     buttons.addChild(new Button("insert"));
     buttons.addChild(new Button("remove"));
     buttons.addChild(new Button("last"));
@@ -215,14 +245,28 @@ public class MainMenuState extends BaseAppState {
   }
 
   @Override
-  protected void onEnable() {
-    // Node gui = ((Jme3App)getApplication()).getGuiNode();
-    // gui.attachChild(main);
+  protected void onEnable() {  
     guiNode.attachChild(main);
     GuiGlobals.getInstance().requestFocus(main);
   }
 
+  @SuppressWarnings("unchecked")
   public void putText(Spatial spatial) {
+
+    if (spatial == null) {
+      log.error("putText spatial is null");
+      return;
+    }
+
+    if (spatial != null) {
+      Spatial p = spatial.getParent();
+      if (p != null) {
+        parentButton.setText("parent: " + p);
+      } else {
+        parentButton.setText("parent:");
+      }
+    }
+
     Vector3f xyz = spatial.getWorldTranslation();
     Quaternion q = spatial.getLocalRotation();
     float[] angles = new float[3]; // yaw, roll, pitch
@@ -236,6 +280,9 @@ public class MainMenuState extends BaseAppState {
     yaw.setText(String.format("%.3f", angles[0] * FastMath.RAD_TO_DEG));
     roll.setText(String.format("%.3f", angles[1] * FastMath.RAD_TO_DEG));
     pitch.setText(String.format("%.3f", angles[2] * FastMath.RAD_TO_DEG));
+    
+    Vector3f sc = spatial.getLocalScale();
+    scale.setText(sc.toString());
 
     boolean isNode = (spatial instanceof Node);
 
@@ -256,20 +303,26 @@ public class MainMenuState extends BaseAppState {
       sb.append(spatial);
     }
     breadCrumbs.setText(sb.toString());
-
+    childrenContainer.clearChildren();
+    children.clear();
     if (isNode) {
       Node node = (Node) spatial;
-      sb = new StringBuilder();
       List<Spatial> c = node.getChildren();
-      sb.append("[");
-      for (int i = 0; i < c.size(); ++i) {
-        if (i != 0) {
-          sb.append(", ");
-        }
-        sb.append(node.getChild(i).getName());
+      for (Spatial child : c) {
+        Button b = new Button(child.toString());
+        b.addClickCommands(new Command<Button>() {
+          @Override
+          public void execute(Button source) {
+            if (child != null) {
+              jme.setSelected(child);
+            }
+          }
+        });
+        children.put(child.toString(), b);
       }
-      sb.append("]");
-      children.setText(sb.toString());
+      for (String key : children.keySet()) {
+        childrenContainer.addChild(children.get(key));
+      }
     }
   }
 
