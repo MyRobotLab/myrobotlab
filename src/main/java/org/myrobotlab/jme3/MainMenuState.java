@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.myrobotlab.service.JMonkeyEngine;
 
+import com.google.common.base.Function;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.FastMath;
@@ -24,6 +25,10 @@ import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.BorderLayout.Position;
 import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.core.VersionedReference;
+import com.simsilica.lemur.event.ConsumingMouseListener;
+import com.simsilica.lemur.event.CursorEventControl;
+import com.simsilica.lemur.event.DragHandler;
+import com.simsilica.lemur.event.MouseEventControl;
 import com.simsilica.lemur.style.BaseStyles;
 
 public class MainMenuState extends BaseAppState {
@@ -47,7 +52,7 @@ public class MainMenuState extends BaseAppState {
   TextField roll;
   TextField pitch;
   TextField yaw;
-  
+
   TextField search;
 
   Label children;
@@ -72,7 +77,7 @@ public class MainMenuState extends BaseAppState {
   }
 
   protected void addInfoTab() {
-    
+
     x = new TextField("0.000");
     y = new TextField("0.000");
     z = new TextField("0.000");
@@ -82,10 +87,10 @@ public class MainMenuState extends BaseAppState {
     yaw = new TextField("0.000");
 
     update = new Button("update");
-    
+
     search = new TextField("             ");
     searchButton = new Button("search");
-    
+
     Container contents = new Container();
 
     Container sub = new Container();
@@ -130,7 +135,10 @@ public class MainMenuState extends BaseAppState {
 
   @Override // part of Lemur "standard"
   protected void initialize(Application appx) {
+
     main = new Container();
+    MouseEventControl.addListenersToSpatial(main, ConsumingMouseListener.INSTANCE);
+
     main.setLayout(new BorderLayout());
     guiNode = app.getGuiNode();
 
@@ -140,7 +148,7 @@ public class MainMenuState extends BaseAppState {
 
     // Put it somewhere that we will see it
     // Note: Lemur GUI elements grow down from the upper left corner.
-    main.setLocalTranslation(10, jme.getSettings().getHeight()/2, 0);
+    main.setLocalTranslation(10, jme.getSettings().getHeight() / 2, 0);
 
     Container north = new Container();
     Container center = new Container();
@@ -154,6 +162,13 @@ public class MainMenuState extends BaseAppState {
     title.setFontSize(16);
     title.setInsets(new Insets3f(10, 10, 0, 10));
 
+    DragHandler dragHandler = new DragHandler();
+    dragHandler.setDraggableLocator(new Function<Spatial, Spatial>() {
+      public Spatial apply(Spatial spatial) {
+        return spatial.getParent();
+      }
+    });
+
     breadCrumbs = new Label("                                        ");
     north.addChild(breadCrumbs);
 
@@ -166,6 +181,8 @@ public class MainMenuState extends BaseAppState {
         System.out.println("nav mode");
       }
     });
+    CursorEventControl.addListenersToSpatial(main, dragHandler);
+    
 
     tabs = south.addChild(new TabbedPanel());
     tabs.setInsets(new Insets3f(5, 5, 5, 5));
@@ -173,7 +190,7 @@ public class MainMenuState extends BaseAppState {
 
     addInfoTab();
     addNavTab();
-    
+
     statusLabel = south.addChild(new Label("Status"));
     statusLabel.setInsets(new Insets3f(2, 5, 2, 5));
 
