@@ -14,7 +14,7 @@ import com.jme3.scene.shape.Box;
  * actuator
  *
  */
-public class Jme3Servo extends Jme3Object implements VirtualServo {
+public class Jme3Servo extends UserData implements VirtualServo {
 
   public Jme3Servo(JMonkeyEngine jme, Node node) {
     super(jme, node);

@@ -9,7 +9,7 @@ import org.myrobotlab.service.interfaces.ServoController;
 
 import com.jme3.scene.Node;
 
-public class Jme3ServoController extends Jme3Object implements ServoController {
+public class Jme3ServoController extends UserData implements ServoController {
 
   public Jme3ServoController(JMonkeyEngine jme, Node node) {
     super(jme, node);

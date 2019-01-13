@@ -8,11 +8,18 @@ import org.myrobotlab.service.JMonkeyEngine;
 import org.myrobotlab.service.JMonkeyEngine.Jme3Msg;
 import org.slf4j.Logger;
 
+import com.jme3.bounding.BoundingBox;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.debug.WireBox;
 
 public class Jme3Util {
 
@@ -61,7 +68,7 @@ public class Jme3Util {
     jme.error(format, params);
   }
 
-  public void log(Jme3Object o) {
+  public void log(UserData o) {
     Node n = o.getNode();
     StringBuilder sb = new StringBuilder();
     sb.append(n.getParent());
@@ -82,7 +89,7 @@ public class Jme3Util {
 
   public void moveTo(String name, float x, float y, float z) {
     log.info(String.format("moveTo %s, %.2f,%.2f,%.2f", name, x, y, z));
-    Jme3Object o = jme.get(name);
+    UserData o = jme.getUserData(name);
     if (o == null) {
       log.error("moveTo %s jme3object is null !!!", name);
       return;
@@ -126,7 +133,7 @@ public class Jme3Util {
   // TODO - generalized rotate("-x", 39.3f) which uses default rotation mask
   public void rotateOnAxis(String name, String axis, float degrees) {
     log.info(String.format("rotateOnAxis %s, %s %.2f", name, axis, degrees));
-    Jme3Object o = jme.get(name);
+    UserData o = jme.getUserData(name);
     float angle = degrees * FastMath.PI / 180;
     Vector3f uv = getUnitVector(axis);
     Vector3f rot = uv.mult(angle);
@@ -135,7 +142,7 @@ public class Jme3Util {
 
   public void rotateTo(String name, float degrees) {
     log.info(String.format("rotateTo %s, %.2f", name, degrees));
-    Jme3Object o = jme.get(name);
+    UserData o = jme.getUserData(name);
     float angle = degrees * FastMath.PI / 180;
     Vector3f rot = o.rotationMask.mult(angle);
     o.getNode().rotate(rot.x, rot.y, rot.z);
@@ -143,12 +150,12 @@ public class Jme3Util {
 
   public void bind(String child, String parent) {
     log.info("binding {} to {}", child, parent);
-    Jme3Object childNode = jme.get(child);
+    UserData childNode = jme.getUserData(child);
     if (childNode == null) {
       log.error("bind child {} not found", child);
       return;
     }
-    Jme3Object parentNode = jme.get(parent);
+    UserData parentNode = jme.getUserData(parent);
     if (parentNode == null) {
       log.error("bind parent {} not found", parent);
       return;
@@ -173,5 +180,55 @@ public class Jme3Util {
     log(parentNode);
     log(childNode);
   }
+
+  public Node createUnitAxis() {
+
+    Node n = new Node("axis");
+    Arrow arrow = new Arrow(Vector3f.UNIT_X);
+    arrow.setLineWidth(4); // make arrow thicker
+    addAxis(n, arrow, ColorRGBA.Red);
+
+    arrow = new Arrow(Vector3f.UNIT_Y);
+    arrow.setLineWidth(4); // make arrow thicker
+    addAxis(n, arrow, ColorRGBA.Green);
+
+    arrow = new Arrow(Vector3f.UNIT_Z);
+    arrow.setLineWidth(4); // make arrow thicker
+    addAxis(n, arrow, ColorRGBA.Blue);
+    return n;
+  }
+  
+  private void addAxis(Node n, Mesh shape, ColorRGBA color) {
+    Geometry g = new Geometry("coordinate axis", shape);
+    Material mat = new Material(jme.getApp().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.getAdditionalRenderState().setWireframe(true);
+    mat.setColor("Color", color);
+    g.setMaterial(mat);
+    n.attachChild(g);
+  }
+
+  public Geometry createBoundingBox(Spatial spatial, String color) {
+    // Geometry newBb = WireBox.makeGeometry((BoundingBox)
+    // spatial.getWorldBound());
+    Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
+    // Material mat = new Material(jme.getAssetManager(),
+    // "Common/MatDefs/Light/PBRLighting.j3md");
+    newBb.setName(String.format("_bb-%s", spatial.getName()));
+
+    Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", toColor(color));
+    mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+
+    // mat1.setMode(Mesh.Mode.Lines);
+    // newBb.setLineWidth(2.0f);
+    newBb.setMaterial(mat);
+
+    return newBb;
+  }
+
+  public Geometry createBoundingBox(Spatial spatial) {    
+    return createBoundingBox(spatial, defaultColor);
+  }
+
 
 }

@@ -1,8 +1,7 @@
 package org.myrobotlab.jme3;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
@@ -55,9 +54,9 @@ public class MainMenuState extends BaseAppState {
   TextField y;
   TextField z;
 
-  TextField roll;
-  TextField pitch;
-  TextField yaw;
+  TextField xRot;
+  TextField yRot;
+  TextField zRot;
 
   TextField search;
   Label scale;
@@ -68,7 +67,8 @@ public class MainMenuState extends BaseAppState {
   Button searchButton;
 
   Container childrenContainer;
-  Map<String, Button> children = new TreeMap<String, Button>();
+  // Map<String, Button> children = new TreeMap<String, Button>();
+  List<Button> children = new ArrayList<Button>();
 
   final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
@@ -94,13 +94,13 @@ public class MainMenuState extends BaseAppState {
     y = new TextField("0.000");
     z = new TextField("0.000");
 
-    roll = new TextField("0.000");
-    pitch = new TextField("0.000");
-    yaw = new TextField("0.000");
+    xRot = new TextField("0.000");
+    yRot = new TextField("0.000");
+    zRot = new TextField("0.000");
 
     update = new Button("update");
 
-    search = new TextField("             ");
+    search = new TextField("");
     searchButton = new Button("search");
     childrenContainer = new Container();
 
@@ -117,17 +117,49 @@ public class MainMenuState extends BaseAppState {
     
     scale = new Label("");
 
-    sub.addChild(new Label("yaw:"), 1, 0);
-    sub.addChild(new Label("roll:"), 1, 2);
-    sub.addChild(new Label("pitch:"), 1, 4);
-    sub.addChild(yaw, 1, 1);
-    sub.addChild(roll, 1, 3);
-    sub.addChild(pitch, 1, 5);
+    sub.addChild(new Label("xRot:"), 1, 0);
+    sub.addChild(new Label("yRot:"), 1, 2);
+    sub.addChild(new Label("zRot:"), 1, 4);
+    sub.addChild(xRot, 1, 1);
+    sub.addChild(yRot, 1, 3);
+    sub.addChild(zRot, 1, 5);
     sub.addChild(new Label("scale:"), 2,0);
     sub.addChild(scale, 2,1);
     sub.addChild(update, 3, 5);
     contents.addChild(sub);
     
+    statusLabel = contents.addChild(new Label("Status"));
+    statusLabel.setInsets(new Insets3f(2, 5, 2, 5));
+
+    // Add some actions that will manipulate the document model independently
+    // of the text field
+    Container buttons = contents.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
+    buttons.setInsets(new Insets3f(5, 5, 5, 5));
+    Button close = new Button("close");
+    close.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+          onDisable();
+      }
+    });
+    buttons.addChild(close);
+    Button save = new Button("save");
+    save.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+          jme.saveSpatial(jme.getSelected());
+      }
+    });
+    buttons.addChild(save);
+    buttons.addChild(new Button("rename"));
+    buttons.addChild(new Button("hide"));
+    buttons.addChild(new Button("lookat"));
+    buttons.addChild(new Button("clone"));
+    // buttons.addChild(new Button("rotate"));
+    buttons.addChild(new Button("bind"));
+    
+    
+    // --------children--------------
     contents.addChild(search);
     contents.addChild(searchButton);
     contents.addChild(new Label("children"));
@@ -199,7 +231,7 @@ public class MainMenuState extends BaseAppState {
     north.addChild(breadCrumbs);
 
     parentButton = center.addChild(new Button("parent:"));
-    Button floor = center.addChild(new Button("floor"));
+    // Button floor = center.addChild(new Button("floor"));
 
     parentButton.addClickCommands(new Command<Button>() {
       @Override
@@ -220,19 +252,7 @@ public class MainMenuState extends BaseAppState {
 
     addInfoTab();
     addHelpTab();
-
-    statusLabel = south.addChild(new Label("Status"));
-    statusLabel.setInsets(new Insets3f(2, 5, 2, 5));
-
-    // Add some actions that will manipulate the document model independently
-    // of the text field
-    Container buttons = south.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
-    buttons.setInsets(new Insets3f(5, 5, 5, 5));
-    buttons.addChild(new Button("close"));
-    buttons.addChild(new Button("dump"));
-    buttons.addChild(new Button("insert"));
-    buttons.addChild(new Button("remove"));
-    buttons.addChild(new Button("last"));
+    
   }
 
   public void loadGui() {
@@ -277,21 +297,18 @@ public class MainMenuState extends BaseAppState {
     z.setText(String.format("%.3f", xyz.z));
 
     // 2012 and the javadoc is still wrong ?
-    yaw.setText(String.format("%.3f", angles[0] * FastMath.RAD_TO_DEG));
-    roll.setText(String.format("%.3f", angles[1] * FastMath.RAD_TO_DEG));
-    pitch.setText(String.format("%.3f", angles[2] * FastMath.RAD_TO_DEG));
+    zRot.setText(String.format("%.3f", angles[0] * FastMath.RAD_TO_DEG));
+    xRot.setText(String.format("%.3f", angles[1] * FastMath.RAD_TO_DEG));
+    yRot.setText(String.format("%.3f", angles[2] * FastMath.RAD_TO_DEG));
     
     Vector3f sc = spatial.getLocalScale();
     scale.setText(sc.toString());
-
-    boolean isNode = (spatial instanceof Node);
-
     // String type = (spatial instanceof Node) ? "Node" : "Geometry";
 
     title.setText(spatial.toString());
-
     Spatial rootChild = jme.getRootChild(spatial);
 
+    /*
     StringBuilder sb = new StringBuilder();
     if (rootChild != null) {
       sb.append(rootChild);
@@ -302,9 +319,16 @@ public class MainMenuState extends BaseAppState {
     } else {
       sb.append(spatial);
     }
-    breadCrumbs.setText(sb.toString());
+    */
+    
+    breadCrumbs.setText(jme.getKeyPath(spatial));
+    addChildren(spatial);
+  }
+  
+  public void addChildren(Spatial spatial) {
     childrenContainer.clearChildren();
     children.clear();
+    boolean isNode = (spatial instanceof Node);
     if (isNode) {
       Node node = (Node) spatial;
       List<Spatial> c = node.getChildren();
@@ -318,11 +342,14 @@ public class MainMenuState extends BaseAppState {
             }
           }
         });
-        children.put(child.toString(), b);
+        // children.put(child.toString(), b);
+        childrenContainer.addChild(b);
       }
+      /*
       for (String key : children.keySet()) {
         childrenContainer.addChild(children.get(key));
       }
+      */
     }
   }
 
