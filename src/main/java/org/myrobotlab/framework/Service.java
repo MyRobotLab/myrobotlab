@@ -1493,7 +1493,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
           // return
           return retobj;
         } catch (Exception e1) {
-          log.error("boom goes method {}", mC.getName(), e1);
+          log.error("boom goes method - could not find method in cache {}", mC.getName(), e1);
         }
 
       }

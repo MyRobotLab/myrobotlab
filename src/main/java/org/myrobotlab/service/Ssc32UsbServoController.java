@@ -131,7 +131,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   @Override
-  public void servoAttachPin(ServoControl servo, int pin) {
+  public void servoAttachPin(ServoControl servo, Integer pin) {
     // DUNNO HOW TO RE-ENABLE unless its just a write to current position
     servoMoveTo(servo);
   }

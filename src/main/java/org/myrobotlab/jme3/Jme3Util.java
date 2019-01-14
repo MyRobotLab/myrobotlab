@@ -13,6 +13,7 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -140,12 +141,38 @@ public class Jme3Util {
     o.getNode().rotate(rot.x, rot.y, rot.z);
   }
 
-  public void rotateTo(String name, float degrees) {
-    log.info(String.format("rotateTo %s, %.2f", name, degrees));
+  /**
+   * absolute (local) rotation ..
+   * @param name
+   * @param degrees
+   */
+  public void rotateTo(String name, double degrees) {
+    log.info(String.format("rotateTo %s, degrees %.2f", name, degrees));
+    
     UserData o = jme.getUserData(name);
-    float angle = degrees * FastMath.PI / 180;
-    Vector3f rot = o.rotationMask.mult(angle);
-    o.getNode().rotate(rot.x, rot.y, rot.z);
+    Vector3f rotMask = o.rotationMask;
+    if (rotMask == null) {
+      rotMask = new Vector3f(0, 1, 0); // default rotate around "y" axis
+    }
+    
+    if (o.mapper != null) {
+      degrees = o.mapper.calcOutput(degrees);
+      log.info(String.format("rotateTo map %s, degrees %.2f", name, degrees));
+    }
+    
+    // get current local rotations
+    Node n = o.getNode();
+    Quaternion q = n.getLocalRotation();
+    float[] angles = new float[3];
+    q.toAngles(angles);
+    log.info(String.format("before %s, %.2f", name, angles[1] * 180/FastMath.PI));
+ 
+    q.fromAngleAxis(((float)(degrees) * FastMath.PI/180), rotMask);// FIXME optimize final Y_AXIS = new Vector3f(0,1,0)
+
+    // apply map if it exists (shifted)
+    n.setLocalRotation(q);
+    q.toAngles(angles);
+    log.info(String.format("after %s, %.2f", name, angles[1]* 180/FastMath.PI));   
   }
 
   public void bind(String child, String parent) {

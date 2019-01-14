@@ -391,7 +391,7 @@ public class Servo extends Service implements ServoControl {
    * Enabling PWM for the Servo. Equivalent to Arduino's Servo.attach(pin). It
    * energizes the servo sending pulses to maintain its current position.
    */
-  public void enable(int pin) {
+  public void enable(Integer pin) {
     lastActivityTime = System.currentTimeMillis();
     controller.servoAttachPin(this, pin);
     this.pin = pin;
