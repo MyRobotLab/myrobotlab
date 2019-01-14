@@ -26,6 +26,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.AnalogHandler;
 import org.myrobotlab.jme3.HudText;
 import org.myrobotlab.jme3.Jme3App;
+import org.myrobotlab.jme3.Jme3ServoController;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.jme3.MainMenuState;
 import org.myrobotlab.jme3.UserData;
@@ -35,6 +36,7 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualMotor;
 import org.slf4j.Logger;
 
@@ -75,7 +77,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.control.BillboardControl;
 import com.jme3.scene.control.CameraControl.ControlDirection;
-import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
 import com.jme3.scene.plugins.blender.BlenderLoader;
 import com.jme3.scene.shape.Box;
@@ -94,6 +95,10 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
   private static final long serialVersionUID = 1L;
+  
+  transient Jme3ServoController servoController = null;
+  
+  final Map<String, String> nameMappings = new TreeMap<String,String>();
 
   final public String KEY_SEPERATOR = "/";
 
@@ -147,9 +152,23 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
       LoggingFactory.init("info");
 
+      Runtime.start("gui", "SwingGui");
       // Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
       jme.addGrid();
+      
+      jme.rename("head-6", "i01.head.rotHead");
+      jme.setMapper("i01.head.rotHead", 0, 180, -90, 90);
+      
+
+      Servo servo = (Servo) Runtime.start("i01.head.rotHead", "Servo");
+      
+      
+      
+      boolean test = true;
+      if (test) {
+        return;
+      }
 
       // jme.scaleModels("rescaled");
 
@@ -370,7 +389,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
   public void rotateTo(String name, double degrees) {
     Jme3Msg msg = new Jme3Msg();
     msg.method = "rotateTo";
-    msg.data = new Object[] { name, (float) degrees };
+    msg.data = new Object[] { name, degrees };
     addMsg(msg);
   }
 
@@ -394,13 +413,14 @@ public class JMonkeyEngine extends Service implements ActionListener,
     index(n);
   }
 
-  public void setMapper(String name, int minx, int maxx, int miny, int maxy) {
+  public Mapper setMapper(String name, int minx, int maxx, int miny, int maxy) {
     UserData node = getUserData(name);
     if (node == null) {
       error("setMapper %s does not exist", name);
-      return;
+      return null;
     }
     node.mapper = new Mapper(minx, maxx, miny, maxy);
+    return node.mapper;
   }
 
   public class Jme3Msg {
@@ -528,6 +548,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     d.mkdirs();
     util = new Jme3Util(this);
     analog = new AnalogHandler(this);
+    servoController = new Jme3ServoController(this);
   }
 
   public void addBox(String boxName) {
@@ -614,16 +635,17 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   public void attach(Attachable service) throws Exception {
-    if (app == null) {
-      start(); // FIXME - start a default app
-    }
-    // give specific JmeApp the opportunity to attach
+ 
     app.attach(service);
 
     // Cv Publisher ..
     if (service instanceof AbstractComputerVision) {
       AbstractComputerVision cv = (AbstractComputerVision) service;
       subscribe(service.getName(), "publishCvData");
+    }
+    
+    if (service instanceof ServoControl) {
+      servoController.attach(service);
     }
 
     // backward attach ?
@@ -669,23 +691,23 @@ public class JMonkeyEngine extends Service implements ActionListener,
   public void setSelected(Spatial newSelected) {
 
     // turn off old
-    if (selected != null) {     
+    if (selected != null) {
       enableBoundingBox(selected, false);
       enableCoordinateAxes(selected, false);
     }
-    
+
     // set selected
     selected = newSelected;
-    
+
     // display in menu
     menu.putText(newSelected);
-    
+
     // turn on new
     if (newSelected != null) {
       enableBoundingBox(newSelected, true);
-      enableCoordinateAxes(newSelected, true);    
-    }   
-  }  
+      enableCoordinateAxes(newSelected, true);
+    }
+  }
 
   public void enableFlyCam(boolean b) {
     flyCam.setEnabled(b);
@@ -1160,12 +1182,12 @@ public class JMonkeyEngine extends Service implements ActionListener,
         setSelected(target);
       }
     } // else if ...
-/*
-    if (selected != null) {
-      putText(selected, 10, 10);
-      menu.putText(selected);
-    }
-    */
+    /*
+     * if (selected != null) { putText(selected, 10, 10);
+     * menu.putText(selected); }
+     */
+    
+    menu.putText(selected);
   }
 
   /**
@@ -1220,14 +1242,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
       attach(service);
     }
   }
-
-  /*
-   * public UserData putNode(String name, String parentName, String assetPath,
-   * Mapper mapper, Vector3f rotationMask, Vector3f localTranslation, double
-   * currentAngle) { if (nodes.containsKey(name)) {
-   * log.warn("there is already a node named {}", name); return nodes.get(name);
-   * } return null; }
-   */
 
   public void putText(Spatial spatial, int x, int y) {
     Vector3f xyz = spatial.getWorldTranslation();
@@ -1706,10 +1720,17 @@ public class JMonkeyEngine extends Service implements ActionListener,
     start();
     // notify me if new services are created
     subscribe(Runtime.getRuntimeName(), "registered");
-    List<ServiceInterface> services = Runtime.getServices();
 
-    // for all apps "attach" all services
-    // for (apps.size())
+    if (autoAttach) {
+      List<ServiceInterface> services = Runtime.getServices();
+      for (ServiceInterface si : services) {
+        try {
+          attach(si);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
 
   }
 
@@ -1742,24 +1763,23 @@ public class JMonkeyEngine extends Service implements ActionListener,
       setVisible(false);
     }
   }
-  
+
   public Node getNode(Spatial spatial) {
     if (spatial instanceof Geometry) {
       return spatial.getParent();
     }
-    return (Node)spatial;
+    return (Node) spatial;
   }
-  
+
   public void enableBoundingBox(Spatial spatial, boolean b) {
-    Node node = getNode(spatial);    
+    Node node = getNode(spatial);
     UserData data = getUserData(node);
     data.enableBoundingBox(b);
   }
-  
 
   // FIXME !!!! enableCoodinateAxes - same s bb including parent if geometry
   public void enableCoordinateAxes(Spatial spatial, boolean b) {
-    Node node = getNode(spatial);    
+    Node node = getNode(spatial);
     UserData data = getUserData(node);
     data.enableCoordinateAxes(b);
   }
@@ -1822,7 +1842,16 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   public void rename(String name, String newName) {
-
+    UserData data = getUserData(name);
+    if (data == null) {
+      error("rename(%s, %s) could not find %s", name, newName, name);
+    }
+    
+    // change name
+    data.spatial.setName(newName);
+    nodes.remove(name);
+    // fix index
+    nodes.put(newName, data.spatial);
   }
 
   public void setRotation(String name, String rotation) {
@@ -1900,15 +1929,16 @@ public class JMonkeyEngine extends Service implements ActionListener,
       Spatial s = tree.get(path);
       if (spatial != s) {
         // if (s instanceof Geometry) {
-          s.setName(String.format("%s-%d", s.getName(), id.incrementAndGet()));
+        s.setName(String.format("%s-%d", s.getName(), id.incrementAndGet()));
         // } else {
-        //   log.error("buildTree collision [{}] {} already exists - NOT replacing with {}", path, s, spatial);
-        //   return tree;
+        // log.error("buildTree collision [{}] {} already exists - NOT replacing
+        // with {}", path, s, spatial);
+        // return tree;
         // }
       }
       // already exists with correct path
     }
-    
+
     if (!includeGeometries && (spatial instanceof Geometry)) {
       return tree;
     }
@@ -1970,6 +2000,9 @@ public class JMonkeyEngine extends Service implements ActionListener,
    * @return
    */
   public UserData getUserData(String path /* , boolean useDepth */) {
+    if (nameMappings.containsKey(path)) {
+      path = nameMappings.get(path);
+    }
     if (!nodes.containsKey(path)) {
       error("geteUserData %s cannot be found", path);
       return null;
@@ -2005,8 +2038,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   public Geometry createBoundingBox(Spatial spatial) {
-   return util.createBoundingBox(spatial);
+    return util.createBoundingBox(spatial);
   }
-
 
 }

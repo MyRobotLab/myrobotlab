@@ -84,7 +84,7 @@ public class VirtualServoController extends Service implements ServoController {
   }
 
   @Override
-  public void servoAttachPin(ServoControl servo, int pin) {
+  public void servoAttachPin(ServoControl servo, Integer pin) {
     // TODO Auto-generated method stub
 
   }

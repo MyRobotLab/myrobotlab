@@ -55,7 +55,10 @@ public interface ServoController extends Attachable {
 	 * Arduino's servo.attach(pin) which is just energizing on a pin
 	 */
 	// FIXME should be servoEnable - consistent with ServoControl
-	void servoAttachPin(ServoControl servo, int pin);
+	// FIXME - servoEnablePin - which this method should be called, is auto-magically called in the "attach" phase,
+	// to get JME to auto-attach on creation of new services, it does not "need" the pin so this throws on auto-attach because
+	// the pin is null at that point - but JME (and possibly other servocontrollers) do not need a pin :P
+	void servoAttachPin(ServoControl servo, Integer pin); // jme change to pin because it does'nt need it but  auto-calls it
 
 	void servoSweepStart(ServoControl servo);
 

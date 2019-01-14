@@ -41,7 +41,9 @@ public class UserData implements Savable {
   public Mapper mapper;
 
   public Vector3f rotationMask;
-  public Vector3f localTranslation; // transitory ? init only ?
+  public Vector3f localTranslation; // transitory ? init only ?  INIT !!! probably - which means its local first loaded
+  
+  public Vector3f initialRotation;
 
   public Double currentAngle;
 
@@ -183,6 +185,7 @@ public class UserData implements Savable {
       mat.setColor("Color", Jme3Util.toColor(color));
       mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
       bb.setMaterial(mat);
+      bbColor = color;
     }
 
     if (b && bb != null) {

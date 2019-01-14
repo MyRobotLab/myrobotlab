@@ -1709,7 +1709,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   @Deprecated
   // > servoEnablePwm/deviceId/pin
-  public void servoAttachPin(ServoControl servo, int pin) {
+  public void servoAttachPin(ServoControl servo, Integer pin) {
     log.info("{}.attachPin({})", servo.getName(), servo.getPin());
     msg.servoAttachPin(getDeviceId(servo), pin);
   }

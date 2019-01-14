@@ -476,7 +476,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * 
    */
   @Override
-  public void servoAttachPin(ServoControl servo, int pin) {
+  public void servoAttachPin(ServoControl servo, Integer pin) {
     ServoData servoData = servoMap.get(servo.getName());
     servoData.pin = pin;
     servoData.isEnergized = true;
