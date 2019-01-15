@@ -164,7 +164,8 @@ public class Jme3Util {
    * @param name
    * @param degrees
    */
-  public void rotateTo(String name, double degrees) {
+  public void rotateTo(String name, Double degreesIn) {
+    float degrees = degreesIn.floatValue();
     log.info(String.format("rotateTo %s, degrees %.2f", name, degrees));
     
     UserData o = jme.getUserData(name);
@@ -175,7 +176,7 @@ public class Jme3Util {
     
     int angleIndex = getIndexFromUnitVector(rotMask);
     if (o.mapper != null) {
-      degrees = o.mapper.calcOutput(degrees);
+      degrees = (float) o.mapper.calcOutput(degreesIn);
       log.info(String.format("rotateTo map %s, degrees %.2f", name, degrees));
     }
     
@@ -186,7 +187,7 @@ public class Jme3Util {
     q.toAngles(angles);
     log.info(String.format("before %s, %.2f", name, angles[angleIndex] * 180/FastMath.PI));
  
-    q.fromAngleAxis(((float)(degrees) * FastMath.PI/180), rotMask);// FIXME optimize final Y_AXIS = new Vector3f(0,1,0)
+    q.fromAngleAxis(((degrees) * FastMath.PI/180), rotMask);// FIXME optimize final Y_AXIS = new Vector3f(0,1,0)
 
     // apply map if it exists (shifted)
     n.setLocalRotation(q);
