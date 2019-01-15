@@ -29,6 +29,7 @@ import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3ServoController;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.jme3.MainMenuState;
+import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -41,8 +42,11 @@ import org.myrobotlab.virtual.VirtualMotor;
 import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.bullet.BulletAppState;
+// import com.jme3.bullet.animation.DynamicAnimControl;
 import com.jme3.collision.CollisionResults;
 import com.jme3.export.binary.BinaryExporter;
 import com.jme3.font.BitmapFont;
@@ -95,10 +99,14 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
   private static final long serialVersionUID = 1L;
+
+  transient Jme3ServoController servoController;
   
-  transient Jme3ServoController servoController = null;
+  transient AppStateManager stateManager;
+
+  final Map<String, String> nameMappings = new TreeMap<String, String>();
   
-  final Map<String, String> nameMappings = new TreeMap<String,String>();
+  transient BulletAppState bulletAppState;
 
   final public String KEY_SEPERATOR = "/";
 
@@ -111,23 +119,26 @@ public class JMonkeyEngine extends Service implements ActionListener,
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(JMonkeyEngine.class.getCanonicalName());
     meta.addDescription("is a 3d game engine, used for simulators");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // TODO: extract version numbers like this into a constant/enum
-    String jmeVersion = "3.2.0-stable";
+    String jmeVersion = "3.2.2-stable";
     meta.addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
+    // meta.addDependency("org.jmonkeyengine", "jme3-test-data", jmeVersion);
     // meta.addDependency("org.jmonkeyengine", "jme3-niftygui", jmeVersion); Yay
     // ! bye bye
     meta.addDependency("com.simsilica", "lemur", "1.11.0");
     meta.addDependency("com.simsilica", "lemur-proto", "1.10.0");
 
-    meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
-    meta.addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
+    // meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
+    // meta.addDependency("org.jmonkeyengine", "jme3-bullet-native",
+    // jmeVersion);
+
+    meta.addDependency("jme3utilities", "Minie", "0.6.2");
 
     // "new" physics - ik forward kinematics ...
 
@@ -157,14 +168,23 @@ public class JMonkeyEngine extends Service implements ActionListener,
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
       jme.addGrid();
       
+      /*
       jme.rename("head-6", "i01.head.rotHead");
       jme.setMapper("i01.head.rotHead", 0, 180, -90, 90); // shift 90 degrees
+      */
+      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
+      jme.move("floor.box.01", 2, 0);
+
       
 
-      Servo servo = (Servo) Runtime.start("i01.head.rotHead", "Servo");
-      
-      
-      
+      /*
+      jme.rename("head-6", "i01.head.rotHead");
+      jme.setMapper("i01.head.rotHead", 0, 180, -90, 90);
+      */
+
+      Servo servo = (Servo) Runtime.start("i01.head.jaw", "Servo");
+      jme.setRotation("i01.head.jaw", "x");
+
       boolean test = true;
       if (test) {
         return;
@@ -540,7 +560,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
    */
   transient Jme3Util util;
 
-  String modelsDir = getDataDir() + File.separator + "assets" + File.separator + "Models";
+  String assetsDir = getDataDir() + File.separator + "assets";
+  String modelsDir = assetsDir + File.separator + "Models";
 
   public JMonkeyEngine(String n) {
     super(n);
@@ -609,6 +630,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // UserData o = new UserData(this, boxNode);
     // nodes.put(name, o);
     rootNode.attachChild(geom);
+    moveTo(name, 0.0f, 0.5f * height, 0.0f);
     index(boxNode);
   }
 
@@ -617,7 +639,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   public Geometry addGrid(String name, Vector3f pos, int size, String color) {
-    Geometry g = new Geometry("wireframe grid", new Grid(size, size, 0.5f));
+    Geometry g = new Geometry("wireframe grid", new Grid(size, size, 1.0f));
     Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     mat.getAdditionalRenderState().setWireframe(true);
     mat.setColor("Color", Jme3Util.toColor(color));
@@ -635,7 +657,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   public void attach(Attachable service) throws Exception {
- 
+
     app.attach(service);
 
     // Cv Publisher ..
@@ -643,7 +665,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
       AbstractComputerVision cv = (AbstractComputerVision) service;
       subscribe(service.getName(), "publishCvData");
     }
-    
+
     if (service instanceof ServoControl) {
       servoController.attach(service);
     }
@@ -1099,6 +1121,10 @@ public class JMonkeyEngine extends Service implements ActionListener,
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
     log.info("onAnalog {} {} {}", name, keyPressed, tpf);
+    
+    if (selected == null) {
+      return;
+    }
 
     if (name.equals("mouse-click-left")) {
       // alt + ctrl + lmb = zoom in / zoom out
@@ -1186,7 +1212,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
      * if (selected != null) { putText(selected, 10, 10);
      * menu.putText(selected); }
      */
-    
+
     menu.putText(selected);
   }
 
@@ -1518,12 +1544,22 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
     assetManager.registerLocator("./", FileLocator.class);
     assetManager.registerLocator(getDataDir(), FileLocator.class);
+    assetManager.registerLocator(assetsDir, FileLocator.class);
     assetManager.registerLocator(getResourceDir(), FileLocator.class);
 
     // FIXME - should be moved under ./data/JMonkeyEngine/
     assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
     assetManager.registerLoader(BlenderLoader.class, "blend");
-
+    stateManager = app.getStateManager();
+    
+    /**<pre> Physics related
+    bulletAppState = new BulletAppState();
+    bulletAppState.setEnabled(true);
+    stateManager.attach(bulletAppState);
+    PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
+    bulletAppState.setDebugEnabled(true);
+    */
+    
     // what inputs will jme service handle ?
 
     /**
@@ -1846,7 +1882,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     if (data == null) {
       error("rename(%s, %s) could not find %s", name, newName, name);
     }
-    
+
     // change name
     data.spatial.setName(newName);
     nodes.remove(name);
