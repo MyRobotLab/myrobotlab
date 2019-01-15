@@ -179,6 +179,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
       jme.move("floor.box.01", 2, 0);
 
       /*
+      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
+      jme.move("floor.box.01", 2, 0);
+      
+
+      /*
       jme.rename("head-6", "i01.head.rotHead");
       jme.setMapper("i01.head.rotHead", 0, 180, -90, 90);
       */
