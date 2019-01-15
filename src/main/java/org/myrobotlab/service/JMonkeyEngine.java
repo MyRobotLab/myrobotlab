@@ -175,7 +175,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.move("floor.box.01", 2, 0);
 
-      
+      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
+      jme.move("floor.box.01", 2, 0);
 
       /*
       jme.rename("head-6", "i01.head.rotHead");
