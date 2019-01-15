@@ -158,7 +158,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
       jme.addGrid();
       
       jme.rename("head-6", "i01.head.rotHead");
-      jme.setMapper("i01.head.rotHead", 0, 180, -90, 90);
+      jme.setMapper("i01.head.rotHead", 0, 180, -90, 90); // shift 90 degrees
       
 
       Servo servo = (Servo) Runtime.start("i01.head.rotHead", "Servo");

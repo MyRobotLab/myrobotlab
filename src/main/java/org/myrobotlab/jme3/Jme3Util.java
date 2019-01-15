@@ -140,6 +140,24 @@ public class Jme3Util {
     Vector3f rot = uv.mult(angle);
     o.getNode().rotate(rot.x, rot.y, rot.z);
   }
+  
+  static Integer getIndexFromUnitVector(Vector3f vector) {
+     if (vector == null) {
+       log.error("getIndexFromVector(null) not valid");
+       return null;
+     }
+     
+     if (vector.equals(Vector3f.UNIT_X)) {
+       return 0;
+     } else if (vector.equals(Vector3f.UNIT_Y)) {
+       return 1;
+     }else if (vector.equals(Vector3f.UNIT_Z)) {
+       return 2;
+     }
+     
+     log.error("vector %s does not equal a unit vector");
+     return null;
+  }
 
   /**
    * absolute (local) rotation ..
@@ -152,9 +170,10 @@ public class Jme3Util {
     UserData o = jme.getUserData(name);
     Vector3f rotMask = o.rotationMask;
     if (rotMask == null) {
-      rotMask = new Vector3f(0, 1, 0); // default rotate around "y" axis
+      rotMask = Vector3f.UNIT_Y;//new Vector3f(0, 1, 0); // default rotate around "y" axis
     }
     
+    int angleIndex = getIndexFromUnitVector(rotMask);
     if (o.mapper != null) {
       degrees = o.mapper.calcOutput(degrees);
       log.info(String.format("rotateTo map %s, degrees %.2f", name, degrees));
@@ -165,14 +184,14 @@ public class Jme3Util {
     Quaternion q = n.getLocalRotation();
     float[] angles = new float[3];
     q.toAngles(angles);
-    log.info(String.format("before %s, %.2f", name, angles[1] * 180/FastMath.PI));
+    log.info(String.format("before %s, %.2f", name, angles[angleIndex] * 180/FastMath.PI));
  
     q.fromAngleAxis(((float)(degrees) * FastMath.PI/180), rotMask);// FIXME optimize final Y_AXIS = new Vector3f(0,1,0)
 
     // apply map if it exists (shifted)
     n.setLocalRotation(q);
     q.toAngles(angles);
-    log.info(String.format("after %s, %.2f", name, angles[1]* 180/FastMath.PI));   
+    log.info(String.format("after %s, %.2f", name, angles[angleIndex]* 180/FastMath.PI));   
   }
 
   public void bind(String child, String parent) {
