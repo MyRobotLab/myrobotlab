@@ -2136,6 +2136,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     log.error("status:", e);
     Status ret = Status.error(e);
     ret.name = getName();
+    log.error(ret.toString());
     invoke("publishStatus", ret);
     return ret;
   }
@@ -2144,6 +2145,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public Status error(String format, Object... args) {
     Status ret = Status.error(String.format(format, args));
     ret.name = getName();
+    log.error(ret.toString());
     invoke("publishStatus", ret);
     return ret;
   }

@@ -690,7 +690,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
   public void cycle() {
 
     if (selected == null) {
-      setSelected(rootNode);
+      Spatial s = rootNode.getChild(0);
+      setSelected(s);
     }
 
     Node parent = selected.getParent();
@@ -937,6 +938,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
   public void loadModels() {
     // load the root data dir
     loadModels(modelsDir);
+    loadNodes(modelsDir);
   }
 
   public void loadModels(String dirPath) {
@@ -967,6 +969,62 @@ public class JMonkeyEngine extends Service implements ActionListener,
       }
     }
   }
+  
+  /**
+   * based on a directory structure - add missing nodes and bindings
+   * top node will be bound to root
+   * @param dirPath
+   */
+  public void loadNodes(String dirPath) {
+    File dir = new File(dirPath);
+    if (!dir.isDirectory()) {
+      error("%s is not a directory", dirPath);
+      return;
+    }    
+    // get list of files in dir ..
+    File[] files = dir.listFiles();
+
+    // scan for all non json files first ...
+    // initially set them invisible ...
+    for (File f : files) {      
+      if (f.isDirectory()) {
+        loadNode(f.getAbsolutePath());
+      }
+    }
+
+    // process structure json files ..
+
+    // breadth first search ...
+    for (File f : files) {
+      if (f.isDirectory()) {
+        loadModels(f.getAbsolutePath());
+      }
+    }
+  }
+  
+  /**
+   * load a node with all potential children
+   * @param parentDirPath
+   */
+  public void loadNode(String parentDirPath) {
+    File parent = new File(parentDirPath);
+    if (!parent.isDirectory()) {
+      // parent is not a directory ...
+      // we are done here ..
+      return;
+    }
+    
+    File[] files = parent.listFiles();
+    // depth first search - process all children first
+    // to build the tree
+    for (File f : files) {
+      if (f.isDirectory()) {
+        loadNode(f.getAbsolutePath());
+      }
+    }
+    
+  }
+  
 
   // FIXME - remove - just load a json file
   // NOT TO BE CALLED BY ANY OTHER THREAD BESIDES JME THREAD !!! OR YOU GET A
