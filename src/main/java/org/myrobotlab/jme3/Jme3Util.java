@@ -9,6 +9,7 @@ import org.myrobotlab.service.JMonkeyEngine.Jme3Msg;
 import org.slf4j.Logger;
 
 import com.jme3.bounding.BoundingBox;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
@@ -169,6 +170,10 @@ public class Jme3Util {
     log.info(String.format("rotateTo %s, degrees %.2f", name, degrees));
     
     UserData o = jme.getUserData(name);
+    if (o == null) {
+      jme.error("no user data for %s", name);
+      return;
+    }
     Vector3f rotMask = o.rotationMask;
     if (rotMask == null) {
       rotMask = Vector3f.UNIT_Y;//new Vector3f(0, 1, 0); // default rotate around "y" axis
@@ -230,7 +235,7 @@ public class Jme3Util {
 
   public Node createUnitAxis() {
 
-    Node n = new Node("axis");
+    Node n = new Node("_axis");
     Arrow arrow = new Arrow(Vector3f.UNIT_X);
     arrow.setLineWidth(4); // make arrow thicker
     addAxis(n, arrow, ColorRGBA.Red);
@@ -246,7 +251,7 @@ public class Jme3Util {
   }
   
   private void addAxis(Node n, Mesh shape, ColorRGBA color) {
-    Geometry g = new Geometry("coordinate axis", shape);
+    Geometry g = new Geometry("_coordinate axis", shape);
     Material mat = new Material(jme.getApp().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
     mat.getAdditionalRenderState().setWireframe(true);
     mat.setColor("Color", color);
@@ -257,6 +262,12 @@ public class Jme3Util {
   public Geometry createBoundingBox(Spatial spatial, String color) {
     // Geometry newBb = WireBox.makeGeometry((BoundingBox)
     // spatial.getWorldBound());
+    BoundingVolume bv = spatial.getWorldBound();
+    if (bv == null) {
+      error("createBoundingBox(%s) world bounds is null", spatial.getName());
+      return null;
+    }
+    
     Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
     // Material mat = new Material(jme.getAssetManager(),
     // "Common/MatDefs/Light/PBRLighting.j3md");

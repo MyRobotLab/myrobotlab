@@ -41,8 +41,10 @@ public class UserData implements Savable {
   public Mapper mapper;
 
   public Vector3f rotationMask;
-  public Vector3f localTranslation; // transitory ? init only ?  INIT !!! probably - which means its local first loaded
-  
+  public Vector3f localTranslation; // transitory ? init only ? INIT !!!
+                                    // probably - which means its local first
+                                    // loaded
+
   public Vector3f initialRotation;
 
   public Double currentAngle;
@@ -177,7 +179,11 @@ public class UserData implements Savable {
 
     if (bb == null) {
       bb = jme.createBoundingBox(spatial);
-      ((Node) spatial).attachChild(bb);
+      if (bb != null) {
+        ((Node) spatial).attachChild(bb);
+      } else {
+        return;
+      }
     }
 
     if (!color.equals(bbColor)) {
