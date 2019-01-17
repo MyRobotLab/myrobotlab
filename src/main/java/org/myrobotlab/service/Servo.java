@@ -290,10 +290,15 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
   /*
-   * public static class ServoEventData { public String name; public Double pos;
-   * public Integer state; public double velocity; public Double targetPos; //
-   * public int type; }
-   */
+  public static class ServoEventData {
+    public String name;
+    public Double pos;
+    public Integer state;
+    public double velocity;
+    public Double targetPos;
+    // public int type;
+  }
+  */
   public static class ServoEventData {
     public String name;
     public Double pos;
@@ -386,7 +391,7 @@ public class Servo extends Service implements ServoControl {
    * Enabling PWM for the Servo. Equivalent to Arduino's Servo.attach(pin). It
    * energizes the servo sending pulses to maintain its current position.
    */
-  public void enable(int pin) {
+  public void enable(Integer pin) {
     lastActivityTime = System.currentTimeMillis();
     controller.servoAttachPin(this, pin);
     this.pin = pin;
@@ -1336,9 +1341,8 @@ public class Servo extends Service implements ServoControl {
   }
 
   /**
-   * unsynchronize 2 sevos. If the servo is running in sync already, this method
-   * will stop the synchronization
-   * 
+   * unsynchronize 2 sevos.  If the servo is running in sync already,
+   * this method will stop the synchronization
    * @param args
    * @throws InterruptedException
    */

@@ -84,7 +84,7 @@ public class VirtualServoController extends Service implements ServoController {
   }
 
   @Override
-  public void servoAttachPin(ServoControl servo, int pin) {
+  public void servoAttachPin(ServoControl servo, Integer pin) {
     // TODO Auto-generated method stub
 
   }
@@ -158,7 +158,7 @@ public class VirtualServoController extends Service implements ServoController {
         long now = System.currentTimeMillis();
 
         if (pos >= targetPos) { // if (now >= etaTs) { // change to pos ==
-          // targetPos
+                                // targetPos
           log.info("{} reached {} target position eta {} - finished move", servo.getName(), pos, targetPos);
           isRunning = false;
           worker = null;
@@ -173,14 +173,13 @@ public class VirtualServoController extends Service implements ServoController {
         pos = startPos + deltaTime * velocity;
 
         log.info("incremental move {} from {} to {} position at deta time {} ms is {}", servo.getName(), startPos, targetPos, deltaTime, pos / 1000);
-        jme.updatePosition(servo.getName(), lastPos - (pos / 1000));
+        jme.rotateTo(servo.getName(), lastPos - (pos / 1000));
         // eventQueue.add()
         // servo.writeMicroseconds(uS);
-        // Message msg = Message.createMessage(getName(), jme.getName(),
-        // "servoMoveTo", new Object[] { servo });
+        // Message msg = Message.createMessage(getName(), jme.getName(), "servoMoveTo", new Object[] { servo });
         // all translation logic should be here from the the servo data to 3d
         // a simple command to rotate is needed (with name info)
-        // jme.addMsg(msg);
+        //  jme.addMsg(msg);
         // jme.rotate();
 
         try {
