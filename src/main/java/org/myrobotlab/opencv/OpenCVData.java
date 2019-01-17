@@ -7,11 +7,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.imageio.ImageIO;
@@ -26,10 +26,11 @@ import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.cv.CvData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
+import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
@@ -79,8 +80,9 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class OpenCVData implements Serializable {
-
+public class OpenCVData  extends CvData {
+  
+   
   public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
   private static final long serialVersionUID = 1L;
 
@@ -124,23 +126,27 @@ public class OpenCVData implements Serializable {
    */
   List<String> filters = new ArrayList<String>();
 
+
   private int frameIndex;
+
 
   /**
    * graphics object for display
    */
   transient Map<String, Graphics2D> g2ds = new HashMap<>();
 
+
   /**
    * name of the service which produced this data
    */
   private String name;
 
+
   /**
    * the filter's name - used as a key to get or put data associated with a
    * specific filter
    */
-
+  
   private String selectedFilter = INPUT_KEY;
 
   /**
@@ -151,7 +157,7 @@ public class OpenCVData implements Serializable {
 
   private long timestamp;
 
-  public OpenCVData() {
+  public OpenCVData() {    
   }
 
   public OpenCVData(String name, long frameStartTs, int frameIndex, Frame frame) {
@@ -173,7 +179,6 @@ public class OpenCVData implements Serializable {
     sources.put(String.format("%s.output.IplImage", name), firstImage);
 
   }
-
   /**
    * resource cleanup
    */
@@ -182,10 +187,12 @@ public class OpenCVData implements Serializable {
       g.dispose();
     }
   }
-
+  
+  
   public IplImage get(String fullKey) {
     return (IplImage) sources.get(fullKey);
   }
+  
 
   public List<Rectangle> getBoundingBoxArray() {
     return (List) sources.get(String.format("%s.output.BoundingBoxArray", name));
@@ -234,13 +241,13 @@ public class OpenCVData implements Serializable {
     if (!sources.containsKey(key)) {
 
       IplImage image = getImage(); // <- should be output or "selected Filter ..
-      // i guess"
+                                   // i guess"
       if (image != null) {
         // bi = converterToJava.convert(getInputFrame());
         bi = OpenCV.toBufferedImage(image);
       } else {
         bi = OpenCV.toBufferedImage(getInputFrame()); // logic should probably
-        // not be buried down
+                                                       // not be buried down
       }
       // cache result
       sources.put(key, bi);
@@ -258,7 +265,7 @@ public class OpenCVData implements Serializable {
     return (Frame) sources.get(key);
   }
 
-  public Object getFrameIndex() {
+  public int getFrameIndex() {
     return frameIndex;
   }
 
@@ -319,7 +326,6 @@ public class OpenCVData implements Serializable {
 
   /**
    * gets kinect depth image
-   * 
    * @return
    */
   public IplImage getKinectDepth() {
@@ -328,7 +334,6 @@ public class OpenCVData implements Serializable {
 
   /**
    * gets kinect rgb image
-   * 
    * @return
    */
   public IplImage getKinectVideo() {
@@ -422,13 +427,11 @@ public class OpenCVData implements Serializable {
   }
 
   /**
-   * pushes a reference to both images from a kinect grabber default "input"
-   * image is depth - but both can be accessed from any filter
+   * pushes a reference to both images from a kinect grabber
+   * default "input" image is depth - but both can be accessed from any filter
    * 
-   * @param depth
-   *          - depth image
-   * @param video
-   *          - rgb image
+   * @param depth - depth image
+   * @param video - rgb image
    */
   public void putKinect(IplImage depth, IplImage video) {
     sources.put(OpenCV.INPUT_KEY, depth);
@@ -439,7 +442,7 @@ public class OpenCVData implements Serializable {
   public void setFrameIndex(int frameIndex) {
     this.frameIndex = frameIndex;
   }
-
+  
   public void setName(String name) {
     this.name = name;
   }
@@ -513,6 +516,39 @@ public class OpenCVData implements Serializable {
     ImageIO.write(getDisplay(), format, fos);
     fos.close();
     return filename;
+  }
+
+  
+  public void writeAll() {
+    for (String key : sources.keySet()) {
+      // OpenCV.recor
+    }
+  }
+
+  public List<PointCloud> getPointCloudList() {
+    return (List<PointCloud>)sources.get(CvData.POINT_CLOUDS);
+  }
+  
+  public PointCloud getPointCloud() {
+    List<PointCloud> pcs = getPointCloudList();
+    if (pcs == null && pcs.size() != 0) {
+      return null;
+    }
+    return pcs.get(0);    
+  }
+
+  @Override
+  public Set<String> getKeySet() {
+    return sources.keySet();
+  }
+
+  public void put(PointCloud pc) {
+    List<PointCloud> pcs = (List<PointCloud>) sources.get(CvData.POINT_CLOUDS);
+    if (pcs == null) {
+      pcs = new ArrayList<PointCloud>();
+    } 
+    pcs.add(pc);
+   sources.put(CvData.POINT_CLOUDS, pcs);
   }
 
 }

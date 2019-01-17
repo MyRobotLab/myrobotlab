@@ -66,7 +66,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.CommunicationManager;
 import org.myrobotlab.net.Heartbeat;
-import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
@@ -122,10 +121,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
-
-  public static final String DATA_DIR = "data" + File.separator + OpenCV.class.getSimpleName();
-  public static final String RESOURCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName();
-
+  
   /**
    * key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway
    * name]/scheme://key for gateway mrl://gateway/xmpp://incubator incubator if
@@ -149,10 +145,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   transient protected Inbox inbox = null;
 
   transient Timer timer = null;
-
-  public final String DATA_INSTANCE_DIR = "data" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
-  public final String RESOURCE_INSTANCE_DIR = "resource" + File.separator + OpenCV.class.getSimpleName() + File.separator + name;
-
+  
   /**
    * a more capable task handler
    */
@@ -201,11 +194,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
-   * 
-   * @param myKey
-   *          m
-   * @param serviceClass
-   *          class
+   * @param myKey m
+   * @param serviceClass class 
    * @return a map of string to service reservation
    * 
    */
@@ -784,6 +774,22 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return "------\r\n" + sw.toString() + "------\r\n";
   }
 
+  public String getDataDir() {
+    return "data" + File.separator + getClass().getSimpleName();
+  }
+  
+  public String getDataInstanceDir() {
+    return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
+  }
+  
+  public String getResourceDir() {
+    return "data" + File.separator + getClass().getSimpleName();
+  }
+  
+  public String getResourceInstanceDir() {
+    return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
+  }
+  
   // FIXME - make a static initialization part !!!
 
   public Service(String reservedKey) {
@@ -791,8 +797,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
-
-    // xxx
+    
+    /**
+     * <pre>
+     * necessary ?
+     *
+    File dir = new File(getDataDir());
+    dir.mkdirs();
+    dir = new File(getResourceDir());
+    dir.mkdirs();
+    */
+    
     try {// FIXME !!! AFTER MERGE !!!
       serviceType = getMetaData(this.getClass().getCanonicalName());
     } catch (Exception e) {
@@ -1478,8 +1493,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
           // return
           return retobj;
         } catch (Exception e1) {
-          log.error("boom goes method {}", mC.getName());
-          Logging.logError(e1);
+          log.error("boom goes method - could not find method in cache {}", mC.getName(), e1);
         }
 
       }
@@ -1584,7 +1598,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       }
       log.info("cfg file {} does not exist", filename);
     } catch (Exception e) {
-      log.error("failed loading {}", filename, e);
+      log.error("failed loading {}", filename,e);
     }
     return false;
   }
@@ -1601,9 +1615,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   public void out(String method, Object o) {
     Message m = Message.createMessage(this, null, method, o); // create a
-    // un-named
-    // message
-    // as output
+                                                              // un-named
+                                                              // message
+                                                              // as output
 
     if (m.sender.length() == 0) {
       m.sender = this.getName();
@@ -1905,13 +1919,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * this send forces remote connect - for registering services
-   * 
-   * @param url
-   *          u
-   * @param method
-   *          m
-   * @param param1
-   *          the param
+   * @param url u
+   * @param method m 
+   * @param param1 the param
    */
   public void send(URI url, String method, Object param1) {
     Object[] params = new Object[1];
@@ -2022,7 +2032,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void startRecording() {
     invoke("startRecording", new Object[] { null });
   }
-
+  
   @Override
   public void loadAndStart() {
     load();
@@ -2096,9 +2106,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
         cm.send(Message.createMessage(this, serviceName, "addListener", listener));
       }
     } else {
-      MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-      cm.send(Message.createMessage(this, topicName, "addListener", listener));
-    }
+    MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+    cm.send(Message.createMessage(this, topicName, "addListener", listener));
+  }
   }
 
   public void sendPeer(String peerKey, String method, Object... params) {
@@ -2126,6 +2136,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     log.error("status:", e);
     Status ret = Status.error(e);
     ret.name = getName();
+    log.error(ret.toString());
     invoke("publishStatus", ret);
     return ret;
   }
@@ -2134,6 +2145,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public Status error(String format, Object... args) {
     Status ret = Status.error(String.format(format, args));
     ret.name = getName();
+    log.error(ret.toString());
     invoke("publishStatus", ret);
     return ret;
   }
@@ -2420,6 +2432,39 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public boolean isVirtual() {
     return isVirtual;
+  }
+  
+  /**
+   * a convenience method for a Service
+   * which always attempts to find a file with the same ordered precedence
+   * 
+   * 1. check data/{ServiceType} first  (users data directory)
+   * 2. check resource/{ServiceType}    (mrl's static resource directory)
+   * 3. check absolute path 
+   * 
+   * @return
+   */
+  public File getFile(String filename) {
+    File file = new File(getDataDir() + File.separator + filename);
+    if (file.exists()) {
+      log.info("found file in data directory - {}", file.getAbsolutePath());
+      return file;
+    }
+    file = new File(getResourceDir() + File.separator + filename);
+    if (file.exists()) {
+      log.info("found file in resource directory - {}", file.getAbsolutePath());
+      return file;
+    }
+    
+    file = new File(filename);
+    
+    if (file.exists()) {
+      log.info("found file - {}", file.getAbsolutePath());
+      return file;
+    }
+    
+    error("could not find file {}", file.getAbsolutePath());
+    return file;
   }
 
   /**

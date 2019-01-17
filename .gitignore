@@ -95,3 +95,5 @@ Thumbs.db
 /Solr/
 /OpenCV/
 /models/*
+/models/
+/Common/
