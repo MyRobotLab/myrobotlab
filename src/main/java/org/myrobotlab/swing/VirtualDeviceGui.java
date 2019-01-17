@@ -37,42 +37,42 @@ import org.slf4j.Logger;
 
 public class VirtualDeviceGui extends ServiceGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(VirtualDeviceGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(VirtualDeviceGui.class);
 
-  public VirtualDeviceGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
-  }
+	public VirtualDeviceGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent arg0) {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+	@Override
+	public void subscribeGui() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
 
-    // subscribe("publishState", "onState", VirtualDevice.class);
-    // send("publishState");
-  }
+		// subscribe("publishState", "onState", VirtualDevice.class);
+		// send("publishState");
+	}
 
-  @Override
-  public void unsubscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+	@Override
+	public void unsubscribeGui() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
 
-    // unsubscribe("publishState", "onState", VirtualDevice.class);
-  }
+		// unsubscribe("publishState", "onState", VirtualDevice.class);
+	}
 
-  public void onState(VirtualDevice template) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	public void onState(VirtualDevice template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-      }
-    });
-  }
+			}
+		});
+	}
 
 }

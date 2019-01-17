@@ -37,22 +37,22 @@ import com.sun.j3d.utils.geometry.Sphere;
  */
 public class GripperActuator extends ActuatorDevice {
 
-  GripperActuator(float radius) {
-    create3D(radius);
-  }
+	GripperActuator(float radius) {
+		create3D(radius);
+	}
 
-  void create3D(float radius) {
-    super.create3D(true);
-    // body
-    if (radius > 0) {
-      Color3f color = new Color3f(0.8f, 0.8f, 0.0f);
-      Appearance appear = new Appearance();
-      appear.setMaterial(new Material(color, black, color, white, 100.0f));
-      Node node = new Sphere(radius, appear);
-      node.setCollidable(false);
-      node.setPickable(false);
-      addChild(node);
-    }
-  }
+	void create3D(float radius) {
+		super.create3D(true);
+		// body
+		if (radius > 0) {
+			Color3f color = new Color3f(0.8f, 0.8f, 0.0f);
+			Appearance appear = new Appearance();
+			appear.setMaterial(new Material(color, black, color, white, 100.0f));
+			Node node = new Sphere(radius, appear);
+			node.setCollidable(false);
+			node.setPickable(false);
+			addChild(node);
+		}
+	}
 
 }

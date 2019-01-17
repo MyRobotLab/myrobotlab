@@ -38,81 +38,81 @@ import org.myrobotlab.mapper.sim.RobotFactory;
  **/
 public class DifferentialKinematicDemo extends Demo {
 
-  public class Robot extends Agent {
-    DifferentialKinematic kinematic;
-    int state;
+	public class Robot extends Agent {
+		DifferentialKinematic kinematic;
+		int state;
 
-    public Robot(Vector3d position, String name) {
-      super(position, name);
-      // Change the kinematic to differentialDrive
-      kinematic = RobotFactory.setDifferentialDriveKinematicModel(this);
-    }
+		public Robot(Vector3d position, String name) {
+			super(position, name);
+			// Change the kinematic to differentialDrive
+			kinematic = RobotFactory.setDifferentialDriveKinematicModel(this);
+		}
 
-    /** Initialize Agent's Behavior */
-    @Override
-    public void initBehavior() {
-      state = 0;
-    }
+		/** Initialize Agent's Behavior */
+		@Override
+		public void initBehavior() {
+			state = 0;
+		}
 
-    /** Perform one step of Agent's Behavior */
-    @Override
-    public void performBehavior() {
+		/** Perform one step of Agent's Behavior */
+		@Override
+		public void performBehavior() {
 
-      // here we do not use SetTranslationalVelocity and
-      // SetRotationalVelocity.
-      // Instead we control directly the wheels velocity.
-      // We need to use the kinematic object to do so.
+			// here we do not use SetTranslationalVelocity and
+			// SetRotationalVelocity.
+			// Instead we control directly the wheels velocity.
+			// We need to use the kinematic object to do so.
 
-      if (getCounter() % 300 == 0) {
+			if (getCounter() % 300 == 0) {
 
-        switch (state) {
+				switch (state) {
 
-          // turn right
-          case 0:
-            kinematic.setWheelsVelocity(0.8, 0.5);
-            break;
-          // turn left
-          case 1:
-            kinematic.setWheelsVelocity(0.5, 0.8);
-            break;
+				// turn right
+				case 0:
+					kinematic.setWheelsVelocity(0.8, 0.5);
+					break;
+				// turn left
+				case 1:
+					kinematic.setWheelsVelocity(0.5, 0.8);
+					break;
 
-          case 2:
-            kinematic.setWheelsVelocity(-0.8, 0.5);
-            break;
-          // on place
-          case 3:
-            kinematic.setWheelsVelocity(0.8, 0);
-            break;
-          // forward
-          case 4:
-            kinematic.setWheelsVelocity(0.1, 0.1);
-            break;
-          // backward
-          case 5:
-            kinematic.setWheelsVelocity(-0.5, -0.5);
-            state = -1;
-            break;
+				case 2:
+					kinematic.setWheelsVelocity(-0.8, 0.5);
+					break;
+				// on place
+				case 3:
+					kinematic.setWheelsVelocity(0.8, 0);
+					break;
+				// forward
+				case 4:
+					kinematic.setWheelsVelocity(0.1, 0.1);
+					break;
+				// backward
+				case 5:
+					kinematic.setWheelsVelocity(-0.5, -0.5);
+					state = -1;
+					break;
 
-        }
-        state++;
-      }
+				}
+				state++;
+			}
 
-      if (collisionDetected())
-        moveToStartPosition();
-    }
+			if (collisionDetected())
+				moveToStartPosition();
+		}
 
-  }
+	}
 
-  public DifferentialKinematicDemo() {
-    boxColor = new Color3f(0.6f, 0.5f, .3f);
+	public DifferentialKinematicDemo() {
+		boxColor = new Color3f(0.6f, 0.5f, .3f);
 
-    add(new Box(new Vector3d(-8, 0, 0), new Vector3f(0.1f, 1, 16), this));
-    add(new Box(new Vector3d(0, 0, -8), new Vector3f(16, 1, 0.1f), this));
-    add(new Box(new Vector3d(8, 0, 0), new Vector3f(0.1f, 1, 16), this));
-    add(new Box(new Vector3d(0, 0, 8), new Vector3f(16, 1, 0.1f), this));
+		add(new Box(new Vector3d(-8, 0, 0), new Vector3f(0.1f, 1, 16), this));
+		add(new Box(new Vector3d(0, 0, -8), new Vector3f(16, 1, 0.1f), this));
+		add(new Box(new Vector3d(8, 0, 0), new Vector3f(0.1f, 1, 16), this));
+		add(new Box(new Vector3d(0, 0, 8), new Vector3f(16, 1, 0.1f), this));
 
-    // Add a robot.
-    add(new Robot(new Vector3d(0, 0, 0), "my robot"));
+		// Add a robot.
+		add(new Robot(new Vector3d(0, 0, 0), "my robot"));
 
-  }
+	}
 }

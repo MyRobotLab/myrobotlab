@@ -40,38 +40,36 @@ import org.slf4j.Logger;
 
 public class MarySpeechGui extends AbstractSpeechSynthesisGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(MarySpeechGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(MarySpeechGui.class);
 
-  // used for effects like in mary
-  protected final JPanel EffectpanelTLeft = new JPanel();
-  protected final JPanel EffectpanelTRight = new JPanel();
-  protected final JPanel EffectpanelBLeft = new JPanel();
-  protected final JPanel EffectpanelBRight = new JPanel();
+	// used for effects like in mary
+	protected final JPanel EffectpanelTLeft = new JPanel();
+	protected final JPanel EffectpanelTRight = new JPanel();
+	protected final JPanel EffectpanelBLeft = new JPanel();
+	protected final JPanel EffectpanelBRight = new JPanel();
 
-  public MarySpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
-    super(boundServiceName, myService);
-    /*
-     * Runtime.getInstance(); MarySpeech mary = (MarySpeech)
-     * Runtime.getService(boundServiceName); EffectpanelTLeft.setLayout(new
-     * GridLayout(1, 1, 0, 0)); EffectpanelTRight.setLayout(new GridLayout(1, 1,
-     * 0, 0)); EffectpanelBLeft.setLayout(new GridLayout(1, 1, 0, 0));
-     * EffectpanelBRight.setLayout(new GridLayout(1, 1, 0, 0));
-     * 
-     * mary.getEffectsList().forEach((k, v) -> comboEffects.addItem(k));
-     * 
-     * EffectpanelTLeft.add(ComboEffectLabel);
-     * EffectpanelTLeft.add(comboEffects);
-     * EffectpanelBRight.add(selectedEffects);
-     * 
-     * EffectpanelTRight.add(ComboEffectLabel2);
-     * EffectpanelTRight.add(effetsParameters); EffectpanelBLeft.add(addEffect);
-     * EffectpanelBLeft.add(updateEffect); speechGuiPanel.add(EffectpanelTLeft);
-     * speechGuiPanel.add(EffectpanelTRight);
-     * speechGuiPanel.add(EffectpanelBLeft);
-     * speechGuiPanel.add(EffectpanelBRight);
-     */
+	public MarySpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
+		super(boundServiceName, myService);
+		/*
+		 * Runtime.getInstance(); MarySpeech mary = (MarySpeech)
+		 * Runtime.getService(boundServiceName); EffectpanelTLeft.setLayout(new
+		 * GridLayout(1, 1, 0, 0)); EffectpanelTRight.setLayout(new GridLayout(1, 1, 0,
+		 * 0)); EffectpanelBLeft.setLayout(new GridLayout(1, 1, 0, 0));
+		 * EffectpanelBRight.setLayout(new GridLayout(1, 1, 0, 0));
+		 * 
+		 * mary.getEffectsList().forEach((k, v) -> comboEffects.addItem(k));
+		 * 
+		 * EffectpanelTLeft.add(ComboEffectLabel); EffectpanelTLeft.add(comboEffects);
+		 * EffectpanelBRight.add(selectedEffects);
+		 * 
+		 * EffectpanelTRight.add(ComboEffectLabel2);
+		 * EffectpanelTRight.add(effetsParameters); EffectpanelBLeft.add(addEffect);
+		 * EffectpanelBLeft.add(updateEffect); speechGuiPanel.add(EffectpanelTLeft);
+		 * speechGuiPanel.add(EffectpanelTRight); speechGuiPanel.add(EffectpanelBLeft);
+		 * speechGuiPanel.add(EffectpanelBRight);
+		 */
 
-  }
+	}
 
 }

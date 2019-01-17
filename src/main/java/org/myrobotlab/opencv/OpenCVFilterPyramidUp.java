@@ -38,41 +38,41 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterPyramidUp extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidUp.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidUp.class);
 
-  transient IplImage dst = null;
+	transient IplImage dst = null;
 
-  int filter = 7;
+	int filter = 7;
 
-  public OpenCVFilterPyramidUp(String name) {
-    super(name);
-  }
+	public OpenCVFilterPyramidUp(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    if (image == null) {
-      log.error("image is null");
-    }
+		if (image == null) {
+			log.error("image is null");
+		}
 
-    if (dst == null) {
-      dst = cvCreateImage(cvSize(2 * image.width(), 2 * image.height()), 8, image.nChannels());
-    }
+		if (dst == null) {
+			dst = cvCreateImage(cvSize(2 * image.width(), 2 * image.height()), 8, image.nChannels());
+		}
 
-    cvPyrUp(image, dst, filter);
+		cvPyrUp(image, dst, filter);
 
-    return dst;
-  }
+		return dst;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

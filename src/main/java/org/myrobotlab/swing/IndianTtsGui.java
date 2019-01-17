@@ -35,11 +35,11 @@ import org.slf4j.Logger;
 
 public class IndianTtsGui extends AbstractSpeechSynthesisGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(IndianTtsGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(IndianTtsGui.class);
 
-  public IndianTtsGui(final String boundServiceName, final SwingGui myService) throws IOException {
-    super(boundServiceName, myService);
-  }
+	public IndianTtsGui(final String boundServiceName, final SwingGui myService) throws IOException {
+		super(boundServiceName, myService);
+	}
 
 }

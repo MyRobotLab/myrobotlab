@@ -15,137 +15,137 @@ import org.slf4j.Logger;
 
 public class Pir extends Service implements PinListener {
 
-  public final static Logger log = LoggerFactory.getLogger(Pir.class);
+	public final static Logger log = LoggerFactory.getLogger(Pir.class);
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	/**
+	 * This static method returns all the details of the class without it having to
+	 * be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Pir.class.getCanonicalName());
-    meta.addDescription("PIR - Passive Infrared Sensor");
-    meta.setAvailable(true); // false if you do not want it viewable in a
-    meta.addCategory("sensor");
-    return meta;
-  }
+		ServiceType meta = new ServiceType(Pir.class.getCanonicalName());
+		meta.addDescription("PIR - Passive Infrared Sensor");
+		meta.setAvailable(true); // false if you do not want it viewable in a
+		meta.addCategory("sensor");
+		return meta;
+	}
 
-  public static void main(String[] args) {
-    try {
+	public static void main(String[] args) {
+		try {
 
-      LoggingFactory.init("info");
+			LoggingFactory.init("info");
 
-      Pir pir = (Pir) Runtime.start("pir", "Pir");
-      Runtime.start("gui", "SwingGui");
-      String arduinoPort = "COM4";
+			Pir pir = (Pir) Runtime.start("pir", "Pir");
+			Runtime.start("gui", "SwingGui");
+			String arduinoPort = "COM4";
 
-      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      virtual.connect(arduinoPort);
-      arduino.connect(arduinoPort);
-      arduino.setBoardMega();
-      pir.attach(arduino, 2);
-      pir.enable();
+			VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+			Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+			virtual.connect(arduinoPort);
+			arduino.connect(arduinoPort);
+			arduino.setBoardMega();
+			pir.attach(arduino, 2);
+			pir.enable();
 
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
-  boolean isActive = false;
-  boolean isEnabled = false;
-  public boolean isVerbose = true;
+	boolean isActive = false;
+	boolean isEnabled = false;
+	public boolean isVerbose = true;
 
-  Integer pin;
+	Integer pin;
 
-  PinArrayControl pinControl;
-  List<String> controllers;
+	PinArrayControl pinControl;
+	List<String> controllers;
 
-  public Pir(String n) {
-    super(n);
-  }
+	public Pir(String n) {
+		super(n);
+	}
 
-  public void attach(PinArrayControl control, int pin) {
-    this.pinControl = control;
-    this.pin = pin;
-    pinControl.attach(this, pin);
-  }
+	public void attach(PinArrayControl control, int pin) {
+		this.pinControl = control;
+		this.pin = pin;
+		pinControl.attach(this, pin);
+	}
 
-  public void disable() {
-    if (pinControl == null) {
-      error("pin control not set");
-      return;
-    }
+	public void disable() {
+		if (pinControl == null) {
+			error("pin control not set");
+			return;
+		}
 
-    if (pin == null) {
-      error("pin not set");
-      return;
-    }
+		if (pin == null) {
+			error("pin not set");
+			return;
+		}
 
-    pinControl.disablePin(pin);
-    isEnabled = false;
-    broadcastState();
-  }
+		pinControl.disablePin(pin);
+		isEnabled = false;
+		broadcastState();
+	}
 
-  public void enable() {
-    enable(1);
-  }
+	public void enable() {
+		enable(1);
+	}
 
-  public void enable(int pollBySecond) {
-    if (pinControl == null) {
-      error("pin control not set");
-      return;
-    }
+	public void enable(int pollBySecond) {
+		if (pinControl == null) {
+			error("pin control not set");
+			return;
+		}
 
-    if (pin == null) {
-      error("pin not set");
-      return;
-    }
+		if (pin == null) {
+			error("pin not set");
+			return;
+		}
 
-    pinControl.enablePin(pin, pollBySecond);
-    isEnabled = true;
-    broadcastState();
-  }
+		pinControl.enablePin(pin, pollBySecond);
+		isEnabled = true;
+		broadcastState();
+	}
 
-  public List<String> refresh() {
-    controllers = Runtime.getServiceNamesFromInterface(PinArrayControl.class);
-    broadcastState();
-    return controllers;
-  }
+	public List<String> refresh() {
+		controllers = Runtime.getServiceNamesFromInterface(PinArrayControl.class);
+		broadcastState();
+		return controllers;
+	}
 
-  @Override
-  public void onPin(PinData pindata) {
-    if (isVerbose) {
-      log.info("onPin {}", pindata);
-    }
-    boolean sense = (pindata.value != 0);
+	@Override
+	public void onPin(PinData pindata) {
+		if (isVerbose) {
+			log.info("onPin {}", pindata);
+		}
+		boolean sense = (pindata.value != 0);
 
-    if (isActive != sense) {
-      // state change
-      invoke("publishSense", sense);
-      isActive = sense;
-    }
-  }
+		if (isActive != sense) {
+			// state change
+			invoke("publishSense", sense);
+			isActive = sense;
+		}
+	}
 
-  public Boolean publishSense(Boolean b) {
-    return b;
-  }
+	public Boolean publishSense(Boolean b) {
+		return b;
+	}
 
-  public void setPin(int pin) {
-    this.pin = pin;
-    broadcastState();
-  }
+	public void setPin(int pin) {
+		this.pin = pin;
+		broadcastState();
+	}
 
-  public void setPinArrayControl(PinArrayControl pinControl) {
-    this.pinControl = pinControl;
-    broadcastState();
-  }
+	public void setPinArrayControl(PinArrayControl pinControl) {
+		this.pinControl = pinControl;
+		broadcastState();
+	}
 
 }

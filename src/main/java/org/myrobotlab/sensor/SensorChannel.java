@@ -4,6 +4,6 @@ import org.myrobotlab.framework.interfaces.Invoker;
 
 public class SensorChannel {
 
-  Invoker publisher;
+	Invoker publisher;
 
 }

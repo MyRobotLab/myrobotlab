@@ -1,9 +1,9 @@
 package org.myrobotlab.framework;
 
 public class Hello {
-  Platform platform;
+	Platform platform;
 
-  public Hello() {
-    platform = Platform.getLocalInstance();
-  }
+	public Hello() {
+		platform = Platform.getLocalInstance();
+	}
 }

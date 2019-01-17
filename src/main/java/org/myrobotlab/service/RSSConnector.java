@@ -18,132 +18,132 @@ import com.sun.syndication.io.XmlReader;
 
 public class RSSConnector extends AbstractConnector {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  private String rssUrl = "http://www.myrobotlab.org/rss.xml";
-  private boolean interrupted = false;
+	private String rssUrl = "http://www.myrobotlab.org/rss.xml";
+	private boolean interrupted = false;
 
-  public RSSConnector(String reservedKey) {
-    super(reservedKey);
-  }
+	public RSSConnector(String reservedKey) {
+		super(reservedKey);
+	}
 
-  @Override
-  public void setConfig(ConnectorConfig config) {
-    // TODO Auto-generated method stub
-    log.info("Set Config not yet implemented");
-  }
+	@Override
+	public void setConfig(ConnectorConfig config) {
+		// TODO Auto-generated method stub
+		log.info("Set Config not yet implemented");
+	}
 
-  @Override
-  public void startCrawling() {
-    // TODO : make this cooler. :) for now.. fire and forget
-    this.state = ConnectorState.RUNNING;
-    URL url;
-    try {
-      url = new URL(rssUrl);
-    } catch (MalformedURLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return;
-    }
+	@Override
+	public void startCrawling() {
+		// TODO : make this cooler. :) for now.. fire and forget
+		this.state = ConnectorState.RUNNING;
+		URL url;
+		try {
+			url = new URL(rssUrl);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
 
-    SyndFeedInput input = new SyndFeedInput();
-    SyndFeed feed;
-    try {
-      feed = input.build(new XmlReader(url));
-    } catch (IllegalArgumentException | FeedException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      this.state = ConnectorState.STOPPED;
-      return;
-    }
+		SyndFeedInput input = new SyndFeedInput();
+		SyndFeed feed;
+		try {
+			feed = input.build(new XmlReader(url));
+		} catch (IllegalArgumentException | FeedException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			this.state = ConnectorState.STOPPED;
+			return;
+		}
 
-    // System.out.println(feed);
-    // try {
-    // feed = FeedParser.parse(url);
-    // } catch (FeedIOException | FeedXMLParseException |
-    // UnsupportedFeedException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // return;
-    // }
+		// System.out.println(feed);
+		// try {
+		// feed = FeedParser.parse(url);
+		// } catch (FeedIOException | FeedXMLParseException |
+		// UnsupportedFeedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// return;
+		// }
 
-    // FeedHeader header = feed.getHeader();
-    // int items = feed.getItemCount();
+		// FeedHeader header = feed.getHeader();
+		// int items = feed.getItemCount();
 
-    int i = 0;
-    for (Object o : feed.getEntries()) {
+		int i = 0;
+		for (Object o : feed.getEntries()) {
 
-      SyndEntryImpl item = (SyndEntryImpl) o;
+			SyndEntryImpl item = (SyndEntryImpl) o;
 
-      i++;
-      if (interrupted) {
-        state = ConnectorState.INTERRUPTED;
-        // TODO: clean up after yourself!
-        return;
-      }
-      // FeedItem item = feed.getItem(i);
-      // create an id for this as being url # item offset
-      Document feedItem = new Document(url + "#" + i);
-      feedItem.setField("rss_title", feed.getTitle());
-      feedItem.setField("rss_link", feed.getLink());
-      feedItem.setField("rss_description", feed.getDescription());
-      feedItem.setField("rss_language", feed.getLanguage());
-      feedItem.setField("rss_date", feed.getPublishedDate());
-      feedItem.setField("title", item.getTitle());
-      feedItem.setField("link", item.getLink());
-      // TODO: if this is html vs plain text. we should
-      String text = HtmlFilter.stripHtml(item.getDescription().getValue());
-      feedItem.setField("description", text);
-      feedItem.setField("date", item.getPublishedDate());
-      feedItem.setField("html", item.getDescription().getValue());
-      feed(feedItem);
-    }
-    // flush the last partial batch of documents if we are batching.
-    flush();
-    this.state = ConnectorState.STOPPED;
-  }
+			i++;
+			if (interrupted) {
+				state = ConnectorState.INTERRUPTED;
+				// TODO: clean up after yourself!
+				return;
+			}
+			// FeedItem item = feed.getItem(i);
+			// create an id for this as being url # item offset
+			Document feedItem = new Document(url + "#" + i);
+			feedItem.setField("rss_title", feed.getTitle());
+			feedItem.setField("rss_link", feed.getLink());
+			feedItem.setField("rss_description", feed.getDescription());
+			feedItem.setField("rss_language", feed.getLanguage());
+			feedItem.setField("rss_date", feed.getPublishedDate());
+			feedItem.setField("title", item.getTitle());
+			feedItem.setField("link", item.getLink());
+			// TODO: if this is html vs plain text. we should
+			String text = HtmlFilter.stripHtml(item.getDescription().getValue());
+			feedItem.setField("description", text);
+			feedItem.setField("date", item.getPublishedDate());
+			feedItem.setField("html", item.getDescription().getValue());
+			feed(feedItem);
+		}
+		// flush the last partial batch of documents if we are batching.
+		flush();
+		this.state = ConnectorState.STOPPED;
+	}
 
-  public String getRssUrl() {
-    return rssUrl;
-  }
+	public String getRssUrl() {
+		return rssUrl;
+	}
 
-  public void setRssUrl(String rssUrl) {
-    this.rssUrl = rssUrl;
-  }
+	public void setRssUrl(String rssUrl) {
+		this.rssUrl = rssUrl;
+	}
 
-  public static void main(String[] args) throws Exception {
-    RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
-    // Solr solr = (Solr) Runtime.start("solr", "Solr");
-    // solr.setSolrUrl("http://www.skizatch.org:8983/solr/graph");
-    // connector.addDocumentListener(solr);
-    connector.startCrawling();
-  }
+	public static void main(String[] args) throws Exception {
+		RSSConnector connector = (RSSConnector) Runtime.start("rss", "RSSConnector");
+		// Solr solr = (Solr) Runtime.start("solr", "Solr");
+		// solr.setSolrUrl("http://www.skizatch.org:8983/solr/graph");
+		// connector.addDocumentListener(solr);
+		connector.startCrawling();
+	}
 
-  @Override
-  public void stopCrawling() {
-    // interrupt the current crawl gently.
-    interrupted = true;
-  }
+	@Override
+	public void stopCrawling() {
+		// interrupt the current crawl gently.
+		interrupted = true;
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	/**
+	 * This static method returns all the details of the class without it having to
+	 * be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(RSSConnector.class.getCanonicalName());
-    meta.addDescription("This will crawl an rss feed at the given url and break apart the page into Documents");
-    meta.setCloudService(true);
-    meta.addCategory("data");
-    // Tried to add this dependency, but no luck with defining the ivy.xml
-    meta.addDependency("rome", "rome", "1.0");
-    // meta.addDependency("feed4j", "feed4j", "1.0.0");
+		ServiceType meta = new ServiceType(RSSConnector.class.getCanonicalName());
+		meta.addDescription("This will crawl an rss feed at the given url and break apart the page into Documents");
+		meta.setCloudService(true);
+		meta.addCategory("data");
+		// Tried to add this dependency, but no luck with defining the ivy.xml
+		meta.addDependency("rome", "rome", "1.0");
+		// meta.addDependency("feed4j", "feed4j", "1.0.0");
 
-    return meta;
-  }
+		return meta;
+	}
 
 }

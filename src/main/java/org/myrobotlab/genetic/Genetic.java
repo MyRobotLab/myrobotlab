@@ -10,8 +10,8 @@ import java.util.ArrayList;
  *
  */
 public interface Genetic {
-  void calcFitness(ArrayList<Chromosome> chromosomes);
+	void calcFitness(ArrayList<Chromosome> chromosomes);
 
-  void decode(ArrayList<Chromosome> chromosomes);
+	void decode(ArrayList<Chromosome> chromosomes);
 
 }

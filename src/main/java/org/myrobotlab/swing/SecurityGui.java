@@ -45,72 +45,71 @@ import org.slf4j.Logger;
 
 public class SecurityGui extends ServiceGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(SecurityGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(SecurityGui.class);
 
-  Map<String, JPasswordField> keyNames = new HashMap<String, JPasswordField>();
-  Map<String, JPasswordField> keyValues = new HashMap<String, JPasswordField>();
+	Map<String, JPasswordField> keyNames = new HashMap<String, JPasswordField>();
+	Map<String, JPasswordField> keyValues = new HashMap<String, JPasswordField>();
 
-  JTextField newKeyName = new JTextField();
-  JPasswordField newKeyValue = new JPasswordField();
-  JButton set = new JButton("set");
+	JTextField newKeyName = new JTextField();
+	JPasswordField newKeyValue = new JPasswordField();
+	JButton set = new JButton("set");
 
-  public SecurityGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
+	public SecurityGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 
-    newKeyName.setPreferredSize(new Dimension(200, 20));
-    newKeyValue.setPreferredSize(new Dimension(200, 20));
+		newKeyName.setPreferredSize(new Dimension(200, 20));
+		newKeyValue.setPreferredSize(new Dimension(200, 20));
 
-    setTitle("keys");
-    add("key name ", "key value");
-    setBottomTitle("add keys");
-    addBottom("key name", "key value", " ");
-    addBottom(newKeyName, newKeyValue, set);
-    set.addActionListener(this);
-  }
+		setTitle("keys");
+		add("key name ", "key value");
+		setBottomTitle("add keys");
+		addBottom("key name", "key value", " ");
+		addBottom(newKeyName, newKeyValue, set);
+		set.addActionListener(this);
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
-    Object o = event.getSource();
-    if (o == set) {
-      send("setKey", newKeyName.getText().trim(), new String(newKeyValue.getPassword()).trim());
-      send("save");
-      send("broadcastState");
-    }
-  }
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object o = event.getSource();
+		if (o == set) {
+			send("setKey", newKeyName.getText().trim(), new String(newKeyValue.getPassword()).trim());
+			send("save");
+			send("broadcastState");
+		}
+	}
 
-  @Override
-  public void subscribeGui() {
-    send("broadcastState");
-  }
+	@Override
+	public void subscribeGui() {
+		send("broadcastState");
+	}
 
-  @Override
-  public void unsubscribeGui() {
-  }
+	@Override
+	public void unsubscribeGui() {
+	}
 
-  /**
-   * Service State change - this method will be called when a "broadcastState"
-   * method is called which triggers a publishState. This event handler is
-   * typically used when data or state information in the service has changed,
-   * and the UI should update to reflect this changed state.
-   * 
-   * @param security
-   *          the security service
-   */
-  public void onState(Security security) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        Set<Object> names = security.getKeyNames();
-        // sort them
-        Set<Object> sorted = new TreeSet<Object>(names);
-        center.removeAll();
-        for (Object name : sorted) {
-          add(name.toString(), "*********");
-        }
-        center.validate();
-      }
-    });
-  }
+	/**
+	 * Service State change - this method will be called when a "broadcastState"
+	 * method is called which triggers a publishState. This event handler is
+	 * typically used when data or state information in the service has changed, and
+	 * the UI should update to reflect this changed state.
+	 * 
+	 * @param security the security service
+	 */
+	public void onState(Security security) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Set<Object> names = security.getKeyNames();
+				// sort them
+				Set<Object> sorted = new TreeSet<Object>(names);
+				center.removeAll();
+				for (Object name : sorted) {
+					add(name.toString(), "*********");
+				}
+				center.validate();
+			}
+		});
+	}
 
 }

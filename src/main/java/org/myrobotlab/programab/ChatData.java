@@ -13,15 +13,15 @@ import org.alicebot.ab.Chat;
  */
 public class ChatData {
 
-  public boolean processOOB = true;
-  public transient Chat chat;
-  public Date lastResponseTime = null;
-  public boolean enableAutoConversation = false;
-  // Number of milliseconds before the robot starts talking on its own.
-  public int maxConversationDelay = 5000;
+	public boolean processOOB = true;
+	public transient Chat chat;
+	public Date lastResponseTime = null;
+	public boolean enableAutoConversation = false;
+	// Number of milliseconds before the robot starts talking on its own.
+	public int maxConversationDelay = 5000;
 
-  public ChatData(Chat chat) {
-    this.chat = chat;
-  }
+	public ChatData(Chat chat) {
+		this.chat = chat;
+	}
 
 }

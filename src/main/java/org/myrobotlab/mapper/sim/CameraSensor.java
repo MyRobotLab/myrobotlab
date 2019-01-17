@@ -29,15 +29,15 @@ package org.myrobotlab.mapper.sim;
  */
 public class CameraSensor extends Eye {
 
-  /**
-   * Constructs
-   * 
-   * @param radius
-   * @param imageWidth
-   * @param imageHeight
-   */
-  CameraSensor(float radius, int imageWidth, int imageHeight) {
-    super(radius, imageWidth, imageHeight);
+	/**
+	 * Constructs
+	 * 
+	 * @param radius
+	 * @param imageWidth
+	 * @param imageHeight
+	 */
+	CameraSensor(float radius, int imageWidth, int imageHeight) {
+		super(radius, imageWidth, imageHeight);
 
-  }
+	}
 }

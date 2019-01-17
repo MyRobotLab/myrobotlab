@@ -37,49 +37,49 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterDetectorGui extends OpenCVFilterGui implements ActionListener {
 
-  String watchText = "watch foreground";
-  String learnText = "learn background";
-  JButton learn = new JButton(watchText);
+	String watchText = "watch foreground";
+	String learnText = "learn background";
+	JButton learn = new JButton(watchText);
 
-  public OpenCVFilterDetectorGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-    super(boundFilterName, boundServiceName, myService);
+	public OpenCVFilterDetectorGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+		super(boundFilterName, boundServiceName, myService);
 
-    display.add(learn);
-    learn.addActionListener(this);
-  }
+		display.add(learn);
+		learn.addActionListener(this);
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    Object o = e.getSource();
-    OpenCVFilterDetector bf = (OpenCVFilterDetector) boundFilter.filter;
-    if (o == learn) {
-      if (watchText.equals(learn.getText())) {
-        learn.setText(learnText);
-        bf.learningRate = 0;
-      } else {
-        learn.setText(watchText);
-        bf.learningRate = -1;
-      }
-    }
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		OpenCVFilterDetector bf = (OpenCVFilterDetector) boundFilter.filter;
+		if (o == learn) {
+			if (watchText.equals(learn.getText())) {
+				learn.setText(learnText);
+				bf.learningRate = 0;
+			} else {
+				learn.setText(watchText);
+				bf.learningRate = -1;
+			}
+		}
 
-  }
+	}
 
-  // FIXME - update components :)
-  @Override
-  public void getFilterState(final FilterWrapper filterWrapper) {
-    boundFilter = filterWrapper;
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        OpenCVFilterDetector bf = (OpenCVFilterDetector) filterWrapper.filter;
-        if (bf.learningRate == -1) {
-          learn.setText(watchText);
-        } else {
-          learn.setText(learnText);
-        }
-      }
-    });
+	// FIXME - update components :)
+	@Override
+	public void getFilterState(final FilterWrapper filterWrapper) {
+		boundFilter = filterWrapper;
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				OpenCVFilterDetector bf = (OpenCVFilterDetector) filterWrapper.filter;
+				if (bf.learningRate == -1) {
+					learn.setText(watchText);
+				} else {
+					learn.setText(learnText);
+				}
+			}
+		});
 
-  }
+	}
 
 }

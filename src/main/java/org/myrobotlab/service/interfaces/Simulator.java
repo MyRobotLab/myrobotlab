@@ -16,11 +16,11 @@ import org.myrobotlab.virtual.VirtualServo;
 
 public interface Simulator extends NameProvider {
 
-  // Generalized create ??? a good thing - router for ObjectFactory??
-  // public Object create(ServiceInterface service);
+	// Generalized create ??? a good thing - router for ObjectFactory??
+	// public Object create(ServiceInterface service);
 
-  public VirtualServo createVirtualServo(String name);
+	public VirtualServo createVirtualServo(String name);
 
-  public VirtualMotor createVirtualMotor(String name);
+	public VirtualMotor createVirtualMotor(String name);
 
 }

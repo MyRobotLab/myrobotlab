@@ -27,36 +27,36 @@ import org.myrobotlab.service.interfaces.EncoderController;
  */
 public class Amt203Encoder extends AbstractEncoder implements EncoderControl {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public Amt203Encoder(String reservedKey) {
-    super(reservedKey);
-    // 12 bit encoder is 4096 steps of resolution
-    resolution = 4096;
-  }
+	public Amt203Encoder(String reservedKey) {
+		super(reservedKey);
+		// 12 bit encoder is 4096 steps of resolution
+		resolution = 4096;
+	}
 
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Amt203Encoder.class.getCanonicalName());
-    meta.addDescription("AMT203 Encoder - Absolute position encoder");
-    meta.addCategory("encoder", "sensor");
-    return meta;
-  }
+	static public ServiceType getMetaData() {
+		ServiceType meta = new ServiceType(Amt203Encoder.class.getCanonicalName());
+		meta.addDescription("AMT203 Encoder - Absolute position encoder");
+		meta.addCategory("encoder", "sensor");
+		return meta;
+	}
 
-  public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 
-    LoggingFactory.init("INFO");
+		LoggingFactory.init("INFO");
 
-    String port = "COM4";
-    Runtime.start("gui", "SwingGui");
-    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
-    ard.connect(port);
-    ard.setDebug(true);
-    Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder");
-    encoder.pin = 3;
-    ard.attach(encoder);
-    Thread.sleep(10000);
-    encoder.setZeroPoint();
-    System.out.println("Here we are..");
-  }
+		String port = "COM4";
+		Runtime.start("gui", "SwingGui");
+		Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
+		ard.connect(port);
+		ard.setDebug(true);
+		Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder");
+		encoder.pin = 3;
+		ard.attach(encoder);
+		Thread.sleep(10000);
+		encoder.setZeroPoint();
+		System.out.println("Here we are..");
+	}
 
 }

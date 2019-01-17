@@ -4,8 +4,8 @@ import org.myrobotlab.service.data.MyoData;
 
 public interface MyoDataPublisher {
 
-  public String getName();
+	public String getName();
 
-  public MyoData publishMyoData(MyoData data);
+	public MyoData publishMyoData(MyoData data);
 
 }

@@ -42,84 +42,84 @@ import org.slf4j.Logger;
 
 public class PidGui extends ServiceGui implements ActionListener {
 
-  JTextField key = new JTextField("test", 10);
-  JTextField input = new JTextField(10);
-  JLabel output = new JLabel("          ");
-  JTextField kp = new JTextField(10);
-  JTextField ki = new JTextField(10);
-  JTextField kd = new JTextField(10);
-  JButton setPID = new JButton("set");
+	JTextField key = new JTextField("test", 10);
+	JTextField input = new JTextField(10);
+	JLabel output = new JLabel("          ");
+	JTextField kp = new JTextField(10);
+	JTextField ki = new JTextField(10);
+	JTextField kd = new JTextField(10);
+	JButton setPID = new JButton("set");
 
-  JButton direction = new JButton("invert");
-  JButton setPid = new JButton("set pid");
-  JButton compute = new JButton("compute");
+	JButton direction = new JButton("invert");
+	JButton setPid = new JButton("set pid");
+	JButton compute = new JButton("compute");
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(PidGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(PidGui.class);
 
-  public PidGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
+	public PidGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 
-    direction.addActionListener(this);
-    setPID.addActionListener(this);
+		direction.addActionListener(this);
+		setPID.addActionListener(this);
 
-    addLine("key", key);
-    addLine("Kp", kp);
-    addLine("Ki", ki);
-    addLine("Kd", kd);
-    addLine(setPid, direction);
-    addLine("input", input, "output", output, compute);
+		addLine("key", key);
+		addLine("Kp", kp);
+		addLine("Ki", ki);
+		addLine("Kd", kd);
+		addLine(setPid, direction);
+		addLine("input", input, "output", output, compute);
 
-  }
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
-    Object o = event.getSource();
-    if (o == direction) {
-      if (direction.getText().equals("invert")) {
-        swingGui.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_REVERSE));
-        direction.setText("direct");
-      } else {
-        swingGui.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_DIRECT));
-        direction.setText("invert");
-      }
-    } else if (o == setPID) {
-      Double Kp = Double.parseDouble(kp.getText());
-      Double Ki = Double.parseDouble(ki.getText());
-      Double Kd = Double.parseDouble(kd.getText());
-      swingGui.send(boundServiceName, "setPID", Kp, Ki, Kd);
-    }
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object o = event.getSource();
+		if (o == direction) {
+			if (direction.getText().equals("invert")) {
+				swingGui.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_REVERSE));
+				direction.setText("direct");
+			} else {
+				swingGui.send(boundServiceName, "setControllerDirection", new Integer(Pid.DIRECTION_DIRECT));
+				direction.setText("invert");
+			}
+		} else if (o == setPID) {
+			Double Kp = Double.parseDouble(kp.getText());
+			Double Ki = Double.parseDouble(ki.getText());
+			Double Kd = Double.parseDouble(kd.getText());
+			swingGui.send(boundServiceName, "setPID", Kp, Ki, Kd);
+		}
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-  }
+	@Override
+	public void subscribeGui() {
+	}
 
-  @Override
-  public void unsubscribeGui() {
-  }
+	@Override
+	public void unsubscribeGui() {
+	}
 
-  public void onState(final Pid pid) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        Map<String, PidData> data = pid.getPidData();
-        for (String p : data.keySet()) {
-          int dir = pid.getControllerDirection(p);
-          if (dir == Pid.DIRECTION_REVERSE) {
-            direction.setText("direct");
-          } else {
-            direction.setText("invert");
-          }
+	public void onState(final Pid pid) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				Map<String, PidData> data = pid.getPidData();
+				for (String p : data.keySet()) {
+					int dir = pid.getControllerDirection(p);
+					if (dir == Pid.DIRECTION_REVERSE) {
+						direction.setText("direct");
+					} else {
+						direction.setText("invert");
+					}
 
-          ki.setText(String.format("%s", pid.getKi(p)));
-          kp.setText(String.format("%s", pid.getKp(p)));
-          kd.setText(String.format("%s", pid.getKd(p)));
+					ki.setText(String.format("%s", pid.getKi(p)));
+					kp.setText(String.format("%s", pid.getKp(p)));
+					kd.setText(String.format("%s", pid.getKd(p)));
 
-        }
-      }
-    });
-  }
+				}
+			}
+		});
+	}
 
 }

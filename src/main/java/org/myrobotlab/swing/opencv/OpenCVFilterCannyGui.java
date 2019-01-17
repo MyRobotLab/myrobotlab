@@ -44,101 +44,101 @@ import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterCannyGui extends OpenCVFilterGui implements ChangeListener {
 
-  SliderWithText lowThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 0);
-  SliderWithText highThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 256);
-  SliderWithText apertureSize = new SliderWithText(JSlider.HORIZONTAL, 1, 3, 1); // docs
-  // say
-  // 1
-  // 3
-  // 5
-  // 7
-  // ...
-  // but
-  // 1
-  // craches
-  // -
-  // will
-  // use
-  // 3
-  // 5
-  // or
-  // 7
+	SliderWithText lowThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 0);
+	SliderWithText highThreshold = new SliderWithText(JSlider.HORIZONTAL, 0, 256, 256);
+	SliderWithText apertureSize = new SliderWithText(JSlider.HORIZONTAL, 1, 3, 1); // docs
+	// say
+	// 1
+	// 3
+	// 5
+	// 7
+	// ...
+	// but
+	// 1
+	// craches
+	// -
+	// will
+	// use
+	// 3
+	// 5
+	// or
+	// 7
 
-  public OpenCVFilterCannyGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-    super(boundFilterName, boundServiceName, myService);
+	public OpenCVFilterCannyGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+		super(boundFilterName, boundServiceName, myService);
 
-    lowThreshold.addChangeListener(this);
-    highThreshold.addChangeListener(this);
-    apertureSize.addChangeListener(this);
+		lowThreshold.addChangeListener(this);
+		highThreshold.addChangeListener(this);
+		apertureSize.addChangeListener(this);
 
-    GridBagConstraints gc2 = new GridBagConstraints();
+		GridBagConstraints gc2 = new GridBagConstraints();
 
-    TitledBorder title;
-    JPanel j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("threshold");
-    j.setBorder(title);
+		TitledBorder title;
+		JPanel j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("threshold");
+		j.setBorder(title);
 
-    gc.gridx = 0;
-    gc.gridy = 0;
-    j.add(new JLabel("low"), gc);
-    ++gc.gridx;
-    j.add(lowThreshold, gc);
-    ++gc.gridx;
-    j.add(lowThreshold.value, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(new JLabel("high"), gc);
-    ++gc.gridx;
-    j.add(highThreshold, gc);
-    ++gc.gridx;
-    j.add(highThreshold.value, gc);
+		gc.gridx = 0;
+		gc.gridy = 0;
+		j.add(new JLabel("low"), gc);
+		++gc.gridx;
+		j.add(lowThreshold, gc);
+		++gc.gridx;
+		j.add(lowThreshold.value, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(new JLabel("high"), gc);
+		++gc.gridx;
+		j.add(highThreshold, gc);
+		++gc.gridx;
+		j.add(highThreshold.value, gc);
 
-    display.add(j, gc2);
-    gc2.gridy = 1;
-    gc2.gridx = 0;
+		display.add(j, gc2);
+		gc2.gridy = 1;
+		gc2.gridx = 0;
 
-    j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("apertureSize");
-    j.setBorder(title);
-    j.add(apertureSize);
-    j.add(apertureSize.value);
-    display.add(j, gc2);
+		j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("apertureSize");
+		j.setBorder(title);
+		j.add(apertureSize);
+		j.add(apertureSize.value);
+		display.add(j, gc2);
 
-  }
+	}
 
-  // FIXME - update components :)
-  @Override
-  public void getFilterState(final FilterWrapper filterWrapper) {
-    boundFilter = filterWrapper;
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // OpenCVFilterCanny bf = (OpenCVFilterCanny) filterWrapper.filter;
-        // TODO: not implemented?
-      }
-    });
+	// FIXME - update components :)
+	@Override
+	public void getFilterState(final FilterWrapper filterWrapper) {
+		boundFilter = filterWrapper;
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// OpenCVFilterCanny bf = (OpenCVFilterCanny) filterWrapper.filter;
+				// TODO: not implemented?
+			}
+		});
 
-  }
+	}
 
-  @Override
-  public void stateChanged(ChangeEvent e) {
+	@Override
+	public void stateChanged(ChangeEvent e) {
 
-    Object o = e.getSource();
-    OpenCVFilterCanny bf = (OpenCVFilterCanny) boundFilter.filter;
+		Object o = e.getSource();
+		OpenCVFilterCanny bf = (OpenCVFilterCanny) boundFilter.filter;
 
-    if (o == apertureSize) {
-      bf.apertureSize = apertureSize.getValue() * 2 + 1;
-      apertureSize.setText(bf.apertureSize);
-    } else if (o == highThreshold) {
-      bf.highThreshold = highThreshold.getValue();
-      highThreshold.setText(highThreshold.getValue());
-    } else if (o == lowThreshold) {
-      bf.lowThreshold = lowThreshold.getValue();
-      lowThreshold.setText(lowThreshold.getValue());
-    }
+		if (o == apertureSize) {
+			bf.apertureSize = apertureSize.getValue() * 2 + 1;
+			apertureSize.setText(bf.apertureSize);
+		} else if (o == highThreshold) {
+			bf.highThreshold = highThreshold.getValue();
+			highThreshold.setText(highThreshold.getValue());
+		} else if (o == lowThreshold) {
+			bf.lowThreshold = lowThreshold.getValue();
+			lowThreshold.setText(lowThreshold.getValue());
+		}
 
-    setFilterState(bf);
+		setFilterState(bf);
 
-  }
+	}
 
 }

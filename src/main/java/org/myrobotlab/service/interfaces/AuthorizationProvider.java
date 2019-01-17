@@ -6,11 +6,11 @@ import org.myrobotlab.framework.Message;
 
 public interface AuthorizationProvider {
 
-  boolean allowExport(String serviceName);
+	boolean allowExport(String serviceName);
 
-  // from remote not all inbound
-  boolean isAuthorized(HashMap<String, String> security, String serviceName, String method);
+	// from remote not all inbound
+	boolean isAuthorized(HashMap<String, String> security, String serviceName, String method);
 
-  boolean isAuthorized(Message msg);
+	boolean isAuthorized(Message msg);
 
 }

@@ -47,97 +47,97 @@ import org.myrobotlab.mapper.sim.Wall;
  */
 public class ImagerDemo extends Demo {
 
-  class DemoRobotImager extends Agent {
-    class ImagerPanel extends JPanel {
+	class DemoRobotImager extends Agent {
+		class ImagerPanel extends JPanel {
 
-      private static final long serialVersionUID = 1L;
+			private static final long serialVersionUID = 1L;
 
-      @Override
-      protected void paintComponent(Graphics g) {
-        int width = luminanceMatrix.getWidth();
-        int height = luminanceMatrix.getHeight();
-        super.paintComponent(g);
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
-        g.setColor(Color.BLACK);
-        for (int y = 0; y < height; y += 4) {
-          for (int x = 0; x < width; x += 4) {
-            float level = luminanceMatrix.get(x, y);
-            if (level < 0.5) {
-              g.fillRect(x, y, 4, 4);
-            }
-          }
-        }
+			@Override
+			protected void paintComponent(Graphics g) {
+				int width = luminanceMatrix.getWidth();
+				int height = luminanceMatrix.getHeight();
+				super.paintComponent(g);
+				g.setColor(Color.WHITE);
+				g.fillRect(0, 0, width, height);
+				g.setColor(Color.BLACK);
+				for (int y = 0; y < height; y += 4) {
+					for (int x = 0; x < width; x += 4) {
+						float level = luminanceMatrix.get(x, y);
+						if (level < 0.5) {
+							g.fillRect(x, y, 4, 4);
+						}
+					}
+				}
 
-      }
-    }
+			}
+		}
 
-    double elapsed;
+		double elapsed;
 
-    CameraSensor camera;
+		CameraSensor camera;
 
-    SensorMatrix luminanceMatrix;
+		SensorMatrix luminanceMatrix;
 
-    JPanel panel;
+		JPanel panel;
 
-    JInternalFrame window;
+		JInternalFrame window;
 
-    public DemoRobotImager(Vector3d position, String name) {
-      super(position, name);
-      camera = RobotFactory.addCameraSensor(this);
-      // prepare a buffer for storing gray level image
-      luminanceMatrix = camera.createCompatibleSensorMatrix();
-      // Prepare UI panel for image display
-      panel = new ImagerPanel();
-      Dimension dim = new Dimension(luminanceMatrix.getWidth(), luminanceMatrix.getHeight());
-      panel.setPreferredSize(dim);
-      panel.setMinimumSize(dim);
-      setUIPanel(panel);
-    }
+		public DemoRobotImager(Vector3d position, String name) {
+			super(position, name);
+			camera = RobotFactory.addCameraSensor(this);
+			// prepare a buffer for storing gray level image
+			luminanceMatrix = camera.createCompatibleSensorMatrix();
+			// Prepare UI panel for image display
+			panel = new ImagerPanel();
+			Dimension dim = new Dimension(luminanceMatrix.getWidth(), luminanceMatrix.getHeight());
+			panel.setPreferredSize(dim);
+			panel.setMinimumSize(dim);
+			setUIPanel(panel);
+		}
 
-    /** Initialize Agent's Behavior */
-    @Override
-    public void initBehavior() {
-      elapsed = getLifeTime();
+		/** Initialize Agent's Behavior */
+		@Override
+		public void initBehavior() {
+			elapsed = getLifeTime();
 
-    }
+		}
 
-    /** Perform one step of Agent's Behavior */
-    @Override
-    public void performBehavior() {
+		/** Perform one step of Agent's Behavior */
+		@Override
+		public void performBehavior() {
 
-      // progress at 0.5 m/s
-      setTranslationalVelocity(0.5);
-      // frequently change orientation
-      if ((getCounter() % 100) == 0)
-        setRotationalVelocity(Math.PI / 2 * (0.5 - Math.random()));
+			// progress at 0.5 m/s
+			setTranslationalVelocity(0.5);
+			// frequently change orientation
+			if ((getCounter() % 100) == 0)
+				setRotationalVelocity(Math.PI / 2 * (0.5 - Math.random()));
 
-      // display every second a binarized representation of camera image.
-      if ((getLifeTime() - elapsed) > 1) {
-        elapsed = getLifeTime();
-        camera.copyVisionImage(luminanceMatrix);
-        panel.repaint();
-      }
-      if (collisionDetected())
-        moveToStartPosition();
-    }
-  }
+			// display every second a binarized representation of camera image.
+			if ((getLifeTime() - elapsed) > 1) {
+				elapsed = getLifeTime();
+				camera.copyVisionImage(luminanceMatrix);
+				panel.repaint();
+			}
+			if (collisionDetected())
+				moveToStartPosition();
+		}
+	}
 
-  public ImagerDemo() {
-    Wall w1 = new Wall(new Vector3d(9, 0, 0), 19, 1, this);
-    w1.rotate90(1);
-    add(w1);
-    Wall w2 = new Wall(new Vector3d(-9, 0, 0), 19, 2, this);
-    w2.rotate90(1);
-    add(w2);
-    Wall w3 = new Wall(new Vector3d(0, 0, 9), 19, 1, this);
-    add(w3);
-    Wall w4 = new Wall(new Vector3d(0, 0, -9), 19, 2, this);
-    add(w4);
-    Box b1 = new Box(new Vector3d(-3, 0, -3), new Vector3f(1, 1, 2), this);
-    add(b1);
-    Arch a1 = new Arch(new Vector3d(3, 0, -3), this);
-    add(a1);
-    add(new DemoRobotImager(new Vector3d(0, 0, 0), "DemoRobot"));
-  }
+	public ImagerDemo() {
+		Wall w1 = new Wall(new Vector3d(9, 0, 0), 19, 1, this);
+		w1.rotate90(1);
+		add(w1);
+		Wall w2 = new Wall(new Vector3d(-9, 0, 0), 19, 2, this);
+		w2.rotate90(1);
+		add(w2);
+		Wall w3 = new Wall(new Vector3d(0, 0, 9), 19, 1, this);
+		add(w3);
+		Wall w4 = new Wall(new Vector3d(0, 0, -9), 19, 2, this);
+		add(w4);
+		Box b1 = new Box(new Vector3d(-3, 0, -3), new Vector3f(1, 1, 2), this);
+		add(b1);
+		Arch a1 = new Arch(new Vector3d(3, 0, -3), this);
+		add(a1);
+		add(new DemoRobotImager(new Vector3d(0, 0, 0), "DemoRobot"));
+	}
 }

@@ -96,482 +96,489 @@ import com.oculusvr.capi.ViewScaleDesc;
  */
 public class OculusDisplay implements Runnable {
 
-  public final static Logger log = LoggerFactory.getLogger(OculusDisplay.class);
-  // operate the display on a thread so we don't block
-  transient Thread displayThread = null;
-  // the oculus service
-  transient public OculusRift oculus;
-  private int width;
-  private int height;
-  private float ipd;
-  private float eyeHeight;
-  protected Hmd hmd;
-  protected HmdDesc hmdDesc;
-  ContextAttribs contextAttributes;
-  protected PixelFormat pixelFormat = new PixelFormat();
-  private GLContext glContext = new GLContext();
-  private final FovPort[] fovPorts = FovPort.buildPair();
-  protected final Posef[] poses = Posef.buildPair();
-  private final Matrix4f[] projections = new Matrix4f[2];
-  private final OvrVector3f[] eyeOffsets = OvrVector3f.buildPair();
-  private final OvrSizei[] textureSizes = new OvrSizei[2];
-  private final ViewScaleDesc viewScaleDesc = new ViewScaleDesc();
-  private FrameBuffer frameBuffer = null;
-  // keep track of how many frames we have submitted to the display.
-  private int frameCount = -1;
-  private TextureSwapChain swapChain = null;
-  // a texture to mirror what is displayed on the rift.
-  private MirrorTexture mirrorTexture = null;
-  // this is what gets submitted to the rift for display.
-  private LayerEyeFov layer = new LayerEyeFov();
-  // The last image captured from the OpenCV services (left&right)
-  private RiftFrame currentFrame;
+	public final static Logger log = LoggerFactory.getLogger(OculusDisplay.class);
+	// operate the display on a thread so we don't block
+	transient Thread displayThread = null;
+	// the oculus service
+	transient public OculusRift oculus;
+	private int width;
+	private int height;
+	private float ipd;
+	private float eyeHeight;
+	protected Hmd hmd;
+	protected HmdDesc hmdDesc;
+	ContextAttribs contextAttributes;
+	protected PixelFormat pixelFormat = new PixelFormat();
+	private GLContext glContext = new GLContext();
+	private final FovPort[] fovPorts = FovPort.buildPair();
+	protected final Posef[] poses = Posef.buildPair();
+	private final Matrix4f[] projections = new Matrix4f[2];
+	private final OvrVector3f[] eyeOffsets = OvrVector3f.buildPair();
+	private final OvrSizei[] textureSizes = new OvrSizei[2];
+	private final ViewScaleDesc viewScaleDesc = new ViewScaleDesc();
+	private FrameBuffer frameBuffer = null;
+	// keep track of how many frames we have submitted to the display.
+	private int frameCount = -1;
+	private TextureSwapChain swapChain = null;
+	// a texture to mirror what is displayed on the rift.
+	private MirrorTexture mirrorTexture = null;
+	// this is what gets submitted to the rift for display.
+	private LayerEyeFov layer = new LayerEyeFov();
+	// The last image captured from the OpenCV services (left&right)
+	private RiftFrame currentFrame;
 
-  private static Program unitQuadProgram;
-  private static VertexArray unitQuadVao;
+	private static Program unitQuadProgram;
+	private static VertexArray unitQuadVao;
 
-  private static final String UNIT_QUAD_VS;
-  private static final String UNIT_QUAD_FS;
-  private static final String SHADERS_TEXTURED_VS;
-  private static final String SHADERS_TEXTURED_FS;
-  private static final String SHADERS_CUBEMAP_VS;
-  private static final String SHADERS_CUBEMAP_FS;
+	private static final String UNIT_QUAD_VS;
+	private static final String UNIT_QUAD_FS;
+	private static final String SHADERS_TEXTURED_VS;
+	private static final String SHADERS_TEXTURED_FS;
+	private static final String SHADERS_CUBEMAP_VS;
+	private static final String SHADERS_CUBEMAP_FS;
 
-  private static IndexedGeometry screenGeometry;
-  private static Program screenProgram;
+	private static IndexedGeometry screenGeometry;
+	private static Program screenProgram;
 
-  private static IndexedGeometry cubeGeometry;
-  private static Program skyboxProgram;
-  private static Texture skyboxTexture;
+	private static IndexedGeometry cubeGeometry;
+	private static Program skyboxProgram;
+	private static Texture skyboxTexture;
 
-  private volatile boolean newFrame = true;
-  private float screenSize = 1.0f;
+	private volatile boolean newFrame = true;
+	private float screenSize = 1.0f;
 
-  public volatile boolean trackHead = true;
+	public volatile boolean trackHead = true;
 
-  static {
-    try {
-      UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.vs"), Charsets.UTF_8);
-      UNIT_QUAD_FS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource("resource/oculus/Textured.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource("resource/oculus/Textured.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.fs"), Charsets.UTF_8);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
-  }
+	static {
+		try {
+			UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.vs"), Charsets.UTF_8);
+			UNIT_QUAD_FS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.fs"), Charsets.UTF_8);
+			SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource("resource/oculus/Textured.fs"),
+					Charsets.UTF_8);
+			SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource("resource/oculus/Textured.vs"),
+					Charsets.UTF_8);
+			SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.vs"),
+					Charsets.UTF_8);
+			SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.fs"),
+					Charsets.UTF_8);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
-  private static final Resource SKYBOX[] = { IMAGES_SKY_CITY_XPOS_PNG, IMAGES_SKY_CITY_XNEG_PNG, IMAGES_SKY_CITY_YPOS_PNG, IMAGES_SKY_CITY_YNEG_PNG, IMAGES_SKY_CITY_ZPOS_PNG,
-      IMAGES_SKY_CITY_ZNEG_PNG, };
+	private static final Resource SKYBOX[] = { IMAGES_SKY_CITY_XPOS_PNG, IMAGES_SKY_CITY_XNEG_PNG,
+			IMAGES_SKY_CITY_YPOS_PNG, IMAGES_SKY_CITY_YNEG_PNG, IMAGES_SKY_CITY_ZPOS_PNG, IMAGES_SKY_CITY_ZNEG_PNG, };
 
-  public Orientation orientationInfo;
+	public Orientation orientationInfo;
 
-  // textures for the screen one for the left eye, one for the right eye.
-  private Texture leftTexture;
-  private Texture rightTexture;
+	// textures for the screen one for the left eye, one for the right eye.
+	private Texture leftTexture;
+	private Texture rightTexture;
 
-  public OculusDisplay() {
-  }
+	public OculusDisplay() {
+	}
 
-  private void recenterView() {
-    org.saintandreas.math.Vector3f center = org.saintandreas.math.Vector3f.UNIT_Y.mult(eyeHeight);
-    org.saintandreas.math.Vector3f eye = new org.saintandreas.math.Vector3f(0, eyeHeight, ipd * 10.0f);
-    MatrixStack.MODELVIEW.lookat(eye, center, org.saintandreas.math.Vector3f.UNIT_Y);
-    hmd.recenterPose();
-  }
+	private void recenterView() {
+		org.saintandreas.math.Vector3f center = org.saintandreas.math.Vector3f.UNIT_Y.mult(eyeHeight);
+		org.saintandreas.math.Vector3f eye = new org.saintandreas.math.Vector3f(0, eyeHeight, ipd * 10.0f);
+		MatrixStack.MODELVIEW.lookat(eye, center, org.saintandreas.math.Vector3f.UNIT_Y);
+		hmd.recenterPose();
+	}
 
-  public void updateOrientation(Orientation orientation) {
-    // TODO: we can probably remove this , the orientation info is known when
-    // we're rendering.
-    this.orientationInfo = orientation;
-  }
+	public void updateOrientation(Orientation orientation) {
+		// TODO: we can probably remove this , the orientation info is known when
+		// we're rendering.
+		this.orientationInfo = orientation;
+	}
 
-  // sets up the opengl display for rendering the mirror texture.
-  protected final void setupDisplay() {
-    // our size. / resolution? is this configurable? maybe not?
-    width = hmdDesc.Resolution.w / 4;
-    height = hmdDesc.Resolution.h / 4;
-    int left = 100;
-    int right = 100;
-    try {
-      Display.setDisplayMode(new DisplayMode(width, height));
-    } catch (LWJGLException e) {
-      throw new RuntimeException(e);
-    }
-    Display.setTitle("MRL Oculus Rift Viewer");
-    Display.setLocation(left, right);
-    Display.setVSyncEnabled(true);
-    onResize(width, height);
-    log.info("Setup Oculus Diplsay with resolution {} x {}", width, height);
-  }
+	// sets up the opengl display for rendering the mirror texture.
+	protected final void setupDisplay() {
+		// our size. / resolution? is this configurable? maybe not?
+		width = hmdDesc.Resolution.w / 4;
+		height = hmdDesc.Resolution.h / 4;
+		int left = 100;
+		int right = 100;
+		try {
+			Display.setDisplayMode(new DisplayMode(width, height));
+		} catch (LWJGLException e) {
+			throw new RuntimeException(e);
+		}
+		Display.setTitle("MRL Oculus Rift Viewer");
+		Display.setLocation(left, right);
+		Display.setVSyncEnabled(true);
+		onResize(width, height);
+		log.info("Setup Oculus Diplsay with resolution {} x {}", width, height);
+	}
 
-  // if the window is resized.
-  protected void onResize(int width, int height) {
-    this.width = width;
-    this.height = height;
-  }
+	// if the window is resized.
+	protected void onResize(int width, int height) {
+		this.width = width;
+		this.height = height;
+	}
 
-  // initialize the oculus hmd
-  private void internalInit() {
-    // constructor
-    // start up hmd libs
-    initHmd();
-    // initialize the opengl rendering context
-    initGl();
-    // look ahead
-    recenterView();
-  }
+	// initialize the oculus hmd
+	private void internalInit() {
+		// constructor
+		// start up hmd libs
+		initHmd();
+		// initialize the opengl rendering context
+		initGl();
+		// look ahead
+		recenterView();
+	}
 
-  // oculus device initialization, assumes that oculus runtime is up and running
-  // on the server.
-  private void initHmd() {
-    if (hmd == null) {
-      Hmd.initialize();
-      try {
-        Thread.sleep(400);
-      } catch (InterruptedException e) {
-        throw new IllegalStateException(e);
-      }
-      // create it (this should be owned by the Oculus service i think? and
-      // passed in with setHmd(hmd)
-      hmd = Hmd.create();
-    }
-    if (null == hmd) {
-      throw new IllegalStateException("Unable to initialize HMD");
-    }
-    // grab the description of the device.
-    hmdDesc = hmd.getDesc();
-    // hmd.recenterPose();
-    for (int eye = 0; eye < 2; ++eye) {
-      fovPorts[eye] = hmdDesc.DefaultEyeFov[eye];
-      OvrMatrix4f m = Hmd.getPerspectiveProjection(fovPorts[eye], 0.1f, 1000000f, ovrProjection_ClipRangeOpenGL);
-      projections[eye] = toMatrix4f(m);
-      textureSizes[eye] = hmd.getFovTextureSize(eye, fovPorts[eye], 1.0f);
-    }
-    // TODO: maybe ipd and eyeHeight go away?
-    ipd = hmd.getFloat(OvrLibrary.OVR_KEY_IPD, OVR_DEFAULT_IPD);
-    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT,
-    // OVR_DEFAULT_EYE_HEIGHT);
-    eyeHeight = 0;
-  }
+	// oculus device initialization, assumes that oculus runtime is up and running
+	// on the server.
+	private void initHmd() {
+		if (hmd == null) {
+			Hmd.initialize();
+			try {
+				Thread.sleep(400);
+			} catch (InterruptedException e) {
+				throw new IllegalStateException(e);
+			}
+			// create it (this should be owned by the Oculus service i think? and
+			// passed in with setHmd(hmd)
+			hmd = Hmd.create();
+		}
+		if (null == hmd) {
+			throw new IllegalStateException("Unable to initialize HMD");
+		}
+		// grab the description of the device.
+		hmdDesc = hmd.getDesc();
+		// hmd.recenterPose();
+		for (int eye = 0; eye < 2; ++eye) {
+			fovPorts[eye] = hmdDesc.DefaultEyeFov[eye];
+			OvrMatrix4f m = Hmd.getPerspectiveProjection(fovPorts[eye], 0.1f, 1000000f, ovrProjection_ClipRangeOpenGL);
+			projections[eye] = toMatrix4f(m);
+			textureSizes[eye] = hmd.getFovTextureSize(eye, fovPorts[eye], 1.0f);
+		}
+		// TODO: maybe ipd and eyeHeight go away?
+		ipd = hmd.getFloat(OvrLibrary.OVR_KEY_IPD, OVR_DEFAULT_IPD);
+		// eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT,
+		// OVR_DEFAULT_EYE_HEIGHT);
+		eyeHeight = 0;
+	}
 
-  // Main rendering loop for running the oculus display.
-  public void run() {
-    internalInit();
-    // Load the screen in the scene i guess first.
-    while (!Display.isCloseRequested()) {
-      if (Display.wasResized()) {
-        onResize(Display.getWidth(), Display.getHeight());
-      }
-      update();
-      drawFrame();
-      finishFrame();
-    }
-    onDestroy();
-    Display.destroy();
-  }
+	// Main rendering loop for running the oculus display.
+	public void run() {
+		internalInit();
+		// Load the screen in the scene i guess first.
+		while (!Display.isCloseRequested()) {
+			if (Display.wasResized()) {
+				onResize(Display.getWidth(), Display.getHeight());
+			}
+			update();
+			drawFrame();
+			finishFrame();
+		}
+		onDestroy();
+		Display.destroy();
+	}
 
-  public final void drawFrame() {
-    // System.out.println("Draw Frame called.");
-    if (currentFrame == null) {
-      return;
-    }
-    if (currentFrame.left == null || currentFrame.right == null) {
-      return;
-    }
-    // load new textures if a new rift frame has arrived.
-    if (newFrame) {
-      loadRiftFrameTextures();
-      newFrame = false;
-    }
+	public final void drawFrame() {
+		// System.out.println("Draw Frame called.");
+		if (currentFrame == null) {
+			return;
+		}
+		if (currentFrame.left == null || currentFrame.right == null) {
+			return;
+		}
+		// load new textures if a new rift frame has arrived.
+		if (newFrame) {
+			loadRiftFrameTextures();
+			newFrame = false;
+		}
 
-    width = hmdDesc.Resolution.w / 4;
-    height = hmdDesc.Resolution.h / 4;
+		width = hmdDesc.Resolution.w / 4;
+		height = hmdDesc.Resolution.h / 4;
 
-    ++frameCount;
-    Posef eyePoses[] = hmd.getEyePoses(frameCount, eyeOffsets);
-    frameBuffer.activate();
+		++frameCount;
+		Posef eyePoses[] = hmd.getEyePoses(frameCount, eyeOffsets);
+		frameBuffer.activate();
 
-    MatrixStack pr = MatrixStack.PROJECTION;
-    MatrixStack mv = MatrixStack.MODELVIEW;
-    int textureId = swapChain.getTextureId(swapChain.getCurrentIndex());
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
-    for (int eye = 0; eye < 2; ++eye) {
-      OvrRecti vp = layer.Viewport[eye];
-      glScissor(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
-      glViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
-      pr.set(projections[eye]);
-      Posef pose = eyePoses[eye];
-      // This doesn't work as it breaks the contiguous nature of the array
-      // FIXME there has to be a better way to do this
-      poses[eye].Orientation = pose.Orientation;
-      poses[eye].Position = pose.Position;
-      if (trackHead)
-        mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1)).preRotate(toQuaternion(poses[eye].Orientation).inverse());
-      // TODO: is there a way to render both of these are the same time?
-      if (eye == 0 && currentFrame.left != null) {
-        renderScreen(leftTexture, orientationInfo);
-      } else if (eye == 1 && currentFrame.right != null) {
-        renderScreen(rightTexture, orientationInfo);
-      }
-      if (trackHead)
-        mv.pop();
-    }
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-    frameBuffer.deactivate();
+		MatrixStack pr = MatrixStack.PROJECTION;
+		MatrixStack mv = MatrixStack.MODELVIEW;
+		int textureId = swapChain.getTextureId(swapChain.getCurrentIndex());
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+		for (int eye = 0; eye < 2; ++eye) {
+			OvrRecti vp = layer.Viewport[eye];
+			glScissor(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
+			glViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
+			pr.set(projections[eye]);
+			Posef pose = eyePoses[eye];
+			// This doesn't work as it breaks the contiguous nature of the array
+			// FIXME there has to be a better way to do this
+			poses[eye].Orientation = pose.Orientation;
+			poses[eye].Position = pose.Position;
+			if (trackHead)
+				mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1))
+						.preRotate(toQuaternion(poses[eye].Orientation).inverse());
+			// TODO: is there a way to render both of these are the same time?
+			if (eye == 0 && currentFrame.left != null) {
+				renderScreen(leftTexture, orientationInfo);
+			} else if (eye == 1 && currentFrame.right != null) {
+				renderScreen(rightTexture, orientationInfo);
+			}
+			if (trackHead)
+				mv.pop();
+		}
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+		frameBuffer.deactivate();
 
-    swapChain.commit();
-    hmd.submitFrame(frameCount, layer);
+		swapChain.commit();
+		hmd.submitFrame(frameCount, layer);
 
-    // FIXME Copy the layer to the main window using a mirror texture
-    glScissor(0, 0, width, height);
-    glViewport(0, 0, width, height);
-    glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // SceneHelpers.renderTexturedQuad(mirrorTexture.getTextureId());
+		// FIXME Copy the layer to the main window using a mirror texture
+		glScissor(0, 0, width, height);
+		glViewport(0, 0, width, height);
+		glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// SceneHelpers.renderTexturedQuad(mirrorTexture.getTextureId());
 
-    // I think this renders the mirror window
-    renderTexturedQuad(mirrorTexture.getTextureId());
+		// I think this renders the mirror window
+		renderTexturedQuad(mirrorTexture.getTextureId());
 
-  }
+	}
 
-  private void loadRiftFrameTextures() {
+	private void loadRiftFrameTextures() {
 
-    // if the left & right texture are already loaded, let's delete them
-    if (leftTexture != null)
-      glDeleteTextures(leftTexture.id);
-    if (rightTexture != null)
-      glDeleteTextures(rightTexture.id);
+		// if the left & right texture are already loaded, let's delete them
+		if (leftTexture != null)
+			glDeleteTextures(leftTexture.id);
+		if (rightTexture != null)
+			glDeleteTextures(rightTexture.id);
 
-    // here we can just update the textures that we're using
-    leftTexture = Texture.loadImage(currentFrame.left.getImage());
-    rightTexture = Texture.loadImage(currentFrame.right.getImage());
+		// here we can just update the textures that we're using
+		leftTexture = Texture.loadImage(currentFrame.left.getImage());
+		rightTexture = Texture.loadImage(currentFrame.right.getImage());
 
-    leftTexture.bind();
-    leftTexture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    leftTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    leftTexture.unbind();
+		leftTexture.bind();
+		leftTexture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		leftTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		leftTexture.unbind();
 
-    rightTexture.bind();
-    rightTexture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    rightTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    rightTexture.unbind();
-  }
+		rightTexture.bind();
+		rightTexture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		rightTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		rightTexture.unbind();
+	}
 
-  protected void finishFrame() {
-    // // Display update combines both input processing and
-    // // buffer swapping. We want only the input processing
-    // // so we have to call processMessages.
-    // Display.processMessages();
-    Display.update();
-  }
+	protected void finishFrame() {
+		// // Display update combines both input processing and
+		// // buffer swapping. We want only the input processing
+		// // so we have to call processMessages.
+		// Display.processMessages();
+		Display.update();
+	}
 
-  protected void initGl() {
-    try {
-      contextAttributes = new ContextAttribs(4, 1).withProfileCore(true).withDebug(true);
-      setupDisplay();
-      Display.create(pixelFormat, contextAttributes);
-      // This supresses a strange error where when using
-      // the Oculus Rift in direct mode on Windows,
-      // there is an OpenGL GL_INVALID_FRAMEBUFFER_OPERATION
-      // error present immediately after the context has been created.
-      @SuppressWarnings("unused")
-      int err = glGetError();
-      GLContext.useContext(glContext, false);
-      // TODO: maybe get rid of these?
-      Mouse.create();
-      Keyboard.create();
-    } catch (LWJGLException e) {
-      throw new RuntimeException(e);
-    }
+	protected void initGl() {
+		try {
+			contextAttributes = new ContextAttribs(4, 1).withProfileCore(true).withDebug(true);
+			setupDisplay();
+			Display.create(pixelFormat, contextAttributes);
+			// This supresses a strange error where when using
+			// the Oculus Rift in direct mode on Windows,
+			// there is an OpenGL GL_INVALID_FRAMEBUFFER_OPERATION
+			// error present immediately after the context has been created.
+			@SuppressWarnings("unused")
+			int err = glGetError();
+			GLContext.useContext(glContext, false);
+			// TODO: maybe get rid of these?
+			Mouse.create();
+			Keyboard.create();
+		} catch (LWJGLException e) {
+			throw new RuntimeException(e);
+		}
 
-    Display.setVSyncEnabled(false);
-    TextureSwapChainDesc desc = new TextureSwapChainDesc();
-    desc.Type = OvrLibrary.ovrTextureType.ovrTexture_2D;
-    desc.ArraySize = 1;
-    desc.Width = textureSizes[0].w + textureSizes[1].w;
-    desc.Height = textureSizes[0].h;
-    desc.MipLevels = 1;
-    desc.Format = OvrLibrary.ovrTextureFormat.OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
-    desc.SampleCount = 1;
-    desc.StaticImage = false;
-    swapChain = hmd.createSwapTextureChain(desc);
-    MirrorTextureDesc mirrorDesc = new MirrorTextureDesc();
-    mirrorDesc.Format = OvrLibrary.ovrTextureFormat.OVR_FORMAT_R8G8B8A8_UNORM;
-    mirrorDesc.Width = width;
-    mirrorDesc.Height = height;
-    mirrorTexture = hmd.createMirrorTexture(mirrorDesc);
+		Display.setVSyncEnabled(false);
+		TextureSwapChainDesc desc = new TextureSwapChainDesc();
+		desc.Type = OvrLibrary.ovrTextureType.ovrTexture_2D;
+		desc.ArraySize = 1;
+		desc.Width = textureSizes[0].w + textureSizes[1].w;
+		desc.Height = textureSizes[0].h;
+		desc.MipLevels = 1;
+		desc.Format = OvrLibrary.ovrTextureFormat.OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
+		desc.SampleCount = 1;
+		desc.StaticImage = false;
+		swapChain = hmd.createSwapTextureChain(desc);
+		MirrorTextureDesc mirrorDesc = new MirrorTextureDesc();
+		mirrorDesc.Format = OvrLibrary.ovrTextureFormat.OVR_FORMAT_R8G8B8A8_UNORM;
+		mirrorDesc.Width = width;
+		mirrorDesc.Height = height;
+		mirrorTexture = hmd.createMirrorTexture(mirrorDesc);
 
-    layer.Header.Type = OvrLibrary.ovrLayerType.ovrLayerType_EyeFov;
-    layer.ColorTexure[0] = swapChain;
-    layer.Fov = fovPorts;
-    layer.RenderPose = poses;
-    for (int eye = 0; eye < 2; ++eye) {
-      layer.Viewport[eye].Size = textureSizes[eye];
-      layer.Viewport[eye].Pos = new OvrVector2i(0, 0);
-    }
-    layer.Viewport[1].Pos.x = layer.Viewport[1].Size.w;
-    frameBuffer = new FrameBuffer(desc.Width, desc.Height);
+		layer.Header.Type = OvrLibrary.ovrLayerType.ovrLayerType_EyeFov;
+		layer.ColorTexure[0] = swapChain;
+		layer.Fov = fovPorts;
+		layer.RenderPose = poses;
+		for (int eye = 0; eye < 2; ++eye) {
+			layer.Viewport[eye].Size = textureSizes[eye];
+			layer.Viewport[eye].Pos = new OvrVector2i(0, 0);
+		}
+		layer.Viewport[1].Pos.x = layer.Viewport[1].Size.w;
+		frameBuffer = new FrameBuffer(desc.Width, desc.Height);
 
-    for (int eye = 0; eye < 2; ++eye) {
-      EyeRenderDesc eyeRenderDesc = hmd.getRenderDesc(eye, fovPorts[eye]);
-      this.eyeOffsets[eye].x = eyeRenderDesc.HmdToEyeViewOffset.x;
-      this.eyeOffsets[eye].y = eyeRenderDesc.HmdToEyeViewOffset.y;
-      this.eyeOffsets[eye].z = eyeRenderDesc.HmdToEyeViewOffset.z;
-    }
-    viewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
-  }
+		for (int eye = 0; eye < 2; ++eye) {
+			EyeRenderDesc eyeRenderDesc = hmd.getRenderDesc(eye, fovPorts[eye]);
+			this.eyeOffsets[eye].x = eyeRenderDesc.HmdToEyeViewOffset.x;
+			this.eyeOffsets[eye].y = eyeRenderDesc.HmdToEyeViewOffset.y;
+			this.eyeOffsets[eye].z = eyeRenderDesc.HmdToEyeViewOffset.z;
+		}
+		viewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
+	}
 
-  protected void onDestroy() {
-    hmd.destroy();
-    Hmd.shutdown();
-  }
+	protected void onDestroy() {
+		hmd.destroy();
+		Hmd.shutdown();
+	}
 
-  protected void update() {
-    // TODO: some sort of update logic for the game?
-    // while (Keyboard.next()) {
-    // onKeyboardEvent();
-    // }
-    //
-    // while (Mouse.next()) {
-    // onMouseEvent();
-    // }
-    // TODO : nothing?
-    // Here we could update our projection matrix based on HMD info
-  }
+	protected void update() {
+		// TODO: some sort of update logic for the game?
+		// while (Keyboard.next()) {
+		// onKeyboardEvent();
+		// }
+		//
+		// while (Mouse.next()) {
+		// onMouseEvent();
+		// }
+		// TODO : nothing?
+		// Here we could update our projection matrix based on HMD info
+	}
 
-  // TODO: synchronize access to the current frame?
-  public synchronized RiftFrame getCurrentFrame() {
-    return currentFrame;
-  }
+	// TODO: synchronize access to the current frame?
+	public synchronized RiftFrame getCurrentFrame() {
+		return currentFrame;
+	}
 
-  // TODO: do i need to synchronize this?
-  public synchronized void setCurrentFrame(RiftFrame currentFrame) {
-    this.currentFrame = currentFrame;
-    newFrame = true;
-  }
+	// TODO: do i need to synchronize this?
+	public synchronized void setCurrentFrame(RiftFrame currentFrame) {
+		this.currentFrame = currentFrame;
+		newFrame = true;
+	}
 
-  public static void renderTexturedQuad(int texture) {
-    if (null == unitQuadProgram) {
-      unitQuadProgram = new Program(UNIT_QUAD_VS, UNIT_QUAD_FS);
-      unitQuadProgram.link();
-    }
-    if (null == unitQuadVao) {
-      unitQuadVao = new VertexArray();
-    }
-    unitQuadProgram.use();
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    unitQuadVao.bind();
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    Texture.unbind(GL_TEXTURE_2D);
-    Program.clear();
-    VertexArray.unbind();
-  }
+	public static void renderTexturedQuad(int texture) {
+		if (null == unitQuadProgram) {
+			unitQuadProgram = new Program(UNIT_QUAD_VS, UNIT_QUAD_FS);
+			unitQuadProgram.link();
+		}
+		if (null == unitQuadVao) {
+			unitQuadVao = new VertexArray();
+		}
+		unitQuadProgram.use();
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		unitQuadVao.bind();
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		Texture.unbind(GL_TEXTURE_2D);
+		Program.clear();
+		VertexArray.unbind();
+	}
 
-  public static void renderSkybox() {
-    if (null == cubeGeometry) {
-      cubeGeometry = OpenGL.makeColorCube();
-    }
-    if (null == skyboxProgram) {
-      skyboxProgram = new Program(SHADERS_CUBEMAP_VS, SHADERS_CUBEMAP_FS);
-      skyboxProgram.link();
-    }
-    if (null == skyboxTexture) {
-      skyboxTexture = OpenGL.getCubemapTextures(SKYBOX);
-    }
-    MatrixStack mv = MatrixStack.MODELVIEW;
-    cubeGeometry.bindVertexArray();
-    mv.push();
-    Quaternion q = mv.getRotation();
-    mv.identity().rotate(q);
-    skyboxProgram.use();
-    OpenGL.bindAll(skyboxProgram);
-    glCullFace(GL_FRONT);
-    skyboxTexture.bind();
-    glDisable(GL_DEPTH_TEST);
-    cubeGeometry.draw();
-    glEnable(GL_DEPTH_TEST);
-    skyboxTexture.unbind();
-    glCullFace(GL_BACK);
-    mv.pop();
-  }
+	public static void renderSkybox() {
+		if (null == cubeGeometry) {
+			cubeGeometry = OpenGL.makeColorCube();
+		}
+		if (null == skyboxProgram) {
+			skyboxProgram = new Program(SHADERS_CUBEMAP_VS, SHADERS_CUBEMAP_FS);
+			skyboxProgram.link();
+		}
+		if (null == skyboxTexture) {
+			skyboxTexture = OpenGL.getCubemapTextures(SKYBOX);
+		}
+		MatrixStack mv = MatrixStack.MODELVIEW;
+		cubeGeometry.bindVertexArray();
+		mv.push();
+		Quaternion q = mv.getRotation();
+		mv.identity().rotate(q);
+		skyboxProgram.use();
+		OpenGL.bindAll(skyboxProgram);
+		glCullFace(GL_FRONT);
+		skyboxTexture.bind();
+		glDisable(GL_DEPTH_TEST);
+		cubeGeometry.draw();
+		glEnable(GL_DEPTH_TEST);
+		skyboxTexture.unbind();
+		glCullFace(GL_BACK);
+		mv.pop();
+	}
 
-  /*
-   * helper function to render an image on the current bound texture.
-   */
-  public void renderScreen(Texture screenTexture, Orientation orientation) {
-    // clean up
-    glClear(GL_DEPTH_BUFFER_BIT);
-    renderSkybox();
-    // TODO: don't lazy create this.
-    if (null == screenGeometry) {
-      screenGeometry = OpenGL.makeTexturedQuad(new Vector2f(-screenSize, -screenSize), new Vector2f(screenSize, screenSize));
-    }
-    if (null == screenProgram) {
-      screenProgram = new Program(SHADERS_TEXTURED_VS, SHADERS_TEXTURED_FS);
-      screenProgram.link();
-    }
-    screenProgram.use();
-    OpenGL.bindAll(screenProgram);
-    screenTexture.bind();
-    screenGeometry.bindVertexArray();
-    screenGeometry.draw();
-    Texture.unbind(GL_TEXTURE_2D);
-    Program.clear();
-    VertexArray.unbind();
-  }
+	/*
+	 * helper function to render an image on the current bound texture.
+	 */
+	public void renderScreen(Texture screenTexture, Orientation orientation) {
+		// clean up
+		glClear(GL_DEPTH_BUFFER_BIT);
+		renderSkybox();
+		// TODO: don't lazy create this.
+		if (null == screenGeometry) {
+			screenGeometry = OpenGL.makeTexturedQuad(new Vector2f(-screenSize, -screenSize),
+					new Vector2f(screenSize, screenSize));
+		}
+		if (null == screenProgram) {
+			screenProgram = new Program(SHADERS_TEXTURED_VS, SHADERS_TEXTURED_FS);
+			screenProgram.link();
+		}
+		screenProgram.use();
+		OpenGL.bindAll(screenProgram);
+		screenTexture.bind();
+		screenGeometry.bindVertexArray();
+		screenGeometry.draw();
+		Texture.unbind(GL_TEXTURE_2D);
+		Program.clear();
+		VertexArray.unbind();
+	}
 
-  public int getWidth() {
-    return width;
-  }
+	public int getWidth() {
+		return width;
+	}
 
-  public int getHeight() {
-    return height;
-  }
+	public int getHeight() {
+		return height;
+	}
 
-  public void start() {
-    log.info("starting oculus display thread");
-    if (displayThread != null) {
-      log.info("Oculus Display thread already started.");
-      return;
-    }
-    // create a thread to run the main render loop
-    displayThread = new Thread(this, String.format("%s_oculusDisplayThread", oculus.getName()));
-    displayThread.start();
-  }
+	public void start() {
+		log.info("starting oculus display thread");
+		if (displayThread != null) {
+			log.info("Oculus Display thread already started.");
+			return;
+		}
+		// create a thread to run the main render loop
+		displayThread = new Thread(this, String.format("%s_oculusDisplayThread", oculus.getName()));
+		displayThread.start();
+	}
 
-  public Hmd getHmd() {
-    return hmd;
-  }
+	public Hmd getHmd() {
+		return hmd;
+	}
 
-  public void setHmd(Hmd hmd) {
-    this.hmd = hmd;
-  }
+	public void setHmd(Hmd hmd) {
+		this.hmd = hmd;
+	}
 
-  // The following methods are taken from the joculur-examples
-  public static Vector3f toVector3f(OvrVector3f v) {
-    return new Vector3f(v.x, v.y, v.z);
-  }
+	// The following methods are taken from the joculur-examples
+	public static Vector3f toVector3f(OvrVector3f v) {
+		return new Vector3f(v.x, v.y, v.z);
+	}
 
-  public static Quaternion toQuaternion(OvrQuaternionf q) {
-    return new Quaternion(q.x, q.y, q.z, q.w);
-  }
+	public static Quaternion toQuaternion(OvrQuaternionf q) {
+		return new Quaternion(q.x, q.y, q.z, q.w);
+	}
 
-  public static Matrix4f toMatrix4f(Posef p) {
-    return new Matrix4f().rotate(toQuaternion(p.Orientation)).mult(new Matrix4f().translate(toVector3f(p.Position)));
-  }
+	public static Matrix4f toMatrix4f(Posef p) {
+		return new Matrix4f().rotate(toQuaternion(p.Orientation))
+				.mult(new Matrix4f().translate(toVector3f(p.Position)));
+	}
 
-  public static Matrix4f toMatrix4f(OvrMatrix4f m) {
-    if (null == m) {
-      return new Matrix4f();
-    }
-    return new Matrix4f(m.M).transpose();
-  }
-  // End methods from saintandreas
+	public static Matrix4f toMatrix4f(OvrMatrix4f m) {
+		if (null == m) {
+			return new Matrix4f();
+		}
+		return new Matrix4f(m.M).transpose();
+	}
+	// End methods from saintandreas
 
 }

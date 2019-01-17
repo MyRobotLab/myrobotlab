@@ -43,76 +43,76 @@ import org.slf4j.Logger;
 // FIXME - add ui parameters
 public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAdaptiveThreshold.class);
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAdaptiveThreshold.class);
 
-  transient IplImage gray = null;
+	transient IplImage gray = null;
 
-  public OpenCVFilterAdaptiveThreshold(String name) {
-    super(name);
-  }
+	public OpenCVFilterAdaptiveThreshold(String name) {
+		super(name);
+	}
 
-  /*
-   * Threshold Applies fixed-level threshold to array elements
-   * 
-   * void cvThreshold( const CvArr* src, CvArr* dst, double threshold, double
-   * maxValue, int thresholdType ); src Source array (single-channel, 8-bit of
-   * 32-bit floating point). dst Destination array; must be either the same type
-   * as src or 8-bit. threshold Threshold value. maxValue Maximum value to use
-   * with CV_THRESH_BINARY, CV_THRESH_BINARY_INV, and CV_THRESH_TRUNC
-   * thresholding types. thresholdType Thresholding type (see the discussion)
-   * The function cvThreshold applies fixed-level thresholding to single-channel
-   * array. The function is typically used to get bi-level (binary) image out of
-   * grayscale image or for removing a noise, i.e. filtering out pixels with too
-   * small or too large values. There are several types of thresholding the
-   * function supports that are determined by thresholdType:
-   * 
-   * thresholdType=CV_THRESH_BINARY: dst(x,y) = maxValue, if src(x,y)>threshold
-   * 0, otherwise
-   * 
-   * thresholdType=CV_THRESH_BINARY_INV: dst(x,y) = 0, if src(x,y)>threshold
-   * maxValue, otherwise
-   * 
-   * thresholdType=CV_THRESH_TRUNC: dst(x,y) = threshold, if src(x,y)>threshold
-   * src(x,y), otherwise
-   * 
-   * thresholdType=CV_THRESH_TOZERO: dst(x,y) = src(x,y), if (x,y)>threshold 0,
-   * otherwise
-   * 
-   * thresholdType=CV_THRESH_TOZERO_INV: dst(x,y) = 0, if src(x,y)>threshold
-   * src(x,y), otherwise
-   */
+	/*
+	 * Threshold Applies fixed-level threshold to array elements
+	 * 
+	 * void cvThreshold( const CvArr* src, CvArr* dst, double threshold, double
+	 * maxValue, int thresholdType ); src Source array (single-channel, 8-bit of
+	 * 32-bit floating point). dst Destination array; must be either the same type
+	 * as src or 8-bit. threshold Threshold value. maxValue Maximum value to use
+	 * with CV_THRESH_BINARY, CV_THRESH_BINARY_INV, and CV_THRESH_TRUNC thresholding
+	 * types. thresholdType Thresholding type (see the discussion) The function
+	 * cvThreshold applies fixed-level thresholding to single-channel array. The
+	 * function is typically used to get bi-level (binary) image out of grayscale
+	 * image or for removing a noise, i.e. filtering out pixels with too small or
+	 * too large values. There are several types of thresholding the function
+	 * supports that are determined by thresholdType:
+	 * 
+	 * thresholdType=CV_THRESH_BINARY: dst(x,y) = maxValue, if src(x,y)>threshold 0,
+	 * otherwise
+	 * 
+	 * thresholdType=CV_THRESH_BINARY_INV: dst(x,y) = 0, if src(x,y)>threshold
+	 * maxValue, otherwise
+	 * 
+	 * thresholdType=CV_THRESH_TRUNC: dst(x,y) = threshold, if src(x,y)>threshold
+	 * src(x,y), otherwise
+	 * 
+	 * thresholdType=CV_THRESH_TOZERO: dst(x,y) = src(x,y), if (x,y)>threshold 0,
+	 * otherwise
+	 * 
+	 * thresholdType=CV_THRESH_TOZERO_INV: dst(x,y) = 0, if src(x,y)>threshold
+	 * src(x,y), otherwise
+	 */
 
-  @Override
-  public void imageChanged(IplImage image) {
-    gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+		gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    // CV_THRESH_BINARY
-    // CV_THRESH_BINARY_INV
-    // CV_THRESH_TRUNC
-    // CV_THRESH_TOZERO
-    // CV_THRESH_TOZERO_INV
+		// CV_THRESH_BINARY
+		// CV_THRESH_BINARY_INV
+		// CV_THRESH_TRUNC
+		// CV_THRESH_TOZERO
+		// CV_THRESH_TOZERO_INV
 
-    // cxcore.cvSetImageCOI(image, 1);
+		// cxcore.cvSetImageCOI(image, 1);
 
-    // http://www710.univ-lyon1.fr/~bouakaz/OpenCV-0.9.5/docs/ref/OpenCVRef_ImageProcessing.htm
-    // cv.cvThreshold(image, image, cfg.getFloat("lowThreshold"),
-    // cfg.getFloat("highThreshold"), CV_THRESH_BINARY);
+		// http://www710.univ-lyon1.fr/~bouakaz/OpenCV-0.9.5/docs/ref/OpenCVRef_ImageProcessing.htm
+		// cv.cvThreshold(image, image, cfg.getFloat("lowThreshold"),
+		// cfg.getFloat("highThreshold"), CV_THRESH_BINARY);
 
-    // must be gray for adaptive
-    cvCvtColor(image, gray, CV_BGR2GRAY);
-    cvAdaptiveThreshold(gray, gray, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 30);
+		// must be gray for adaptive
+		cvCvtColor(image, gray, CV_BGR2GRAY);
+		cvAdaptiveThreshold(gray, gray, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 30);
 
-    return gray;
-  }
+		return gray;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

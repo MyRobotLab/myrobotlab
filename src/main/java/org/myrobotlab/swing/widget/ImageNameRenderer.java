@@ -12,30 +12,31 @@ import org.myrobotlab.image.Util;
 
 public class ImageNameRenderer extends JLabel implements ListCellRenderer {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public ImageNameRenderer() {
-    setOpaque(true);
-    setIconTextGap(12);
-  }
+	public ImageNameRenderer() {
+		setOpaque(true);
+		setIconTextGap(12);
+	}
 
-  @Override
-  public Component getListCellRendererComponent(@SuppressWarnings("rawtypes") JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-    NameTypeProvider entry = (NameTypeProvider) value;
-    setText("<html><font color=#" + Style.listBackground + ">" + entry.getName() + "</font></html>");
+	@Override
+	public Component getListCellRendererComponent(@SuppressWarnings("rawtypes") JList list, Object value, int index,
+			boolean isSelected, boolean cellHasFocus) {
+		NameTypeProvider entry = (NameTypeProvider) value;
+		setText("<html><font color=#" + Style.listBackground + ">" + entry.getName() + "</font></html>");
 
-    ImageIcon icon = Util.getScaledIcon(Util.getImage((entry.getSimpleName() + ".png"), "unknown.png"), 0.50);
-    setIcon(icon);
+		ImageIcon icon = Util.getScaledIcon(Util.getImage((entry.getSimpleName() + ".png"), "unknown.png"), 0.50);
+		setIcon(icon);
 
-    if (isSelected) {
-      setBackground(Style.listHighlight);
-      setForeground(Style.listBackground);
-    } else {
-      setBackground(Style.listBackground);
-      setForeground(Style.listForeground);
-    }
+		if (isSelected) {
+			setBackground(Style.listHighlight);
+			setForeground(Style.listBackground);
+		} else {
+			setBackground(Style.listBackground);
+			setForeground(Style.listForeground);
+		}
 
-    // log.info("getListCellRendererComponent - end");
-    return this;
-  }
+		// log.info("getListCellRendererComponent - end");
+		return this;
+	}
 }

@@ -7,9 +7,9 @@ import org.myrobotlab.framework.interfaces.MessageSender;
 
 public class ApiSwagger extends Api {
 
-  public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) {
+	public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) {
 
-    return null;
-  }
+		return null;
+	}
 
 }

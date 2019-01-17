@@ -37,28 +37,28 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterResetImageRoi extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResetImageRoi.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterResetImageRoi.class);
 
-  public OpenCVFilterResetImageRoi(String name) {
-    super(name);
-  }
+	public OpenCVFilterResetImageRoi(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
-    CvRect r = new CvRect(0, 0, image.width(), image.width());
-    cvSetImageROI(image, r);
-    return image;
-  }
+	@Override
+	public IplImage process(IplImage image) {
+		CvRect r = new CvRect(0, 0, image.width(), image.width());
+		cvSetImageROI(image, r);
+		return image;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

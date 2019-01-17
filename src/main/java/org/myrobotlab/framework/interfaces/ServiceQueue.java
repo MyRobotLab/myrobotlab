@@ -7,22 +7,21 @@ import org.myrobotlab.framework.Message;
 // decompose Message Sender & Message Subscriber
 public interface ServiceQueue {
 
-  /**
-   * put message in inbox, so it will be processed by this service
-   * 
-   * @param msg
-   *          m
-   */
+	/**
+	 * put message in inbox, so it will be processed by this service
+	 * 
+	 * @param msg m
+	 */
 
-  public void in(Message msg);
+	public void in(Message msg);
 
-  public void out(Message msg);
+	public void out(Message msg);
 
-  // TODO - put in seperate Invoking interface
-  public Object invoke(String method);
+	// TODO - put in seperate Invoking interface
+	public Object invoke(String method);
 
-  public Object invoke(String method, Object... params);
+	public Object invoke(String method, Object... params);
 
-  // public boolean isLocal();
+	// public boolean isLocal();
 
 }

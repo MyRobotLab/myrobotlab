@@ -38,46 +38,46 @@ import com.sun.j3d.utils.geometry.Sphere;
  */
 public class CherryAgent extends SimpleAgent {
 
-  Color3f color;
+	Color3f color;
 
-  /*
-   * Construct an AppleAgent.
-   */
-  public CherryAgent(Vector3d pos, String name, float radius) {
-    super(pos, name);
-    // to avoid collision indication
-    setCanBeTraversed(true);
+	/*
+	 * Construct an AppleAgent.
+	 */
+	public CherryAgent(Vector3d pos, String name, float radius) {
+		super(pos, name);
+		// to avoid collision indication
+		setCanBeTraversed(true);
 
-    this.radius = radius;
-    this.height = 2 * radius;
-    this.color = new Color3f(0.8f, 0, 0);
+		this.radius = radius;
+		this.height = 2 * radius;
+		this.color = new Color3f(0.8f, 0, 0);
 
-  }
+	}
 
-  /** Create 3D geometry. */
-  @Override
-  protected void create3D() {
-    Appearance appear = new Appearance();
+	/** Create 3D geometry. */
+	@Override
+	protected void create3D() {
+		Appearance appear = new Appearance();
 
-    material.setCapability(Material.ALLOW_COMPONENT_WRITE);
-    material.setDiffuseColor(color);
-    material.setSpecularColor(black);
-    appear.setMaterial(material);
-    int flags = Primitive.GEOMETRY_NOT_SHARED | Primitive.ENABLE_GEOMETRY_PICKING | Primitive.GENERATE_NORMALS;
+		material.setCapability(Material.ALLOW_COMPONENT_WRITE);
+		material.setDiffuseColor(color);
+		material.setSpecularColor(black);
+		appear.setMaterial(material);
+		int flags = Primitive.GEOMETRY_NOT_SHARED | Primitive.ENABLE_GEOMETRY_PICKING | Primitive.GENERATE_NORMALS;
 
-    body = new Sphere(radius, flags, appear);
+		body = new Sphere(radius, flags, appear);
 
-    // we must be able to change the pick flag of the agent
-    body.setCapability(Node.ALLOW_PICKABLE_READ);
-    body.setCapability(Node.ALLOW_PICKABLE_WRITE);
-    body.setPickable(true);
-    body.setCollidable(true);
-    addChild(body);
+		// we must be able to change the pick flag of the agent
+		body.setCapability(Node.ALLOW_PICKABLE_READ);
+		body.setCapability(Node.ALLOW_PICKABLE_WRITE);
+		body.setPickable(true);
+		body.setCollidable(true);
+		addChild(body);
 
-    // Add bounds for interactions
-    Bounds bounds = new BoundingSphere(new Point3d(0, 0, 0), radius);
-    setBounds(bounds);
+		// Add bounds for interactions
+		Bounds bounds = new BoundingSphere(new Point3d(0, 0, 0), radius);
+		setBounds(bounds);
 
-  }
+	}
 
 }

@@ -34,18 +34,18 @@ import java.io.File;
  */
 public class IntrinsicToDepthParameters {
 
-  public static void main(String args[]) {
-    // String baseDir = UtilIO.pathExample("kinect/basket");
-    String baseDir = "src/main/resources/resource/BoofCv";
+	public static void main(String args[]) {
+		// String baseDir = UtilIO.pathExample("kinect/basket");
+		String baseDir = "src/main/resources/resource/BoofCv";
 
-    CameraPinholeRadial intrinsic = CalibrationIO.load(new File(baseDir, "intrinsic.yaml"));
+		CameraPinholeRadial intrinsic = CalibrationIO.load(new File(baseDir, "intrinsic.yaml"));
 
-    VisualDepthParameters depth = new VisualDepthParameters();
+		VisualDepthParameters depth = new VisualDepthParameters();
 
-    depth.setVisualParam(intrinsic);
-    depth.setMaxDepth(UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE);
-    depth.setPixelNoDepth(UtilOpenKinect.FREENECT_DEPTH_MM_NO_VALUE);
+		depth.setVisualParam(intrinsic);
+		depth.setMaxDepth(UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE);
+		depth.setPixelNoDepth(UtilOpenKinect.FREENECT_DEPTH_MM_NO_VALUE);
 
-    CalibrationIO.save(depth, baseDir + "visualdepth.yaml");
-  }
+		CalibrationIO.save(depth, baseDir + "visualdepth.yaml");
+	}
 }

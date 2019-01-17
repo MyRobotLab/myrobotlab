@@ -41,48 +41,48 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterCanny extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCanny.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCanny.class);
 
-  public int apertureSize = 5;
-  public double lowThreshold = 0.0;
-  public double highThreshold = 50.0;
+	public int apertureSize = 5;
+	public double lowThreshold = 0.0;
+	public double highThreshold = 50.0;
 
-  transient IplImage gray = null;
-  transient IplImage inlines = null;
+	transient IplImage gray = null;
+	transient IplImage inlines = null;
 
-  public OpenCVFilterCanny(String name) {
-    super(name);
-  }
+	public OpenCVFilterCanny(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    if (gray == null) {
-      gray = cvCreateImage(cvGetSize(image), 8, 1);
-    }
-    if (inlines == null) {
-      inlines = cvCreateImage(cvGetSize(image), 8, 1);
-    }
+		if (gray == null) {
+			gray = cvCreateImage(cvGetSize(image), 8, 1);
+		}
+		if (inlines == null) {
+			inlines = cvCreateImage(cvGetSize(image), 8, 1);
+		}
 
-    if (image.nChannels() == 3) {
-      cvCvtColor(image, gray, CV_BGR2GRAY);
-    } else {
-      gray = image.clone();
-    }
+		if (image.nChannels() == 3) {
+			cvCvtColor(image, gray, CV_BGR2GRAY);
+		} else {
+			gray = image.clone();
+		}
 
-    cvCanny(gray, inlines, lowThreshold, highThreshold, apertureSize);
-    return inlines;
-  }
+		cvCanny(gray, inlines, lowThreshold, highThreshold, apertureSize);
+		return inlines;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

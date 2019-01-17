@@ -34,54 +34,54 @@ import org.myrobotlab.mapper.sim.World;
  */
 class AgentFollower implements Runnable {
 
-  World world;
-  SimpleAgent agent;
-  Thread thread;
-  boolean stopped;
-  boolean changed;
-  int viewPointType;
+	World world;
+	SimpleAgent agent;
+	Thread thread;
+	boolean stopped;
+	boolean changed;
+	int viewPointType;
 
-  AgentFollower(World world, SimpleAgent agent) {
-    this.agent = agent;
-    this.world = world;
-    viewPointType = World.VIEW_ABOVE_AGENT;
-    stopped = true;
-    thread = new Thread(this);
-    thread.start();
-  }
+	AgentFollower(World world, SimpleAgent agent) {
+		this.agent = agent;
+		this.world = world;
+		viewPointType = World.VIEW_ABOVE_AGENT;
+		stopped = true;
+		thread = new Thread(this);
+		thread.start();
+	}
 
-  protected void resume() {
-    stopped = false;
-    changed = true;
-  }
+	protected void resume() {
+		stopped = false;
+		changed = true;
+	}
 
-  @Override
-  public void run() {
-    while (true) {
-      changed = false;
-      if (!stopped)
-        world.changeViewPoint(viewPointType, agent);
-      try {
-        // don't need precise time tick
-        // do multiple sleep to diminish ui latency
-        for (int i = 0; i < 30; i++) {
-          Thread.sleep(100);
-          if (changed)
-            break;
-        }
+	@Override
+	public void run() {
+		while (true) {
+			changed = false;
+			if (!stopped)
+				world.changeViewPoint(viewPointType, agent);
+			try {
+				// don't need precise time tick
+				// do multiple sleep to diminish ui latency
+				for (int i = 0; i < 30; i++) {
+					Thread.sleep(100);
+					if (changed)
+						break;
+				}
 
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-  }
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-  protected void setViewPointType(int type) {
-    viewPointType = type;
-  }
+	protected void setViewPointType(int type) {
+		viewPointType = type;
+	}
 
-  protected void suspend() {
-    stopped = true;
-    changed = true;
-  }
+	protected void suspend() {
+		stopped = true;
+		changed = true;
+	}
 }

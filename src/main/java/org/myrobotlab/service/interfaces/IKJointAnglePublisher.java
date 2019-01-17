@@ -5,8 +5,8 @@ import java.util.Map;
 
 public interface IKJointAnglePublisher {
 
-  public String getName();
+	public String getName();
 
-  public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap);
+	public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap);
 
 }

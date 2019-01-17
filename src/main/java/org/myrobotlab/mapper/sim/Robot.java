@@ -25,36 +25,36 @@ import javax.vecmath.Vector3d;
 
 public class Robot extends Agent {
 
-  Plan plan;
+	Plan plan;
 
-  public Robot(Vector3d position, String name) {
-    super(position, name);
-    // a square movement plan
-    double deg90 = Math.PI / 2;
-    plan = new Plan(this);
-    plan.forward(3, 2);
-    plan.turn(-deg90, 2);
-    plan.forward(3, 2);
-    plan.turn(-deg90, 2);
-    plan.forward(3, 2);
-    plan.turn(-deg90, 2);
-    plan.forward(3, 2);
-    plan.turn(-deg90, 2);
-    plan.loop();
+	public Robot(Vector3d position, String name) {
+		super(position, name);
+		// a square movement plan
+		double deg90 = Math.PI / 2;
+		plan = new Plan(this);
+		plan.forward(3, 2);
+		plan.turn(-deg90, 2);
+		plan.forward(3, 2);
+		plan.turn(-deg90, 2);
+		plan.forward(3, 2);
+		plan.turn(-deg90, 2);
+		plan.forward(3, 2);
+		plan.turn(-deg90, 2);
+		plan.loop();
 
-  }
+	}
 
-  @Override
-  public void initBehavior() {
-    // plan.reset();
-  }
+	@Override
+	public void initBehavior() {
+		// plan.reset();
+	}
 
-  @Override
-  public void performBehavior() {
-    if (collisionDetected()) {
-      // Change plan
-    }
-    plan.doStep();
+	@Override
+	public void performBehavior() {
+		if (collisionDetected()) {
+			// Change plan
+		}
+		plan.doStep();
 
-  }
+	}
 }

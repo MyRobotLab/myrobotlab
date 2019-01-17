@@ -32,94 +32,94 @@ import javax.swing.JPanel;
  */
 public abstract class Device extends BaseObject {
 
-  private SimpleAgent owner;
-  private String name;
-  private double updatePerSecond;
-  private double elapsedSinceUpdate;
-  private boolean firstUpdate;
-  private boolean updateOnEachFrame;
+	private SimpleAgent owner;
+	private String name;
+	private double updatePerSecond;
+	private double elapsedSinceUpdate;
+	private boolean firstUpdate;
+	private boolean updateOnEachFrame;
 
-  Device() {
-    owner = null;
-    name = "<name>";
-    updatePerSecond = 1.0;
-    elapsedSinceUpdate = 0.0;
-    firstUpdate = true;
-    updateOnEachFrame = false;
-    ;
-  }
+	Device() {
+		owner = null;
+		name = "<name>";
+		updatePerSecond = 1.0;
+		elapsedSinceUpdate = 0.0;
+		firstUpdate = true;
+		updateOnEachFrame = false;
+		;
+	}
 
-  /**
-   * Creates the panel associated to the device. This panel can be inserted in
-   * the inspector window for monitoring.
-   * 
-   * @return the JPanel. null if no panel can be associated
-   */
-  public JPanel createInspectorPanel() {
-    return null;
-  }
+	/**
+	 * Creates the panel associated to the device. This panel can be inserted in the
+	 * inspector window for monitoring.
+	 * 
+	 * @return the JPanel. null if no panel can be associated
+	 */
+	public JPanel createInspectorPanel() {
+		return null;
+	}
 
-  /**
-   * @return device's name .
-   */
-  public String getName() {
-    return name;
-  }
+	/**
+	 * @return device's name .
+	 */
+	public String getName() {
+		return name;
+	}
 
-  /** Get the agent owner of this device */
-  protected SimpleAgent getOwner() {
-    return this.owner;
-  }
+	/** Get the agent owner of this device */
+	protected SimpleAgent getOwner() {
+		return this.owner;
+	}
 
-  /**
-   * Returns the number of updates per second requested for this sensor.
-   * 
-   * @return requested number of update per second (in virtual time).
-   */
-  public double getUpdatePerSecond() {
-    return updatePerSecond;
-  }
+	/**
+	 * Returns the number of updates per second requested for this sensor.
+	 * 
+	 * @return requested number of update per second (in virtual time).
+	 */
+	public double getUpdatePerSecond() {
+		return updatePerSecond;
+	}
 
-  /** to be overriden */
-  protected void reset() {
-  }
+	/** to be overriden */
+	protected void reset() {
+	}
 
-  protected void setName(String name) {
-    this.name = name;
-  }
+	protected void setName(String name) {
+		this.name = name;
+	}
 
-  /** Set the agent owner of this device */
-  protected void setOwner(SimpleAgent agent) {
-    this.owner = agent;
-  }
+	/** Set the agent owner of this device */
+	protected void setOwner(SimpleAgent agent) {
+		this.owner = agent;
+	}
 
-  /* Sets if update happens on each frame . */
-  public void setUpdateOnEachFrame(boolean on) {
-    updateOnEachFrame = on;
-  }
+	/* Sets if update happens on each frame . */
+	public void setUpdateOnEachFrame(boolean on) {
+		updateOnEachFrame = on;
+	}
 
-  /* Sets the number of update per seconds for this sensor. */
-  public void setUpdatePerSecond(double ups) {
-    updatePerSecond = ups;
-  }
+	/* Sets the number of update per seconds for this sensor. */
+	public void setUpdatePerSecond(double ups) {
+		updatePerSecond = ups;
+	}
 
-  /** to be overriden */
-  protected void update() {
-  }
+	/** to be overriden */
+	protected void update() {
+	}
 
-  /** Called by the simulator loop */
-  protected void update(double elapsedSeconds) {
-    if (updateOnEachFrame) {
-      update();
-    } else {
-      elapsedSinceUpdate += elapsedSeconds;
-      double delta = 1.0 / updatePerSecond;
-      if ((elapsedSinceUpdate > delta) || (firstUpdate)) {
-        update();
-        elapsedSinceUpdate -= delta;
-        firstUpdate = false;
-      }
-    }
-  }
+	/** Called by the simulator loop */
+	protected void update(double elapsedSeconds) {
+		if (updateOnEachFrame) {
+			update();
+		} else {
+			elapsedSinceUpdate += elapsedSeconds;
+			double delta = 1.0 / updatePerSecond;
+			if ((elapsedSinceUpdate > delta) || (firstUpdate)) {
+				update();
+				elapsedSinceUpdate -= delta;
+				firstUpdate = false;
+			}
+		}
+	}
 
 }

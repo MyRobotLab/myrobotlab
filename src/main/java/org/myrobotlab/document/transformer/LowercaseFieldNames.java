@@ -12,28 +12,28 @@ import org.myrobotlab.document.Document;
  */
 public class LowercaseFieldNames extends AbstractStage {
 
-  @Override
-  public void startStage(StageConfiguration config) {
+	@Override
+	public void startStage(StageConfiguration config) {
 
-  }
+	}
 
-  @Override
-  public List<Document> processDocument(Document doc) {
-    String[] fields = doc.getFields().toArray(new String[doc.getFields().size()]);
-    for (String fieldName : fields) {
-      doc.renameField(fieldName, fieldName.toLowerCase());
-    }
-    return null;
-  }
+	@Override
+	public List<Document> processDocument(Document doc) {
+		String[] fields = doc.getFields().toArray(new String[doc.getFields().size()]);
+		for (String fieldName : fields) {
+			doc.renameField(fieldName, fieldName.toLowerCase());
+		}
+		return null;
+	}
 
-  @Override
-  public void stopStage() {
-    // TODO Auto-generated method stub
-  }
+	@Override
+	public void stopStage() {
+		// TODO Auto-generated method stub
+	}
 
-  @Override
-  public void flush() {
-    // Only required if this stage does any batching. NO-OP here.
-  }
+	@Override
+	public void flush() {
+		// Only required if this stage does any batching. NO-OP here.
+	}
 
 }

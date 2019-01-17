@@ -13,29 +13,29 @@ import org.deeplearning4j.nn.graph.ComputationGraph;
  */
 public class CustomModel {
 
-  public ComputationGraph model;
-  public List<String> labels;
+	public ComputationGraph model;
+	public List<String> labels;
 
-  public CustomModel(ComputationGraph model, List<String> labels) {
-    super();
-    this.model = model;
-    this.labels = labels;
-  }
+	public CustomModel(ComputationGraph model, List<String> labels) {
+		super();
+		this.model = model;
+		this.labels = labels;
+	}
 
-  public ComputationGraph getModel() {
-    return model;
-  }
+	public ComputationGraph getModel() {
+		return model;
+	}
 
-  public void setModel(ComputationGraph model) {
-    this.model = model;
-  }
+	public void setModel(ComputationGraph model) {
+		this.model = model;
+	}
 
-  public List<String> getLabels() {
-    return labels;
-  }
+	public List<String> getLabels() {
+		return labels;
+	}
 
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
-  }
+	public void setLabels(List<String> labels) {
+		this.labels = labels;
+	}
 
 }

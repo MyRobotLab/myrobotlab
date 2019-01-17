@@ -4,6 +4,6 @@ import org.myrobotlab.service.data.HttpData;
 
 public interface HttpDataListener {
 
-  public void onHttpData(HttpData data);
+	public void onHttpData(HttpData data);
 
 }

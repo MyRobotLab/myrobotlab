@@ -36,36 +36,36 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterNot extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterNot.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterNot.class.getCanonicalName());
 
-  transient IplImage buffer = null;
+	transient IplImage buffer = null;
 
-  public OpenCVFilterNot() {
-    super();
-  }
+	public OpenCVFilterNot() {
+		super();
+	}
 
-  public OpenCVFilterNot(String name) {
-    super(name);
-  }
+	public OpenCVFilterNot(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-    // TODO Auto-generated method stub
+	@Override
+	public void imageChanged(IplImage image) {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
-    buffer = image.clone(); // FIXME I think cvcopy is safer
-    cvNot(image, buffer);
-    return buffer;
-  }
+	@Override
+	public IplImage process(IplImage image) {
+		buffer = image.clone(); // FIXME I think cvcopy is safer
+		cvNot(image, buffer);
+		return buffer;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

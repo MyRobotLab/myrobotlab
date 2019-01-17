@@ -9,11 +9,11 @@ package org.myrobotlab.chess;
 //
 
 final class HistoryData {
-  HMove m;
-  int capture;
-  int castle;
-  int ep;
-  int fifty;
-  long[] pawnBits;
-  long[] pieceBits;
+	HMove m;
+	int capture;
+	int castle;
+	int ep;
+	int fifty;
+	long[] pawnBits;
+	long[] pieceBits;
 }

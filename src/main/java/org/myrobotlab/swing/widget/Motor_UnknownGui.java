@@ -6,22 +6,22 @@ import org.slf4j.Logger;
 
 public class Motor_UnknownGui extends MotorControllerPanel {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(MotorControllerPanel.class);
+	public final static Logger log = LoggerFactory.getLogger(MotorControllerPanel.class);
 
-  Motor motor = null;
+	Motor motor = null;
 
-  @Override
-  public void set(Motor motor) {
-    log.warn("setData on an unknown MotorGUI Panel :P");
-    this.motor = motor;
-  }
+	@Override
+	public void set(Motor motor) {
+		log.warn("setData on an unknown MotorGUI Panel :P");
+		this.motor = motor;
+	}
 
-  @Override
-  public void setAttached(boolean state) {
-    // TODO Auto-generated method stub
+	@Override
+	public void setAttached(boolean state) {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
 }

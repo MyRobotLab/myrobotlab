@@ -40,55 +40,55 @@ import org.slf4j.Logger;
 
 public class BlenderGui extends ServiceGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(BlenderGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(BlenderGui.class);
 
-  JButton connect = new JButton("connect");
+	JButton connect = new JButton("connect");
 
-  public BlenderGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
+	public BlenderGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 
-    display.setLayout(new BorderLayout());
-    JPanel north = new JPanel();
-    north.add(connect);
-    connect.addActionListener(this);
+		display.setLayout(new BorderLayout());
+		JPanel north = new JPanel();
+		north.add(connect);
+		connect.addActionListener(this);
 
-  }
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
-    Object o = event.getSource();
-    if (o == connect) {
-      send("connect");
-    }
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object o = event.getSource();
+		if (o == connect) {
+			send("connect");
+		}
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-    subscribe("isConnected", "onConnected");
-    send("publishState");
-  }
+	@Override
+	public void subscribeGui() {
+		subscribe("isConnected", "onConnected");
+		send("publishState");
+	}
 
-  @Override
-  public void unsubscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+	@Override
+	public void unsubscribeGui() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
 
-    unsubscribe("publishState", "onState");
-  }
+		unsubscribe("publishState", "onState");
+	}
 
-  public void onState(Blender template) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	public void onState(Blender template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-      }
-    });
-  }
+			}
+		});
+	}
 
-  public void onConnected() {
-    connect.setText("disconnect");
-  }
+	public void onConnected() {
+		connect.setText("disconnect");
+	}
 
 }

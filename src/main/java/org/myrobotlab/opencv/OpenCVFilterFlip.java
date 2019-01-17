@@ -37,33 +37,33 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterFlip extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  transient IplImage flipped;
-  public int flipCode = 0;
+	transient IplImage flipped;
+	public int flipCode = 0;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFlip.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFlip.class.getCanonicalName());
 
-  public OpenCVFilterFlip(String name) {
-    super(name);
-  }
+	public OpenCVFilterFlip(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-    flipped = IplImage.createCompatible(image);
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+		flipped = IplImage.createCompatible(image);
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    cvFlip(image, flipped, flipCode);
+		cvFlip(image, flipped, flipCode);
 
-    return flipped;
-  }
+		return flipped;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

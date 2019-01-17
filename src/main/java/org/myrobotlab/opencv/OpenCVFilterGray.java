@@ -39,35 +39,35 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterGray extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGray.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGray.class);
 
-  transient IplImage gray = null;
+	transient IplImage gray = null;
 
-  public OpenCVFilterGray(String name) {
-    super(name);
-  }
+	public OpenCVFilterGray(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-    gray = cvCreateImage(cvGetSize(image), 8, 1);
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+		gray = cvCreateImage(cvGetSize(image), 8, 1);
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    if (image.nChannels() == 3) {
-      cvCvtColor(image, gray, CV_BGR2GRAY);
-      return gray;
-    }
+		if (image.nChannels() == 3) {
+			cvCvtColor(image, gray, CV_BGR2GRAY);
+			return gray;
+		}
 
-    return image;
-  }
+		return image;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

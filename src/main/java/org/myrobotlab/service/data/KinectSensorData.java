@@ -9,5 +9,5 @@ package org.myrobotlab.service.data;
  */
 public class KinectSensorData {
 
-  public short[] data = new short[307200];
+	public short[] data = new short[307200];
 }

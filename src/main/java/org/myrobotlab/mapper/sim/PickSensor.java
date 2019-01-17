@@ -30,15 +30,15 @@ import javax.media.j3d.BranchGroup;
  * Base class for all sensors using picking.
  */
 public abstract class PickSensor extends SensorDevice {
-  protected BranchGroup pickableSceneBranch;
+	protected BranchGroup pickableSceneBranch;
 
-  /**
-   * It should be called before update.
-   * 
-   * @param pickableSceneBranch
-   */
-  protected void setPickableSceneBranch(BranchGroup pickableSceneBranch) {
-    this.pickableSceneBranch = pickableSceneBranch;
-  }
+	/**
+	 * It should be called before update.
+	 * 
+	 * @param pickableSceneBranch
+	 */
+	protected void setPickableSceneBranch(BranchGroup pickableSceneBranch) {
+		this.pickableSceneBranch = pickableSceneBranch;
+	}
 
 }

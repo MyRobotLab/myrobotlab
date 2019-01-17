@@ -41,221 +41,218 @@ import javax.vecmath.Vector3d;
  */
 public class MouseOrbiter implements MouseInputListener {
 
-  private Transform3D longditudeTransform = new Transform3D();
-  private Transform3D latitudeTransform = new Transform3D();
-  private Transform3D rotateTransform = new Transform3D();
-  // needed for integrateTransforms but don't want to new every time
-  private Transform3D temp1 = new Transform3D();
-  private Transform3D temp2 = new Transform3D();
-  private Transform3D translation = new Transform3D();
-  private Vector3d transVector = new Vector3d();
-  private Vector3d distanceVector = new Vector3d();
-  private Vector3d centerVector = new Vector3d();
-  private Vector3d invertCenterVector = new Vector3d();
-  private double longditude = 0.0;
-  private double latitude = 0.0;
-  private double rollAngle = 0.0;
-  private double startDistanceFromCenter = 20.0;
-  private double distanceFromCenter = 20.0;
-  private final double MAX_MOUSE_ANGLE = Math.toRadians(3);
-  private final double ZOOM_FACTOR = 1.0;
-  private Point3d rotationCenter = new Point3d();
-  private Matrix3d rotMatrix = new Matrix3d();
-  private Transform3D currentXfm = new Transform3D();
-  private int mouseX = 0;
-  private int mouseY = 0;
-  private double rotXFactor = 1;
-  private double rotYFactor = 1;
-  private double transXFactor = 1;
-  private double transYFactor = 1;
-  private double zoomFactor = 1.0;
-  private double xtrans = 0.0;
-  private double ytrans = 0.0;
-  private double ztrans = 0.0;
-  private boolean zoomEnabled = true;
-  private boolean rotateEnabled = true;
-  private boolean translateEnabled = true;
-  private boolean reverseRotate = true;
-  private boolean reverseTrans = true;
-  private boolean reverseZoom = true;
-  private double minRadius = 0.0;
-  private static final double NOMINAL_ZOOM_FACTOR = .01;
-  private static final double NOMINAL_PZOOM_FACTOR = 1.0;
-  private static final double NOMINAL_ROT_FACTOR = .01;
-  private static final double NOMINAL_TRANS_FACTOR = .01;
-  private double rotXMul = NOMINAL_ROT_FACTOR * rotXFactor;
-  private double rotYMul = NOMINAL_ROT_FACTOR * rotYFactor;
-  private double transXMul = NOMINAL_TRANS_FACTOR * transXFactor;
-  private double transYMul = NOMINAL_TRANS_FACTOR * transYFactor;
-  private double zoomMul = NOMINAL_ZOOM_FACTOR * zoomFactor;
-  private boolean motion = false;
-  TransformGroup targetTG;
-  Transform3D targetTransform;
+	private Transform3D longditudeTransform = new Transform3D();
+	private Transform3D latitudeTransform = new Transform3D();
+	private Transform3D rotateTransform = new Transform3D();
+	// needed for integrateTransforms but don't want to new every time
+	private Transform3D temp1 = new Transform3D();
+	private Transform3D temp2 = new Transform3D();
+	private Transform3D translation = new Transform3D();
+	private Vector3d transVector = new Vector3d();
+	private Vector3d distanceVector = new Vector3d();
+	private Vector3d centerVector = new Vector3d();
+	private Vector3d invertCenterVector = new Vector3d();
+	private double longditude = 0.0;
+	private double latitude = 0.0;
+	private double rollAngle = 0.0;
+	private double startDistanceFromCenter = 20.0;
+	private double distanceFromCenter = 20.0;
+	private final double MAX_MOUSE_ANGLE = Math.toRadians(3);
+	private final double ZOOM_FACTOR = 1.0;
+	private Point3d rotationCenter = new Point3d();
+	private Matrix3d rotMatrix = new Matrix3d();
+	private Transform3D currentXfm = new Transform3D();
+	private int mouseX = 0;
+	private int mouseY = 0;
+	private double rotXFactor = 1;
+	private double rotYFactor = 1;
+	private double transXFactor = 1;
+	private double transYFactor = 1;
+	private double zoomFactor = 1.0;
+	private double xtrans = 0.0;
+	private double ytrans = 0.0;
+	private double ztrans = 0.0;
+	private boolean zoomEnabled = true;
+	private boolean rotateEnabled = true;
+	private boolean translateEnabled = true;
+	private boolean reverseRotate = true;
+	private boolean reverseTrans = true;
+	private boolean reverseZoom = true;
+	private double minRadius = 0.0;
+	private static final double NOMINAL_ZOOM_FACTOR = .01;
+	private static final double NOMINAL_PZOOM_FACTOR = 1.0;
+	private static final double NOMINAL_ROT_FACTOR = .01;
+	private static final double NOMINAL_TRANS_FACTOR = .01;
+	private double rotXMul = NOMINAL_ROT_FACTOR * rotXFactor;
+	private double rotYMul = NOMINAL_ROT_FACTOR * rotYFactor;
+	private double transXMul = NOMINAL_TRANS_FACTOR * transXFactor;
+	private double transYMul = NOMINAL_TRANS_FACTOR * transYFactor;
+	private double zoomMul = NOMINAL_ZOOM_FACTOR * zoomFactor;
+	private boolean motion = false;
+	TransformGroup targetTG;
+	Transform3D targetTransform;
 
-  /**
-   * Creates a new OrbitBehavior
-   * 
-   * @param c
-   *          The Canvas3D to add the behavior to
-   * @param targetTransformGroup
-   *          The transformgroup affected by mouse movement
-   */
-  public MouseOrbiter(javax.media.j3d.Canvas3D c, TransformGroup targetTransformGroup) {
-    c.addMouseListener(this);
-    c.addMouseMotionListener(this);
-    this.targetTG = targetTransformGroup;
-    targetTransform = new Transform3D();
-    resetView();
-    integrateTransforms();
-  }
+	/**
+	 * Creates a new OrbitBehavior
+	 * 
+	 * @param c                    The Canvas3D to add the behavior to
+	 * @param targetTransformGroup The transformgroup affected by mouse movement
+	 */
+	public MouseOrbiter(javax.media.j3d.Canvas3D c, TransformGroup targetTransformGroup) {
+		c.addMouseListener(this);
+		c.addMouseMotionListener(this);
+		this.targetTG = targetTransformGroup;
+		targetTransform = new Transform3D();
+		resetView();
+		integrateTransforms();
+	}
 
-  protected synchronized void integrateTransforms() {
-    // Check if the transform has been changed by another
-    // behavior
-    targetTG.getTransform(currentXfm);
-    if (!targetTransform.equals(currentXfm))
-      resetView();
-    longditudeTransform.rotY(longditude);
-    latitudeTransform.rotX(latitude);
-    rotateTransform.mul(rotateTransform, latitudeTransform);
-    rotateTransform.mul(rotateTransform, longditudeTransform);
-    distanceVector.z = distanceFromCenter - startDistanceFromCenter;
-    temp1.set(distanceVector);
-    temp1.mul(rotateTransform, temp1);
-    // want to look at rotationCenter
-    transVector.x = rotationCenter.x + xtrans;
-    transVector.y = rotationCenter.y + ytrans;
-    transVector.z = rotationCenter.z + ztrans;
-    translation.set(transVector);
-    targetTransform.mul(temp1, translation);
-    // handle rotationCenter
-    temp1.set(centerVector);
-    temp1.mul(targetTransform);
-    invertCenterVector.x = -centerVector.x;
-    invertCenterVector.y = -centerVector.y;
-    invertCenterVector.z = -centerVector.z;
-    temp2.set(invertCenterVector);
-    targetTransform.mul(temp1, temp2);
-    targetTG.setTransform(targetTransform);
-    // reset yaw and pitch angles
-    longditude = 0.0;
-    latitude = 0.0;
-  }
+	protected synchronized void integrateTransforms() {
+		// Check if the transform has been changed by another
+		// behavior
+		targetTG.getTransform(currentXfm);
+		if (!targetTransform.equals(currentXfm))
+			resetView();
+		longditudeTransform.rotY(longditude);
+		latitudeTransform.rotX(latitude);
+		rotateTransform.mul(rotateTransform, latitudeTransform);
+		rotateTransform.mul(rotateTransform, longditudeTransform);
+		distanceVector.z = distanceFromCenter - startDistanceFromCenter;
+		temp1.set(distanceVector);
+		temp1.mul(rotateTransform, temp1);
+		// want to look at rotationCenter
+		transVector.x = rotationCenter.x + xtrans;
+		transVector.y = rotationCenter.y + ytrans;
+		transVector.z = rotationCenter.z + ztrans;
+		translation.set(transVector);
+		targetTransform.mul(temp1, translation);
+		// handle rotationCenter
+		temp1.set(centerVector);
+		temp1.mul(targetTransform);
+		invertCenterVector.x = -centerVector.x;
+		invertCenterVector.y = -centerVector.y;
+		invertCenterVector.z = -centerVector.z;
+		temp2.set(invertCenterVector);
+		targetTransform.mul(temp1, temp2);
+		targetTG.setTransform(targetTransform);
+		// reset yaw and pitch angles
+		longditude = 0.0;
+		latitude = 0.0;
+	}
 
-  @Override
-  public void mouseClicked(MouseEvent arg0) {
-  }
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+	}
 
-  @Override
-  public void mouseDragged(MouseEvent event) {
-    processMouseEvent(event);
-  }
+	@Override
+	public void mouseDragged(MouseEvent event) {
+		processMouseEvent(event);
+	}
 
-  @Override
-  public void mouseEntered(MouseEvent arg0) {
-  }
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+	}
 
-  @Override
-  public void mouseExited(MouseEvent arg0) {
-  }
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+	}
 
-  @Override
-  public void mouseMoved(MouseEvent event) {
-    processMouseEvent(event);
-  }
+	@Override
+	public void mouseMoved(MouseEvent event) {
+		processMouseEvent(event);
+	}
 
-  @Override
-  public void mousePressed(MouseEvent event) {
-    processMouseEvent(event);
-  }
+	@Override
+	public void mousePressed(MouseEvent event) {
+		processMouseEvent(event);
+	}
 
-  @Override
-  public void mouseReleased(MouseEvent event) {
-    processMouseEvent(event);
-  }
+	@Override
+	public void mouseReleased(MouseEvent event) {
+		processMouseEvent(event);
+	}
 
-  protected void processMouseEvent(final MouseEvent evt) {
-    if (evt.getID() == MouseEvent.MOUSE_PRESSED) {
-      mouseX = evt.getX();
-      mouseY = evt.getY();
-      motion = true;
-    } else if (evt.getID() == MouseEvent.MOUSE_DRAGGED) {
-      int xchange = evt.getX() - mouseX;
-      int ychange = evt.getY() - mouseY;
-      // rotate
-      if (!evt.isAltDown() && !evt.isMetaDown()) {
-        if (reverseRotate) {
-          longditude -= xchange * rotXMul;
-          latitude -= ychange * rotYMul;
-        } else {
-          longditude += xchange * rotXMul;
-          latitude += ychange * rotYMul;
-        }
-      }
-      // translate
-      else if (!evt.isAltDown() && evt.isMetaDown()) {
-        if (reverseTrans) {
-          xtrans -= xchange * transXMul;
-          ytrans += ychange * transYMul;
-        } else {
-          xtrans += xchange * transXMul;
-          ytrans -= ychange * transYMul;
-        }
-      }
-      // zoom
-      else if (evt.isAltDown() && !evt.isMetaDown()) {
-        if (reverseZoom) {
-          distanceFromCenter -= ychange * zoomMul;
-        } else {
-          distanceFromCenter += ychange * zoomMul;
-        }
+	protected void processMouseEvent(final MouseEvent evt) {
+		if (evt.getID() == MouseEvent.MOUSE_PRESSED) {
+			mouseX = evt.getX();
+			mouseY = evt.getY();
+			motion = true;
+		} else if (evt.getID() == MouseEvent.MOUSE_DRAGGED) {
+			int xchange = evt.getX() - mouseX;
+			int ychange = evt.getY() - mouseY;
+			// rotate
+			if (!evt.isAltDown() && !evt.isMetaDown()) {
+				if (reverseRotate) {
+					longditude -= xchange * rotXMul;
+					latitude -= ychange * rotYMul;
+				} else {
+					longditude += xchange * rotXMul;
+					latitude += ychange * rotYMul;
+				}
+			}
+			// translate
+			else if (!evt.isAltDown() && evt.isMetaDown()) {
+				if (reverseTrans) {
+					xtrans -= xchange * transXMul;
+					ytrans += ychange * transYMul;
+				} else {
+					xtrans += xchange * transXMul;
+					ytrans -= ychange * transYMul;
+				}
+			}
+			// zoom
+			else if (evt.isAltDown() && !evt.isMetaDown()) {
+				if (reverseZoom) {
+					distanceFromCenter -= ychange * zoomMul;
+				} else {
+					distanceFromCenter += ychange * zoomMul;
+				}
 
-      }
-      mouseX = evt.getX();
-      mouseY = evt.getY();
-      motion = true;
-    }
-    integrateTransforms();
+			}
+			mouseX = evt.getX();
+			mouseY = evt.getY();
+			motion = true;
+		}
+		integrateTransforms();
 
-  }
+	}
 
-  /**
-   * Reset the orientation and distance of this behavior to the current values
-   * in target Transform Group
-   */
-  public void resetView() {
-    // Vector3d centerToView = new Vector3d();
-    Vector3d centerToView = new Vector3d(0, 0, 0);
+	/**
+	 * Reset the orientation and distance of this behavior to the current values in
+	 * target Transform Group
+	 */
+	public void resetView() {
+		// Vector3d centerToView = new Vector3d();
+		Vector3d centerToView = new Vector3d(0, 0, 0);
 
-    targetTG.getTransform(targetTransform);
-    targetTransform.get(rotMatrix, transVector);
-    centerToView.sub(transVector, rotationCenter);
-    distanceFromCenter = centerToView.length();
-    startDistanceFromCenter = distanceFromCenter;
-    targetTransform.get(rotMatrix);
-    rotateTransform.set(rotMatrix);
-    // compute the initial x/y/z offset
-    temp1.set(centerToView);
-    rotateTransform.invert();
-    rotateTransform.mul(temp1);
-    rotateTransform.get(centerToView);
-    xtrans = centerToView.x;
-    ytrans = centerToView.y;
-    ztrans = centerToView.z;
-    // reset rotMatrix
-    rotateTransform.set(rotMatrix);
-  }
+		targetTG.getTransform(targetTransform);
+		targetTransform.get(rotMatrix, transVector);
+		centerToView.sub(transVector, rotationCenter);
+		distanceFromCenter = centerToView.length();
+		startDistanceFromCenter = distanceFromCenter;
+		targetTransform.get(rotMatrix);
+		rotateTransform.set(rotMatrix);
+		// compute the initial x/y/z offset
+		temp1.set(centerToView);
+		rotateTransform.invert();
+		rotateTransform.mul(temp1);
+		rotateTransform.get(centerToView);
+		xtrans = centerToView.x;
+		ytrans = centerToView.y;
+		ztrans = centerToView.z;
+		// reset rotMatrix
+		rotateTransform.set(rotMatrix);
+	}
 
-  /**
-   * Sets the center around which the View rotates. The default is (0,0,0).
-   * 
-   * @param center
-   *          The Point3d to set the center of rotation to
-   */
-  public synchronized void setRotationCenter(Point3d center) {
-    rotationCenter.x = center.x;
-    rotationCenter.y = center.y;
-    rotationCenter.z = center.z;
-    centerVector.set(rotationCenter);
-  }
+	/**
+	 * Sets the center around which the View rotates. The default is (0,0,0).
+	 * 
+	 * @param center The Point3d to set the center of rotation to
+	 */
+	public synchronized void setRotationCenter(Point3d center) {
+		rotationCenter.x = center.x;
+		rotationCenter.y = center.y;
+		rotationCenter.z = center.z;
+		centerVector.set(rotationCenter);
+	}
 }

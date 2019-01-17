@@ -19,45 +19,45 @@ import org.slf4j.Logger;
  */
 public class MultiWii extends Service {
 
-  transient public SerialDevice serial;
+	transient public SerialDevice serial;
 
-  transient public SerialDevice uart;
+	transient public SerialDevice uart;
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(MultiWii.class);
+	public final static Logger log = LoggerFactory.getLogger(MultiWii.class);
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
+	public static void main(String[] args) {
+		LoggingFactory.init(Level.INFO);
 
-    try {
+		try {
 
-      Runtime.start("template", "_TemplateService");
-      Runtime.start("gui", "SwingGui");
+			Runtime.start("template", "_TemplateService");
+			Runtime.start("gui", "SwingGui");
 
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
-  public MultiWii(String n) {
-    super(n);
-  }
+	public MultiWii(String n) {
+		super(n);
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	/**
+	 * This static method returns all the details of the class without it having to
+	 * be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(MultiWii.class.getCanonicalName());
-    meta.addDescription("MultiWii interface");
-    meta.addCategory("control");
-    return meta;
-  }
+		ServiceType meta = new ServiceType(MultiWii.class.getCanonicalName());
+		meta.addDescription("MultiWii interface");
+		meta.addCategory("control");
+		return meta;
+	}
 
 }

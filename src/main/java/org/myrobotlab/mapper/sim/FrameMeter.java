@@ -28,52 +28,52 @@ package org.myrobotlab.mapper.sim;
 /* A helper class to measure the frame per second  at a given point. */
 final class FrameMeter {
 
-  private long lastTime;
-  private long startTime;
-  private long count;
-  private long totalCount;
-  /** Instant fps */
-  public float fps;
-  public float fpsSinceStart;
-  private int updateRate;
+	private long lastTime;
+	private long startTime;
+	private long count;
+	private long totalCount;
+	/** Instant fps */
+	public float fps;
+	public float fpsSinceStart;
+	private int updateRate;
 
-  public FrameMeter() {
-    updateRate = 200;
-    reset();
-  }
+	public FrameMeter() {
+		updateRate = 200;
+		reset();
+	}
 
-  public int getUpdateRate() {
-    return updateRate;
-  }
+	public int getUpdateRate() {
+		return updateRate;
+	}
 
-  /*
-   * Method to be called at the measure point
-   */
-  public void measurePoint(int inc) {
-    count += inc;
-    totalCount += inc;
-    if (count >= updateRate) {
-      long currTime = System.currentTimeMillis();
-      long dt = (currTime - lastTime);
-      if (dt != 0)
-        fps = (1000f * count) / dt;
-      fpsSinceStart = (1000f * totalCount) / (currTime - startTime);
-      lastTime = currTime;
-      count = 0;
-    }
-  }
+	/*
+	 * Method to be called at the measure point
+	 */
+	public void measurePoint(int inc) {
+		count += inc;
+		totalCount += inc;
+		if (count >= updateRate) {
+			long currTime = System.currentTimeMillis();
+			long dt = (currTime - lastTime);
+			if (dt != 0)
+				fps = (1000f * count) / dt;
+			fpsSinceStart = (1000f * totalCount) / (currTime - startTime);
+			lastTime = currTime;
+			count = 0;
+		}
+	}
 
-  /* Resets the measure */
-  public void reset() {
-    startTime = lastTime = System.currentTimeMillis();
-    totalCount = 0;
-    count = 0;
-    fps = 0;
-    fpsSinceStart = 0;
-  }
+	/* Resets the measure */
+	public void reset() {
+		startTime = lastTime = System.currentTimeMillis();
+		totalCount = 0;
+		count = 0;
+		fps = 0;
+		fpsSinceStart = 0;
+	}
 
-  public void setUpdateRate(int rate) {
-    updateRate = rate;
-    reset();
-  }
+	public void setUpdateRate(int rate) {
+		updateRate = rate;
+		reset();
+	}
 }

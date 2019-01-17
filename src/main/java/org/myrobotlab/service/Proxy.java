@@ -25,47 +25,47 @@ import org.slf4j.Logger;
  */
 public class Proxy extends Service {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Proxy.class);
+	public final static Logger log = LoggerFactory.getLogger(Proxy.class);
 
-  // LinkedTreeMap<String> data;
+	// LinkedTreeMap<String> data;
 
-  public Proxy(String n) {
-    super(n);
-  }
+	public Proxy(String n) {
+		super(n);
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	/**
+	 * This static method returns all the details of the class without it having to
+	 * be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Proxy.class.getCanonicalName());
-    meta.addDescription("used as a general template");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("general");
-    return meta;
-  }
+		ServiceType meta = new ServiceType(Proxy.class.getCanonicalName());
+		meta.addDescription("used as a general template");
+		meta.setAvailable(true); // false if you do not want it viewable in a gui
+		// add dependency if necessary
+		// meta.addDependency("org.coolproject", "1.0.0");
+		meta.addCategory("general");
+		return meta;
+	}
 
-  public static void main(String[] args) {
-    try {
+	public static void main(String[] args) {
+		try {
 
-      LoggingFactory.init(Level.INFO);
+			LoggingFactory.init(Level.INFO);
 
-      Runtime.start("template", "_TemplateService");
-      Runtime.start("servo", "Servo");
-      Runtime.start("gui", "SwingGui");
+			Runtime.start("template", "_TemplateService");
+			Runtime.start("servo", "Servo");
+			Runtime.start("gui", "SwingGui");
 
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
+		} catch (Exception e) {
+			Logging.logError(e);
+		}
+	}
 
 }

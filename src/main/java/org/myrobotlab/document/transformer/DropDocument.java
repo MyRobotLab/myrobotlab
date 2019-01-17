@@ -14,41 +14,41 @@ import org.myrobotlab.document.ProcessingStatus;
  */
 public class DropDocument extends AbstractStage {
 
-  private String field;
-  private String value;
+	private String field;
+	private String value;
 
-  @Override
-  public void startStage(StageConfiguration config) {
-    if (config != null) {
-      field = config.getProperty("field", null);
-      value = config.getProperty("value", null);
-    }
-  }
+	@Override
+	public void startStage(StageConfiguration config) {
+		if (config != null) {
+			field = config.getProperty("field", null);
+			value = config.getProperty("value", null);
+		}
+	}
 
-  @Override
-  public List<Document> processDocument(Document doc) {
-    // TODO Auto-generated method stub
-    if (doc.hasField(field)) {
-      for (Object o : doc.getField(field)) {
-        if (o.equals(value)) {
-          doc.setStatus(ProcessingStatus.DROP);
-          break;
-        }
-      }
-    }
-    return null;
-  }
+	@Override
+	public List<Document> processDocument(Document doc) {
+		// TODO Auto-generated method stub
+		if (doc.hasField(field)) {
+			for (Object o : doc.getField(field)) {
+				if (o.equals(value)) {
+					doc.setStatus(ProcessingStatus.DROP);
+					break;
+				}
+			}
+		}
+		return null;
+	}
 
-  @Override
-  public void stopStage() {
-    // TODO Auto-generated method stub
+	@Override
+	public void stopStage() {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
-  @Override
-  public void flush() {
-    // TODO Auto-generated method stub
+	@Override
+	public void flush() {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
 }
