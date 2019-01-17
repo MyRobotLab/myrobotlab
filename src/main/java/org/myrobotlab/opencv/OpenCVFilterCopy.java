@@ -43,75 +43,75 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterCopy extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCopy.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterCopy.class.getCanonicalName());
 
-	public OpenCVFilterCopy() {
-		super();
-	}
+  public OpenCVFilterCopy() {
+    super();
+  }
 
-	public OpenCVFilterCopy(String name) {
-		super(name);
-	}
+  public OpenCVFilterCopy(String name) {
+    super(name);
+  }
 
-	/*
-	 * 
-	 * void getSubImg(IplImage* img, IplImage* subImg, CvRect roiRect) {
-	 * 
-	 * cvSetImageROI(img, roiRect); subImg = cvCreateImage(cvGetSize(img),
-	 * img->depth, img->nChannels); cvCopy(img, subImg, NULL); cvResetImageROI(img);
-	 * }
-	 */
+  /*
+   * 
+   * void getSubImg(IplImage* img, IplImage* subImg, CvRect roiRect) {
+   * 
+   * cvSetImageROI(img, roiRect); subImg = cvCreateImage(cvGetSize(img),
+   * img->depth, img->nChannels); cvCopy(img, subImg, NULL);
+   * cvResetImageROI(img); }
+   */
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
-		IplImage copy = copy(image);
-		put("copy", copy);
-		return copy;
-	}
+  @Override
+  public IplImage process(IplImage image) {
+    IplImage copy = copy(image);
+    put("copy", copy);
+    return copy;
+  }
 
-	/**
-	 * default copy - location starts in 0,0 - overlap gets cropped
-	 * 
-	 * @param src
-	 * @param dst
-	 * @return
-	 */
-	public IplImage copy(IplImage src, IplImage dst) {
-		CvRect rect = getMinRoi(src, dst);
-		IplImage ret = copyWithRoi(src, dst, 0, 0, rect.width(), rect.height());
-		return ret;
-	}
+  /**
+   * default copy - location starts in 0,0 - overlap gets cropped
+   * 
+   * @param src
+   * @param dst
+   * @return
+   */
+  public IplImage copy(IplImage src, IplImage dst) {
+    CvRect rect = getMinRoi(src, dst);
+    IplImage ret = copyWithRoi(src, dst, 0, 0, rect.width(), rect.height());
+    return ret;
+  }
 
-	public CvRect getMinRoi(IplImage src, IplImage dst) {
-		int minWidth = (src.width() < dst.width()) ? src.width() : dst.width();
-		int minHeight = (src.height() < dst.height()) ? src.height() : dst.height();
-		CvRect rect = new CvRect(0, 0, minWidth, minHeight);
-		return rect;
-	}
+  public CvRect getMinRoi(IplImage src, IplImage dst) {
+    int minWidth = (src.width() < dst.width()) ? src.width() : dst.width();
+    int minHeight = (src.height() < dst.height()) ? src.height() : dst.height();
+    CvRect rect = new CvRect(0, 0, minWidth, minHeight);
+    return rect;
+  }
 
-	// FIXME - if dst == null - create src sized copy
-	public IplImage copyWithRoi(IplImage src, IplImage dst, int roiX, int roiY, int roiWidth, int roiHeight) {
-		CvRect roiRect = new CvRect(roiX, roiY, roiWidth, roiHeight);
-		cvSetImageROI(dst, roiRect);
+  // FIXME - if dst == null - create src sized copy
+  public IplImage copyWithRoi(IplImage src, IplImage dst, int roiX, int roiY, int roiWidth, int roiHeight) {
+    CvRect roiRect = new CvRect(roiX, roiY, roiWidth, roiHeight);
+    cvSetImageROI(dst, roiRect);
 
-		// cvCopy(src, dst, null);
-		cvCopy(src, dst);
+    // cvCopy(src, dst, null);
+    cvCopy(src, dst);
 
-		cvResetImageROI(dst);
-		return dst;
-	}
+    cvResetImageROI(dst);
+    return dst;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		return image;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 
 }

@@ -17,56 +17,55 @@ import org.slf4j.Logger;
  */
 public class CastValuesToDouble extends AbstractStage {
 
-	public final static Logger log = LoggerFactory.getLogger(CastValuesToDouble.class);
-	private String inputField = null;
-	private String outputField = null;
+  public final static Logger log = LoggerFactory.getLogger(CastValuesToDouble.class);
+  private String inputField = null;
+  private String outputField = null;
 
-	@Override
-	public void startStage(StageConfiguration config) {
-		if (config != null) {
-			inputField = config.getProperty("inputField");
-			outputField = config.getProperty("outputField");
-		}
-	}
+  @Override
+  public void startStage(StageConfiguration config) {
+    if (config != null) {
+      inputField = config.getProperty("inputField");
+      outputField = config.getProperty("outputField");
+    }
+  }
 
-	@Override
-	public List<Document> processDocument(Document doc) {
-		// throw away malformed values.
-		if (!doc.hasField(inputField)) {
-			return null;
-		}
-		ArrayList<Double> doubles = new ArrayList<Double>();
-		for (Object val : doc.getField(inputField)) {
+  @Override
+  public List<Document> processDocument(Document doc) {
+    // throw away malformed values.
+    if (!doc.hasField(inputField)) {
+      return null;
+    }
+    ArrayList<Double> doubles = new ArrayList<Double>();
+    for (Object val : doc.getField(inputField)) {
 
-			try {
-				double i = Double.valueOf(val.toString().replaceAll(",", ""));
-				doubles.add(i);
-			} catch (NumberFormatException e) {
-				log.warn("Failed to cast value to double: doc id: {} field: {} value: {}", doc.getId(), inputField,
-						val);
-				// e.printStackTrace();
-				// ??
-				// doc.setStatus(ProcessingStatus.ERROR);
-			}
-		}
+      try {
+        double i = Double.valueOf(val.toString().replaceAll(",", ""));
+        doubles.add(i);
+      } catch (NumberFormatException e) {
+        log.warn("Failed to cast value to double: doc id: {} field: {} value: {}", doc.getId(), inputField, val);
+        // e.printStackTrace();
+        // ??
+        // doc.setStatus(ProcessingStatus.ERROR);
+      }
+    }
 
-		doc.removeField(outputField);
-		for (Double i : doubles) {
-			doc.addToField(outputField, i);
-		}
+    doc.removeField(outputField);
+    for (Double i : doubles) {
+      doc.addToField(outputField, i);
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	@Override
-	public void stopStage() {
-		// NOOP
+  @Override
+  public void stopStage() {
+    // NOOP
 
-	}
+  }
 
-	@Override
-	public void flush() {
-		// NOOP
-	}
+  @Override
+  public void flush() {
+    // NOOP
+  }
 
 }

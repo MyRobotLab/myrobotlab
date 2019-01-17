@@ -36,38 +36,38 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterAddMaskGui extends OpenCVFilterGui implements ActionListener {
 
-	public OpenCVFilterAddMaskGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
-		// ComboBoxModel list = new ComboBoxModel(this);
-	}
+  public OpenCVFilterAddMaskGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
+    // ComboBoxModel list = new ComboBoxModel(this);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// Object o = e.getSource();
-		OpenCVFilterAddMask bf = (OpenCVFilterAddMask) boundFilter.filter;
-		setFilterState(bf);
-	}
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // Object o = e.getSource();
+    OpenCVFilterAddMask bf = (OpenCVFilterAddMask) boundFilter.filter;
+    setFilterState(bf);
+  }
 
-	// @Override
-	public void attachGui() {
-		log.debug("attachGui");
-	}
+  // @Override
+  public void attachGui() {
+    log.debug("attachGui");
+  }
 
-	// @Override
-	public void detachGui() {
-		log.debug("detachGui");
+  // @Override
+  public void detachGui() {
+    log.debug("detachGui");
 
-	}
+  }
 
-	@Override
-	public void getFilterState(final FilterWrapper filterWrapper) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				OpenCVFilterAddMask bf = (OpenCVFilterAddMask) filterWrapper.filter;
-				sources.setSelectedItem(bf.maskName);
-			}
-		});
-	}
+  @Override
+  public void getFilterState(final FilterWrapper filterWrapper) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        OpenCVFilterAddMask bf = (OpenCVFilterAddMask) filterWrapper.filter;
+        sources.setSelectedItem(bf.maskName);
+      }
+    });
+  }
 
 }

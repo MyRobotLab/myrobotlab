@@ -19,49 +19,49 @@ import org.slf4j.Logger;
  */
 public class BodyPartGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(BodyPartGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(BodyPartGui.class);
 
-	JList servoList = new JList();
-	DefaultListModel listModel = new DefaultListModel();
+  JList servoList = new JList();
+  DefaultListModel listModel = new DefaultListModel();
 
-	public BodyPartGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		servoList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		servoList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-		servoList.setVisibleRowCount(-1);
+  public BodyPartGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    servoList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+    servoList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+    servoList.setVisibleRowCount(-1);
 
-		add(servoList);
+    add(servoList);
 
-	}
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
 
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
+  @Override
+  public void subscribeGui() {
 
-	}
+  }
 
-	@Override
-	public void unsubscribeGui() {
+  @Override
+  public void unsubscribeGui() {
 
-	}
+  }
 
-	public void onState(BodyPart sk) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				listModel.clear();
-				for (int i = 0; i < sk.getAcuators(sk.getIntanceName()).size(); i++) {
-					listModel.addElement(sk.getAcuators(sk.getIntanceName()).get(i));
-				}
-				servoList.setModel(listModel);
+  public void onState(BodyPart sk) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        listModel.clear();
+        for (int i = 0; i < sk.getAcuators(sk.getIntanceName()).size(); i++) {
+          listModel.addElement(sk.getAcuators(sk.getIntanceName()).get(i));
+        }
+        servoList.setModel(listModel);
 
-			}
-		});
-	}
+      }
+    });
+  }
 
 }

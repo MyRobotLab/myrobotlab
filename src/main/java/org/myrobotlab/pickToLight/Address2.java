@@ -31,60 +31,61 @@ package org.myrobotlab.pickToLight;
  */
 public class Address2 {
 
-	protected String controller;
-	protected int i2CBus;
-	protected int i2CAddress;
+  protected String controller;
+  protected int i2CBus;
+  protected int i2CAddress;
 
-	/**
-	 * Gets the value of the controller property.
-	 * 
-	 * @return possible object is {@link String }
-	 * 
-	 */
-	public String getController() {
-		return controller;
-	}
+  /**
+   * Gets the value of the controller property.
+   * 
+   * @return possible object is {@link String }
+   * 
+   */
+  public String getController() {
+    return controller;
+  }
 
-	/**
-	 * @return the value of the i2CAddress property.
-	 * 
-	 */
-	public int getI2CAddress() {
-		return i2CAddress;
-	}
+  /**
+   * @return the value of the i2CAddress property.
+   * 
+   */
+  public int getI2CAddress() {
+    return i2CAddress;
+  }
 
-	/**
-	 * @return the value of the i2CBus property.
-	 * 
-	 */
-	public int getI2CBus() {
-		return i2CBus;
-	}
+  /**
+   * @return the value of the i2CBus property.
+   * 
+   */
+  public int getI2CBus() {
+    return i2CBus;
+  }
 
-	/**
-	 * Sets the value of the controller property.
-	 * 
-	 * @param value allowed object is {@link String }
-	 * 
-	 */
-	public void setController(String value) {
-		this.controller = value;
-	}
+  /**
+   * Sets the value of the controller property.
+   * 
+   * @param value
+   *          allowed object is {@link String }
+   * 
+   */
+  public void setController(String value) {
+    this.controller = value;
+  }
 
-	/*
-	 * Sets the value of the i2CAddress property.
-	 * 
-	 */
-	public void setI2CAddress(int value) {
-		this.i2CAddress = value;
-	}
+  /*
+   * Sets the value of the i2CAddress property.
+   * 
+   */
+  public void setI2CAddress(int value) {
+    this.i2CAddress = value;
+  }
 
-	/*
-	 * Sets the value of the i2CBus property.
-	 * 
-	 */
-	public void setI2CBus(int value) {
-		this.i2CBus = value;
-	}
+  /*
+   * Sets the value of the i2CBus property.
+   * 
+   */
+  public void setI2CBus(int value) {
+    this.i2CBus = value;
+  }
 
 }

@@ -43,66 +43,66 @@ import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
 public abstract class OpenCVFilterGui implements ActionListener {
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGui.class);
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGui.class);
 
-	public final String name;
-	JPanel main = new JPanel(new BorderLayout());
-	JPanel display = new JPanel(new GridBagLayout());
-	public final String boundServiceName;
-	final SwingGui myGui;
-	final public GridBagConstraints gc = new GridBagConstraints();
+  public final String name;
+  JPanel main = new JPanel(new BorderLayout());
+  JPanel display = new JPanel(new GridBagLayout());
+  public final String boundServiceName;
+  final SwingGui myGui;
+  final public GridBagConstraints gc = new GridBagConstraints();
 
-	FilterWrapper boundFilter = null;
+  FilterWrapper boundFilter = null;
 
-	JComboBox<String> sources = new JComboBox<String>();
-	ComboBoxModel2 sourcesModel = new ComboBoxModel2(this);
+  JComboBox<String> sources = new JComboBox<String>();
+  ComboBoxModel2 sourcesModel = new ComboBoxModel2(this);
 
-	OpenCVFilterGui self;
+  OpenCVFilterGui self;
 
-	public OpenCVFilterGui(String boundFilterName, String boundServiceName, SwingGui myGui) {
-		name = boundFilterName;
-		this.boundServiceName = boundServiceName;
-		this.myGui = myGui;
+  public OpenCVFilterGui(String boundFilterName, String boundServiceName, SwingGui myGui) {
+    name = boundFilterName;
+    this.boundServiceName = boundServiceName;
+    this.myGui = myGui;
 
-		sources.addActionListener(sourcesModel);
+    sources.addActionListener(sourcesModel);
 
-		// title
-		TitledBorder title;
-		title = BorderFactory.createTitledBorder(name);
-		display.setBorder(title);
+    // title
+    TitledBorder title;
+    title = BorderFactory.createTitledBorder(name);
+    display.setBorder(title);
 
-		/*
-		 * JPanel input = new JPanel(); title =
-		 * BorderFactory.createTitledBorder("input"); input.setBorder(title);
-		 * input.add(sources); main.add(input, BorderLayout.NORTH);
-		 */
-		main.add(display, BorderLayout.CENTER);
-		self = this;
-	}
+    /*
+     * JPanel input = new JPanel(); title =
+     * BorderFactory.createTitledBorder("input"); input.setBorder(title);
+     * input.add(sources); main.add(input, BorderLayout.NORTH);
+     */
+    main.add(display, BorderLayout.CENTER);
+    self = this;
+  }
 
-	public JPanel getDisplay() {
-		return main;
-	}
+  public JPanel getDisplay() {
+    return main;
+  }
 
-	public abstract void getFilterState(final FilterWrapper filterWrapper);
+  public abstract void getFilterState(final FilterWrapper filterWrapper);
 
-	public void initFilterState(OpenCVFilter filter) {
-		boundFilter = new FilterWrapper(name, filter);
-		sources.setModel(sourcesModel);
-		sources.setSelectedItem(filter.sourceKey);
-	}
+  public void initFilterState(OpenCVFilter filter) {
+    boundFilter = new FilterWrapper(name, filter);
+    sources.setModel(sourcesModel);
+    sources.setSelectedItem(filter.sourceKey);
+  }
 
-	public void setFilterState(OpenCVFilter filter) {
-		myGui.send(boundServiceName, "setFilterState", new FilterWrapper(name, filter));
-	}
+  public void setFilterState(OpenCVFilter filter) {
+    myGui.send(boundServiceName, "setFilterState", new FilterWrapper(name, filter));
+  }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+  @Override
+  public String toString() {
+    return name;
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	}
+  @Override
+  public void actionPerformed(ActionEvent e) {
+  }
 
 }

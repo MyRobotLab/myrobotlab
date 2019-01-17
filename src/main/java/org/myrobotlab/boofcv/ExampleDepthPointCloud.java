@@ -71,44 +71,44 @@ import boofcv.io.calibration.CalibrationIO;
  */
 public class ExampleDepthPointCloud {
 
-	public static void main(String args[]) throws IOException {
+  public static void main(String args[]) throws IOException {
 
-		// String baseDir = "src/main/resources/resource/BoofCv";
-		String nameRgb = "src/main/resources/resource/BoofCv/basket_rgb.png";
-		String nameDepth = "src/main/resources/resource/BoofCv/basket_depth.png";
-		String nameCalib = "src/main/resources/resource/BoofCv/visualdepth.yaml";
+    // String baseDir = "src/main/resources/resource/BoofCv";
+    String nameRgb = "src/main/resources/resource/BoofCv/basket_rgb.png";
+    String nameDepth = "src/main/resources/resource/BoofCv/basket_depth.png";
+    String nameCalib = "src/main/resources/resource/BoofCv/visualdepth.yaml";
 
-		VisualDepthParameters param = CalibrationIO.load(nameCalib);
+    VisualDepthParameters param = CalibrationIO.load(nameCalib);
 
-		BufferedImage buffered = UtilImageIO.loadImage(nameRgb);
-		Planar<GrayU8> rgb = ConvertBufferedImage.convertFromPlanar(buffered, null, true, GrayU8.class);
-		GrayU16 depth = ConvertBufferedImage.convertFrom(UtilImageIO.loadImage(nameDepth), null, GrayU16.class);
+    BufferedImage buffered = UtilImageIO.loadImage(nameRgb);
+    Planar<GrayU8> rgb = ConvertBufferedImage.convertFromPlanar(buffered, null, true, GrayU8.class);
+    GrayU16 depth = ConvertBufferedImage.convertFrom(UtilImageIO.loadImage(nameDepth), null, GrayU16.class);
 
-		FastQueue<Point3D_F64> cloud = new FastQueue<>(Point3D_F64.class, true);
-		FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
+    FastQueue<Point3D_F64> cloud = new FastQueue<>(Point3D_F64.class, true);
+    FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
 
-		VisualDepthOps.depthTo3D(param.visualParam, rgb, depth, cloud, cloudColor);
+    VisualDepthOps.depthTo3D(param.visualParam, rgb, depth, cloud, cloudColor);
 
-		PointCloudViewer viewer = VisualizeData.createPointCloudViewer();
-		viewer.setCameraHFov(PerspectiveOps.computeHFov(param.visualParam));
-		viewer.setTranslationStep(15);
+    PointCloudViewer viewer = VisualizeData.createPointCloudViewer();
+    viewer.setCameraHFov(PerspectiveOps.computeHFov(param.visualParam));
+    viewer.setTranslationStep(15);
 
-		for (int i = 0; i < cloud.size; i++) {
-			Point3D_F64 p = cloud.get(i);
-			int[] color = cloudColor.get(i);
-			int c = (color[0] << 16) | (color[1] << 8) | color[2];
-			viewer.addPoint(p.x, p.y, p.z, c);
-		}
-		viewer.getComponent().setPreferredSize(new Dimension(rgb.width, rgb.height));
+    for (int i = 0; i < cloud.size; i++) {
+      Point3D_F64 p = cloud.get(i);
+      int[] color = cloudColor.get(i);
+      int c = (color[0] << 16) | (color[1] << 8) | color[2];
+      viewer.addPoint(p.x, p.y, p.z, c);
+    }
+    viewer.getComponent().setPreferredSize(new Dimension(rgb.width, rgb.height));
 
-		// ---------- Display depth image
-		// use the actual max value in the image to maximize its appearance
-		int maxValue = ImageStatistics.max(depth);
-		BufferedImage depthOut = VisualizeImageData.disparity(depth, null, 0, maxValue, 0);
-		ShowImages.showWindow(depthOut, "Depth Image", true);
+    // ---------- Display depth image
+    // use the actual max value in the image to maximize its appearance
+    int maxValue = ImageStatistics.max(depth);
+    BufferedImage depthOut = VisualizeImageData.disparity(depth, null, 0, maxValue, 0);
+    ShowImages.showWindow(depthOut, "Depth Image", true);
 
-		// ---------- Display colorized point cloud
-		ShowImages.showWindow(viewer.getComponent(), "Point Cloud", true);
-		System.out.println("Total points = " + cloud.size);
-	}
+    // ---------- Display colorized point cloud
+    ShowImages.showWindow(viewer.getComponent(), "Point Cloud", true);
+    System.out.println("Total points = " + cloud.size);
+  }
 }

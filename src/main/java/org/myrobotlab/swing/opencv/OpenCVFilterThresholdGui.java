@@ -44,112 +44,111 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterThresholdGui extends OpenCVFilterGui {
 
-	public class AdjustSlider implements ChangeListener {
+  public class AdjustSlider implements ChangeListener {
 
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			OpenCVFilterThreshold bf = (OpenCVFilterThreshold) boundFilter.filter;
-			JSlider2 slider = (JSlider2) e.getSource();
-			if (slider.getName().equals("lowThreshold")) {
-				bf.lowThreshold = slider.getValue();
-			} else if (slider.getName().equals("lowThreshold")) {
-				bf.highThreshold = slider.getValue();
-			}
-			slider.value.setText("" + slider.getValue());
-			setFilterState(bf);
-		}
-	}
+    @Override
+    public void stateChanged(ChangeEvent e) {
+      OpenCVFilterThreshold bf = (OpenCVFilterThreshold) boundFilter.filter;
+      JSlider2 slider = (JSlider2) e.getSource();
+      if (slider.getName().equals("lowThreshold")) {
+        bf.lowThreshold = slider.getValue();
+      } else if (slider.getName().equals("lowThreshold")) {
+        bf.highThreshold = slider.getValue();
+      }
+      slider.value.setText("" + slider.getValue());
+      setFilterState(bf);
+    }
+  }
 
-	public class JSlider2 extends JSlider {
-		private static final long serialVersionUID = 1L;
-		JLabel value = new JLabel();
+  public class JSlider2 extends JSlider {
+    private static final long serialVersionUID = 1L;
+    JLabel value = new JLabel();
 
-		public JSlider2(int vertical, int i, int j, int k) {
-			super(vertical, i, j, k);
-			value.setText("" + k);
-		}
+    public JSlider2(int vertical, int i, int j, int k) {
+      super(vertical, i, j, k);
+      value.setText("" + k);
+    }
 
-	}
+  }
 
-	JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
+  JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
 
-	JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
+  JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
 
-	// CV_THRESH_BINARY
-	// CV_THRESH_BINARY_INV
-	// CV_THRESH_TRUNC
-	// CV_THRESH_TOZERO
-	// CV_THRESH_TOZERO_INV
+  // CV_THRESH_BINARY
+  // CV_THRESH_BINARY_INV
+  // CV_THRESH_TRUNC
+  // CV_THRESH_TOZERO
+  // CV_THRESH_TOZERO_INV
 
-	JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
+  JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
 
-	JComboBox<String> type = new JComboBox<String>(new String[] { "CV_THRESH_BINARY", "CV_THRESH_BINARY_INV",
-			"CV_THRESH_TRUNC", "CV_THRESH_TOZERO", "CV_THRESH_TOZERO_INV" });
+  JComboBox<String> type = new JComboBox<String>(new String[] { "CV_THRESH_BINARY", "CV_THRESH_BINARY_INV", "CV_THRESH_TRUNC", "CV_THRESH_TOZERO", "CV_THRESH_TOZERO_INV" });
 
-	AdjustSlider change = new AdjustSlider();
+  AdjustSlider change = new AdjustSlider();
 
-	public OpenCVFilterThresholdGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
+  public OpenCVFilterThresholdGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
 
-		lowThreshold.setName("lowThreshold");
-		highThreshold.setName("highThreshold");
+    lowThreshold.setName("lowThreshold");
+    highThreshold.setName("highThreshold");
 
-		lowThreshold.addChangeListener(change);
-		highThreshold.addChangeListener(change);
+    lowThreshold.addChangeListener(change);
+    highThreshold.addChangeListener(change);
 
-		GridBagConstraints gc2 = new GridBagConstraints();
+    GridBagConstraints gc2 = new GridBagConstraints();
 
-		TitledBorder title;
-		JPanel j = new JPanel(new GridBagLayout());
-		title = BorderFactory.createTitledBorder("threshold");
-		j.setBorder(title);
+    TitledBorder title;
+    JPanel j = new JPanel(new GridBagLayout());
+    title = BorderFactory.createTitledBorder("threshold");
+    j.setBorder(title);
 
-		gc.gridx = 0;
-		gc.gridy = 0;
-		j.add(new JLabel("low"), gc);
-		++gc.gridx;
-		j.add(lowThreshold, gc);
-		++gc.gridx;
-		j.add(lowThreshold.value, gc);
-		++gc.gridy;
-		gc.gridx = 0;
-		j.add(new JLabel("high"), gc);
-		++gc.gridx;
-		j.add(highThreshold, gc);
-		++gc.gridx;
-		j.add(highThreshold.value, gc);
+    gc.gridx = 0;
+    gc.gridy = 0;
+    j.add(new JLabel("low"), gc);
+    ++gc.gridx;
+    j.add(lowThreshold, gc);
+    ++gc.gridx;
+    j.add(lowThreshold.value, gc);
+    ++gc.gridy;
+    gc.gridx = 0;
+    j.add(new JLabel("high"), gc);
+    ++gc.gridx;
+    j.add(highThreshold, gc);
+    ++gc.gridx;
+    j.add(highThreshold.value, gc);
 
-		display.add(j, gc2);
-		gc2.gridy = 1;
-		gc2.gridx = 0;
+    display.add(j, gc2);
+    gc2.gridy = 1;
+    gc2.gridx = 0;
 
-		j = new JPanel(new GridBagLayout());
-		title = BorderFactory.createTitledBorder("type");
-		j.setBorder(title);
-		// j.add(apertureSize);
-		// j.add(apertureSize.value);
-		j.add(type);
-		display.add(j, gc2);
+    j = new JPanel(new GridBagLayout());
+    title = BorderFactory.createTitledBorder("type");
+    j.setBorder(title);
+    // j.add(apertureSize);
+    // j.add(apertureSize.value);
+    j.add(type);
+    display.add(j, gc2);
 
-	}
+  }
 
-	@Override
-	public void getFilterState(final FilterWrapper filterWrapper) {
-		boundFilter = filterWrapper;
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				OpenCVFilterThreshold bf = (OpenCVFilterThreshold) filterWrapper.filter;
-				lowThreshold.setValueIsAdjusting(true);
-				lowThreshold.setValue((int) bf.lowThreshold);
-				lowThreshold.setValueIsAdjusting(false);
+  @Override
+  public void getFilterState(final FilterWrapper filterWrapper) {
+    boundFilter = filterWrapper;
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        OpenCVFilterThreshold bf = (OpenCVFilterThreshold) filterWrapper.filter;
+        lowThreshold.setValueIsAdjusting(true);
+        lowThreshold.setValue((int) bf.lowThreshold);
+        lowThreshold.setValueIsAdjusting(false);
 
-				highThreshold.setValueIsAdjusting(true);
-				highThreshold.setValue((int) bf.highThreshold);
-				highThreshold.setValueIsAdjusting(false);
-			}
-		});
+        highThreshold.setValueIsAdjusting(true);
+        highThreshold.setValue((int) bf.highThreshold);
+        highThreshold.setValueIsAdjusting(false);
+      }
+    });
 
-	}
+  }
 
 }

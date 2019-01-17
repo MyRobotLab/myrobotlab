@@ -58,61 +58,61 @@ import org.slf4j.Logger;
  */
 public class OpenCVFilterSolr extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
-	transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSolr.class);
+  private static final long serialVersionUID = 1L;
+  transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSolr.class);
 
-	private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-	private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
+  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
 
-	private String formattedSearchResult = "No Result";
+  private String formattedSearchResult = "No Result";
 
-	private Solr solr = null;
-	private String solrUrl = "http://localhost:8983/solr/wikipedia";
+  private Solr solr = null;
+  private String solrUrl = "http://localhost:8983/solr/wikipedia";
 
-	public OpenCVFilterSolr() {
-		super();
-	}
+  public OpenCVFilterSolr() {
+    super();
+  }
 
-	public OpenCVFilterSolr(String name) {
-		super(name);
-	}
+  public OpenCVFilterSolr(String name) {
+    super(name);
+  }
 
-	public void initSolr() {
-		solr = (Solr) Runtime.createAndStart("solr", "Solr");
-		solr.setSolrUrl(solrUrl);
-	}
+  public void initSolr() {
+    solr = (Solr) Runtime.createAndStart("solr", "Solr");
+    solr.setSolrUrl(solrUrl);
+  }
 
-	public void populateSearch(String queryString, String field) {
-		QueryResponse qResp = solr.search(queryString);
-		SolrDocumentList results = qResp.getResults();
-		if (results.size() > 0) {
-			formattedSearchResult = results.get(0).getFirstValue(field).toString();
-		} else {
-			formattedSearchResult = "No Result";
-		}
-	}
+  public void populateSearch(String queryString, String field) {
+    QueryResponse qResp = solr.search(queryString);
+    SolrDocumentList results = qResp.getResults();
+    if (results.size() > 0) {
+      formattedSearchResult = results.get(0).getFirstValue(field).toString();
+    } else {
+      formattedSearchResult = "No Result";
+    }
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
+  @Override
+  public IplImage process(IplImage image) {
 
-		if (solr == null)
-			initSolr();
+    if (solr == null)
+      initSolr();
 
-		cvPutText(image, formattedSearchResult, cvPoint(20, 40), font, CvScalar.GREEN);
-		// TODO: get a handle to the solr instance.
-		// TODO: display the solr search result text.
-		return image;
-	}
+    cvPutText(image, formattedSearchResult, cvPoint(20, 40), font, CvScalar.GREEN);
+    // TODO: get a handle to the solr instance.
+    // TODO: display the solr search result text.
+    return image;
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

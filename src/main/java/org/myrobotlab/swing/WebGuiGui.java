@@ -37,33 +37,33 @@ import org.slf4j.Logger;
 
 public class WebGuiGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(WebGuiGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(WebGuiGui.class);
 
-	public WebGuiGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-	}
+  public WebGuiGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void unsubscribeGui() {
+  }
 
-	public void onState(WebGui template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void onState(WebGui template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 }

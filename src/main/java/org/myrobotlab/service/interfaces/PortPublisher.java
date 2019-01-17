@@ -6,14 +6,14 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface PortPublisher extends NameProvider {
 
-	public String publishConnect(String portName);
+  public String publishConnect(String portName);
 
-	public String publishDisconnect(String portName);
+  public String publishDisconnect(String portName);
 
-	public boolean isConnected();
+  public boolean isConnected();
 
-	public String getPortName();
+  public String getPortName();
 
-	public List<String> getPortNames();
+  public List<String> getPortNames();
 
 }

@@ -42,47 +42,47 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterKinectNavigateGui extends OpenCVFilterGui implements ActionListener, ChangeListener {
 
-	JLabel selectedPoint = new JLabel("here xxxxxxxxxxxxxxxxx");
+  JLabel selectedPoint = new JLabel("here xxxxxxxxxxxxxxxxx");
 
-	public OpenCVFilterKinectNavigateGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
+  public OpenCVFilterKinectNavigateGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
 
-		// display.add(input, BorderLayout.NORTH);
+    // display.add(input, BorderLayout.NORTH);
 
-		// set the hook
-		MRLListener listener = new MRLListener("publishFilterState", myService.getName(), "setFilterState");
-		myService.send(boundServiceName, "addListener", listener);
-		// thread wait?
-		// send the event
-		myService.send(boundServiceName, "publishFilterState", boundFilterName);
-		display.setLayout(new BorderLayout());
-		display.add(selectedPoint, BorderLayout.CENTER);
-	}
+    // set the hook
+    MRLListener listener = new MRLListener("publishFilterState", myService.getName(), "setFilterState");
+    myService.send(boundServiceName, "addListener", listener);
+    // thread wait?
+    // send the event
+    myService.send(boundServiceName, "publishFilterState", boundFilterName);
+    display.setLayout(new BorderLayout());
+    display.add(selectedPoint, BorderLayout.CENTER);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterKinectNavigate filter = (OpenCVFilterKinectNavigate) boundFilter.filter;
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
+    OpenCVFilterKinectNavigate filter = (OpenCVFilterKinectNavigate) boundFilter.filter;
 
-		/*
-		 * if (o == getFeatures) { filter.needTrackingPoints = true; } else if (o ==
-		 * clearPoints) { filter.clearPoints = true; }
-		 */
+    /*
+     * if (o == getFeatures) { filter.needTrackingPoints = true; } else if (o ==
+     * clearPoints) { filter.clearPoints = true; }
+     */
 
-		// send the updated filter to OpenCV service
-		myGui.send(boundServiceName, "setFilterState", boundFilter);
-	}
+    // send the updated filter to OpenCV service
+    myGui.send(boundServiceName, "setFilterState", boundFilter);
+  }
 
-	@Override
-	public void getFilterState(FilterWrapper boundFilter) {
-		log.info("{}", boundFilter);
-	}
+  @Override
+  public void getFilterState(FilterWrapper boundFilter) {
+    log.info("{}", boundFilter);
+  }
 
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		if (boundFilter != null) {
-			myGui.send(boundServiceName, "setFilterState", boundFilter);
-		} // else - adjust gui text only
-	}
+  @Override
+  public void stateChanged(ChangeEvent e) {
+    if (boundFilter != null) {
+      myGui.send(boundServiceName, "setFilterState", boundFilter);
+    } // else - adjust gui text only
+  }
 
 }

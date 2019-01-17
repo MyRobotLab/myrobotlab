@@ -4,40 +4,40 @@ import java.io.Serializable;
 
 public class ServiceExclude implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	String org;
-	String module;
-	String name;
-	String type;
-	String ext;
-	String matcher;
-	String conf;
-	String version;
+  String org;
+  String module;
+  String name;
+  String type;
+  String ext;
+  String matcher;
+  String conf;
+  String version;
 
-	public ServiceExclude(String groupId, String artifactId) {
-		this.org = groupId;
-		this.module = artifactId;
-	}
+  public ServiceExclude(String groupId, String artifactId) {
+    this.org = groupId;
+    this.module = artifactId;
+  }
 
-	public String getOrgId() {
-		return org;
-	}
+  public String getOrgId() {
+    return org;
+  }
 
-	public String getArtifactId() {
-		return module;
-	}
+  public String getArtifactId() {
+    return module;
+  }
 
-	public String getVersion() {
-		return version;
-	}
+  public String getVersion() {
+    return version;
+  }
 
-	public String getType() {
-		return type;
-	}
+  public String getType() {
+    return type;
+  }
 
-	public String getExt() {
-		return ext;
-	}
+  public String getExt() {
+    return ext;
+  }
 
 }

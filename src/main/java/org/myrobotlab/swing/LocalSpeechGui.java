@@ -35,12 +35,12 @@ import org.slf4j.Logger;
 
 public class LocalSpeechGui extends AbstractSpeechSynthesisGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(LocalSpeechGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(LocalSpeechGui.class);
 
-	public LocalSpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
-		super(boundServiceName, myService);
+  public LocalSpeechGui(final String boundServiceName, final SwingGui myService) throws IOException {
+    super(boundServiceName, myService);
 
-	}
+  }
 
 }

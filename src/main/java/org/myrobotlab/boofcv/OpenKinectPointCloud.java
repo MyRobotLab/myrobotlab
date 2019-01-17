@@ -51,163 +51,163 @@ import java.util.List;
  */
 public class OpenKinectPointCloud {
 
-	{
-		// be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
-		// location of your shared library!
-		NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
-	}
+  {
+    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
+    // location of your shared library!
+    NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
+  }
 
-	private PointCloudViewer viewer;
+  private PointCloudViewer viewer;
 
-	private volatile boolean videoAvailable = false;
-	private volatile boolean depthAvailable = false;
+  private volatile boolean videoAvailable = false;
+  private volatile boolean depthAvailable = false;
 
-	boolean firstDepth = true;
-	boolean firstVideo = true;
-	boolean firstImage = true;
+  boolean firstDepth = true;
+  boolean firstVideo = true;
+  boolean firstImage = true;
 
-	String baseDir = "src/main/resources/resource/BoofCv";
-	String nameCalib = "intrinsic.yaml";
+  String baseDir = "src/main/resources/resource/BoofCv";
+  String nameCalib = "intrinsic.yaml";
 
-	Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);
-	GrayU16 depth = new GrayU16(1, 1);
+  Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);
+  GrayU16 depth = new GrayU16(1, 1);
 
-	List<Point3D_F64> points = new ArrayList<Point3D_F64>();
-	int colors[] = new int[1];
+  List<Point3D_F64> points = new ArrayList<Point3D_F64>();
+  int colors[] = new int[1];
 
-	public void process() {
+  public void process() {
 
-		Context kinect = Freenect.createContext();
+    Context kinect = Freenect.createContext();
 
-		if (kinect.numDevices() < 0)
-			throw new RuntimeException("No kinect found!");
+    if (kinect.numDevices() < 0)
+      throw new RuntimeException("No kinect found!");
 
-		Device device = kinect.openDevice(0);
+    Device device = kinect.openDevice(0);
 
-		device.setDepthFormat(DepthFormat.REGISTERED);
-		device.setVideoFormat(VideoFormat.RGB);
+    device.setDepthFormat(DepthFormat.REGISTERED);
+    device.setVideoFormat(VideoFormat.RGB);
 
-		CameraPinholeRadial param = CalibrationIO.load(new File(baseDir, nameCalib));
+    CameraPinholeRadial param = CalibrationIO.load(new File(baseDir, nameCalib));
 
-		FastQueue<Point3D_F64> cloud = new FastQueue<>(Point3D_F64.class, true);
-		FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
+    FastQueue<Point3D_F64> cloud = new FastQueue<>(Point3D_F64.class, true);
+    FastQueueArray_I32 cloudColor = new FastQueueArray_I32(3);
 
-		viewer = VisualizeData.createPointCloudViewer();
-		viewer.setCameraHFov(PerspectiveOps.computeHFov(param));
-		viewer.setTranslationStep(15);
+    viewer = VisualizeData.createPointCloudViewer();
+    viewer.setCameraHFov(PerspectiveOps.computeHFov(param));
+    viewer.setTranslationStep(15);
 
-		device.startDepth(new DepthHandler() {
-			@Override
-			public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
-				processDepth(mode, frame, timestamp);
-			}
-		});
-		device.startVideo(new VideoHandler() {
-			@Override
-			public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
-				processRgb(mode, frame, timestamp);
-			}
-		});
+    device.startDepth(new DepthHandler() {
+      @Override
+      public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
+        processDepth(mode, frame, timestamp);
+      }
+    });
+    device.startVideo(new VideoHandler() {
+      @Override
+      public void onFrameReceived(FrameMode mode, ByteBuffer frame, int timestamp) {
+        processRgb(mode, frame, timestamp);
+      }
+    });
 
-		long starTime = System.currentTimeMillis();
-		while (starTime + 100000 > System.currentTimeMillis()) {
+    long starTime = System.currentTimeMillis();
+    while (starTime + 100000 > System.currentTimeMillis()) {
 
-			if (videoAvailable && depthAvailable) {
-				if (firstImage) {
-					viewer.getComponent().setPreferredSize(new Dimension(rgb.width, rgb.height));
-				}
+      if (videoAvailable && depthAvailable) {
+        if (firstImage) {
+          viewer.getComponent().setPreferredSize(new Dimension(rgb.width, rgb.height));
+        }
 
-				VisualDepthOps.depthTo3D(param, rgb, depth, cloud, cloudColor);
+        VisualDepthOps.depthTo3D(param, rgb, depth, cloud, cloudColor);
 
-				if (colors.length != cloud.size()) {
-					colors = new int[cloud.size()];
-					points = new ArrayList<Point3D_F64>(cloud.size());
-				}
+        if (colors.length != cloud.size()) {
+          colors = new int[cloud.size()];
+          points = new ArrayList<Point3D_F64>(cloud.size());
+        }
 
-				points.clear();
-				for (int i = 0; i < cloud.size; i++) {
-					Point3D_F64 p = cloud.get(i);
-					int[] color = cloudColor.get(i);
-					int c = (color[0] << 16) | (color[1] << 8) | color[2];
-					points.add(p);
-					colors[i] = c;
-				}
+        points.clear();
+        for (int i = 0; i < cloud.size; i++) {
+          Point3D_F64 p = cloud.get(i);
+          int[] color = cloudColor.get(i);
+          int c = (color[0] << 16) | (color[1] << 8) | color[2];
+          points.add(p);
+          colors[i] = c;
+        }
 
-				viewer.clearPoints();
-				if (colors.length != points.size()) {
-					Log.info("WTF", colors.length, points.size(), cloud.size);
-				}
-				viewer.addCloud(points, colors);
+        viewer.clearPoints();
+        if (colors.length != points.size()) {
+          Log.info("WTF", colors.length, points.size(), cloud.size);
+        }
+        viewer.addCloud(points, colors);
 
-				if (firstImage) {
-					ShowImages.showWindow(viewer.getComponent(), "Point Cloud", true);
-					firstImage = false;
-				} else {
-					viewer.getComponent().repaint();
-				}
-				videoAvailable = false;
-				depthAvailable = false;
-			}
-			sleep(10);
-		}
-		System.out.println("100 Seconds elapsed");
+        if (firstImage) {
+          ShowImages.showWindow(viewer.getComponent(), "Point Cloud", true);
+          firstImage = false;
+        } else {
+          viewer.getComponent().repaint();
+        }
+        videoAvailable = false;
+        depthAvailable = false;
+      }
+      sleep(10);
+    }
+    System.out.println("100 Seconds elapsed");
 
-		device.stopDepth();
-		device.stopVideo();
-		device.close();
-	}
+    device.stopDepth();
+    device.stopVideo();
+    device.close();
+  }
 
-	private void sleep(int millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-		}
+  private void sleep(int millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException e) {
+    }
 
-	}
+  }
 
-	protected void processDepth(FrameMode mode, ByteBuffer frame, int timestamp) {
+  protected void processDepth(FrameMode mode, ByteBuffer frame, int timestamp) {
 
-		// System.out.println("Got depth! "+timestamp);
-		if (firstDepth) {
-			depth.reshape(mode.getWidth(), mode.getHeight());
-			firstDepth = false;
-		}
+    // System.out.println("Got depth! "+timestamp);
+    if (firstDepth) {
+      depth.reshape(mode.getWidth(), mode.getHeight());
+      firstDepth = false;
+    }
 
-		// Skip frames until the previous depth map has been shown
-		if (!depthAvailable) {
-			// Convert the frame to a depth map))
-			UtilOpenKinect.bufferDepthToU16(frame, depth);
-			// Log.info("frame.capacity", frame.capacity());
-			// Log.info("depthAvailable", depth.width, depth.height);
-			depthAvailable = true;
-		}
-	}
+    // Skip frames until the previous depth map has been shown
+    if (!depthAvailable) {
+      // Convert the frame to a depth map))
+      UtilOpenKinect.bufferDepthToU16(frame, depth);
+      // Log.info("frame.capacity", frame.capacity());
+      // Log.info("depthAvailable", depth.width, depth.height);
+      depthAvailable = true;
+    }
+  }
 
-	protected void processRgb(FrameMode mode, ByteBuffer frame, int timestamp) {
+  protected void processRgb(FrameMode mode, ByteBuffer frame, int timestamp) {
 
-		if (mode.getVideoFormat() != VideoFormat.RGB) {
-			System.out.println("Bad rgb format!");
-		}
+    if (mode.getVideoFormat() != VideoFormat.RGB) {
+      System.out.println("Bad rgb format!");
+    }
 
-		// System.out.println("Got rgb! "+timestamp);
-		if (firstVideo) {
-			rgb.reshape(mode.getWidth(), mode.getHeight());
-			viewer.getComponent().setPreferredSize(new Dimension(rgb.width, rgb.height));
-			firstVideo = false;
-		}
+    // System.out.println("Got rgb! "+timestamp);
+    if (firstVideo) {
+      rgb.reshape(mode.getWidth(), mode.getHeight());
+      viewer.getComponent().setPreferredSize(new Dimension(rgb.width, rgb.height));
+      firstVideo = false;
+    }
 
-		// Skip frames until the previous video has been shown
-		if (!videoAvailable) {
-			UtilOpenKinect.bufferRgbToMsU8(frame, rgb);
-			// Log.info("videoAvailable");
-			videoAvailable = true;
-		}
+    // Skip frames until the previous video has been shown
+    if (!videoAvailable) {
+      UtilOpenKinect.bufferRgbToMsU8(frame, rgb);
+      // Log.info("videoAvailable");
+      videoAvailable = true;
+    }
 
-	}
+  }
 
-	public static void main(String args[]) {
-		OpenKinectPointCloud app = new OpenKinectPointCloud();
+  public static void main(String args[]) {
+    OpenKinectPointCloud app = new OpenKinectPointCloud();
 
-		app.process();
-	}
+    app.process();
+  }
 }

@@ -37,49 +37,49 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterErodeGui extends OpenCVFilterGui implements ActionListener {
 
-	JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+  JComboBox<Integer> iterations = new JComboBox<Integer>(new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
-	public OpenCVFilterErodeGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
+  public OpenCVFilterErodeGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
 
-		iterations.addActionListener(this);
-		display.add(iterations);
+    iterations.addActionListener(this);
+    display.add(iterations);
 
-	}
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterErode bf = (OpenCVFilterErode) boundFilter.filter;
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
+    OpenCVFilterErode bf = (OpenCVFilterErode) boundFilter.filter;
 
-		if (o == iterations) {
-			bf.numberOfIterations = (Integer) iterations.getSelectedItem();
-		}
+    if (o == iterations) {
+      bf.numberOfIterations = (Integer) iterations.getSelectedItem();
+    }
 
-		setFilterState(bf);
-	}
+    setFilterState(bf);
+  }
 
-	// @Override
-	public void attachGui() {
-		log.debug("attachGui");
+  // @Override
+  public void attachGui() {
+    log.debug("attachGui");
 
-	}
+  }
 
-	// @Override
-	public void detachGui() {
-		log.debug("detachGui");
+  // @Override
+  public void detachGui() {
+    log.debug("detachGui");
 
-	}
+  }
 
-	@Override
-	public void getFilterState(final FilterWrapper filterWrapper) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				OpenCVFilterErode bf = (OpenCVFilterErode) filterWrapper.filter;
-				iterations.setSelectedItem(bf.numberOfIterations);
-			}
-		});
-	}
+  @Override
+  public void getFilterState(final FilterWrapper filterWrapper) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        OpenCVFilterErode bf = (OpenCVFilterErode) filterWrapper.filter;
+        iterations.setSelectedItem(bf.numberOfIterations);
+      }
+    });
+  }
 
 }

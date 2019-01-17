@@ -37,34 +37,34 @@ import org.slf4j.Logger;
 
 public class CronGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(CronGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(CronGui.class);
 
-	public CronGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-	}
+  public CronGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void unsubscribeGui() {
+  }
 
-	public void onState(Cron template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void onState(Cron template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
 }

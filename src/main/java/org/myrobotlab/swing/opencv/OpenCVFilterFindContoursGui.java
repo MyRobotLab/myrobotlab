@@ -30,32 +30,32 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterFindContoursGui extends OpenCVFilterGui {
 
-	public OpenCVFilterFindContoursGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
+  public OpenCVFilterFindContoursGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
 
-	}
+  }
 
-	public void apply() {
-		log.debug("apply");
+  public void apply() {
+    log.debug("apply");
 
-	}
+  }
 
-	// @Override
-	public void attachGui() {
-		log.debug("attachGui");
+  // @Override
+  public void attachGui() {
+    log.debug("attachGui");
 
-	}
+  }
 
-	// @Override
-	public void detachGui() {
-		log.debug("detachGui");
+  // @Override
+  public void detachGui() {
+    log.debug("detachGui");
 
-	}
+  }
 
-	@Override
-	public void getFilterState(FilterWrapper filter) {
-		// TODO Auto-generated method stub
+  @Override
+  public void getFilterState(FilterWrapper filter) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
 }

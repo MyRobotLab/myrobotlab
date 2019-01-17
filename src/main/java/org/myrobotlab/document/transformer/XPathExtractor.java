@@ -40,182 +40,182 @@ import org.xml.sax.SAXException;
  */
 public class XPathExtractor extends AbstractStage {
 
-	public final static Logger log = LoggerFactory.getLogger(XPathExtractor.class.getCanonicalName());
-	protected String xmlField = "xml";
-	protected String configFile = "config/xpaths.txt";
-	// mapping of field name to the xpaths that evaluate for its extraction
-	protected HashMap<XPathExpression, ArrayList<String>> xpaths = new HashMap<XPathExpression, ArrayList<String>>();
-	protected boolean useNamespaces = true;
-	private DocumentBuilderFactory factory;
-	private DocumentBuilder builder;
-	private XPathFactory xpathFactory;
-	private XPath xpath;
-	// TODO: move this to the base class.
-	private boolean debug = false;
+  public final static Logger log = LoggerFactory.getLogger(XPathExtractor.class.getCanonicalName());
+  protected String xmlField = "xml";
+  protected String configFile = "config/xpaths.txt";
+  // mapping of field name to the xpaths that evaluate for its extraction
+  protected HashMap<XPathExpression, ArrayList<String>> xpaths = new HashMap<XPathExpression, ArrayList<String>>();
+  protected boolean useNamespaces = true;
+  private DocumentBuilderFactory factory;
+  private DocumentBuilder builder;
+  private XPathFactory xpathFactory;
+  private XPath xpath;
+  // TODO: move this to the base class.
+  private boolean debug = false;
 
-	@Override
-	public void startStage(StageConfiguration config) {
+  @Override
+  public void startStage(StageConfiguration config) {
 
-		if (config != null) {
-			xmlField = config.getProperty("xmlField", "xml");
-			configFile = config.getProperty("configFile", "config/xpaths.txt");
-			useNamespaces = Boolean.valueOf(config.getProperty("useNamespaces", "true"));
-		}
+    if (config != null) {
+      xmlField = config.getProperty("xmlField", "xml");
+      configFile = config.getProperty("configFile", "config/xpaths.txt");
+      useNamespaces = Boolean.valueOf(config.getProperty("useNamespaces", "true"));
+    }
 
-		factory = DocumentBuilderFactory.newInstance();
-		// TODO: do we really care about name spaces (they can be a pain sometimes)
-		factory.setNamespaceAware(useNamespaces);
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			log.warn("Parser configuration error.", e);
-		}
-		xpathFactory = XPathFactory.newInstance();
-		xpath = xpathFactory.newXPath();
-		// TODO Auto-generated method stub
-		try {
-			xpaths = loadConfig(configFile);
-		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
-			log.warn("XPath Expression problem loading file {}", configFile, e);
-		}
+    factory = DocumentBuilderFactory.newInstance();
+    // TODO: do we really care about name spaces (they can be a pain sometimes)
+    factory.setNamespaceAware(useNamespaces);
+    try {
+      builder = factory.newDocumentBuilder();
+    } catch (ParserConfigurationException e) {
+      log.warn("Parser configuration error.", e);
+    }
+    xpathFactory = XPathFactory.newInstance();
+    xpath = xpathFactory.newXPath();
+    // TODO Auto-generated method stub
+    try {
+      xpaths = loadConfig(configFile);
+    } catch (XPathExpressionException e) {
+      // TODO Auto-generated catch block
+      log.warn("XPath Expression problem loading file {}", configFile, e);
+    }
 
-	}
+  }
 
-	@Override
-	public List<Document> processDocument(Document doc) {
-		// TODO Auto-generated method stub
-		if (!doc.hasField(xmlField)) {
-			log.info("No XML Field on doc {}", doc.getId());
-			return null;
-		}
+  @Override
+  public List<Document> processDocument(Document doc) {
+    // TODO Auto-generated method stub
+    if (!doc.hasField(xmlField)) {
+      log.info("No XML Field on doc {}", doc.getId());
+      return null;
+    }
 
-		for (Object o : doc.getField(xmlField)) {
-			// TODO: this is bad , lets cast
-			String xml = (String) o;
-			try {
-				processXml(xml, doc);
-			} catch (XPathExpressionException | SAXException | IOException e) {
-				log.warn("Exception processing xml", e);
-				continue;
-			}
+    for (Object o : doc.getField(xmlField)) {
+      // TODO: this is bad , lets cast
+      String xml = (String) o;
+      try {
+        processXml(xml, doc);
+      } catch (XPathExpressionException | SAXException | IOException e) {
+        log.warn("Exception processing xml", e);
+        continue;
+      }
 
-		}
-		return null;
-	}
+    }
+    return null;
+  }
 
-	private void processXml(String xml, Document doc) throws SAXException, IOException, XPathExpressionException {
-		// Ok. now for each of the configured xpaths, we want to parse the xml
-		// evaluate the xpaths expressions and put the values into the mrl documnet
-		// object.
-		InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-		org.w3c.dom.Document xmldoc = builder.parse(stream);
-		// TODO: iterate the xpaths..
-		for (XPathExpression xpath : xpaths.keySet()) {
-			NodeList nodes = (NodeList) xpath.evaluate(xmldoc, XPathConstants.NODESET);
-			for (int i = 0; i < nodes.getLength(); i++) {
-				for (String fieldName : xpaths.get(xpath)) {
-					// add the evaluated xpath to the fields that this xpath maps to.
+  private void processXml(String xml, Document doc) throws SAXException, IOException, XPathExpressionException {
+    // Ok. now for each of the configured xpaths, we want to parse the xml
+    // evaluate the xpaths expressions and put the values into the mrl documnet
+    // object.
+    InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+    org.w3c.dom.Document xmldoc = builder.parse(stream);
+    // TODO: iterate the xpaths..
+    for (XPathExpression xpath : xpaths.keySet()) {
+      NodeList nodes = (NodeList) xpath.evaluate(xmldoc, XPathConstants.NODESET);
+      for (int i = 0; i < nodes.getLength(); i++) {
+        for (String fieldName : xpaths.get(xpath)) {
+          // add the evaluated xpath to the fields that this xpath maps to.
 
-					doc.addToField(fieldName, nodes.item(i).getTextContent());
-				}
-			}
-		}
-	}
+          doc.addToField(fieldName, nodes.item(i).getTextContent());
+        }
+      }
+    }
+  }
 
-	protected HashMap<XPathExpression, ArrayList<String>> loadConfig(String filename) throws XPathExpressionException {
+  protected HashMap<XPathExpression, ArrayList<String>> loadConfig(String filename) throws XPathExpressionException {
 
-		HashMap<XPathExpression, ArrayList<String>> configMap = new HashMap<XPathExpression, ArrayList<String>>();
-		FileInputStream fstream;
-		try {
-			fstream = new FileInputStream(filename);
-		} catch (FileNotFoundException e) {
-			log.warn("XPATH Extractor config file not found: {}", filename, e);
-			return null;
-		}
-		DataInputStream in = new DataInputStream(fstream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		String strLine;
-		// Read File Line By Line
-		try {
-			while ((strLine = br.readLine()) != null) {
-				// ignore white space
-				strLine = strLine.trim();
-				// ignore commented out lines
-				if (strLine.matches("^#.*")) {
-					continue;
-				}
-				// skip blank lines
-				if (strLine.length() == 0) {
-					continue;
-				}
-				String fieldName = strLine.split(",")[0];
-				int offset = fieldName.length() + 1;
-				String strXPath = strLine.substring(offset, strLine.length());
+    HashMap<XPathExpression, ArrayList<String>> configMap = new HashMap<XPathExpression, ArrayList<String>>();
+    FileInputStream fstream;
+    try {
+      fstream = new FileInputStream(filename);
+    } catch (FileNotFoundException e) {
+      log.warn("XPATH Extractor config file not found: {}", filename, e);
+      return null;
+    }
+    DataInputStream in = new DataInputStream(fstream);
+    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+    String strLine;
+    // Read File Line By Line
+    try {
+      while ((strLine = br.readLine()) != null) {
+        // ignore white space
+        strLine = strLine.trim();
+        // ignore commented out lines
+        if (strLine.matches("^#.*")) {
+          continue;
+        }
+        // skip blank lines
+        if (strLine.length() == 0) {
+          continue;
+        }
+        String fieldName = strLine.split(",")[0];
+        int offset = fieldName.length() + 1;
+        String strXPath = strLine.substring(offset, strLine.length());
 
-				// compile the
-				XPathExpression xPath = xpath.compile(strXPath);
+        // compile the
+        XPathExpression xPath = xpath.compile(strXPath);
 
-				if (debug) {
-					log.info("Adding XPATH {} Maps To : {}", strXPath, fieldName);
-				}
+        if (debug) {
+          log.info("Adding XPATH {} Maps To : {}", strXPath, fieldName);
+        }
 
-				if (configMap.containsKey(xPath)) {
-					configMap.get(xPath).add(fieldName);
-				} else {
-					ArrayList<String> fields = new ArrayList<String>();
-					fields.add(fieldName);
-					configMap.put(xPath, fields);
-				}
-			}
-		} catch (IOException e) {
-			log.warn("IO Exception reading from file {}", filename, e);
-			// return what we can...
-			return configMap;
-		}
-		// try to not leak some file handles.
-		try {
-			br.close();
-		} catch (IOException e) {
-			log.warn("Exception occured when trying to close the config file.", e);
-		}
+        if (configMap.containsKey(xPath)) {
+          configMap.get(xPath).add(fieldName);
+        } else {
+          ArrayList<String> fields = new ArrayList<String>();
+          fields.add(fieldName);
+          configMap.put(xPath, fields);
+        }
+      }
+    } catch (IOException e) {
+      log.warn("IO Exception reading from file {}", filename, e);
+      // return what we can...
+      return configMap;
+    }
+    // try to not leak some file handles.
+    try {
+      br.close();
+    } catch (IOException e) {
+      log.warn("Exception occured when trying to close the config file.", e);
+    }
 
-		return configMap;
-	}
+    return configMap;
+  }
 
-	@Override
-	public void stopStage() {
-		// TODO Auto-generated method stub
+  @Override
+  public void stopStage() {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void flush() {
-		// no batching in this transformer. no need to flush?
-	}
+  @Override
+  public void flush() {
+    // no batching in this transformer. no need to flush?
+  }
 
-	public String getXmlField() {
-		return xmlField;
-	}
+  public String getXmlField() {
+    return xmlField;
+  }
 
-	public void setXmlField(String xmlField) {
-		this.xmlField = xmlField;
-	}
+  public void setXmlField(String xmlField) {
+    this.xmlField = xmlField;
+  }
 
-	public String getConfigFile() {
-		return configFile;
-	}
+  public String getConfigFile() {
+    return configFile;
+  }
 
-	public void setConfigFile(String configFile) {
-		this.configFile = configFile;
-	}
+  public void setConfigFile(String configFile) {
+    this.configFile = configFile;
+  }
 
-	public boolean isUseNamespaces() {
-		return useNamespaces;
-	}
+  public boolean isUseNamespaces() {
+    return useNamespaces;
+  }
 
-	public void setUseNamespaces(boolean useNamespaces) {
-		this.useNamespaces = useNamespaces;
-	}
+  public void setUseNamespaces(boolean useNamespaces) {
+    this.useNamespaces = useNamespaces;
+  }
 
 }

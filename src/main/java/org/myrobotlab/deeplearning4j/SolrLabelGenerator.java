@@ -14,30 +14,30 @@ import org.datavec.api.writable.Writable;
  */
 public class SolrLabelGenerator extends ParentPathLabelGenerator {
 
-	private static final long serialVersionUID = 1L;
-	private SolrInputSplit inputSplit;
+  private static final long serialVersionUID = 1L;
+  private SolrInputSplit inputSplit;
 
-	public void setSolrInputSplit(SolrInputSplit solrInputSplit) {
-		this.inputSplit = solrInputSplit;
-	}
+  public void setSolrInputSplit(SolrInputSplit solrInputSplit) {
+    this.inputSplit = solrInputSplit;
+  }
 
-	@Override
-	public Writable getLabelForPath(String path) {
-		// here we could ask the input split what it's label is for a given doc id.
-		// TODO: we only want the doc id passed in here!
-		String[] parts = path.split("\\\\");
-		// last part is the one we want.
-		String docId = parts[parts.length - 1];
-		// something like (pass path. rather doc id!"
-		String label = inputSplit.resolveLabelForID(docId);
-		return new Text(label);
-	}
+  @Override
+  public Writable getLabelForPath(String path) {
+    // here we could ask the input split what it's label is for a given doc id.
+    // TODO: we only want the doc id passed in here!
+    String[] parts = path.split("\\\\");
+    // last part is the one we want.
+    String docId = parts[parts.length - 1];
+    // something like (pass path. rather doc id!"
+    String label = inputSplit.resolveLabelForID(docId);
+    return new Text(label);
+  }
 
-	@Override
-	public Writable getLabelForPath(URI uri) {
-		Writable w = super.getLabelForPath(uri);
-		// System.out.println("URL: " + uri.toString());
-		return w;
-	}
+  @Override
+  public Writable getLabelForPath(URI uri) {
+    Writable w = super.getLabelForPath(uri);
+    // System.out.println("URL: " + uri.toString());
+    return w;
+  }
 
 }

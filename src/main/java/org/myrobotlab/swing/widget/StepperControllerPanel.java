@@ -9,14 +9,14 @@ import javax.swing.JPanel;
  */
 abstract class StepperControllerPanel extends JPanel {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	StepperControllerPanel() {
-		setBorder(BorderFactory.createTitledBorder("type"));
-	}
+  StepperControllerPanel() {
+    setBorder(BorderFactory.createTitledBorder("type"));
+  }
 
-	abstract void setAttached(boolean state);
+  abstract void setAttached(boolean state);
 
-	abstract public void setData(Object[] data);
+  abstract public void setData(Object[] data);
 
 }

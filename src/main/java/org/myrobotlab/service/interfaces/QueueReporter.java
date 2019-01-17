@@ -4,7 +4,7 @@ import org.myrobotlab.framework.QueueStats;
 
 public interface QueueReporter {
 
-	public QueueStats publishStats(QueueStats stats);
+  public QueueStats publishStats(QueueStats stats);
 
-	public void updateStats(QueueStats stats);
+  public void updateStats(QueueStats stats);
 }

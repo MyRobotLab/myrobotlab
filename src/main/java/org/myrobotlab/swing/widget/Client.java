@@ -42,91 +42,91 @@ import org.slf4j.Logger;
 
 public class Client extends JApplet {
 
-	public final static Logger log = LoggerFactory.getLogger(Client.class);
+  public final static Logger log = LoggerFactory.getLogger(Client.class);
 
-	private static final long serialVersionUID = 1L;
-	private JPanel jContentPane = null;
+  private static final long serialVersionUID = 1L;
+  private JPanel jContentPane = null;
 
-	private String appletHostAddress = null;
-	private InetAddress appletAddress = null;
-	private String codeBaseHostAddress = null;
+  private String appletHostAddress = null;
+  private InetAddress appletAddress = null;
+  private String codeBaseHostAddress = null;
 
-	private SwingGui guiService;
+  private SwingGui guiService;
 
-	public Client() {
-		super();
-	}
+  public Client() {
+    super();
+  }
 
-	private JPanel getJContentPane() {
-		if (jContentPane == null) {
-			jContentPane = new JPanel();
-			jContentPane.add(guiService.getDisplay());
-		}
-		return jContentPane;
-	}
+  private JPanel getJContentPane() {
+    if (jContentPane == null) {
+      jContentPane = new JPanel();
+      jContentPane.add(guiService.getDisplay());
+    }
+    return jContentPane;
+  }
 
-	@Override
-	public void init() {
-		this.setSize(500, 600);
-		try {
-			LoggingFactory.init(Level.WARN);
-			// determine network details - can only accurately determine applet
-			// IP from server request
-			codeBaseHostAddress = getCodeBase().getHost();
-			appletAddress = InetAddress.getLocalHost();
-			appletHostAddress = appletAddress.getHostAddress();
+  @Override
+  public void init() {
+    this.setSize(500, 600);
+    try {
+      LoggingFactory.init(Level.WARN);
+      // determine network details - can only accurately determine applet
+      // IP from server request
+      codeBaseHostAddress = getCodeBase().getHost();
+      appletAddress = InetAddress.getLocalHost();
+      appletHostAddress = appletAddress.getHostAddress();
 
-			/*
-			 * ConfigurationManager cfg = new ConfigurationManager(null);
-			 * cfg.set("hostname", appletAddress.getHostName());
-			 * cfg.setRoot(appletAddress.getHostName()); cfg.set("servicePort", 0); //
-			 * Applet - can not have a service port
-			 */
-			// TODO - hardcode set SwingGui to display only appropriate
-			// components !!!
-			guiService = new SwingGui(appletAddress.getHostName() + " gui");
-			guiService.startService();
+      /*
+       * ConfigurationManager cfg = new ConfigurationManager(null);
+       * cfg.set("hostname", appletAddress.getHostName());
+       * cfg.setRoot(appletAddress.getHostName()); cfg.set("servicePort", 0); //
+       * Applet - can not have a service port
+       */
+      // TODO - hardcode set SwingGui to display only appropriate
+      // components !!!
+      guiService = new SwingGui(appletAddress.getHostName() + " gui");
+      guiService.startService();
 
-			if (codeBaseHostAddress.length() == 0) {
-				codeBaseHostAddress = "localhost"; // for faking out the applet
-				// wrapper when running in
-				// the ide
-			}
+      if (codeBaseHostAddress.length() == 0) {
+        codeBaseHostAddress = "localhost"; // for faking out the applet
+        // wrapper when running in
+        // the ide
+      }
 
-			log.info("appletAddress [" + appletAddress + "]");
-			log.info("appletHostAddress [" + appletHostAddress + "]");
-			log.info("codeBaseHostAddress [" + codeBaseHostAddress + "]");
-			log.info("getCodeBase [" + getCodeBase() + "]");
+      log.info("appletAddress [" + appletAddress + "]");
+      log.info("appletHostAddress [" + appletHostAddress + "]");
+      log.info("codeBaseHostAddress [" + codeBaseHostAddress + "]");
+      log.info("getCodeBase [" + getCodeBase() + "]");
 
-			// Multicast Begin
-			// --------------------------------------------------
-			// TODO - TCP/IP control assigns MultiCast address:port & datatype +
-			// control messages stop/start switch
-			MulticastSocket server = new MulticastSocket(1234);
-			InetAddress group = InetAddress.getByName("234.5.6.7");
-			server.joinGroup(group);
-			boolean infinite = true;
+      // Multicast Begin
+      // --------------------------------------------------
+      // TODO - TCP/IP control assigns MultiCast address:port & datatype +
+      // control messages stop/start switch
+      MulticastSocket server = new MulticastSocket(1234);
+      InetAddress group = InetAddress.getByName("234.5.6.7");
+      server.joinGroup(group);
+      boolean infinite = true;
 
-			/* Continually receives data and prints them */
-			while (infinite) {
-				byte buf[] = new byte[1024];
-				DatagramPacket data = new DatagramPacket(buf, buf.length);
-				server.receive(data);
-				String msg = new String(data.getData()).trim();
-				System.out.println(msg);
-			}
-			server.close();
-			// Multicast End --------------------------------------------------
+      /* Continually receives data and prints them */
+      while (infinite) {
+        byte buf[] = new byte[1024];
+        DatagramPacket data = new DatagramPacket(buf, buf.length);
+        server.receive(data);
+        String msg = new String(data.getData()).trim();
+        System.out.println(msg);
+      }
+      server.close();
+      // Multicast End --------------------------------------------------
 
-		} catch (UnknownHostException e) {
-			log.error("Couldn't get Internet appletAddress: Unknown appletHostAddress");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			Logging.logError(e);
-		}
+    } catch (UnknownHostException e) {
+      log.error("Couldn't get Internet appletAddress: Unknown appletHostAddress");
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      Logging.logError(e);
+    }
 
-		this.setContentPane(getJContentPane());
+    this.setContentPane(getJContentPane());
 
-	}
+  }
 
 }

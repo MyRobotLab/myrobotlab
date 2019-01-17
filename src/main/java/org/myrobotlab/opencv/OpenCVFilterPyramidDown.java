@@ -38,32 +38,32 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterPyramidDown extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidDown.class);
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterPyramidDown.class);
 
-	final static int CV_GAUSSIAN_5X5 = 7;
+  final static int CV_GAUSSIAN_5X5 = 7;
 
-	transient IplImage dst = null;
+  transient IplImage dst = null;
 
-	public OpenCVFilterPyramidDown(String name) {
-		super(name);
-	}
+  public OpenCVFilterPyramidDown(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		dst = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    dst = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
-		cvPyrDown(image, dst, CV_GAUSSIAN_5X5);
-		return dst;
-	}
+  @Override
+  public IplImage process(IplImage image) {
+    cvPyrDown(image, dst, CV_GAUSSIAN_5X5);
+    return dst;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		return image;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 
 }

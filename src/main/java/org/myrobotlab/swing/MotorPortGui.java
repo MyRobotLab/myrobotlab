@@ -49,249 +49,248 @@ import org.myrobotlab.swing.widget.ImageButton;
 
 public class MotorPortGui extends ServiceGui implements ActionListener, ChangeListener {
 
-	// FIXME - make AbstractMotorGui !!!
-	public class FloatJSlider extends JSlider {
+  // FIXME - make AbstractMotorGui !!!
+  public class FloatJSlider extends JSlider {
 
-		private static final long serialVersionUID = 1L;
-		final int scale;
+    private static final long serialVersionUID = 1L;
+    final int scale;
 
-		public FloatJSlider(int min, int max, int value, int scale) {
-			super(min, max, value);
-			this.scale = scale;
+    public FloatJSlider(int min, int max, int value, int scale) {
+      super(min, max, value);
+      this.scale = scale;
 
-			Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-			labelTable.put(new Integer(min), new JLabel(String.format("%.2f", (float) min / scale)));
-			labelTable.put(new Integer(min / 2), new JLabel(String.format("%.2f", (float) min / scale / 2)));
-			labelTable.put(new Integer(value), new JLabel(String.format("%.2f", (float) value / scale)));
-			labelTable.put(new Integer(max / 2), new JLabel(String.format("%.2f", (float) max / scale / 2)));
-			labelTable.put(new Integer(max), new JLabel(String.format("%.2f", (float) max / scale)));
-			setLabelTable(labelTable);
-			setPaintTrack(false);
-		}
+      Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
+      labelTable.put(new Integer(min), new JLabel(String.format("%.2f", (float) min / scale)));
+      labelTable.put(new Integer(min / 2), new JLabel(String.format("%.2f", (float) min / scale / 2)));
+      labelTable.put(new Integer(value), new JLabel(String.format("%.2f", (float) value / scale)));
+      labelTable.put(new Integer(max / 2), new JLabel(String.format("%.2f", (float) max / scale / 2)));
+      labelTable.put(new Integer(max), new JLabel(String.format("%.2f", (float) max / scale)));
+      setLabelTable(labelTable);
+      setPaintTrack(false);
+    }
 
-		public float getScaledValue() {
-			return ((float) super.getValue()) / this.scale;
-		}
-	}
+    public float getScaledValue() {
+      return ((float) super.getValue()) / this.scale;
+    }
+  }
 
-	// controller
-	JPanel controllerPanel = new JPanel(new BorderLayout());
-	JComboBox<String> controllerList = new JComboBox<String>();
+  // controller
+  JPanel controllerPanel = new JPanel(new BorderLayout());
+  JComboBox<String> controllerList = new JComboBox<String>();
 
-	MotorController controller = null;
+  MotorController controller = null;
 
-	JCheckBox invert = new JCheckBox("invert");
-	// power
-	JPanel powerPanel = new JPanel(new BorderLayout());
-	private FloatJSlider power = null;
-	private JLabel powerValue = new JLabel("0.00");
-	ImageButton stopButton;
-	ImageButton clockwiseButton;
-	ImageButton counterclockwiseButton;
+  JCheckBox invert = new JCheckBox("invert");
+  // power
+  JPanel powerPanel = new JPanel(new BorderLayout());
+  private FloatJSlider power = null;
+  private JLabel powerValue = new JLabel("0.00");
+  ImageButton stopButton;
+  ImageButton clockwiseButton;
+  ImageButton counterclockwiseButton;
 
-	// FIXME - order of operation ...
-	// 0. on contruction - query through for all mcs
-	// 1. register for registered & released - as this is when mc info is updated
-	//
-	// TODO - make MotorPanel - for 1 motor - for shared embedded widget
-	// TODO - stop sign button for panic stop
-	// TODO - tighten up interfaces
-	// TODO - DIRECT calls ! - motor & controller HAVE to be on the same
-	// computer
-	// TODO - cw ccw buttons enabled
+  // FIXME - order of operation ...
+  // 0. on contruction - query through for all mcs
+  // 1. register for registered & released - as this is when mc info is updated
+  //
+  // TODO - make MotorPanel - for 1 motor - for shared embedded widget
+  // TODO - stop sign button for panic stop
+  // TODO - tighten up interfaces
+  // TODO - DIRECT calls ! - motor & controller HAVE to be on the same
+  // computer
+  // TODO - cw ccw buttons enabled
 
-	String attach = "attach";
-	String detach = "detach";
-	JButton attachButton = new JButton(attach);
+  String attach = "attach";
+  String detach = "detach";
+  JButton attachButton = new JButton(attach);
 
-	String setPort = "setPort";
+  String setPort = "setPort";
 
-	JComboBox<String> portList = new JComboBox<String>();
+  JComboBox<String> portList = new JComboBox<String>();
 
-	MotorPort myMotor;
+  MotorPort myMotor;
 
-	public MotorPortGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		myMotor = (MotorPort) Runtime.getService(boundServiceName);
+  public MotorPortGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    myMotor = (MotorPort) Runtime.getService(boundServiceName);
 
-		// controllerPanel begin ------------------
-		addTopLine(createFlowPanel("controller", attachButton, "controller", controllerList, "port", portList));
+    // controllerPanel begin ------------------
+    addTopLine(createFlowPanel("controller", attachButton, "controller", controllerList, "port", portList));
 
-		counterclockwiseButton = new ImageButton("Motor", "counterclockwise", this);
-		stopButton = new ImageButton("Motor", "stop", this);
-		clockwiseButton = new ImageButton("Motor", "clockwise", this);
+    counterclockwiseButton = new ImageButton("Motor", "counterclockwise", this);
+    stopButton = new ImageButton("Motor", "stop", this);
+    clockwiseButton = new ImageButton("Motor", "clockwise", this);
 
-		power = new FloatJSlider(-100, 100, 0, 100);
-		power.setMajorTickSpacing(25);
-		power.setPaintTicks(true);
-		power.setPaintLabels(true);
+    power = new FloatJSlider(-100, 100, 0, 100);
+    power.setMajorTickSpacing(25);
+    power.setPaintTicks(true);
+    power.setPaintLabels(true);
 
-		addLine(createFlowPanel("power", invert, powerValue, counterclockwiseButton, stopButton, clockwiseButton,
-				power));
+    addLine(createFlowPanel("power", invert, powerValue, counterclockwiseButton, stopButton, clockwiseButton, power));
 
-		refreshControllers();
-		// refreshPortList();
-		restoreListeners();
-	}
+    refreshControllers();
+    // refreshPortList();
+    restoreListeners();
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
+  @Override
+  public void actionPerformed(ActionEvent e) {
 
-		Object source = e.getSource();
+    Object source = e.getSource();
 
-		// when a controller is selected we must
-		// query the ports (and pins and other stuffs?) from the motor controller
-		if (source == controllerList) {
+    // when a controller is selected we must
+    // query the ports (and pins and other stuffs?) from the motor controller
+    if (source == controllerList) {
 
-			String newController = (String) controllerList.getSelectedItem();
+      String newController = (String) controllerList.getSelectedItem();
 
-			// FIXME - perhaps inherit from base MotorGui - reduce code, because
-			// the ports/pins/ or other config is the only place which will differ
-			// this could query depending on class type of Motor ie ..
-			// do you have pins ?
-			// do you have ports ?
-			// and fill the appropriate ui
+      // FIXME - perhaps inherit from base MotorGui - reduce code, because
+      // the ports/pins/ or other config is the only place which will differ
+      // this could query depending on class type of Motor ie ..
+      // do you have pins ?
+      // do you have ports ?
+      // and fill the appropriate ui
 
-			if (newController != null && newController.length() > 0) {
-				refreshPortList(newController);
-			} else {
-				portList.removeAllItems();
-			}
+      if (newController != null && newController.length() > 0) {
+        refreshPortList(newController);
+      } else {
+        portList.removeAllItems();
+      }
 
-		} else if (source == stopButton) {
-			power.setValue(0);
+    } else if (source == stopButton) {
+      power.setValue(0);
 
-		} else if (source == invert) {
-			myMotor.setInverted(invert.isSelected());
+    } else if (source == invert) {
+      myMotor.setInverted(invert.isSelected());
 
-		} else if (source == attachButton) {
-			if (attachButton.getText().equals(attach)) {
-				// myService.sendBlocking(boundServiceName, setPort,
-				// Integer.decode(portList.getSelectedItem().toString()));
-				// myService.sendBlocking(boundServiceName, setRightPwmPin,
-				// Integer.decode(rightPwmPinList.getSelectedItem().toString()));
-				// myService.send(boundServiceName, attach,
-				// controllerList.getSelectedItem());
-				myMotor.setPort(portList.getSelectedItem().toString());
+    } else if (source == attachButton) {
+      if (attachButton.getText().equals(attach)) {
+        // myService.sendBlocking(boundServiceName, setPort,
+        // Integer.decode(portList.getSelectedItem().toString()));
+        // myService.sendBlocking(boundServiceName, setRightPwmPin,
+        // Integer.decode(rightPwmPinList.getSelectedItem().toString()));
+        // myService.send(boundServiceName, attach,
+        // controllerList.getSelectedItem());
+        myMotor.setPort(portList.getSelectedItem().toString());
 
-				try {
-					myMotor.attach((String) controllerList.getSelectedItem());
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			} else {
-				swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
-			}
-		}
+        try {
+          myMotor.attach((String) controllerList.getSelectedItem());
+        } catch (Exception e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
+      } else {
+        swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
+      }
+    }
 
-	}
+  }
 
-	void refreshPortList(String controllerName) {
-		MotorController mpc = (MotorController) Runtime.getService(controllerName);
-		List<String> mbl = mpc.getPorts();
-		portList.removeAllItems();
-		for (int i = 0; i < mbl.size(); i++) {
-			portList.addItem(mbl.get(i));
-		}
-	}
+  void refreshPortList(String controllerName) {
+    MotorController mpc = (MotorController) Runtime.getService(controllerName);
+    List<String> mbl = mpc.getPorts();
+    portList.removeAllItems();
+    for (int i = 0; i < mbl.size(); i++) {
+      portList.addItem(mbl.get(i));
+    }
+  }
 
-	@Override
-	public void subscribeGui() {
-		// change pos
-		subscribe("publishChangePos");
-	}
+  @Override
+  public void subscribeGui() {
+    // change pos
+    subscribe("publishChangePos");
+  }
 
-	@Override
-	public void unsubscribeGui() {
-		// change pos
-		unsubscribe("publishChangePos");
-	}
+  @Override
+  public void unsubscribeGui() {
+    // change pos
+    unsubscribe("publishChangePos");
+  }
 
-	public void onRegistered(ServiceInterface si) {
-		log.info("new service {}", si);
-	}
+  public void onRegistered(ServiceInterface si) {
+    log.info("new service {}", si);
+  }
 
-	public void onState(MotorPort motor) {
+  public void onState(MotorPort motor) {
 
-		// disable ui events
-		removeListeners();
+    // disable ui events
+    removeListeners();
 
-		// refresh controller list
-		refreshControllers();
+    // refresh controller list
+    refreshControllers();
 
-		// enable control ui components if motor is attached
-		setControlEnabled(motor.isAttached());
+    // enable control ui components if motor is attached
+    setControlEnabled(motor.isAttached());
 
-		// if a controller is currently set
-		// we need its portList
-		// if (selectedController != null){
+    // if a controller is currently set
+    // we need its portList
+    // if (selectedController != null){
 
-		// }
+    // }
 
-		portList.setSelectedItem(motor.getPort());
+    portList.setSelectedItem(motor.getPort());
 
-		if (motor.isAttached()) {
-			MotorController mc = (MotorController) motor.getController();
-			controllerList.setSelectedItem(mc.getName());
-			attachButton.setText(detach);
-			controllerList.setEnabled(false);
-			portList.setEnabled(false);
-		} else {
-			attachButton.setText(attach);
-			controllerList.setEnabled(true);
-			portList.setEnabled(true);
-		}
-		invert.setSelected(motor.isInverted());
+    if (motor.isAttached()) {
+      MotorController mc = (MotorController) motor.getController();
+      controllerList.setSelectedItem(mc.getName());
+      attachButton.setText(detach);
+      controllerList.setEnabled(false);
+      portList.setEnabled(false);
+    } else {
+      attachButton.setText(attach);
+      controllerList.setEnabled(true);
+      portList.setEnabled(true);
+    }
+    invert.setSelected(motor.isInverted());
 
-		restoreListeners();
-	}
+    restoreListeners();
+  }
 
-	public void setControlEnabled(boolean enable) {
-		stopButton.setEnabled(enable);
-		clockwiseButton.setEnabled(enable);
-		counterclockwiseButton.setEnabled(enable);
-		power.setEnabled(enable);
-		invert.setEnabled(enable);
-		powerValue.setEnabled(enable);
+  public void setControlEnabled(boolean enable) {
+    stopButton.setEnabled(enable);
+    clockwiseButton.setEnabled(enable);
+    counterclockwiseButton.setEnabled(enable);
+    power.setEnabled(enable);
+    invert.setEnabled(enable);
+    powerValue.setEnabled(enable);
 
-	}
+  }
 
-	@Override
-	public void stateChanged(ChangeEvent ce) {
-		Object source = ce.getSource();
-		if (power == source) {
-			powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
-			swingGui.send(boundServiceName, "move", power.getScaledValue());
-		}
-	}
+  @Override
+  public void stateChanged(ChangeEvent ce) {
+    Object source = ce.getSource();
+    if (power == source) {
+      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
+      swingGui.send(boundServiceName, "move", power.getScaledValue());
+    }
+  }
 
-	public void refreshControllers() {
-		if (myMotor != null) {
-			List<String> v = myMotor.refreshControllers();
-			controllerList.removeAllItems();
-			controllerList.addItem("");
-			for (int i = 0; i < v.size(); ++i) {
-				controllerList.addItem(v.get(i));
-			}
-			if (myMotor.getController() != null) {
-				controllerList.setSelectedItem(myMotor.getController().getName());
-			}
-		}
-	}
+  public void refreshControllers() {
+    if (myMotor != null) {
+      List<String> v = myMotor.refreshControllers();
+      controllerList.removeAllItems();
+      controllerList.addItem("");
+      for (int i = 0; i < v.size(); ++i) {
+        controllerList.addItem(v.get(i));
+      }
+      if (myMotor.getController() != null) {
+        controllerList.setSelectedItem(myMotor.getController().getName());
+      }
+    }
+  }
 
-	public void removeListeners() {
-		attachButton.removeActionListener(this);
-		controllerList.removeActionListener(this);
-		power.removeChangeListener(this);
-		invert.removeActionListener(this);
-	}
+  public void removeListeners() {
+    attachButton.removeActionListener(this);
+    controllerList.removeActionListener(this);
+    power.removeChangeListener(this);
+    invert.removeActionListener(this);
+  }
 
-	public void restoreListeners() {
-		attachButton.addActionListener(this);
-		controllerList.addActionListener(this);
-		power.addChangeListener(this);
-		invert.addActionListener(this);
-	}
+  public void restoreListeners() {
+    attachButton.addActionListener(this);
+    controllerList.addActionListener(this);
+    power.addChangeListener(this);
+    invert.addActionListener(this);
+  }
 
 }

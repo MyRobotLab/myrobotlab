@@ -44,165 +44,164 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterKinectDepth extends OpenCVFilter {
 
-	// useful data for the kinect is 632 X 480 - 8 pixels on the right edge are
-	// not good data
-	// http://groups.google.com/group/openkinect/browse_thread/thread/6539281cf451ae9e?pli=1
+  // useful data for the kinect is 632 X 480 - 8 pixels on the right edge are
+  // not good data
+  // http://groups.google.com/group/openkinect/browse_thread/thread/6539281cf451ae9e?pli=1
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepth.class);
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepth.class);
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	transient IplImage lastDepth = null;
-	double maxX = 65535;
-	double maxY = 1.0;
-	double minX = 0;
-	double minY = 0.0;
+  transient IplImage lastDepth = null;
+  double maxX = 65535;
+  double maxY = 1.0;
+  double minX = 0;
+  double minY = 0.0;
 
-	IplImage returnImage = null;
+  IplImage returnImage = null;
 
-	/**
-	 * list of samplepoint to return depth
-	 */
-	List<Point> samplePoints = new ArrayList<>();
+  /**
+   * list of samplepoint to return depth
+   */
+  List<Point> samplePoints = new ArrayList<>();
 
-	boolean clearSamplePoints = false;
+  boolean clearSamplePoints = false;
 
-	/**
-	 * default return colored 3x256(rgb) depth / false is a lossy 1x(256) grey scale
-	 */
-	boolean useColor = true;
+  /**
+   * default return colored 3x256(rgb) depth / false is a lossy 1x(256) grey
+   * scale
+   */
+  boolean useColor = true;
 
-	/**
-	 * use depth as return image
-	 */
-	boolean useDepth = true;
+  /**
+   * use depth as return image
+   */
+  boolean useDepth = true;
 
-	/**
-	 * color depth info
-	 */
-	IplImage color;
+  /**
+   * color depth info
+   */
+  IplImage color;
 
-	public OpenCVFilterKinectDepth(String name) {
-		super(name);
-	}
+  public OpenCVFilterKinectDepth(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+  }
 
-	public boolean isColor() {
-		return useColor;
-	}
+  public boolean isColor() {
+    return useColor;
+  }
 
-	public boolean isDepth() {
-		return useDepth;
-	}
+  public boolean isDepth() {
+    return useDepth;
+  }
 
-	@Override
-	public IplImage process(IplImage depth) throws InterruptedException {
+  @Override
+  public IplImage process(IplImage depth) throws InterruptedException {
 
-		if (depth.depth() != 16 && depth.nChannels() != 1) {
-			log.error("not valid kinect depth image expecting 1 channel 16 depth got {} channel {} depth",
-					depth.depth(), depth.nChannels());
-			return depth;
-		}
+    if (depth.depth() != 16 && depth.nChannels() != 1) {
+      log.error("not valid kinect depth image expecting 1 channel 16 depth got {} channel {} depth", depth.depth(), depth.nChannels());
+      return depth;
+    }
 
-		lastDepth = depth;
+    lastDepth = depth;
 
-		if (clearSamplePoints) {
-			samplePoints.clear();
-			clearSamplePoints = false;
-		}
+    if (clearSamplePoints) {
+      samplePoints.clear();
+      clearSamplePoints = false;
+    }
 
-		if (!useDepth) {
-			return data.getKinectVideo();
-		}
+    if (!useDepth) {
+      return data.getKinectVideo();
+    }
 
-		if (useColor) {
+    if (useColor) {
 
-			// parallel indexers !
-			// https://github.com/bytedeco/bytedeco.github.io/blob/master/_posts/2014-12-23-third-release.md
+      // parallel indexers !
+      // https://github.com/bytedeco/bytedeco.github.io/blob/master/_posts/2014-12-23-third-release.md
 
-			if (color == null) {
-				color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
-			}
+      if (color == null) {
+        color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3);
+      }
 
-			final UShortRawIndexer depthIdx = (UShortRawIndexer) depth.createIndexer();
-			final UByteIndexer colorIdx = color.createIndexer();
+      final UShortRawIndexer depthIdx = (UShortRawIndexer) depth.createIndexer();
+      final UByteIndexer colorIdx = color.createIndexer();
 
-			Parallel.loop(0, depth.height(), new Parallel.Looper() {
-				public void loop(int from, int to, int looperID) {
-					for (int i = from; i < to; i++) {
-						for (int j = 0; j < depth.width(); j++) {
+      Parallel.loop(0, depth.height(), new Parallel.Looper() {
+        public void loop(int from, int to, int looperID) {
+          for (int i = from; i < to; i++) {
+            for (int j = 0; j < depth.width(); j++) {
 
-							int value = depthIdx.get(i, j);
-							double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
-							Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
+              int value = depthIdx.get(i, j);
+              double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
+              Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
 
-							colorIdx.put(i, j, 0, (byte) c.getBlue());
-							colorIdx.put(i, j, 1, (byte) c.getRed());
-							colorIdx.put(i, j, 2, (byte) c.getGreen());
-						}
-					}
-				}
-			});
+              colorIdx.put(i, j, 0, (byte) c.getBlue());
+              colorIdx.put(i, j, 1, (byte) c.getRed());
+              colorIdx.put(i, j, 2, (byte) c.getGreen());
+            }
+          }
+        }
+      });
 
-			depthIdx.release();
-			colorIdx.release();
+      depthIdx.release();
+      colorIdx.release();
 
-			return color;
-		}
+      return color;
+    }
 
-		return depth;
-	}
+    return depth;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		if (lastDepth == null) {
-			return image;
-		}
-		ByteBuffer buffer = lastDepth.getByteBuffer();
-		for (Point point : samplePoints) {
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (lastDepth == null) {
+      return image;
+    }
+    ByteBuffer buffer = lastDepth.getByteBuffer();
+    for (Point point : samplePoints) {
 
-			int depthBytesPerChannel = lastDepth.depth() / 8;
-			int depthIndex = point.y * lastDepth.widthStep() + point.x * lastDepth.nChannels() * depthBytesPerChannel;
+      int depthBytesPerChannel = lastDepth.depth() / 8;
+      int depthIndex = point.y * lastDepth.widthStep() + point.x * lastDepth.nChannels() * depthBytesPerChannel;
 
-			String str = String.format("(%d,%d) %d", point.x, point.y,
-					(buffer.get(depthIndex + 1) & 0xFF) << 8 | (buffer.get(depthIndex) & 0xFF));
-			graphics.drawString(str, point.x + 3, point.y);
-			graphics.drawOval(point.x, point.y, 2, 2);
-		}
-		return image;
-	}
+      String str = String.format("(%d,%d) %d", point.x, point.y, (buffer.get(depthIndex + 1) & 0xFF) << 8 | (buffer.get(depthIndex) & 0xFF));
+      graphics.drawString(str, point.x + 3, point.y);
+      graphics.drawOval(point.x, point.y, 2, 2);
+    }
+    return image;
+  }
 
-	public IplImage processx(IplImage image) {
+  public IplImage processx(IplImage image) {
 
-		if (returnImage == null) {
-			returnImage = IplImage.create(image.width(), image.height(), 16, 3);
-		}
+    if (returnImage == null) {
+      returnImage = IplImage.create(image.width(), image.height(), 16, 3);
+    }
 
-		// cvCvtColor(image, returnImage, CV_GRAY2BGR);
-		// cvCvtColor(image, returnImage, CV_BGR2HSV);
-		// cvCvtColor(image, returnImage, COLOR_BGR2HSV);
+    // cvCvtColor(image, returnImage, CV_GRAY2BGR);
+    // cvCvtColor(image, returnImage, CV_BGR2HSV);
+    // cvCvtColor(image, returnImage, COLOR_BGR2HSV);
 
-		return returnImage;
+    return returnImage;
 
-	}
+  }
 
-	public void samplePoint(Integer x, Integer y) {
-		samplePoints.add(new Point(x, y));
-	}
+  public void samplePoint(Integer x, Integer y) {
+    samplePoints.add(new Point(x, y));
+  }
 
-	public void useColor(boolean b) {
-		useColor = b;
-	}
+  public void useColor(boolean b) {
+    useColor = b;
+  }
 
-	public void useDepth(boolean b) {
-		useDepth = b;
-	}
+  public void useDepth(boolean b) {
+    useDepth = b;
+  }
 
-	public void clearSamplePoints() {
-		clearSamplePoints = true;
-	}
+  public void clearSamplePoints() {
+    clearSamplePoints = true;
+  }
 
 }

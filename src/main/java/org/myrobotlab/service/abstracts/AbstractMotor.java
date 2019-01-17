@@ -63,333 +63,333 @@ import org.slf4j.Logger;
 
 abstract public class AbstractMotor extends Service implements MotorControl, EncoderListener, PinListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(AbstractMotor.class);
+  public final static Logger log = LoggerFactory.getLogger(AbstractMotor.class);
 
-	// my motor controller - TODO support multiple controllers ??? would virtual
-	// benefit ?
-	protected transient MotorController controller = null;
-	/**
-	 * list of names of possible controllers
-	 */
-	public List<String> controllers;
+  // my motor controller - TODO support multiple controllers ??? would virtual
+  // benefit ?
+  protected transient MotorController controller = null;
+  /**
+   * list of names of possible controllers
+   */
+  public List<String> controllers;
 
-	boolean locked = false;
+  boolean locked = false;
 
-	/**
-	 * the power level requested - varies between -1.0 &lt;--&gt; 1.0
-	 */
+  /**
+   * the power level requested - varies between -1.0 &lt;--&gt; 1.0
+   */
 
-	// FIXME - check to see if these are necessary PROBABLY NOT SINCE THE MAPPER
-	// PARTS ARE NOW PART OF CONTROLLER
+  // FIXME - check to see if these are necessary PROBABLY NOT SINCE THE MAPPER
+  // PARTS ARE NOW PART OF CONTROLLER
 
-	// inputs
-	Double powerInput;
-	Double positionInput; // aka targetPos
+  // inputs
+  Double powerInput;
+  Double positionInput; // aka targetPos
 
-	// feedback
-	Double positionCurrent; // aka currentPos
+  // feedback
+  Double positionCurrent; // aka currentPos
 
-	/**
-	 * a new "un-set" mapper for merging with default motorcontroller
-	 */
-	Mapper mapper = new MapperLinear();
+  /**
+   * a new "un-set" mapper for merging with default motorcontroller
+   */
+  Mapper mapper = new MapperLinear();
 
-	transient MotorEncoder encoder = null;
+  transient MotorEncoder encoder = null;
 
-	// FIXME - implements an Encoder interface
-	// get a named instance - stopping and tarting should not be creating &
-	// destroying
-	transient Object lock = new Object();
+  // FIXME - implements an Encoder interface
+  // get a named instance - stopping and tarting should not be creating &
+  // destroying
+  transient Object lock = new Object();
 
-	String controllerName;
+  String controllerName;
 
-	public AbstractMotor(String n) {
-		super(n);
-		subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-		// "top" half of the mapper is set by the control
-		// so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
-		// input limits
-		// "bottom" half of the mapper will be set by the controller
-		mapper.map(-1.0, 1.0, null, null);
-	}
+  public AbstractMotor(String n) {
+    super(n);
+    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    // "top" half of the mapper is set by the control
+    // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
+    // input limits
+    // "bottom" half of the mapper will be set by the controller
+    mapper.map(-1.0, 1.0, null, null);
+  }
 
-	public void onRegistered(ServiceInterface s) {
-		refreshControllers();
-		broadcastState();
-	}
+  public void onRegistered(ServiceInterface s) {
+    refreshControllers();
+    broadcastState();
+  }
 
-	public List<String> refreshControllers() {
-		controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
-		return controllers;
-	}
+  public List<String> refreshControllers() {
+    controllers = Runtime.getServiceNamesFromInterface(MotorController.class);
+    return controllers;
+  }
 
-	public MotorController getController() {
-		return controller;
-	}
+  public MotorController getController() {
+    return controller;
+  }
 
-	// FIXME - repair input/output
-	@Override
-	public double getPowerLevel() {
-		return powerInput;
-	}
+  // FIXME - repair input/output
+  @Override
+  public double getPowerLevel() {
+    return powerInput;
+  }
 
-	@Override
-	public boolean isAttached(MotorController controller) {
-		return this.controller == controller;
-	}
+  @Override
+  public boolean isAttached(MotorController controller) {
+    return this.controller == controller;
+  }
 
-	@Override
-	public boolean isInverted() {
-		return mapper.isInverted();
-	}
+  @Override
+  public boolean isInverted() {
+    return mapper.isInverted();
+  }
 
-	@Override
-	public void lock() {
-		info("%s.lock", getName());
-		locked = true;
-		broadcastState();
-	}
+  @Override
+  public void lock() {
+    info("%s.lock", getName());
+    locked = true;
+    broadcastState();
+  }
 
-	@Override
-	public void move(double powerInput) {
-		info("%s.move(%.2f)", getName(), powerInput);
-		this.powerInput = powerInput;
-		if (controller != null)
-			controller.motorMove(this);
-		broadcastState();
-	}
+  @Override
+  public void move(double powerInput) {
+    info("%s.move(%.2f)", getName(), powerInput);
+    this.powerInput = powerInput;
+    if (controller != null)
+      controller.motorMove(this);
+    broadcastState();
+  }
 
-	// FIXME - add velocity? acceleration?
-	@Override
-	public void moveTo(double positionInput, Double powerInput) {
-		this.powerInput = powerInput;
+  // FIXME - add velocity? acceleration?
+  @Override
+  public void moveTo(double positionInput, Double powerInput) {
+    this.powerInput = powerInput;
 
-		if (powerInput != null) {
-			this.powerInput = powerInput;
-		}
+    if (powerInput != null) {
+      this.powerInput = powerInput;
+    }
 
-		if (controller != null) {
-			controller.motorMoveTo(this);
-			broadcastState();
-		} else {
-			error(String.format("%s's controller is not set", getName()));
-		}
-	}
+    if (controller != null) {
+      controller.motorMoveTo(this);
+      broadcastState();
+    } else {
+      error(String.format("%s's controller is not set", getName()));
+    }
+  }
 
-	@Override
-	public void moveTo(double newPos) {
-		moveTo(newPos, null);
-	}
+  @Override
+  public void moveTo(double newPos) {
+    moveTo(newPos, null);
+  }
 
-	@Override
-	public void setInverted(boolean invert) {
-		mapper.setInverted(invert);
-		broadcastState();
-	}
+  @Override
+  public void setInverted(boolean invert) {
+    mapper.setInverted(invert);
+    broadcastState();
+  }
 
-	// ---- Servo begin ---------
-	public void setMinMaxOutput(double min, double max) {
-		mapper.setLimits(min, max);
-		broadcastState();
-	}
+  // ---- Servo begin ---------
+  public void setMinMaxOutput(double min, double max) {
+    mapper.setLimits(min, max);
+    broadcastState();
+  }
 
-	public void map(double minX, double maxX, double minY, double maxY) {
-		mapper.map(minX, maxX, minY, maxY);
-		broadcastState();
-	}
+  public void map(double minX, double maxX, double minY, double maxY) {
+    mapper.map(minX, maxX, minY, maxY);
+    broadcastState();
+  }
 
-	@Override
-	public void stop() {
-		// log.info("{}.stop()", getName());
-		powerInput = 0.0;
-		if (controller != null) {
-			controller.motorStop(this);
-		}
-		broadcastState();
-	}
+  @Override
+  public void stop() {
+    // log.info("{}.stop()", getName());
+    powerInput = 0.0;
+    if (controller != null) {
+      controller.motorStop(this);
+    }
+    broadcastState();
+  }
 
-	// FIXME - proxy to MotorControllerx
-	@Override
-	public void stopAndLock() {
-		info("stopAndLock");
-		move(0.0);
-		lock();
-		broadcastState();
-	}
+  // FIXME - proxy to MotorControllerx
+  @Override
+  public void stopAndLock() {
+    info("stopAndLock");
+    move(0.0);
+    lock();
+    broadcastState();
+  }
 
-	@Override
-	public void unlock() {
-		info("unLock");
-		locked = false;
-		broadcastState();
-	}
+  @Override
+  public void unlock() {
+    info("unLock");
+    locked = false;
+    broadcastState();
+  }
 
-	@Override
-	public boolean isLocked() {
-		return locked;
-	}
+  @Override
+  public boolean isLocked() {
+    return locked;
+  }
 
-	@Override
-	public void stopService() {
-		super.stopService();
-		if (controller != null) {
-			stopAndLock();
-		}
-	}
+  @Override
+  public void stopService() {
+    super.stopService();
+    if (controller != null) {
+      stopAndLock();
+    }
+  }
 
-	// FIXME - related to update(SensorData) no ?
-	public int updatePosition(int position) {
-		positionCurrent = (double) position;
-		return position;
-	}
+  // FIXME - related to update(SensorData) no ?
+  public int updatePosition(int position) {
+    positionCurrent = (double) position;
+    return position;
+  }
 
-	public double updatePosition(double position) {
-		positionCurrent = position;
-		return position;
-	}
+  public double updatePosition(double position) {
+    positionCurrent = position;
+    return position;
+  }
 
-	@Override
-	public double getTargetPos() {
-		return positionInput;
-	}
+  @Override
+  public double getTargetPos() {
+    return positionInput;
+  }
 
-	@Override
-	public void onPulse(EncoderData data) {
-		// TODO Auto-generated method stub
+  @Override
+  public void onPulse(EncoderData data) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void setEncoder(EncoderPublisher encoder) {
-		// TODO Auto-generated method stub
+  @Override
+  public void setEncoder(EncoderPublisher encoder) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	public void detachMotorController(MotorController controller) {
-		controller.detach(this);
-		controller = null;
-		controllerName = null;
-		broadcastState();
-	}
+  public void detachMotorController(MotorController controller) {
+    controller.detach(this);
+    controller = null;
+    controllerName = null;
+    broadcastState();
+  }
 
-	@Override
-	public void attach(Attachable service) throws Exception {
-		if (MotorController.class.isAssignableFrom(service.getClass())) {
-			attachMotorController((MotorController) service);
-			return;
-		}
+  @Override
+  public void attach(Attachable service) throws Exception {
+    if (MotorController.class.isAssignableFrom(service.getClass())) {
+      attachMotorController((MotorController) service);
+      return;
+    }
 
-		error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
-	}
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+  }
 
-	// hmm
-	public void onPin(PinData data) {
-		Double pwr = null;
+  // hmm
+  public void onPin(PinData data) {
+    Double pwr = null;
 
-		pwr = data.value.doubleValue();
+    pwr = data.value.doubleValue();
 
-		move(pwr);
-	}
+    move(pwr);
+  }
 
-	// hmm
-	public void onJoystickData(JoystickData data) {
-		// info("AbstractMotor onJoystickData - %f", data.value);
-		Double pwr = null;
-		pwr = data.value.doubleValue();
-		move(pwr);
-	}
+  // hmm
+  public void onJoystickData(JoystickData data) {
+    // info("AbstractMotor onJoystickData - %f", data.value);
+    Double pwr = null;
+    pwr = data.value.doubleValue();
+    move(pwr);
+  }
 
-	//////////////// begin new stuff ///////////////////////
+  //////////////// begin new stuff ///////////////////////
 
-	public void attach(PinDefinition pindef) {
-		// SINGLE PIN MAN !! not ALL PINS !
-		// must be local now :P
-		// FIXME this "should" be cable of adding vi
-		// e.g send(pindef.getName(), "attach", getName(), pindef.getAddress());
-		// attach(pindef.getName(), pindef.getAddress)
-		PinArrayControl pac = (PinArrayControl) Runtime.getService(pindef.getName());
-		pac.attach(this, pindef.getAddress());
-		// subscribe(pindef.getName(), "publishPin", getName(), "move");
-	}
+  public void attach(PinDefinition pindef) {
+    // SINGLE PIN MAN !! not ALL PINS !
+    // must be local now :P
+    // FIXME this "should" be cable of adding vi
+    // e.g send(pindef.getName(), "attach", getName(), pindef.getAddress());
+    // attach(pindef.getName(), pindef.getAddress)
+    PinArrayControl pac = (PinArrayControl) Runtime.getService(pindef.getName());
+    pac.attach(this, pindef.getAddress());
+    // subscribe(pindef.getName(), "publishPin", getName(), "move");
+  }
 
-	public void attach(Component joystickComponent) {
-		if (joystickComponent == null) {
-			error("cannot attach a null joystick component", getName());
-			return;
-		}
-		send(joystickComponent.getName(), "addListener", getName(), joystickComponent.id);
-	}
+  public void attach(Component joystickComponent) {
+    if (joystickComponent == null) {
+      error("cannot attach a null joystick component", getName());
+      return;
+    }
+    send(joystickComponent.getName(), "addListener", getName(), joystickComponent.id);
+  }
 
-	public void attach(ButtonDefinition buttondef) {
-		subscribe(buttondef.getName(), "publishButton", getName(), "move");
-	}
+  public void attach(ButtonDefinition buttondef) {
+    subscribe(buttondef.getName(), "publishButton", getName(), "move");
+  }
 
-	//////////////// end new stuff ///////////////////////
+  //////////////// end new stuff ///////////////////////
 
-	@Override
-	public void attachMotorController(MotorController controller) throws Exception {
-		if (controller == null) {
-			error("motor.attach(controller) - controller cannot be null");
-			return;
-		}
-		if (isAttached(controller)) {
-			log.info("motor {} already attached to motor controller {}", getName(), controller.getName());
-			return;
-		}
+  @Override
+  public void attachMotorController(MotorController controller) throws Exception {
+    if (controller == null) {
+      error("motor.attach(controller) - controller cannot be null");
+      return;
+    }
+    if (isAttached(controller)) {
+      log.info("motor {} already attached to motor controller {}", getName(), controller.getName());
+      return;
+    }
 
-		this.controller = controller;
-		this.controllerName = controller.getName();
-		this.mapper.merge(controller.getDefaultMapper());
+    this.controller = controller;
+    this.controllerName = controller.getName();
+    this.mapper.merge(controller.getDefaultMapper());
 
-		broadcastState();
-		controller.attach(this);
-	}
+    broadcastState();
+    controller.attach(this);
+  }
 
-	/////// config start ////////////////////////
+  /////// config start ////////////////////////
 
-	@Override
-	public boolean isAttached() {
-		return controller != null;
-	}
+  @Override
+  public boolean isAttached() {
+    return controller != null;
+  }
 
-	// TODO - this could be Java 8 default interface implementation
-	@Override
-	public void detach(String controllerName) {
-		if (controller == null || !controllerName.equals(controller.getName())) {
-			return;
-		}
-		controller.detach(this);
-		controller = null;
-	}
+  // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+  }
 
-	@Override
-	public boolean isAttached(String name) {
-		return (controller != null && controller.getName().equals(name));
-	}
+  @Override
+  public boolean isAttached(String name) {
+    return (controller != null && controller.getName().equals(name));
+  }
 
-	@Override
-	public Set<String> getAttached() {
-		HashSet<String> ret = new HashSet<String>();
-		if (controller != null) {
-			ret.add(controller.getName());
-		}
-		return ret;
-	}
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null) {
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
 
-	// FIXME promote to interface
-	public Mapper getMapper() {
-		return mapper;
-	}
+  // FIXME promote to interface
+  public Mapper getMapper() {
+    return mapper;
+  }
 
-	// FIXME promote to interface
-	public void setMapper(Mapper mapper) {
-		this.mapper = mapper;
-	}
+  // FIXME promote to interface
+  public void setMapper(Mapper mapper) {
+    this.mapper = mapper;
+  }
 
-	// FIXME promot to interface
-	public double calcControllerOutput() {
-		return mapper.calcOutput(getPowerLevel());
-	}
+  // FIXME promot to interface
+  public double calcControllerOutput() {
+    return mapper.calcOutput(getPowerLevel());
+  }
 }

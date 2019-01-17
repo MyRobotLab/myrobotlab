@@ -32,26 +32,26 @@ import javax.vecmath.Color3f;
  */
 public class BlockWorldObject extends StaticObject {
 
-	/* Rotates the object counter clockwise. */
-	public void rotate90(int ntimes) {
-		this.rotateY(ntimes * Math.PI / 2.0);
-	}
+  /* Rotates the object counter clockwise. */
+  public void rotate90(int ntimes) {
+    this.rotateY(ntimes * Math.PI / 2.0);
+  }
 
-	/** Set the object color */
-	@Override
-	public void setColor(Color3f color) {
-		Material mat = appearance.getMaterial();
-		Color3f ambient = new Color3f(color);
-		ambient.scale(0.3f);
-		mat.setAmbientColor(ambient);
-		color.clampMax(0.8f);
-		mat.setDiffuseColor(color);
-		// No specular color
-		Color3f specular = new Color3f(0, 0, 0);
-		mat.setSpecularColor(specular);
+  /** Set the object color */
+  @Override
+  public void setColor(Color3f color) {
+    Material mat = appearance.getMaterial();
+    Color3f ambient = new Color3f(color);
+    ambient.scale(0.3f);
+    mat.setAmbientColor(ambient);
+    color.clampMax(0.8f);
+    mat.setDiffuseColor(color);
+    // No specular color
+    Color3f specular = new Color3f(0, 0, 0);
+    mat.setSpecularColor(specular);
 
-		mat.setShininess(1f);
+    mat.setShininess(1f);
 
-	}
+  }
 
 }

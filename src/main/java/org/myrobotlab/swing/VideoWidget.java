@@ -39,110 +39,110 @@ import org.myrobotlab.swing.widget.VideoDisplayPanel;
 
 public class VideoWidget extends ServiceGui {
 
-	HashMap<String, VideoDisplayPanel> displays = new HashMap<String, VideoDisplayPanel>();
-	boolean allowFork = false;
-	public Dimension normalizedSize = null;
-	int videoDisplayXPos = 0;
-	int videoDisplayYPos = 0;
+  HashMap<String, VideoDisplayPanel> displays = new HashMap<String, VideoDisplayPanel>();
+  boolean allowFork = false;
+  public Dimension normalizedSize = null;
+  int videoDisplayXPos = 0;
+  int videoDisplayYPos = 0;
 
-	public VideoWidget(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		// set initial default output
-		addVideoDisplayPanel("output");
-	}
+  public VideoWidget(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    // set initial default output
+    addVideoDisplayPanel("output");
+  }
 
-	public void setTitle(String t) {
-		TitledBorder title;
-		title = BorderFactory.createTitledBorder(t);
-		display.setBorder(title);
-	}
+  public void setTitle(String t) {
+    TitledBorder title;
+    title = BorderFactory.createTitledBorder(t);
+    display.setBorder(title);
+  }
 
-	public VideoDisplayPanel addVideoDisplayPanel(String source) {
-		return addVideoDisplayPanel(source, null);
-	}
+  public VideoDisplayPanel addVideoDisplayPanel(String source) {
+    return addVideoDisplayPanel(source, null);
+  }
 
-	public VideoDisplayPanel addVideoDisplayPanel(String source, ImageIcon icon) {
-		// FIXME FIXME FIXME - should be FlowLayout No?
+  public VideoDisplayPanel addVideoDisplayPanel(String source, ImageIcon icon) {
+    // FIXME FIXME FIXME - should be FlowLayout No?
 
-		if (videoDisplayXPos % 2 == 0) {
-			videoDisplayXPos = 0;
-			++videoDisplayYPos;
-		}
+    if (videoDisplayXPos % 2 == 0) {
+      videoDisplayXPos = 0;
+      ++videoDisplayYPos;
+    }
 
-		// gc.gridx = videoDisplayXPos;
-		// gc.gridy = videoDisplayYPos;
+    // gc.gridx = videoDisplayXPos;
+    // gc.gridy = videoDisplayYPos;
 
-		VideoDisplayPanel vp = new VideoDisplayPanel(source, this, swingGui, boundServiceName);
+    VideoDisplayPanel vp = new VideoDisplayPanel(source, this, swingGui, boundServiceName);
 
-		// add it to the map of displays
-		displays.put(source, vp);
+    // add it to the map of displays
+    displays.put(source, vp);
 
-		// add it to the display
-		display.add(vp.myDisplay);
+    // add it to the display
+    display.add(vp.myDisplay);
 
-		++videoDisplayXPos;
-		display.invalidate();
-		swingGui.pack();
+    ++videoDisplayXPos;
+    display.invalidate();
+    swingGui.pack();
 
-		return vp;
-	}
+    return vp;
+  }
 
-	@Override
-	public void subscribeGui() {
-		// FIXME - should be to spec .. onDisplay no displayFrame
-		subscribe("publishDisplay", "displayFrame");
-	}
+  @Override
+  public void subscribeGui() {
+    // FIXME - should be to spec .. onDisplay no displayFrame
+    subscribe("publishDisplay", "displayFrame");
+  }
 
-	public void attachGui(String srcMethod, String dstMethod) {
-		subscribe(srcMethod, dstMethod);
-	}
+  public void attachGui(String srcMethod, String dstMethod) {
+    subscribe(srcMethod, dstMethod);
+  }
 
-	@Override
-	public void unsubscribeGui() {
-		unsubscribe("publishDisplay", "displayFrame");
-	}
+  @Override
+  public void unsubscribeGui() {
+    unsubscribe("publishDisplay", "displayFrame");
+  }
 
-	// multiplex images if desired
-	public void displayFrame(SerializableImage img) {
-		String source = img.getSource();
-		if (displays.containsKey(source)) {
-			displays.get(source).displayFrame(img);
-		} else if (allowFork) {
-			VideoDisplayPanel vdp = addVideoDisplayPanel(img.getSource());
-			vdp.displayFrame(img);
-		} else {
-			displays.get("output").displayFrame(img); // FIXME - kludgy !!!
-		}
-	}
+  // multiplex images if desired
+  public void displayFrame(SerializableImage img) {
+    String source = img.getSource();
+    if (displays.containsKey(source)) {
+      displays.get(source).displayFrame(img);
+    } else if (allowFork) {
+      VideoDisplayPanel vdp = addVideoDisplayPanel(img.getSource());
+      vdp.displayFrame(img);
+    } else {
+      displays.get("output").displayFrame(img); // FIXME - kludgy !!!
+    }
+  }
 
-	public void removeAllVideoDisplayPanels() {
-		Iterator<String> itr = displays.keySet().iterator();
-		while (itr.hasNext()) {
-			String n = itr.next();
-			log.error("removing " + n);
-			// removeVideoDisplayPanel(n);
-			VideoDisplayPanel vdp = displays.get(n);
-			display.remove(vdp.myDisplay);
-		}
-		displays.clear();
-		videoDisplayXPos = 0;
-		videoDisplayYPos = 0;
-	}
+  public void removeAllVideoDisplayPanels() {
+    Iterator<String> itr = displays.keySet().iterator();
+    while (itr.hasNext()) {
+      String n = itr.next();
+      log.error("removing " + n);
+      // removeVideoDisplayPanel(n);
+      VideoDisplayPanel vdp = displays.get(n);
+      display.remove(vdp.myDisplay);
+    }
+    displays.clear();
+    videoDisplayXPos = 0;
+    videoDisplayYPos = 0;
+  }
 
-	public void removeVideoDisplayPanel(String source) {
-		if (!displays.containsKey(source)) {
-			log.error("cannot remove VideoDisplayPanel " + source);
-			return;
-		}
+  public void removeVideoDisplayPanel(String source) {
+    if (!displays.containsKey(source)) {
+      log.error("cannot remove VideoDisplayPanel " + source);
+      return;
+    }
 
-		VideoDisplayPanel vdp = displays.remove(source);
-		display.remove(vdp.myDisplay);
-		display.invalidate();
-		swingGui.pack();
-	}
+    VideoDisplayPanel vdp = displays.remove(source);
+    display.remove(vdp.myDisplay);
+    display.invalidate();
+    swingGui.pack();
+  }
 
-	public void allowFork(boolean b) {
-		this.allowFork = b;
-	}
+  public void allowFork(boolean b) {
+    this.allowFork = b;
+  }
 
 }

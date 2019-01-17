@@ -69,122 +69,121 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterFindContours extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFindContours.class);
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFindContours.class);
 
-	boolean useMinArea = true;
+  boolean useMinArea = true;
 
-	public boolean publishPolygon = true;
+  public boolean publishPolygon = true;
 
-	boolean useMaxArea = false;
-	int minArea = 150;
-	int maxArea = -1;
+  boolean useMaxArea = false;
+  int minArea = 150;
+  int maxArea = -1;
 
-	boolean isMinArea;
-	boolean isMaxArea;
+  boolean isMinArea;
+  boolean isMaxArea;
 
-	transient IplImage grey = null;
-	transient CvSeq contourPointer = new CvSeq();
-	transient CvMemStorage storage = null;
+  transient IplImage grey = null;
+  transient CvSeq contourPointer = new CvSeq();
+  transient CvMemStorage storage = null;
 
-	// floor finder related
-	CvPoint origin = null;
+  // floor finder related
+  CvPoint origin = null;
 
-	public OpenCVFilterFindContours(String name) {
-		super(name);
-	}
+  public OpenCVFilterFindContours(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		if (storage == null) {
-			storage = cvCreateMemStorage(0);
-		}
-		grey = cvCreateImage(cvGetSize(image), 8, 1);
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    if (storage == null) {
+      storage = cvCreateMemStorage(0);
+    }
+    grey = cvCreateImage(cvGetSize(image), 8, 1);
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
+  @Override
+  public IplImage process(IplImage image) {
 
-		// FIXME 3 channel search ???
-		if (image.nChannels() == 3) {
-			cvCvtColor(image, grey, CV_BGR2GRAY);
-		} else {
-			grey = image.clone();
-		}
+    // FIXME 3 channel search ???
+    if (image.nChannels() == 3) {
+      cvCvtColor(image, grey, CV_BGR2GRAY);
+    } else {
+      grey = image.clone();
+    }
 
-		cvFindContours(grey, storage, contourPointer, Loader.sizeof(CvContour.class), 0, CV_CHAIN_APPROX_SIMPLE);
-		CvSeq contours = contourPointer;
-		ArrayList<Rectangle> list = new ArrayList<Rectangle>();
+    cvFindContours(grey, storage, contourPointer, Loader.sizeof(CvContour.class), 0, CV_CHAIN_APPROX_SIMPLE);
+    CvSeq contours = contourPointer;
+    ArrayList<Rectangle> list = new ArrayList<Rectangle>();
 
-		while (contours != null && !contours.isNull()) {
-			if (contours.elem_size() > 0) {
+    while (contours != null && !contours.isNull()) {
+      if (contours.elem_size() > 0) {
 
-				CvRect rect = cvBoundingRect(contours, 0);
+        CvRect rect = cvBoundingRect(contours, 0);
 
-				minArea = 600;
+        minArea = 600;
 
-				if (useMinArea) {
-					isMinArea = (rect.width() * rect.height() > minArea) ? true : false;
-				} else {
-					useMinArea = true;
-				}
+        if (useMinArea) {
+          isMinArea = (rect.width() * rect.height() > minArea) ? true : false;
+        } else {
+          useMinArea = true;
+        }
 
-				if (useMaxArea) {
-					isMaxArea = (rect.width() * rect.height() < maxArea) ? true : false;
-				} else {
-					isMaxArea = true;
-				}
+        if (useMaxArea) {
+          isMaxArea = (rect.width() * rect.height() < maxArea) ? true : false;
+        } else {
+          isMaxArea = true;
+        }
 
-				if (isMinArea && isMaxArea) {
+        if (isMinArea && isMaxArea) {
 
-					Rectangle box = new Rectangle();
+          Rectangle box = new Rectangle();
 
-					box.x = rect.x();
-					box.y = rect.y();
-					box.width = rect.width();
-					box.height = rect.height();
+          box.x = rect.x();
+          box.y = rect.y();
+          box.width = rect.width();
+          box.height = rect.height();
 
-					list.add(box);
+          list.add(box);
 
-					// log.debug("box {}", box);
+          // log.debug("box {}", box);
 
-					if (origin == null) {
-						origin = new CvPoint(width / 2, 10 /* height ?? */);
-					}
+          if (origin == null) {
+            origin = new CvPoint(width / 2, 10 /* height ?? */);
+          }
 
-					if (publishPolygon) {
-						CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage,
-								CV_POLY_APPROX_DP, cvContourPerimeter(contours) * 0.02, 1);
-						for (int i = 0; i < result.total(); i++) {
-							CvPoint point = new CvPoint(cvGetSeqElem(result, i));
-							// log.debug("point {}", point);
-						}
-					}
-				}
-			}
-			contours = contours.h_next();
-		}
+          if (publishPolygon) {
+            CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours) * 0.02, 1);
+            for (int i = 0; i < result.total(); i++) {
+              CvPoint point = new CvPoint(cvGetSeqElem(result, i));
+              // log.debug("point {}", point);
+            }
+          }
+        }
+      }
+      contours = contours.h_next();
+    }
 
-		// FIXME - sources could use this too
-		data.putBoundingBoxArray(list);
-		cvClearMemStorage(storage);
-		return image;
-	}
+    // FIXME - sources could use this too
+    data.putBoundingBoxArray(list);
+    cvClearMemStorage(storage);
+    return image;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
 
-		List<Rectangle> boxes = data.getBoundingBoxArray();
-		if (boxes != null) {
-			for (Rectangle box : boxes) {
-				graphics.drawOval((int) box.x, (int) box.y, (int) (box.x + box.width), (int) (box.y + box.height));
-			}
-			graphics.drawString(String.format("cnt %d", boxes.size()), 10, 10);
-		} else {
-			graphics.drawString(String.format("cnt %d", 0), 10, 10);
-		}
-		return image;
-	}
+    List<Rectangle> boxes = data.getBoundingBoxArray();
+    if (boxes != null) {
+      for (Rectangle box : boxes) {
+        graphics.drawOval((int) box.x, (int) box.y, (int) (box.x + box.width), (int) (box.y + box.height));
+      }
+      graphics.drawString(String.format("cnt %d", boxes.size()), 10, 10);
+    } else {
+      graphics.drawString(String.format("cnt %d", 0), 10, 10);
+    }
+    return image;
+  }
 
 }

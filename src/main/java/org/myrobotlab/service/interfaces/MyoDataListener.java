@@ -4,7 +4,7 @@ import org.myrobotlab.service.data.MyoData;
 
 public interface MyoDataListener {
 
-	public String getName();
+  public String getName();
 
-	public MyoData onMyoData(MyoData data);
+  public MyoData onMyoData(MyoData data);
 }

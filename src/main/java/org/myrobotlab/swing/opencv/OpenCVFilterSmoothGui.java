@@ -33,19 +33,19 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterSmoothGui extends OpenCVFilterGui {
 
-	JButton button = new JButton("smooth me");
-	JTextField kernel = new JTextField("3");
+  JButton button = new JButton("smooth me");
+  JTextField kernel = new JTextField("3");
 
-	public OpenCVFilterSmoothGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
-		display.add(button);
-		display.add(kernel);
-	}
+  public OpenCVFilterSmoothGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
+    display.add(button);
+    display.add(kernel);
+  }
 
-	@Override
-	public void getFilterState(FilterWrapper filter) {
-		// TODO Auto-generated method stub
+  @Override
+  public void getFilterState(FilterWrapper filter) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
 }

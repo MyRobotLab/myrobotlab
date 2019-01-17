@@ -29,9 +29,9 @@ import java.util.ArrayList;
 
 public class CcmdParam {
 
-	public ArrayList<String> m_strings = new ArrayList<String>();
+  public ArrayList<String> m_strings = new ArrayList<String>();
 
-	public CcmdParam() {
-	}
+  public CcmdParam() {
+  }
 
 }

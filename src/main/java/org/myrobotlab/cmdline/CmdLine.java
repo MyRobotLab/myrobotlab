@@ -30,161 +30,161 @@ import java.util.HashMap;
 
 public class CmdLine extends HashMap<String, CcmdParam> {
 
-	private static final long serialVersionUID = 1560723637806853945L;
+  private static final long serialVersionUID = 1560723637806853945L;
 
-	private String[] args = null;
+  private String[] args = null;
 
-	public static void main(String[] args) {
+  public static void main(String[] args) {
 
-		CmdLine cmdline = new CmdLine(args);
+    CmdLine cmdline = new CmdLine(args);
 
-		if (cmdline.containsKey("-test")) {
-			String service = cmdline.getSafeArgument("-service", 0, "");
-			System.out.println("Service: " + service);
-		}
-	}
+    if (cmdline.containsKey("-test")) {
+      String service = cmdline.getSafeArgument("-service", 0, "");
+      System.out.println("Service: " + service);
+    }
+  }
 
-	public CmdLine(String[] args) {
-		splitLine(args);
-	}
+  public CmdLine(String[] args) {
+    splitLine(args);
+  }
 
-	public String getArgument(final String pSwitch, int iIdx) {
-		if (hasSwitch(pSwitch)) {
-			if (containsKey(pSwitch)) {
-				if (get(pSwitch).m_strings.size() > iIdx) {
-					return get(pSwitch).m_strings.get(iIdx);
-				}
-			}
-		}
+  public String getArgument(final String pSwitch, int iIdx) {
+    if (hasSwitch(pSwitch)) {
+      if (containsKey(pSwitch)) {
+        if (get(pSwitch).m_strings.size() > iIdx) {
+          return get(pSwitch).m_strings.get(iIdx);
+        }
+      }
+    }
 
-		// throw (int)0;
+    // throw (int)0;
 
-		return "";
+    return "";
 
-	}
+  }
 
-	public int getArgumentCount(final String pSwitch) {
-		int iArgumentCount = -1;
+  public int getArgumentCount(final String pSwitch) {
+    int iArgumentCount = -1;
 
-		if (hasSwitch(pSwitch)) {
-			if (containsKey(pSwitch)) {
-				iArgumentCount = get(pSwitch).m_strings.size();
-			}
-		}
+    if (hasSwitch(pSwitch)) {
+      if (containsKey(pSwitch)) {
+        iArgumentCount = get(pSwitch).m_strings.size();
+      }
+    }
 
-		return iArgumentCount;
-	}
+    return iArgumentCount;
+  }
 
-	public ArrayList<String> getArgumentList(final String pSwitch) {
-		return get(pSwitch).m_strings;
-	}
+  public ArrayList<String> getArgumentList(final String pSwitch) {
+    return get(pSwitch).m_strings;
+  }
 
-	public String getSafeArgument(final String pSwitch, int iIdx, final String pDefault) {
-		String sRet = new String("");
+  public String getSafeArgument(final String pSwitch, int iIdx, final String pDefault) {
+    String sRet = new String("");
 
-		if (pDefault != null) {
-			sRet = pDefault;
-		}
+    if (pDefault != null) {
+      sRet = pDefault;
+    }
 
-		if (!hasSwitch(pSwitch))
-			return sRet;
+    if (!hasSwitch(pSwitch))
+      return sRet;
 
-		String r = getArgument(pSwitch, iIdx);
-		if ((r == null || r.length() == 0) && (pDefault != null && pDefault.length() != 0)) {
-			return pDefault;
-		} else {
-			return r;
-		}
-	}
+    String r = getArgument(pSwitch, iIdx);
+    if ((r == null || r.length() == 0) && (pDefault != null && pDefault.length() != 0)) {
+      return pDefault;
+    } else {
+      return r;
+    }
+  }
 
-	public boolean hasSwitch(final String pSwitch) {
-		return containsKey(pSwitch);
-	}
+  public boolean hasSwitch(final String pSwitch) {
+    return containsKey(pSwitch);
+  }
 
-	public boolean isSwitch(final String pParam) {
-		if (pParam == null) {
-			return false;
-		}
-		if (pParam.length() <= 1) {
-			return false;
-		}
+  public boolean isSwitch(final String pParam) {
+    if (pParam == null) {
+      return false;
+    }
+    if (pParam.length() <= 1) {
+      return false;
+    }
 
-		if (pParam.charAt(0) == '-') {
-			boolean ret = true;
+    if (pParam.charAt(0) == '-') {
+      boolean ret = true;
 
-			// allow negative numbers as arguments.
-			// ie., don't count them as switches
-			ret &= !Character.isDigit(pParam.charAt(1));
+      // allow negative numbers as arguments.
+      // ie., don't count them as switches
+      ret &= !Character.isDigit(pParam.charAt(1));
 
-			// if we have a space then the param was escaped
-			// if its escaped e.g. -agent "-test -logLevel WARN" then its not a
-			// flag
-			ret &= !pParam.contains(" ");
-			return ret;
-		} else {
-			return false;
-		}
+      // if we have a space then the param was escaped
+      // if its escaped e.g. -agent "-test -logLevel WARN" then its not a
+      // flag
+      ret &= !pParam.contains(" ");
+      return ret;
+    } else {
+      return false;
+    }
 
-	}
+  }
 
-	public int splitLine(String[] args) {
-		// HashMap<String, CcmdParam> a = new HashMap<String, CcmdParam>();
-		// a.put(arg0, arg1)
-		this.args = args;
-		String curParam = new String();
-		for (int i = 0; i < args.length; ++i) {
-			if (isSwitch(args[i])) {
-				curParam = args[i];
-				String arg = "";
+  public int splitLine(String[] args) {
+    // HashMap<String, CcmdParam> a = new HashMap<String, CcmdParam>();
+    // a.put(arg0, arg1)
+    this.args = args;
+    String curParam = new String();
+    for (int i = 0; i < args.length; ++i) {
+      if (isSwitch(args[i])) {
+        curParam = args[i];
+        String arg = "";
 
-				// look at next input string to see if it's a switch or an
-				// argument
-				if (i + 1 < args.length) {
-					if (!isSwitch(args[i + 1])) {
-						// it's an argument, not a switch
-						arg = args[i + 1];
+        // look at next input string to see if it's a switch or an
+        // argument
+        if (i + 1 < args.length) {
+          if (!isSwitch(args[i + 1])) {
+            // it's an argument, not a switch
+            arg = args[i + 1];
 
-						// skip to next
-						i++;
-					} else {
-						arg = "";
-					}
-				}
+            // skip to next
+            i++;
+          } else {
+            arg = "";
+          }
+        }
 
-				// add it
-				CcmdParam cmd = new CcmdParam();
+        // add it
+        CcmdParam cmd = new CcmdParam();
 
-				// only add non-empty args
-				if (arg != "") {
-					cmd.m_strings.add(arg);
-				}
+        // only add non-empty args
+        if (arg != "") {
+          cmd.m_strings.add(arg);
+        }
 
-				// add the CCmdParam to 'this'
-				put(curParam, cmd);
-			} else {
-				// it's not a new switch, so it must be more stuff for the last
-				// switch
-				// ...let's add it
-				// get an iterator for the current param
-				if (containsKey(curParam)) {
-					// (*theIterator).second.m_strings.push_back(argv[i]);
-					get(curParam).m_strings.add(args[i]);
-				} else {
-					// ??
-				}
-			}
-		}
-		return 5;
+        // add the CCmdParam to 'this'
+        put(curParam, cmd);
+      } else {
+        // it's not a new switch, so it must be more stuff for the last
+        // switch
+        // ...let's add it
+        // get an iterator for the current param
+        if (containsKey(curParam)) {
+          // (*theIterator).second.m_strings.push_back(argv[i]);
+          get(curParam).m_strings.add(args[i]);
+        } else {
+          // ??
+        }
+      }
+    }
+    return 5;
 
-	}
+  }
 
-	@Override
-	public String toString() {
-		StringBuffer ret = new StringBuffer();
-		for (int i = 0; i < args.length; ++i) {
-			ret.append("\"" + args[i] + "\"").append(" ");
-		}
+  @Override
+  public String toString() {
+    StringBuffer ret = new StringBuffer();
+    for (int i = 0; i < args.length; ++i) {
+      ret.append("\"" + args[i] + "\"").append(" ");
+    }
 
-		return ret.toString();
-	}
+    return ret.toString();
+  }
 }

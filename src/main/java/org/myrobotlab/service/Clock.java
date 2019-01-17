@@ -44,178 +44,178 @@ import org.slf4j.Logger;
  */
 public class Clock extends Service {
 
-	public class ClockThread implements Runnable {
-		public Thread thread = null;
+  public class ClockThread implements Runnable {
+    public Thread thread = null;
 
-		ClockThread() {
-			thread = new Thread(this, getName() + "_ticking_thread");
-			thread.start();
-		}
+    ClockThread() {
+      thread = new Thread(this, getName() + "_ticking_thread");
+      thread.start();
+    }
 
-		@Override
-		public void run() {
+    @Override
+    public void run() {
 
-			try {
+      try {
 
-				while (isClockRunning) {
-					Date now = new Date();
-					Iterator<ClockEvent> i = events.iterator();
-					while (i.hasNext()) {
-						ClockEvent event = i.next();
-						if (now.after(event.time)) {
-							// TODO repeat - don't delete set time forward
-							// interval
-							send(event.name, event.method, event.data);
+        while (isClockRunning) {
+          Date now = new Date();
+          Iterator<ClockEvent> i = events.iterator();
+          while (i.hasNext()) {
+            ClockEvent event = i.next();
+            if (now.after(event.time)) {
+              // TODO repeat - don't delete set time forward
+              // interval
+              send(event.name, event.method, event.data);
 
-							i.remove();
-						}
-					}
+              i.remove();
+            }
+          }
 
-					if (!NoExecutionAtFirstClockStarted) {
-						invoke("pulse", new Date());
-					}
-					Thread.sleep(interval);
-					NoExecutionAtFirstClockStarted = false;
-				}
-			} catch (InterruptedException e) {
-				log.info("ClockThread interrupt");
-				isClockRunning = false;
-			}
-		}
-	}
+          if (!NoExecutionAtFirstClockStarted) {
+            invoke("pulse", new Date());
+          }
+          Thread.sleep(interval);
+          NoExecutionAtFirstClockStarted = false;
+        }
+      } catch (InterruptedException e) {
+        log.info("ClockThread interrupt");
+        isClockRunning = false;
+      }
+    }
+  }
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(Clock.class.getCanonicalName());
-	public boolean isClockRunning;
+  public final static Logger log = LoggerFactory.getLogger(Clock.class.getCanonicalName());
+  public boolean isClockRunning;
 
-	public int interval = 1000;
+  public int interval = 1000;
 
-	public transient ClockThread myClock = null;
+  public transient ClockThread myClock = null;
 
-	// FIXME
-	ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
+  // FIXME
+  ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
 
-	private boolean NoExecutionAtFirstClockStarted = false;
+  private boolean NoExecutionAtFirstClockStarted = false;
 
-	private boolean restartMe;
+  private boolean restartMe;
 
-	public Clock(String n) {
-		super(n);
-	}
+  public Clock(String n) {
+    super(n);
+  }
 
-	public void addClockEvent(Date time, String name, String method, Object... data) {
-		ClockEvent event = new ClockEvent(time, name, method, data);
-		events.add(event);
-	}
+  public void addClockEvent(Date time, String name, String method, Object... data) {
+    ClockEvent event = new ClockEvent(time, name, method, data);
+    events.add(event);
+  }
 
-	// clock started event
-	public void clockStarted() {
-		isClockRunning = true;
-		log.info("clock started");
-		broadcastState();
-	}
+  // clock started event
+  public void clockStarted() {
+    isClockRunning = true;
+    log.info("clock started");
+    broadcastState();
+  }
 
-	public void clockStopped() {
-		isClockRunning = false;
-		broadcastState();
-		if (restartMe) {
-			sleep(10);
-			startClock(NoExecutionAtFirstClockStarted);
-		}
+  public void clockStopped() {
+    isClockRunning = false;
+    broadcastState();
+    if (restartMe) {
+      sleep(10);
+      startClock(NoExecutionAtFirstClockStarted);
+    }
 
-	}
+  }
 
-	public Date pulse(Date time) {
-		return time;
-	}
+  public Date pulse(Date time) {
+    return time;
+  }
 
-	public void setInterval(Integer milliseconds) {
-		interval = milliseconds;
-		broadcastState();
-	}
+  public void setInterval(Integer milliseconds) {
+    interval = milliseconds;
+    broadcastState();
+  }
 
-	public void startClock(boolean NoExecutionAtFirstClockStarted) {
-		if (myClock == null) {
-			this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
-			// info("starting clock");
-			myClock = new ClockThread();
-			invoke("clockStarted");
-		} else {
-			log.warn("clock already started");
-		}
-	}
+  public void startClock(boolean NoExecutionAtFirstClockStarted) {
+    if (myClock == null) {
+      this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
+      // info("starting clock");
+      myClock = new ClockThread();
+      invoke("clockStarted");
+    } else {
+      log.warn("clock already started");
+    }
+  }
 
-	public void restartClock(boolean NoExecutionAtFirstClockStarted) {
-		this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
-		if (!isClockRunning) {
-			startClock(NoExecutionAtFirstClockStarted);
-		} else {
-			stopClock(true);
-		}
+  public void restartClock(boolean NoExecutionAtFirstClockStarted) {
+    this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
+    if (!isClockRunning) {
+      startClock(NoExecutionAtFirstClockStarted);
+    } else {
+      stopClock(true);
+    }
 
-	}
+  }
 
-	public void startClock() {
-		startClock(false);
-	}
+  public void startClock() {
+    startClock(false);
+  }
 
-	public void restartClock() {
-		restartClock(false);
-	}
+  public void restartClock() {
+    restartClock(false);
+  }
 
-	public void stopClock() {
-		stopClock(false);
-	}
+  public void stopClock() {
+    stopClock(false);
+  }
 
-	public void stopClock(boolean restartMe) {
-		this.restartMe = restartMe;
-		if (myClock != null) {
-			// info("stopping clock");
-			log.info("stopping " + getName() + " myClock");
-			myClock.thread.interrupt();
-			myClock.thread = null;
-			myClock = null;
-			// have requestors broadcast state !
-			// broadcastState();
-			invoke("clockStopped");
-		} else {
-			log.warn("clock already stopped");
-		}
-	}
+  public void stopClock(boolean restartMe) {
+    this.restartMe = restartMe;
+    if (myClock != null) {
+      // info("stopping clock");
+      log.info("stopping " + getName() + " myClock");
+      myClock.thread.interrupt();
+      myClock.thread = null;
+      myClock = null;
+      // have requestors broadcast state !
+      // broadcastState();
+      invoke("clockStopped");
+    } else {
+      log.warn("clock already stopped");
+    }
+  }
 
-	@Override
-	public void stopService() {
-		stopClock();
-		super.stopService();
-	}
+  @Override
+  public void stopService() {
+    stopClock();
+    super.stopService();
+  }
 
-	public static void main(String[] args) throws Exception {
-		LoggingFactory.init(Level.INFO);
+  public static void main(String[] args) throws Exception {
+    LoggingFactory.init(Level.INFO);
 
-		Clock clock = (Clock) Runtime.start("clock", "Clock");
-		clock.setInterval(1000);
-		clock.restartClock();
-		sleep(2000);
-		clock.restartClock();
-		sleep(2000);
-		clock.stopClock();
-	}
+    Clock clock = (Clock) Runtime.start("clock", "Clock");
+    clock.setInterval(1000);
+    clock.restartClock();
+    sleep(2000);
+    clock.restartClock();
+    sleep(2000);
+    clock.stopClock();
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(Clock.class.getCanonicalName());
-		meta.addDescription("used to generate pulses and recurring messages");
-		meta.addCategory("scheduling");
+    ServiceType meta = new ServiceType(Clock.class.getCanonicalName());
+    meta.addDescription("used to generate pulses and recurring messages");
+    meta.addCategory("scheduling");
 
-		return meta;
-	}
+    return meta;
+  }
 }

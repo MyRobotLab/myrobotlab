@@ -38,71 +38,72 @@ import org.slf4j.Logger;
 
 public class _TemplateServiceGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGui.class);
 
-	JLabel var1 = new JLabel("0.0");
-	JLabel var2 = new JLabel("1.0");
+  JLabel var1 = new JLabel("0.0");
+  JLabel var2 = new JLabel("1.0");
 
-	public _TemplateServiceGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
+  public _TemplateServiceGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
-		setTitle("status");
-		addLine("name ", boundServiceName);
-		addLine("var1 ", var1);
-		addLine("var2 ", var2);
+    setTitle("status");
+    addLine("name ", boundServiceName);
+    addLine("var1 ", var1);
+    addLine("var2 ", var2);
 
-		setTitle("input");
-		addLine("service ", boundServiceName);
+    setTitle("input");
+    addLine("service ", boundServiceName);
 
-		setTitle("output");
+    setTitle("output");
 
-		/*
-		 * JPanel panel = createPanel("panel1"); panel.add(createLine("service ",
-		 * boundServiceName)); panel.add(createLine("gui service ",
-		 * myService.getName())); panel.add(createLine(boundServiceName,
-		 * " begining service"));
-		 * 
-		 * display.add(panel, BorderLayout.EAST);
-		 */
-	}
+    /*
+     * JPanel panel = createPanel("panel1"); panel.add(createLine("service ",
+     * boundServiceName)); panel.add(createLine("gui service ",
+     * myService.getName())); panel.add(createLine(boundServiceName,
+     * " begining service"));
+     * 
+     * display.add(panel, BorderLayout.EAST);
+     */
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
 
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
-		// un-defined gui's
+  @Override
+  public void subscribeGui() {
+    // un-defined gui's
 
-		// subscribe("someMethod");
-		// send("someMethod");
-	}
+    // subscribe("someMethod");
+    // send("someMethod");
+  }
 
-	@Override
-	public void unsubscribeGui() {
-		// commented out subscription due to this class being used for
-		// un-defined gui's
+  @Override
+  public void unsubscribeGui() {
+    // commented out subscription due to this class being used for
+    // un-defined gui's
 
-		// unsubscribe("someMethod");
-	}
+    // unsubscribe("someMethod");
+  }
 
-	/**
-	 * Service State change - this method will be called when a "broadcastState"
-	 * method is called which triggers a publishState. This event handler is
-	 * typically used when data or state information in the service has changed, and
-	 * the UI should update to reflect this changed state.
-	 * 
-	 * @param template the template service
-	 */
-	public void onState(_TemplateService template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  /**
+   * Service State change - this method will be called when a "broadcastState"
+   * method is called which triggers a publishState. This event handler is
+   * typically used when data or state information in the service has changed,
+   * and the UI should update to reflect this changed state.
+   * 
+   * @param template
+   *          the template service
+   */
+  public void onState(_TemplateService template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-			}
-		});
-	}
+      }
+    });
+  }
 
 }

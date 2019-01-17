@@ -31,53 +31,53 @@ import org.tensorflow.TensorFlow;
  */
 public class Tensorflow extends Service {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public Tensorflow(String name) {
-		super(name);
-	}
+  public Tensorflow(String name) {
+    super(name);
+  }
 
-	static public ServiceType getMetaData() {
-		ServiceType meta = new ServiceType(Tensorflow.class.getCanonicalName());
-		/**
-		 * <pre>
-		 * tensorflow not ready for primetime
-		 */
-		meta.addDescription("Tensorflow machine learning library from Google");
-		meta.addCategory("ai");
-		// TODO: what happens when you try to install this on an ARM processor like
-		// RasPI or the Jetson TX2 ?
-		meta.addDependency("org.tensorflow", "tensorflow", "1.8.0");
+  static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(Tensorflow.class.getCanonicalName());
+    /**
+     * <pre>
+     * tensorflow not ready for primetime
+     */
+    meta.addDescription("Tensorflow machine learning library from Google");
+    meta.addCategory("ai");
+    // TODO: what happens when you try to install this on an ARM processor like
+    // RasPI or the Jetson TX2 ?
+    meta.addDependency("org.tensorflow", "tensorflow", "1.8.0");
 
-		// enable GPU support ?
-		boolean gpu = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
-		if (gpu) {
-			// Currently only supported on Linux. 64 bit.
-			meta.addDependency("org.tensorflow", "libtensorflow", "1.8.0");
-			meta.addDependency("org.tensorflow", "libtensorflow_jni_gpu", "1.8.0");
-		}
-		/* </pre> */
-		return meta;
-	}
+    // enable GPU support ?
+    boolean gpu = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
+    if (gpu) {
+      // Currently only supported on Linux. 64 bit.
+      meta.addDependency("org.tensorflow", "libtensorflow", "1.8.0");
+      meta.addDependency("org.tensorflow", "libtensorflow_jni_gpu", "1.8.0");
+    }
+    /* </pre> */
+    return meta;
+  }
 
-	public static void main(String[] args) throws Exception {
-		// Test code taken directly from the tensorflow webpage to verify that the
-		// libraries have loaded as expected.
-		try (Graph g = new Graph()) {
-			final String value = "Hello from " + TensorFlow.version();
+  public static void main(String[] args) throws Exception {
+    // Test code taken directly from the tensorflow webpage to verify that the
+    // libraries have loaded as expected.
+    try (Graph g = new Graph()) {
+      final String value = "Hello from " + TensorFlow.version();
 
-			// Construct the computation graph with a single operation, a constant
-			// named "MyConst" with a value "value".
-			try (Tensor t = Tensor.create(value.getBytes("UTF-8"))) {
-				// The Java API doesn't yet include convenience functions for adding
-				// operations.
-				g.opBuilder("Const", "MyConst").setAttr("dtype", t.dataType()).setAttr("value", t).build();
-			}
+      // Construct the computation graph with a single operation, a constant
+      // named "MyConst" with a value "value".
+      try (Tensor t = Tensor.create(value.getBytes("UTF-8"))) {
+        // The Java API doesn't yet include convenience functions for adding
+        // operations.
+        g.opBuilder("Const", "MyConst").setAttr("dtype", t.dataType()).setAttr("value", t).build();
+      }
 
-			// Execute the "MyConst" operation in a Session.
-			try (Session s = new Session(g); Tensor output = s.runner().fetch("MyConst").run().get(0)) {
-				System.out.println(new String(output.bytesValue(), "UTF-8"));
-			}
-		}
-	}
+      // Execute the "MyConst" operation in a Session.
+      try (Session s = new Session(g); Tensor output = s.runner().fetch("MyConst").run().get(0)) {
+        System.out.println(new String(output.bytesValue(), "UTF-8"));
+      }
+    }
+  }
 }

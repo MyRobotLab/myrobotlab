@@ -11,14 +11,14 @@ import org.myrobotlab.service.Motor;
  */
 public abstract class MotorControllerPanel extends JPanel {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	MotorControllerPanel() {
-		setBorder(BorderFactory.createTitledBorder("type"));
-	}
+  MotorControllerPanel() {
+    setBorder(BorderFactory.createTitledBorder("type"));
+  }
 
-	abstract public void set(Motor motor);
+  abstract public void set(Motor motor);
 
-	public abstract void setAttached(boolean state);
+  public abstract void setAttached(boolean state);
 
 }

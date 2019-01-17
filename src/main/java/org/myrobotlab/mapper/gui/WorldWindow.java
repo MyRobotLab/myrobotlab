@@ -36,21 +36,21 @@ import org.myrobotlab.mapper.sim.World;
  */
 public final class WorldWindow extends JInternalFrame {
 
-	private static final long serialVersionUID = 1L;
-	World world;
+  private static final long serialVersionUID = 1L;
+  World world;
 
-	public WorldWindow(World world) {
-		super("world");
-		this.world = world;
-		initialize();
-	}
+  public WorldWindow(World world) {
+    super("world");
+    this.world = world;
+    initialize();
+  }
 
-	private void initialize() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-		panel.add("Center", world.getCanvas3D());
-		setContentPane(panel);
-		setSize(400, 400);
-		setResizable(true);
-	}
+  private void initialize() {
+    JPanel panel = new JPanel();
+    panel.setLayout(new BorderLayout());
+    panel.add("Center", world.getCanvas3D());
+    setContentPane(panel);
+    setSize(400, 400);
+    setResizable(true);
+  }
 }
