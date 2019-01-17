@@ -37,27 +37,26 @@ import java.awt.image.BufferedImage;
  */
 class Util {
 
-	public static BufferedImage convertImageToBufferedImage(Image image) {
-		int width = image.getWidth(null);
-		int height = image.getHeight(null);
-		BufferedImage bimage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		Graphics2D graphics2D = bimage.createGraphics();
-		graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-		graphics2D.drawImage(image, 0, 0, width, height, null);
-		return bimage;
-	}
+  public static BufferedImage convertImageToBufferedImage(Image image) {
+    int width = image.getWidth(null);
+    int height = image.getHeight(null);
+    BufferedImage bimage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    Graphics2D graphics2D = bimage.createGraphics();
+    graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+    graphics2D.drawImage(image, 0, 0, width, height, null);
+    return bimage;
+  }
 
-	public static Image loadImage(String fileName, Component component) {
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		Image image = toolkit.getImage(fileName);
-		MediaTracker mediaTracker = new MediaTracker(component);
-		mediaTracker.addImage(image, 0);
-		try {
-			mediaTracker.waitForID(0);
-		} catch (InterruptedException ie) {
-			return null;
-		}
-		return image;
-	}
+  public static Image loadImage(String fileName, Component component) {
+    Toolkit toolkit = Toolkit.getDefaultToolkit();
+    Image image = toolkit.getImage(fileName);
+    MediaTracker mediaTracker = new MediaTracker(component);
+    mediaTracker.addImage(image, 0);
+    try {
+      mediaTracker.waitForID(0);
+    } catch (InterruptedException ie) {
+      return null;
+    }
+    return image;
+  }
 }

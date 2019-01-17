@@ -44,86 +44,86 @@ import java.io.IOException;
  * @author Peter Abeles
  */
 public class LogKinectDataApp implements StreamOpenKinectRgbDepth.Listener {
-	{
-		// be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
-		// location of your shared library!
-		NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
-	}
+  {
+    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
+    // location of your shared library!
+    NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
+  }
 
-	int maxImages;
-	boolean showImage;
-	Resolution resolution = Resolution.MEDIUM;
+  int maxImages;
+  boolean showImage;
+  Resolution resolution = Resolution.MEDIUM;
 
-	BufferedImage buffRgb;
-	int frameNumber;
+  BufferedImage buffRgb;
+  int frameNumber;
 
-	DataOutputStream logFile;
+  DataOutputStream logFile;
 
-	GrowQueue_I8 buffer = new GrowQueue_I8(1);
+  GrowQueue_I8 buffer = new GrowQueue_I8(1);
 
-	ImagePanel gui;
+  ImagePanel gui;
 
-	public LogKinectDataApp(int maxImages, boolean showImage) {
-		this.maxImages = maxImages;
-		this.showImage = showImage;
-	}
+  public LogKinectDataApp(int maxImages, boolean showImage) {
+    this.maxImages = maxImages;
+    this.showImage = showImage;
+  }
 
-	public void process() throws IOException {
+  public void process() throws IOException {
 
-		logFile = new DataOutputStream(new FileOutputStream("log/timestamps.txt"));
-		logFile.write("# Time stamps for rgb and depth cameras.\n".getBytes());
+    logFile = new DataOutputStream(new FileOutputStream("log/timestamps.txt"));
+    logFile.write("# Time stamps for rgb and depth cameras.\n".getBytes());
 
-		int w = UtilOpenKinect.getWidth(resolution);
-		int h = UtilOpenKinect.getHeight(resolution);
+    int w = UtilOpenKinect.getWidth(resolution);
+    int h = UtilOpenKinect.getHeight(resolution);
 
-		buffRgb = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+    buffRgb = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
-		if (showImage) {
-			gui = ShowImages.showWindow(buffRgb, "Kinect RGB");
-		}
+    if (showImage) {
+      gui = ShowImages.showWindow(buffRgb, "Kinect RGB");
+    }
 
-		StreamOpenKinectRgbDepth stream = new StreamOpenKinectRgbDepth();
-		Context kinect = Freenect.createContext();
+    StreamOpenKinectRgbDepth stream = new StreamOpenKinectRgbDepth();
+    Context kinect = Freenect.createContext();
 
-		if (kinect.numDevices() < 0)
-			throw new RuntimeException("No kinect found!");
+    if (kinect.numDevices() < 0)
+      throw new RuntimeException("No kinect found!");
 
-		Device device = kinect.openDevice(0);
+    Device device = kinect.openDevice(0);
 
-		stream.start(device, resolution, this);
+    stream.start(device, resolution, this);
 
-		if (maxImages > 0) {
-			while (frameNumber < maxImages) {
-				System.out.printf("Total saved %d\n", frameNumber);
-				BoofMiscOps.pause(100);
-			}
-			stream.stop();
-			System.out.println("Exceeded max images");
-			System.exit(0);
-		}
-	}
+    if (maxImages > 0) {
+      while (frameNumber < maxImages) {
+        System.out.printf("Total saved %d\n", frameNumber);
+        BoofMiscOps.pause(100);
+      }
+      stream.stop();
+      System.out.println("Exceeded max images");
+      System.exit(0);
+    }
+  }
 
-	@Override
-	public void processKinect(Planar<GrayU8> rgb, GrayU16 depth, long timeRgb, long timeDepth) {
-		System.out.println(frameNumber + "  " + timeRgb);
-		try {
-			logFile.write(String.format("%10d %d %d\n", frameNumber, timeRgb, timeDepth).getBytes());
-			logFile.flush();
-			UtilImageIO.savePPM(rgb, String.format("log/rgb%07d.ppm", frameNumber), buffer);
-			UtilOpenKinect.saveDepth(depth, String.format("log/depth%07d.depth", frameNumber), buffer);
-			frameNumber++;
+  @Override
+  public void processKinect(Planar<GrayU8> rgb, GrayU16 depth, long timeRgb, long timeDepth) {
+    System.out.println(frameNumber + "  " + timeRgb);
+    try {
+      logFile.write(String.format("%10d %d %d\n", frameNumber, timeRgb, timeDepth).getBytes());
+      logFile.flush();
+      UtilImageIO.savePPM(rgb, String.format("log/rgb%07d.ppm", frameNumber), buffer);
+      UtilOpenKinect.saveDepth(depth, String.format("log/depth%07d.depth", frameNumber), buffer);
+      frameNumber++;
 
-			if (showImage) {
-				ConvertBufferedImage.convertTo_U8(rgb, buffRgb, true);
-				gui.repaint();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+      if (showImage) {
+        ConvertBufferedImage.convertTo_U8(rgb, buffRgb, true);
+        gui.repaint();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
-	public static void main(String args[]) throws IOException {
-		LogKinectDataApp app = new LogKinectDataApp(1000000, false);
-		app.process();
-	}
+  public static void main(String args[]) throws IOException {
+    LogKinectDataApp app = new LogKinectDataApp(1000000, false);
+    app.process();
+  }
 }

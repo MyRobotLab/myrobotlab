@@ -44,113 +44,113 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterFaceRecognizerGui extends OpenCVFilterGui implements ActionListener {
 
-	private JTextField trainName = new JTextField("trainName", 10);
-	private JCheckBox trainMode = new JCheckBox();
+  private JTextField trainName = new JTextField("trainName", 10);
+  private JCheckBox trainMode = new JCheckBox();
 
-	private JButton saveButton = new JButton("Save");
-	private JButton loadButton = new JButton("Load");
+  private JButton saveButton = new JButton("Save");
+  private JButton loadButton = new JButton("Load");
 
-	public OpenCVFilterFaceRecognizerGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
-		// build the config for this filter.
-		TitledBorder title = BorderFactory.createTitledBorder("Face Recognizer");
-		JPanel j = new JPanel(new GridBagLayout());
-		j.setBorder(title);
-		// text box for persons name
-		trainName.addActionListener(this);
-		trainName.setText("");
+  public OpenCVFilterFaceRecognizerGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
+    // build the config for this filter.
+    TitledBorder title = BorderFactory.createTitledBorder("Face Recognizer");
+    JPanel j = new JPanel(new GridBagLayout());
+    j.setBorder(title);
+    // text box for persons name
+    trainName.addActionListener(this);
+    trainName.setText("");
 
-		// check box for if you're training or not.
-		// by default not checked.
-		trainMode.setSelected(false);
-		trainMode.addActionListener(this);
-		// the person's name that you're going to train for.
-		// assemble those elements into the UI.
-		JPanel jp = new JPanel(new GridBagLayout());
-		jp.add(new JLabel("Train:"));
-		jp.add(trainMode);
-		jp.add(new JLabel("Name:"));
-		jp.add(trainName);
-		display.add(jp, gc);
+    // check box for if you're training or not.
+    // by default not checked.
+    trainMode.setSelected(false);
+    trainMode.addActionListener(this);
+    // the person's name that you're going to train for.
+    // assemble those elements into the UI.
+    JPanel jp = new JPanel(new GridBagLayout());
+    jp.add(new JLabel("Train:"));
+    jp.add(trainMode);
+    jp.add(new JLabel("Name:"));
+    jp.add(trainName);
+    display.add(jp, gc);
 
-		saveButton.addActionListener(this);
-		loadButton.addActionListener(this);
-		JPanel jp2 = new JPanel(new GridBagLayout());
-		jp2.add(saveButton);
-		jp2.add(loadButton);
+    saveButton.addActionListener(this);
+    loadButton.addActionListener(this);
+    JPanel jp2 = new JPanel(new GridBagLayout());
+    jp2.add(saveButton);
+    jp2.add(loadButton);
 
-		display.add(jp2, gc);
-	}
+    display.add(jp2, gc);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterFaceRecognizer bf = (OpenCVFilterFaceRecognizer) boundFilter.filter;
-		if (o == trainMode) {
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
+    OpenCVFilterFaceRecognizer bf = (OpenCVFilterFaceRecognizer) boundFilter.filter;
+    if (o == trainMode) {
 
-			if (((JCheckBox) o).isSelected()) {
-				bf.setMode(OpenCVFilterFaceRecognizer.Mode.TRAIN);
-				bf.setTrainName(trainName.getText());
-			} else {
-				// This means we went from training mode to recognition mode
-				// assume that we've created some new training images.
-				// so we can invoke the training method
-				try {
-					bf.train();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				// done training. start recognizing...
-				bf.setMode(OpenCVFilterFaceRecognizer.Mode.RECOGNIZE);
-			}
-			// this is the checkbox
-			// when we select this, we should go into train mode
-			// when we deselect this, we should train the model and
-			// go into recognition mode
-		} else if (o == trainName) {
-			// the opencv set the current name
-			// that the cv filter is accumulating images for.
-			bf.setTrainName(((JTextField) o).getText());
-		} else if (o == saveButton) {
-			try {
-				bf.save();
-			} catch (IOException e1) {
-				log.warn("Error saving face recognition model {}", e1.getLocalizedMessage());
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		} else if (o == loadButton) {
-			bf.load();
-		}
-	}
+      if (((JCheckBox) o).isSelected()) {
+        bf.setMode(OpenCVFilterFaceRecognizer.Mode.TRAIN);
+        bf.setTrainName(trainName.getText());
+      } else {
+        // This means we went from training mode to recognition mode
+        // assume that we've created some new training images.
+        // so we can invoke the training method
+        try {
+          bf.train();
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
+        // done training. start recognizing...
+        bf.setMode(OpenCVFilterFaceRecognizer.Mode.RECOGNIZE);
+      }
+      // this is the checkbox
+      // when we select this, we should go into train mode
+      // when we deselect this, we should train the model and
+      // go into recognition mode
+    } else if (o == trainName) {
+      // the opencv set the current name
+      // that the cv filter is accumulating images for.
+      bf.setTrainName(((JTextField) o).getText());
+    } else if (o == saveButton) {
+      try {
+        bf.save();
+      } catch (IOException e1) {
+        log.warn("Error saving face recognition model {}", e1.getLocalizedMessage());
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+    } else if (o == loadButton) {
+      bf.load();
+    }
+  }
 
-	// @Override
-	public void attachGui() {
-		log.debug("attachGui");
+  // @Override
+  public void attachGui() {
+    log.debug("attachGui");
 
-	}
+  }
 
-	// @Override
-	public void detachGui() {
-		log.debug("detachGui");
+  // @Override
+  public void detachGui() {
+    log.debug("detachGui");
 
-	}
+  }
 
-	@Override
-	public void getFilterState(FilterWrapper filterWrapper) {
-		// TODO: what the heck are we doing with this method?!
-	}
+  @Override
+  public void getFilterState(FilterWrapper filterWrapper) {
+    // TODO: what the heck are we doing with this method?!
+  }
 
-	// @Override
-	// public void getFilterState(final FilterWrapper filterWrapper) {
-	// SwingUtilities.invokeLater(new Runnable() {
-	// @Override
-	// public void run() {
-	// OpenCVFilterFaceDetect bf = (OpenCVFilterFaceDetect) filterWrapper.filter;
-	// // cascadeFile.setSelectedItem(bf.cascadeFile);
-	// }
-	// });
-	// }
+  // @Override
+  // public void getFilterState(final FilterWrapper filterWrapper) {
+  // SwingUtilities.invokeLater(new Runnable() {
+  // @Override
+  // public void run() {
+  // OpenCVFilterFaceDetect bf = (OpenCVFilterFaceDetect) filterWrapper.filter;
+  // // cascadeFile.setSelectedItem(bf.cascadeFile);
+  // }
+  // });
+  // }
 
 }

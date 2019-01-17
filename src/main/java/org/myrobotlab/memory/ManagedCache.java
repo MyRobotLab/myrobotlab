@@ -11,22 +11,23 @@ package org.myrobotlab.memory;
  * 
  */
 public interface ManagedCache extends Cache {
-	/**
-	 * Clear all values from the cache.
-	 */
-	void clear();
+  /**
+   * Clear all values from the cache.
+   */
+  void clear();
 
-	/**
-	 * Update the timeout for name so that it is cleaned up the next time timeout()
-	 * is called.
-	 * 
-	 * @param name the name
-	 */
-	@Override
-	void expire(String name);
+  /**
+   * Update the timeout for name so that it is cleaned up the next time
+   * timeout() is called.
+   * 
+   * @param name
+   *          the name
+   */
+  @Override
+  void expire(String name);
 
-	/**
-	 * Clear out any values that should be timed out.
-	 */
-	void timeout();
+  /**
+   * Clear out any values that should be timed out.
+   */
+  void timeout();
 }

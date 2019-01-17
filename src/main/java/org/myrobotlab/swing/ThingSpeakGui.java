@@ -44,60 +44,60 @@ import org.slf4j.Logger;
 
 public class ThingSpeakGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(ThingSpeakGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(ThingSpeakGui.class);
 
-	JTextField writeKey = new JTextField(15);
-	JLabel intervalSeconds = new JLabel("");
-	JLabel lastUpdate = new JLabel("");
-	JButton save = new JButton("save");
+  JTextField writeKey = new JTextField(15);
+  JLabel intervalSeconds = new JLabel("");
+  JLabel lastUpdate = new JLabel("");
+  JButton save = new JButton("save");
 
-	public ThingSpeakGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
+  public ThingSpeakGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
-		JPanel input = new JPanel(new GridLayout(0, 2));
-		input.add(new JLabel("write key"));
-		input.add(writeKey);
-		input.add(new JLabel("update interval"));
-		input.add(intervalSeconds);
-		input.add(new JLabel("last update"));
-		input.add(lastUpdate);
+    JPanel input = new JPanel(new GridLayout(0, 2));
+    input.add(new JLabel("write key"));
+    input.add(writeKey);
+    input.add(new JLabel("update interval"));
+    input.add(intervalSeconds);
+    input.add(new JLabel("last update"));
+    input.add(lastUpdate);
 
-		input.add(save);
+    input.add(save);
 
-		save.addActionListener(this);
-		display.add(input);
-	}
+    save.addActionListener(this);
+    display.add(input);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object o = event.getSource();
-		if (o == save) {
-			swingGui.send(boundServiceName, "saveConfig");
-		}
-	}
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    Object o = event.getSource();
+    if (o == save) {
+      swingGui.send(boundServiceName, "saveConfig");
+    }
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void unsubscribeGui() {
+  }
 
-	public void onState(final ThingSpeak thing) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
+  public void onState(final ThingSpeak thing) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
 
-				writeKey.setText(thing.getWriteKey());
-				intervalSeconds.setText(thing.getIntervalSeconds().toString());
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-DD HH:mm:ss");
-				Date resultdate = new Date(thing.getLastUpdate());
-				lastUpdate.setText(sdf.format(resultdate));
+        writeKey.setText(thing.getWriteKey());
+        intervalSeconds.setText(thing.getIntervalSeconds().toString());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-DD HH:mm:ss");
+        Date resultdate = new Date(thing.getLastUpdate());
+        lastUpdate.setText(sdf.format(resultdate));
 
-			}
-		});
-	}
+      }
+    });
+  }
 
 }

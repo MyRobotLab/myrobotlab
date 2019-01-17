@@ -42,53 +42,52 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterTrackerGui extends OpenCVFilterGui implements ActionListener {
 
-	private JComboBox<String> trackerType = new JComboBox<String>(
-			new String[] { "TLD", "Boosting", "CSRT", "GOTURN", "KCF", "MedianFlow", "MIL", "MOSSE" });
-	// TODO: add bounding box size control.
+  private JComboBox<String> trackerType = new JComboBox<String>(new String[] { "TLD", "Boosting", "CSRT", "GOTURN", "KCF", "MedianFlow", "MIL", "MOSSE" });
+  // TODO: add bounding box size control.
 
-	JTextField bbSizeX = new JTextField("20", 8);
-	JTextField bbSizeY = new JTextField("20", 8);
+  JTextField bbSizeX = new JTextField("20", 8);
+  JTextField bbSizeY = new JTextField("20", 8);
 
-	public OpenCVFilterTrackerGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-		super(boundFilterName, boundServiceName, myService);
-		// build the config for this filter.
-		TitledBorder title = BorderFactory.createTitledBorder("Tracker");
-		JPanel j = new JPanel(new GridBagLayout());
-		j.setBorder(title);
-		trackerType.addActionListener(this);
+  public OpenCVFilterTrackerGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+    super(boundFilterName, boundServiceName, myService);
+    // build the config for this filter.
+    TitledBorder title = BorderFactory.createTitledBorder("Tracker");
+    JPanel j = new JPanel(new GridBagLayout());
+    j.setBorder(title);
+    trackerType.addActionListener(this);
 
-		bbSizeX.addActionListener(this);
-		bbSizeY.addActionListener(this);
-		j.add(trackerType);
-		j.add(new JLabel("Box Width:"));
-		j.add(bbSizeX);
-		j.add(new JLabel("Height:"));
-		j.add(bbSizeY);
-		display.add(j);
+    bbSizeX.addActionListener(this);
+    bbSizeY.addActionListener(this);
+    j.add(trackerType);
+    j.add(new JLabel("Box Width:"));
+    j.add(bbSizeX);
+    j.add(new JLabel("Height:"));
+    j.add(bbSizeY);
+    display.add(j);
 
-		// OpenCVFilterTracker bf = (OpenCVFilterTracker) boundFilter.filter;
-		// bbSizeX.setText(Integer.toString(bf.boxWidth));
-		// bbSizeY.setText(Integer.toString(bf.boxHeight));
+    // OpenCVFilterTracker bf = (OpenCVFilterTracker) boundFilter.filter;
+    // bbSizeX.setText(Integer.toString(bf.boxWidth));
+    // bbSizeY.setText(Integer.toString(bf.boxHeight));
 
-	}
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
-		OpenCVFilterTracker bf = (OpenCVFilterTracker) boundFilter.filter;
-		if (o == trackerType) {
-			String type = trackerType.getSelectedItem().toString();
-			bf.trackerType = type;
-		} else if (o == bbSizeX) {
-			bf.boxWidth = Integer.valueOf(bbSizeX.getText());
-		} else if (o == bbSizeY) {
-			bf.boxHeight = Integer.valueOf(bbSizeY.getText());
-		}
-	}
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
+    OpenCVFilterTracker bf = (OpenCVFilterTracker) boundFilter.filter;
+    if (o == trackerType) {
+      String type = trackerType.getSelectedItem().toString();
+      bf.trackerType = type;
+    } else if (o == bbSizeX) {
+      bf.boxWidth = Integer.valueOf(bbSizeX.getText());
+    } else if (o == bbSizeY) {
+      bf.boxHeight = Integer.valueOf(bbSizeY.getText());
+    }
+  }
 
-	@Override
-	public void getFilterState(FilterWrapper filterWrapper) {
-		// TODO: what should i implement here?
-	}
+  @Override
+  public void getFilterState(FilterWrapper filterWrapper) {
+    // TODO: what should i implement here?
+  }
 
 }

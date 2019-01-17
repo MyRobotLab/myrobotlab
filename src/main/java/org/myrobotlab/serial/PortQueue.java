@@ -20,60 +20,60 @@ import org.slf4j.Logger;
  */
 public class PortQueue extends Port {
 
-	public final static Logger log = LoggerFactory.getLogger(PortQueue.class);
+  public final static Logger log = LoggerFactory.getLogger(PortQueue.class);
 
-	private BlockingQueue<Integer> in;
-	private BlockingQueue<Integer> out;
+  private BlockingQueue<Integer> in;
+  private BlockingQueue<Integer> out;
 
-	public PortQueue(String portName) {
-		super(portName);
-	}
+  public PortQueue(String portName) {
+    super(portName);
+  }
 
-	public PortQueue(String portName, BlockingQueue<Integer> in, BlockingQueue<Integer> out) {
-		super(portName);
-		this.in = in;
-		this.out = out;
-	}
+  public PortQueue(String portName, BlockingQueue<Integer> in, BlockingQueue<Integer> out) {
+    super(portName);
+    this.in = in;
+    this.out = out;
+  }
 
-	public int available() throws IOException {
-		return in.size();
-	}
+  public int available() throws IOException {
+    return in.size();
+  }
 
-	@Override
-	public List<String> getPortNames() {
-		// no "new" ports to contribute in
-		// the "pure" Java (non-JNI/JNA) world...
-		return new ArrayList<String>();
-	}
+  @Override
+  public List<String> getPortNames() {
+    // no "new" ports to contribute in
+    // the "pure" Java (non-JNI/JNA) world...
+    return new ArrayList<String>();
+  }
 
-	@Override
-	public int read() throws IOException, InterruptedException {
-		return in.take();
-	}
+  @Override
+  public int read() throws IOException, InterruptedException {
+    return in.take();
+  }
 
-	public boolean setParams(int rate, int databits, int stopbits, int parity) {
+  public boolean setParams(int rate, int databits, int stopbits, int parity) {
 
-		log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
-		return true;
-	}
+    log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
+    return true;
+  }
 
-	@Override
-	public void write(int data) throws IOException {
-		out.add(data);
-		// WOW - PipedOutputStream auto flushes about 1 time every second :P
-		// we force flushing here !
-	}
+  @Override
+  public void write(int data) throws IOException {
+    out.add(data);
+    // WOW - PipedOutputStream auto flushes about 1 time every second :P
+    // we force flushing here !
+  }
 
-	public void write(int[] data) throws IOException {
-		// TODO: is there a more effecient way to do this?
-		for (int i = 0; i < data.length; i++) {
-			write(data[i]);
-		}
-	}
+  public void write(int[] data) throws IOException {
+    // TODO: is there a more effecient way to do this?
+    for (int i = 0; i < data.length; i++) {
+      write(data[i]);
+    }
+  }
 
-	@Override
-	public boolean isHardware() {
-		return false;
-	}
+  @Override
+  public boolean isHardware() {
+    return false;
+  }
 
 }

@@ -41,57 +41,57 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterFloodFill extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFloodFill.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFloodFill.class.getCanonicalName());
 
-	transient IplImage buffer = null;
+  transient IplImage buffer = null;
 
-	CvPoint startPoint = cvPoint(180, 120);
-	CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
-	CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
-	CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
+  CvPoint startPoint = cvPoint(180, 120);
+  CvScalar fillColor = cvScalar(255.0, 0.0, 0.0, 1.0);
+  CvScalar lo_diff = CV_RGB(20.0, 20.0, 20.0);// cvScalar(20, 0.0, 0.5, 1.0);
+  CvScalar up_diff = CV_RGB(20.0, 20.0, 20.0);
 
-	public OpenCVFilterFloodFill() {
-		super();
-	}
+  public OpenCVFilterFloodFill() {
+    super();
+  }
 
-	public OpenCVFilterFloodFill(String name) {
-		super(name);
-	}
+  public OpenCVFilterFloodFill(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
-		if (startPoint == null) {
-			startPoint = cvPoint(image.width() / 2, image.height() - 4);
-		}
+  @Override
+  public IplImage process(IplImage image) {
+    if (startPoint == null) {
+      startPoint = cvPoint(image.width() / 2, image.height() - 4);
+    }
 
-		// fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);
-		fillColor = cvScalar(0.0, 0.0, 0.0, 1.0);
+    // fillColor = cvScalar(255.0, 255.0, 255.0, 1.0);
+    fillColor = cvScalar(0.0, 0.0, 0.0, 1.0);
 
-		// lo_diff = CV_RGB(25, 1, 1);// cvScalar(20, 0.0, 0.5, 1.0);
-		// up_diff = CV_RGB(125, 1, 1);
+    // lo_diff = CV_RGB(25, 1, 1);// cvScalar(20, 0.0, 0.5, 1.0);
+    // up_diff = CV_RGB(125, 1, 1);
 
-		lo_diff = CV_RGB(25, 1, 1);// cvScalar(20, 0.0, 0.5, 1.0);
-		up_diff = CV_RGB(125, 1, 1);
+    lo_diff = CV_RGB(25, 1, 1);// cvScalar(20, 0.0, 0.5, 1.0);
+    up_diff = CV_RGB(125, 1, 1);
 
-		cvFloodFill(image, startPoint, fillColor, lo_diff, up_diff, null, 8, null);
+    cvFloodFill(image, startPoint, fillColor, lo_diff, up_diff, null, 8, null);
 
-		// fillColor = cvScalar(0.0, 255.0, 0.0, 1.0);
-		// cvDrawRect(image, startPoint, startPoint, fillColor, 2, 1, 0);
-		return image;
+    // fillColor = cvScalar(0.0, 255.0, 0.0, 1.0);
+    // cvDrawRect(image, startPoint, startPoint, fillColor, 2, 1, 0);
+    return image;
 
-	}
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		return image;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 
 }

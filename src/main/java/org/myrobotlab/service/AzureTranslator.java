@@ -25,98 +25,97 @@ import io.github.firemaples.translate.Translate;
 
 public class AzureTranslator extends Service implements TextListener, TextPublisher {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	String toLanguage = "it";
-	String fromLanguage = null;
-	public final static Logger log = LoggerFactory.getLogger(AzureTranslator.class);
+  String toLanguage = "it";
+  String fromLanguage = null;
+  public final static Logger log = LoggerFactory.getLogger(AzureTranslator.class);
 
-	public static void main(String[] args) throws Exception {
-		LoggingFactory.init(Level.INFO);
-		try {
+  public static void main(String[] args) throws Exception {
+    LoggingFactory.init(Level.INFO);
+    try {
 
-			AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");
-			Runtime.start("gui", "SwingGui");
-			log.info("Translator service instance: {}", translator);
+      AzureTranslator translator = (AzureTranslator) Runtime.start("translator", "AzureTranslator");
+      Runtime.start("gui", "SwingGui");
+      log.info("Translator service instance: {}", translator);
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public AzureTranslator(String n) {
-		super(n);
-	}
+  public AzureTranslator(String n) {
+    super(n);
+  }
 
-	public String translate(String toTranslate) throws Exception {
-		String translatedText = null;
-		if (fromLanguage == null) {
-			translatedText = Translate.execute(toTranslate, Language.AUTO_DETECT, Language.fromString(toLanguage));
-		} else {
-			translatedText = Translate.execute(toTranslate, Language.fromString(fromLanguage),
-					Language.fromString(toLanguage));
-		}
-		return translatedText;
-	}
+  public String translate(String toTranslate) throws Exception {
+    String translatedText = null;
+    if (fromLanguage == null) {
+      translatedText = Translate.execute(toTranslate, Language.AUTO_DETECT, Language.fromString(toLanguage));
+    } else {
+      translatedText = Translate.execute(toTranslate, Language.fromString(fromLanguage), Language.fromString(toLanguage));
+    }
+    return translatedText;
+  }
 
-	public Language detectLanguage(String toDetect) throws Exception {
-		Language detectedLanguage = Detect.execute(toDetect);
-		return detectedLanguage;
-	}
+  public Language detectLanguage(String toDetect) throws Exception {
+    Language detectedLanguage = Detect.execute(toDetect);
+    return detectedLanguage;
+  }
 
-	public void setCredentials(String clientSecret) {
+  public void setCredentials(String clientSecret) {
 
-		// Translate.setKey(clientID);
-		Translate.setSubscriptionKey(clientSecret);
-		// Detect.setKey(clientID);
-		Detect.setSubscriptionKey(clientSecret);
-	}
+    // Translate.setKey(clientID);
+    Translate.setSubscriptionKey(clientSecret);
+    // Detect.setKey(clientID);
+    Detect.setSubscriptionKey(clientSecret);
+  }
 
-	public void fromLanguage(String from) {
-		fromLanguage = from;
-	}
+  public void fromLanguage(String from) {
+    fromLanguage = from;
+  }
 
-	public void toLanguage(String to) {
-		toLanguage = to;
-	}
+  public void toLanguage(String to) {
+    toLanguage = to;
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(AzureTranslator.class);
-		meta.addDescription("interface to Azure translation services");
-		meta.addCategory("translation", "cloud", "ai");
-		meta.addDependency("io.github.firemaples", "microsoft-translator-java-api", "0.8.3");
-		meta.setCloudService(true);
-		return meta;
-	}
+    ServiceType meta = new ServiceType(AzureTranslator.class);
+    meta.addDescription("interface to Azure translation services");
+    meta.addCategory("translation", "cloud", "ai");
+    meta.addDependency("io.github.firemaples", "microsoft-translator-java-api", "0.8.3");
+    meta.setCloudService(true);
+    return meta;
+  }
 
-	@Override
-	public String publishText(String text) {
-		return text;
-	}
+  @Override
+  public String publishText(String text) {
+    return text;
+  }
 
-	@Override
-	public void addTextListener(TextListener service) {
-		addListener("publishText", service.getName(), "onText");
-	}
+  @Override
+  public void addTextListener(TextListener service) {
+    addListener("publishText", service.getName(), "onText");
+  }
 
-	@Override
-	public void onText(String text) {
-		String cleanText;
-		try {
-			cleanText = translate(text);
-			invoke("publishText", cleanText);
-		} catch (Exception e) {
-			log.error("Unable to translate text! {} {}", text, e);
-		}
-	}
+  @Override
+  public void onText(String text) {
+    String cleanText;
+    try {
+      cleanText = translate(text);
+      invoke("publishText", cleanText);
+    } catch (Exception e) {
+      log.error("Unable to translate text! {} {}", text, e);
+    }
+  }
 
 }

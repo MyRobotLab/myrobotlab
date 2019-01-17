@@ -51,60 +51,60 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterHsv extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHsv.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHsv.class.getCanonicalName());
 
-	transient IplImage hsv = null;
-	transient IplImage hue = null;
-	transient IplImage value = null;
-	transient IplImage saturation = null;
-	transient IplImage mask = null;
+  transient IplImage hsv = null;
+  transient IplImage hue = null;
+  transient IplImage value = null;
+  transient IplImage saturation = null;
+  transient IplImage mask = null;
 
-	int x = 0;
-	int y = 0;
-	int clickCounter = 0;
-	Graphics g = null;
-	String lastHexValueOfPoint = "";
+  int x = 0;
+  int y = 0;
+  int clickCounter = 0;
+  Graphics g = null;
+  String lastHexValueOfPoint = "";
 
-	transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
+  transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
-	public OpenCVFilterHsv() {
-		super();
-	}
+  public OpenCVFilterHsv() {
+    super();
+  }
 
-	public OpenCVFilterHsv(String name) {
-		super(name);
-	}
+  public OpenCVFilterHsv(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		hsv = IplImage.createCompatible(image);
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    hsv = IplImage.createCompatible(image);
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
-		cvCvtColor(image, hsv, CV_RGB2HSV);
-		return hsv;
+  @Override
+  public IplImage process(IplImage image) {
+    cvCvtColor(image, hsv, CV_RGB2HSV);
+    return hsv;
 
-	}
+  }
 
-	public void samplePoint(Integer inX, Integer inY) {
-		++clickCounter;
-		x = inX;
-		y = inY;
-	}
+  public void samplePoint(Integer inX, Integer inY) {
+    ++clickCounter;
+    x = inX;
+    y = inY;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
 
-		if (x != 0 && clickCounter % 2 == 0) {
-			int clr = image.getRGB(x, y);
-			lastHexValueOfPoint = Integer.toHexString(clr);
-			graphics.drawString(lastHexValueOfPoint, x, y);
-		}
+    if (x != 0 && clickCounter % 2 == 0) {
+      int clr = image.getRGB(x, y);
+      lastHexValueOfPoint = Integer.toHexString(clr);
+      graphics.drawString(lastHexValueOfPoint, x, y);
+    }
 
-		return image;
-	}
+    return image;
+  }
 
 }

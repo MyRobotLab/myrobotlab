@@ -40,78 +40,78 @@ import org.myrobotlab.mapper.sim.Wall;
  */
 public class BlinkingLampDemo extends Demo {
 
-	public class Robot extends Agent {
+  public class Robot extends Agent {
 
-		RangeSensorBelt sonars;
-		LampActuator lamp;
+    RangeSensorBelt sonars;
+    LampActuator lamp;
 
-		public Robot(Vector3d position, String name) {
-			super(position, name);
-			sonars = RobotFactory.addSonarBeltSensor(this, 6);
-			lamp = RobotFactory.addLamp(this);
-		}
+    public Robot(Vector3d position, String name) {
+      super(position, name);
+      sonars = RobotFactory.addSonarBeltSensor(this, 6);
+      lamp = RobotFactory.addLamp(this);
+    }
 
-		/** Initialize Agent's Behavior */
-		@Override
-		public void initBehavior() {
-		}
+    /** Initialize Agent's Behavior */
+    @Override
+    public void initBehavior() {
+    }
 
-		/** Perform one step of Agent's Behavior */
-		@Override
-		public void performBehavior() {
-			// turn lamp On or Off depending on sonars
-			lamp.setBlink(false);
-			lamp.setOn(false);
-			if (sonars.oneHasHit()) {
-				lamp.setBlink(true);
-				// reads the three front quadrants
-				double left = sonars.getFrontLeftQuadrantMeasurement();
-				double right = sonars.getFrontRightQuadrantMeasurement();
-				double front = sonars.getFrontQuadrantMeasurement();
-				// if obstacle near
-				if ((front < 1) || (left < 1) || (right < 1)) {
-					lamp.setBlink(false);
-					lamp.setOn(true);
-					if (left < right)
-						setRotationalVelocity(-1);
-					else
-						setRotationalVelocity(1);
-					setTranslationalVelocity(0.1);
+    /** Perform one step of Agent's Behavior */
+    @Override
+    public void performBehavior() {
+      // turn lamp On or Off depending on sonars
+      lamp.setBlink(false);
+      lamp.setOn(false);
+      if (sonars.oneHasHit()) {
+        lamp.setBlink(true);
+        // reads the three front quadrants
+        double left = sonars.getFrontLeftQuadrantMeasurement();
+        double right = sonars.getFrontRightQuadrantMeasurement();
+        double front = sonars.getFrontQuadrantMeasurement();
+        // if obstacle near
+        if ((front < 1) || (left < 1) || (right < 1)) {
+          lamp.setBlink(false);
+          lamp.setOn(true);
+          if (left < right)
+            setRotationalVelocity(-1);
+          else
+            setRotationalVelocity(1);
+          setTranslationalVelocity(0.1);
 
-				} else {
-					setRotationalVelocity(0);
-					setTranslationalVelocity(0.3);
-				}
-			} else if (collisionDetected()) {
+        } else {
+          setRotationalVelocity(0);
+          setTranslationalVelocity(0.3);
+        }
+      } else if (collisionDetected()) {
 
-				lamp.setOn(true);
-			} else {
-				setTranslationalVelocity(0.8);
-				setRotationalVelocity(0);
-			}
-		}
-	}
+        lamp.setOn(true);
+      } else {
+        setTranslationalVelocity(0.8);
+        setRotationalVelocity(0);
+      }
+    }
+  }
 
-	public BlinkingLampDemo() {
+  public BlinkingLampDemo() {
 
-		Wall w1 = new Wall(new Vector3d(9, 0, 0), 19, 1, this);
-		w1.rotate90(1);
-		add(w1);
-		Wall w2 = new Wall(new Vector3d(-9, 0, 0), 19, 2, this);
-		w2.rotate90(1);
-		add(w2);
-		Wall w3 = new Wall(new Vector3d(0, 0, 9), 19, 1, this);
-		add(w3);
-		Wall w4 = new Wall(new Vector3d(0, 0, -9), 19, 2, this);
-		add(w4);
-		Box b1 = new Box(new Vector3d(-3, 0, -3), new Vector3f(1, 1, 2), this);
-		add(b1);
-		Arch a1 = new Arch(new Vector3d(3, 0, -3), this);
-		add(a1);
+    Wall w1 = new Wall(new Vector3d(9, 0, 0), 19, 1, this);
+    w1.rotate90(1);
+    add(w1);
+    Wall w2 = new Wall(new Vector3d(-9, 0, 0), 19, 2, this);
+    w2.rotate90(1);
+    add(w2);
+    Wall w3 = new Wall(new Vector3d(0, 0, 9), 19, 1, this);
+    add(w3);
+    Wall w4 = new Wall(new Vector3d(0, 0, -9), 19, 2, this);
+    add(w4);
+    Box b1 = new Box(new Vector3d(-3, 0, -3), new Vector3f(1, 1, 2), this);
+    add(b1);
+    Arch a1 = new Arch(new Vector3d(3, 0, -3), this);
+    add(a1);
 
-		// add(new Robot(new Vector3d(-3, 0, 4), "blinker"));
-		add(new Robot(new Vector3d(0, 0, 4), "blinker"));
-		add(new Robot(new Vector3d(3, 0, 4), "blinker"));
+    // add(new Robot(new Vector3d(-3, 0, 4), "blinker"));
+    add(new Robot(new Vector3d(0, 0, 4), "blinker"));
+    add(new Robot(new Vector3d(3, 0, 4), "blinker"));
 
-	}
+  }
 }

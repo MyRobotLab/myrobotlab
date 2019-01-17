@@ -52,109 +52,109 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterHoughLines2 extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHoughLines2.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterHoughLines2.class.getCanonicalName());
 
-	transient IplImage gray = null;
+  transient IplImage gray = null;
 
-	double lowThreshold = 0.0;
-	double highThreshold = 50.0;
-	int apertureSize = 5;
-	Pointer storage = null;
-	transient IplImage inlines = null;
+  double lowThreshold = 0.0;
+  double highThreshold = 50.0;
+  int apertureSize = 5;
+  Pointer storage = null;
+  transient IplImage inlines = null;
 
-	CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
+  CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
-	CvPoint p0 = cvPoint(0, 0);
+  CvPoint p0 = cvPoint(0, 0);
 
-	CvPoint p1 = cvPoint(0, 0);
+  CvPoint p1 = cvPoint(0, 0);
 
-	public OpenCVFilterHoughLines2(String name) {
-		super(name);
-	}
+  public OpenCVFilterHoughLines2(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
+  @Override
+  public IplImage process(IplImage image) {
 
-		if (image == null) {
-			log.error("image is null");
-		}
+    if (image == null) {
+      log.error("image is null");
+    }
 
-		if (gray == null) {
-			gray = cvCreateImage(cvGetSize(image), 8, 1);
-		}
+    if (gray == null) {
+      gray = cvCreateImage(cvGetSize(image), 8, 1);
+    }
 
-		if (storage == null) {
-			storage = CvMemStorage.create();
-		}
+    if (storage == null) {
+      storage = CvMemStorage.create();
+    }
 
-		if (inlines == null) {
-			inlines = cvCreateImage(cvGetSize(image), 8, 1);
-		}
+    if (inlines == null) {
+      inlines = cvCreateImage(cvGetSize(image), 8, 1);
+    }
 
-		if (image.nChannels() > 1) {
-			cvCvtColor(image, gray, CV_BGR2GRAY);
-		} else {
-			gray = image.clone();
-		}
+    if (image.nChannels() > 1) {
+      cvCvtColor(image, gray, CV_BGR2GRAY);
+    } else {
+      gray = image.clone();
+    }
 
-		// TODO - use named inputs and outputs
-		lowThreshold = 5.0;
-		highThreshold = 400.0;
-		apertureSize = 3;
-		cvCanny(gray, inlines, lowThreshold, highThreshold, apertureSize);
+    // TODO - use named inputs and outputs
+    lowThreshold = 5.0;
+    highThreshold = 400.0;
+    apertureSize = 3;
+    cvCanny(gray, inlines, lowThreshold, highThreshold, apertureSize);
 
-		// http://www.aishack.in/2010/04/hough-transform-in-opencv/ -
-		// explanation of hough transform parameters
+    // http://www.aishack.in/2010/04/hough-transform-in-opencv/ -
+    // explanation of hough transform parameters
 
-		// CV_HOUGH_MULTI_SCALE || CV_HOUGH_STANDARD
-		CvSeq lines = cvHoughLines2(inlines, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10);// ,
-																									// 40,
-																									// 10);
+    // CV_HOUGH_MULTI_SCALE || CV_HOUGH_STANDARD
+    CvSeq lines = cvHoughLines2(inlines, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10);// ,
+    // 40,
+    // 10);
 
-		// Pointer p = null;
-		// cvHoughLines2(inlines, p, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10,
-		// 40, 10);
+    // Pointer p = null;
+    // cvHoughLines2(inlines, p, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 10,
+    // 40, 10);
 
-		for (int i = 0; i < lines.total(); i++) {
+    for (int i = 0; i < lines.total(); i++) {
 
-			Pointer line = cvGetSeqElem(lines, i);
-			CvPoint pt1 = new CvPoint(line);
-			pt1.position(0);
-			CvPoint pt2 = new CvPoint(line);
-			pt2.position(1);
+      Pointer line = cvGetSeqElem(lines, i);
+      CvPoint pt1 = new CvPoint(line);
+      pt1.position(0);
+      CvPoint pt2 = new CvPoint(line);
+      pt2.position(1);
 
-			log.info("Line spotted: ");
-			log.info("\t pt1: " + pt1);
-			log.info("\t pt2: " + pt2);
-			// cvLine(image, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0); // draw
-			// the segment on the image
-			cvDrawLine(image, p0, p1, CV_RGB(255, 255, 255), 2, 8, 0);
+      log.info("Line spotted: ");
+      log.info("\t pt1: " + pt1);
+      log.info("\t pt2: " + pt2);
+      // cvLine(image, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0); // draw
+      // the segment on the image
+      cvDrawLine(image, p0, p1, CV_RGB(255, 255, 255), 2, 8, 0);
 
-			try {
-				// close these resources?!
-				pt1.close();
-				pt2.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+      try {
+        // close these resources?!
+        pt1.close();
+        pt2.close();
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
 
-		}
+    }
 
-		// cxcore.cvPutText(image, "x", cvPoint(10, 14), font, CvScalar.WHITE);
+    // cxcore.cvPutText(image, "x", cvPoint(10, 14), font, CvScalar.WHITE);
 
-		return image;
-	}
+    return image;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		return image;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 
 }

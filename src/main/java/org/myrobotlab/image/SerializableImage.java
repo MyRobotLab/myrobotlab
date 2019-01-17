@@ -55,180 +55,180 @@ import org.slf4j.Logger;
  */
 public class SerializableImage implements Serializable {
 
-	public final static Logger log = LoggerFactory.getLogger(SerializableImage.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(SerializableImage.class.getCanonicalName());
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	/**
-	 * internal buffered image
-	 */
-	transient private BufferedImage image;
+  /**
+   * internal buffered image
+   */
+  transient private BufferedImage image;
 
-	/**
-	 * png encoded byte buffer - TODO offer type png tff etc? TODO - consider
-	 * hashmap cache similar to the OpenCVData ???
-	 */
-	private ByteBuffer buffer;
+  /**
+   * png encoded byte buffer - TODO offer type png tff etc? TODO - consider
+   * hashmap cache similar to the OpenCVData ???
+   */
+  private ByteBuffer buffer;
 
-	private byte[] bytes;
+  private byte[] bytes;
 
-	private String source;
-	private long timestamp;
-	public int frameIndex;
+  private String source;
+  private long timestamp;
+  public int frameIndex;
 
-	public static void main(String[] args) throws Exception {
-		try {
-			LoggingFactory.init();
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("object.data"));
+  public static void main(String[] args) throws Exception {
+    try {
+      LoggingFactory.init();
+      ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("object.data"));
 
-			ImageIO.write(null, "png", new MemoryCacheImageOutputStream(out));
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+      ImageIO.write(null, "png", new MemoryCacheImageOutputStream(out));
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
 
-	}
+  }
 
-	public static void writeToFile(BufferedImage img, String filename) {
-		try {
-			FileOutputStream out = new FileOutputStream(new File(filename));
-			String extension = null;
-			int i = filename.lastIndexOf('.');
-			if (i > 0) {
-				extension = filename.substring(i + 1);
-			}
+  public static void writeToFile(BufferedImage img, String filename) {
+    try {
+      FileOutputStream out = new FileOutputStream(new File(filename));
+      String extension = null;
+      int i = filename.lastIndexOf('.');
+      if (i > 0) {
+        extension = filename.substring(i + 1);
+      }
 
-			if (extension != null) {
-				ImageIO.write(img, extension, new MemoryCacheImageOutputStream(out));
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      if (extension != null) {
+        ImageIO.write(img, extension, new MemoryCacheImageOutputStream(out));
+      }
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
-	public SerializableImage(BufferedImage image, String source) {
-		this.source = source;
-		this.image = image;
-		this.timestamp = System.currentTimeMillis();
-	}
+  public SerializableImage(BufferedImage image, String source) {
+    this.source = source;
+    this.image = image;
+    this.timestamp = System.currentTimeMillis();
+  }
 
-	public SerializableImage(BufferedImage image, String source, int frameIndex) {
-		this.source = source;
-		this.image = image;
-		this.frameIndex = frameIndex;
-		this.timestamp = System.currentTimeMillis();
-	}
+  public SerializableImage(BufferedImage image, String source, int frameIndex) {
+    this.source = source;
+    this.image = image;
+    this.frameIndex = frameIndex;
+    this.timestamp = System.currentTimeMillis();
+  }
 
-	public SerializableImage(byte[] buffer, String source, int frameIndex) {
-		this.source = source;
-		this.bytes = buffer;
-		this.frameIndex = frameIndex;
-		this.timestamp = System.currentTimeMillis();
-	}
+  public SerializableImage(byte[] buffer, String source, int frameIndex) {
+    this.source = source;
+    this.bytes = buffer;
+    this.frameIndex = frameIndex;
+    this.timestamp = System.currentTimeMillis();
+  }
 
-	public SerializableImage(ByteBuffer buffer, String source, int frameIndex) {
-		this.source = source;
-		this.buffer = buffer;
-		this.frameIndex = frameIndex;
-		this.timestamp = System.currentTimeMillis();
-	}
+  public SerializableImage(ByteBuffer buffer, String source, int frameIndex) {
+    this.source = source;
+    this.buffer = buffer;
+    this.frameIndex = frameIndex;
+    this.timestamp = System.currentTimeMillis();
+  }
 
-	public ByteBuffer getByteBuffer() {
-		return buffer;
-	}
+  public ByteBuffer getByteBuffer() {
+    return buffer;
+  }
 
-	public byte[] getBytes() {
-		if (bytes != null) {
-			return bytes;
-		}
+  public byte[] getBytes() {
+    if (bytes != null) {
+      return bytes;
+    }
 
-		if (buffer != null) {
-			bytes = new byte[buffer.remaining()];
-			buffer.get(bytes);
-			return bytes;
-		}
+    if (buffer != null) {
+      bytes = new byte[buffer.remaining()];
+      buffer.get(bytes);
+      return bytes;
+    }
 
-		if (image != null) {
-			try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				ImageIO.write(image, "png", new MemoryCacheImageOutputStream(bos));
-				bytes = bos.toByteArray();
-				return bytes;
-			} catch (Exception e) {
-				Logging.logError(e);
-			}
-		}
-		// TODO image --to--> bytes
-		return null;
-	}
+    if (image != null) {
+      try {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", new MemoryCacheImageOutputStream(bos));
+        bytes = bos.toByteArray();
+        return bytes;
+      } catch (Exception e) {
+        Logging.logError(e);
+      }
+    }
+    // TODO image --to--> bytes
+    return null;
+  }
 
-	public int getHeight() {
-		return image.getHeight();
-	}
+  public int getHeight() {
+    return image.getHeight();
+  }
 
-	public BufferedImage getImage() {
-		if (image != null)
-			return image;
+  public BufferedImage getImage() {
+    if (image != null)
+      return image;
 
-		try {
-			if (bytes != null) {
-				InputStream inputStream = new ByteArrayInputStream(bytes);
-				image = ImageIO.read(inputStream);
-				return image;
-			}
+    try {
+      if (bytes != null) {
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        image = ImageIO.read(inputStream);
+        return image;
+      }
 
-			if (buffer != null) {
-				// FIXME - this does not work (always) :(
-				// not thread safe
-				bytes = new byte[buffer.remaining()];
-				buffer.get(bytes);
-				InputStream inputStream = new ByteArrayInputStream(bytes);
-				image = ImageIO.read(inputStream);
-			}
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
+      if (buffer != null) {
+        // FIXME - this does not work (always) :(
+        // not thread safe
+        bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        image = ImageIO.read(inputStream);
+      }
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	public String getSource() {
-		return source;
-	}
+  public String getSource() {
+    return source;
+  }
 
-	public long getTimestamp() {
-		return timestamp;
-	}
+  public long getTimestamp() {
+    return timestamp;
+  }
 
-	public int getWidth() {
-		return image.getWidth();
-	}
+  public int getWidth() {
+    return image.getWidth();
+  }
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		image = (ImageIO.read(new MemoryCacheImageInputStream(in)));
-		Logging.logTime("readObject");
-	}
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    image = (ImageIO.read(new MemoryCacheImageInputStream(in)));
+    Logging.logTime("readObject");
+  }
 
-	public void setImage(BufferedImage image) {
-		this.image = image;
-	}
+  public void setImage(BufferedImage image) {
+    this.image = image;
+  }
 
-	public void setSource(String source) {
-		this.source = source;
-	}
+  public void setSource(String source) {
+    this.source = source;
+  }
 
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
+  public void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
+  }
 
-	// FIXME ??? use OpenCV cvEncode ???
-	// FIXME !! PNG default ???
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		ImageIO.write(image, "png", new MemoryCacheImageOutputStream(out));
-		Logging.logTime("writeObject");
-	}
+  // FIXME ??? use OpenCV cvEncode ???
+  // FIXME !! PNG default ???
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    ImageIO.write(image, "png", new MemoryCacheImageOutputStream(out));
+    Logging.logTime("writeObject");
+  }
 
-	public void writeToFile(String filename) {
-		writeToFile(image, filename);
-	}
+  public void writeToFile(String filename) {
+    writeToFile(image, filename);
+  }
 
 }

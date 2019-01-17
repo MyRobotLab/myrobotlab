@@ -42,66 +42,64 @@ import org.slf4j.Logger;
 
 public class WolframAlphaGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(WolframAlphaGui.class);
-	private JEditorPane result = new JEditorPane();
-	private JTextField query = new JTextField();
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(WolframAlphaGui.class);
+  private JEditorPane result = new JEditorPane();
+  private JTextField query = new JTextField();
 
-	public WolframAlphaGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
+  public WolframAlphaGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
 
-		display.setLayout(new BorderLayout());
-		display.setPreferredSize(new Dimension(800, 600));
-		JScrollPane js = new JScrollPane(result);
-		js.setAutoscrolls(true);
-		display.add(js, "Center");
-		display.add(query, "South");
-		// query.setText("query");
-		result.setContentType("text/html");
-		result.setText(
-				"<html><body>Wolfram Alpha Knowledge Engine<br>Type a query and press enter in the box below.</body></html>");
-		query.addActionListener(new ActionListener() {
+    display.setLayout(new BorderLayout());
+    display.setPreferredSize(new Dimension(800, 600));
+    JScrollPane js = new JScrollPane(result);
+    js.setAutoscrolls(true);
+    display.add(js, "Center");
+    display.add(query, "South");
+    // query.setText("query");
+    result.setContentType("text/html");
+    result.setText("<html><body>Wolfram Alpha Knowledge Engine<br>Type a query and press enter in the box below.</body></html>");
+    query.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				String text = query.getText();
-				query.setText("querying...");
-				query.validate();
-				query.update(query.getGraphics());
-				String answer = (String) myService.sendBlocking(boundServiceName, 30000, "wolframAlpha", text,
-						Boolean.TRUE);
-				// System.out.println(answer);
-				result.setText(answer);
-				result.setCaretPosition(0);
-				query.setText("");
-			}
-		});
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        String text = query.getText();
+        query.setText("querying...");
+        query.validate();
+        query.update(query.getGraphics());
+        String answer = (String) myService.sendBlocking(boundServiceName, 30000, "wolframAlpha", text, Boolean.TRUE);
+        // System.out.println(answer);
+        result.setText(answer);
+        result.setCaretPosition(0);
+        query.setText("");
+      }
+    });
 
-	}
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
-		subscribe("publishState", "onState");
-		swingGui.send(boundServiceName, "publishState");
-	}
+  @Override
+  public void subscribeGui() {
+    subscribe("publishState", "onState");
+    swingGui.send(boundServiceName, "publishState");
+  }
 
-	@Override
-	public void unsubscribeGui() {
-		unsubscribe("publishState", "onState");
-	}
+  @Override
+  public void unsubscribeGui() {
+    unsubscribe("publishState", "onState");
+  }
 
-	public void onState(WolframAlpha template) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-			}
-		});
-	}
+  public void onState(WolframAlpha template) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+      }
+    });
+  }
 
 }

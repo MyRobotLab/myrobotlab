@@ -27,17 +27,17 @@ package org.myrobotlab.service.interfaces;
 
 public interface I2CBusControl {
 
-	/*
-	 * Mats: Not sure what methods to put here yet
-	 * 
-	 * public boolean setController(String controllerName, String deviceBus, String
-	 * deviceAddress); public boolean setController(String controllerName); public
-	 * boolean setController(I2CController controller); public boolean
-	 * setController(I2CController controller, String deviceBus, String
-	 * deviceAddress); public void unsetController();
-	 */
-	public void setDeviceBus(String deviceBus);
+  /*
+   * Mats: Not sure what methods to put here yet
+   * 
+   * public boolean setController(String controllerName, String deviceBus,
+   * String deviceAddress); public boolean setController(String controllerName);
+   * public boolean setController(I2CController controller); public boolean
+   * setController(I2CController controller, String deviceBus, String
+   * deviceAddress); public void unsetController();
+   */
+  public void setDeviceBus(String deviceBus);
 
-	public void setDeviceAddress(String deviceAddress);
+  public void setDeviceAddress(String deviceAddress);
 
 }

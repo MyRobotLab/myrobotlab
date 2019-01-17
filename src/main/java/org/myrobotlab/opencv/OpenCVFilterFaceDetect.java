@@ -58,232 +58,232 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetect.class);
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetect.class);
 
-	CvMemStorage storage = null;
-	public CvHaarClassifierCascade cascade = null; // TODO - was static
+  CvMemStorage storage = null;
+  public CvHaarClassifierCascade cascade = null; // TODO - was static
 
-	/**
-	 * our default classifier - pre-trained
-	 */
-	public String cascadeDir = "haarcascades";
-	public String cascadeFile = "haarcascade_frontalface_alt2.xml";
+  /**
+   * our default classifier - pre-trained
+   */
+  public String cascadeDir = "haarcascades";
+  public String cascadeFile = "haarcascade_frontalface_alt2.xml";
 
-	/**
-	 * bounding boxes of faces
-	 */
-	ArrayList<Rectangle> bb = null;
-	int i;
-	double scaleFactor = 1.1;
-	int minNeighbors = 1;
+  /**
+   * bounding boxes of faces
+   */
+  ArrayList<Rectangle> bb = null;
+  int i;
+  double scaleFactor = 1.1;
+  int minNeighbors = 1;
 
-	// public int stablizedFrameCount = 10;
-	public int minFaceFrames = 10;
-	public int minEmptyFrames = 10;
-	public int firstFaceFrame = 0;
-	public int firstEmptyFrame = 0;
-	public int faceCnt = 0;
-	public int lastFaceCnt = 0;
+  // public int stablizedFrameCount = 10;
+  public int minFaceFrames = 10;
+  public int minEmptyFrames = 10;
+  public int firstFaceFrame = 0;
+  public int firstEmptyFrame = 0;
+  public int faceCnt = 0;
+  public int lastFaceCnt = 0;
 
-	public static final String STATE_LOST_TRACKING = "STATE_LOST_TRACKING";
-	public static final String STATE_LOSING_TRACKING = "STATE_LOSING_TRACKING";
-	public static final String STATE_DETECTING_FACE = "STATE_DETECTING_FACE";
-	public static final String STATE_DETECTED_FACE = "STATE_DETECTED_FACE";
+  public static final String STATE_LOST_TRACKING = "STATE_LOST_TRACKING";
+  public static final String STATE_LOSING_TRACKING = "STATE_LOSING_TRACKING";
+  public static final String STATE_DETECTING_FACE = "STATE_DETECTING_FACE";
+  public static final String STATE_DETECTED_FACE = "STATE_DETECTED_FACE";
 
-	/**
-	 * Begin Recognition - which is just a sub-classification of "face"(detection)
-	 */
-	public String trainingDir = "training" + File.separator + "_faces";
+  /**
+   * Begin Recognition - which is just a sub-classification of "face"(detection)
+   */
+  public String trainingDir = "training" + File.separator + "_faces";
 
-	private String state = STATE_LOST_TRACKING;
-	int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default
-	// int option = 0; // default
+  private String state = STATE_LOST_TRACKING;
+  int option = CV_HAAR_DO_CANNY_PRUNING | CV_HAAR_FIND_BIGGEST_OBJECT; // default
+  // int option = 0; // default
 
-	public OpenCVFilterFaceDetect(String name) {
-		super(name);
-	}
+  public OpenCVFilterFaceDetect(String name) {
+    super(name);
+  }
 
-	/**
-	 * causes flat regions (no lines) to be skipped
-	 */
-	public void addOptionCannyPruning() {
-		option |= CV_HAAR_DO_CANNY_PRUNING;
-	}
+  /**
+   * causes flat regions (no lines) to be skipped
+   */
+  public void addOptionCannyPruning() {
+    option |= CV_HAAR_DO_CANNY_PRUNING;
+  }
 
-	public void addOptionRoughSearch() {
-		option |= CV_HAAR_DO_ROUGH_SEARCH;
-	}
+  public void addOptionRoughSearch() {
+    option |= CV_HAAR_DO_ROUGH_SEARCH;
+  }
 
-	public void addOptionFeatureMax() {
-		option |= CV_HAAR_FEATURE_MAX;
-	}
+  public void addOptionFeatureMax() {
+    option |= CV_HAAR_FEATURE_MAX;
+  }
 
-	/**
-	 * tells the detector to return the biggest - hence # of objects will be 1 or
-	 * none
-	 */
-	public void addOptionFindBiggestObject() {
-		option |= CV_HAAR_FIND_BIGGEST_OBJECT;
-	}
+  /**
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
+   */
+  public void addOptionFindBiggestObject() {
+    option |= CV_HAAR_FIND_BIGGEST_OBJECT;
+  }
 
-	public void addOptionMagicVal() {
-		option |= CV_HAAR_MAGIC_VAL;
-	}
+  public void addOptionMagicVal() {
+    option |= CV_HAAR_MAGIC_VAL;
+  }
 
-	public void addOptionScaleImage() {
-		option |= CV_HAAR_SCALE_IMAGE;
-	}
+  public void addOptionScaleImage() {
+    option |= CV_HAAR_SCALE_IMAGE;
+  }
 
-	public void addStageMax() {
-		option |= CV_HAAR_STAGE_MAX;
-	}
+  public void addStageMax() {
+    option |= CV_HAAR_STAGE_MAX;
+  }
 
-	/**
-	 * causes flat regions (no lines) to be skipped
-	 */
-	public void removeOptionCannyPruning() {
-		option &= 0xFF ^ CV_HAAR_DO_CANNY_PRUNING;
-	}
+  /**
+   * causes flat regions (no lines) to be skipped
+   */
+  public void removeOptionCannyPruning() {
+    option &= 0xFF ^ CV_HAAR_DO_CANNY_PRUNING;
+  }
 
-	public void removeOptionRoughSearch() {
-		option &= 0xFF ^ CV_HAAR_DO_ROUGH_SEARCH;
-	}
+  public void removeOptionRoughSearch() {
+    option &= 0xFF ^ CV_HAAR_DO_ROUGH_SEARCH;
+  }
 
-	public void removeOptionFeatureMax() {
-		option &= 0xFF ^ CV_HAAR_FEATURE_MAX;
-	}
+  public void removeOptionFeatureMax() {
+    option &= 0xFF ^ CV_HAAR_FEATURE_MAX;
+  }
 
-	/**
-	 * tells the detector to return the biggest - hence # of objects will be 1 or
-	 * none
-	 */
-	public void removeOptionFindBiggestObject() {
-		option &= 0xFF ^ CV_HAAR_FIND_BIGGEST_OBJECT;
-	}
+  /**
+   * tells the detector to return the biggest - hence # of objects will be 1 or
+   * none
+   */
+  public void removeOptionFindBiggestObject() {
+    option &= 0xFF ^ CV_HAAR_FIND_BIGGEST_OBJECT;
+  }
 
-	public void removeOptionMagicVal() {
-		option &= 0xFF ^ CV_HAAR_MAGIC_VAL;
-	}
+  public void removeOptionMagicVal() {
+    option &= 0xFF ^ CV_HAAR_MAGIC_VAL;
+  }
 
-	public void removeOptionScaleImage() {
-		option &= 0xFF ^ CV_HAAR_SCALE_IMAGE;
-	}
+  public void removeOptionScaleImage() {
+    option &= 0xFF ^ CV_HAAR_SCALE_IMAGE;
+  }
 
-	public void removeStageMax() {
-		option &= 0xFF ^ CV_HAAR_STAGE_MAX;
-	}
+  public void removeStageMax() {
+    option &= 0xFF ^ CV_HAAR_STAGE_MAX;
+  }
 
-	public void setOption(int option) {
-		this.option = option;
-	}
+  public void setOption(int option) {
+    this.option = option;
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// Allocate the memory storage TODO make this globalData
-		if (storage == null) {
-			storage = cvCreateMemStorage(0);
-		}
+  @Override
+  public void imageChanged(IplImage image) {
+    // Allocate the memory storage TODO make this globalData
+    if (storage == null) {
+      storage = cvCreateMemStorage(0);
+    }
 
-		if (cascade == null) {
-			// Preload the opencv_objdetect module to work around a known bug.
-			Loader.load(opencv_objdetect.class);
+    if (cascade == null) {
+      // Preload the opencv_objdetect module to work around a known bug.
+      Loader.load(opencv_objdetect.class);
 
-			log.info("Starting new classifier {}", cascadeFile);
-			cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
+      log.info("Starting new classifier {}", cascadeFile);
+      cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
 
-			if (cascade == null) {
-				log.error("Could not load classifier cascade");
-			}
-		}
+      if (cascade == null) {
+        log.error("Could not load classifier cascade");
+      }
+    }
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
+  @Override
+  public IplImage process(IplImage image) {
 
-		bb = new ArrayList<Rectangle>();
+    bb = new ArrayList<Rectangle>();
 
-		// Clear the memory storage which was used before
-		cvClearMemStorage(storage);
+    // Clear the memory storage which was used before
+    cvClearMemStorage(storage);
 
-		// Find whether the cascade is loaded, to find the faces. If yes, then:
-		if (cascade != null) {
-			CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor, minNeighbors, option);
-			if (faces != null) {
-				faceCnt = faces.total();
-				for (i = 0; i < faceCnt; i++) {
-					try {
+    // Find whether the cascade is loaded, to find the faces. If yes, then:
+    if (cascade != null) {
+      CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor, minNeighbors, option);
+      if (faces != null) {
+        faceCnt = faces.total();
+        for (i = 0; i < faceCnt; i++) {
+          try {
 
-						CvRect r = new CvRect(cvGetSeqElem(faces, i));
-						bb.add(new Rectangle(r.x(), r.y(), r.width(), r.height()));
-						data.putBoundingBoxArray(bb);
-						r.close();
-					} catch (Exception e) {
-					}
-				}
-			}
-		} else {
-			log.info("Creating and loading new classifier instance {}", cascadeFile);
-			cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
-		}
+            CvRect r = new CvRect(cvGetSeqElem(faces, i));
+            bb.add(new Rectangle(r.x(), r.y(), r.width(), r.height()));
+            data.putBoundingBoxArray(bb);
+            r.close();
+          } catch (Exception e) {
+          }
+        }
+      }
+    } else {
+      log.info("Creating and loading new classifier instance {}", cascadeFile);
+      cascade = new CvHaarClassifierCascade(cvLoad(String.format("%s/%s", cascadeDir, cascadeFile)));
+    }
 
-		switch (state) {
-		case STATE_LOST_TRACKING:
-			if (faceCnt > 0) {
-				firstFaceFrame = opencv.getFrameIndex();
-				state = STATE_DETECTING_FACE;
-				broadcastFilterState();
-			}
-			break;
-		case STATE_DETECTING_FACE:
-			if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
-				state = STATE_DETECTED_FACE;
-				// broadcastFilterState();
-			} else if (faceCnt == 0) {
-				firstFaceFrame = opencv.getFrameIndex();
-			}
-			break;
-		case STATE_DETECTED_FACE:
-			if (faceCnt == 0) {
-				state = STATE_LOSING_TRACKING;
-				firstFaceFrame = opencv.getFrameIndex();
-				broadcastFilterState();
-			}
-			break;
+    switch (state) {
+      case STATE_LOST_TRACKING:
+        if (faceCnt > 0) {
+          firstFaceFrame = opencv.getFrameIndex();
+          state = STATE_DETECTING_FACE;
+          broadcastFilterState();
+        }
+        break;
+      case STATE_DETECTING_FACE:
+        if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
+          state = STATE_DETECTED_FACE;
+          // broadcastFilterState();
+        } else if (faceCnt == 0) {
+          firstFaceFrame = opencv.getFrameIndex();
+        }
+        break;
+      case STATE_DETECTED_FACE:
+        if (faceCnt == 0) {
+          state = STATE_LOSING_TRACKING;
+          firstFaceFrame = opencv.getFrameIndex();
+          broadcastFilterState();
+        }
+        break;
 
-		case STATE_LOSING_TRACKING:
-			if (faceCnt == 0 && opencv.getFrameIndex() - firstEmptyFrame > minEmptyFrames) {
-				state = STATE_LOST_TRACKING;
-				// broadcastFilterState();
-			} else if (faceCnt > 0) {
-				firstEmptyFrame = opencv.getFrameIndex();
-			}
-			break;
-		default:
-			log.error("invalid state");
-			break;
-		}
-		// face detection events
-		if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
+      case STATE_LOSING_TRACKING:
+        if (faceCnt == 0 && opencv.getFrameIndex() - firstEmptyFrame > minEmptyFrames) {
+          state = STATE_LOST_TRACKING;
+          // broadcastFilterState();
+        } else if (faceCnt > 0) {
+          firstEmptyFrame = opencv.getFrameIndex();
+        }
+        break;
+      default:
+        log.error("invalid state");
+        break;
+    }
+    // face detection events
+    if (faceCnt > 0 && opencv.getFrameIndex() - firstFaceFrame > minFaceFrames) {
 
-		} else {
+    } else {
 
-		}
-		lastFaceCnt = faceCnt;
-		return image;
-	}
+    }
+    lastFaceCnt = faceCnt;
+    return image;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		if (bb.size() > 0) {
-			for (int i = 0; i < bb.size(); ++i) {
-				Rectangle rect = bb.get(i);
-				graphics.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
-			}
-		}
-		return image;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    if (bb.size() > 0) {
+      for (int i = 0; i < bb.size(); ++i) {
+        Rectangle rect = bb.get(i);
+        graphics.drawRect((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
+      }
+    }
+    return image;
+  }
 
 }

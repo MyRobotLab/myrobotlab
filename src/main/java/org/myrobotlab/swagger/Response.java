@@ -1,6 +1,6 @@
 package org.myrobotlab.swagger;
 
 public class Response {
-	String description;
-	Schema schema;
+  String description;
+  Schema schema;
 }

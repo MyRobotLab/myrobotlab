@@ -42,80 +42,78 @@ import org.myrobotlab.mapper.sim.World;
  * The SwingGui for controlling the world.
  */
 public class WorldControlGUI extends JPanel implements ActionListener {
-	private static final long serialVersionUID = 1L;
-	World world;
-	Simulator simulator;
-	AgentFollower agentFollower;
-	Font smallFont;
+  private static final long serialVersionUID = 1L;
+  World world;
+  Simulator simulator;
+  AgentFollower agentFollower;
+  Font smallFont;
 
-	public WorldControlGUI(World world, Simulator simulator) {
-		this.world = world;
-		smallFont = new Font("Arial", Font.PLAIN, 11);
-		createGUI();
-		agentFollower = new AgentFollower(world, (SimpleAgent) simulator.getAgentList().get(0));
-	}
+  public WorldControlGUI(World world, Simulator simulator) {
+    this.world = world;
+    smallFont = new Font("Arial", Font.PLAIN, 11);
+    createGUI();
+    agentFollower = new AgentFollower(world, (SimpleAgent) simulator.getAgentList().get(0));
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent actionEvent) {
-		String action = actionEvent.getActionCommand();
-		if (action.equals("topview")) {
-			agentFollower.suspend();
-			world.changeViewPoint(World.VIEW_FROM_TOP, null);
-		} else if (action.equals("eastview")) {
-			agentFollower.suspend();
-			world.changeViewPoint(World.VIEW_FROM_EAST, null);
-		} else if (action.equals("followfar")) {
-			agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT);
-			agentFollower.resume();
-		} else if (action.equals("follownear")) {
-			agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT_NEAR);
-			agentFollower.resume();
-		} else if (action.equals("followside")) {
-			agentFollower.setViewPointType(World.VIEW_AGENT_SIDE);
-			agentFollower.resume();
-		}
-	}
+  @Override
+  public void actionPerformed(ActionEvent actionEvent) {
+    String action = actionEvent.getActionCommand();
+    if (action.equals("topview")) {
+      agentFollower.suspend();
+      world.changeViewPoint(World.VIEW_FROM_TOP, null);
+    } else if (action.equals("eastview")) {
+      agentFollower.suspend();
+      world.changeViewPoint(World.VIEW_FROM_EAST, null);
+    } else if (action.equals("followfar")) {
+      agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT);
+      agentFollower.resume();
+    } else if (action.equals("follownear")) {
+      agentFollower.setViewPointType(World.VIEW_ABOVE_AGENT_NEAR);
+      agentFollower.resume();
+    } else if (action.equals("followside")) {
+      agentFollower.setViewPointType(World.VIEW_AGENT_SIDE);
+      agentFollower.resume();
+    }
+  }
 
-	/** helper function */
-	private void createButton(Container container, String label, String action) {
-		JButton b = new JButton(label);
-		b.setFont(smallFont);
-		b.setActionCommand(action);
-		b.addActionListener(this);
-		container.add(b);
-	}
+  /** helper function */
+  private void createButton(Container container, String label, String action) {
+    JButton b = new JButton(label);
+    b.setFont(smallFont);
+    b.setActionCommand(action);
+    b.addActionListener(this);
+    container.add(b);
+  }
 
-	void createGUI() {
-		/*
-		 * setBorder(BorderFactory.createCompoundBorder(
-		 * BorderFactory.createTitledBorder("World"),
-		 * BorderFactory.createEmptyBorder(5,5,5,5)));
-		 */
-		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+  void createGUI() {
+    /*
+     * setBorder(BorderFactory.createCompoundBorder(
+     * BorderFactory.createTitledBorder("World"),
+     * BorderFactory.createEmptyBorder(5,5,5,5)));
+     */
+    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-		// View Buttons
-		JPanel panel1 = new JPanel();
-		panel1.setLayout(new BoxLayout(panel1, BoxLayout.Y_AXIS));
-		panel1.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("View From:"),
-				BorderFactory.createEmptyBorder()));
-		JPanel panel1_1 = new JPanel();
-		panel1_1.setLayout(new BoxLayout(panel1_1, BoxLayout.X_AXIS));
-		createButton(panel1_1, "top", "topview");
-		createButton(panel1_1, "side", "eastview");
-		panel1.add(panel1_1);
+    // View Buttons
+    JPanel panel1 = new JPanel();
+    panel1.setLayout(new BoxLayout(panel1, BoxLayout.Y_AXIS));
+    panel1.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("View From:"), BorderFactory.createEmptyBorder()));
+    JPanel panel1_1 = new JPanel();
+    panel1_1.setLayout(new BoxLayout(panel1_1, BoxLayout.X_AXIS));
+    createButton(panel1_1, "top", "topview");
+    createButton(panel1_1, "side", "eastview");
+    panel1.add(panel1_1);
 
-		JPanel panel2 = new JPanel();
-		panel2.setLayout(new BoxLayout(panel2, BoxLayout.Y_AXIS));
-		panel2.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Follow:"),
-				BorderFactory.createEmptyBorder()));
-		JPanel panel2_1 = new JPanel();
-		panel2_1.setLayout(new BoxLayout(panel2_1, BoxLayout.X_AXIS));
-		createButton(panel2_1, "far", "followfar");
-		createButton(panel2_1, "near", "follownear");
-		createButton(panel2_1, "side", "followside");
-		panel2.add(panel2_1);
-		add(panel1);
-		add(panel2);
+    JPanel panel2 = new JPanel();
+    panel2.setLayout(new BoxLayout(panel2, BoxLayout.Y_AXIS));
+    panel2.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Follow:"), BorderFactory.createEmptyBorder()));
+    JPanel panel2_1 = new JPanel();
+    panel2_1.setLayout(new BoxLayout(panel2_1, BoxLayout.X_AXIS));
+    createButton(panel2_1, "far", "followfar");
+    createButton(panel2_1, "near", "follownear");
+    createButton(panel2_1, "side", "followside");
+    panel2.add(panel2_1);
+    add(panel1);
+    add(panel2);
 
-	}
+  }
 }

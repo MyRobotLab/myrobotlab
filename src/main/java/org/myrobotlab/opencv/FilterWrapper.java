@@ -16,13 +16,13 @@ import java.io.Serializable;
  */
 public class FilterWrapper implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	public final String name;
-	public final OpenCVFilter filter;
+  private static final long serialVersionUID = 1L;
+  public final String name;
+  public final OpenCVFilter filter;
 
-	public FilterWrapper(String name, OpenCVFilter filter) {
-		this.name = name;
-		this.filter = filter;
-	}
+  public FilterWrapper(String name, OpenCVFilter filter) {
+    this.name = name;
+    this.filter = filter;
+  }
 
 }

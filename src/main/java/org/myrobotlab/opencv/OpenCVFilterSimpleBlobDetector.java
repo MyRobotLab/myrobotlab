@@ -49,98 +49,98 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSimpleBlobDetector.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSimpleBlobDetector.class.getCanonicalName());
 
-	public ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
-	transient CvFont font = new CvFont();
+  public ArrayList<Point2df> pointsToPublish = new ArrayList<Point2df>();
+  transient CvFont font = new CvFont();
 
-	public OpenCVFilterSimpleBlobDetector() {
-		super();
-		cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1.0, 1.0);
-	}
+  public OpenCVFilterSimpleBlobDetector() {
+    super();
+    cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1.0, 1.0);
+  }
 
-	public OpenCVFilterSimpleBlobDetector(String name) {
-		super(name);
-		// TODO: what / when should we initialize this ?
-		cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1.0, 1.0);
-	}
+  public OpenCVFilterSimpleBlobDetector(String name) {
+    super(name);
+    // TODO: what / when should we initialize this ?
+    cvInitFont(font, CV_FONT_HERSHEY_PLAIN, 1.0, 1.0);
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
-		// TODO: track an array of blobs , not just one.
-		SimpleBlobDetector o = new SimpleBlobDetector();
+  @Override
+  public IplImage process(IplImage image) {
+    // TODO: track an array of blobs , not just one.
+    SimpleBlobDetector o = new SimpleBlobDetector();
 
-		// KeyPoint point = new KeyPoint();
-		KeyPointVector pv = new KeyPointVector();
+    // KeyPoint point = new KeyPoint();
+    KeyPointVector pv = new KeyPointVector();
 
-		// TODO: i'd like to detect all the points at once..
-		// can i pass an array or something like that? hmm.
-		// TODO: this is null?! we blow up! (after javacv upgrade)
+    // TODO: i'd like to detect all the points at once..
+    // can i pass an array or something like that? hmm.
+    // TODO: this is null?! we blow up! (after javacv upgrade)
 
-		o.detect(new Mat(image), pv);
+    o.detect(new Mat(image), pv);
 
-		// close this o/w you could leak something i guess?
-		o.close();
+    // close this o/w you could leak something i guess?
+    o.close();
 
-		// System.out.println(point.toString());
-		if (pv.size() == 0) {
-			log.error("no key points");
-			return image;
-		}
+    // System.out.println(point.toString());
+    if (pv.size() == 0) {
+      log.error("no key points");
+      return image;
+    }
 
-		// FIXME - go through for loop to get them all ?
-		KeyPoint point = pv.get(0);
+    // FIXME - go through for loop to get them all ?
+    KeyPoint point = pv.get(0);
 
-		float x = point.pt().x();
-		float y = point.pt().y();
-		if (x == 0 && y == 0) {
-			// ignore the zero / zero point
-			return image;
-		}
-		// pointsToPublish.clear();
-		// min distance to an existing point ?
-		// up to 25 pixels away?
-		double minDist = 20.0;
-		// Is this a new blob? or an old blob?
-		boolean dupPoint = false;
-		for (Point2df p : pointsToPublish) {
-			double dist = Math.sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y));
-			if (dist < minDist) {
-				// we already have this point ?
-				dupPoint = true;
-				break;
-			}
-		}
+    float x = point.pt().x();
+    float y = point.pt().y();
+    if (x == 0 && y == 0) {
+      // ignore the zero / zero point
+      return image;
+    }
+    // pointsToPublish.clear();
+    // min distance to an existing point ?
+    // up to 25 pixels away?
+    double minDist = 20.0;
+    // Is this a new blob? or an old blob?
+    boolean dupPoint = false;
+    for (Point2df p : pointsToPublish) {
+      double dist = Math.sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y));
+      if (dist < minDist) {
+        // we already have this point ?
+        dupPoint = true;
+        break;
+      }
+    }
 
-		if (!dupPoint) {
-			pointsToPublish.add(new Point2df(x, y));
-			log.info("There are " + pointsToPublish.size() + " blobs.");
-		}
-		return image;
-	}
+    if (!dupPoint) {
+      pointsToPublish.add(new Point2df(x, y));
+      log.info("There are " + pointsToPublish.size() + " blobs.");
+    }
+    return image;
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+  }
 
-	public void clearPoints() {
-		pointsToPublish.clear();
-	}
+  public void clearPoints() {
+    pointsToPublish.clear();
+  }
 
-	public int getNumberOfBlobs() {
-		return pointsToPublish.size();
-	}
+  public int getNumberOfBlobs() {
+    return pointsToPublish.size();
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
 
-		for (int i = 0; i < pointsToPublish.size(); ++i) {
-			Point2df point = pointsToPublish.get(i);
-			graphics.drawOval((int) point.x, (int) point.y, 5, 5);
-		}
-		graphics.drawString(String.format("Blobs Found: %d", pointsToPublish.size()), 20, 40);
-		return image;
-	}
+    for (int i = 0; i < pointsToPublish.size(); ++i) {
+      Point2df point = pointsToPublish.get(i);
+      graphics.drawOval((int) point.x, (int) point.y, 5, 5);
+    }
+    graphics.drawString(String.format("Blobs Found: %d", pointsToPublish.size()), 20, 40);
+    return image;
+  }
 }

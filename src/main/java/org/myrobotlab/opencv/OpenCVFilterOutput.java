@@ -34,36 +34,36 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterOutput extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterOutput.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterOutput.class.getCanonicalName());
 
-	// display related
-	Graphics2D graphics = null;
+  // display related
+  Graphics2D graphics = null;
 
-	public OpenCVFilterOutput() {
-		super();
-	}
+  public OpenCVFilterOutput() {
+    super();
+  }
 
-	public OpenCVFilterOutput(String name) {
-		super(name);
-	}
+  public OpenCVFilterOutput(String name) {
+    super(name);
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		// TODO Auto-generated method stub
+  @Override
+  public void imageChanged(IplImage image) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
+  @Override
+  public IplImage process(IplImage image) {
 
-		return image;
-	}
+    return image;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		return image;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 
 }

@@ -8,12 +8,12 @@ package org.myrobotlab.kinematics;
  *
  */
 public class PositionData {
-	public String armName;
-	public Point position;
+  public String armName;
+  public Point position;
 
-	public PositionData(String armName, Point position) {
-		this.armName = armName;
-		this.position = position;
-	}
+  public PositionData(String armName, Point position) {
+    this.armName = armName;
+    this.position = position;
+  }
 
 }

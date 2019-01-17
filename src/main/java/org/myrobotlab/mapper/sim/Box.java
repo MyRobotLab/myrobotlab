@@ -40,64 +40,70 @@ import com.sun.j3d.utils.geometry.Primitive;
  */
 public class Box extends BlockWorldObject {
 
-	/** Object dimension.s */
-	float sx, sy, sz;
+  /** Object dimension.s */
+  float sx, sy, sz;
 
-	/**
-	 * Constructs a box object.
-	 * 
-	 * @param pos    position of the center of the object.
-	 * @param extent - extent in the three directions.
-	 * @param wd     EnvironmentDescription for global parameters.
-	 */
-	public Box(Vector3d pos, Vector3f extent, EnvironmentDescription wd) {
-		this(pos, extent, wd, wd.boxColor);
-	}
+  /**
+   * Constructs a box object.
+   * 
+   * @param pos
+   *          position of the center of the object.
+   * @param extent
+   *          - extent in the three directions.
+   * @param wd
+   *          EnvironmentDescription for global parameters.
+   */
+  public Box(Vector3d pos, Vector3f extent, EnvironmentDescription wd) {
+    this(pos, extent, wd, wd.boxColor);
+  }
 
-	/**
-	 * Constructs a box object.
-	 * 
-	 * @param pos    position of the center of the object.
-	 * @param extent - extent in the three directions.
-	 * @param wd     EnvironmentDescription for global parameters.
-	 * @param color  color of the object.
-	 */
-	public Box(Vector3d pos, Vector3f extent, EnvironmentDescription wd, Color3f color) {
-		this.sx = extent.x;
-		this.sy = extent.y;
-		this.sz = extent.z;
-		// put it on the floor
-		pos.y += sy / 2;
-		create3D(wd, color);
-		translateTo(pos);
-	}
+  /**
+   * Constructs a box object.
+   * 
+   * @param pos
+   *          position of the center of the object.
+   * @param extent
+   *          - extent in the three directions.
+   * @param wd
+   *          EnvironmentDescription for global parameters.
+   * @param color
+   *          color of the object.
+   */
+  public Box(Vector3d pos, Vector3f extent, EnvironmentDescription wd, Color3f color) {
+    this.sx = extent.x;
+    this.sy = extent.y;
+    this.sz = extent.z;
+    // put it on the floor
+    pos.y += sy / 2;
+    create3D(wd, color);
+    translateTo(pos);
+  }
 
-	/** Create the 3d object */
-	protected void create3D(EnvironmentDescription wd, Color3f color) {
-		// create the box using a primitive
-		super.create3D();
-		Material mat = new Material();
-		appearance.setMaterial(mat);
+  /** Create the 3d object */
+  protected void create3D(EnvironmentDescription wd, Color3f color) {
+    // create the box using a primitive
+    super.create3D();
+    Material mat = new Material();
+    appearance.setMaterial(mat);
 
-		int flags = Primitive.GEOMETRY_NOT_SHARED | Primitive.ENABLE_GEOMETRY_PICKING | Primitive.GENERATE_NORMALS;
-		flags |= Primitive.ENABLE_APPEARANCE_MODIFY;
-		// com.sun.j3d.utils.geometry.Box box =new
-		// com.sun.j3d.utils.geometry.Box(sx,sy,sz,flags,appearance,0);
-		// bug in j3d api doc . must give half values.
-		com.sun.j3d.utils.geometry.Box box = new com.sun.j3d.utils.geometry.Box(sx / 2, sy / 2, sz / 2, flags,
-				appearance, 0);
-		// Enable sensor detection
-		box.setPickable(true);
+    int flags = Primitive.GEOMETRY_NOT_SHARED | Primitive.ENABLE_GEOMETRY_PICKING | Primitive.GENERATE_NORMALS;
+    flags |= Primitive.ENABLE_APPEARANCE_MODIFY;
+    // com.sun.j3d.utils.geometry.Box box =new
+    // com.sun.j3d.utils.geometry.Box(sx,sy,sz,flags,appearance,0);
+    // bug in j3d api doc . must give half values.
+    com.sun.j3d.utils.geometry.Box box = new com.sun.j3d.utils.geometry.Box(sx / 2, sy / 2, sz / 2, flags, appearance, 0);
+    // Enable sensor detection
+    box.setPickable(true);
 
-		// define the boundsfFor collision detection
-		BoundingBox bounds = new BoundingBox();
-		bounds.setUpper(sx / 2, sy / 2, sz / 2);
-		bounds.setLower(-sx / 2, -sy / 2, -sz / 2);
-		setBounds(bounds);
+    // define the boundsfFor collision detection
+    BoundingBox bounds = new BoundingBox();
+    bounds.setUpper(sx / 2, sy / 2, sz / 2);
+    bounds.setLower(-sx / 2, -sy / 2, -sz / 2);
+    setBounds(bounds);
 
-		setColor(color);
-		addChild(box);
+    setColor(color);
+    addChild(box);
 
-	}
+  }
 
 }

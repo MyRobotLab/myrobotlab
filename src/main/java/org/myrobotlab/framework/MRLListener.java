@@ -49,69 +49,68 @@ import org.slf4j.Logger;
  *
  */
 public final class MRLListener implements Serializable {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
+  public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
 
-	int _hashCode;
+  int _hashCode;
 
-	/**
-	 * the keyed topic Method - when this method is invoked listeners are sent
-	 * messages with return data
-	 */
-	public String topicMethod;
+  /**
+   * the keyed topic Method - when this method is invoked listeners are sent
+   * messages with return data
+   */
+  public String topicMethod;
 
-	/**
-	 * globally unique name of Service the a topic message will be sent to
-	 */
-	public String callbackName;
+  /**
+   * globally unique name of Service the a topic message will be sent to
+   */
+  public String callbackName;
 
-	/**
-	 * the method which will be invoked
-	 */
-	public String callbackMethod;
+  /**
+   * the method which will be invoked
+   */
+  public String callbackMethod;
 
-	public MRLListener(String topicMethod, String callbackName, String callbackMethod) {
-		this.topicMethod = topicMethod;
-		this.callbackMethod = callbackMethod;
-		this.callbackName = callbackName;
-	}
+  public MRLListener(String topicMethod, String callbackName, String callbackMethod) {
+    this.topicMethod = topicMethod;
+    this.callbackMethod = callbackMethod;
+    this.callbackName = callbackName;
+  }
 
-	final public boolean equals(final MRLListener other) {
-		if (callbackName.equals(other.callbackName) && callbackMethod.equals(other.callbackMethod)
-				&& topicMethod.equals(other.topicMethod)) {
-			return true;
-		}
-		return false;
-	}
+  final public boolean equals(final MRLListener other) {
+    if (callbackName.equals(other.callbackName) && callbackMethod.equals(other.callbackMethod) && topicMethod.equals(other.topicMethod)) {
+      return true;
+    }
+    return false;
+  }
 
-	@Override
-	final public int hashCode() {
-		if (_hashCode == 0) {
-			_hashCode = 37 + topicMethod.hashCode() + callbackName.hashCode() + callbackMethod.hashCode();
-		}
+  @Override
+  final public int hashCode() {
+    if (_hashCode == 0) {
+      _hashCode = 37 + topicMethod.hashCode() + callbackName.hashCode() + callbackMethod.hashCode();
+    }
 
-		return _hashCode;
-	}
+    return _hashCode;
+  }
 
-	@Override
-	public String toString() {
-		return String.format("%s -will activate-> %s.%s", topicMethod, callbackName, callbackMethod);
-	}
+  @Override
+  public String toString() {
+    return String.format("%s -will activate-> %s.%s", topicMethod, callbackName, callbackMethod);
+  }
 
-	public static void main(String args[]) throws InterruptedException, IOException {
-		LoggingFactory.init(Level.DEBUG);
+  public static void main(String args[]) throws InterruptedException, IOException {
+    LoggingFactory.init(Level.DEBUG);
 
-		try {
-			// MRLListener listener = new MRLListener("thrower/pitch");
+    try {
+      // MRLListener listener = new MRLListener("thrower/pitch");
 
-			// assert listener.name = thrower
-			// assert listener.outMethdod = onPitch
-			// log.info(listener.toString());
+      // assert listener.name = thrower
+      // assert listener.outMethdod = onPitch
+      // log.info(listener.toString());
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

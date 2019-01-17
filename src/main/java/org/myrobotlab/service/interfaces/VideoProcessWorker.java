@@ -18,38 +18,38 @@ package org.myrobotlab.service.interfaces;
  */
 public class VideoProcessWorker implements Runnable {
 
-	VideoProcessor videoProcessor;
-	boolean processing = false;
-	transient Thread worker;
+  VideoProcessor videoProcessor;
+  boolean processing = false;
+  transient Thread worker;
 
-	public VideoProcessWorker(VideoProcessor videoProcessor) {
-		this.videoProcessor = videoProcessor;
-	}
+  public VideoProcessWorker(VideoProcessor videoProcessor) {
+    this.videoProcessor = videoProcessor;
+  }
 
-	// throw from video processing method
-	public void run() {
-		processing = true;
-		while (processing) {
-			videoProcessor.processVideo();
-		}
-	}
+  // throw from video processing method
+  public void run() {
+    processing = true;
+    while (processing) {
+      videoProcessor.processVideo();
+    }
+  }
 
-	public void start() {
-		if (worker == null) {
-			worker = new Thread(this, videoProcessor.getName() + ".videoProcessor");
-			worker.start();
-		}
-	}
+  public void start() {
+    if (worker == null) {
+      worker = new Thread(this, videoProcessor.getName() + ".videoProcessor");
+      worker.start();
+    }
+  }
 
-	public void stop() {
-		processing = false;
-		if (worker != null) {
-			worker.interrupt();
-		}
-		worker = null;
-	}
+  public void stop() {
+    processing = false;
+    if (worker != null) {
+      worker.interrupt();
+    }
+    worker = null;
+  }
 
-	public boolean isProcessing() {
-		return worker != null;
-	}
+  public boolean isProcessing() {
+    return worker != null;
+  }
 }

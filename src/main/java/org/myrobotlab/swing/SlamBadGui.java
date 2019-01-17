@@ -34,32 +34,32 @@ import org.myrobotlab.service.SwingGui;
 
 public class SlamBadGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
+  static final long serialVersionUID = 1L;
 
-	SlamBad mySimbad = null;
+  SlamBad mySimbad = null;
 
-	public SlamBadGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		mySimbad = (SlamBad) Runtime.getService(boundServiceName);
-	}
+  public SlamBadGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    mySimbad = (SlamBad) Runtime.getService(boundServiceName);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void unsubscribeGui() {
+  }
 
-	// FIXME - is get/set state interact with Runtime registry ???
-	// it probably should
-	public void onState(SlamBad c) {
-	}
+  // FIXME - is get/set state interact with Runtime registry ???
+  // it probably should
+  public void onState(SlamBad c) {
+  }
 
 }

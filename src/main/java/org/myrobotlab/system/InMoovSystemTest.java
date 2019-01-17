@@ -17,22 +17,22 @@ import org.myrobotlab.service.Runtime;
 @Ignore
 public class InMoovSystemTest {
 
-	private String inmoovScript = "./InMoov/InMoov.py";
+  private String inmoovScript = "./InMoov/InMoov.py";
 
-	@Test
-	public void testInMoovBuild() throws IOException {
+  @Test
+  public void testInMoovBuild() throws IOException {
 
-		// setup some logging.. etc.
-		LoggingFactory.init("INFO");
-		// make sure the inmoov zip is installed locally
-		// Runtime.install();
+    // setup some logging.. etc.
+    LoggingFactory.init("INFO");
+    // make sure the inmoov zip is installed locally
+    // Runtime.install();
 
-		Python python = (Python) Runtime.createAndStart("python", "Python");
-		python.execFile(inmoovScript);
-		System.err.println("Press any key to exit.");
-		System.out.flush();
-		System.in.read();
-		System.err.println("Ahhhh... the any key!");
-		System.err.flush();
-	}
+    Python python = (Python) Runtime.createAndStart("python", "Python");
+    python.execFile(inmoovScript);
+    System.err.println("Press any key to exit.");
+    System.out.flush();
+    System.in.read();
+    System.err.println("Ahhhh... the any key!");
+    System.err.flush();
+  }
 }

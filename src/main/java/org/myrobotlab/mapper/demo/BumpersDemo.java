@@ -35,88 +35,88 @@ import org.myrobotlab.mapper.sim.RobotFactory;
 /** A Bumping demo. */
 public class BumpersDemo extends Demo {
 
-	public class Robot extends Agent {
+  public class Robot extends Agent {
 
-		RangeSensorBelt bumpers;
-		int backcount;
+    RangeSensorBelt bumpers;
+    int backcount;
 
-		public Robot(Vector3d position, String name) {
-			super(position, name);
-			// Add sensors
-			bumpers = RobotFactory.addBumperBeltSensor(this, 16);
-			backcount = 0;
-		}
+    public Robot(Vector3d position, String name) {
+      super(position, name);
+      // Add sensors
+      bumpers = RobotFactory.addBumperBeltSensor(this, 16);
+      backcount = 0;
+    }
 
-		/** Initialize Agent's Behavior */
-		@Override
-		public void initBehavior() {
-			// nothing particular in this case
-		}
+    /** Initialize Agent's Behavior */
+    @Override
+    public void initBehavior() {
+      // nothing particular in this case
+    }
 
-		int max(int a, int b) {
-			if (a > b)
-				return a;
-			else
-				return b;
-		}
+    int max(int a, int b) {
+      if (a > b)
+        return a;
+      else
+        return b;
+    }
 
-		/** Perform one step of Agent's Behavior */
-		@Override
-		public void performBehavior() {
-			backcount--;
-			if (backcount <= 0) {
-				if (collisionDetected()) {
-					setTranslationalVelocity((0.5 - Math.random()));
-					setRotationalVelocity((0.5 - Math.random()));
-					backcount = 20;
-				} else if (bumpers.oneHasHit()) {
-					int front = bumpers.getFrontQuadrantHits();
-					int left = bumpers.getLeftQuadrantHits();
-					int right = bumpers.getRightQuadrantHits();
-					int back = bumpers.getBackQuadrantHits();
-					int m = max(max(front, back), max(left, right));
+    /** Perform one step of Agent's Behavior */
+    @Override
+    public void performBehavior() {
+      backcount--;
+      if (backcount <= 0) {
+        if (collisionDetected()) {
+          setTranslationalVelocity((0.5 - Math.random()));
+          setRotationalVelocity((0.5 - Math.random()));
+          backcount = 20;
+        } else if (bumpers.oneHasHit()) {
+          int front = bumpers.getFrontQuadrantHits();
+          int left = bumpers.getLeftQuadrantHits();
+          int right = bumpers.getRightQuadrantHits();
+          int back = bumpers.getBackQuadrantHits();
+          int m = max(max(front, back), max(left, right));
 
-					double r = 0, t = 0;
-					if (front == m) {
-						r = 1.5 - Math.random() * 3;
-						t = -0.5;
-					} else if (left == m) {
-						r = -1;
-						t = 0;
-					} else if (right == m) {
-						r = 1;
-						t = 0;
-					} else if (back == m) {
-						r = 1.5 - Math.random() * 3;
-						t = 0.5;
-					}
-					setRotationalVelocity(r);
-					setTranslationalVelocity(t);
-					backcount = 20;
-				} else if ((getCounter() % 10) == 0) {
-					setRotationalVelocity(Math.PI / 2 * (0.5 - Math.random()));
-					setTranslationalVelocity(0.5);
-				}
-			}
-		}
-	}
+          double r = 0, t = 0;
+          if (front == m) {
+            r = 1.5 - Math.random() * 3;
+            t = -0.5;
+          } else if (left == m) {
+            r = -1;
+            t = 0;
+          } else if (right == m) {
+            r = 1;
+            t = 0;
+          } else if (back == m) {
+            r = 1.5 - Math.random() * 3;
+            t = 0.5;
+          }
+          setRotationalVelocity(r);
+          setTranslationalVelocity(t);
+          backcount = 20;
+        } else if ((getCounter() % 10) == 0) {
+          setRotationalVelocity(Math.PI / 2 * (0.5 - Math.random()));
+          setTranslationalVelocity(0.5);
+        }
+      }
+    }
+  }
 
-	public BumpersDemo() {
-		setWorldSize(12);
+  public BumpersDemo() {
+    setWorldSize(12);
 
-		boxColor = new Color3f(0.6f, 0.5f, .3f);
+    boxColor = new Color3f(0.6f, 0.5f, .3f);
 
-		add(new Box(new Vector3d(-5, 0, 0), new Vector3f(0.1f, 1, 10), this));
-		add(new Box(new Vector3d(0, 0, -5), new Vector3f(10, 1, 0.1f), this));
-		add(new Box(new Vector3d(5, 0, 0), new Vector3f(0.1f, 1, 10), this));
-		add(new Box(new Vector3d(0, 0, 5), new Vector3f(10, 1, 0.1f), this));
-		add(new Box(new Vector3d(2, 0, 2), new Vector3f(2, 1, 3), this));
-		add(new Box(new Vector3d(-2, 0, -2), new Vector3f(3, 1, 2), this));
+    add(new Box(new Vector3d(-5, 0, 0), new Vector3f(0.1f, 1, 10), this));
+    add(new Box(new Vector3d(0, 0, -5), new Vector3f(10, 1, 0.1f), this));
+    add(new Box(new Vector3d(5, 0, 0), new Vector3f(0.1f, 1, 10), this));
+    add(new Box(new Vector3d(0, 0, 5), new Vector3f(10, 1, 0.1f), this));
+    add(new Box(new Vector3d(2, 0, 2), new Vector3f(2, 1, 3), this));
+    add(new Box(new Vector3d(-2, 0, -2), new Vector3f(3, 1, 2), this));
 
-		add(new Robot(new Vector3d(4, 0, 4), "bump1"));
-		add(new Robot(new Vector3d(4, 0, -4), "bump2"));
-		add(new Robot(new Vector3d(-4, 0, 4), "bump3"));
-		add(new Robot(new Vector3d(-4, 0, -4), "bump4"));
+    add(new Robot(new Vector3d(4, 0, 4), "bump1"));
+    add(new Robot(new Vector3d(4, 0, -4), "bump2"));
+    add(new Robot(new Vector3d(-4, 0, 4), "bump3"));
+    add(new Robot(new Vector3d(-4, 0, -4), "bump4"));
 
-	}
+  }
 }

@@ -38,69 +38,69 @@ import java.awt.image.WritableRaster;
 
 public class Algorithm {
 
-	public final static int INVERT = 0;
+  public final static int INVERT = 0;
 
-	public final static int OUTLINE = 1;
+  public final static int OUTLINE = 1;
 
-	public static Color average(BufferedImage image, Rectangle targetArea) {
-		return average(image, targetArea, 1);
-	}
+  public static Color average(BufferedImage image, Rectangle targetArea) {
+    return average(image, targetArea, 1);
+  }
 
-	public static Color average(BufferedImage image, Rectangle targetArea, int density) {
+  public static Color average(BufferedImage image, Rectangle targetArea, int density) {
 
-		// Assuming that all images have the same dimensions
-		int w = targetArea.width + targetArea.x;
-		int h = targetArea.height + targetArea.y;
+    // Assuming that all images have the same dimensions
+    int w = targetArea.width + targetArea.x;
+    int h = targetArea.height + targetArea.y;
 
-		int sumRed = 0;
-		int sumGreen = 0;
-		int sumBlue = 0;
+    int sumRed = 0;
+    int sumGreen = 0;
+    int sumBlue = 0;
 
-		int cnt = 0;
+    int cnt = 0;
 
-		for (int y = targetArea.y; y < h; y += density)
-			for (int x = targetArea.x; x < w; x += density) {
-				Color c = new Color(image.getRGB(x, y)); // TODO this seems
-				// wholly
-				// inefficient - fix
-				// me
-				sumRed += c.getRed();
-				sumGreen += c.getGreen();
-				sumBlue += c.getBlue();
-				++cnt;
-			}
+    for (int y = targetArea.y; y < h; y += density)
+      for (int x = targetArea.x; x < w; x += density) {
+        Color c = new Color(image.getRGB(x, y)); // TODO this seems
+        // wholly
+        // inefficient - fix
+        // me
+        sumRed += c.getRed();
+        sumGreen += c.getGreen();
+        sumBlue += c.getBlue();
+        ++cnt;
+      }
 
-		Color retColor = new Color(sumRed / cnt, sumGreen / cnt, sumBlue / cnt);
+    Color retColor = new Color(sumRed / cnt, sumGreen / cnt, sumBlue / cnt);
 
-		return retColor;
-	}
+    return retColor;
+  }
 
-	public static BufferedImage average(BufferedImage[] images) {
+  public static BufferedImage average(BufferedImage[] images) {
 
-		int n = images.length;
+    int n = images.length;
 
-		// Assuming that all images have the same dimensions
-		int w = images[0].getWidth();
-		int h = images[0].getHeight();
+    // Assuming that all images have the same dimensions
+    int w = images[0].getWidth();
+    int h = images[0].getHeight();
 
-		BufferedImage average = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+    BufferedImage average = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
 
-		WritableRaster raster = average.getRaster().createCompatibleWritableRaster();
+    WritableRaster raster = average.getRaster().createCompatibleWritableRaster();
 
-		for (int y = 0; y < h; ++y)
-			for (int x = 0; x < w; ++x) {
+    for (int y = 0; y < h; ++y)
+      for (int x = 0; x < w; ++x) {
 
-				float sum = 0.0f;
+        float sum = 0.0f;
 
-				for (int i = 0; i < n; ++i)
-					sum = sum + images[i].getRaster().getSample(x, y, 0);
+        for (int i = 0; i < n; ++i)
+          sum = sum + images[i].getRaster().getSample(x, y, 0);
 
-				raster.setSample(x, y, 0, Math.round(sum / n));
-			}
+        raster.setSample(x, y, 0, Math.round(sum / n));
+      }
 
-		average.setData(raster);
+    average.setData(raster);
 
-		return average;
-	}
+    return average;
+  }
 
 }

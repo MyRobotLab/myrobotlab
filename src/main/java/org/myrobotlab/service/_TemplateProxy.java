@@ -12,48 +12,48 @@ import org.myrobotlab.logging.LoggingFactory;
  **/
 public class _TemplateProxy extends PythonProxy {
 
-	public _TemplateProxy(String n) {
-		super(n);
-	}
+  public _TemplateProxy(String n) {
+    super(n);
+  }
 
-	public Object test(String testString) {
-		return exec("test", new Object[] { (Object) testString });
-	}
+  public Object test(String testString) {
+    return exec("test", new Object[] { (Object) testString });
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
 
-		ServiceType meta = new ServiceType(_TemplateProxy.class.getCanonicalName());
-		meta.addDescription("Template proxy service");
-		meta.setAvailable(false);
-		return PythonProxy.addMetaData(meta); // This is used so that the
-												// dependencies and peers are
-												// automatically added
-	}
+    ServiceType meta = new ServiceType(_TemplateProxy.class.getCanonicalName());
+    meta.addDescription("Template proxy service");
+    meta.setAvailable(false);
+    return PythonProxy.addMetaData(meta); // This is used so that the
+    // dependencies and peers are
+    // automatically added
+  }
 
-	// Required because of Java reflection weirdness
-	public void handshake() {
-		super.handshake();
-	}
+  // Required because of Java reflection weirdness
+  public void handshake() {
+    super.handshake();
+  }
 
-	public static void main(String[] args) {
-		try {
+  public static void main(String[] args) {
+    try {
 
-			LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
-			_TemplateProxy test = (_TemplateProxy) Runtime.start("test", "_TemplateProxy");
-			test.test("This is a test");
+      _TemplateProxy test = (_TemplateProxy) Runtime.start("test", "_TemplateProxy");
+      test.test("This is a test");
 
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

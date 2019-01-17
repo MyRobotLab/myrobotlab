@@ -40,43 +40,43 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterSplit extends OpenCVFilter {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSplit.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSplit.class.getCanonicalName());
 
-	public final String splitKey = String.format("%s_SPLIT", name);;
-	transient public IplImage splitImage;
+  public final String splitKey = String.format("%s_SPLIT", name);;
+  transient public IplImage splitImage;
 
-	public OpenCVFilterSplit() {
-		super();
-	}
+  public OpenCVFilterSplit() {
+    super();
+  }
 
-	public OpenCVFilterSplit(String name) {
-		super(name);
-	}
+  public OpenCVFilterSplit(String name) {
+    super(name);
+  }
 
-	@Override
-	public ArrayList<String> getPossibleSources() {
-		ArrayList<String> ret = new ArrayList<String>();
-		ret.add(name);
-		ret.add(splitKey);
-		return ret;
-	}
+  @Override
+  public ArrayList<String> getPossibleSources() {
+    ArrayList<String> ret = new ArrayList<String>();
+    ret.add(name);
+    ret.add(splitKey);
+    return ret;
+  }
 
-	@Override
-	public void imageChanged(IplImage image) {
-		splitImage = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
-	}
+  @Override
+  public void imageChanged(IplImage image) {
+    splitImage = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
+  }
 
-	@Override
-	public IplImage process(IplImage image) {
-		cvCopy(image, splitImage);
-		return image;
-	}
+  @Override
+  public IplImage process(IplImage image) {
+    cvCopy(image, splitImage);
+    return image;
+  }
 
-	@Override
-	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-		return image;
-	}
+  @Override
+  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+    return image;
+  }
 
 }

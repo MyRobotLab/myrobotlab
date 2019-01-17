@@ -8,12 +8,12 @@ import org.myrobotlab.service.Runtime;
 
 public class InvokerUtils {
 
-	// FIXME - need to throw on error - returning null is "often" valid
-	public static Object invoke(String uri) throws IOException {
-		Message msg = CodecUri.decodePathInfo(uri);
-		ServiceInterface si = Runtime.getService(msg.name);
-		Object ret = si.invoke(msg.method, msg.data);
-		return ret;
-	}
+  // FIXME - need to throw on error - returning null is "often" valid
+  public static Object invoke(String uri) throws IOException {
+    Message msg = CodecUri.decodePathInfo(uri);
+    ServiceInterface si = Runtime.getService(msg.name);
+    Object ret = si.invoke(msg.method, msg.data);
+    return ret;
+  }
 
 }

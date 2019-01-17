@@ -13,60 +13,60 @@ import org.slf4j.Logger;
 
 public class BoofCv extends Service implements Point2DfPublisher, Point2DfListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(BoofCv.class);
+  public final static Logger log = LoggerFactory.getLogger(BoofCv.class);
 
-	public BoofCv(String n) {
-		super(n);
-	}
+  public BoofCv(String n) {
+    super(n);
+  }
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-		ServiceType meta = new ServiceType(BoofCv.class.getCanonicalName());
-		meta.addDescription("a very portable vision library using pure Java");
-		meta.setAvailable(true);
-		// add dependency if necessary
-		meta.addDependency("org.boofcv", "boofcv-core", "0.31");
-		meta.addDependency("org.boofcv", "boofcv-swing", "0.31");
-		meta.addDependency("org.boofcv", "boofcv-openkinect", "0.31");
-		meta.addCategory("vision", "video");
-		/*
-		 * meta.exclude("org.bytedeco", "javacv");
-		 * meta.exclude("org.bytedeco.javacpp-presets", "opencv");
-		 */
-		return meta;
-	}
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(BoofCv.class.getCanonicalName());
+    meta.addDescription("a very portable vision library using pure Java");
+    meta.setAvailable(true);
+    // add dependency if necessary
+    meta.addDependency("org.boofcv", "boofcv-core", "0.31");
+    meta.addDependency("org.boofcv", "boofcv-swing", "0.31");
+    meta.addDependency("org.boofcv", "boofcv-openkinect", "0.31");
+    meta.addCategory("vision", "video");
+    /*
+     * meta.exclude("org.bytedeco", "javacv");
+     * meta.exclude("org.bytedeco.javacpp-presets", "opencv");
+     */
+    return meta;
+  }
 
-	public Point2df publishPoint2Df(Point2df point) {
-		return point;
-	}
+  public Point2df publishPoint2Df(Point2df point) {
+    return point;
+  }
 
-	public Point2df onPoint2Df(Point2df point) {
-		System.out.println("Receinvig");
-		return point;
-	}
+  public Point2df onPoint2Df(Point2df point) {
+    System.out.println("Receinvig");
+    return point;
+  }
 
-	public static void main(String[] args) {
-		try {
+  public static void main(String[] args) {
+    try {
 
-			LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.INFO);
 
-			// ImageType<Planar<GrayU8>> colorType = ImageType.pl(3,GrayU8.class);
-			BoofCv boofcv = (BoofCv) Runtime.start("boofcv", "BoofCv");
+      // ImageType<Planar<GrayU8>> colorType = ImageType.pl(3,GrayU8.class);
+      BoofCv boofcv = (BoofCv) Runtime.start("boofcv", "BoofCv");
 
-			// BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
-			// Runtime.start("gui", "SwingGui");
-		} catch (Exception e) {
-			Logging.logError(e);
-		}
-	}
+      // BoofCV template = (BoofCV) Runtime.start("template", "BoofCV");
+      // Runtime.start("gui", "SwingGui");
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
 
 }

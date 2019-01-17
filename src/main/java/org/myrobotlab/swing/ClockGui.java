@@ -40,76 +40,76 @@ import org.myrobotlab.service.SwingGui;
 
 // FIXME - add stopwatch capabilities
 public class ClockGui extends ServiceGui implements ActionListener {
-	static final long serialVersionUID = 1L;
-	JButton startClock = new JButton("start clock");
+  static final long serialVersionUID = 1L;
+  JButton startClock = new JButton("start clock");
 
-	JLabel clockDisplay = new JLabel("<html><p style=\"font-size:15px;\">00:00:00.</p></html>");
-	String displayFormat = "<html><p style=\"font-size:15px\">%s</p></html>";
-	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	JTextField interval = new JTextField("1000", 8);
+  JLabel clockDisplay = new JLabel("<html><p style=\"font-size:15px;\">00:00:00.</p></html>");
+  String displayFormat = "<html><p style=\"font-size:15px\">%s</p></html>";
+  DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+  JTextField interval = new JTextField("1000", 8);
 
-	public ClockGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		addTop(3, clockDisplay);
-		addTop(startClock, interval, "ms");
-		clockDisplay.setText(String.format(displayFormat, dateFormat.format(new Date())));
-		startClock.addActionListener(this);
-	}
+  public ClockGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    addTop(3, clockDisplay);
+    addTop(startClock, interval, "ms");
+    clockDisplay.setText(String.format(displayFormat, dateFormat.format(new Date())));
+    startClock.addActionListener(this);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		Object o = e.getSource();
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
 
-		if (o == startClock) {
-			if (startClock.getText().compareTo("start clock") == 0) {
-				swingGui.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
-				swingGui.send(boundServiceName, "startClock");
-			} else {
-				swingGui.send(boundServiceName, "stopClock");
-			}
-		}
-		swingGui.send(boundServiceName, "publishState");
-	}
+    if (o == startClock) {
+      if (startClock.getText().compareTo("start clock") == 0) {
+        swingGui.send(boundServiceName, "setInterval", Integer.parseInt(interval.getText()));
+        swingGui.send(boundServiceName, "startClock");
+      } else {
+        swingGui.send(boundServiceName, "stopClock");
+      }
+    }
+    swingGui.send(boundServiceName, "publishState");
+  }
 
-	public void addClockEvent(Date time, String name, String method, Object... data) {
-		swingGui.send(boundServiceName, "addClockEvent", time, name, method, data);
-	}
+  public void addClockEvent(Date time, String name, String method, Object... data) {
+    swingGui.send(boundServiceName, "addClockEvent", time, name, method, data);
+  }
 
-	@Override
-	public void subscribeGui() {
-		subscribe("countdown");
-		subscribe("publishState");
-		subscribe("pulse");
-	}
+  @Override
+  public void subscribeGui() {
+    subscribe("countdown");
+    subscribe("publishState");
+    subscribe("pulse");
+  }
 
-	@Override
-	public void unsubscribeGui() {
-		unsubscribe("countdown");
-		unsubscribe("publishState");
-		unsubscribe("pulse");
-	}
+  @Override
+  public void unsubscribeGui() {
+    unsubscribe("countdown");
+    unsubscribe("publishState");
+    unsubscribe("pulse");
+  }
 
-	public void onState(final Clock c) {
-		/*
-		 * setText IS THREAD SAFE !!!!!
-		 *
-		 * SwingUtilities.invokeLater(new Runnable() { public void run() {
-		 */
+  public void onState(final Clock c) {
+    /*
+     * setText IS THREAD SAFE !!!!!
+     *
+     * SwingUtilities.invokeLater(new Runnable() { public void run() {
+     */
 
-		interval.setText((c.interval + ""));
+    interval.setText((c.interval + ""));
 
-		if (c.isClockRunning) {
-			startClock.setText("stop clock");
-			interval.setEnabled(false);
-		} else {
-			startClock.setText("start clock");
-			interval.setEnabled(true);
-		}
-	}
+    if (c.isClockRunning) {
+      startClock.setText("stop clock");
+      interval.setEnabled(false);
+    } else {
+      startClock.setText("start clock");
+      interval.setEnabled(true);
+    }
+  }
 
-	public void onPulse(Date date) {
-		clockDisplay.setText(String.format(displayFormat, dateFormat.format(date)));
-		// countdown(System.currentTimeMillis(), date.);
-	}
+  public void onPulse(Date date) {
+    clockDisplay.setText(String.format(displayFormat, dateFormat.format(date)));
+    // countdown(System.currentTimeMillis(), date.);
+  }
 
 }

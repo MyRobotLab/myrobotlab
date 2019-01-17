@@ -41,129 +41,127 @@ import org.slf4j.Logger;
 
 public class OledSsd1306Gui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(OledSsd1306Gui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(OledSsd1306Gui.class);
 
-	String attach = "attach";
-	String detach = "detach";
-	JButton attachButton = new JButton(attach);
+  String attach = "attach";
+  String detach = "detach";
+  JButton attachButton = new JButton(attach);
 
-	JComboBox<String> controllerList = new JComboBox<String>();
-	JComboBox<String> deviceAddressList = new JComboBox<String>();
-	JComboBox<String> deviceBusList = new JComboBox<String>();
+  JComboBox<String> controllerList = new JComboBox<String>();
+  JComboBox<String> deviceAddressList = new JComboBox<String>();
+  JComboBox<String> deviceBusList = new JComboBox<String>();
 
-	OledSsd1306 boundService = null;
+  OledSsd1306 boundService = null;
 
-	public OledSsd1306Gui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		boundService = (OledSsd1306) Runtime.getService(boundServiceName);
+  public OledSsd1306Gui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    boundService = (OledSsd1306) Runtime.getService(boundServiceName);
 
-		// build input begin ------------------
-		// addLine(createFlowPanel("input", attachButton, "Controller",
-		// controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
-		addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address",
-				deviceAddressList));
+    // build input begin ------------------
+    // addLine(createFlowPanel("input", attachButton, "Controller",
+    // controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
+    addTopLine(createFlowPanel("input", attachButton, "Controller", controllerList, "Bus", deviceBusList, "Address", deviceAddressList));
 
-		refreshControllers();
-		getDeviceBusList();
-		getDeviceAddressList();
+    refreshControllers();
+    getDeviceBusList();
+    getDeviceAddressList();
 
-		restoreListeners();
+    restoreListeners();
 
-	}
+  }
 
-	@Override
-	public void actionPerformed(final ActionEvent event) {
-		// TODO Auto-generated method stub
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				Object o = event.getSource();
-				if (o == attachButton) {
-					if (attachButton.getText().equals(attach)) {
-						int index = controllerList.getSelectedIndex();
-						if (index != -1) {
-							swingGui.send(boundServiceName, attach, controllerList.getSelectedItem(),
-									deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
-						}
-					} else {
-						swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
-					}
-				}
-				return;
-			}
-		});
-	}
+  @Override
+  public void actionPerformed(final ActionEvent event) {
+    // TODO Auto-generated method stub
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        Object o = event.getSource();
+        if (o == attachButton) {
+          if (attachButton.getText().equals(attach)) {
+            int index = controllerList.getSelectedIndex();
+            if (index != -1) {
+              swingGui.send(boundServiceName, attach, controllerList.getSelectedItem(), deviceBusList.getSelectedItem(), deviceAddressList.getSelectedItem());
+            }
+          } else {
+            swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
+          }
+        }
+        return;
+      }
+    });
+  }
 
-	@Override
-	public void subscribeGui() {
-	}
+  @Override
+  public void subscribeGui() {
+  }
 
-	@Override
-	public void unsubscribeGui() {
-	}
+  @Override
+  public void unsubscribeGui() {
+  }
 
-	public void onState(final OledSsd1306 driver) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				removeListeners();
-				refreshControllers();
-				if (driver.controller != null) {
-					controllerList.setSelectedItem(driver.controller.getName());
-					deviceBusList.setSelectedItem(boundService.deviceBus);
-					deviceAddressList.setSelectedItem(boundService.deviceAddress);
-				}
-				if (driver.isAttached) {
-					attachButton.setText(detach);
-					controllerList.setEnabled(false);
-					deviceBusList.setEnabled(false);
-					deviceAddressList.setEnabled(false);
-				} else {
-					attachButton.setText(attach);
-					controllerList.setEnabled(true);
-					deviceBusList.setEnabled(true);
-					deviceAddressList.setEnabled(true);
-				}
-				restoreListeners();
-			}
-		});
-	}
+  public void onState(final OledSsd1306 driver) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        removeListeners();
+        refreshControllers();
+        if (driver.controller != null) {
+          controllerList.setSelectedItem(driver.controller.getName());
+          deviceBusList.setSelectedItem(boundService.deviceBus);
+          deviceAddressList.setSelectedItem(boundService.deviceAddress);
+        }
+        if (driver.isAttached) {
+          attachButton.setText(detach);
+          controllerList.setEnabled(false);
+          deviceBusList.setEnabled(false);
+          deviceAddressList.setEnabled(false);
+        } else {
+          attachButton.setText(attach);
+          controllerList.setEnabled(true);
+          deviceBusList.setEnabled(true);
+          deviceAddressList.setEnabled(true);
+        }
+        restoreListeners();
+      }
+    });
+  }
 
-	public void getDeviceBusList() {
-		List<String> mbl = boundService.deviceBusList;
-		for (int i = 0; i < mbl.size(); i++) {
-			deviceBusList.addItem(mbl.get(i));
-		}
-	}
+  public void getDeviceBusList() {
+    List<String> mbl = boundService.deviceBusList;
+    for (int i = 0; i < mbl.size(); i++) {
+      deviceBusList.addItem(mbl.get(i));
+    }
+  }
 
-	public void getDeviceAddressList() {
+  public void getDeviceAddressList() {
 
-		List<String> mal = boundService.deviceAddressList;
-		for (int i = 0; i < mal.size(); i++) {
-			deviceAddressList.addItem(mal.get(i));
-		}
-	}
+    List<String> mal = boundService.deviceAddressList;
+    for (int i = 0; i < mal.size(); i++) {
+      deviceAddressList.addItem(mal.get(i));
+    }
+  }
 
-	public void refreshControllers() {
+  public void refreshControllers() {
 
-		if (boundService != null) {
-			List<String> v = boundService.controllers;
-			controllerList.removeAllItems();
-			for (int i = 0; i < v.size(); ++i) {
-				controllerList.addItem(v.get(i));
-			}
-			if (boundService.controller != null) {
-				controllerList.setSelectedItem(boundService.controller.getName());
-			}
-		}
-	}
+    if (boundService != null) {
+      List<String> v = boundService.controllers;
+      controllerList.removeAllItems();
+      for (int i = 0; i < v.size(); ++i) {
+        controllerList.addItem(v.get(i));
+      }
+      if (boundService.controller != null) {
+        controllerList.setSelectedItem(boundService.controller.getName());
+      }
+    }
+  }
 
-	public void removeListeners() {
-		attachButton.removeActionListener(this);
-	}
+  public void removeListeners() {
+    attachButton.removeActionListener(this);
+  }
 
-	public void restoreListeners() {
-		attachButton.addActionListener(this);
-	}
+  public void restoreListeners() {
+    attachButton.addActionListener(this);
+  }
 }

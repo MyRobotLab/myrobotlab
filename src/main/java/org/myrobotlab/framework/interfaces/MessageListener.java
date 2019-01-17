@@ -30,6 +30,6 @@ import org.myrobotlab.framework.Message;
 // FIXME - is this a good idea? or does it just add more clutter?
 public interface MessageListener {
 
-	public void onMessage(Message msg);
+  public void onMessage(Message msg);
 
 }

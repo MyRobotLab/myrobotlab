@@ -26,19 +26,19 @@
 package org.myrobotlab.service.interfaces;
 
 public interface Ads1115Control {
-	public void refresh();
+  public void refresh();
 
-	public int readADC_SingleEnded(int channel);
+  public int readADC_SingleEnded(int channel);
 
-	public int readADC_Differential_0_1();
+  public int readADC_Differential_0_1();
 
-	public int readADC_Differential_2_3();
+  public int readADC_Differential_2_3();
 
-	public void startComparator_SingleEnded(int channel, int threshold);
+  public void startComparator_SingleEnded(int channel, int threshold);
 
-	public int getLastConversionResults();
+  public int getLastConversionResults();
 
-	public void setGain(int gain);
+  public void setGain(int gain);
 
-	public int getGain();
+  public int getGain();
 }

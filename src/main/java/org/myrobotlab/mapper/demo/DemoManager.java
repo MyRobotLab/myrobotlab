@@ -35,46 +35,46 @@ import javax.swing.JMenuItem;
  */
 public class DemoManager {
 
-	// available demos classes
-	final static String classNames[] = { "simbad.demo.BaseDemo", "simbad.demo.BumpersDemo",
-			"simbad.demo.SingleAvoiderDemo", "simbad.demo.AvoidersDemo", "simbad.demo.ImagerDemo",
-			"simbad.demo.LightSearchDemo", "simbad.demo.SimplestDemo", "simbad.demo.BlinkingLampDemo",
-			"simbad.demo.DifferentialKinematicDemo", "simbad.demo.KheperaDemo", "simbad.demo.PickCherriesDemo",
-			"simbad.demo.PushBallsDemo" };
+  // available demos classes
+  final static String classNames[] = { "simbad.demo.BaseDemo", "simbad.demo.BumpersDemo", "simbad.demo.SingleAvoiderDemo", "simbad.demo.AvoidersDemo", "simbad.demo.ImagerDemo",
+      "simbad.demo.LightSearchDemo", "simbad.demo.SimplestDemo", "simbad.demo.BlinkingLampDemo", "simbad.demo.DifferentialKinematicDemo", "simbad.demo.KheperaDemo",
+      "simbad.demo.PickCherriesDemo", "simbad.demo.PushBallsDemo" };
 
-	/**
-	 * Creates a menu corresponding to the demo set.
-	 * 
-	 * @param actionListener listener
-	 * @return a jmenu
-	 */
-	public final static JMenu createMenu(ActionListener actionListener) {
-		JMenu menu = new JMenu("Examples");
-		for (int i = 0; i < classNames.length; i++) {
-			JMenuItem item = new JMenuItem(classNames[i]);
-			item.setActionCommand("demo");
-			item.addActionListener(actionListener);
-			menu.add(item);
-		}
-		return menu;
-	}
+  /**
+   * Creates a menu corresponding to the demo set.
+   * 
+   * @param actionListener
+   *          listener
+   * @return a jmenu
+   */
+  public final static JMenu createMenu(ActionListener actionListener) {
+    JMenu menu = new JMenu("Examples");
+    for (int i = 0; i < classNames.length; i++) {
+      JMenuItem item = new JMenuItem(classNames[i]);
+      item.setActionCommand("demo");
+      item.addActionListener(actionListener);
+      menu.add(item);
+    }
+    return menu;
+  }
 
-	/**
-	 * Creates a demo corresponding to the menu item.
-	 * 
-	 * @param event e
-	 * @return demo
-	 */
-	public static Demo getDemoFromActionEvent(ActionEvent event) {
-		Class cl = null;
-		Demo demo = null;
-		String demoName = ((JMenuItem) event.getSource()).getText();
-		try {
-			cl = Class.forName(demoName);
-			demo = (Demo) cl.newInstance();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return demo;
-	}
+  /**
+   * Creates a demo corresponding to the menu item.
+   * 
+   * @param event
+   *          e
+   * @return demo
+   */
+  public static Demo getDemoFromActionEvent(ActionEvent event) {
+    Class cl = null;
+    Demo demo = null;
+    String demoName = ((JMenuItem) event.getSource()).getText();
+    try {
+      cl = Class.forName(demoName);
+      demo = (Demo) cl.newInstance();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return demo;
+  }
 }

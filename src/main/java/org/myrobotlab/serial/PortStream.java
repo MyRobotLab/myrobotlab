@@ -21,83 +21,83 @@ import org.slf4j.Logger;
  */
 public class PortStream extends Port {
 
-	public final static Logger log = LoggerFactory.getLogger(PortStream.class);
+  public final static Logger log = LoggerFactory.getLogger(PortStream.class);
 
-	private InputStream in;
-	private OutputStream out;
+  private InputStream in;
+  private OutputStream out;
 
-	public PortStream(String portName) throws IOException {
-		super(portName);
-	}
+  public PortStream(String portName) throws IOException {
+    super(portName);
+  }
 
-	public PortStream(String portName, InputStream in, OutputStream out) throws IOException {
-		super(portName);
-		this.in = in;
-		this.out = out;
-	}
+  public PortStream(String portName, InputStream in, OutputStream out) throws IOException {
+    super(portName);
+    this.in = in;
+    this.out = out;
+  }
 
-	public int available() throws IOException {
-		return in.available();
-	}
+  public int available() throws IOException {
+    return in.available();
+  }
 
-	public InputStream getInputStream() {
-		return in;
-	}
+  public InputStream getInputStream() {
+    return in;
+  }
 
-	public OutputStream getOutputStream() {
-		return out;
-	}
+  public OutputStream getOutputStream() {
+    return out;
+  }
 
-	@Override
-	public List<String> getPortNames() {
-		// no "new" ports to contribute in
-		// the "pure" Java (non-JNI/JNA) world...
-		return new ArrayList<String>();
-	}
+  @Override
+  public List<String> getPortNames() {
+    // no "new" ports to contribute in
+    // the "pure" Java (non-JNI/JNA) world...
+    return new ArrayList<String>();
+  }
 
-	@Override
-	public int read() throws IOException {
-		return in.read();
-	}
+  @Override
+  public int read() throws IOException {
+    return in.read();
+  }
 
-	// WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
-	// is ever bigger than the read and no end of stream has occurred
-	// it will block forever :P
-	public int read(byte[] data) throws IOException {
-		return in.read(data);
-	}
+  // WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
+  // is ever bigger than the read and no end of stream has occurred
+  // it will block forever :P
+  public int read(byte[] data) throws IOException {
+    return in.read(data);
+  }
 
-	public void setInputStream(InputStream in) {
-		this.in = in;
-	}
+  public void setInputStream(InputStream in) {
+    this.in = in;
+  }
 
-	public void setOutputStream(OutputStream out) {
-		this.out = out;
-	}
+  public void setOutputStream(OutputStream out) {
+    this.out = out;
+  }
 
-	public boolean setParams(int rate, int databits, int stopbits, int parity) {
-		log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
-		return true;
-	}
+  public boolean setParams(int rate, int databits, int stopbits, int parity) {
+    log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
+    return true;
+  }
 
-	@Override
-	public void write(int data) throws IOException {
-		out.write(data);
-		// WOW - PipedOutputStream auto flushes about 1 time every second :P
-		// we force flushing here !
-		out.flush();
-	}
+  @Override
+  public void write(int data) throws IOException {
+    out.write(data);
+    // WOW - PipedOutputStream auto flushes about 1 time every second :P
+    // we force flushing here !
+    out.flush();
+  }
 
-	public void write(int[] data) throws IOException {
-		// TODO: is there a more effecient way to do this?
-		for (int i = 0; i < data.length; i++) {
-			out.write(data[i]);
-		}
-	}
+  public void write(int[] data) throws IOException {
+    // TODO: is there a more effecient way to do this?
+    for (int i = 0; i < data.length; i++) {
+      out.write(data[i]);
+    }
+  }
 
-	@Override
-	public boolean isHardware() {
-		return false;
-	}
+  @Override
+  public boolean isHardware() {
+    return false;
+  }
 
 }

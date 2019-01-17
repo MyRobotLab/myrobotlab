@@ -44,76 +44,75 @@ import org.slf4j.Logger;
 
 public class TwitterGui extends ServiceGui implements ActionListener {
 
-	static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGui.class);
+  static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGui.class);
 
-	JPasswordField consumerKey = new JPasswordField("XXXXXX", 20);
-	JPasswordField consumerSecret = new JPasswordField("XXXXXX", 20);
-	JPasswordField accessToken = new JPasswordField("XXXXXX", 20);
-	JPasswordField accessTokenSecret = new JPasswordField("XXXXXX", 20);
-	JButton setKeys = new JButton("set keys");
-	JTextField text = new JTextField(20);
-	JButton tweet = new JButton("tweet");
-	Twitter twitter = null;
+  JPasswordField consumerKey = new JPasswordField("XXXXXX", 20);
+  JPasswordField consumerSecret = new JPasswordField("XXXXXX", 20);
+  JPasswordField accessToken = new JPasswordField("XXXXXX", 20);
+  JPasswordField accessTokenSecret = new JPasswordField("XXXXXX", 20);
+  JButton setKeys = new JButton("set keys");
+  JTextField text = new JTextField(20);
+  JButton tweet = new JButton("tweet");
+  Twitter twitter = null;
 
-	public TwitterGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		display.setLayout(new BorderLayout());
-		JPanel keyInfo = new JPanel(new GridLayout(0, 2));
-		keyInfo.add(new JLabel("consumer key"));
-		keyInfo.add(consumerKey);
-		keyInfo.add(new JLabel("consumer secret"));
-		keyInfo.add(consumerSecret);
-		keyInfo.add(new JLabel("access token"));
-		keyInfo.add(accessToken);
-		keyInfo.add(new JLabel("access token secret"));
-		keyInfo.add(accessTokenSecret);
-		keyInfo.add(new JLabel(""));
-		keyInfo.add(setKeys);
-		setKeys.addActionListener(this);
-		tweet.addActionListener(this);
-		// display.setLayout(new BorderLayout());
-		display.add(keyInfo, BorderLayout.NORTH);
-		JPanel tweetPanel = new JPanel(new GridLayout(2, 1));
-		tweetPanel.add(text);
-		tweetPanel.add(tweet);
-		display.add(tweetPanel, BorderLayout.SOUTH);
-	}
+  public TwitterGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    display.setLayout(new BorderLayout());
+    JPanel keyInfo = new JPanel(new GridLayout(0, 2));
+    keyInfo.add(new JLabel("consumer key"));
+    keyInfo.add(consumerKey);
+    keyInfo.add(new JLabel("consumer secret"));
+    keyInfo.add(consumerSecret);
+    keyInfo.add(new JLabel("access token"));
+    keyInfo.add(accessToken);
+    keyInfo.add(new JLabel("access token secret"));
+    keyInfo.add(accessTokenSecret);
+    keyInfo.add(new JLabel(""));
+    keyInfo.add(setKeys);
+    setKeys.addActionListener(this);
+    tweet.addActionListener(this);
+    // display.setLayout(new BorderLayout());
+    display.add(keyInfo, BorderLayout.NORTH);
+    JPanel tweetPanel = new JPanel(new GridLayout(2, 1));
+    tweetPanel.add(text);
+    tweetPanel.add(tweet);
+    display.add(tweetPanel, BorderLayout.SOUTH);
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		Object o = event.getSource();
-		if (o == setKeys) {
-			swingGui.send(boundServiceName, "setSecurity", new String(consumerKey.getPassword()),
-					new String(consumerSecret.getPassword()), new String(accessToken.getPassword()),
-					new String(accessTokenSecret.getPassword()));
-		} else if (o == tweet) {
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    Object o = event.getSource();
+    if (o == setKeys) {
+      swingGui.send(boundServiceName, "setSecurity", new String(consumerKey.getPassword()), new String(consumerSecret.getPassword()), new String(accessToken.getPassword()),
+          new String(accessTokenSecret.getPassword()));
+    } else if (o == tweet) {
 
-			swingGui.send(boundServiceName, "tweet", new String(text.getText()));
+      swingGui.send(boundServiceName, "tweet", new String(text.getText()));
 
-		}
+    }
 
-		// TODO Auto-generated method stub
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	public void onState(final Twitter twitter) {
-		this.twitter = twitter;
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				consumerKey.setText(twitter.consumerKey);
-				consumerSecret.setText(twitter.consumerSecret);
-				accessToken.setText(twitter.accessToken);
-				accessTokenSecret.setText(twitter.accessTokenSecret);
-				text.setText("Your Text Here");
+  public void onState(final Twitter twitter) {
+    this.twitter = twitter;
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        consumerKey.setText(twitter.consumerKey);
+        consumerSecret.setText(twitter.consumerSecret);
+        accessToken.setText(twitter.accessToken);
+        accessTokenSecret.setText(twitter.accessTokenSecret);
+        text.setText("Your Text Here");
 
-			}
-		});
-	}
+      }
+    });
+  }
 
-	public void setState() {
-		swingGui.send(boundServiceName, "setState", twitter);
-	}
+  public void setState() {
+    swingGui.send(boundServiceName, "setState", twitter);
+  }
 
 }

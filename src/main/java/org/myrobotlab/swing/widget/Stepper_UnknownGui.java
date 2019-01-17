@@ -5,22 +5,22 @@ import org.slf4j.Logger;
 
 public class Stepper_UnknownGui extends StepperControllerPanel {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public final static Logger log = LoggerFactory.getLogger(StepperControllerPanel.class);
+  public final static Logger log = LoggerFactory.getLogger(StepperControllerPanel.class);
 
-	Object[] data = null;
+  Object[] data = null;
 
-	@Override
-	void setAttached(boolean state) {
-		// TODO Auto-generated method stub
+  @Override
+  void setAttached(boolean state) {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	@Override
-	public void setData(Object[] data) {
-		log.warn("setData on an unknown StepperGUI Panel :P");
-		this.data = data;
-	}
+  @Override
+  public void setData(Object[] data) {
+    log.warn("setData on an unknown StepperGUI Panel :P");
+    this.data = data;
+  }
 
 }

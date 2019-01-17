@@ -48,215 +48,214 @@ import org.myrobotlab.swing.widget.ImageButton;
 
 public class MotorHat4PiGui extends ServiceGui implements ActionListener, ChangeListener {
 
-	public class FloatJSlider extends JSlider {
+  public class FloatJSlider extends JSlider {
 
-		private static final long serialVersionUID = 1L;
-		final int scale;
+    private static final long serialVersionUID = 1L;
+    final int scale;
 
-		public FloatJSlider(int min, int max, int value, int scale) {
-			super(min, max, value);
-			this.scale = scale;
+    public FloatJSlider(int min, int max, int value, int scale) {
+      super(min, max, value);
+      this.scale = scale;
 
-			Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-			labelTable.put(new Integer(min), new JLabel(String.format("%.2f", (float) min / scale)));
-			labelTable.put(new Integer(min / 2), new JLabel(String.format("%.2f", (float) min / scale / 2)));
-			labelTable.put(new Integer(value), new JLabel(String.format("%.2f", (float) value / scale)));
-			labelTable.put(new Integer(max / 2), new JLabel(String.format("%.2f", (float) max / scale / 2)));
-			labelTable.put(new Integer(max), new JLabel(String.format("%.2f", (float) max / scale)));
-			setLabelTable(labelTable);
-			setPaintTrack(false);
-		}
+      Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
+      labelTable.put(new Integer(min), new JLabel(String.format("%.2f", (float) min / scale)));
+      labelTable.put(new Integer(min / 2), new JLabel(String.format("%.2f", (float) min / scale / 2)));
+      labelTable.put(new Integer(value), new JLabel(String.format("%.2f", (float) value / scale)));
+      labelTable.put(new Integer(max / 2), new JLabel(String.format("%.2f", (float) max / scale / 2)));
+      labelTable.put(new Integer(max), new JLabel(String.format("%.2f", (float) max / scale)));
+      setLabelTable(labelTable);
+      setPaintTrack(false);
+    }
 
-		public float getScaledValue() {
-			return ((float) super.getValue()) / this.scale;
-		}
-	}
+    public float getScaledValue() {
+      return ((float) super.getValue()) / this.scale;
+    }
+  }
 
-	// controller
-	JPanel controllerPanel = new JPanel(new BorderLayout());
-	JComboBox<String> controllerList = new JComboBox<String>();
-	MotorController controller = null;
+  // controller
+  JPanel controllerPanel = new JPanel(new BorderLayout());
+  JComboBox<String> controllerList = new JComboBox<String>();
+  MotorController controller = null;
 
-	JCheckBox invert = new JCheckBox("invert");
-	// power
-	JPanel powerPanel = new JPanel(new BorderLayout());
-	private FloatJSlider power = null;
-	private JLabel powerValue = new JLabel("0.00");
-	ImageButton stopButton;
-	ImageButton clockwiseButton;
-	ImageButton counterclockwiseButton;
+  JCheckBox invert = new JCheckBox("invert");
+  // power
+  JPanel powerPanel = new JPanel(new BorderLayout());
+  private FloatJSlider power = null;
+  private JLabel powerValue = new JLabel("0.00");
+  ImageButton stopButton;
+  ImageButton clockwiseButton;
+  ImageButton counterclockwiseButton;
 
-	// TODO - make MotorPanel - for 1 motor - for shared embedded widget
-	// TODO - stop sign button for panic stop
-	// TODO - tighten up interfaces
-	// TODO - DIRECT calls ! - motor & controller HAVE to be on the same
-	// computer
-	// TODO - cw ccw buttons enabled
+  // TODO - make MotorPanel - for 1 motor - for shared embedded widget
+  // TODO - stop sign button for panic stop
+  // TODO - tighten up interfaces
+  // TODO - DIRECT calls ! - motor & controller HAVE to be on the same
+  // computer
+  // TODO - cw ccw buttons enabled
 
-	String attach = "attach";
-	String detach = "detach";
-	JButton attachButton = new JButton(attach);
+  String attach = "attach";
+  String detach = "detach";
+  JButton attachButton = new JButton(attach);
 
-	String setMotor = "setMotor";
+  String setMotor = "setMotor";
 
-	JComboBox<String> motorList = new JComboBox<String>();
+  JComboBox<String> motorList = new JComboBox<String>();
 
-	MotorHat4Pi myMotor;
+  MotorHat4Pi myMotor;
 
-	public MotorHat4PiGui(final String boundServiceName, final SwingGui myService) {
-		super(boundServiceName, myService);
-		myMotor = (MotorHat4Pi) Runtime.getService(boundServiceName);
+  public MotorHat4PiGui(final String boundServiceName, final SwingGui myService) {
+    super(boundServiceName, myService);
+    myMotor = (MotorHat4Pi) Runtime.getService(boundServiceName);
 
-		// controllerPanel begin ------------------
-		addTopLine(createFlowPanel("Controller", attachButton, "Controller", controllerList, "Motor", motorList));
+    // controllerPanel begin ------------------
+    addTopLine(createFlowPanel("Controller", attachButton, "Controller", controllerList, "Motor", motorList));
 
-		counterclockwiseButton = new ImageButton("Motor", "counterclockwise", this);
-		stopButton = new ImageButton("Motor", "stop", this);
-		clockwiseButton = new ImageButton("Motor", "clockwise", this);
+    counterclockwiseButton = new ImageButton("Motor", "counterclockwise", this);
+    stopButton = new ImageButton("Motor", "stop", this);
+    clockwiseButton = new ImageButton("Motor", "clockwise", this);
 
-		power = new FloatJSlider(-100, 100, 0, 100);
-		power.setMajorTickSpacing(25);
-		power.setPaintTicks(true);
-		power.setPaintLabels(true);
+    power = new FloatJSlider(-100, 100, 0, 100);
+    power.setMajorTickSpacing(25);
+    power.setPaintTicks(true);
+    power.setPaintLabels(true);
 
-		addLine(createFlowPanel("power", invert, powerValue, counterclockwiseButton, stopButton, clockwiseButton,
-				power));
+    addLine(createFlowPanel("power", invert, powerValue, counterclockwiseButton, stopButton, clockwiseButton, power));
 
-		refreshControllers();
-		refreshMotorList();
-		restoreListeners();
-	}
+    refreshControllers();
+    refreshMotorList();
+    restoreListeners();
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
+  @Override
+  public void actionPerformed(ActionEvent e) {
 
-		Object source = e.getSource();
+    Object source = e.getSource();
 
-		if (source == controllerList) {
+    if (source == controllerList) {
 
-			String newController = (String) controllerList.getSelectedItem();
+      String newController = (String) controllerList.getSelectedItem();
 
-			if (newController != null && newController.length() > 0) {
-				refreshMotorList();
-			}
+      if (newController != null && newController.length() > 0) {
+        refreshMotorList();
+      }
 
-		} else if (source == stopButton) {
-			power.setValue(0);
+    } else if (source == stopButton) {
+      power.setValue(0);
 
-		} else if (source == invert) {
-			myMotor.setInverted(invert.isSelected());
+    } else if (source == invert) {
+      myMotor.setInverted(invert.isSelected());
 
-		} else if (source == attachButton) {
-			if (attachButton.getText().equals(attach)) {
-				swingGui.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
-				swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
-				/*
-				 * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.
-				 * getSelectedItem().toString()));
-				 * myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.
-				 * getSelectedItem().toString())); try { myMotor.attach((String)
-				 * controllerList.getSelectedItem()); } catch (Exception e1) { // TODO
-				 * Auto-generated catch block e1.printStackTrace(); }
-				 */
-			} else {
-				swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
-			}
-		}
+    } else if (source == attachButton) {
+      if (attachButton.getText().equals(attach)) {
+        swingGui.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
+        swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
+        /*
+         * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.
+         * getSelectedItem().toString()));
+         * myMotor.setRightPwmPin((int)Integer.decode(rightPwmPinList.
+         * getSelectedItem().toString())); try { myMotor.attach((String)
+         * controllerList.getSelectedItem()); } catch (Exception e1) { // TODO
+         * Auto-generated catch block e1.printStackTrace(); }
+         */
+      } else {
+        swingGui.send(boundServiceName, detach, controllerList.getSelectedItem());
+      }
+    }
 
-	}
+  }
 
-	void refreshMotorList() {
-		List<String> mbl = myMotor.motorList;
-		for (int i = 0; i < mbl.size(); i++) {
-			motorList.addItem(mbl.get(i));
-		}
-	}
+  void refreshMotorList() {
+    List<String> mbl = myMotor.motorList;
+    for (int i = 0; i < mbl.size(); i++) {
+      motorList.addItem(mbl.get(i));
+    }
+  }
 
-	@Override
-	public void subscribeGui() {
-		subscribe("publishChangePos");
-		swingGui.send(boundServiceName, "publishState");
-	}
+  @Override
+  public void subscribeGui() {
+    subscribe("publishChangePos");
+    swingGui.send(boundServiceName, "publishState");
+  }
 
-	@Override
-	public void unsubscribeGui() {
-		unsubscribe("publishChangePos", "onChangePos");
-	}
+  @Override
+  public void unsubscribeGui() {
+    unsubscribe("publishChangePos", "onChangePos");
+  }
 
-	public void onState(MotorHat4Pi motor) {
+  public void onState(MotorHat4Pi motor) {
 
-		removeListeners();
-		refreshControllers();
+    removeListeners();
+    refreshControllers();
 
-		setEnabled(motor.isAttached());
+    setEnabled(motor.isAttached());
 
-		motorList.setSelectedItem(motor.getMotorId());
+    motorList.setSelectedItem(motor.getMotorId());
 
-		if (motor.isAttached()) {
-			MotorController mc = (MotorController) motor.getController();
-			controllerList.setSelectedItem(mc.getName());
-			attachButton.setText(detach);
-			controllerList.setEnabled(false);
-			motorList.setEnabled(false);
-			powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
-		} else {
-			attachButton.setText(attach);
-			controllerList.setEnabled(true);
-			motorList.setEnabled(true);
-		}
-		invert.setSelected(motor.isInverted());
+    if (motor.isAttached()) {
+      MotorController mc = (MotorController) motor.getController();
+      controllerList.setSelectedItem(mc.getName());
+      attachButton.setText(detach);
+      controllerList.setEnabled(false);
+      motorList.setEnabled(false);
+      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
+    } else {
+      attachButton.setText(attach);
+      controllerList.setEnabled(true);
+      motorList.setEnabled(true);
+    }
+    invert.setSelected(motor.isInverted());
 
-		restoreListeners();
-	}
+    restoreListeners();
+  }
 
-	public void setEnabled(boolean enable) {
-		stopButton.setEnabled(enable);
-		clockwiseButton.setEnabled(enable);
-		counterclockwiseButton.setEnabled(enable);
-		power.setEnabled(enable);
-		invert.setEnabled(enable);
-		powerValue.setEnabled(enable);
+  public void setEnabled(boolean enable) {
+    stopButton.setEnabled(enable);
+    clockwiseButton.setEnabled(enable);
+    counterclockwiseButton.setEnabled(enable);
+    power.setEnabled(enable);
+    invert.setEnabled(enable);
+    powerValue.setEnabled(enable);
 
-	}
+  }
 
-	@Override
-	public void stateChanged(ChangeEvent ce) {
-		Object source = ce.getSource();
-		if (power == source) {
-			powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
-			swingGui.send(boundServiceName, "move", power.getScaledValue());
-			// log.info(String.format("send %s, move, %s", boundServiceName,
-			// power.getScaledValue()));
-		}
-	}
+  @Override
+  public void stateChanged(ChangeEvent ce) {
+    Object source = ce.getSource();
+    if (power == source) {
+      powerValue.setText(String.format("in %3.2f out %3.0f", power.getScaledValue(), myMotor.getPowerLevel()));
+      swingGui.send(boundServiceName, "move", power.getScaledValue());
+      // log.info(String.format("send %s, move, %s", boundServiceName,
+      // power.getScaledValue()));
+    }
+  }
 
-	public void refreshControllers() {
-		if (myMotor != null) {
-			List<String> v = myMotor.refreshControllers();
-			controllerList.removeAllItems();
-			for (int i = 0; i < v.size(); ++i) {
-				controllerList.addItem(v.get(i));
-			}
-			if (myMotor.getController() != null) {
-				controllerList.setSelectedItem(myMotor.getController().getName());
-			}
-		}
-	}
+  public void refreshControllers() {
+    if (myMotor != null) {
+      List<String> v = myMotor.refreshControllers();
+      controllerList.removeAllItems();
+      for (int i = 0; i < v.size(); ++i) {
+        controllerList.addItem(v.get(i));
+      }
+      if (myMotor.getController() != null) {
+        controllerList.setSelectedItem(myMotor.getController().getName());
+      }
+    }
+  }
 
-	public void removeListeners() {
-		attachButton.removeActionListener(this);
-		controllerList.removeActionListener(this);
-		motorList.removeActionListener(this);
-		power.removeChangeListener(this);
-		invert.removeActionListener(this);
-	}
+  public void removeListeners() {
+    attachButton.removeActionListener(this);
+    controllerList.removeActionListener(this);
+    motorList.removeActionListener(this);
+    power.removeChangeListener(this);
+    invert.removeActionListener(this);
+  }
 
-	public void restoreListeners() {
-		attachButton.addActionListener(this);
-		controllerList.addActionListener(this);
-		motorList.addActionListener(this);
-		power.addChangeListener(this);
-		invert.addActionListener(this);
-	}
+  public void restoreListeners() {
+    attachButton.addActionListener(this);
+    controllerList.addActionListener(this);
+    motorList.addActionListener(this);
+    power.addChangeListener(this);
+    invert.addActionListener(this);
+  }
 
 }
