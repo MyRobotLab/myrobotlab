@@ -32,42 +32,42 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class ColoredPoint implements Serializable {
-  private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(ColoredPoint.class);
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(ColoredPoint.class);
 
-  public int x;
-  public int y;
-  public int color;
+	public int x;
+	public int y;
+	public int color;
 
-  // ctors begin ----
-  public ColoredPoint() {
-  }
+	// ctors begin ----
+	public ColoredPoint() {
+	}
 
-  public ColoredPoint(final ColoredPoint other) {
-    this();
-    set(other);
-  }
+	public ColoredPoint(final ColoredPoint other) {
+		this();
+		set(other);
+	}
 
-  public Color getAWTColor() {
-    return new Color(getRed(), getGreen(), getBlue());
-  }
+	public Color getAWTColor() {
+		return new Color(getRed(), getGreen(), getBlue());
+	}
 
-  public int getBlue() {
-    return ((color & 0x0000ff00) >> 8);
-  }
+	public int getBlue() {
+		return ((color & 0x0000ff00) >> 8);
+	}
 
-  public int getGreen() {
-    return color & 0x000000ff;
-  }
+	public int getGreen() {
+		return color & 0x000000ff;
+	}
 
-  public int getRed() {
-    return ((color & 0x00ff0000) >> 16);
-  }
+	public int getRed() {
+		return ((color & 0x00ff0000) >> 16);
+	}
 
-  public void set(final ColoredPoint other) {
-    x = other.x;
-    y = other.y;
-    color = other.color;
-  }
+	public void set(final ColoredPoint other) {
+		x = other.x;
+		y = other.y;
+		color = other.color;
+	}
 
 }

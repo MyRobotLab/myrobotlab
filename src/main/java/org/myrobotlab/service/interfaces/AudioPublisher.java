@@ -4,9 +4,9 @@ import org.myrobotlab.service.data.AudioData;
 
 public interface AudioPublisher {
 
-  public void publishAudioStart(AudioData data);
+	public void publishAudioStart(AudioData data);
 
-  public void publishAudioEnd(AudioData data);
+	public void publishAudioEnd(AudioData data);
 
-  // hmm public void attach(AudioListener listener);
+	// hmm public void attach(AudioListener listener);
 }

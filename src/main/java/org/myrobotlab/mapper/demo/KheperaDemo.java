@@ -36,37 +36,37 @@ import org.myrobotlab.mapper.sim.KheperaRobot;
  **/
 public class KheperaDemo extends Demo {
 
-  // derive from class KheperaRobot instead of class Agent
-  public class Robot extends KheperaRobot {
-    public Robot(Vector3d position, String name) {
-      super(position, name);
-    }
+	// derive from class KheperaRobot instead of class Agent
+	public class Robot extends KheperaRobot {
+		public Robot(Vector3d position, String name) {
+			super(position, name);
+		}
 
-    /** Initialize Agent's Behavior */
-    @Override
-    public void initBehavior() {
-    }
+		/** Initialize Agent's Behavior */
+		@Override
+		public void initBehavior() {
+		}
 
-    /** Perform one step of Agent's Behavior */
-    @Override
-    public void performBehavior() {
-      setWheelsVelocity(0.01, 0.01);
-      if (collisionDetected())
-        moveToStartPosition();
-    }
+		/** Perform one step of Agent's Behavior */
+		@Override
+		public void performBehavior() {
+			setWheelsVelocity(0.01, 0.01);
+			if (collisionDetected())
+				moveToStartPosition();
+		}
 
-  }
+	}
 
-  public KheperaDemo() {
-    setWorldSize(1f);
-    boxColor = new Color3f(0.6f, 0.5f, .3f);
+	public KheperaDemo() {
+		setWorldSize(1f);
+		boxColor = new Color3f(0.6f, 0.5f, .3f);
 
-    add(new Box(new Vector3d(0, 0, -0.07), new Vector3f(0.10f, 0.03f, 0.055f), this));
+		add(new Box(new Vector3d(0, 0, -0.07), new Vector3f(0.10f, 0.03f, 0.055f), this));
 
-    add(new Box(new Vector3d(0.2, 0, 0), new Vector3f(0.055f, 0.1f, 0.055f), this));
+		add(new Box(new Vector3d(0.2, 0, 0), new Vector3f(0.055f, 0.1f, 0.055f), this));
 
-    // Add a robot.
-    add(new Robot(new Vector3d(0, 0, 0), "khepera"));
+		// Add a robot.
+		add(new Robot(new Vector3d(0, 0, 0), "khepera"));
 
-  }
+	}
 }

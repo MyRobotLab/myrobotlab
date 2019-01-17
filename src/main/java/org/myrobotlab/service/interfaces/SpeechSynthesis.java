@@ -15,107 +15,100 @@ import org.slf4j.Logger;
  */
 public interface SpeechSynthesis extends NameProvider {
 
-  public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
+	public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
 
-  public String getlastUtterance();
+	public String getlastUtterance();
 
-  /**
-   * set the speaker voice
-   * 
-   * @param voice
-   * @return
-   */
-  public boolean setVoice(String voice);
+	/**
+	 * set the speaker voice
+	 * 
+	 * @param voice
+	 * @return
+	 */
+	public boolean setVoice(String voice);
 
-  /**
-   * Begin speaking something and return immediately
-   * 
-   * @param toSpeak
-   *          - the string of text to speak.
-   * @return TODO
-   * @throws Exception
-   *           e
-   */
-  public List<AudioData> speak(String toSpeak) throws Exception;
+	/**
+	 * Begin speaking something and return immediately
+	 * 
+	 * @param toSpeak - the string of text to speak.
+	 * @return TODO
+	 * @throws Exception e
+	 */
+	public List<AudioData> speak(String toSpeak) throws Exception;
 
-  /**
-   * Begin speaking and wait until all speech has been played back/
-   * 
-   * @param toSpeak
-   *          - the string of text to speak.
-   * @throws Exception
-   *           e
-   * @return true/false
-   */
-  public List<AudioData> speakBlocking(String toSpeak) throws Exception;
+	/**
+	 * Begin speaking and wait until all speech has been played back/
+	 * 
+	 * @param toSpeak - the string of text to speak.
+	 * @throws Exception e
+	 * @return true/false
+	 */
+	public List<AudioData> speakBlocking(String toSpeak) throws Exception;
 
-  /**
-   * Change audioData volume
-   * 
-   * @param volume
-   *          - double between 0 & 1.
-   */
-  public void setVolume(double volume);
+	/**
+	 * Change audioData volume
+	 * 
+	 * @param volume - double between 0 & 1.
+	 */
+	public void setVolume(double volume);
 
-  /**
-   * Get audioData volume
-   * 
-   * @return double
-   */
-  public double getVolume();
+	/**
+	 * Get audioData volume
+	 * 
+	 * @return double
+	 */
+	public double getVolume();
 
-  /**
-   * Get current voice
-   * 
-   * @return Voice
-   */
-  public Voice getVoice();
+	/**
+	 * Get current voice
+	 * 
+	 * @return Voice
+	 */
+	public Voice getVoice();
 
-  /**
-   * get voice effects on a remote server
-   * 
-   * @return list
-   */
-  // public List<String> getVoiceEffectFiles();
+	/**
+	 * get voice effects on a remote server
+	 * 
+	 * @return list
+	 */
+	// public List<String> getVoiceEffectFiles();
 
-  /**
-   * start callback for speech synth. (Invoked when speaking starts)
-   * 
-   * @param utterance
-   *          text
-   * @return the same text
-   */
-  public String publishStartSpeaking(String utterance);
+	/**
+	 * start callback for speech synth. (Invoked when speaking starts)
+	 * 
+	 * @param utterance text
+	 * @return the same text
+	 */
+	public String publishStartSpeaking(String utterance);
 
-  /**
-   * stop callback for speech synth. (Invoked when speaking stops.)
-   * 
-   * @param utterance
-   *          text
-   * @return text
-   */
-  public String publishEndSpeaking(String utterance);
+	/**
+	 * stop callback for speech synth. (Invoked when speaking stops.)
+	 * 
+	 * @param utterance text
+	 * @return text
+	 */
+	public String publishEndSpeaking(String utterance);
 
-  /**
-   * silence the service
-   */
-  public void mute();
+	/**
+	 * silence the service
+	 */
+	public void mute();
 
-  /**
-   * un-silence the service
-   */
-  public void unmute();
+	/**
+	 * un-silence the service
+	 */
+	public void unmute();
 
-  // FIXME - not needed in interface
-  // public String getLocalFileName(SpeechSynthesis provider, String toSpeak)
-  // throws UnsupportedEncodingException;
+	// FIXME - not needed in interface
+	// public String getLocalFileName(SpeechSynthesis provider, String toSpeak)
+	// throws UnsupportedEncodingException;
 
-  // FIXME addSpeechRecognizer
-  public void addEar(SpeechRecognizer ear);
+	// FIXME addSpeechRecognizer
+	public void addEar(SpeechRecognizer ear);
 
-  // FIXME - is this in the wrong place ??? - this seems like bot logic ...
-  public void onRequestConfirmation(String text);
+	// FIXME - is this in the wrong place ??? - this seems like bot logic ...
+	public void onRequestConfirmation(String text);
 
-  public List<Voice> getVoices();
+	public List<Voice> getVoices();
 
 }

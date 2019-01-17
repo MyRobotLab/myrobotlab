@@ -35,85 +35,85 @@ import org.myrobotlab.service.SwingGui;
 
 public class MobilePlatformGui extends ServiceGui {
 
-  MobilePlatform localReference = null;
+	MobilePlatform localReference = null;
 
-  JLabel speed = new JLabel("0.0");
+	JLabel speed = new JLabel("0.0");
 
-  // bindings begin --------------
+	// bindings begin --------------
 
-  JLabel dimensionX = new JLabel("0.0");;
-  JLabel dimensionY = new JLabel("0.0");
-  JLabel dimensionZ = new JLabel("0.0");
+	JLabel dimensionX = new JLabel("0.0");;
+	JLabel dimensionY = new JLabel("0.0");
+	JLabel dimensionZ = new JLabel("0.0");
 
-  JLabel positionX = new JLabel("0.0");
-  JLabel positionY = new JLabel("0.0");
-  JLabel positionZ = new JLabel("0.0");
+	JLabel positionX = new JLabel("0.0");
+	JLabel positionY = new JLabel("0.0");
+	JLabel positionZ = new JLabel("0.0");
 
-  JLabel targetX = new JLabel("0.0");
-  JLabel targetY = new JLabel("0.0");
-  JLabel targetZ = new JLabel("0.0");
+	JLabel targetX = new JLabel("0.0");
+	JLabel targetY = new JLabel("0.0");
+	JLabel targetZ = new JLabel("0.0");
 
-  JLabel dhT = new JLabel("0.0");
-  JLabel speedLast = new JLabel("0.0");
+	JLabel dhT = new JLabel("0.0");
+	JLabel speedLast = new JLabel("0.0");
 
-  JLabel power = new JLabel("0.0");
+	JLabel power = new JLabel("0.0");
 
-  JLabel headingCurrent = new JLabel("0.0");
-  JLabel headingTarget = new JLabel("0.0");
-  JLabel headingLast = new JLabel("0.0");
-  JLabel headingDelta = new JLabel("0.0");
-  JLabel headingSpeed = new JLabel("0.0");
+	JLabel headingCurrent = new JLabel("0.0");
+	JLabel headingTarget = new JLabel("0.0");
+	JLabel headingLast = new JLabel("0.0");
+	JLabel headingDelta = new JLabel("0.0");
+	JLabel headingSpeed = new JLabel("0.0");
 
-  JLabel directionCurrent = new JLabel("0.0");
-  JLabel directionTarget = new JLabel("0.0");
+	JLabel directionCurrent = new JLabel("0.0");
+	JLabel directionTarget = new JLabel("0.0");
 
-  JLabel inMotion = new JLabel("false");
+	JLabel inMotion = new JLabel("false");
 
-  public MobilePlatformGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
-    display.setLayout(new FlowLayout());
+	public MobilePlatformGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
+		display.setLayout(new FlowLayout());
 
-    // position
-    setLeftTitle("position");
-    addLeftLine("(x,y) (", positionX, ",", positionY, ")");
-    addLeftLine("inMotion ", inMotion);
+		// position
+		setLeftTitle("position");
+		addLeftLine("(x,y) (", positionX, ",", positionY, ")");
+		addLeftLine("inMotion ", inMotion);
 
-    setTitle("heading");
-    addLine("current ", headingCurrent);
-    addLine("last    ", headingLast);
-    addLine("dT      ", dhT);
-    addLine("speed   ", headingSpeed);
+		setTitle("heading");
+		addLine("current ", headingCurrent);
+		addLine("last    ", headingLast);
+		addLine("dT      ", dhT);
+		addLine("speed   ", headingSpeed);
 
-    // target
-    setRightTitle("target");
-    addRightLine("(x,y)         (", targetX, ",", targetY, ")");
-    addRightLine("bearing ", headingTarget);
-    addRightLine("delta ", headingDelta);
-    addRightLine("direction ", directionTarget);
+		// target
+		setRightTitle("target");
+		addRightLine("(x,y)         (", targetX, ",", targetY, ")");
+		addRightLine("bearing ", headingTarget);
+		addRightLine("delta ", headingDelta);
+		addRightLine("direction ", directionTarget);
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-  }
+	@Override
+	public void subscribeGui() {
+	}
 
-  @Override
-  public void unsubscribeGui() {
-  }
+	@Override
+	public void unsubscribeGui() {
+	}
 
-  /*
-   * Service State change - this method will be called when a "broadcastState"
-   * method is called which triggers a publishState. This event handler is
-   * typically used when data or state information in the service has changed,
-   * and the UI should update to reflect this changed state.
-   */
-  public void onState(MobilePlatform template) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	/*
+	 * Service State change - this method will be called when a "broadcastState"
+	 * method is called which triggers a publishState. This event handler is
+	 * typically used when data or state information in the service has changed, and
+	 * the UI should update to reflect this changed state.
+	 */
+	public void onState(MobilePlatform template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-      }
-    });
-  }
+			}
+		});
+	}
 
 }

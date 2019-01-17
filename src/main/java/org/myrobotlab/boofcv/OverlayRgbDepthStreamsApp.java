@@ -40,56 +40,56 @@ import java.awt.image.BufferedImage;
  * @author Peter Abeles
  */
 public class OverlayRgbDepthStreamsApp implements StreamOpenKinectRgbDepth.Listener {
-  {
-    // be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
-    // location of your shared library!
-    NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
-  }
+	{
+		// be sure to set OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY to the
+		// location of your shared library!
+		NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
+	}
 
-  Resolution resolution = Resolution.MEDIUM;
+	Resolution resolution = Resolution.MEDIUM;
 
-  BufferedImage buffRgb;
-  BufferedImage buffDepth;
+	BufferedImage buffRgb;
+	BufferedImage buffDepth;
 
-  ImagePanel gui;
+	ImagePanel gui;
 
-  public void process() {
+	public void process() {
 
-    int w = UtilOpenKinect.getWidth(resolution);
-    int h = UtilOpenKinect.getHeight(resolution);
+		int w = UtilOpenKinect.getWidth(resolution);
+		int h = UtilOpenKinect.getHeight(resolution);
 
-    buffRgb = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-    buffDepth = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		buffRgb = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		buffDepth = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
-    gui = ShowImages.showWindow(buffRgb, "Kinect Overlay");
+		gui = ShowImages.showWindow(buffRgb, "Kinect Overlay");
 
-    StreamOpenKinectRgbDepth stream = new StreamOpenKinectRgbDepth();
-    Context kinect = Freenect.createContext();
+		StreamOpenKinectRgbDepth stream = new StreamOpenKinectRgbDepth();
+		Context kinect = Freenect.createContext();
 
-    if (kinect.numDevices() < 0)
-      throw new RuntimeException("No kinect found!");
+		if (kinect.numDevices() < 0)
+			throw new RuntimeException("No kinect found!");
 
-    Device device = kinect.openDevice(0);
-    stream.start(device, resolution, this);
-  }
+		Device device = kinect.openDevice(0);
+		stream.start(device, resolution, this);
+	}
 
-  @Override
-  public void processKinect(Planar<GrayU8> rgb, GrayU16 depth, long timeRgb, long timeDepth) {
-    VisualizeImageData.disparity(depth, buffDepth, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
-    ConvertBufferedImage.convertTo_U8(rgb, buffRgb, true);
+	@Override
+	public void processKinect(Planar<GrayU8> rgb, GrayU16 depth, long timeRgb, long timeDepth) {
+		VisualizeImageData.disparity(depth, buffDepth, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
+		ConvertBufferedImage.convertTo_U8(rgb, buffRgb, true);
 
-    Graphics2D g2 = buffRgb.createGraphics();
-    float alpha = 0.5f;
-    int type = AlphaComposite.SRC_OVER;
-    AlphaComposite composite = AlphaComposite.getInstance(type, alpha);
-    g2.setComposite(composite);
-    g2.drawImage(buffDepth, 0, 0, null);
+		Graphics2D g2 = buffRgb.createGraphics();
+		float alpha = 0.5f;
+		int type = AlphaComposite.SRC_OVER;
+		AlphaComposite composite = AlphaComposite.getInstance(type, alpha);
+		g2.setComposite(composite);
+		g2.drawImage(buffDepth, 0, 0, null);
 
-    gui.repaint();
-  }
+		gui.repaint();
+	}
 
-  public static void main(String args[]) {
-    OverlayRgbDepthStreamsApp app = new OverlayRgbDepthStreamsApp();
-    app.process();
-  }
+	public static void main(String args[]) {
+		OverlayRgbDepthStreamsApp app = new OverlayRgbDepthStreamsApp();
+		app.process();
+	}
 }

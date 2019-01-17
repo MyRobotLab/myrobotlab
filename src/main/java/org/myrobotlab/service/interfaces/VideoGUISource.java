@@ -28,6 +28,6 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.swing.VideoWidget;
 
 public interface VideoGUISource {
-  public VideoWidget getLocalDisplay();
+	public VideoWidget getLocalDisplay();
 
 }

@@ -41,92 +41,92 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFloorFinderGui extends OpenCVFilterGui {
 
-  public class AdjustSlider implements ChangeListener {
+	public class AdjustSlider implements ChangeListener {
 
-    @Override
-    public void stateChanged(ChangeEvent e) {
-      JSlider2 slider = (JSlider2) e.getSource();
-      Object[] params = new Object[3];
-      params[0] = name;
-      params[1] = slider.getName();
-      params[2] = slider.getValue();
-      if (slider.getName().compareTo("apertureSize") == 0) {
-        params[2] = slider.getValue() * 2 + 1;
-      }
-      myGui.send(boundServiceName, "setFilterCFG", params);
-      slider.value.setText("" + slider.getValue());
-    }
-  }
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			JSlider2 slider = (JSlider2) e.getSource();
+			Object[] params = new Object[3];
+			params[0] = name;
+			params[1] = slider.getName();
+			params[2] = slider.getValue();
+			if (slider.getName().compareTo("apertureSize") == 0) {
+				params[2] = slider.getValue() * 2 + 1;
+			}
+			myGui.send(boundServiceName, "setFilterCFG", params);
+			slider.value.setText("" + slider.getValue());
+		}
+	}
 
-  public class JSlider2 extends JSlider {
-    private static final long serialVersionUID = 1L;
-    JLabel value = new JLabel();
+	public class JSlider2 extends JSlider {
+		private static final long serialVersionUID = 1L;
+		JLabel value = new JLabel();
 
-    public JSlider2(int vertical, int i, int j, int k) {
-      super(vertical, i, j, k);
-      value.setText("" + k);
-    }
+		public JSlider2(int vertical, int i, int j, int k) {
+			super(vertical, i, j, k);
+			value.setText("" + k);
+		}
 
-  }
+	}
 
-  JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
+	JSlider2 lowThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 0);
 
-  JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
+	JSlider2 highThreshold = new JSlider2(JSlider.HORIZONTAL, 0, 256, 256);
 
-  JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
+	JSlider2 apertureSize = new JSlider2(JSlider.HORIZONTAL, 1, 3, 1);
 
-  AdjustSlider change = new AdjustSlider();
+	AdjustSlider change = new AdjustSlider();
 
-  public OpenCVFloorFinderGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-    super(boundFilterName, boundServiceName, myService);
+	public OpenCVFloorFinderGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+		super(boundFilterName, boundServiceName, myService);
 
-    lowThreshold.setName("lowThreshold");
-    highThreshold.setName("highThreshold");
-    apertureSize.setName("apertureSize");
+		lowThreshold.setName("lowThreshold");
+		highThreshold.setName("highThreshold");
+		apertureSize.setName("apertureSize");
 
-    lowThreshold.addChangeListener(change);
-    highThreshold.addChangeListener(change);
-    apertureSize.addChangeListener(change);
+		lowThreshold.addChangeListener(change);
+		highThreshold.addChangeListener(change);
+		apertureSize.addChangeListener(change);
 
-    GridBagConstraints gc2 = new GridBagConstraints();
+		GridBagConstraints gc2 = new GridBagConstraints();
 
-    TitledBorder title;
-    JPanel j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("threshold");
-    j.setBorder(title);
+		TitledBorder title;
+		JPanel j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("threshold");
+		j.setBorder(title);
 
-    gc.gridx = 0;
-    gc.gridy = 0;
-    j.add(new JLabel("low"), gc);
-    ++gc.gridx;
-    j.add(lowThreshold, gc);
-    ++gc.gridx;
-    j.add(lowThreshold.value, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(new JLabel("high"), gc);
-    ++gc.gridx;
-    j.add(highThreshold, gc);
-    ++gc.gridx;
-    j.add(highThreshold.value, gc);
+		gc.gridx = 0;
+		gc.gridy = 0;
+		j.add(new JLabel("low"), gc);
+		++gc.gridx;
+		j.add(lowThreshold, gc);
+		++gc.gridx;
+		j.add(lowThreshold.value, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(new JLabel("high"), gc);
+		++gc.gridx;
+		j.add(highThreshold, gc);
+		++gc.gridx;
+		j.add(highThreshold.value, gc);
 
-    display.add(j, gc2);
-    gc2.gridy = 1;
-    gc2.gridx = 0;
+		display.add(j, gc2);
+		gc2.gridy = 1;
+		gc2.gridx = 0;
 
-    j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("apertureSize");
-    j.setBorder(title);
-    j.add(apertureSize);
-    j.add(apertureSize.value);
-    display.add(j, gc2);
+		j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("apertureSize");
+		j.setBorder(title);
+		j.add(apertureSize);
+		j.add(apertureSize.value);
+		display.add(j, gc2);
 
-  }
+	}
 
-  @Override
-  public void getFilterState(FilterWrapper filterWrapper) {
-    // TODO Auto-generated method stub
+	@Override
+	public void getFilterState(FilterWrapper filterWrapper) {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
 }

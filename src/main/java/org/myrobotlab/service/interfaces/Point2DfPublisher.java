@@ -4,7 +4,7 @@ import org.myrobotlab.math.geometry.Point2df;
 
 public interface Point2DfPublisher {
 
-  public String getName();
+	public String getName();
 
-  public Point2df publishPoint2Df(Point2df point);
+	public Point2df publishPoint2Df(Point2df point);
 }

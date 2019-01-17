@@ -50,122 +50,122 @@ import org.myrobotlab.mapper.sim.Simulator;
  */
 public class AgentInspector extends JInternalFrame implements Runnable {
 
-  private static final long serialVersionUID = 1L;
-  Simulator simulator;
-  private SimpleAgent agent;
-  private JTextArea textArea;
-  /** The list of all agent's sensor panels */
-  private ArrayList<JPanel> sensorPanels;
-  /** The list of all agent's actuator panels */
-  private ArrayList<JPanel> actuatorPanels;
-  private Thread thread;
-  float framesPerSecond;
-  Font font;
+	private static final long serialVersionUID = 1L;
+	Simulator simulator;
+	private SimpleAgent agent;
+	private JTextArea textArea;
+	/** The list of all agent's sensor panels */
+	private ArrayList<JPanel> sensorPanels;
+	/** The list of all agent's actuator panels */
+	private ArrayList<JPanel> actuatorPanels;
+	private Thread thread;
+	float framesPerSecond;
+	Font font;
 
-  public AgentInspector(Agent agent, boolean useThread, Simulator simulator) {
-    super(agent.getName() + " Inspector");
-    this.agent = agent;
-    this.simulator = simulator;
-    agent.setAgentInspector(this);
-    sensorPanels = new ArrayList<JPanel>();
-    actuatorPanels = new ArrayList<JPanel>();
-    initialize();
-    setFramesPerSecond(2.0f);
-    if (useThread) {
-      thread = new Thread(this);
-      thread.start();
-    }
-  }
+	public AgentInspector(Agent agent, boolean useThread, Simulator simulator) {
+		super(agent.getName() + " Inspector");
+		this.agent = agent;
+		this.simulator = simulator;
+		agent.setAgentInspector(this);
+		sensorPanels = new ArrayList<JPanel>();
+		actuatorPanels = new ArrayList<JPanel>();
+		initialize();
+		setFramesPerSecond(2.0f);
+		if (useThread) {
+			thread = new Thread(this);
+			thread.start();
+		}
+	}
 
-  private void initialize() {
-    font = new Font("Arial", Font.PLAIN, 11);
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-    //
+	private void initialize() {
+		font = new Font("Arial", Font.PLAIN, 11);
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+		//
 
-    // create sensor panels
-    ArrayList<SensorDevice> sensors = agent.getSensorList();
-    for (int i = 0; i < sensors.size(); i++) {
-      SensorDevice sd = (SensorDevice) sensors.get(i);
-      if (sd == null)
-        continue;
-      JPanel sdpanel = sd.createInspectorPanel();
-      if (sdpanel != null) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
-        JLabel l = new JLabel(sd.getName());
-        l.setFont(font);
-        p.add(l);
-        p.add(sdpanel);
-        p.setBorder(BorderFactory.createEtchedBorder());
-        p.setBackground(Color.WHITE);
-        panel.add(p);
-        sensorPanels.add(sdpanel);
-      }
-    }
-    // create Actuators panels
-    ArrayList<ActuatorDevice> actuators = agent.getActuatorList();
-    for (int i = 0; i < actuators.size(); i++) {
-      ActuatorDevice ad = (ActuatorDevice) actuators.get(i);
-      if (ad == null)
-        continue;
-      JPanel adpanel = ad.createInspectorPanel();
-      if (adpanel != null) {
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
-        JLabel l = new JLabel(ad.getName());
-        l.setFont(font);
-        p.add(l);
-        p.add(adpanel);
-        p.setBorder(BorderFactory.createEtchedBorder());
-        p.setBackground(Color.WHITE);
-        panel.add(p);
-        actuatorPanels.add(adpanel);
-      }
-    }
+		// create sensor panels
+		ArrayList<SensorDevice> sensors = agent.getSensorList();
+		for (int i = 0; i < sensors.size(); i++) {
+			SensorDevice sd = (SensorDevice) sensors.get(i);
+			if (sd == null)
+				continue;
+			JPanel sdpanel = sd.createInspectorPanel();
+			if (sdpanel != null) {
+				JPanel p = new JPanel();
+				p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
+				JLabel l = new JLabel(sd.getName());
+				l.setFont(font);
+				p.add(l);
+				p.add(sdpanel);
+				p.setBorder(BorderFactory.createEtchedBorder());
+				p.setBackground(Color.WHITE);
+				panel.add(p);
+				sensorPanels.add(sdpanel);
+			}
+		}
+		// create Actuators panels
+		ArrayList<ActuatorDevice> actuators = agent.getActuatorList();
+		for (int i = 0; i < actuators.size(); i++) {
+			ActuatorDevice ad = (ActuatorDevice) actuators.get(i);
+			if (ad == null)
+				continue;
+			JPanel adpanel = ad.createInspectorPanel();
+			if (adpanel != null) {
+				JPanel p = new JPanel();
+				p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
+				JLabel l = new JLabel(ad.getName());
+				l.setFont(font);
+				p.add(l);
+				p.add(adpanel);
+				p.setBorder(BorderFactory.createEtchedBorder());
+				p.setBackground(Color.WHITE);
+				panel.add(p);
+				actuatorPanels.add(adpanel);
+			}
+		}
 
-    // agent info
-    textArea = new JTextArea("", 8, 6);
-    textArea.setBorder(BorderFactory.createEtchedBorder());
-    textArea.setMinimumSize(new Dimension(200, 200));
-    textArea.setPreferredSize(new Dimension(200, 200));
-    textArea.setFont(font);
-    textArea.setEditable(false);
+		// agent info
+		textArea = new JTextArea("", 8, 6);
+		textArea.setBorder(BorderFactory.createEtchedBorder());
+		textArea.setMinimumSize(new Dimension(200, 200));
+		textArea.setPreferredSize(new Dimension(200, 200));
+		textArea.setFont(font);
+		textArea.setEditable(false);
 
-    panel.add(textArea);
-    setContentPane(panel);
-    // panel.setPreferredSize(new Dimension(200, 280));
-    pack();
+		panel.add(textArea);
+		setContentPane(panel);
+		// panel.setPreferredSize(new Dimension(200, 280));
+		pack();
 
-  }
+	}
 
-  /** update loop */
-  @Override
-  public void run() {
-    while (true) {
-      try {
-        // don't need precise time tick
-        Thread.sleep((int) (1000f / framesPerSecond));
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      update();
-    }
-  }
+	/** update loop */
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				// don't need precise time tick
+				Thread.sleep((int) (1000f / framesPerSecond));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			update();
+		}
+	}
 
-  public void setFramesPerSecond(float fps) {
-    framesPerSecond = fps;
-  }
+	public void setFramesPerSecond(float fps) {
+		framesPerSecond = fps;
+	}
 
-  public void update() {
-    simulator.lock(); // start of critical section
-    textArea.setText(agent.asString());
-    for (int i = 0; i < sensorPanels.size(); i++)
-      ((JPanel) sensorPanels.get(i)).repaint();
-    for (int i = 0; i < actuatorPanels.size(); i++)
-      ((JPanel) actuatorPanels.get(i)).repaint();
+	public void update() {
+		simulator.lock(); // start of critical section
+		textArea.setText(agent.asString());
+		for (int i = 0; i < sensorPanels.size(); i++)
+			((JPanel) sensorPanels.get(i)).repaint();
+		for (int i = 0; i < actuatorPanels.size(); i++)
+			((JPanel) actuatorPanels.get(i)).repaint();
 
-    simulator.unlock(); // end of critical section
-  }
+		simulator.unlock(); // end of critical section
+	}
 
 }

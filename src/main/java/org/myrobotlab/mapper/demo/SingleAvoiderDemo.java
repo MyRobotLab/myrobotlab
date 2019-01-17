@@ -36,86 +36,86 @@ import org.myrobotlab.mapper.sim.RobotFactory;
 /** A collision avoidance demo. */
 public class SingleAvoiderDemo extends Demo {
 
-  public class Robot extends Agent {
-    Point3d coords = new Point3d();
-    Point3d prev = new Point3d();
-    Transform3D t3d = new Transform3D();
+	public class Robot extends Agent {
+		Point3d coords = new Point3d();
+		Point3d prev = new Point3d();
+		Transform3D t3d = new Transform3D();
 
-    RangeSensorBelt sonars, bumpers;
+		RangeSensorBelt sonars, bumpers;
 
-    boolean stop = false;
+		boolean stop = false;
 
-    public Robot(Vector3d position, String name) {
-      super(position, name);
-      // Add sensors
-      bumpers = RobotFactory.addBumperBeltSensor(this, 12);
-      sonars = RobotFactory.addSonarBeltSensor(this, 12);
-    }
+		public Robot(Vector3d position, String name) {
+			super(position, name);
+			// Add sensors
+			bumpers = RobotFactory.addBumperBeltSensor(this, 12);
+			sonars = RobotFactory.addSonarBeltSensor(this, 12);
+		}
 
-    /** Initialize Agent's Behavior */
-    @Override
-    public void initBehavior() {
-      // nothing particular in this case
-    }
+		/** Initialize Agent's Behavior */
+		@Override
+		public void initBehavior() {
+			// nothing particular in this case
+		}
 
-    /** Perform one step of Agent's Behavior */
-    @Override
-    public void performBehavior() {
+		/** Perform one step of Agent's Behavior */
+		@Override
+		public void performBehavior() {
 
-      if (!stop) {
-        if (bumpers.oneHasHit()) {
-          setTranslationalVelocity(-0.1);
-          setRotationalVelocity(0.5 - (0.1 * Math.random()));
+			if (!stop) {
+				if (bumpers.oneHasHit()) {
+					setTranslationalVelocity(-0.1);
+					setRotationalVelocity(0.5 - (0.1 * Math.random()));
 
-        } else if (sonars.oneHasHit()) {
-          // reads the three front quadrants
-          double left = sonars.getFrontLeftQuadrantMeasurement();
-          double right = sonars.getFrontRightQuadrantMeasurement();
-          double front = sonars.getFrontQuadrantMeasurement();
-          // if obstacle near
-          if ((front < 0.7) || (left < 0.7) || (right < 0.7)) {
-            if (left < right)
-              setRotationalVelocity(-1 - (0.1 * Math.random()));
-            else
-              setRotationalVelocity(1 - (0.1 * Math.random()));
-            setTranslationalVelocity(0);
+				} else if (sonars.oneHasHit()) {
+					// reads the three front quadrants
+					double left = sonars.getFrontLeftQuadrantMeasurement();
+					double right = sonars.getFrontRightQuadrantMeasurement();
+					double front = sonars.getFrontQuadrantMeasurement();
+					// if obstacle near
+					if ((front < 0.7) || (left < 0.7) || (right < 0.7)) {
+						if (left < right)
+							setRotationalVelocity(-1 - (0.1 * Math.random()));
+						else
+							setRotationalVelocity(1 - (0.1 * Math.random()));
+						setTranslationalVelocity(0);
 
-          } else {
-            setRotationalVelocity(0);
-            setTranslationalVelocity(0.6);
-          }
-        } else {
-          setTranslationalVelocity(0.8);
-          setRotationalVelocity(0);
-        }
-      }
-      prev.set(coords);
-      getCoords(coords);
-      if ((coords.x < -5.1) || (coords.x > 5.1) || (coords.z < -5.1) || (coords.z > 5.1)) {
-        // stop = true;
-        System.out.println(coords.toString() + "prev-->" + prev.toString());
-        getTranslationTransform(t3d);
-        System.out.println("scale :" + t3d.getScale());
-        this.moveToStartPosition();
-      }
+					} else {
+						setRotationalVelocity(0);
+						setTranslationalVelocity(0.6);
+					}
+				} else {
+					setTranslationalVelocity(0.8);
+					setRotationalVelocity(0);
+				}
+			}
+			prev.set(coords);
+			getCoords(coords);
+			if ((coords.x < -5.1) || (coords.x > 5.1) || (coords.z < -5.1) || (coords.z > 5.1)) {
+				// stop = true;
+				System.out.println(coords.toString() + "prev-->" + prev.toString());
+				getTranslationTransform(t3d);
+				System.out.println("scale :" + t3d.getScale());
+				this.moveToStartPosition();
+			}
 
-    }
+		}
 
-  }
+	}
 
-  public SingleAvoiderDemo() {
-    setUsePhysics(false);
-    boxColor = new Color3f(0.6f, 0.5f, .3f);
+	public SingleAvoiderDemo() {
+		setUsePhysics(false);
+		boxColor = new Color3f(0.6f, 0.5f, .3f);
 
-    setWorldSize(12);
-    add(new Box(new Vector3d(-5, 0, 0), new Vector3f(0.1f, 1, 10), this));
-    add(new Box(new Vector3d(0, 0, -5), new Vector3f(10, 1, 0.1f), this));
-    add(new Box(new Vector3d(5, 0, 0), new Vector3f(0.1f, 1, 10), this));
-    add(new Box(new Vector3d(0, 0, 5), new Vector3f(10, 1, 0.1f), this));
-    add(new Box(new Vector3d(0, 0, 0), new Vector3f(6, 1, 6), this));
+		setWorldSize(12);
+		add(new Box(new Vector3d(-5, 0, 0), new Vector3f(0.1f, 1, 10), this));
+		add(new Box(new Vector3d(0, 0, -5), new Vector3f(10, 1, 0.1f), this));
+		add(new Box(new Vector3d(5, 0, 0), new Vector3f(0.1f, 1, 10), this));
+		add(new Box(new Vector3d(0, 0, 5), new Vector3f(10, 1, 0.1f), this));
+		add(new Box(new Vector3d(0, 0, 0), new Vector3f(6, 1, 6), this));
 
-    // Add a robot.
-    add(new Robot(new Vector3d(4, 0, 4), "my robot"));
+		// Add a robot.
+		add(new Robot(new Vector3d(4, 0, 4), "my robot"));
 
-  }
+	}
 }

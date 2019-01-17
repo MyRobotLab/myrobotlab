@@ -28,150 +28,150 @@ import org.slf4j.Logger;
  * 
  */
 public class ProgressDialog extends JDialog implements ActionListener {
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(ProgressDialog.class);
+	public final static Logger log = LoggerFactory.getLogger(ProgressDialog.class);
 
-  // north
-  JLabel actionText = null;
+	// north
+	JLabel actionText = null;
 
-  // center
-  private JTextArea reportArea = null;
-  JScrollPane scrollPane = null;
-  JLabel spinner = null;
+	// center
+	private JTextArea reportArea = null;
+	JScrollPane scrollPane = null;
+	JLabel spinner = null;
 
-  // south
-  JLabel buttonText = new JLabel("");
-  JButton okToUpdates = new JButton("ok");
-  // JButton ok_update = new JButton("ok");
-  JButton cancel = new JButton("cancel");
-  JButton restart = new JButton("exit"); // FIXME - should be restart
-  JButton noWorky = new JButton("noWorky!");
+	// south
+	JLabel buttonText = new JLabel("");
+	JButton okToUpdates = new JButton("ok");
+	// JButton ok_update = new JButton("ok");
+	JButton cancel = new JButton("cancel");
+	JButton restart = new JButton("exit"); // FIXME - should be restart
+	JButton noWorky = new JButton("noWorky!");
 
-  ArrayList<Status> errors = new ArrayList<Status>();
-  RuntimeGui parent;
+	ArrayList<Status> errors = new ArrayList<Status>();
+	RuntimeGui parent;
 
-  public ProgressDialog(RuntimeGui parent) {
-    super(parent.swingGui.getFrame(), "new components");
-    this.parent = parent;
-    Container display = getContentPane();
+	public ProgressDialog(RuntimeGui parent) {
+		super(parent.swingGui.getFrame(), "new components");
+		this.parent = parent;
+		Container display = getContentPane();
 
-    // north
-    JPanel north = new JPanel();
-    display.add(north, BorderLayout.NORTH);
+		// north
+		JPanel north = new JPanel();
+		display.add(north, BorderLayout.NORTH);
 
-    spinner = new JLabel();
-    north.add(spinner);
+		spinner = new JLabel();
+		north.add(spinner);
 
-    actionText = new JLabel("");
-    north.add(actionText);
+		actionText = new JLabel("");
+		north.add(actionText);
 
-    // center
-    reportArea = new JTextArea("details\n", 5, 10);
-    reportArea.setLineWrap(true);
-    reportArea.setEditable(false);
-    reportArea.setBackground(SystemColor.control);
+		// center
+		reportArea = new JTextArea("details\n", 5, 10);
+		reportArea.setLineWrap(true);
+		reportArea.setEditable(false);
+		reportArea.setBackground(SystemColor.control);
 
-    scrollPane = new JScrollPane(reportArea);
-    DefaultCaret caret = (DefaultCaret) reportArea.getCaret();
-    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		scrollPane = new JScrollPane(reportArea);
+		DefaultCaret caret = (DefaultCaret) reportArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
-    display.add(scrollPane, BorderLayout.CENTER);
+		display.add(scrollPane, BorderLayout.CENTER);
 
-    // south
-    JPanel south = new JPanel();
-    display.add(south, BorderLayout.SOUTH);
-    okToUpdates.addActionListener(this);
-    cancel.addActionListener(this);
-    restart.addActionListener(this);
-    noWorky.addActionListener(this);
-    hideButtons();
-    south.add(okToUpdates);
-    south.add(cancel);
-    south.add(restart);
-    south.add(noWorky);
-    south.add(buttonText);
-    // setPreferredSize(new Dimension(350, 300));
-    setSize(320, 300);
-  }
+		// south
+		JPanel south = new JPanel();
+		display.add(south, BorderLayout.SOUTH);
+		okToUpdates.addActionListener(this);
+		cancel.addActionListener(this);
+		restart.addActionListener(this);
+		noWorky.addActionListener(this);
+		hideButtons();
+		south.add(okToUpdates);
+		south.add(cancel);
+		south.add(restart);
+		south.add(noWorky);
+		south.add(buttonText);
+		// setPreferredSize(new Dimension(350, 300));
+		setSize(320, 300);
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
-    Object source = event.getSource();
-    if (source == noWorky) {
-      parent.swingGui.noWorky();
-    } else if (source == restart) {
-      parent.restart();
-    } else if (source == cancel) {
-      setVisible(false);
-    } else {
-      log.error("unknown source");
-    }
-  }
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object source = event.getSource();
+		if (source == noWorky) {
+			parent.swingGui.noWorky();
+		} else if (source == restart) {
+			parent.restart();
+		} else if (source == cancel) {
+			setVisible(false);
+		} else {
+			log.error("unknown source");
+		}
+	}
 
-  public void addStatus(Status status) {
-    reportArea.append(String.format("%s\n", status.detail));
-    if (status.isError()) {
-      errors.add(status);
-      spinner.setIcon(Util.getImageIcon("error.png"));
-    }
-  }
+	public void addStatus(Status status) {
+		reportArea.append(String.format("%s\n", status.detail));
+		if (status.isError()) {
+			errors.add(status);
+			spinner.setIcon(Util.getImageIcon("error.png"));
+		}
+	}
 
-  public void beginUpdates() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        hideButtons();
-        errors.clear();
-        buttonText.setText("");
-        reportArea.setText("");
-        setVisible(true);
-        actionText.setText("downloading components");
-        spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource("/resource/progressBar.gif")));
-      }
-    });
-  }
+	public void beginUpdates() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				hideButtons();
+				errors.clear();
+				buttonText.setText("");
+				reportArea.setText("");
+				setVisible(true);
+				actionText.setText("downloading components");
+				spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource("/resource/progressBar.gif")));
+			}
+		});
+	}
 
-  public void checkingForUpdates() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        hideButtons();
-        errors.clear();
-        buttonText.setText("");
-        reportArea.setText("");
-        setVisible(true);
-        actionText.setText("checking for updates");
-        spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource("/resource/progressBar.gif")));
-      }
-    });
-  }
+	public void checkingForUpdates() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				hideButtons();
+				errors.clear();
+				buttonText.setText("");
+				reportArea.setText("");
+				setVisible(true);
+				actionText.setText("checking for updates");
+				spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource("/resource/progressBar.gif")));
+			}
+		});
+	}
 
-  public void finished() {
-    hideButtons();
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        if (errors.size() == 0) {
-          spinner.setIcon(Util.getImageIcon("success.png"));
-          restart.setVisible(true);
-        } else {
-          reportArea.append("ERRORS -----------\n");
-          for (int i = 0; i < errors.size(); ++i) {
-            reportArea.append(String.format("%s\n", errors.get(i).detail));
-          }
-          noWorky.setVisible(true);
-        }
-        actionText.setText("finished");
-      }
-    });
-  }
+	public void finished() {
+		hideButtons();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (errors.size() == 0) {
+					spinner.setIcon(Util.getImageIcon("success.png"));
+					restart.setVisible(true);
+				} else {
+					reportArea.append("ERRORS -----------\n");
+					for (int i = 0; i < errors.size(); ++i) {
+						reportArea.append(String.format("%s\n", errors.get(i).detail));
+					}
+					noWorky.setVisible(true);
+				}
+				actionText.setText("finished");
+			}
+		});
+	}
 
-  public void hideButtons() {
-    okToUpdates.setVisible(false);
-    cancel.setVisible(false);
-    restart.setVisible(false);
-    noWorky.setVisible(false);
-  }
+	public void hideButtons() {
+		okToUpdates.setVisible(false);
+		cancel.setVisible(false);
+		restart.setVisible(false);
+		noWorky.setVisible(false);
+	}
 
 }

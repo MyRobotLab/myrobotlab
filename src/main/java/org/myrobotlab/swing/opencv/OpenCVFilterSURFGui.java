@@ -42,44 +42,44 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterSURFGui extends OpenCVFilterGui implements ActionListener {
 
-  JTextField objectFilename = new JTextField("objectFilename", 200);
+	JTextField objectFilename = new JTextField("objectFilename", 200);
 
-  public OpenCVFilterSURFGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-    super(boundFilterName, boundServiceName, myService);
-    objectFilename.addActionListener(this);
-    TitledBorder title;
-    JPanel j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("SURF Config");
-    j.setBorder(title);
-    j.add(new JLabel("Filename"));
-    j.add(objectFilename);
-    display.add(j, gc);
-  }
+	public OpenCVFilterSURFGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+		super(boundFilterName, boundServiceName, myService);
+		objectFilename.addActionListener(this);
+		TitledBorder title;
+		JPanel j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("SURF Config");
+		j.setBorder(title);
+		j.add(new JLabel("Filename"));
+		j.add(objectFilename);
+		display.add(j, gc);
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent event) {
-    // TODO Auto-generated method stub
-    Object o = event.getSource();
-    OpenCVFilterSURF sf = (OpenCVFilterSURF) boundFilter.filter;
-    if (o == objectFilename) {
-      String val = ((JTextField) o).getText();
-      sf.loadObjectImageFilename(val);
-    } else {
-      log.warn("Inknown object invoked in surf filter ui");
-    }
-  }
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		// TODO Auto-generated method stub
+		Object o = event.getSource();
+		OpenCVFilterSURF sf = (OpenCVFilterSURF) boundFilter.filter;
+		if (o == objectFilename) {
+			String val = ((JTextField) o).getText();
+			sf.loadObjectImageFilename(val);
+		} else {
+			log.warn("Inknown object invoked in surf filter ui");
+		}
+	}
 
-  // FIXME - update components :)
-  @Override
-  public void getFilterState(final FilterWrapper filterWrapper) {
-    boundFilter = filterWrapper;
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // OpenCVFilterSURF af = (OpenCVFilterSURF) filterWrapper.filter;
-        // TODO: doesn't do anything yet ? not implemented?
-      }
-    });
+	// FIXME - update components :)
+	@Override
+	public void getFilterState(final FilterWrapper filterWrapper) {
+		boundFilter = filterWrapper;
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// OpenCVFilterSURF af = (OpenCVFilterSURF) filterWrapper.filter;
+				// TODO: doesn't do anything yet ? not implemented?
+			}
+		});
 
-  }
+	}
 }

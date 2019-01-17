@@ -36,64 +36,63 @@ import org.myrobotlab.service.SwingGui;
 
 public class TestCatcherGui extends ServiceGui {
 
-  static final long serialVersionUID = 1L;
-  JLabel catchInteger = new JLabel("0");
-  JButton bindCatchIntegerButton = null;
+	static final long serialVersionUID = 1L;
+	JLabel catchInteger = new JLabel("0");
+	JButton bindCatchIntegerButton = null;
 
-  public TestCatcherGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
+	public TestCatcherGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
 
-    display.add(new JLabel("catchInteger : "));
-    display.add(catchInteger);
-    display.add(getBindCatchIntegerButton());
+		display.add(new JLabel("catchInteger : "));
+		display.add(catchInteger);
+		display.add(getBindCatchIntegerButton());
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-  }
+	@Override
+	public void subscribeGui() {
+	}
 
-  // TODO - reflect and auto-bind (or pull info from the Service/Method
-  // directory
-  // autoBind(ServiceName) would send all NotificationEntries to a service
-  public void bindCatchInteger() {
-    MRLListener MRLListener = new MRLListener("catchInteger", swingGui.getName(), "catchInteger");
-    swingGui.send(boundServiceName, "addListener", MRLListener);
-  }
+	// TODO - reflect and auto-bind (or pull info from the Service/Method
+	// directory
+	// autoBind(ServiceName) would send all NotificationEntries to a service
+	public void bindCatchInteger() {
+		MRLListener MRLListener = new MRLListener("catchInteger", swingGui.getName(), "catchInteger");
+		swingGui.send(boundServiceName, "addListener", MRLListener);
+	}
 
-  public void catchInteger(Integer i) {
-    catchInteger.setText(i.toString());
-  }
+	public void catchInteger(Integer i) {
+		catchInteger.setText(i.toString());
+	}
 
-  @Override
-  public void unsubscribeGui() {
-  }
+	@Override
+	public void unsubscribeGui() {
+	}
 
-  // TODO - generalize this and use it in reflection
-  public JButton getBindCatchIntegerButton() {
-    if (bindCatchIntegerButton == null) {
-      bindCatchIntegerButton = new JButton("connect");
-      bindCatchIntegerButton.addActionListener(new ActionListener() {
+	// TODO - generalize this and use it in reflection
+	public JButton getBindCatchIntegerButton() {
+		if (bindCatchIntegerButton == null) {
+			bindCatchIntegerButton = new JButton("connect");
+			bindCatchIntegerButton.addActionListener(new ActionListener() {
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          swingGui.send(boundServiceName, "catchNothing");
-          /*
-           * if (bindCatchIntegerButton.getText().compareTo("connect") == 0) {
-           * bindCatchIntegerButton.setText("disconnect");
-           * subscribe("catchInteger", "catchInteger", SerializableImage.class);
-           * } else { bindCatchIntegerButton.setText("connect");
-           * unsubscribe("catchInteger", "catchInteger",
-           * SerializableImage.class); }
-           */
-        }
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					swingGui.send(boundServiceName, "catchNothing");
+					/*
+					 * if (bindCatchIntegerButton.getText().compareTo("connect") == 0) {
+					 * bindCatchIntegerButton.setText("disconnect"); subscribe("catchInteger",
+					 * "catchInteger", SerializableImage.class); } else {
+					 * bindCatchIntegerButton.setText("connect"); unsubscribe("catchInteger",
+					 * "catchInteger", SerializableImage.class); }
+					 */
+				}
 
-      });
+			});
 
-    }
+		}
 
-    return bindCatchIntegerButton;
+		return bindCatchIntegerButton;
 
-  }
+	}
 
 }

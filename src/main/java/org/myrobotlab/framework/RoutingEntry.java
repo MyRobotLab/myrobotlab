@@ -28,52 +28,52 @@ package org.myrobotlab.framework;
 import java.io.Serializable;
 
 public class RoutingEntry implements Serializable {
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public int ID;
-  public String name; // routing name - any service which recieves a message
-  // will add its name to the history
-  public long timestamp; // timestamp of message arrival
+	public int ID;
+	public String name; // routing name - any service which recieves a message
+	// will add its name to the history
+	public long timestamp; // timestamp of message arrival
 
-  // option constants
+	// option constants
 
-  // ctors begin ----
-  public RoutingEntry() {
-    name = new String();
-    timestamp = System.currentTimeMillis();
-  }
+	// ctors begin ----
+	public RoutingEntry() {
+		name = new String();
+		timestamp = System.currentTimeMillis();
+	}
 
-  public RoutingEntry(final RoutingEntry other) {
-    this();
-    set(other);
-  }
+	public RoutingEntry(final RoutingEntry other) {
+		this();
+		set(other);
+	}
 
-  // ctors end ----
-  // assignment begin --- todo - look @ clone copy
-  public void set(final RoutingEntry other) {
-    ID = other.ID;
-    name = other.name;
-    timestamp = other.timestamp;
+	// ctors end ----
+	// assignment begin --- todo - look @ clone copy
+	public void set(final RoutingEntry other) {
+		ID = other.ID;
+		name = other.name;
+		timestamp = other.timestamp;
 
-  }
+	}
 
-  // assignment end ---
+	// assignment end ---
 
-  /*
-   * Default format was xml is now JSON TODO - make toStringStyler like spring
-   */
-  @Override
-  public String toString() {
-    StringBuffer ret = new StringBuffer();
-    // ret.append("{<RoutingEntry");
-    ret.append("{");
-    ret.append("\"ID\":\"" + ID + "\"");
-    ret.append("\"name\":" + "\"" + name + "\"");
-    ret.append("\"timestamp\":" + "\"" + timestamp + "\"");
+	/*
+	 * Default format was xml is now JSON TODO - make toStringStyler like spring
+	 */
+	@Override
+	public String toString() {
+		StringBuffer ret = new StringBuffer();
+		// ret.append("{<RoutingEntry");
+		ret.append("{");
+		ret.append("\"ID\":\"" + ID + "\"");
+		ret.append("\"name\":" + "\"" + name + "\"");
+		ret.append("\"timestamp\":" + "\"" + timestamp + "\"");
 
-    // ret.append("</RoutingEntry>");
-    ret.append("}");
-    return ret.toString();
-  }
+		// ret.append("</RoutingEntry>");
+		ret.append("}");
+		return ret.toString();
+	}
 
 }

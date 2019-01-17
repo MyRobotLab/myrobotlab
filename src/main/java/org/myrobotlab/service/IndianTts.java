@@ -21,109 +21,110 @@ import org.slf4j.Logger;
  */
 public class IndianTts extends AbstractSpeechSynthesis {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  transient public final static Logger log = LoggerFactory.getLogger(IndianTts.class);
+	transient public final static Logger log = LoggerFactory.getLogger(IndianTts.class);
 
-  transient HttpClient httpClient = null;
+	transient HttpClient httpClient = null;
 
-  public final String INDIANTTS_USER_USERID = "indiantts.user.userid";
-  public final String INDIANTTS_USER_API = "indiantts.user.api";
+	public final String INDIANTTS_USER_USERID = "indiantts.user.userid";
+	public final String INDIANTTS_USER_API = "indiantts.user.api";
 
-  public IndianTts(String reservedKey) {
-    super(reservedKey);
-  }
+	public IndianTts(String reservedKey) {
+		super(reservedKey);
+	}
 
-  public void startService() {
-    super.startService();
-    httpClient = (HttpClient) startPeer("httpClient");
-    httpClient.startService();
-  }
+	public void startService() {
+		super.startService();
+		httpClient = (HttpClient) startPeer("httpClient");
+		httpClient.startService();
+	}
 
-  @Override
-  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
+	@Override
+	public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
 
-    String userid = getKey(INDIANTTS_USER_USERID);
-    String secret = getKey(INDIANTTS_USER_API);
+		String userid = getKey(INDIANTTS_USER_USERID);
+		String secret = getKey(INDIANTTS_USER_API);
 
-    // check keys
-    if (userid == null) {
-      error("%s needs to be set - http://ivr.indiantts.co.in", INDIANTTS_USER_USERID);
-      return null;
-    }
+		// check keys
+		if (userid == null) {
+			error("%s needs to be set - http://ivr.indiantts.co.in", INDIANTTS_USER_USERID);
+			return null;
+		}
 
-    if (secret == null) {
-      error("%s needs to be set - http://ivr.indiantts.co.in", INDIANTTS_USER_API);
-      return null;
-    }
+		if (secret == null) {
+			error("%s needs to be set - http://ivr.indiantts.co.in", INDIANTTS_USER_API);
+			return null;
+		}
 
-    String encoded = URLEncoder.encode(toSpeak, "UTF-8");
+		String encoded = URLEncoder.encode(toSpeak, "UTF-8");
 
-    // TODO: also the speed setting is passed in as s=
-    String uri = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + secret + "&user_id=" + userid + "&action=play";
+		// TODO: also the speed setting is passed in as s=
+		String uri = "http://ivrapi.indiantts.co.in/tts?type=indiantts&text=" + encoded + "&api_key=" + secret
+				+ "&user_id=" + userid + "&action=play";
 
-    HttpData data = httpClient.getResponse(uri);
-    // check response
-    if (!"audio/x-wav".equals(data.contentType)) {
-      String ret = new String(data.data);
-      error("non-audio data returned - %s", ret);
-      return null;
-    }
+		HttpData data = httpClient.getResponse(uri);
+		// check response
+		if (!"audio/x-wav".equals(data.contentType)) {
+			String ret = new String(data.data);
+			error("non-audio data returned - %s", ret);
+			return null;
+		}
 
-    // save data to cache file if valid
-    if (data.data == null || data.data.length == 0) {
-      error("%s returned 0 byte file !!! - it may block you", getName());
-      return null;
-    } else {
-      FileIO.toFile(audioData.getFileName(), data.data);
-    }
+		// save data to cache file if valid
+		if (data.data == null || data.data.length == 0) {
+			error("%s returned 0 byte file !!! - it may block you", getName());
+			return null;
+		} else {
+			FileIO.toFile(audioData.getFileName(), data.data);
+		}
 
-    return audioData;
-  }
+		return audioData;
+	}
 
-  static public ServiceType getMetaData() {
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(IndianTts.class.getCanonicalName());
-    meta.addDescription("Hindi tts support");
-    meta.setCloudService(true);
-    meta.addCategory("speech");
-    meta.setSponsor("moz4r");
-    meta.addCategory("speech", "sound");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
+		ServiceType meta = AbstractSpeechSynthesis.getMetaData(IndianTts.class.getCanonicalName());
+		meta.addDescription("Hindi tts support");
+		meta.setCloudService(true);
+		meta.addCategory("speech");
+		meta.setSponsor("moz4r");
+		meta.addCategory("speech", "sound");
+		meta.addPeer("httpClient", "HttpClient", "httpClient");
 
-    return meta;
-  }
+		return meta;
+	}
 
-  public void setKeys(String keyId, String keyIdSecret) {
-    Security security = Runtime.getSecurity();
-    security.setKey(INDIANTTS_USER_USERID, keyId);
-    security.setKey(INDIANTTS_USER_API, keyIdSecret);
-    broadcastState();
-  }
+	public void setKeys(String keyId, String keyIdSecret) {
+		Security security = Runtime.getSecurity();
+		security.setKey(INDIANTTS_USER_USERID, keyId);
+		security.setKey(INDIANTTS_USER_API, keyIdSecret);
+		broadcastState();
+	}
 
-  @Override
-  public String[] getKeyNames() {
-    return new String[] { INDIANTTS_USER_USERID, INDIANTTS_USER_API };
-  }
+	@Override
+	public String[] getKeyNames() {
+		return new String[] { INDIANTTS_USER_USERID, INDIANTTS_USER_API };
+	}
 
-  @Override
-  protected void loadVoices() {
-    addVoice("Sri", "female", "hi", null);
-  }
+	@Override
+	protected void loadVoices() {
+		addVoice("Sri", "female", "hi", null);
+	}
 
-  public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 
-    LoggingFactory.init(Level.INFO);
-    // try {
-    // Runtime.start("webgui", "WebGui");
-    Runtime.start("gui", "SwingGui");
-    IndianTts indianTts = (IndianTts) Runtime.start("indianTts", "IndianTts");
-    // Runtime.start("gui", "SwingGui");
-    // demo api key
-    // indianTts.setKeys("XXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-    indianTts.speakBlocking("नमस्ते भारत मित्र");
-    indianTts.speak("नमस्ते नमस्ते भारत मित्र");
+		LoggingFactory.init(Level.INFO);
+		// try {
+		// Runtime.start("webgui", "WebGui");
+		Runtime.start("gui", "SwingGui");
+		IndianTts indianTts = (IndianTts) Runtime.start("indianTts", "IndianTts");
+		// Runtime.start("gui", "SwingGui");
+		// demo api key
+		// indianTts.setKeys("XXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		indianTts.speakBlocking("नमस्ते भारत मित्र");
+		indianTts.speak("नमस्ते नमस्ते भारत मित्र");
 
-    // }
-  }
+		// }
+	}
 }

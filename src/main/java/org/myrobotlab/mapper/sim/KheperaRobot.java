@@ -50,132 +50,128 @@ import com.sun.j3d.utils.geometry.Primitive;
  */
 public class KheperaRobot extends Agent {
 
-  RangeSensorBelt IRBelt;
+	RangeSensorBelt IRBelt;
 
-  /**
-   * Constructs a new KheperaRobot .
-   * 
-   * @param pos
-   *          start position.
-   * @param name
-   *          name
-   */
-  public KheperaRobot(Vector3d pos, String name) {
-    super(pos, name);
+	/**
+	 * Constructs a new KheperaRobot .
+	 * 
+	 * @param pos  start position.
+	 * @param name name
+	 */
+	public KheperaRobot(Vector3d pos, String name) {
+		super(pos, name);
 
-    // dimensions
-    this.height = 0.03f;
-    this.radius = 0.055f / 2f;
-    this.mass = 0.07f;
-    // sensors
-    addIRSensors();
-    // two wheels control.
-    setKinematicModel(new DifferentialKinematic(getRadius()));
-  }
+		// dimensions
+		this.height = 0.03f;
+		this.radius = 0.055f / 2f;
+		this.mass = 0.07f;
+		// sensors
+		addIRSensors();
+		// two wheels control.
+		setKinematicModel(new DifferentialKinematic(getRadius()));
+	}
 
-  /**
-   * Adds the standard set of IR Sensors.
-   * 
-   */
-  private void addIRSensors() {
-    double pi = Math.PI;
-    double range = 0.05;
-    // Angular position of each sensor
-    double anglesPos[] = { pi / 2 - pi / 8, // 0
-        pi / 4, // 1
-        pi / 4 - pi / 6, // 2 front
-        pi / 4 - pi / 3, // 3 front
-        -pi / 4, // 4
-        -pi / 2 + pi / 8, // 5
-        pi + pi / 8, // 6 back
-        pi - pi / 8 // 7 back
-    };
-    // Orientation of each sensor ray.
-    double anglesDirs[] = { pi / 2, // 0
-        pi / 4, // 1
-        0, // 2 front
-        0, // 3 front
-        -pi / 4, // 4
-        -pi / 2, // 5
-        pi, // 6 back
-        pi // 7 back
-    };
-    Vector3d pos[] = new Vector3d[8];
-    Vector3d dirs[] = new Vector3d[8];
-    // construct positions : relative to belt center
-    // and direction : relative to sensor pos.
-    for (int i = 0; i < pos.length; i++) {
-      double a1 = anglesPos[i];
-      double a2 = anglesDirs[i];
-      // Bug corrected : due to z axis inversion must negate sinus
-      pos[i] = new Vector3d(Math.cos(a1) * radius, 0, -Math.sin(a1) * radius);
-      dirs[i] = new Vector3d(Math.cos(a2) * range, 0, -Math.sin(a2) * range);
-    }
-    int flags = RangeSensorBelt.FLAG_SHOW_FULL_SENSOR_RAY;
-    IRBelt = new RangeSensorBelt(pos, dirs, RangeSensorBelt.TYPE_IR, flags);
-    IRBelt.setUpdatePerSecond(3);
-    IRBelt.setName("IR");
-    Vector3d position = new Vector3d(0, 0, 0.0);
-    addSensorDevice(IRBelt, position, 0);
-  }
+	/**
+	 * Adds the standard set of IR Sensors.
+	 * 
+	 */
+	private void addIRSensors() {
+		double pi = Math.PI;
+		double range = 0.05;
+		// Angular position of each sensor
+		double anglesPos[] = { pi / 2 - pi / 8, // 0
+				pi / 4, // 1
+				pi / 4 - pi / 6, // 2 front
+				pi / 4 - pi / 3, // 3 front
+				-pi / 4, // 4
+				-pi / 2 + pi / 8, // 5
+				pi + pi / 8, // 6 back
+				pi - pi / 8 // 7 back
+		};
+		// Orientation of each sensor ray.
+		double anglesDirs[] = { pi / 2, // 0
+				pi / 4, // 1
+				0, // 2 front
+				0, // 3 front
+				-pi / 4, // 4
+				-pi / 2, // 5
+				pi, // 6 back
+				pi // 7 back
+		};
+		Vector3d pos[] = new Vector3d[8];
+		Vector3d dirs[] = new Vector3d[8];
+		// construct positions : relative to belt center
+		// and direction : relative to sensor pos.
+		for (int i = 0; i < pos.length; i++) {
+			double a1 = anglesPos[i];
+			double a2 = anglesDirs[i];
+			// Bug corrected : due to z axis inversion must negate sinus
+			pos[i] = new Vector3d(Math.cos(a1) * radius, 0, -Math.sin(a1) * radius);
+			dirs[i] = new Vector3d(Math.cos(a2) * range, 0, -Math.sin(a2) * range);
+		}
+		int flags = RangeSensorBelt.FLAG_SHOW_FULL_SENSOR_RAY;
+		IRBelt = new RangeSensorBelt(pos, dirs, RangeSensorBelt.TYPE_IR, flags);
+		IRBelt.setUpdatePerSecond(3);
+		IRBelt.setName("IR");
+		Vector3d position = new Vector3d(0, 0, 0.0);
+		addSensorDevice(IRBelt, position, 0);
+	}
 
-  /** Create 3D geometry. */
-  @Override
-  protected void create3D() {
-    Color3f color = new Color3f(0.3f, 0.8f, 0.8f);
-    Color3f color2 = new Color3f(1.0f, 0.0f, 0.0f);
-    // body
-    Appearance appear = new Appearance();
-    Material mat = new Material();
-    mat.setDiffuseColor(color);
-    appear.setMaterial(mat);
-    int flags = Primitive.GEOMETRY_NOT_SHARED | Primitive.ENABLE_GEOMETRY_PICKING | Primitive.GENERATE_NORMALS;
-    flags |= Primitive.ENABLE_APPEARANCE_MODIFY;
-    body = new Cylinder(radius, height, flags, appear);
-    // we must be able to change the pick flag of the agent
-    body.setCapability(Node.ALLOW_PICKABLE_READ);
-    body.setCapability(Node.ALLOW_PICKABLE_WRITE);
-    body.setPickable(true);
-    body.setCollidable(true);
-    addChild(body);
-    // direction indicator
-    float coords[] = { radius / 2, height, -radius / 2, //
-        radius / 2, height, radius / 2, //
-        radius, height, 0 //
-    };
-    float normals[] = { 0, 1, 0, 0, 1, 0, 0, 1, 0 };
-    TriangleArray tris = new TriangleArray(coords.length, GeometryArray.COORDINATES | GeometryArray.NORMALS);
-    tris.setCoordinates(0, coords);
-    tris.setNormals(0, normals);
-    appear = new Appearance();
-    appear.setMaterial(new Material(color2, black, color2, white, 100.0f));
-    Shape3D s = new Shape3D(tris, appear);
-    s.setPickable(false);
-    addChild(s);
+	/** Create 3D geometry. */
+	@Override
+	protected void create3D() {
+		Color3f color = new Color3f(0.3f, 0.8f, 0.8f);
+		Color3f color2 = new Color3f(1.0f, 0.0f, 0.0f);
+		// body
+		Appearance appear = new Appearance();
+		Material mat = new Material();
+		mat.setDiffuseColor(color);
+		appear.setMaterial(mat);
+		int flags = Primitive.GEOMETRY_NOT_SHARED | Primitive.ENABLE_GEOMETRY_PICKING | Primitive.GENERATE_NORMALS;
+		flags |= Primitive.ENABLE_APPEARANCE_MODIFY;
+		body = new Cylinder(radius, height, flags, appear);
+		// we must be able to change the pick flag of the agent
+		body.setCapability(Node.ALLOW_PICKABLE_READ);
+		body.setCapability(Node.ALLOW_PICKABLE_WRITE);
+		body.setPickable(true);
+		body.setCollidable(true);
+		addChild(body);
+		// direction indicator
+		float coords[] = { radius / 2, height, -radius / 2, //
+				radius / 2, height, radius / 2, //
+				radius, height, 0 //
+		};
+		float normals[] = { 0, 1, 0, 0, 1, 0, 0, 1, 0 };
+		TriangleArray tris = new TriangleArray(coords.length, GeometryArray.COORDINATES | GeometryArray.NORMALS);
+		tris.setCoordinates(0, coords);
+		tris.setNormals(0, normals);
+		appear = new Appearance();
+		appear.setMaterial(new Material(color2, black, color2, white, 100.0f));
+		Shape3D s = new Shape3D(tris, appear);
+		s.setPickable(false);
+		addChild(s);
 
-    // Add bounds for interactions and collision
-    Bounds bounds = new BoundingSphere(new Point3d(0, 0, 0), radius);
-    setBounds(bounds);
-  }
+		// Add bounds for interactions and collision
+		Bounds bounds = new BoundingSphere(new Point3d(0, 0, 0), radius);
+		setBounds(bounds);
+	}
 
-  /**
-   * Returns the set of IR sensor.
-   * 
-   * @return a RangeSensorBelt.
-   */
-  public RangeSensorBelt getIRSensors() {
-    return IRBelt;
-  }
+	/**
+	 * Returns the set of IR sensor.
+	 * 
+	 * @return a RangeSensorBelt.
+	 */
+	public RangeSensorBelt getIRSensors() {
+		return IRBelt;
+	}
 
-  /**
-   * Sets the wheels velocity.
-   * 
-   * @param left
-   *          wheel velocity in m/s.
-   * @param right
-   *          wheel velocity in m/s.
-   */
-  public void setWheelsVelocity(double left, double right) {
-    ((DifferentialKinematic) kinematicModel).setWheelsVelocity(left, right);
-  }
+	/**
+	 * Sets the wheels velocity.
+	 * 
+	 * @param left  wheel velocity in m/s.
+	 * @param right wheel velocity in m/s.
+	 */
+	public void setWheelsVelocity(double left, double right) {
+		((DifferentialKinematic) kinematicModel).setWheelsVelocity(left, right);
+	}
 }

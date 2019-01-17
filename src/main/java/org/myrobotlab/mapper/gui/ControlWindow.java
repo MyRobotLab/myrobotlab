@@ -38,20 +38,20 @@ import org.myrobotlab.mapper.sim.World;
  */
 public class ControlWindow extends JInternalFrame {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public ControlWindow(World world, Simulator simulator) {
-    super("Control");
-    createGui(world, simulator);
-  }
+	public ControlWindow(World world, Simulator simulator) {
+		super("Control");
+		createGui(world, simulator);
+	}
 
-  private void createGui(World world, Simulator simulator) {
+	private void createGui(World world, Simulator simulator) {
 
-    JPanel panel = new JPanel();
-    setContentPane(panel);
-    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-    panel.add(new WorldControlGUI(world, simulator));
-    panel.add(new SimulatorControlGUI((JFrame) getParent(), simulator));
-    pack();
-  }
+		JPanel panel = new JPanel();
+		setContentPane(panel);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.add(new WorldControlGUI(world, simulator));
+		panel.add(new SimulatorControlGUI((JFrame) getParent(), simulator));
+		pack();
+	}
 }

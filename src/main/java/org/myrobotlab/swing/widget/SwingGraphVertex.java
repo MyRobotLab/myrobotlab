@@ -28,33 +28,33 @@ package org.myrobotlab.swing.widget;
 import java.io.Serializable;
 
 public class SwingGraphVertex implements Serializable {
-  public static enum Type {
-    SERVICE, INPORT, OUTPORT
-  }
+	public static enum Type {
+		SERVICE, INPORT, OUTPORT
+	}
 
-  static final long serialVersionUID = 1L;
-  public String name;
-  public String toolTip;
-  public String canonicalName;
-  public String displayName;
-  public String status;
+	static final long serialVersionUID = 1L;
+	public String name;
+	public String toolTip;
+	public String canonicalName;
+	public String displayName;
+	public String status;
 
-  public Type type;
+	public Type type;
 
-  public SwingGraphVertex() {
-  }
+	public SwingGraphVertex() {
+	}
 
-  public SwingGraphVertex(String name, String canonicalName, String displayName, String toolTip, Type t) {
-    this.name = name;
-    this.canonicalName = canonicalName;
-    this.displayName = displayName;
-    this.toolTip = toolTip;
-    this.type = t;
-  }
+	public SwingGraphVertex(String name, String canonicalName, String displayName, String toolTip, Type t) {
+		this.name = name;
+		this.canonicalName = canonicalName;
+		this.displayName = displayName;
+		this.toolTip = toolTip;
+		this.type = t;
+	}
 
-  @Override
-  public String toString() {
-    return displayName;
-  }
+	@Override
+	public String toString() {
+		return displayName;
+	}
 
 }

@@ -27,15 +27,15 @@ package org.myrobotlab.service.interfaces;
 
 public interface VoltageSensorControl {
 
-  double getPower();
+	double getPower();
 
-  double getCurrent();
+	double getCurrent();
 
-  double getShuntVoltage();
+	double getShuntVoltage();
 
-  double getBusVoltage();
+	double getBusVoltage();
 
-  double getShuntResistance();
+	double getShuntResistance();
 
-  void setShuntResistance(double shuntResistance);
+	void setShuntResistance(double shuntResistance);
 }

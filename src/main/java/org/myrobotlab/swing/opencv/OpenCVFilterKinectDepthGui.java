@@ -44,104 +44,104 @@ import org.myrobotlab.service.SwingGui;
 
 public class OpenCVFilterKinectDepthGui extends OpenCVFilterGui implements ActionListener, ChangeListener {
 
-  JCheckBox useDepth = new JCheckBox("Use depth ");
-  JCheckBox useColor = new JCheckBox("Use color ");
-  JButton clearSamplePoints = new JButton("Clear Points");
+	JCheckBox useDepth = new JCheckBox("Use depth ");
+	JCheckBox useColor = new JCheckBox("Use color ");
+	JButton clearSamplePoints = new JButton("Clear Points");
 
-  public OpenCVFilterKinectDepthGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-    super(boundFilterName, boundServiceName, myService);
-    // updateState((OpenCVFilterKinectDepth) boundFilter.filter); noWorky -
-    // would be nice to have a good reference
-    useDepth.setSelected(true);
-    useColor.setSelected(true);
-    enableListeners();
-    display.setLayout(new BorderLayout());
-    JPanel f = new JPanel();
-    f.add(useDepth);
-    f.add(useColor);
-    display.add(f, BorderLayout.CENTER);
-    display.add(clearSamplePoints, BorderLayout.SOUTH);
-    clearSamplePoints.addActionListener(this);
-  }
+	public OpenCVFilterKinectDepthGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+		super(boundFilterName, boundServiceName, myService);
+		// updateState((OpenCVFilterKinectDepth) boundFilter.filter); noWorky -
+		// would be nice to have a good reference
+		useDepth.setSelected(true);
+		useColor.setSelected(true);
+		enableListeners();
+		display.setLayout(new BorderLayout());
+		JPanel f = new JPanel();
+		f.add(useDepth);
+		f.add(useColor);
+		display.add(f, BorderLayout.CENTER);
+		display.add(clearSamplePoints, BorderLayout.SOUTH);
+		clearSamplePoints.addActionListener(this);
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    Object o = e.getSource();
-    OpenCVFilterKinectDepth filter = (OpenCVFilterKinectDepth) boundFilter.filter;
-    if (o == useDepth) {
-      if (useDepth.isSelected()) {
-        filter.useDepth(true);
-      } else {
-        filter.useDepth(false);
-      }
-    }
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		OpenCVFilterKinectDepth filter = (OpenCVFilterKinectDepth) boundFilter.filter;
+		if (o == useDepth) {
+			if (useDepth.isSelected()) {
+				filter.useDepth(true);
+			} else {
+				filter.useDepth(false);
+			}
+		}
 
-    if (o == useColor) {
-      if (useColor.isSelected()) {
-        filter.useColor(true);
-      } else {
-        filter.useColor(false);
-      }
-    }
+		if (o == useColor) {
+			if (useColor.isSelected()) {
+				filter.useColor(true);
+			} else {
+				filter.useColor(false);
+			}
+		}
 
-    if (o == clearSamplePoints) {
-      filter.clearSamplePoints();
-    }
+		if (o == clearSamplePoints) {
+			filter.clearSamplePoints();
+		}
 
-    // send the updated filter to OpenCV service
-    myGui.send(boundServiceName, "setFilterState", boundFilter);
-  }
+		// send the updated filter to OpenCV service
+		myGui.send(boundServiceName, "setFilterState", boundFilter);
+	}
 
-  // FIXME - rename to onFilterState - its a callback available from the filter
-  @Override
-  public void getFilterState(final FilterWrapper filterWrapper) {
-    boundFilter = filterWrapper;
-    updateState((OpenCVFilterKinectDepth) filterWrapper.filter);
-  }
+	// FIXME - rename to onFilterState - its a callback available from the filter
+	@Override
+	public void getFilterState(final FilterWrapper filterWrapper) {
+		boundFilter = filterWrapper;
+		updateState((OpenCVFilterKinectDepth) filterWrapper.filter);
+	}
 
-  /**
-   * updates the ui based on filter data
-   * 
-   * @param filter
-   */
-  private void updateState(OpenCVFilterKinectDepth filter) {
+	/**
+	 * updates the ui based on filter data
+	 * 
+	 * @param filter
+	 */
+	private void updateState(OpenCVFilterKinectDepth filter) {
 
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        disableListeners();
-        OpenCVFilterKinectDepth myfilter = (OpenCVFilterKinectDepth) boundFilter.filter;
-        if (myfilter.isDepth()) {
-          useDepth.setSelected(true);
-        } else {
-          useDepth.setSelected(true);
-        }
-        if (myfilter.isColor()) {
-          useColor.setSelected(true);
-        } else {
-          useColor.setSelected(true);
-        }
-        enableListeners();
-      }
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				disableListeners();
+				OpenCVFilterKinectDepth myfilter = (OpenCVFilterKinectDepth) boundFilter.filter;
+				if (myfilter.isDepth()) {
+					useDepth.setSelected(true);
+				} else {
+					useDepth.setSelected(true);
+				}
+				if (myfilter.isColor()) {
+					useColor.setSelected(true);
+				} else {
+					useColor.setSelected(true);
+				}
+				enableListeners();
+			}
 
-    });
-  }
+		});
+	}
 
-  private void enableListeners() {
-    useDepth.addActionListener(this);
-    useColor.addActionListener(this);
-  }
+	private void enableListeners() {
+		useDepth.addActionListener(this);
+		useColor.addActionListener(this);
+	}
 
-  private void disableListeners() {
-    useDepth.removeActionListener(this);
-    useColor.removeActionListener(this);
-  }
+	private void disableListeners() {
+		useDepth.removeActionListener(this);
+		useColor.removeActionListener(this);
+	}
 
-  @Override
-  public void stateChanged(ChangeEvent e) {
-    if (boundFilter != null) {
-      myGui.send(boundServiceName, "setFilterState", boundFilter);
-    } // else - adjust gui text only
-  }
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (boundFilter != null) {
+			myGui.send(boundServiceName, "setFilterState", boundFilter);
+		} // else - adjust gui text only
+	}
 
 }

@@ -37,58 +37,58 @@ import java.io.IOException;
  * @author Peter Abeles
  */
 public class PlaybackKinectLogApp {
-  ImageGridPanel gui;
+	ImageGridPanel gui;
 
-  String directory;
+	String directory;
 
-  GrowQueue_I8 data = new GrowQueue_I8();
-  boolean depthIsPng = false;
+	GrowQueue_I8 data = new GrowQueue_I8();
+	boolean depthIsPng = false;
 
-  // image with depth information
-  private GrayU16 depth = new GrayU16(1, 1);
-  // image with color information
-  private Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);
+	// image with depth information
+	private GrayU16 depth = new GrayU16(1, 1);
+	// image with color information
+	private Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);
 
-  BufferedImage outRgb;
-  BufferedImage outDepth;
+	BufferedImage outRgb;
+	BufferedImage outDepth;
 
-  public PlaybackKinectLogApp(String directory) {
-    this.directory = directory;
-  }
+	public PlaybackKinectLogApp(String directory) {
+		this.directory = directory;
+	}
 
-  public void process() throws IOException {
-    parseFrame(0);
+	public void process() throws IOException {
+		parseFrame(0);
 
-    outRgb = new BufferedImage(rgb.getWidth(), rgb.getHeight(), BufferedImage.TYPE_INT_RGB);
-    outDepth = new BufferedImage(depth.getWidth(), depth.getHeight(), BufferedImage.TYPE_INT_RGB);
+		outRgb = new BufferedImage(rgb.getWidth(), rgb.getHeight(), BufferedImage.TYPE_INT_RGB);
+		outDepth = new BufferedImage(depth.getWidth(), depth.getHeight(), BufferedImage.TYPE_INT_RGB);
 
-    gui = new ImageGridPanel(1, 2, outRgb, outDepth);
-    ShowImages.showWindow(gui, "Kinect Data");
+		gui = new ImageGridPanel(1, 2, outRgb, outDepth);
+		ShowImages.showWindow(gui, "Kinect Data");
 
-    int frame = 1;
-    while (true) {
-      parseFrame(frame++);
-      ConvertBufferedImage.convertTo_U8(rgb, outRgb, true);
-      VisualizeImageData.disparity(depth, outDepth, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
-      gui.repaint();
-      BoofMiscOps.pause(30);
-    }
-  }
+		int frame = 1;
+		while (true) {
+			parseFrame(frame++);
+			ConvertBufferedImage.convertTo_U8(rgb, outRgb, true);
+			VisualizeImageData.disparity(depth, outDepth, 0, UtilOpenKinect.FREENECT_DEPTH_MM_MAX_VALUE, 0);
+			gui.repaint();
+			BoofMiscOps.pause(30);
+		}
+	}
 
-  private void parseFrame(int frameNumber) throws IOException {
-    UtilImageIO.loadPPM_U8(String.format("%s/rgb%07d.ppm", directory, frameNumber), rgb, data);
-    if (depthIsPng) {
-      BufferedImage image = UtilImageIO.loadImage(String.format("%s/depth%07d.png", directory, frameNumber));
-      ConvertBufferedImage.convertFrom(image, depth, true);
-    } else {
-      UtilOpenKinect.parseDepth(String.format("%s/depth%07d.depth", directory, frameNumber), depth, data);
-    }
+	private void parseFrame(int frameNumber) throws IOException {
+		UtilImageIO.loadPPM_U8(String.format("%s/rgb%07d.ppm", directory, frameNumber), rgb, data);
+		if (depthIsPng) {
+			BufferedImage image = UtilImageIO.loadImage(String.format("%s/depth%07d.png", directory, frameNumber));
+			ConvertBufferedImage.convertFrom(image, depth, true);
+		} else {
+			UtilOpenKinect.parseDepth(String.format("%s/depth%07d.depth", directory, frameNumber), depth, data);
+		}
 
-  }
+	}
 
-  public static void main(String args[]) throws IOException {
-    PlaybackKinectLogApp app = new PlaybackKinectLogApp("log");
+	public static void main(String args[]) throws IOException {
+		PlaybackKinectLogApp app = new PlaybackKinectLogApp("log");
 
-    app.process();
-  }
+		app.process();
+	}
 }

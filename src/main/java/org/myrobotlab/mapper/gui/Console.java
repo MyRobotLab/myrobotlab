@@ -42,64 +42,64 @@ import javax.swing.ScrollPaneConstants;
  */
 public class Console extends JInternalFrame implements Runnable {
 
-  private static final long serialVersionUID = 1L;
-  Thread thread;
-  PipedOutputStream out;
-  PipedInputStream in;
-  JTextArea jtextArea;
-  JScrollPane jscrollPane;
-  static int MAXLENGHT = 10 * 1024;
+	private static final long serialVersionUID = 1L;
+	Thread thread;
+	PipedOutputStream out;
+	PipedInputStream in;
+	JTextArea jtextArea;
+	JScrollPane jscrollPane;
+	static int MAXLENGHT = 10 * 1024;
 
-  public Console(int sizex, int sizey) {
-    super("System.out");
-    initialize();
-    setSize(sizex, sizey);
-  }
+	public Console(int sizex, int sizey) {
+		super("System.out");
+		initialize();
+		setSize(sizex, sizey);
+	}
 
-  private void initialize() {
-    // redirige la System.out sur un pipe
-    try {
-      out = new PipedOutputStream();
-      in = new PipedInputStream(out);
-    } catch (IOException e) {
-      System.err.println(" IO Exception");
-    }
-    System.setOut(new PrintStream(out));
-    jtextArea = new JTextArea(30, 30);
-    jtextArea.setEditable(false);
-    jtextArea.setAutoscrolls(true);
-    jtextArea.setFont(new Font("Courier", Font.PLAIN, 10));
-    jscrollPane = new JScrollPane(jtextArea);
-    jscrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    setContentPane(jscrollPane);
-    thread = new Thread(this);
-    thread.start();
-    setResizable(true);
-  }
+	private void initialize() {
+		// redirige la System.out sur un pipe
+		try {
+			out = new PipedOutputStream();
+			in = new PipedInputStream(out);
+		} catch (IOException e) {
+			System.err.println(" IO Exception");
+		}
+		System.setOut(new PrintStream(out));
+		jtextArea = new JTextArea(30, 30);
+		jtextArea.setEditable(false);
+		jtextArea.setAutoscrolls(true);
+		jtextArea.setFont(new Font("Courier", Font.PLAIN, 10));
+		jscrollPane = new JScrollPane(jtextArea);
+		jscrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		setContentPane(jscrollPane);
+		thread = new Thread(this);
+		thread.start();
+		setResizable(true);
+	}
 
-  @Override
-  public void run() {
-    while (true) {
-      try {
-        Thread.sleep(100);
-        if (in.available() > 0) {
-          byte buf[] = new byte[in.available()];
-          in.read(buf, 0, buf.length);
-          // blocking should be ?
-          String text = jtextArea.getText();
-          text += new String(buf);
-          int l = text.length();
-          if (l > MAXLENGHT)
-            text = text.substring(l - MAXLENGHT, l - 1);
-          jtextArea.setText(text);
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				Thread.sleep(100);
+				if (in.available() > 0) {
+					byte buf[] = new byte[in.available()];
+					in.read(buf, 0, buf.length);
+					// blocking should be ?
+					String text = jtextArea.getText();
+					text += new String(buf);
+					int l = text.length();
+					if (l > MAXLENGHT)
+						text = text.substring(l - MAXLENGHT, l - 1);
+					jtextArea.setText(text);
 
-          jtextArea.setCaretPosition(jtextArea.getDocument().getLength());
+					jtextArea.setCaretPosition(jtextArea.getDocument().getLength());
 
-        }
-      } catch (IOException e) {
-        System.err.println("Console IO Exception");
-      } catch (InterruptedException e) {
-      }
-    }
-  }
+				}
+			} catch (IOException e) {
+				System.err.println("Console IO Exception");
+			} catch (InterruptedException e) {
+			}
+		}
+	}
 }

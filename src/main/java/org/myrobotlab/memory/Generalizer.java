@@ -10,17 +10,17 @@ import java.util.HashMap;
  */
 public class Generalizer {
 
-  // context - general expression formula
-  // no context - 100 = many
-  // 3 = a few
-  // 2 = a couple
-  // 1 = one
+	// context - general expression formula
+	// no context - 100 = many
+	// 3 = a few
+	// 2 = a couple
+	// 1 = one
 
-  // large medium small
-  HashMap<String, String> context = new HashMap<String, String>();
+	// large medium small
+	HashMap<String, String> context = new HashMap<String, String>();
 
-  // a thing
+	// a thing
 
-  // colors from rgb values
+	// colors from rgb values
 
 }

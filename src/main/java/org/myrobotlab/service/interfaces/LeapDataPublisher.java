@@ -4,8 +4,8 @@ import org.myrobotlab.service.data.LeapData;
 
 public interface LeapDataPublisher {
 
-  public String getName();
+	public String getName();
 
-  public LeapData publishLeapData(LeapData data);
+	public LeapData publishLeapData(LeapData data);
 
 }

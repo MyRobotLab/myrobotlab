@@ -13,21 +13,21 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
  */
 public class ServiceEnvironment implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public URI accessURL;
-  public HashMap<String, ServiceInterface> serviceDirectory; // TODO make
-  // public
-  // & concurrent
-  /**
-   * platform of the environment - this can be used to implement proxy rules
-   * depending on what Services will work on which platform
-   */
-  public Platform platform;
+	public URI accessURL;
+	public HashMap<String, ServiceInterface> serviceDirectory; // TODO make
+	// public
+	// & concurrent
+	/**
+	 * platform of the environment - this can be used to implement proxy rules
+	 * depending on what Services will work on which platform
+	 */
+	public Platform platform;
 
-  public ServiceEnvironment(URI url) {
-    this.accessURL = url;
-    serviceDirectory = new HashMap<String, ServiceInterface>();
-    platform = Platform.getLocalInstance();
-  }
+	public ServiceEnvironment(URI url) {
+		this.accessURL = url;
+		serviceDirectory = new HashMap<String, ServiceInterface>();
+		platform = Platform.getLocalInstance();
+	}
 }

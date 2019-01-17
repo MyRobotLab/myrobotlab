@@ -39,52 +39,51 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterThreshold extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterThreshold.class);
-  transient IplImage gray = null;
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterThreshold.class);
+	transient IplImage gray = null;
 
-  public float lowThreshold = 0.0f;
-  public float highThreshold = 256.0f;
+	public float lowThreshold = 0.0f;
+	public float highThreshold = 256.0f;
 
-  public OpenCVFilterThreshold() {
-    super();
-  }
+	public OpenCVFilterThreshold() {
+		super();
+	}
 
-  public OpenCVFilterThreshold(String name) {
-    super(name);
-  }
+	public OpenCVFilterThreshold(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-    gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+		gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    // CV_THRESH_BINARY
-    // CV_THRESH_BINARY_INV
-    // CV_THRESH_TRUNC
-    // CV_THRESH_TOZERO
-    // CV_THRESH_TOZERO_INV
+		// CV_THRESH_BINARY
+		// CV_THRESH_BINARY_INV
+		// CV_THRESH_TRUNC
+		// CV_THRESH_TOZERO
+		// CV_THRESH_TOZERO_INV
 
-    // cxcore.cvSetImageCOI(image, 1);
+		// cxcore.cvSetImageCOI(image, 1);
 
-    // http://www710.univ-lyon1.fr/~bouakaz/OpenCV-0.9.5/docs/ref/OpenCVRef_ImageProcessing.htm
-    cvThreshold(image, image, lowThreshold, highThreshold, CV_THRESH_BINARY);
+		// http://www710.univ-lyon1.fr/~bouakaz/OpenCV-0.9.5/docs/ref/OpenCVRef_ImageProcessing.htm
+		cvThreshold(image, image, lowThreshold, highThreshold, CV_THRESH_BINARY);
 
-    // must be gray for adaptive
-    /*
-     * cv.cvCvtColor( image, gray, cv.CV_BGR2GRAY );
-     * cv.cvAdaptiveThreshold(gray, gray, 255, cv.CV_ADAPTIVE_THRESH_MEAN_C,
-     * CV_THRESH_BINARY, 7,30);
-     */
-    return image;
-  }
+		// must be gray for adaptive
+		/*
+		 * cv.cvCvtColor( image, gray, cv.CV_BGR2GRAY ); cv.cvAdaptiveThreshold(gray,
+		 * gray, 255, cv.CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7,30);
+		 */
+		return image;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

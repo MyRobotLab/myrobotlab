@@ -45,162 +45,162 @@ import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterInRangeGui extends OpenCVFilterGui implements ChangeListener {
 
-  JCheckBox useHue = new JCheckBox();
-  SliderWithText hueMin = new SliderWithText(JSlider.VERTICAL, 0, 256, 0);
-  SliderWithText hueMax = new SliderWithText(JSlider.VERTICAL, 0, 256, 256);
+	JCheckBox useHue = new JCheckBox();
+	SliderWithText hueMin = new SliderWithText(JSlider.VERTICAL, 0, 256, 0);
+	SliderWithText hueMax = new SliderWithText(JSlider.VERTICAL, 0, 256, 256);
 
-  JCheckBox useSaturation = new JCheckBox();
-  SliderWithText saturationMin = new SliderWithText(JSlider.VERTICAL, 0, 256, 0);
-  SliderWithText saturationMax = new SliderWithText(JSlider.VERTICAL, 0, 256, 256);
+	JCheckBox useSaturation = new JCheckBox();
+	SliderWithText saturationMin = new SliderWithText(JSlider.VERTICAL, 0, 256, 0);
+	SliderWithText saturationMax = new SliderWithText(JSlider.VERTICAL, 0, 256, 256);
 
-  JCheckBox useValue = new JCheckBox();
-  SliderWithText valueMin = new SliderWithText(JSlider.VERTICAL, 0, 256, 0);
-  SliderWithText valueMax = new SliderWithText(JSlider.VERTICAL, 0, 256, 256);
+	JCheckBox useValue = new JCheckBox();
+	SliderWithText valueMin = new SliderWithText(JSlider.VERTICAL, 0, 256, 0);
+	SliderWithText valueMax = new SliderWithText(JSlider.VERTICAL, 0, 256, 256);
 
-  OpenCVFilterInRange myFilter = null;
+	OpenCVFilterInRange myFilter = null;
 
-  public OpenCVFilterInRangeGui(String boundFilterName, String boundServiceName, SwingGui myService) {
-    super(boundFilterName, boundServiceName, myService);
-    // myFilter = (OpenCVFilterInRange) myOpenCVFilter;
-    // myFilter.useHue = true;
+	public OpenCVFilterInRangeGui(String boundFilterName, String boundServiceName, SwingGui myService) {
+		super(boundFilterName, boundServiceName, myService);
+		// myFilter = (OpenCVFilterInRange) myOpenCVFilter;
+		// myFilter.useHue = true;
 
-    hueMin.addChangeListener(this);
-    hueMax.addChangeListener(this);
-    valueMin.addChangeListener(this);
-    valueMax.addChangeListener(this);
-    saturationMin.addChangeListener(this);
-    saturationMax.addChangeListener(this);
+		hueMin.addChangeListener(this);
+		hueMax.addChangeListener(this);
+		valueMin.addChangeListener(this);
+		valueMax.addChangeListener(this);
+		saturationMin.addChangeListener(this);
+		saturationMax.addChangeListener(this);
 
-    useHue.addChangeListener(this);
-    useSaturation.addChangeListener(this);
-    useValue.addChangeListener(this);
+		useHue.addChangeListener(this);
+		useSaturation.addChangeListener(this);
+		useValue.addChangeListener(this);
 
-    display.setLayout(new BorderLayout());
-    JPanel p = new JPanel();
-    // JPanel display = new JPanel();
+		display.setLayout(new BorderLayout());
+		JPanel p = new JPanel();
+		// JPanel display = new JPanel();
 
-    TitledBorder title;
-    JPanel j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("hue");
-    j.setBorder(title);
-    gc.gridx = 0;
-    gc.gridy = 0;
-    j.add(new JLabel("enable"), gc);
-    ++gc.gridx;
-    j.add(useHue, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(new JLabel("  min max"), gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(hueMin, gc);
-    ++gc.gridx;
-    j.add(hueMax, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(hueMin.value, gc);
-    ++gc.gridx;
-    j.add(hueMax.value, gc);
-    p.add(j);
+		TitledBorder title;
+		JPanel j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("hue");
+		j.setBorder(title);
+		gc.gridx = 0;
+		gc.gridy = 0;
+		j.add(new JLabel("enable"), gc);
+		++gc.gridx;
+		j.add(useHue, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(new JLabel("  min max"), gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(hueMin, gc);
+		++gc.gridx;
+		j.add(hueMax, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(hueMin.value, gc);
+		++gc.gridx;
+		j.add(hueMax.value, gc);
+		p.add(j);
 
-    j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("saturation");
-    j.setBorder(title);
-    gc.gridx = 0;
-    gc.gridy = 0;
-    j.add(new JLabel("enable"), gc);
-    ++gc.gridx;
-    j.add(useSaturation, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(new JLabel("  min max"), gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(saturationMin, gc);
-    ++gc.gridx;
-    j.add(saturationMax, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(saturationMin.value, gc);
-    ++gc.gridx;
-    j.add(saturationMax.value, gc);
-    p.add(j);
+		j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("saturation");
+		j.setBorder(title);
+		gc.gridx = 0;
+		gc.gridy = 0;
+		j.add(new JLabel("enable"), gc);
+		++gc.gridx;
+		j.add(useSaturation, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(new JLabel("  min max"), gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(saturationMin, gc);
+		++gc.gridx;
+		j.add(saturationMax, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(saturationMin.value, gc);
+		++gc.gridx;
+		j.add(saturationMax.value, gc);
+		p.add(j);
 
-    j = new JPanel(new GridBagLayout());
-    title = BorderFactory.createTitledBorder("value");
-    j.setBorder(title);
-    gc.gridx = 0;
-    gc.gridy = 0;
-    j.add(new JLabel("enable"), gc);
-    ++gc.gridx;
-    j.add(useValue, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(new JLabel(" min max"), gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(valueMin, gc);
-    ++gc.gridx;
-    j.add(valueMax, gc);
-    ++gc.gridy;
-    gc.gridx = 0;
-    j.add(valueMin.value, gc);
-    ++gc.gridx;
-    j.add(valueMax.value, gc);
-    p.add(j);
+		j = new JPanel(new GridBagLayout());
+		title = BorderFactory.createTitledBorder("value");
+		j.setBorder(title);
+		gc.gridx = 0;
+		gc.gridy = 0;
+		j.add(new JLabel("enable"), gc);
+		++gc.gridx;
+		j.add(useValue, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(new JLabel(" min max"), gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(valueMin, gc);
+		++gc.gridx;
+		j.add(valueMax, gc);
+		++gc.gridy;
+		gc.gridx = 0;
+		j.add(valueMin.value, gc);
+		++gc.gridx;
+		j.add(valueMax.value, gc);
+		p.add(j);
 
-    display.add(p, BorderLayout.CENTER);
+		display.add(p, BorderLayout.CENTER);
 
-  }
+	}
 
-  @Override
-  public void getFilterState(final FilterWrapper filterWrapper) {
-    boundFilter = filterWrapper;
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        // OpenCVFilterInRange bf = (OpenCVFilterInRange) filterWrapper.filter;
-        // TODO: not implemented ?
-      }
-    });
-  }
+	@Override
+	public void getFilterState(final FilterWrapper filterWrapper) {
+		boundFilter = filterWrapper;
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// OpenCVFilterInRange bf = (OpenCVFilterInRange) filterWrapper.filter;
+				// TODO: not implemented ?
+			}
+		});
+	}
 
-  @Override
-  public void stateChanged(ChangeEvent e) {
-    Object o = e.getSource();
-    OpenCVFilterInRange bf = (OpenCVFilterInRange) boundFilter.filter;
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Object o = e.getSource();
+		OpenCVFilterInRange bf = (OpenCVFilterInRange) boundFilter.filter;
 
-    if (o == useHue) {
-      bf.useHue = useHue.getModel().isSelected();
-    } else if (o == hueMin) {
-      bf.hueMinValue = hueMin.getValue();
-      hueMin.setText(hueMin.getValue());
-    } else if (o == hueMax) {
-      bf.hueMaxValue = hueMax.getValue();
-      hueMax.setText(hueMax.getValue());
-    }
+		if (o == useHue) {
+			bf.useHue = useHue.getModel().isSelected();
+		} else if (o == hueMin) {
+			bf.hueMinValue = hueMin.getValue();
+			hueMin.setText(hueMin.getValue());
+		} else if (o == hueMax) {
+			bf.hueMaxValue = hueMax.getValue();
+			hueMax.setText(hueMax.getValue());
+		}
 
-    if (o == useValue) {
-      bf.useValue = useValue.getModel().isSelected();
-    } else if (o == valueMin) {
-      bf.valueMinValue = valueMin.getValue();
-      valueMin.setText(valueMin.getValue());
-    } else if (o == valueMax) {
-      bf.valueMaxValue = valueMax.getValue();
-      valueMax.setText(valueMax.getValue());
-    }
+		if (o == useValue) {
+			bf.useValue = useValue.getModel().isSelected();
+		} else if (o == valueMin) {
+			bf.valueMinValue = valueMin.getValue();
+			valueMin.setText(valueMin.getValue());
+		} else if (o == valueMax) {
+			bf.valueMaxValue = valueMax.getValue();
+			valueMax.setText(valueMax.getValue());
+		}
 
-    if (o == useSaturation) {
-      bf.useSaturation = useSaturation.getModel().isSelected();
-    } else if (o == saturationMin) {
-      bf.saturationMinValue = saturationMin.getValue();
-      saturationMin.setText(saturationMin.getValue());
-    } else if (o == saturationMax) {
-      bf.saturationMaxValue = saturationMax.getValue();
-      saturationMax.setText(saturationMax.getValue());
-    }
+		if (o == useSaturation) {
+			bf.useSaturation = useSaturation.getModel().isSelected();
+		} else if (o == saturationMin) {
+			bf.saturationMinValue = saturationMin.getValue();
+			saturationMin.setText(saturationMin.getValue());
+		} else if (o == saturationMax) {
+			bf.saturationMaxValue = saturationMax.getValue();
+			saturationMax.setText(saturationMax.getValue());
+		}
 
-    setFilterState(bf);
-  }
+		setFilterState(bf);
+	}
 
 }

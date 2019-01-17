@@ -36,31 +36,31 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterErode extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public int numberOfIterations = 1;
+	public int numberOfIterations = 1;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterErode.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterErode.class);
 
-  public OpenCVFilterErode(String name) {
-    super(name);
-  }
+	public OpenCVFilterErode(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    cvErode(image, image, null, numberOfIterations); // 3 iterations
+		cvErode(image, image, null, numberOfIterations); // 3 iterations
 
-    return image;
-  }
+		return image;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

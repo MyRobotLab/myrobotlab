@@ -15,41 +15,41 @@ import org.myrobotlab.document.Document;
  */
 public class NormalizeFieldNames extends AbstractStage {
 
-  @Override
-  public void startStage(StageConfiguration config) {
-    // none.. yet.
-  }
+	@Override
+	public void startStage(StageConfiguration config) {
+		// none.. yet.
+	}
 
-  @Override
-  public List<Document> processDocument(Document doc) {
+	@Override
+	public List<Document> processDocument(Document doc) {
 
-    Set<String> fieldNames = doc.getFields();
-    for (String fieldName : fieldNames) {
-      doc.renameField(fieldName, normalizeFieldName(fieldName));
-    }
-    return null;
-  }
+		Set<String> fieldNames = doc.getFields();
+		for (String fieldName : fieldNames) {
+			doc.renameField(fieldName, normalizeFieldName(fieldName));
+		}
+		return null;
+	}
 
-  private String normalizeFieldName(String fieldName) {
-    // TODO: better field name normalization..
-    String normFieldName = fieldName.replaceAll(" ", "_");
-    normFieldName = normFieldName.replaceAll("/", "_");
-    normFieldName = normFieldName.replaceAll("-", "_");
-    normFieldName = normFieldName.replaceAll("_+", "_");
-    normFieldName = normFieldName.toLowerCase();
-    return normFieldName;
-  }
+	private String normalizeFieldName(String fieldName) {
+		// TODO: better field name normalization..
+		String normFieldName = fieldName.replaceAll(" ", "_");
+		normFieldName = normFieldName.replaceAll("/", "_");
+		normFieldName = normFieldName.replaceAll("-", "_");
+		normFieldName = normFieldName.replaceAll("_+", "_");
+		normFieldName = normFieldName.toLowerCase();
+		return normFieldName;
+	}
 
-  @Override
-  public void stopStage() {
-    // TODO Auto-generated method stub
+	@Override
+	public void stopStage() {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
-  @Override
-  public void flush() {
-    // TODO Auto-generated method stub
+	@Override
+	public void flush() {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
 }

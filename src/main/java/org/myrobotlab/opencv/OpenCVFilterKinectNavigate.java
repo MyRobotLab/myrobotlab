@@ -56,153 +56,153 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterKinectNavigate extends OpenCVFilter {
 
-  // useful data for the kinect is 632 X 480 - 8 pixels on the right edge are
-  // not good data
-  // http://groups.google.com/group/openkinect/browse_thread/thread/6539281cf451ae9e?pli=1
+	// useful data for the kinect is 632 X 480 - 8 pixels on the right edge are
+	// not good data
+	// http://groups.google.com/group/openkinect/browse_thread/thread/6539281cf451ae9e?pli=1
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectNavigate.class);
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectNavigate.class);
 
-  int filter = 7;
-  boolean createMask = false;
+	int filter = 7;
+	boolean createMask = false;
 
-  transient IplImage dst = null;
-  transient IplImage src = null;
-  transient IplImage mask = null;
+	transient IplImage dst = null;
+	transient IplImage src = null;
+	transient IplImage mask = null;
 
-  transient IplImage lastDepthImage = null;
+	transient IplImage lastDepthImage = null;
 
-  int x = 0;
-  int y = 0;
-  int clickCounter = 0;
+	int x = 0;
+	int y = 0;
+	int clickCounter = 0;
 
-  double minX = 0;
-  double maxX = 65535;
-  double minY = 0.0;
-  double maxY = 1.0;
+	double minX = 0;
+	double maxX = 65535;
+	double minY = 0.0;
+	double maxY = 1.0;
 
-  boolean displayCamera = false;
+	boolean displayCamera = false;
 
-  public OpenCVFilterKinectNavigate() {
-    super();
-  }
+	public OpenCVFilterKinectNavigate() {
+		super();
+	}
 
-  public OpenCVFilterKinectNavigate(String name) {
-    super(name);
-  }
+	public OpenCVFilterKinectNavigate(String name) {
+		super(name);
+	}
 
-  public void setDisplayCamera(boolean b) {
-    displayCamera = b;
-  }
+	public void setDisplayCamera(boolean b) {
+		displayCamera = b;
+	}
 
-  public void createMask() {
-    createMask = true;
-  }
+	public void createMask() {
+		createMask = true;
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+	}
 
-  @Override
-  public IplImage process(IplImage image) throws InterruptedException {
+	@Override
+	public IplImage process(IplImage image) throws InterruptedException {
 
-    // INFO - This filter has 2 sources !!!
-    IplImage depth = data.getKinectDepth();
-    if (depth != null) {
+		// INFO - This filter has 2 sources !!!
+		IplImage depth = data.getKinectDepth();
+		if (depth != null) {
 
-      lastDepthImage = depth;
+			lastDepthImage = depth;
 
-      IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1
-                                                                                        // channel
-                                                                                        // for
-                                                                                        // grey
-                                                                                        // rgb
+			IplImage color = IplImage.create(depth.width(), depth.height(), IPL_DEPTH_8U, 3); // 1
+																								// channel
+																								// for
+																								// grey
+																								// rgb
 
-      ByteBuffer colorBuffer = color.getByteBuffer();
-      // it may be deprecated but the "new" function .asByteBuffer() does not
-      // return all data
-      ByteBuffer depthBuffer = depth.getByteBuffer();
+			ByteBuffer colorBuffer = color.getByteBuffer();
+			// it may be deprecated but the "new" function .asByteBuffer() does not
+			// return all data
+			ByteBuffer depthBuffer = depth.getByteBuffer();
 
-      int depthBytesPerChannel = lastDepthImage.depth() / 8;
+			int depthBytesPerChannel = lastDepthImage.depth() / 8;
 
-      // iterate through the depth bytes bytes and convert to HSV / RGB format
-      // map depth gray (0,65535) => 3 x (0,255) HSV :P
-      for (int y = 0; y < depth.height(); y++) { // 480
-        for (int x = 0; x < depth.width(); x++) { // 640
-          int depthIndex = y * depth.widthStep() + x * depth.nChannels() * depthBytesPerChannel;
-          int colorIndex = y * color.widthStep() + x * color.nChannels();
+			// iterate through the depth bytes bytes and convert to HSV / RGB format
+			// map depth gray (0,65535) => 3 x (0,255) HSV :P
+			for (int y = 0; y < depth.height(); y++) { // 480
+				for (int x = 0; x < depth.width(); x++) { // 640
+					int depthIndex = y * depth.widthStep() + x * depth.nChannels() * depthBytesPerChannel;
+					int colorIndex = y * color.widthStep() + x * color.nChannels();
 
-          // Used to read the pixel value - the 0xFF is needed to cast from
-          // an unsigned byte to an int.
-          // int value = depthBuffer.get(depthIndex);// << 8 & 0xFF +
-          // buffer.get(depthIndex+1)& 0xFF;
-          // this is 16 bit depth - I switched the MSB !!!!
-          int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
-          double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
+					// Used to read the pixel value - the 0xFF is needed to cast from
+					// an unsigned byte to an int.
+					// int value = depthBuffer.get(depthIndex);// << 8 & 0xFF +
+					// buffer.get(depthIndex+1)& 0xFF;
+					// this is 16 bit depth - I switched the MSB !!!!
+					int value = (depthBuffer.get(depthIndex + 1) & 0xFF) << 8 | (depthBuffer.get(depthIndex) & 0xFF);
+					double hsv = minY + ((value - minX) * (maxY - minY)) / (maxX - minX);
 
-          Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
+					Color c = Color.getHSBColor((float) hsv, 0.9f, 0.9f);
 
-          if (color.nChannels() == 3) {
-            colorBuffer.put(colorIndex, (byte) c.getBlue());
-            colorBuffer.put(colorIndex + 1, (byte) c.getRed());
-            colorBuffer.put(colorIndex + 2, (byte) c.getGreen());
-          } else if (color.nChannels() == 1) {
-            colorBuffer.put(colorIndex, (byte) c.getBlue());
-          }
+					if (color.nChannels() == 3) {
+						colorBuffer.put(colorIndex, (byte) c.getBlue());
+						colorBuffer.put(colorIndex + 1, (byte) c.getRed());
+						colorBuffer.put(colorIndex + 2, (byte) c.getGreen());
+					} else if (color.nChannels() == 1) {
+						colorBuffer.put(colorIndex, (byte) c.getBlue());
+					}
 
-          // Sets the pixel to a value (greyscale).
-          // colorBuffer.put(index, (byte)hsv);
+					// Sets the pixel to a value (greyscale).
+					// colorBuffer.put(index, (byte)hsv);
 
-          // Sets the pixel to a value (RGB, stored in BGR order).
-          // buffer.put(index, blue);
-          // buffer.put(index + 1, green);
-          // buffer.put(index + 2, red);
-        }
-      }
+					// Sets the pixel to a value (RGB, stored in BGR order).
+					// buffer.put(index, blue);
+					// buffer.put(index + 1, green);
+					// buffer.put(index + 2, red);
+				}
+			}
 
-      boolean processDepth = false;
+			boolean processDepth = false;
 
-      if (!processDepth) {
-        return color;
-      }
+			if (!processDepth) {
+				return color;
+			}
 
-      // IplImage color = IplImage.create(img.width(), img.height(),
-      // IPL_DEPTH_8U, 3);
-      // cvCvtColor(img, color, CV_GRAY2RGB );
+			// IplImage color = IplImage.create(img.width(), img.height(),
+			// IPL_DEPTH_8U, 3);
+			// cvCvtColor(img, color, CV_GRAY2RGB );
 
-      // BufferedImage image = OpenCV.IplImageToBufferedImage(img);
+			// BufferedImage image = OpenCV.IplImageToBufferedImage(img);
 
-      // SerializableImage.writeToFile(image, "test.png");
+			// SerializableImage.writeToFile(image, "test.png");
 
-      return depth;
+			return depth;
 
-    } else {
-      lastDepthImage = image;
-    }
+		} else {
+			lastDepthImage = image;
+		}
 
-    return image;
-  }
+		return image;
+	}
 
-  public void samplePoint(Integer inX, Integer inY) {
-    ++clickCounter;
-    if (lastDepthImage != null) {
-      x = inX;
-      y = inY;
+	public void samplePoint(Integer inX, Integer inY) {
+		++clickCounter;
+		if (lastDepthImage != null) {
+			x = inX;
+			y = inY;
 
-      ByteBuffer buffer = lastDepthImage.createBuffer();
-      lastDepthImage.depth();
+			ByteBuffer buffer = lastDepthImage.createBuffer();
+			lastDepthImage.depth();
 
-      int bytesPerChannel = lastDepthImage.depth() / 8;
-      int bytesPerX = bytesPerChannel * lastDepthImage.nChannels();
-      int value = buffer.get(y * bytesPerX * lastDepthImage.width() + x * bytesPerX) & 0xFF;
-      log.info("{}", value);
-    }
-  }
+			int bytesPerChannel = lastDepthImage.depth() / 8;
+			int bytesPerX = bytesPerChannel * lastDepthImage.nChannels();
+			int value = buffer.get(y * bytesPerX * lastDepthImage.width() + x * bytesPerX) & 0xFF;
+			log.info("{}", value);
+		}
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

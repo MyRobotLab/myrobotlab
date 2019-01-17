@@ -24,66 +24,65 @@ import org.myrobotlab.framework.Platform;
  */
 public class Connection implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  long lastStateChange = 0;
+	long lastStateChange = 0;
 
-  // states
-  public final static String DISCOVERED = "DISCOVERED";
-  public final static String CONNECTED = "CONNECTED";
-  public final static String UNKNOWN = "UNKNOWN";
-  public final static String DISCONNECTED = "DISCONNECTED";
-  public final static String CONNECTING = "CONNECTING";
+	// states
+	public final static String DISCOVERED = "DISCOVERED";
+	public final static String CONNECTED = "CONNECTED";
+	public final static String UNKNOWN = "UNKNOWN";
+	public final static String DISCONNECTED = "DISCONNECTED";
+	public final static String CONNECTING = "CONNECTING";
 
-  // types - connection / connection-less
+	// types - connection / connection-less
 
-  /**
-   * proto key - mrlkey is mrl://gatewayName/protocolKey
-   * 
-   */
-  private String service;
-  public URI protocolKey;
-  public String prefix;
-  public Platform platform;
+	/**
+	 * proto key - mrlkey is mrl://gatewayName/protocolKey
+	 * 
+	 */
+	private String service;
+	public URI protocolKey;
+	public String prefix;
+	public Platform platform;
 
-  // String mode; // adaptive ?
-  public String state = UNKNOWN; // adaptive ?
+	// String mode; // adaptive ?
+	public String state = UNKNOWN; // adaptive ?
 
-  // statistics and info
-  public int rx = 0;
-  public int tx = 0;
+	// statistics and info
+	public int rx = 0;
+	public int tx = 0;
 
-  public String rxSender;
-  public String rxSendingMethod;
-  public String rxName;
-  public String rxMethod;
+	public String rxSender;
+	public String rxSendingMethod;
+	public String rxName;
+	public String rxMethod;
 
-  public String txSender;
-  public String txSendingMethod;
-  public String txName;
-  public String txMethod;
+	public String txSender;
+	public String txSendingMethod;
+	public String txName;
+	public String txMethod;
 
-  public boolean authenticated = false;
+	public boolean authenticated = false;
 
-  public HashMap<String, String> addInfo = new HashMap<String, String>();
+	public HashMap<String, String> addInfo = new HashMap<String, String>();
 
-  public Connection() {
-  }
+	public Connection() {
+	}
 
-  public Connection(String gatewayName, URI protocolKey) {
-    this.service = gatewayName;
-    this.protocolKey = protocolKey;
-    /*
-     * try { this.protocolKey = new URI(String.format("mrl://%s/%s",
-     * gatewayName, uri)); } catch (URISyntaxException e) {
-     * Logging.logException(e); }
-     */
-  }
+	public Connection(String gatewayName, URI protocolKey) {
+		this.service = gatewayName;
+		this.protocolKey = protocolKey;
+		/*
+		 * try { this.protocolKey = new URI(String.format("mrl://%s/%s", gatewayName,
+		 * uri)); } catch (URISyntaxException e) { Logging.logException(e); }
+		 */
+	}
 
-  @Override
-  public String toString() {
-    return String.format("%s %s rx %d %s.%s --> %s.%s tx %d %s.%s --> %s.%s", protocolKey, state, rx, rxSender, rxSendingMethod, rxName, rxMethod, tx, txSender, txSendingMethod,
-        txName, txMethod);
-  }
+	@Override
+	public String toString() {
+		return String.format("%s %s rx %d %s.%s --> %s.%s tx %d %s.%s --> %s.%s", protocolKey, state, rx, rxSender,
+				rxSendingMethod, rxName, rxMethod, tx, txSender, txSendingMethod, txName, txMethod);
+	}
 
 }

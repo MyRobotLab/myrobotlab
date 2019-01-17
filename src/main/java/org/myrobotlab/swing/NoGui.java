@@ -39,41 +39,41 @@ import org.slf4j.Logger;
 
 public class NoGui extends ServiceGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(NoGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(NoGui.class);
 
-  public NoGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
-    ServiceInterface si = Runtime.getService(boundServiceName);
-    addTopLine(String.format("%s does not have a user interface", si.getSimpleName()));
-  }
+	public NoGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
+		ServiceInterface si = Runtime.getService(boundServiceName);
+		addTopLine(String.format("%s does not have a user interface", si.getSimpleName()));
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent arg0) {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-  }
+	@Override
+	public void subscribeGui() {
+	}
 
-  @Override
-  public void unsubscribeGui() {
-  }
+	@Override
+	public void unsubscribeGui() {
+	}
 
-  /*
-   * Service State change - this method will be called when a "broadcastState"
-   * method is called which triggers a publishState. This event handler is
-   * typically used when data or state information in the service has changed,
-   * and the UI should update to reflect this changed state.
-   */
-  public void onState(Service template) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	/*
+	 * Service State change - this method will be called when a "broadcastState"
+	 * method is called which triggers a publishState. This event handler is
+	 * typically used when data or state information in the service has changed, and
+	 * the UI should update to reflect this changed state.
+	 */
+	public void onState(Service template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-      }
-    });
-  }
+			}
+		});
+	}
 
 }

@@ -4,10 +4,10 @@ import org.myrobotlab.document.connector.ConnectorState;
 
 public interface DocumentConnector {
 
-  public void startCrawling();
+	public void startCrawling();
 
-  public ConnectorState getConnectorState();
+	public ConnectorState getConnectorState();
 
-  public void stopCrawling();
+	public void stopCrawling();
 
 }

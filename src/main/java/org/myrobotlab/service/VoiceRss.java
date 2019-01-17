@@ -44,125 +44,127 @@ import com.voicerss.tts.VoiceProvider;
 
 public class VoiceRss extends AbstractSpeechSynthesis {
 
-  transient public final static Logger log = LoggerFactory.getLogger(VoiceRss.class);
-  private static final long serialVersionUID = 1L;
+	transient public final static Logger log = LoggerFactory.getLogger(VoiceRss.class);
+	private static final long serialVersionUID = 1L;
 
-  public final static String VOICERSS_API_KEY = "voicerss.api.key";
-  public Integer rate = 0;
+	public final static String VOICERSS_API_KEY = "voicerss.api.key";
+	public Integer rate = 0;
 
-  public VoiceRss(String n) {
-    super(n);
-  }
+	public VoiceRss(String n) {
+		super(n);
+	}
 
-  public Integer getRate() {
-    return rate;
-  }
+	public Integer getRate() {
+		return rate;
+	}
 
-  // FIXME - this needs to be universal e.g. -1.0 <=> 0 <=> 1.0
-  public void setRate(Integer rate) {
-    if (rate < -10) {
-      rate = -10;
-    }
-    if (rate > 10) {
-      rate = 10;
-    }
-    this.rate = rate;
-  }
+	// FIXME - this needs to be universal e.g. -1.0 <=> 0 <=> 1.0
+	public void setRate(Integer rate) {
+		if (rate < -10) {
+			rate = -10;
+		}
+		if (rate > 10) {
+			rate = 10;
+		}
+		this.rate = rate;
+	}
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-    Runtime.start("gui", "SwingGui");
-    VoiceRss voicerss = (VoiceRss) Runtime.start("voicerss", "VoiceRss");
+	public static void main(String[] args) {
+		LoggingFactory.init(Level.INFO);
+		Runtime.start("gui", "SwingGui");
+		VoiceRss voicerss = (VoiceRss) Runtime.start("voicerss", "VoiceRss");
 
-    // add your api key
-    // use gui to do this, or force it here only ONCE :
-    // speech.setKeys("xxx");
-    // speech.setVoice("en-gb");
-    voicerss.setRate(0);
+		// add your api key
+		// use gui to do this, or force it here only ONCE :
+		// speech.setKeys("xxx");
+		// speech.setVoice("en-gb");
+		voicerss.setRate(0);
 
-    // TODO: fix the volume control
-    // speech.setVolume(0);
-    voicerss.speakBlocking("it works, yes I believe it does");
-    voicerss.speakBlocking("yes yes. oh good. excellent!");
-    voicerss.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
-    voicerss.speakBlocking("I'm afraid I can't do that.");
-    voicerss.speak("I am your R 2 D 2 #R2D2#");
-  }
+		// TODO: fix the volume control
+		// speech.setVolume(0);
+		voicerss.speakBlocking("it works, yes I believe it does");
+		voicerss.speakBlocking("yes yes. oh good. excellent!");
+		voicerss.speakBlocking(
+				"to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
+		voicerss.speakBlocking("I'm afraid I can't do that.");
+		voicerss.speak("I am your R 2 D 2 #R2D2#");
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    // ServiceType meta = new ServiceType(VoiceRss.class.getCanonicalName());
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(VoiceRss.class.getCanonicalName());
-    meta.addDescription("VoiceRss speech synthesis service.");
-    meta.addCategory("speech");
-    meta.setSponsor("moz4r");
-    meta.addCategory("speech", "sound");
-    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.setCloudService(true);
-    meta.addDependency("com.voicerss", "tts", "1.0");
-    return meta;
-  }
+	/**
+	 * This static method returns all the details of the class without it having to
+	 * be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
+		// ServiceType meta = new ServiceType(VoiceRss.class.getCanonicalName());
+		ServiceType meta = AbstractSpeechSynthesis.getMetaData(VoiceRss.class.getCanonicalName());
+		meta.addDescription("VoiceRss speech synthesis service.");
+		meta.addCategory("speech");
+		meta.setSponsor("moz4r");
+		meta.addCategory("speech", "sound");
+		meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
+		meta.setCloudService(true);
+		meta.addDependency("com.voicerss", "tts", "1.0");
+		return meta;
+	}
 
-  @Override
-  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception {
-    if (isReady()) {
-      VoiceProvider tts = new VoiceProvider(getKey(VOICERSS_API_KEY));
-      String fileName = getLocalFileName(toSpeak);
-      VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice().getVoiceProvider().toString()); // Languages.English_UnitedStates
-      params.setCodec(AudioCodec.MP3);
-      params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
-      params.setBase64(false);
-      params.setSSML(false); // FIXME - make true
-      params.setRate(rate);
-      byte[] b = tts.speech(params);
-      FileIO.toFile(fileName, b);
-      return new AudioData(fileName);
-    }
-    return null;
-  }
+	@Override
+	public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception {
+		if (isReady()) {
+			VoiceProvider tts = new VoiceProvider(getKey(VOICERSS_API_KEY));
+			String fileName = getLocalFileName(toSpeak);
+			VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"),
+					getVoice().getVoiceProvider().toString()); // Languages.English_UnitedStates
+			params.setCodec(AudioCodec.MP3);
+			params.setFormat(AudioFormat.Format_44KHZ.AF_44khz_16bit_stereo);
+			params.setBase64(false);
+			params.setSSML(false); // FIXME - make true
+			params.setRate(rate);
+			byte[] b = tts.speech(params);
+			FileIO.toFile(fileName, b);
+			return new AudioData(fileName);
+		}
+		return null;
+	}
 
-  @Override
-  public String[] getKeyNames() {
-    return new String[] { VOICERSS_API_KEY };
-  }
+	@Override
+	public String[] getKeyNames() {
+		return new String[] { VOICERSS_API_KEY };
+	}
 
-  @Override
-  protected void loadVoices() {
-    // derived from
-    // http://www.voicerss.org/api/documentation.aspx
-    addVoice("Lei", "female", "ca-es", "ca-es"); // Catalan
-    addVoice("Hui", "female", "zh-cn", "zh-cn"); // Chinese (China)
-    addVoice("Jiao", "female", "zh-hk", "zh-hk"); // Chinese (Hong Kong)
-    addVoice("Ju", "female", "zh-tw", "zh-tw"); // Chinese (Taiwan)
-    addVoice("Ella", "female", "da-dk", "da-dk"); // Danish
-    addVoice("Eva", "female", "nl-nl", "nl-nl"); // Dutch
-    addVoice("Agnes", "female", "en-au", "en-au"); // English (Australia)
-    addVoice("Chloe", "female", "en-ca", "en-ca"); // English (Canada)
-    addVoice("Mary", "female", "en-gb", "en-gb"); // English (Great Britain)
-    addVoice("Aditi", "female", "en-in", "en-in"); // English (India)
-    addVoice("Sally", "female", "en-us", "en-us"); // English (United States)
-    addVoice("Ansa", "female", "fi-fi", "fi-fi"); // Finnish
-    addVoice("Adelle", "female", "fr-ca", "fr-ca"); // French (Canada)
-    addVoice("Adyelya", "female", "fr-fr", "fr-fr"); // French (France)
-    addVoice("Anna", "female", "de-de", "de-de"); // German
-    addVoice("Alessandra", "female", "it-it", "it-it"); // Italian
-    addVoice("Akari", "female", "ja-jp", "ja-jp"); // Japanese
-    addVoice("Su", "female", "ko-kr", "ko-kr"); // Korean
-    addVoice("Anette", "female", "nb-no", "nb-no"); // Norwegian
-    addVoice("Agata", "female", "pl-pl", "pl-pl"); // Polish
-    addVoice("Analia", "female", "pt-br", "pt-br"); // Portuguese (Brazil)
-    addVoice("Balei", "female", "pt-pt", "pt-pt"); // Portuguese (Portugal)
-    addVoice("Anastasia", "female", "ru-ru", "ru-ru"); // Russian
-    addVoice("Isabella", "female", "es-mx", "es-mx"); // Spanish (Mexico)
-    addVoice("Camila", "female", "es-es", "es-es"); // Spanish (Spain)
-    addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
+	@Override
+	protected void loadVoices() {
+		// derived from
+		// http://www.voicerss.org/api/documentation.aspx
+		addVoice("Lei", "female", "ca-es", "ca-es"); // Catalan
+		addVoice("Hui", "female", "zh-cn", "zh-cn"); // Chinese (China)
+		addVoice("Jiao", "female", "zh-hk", "zh-hk"); // Chinese (Hong Kong)
+		addVoice("Ju", "female", "zh-tw", "zh-tw"); // Chinese (Taiwan)
+		addVoice("Ella", "female", "da-dk", "da-dk"); // Danish
+		addVoice("Eva", "female", "nl-nl", "nl-nl"); // Dutch
+		addVoice("Agnes", "female", "en-au", "en-au"); // English (Australia)
+		addVoice("Chloe", "female", "en-ca", "en-ca"); // English (Canada)
+		addVoice("Mary", "female", "en-gb", "en-gb"); // English (Great Britain)
+		addVoice("Aditi", "female", "en-in", "en-in"); // English (India)
+		addVoice("Sally", "female", "en-us", "en-us"); // English (United States)
+		addVoice("Ansa", "female", "fi-fi", "fi-fi"); // Finnish
+		addVoice("Adelle", "female", "fr-ca", "fr-ca"); // French (Canada)
+		addVoice("Adyelya", "female", "fr-fr", "fr-fr"); // French (France)
+		addVoice("Anna", "female", "de-de", "de-de"); // German
+		addVoice("Alessandra", "female", "it-it", "it-it"); // Italian
+		addVoice("Akari", "female", "ja-jp", "ja-jp"); // Japanese
+		addVoice("Su", "female", "ko-kr", "ko-kr"); // Korean
+		addVoice("Anette", "female", "nb-no", "nb-no"); // Norwegian
+		addVoice("Agata", "female", "pl-pl", "pl-pl"); // Polish
+		addVoice("Analia", "female", "pt-br", "pt-br"); // Portuguese (Brazil)
+		addVoice("Balei", "female", "pt-pt", "pt-pt"); // Portuguese (Portugal)
+		addVoice("Anastasia", "female", "ru-ru", "ru-ru"); // Russian
+		addVoice("Isabella", "female", "es-mx", "es-mx"); // Spanish (Mexico)
+		addVoice("Camila", "female", "es-es", "es-es"); // Spanish (Spain)
+		addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
 
-  }
+	}
 }

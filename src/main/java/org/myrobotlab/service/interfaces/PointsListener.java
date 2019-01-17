@@ -6,8 +6,8 @@ import org.myrobotlab.kinematics.Point;
 
 public interface PointsListener {
 
-  public String getName();
+	public String getName();
 
-  public void onPoints(List<Point> p);
+	public void onPoints(List<Point> p);
 
 }

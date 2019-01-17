@@ -35,27 +35,27 @@ import org.myrobotlab.mapper.sim.Box;
  */
 public class SimplestDemo extends Demo {
 
-  public class Robot extends Agent {
+	public class Robot extends Agent {
 
-    public Robot(Vector3d position, String name) {
-      super(position, name);
-    }
+		public Robot(Vector3d position, String name) {
+			super(position, name);
+		}
 
-    /** Initialize Agent's Behavior */
-    @Override
-    public void initBehavior() {
-      setTranslationalVelocity(1f);
-    }
+		/** Initialize Agent's Behavior */
+		@Override
+		public void initBehavior() {
+			setTranslationalVelocity(1f);
+		}
 
-    /** Perform one step of Agent's Behavior */
-    @Override
-    public void performBehavior() {
+		/** Perform one step of Agent's Behavior */
+		@Override
+		public void performBehavior() {
 
-    }
-  }
+		}
+	}
 
-  public SimplestDemo() {
-    add(new Box(new Vector3d(10, 0, 0), new Vector3f(3f, 3f, 3f), this));
-    add(new Robot(new Vector3d(0, 0, 0), "robot"));
-  }
+	public SimplestDemo() {
+		add(new Box(new Vector3d(10, 0, 0), new Vector3f(3f, 3f, 3f), this));
+		add(new Robot(new Vector3d(0, 0, 0), "robot"));
+	}
 }

@@ -16,66 +16,66 @@ import org.myrobotlab.document.Document;
  */
 public class JSoupExtractor extends AbstractStage {
 
-  private String htmlField = "html";
-  private String outputField = "links";
-  private String jSoupSelector = "a[href]";
+	private String htmlField = "html";
+	private String outputField = "links";
+	private String jSoupSelector = "a[href]";
 
-  @Override
-  public void startStage(StageConfiguration config) {
-    if (config != null) {
-      htmlField = config.getProperty(htmlField, "html");
-      outputField = config.getProperty("outputField", "links");
-      jSoupSelector = config.getProperty("jSoupSelector", "a[href]");
-    }
-  }
+	@Override
+	public void startStage(StageConfiguration config) {
+		if (config != null) {
+			htmlField = config.getProperty(htmlField, "html");
+			outputField = config.getProperty("outputField", "links");
+			jSoupSelector = config.getProperty("jSoupSelector", "a[href]");
+		}
+	}
 
-  @Override
-  public List<Document> processDocument(Document doc) {
-    for (Object o : doc.getField(htmlField)) {
-      org.jsoup.nodes.Document jSoupDoc = Jsoup.parse(o.toString());
-      Elements links = jSoupDoc.select(jSoupSelector);
-      for (Element link : links) {
-        doc.addToField(outputField, link);
-      }
-    }
+	@Override
+	public List<Document> processDocument(Document doc) {
+		for (Object o : doc.getField(htmlField)) {
+			org.jsoup.nodes.Document jSoupDoc = Jsoup.parse(o.toString());
+			Elements links = jSoupDoc.select(jSoupSelector);
+			for (Element link : links) {
+				doc.addToField(outputField, link);
+			}
+		}
 
-    return null;
-  }
+		return null;
+	}
 
-  @Override
-  public void stopStage() {
-    // TODO Auto-generated method stub
+	@Override
+	public void stopStage() {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
-  @Override
-  public void flush() {
-    // TODO Auto-generated method stub
+	@Override
+	public void flush() {
+		// TODO Auto-generated method stub
 
-  }
+	}
 
-  public String getHtmlField() {
-    return htmlField;
-  }
+	public String getHtmlField() {
+		return htmlField;
+	}
 
-  public void setHtmlField(String htmlField) {
-    this.htmlField = htmlField;
-  }
+	public void setHtmlField(String htmlField) {
+		this.htmlField = htmlField;
+	}
 
-  public String getOutputField() {
-    return outputField;
-  }
+	public String getOutputField() {
+		return outputField;
+	}
 
-  public void setOutputField(String outputField) {
-    this.outputField = outputField;
-  }
+	public void setOutputField(String outputField) {
+		this.outputField = outputField;
+	}
 
-  public String getjSoupSelector() {
-    return jSoupSelector;
-  }
+	public String getjSoupSelector() {
+		return jSoupSelector;
+	}
 
-  public void setjSoupSelector(String jSoupSelector) {
-    this.jSoupSelector = jSoupSelector;
-  }
+	public void setjSoupSelector(String jSoupSelector) {
+		this.jSoupSelector = jSoupSelector;
+	}
 
 }

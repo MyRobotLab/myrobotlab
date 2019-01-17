@@ -29,7 +29,7 @@ package org.myrobotlab.mapper.sim;
  */
 public abstract class ActuatorDevice extends Device {
 
-  ActuatorDevice() {
-  }
+	ActuatorDevice() {
+	}
 
 }

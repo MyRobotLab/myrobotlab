@@ -40,58 +40,58 @@ import org.slf4j.Logger;
 
 public class UltrasonicSensorGui extends ServiceGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(UltrasonicSensorGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(UltrasonicSensorGui.class);
 
-  JProgressBar range;
+	JProgressBar range;
 
-  public UltrasonicSensorGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
-    display.setLayout(new BorderLayout());
+	public UltrasonicSensorGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
+		display.setLayout(new BorderLayout());
 
-    range = new JProgressBar(0, 300);
-    range.setValue(0);
-    range.setStringPainted(true);
-    range.setPreferredSize(new Dimension(380, 25));
+		range = new JProgressBar(0, 300);
+		range.setValue(0);
+		range.setStringPainted(true);
+		range.setPreferredSize(new Dimension(380, 25));
 
-    display.add(range, BorderLayout.NORTH);
-    // JPanel center = new JPanel();
+		display.add(range, BorderLayout.NORTH);
+		// JPanel center = new JPanel();
 
-  }
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent arg0) {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-    subscribe("publishRange");
-  }
+	@Override
+	public void subscribeGui() {
+		subscribe("publishRange");
+	}
 
-  @Override
-  public void unsubscribeGui() {
-    unsubscribe("publishRange");
-  }
+	@Override
+	public void unsubscribeGui() {
+		unsubscribe("publishRange");
+	}
 
-  public void onState(UltrasonicSensor template) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	public void onState(UltrasonicSensor template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-      }
-    });
-  }
+			}
+		});
+	}
 
-  public void onRange(final Double r) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        range.setValue(r.intValue());
-        range.setString(String.format("%d cm", r.intValue()));
-      }
-    });
+	public void onRange(final Double r) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				range.setValue(r.intValue());
+				range.setString(String.format("%d cm", r.intValue()));
+			}
+		});
 
-  }
+	}
 
 }

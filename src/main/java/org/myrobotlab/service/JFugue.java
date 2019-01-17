@@ -41,72 +41,71 @@ import org.slf4j.Logger;
  */
 public class JFugue extends Service {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(JFugue.class);
-  // transient public ManagedPlayer player = new ManagedPlayer();
-  transient public Player player = new Player();
+	public final static Logger log = LoggerFactory.getLogger(JFugue.class);
+	// transient public ManagedPlayer player = new ManagedPlayer();
+	transient public Player player = new Player();
 
-  // TODO - look at JavaSoundDemo - they have a synth & mixer there
+	// TODO - look at JavaSoundDemo - they have a synth & mixer there
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
-    JFugue jfugue = (JFugue) Runtime.start("jfugue", "JFugue");
-    jfugue.play("C");
-    jfugue.playRythm("O..oO...O..oOO..");
-    jfugue.play("C");
-    jfugue.play("C7h");
-    jfugue.play("C5maj7w");
-  }
+	public static void main(String[] args) {
+		LoggingFactory.init(Level.DEBUG);
+		JFugue jfugue = (JFugue) Runtime.start("jfugue", "JFugue");
+		jfugue.play("C");
+		jfugue.playRythm("O..oO...O..oOO..");
+		jfugue.play("C");
+		jfugue.play("C7h");
+		jfugue.play("C5maj7w");
+	}
 
-  public JFugue(String n) {
-    super(n);
-  }
+	public JFugue(String n) {
+		super(n);
+	}
 
-  public void play(Integer i) { // play tone
-    // player.play("[A" + i + "]w");
-    player.play("[" + i + "]");
-  }
+	public void play(Integer i) { // play tone
+		// player.play("[A" + i + "]w");
+		player.play("[" + i + "]");
+	}
 
-  public void play(Rhythm rythm) {
-    player.play(rythm);
-  }
+	public void play(Rhythm rythm) {
+		player.play(rythm);
+	}
 
-  public void play(String s) {
-    player.play(s);
-  }
+	public void play(String s) {
+		player.play(s);
+	}
 
-  public void playRythm(String data) {
-    Rhythm rhythm = new Rhythm();
-    rhythm.addLayer(data);
-    player.play(rhythm.getPattern());
-    /*
-     * rhythm.setLayer(1, "O..oO...O..oOO.."); rhythm.setLayer(2,
-     * "..*...*...*...*."); rhythm.addSubstitution('O', "[BASS_DRUM]i");
-     * rhythm.addSubstitution('o', "Rs [BASS_DRUM]s");
-     * rhythm.addSubstitution('*', "[ACOUSTIC_SNARE]i");
-     * rhythm.addSubstitution('.', "Ri");
-     * 
-     * play(rhythm);
-     */
-  }
+	public void playRythm(String data) {
+		Rhythm rhythm = new Rhythm();
+		rhythm.addLayer(data);
+		player.play(rhythm.getPattern());
+		/*
+		 * rhythm.setLayer(1, "O..oO...O..oOO.."); rhythm.setLayer(2,
+		 * "..*...*...*...*."); rhythm.addSubstitution('O', "[BASS_DRUM]i");
+		 * rhythm.addSubstitution('o', "Rs [BASS_DRUM]s"); rhythm.addSubstitution('*',
+		 * "[ACOUSTIC_SNARE]i"); rhythm.addSubstitution('.', "Ri");
+		 * 
+		 * play(rhythm);
+		 */
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	/**
+	 * This static method returns all the details of the class without it having to
+	 * be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(JFugue.class.getCanonicalName());
-    meta.addDescription("service wrapping Jfugue, used for music and sound generation");
-    meta.addCategory("sound");
-    // org="jfugue" name="jfugue" rev="5.0.7
-    meta.addDependency("jfugue", "jfugue", "5.0.7");
-    return meta;
-  }
+		ServiceType meta = new ServiceType(JFugue.class.getCanonicalName());
+		meta.addDescription("service wrapping Jfugue, used for music and sound generation");
+		meta.addCategory("sound");
+		// org="jfugue" name="jfugue" rev="5.0.7
+		meta.addDependency("jfugue", "jfugue", "5.0.7");
+		return meta;
+	}
 
 }

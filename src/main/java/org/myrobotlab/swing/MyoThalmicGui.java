@@ -37,42 +37,42 @@ import org.slf4j.Logger;
 
 public class MyoThalmicGui extends ServiceGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(MyoThalmicGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(MyoThalmicGui.class);
 
-  public MyoThalmicGui(final String boundServiceName, final SwingGui myService) {
-    super(boundServiceName, myService);
-  }
+	public MyoThalmicGui(final String boundServiceName, final SwingGui myService) {
+		super(boundServiceName, myService);
+	}
 
-  @Override
-  public void actionPerformed(ActionEvent arg0) {
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
 
-  }
+	}
 
-  @Override
-  public void subscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+	@Override
+	public void subscribeGui() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
 
-    // subscribe("publishState", "onState", _TemplateService.class);
-    // send("publishState");
-  }
+		// subscribe("publishState", "onState", _TemplateService.class);
+		// send("publishState");
+	}
 
-  @Override
-  public void unsubscribeGui() {
-    // commented out subscription due to this class being used for
-    // un-defined gui's
+	@Override
+	public void unsubscribeGui() {
+		// commented out subscription due to this class being used for
+		// un-defined gui's
 
-    // unsubscribe("publishState", "onState", _TemplateService.class);
-  }
+		// unsubscribe("publishState", "onState", _TemplateService.class);
+	}
 
-  public void onState(MyoThalmic template) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
+	public void onState(MyoThalmic template) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
 
-      }
-    });
-  }
+			}
+		});
+	}
 
 }

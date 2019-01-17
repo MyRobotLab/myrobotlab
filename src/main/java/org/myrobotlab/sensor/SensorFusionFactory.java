@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class SensorFusionFactory {
 
-  static Map<String, SensorChannel> channels = new LinkedHashMap<String, SensorChannel>();
+	static Map<String, SensorChannel> channels = new LinkedHashMap<String, SensorChannel>();
 
-  // required sensors to report data set of names
-  // deltaTime expiration
-  // conditions of publish
+	// required sensors to report data set of names
+	// deltaTime expiration
+	// conditions of publish
 }

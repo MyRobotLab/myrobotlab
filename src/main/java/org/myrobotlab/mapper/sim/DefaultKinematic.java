@@ -36,81 +36,76 @@ import javax.vecmath.Vector3d;
  */
 public class DefaultKinematic extends KinematicModel {
 
-  /** Translational velocity in meters per second. */
-  private double translationalVelocity;
-  /** Rotational velocity in radians per second */
-  private double rotationalVelocity;
+	/** Translational velocity in meters per second. */
+	private double translationalVelocity;
+	/** Rotational velocity in radians per second */
+	private double rotationalVelocity;
 
-  DefaultKinematic() {
-    reset();
-  }
+	DefaultKinematic() {
+		reset();
+	}
 
-  /**
-   * @return Gets rotational velocity in radians per second
-   */
-  public final double getRotationalVelocity() {
-    return rotationalVelocity;
-  }
+	/**
+	 * @return Gets rotational velocity in radians per second
+	 */
+	public final double getRotationalVelocity() {
+		return rotationalVelocity;
+	}
 
-  /**
-   * @return Gets translational velocity in meter per second.
-   */
-  public final double getTranslationalVelocity() {
-    return translationalVelocity;
-  }
+	/**
+	 * @return Gets translational velocity in meter per second.
+	 */
+	public final double getTranslationalVelocity() {
+		return translationalVelocity;
+	}
 
-  /** Resets all control parameters to their initial values. */
-  @Override
-  protected void reset() {
-    rotationalVelocity = 0;
-    translationalVelocity = 0;
-  }
+	/** Resets all control parameters to their initial values. */
+	@Override
+	protected void reset() {
+		rotationalVelocity = 0;
+		translationalVelocity = 0;
+	}
 
-  /**
-   * @param rv
-   *          Sets rotational velocity in radians per second.
-   */
-  public final void setRotationalVelocity(double rv) {
-    rotationalVelocity = rv;
-  }
+	/**
+	 * @param rv Sets rotational velocity in radians per second.
+	 */
+	public final void setRotationalVelocity(double rv) {
+		rotationalVelocity = rv;
+	}
 
-  /**
-   * @param tv
-   *          Sets translational velocity in meter per second.
-   */
-  public final void setTranslationalVelocity(double tv) {
-    translationalVelocity = tv;
-  }
+	/**
+	 * @param tv Sets translational velocity in meter per second.
+	 */
+	public final void setTranslationalVelocity(double tv) {
+		translationalVelocity = tv;
+	}
 
-  /** Resets all control parameters to their initial values. */
-  @Override
-  protected String toString(DecimalFormat format) {
-    return "kinematic \t= DefaultKinematic\n" + "rotVelocity   \t= " + format.format(rotationalVelocity) + " rad/s\n" + "transVelocity \t= " + format.format(translationalVelocity)
-        + " m/s\n";
-  }
+	/** Resets all control parameters to their initial values. */
+	@Override
+	protected String toString(DecimalFormat format) {
+		return "kinematic \t= DefaultKinematic\n" + "rotVelocity   \t= " + format.format(rotationalVelocity)
+				+ " rad/s\n" + "transVelocity \t= " + format.format(translationalVelocity) + " m/s\n";
+	}
 
-  /**
-   * Compute instant translation and rotation vectors .
-   * 
-   * @param elapsedSecond
-   *          time elapsed
-   * @param rotation
-   *          current rotation
-   * @param instantTranslation
-   *          to store translation
-   * @param instantRotation
-   *          to store rotation
-   */
+	/**
+	 * Compute instant translation and rotation vectors .
+	 * 
+	 * @param elapsedSecond      time elapsed
+	 * @param rotation           current rotation
+	 * @param instantTranslation to store translation
+	 * @param instantRotation    to store rotation
+	 */
 
-  @Override
-  protected void update(double elapsedSecond, Transform3D rotation, Vector3d instantTranslation, Vector3d instantRotation) {
+	@Override
+	protected void update(double elapsedSecond, Transform3D rotation, Vector3d instantTranslation,
+			Vector3d instantRotation) {
 
-    instantTranslation.set(translationalVelocity * elapsedSecond, 0.0, 0.0);
-    // apply current rotation (on y axis)
-    rotation.transform(instantTranslation);
+		instantTranslation.set(translationalVelocity * elapsedSecond, 0.0, 0.0);
+		// apply current rotation (on y axis)
+		rotation.transform(instantTranslation);
 
-    // perform rotation - on y axis
-    instantRotation.set(0, elapsedSecond * rotationalVelocity, 0);
+		// perform rotation - on y axis
+		instantRotation.set(0, elapsedSecond * rotationalVelocity, 0);
 
-  }
+	}
 }

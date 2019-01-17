@@ -4,6 +4,6 @@ import org.myrobotlab.framework.Status;
 
 public interface InstallProgressListener {
 
-  public void onInstallProgress(Status status);
+	public void onInstallProgress(Status status);
 
 }

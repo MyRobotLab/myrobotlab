@@ -4,8 +4,8 @@ import org.myrobotlab.framework.Service;
 
 public interface StatePublisher {
 
-  public Service publishState();
+	public Service publishState();
 
-  public void broadcastState();
+	public void broadcastState();
 
 }

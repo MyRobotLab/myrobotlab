@@ -35,11 +35,11 @@ import org.slf4j.Logger;
 
 public class PollyGui extends AbstractSpeechSynthesisGui implements ActionListener {
 
-  static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(PollyGui.class);
+	static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(PollyGui.class);
 
-  public PollyGui(final String boundServiceName, final SwingGui myService) throws IOException {
-    super(boundServiceName, myService);
-  }
+	public PollyGui(final String boundServiceName, final SwingGui myService) throws IOException {
+		super(boundServiceName, myService);
+	}
 
 }

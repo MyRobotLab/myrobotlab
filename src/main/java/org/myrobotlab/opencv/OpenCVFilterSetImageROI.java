@@ -37,39 +37,39 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterSetImageROI extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
-  CvRect rect = null;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class);
+	private static final long serialVersionUID = 1L;
+	CvRect rect = null;
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSetImageROI.class);
 
-  public OpenCVFilterSetImageROI(String name) {
-    super(name);
-  }
+	public OpenCVFilterSetImageROI(String name) {
+		super(name);
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-  }
+	@Override
+	public void imageChanged(IplImage image) {
+	}
 
-  public void setROI(int x, int y, int width, int height) {
-    rect = new CvRect(x, y, width, height);
-  }
+	public void setROI(int x, int y, int width, int height) {
+		rect = new CvRect(x, y, width, height);
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
+	@Override
+	public IplImage process(IplImage image) {
 
-    if (rect != null) {
-      cvSetImageROI(image, rect);
-    }
-    return image;
-  }
+		if (rect != null) {
+			cvSetImageROI(image, rect);
+		}
+		return image;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    if (rect != null) {
-      BufferedImage dest = image.getSubimage(0, 0, rect.width(), rect.height());
-      return dest;
-    } else {
-      return image;
-    }
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		if (rect != null) {
+			BufferedImage dest = image.getSubimage(0, 0, rect.width(), rect.height());
+			return dest;
+		} else {
+			return image;
+		}
+	}
 
 }

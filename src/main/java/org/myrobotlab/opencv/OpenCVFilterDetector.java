@@ -39,61 +39,61 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterDetector extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public double learningRate = -1; // 0 trigger || -1 learn and fade
+	public double learningRate = -1; // 0 trigger || -1 learn and fade
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDetector.class.getCanonicalName());
+	public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDetector.class.getCanonicalName());
 
-  transient BackgroundSubtractor mog;
-  transient IplImage foreground;
+	transient BackgroundSubtractor mog;
+	transient IplImage foreground;
 
-  public int history = 10;
-  public float threshold = 128f;
-  public boolean shadowDetection = false;
+	public int history = 10;
+	public float threshold = 128f;
+	public boolean shadowDetection = false;
 
-  public OpenCVFilterDetector() {
-    super();
-  }
+	public OpenCVFilterDetector() {
+		super();
+	}
 
-  public OpenCVFilterDetector(String name) {
-    super(name);
-  }
+	public OpenCVFilterDetector(String name) {
+		super(name);
+	}
 
-  public OpenCVFilterDetector(String name, int history, float threshold, boolean shadowDetection) {
-    super(name);
-    this.history = history;
-    this.threshold = threshold;
-    this.shadowDetection = shadowDetection;
-  }
+	public OpenCVFilterDetector(String name, int history, float threshold, boolean shadowDetection) {
+		super(name);
+		this.history = history;
+		this.threshold = threshold;
+		this.shadowDetection = shadowDetection;
+	}
 
-  @Override
-  public void imageChanged(IplImage image) {
-    foreground = IplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
-    mog = createBackgroundSubtractorMOG2();
+	@Override
+	public void imageChanged(IplImage image) {
+		foreground = IplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
+		mog = createBackgroundSubtractorMOG2();
 
-  }
+	}
 
-  public void learn() {
-    learningRate = -1;
-  }
+	public void learn() {
+		learningRate = -1;
+	}
 
-  @Override
-  public IplImage process(IplImage image) {
-    // constructor changed to require Mat in javacv 0.10
-    // mog.app
-    // 0 trigger || -1 learn
-    mog.apply(new Mat(image), new Mat(foreground), learningRate); // and
-    return foreground;
-  }
+	@Override
+	public IplImage process(IplImage image) {
+		// constructor changed to require Mat in javacv 0.10
+		// mog.app
+		// 0 trigger || -1 learn
+		mog.apply(new Mat(image), new Mat(foreground), learningRate); // and
+		return foreground;
+	}
 
-  public void search() {
-    learningRate = 0;
-  }
+	public void search() {
+		learningRate = 0;
+	}
 
-  @Override
-  public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    return image;
-  }
+	@Override
+	public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
+		return image;
+	}
 
 }

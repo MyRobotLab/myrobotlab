@@ -43,322 +43,328 @@ import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
  */
 public class Polly extends AbstractSpeechSynthesis {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Polly.class);
+	public final static Logger log = LoggerFactory.getLogger(Polly.class);
 
-  public final static String AMAZON_POLLY_USER_KEY = "amazon.polly.user.key";
-  public final static String AMAZON_POLLY_USER_SECRET = "amazon.polly.user.secret";
+	public final static String AMAZON_POLLY_USER_KEY = "amazon.polly.user.key";
+	public final static String AMAZON_POLLY_USER_SECRET = "amazon.polly.user.secret";
 
-  private transient AWSCredentials credentials;
-  private transient AmazonPolly polly;
+	private transient AWSCredentials credentials;
+	private transient AmazonPolly polly;
 
-  private Regions defaultRegion = Regions.US_WEST_2;
+	private Regions defaultRegion = Regions.US_WEST_2;
 
-  public Polly(String n) {
-    super(n);
-  }
+	public Polly(String n) {
+		super(n);
+	}
 
-  /**
-   * for the user's convenience for amazon other cloud providers have single
-   * keys or different details
-   * 
-   * @param keyId
-   * @param keyIdSecret
-   */
-  public void setKeys(String keyId, String keyIdSecret) {
-    setKey(AMAZON_POLLY_USER_KEY, keyId);
-    setKey(AMAZON_POLLY_USER_SECRET, keyIdSecret);
-  }
+	/**
+	 * for the user's convenience for amazon other cloud providers have single keys
+	 * or different details
+	 * 
+	 * @param keyId
+	 * @param keyIdSecret
+	 */
+	public void setKeys(String keyId, String keyIdSecret) {
+		setKey(AMAZON_POLLY_USER_KEY, keyId);
+		setKey(AMAZON_POLLY_USER_SECRET, keyIdSecret);
+	}
 
-  /**
-   * loadVoices - must be loaded by SpeechSynthesis class - contract of
-   * AbstractSpeechSynthesis
-   */
-  protected void loadVoices() {
-    getPolly();
+	/**
+	 * loadVoices - must be loaded by SpeechSynthesis class - contract of
+	 * AbstractSpeechSynthesis
+	 */
+	protected void loadVoices() {
+		getPolly();
 
-    if (polly == null) {
-      error("cannot load voices - polly not initialized");
-      return;
-    }
+		if (polly == null) {
+			error("cannot load voices - polly not initialized");
+			return;
+		}
 
-    // Create describe voices request.
-    DescribeVoicesRequest describeVoicesRequest = new DescribeVoicesRequest();
-    DescribeVoicesResult describeVoicesResult = polly.describeVoices(describeVoicesRequest);
-    List<com.amazonaws.services.polly.model.Voice> awsVoices = describeVoicesResult.getVoices();
-    log.info("found {} voices", awsVoices.size());
-    for (int i = 0; i < awsVoices.size(); ++i) {
-      com.amazonaws.services.polly.model.Voice awsImpl = awsVoices.get(i);
-      log.info("{} voice {}", i, awsImpl);
-      // stripAccents : Voices with accent seem no worky ( anymore )
-      addVoice(StringUtils.stripAccents(awsImpl.getName()), awsImpl.getGender(), awsImpl.getLanguageCode(), awsImpl);
-    }
-  }
+		// Create describe voices request.
+		DescribeVoicesRequest describeVoicesRequest = new DescribeVoicesRequest();
+		DescribeVoicesResult describeVoicesResult = polly.describeVoices(describeVoicesRequest);
+		List<com.amazonaws.services.polly.model.Voice> awsVoices = describeVoicesResult.getVoices();
+		log.info("found {} voices", awsVoices.size());
+		for (int i = 0; i < awsVoices.size(); ++i) {
+			com.amazonaws.services.polly.model.Voice awsImpl = awsVoices.get(i);
+			log.info("{} voice {}", i, awsImpl);
+			// stripAccents : Voices with accent seem no worky ( anymore )
+			addVoice(StringUtils.stripAccents(awsImpl.getName()), awsImpl.getGender(), awsImpl.getLanguageCode(),
+					awsImpl);
+		}
+	}
 
-  /**
-   * set default region for polly
-   * 
-   * @param region
-   */
-  public void setRegion(Regions region) {
-    defaultRegion = region;
-  }
+	/**
+	 * set default region for polly
+	 * 
+	 * @param region
+	 */
+	public void setRegion(Regions region) {
+		defaultRegion = region;
+	}
 
-  /**
-   * For a cloud provider we have to make sure certain dependencies are met,
-   * inter-net connect, keys, and the population of AbstractSpeechSynthesis
-   * voices.
-   * 
-   * @return polly client
-   */
-  private AmazonPolly getPolly() {
+	/**
+	 * For a cloud provider we have to make sure certain dependencies are met,
+	 * inter-net connect, keys, and the population of AbstractSpeechSynthesis
+	 * voices.
+	 * 
+	 * @return polly client
+	 */
+	private AmazonPolly getPolly() {
 
-    String key = getKey(AMAZON_POLLY_USER_KEY);
-    String secret = getKey(AMAZON_POLLY_USER_SECRET);
+		String key = getKey(AMAZON_POLLY_USER_KEY);
+		String secret = getKey(AMAZON_POLLY_USER_SECRET);
 
-    if (key == null || secret == null) {
-      log.error("this service requires 2 keys - you can set them once with Security.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");
-      return null;
-    }
+		if (key == null || secret == null) {
+			log.error(
+					"this service requires 2 keys - you can set them once with Security.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");
+			return null;
+		}
 
-    if (polly == null) {
-      try {
+		if (polly == null) {
+			try {
 
-        if (credentials == null) {
-          // try credential chain - in case they have set env vars
-          credentials = new BasicAWSCredentials(key, secret);
-        }
+				if (credentials == null) {
+					// try credential chain - in case they have set env vars
+					credentials = new BasicAWSCredentials(key, secret);
+				}
 
-        polly = AmazonPollyClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(defaultRegion).build();
+				polly = AmazonPollyClientBuilder.standard()
+						.withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(defaultRegion)
+						.build();
 
-      } catch (Exception e) {
-        try {
-          log.error("could not get client with keys supplied - trying default chain", e);
-          polly = AmazonPollyClient.builder().withCredentials(new DefaultAWSCredentialsProviderChain()).withClientConfiguration(new ClientConfiguration()).withRegion(defaultRegion)
-              .build();
-        } catch (Exception e2) {
+			} catch (Exception e) {
+				try {
+					log.error("could not get client with keys supplied - trying default chain", e);
+					polly = AmazonPollyClient.builder().withCredentials(new DefaultAWSCredentialsProviderChain())
+							.withClientConfiguration(new ClientConfiguration()).withRegion(defaultRegion).build();
+				} catch (Exception e2) {
 
-          error("could not get Polly client - did you setKeys ? polly.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");
-          log.error("giving up", e2);
+					error("could not get Polly client - did you setKeys ? polly.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");
+					log.error("giving up", e2);
 
-          polly = null;
-          credentials = null;
-        }
-      }
-    }
-    if (polly != null) {
-      // check for credentials OK, because this is not catch upper
-      try {
-        DescribeVoicesRequest describeVoicesRequest = new DescribeVoicesRequest();
-        polly.describeVoices(describeVoicesRequest);
-      } catch (AmazonPollyException e3) {
-        error("The keys are invalid");
-        polly = null;
-        credentials = null;
-      }
-    }
-    return polly;
-  }
+					polly = null;
+					credentials = null;
+				}
+			}
+		}
+		if (polly != null) {
+			// check for credentials OK, because this is not catch upper
+			try {
+				DescribeVoicesRequest describeVoicesRequest = new DescribeVoicesRequest();
+				polly.describeVoices(describeVoicesRequest);
+			} catch (AmazonPollyException e3) {
+				error("The keys are invalid");
+				polly = null;
+				credentials = null;
+			}
+		}
+		return polly;
+	}
 
-  @Override
-  public String[] getKeyNames() {
-    return new String[] { AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET };
-  }
+	@Override
+	public String[] getKeyNames() {
+		return new String[] { AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET };
+	}
 
-  /*
-   * Proxy works in 3 modes client - consumer of mrl services relay - proxy
-   * (running as cloud service) direct - goes direct to service In Polly's case
-   * - client - would be an end user using a client key relay - is the mrl proxy
-   * service direct would be from a users, by-passing mrl and going directly to
-   * Amazon with amazon keys cache file - caches file locally (both client or
-   * relay)
-   */
-  @Override
-  public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
-    getPolly();
-    Voice voice = getVoice();
-    // com.amazonaws.services.polly.model.Voice awsVoice =
-    // ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
-    SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName()).withOutputFormat("mp3");
-    SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
-    InputStream data = synthRes.getAudioStream();
-    byte[] d = FileIO.toByteArray(data);
-    // could just save it to file ...
-    // return new AudioData(data);
-    FileIO.toFile(audioData.getFileName(), d);
-    return audioData;
-  }
+	/*
+	 * Proxy works in 3 modes client - consumer of mrl services relay - proxy
+	 * (running as cloud service) direct - goes direct to service In Polly's case -
+	 * client - would be an end user using a client key relay - is the mrl proxy
+	 * service direct would be from a users, by-passing mrl and going directly to
+	 * Amazon with amazon keys cache file - caches file locally (both client or
+	 * relay)
+	 */
+	@Override
+	public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
+		getPolly();
+		Voice voice = getVoice();
+		// com.amazonaws.services.polly.model.Voice awsVoice =
+		// ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
+		SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName())
+				.withOutputFormat("mp3");
+		SynthesizeSpeechResult synthRes = polly.synthesizeSpeech(synthReq);
+		InputStream data = synthRes.getAudioStream();
+		byte[] d = FileIO.toByteArray(data);
+		// could just save it to file ...
+		// return new AudioData(data);
+		FileIO.toFile(audioData.getFileName(), d);
+		return audioData;
+	}
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+	/**
+	 * This static method returns all the details of the class without it having to
+	 * be constructed. It has description, categories, dependencies, and peer
+	 * definitions.
+	 * 
+	 * @return ServiceType - returns all the data
+	 * 
+	 */
+	static public ServiceType getMetaData() {
 
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(Polly.class.getCanonicalName());
+		ServiceType meta = AbstractSpeechSynthesis.getMetaData(Polly.class.getCanonicalName());
 
-    meta.addDescription("used as a general template");
-    meta.setAvailable(true); // false if you do not want it viewable in a
-    // gui
-    // add dependency if necessary
-    meta.addCategory("speech", "sound");
+		meta.addDescription("used as a general template");
+		meta.setAvailable(true); // false if you do not want it viewable in a
+		// gui
+		// add dependency if necessary
+		meta.addCategory("speech", "sound");
 
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.9.5");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.5");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.5");
-    meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.118");
-    meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
-    // force using httpClient service httpcomponents version
-    meta.exclude("org.apache.httpcomponents", "httpcore");
-    meta.exclude("org.apache.httpcomponents", "httpclient");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
+		meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.9.5");
+		meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.5");
+		meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.5");
+		meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.118");
+		meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+		// force using httpClient service httpcomponents version
+		meta.exclude("org.apache.httpcomponents", "httpcore");
+		meta.exclude("org.apache.httpcomponents", "httpclient");
+		meta.addPeer("httpClient", "HttpClient", "httpClient");
 
-    // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly
-    // -->
-    // <dependency org="com.amazonaws" name="aws-java-sdk-polly"
-    // rev="1.11.118"/>
+		// <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly
+		// -->
+		// <dependency org="com.amazonaws" name="aws-java-sdk-polly"
+		// rev="1.11.118"/>
 
-    meta.addCategory("speech");
-    meta.setCloudService(true);
-    return meta;
-  }
+		meta.addCategory("speech");
+		meta.setCloudService(true);
+		return meta;
+	}
 
-  public static void main(String[] args) {
+	public static void main(String[] args) {
 
-    // iterate through all speech services
-    // all will "load" voices and adhere to the AbtractSpeechSynthesis
-    // processing of data
+		// iterate through all speech services
+		// all will "load" voices and adhere to the AbtractSpeechSynthesis
+		// processing of data
 
-    // test all caching
+		// test all caching
 
-    // test all effects
+		// test all effects
 
-    // test default
+		// test default
 
-    // test overriding default
+		// test overriding default
 
-    // test setting Runtime.locale
+		// test setting Runtime.locale
 
-    LoggingFactory.init(Level.INFO);
+		LoggingFactory.init(Level.INFO);
 
-    // set language universally
-    // Runtime.setLanguage("pt");
+		// set language universally
+		// Runtime.setLanguage("pt");
 
-    Runtime.start("gui", "SwingGui");
-    Polly polly = (Polly) Runtime.start("polly", "Polly");
-    // polly.setKey(keyName, keyValue);
-    // polly.setKeys("XXXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXXXXX");
+		Runtime.start("gui", "SwingGui");
+		Polly polly = (Polly) Runtime.start("polly", "Polly");
+		// polly.setKey(keyName, keyValue);
+		// polly.setKeys("XXXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXXXXX");
 
-    // polly.setLanguage("de");
-    log.info("polly voice is {}", polly.getVoice());
+		// polly.setLanguage("de");
+		log.info("polly voice is {}", polly.getVoice());
 
-    boolean b = true;
-    if (b) {
-      return;
-    }
+		boolean b = true;
+		if (b) {
+			return;
+		}
 
-    // Runtime.start("gui", "SwingGui");
-    // add your amazon access key & secret
-    // use gui to do this, or force it here only ONCE :
-    // polly.setKeys("key","secret");
+		// Runtime.start("gui", "SwingGui");
+		// add your amazon access key & secret
+		// use gui to do this, or force it here only ONCE :
+		// polly.setKeys("key","secret");
 
-    List<Voice> voices = polly.getVoices();
-    for (Voice voice : voices) {
-      // polly.setVoice(voice); String lang = polly.getLanguage();
-      log.info("{}", voice);
-    }
+		List<Voice> voices = polly.getVoices();
+		for (Voice voice : voices) {
+			// polly.setVoice(voice); String lang = polly.getLanguage();
+			log.info("{}", voice);
+		}
 
-    polly.speak(String.format("Hello my name is %s I will be your voice today", polly.getVoice().getName()));
-    polly.speakBlocking("or to take arms against a see of troubles");
-    polly.speak("the slings and arrows of ourtrageous fortune");
-    polly.speak("#THROAT01_M# hi! it works.");
+		polly.speak(String.format("Hello my name is %s I will be your voice today", polly.getVoice().getName()));
+		polly.speakBlocking("or to take arms against a see of troubles");
+		polly.speak("the slings and arrows of ourtrageous fortune");
+		polly.speak("#THROAT01_M# hi! it works.");
 
-    for (Voice voice : voices) {
-      polly.setVoice((String) voice.getVoiceProvider());
-      String lang = voice.getLanguage();
-      log.info("{} speaks {}", voice, lang);
+		for (Voice voice : voices) {
+			polly.setVoice((String) voice.getVoiceProvider());
+			String lang = voice.getLanguage();
+			log.info("{} speaks {}", voice, lang);
 
-      if (lang.startsWith("es")) {
-        polly.speak(String.format("Hola, mi nombre es %s y creo que myrobotlab es genial!", voice));
-      } else if (lang.startsWith("en")) {
-        polly.speak(String.format("Hi my name is %s and I think myrobotlab is great!", voice));
-      } else if (lang.startsWith("fr")) {
-        polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!", voice));
-      } else if (lang.startsWith("nl")) {
-        polly.speak(String.format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!", voice));
-      } else if (lang.startsWith("ru")) {
-        polly.speak(String.format("Привет, меня зовут %s, и я думаю, что myrobotlab - это здорово!", voice));
-      } else if (lang.startsWith("ro")) {
-        polly.speak(String.format("Buna ziua, numele meu este %s și cred că myrobotlab este mare!", voice));
-      } else if (lang.startsWith("ro")) {
-        polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
-      } else if (lang.startsWith("it")) {
-        polly.speak(String.format("Ciao, il mio nome è %s e penso myrobotlab è grande!", voice));
-      } else if (lang.startsWith("is")) {
-        polly.speak(String.format("Halló, Nafn mitt er %s og ég held myrobotlab er frábært!", voice));
-      } else if (lang.startsWith("cy")) {
-        polly.speak(String.format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!", voice));
-      } else if (lang.startsWith("de")) {
-        polly.speak(String.format("Hallo, mein Name ist %s und ich denke, myrobotlab ist toll!", voice));
-      } else if (lang.startsWith("da")) {
-        polly.speak(String.format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!", voice));
-      } else if (lang.startsWith("sv")) {
-        polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin är stor!", voice));
-      } else if (lang.startsWith("pl")) {
-        polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
-      } else if (lang.startsWith("tr")) {
-        polly.speak(String.format("Merhaba, adım adım %s ve myrobotlab'ın harika olduğunu düşünüyorum!", voice));
-      } else if (lang.startsWith("pt")) {
-        polly.speak(String.format("Olá, meu nome é %s e eu acho que myrobotlab é ótimo!！", voice));
-      } else if (lang.startsWith("ja")) {
-        polly.speak(String.format("こんにちは、私の名前は%sで、私はmyrobotlabが素晴らしいと思います！", voice));
-      } else {
-        log.info("dunno");
-      }
-    }
+			if (lang.startsWith("es")) {
+				polly.speak(String.format("Hola, mi nombre es %s y creo que myrobotlab es genial!", voice));
+			} else if (lang.startsWith("en")) {
+				polly.speak(String.format("Hi my name is %s and I think myrobotlab is great!", voice));
+			} else if (lang.startsWith("fr")) {
+				polly.speak(String.format("Bonjour, mon nom est %s et je pense que myrobotlab est génial!!", voice));
+			} else if (lang.startsWith("nl")) {
+				polly.speak(String.format("Hallo, mijn naam is %s en ik denk dat myrobotlab is geweldig!", voice));
+			} else if (lang.startsWith("ru")) {
+				polly.speak(String.format("Привет, меня зовут %s, и я думаю, что myrobotlab - это здорово!", voice));
+			} else if (lang.startsWith("ro")) {
+				polly.speak(String.format("Buna ziua, numele meu este %s și cred că myrobotlab este mare!", voice));
+			} else if (lang.startsWith("ro")) {
+				polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
+			} else if (lang.startsWith("it")) {
+				polly.speak(String.format("Ciao, il mio nome è %s e penso myrobotlab è grande!", voice));
+			} else if (lang.startsWith("is")) {
+				polly.speak(String.format("Halló, Nafn mitt er %s og ég held myrobotlab er frábært!", voice));
+			} else if (lang.startsWith("cy")) {
+				polly.speak(String.format("Helo, fy enw i yw %s a fi yn meddwl myrobotlab yn wych!", voice));
+			} else if (lang.startsWith("de")) {
+				polly.speak(String.format("Hallo, mein Name ist %s und ich denke, myrobotlab ist toll!", voice));
+			} else if (lang.startsWith("da")) {
+				polly.speak(String.format("Hej, mit navn er %s og jeg tror myrobotlab er fantastisk!", voice));
+			} else if (lang.startsWith("sv")) {
+				polly.speak(String.format("Hej, mitt namn %s och jag tror ElektronikWikin är stor!", voice));
+			} else if (lang.startsWith("pl")) {
+				polly.speak(String.format("Witam, nazywam się %s i myślę, że myrobotlab jest świetny!", voice));
+			} else if (lang.startsWith("tr")) {
+				polly.speak(
+						String.format("Merhaba, adım adım %s ve myrobotlab'ın harika olduğunu düşünüyorum!", voice));
+			} else if (lang.startsWith("pt")) {
+				polly.speak(String.format("Olá, meu nome é %s e eu acho que myrobotlab é ótimo!！", voice));
+			} else if (lang.startsWith("ja")) {
+				polly.speak(String.format("こんにちは、私の名前は%sで、私はmyrobotlabが素晴らしいと思います！", voice));
+			} else {
+				log.info("dunno");
+			}
+		}
 
-    polly.setVoice("Russel");
-    polly.setVoice("Nicole");
+		polly.setVoice("Russel");
+		polly.setVoice("Nicole");
 
-    polly.setVoice("Brian");
-    polly.setVoice("Amy");
-    polly.setVoice("Emma");
+		polly.setVoice("Brian");
+		polly.setVoice("Amy");
+		polly.setVoice("Emma");
 
-    polly.setVoice("Brian");
-    polly.setVoice("Kimberly");
+		polly.setVoice("Brian");
+		polly.setVoice("Kimberly");
 
-    polly.setVoice("Justin");
-    polly.setVoice("Joey");
-    polly.setVoice("Raveena");
-    polly.setVoice("Ivy");
-    polly.setVoice("Kendra");
+		polly.setVoice("Justin");
+		polly.setVoice("Joey");
+		polly.setVoice("Raveena");
+		polly.setVoice("Ivy");
+		polly.setVoice("Kendra");
 
-    polly.speak("this is a new thing");
+		polly.speak("this is a new thing");
 
-    polly.speak("Hello there, i am a cloud service .. i probably sound like the echo");
-    polly.speak("Here is another sentence");
-    polly.speak("To be or not to be that is the question");
-    polly.speakBlocking("now i am blocking my speech");
-    polly.speakBlocking("put one foot in front of the other and"); // xxx
-    polly.speakBlocking("soon you'll be walking out the door");
-    polly.speak("this is a new sentence");
-    polly.speak("to be or not to be that is the question");
-    polly.speak("weather tis nobler in the mind to suffer");
-    polly.speak("the slings and arrows of ourtrageous fortune");
-    polly.speak("or to take arms against a see of troubles");
+		polly.speak("Hello there, i am a cloud service .. i probably sound like the echo");
+		polly.speak("Here is another sentence");
+		polly.speak("To be or not to be that is the question");
+		polly.speakBlocking("now i am blocking my speech");
+		polly.speakBlocking("put one foot in front of the other and"); // xxx
+		polly.speakBlocking("soon you'll be walking out the door");
+		polly.speak("this is a new sentence");
+		polly.speak("to be or not to be that is the question");
+		polly.speak("weather tis nobler in the mind to suffer");
+		polly.speak("the slings and arrows of ourtrageous fortune");
+		polly.speak("or to take arms against a see of troubles");
 
-    log.info("finished");
-  }
+		log.info("finished");
+	}
 
-  @Override
-  public boolean isReady() {
-    setReady(polly != null ? true : false);
-    return ready;
-  }
+	@Override
+	public boolean isReady() {
+		setReady(polly != null ? true : false);
+		return ready;
+	}
 
 }

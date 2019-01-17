@@ -20,61 +20,61 @@ import org.slf4j.Logger;
  */
 public class PipelineFrameGrabber extends FrameGrabber {
 
-  public final static Logger log = LoggerFactory.getLogger(PipelineFrameGrabber.class.getCanonicalName());
-  transient BlockingQueue<Frame> blockingData;
-  String sourceKey = "";
+	public final static Logger log = LoggerFactory.getLogger(PipelineFrameGrabber.class.getCanonicalName());
+	transient BlockingQueue<Frame> blockingData;
+	String sourceKey = "";
 
-  public PipelineFrameGrabber(BlockingQueue<Frame> queue) {
-    blockingData = queue;
-  }
+	public PipelineFrameGrabber(BlockingQueue<Frame> queue) {
+		blockingData = queue;
+	}
 
-  public PipelineFrameGrabber(int cameraIndex) {
-  }
+	public PipelineFrameGrabber(int cameraIndex) {
+	}
 
-  public PipelineFrameGrabber(String sourceKey) {
-    log.info("attaching video feed to {}");
-    this.sourceKey = sourceKey;
-  }
+	public PipelineFrameGrabber(String sourceKey) {
+		log.info("attaching video feed to {}");
+		this.sourceKey = sourceKey;
+	}
 
-  public void add(Frame image) {
-    blockingData.add(image);
-  }
+	public void add(Frame image) {
+		blockingData.add(image);
+	}
 
-  @Override
-  public Frame grab() {
+	@Override
+	public Frame grab() {
 
-    try {
-      // added non blocking allowing thread to terminate
-      Frame image = blockingData.poll(1000, TimeUnit.MILLISECONDS);
-      return image;
-    } catch (InterruptedException e) {
-      Logging.logError(e);
-      return null;
-    }
+		try {
+			// added non blocking allowing thread to terminate
+			Frame image = blockingData.poll(1000, TimeUnit.MILLISECONDS);
+			return image;
+		} catch (InterruptedException e) {
+			Logging.logError(e);
+			return null;
+		}
 
-  }
+	}
 
-  @Override
-  public void release() throws Exception {
-  }
+	@Override
+	public void release() throws Exception {
+	}
 
-  public void setQueue(BlockingQueue<Frame> queue) {
-    blockingData = queue;
-  }
+	public void setQueue(BlockingQueue<Frame> queue) {
+		blockingData = queue;
+	}
 
-  @Override
-  public void start() {
-    if (blockingData == null) {
-      blockingData = new LinkedBlockingQueue<Frame>();
-    }
-  }
+	@Override
+	public void start() {
+		if (blockingData == null) {
+			blockingData = new LinkedBlockingQueue<Frame>();
+		}
+	}
 
-  @Override
-  public void stop() {
-  }
+	@Override
+	public void stop() {
+	}
 
-  @Override
-  public void trigger() throws Exception {
-  }
+	@Override
+	public void trigger() throws Exception {
+	}
 
 }
