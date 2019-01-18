@@ -58,17 +58,15 @@ public class RepoTest implements StatusPublisher {
   }
 
   /*
-   * @Test public void testErrorException() { Repo repo =
-   * Repo.getInstance(); repo.getErrors().clear(); repo.error(new
-   * IOException("io exception test")); assertTrue(repo.getErrors().size() > 0);
-   * }
+   * @Test public void testErrorException() { Repo repo = Repo.getInstance();
+   * repo.getErrors().clear(); repo.error(new IOException("io exception test"));
+   * assertTrue(repo.getErrors().size() > 0); }
    */
 
   /*
    * @Test public void explode(){ boolean explode = true; assertFalse(explode);
    * }
    */
-
 
   /*
    * 
@@ -90,7 +88,6 @@ public class RepoTest implements StatusPublisher {
     File check = new File("libraries");
     assertFalse(check.exists());
   }
-
 
   @Test
   public void testSave() {

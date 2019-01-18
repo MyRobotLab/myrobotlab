@@ -44,7 +44,7 @@ public class OpenCVTest extends AbstractTest {
   public static void setUpBeforeClass() throws Exception {
     LoggingFactory.init("WARN");
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    //Runtime.setLogLevel("info");
+    // Runtime.setLogLevel("info");
     if (!isHeadless()) {
       swing = (SwingGui) Runtime.start("gui", "SwingGui");
     }
@@ -169,8 +169,8 @@ public class OpenCVTest extends AbstractTest {
   }
 
   /**
-   * minimally all filters should have the ability to load and
-   * run by themselves for a second
+   * minimally all filters should have the ability to load and run by themselves
+   * for a second
    */
   @Test
   public final void testAllFilterTypes() {
@@ -183,7 +183,7 @@ public class OpenCVTest extends AbstractTest {
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.info("trying filter {}", fn);
-      if (fn.startsWith("DL4J") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector")|| fn.startsWith("Solr")|| fn.startsWith("Split")) {
+      if (fn.startsWith("DL4J") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
         log.info("skipping {}", fn);
         continue;
       }
@@ -204,7 +204,7 @@ public class OpenCVTest extends AbstractTest {
     cv.setGrabberType("ImageFile");
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
     cv.addFilter("yolo");
-    Map<String, List<Classification>>  classifications = cv.getClassifications();
+    Map<String, List<Classification>> classifications = cv.getClassifications();
     assertNotNull(classifications);
     assertTrue(classifications.containsKey("person"));
   }

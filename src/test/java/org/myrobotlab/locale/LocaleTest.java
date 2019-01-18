@@ -21,15 +21,13 @@ public class LocaleTest {
     // TODO Auto-generated method stub
     Locale locale = Locale.getDefault();
     /*
-		Method[] methods = locale.getClass().getMethods();
-		for (Method method : methods) {
-			Class<?>[] paramTypes = method.getParameterTypes();
-			if (paramTypes.length == 0) {
-				System.out.println(String.format("log.info(\"locale.%s() [{}]\", locale.%s());", method.getName(),method.getName()));
-			} else {
-				System.out.println(String.format("log.info(\"locale.%s(xxx) [{}]\", locale.%s(xxx));", method.getName(),method.getName()));
-			}
-		}
+     * Method[] methods = locale.getClass().getMethods(); for (Method method :
+     * methods) { Class<?>[] paramTypes = method.getParameterTypes(); if
+     * (paramTypes.length == 0) { System.out.println(String.
+     * format("log.info(\"locale.%s() [{}]\", locale.%s());",
+     * method.getName(),method.getName())); } else { System.out.println(String.
+     * format("log.info(\"locale.%s(xxx) [{}]\", locale.%s(xxx));",
+     * method.getName(),method.getName())); } }
      */
 
     Locale def = Locale.getDefault();
@@ -47,12 +45,11 @@ public class LocaleTest {
     String[] isoCountries = Locale.getISOCountries();
 
     // is Locale serializable
-    Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting()
-        .disableHtmlEscaping().create();
+    Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
     String json = gson.toJson(locale);
     Locale l = gson.fromJson(json, Locale.class);
 
-    Locale br = new Locale("en","BR", "variant");
+    Locale br = new Locale("en", "BR", "variant");
     log.info("br getLanguage - {}", br.getLanguage());
     log.info("br getDisplayLanguage - {}", br.getDisplayLanguage());
     br.toLanguageTag();
@@ -68,7 +65,6 @@ public class LocaleTest {
       log.info(locales[i].toLanguageTag());
       languagesList.put(locales[i].toLanguageTag(), locales[i].getDisplayLanguage());
     }
-
 
     // Locale.
 
@@ -87,12 +83,12 @@ public class LocaleTest {
     log.info("Locale.forLanguageTag(\"en-US\") [{}]", Locale.forLanguageTag("en-US"));
 
     // lots of filtering and lookup capability with rfc specifications
-    //		log.info("locale.lookup(xxx) [{}]", locale.lookup(xxx));
-    //		log.info("locale.filter(xxx) [{}]", locale.filter(xxx));
-    //		log.info("locale.filter(xxx) [{}]", locale.filter(xxx));
-    //		log.info("locale.filterTags(xxx) [{}]", locale.filterTags(xxx));
-    //		log.info("locale.filterTags(xxx) [{}]", locale.filterTags(xxx));
-    //		log.info("locale.forLanguageTag(xxx) [{}]", locale.forLanguageTag(xxx));
+    // log.info("locale.lookup(xxx) [{}]", locale.lookup(xxx));
+    // log.info("locale.filter(xxx) [{}]", locale.filter(xxx));
+    // log.info("locale.filter(xxx) [{}]", locale.filter(xxx));
+    // log.info("locale.filterTags(xxx) [{}]", locale.filterTags(xxx));
+    // log.info("locale.filterTags(xxx) [{}]", locale.filterTags(xxx));
+    // log.info("locale.forLanguageTag(xxx) [{}]", locale.forLanguageTag(xxx));
     log.info("locale.getAvailableLocales() [{}]", Locale.getAvailableLocales());
     log.info("locale.getCountry() [{}]", locale.getCountry());
     log.info("locale.getDisplayCountry() [{}]", locale.getDisplayCountry());
@@ -114,10 +110,10 @@ public class LocaleTest {
     log.info("locale.getScript() [{}]", locale.getScript());
     log.info("locale.getUnicodeLocaleAttributes() [{}]", locale.getUnicodeLocaleAttributes());
     log.info("locale.getUnicodeLocaleKeys() [{}]", locale.getUnicodeLocaleKeys());
-    // log.info("locale.getUnicodeLocaleType(xxx) [{}]", locale.getUnicodeLocaleType(xxx));
+    // log.info("locale.getUnicodeLocaleType(xxx) [{}]",
+    // locale.getUnicodeLocaleType(xxx));
     log.info("locale.getVariant() [{}]", locale.getVariant());
     log.info("locale.hasExtensions() [{}]", locale.hasExtensions());
-
 
     Locale.setDefault(new Locale("en", "BR"));
     // log.info("locale.lookupTag(xxx) [{}]", locale.lookupTag("en"));

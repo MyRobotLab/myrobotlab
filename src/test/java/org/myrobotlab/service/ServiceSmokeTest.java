@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * This test will iterate all possible services (execpt for the blacklisted ones)
- * it will create an instance of that service and pass the service to the json serializer
- * to ensure it doesn't blow up.
+ * This test will iterate all possible services (execpt for the blacklisted
+ * ones) it will create an instance of that service and pass the service to the
+ * json serializer to ensure it doesn't blow up.
  * 
  * @author kwatters
  *
@@ -35,9 +35,10 @@ public class ServiceSmokeTest {
   @Test
   public void testAllServiceSerialization() throws IOException {
 
-    // known problematic services?! TODO: fix them and remove from the following list.
+    // known problematic services?! TODO: fix them and remove from the following
+    // list.
     ArrayList<String> blacklist = new ArrayList<String>();
-    // kills test if library not found!  eek.
+    // kills test if library not found! eek.
     blacklist.add("org.myrobotlab.service.LeapMotion");
     // same..
     blacklist.add("org.myrobotlab.service.OpenNi");
@@ -63,21 +64,17 @@ public class ServiceSmokeTest {
     // just don't want a swing gui opening up in the unit test.
     blacklist.add("org.myrobotlab.service.SwingGui");
 
-
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();
 
-
-
     // we need to load a service for each service type we have.
     String[] x = serviceData.getServiceTypeNames();
-
 
     for (String serviceType : x) {
       log.info("Service Type: {}", serviceType);
     }
     log.info("Press any key to continue");
-    //System.in.read();
+    // System.in.read();
     for (String serviceType : x) {
 
       long start = System.currentTimeMillis();
@@ -96,10 +93,9 @@ public class ServiceSmokeTest {
 
       long delta = System.currentTimeMillis() - start;
       log.info("Done testing serialization of {} in {} ms", serviceType, delta);
-      //System.in.read();
+      // System.in.read();
 
     }
-
 
     Runtime.releaseAll();
 
@@ -114,7 +110,6 @@ public class ServiceSmokeTest {
     String res = CodecUtils.toJson(s);
     assertNotNull(res);
     log.info("Serialization successful for {}", s.getType());
-
 
     // ServiceInterface s = CodecUtils.fromJson(res, clazz)
     // assertNotNull(res);

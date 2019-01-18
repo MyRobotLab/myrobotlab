@@ -24,13 +24,12 @@ public class MotorTest2 {
   @Test
   public void testMove() throws Exception {
     Runtime.start("webgui", "WebGui");
-    arduino = (Arduino)Runtime.start("arduino", "Arduino");
-    motor01 = (MotorDualPwm)Runtime.start("motor01", "MotorDualPwm");
+    arduino = (Arduino) Runtime.start("arduino", "Arduino");
+    motor01 = (MotorDualPwm) Runtime.start("motor01", "MotorDualPwm");
     motor01.setPwmPins(3, 4);
     motor01.attachMotorController(arduino);
 
-    arduino.connect("COM5"); 
-
+    arduino.connect("COM5");
 
     motor01.move(0.3);
     motor01.move(0.1);

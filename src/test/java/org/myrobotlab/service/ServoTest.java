@@ -18,26 +18,26 @@ public class ServoTest {
 
   @Before
   public void setup() throws Exception {
-    // setup the test environment , and create an arduino with a virtual backend for it.
+    // setup the test environment , and create an arduino with a virtual backend
+    // for it.
     LoggingFactory.init("WARN");
     // initialize 2 serial ports (virtual arduino)
-    VirtualArduino va1 = (VirtualArduino)Runtime.start("va1", "VirtualArduino");
-    VirtualArduino va2 = (VirtualArduino)Runtime.start("va2", "VirtualArduino");
+    VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
+    VirtualArduino va2 = (VirtualArduino) Runtime.start("va2", "VirtualArduino");
     va1.connect(V_PORT_1);
     va2.connect(V_PORT_2);
     // initialize an arduino
     ard1 = (Arduino) Runtime.start("ard1", "Arduino");
     ard1.connect(V_PORT_1);
     ard2 = (Arduino) Runtime.start("ard2", "Arduino");
-    ard2.connect(V_PORT_2);	
+    ard2.connect(V_PORT_2);
   }
 
-
   @Test
-  public void testServo() throws Exception {	  
+  public void testServo() throws Exception {
     // this basic test will create a servo and attach it to an arduino.
-    // then detach	  
-    Servo s = (Servo)Runtime.start("ser1", "Servo");
+    // then detach
+    Servo s = (Servo) Runtime.start("ser1", "Servo");
     Integer pin = 1;
     // the pin should always be set to something.
     s.setPin(pin);
@@ -52,8 +52,8 @@ public class ServoTest {
 
     s.attach(ard2, pin);
 
-    // This is broken 
-    // assertTrue(s.controller  == ard2);
+    // This is broken
+    // assertTrue(s.controller == ard2);
     s.rest();
     assertEquals(s.getRest(), 90.0, 0.0);
 
@@ -62,7 +62,7 @@ public class ServoTest {
 
     s.rest();
 
-    // depricated. i feel like if you do 
+    // depricated. i feel like if you do
     s.attach();
     s.enable();
     s.moveTo(90);
@@ -72,14 +72,14 @@ public class ServoTest {
     s.moveTo(91.0);
     s.disable();
 
-    assertFalse(s.isEnabled());    
+    assertFalse(s.isEnabled());
     s.enable();
     assertTrue(s.isEnabled());
 
     // detach the servo.
-    //ard2.detach(s);
+    // ard2.detach(s);
     s.detachServoController(ard2);
-    assertFalse(s.isAttached());	  
+    assertFalse(s.isAttached());
 
     //
     s.attach(ard1, 10, 1);
@@ -94,9 +94,11 @@ public class ServoTest {
 
   // @Test
   public void testAttach() throws Exception {
-    // FIXME - test state change - mrl gets restarted arduino doesn't what happens - how to handle gracefully
+    // FIXME - test state change - mrl gets restarted arduino doesn't what
+    // happens - how to handle gracefully
     // FIXME - test enabled Events
-    // FIXME - make abstract class from interfaces to attempt to do Java 8 interfaces with default		
+    // FIXME - make abstract class from interfaces to attempt to do Java 8
+    // interfaces with default
     // creation ...
     Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
     Runtime.start("gui", "WebGui");
@@ -108,9 +110,9 @@ public class ServoTest {
     // really I have to call refresh first ? :P
     serial.getPortNames();
     List<String> ports = serial.getPortNames();
-    //		for (String port : ports) {
-    //			log.info(port);
-    //		}
+    // for (String port : ports) {
+    // log.info(port);
+    // }
 
     // User code begin ...
     // should be clear & easy !!
@@ -134,13 +136,11 @@ public class ServoTest {
     servo02.broadcastState();
 
     /*
-		servo01.setSpeed(0.02);
-		servo02.setSpeed(0.02);
+     * servo01.setSpeed(0.02); servo02.setSpeed(0.02);
      */
 
     /*
-		servo02.setSpeed(1.0);
-		servo01.setSpeed(1.0);
+     * servo02.setSpeed(1.0); servo01.setSpeed(1.0);
      */
 
     // sub speed single move
@@ -158,15 +158,16 @@ public class ServoTest {
     arduino.setDebug(true);
 
     // detaching the device
-    servo01.detachServoController(arduino); // test servo02.detach(arduino); error ?
-    // servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED DID SPLIT BRAIN FIXME
+    servo01.detachServoController(arduino); // test servo02.detach(arduino);
+                                            // error ?
+    // servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED
+    // DID SPLIT BRAIN FIXME
     servo02.detachServoController(arduino);
 
     // errors / boundary cases
     // servo01.attach(arduino, 8, 40);
     servo02.attach(arduino, 8, 40); // same pin?
     servo01.attach(arduino, 7, 40); // already attached ?
-
 
     servo01.moveTo(130);
     servo02.moveTo(130);
@@ -204,22 +205,19 @@ public class ServoTest {
     servo01.moveTo(30);
     servo01.moveTo(130);
 
-
-
-    //servo02.attach(afdriver, 8);
+    // servo02.attach(afdriver, 8);
 
     // this is valid
     // FIXME --- THIS IS NOT RE-ENTRANT !!!
     // servo01.attach(arduino, 8, 40); // this attaches the device, calls
     // Servo.attach(8), then Servo.write(40)
     // FIXME --- THIS IS NOT RE-ENTRANT !!!
-    //servo02.attach(afdriver, 8, 40);
+    // servo02.attach(afdriver, 8, 40);
     // IS IT Equivalent to this ?
 
     // energize to different pin
     // servo01.attach(7);
     arduino.setDebug(true);
-
 
     servo01.moveTo(130);
     servo01.moveTo(30);
@@ -244,14 +242,9 @@ public class ServoTest {
     servo02.moveTo(130);
 
     /*
-		servo01.moveTo(30);
-		servo02.moveTo(30);
-		servo01.moveTo(130);
-		servo02.moveTo(130);
-		servo01.moveTo(30);
-		servo02.moveTo(30);
-		servo01.moveTo(130);
-		servo02.moveTo(130);
+     * servo01.moveTo(30); servo02.moveTo(30); servo01.moveTo(130);
+     * servo02.moveTo(130); servo01.moveTo(30); servo02.moveTo(30);
+     * servo01.moveTo(130); servo02.moveTo(130);
      */
 
     // servo detach
@@ -262,8 +255,6 @@ public class ServoTest {
     // with the same pin & pos
     servo01.attach();
     servo02.attach();
-
-
 
     servo02.moveTo(30);
     servo02.moveTo(130);

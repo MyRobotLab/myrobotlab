@@ -27,7 +27,7 @@ public class TaskTest {
 
   @Test
   public void addTask() throws InterruptedException, IOException {
-    TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+    TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
     catcher.clear();
     catcher.subscribe("runtime", "getUptime");
     Runtime runtime = Runtime.getInstance();
@@ -49,7 +49,7 @@ public class TaskTest {
     catcher.clear();
   }
 
-  public void onUptime(String data){
+  public void onUptime(String data) {
     log.info("uptime {}", data);
   }
 

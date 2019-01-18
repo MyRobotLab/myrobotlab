@@ -28,9 +28,9 @@ public class Arduino2Test {
   public void setup() throws IOException {
 
     LoggingFactory.init("WARN");
-    VirtualArduino va01 = (VirtualArduino)Runtime.start("va01", "VirtualArduino");
-    VirtualArduino va02 = (VirtualArduino)Runtime.start("va02", "VirtualArduino");
-    
+    VirtualArduino va01 = (VirtualArduino) Runtime.start("va01", "VirtualArduino");
+    VirtualArduino va02 = (VirtualArduino) Runtime.start("va02", "VirtualArduino");
+
     va01.connect(V_PORT_1);
     va02.connect(V_PORT_2);
 
