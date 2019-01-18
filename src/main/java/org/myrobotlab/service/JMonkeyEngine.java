@@ -101,11 +101,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
   private static final long serialVersionUID = 1L;
 
   transient Jme3ServoController servoController;
-  
+
   transient AppStateManager stateManager;
 
   final Map<String, String> nameMappings = new TreeMap<String, String>();
-  
+
   transient BulletAppState bulletAppState;
 
   final public String KEY_SEPERATOR = "/";
@@ -167,11 +167,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
       // Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
       jme.addGrid();
-      
+
       /*
-      jme.rename("head-6", "i01.head.rotHead");
-      jme.setMapper("i01.head.rotHead", 0, 180, -90, 90); // shift 90 degrees
-      */
+       * jme.rename("head-6", "i01.head.rotHead");
+       * jme.setMapper("i01.head.rotHead", 0, 180, -90, 90); // shift 90 degrees
+       */
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.move("floor.box.01", 2, 0);
 
@@ -179,14 +179,13 @@ public class JMonkeyEngine extends Service implements ActionListener,
       jme.move("floor.box.01", 2, 0);
 
       /*
-      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
-      jme.move("floor.box.01", 2, 0);
-      
-
-      /*
-      jme.rename("head-6", "i01.head.rotHead");
-      jme.setMapper("i01.head.rotHead", 0, 180, -90, 90);
-      */
+       * jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
+       * jme.move("floor.box.01", 2, 0);
+       * 
+       * 
+       * /* jme.rename("head-6", "i01.head.rotHead");
+       * jme.setMapper("i01.head.rotHead", 0, 180, -90, 90);
+       */
 
       Servo servo = (Servo) Runtime.start("i01.head.jaw", "Servo");
       jme.setRotation("i01.head.jaw", "x");
@@ -969,10 +968,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
       }
     }
   }
-  
+
   /**
-   * based on a directory structure - add missing nodes and bindings
-   * top node will be bound to root
+   * based on a directory structure - add missing nodes and bindings top node
+   * will be bound to root
+   * 
    * @param dirPath
    */
   public void loadNodes(String dirPath) {
@@ -980,13 +980,13 @@ public class JMonkeyEngine extends Service implements ActionListener,
     if (!dir.isDirectory()) {
       error("%s is not a directory", dirPath);
       return;
-    }    
+    }
     // get list of files in dir ..
     File[] files = dir.listFiles();
 
     // scan for all non json files first ...
     // initially set them invisible ...
-    for (File f : files) {      
+    for (File f : files) {
       if (f.isDirectory()) {
         loadNode(f.getAbsolutePath());
       }
@@ -1001,9 +1001,10 @@ public class JMonkeyEngine extends Service implements ActionListener,
       }
     }
   }
-  
+
   /**
    * load a node with all potential children
+   * 
    * @param parentDirPath
    */
   public void loadNode(String parentDirPath) {
@@ -1013,7 +1014,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
       // we are done here ..
       return;
     }
-    
+
     File[] files = parent.listFiles();
     // depth first search - process all children first
     // to build the tree
@@ -1022,9 +1023,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
         loadNode(f.getAbsolutePath());
       }
     }
-    
+
   }
-  
 
   // FIXME - remove - just load a json file
   // NOT TO BE CALLED BY ANY OTHER THREAD BESIDES JME THREAD !!! OR YOU GET A
@@ -1185,7 +1185,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
     log.info("onAnalog {} {} {}", name, keyPressed, tpf);
-    
+
     if (selected == null) {
       return;
     }
@@ -1615,15 +1615,15 @@ public class JMonkeyEngine extends Service implements ActionListener,
     assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
     assetManager.registerLoader(BlenderLoader.class, "blend");
     stateManager = app.getStateManager();
-    
-    /**<pre> Physics related
-    bulletAppState = new BulletAppState();
-    bulletAppState.setEnabled(true);
-    stateManager.attach(bulletAppState);
-    PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
-    bulletAppState.setDebugEnabled(true);
-    */
-    
+
+    /**
+     * <pre>
+     * Physics related bulletAppState = new BulletAppState();
+     * bulletAppState.setEnabled(true); stateManager.attach(bulletAppState);
+     * PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager,
+     * bulletAppState.getPhysicsSpace()); bulletAppState.setDebugEnabled(true);
+     */
+
     // what inputs will jme service handle ?
 
     /**

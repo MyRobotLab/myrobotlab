@@ -378,7 +378,7 @@ public abstract class OpenCVFilter implements Serializable {
       opencv.invoke("publishClassification", data);
     }
   }
-  
+
   /**
    * <pre>
                 Perhaps don't do a bunch of publishing points
@@ -392,8 +392,8 @@ public abstract class OpenCVFilter implements Serializable {
       opencv.invoke("publishPointCloud", new Object[] {pointCloud});
     }
   }
-  </pre>
-  */
+   * </pre>
+   */
 
   public void put(String keyPart, Object object) {
     data.put(keyPart, object);
@@ -405,7 +405,6 @@ public abstract class OpenCVFilter implements Serializable {
    */
   public void release() {
   }
-  
 
   public void samplePoint(Integer x, Integer y) {
     //
@@ -502,7 +501,7 @@ public abstract class OpenCVFilter implements Serializable {
   public boolean isEnabled() {
     return enabled;
   }
-  
+
   public void put(PointCloud pc) {
     data.put(pc);
   }

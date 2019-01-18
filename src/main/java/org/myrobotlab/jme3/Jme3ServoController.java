@@ -17,16 +17,16 @@ import com.jme3.scene.Spatial;
 public class Jme3ServoController implements ServoController {
 
   JMonkeyEngine jme = null;
-  
+
   public final static Logger log = LoggerFactory.getLogger(VirtualServoController.class);
 
   Map<String, ServoData> servos = new TreeMap<String, ServoData>();
-  
+
   class ServoData {
- 
+
     ServoControl servo;
     UserData data;
-    
+
     public ServoData(ServoControl servo, UserData data) {
       this.servo = servo;
       this.data = data;
@@ -120,8 +120,8 @@ public class Jme3ServoController implements ServoController {
   @Override
   public void servoAttachPin(ServoControl servo, Integer pin) {
     try {
-    attachServoControl(servo);
-    } catch(Exception e) {
+      attachServoControl(servo);
+    } catch (Exception e) {
       log.error("servoAttachPin threw", e);
     }
   }
@@ -146,7 +146,7 @@ public class Jme3ServoController implements ServoController {
       return;
     }
     // UserData d = servos.get(name).data;
-    jme.rotateTo(name, (float)servo.getPos());
+    jme.rotateTo(name, (float) servo.getPos());
   }
 
   @Override
