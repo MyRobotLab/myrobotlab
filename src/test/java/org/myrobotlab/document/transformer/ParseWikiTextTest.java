@@ -30,12 +30,12 @@ public class ParseWikiTextTest extends AbstractStageTest {
     Assert.assertNotNull(doc.getField("text"));
   }
 
-  //  @Override
-  //  public void validateChildren(List<Document> docs) {
-  //    // NoOp most stages don't return children docs.
-  //    for (Document d:  docs) {
-  //      System.out.println(d);
-  //    }
-  //  };
+  // @Override
+  // public void validateChildren(List<Document> docs) {
+  // // NoOp most stages don't return children docs.
+  // for (Document d: docs) {
+  // System.out.println(d);
+  // }
+  // };
 
 }

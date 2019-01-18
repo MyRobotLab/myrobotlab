@@ -24,8 +24,8 @@ public class OpenCVFilterKinectNavigateTest {
     cv.setGrabberType("OpenKinect");
     cv.broadcastState();
 
-
-    // FIXME - all junit tests should inherit from common parent which handles some of the
+    // FIXME - all junit tests should inherit from common parent which handles
+    // some of the
     // common features like virtualization and headless
 
     boolean virtual = true;

@@ -49,12 +49,11 @@ public class InMoovTest implements PinArrayListener {
     }
   }
 
-
   @Before
   public void setUp() throws Exception {
     /**
-     * Arduino's expected state before each test is
-     * 'connected' with no devices, no pins enabled
+     * Arduino's expected state before each test is 'connected' with no devices,
+     * no pins enabled
      */
     uart.clear();
     uart.setTimeout(100);
@@ -80,8 +79,8 @@ public class InMoovTest implements PinArrayListener {
 
   @Test
   public void testMinimalScript() throws ClientProtocolException, IOException {
-    Python python = (Python)Runtime.start("python", "Python");
-    HttpClient http = (HttpClient)Runtime.start("http", "HttpClient");
+    Python python = (Python) Runtime.start("python", "Python");
+    HttpClient http = (HttpClient) Runtime.start("http", "HttpClient");
     String code = http.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov3.minimal.py");
     python.exec(code);
   }

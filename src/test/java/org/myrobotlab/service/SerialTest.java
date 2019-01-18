@@ -56,7 +56,7 @@ public class SerialTest {
     virtualDevice = (VirtualDevice) Runtime.start("virtualDevice", "VirtualDevice");
     virtualDevice.createVirtualSerial(vport);
 
-    uart = (Serial)virtualDevice.getUart(vport);
+    uart = (Serial) virtualDevice.getUart(vport);
     uart.setTimeout(300);
     Thread.sleep(100);
     serial.open(vport);
@@ -97,10 +97,8 @@ public class SerialTest {
       serial.open(vport);
     }
 
-
     serial.addByteListener(catcher);
   }
-
 
   @Test
   public final void testGetDescription() {
@@ -336,7 +334,6 @@ public class SerialTest {
     log.info("here");
   }
 
-
   @Test
   public final void testGetPort() {
     Port port = serial.getPort();
@@ -389,7 +386,7 @@ public class SerialTest {
 
   @Test
   public final void testSetCodec() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException,
-  IllegalArgumentException, InvocationTargetException, Exception, InterruptedException {
+      IllegalArgumentException, InvocationTargetException, Exception, InterruptedException {
     log.info("testSetCodec");
 
     boolean notready = true;

@@ -15,23 +15,22 @@ public class YoloFilterTest {
 
   @Test
   public void testYolo() throws SolrServerException, IOException {
-    
+
     Runtime.start("gui", "SwingGui");
-    
-    Solr solr = (Solr)Runtime.createAndStart("solr", "Solr");
+
+    Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
     solr.startEmbedded();
-    
+
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
     opencv.setStreamerEnabled(false);
     opencv.setCameraIndex(0);
-    
 
     OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");
     opencv.addFilter(yolo);
 
-    solr.attach(opencv); 
+    solr.attach(opencv);
     opencv.capture();
-    
+
   }
 
 }

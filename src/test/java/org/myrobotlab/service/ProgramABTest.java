@@ -64,14 +64,12 @@ public class ProgramABTest extends AbstractServiceTest {
     return testService;
   }
 
-
   public void testProgramAB() throws Exception {
     // a response
     Response resp = testService.getResponse(username, "UNIT TEST PATTERN");
     // System.out.println(resp.msg);
     assertEquals("Unit Test Pattern Passed", resp.msg);
   }
-
 
   public void testOOBTags() throws Exception {
     Response resp = testService.getResponse(username, "OOB TEST");
@@ -114,7 +112,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // Response resp1 = testService.getResponse(session, "SET FOO BAR");
     // System.out.println(resp1.msg);
     Response resp = testService.getResponse(username, "LEARN AAA IS BBB");
-    //System.out.println(resp.msg);
+    // System.out.println(resp.msg);
     resp = testService.getResponse(username, "WHAT IS AAA");
     assertEquals("BBB", resp.msg);
   }
@@ -125,7 +123,7 @@ public class ProgramABTest extends AbstractServiceTest {
     resp = testService.getResponse(username, "SETTEST MOUSE");
     assertEquals("An Animal.", resp.msg);
     resp = testService.getResponse(username, "SETTEST DOG");
-    //System.out.println(resp.msg);
+    // System.out.println(resp.msg);
     assertEquals("An Animal.", resp.msg);
   }
 
@@ -186,7 +184,8 @@ public class ProgramABTest extends AbstractServiceTest {
   }
 
   // the pannous service seems borked at the moment due to bad ssl, and maybe
-  // other stuff..  kwatters: I recommend we build our own service that does this stuff
+  // other stuff.. kwatters: I recommend we build our own service that does this
+  // stuff
   // @Test
   public void pannousTest() {
     Response resp = testService.getResponse(username, "SHOW ME INMOOV");
@@ -198,25 +197,23 @@ public class ProgramABTest extends AbstractServiceTest {
   public void sraixOOBTest() {
     // Response resp = testService.getResponse(username, "MRLSRAIX");
     // System.out.println(resp);
-    //boolean contains = resp.msg.contains("foobar");
-    //assertTrue(contains);
+    // boolean contains = resp.msg.contains("foobar");
+    // assertTrue(contains);
     Response resp = testService.getResponse(username, "OOBMRLSRAIX");
     // System.out.println(resp);
     boolean contains = resp.msg.contains("You are talking to lloyd");
     assertTrue(contains);
   }
 
-
-
   public void sraixTest() {
     Response resp = testService.getResponse(username, "MRLSRAIX");
     System.out.println(resp);
-    //Response resp = testService.getResponse(username, "Why is the sky blue?");
+    // Response resp = testService.getResponse(username, "Why is the sky
+    // blue?");
     // System.out.println(resp);
     boolean contains = resp.msg.contains("atmosphere");
     assertTrue(contains);
   }
-
 
   @Override
   public void testService() throws Exception {
@@ -245,7 +242,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // pikachu the service.
     pikachu.startService();
     // load the bot brain for the chat with the user
-    pikachu.startSession(path , username, "pikachu", new Locale("ja"));
+    pikachu.startSession(path, username, "pikachu", new Locale("ja"));
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
   }

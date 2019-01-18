@@ -62,7 +62,7 @@ public class JMonkeyEngineTest extends AbstractTest {
     // check after the monkeys have pounded on it - it still works !
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     jme.attach(cv);
-    
+
     //
     jme.putText("stat: 1\nstat: 2\nstat: 3", 10, 10);
     jme.putText("stat: 5\nstat: 6\nstat: 7", 10, 10);
@@ -74,7 +74,7 @@ public class JMonkeyEngineTest extends AbstractTest {
     // jme.subscribe("cv", "publishPointCloud");
 
     cv.addFilter("floor", "KinectPointCloud");
-    
+
     // absolute jme movements
     /**
      * <pre>
@@ -90,7 +90,6 @@ public class JMonkeyEngineTest extends AbstractTest {
      * // head.moveTo(90, 90);
      * </pre>
      */
-    
 
     VirtualServoController vsc = (VirtualServoController) Runtime.start("i01.left", "VirtualServoController");
     vsc.attachSimulator(jme);
@@ -104,8 +103,6 @@ public class JMonkeyEngineTest extends AbstractTest {
     InMoovHead head = i01.startHead("COM98");
     Servo s = (Servo) Runtime.getService("i01.head.rothead");
     Servo jaw = (Servo) Runtime.getService("i01.head.jaw");
-
-
 
     // is this necessary ???
     head.rest(); // <- WRONG should not have to do this .. it should be
@@ -122,7 +119,7 @@ public class JMonkeyEngineTest extends AbstractTest {
       s.moveTo(i);
       sleep(100);
     }
-    
+
     // jme.putText("test", 5, 5, 5);
     // cv.capture("../1543648225286");
     // jme.startServoController("i01.left"); // GAH won't work :(
@@ -134,7 +131,6 @@ public class JMonkeyEngineTest extends AbstractTest {
     // jme.start();
 
     // jme.onPointCloud(cv.getPointCloud());
-
 
   }
 
