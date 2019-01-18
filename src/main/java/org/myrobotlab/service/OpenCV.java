@@ -266,7 +266,7 @@ public class OpenCV extends AbstractComputerVision {
   static final long serialVersionUID = 1L;
 
   transient public final static String SOURCE_KINECT_DEPTH = "kinect.depth.IplImage";
-  
+
   static final Set<String> recordKeys = new HashSet<>();
 
   static {
@@ -299,7 +299,7 @@ public class OpenCV extends AbstractComputerVision {
       imageFileExt.add("png");
       imageFileExt.add("pcd");
       imageFileExt.add("pdf");
-      
+
       recordKeys.add("input.video");
       recordKeys.add("input.depth");
 
@@ -803,9 +803,9 @@ public class OpenCV extends AbstractComputerVision {
   private boolean singleFrame;
 
   private PointCloud lastPointCloud;
-  
+
   static String DATA_DIR;
-  
+
   public OpenCV(String n) {
     super(n);
     putText(20, 20, "time:  %d");
@@ -1384,10 +1384,10 @@ public class OpenCV extends AbstractComputerVision {
     // log.debug("data -> {}", data);
 
     // FIXME - should have had it
-    
+
     // FIXME - deprecate it
     invoke("publishOpenCVData", data);
-    
+
     // future publishing (same as BoofCv !)
     invoke("publishCvData", data);
 
@@ -1526,10 +1526,10 @@ public class OpenCV extends AbstractComputerVision {
    * until asked for - then its cached SMART ! :)
    * 
    */
-  public final OpenCVData publishOpenCVData(OpenCVData data) {    
+  public final OpenCVData publishOpenCVData(OpenCVData data) {
     return data;
   }
-  
+
   public final CvData publishCvData(CvData data) {
     return data;
   }
@@ -1584,8 +1584,8 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   /**
-   * Generates either a flv movie file from selected output OR a series of non-lossy pngs from
-   * OpenCVData.
+   * Generates either a flv movie file from selected output OR a series of
+   * non-lossy pngs from OpenCVData.
    * 
    * key- input, filter, or display
    */
@@ -1962,13 +1962,13 @@ public class OpenCV extends AbstractComputerVision {
     }
     return putCacheFile(url, data);
   }
-  
-  public PointCloud publishPointCloud(PointCloud pointCloud){
+
+  public PointCloud publishPointCloud(PointCloud pointCloud) {
     lastPointCloud = pointCloud;
     return pointCloud;
   }
 
-  public PointCloud getPointCloud() {    
+  public PointCloud getPointCloud() {
     return lastPointCloud;
   }
 

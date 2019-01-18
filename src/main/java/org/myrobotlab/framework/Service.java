@@ -121,7 +121,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
-  
+
   /**
    * key into Runtime's hosts of ServiceEnvironments mrlscheme://[gateway
    * name]/scheme://key for gateway mrl://gateway/xmpp://incubator incubator if
@@ -145,7 +145,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   transient protected Inbox inbox = null;
 
   transient Timer timer = null;
-  
+
   /**
    * a more capable task handler
    */
@@ -194,8 +194,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
-   * @param myKey m
-   * @param serviceClass class 
+   * 
+   * @param myKey
+   *          m
+   * @param serviceClass
+   *          class
    * @return a map of string to service reservation
    * 
    */
@@ -777,19 +780,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public String getDataDir() {
     return "data" + File.separator + getClass().getSimpleName();
   }
-  
+
   public String getDataInstanceDir() {
     return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
-  
+
   public String getResourceDir() {
     return "data" + File.separator + getClass().getSimpleName();
   }
-  
+
   public String getResourceInstanceDir() {
     return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
-  
+
   // FIXME - make a static initialization part !!!
 
   public Service(String reservedKey) {
@@ -797,17 +800,15 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
-    
+
     /**
      * <pre>
      * necessary ?
      *
-    File dir = new File(getDataDir());
-    dir.mkdirs();
-    dir = new File(getResourceDir());
-    dir.mkdirs();
-    */
-    
+     * File dir = new File(getDataDir()); dir.mkdirs(); dir = new
+     * File(getResourceDir()); dir.mkdirs();
+     */
+
     try {// FIXME !!! AFTER MERGE !!!
       serviceType = getMetaData(this.getClass().getCanonicalName());
     } catch (Exception e) {
@@ -1598,7 +1599,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       }
       log.info("cfg file {} does not exist", filename);
     } catch (Exception e) {
-      log.error("failed loading {}", filename,e);
+      log.error("failed loading {}", filename, e);
     }
     return false;
   }
@@ -1919,9 +1920,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   /**
    * this send forces remote connect - for registering services
-   * @param url u
-   * @param method m 
-   * @param param1 the param
+   * 
+   * @param url
+   *          u
+   * @param method
+   *          m
+   * @param param1
+   *          the param
    */
   public void send(URI url, String method, Object param1) {
     Object[] params = new Object[1];
@@ -2032,7 +2037,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void startRecording() {
     invoke("startRecording", new Object[] { null });
   }
-  
+
   @Override
   public void loadAndStart() {
     load();
@@ -2106,9 +2111,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
         cm.send(Message.createMessage(this, serviceName, "addListener", listener));
       }
     } else {
-    MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-    cm.send(Message.createMessage(this, topicName, "addListener", listener));
-  }
+      MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+      cm.send(Message.createMessage(this, topicName, "addListener", listener));
+    }
   }
 
   public void sendPeer(String peerKey, String method, Object... params) {
@@ -2433,14 +2438,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean isVirtual() {
     return isVirtual;
   }
-  
+
   /**
-   * a convenience method for a Service
-   * which always attempts to find a file with the same ordered precedence
+   * a convenience method for a Service which always attempts to find a file
+   * with the same ordered precedence
    * 
-   * 1. check data/{ServiceType} first  (users data directory)
-   * 2. check resource/{ServiceType}    (mrl's static resource directory)
-   * 3. check absolute path 
+   * 1. check data/{ServiceType} first (users data directory) 2. check
+   * resource/{ServiceType} (mrl's static resource directory) 3. check absolute
+   * path
    * 
    * @return
    */
@@ -2455,14 +2460,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
       log.info("found file in resource directory - {}", file.getAbsolutePath());
       return file;
     }
-    
+
     file = new File(filename);
-    
+
     if (file.exists()) {
       log.info("found file - {}", file.getAbsolutePath());
       return file;
     }
-    
+
     error("could not find file {}", file.getAbsolutePath());
     return file;
   }

@@ -57,7 +57,7 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   double maxY = 1.0;
   double minX = 0;
   double minY = 0.0;
-  
+
   /**
    * list of samplepoint to return depth
    */

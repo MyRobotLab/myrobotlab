@@ -113,8 +113,7 @@ public class MainMenuState extends BaseAppState {
     sub.addChild(x, 0, 1);
     sub.addChild(y, 0, 3);
     sub.addChild(z, 0, 5);
-    
-    
+
     scale = new Label("");
 
     sub.addChild(new Label("xRot:"), 1, 0);
@@ -123,11 +122,11 @@ public class MainMenuState extends BaseAppState {
     sub.addChild(xRot, 1, 1);
     sub.addChild(yRot, 1, 3);
     sub.addChild(zRot, 1, 5);
-    sub.addChild(new Label("scale:"), 2,0);
-    sub.addChild(scale, 2,1);
+    sub.addChild(new Label("scale:"), 2, 0);
+    sub.addChild(scale, 2, 1);
     sub.addChild(update, 3, 5);
     contents.addChild(sub);
-    
+
     statusLabel = contents.addChild(new Label("Status"));
     statusLabel.setInsets(new Insets3f(2, 5, 2, 5));
 
@@ -139,7 +138,7 @@ public class MainMenuState extends BaseAppState {
     close.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
-          onDisable();
+        onDisable();
       }
     });
     buttons.addChild(close);
@@ -147,7 +146,7 @@ public class MainMenuState extends BaseAppState {
     save.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
-          jme.saveSpatial(jme.getSelected());
+        jme.saveSpatial(jme.getSelected());
       }
     });
     buttons.addChild(save);
@@ -157,8 +156,7 @@ public class MainMenuState extends BaseAppState {
     buttons.addChild(new Button("clone"));
     // buttons.addChild(new Button("rotate"));
     buttons.addChild(new Button("bind"));
-    
-    
+
     // --------children--------------
     contents.addChild(search);
     contents.addChild(searchButton);
@@ -252,7 +250,7 @@ public class MainMenuState extends BaseAppState {
 
     addInfoTab();
     addHelpTab();
-    
+
   }
 
   public void loadGui() {
@@ -265,7 +263,7 @@ public class MainMenuState extends BaseAppState {
   }
 
   @Override
-  protected void onEnable() {  
+  protected void onEnable() {
     guiNode.attachChild(main);
     GuiGlobals.getInstance().requestFocus(main);
   }
@@ -300,7 +298,7 @@ public class MainMenuState extends BaseAppState {
     zRot.setText(String.format("%.3f", angles[0] * FastMath.RAD_TO_DEG));
     xRot.setText(String.format("%.3f", angles[1] * FastMath.RAD_TO_DEG));
     yRot.setText(String.format("%.3f", angles[2] * FastMath.RAD_TO_DEG));
-    
+
     Vector3f sc = spatial.getLocalScale();
     scale.setText(sc.toString());
     // String type = (spatial instanceof Node) ? "Node" : "Geometry";
@@ -309,22 +307,15 @@ public class MainMenuState extends BaseAppState {
     Spatial rootChild = jme.getRootChild(spatial);
 
     /*
-    StringBuilder sb = new StringBuilder();
-    if (rootChild != null) {
-      sb.append(rootChild);
-      sb.append(" > ");
-      sb.append(spatial.getParent());
-      sb.append(" > ");
-      sb.append(spatial);
-    } else {
-      sb.append(spatial);
-    }
-    */
-    
+     * StringBuilder sb = new StringBuilder(); if (rootChild != null) {
+     * sb.append(rootChild); sb.append(" > "); sb.append(spatial.getParent());
+     * sb.append(" > "); sb.append(spatial); } else { sb.append(spatial); }
+     */
+
     breadCrumbs.setText(jme.getKeyPath(spatial));
     addChildren(spatial);
   }
-  
+
   public void addChildren(Spatial spatial) {
     childrenContainer.clearChildren();
     children.clear();
@@ -346,10 +337,9 @@ public class MainMenuState extends BaseAppState {
         childrenContainer.addChild(b);
       }
       /*
-      for (String key : children.keySet()) {
-        childrenContainer.addChild(children.get(key));
-      }
-      */
+       * for (String key : children.keySet()) {
+       * childrenContainer.addChild(children.get(key)); }
+       */
     }
   }
 

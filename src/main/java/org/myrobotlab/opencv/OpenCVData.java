@@ -80,9 +80,8 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class OpenCVData  extends CvData {
-  
-   
+public class OpenCVData extends CvData {
+
   public final static Logger log = LoggerFactory.getLogger(OpenCVData.class);
   private static final long serialVersionUID = 1L;
 
@@ -126,27 +125,23 @@ public class OpenCVData  extends CvData {
    */
   List<String> filters = new ArrayList<String>();
 
-
   private int frameIndex;
-
 
   /**
    * graphics object for display
    */
   transient Map<String, Graphics2D> g2ds = new HashMap<>();
 
-
   /**
    * name of the service which produced this data
    */
   private String name;
 
-
   /**
    * the filter's name - used as a key to get or put data associated with a
    * specific filter
    */
-  
+
   private String selectedFilter = INPUT_KEY;
 
   /**
@@ -157,7 +152,7 @@ public class OpenCVData  extends CvData {
 
   private long timestamp;
 
-  public OpenCVData() {    
+  public OpenCVData() {
   }
 
   public OpenCVData(String name, long frameStartTs, int frameIndex, Frame frame) {
@@ -179,6 +174,7 @@ public class OpenCVData  extends CvData {
     sources.put(String.format("%s.output.IplImage", name), firstImage);
 
   }
+
   /**
    * resource cleanup
    */
@@ -187,12 +183,10 @@ public class OpenCVData  extends CvData {
       g.dispose();
     }
   }
-  
-  
+
   public IplImage get(String fullKey) {
     return (IplImage) sources.get(fullKey);
   }
-  
 
   public List<Rectangle> getBoundingBoxArray() {
     return (List) sources.get(String.format("%s.output.BoundingBoxArray", name));
@@ -247,7 +241,7 @@ public class OpenCVData  extends CvData {
         bi = OpenCV.toBufferedImage(image);
       } else {
         bi = OpenCV.toBufferedImage(getInputFrame()); // logic should probably
-                                                       // not be buried down
+                                                      // not be buried down
       }
       // cache result
       sources.put(key, bi);
@@ -326,6 +320,7 @@ public class OpenCVData  extends CvData {
 
   /**
    * gets kinect depth image
+   * 
    * @return
    */
   public IplImage getKinectDepth() {
@@ -334,6 +329,7 @@ public class OpenCVData  extends CvData {
 
   /**
    * gets kinect rgb image
+   * 
    * @return
    */
   public IplImage getKinectVideo() {
@@ -427,11 +423,13 @@ public class OpenCVData  extends CvData {
   }
 
   /**
-   * pushes a reference to both images from a kinect grabber
-   * default "input" image is depth - but both can be accessed from any filter
+   * pushes a reference to both images from a kinect grabber default "input"
+   * image is depth - but both can be accessed from any filter
    * 
-   * @param depth - depth image
-   * @param video - rgb image
+   * @param depth
+   *          - depth image
+   * @param video
+   *          - rgb image
    */
   public void putKinect(IplImage depth, IplImage video) {
     sources.put(OpenCV.INPUT_KEY, depth);
@@ -442,7 +440,7 @@ public class OpenCVData  extends CvData {
   public void setFrameIndex(int frameIndex) {
     this.frameIndex = frameIndex;
   }
-  
+
   public void setName(String name) {
     this.name = name;
   }
@@ -518,7 +516,6 @@ public class OpenCVData  extends CvData {
     return filename;
   }
 
-  
   public void writeAll() {
     for (String key : sources.keySet()) {
       // OpenCV.recor
@@ -526,15 +523,15 @@ public class OpenCVData  extends CvData {
   }
 
   public List<PointCloud> getPointCloudList() {
-    return (List<PointCloud>)sources.get(CvData.POINT_CLOUDS);
+    return (List<PointCloud>) sources.get(CvData.POINT_CLOUDS);
   }
-  
+
   public PointCloud getPointCloud() {
     List<PointCloud> pcs = getPointCloudList();
     if (pcs == null && pcs.size() != 0) {
       return null;
     }
-    return pcs.get(0);    
+    return pcs.get(0);
   }
 
   @Override
@@ -546,9 +543,9 @@ public class OpenCVData  extends CvData {
     List<PointCloud> pcs = (List<PointCloud>) sources.get(CvData.POINT_CLOUDS);
     if (pcs == null) {
       pcs = new ArrayList<PointCloud>();
-    } 
+    }
     pcs.add(pc);
-   sources.put(CvData.POINT_CLOUDS, pcs);
+    sources.put(CvData.POINT_CLOUDS, pcs);
   }
 
 }

@@ -141,34 +141,35 @@ public class Jme3Util {
     Vector3f rot = uv.mult(angle);
     o.getNode().rotate(rot.x, rot.y, rot.z);
   }
-  
+
   static Integer getIndexFromUnitVector(Vector3f vector) {
-     if (vector == null) {
-       log.error("getIndexFromVector(null) not valid");
-       return null;
-     }
-     
-     if (vector.equals(Vector3f.UNIT_X)) {
-       return 0;
-     } else if (vector.equals(Vector3f.UNIT_Y)) {
-       return 1;
-     }else if (vector.equals(Vector3f.UNIT_Z)) {
-       return 2;
-     }
-     
-     log.error("vector %s does not equal a unit vector");
-     return null;
+    if (vector == null) {
+      log.error("getIndexFromVector(null) not valid");
+      return null;
+    }
+
+    if (vector.equals(Vector3f.UNIT_X)) {
+      return 0;
+    } else if (vector.equals(Vector3f.UNIT_Y)) {
+      return 1;
+    } else if (vector.equals(Vector3f.UNIT_Z)) {
+      return 2;
+    }
+
+    log.error("vector %s does not equal a unit vector");
+    return null;
   }
 
   /**
    * absolute (local) rotation ..
+   * 
    * @param name
    * @param degrees
    */
   public void rotateTo(String name, Double degreesIn) {
     float degrees = degreesIn.floatValue();
     log.info(String.format("rotateTo %s, degrees %.2f", name, degrees));
-    
+
     UserData o = jme.getUserData(name);
     if (o == null) {
       jme.error("no user data for %s", name);
@@ -176,28 +177,32 @@ public class Jme3Util {
     }
     Vector3f rotMask = o.rotationMask;
     if (rotMask == null) {
-      rotMask = Vector3f.UNIT_Y;//new Vector3f(0, 1, 0); // default rotate around "y" axis
+      rotMask = Vector3f.UNIT_Y;// new Vector3f(0, 1, 0); // default rotate
+                                // around "y" axis
     }
-    
+
     int angleIndex = getIndexFromUnitVector(rotMask);
     if (o.mapper != null) {
       degrees = (float) o.mapper.calcOutput(degreesIn);
       log.info(String.format("rotateTo map %s, degrees %.2f", name, degrees));
     }
-    
+
     // get current local rotations
     Node n = o.getNode();
     Quaternion q = n.getLocalRotation();
     float[] angles = new float[3];
     q.toAngles(angles);
-    log.info(String.format("before %s, %.2f", name, angles[angleIndex] * 180/FastMath.PI));
- 
-    q.fromAngleAxis(((degrees) * FastMath.PI/180), rotMask);// FIXME optimize final Y_AXIS = new Vector3f(0,1,0)
+    log.info(String.format("before %s, %.2f", name, angles[angleIndex] * 180 / FastMath.PI));
+
+    q.fromAngleAxis(((degrees) * FastMath.PI / 180), rotMask);// FIXME optimize
+                                                              // final Y_AXIS =
+                                                              // new
+                                                              // Vector3f(0,1,0)
 
     // apply map if it exists (shifted)
     n.setLocalRotation(q);
     q.toAngles(angles);
-    log.info(String.format("after %s, %.2f", name, angles[angleIndex]* 180/FastMath.PI));   
+    log.info(String.format("after %s, %.2f", name, angles[angleIndex] * 180 / FastMath.PI));
   }
 
   public void bind(String child, String parent) {
@@ -249,7 +254,7 @@ public class Jme3Util {
     addAxis(n, arrow, ColorRGBA.Blue);
     return n;
   }
-  
+
   private void addAxis(Node n, Mesh shape, ColorRGBA color) {
     Geometry g = new Geometry("_coordinate axis", shape);
     Material mat = new Material(jme.getApp().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
@@ -267,7 +272,7 @@ public class Jme3Util {
       error("createBoundingBox(%s) world bounds is null", spatial.getName());
       return null;
     }
-    
+
     Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
     // Material mat = new Material(jme.getAssetManager(),
     // "Common/MatDefs/Light/PBRLighting.j3md");
@@ -284,9 +289,8 @@ public class Jme3Util {
     return newBb;
   }
 
-  public Geometry createBoundingBox(Spatial spatial) {    
+  public Geometry createBoundingBox(Spatial spatial) {
     return createBoundingBox(spatial, defaultColor);
   }
-
 
 }

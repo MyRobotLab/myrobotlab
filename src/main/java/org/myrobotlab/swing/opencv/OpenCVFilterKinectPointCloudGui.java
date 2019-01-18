@@ -43,7 +43,6 @@ import org.myrobotlab.swing.widget.SliderWithText;
 
 public class OpenCVFilterKinectPointCloudGui extends OpenCVFilterGui implements ActionListener, ChangeListener {
 
-
   JButton clearPoints = new JButton("clear points");
 
   public OpenCVFilterKinectPointCloudGui(String boundFilterName, String boundServiceName, SwingGui myService) {
@@ -58,34 +57,35 @@ public class OpenCVFilterKinectPointCloudGui extends OpenCVFilterGui implements 
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    // OpenCVFilterKinectPointCloud filter = (OpenCVFilterKinectPointCloud) boundFilter.filter;
+    // OpenCVFilterKinectPointCloud filter = (OpenCVFilterKinectPointCloud)
+    // boundFilter.filter;
     OpenCVFilterKinectPointCloud filter = (OpenCVFilterKinectPointCloud) boundFilter.filter;
     Object o = e.getSource();
-    if (o == clearPoints)
-    {
+    if (o == clearPoints) {
       // send( WTH no send-to-filter ?
-      filter.clearSamplePoints(); // lame 
+      filter.clearSamplePoints(); // lame
     }
-    
+
     // CALL FUNCTIONS or UPDATE THE SKELETAL DATA FILTER ???
     // send the updated filter to OpenCV service
-    // myGui.send(boundServiceName, "setFilterState", boundFilter); // FIXME should just be broadcastFilterstate
+    // myGui.send(boundServiceName, "setFilterState", boundFilter); // FIXME
+    // should just be broadcastFilterstate
   }
 
-  @Override 
+  @Override
   public void stateChanged(ChangeEvent e) {
     if (boundFilter != null) {
       SliderWithText slider = (SliderWithText) e.getSource();
-     
+
       if (!slider.getValueIsAdjusting()) {
         // OpenCVFilterKinectPointCloud filter = (OpenCVFilterKinectPointCloud)
         // boundFilter.filter;
-       // if (slider == level) {
-          // params[2] = slider.getValue() * 2 + 1;
-          // qualityLevel.value.setText("" +
-          // (float)qualityLevel.getValue()/100);
-          // filter.qualityLevel = (float)qualityLevel.getValue()/100;
-       // } 
+        // if (slider == level) {
+        // params[2] = slider.getValue() * 2 + 1;
+        // qualityLevel.value.setText("" +
+        // (float)qualityLevel.getValue()/100);
+        // filter.qualityLevel = (float)qualityLevel.getValue()/100;
+        // }
 
         myGui.send(boundServiceName, "setFilterState", boundFilter);
       } // else - adjust gui text only
@@ -94,7 +94,7 @@ public class OpenCVFilterKinectPointCloudGui extends OpenCVFilterGui implements 
 
   @Override // FIXME - should be onFilterState
   public void getFilterState(FilterWrapper filterWrapper) {
-    
+
   }
 
 }

@@ -2,6 +2,7 @@ package org.myrobotlab.math.geometry;
 
 /**
  * TODO - add more meta data ?
+ * 
  * @author GroG
  *
  */
@@ -11,11 +12,11 @@ public class PointCloud {
   // FloatBuffer data = null;
   Point3df[] data;
   float[] colors;
-  
-  public PointCloud(Point3df[] data) {    
-    this.data = data; 
+
+  public PointCloud(Point3df[] data) {
+    this.data = data;
   }
-  
+
   public Point3df[] getData() {
     return data;
   }
@@ -23,9 +24,9 @@ public class PointCloud {
   public void setColors(float[] colors) {
     this.colors = colors;
   }
-  
+
   public float[] getColors() {
     return colors;
   }
-  
+
 }

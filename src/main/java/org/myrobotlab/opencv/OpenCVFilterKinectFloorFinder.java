@@ -119,44 +119,41 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
    *    <a,b,c> : vector perpendicular to the plane
    * 
    * 
-   * @param depth
+   * &#64;param depth
    * 
    * </pre>
    */
   public IplImage learnFloor(IplImage depth) {
-    
+
     // strategy - get a collection of points (random) or provided by user
     // plane formula
     if (samplePoints.size() < 3) {
-      // need some sample points !!!  at "least 3" !
-      
+      // need some sample points !!! at "least 3" !
+
       Point3df p1 = samplePoints.get(0);
       Point3df p2 = samplePoints.get(1);
       Point3df p3 = samplePoints.get(2);
-      
+
       SphericalCoordinates x;
-      
-      
-      float a1 = p2.x - p1.x; 
-      float b1 = p2.y - p1.y; 
-      float c1 = p2.z - p1.z; 
-      float a2 = p3.x - p1.x; 
-      float b2 = p3.y - p1.y; 
-      float c2 = p3.z - p1.z; 
-      float a = b1 * c2 - b2 * c1; 
-      float b = a2 * c1 - a1 * c2; 
-      float c = a1 * b2 - b1 * a2; 
-      float d = (- a * p1.x - b * p1.y - c * p1.z); 
-      System.out.println("equation of plane is " + a + 
-                         " x + " + b + " y + " + c +  
-                         " z + " + d + " = 0."); 
-      
+
+      float a1 = p2.x - p1.x;
+      float b1 = p2.y - p1.y;
+      float c1 = p2.z - p1.z;
+      float a2 = p3.x - p1.x;
+      float b2 = p3.y - p1.y;
+      float c2 = p3.z - p1.z;
+      float a = b1 * c2 - b2 * c1;
+      float b = a2 * c1 - a1 * c2;
+      float c = a1 * b2 - b1 * a2;
+      float d = (-a * p1.x - b * p1.y - c * p1.z);
+      System.out.println("equation of plane is " + a + " x + " + b + " y + " + c + " z + " + d + " = 0.");
+
       return depth;
     }
-    
+
     // derive plane from sample points
     // https://www.geeksforgeeks.org/program-to-find-equation-of-a-plane-passing-through-3-points/
-    
+
     final UShortRawIndexer depthIdx = (UShortRawIndexer) depth.createIndexer();
     // for (int y = h; y > 1; --y) {
     for (int y = depth.height() - 1; y > -1; --y) {
@@ -165,11 +162,11 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
         try {
           int range = depthIdx.get(y, x);
           // if Math.abs(avgFloor.get(y,x) - range) > maxVariance
-          //      nonFloorDepth (either wall or hole)
-          //      scanning left to right and I in or out of floor
-          //          if (part of floor, makes this 'end marker'
-          //               compute size of rectangle/path - > minarea addPath
-          //          else (begin marker)
+          // nonFloorDepth (either wall or hole)
+          // scanning left to right and I in or out of floor
+          // if (part of floor, makes this 'end marker'
+          // compute size of rectangle/path - > minarea addPath
+          // else (begin marker)
         } catch (Exception e) {
           log.error("here x");
         }
@@ -179,15 +176,16 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
 
     return depth;
   }
-  
+
   final public String MODE_LEARN = "MODE_LEARN";
-  final public String MODE_FIND_PATH = "MODE_FIND_PATH"; // find best path ? other paths ?
-  
+  final public String MODE_FIND_PATH = "MODE_FIND_PATH"; // find best path ?
+                                                         // other paths ?
+
   String mode = MODE_LEARN;
 
   @Override
   public IplImage process(IplImage depth) throws InterruptedException {
-    
+
     if (mode.equals(MODE_LEARN)) {
       return learnFloor(depth);
     }
@@ -232,11 +230,11 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
         try {
           int range = depthIdx.get(y, x);
           // if Math.abs(avgFloor.get(y,x) - range) > maxVariance
-          //      nonFloorDepth (either wall or hole)
-          //      scanning left to right and I in or out of floor
-          //          if (part of floor, makes this 'end marker'
-          //               compute size of rectangle/path - > minarea addPath
-          //          else (begin marker)
+          // nonFloorDepth (either wall or hole)
+          // scanning left to right and I in or out of floor
+          // if (part of floor, makes this 'end marker'
+          // compute size of rectangle/path - > minarea addPath
+          // else (begin marker)
         } catch (Exception e) {
           log.error("here x");
         }
@@ -282,23 +280,24 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
     }
     ByteBuffer buffer = lastDepth.getByteBuffer();
     /*
-    for (Point point : samplePoints) {
-
-      int depthBytesPerChannel = lastDepth.depth() / 8;
-      int depthIndex = point.y * lastDepth.widthStep() + point.x * lastDepth.nChannels() * depthBytesPerChannel;
-
-      String str = String.format("(%d,%d) %d", point.x, point.y, (buffer.get(depthIndex + 1) & 0xFF) << 8 | (buffer.get(depthIndex) & 0xFF));
-      graphics.drawString(str, point.x + 3, point.y);
-      graphics.drawOval(point.x, point.y, 2, 2);
-    }
-    */
+     * for (Point point : samplePoints) {
+     * 
+     * int depthBytesPerChannel = lastDepth.depth() / 8; int depthIndex =
+     * point.y * lastDepth.widthStep() + point.x * lastDepth.nChannels() *
+     * depthBytesPerChannel;
+     * 
+     * String str = String.format("(%d,%d) %d", point.x, point.y,
+     * (buffer.get(depthIndex + 1) & 0xFF) << 8 | (buffer.get(depthIndex) &
+     * 0xFF)); graphics.drawString(str, point.x + 3, point.y);
+     * graphics.drawOval(point.x, point.y, 2, 2); }
+     */
     return image;
   }
 
   public void samplePoint(Integer x, Integer y) {
     if (lastDepth != null) {
-    final UShortRawIndexer depthIdx = (UShortRawIndexer) lastDepth.createIndexer();
-    samplePoints.add(new Point3df(x, y, depthIdx.get(y, x)));
+      final UShortRawIndexer depthIdx = (UShortRawIndexer) lastDepth.createIndexer();
+      samplePoints.add(new Point3df(x, y, depthIdx.get(y, x)));
     }
   }
 
@@ -318,9 +317,9 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
 
       // kinect data
       cv.capture("../1543648225286");
-      
-//    cv.addFilter("depth", "KinectDepth");
-//      cv.addFilter("floor", "KinectFloorFinder");
+
+      // cv.addFilter("depth", "KinectDepth");
+      // cv.addFilter("floor", "KinectFloorFinder");
       cv.addFilter("points", "KinectPointCloud");
 
       // OpenCVFilterKinectFloorFinder floor =

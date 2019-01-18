@@ -30,62 +30,72 @@ import org.myrobotlab.framework.interfaces.Attachable;
 public interface ServoController extends Attachable {
 
   /**
-   * The one and only attach which is type specific and does all the work
-   * which we expect
-   *  
-   * @param servo the servo
-   * @throws Exception e
+   * The one and only attach which is type specific and does all the work which
+   * we expect
+   * 
+   * @param servo
+   *          the servo
+   * @throws Exception
+   *           e
    */
-	void attachServoControl(ServoControl servo) throws Exception;
-	
-	/**
-	 * attach with parameters which will set attributes on ServoControl
-	 * ??? rules on which attributes in which service can be changed ???
-	 * 
-	 * @param servo the servo
-	 * @param pin the pin number 
-	 * @throws Exception e
-	 */
-	void attach(ServoControl servo, int pin) throws Exception;
-	
-	// this is Arduino's servo.attach
-	// void servoAttach(ServoControl servo, int pin, Integer targetOutput, Integer velocity);
-	
-	/*
-	 * Arduino's servo.attach(pin) which is just energizing on a pin
-	 */
-	// FIXME should be servoEnable - consistent with ServoControl
-	// FIXME - servoEnablePin - which this method should be called, is auto-magically called in the "attach" phase,
-	// to get JME to auto-attach on creation of new services, it does not "need" the pin so this throws on auto-attach because
-	// the pin is null at that point - but JME (and possibly other servocontrollers) do not need a pin :P
-	void servoAttachPin(ServoControl servo, Integer pin); // jme change to pin because it does'nt need it but  auto-calls it
+  void attachServoControl(ServoControl servo) throws Exception;
 
-	void servoSweepStart(ServoControl servo);
+  /**
+   * attach with parameters which will set attributes on ServoControl ??? rules
+   * on which attributes in which service can be changed ???
+   * 
+   * @param servo
+   *          the servo
+   * @param pin
+   *          the pin number
+   * @throws Exception
+   *           e
+   */
+  void attach(ServoControl servo, int pin) throws Exception;
 
-	void servoSweepStop(ServoControl servo);
+  // this is Arduino's servo.attach
+  // void servoAttach(ServoControl servo, int pin, Integer targetOutput, Integer
+  // velocity);
 
-	void servoMoveTo(ServoControl servo);
+  /*
+   * Arduino's servo.attach(pin) which is just energizing on a pin
+   */
+  // FIXME should be servoEnable - consistent with ServoControl
+  // FIXME - servoEnablePin - which this method should be called, is
+  // auto-magically called in the "attach" phase,
+  // to get JME to auto-attach on creation of new services, it does not "need"
+  // the pin so this throws on auto-attach because
+  // the pin is null at that point - but JME (and possibly other
+  // servocontrollers) do not need a pin :P
+  void servoAttachPin(ServoControl servo, Integer pin); // jme change to pin
+                                                        // because it does'nt
+                                                        // need it but
+                                                        // auto-calls it
 
-	void servoWriteMicroseconds(ServoControl servo, int uS);
+  void servoSweepStart(ServoControl servo);
 
-	// FIXME should be servoDisable - consistent with ServoControl
-	void servoDetachPin(ServoControl servo);
+  void servoSweepStop(ServoControl servo);
 
-	void servoSetVelocity(ServoControl servo);
+  void servoMoveTo(ServoControl servo);
 
-	void servoSetAcceleration(ServoControl servo);
+  void servoWriteMicroseconds(ServoControl servo, int uS);
 
-	/**
-	 * @param sensorPin
-	 * @param i
-	 */
-	void enablePin(Integer sensorPin, Integer i);
+  // FIXME should be servoDisable - consistent with ServoControl
+  void servoDetachPin(ServoControl servo);
 
-	/**
-	 * @param i
-	 */
-	void disablePin(Integer i);
-	
+  void servoSetVelocity(ServoControl servo);
+
+  void servoSetAcceleration(ServoControl servo);
+
+  /**
+   * @param sensorPin
+   * @param i
+   */
+  void enablePin(Integer sensorPin, Integer i);
+
+  /**
+   * @param i
+   */
+  void disablePin(Integer i);
 
 }
-

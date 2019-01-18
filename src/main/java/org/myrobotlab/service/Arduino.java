@@ -133,7 +133,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     meta.addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
-    // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT"); GroG-"This should not be here"
+    // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT"); GroG-"This should
+    // not be here"
     return meta;
   }
 
@@ -339,7 +340,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       attachMotorControl((MotorControl) service);
       return;
     } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
-      attachEncoderControl((EncoderControl)service);
+      attachEncoderControl((EncoderControl) service);
       return;
     }
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
@@ -524,7 +525,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     if (msg == null) {
       serial = (Serial) startPeer("serial");
       msg = new Msg(this, serial);
-      // FIXME - dynamically additive - if codec key has never been used - add key
+      // FIXME - dynamically additive - if codec key has never been used - add
+      // key
       // serial.getOutbox().setBlocking(true);
       // inbox.setBlocking(true);
       serial.addByteListener(this);
@@ -1089,8 +1091,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     Class<?> type = mc.getClass();
 
     double powerOutput = motorPowerMapper.calcOutput(mc.getPowerLevel());
-    //log.info(mc.getPowerLevel()+" "+powerOutput);
-    
+    // log.info(mc.getPowerLevel()+" "+powerOutput);
+
     if (Motor.class == type) {
       Motor config = (Motor) mc;
       msg.digitalWrite(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
@@ -1177,7 +1179,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > neoPixelAttach/deviceId/pin/b32 numPixels
   public void neoPixelAttach(NeoPixel neopixel, int pin, int numPixels) {
     Integer deviceId = attachDevice(neopixel, new Object[] { pin, numPixels });
-    msg.neoPixelAttach(getDeviceId(neopixel)/* byte */, pin/* byte */, numPixels/* b32 */);
+    msg.neoPixelAttach(getDeviceId(neopixel)/* byte */, pin/* byte */,
+        numPixels/* b32 */);
   }
 
   @Override
@@ -1390,8 +1393,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[]
   // deviceSummary
-  public BoardInfo publishBoardInfo(Integer version/* byte */, Integer boardType/* byte */, Integer microsPerLoop/* b16 */, Integer sram/* b16 */, Integer activePins,
-      int[] deviceSummary/* [] */) {
+  public BoardInfo publishBoardInfo(Integer version/* byte */,
+      Integer boardType/* byte */, Integer microsPerLoop/* b16 */,
+      Integer sram/* b16 */, Integer activePins, int[] deviceSummary/* [] */) {
     long now = System.currentTimeMillis();
 
     log.debug("Version return by Arduino: {}", boardInfo.getVersion());
@@ -1886,13 +1890,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.stopRecording();
   }
 
-
   @Override
   public void stopService() {
     super.stopService();
     detachI2CControls();
-      disconnect();
-    }
+    disconnect();
+  }
 
   public void detachI2CControls() {
     for (Map.Entry<String, I2CDeviceMap> i2cDevice : i2cDevices.entrySet()) {
@@ -2221,11 +2224,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       boolean virtual = true;
       boolean isDone = true;
       String port = "COM10";
-      
+
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
-      Serial serial = (Serial)Runtime.start("serial", "Serial");
+      Serial serial = (Serial) Runtime.start("serial", "Serial");
       log.info("{}", serial.getPortNames());
       // Runtime.start("cli", "Cli");
       // RemoteAdapter remote = (RemoteAdapter) Runtime.start("ra",
@@ -2242,8 +2245,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect(port);
       arduino.setBoardMega();
-      
-      if (isDone){
+
+      if (isDone) {
         return;
       }
       Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
@@ -2297,19 +2300,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // send data to micro-controller
     msg.encoderAttach(deviceId, encoder.getPin());
     encoder.setController(this);
-    
+
   }
 
   // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderPosition(Integer deviceId, Integer position) {
     EncoderData data = new EncoderData(getDeviceName(deviceId), position);
-    log.info("Encoder position. {}" , data);
+    log.info("Encoder position. {}", data);
     // DO WE BOTH PUBLISH & CALLBACK ?
     ((EncoderControl) getDevice(deviceId)).onEncoderData(data);
     invoke("publishEncoderPosition", data);
     return data;
   }
-  
+
   @Override
   public EncoderData publishEncoderPosition(EncoderData data) {
     return data;
@@ -2318,7 +2321,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   public void attach(EncoderControl encoder, Integer pin) throws Exception {
     attachEncoderControl(encoder);
-    // here we want to instruct the arduino via mrl comm to attach an MrlAmt203Encoder device.
+    // here we want to instruct the arduino via mrl comm to attach an
+    // MrlAmt203Encoder device.
     // TODO: is this needed?
     // encoder.attach(this, pin);
   }
@@ -2337,11 +2341,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return mapper;
   }
 
-  // not used currently - should be refactored to use these methods for motor control
+  // not used currently - should be refactored to use these methods for motor
+  // control
   @Override
   public double motorCalcOutput(MotorControl mc) {
     double value = mc.calcControllerOutput();
     return value;
   }
-  
+
 }
