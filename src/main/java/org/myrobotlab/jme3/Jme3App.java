@@ -5,7 +5,11 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
 import org.slf4j.Logger;
 
+import com.jme3.app.BasicProfilerState;
+import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.StatsAppState;
+import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.font.BitmapFont;
 
 /**
@@ -21,9 +25,12 @@ public class Jme3App extends SimpleApplication {
   protected transient JMonkeyEngine jme = null;
 
   public Jme3App(JMonkeyEngine jme) {
-    // super(new MainMenuState(jme));
-    // super(new StatsAppState(), new DebugKeysAppState(), new
-    // BasicProfilerState(false), new MainMenuState(jme));
+    /*
+    super(new StatsAppState(), new DebugKeysAppState(), new BasicProfilerState(false),
+        // new OptionPanelState(), // from Lemur
+        new MainMenuState(jme),
+        new ScreenshotAppState("", System.currentTimeMillis()));
+        */
     this.jme = jme;
   }
 

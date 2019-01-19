@@ -26,6 +26,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.AnalogHandler;
 import org.myrobotlab.jme3.HudText;
 import org.myrobotlab.jme3.Jme3App;
+import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3ServoController;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.jme3.MainMenuState;
@@ -97,19 +98,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
     SceneGraphVisitor /* , AnalogListener - can't do both jmonkey bug */ {
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
+
   private static final long serialVersionUID = 1L;
-
-  transient Jme3ServoController servoController;
-
-  transient AppStateManager stateManager;
-
-  final Map<String, String> nameMappings = new TreeMap<String, String>();
-
-  transient BulletAppState bulletAppState;
-  
-  transient Vector3f cameraDirection = new Vector3f();
-
-  final public String KEY_SEPERATOR = "/";
 
   /**
    * This static method returns all the details of the class without it having
@@ -130,8 +120,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
     meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
     meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
     // meta.addDependency("org.jmonkeyengine", "jme3-test-data", jmeVersion);
-    // meta.addDependency("org.jmonkeyengine", "jme3-niftygui", jmeVersion); Yay
-    // ! bye bye
     meta.addDependency("com.simsilica", "lemur", "1.11.0");
     meta.addDependency("com.simsilica", "lemur-proto", "1.10.0");
 
@@ -155,370 +143,62 @@ public class JMonkeyEngine extends Service implements ActionListener,
     return meta;
   }
 
-  public static void main(String[] args) {
-    try {
-
-      // FIXME - ADD DEFAULT ROTATION !!! ... default"move" & default"rotate" &
-      // default rotationalMask !!!
-      // FIXME - something to autoAttach ! ... even at origin position
-
-      LoggingFactory.init("info");
-
-      Runtime.start("gui", "SwingGui");
-      // Runtime.start("gui", "SwingGui");
-      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-      jme.addGrid();
-
-      /*
-       * jme.rename("head-6", "i01.head.rotHead");
-       * jme.setMapper("i01.head.rotHead", 0, 180, -90, 90); // shift 90 degrees
-       */
-      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "cccccc", true);
-      jme.moveTo("floor.box.01", 3, 0, 0);
-
-      /*
-       * jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
-       * jme.move("floor.box.01", 2, 0);
-       * 
-       * 
-       * /* jme.rename("head-6", "i01.head.rotHead");
-       * jme.setMapper("i01.head.rotHead", 0, 180, -90, 90);
-       */
-
-      Servo servo = (Servo) Runtime.start("i01.head.jaw", "Servo");
-      jme.setRotation("i01.head.jaw", "x");
-      
-      jme.scale("i01", 0.0025f);
-
-      boolean test = true;
-      if (test) {
-        return;
-      }
-
-      // jme.scaleModels("rescaled");
-
-      // FIXME - add christmas hat to inmoov - new years hangover...
-      // FIXME -
-      // jme.addBox("floor.cube");
-      // jme.addBox("floor.tile", 1.01f, 0.001f, 1.0f, "FF0000", true);
-      // jme.addBox("ruler", 0.01f, 0.7747f, 0.01f, "FF0000", true); //
-      // jme.moveTo("ruler", 0.0f, 0.7f, 0.0f); // VS move relative !
-      // jme.bind("cube", "Segway");
-      // jme.bind("i01.torso.lowStom", "segway");
-      // jme.saveNode("i01.torso.lowStom");
-      // jme.enableBoundingBox("segway", true);
-      // jme.scale("segway", 5.0f);
-      // jme.saveToJson("scene.json");
-      // jme.scale("i01.torso.lowStom", 1/400f); // FIXME - fix the models scale
-      // !!! :P - btw - this might be a single model !!!
-      // jme.scale("i01.torso.midStom", 1/400f); // FIXME - fix the models scale
-      // !!! :P - btw - this might be a single model !!!
-      // jme.scale("i01.torso.topStom", 1/400f); // FIXME - fix the models scale
-      // !!! :P - btw - this might be a single model !!!
-
-      jme.setRotation("i01.torso.lowStom", "x");
-
-      jme.setRotation("i01.torso.midStom", "-y");
-      // jme.setMapper("i01.torso.midStom", 0, 180, 120, 60);
-      jme.rotateOnAxis("i01.torso.midStom", "y", 180);
-      jme.bind("i01.torso.midStom", "i01.torso.lowStom");
-      // jme.bind("i01.torso.midStom", "root");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      jme.setRotation("i01.torso.topStom", "z");
-      jme.setMapper("i01.torso.topStom", 0, 180, 80, 100);
-      // jme.rotateOnAxis("i01.torso.topStom", "x", 90);
-      jme.moveTo("i01.torso.topStom", 0, 0.2625f, 0.025f); // this is a
-                                                           // translation to an
-                                                           // initial position
-      jme.bind("i01.torso.topStom", "i01.torso.midStom");
-
-      jme.putNode("rightS");
-      jme.moveTo("rightS", 0, 0.75f, 0);
-      jme.setRotation("rightS", "z");
-      jme.bind("rightS", "i01.torso.topStom");
-
-      // putNode("i01.rightArm.omoplate", "rightS", "Models/Romoplate1.j3o", new
-      // Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(-1), new Vector3f(-143, 0,
-      // -17), 0);
-      jme.setMapper("i01.rightArm.omoplate", 0, 180, 10, 70);
-      jme.moveTo("i01.rightArm.omoplate", -0.3575f, 0, -0.0425f);
-      jme.setRotation("i01.rightArm.omoplate", "-z");
-      jme.bind("i01.rightArm.omoplate", "rightS");
-
-      // putNode("i01.rightArm.shoulder", "i01.rightArm.omoplate",
-      // "Models/Rshoulder1.j3o", new Mapper(0, 180, 0, 180),
-      // Vector3f.UNIT_X.mult(-1), new Vector3f(-23, -45, 0), 0);
-
-      // jme.setMapper("i01.rightArm.shoulder", 0, 180, 10, 70);
-      jme.moveTo("i01.rightArm.shoulder", -0.0575f, -0.1125f, 0);
-      jme.setRotation("i01.rightArm.shoulder", "-x");
-      jme.bind("i01.rightArm.shoulder", "i01.rightArm.omoplate");
-      // TODO jme.rename()
-
-      ///////////////////////////////// BEGIN
-      jme.moveTo("i01.rightArm.rotate", -0.1425f, -0.1375f, 0.02f);
-      jme.setRotation("i01.rightArm.rotate", "-y");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 40, 180);
-      jme.bind("i01.rightArm.rotate", "i01.rightArm.shoulder");
-
-      jme.moveTo("i01.rightArm.bicep", 0.0125f, -0.5625f, -0.08f);
-      jme.setRotation("i01.rightArm.bicep", "-y");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 5, 60);
-      jme.bind("i01.rightArm.bicep", "i01.rightArm.rotate");
-
-      jme.putNode("leftS");
-      jme.moveTo("leftS", 0, 0.75f, 0);
-      jme.setRotation("leftS", "z");
-      jme.bind("leftS", "i01.torso.topStom");
-
-      jme.moveTo("i01.leftArm.omoplate", 0.3575f, 0, -0.0375f);
-      jme.setRotation("i01.leftArm.omoplate", "z");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 10, 70);
-      jme.bind("i01.leftArm.omoplate", "leftS");
-
-      jme.moveTo("i01.leftArm.shoulder", 0.0425f, -0.1125f, 0.0125f);
-      jme.setRotation("i01.leftArm.shoulder", "-x");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 10, 70);
-      jme.bind("i01.leftArm.shoulder", "i01.leftArm.omoplate");
-
-      jme.moveTo("i01.leftArm.rotate", 0.1625f, -0.145f, -0.0075f);
-      jme.setRotation("i01.leftArm.rotate", "-x");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 40, 180);
-      jme.bind("i01.leftArm.rotate", "i01.leftArm.shoulder");
-
-      jme.moveTo("i01.leftArm.bicep", -0.035f, -0.5575f, -0.07f);
-      jme.setRotation("i01.leftArm.bicep", "-x");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 40, 180);
-      jme.bind("i01.leftArm.bicep", "i01.leftArm.rotate");
-
-      jme.moveTo("i01.rightHand.wrist", 0.0375f, -0.725f, -0.025f);
-      jme.setRotation("i01.rightHand.wrist", "-x");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 130, 40);
-      jme.bind("i01.rightHand.wrist", "i01.rightArm.bicep");
-
-      jme.moveTo("i01.leftHand.wrist", 0, -0.725f, -0.05f);
-      jme.setRotation("i01.rightHand.wrist", "y");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 130, 40);
-      jme.bind("i01.rightHand.wrist", "i01.leftArm.bicep");
-      // jme.rotateOnAxis("i01.leftHand.wrist", 90.0);
-
-      jme.moveTo("i01.head.neck", 0, 1.13125f, -0.1125f);
-      jme.setRotation("i01.head.neck", "-x");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 60, 110);
-      jme.bind("i01.head.neck", "i01.torso.topStom");
-
-      jme.putNode("i01.head.rollNeck");
-      jme.moveTo("i01.head.rollNeck", 0, 0, 0);
-      jme.setRotation("i01.head.rollNeck", "z");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 60, 115);
-      jme.bind("i01.head.rollNeck", "i01.head.neck");
-      // jme.rotateOnAxis("i01.head.rollNeck", 90.0);
-
-      jme.moveTo("i01.head.rothead", 0, 0.025f, 0.05f);
-      jme.setRotation("i01.head.rothead", "-y");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 150, 30);
-      jme.bind("i01.head.rothead", "i01.head.rollNeck");
-      // jme.rotateOnAxis("i01.head.rothead", 90.0);
-
-      jme.moveTo("i01.head.jaw", -0.0125f, 0.15f, -0.125f);
-      jme.setRotation("i01.head.jaw", "-x");
-      // jme.setMapper("i01.rightArm.rotate", 0, 180, 0, 180);
-      jme.bind("i01.head.jaw", "i01.head.rothead");
-      // jme.rotateOnAxis("i01.head.rollNeck", 90.0);
-
-      //////////////////////////////// END
-
-      // final scale ..
-      // jme.load("c:/mrl/i01.head.rothead.j3o");
-      // Jme3Object h = jme.get("i01.head.rothead");
-
-      // jme.scale("i01.head.rothead", 1/400f);
-
-      // h.enableBoundingBox(true);
-      // jme.scale("head", 1/400f);
-
-      // final scale ..
-      // jme.scale("i01.torso.lowStom", 1/400f);
-
-      // jme.putNode("RightS");
-
-      log.info("done with main");
-
-      // FIXME - move camera jme.move("camera", x, y , z) // root node...
-
-      
-      VirtualServoController vsc = (VirtualServoController) Runtime.start("i01.left", "VirtualServoController");
-      vsc.attachSimulator(jme);
-      vsc = (VirtualServoController) Runtime.start("i01.right", "VirtualServoController");
-      vsc.attachSimulator(jme);
-
-      InMoov i01 = (InMoov) Runtime.create("i01", "InMoov");// has attach ...
-                                                            // runtime does
-                                                            // dynamic binding
-                                                            // anyway...
-      InMoovHead head = i01.startHead("COM98");
-      Servo s = (Servo) Runtime.getService("i01.head.rothead");
-      Servo jaw = (Servo) Runtime.getService("i01.head.jaw");
-
-      // is this necessary ???
-      head.rest(); // <- WRONG should not have to do this .. it should be
-                   // assumed :P
-      // FIXME - there has to be a "default" speed for virtual servos
-      s.setVelocity(40);
-      s.moveTo(0); // goes to 30 for rothead - because "min" <-- WRONG 0 should
-                   // be 30 .. but start position should be 90 !!!
-      s.moveTo(180);
-      s.moveTo(90);
-      s.moveTo(0);
-      for (int i = 90; i < 180; ++i) {
-        /// head.moveTo(i, i);
-        s.moveTo(i);
-        sleep(100);
-      }
-
-      // i01.startAll("COM98", "COM99");
-      // FIXME - fix dna/peer api
-      log.info("InMoov buildDnaKeys [{}]", i01.buildDnaKeys("i01", "InMoov"));
-      log.info("InMoov getDnaString [{}]", InMoov.getDnaString());
-
-      jme.releaseService();
-
-      // NO NO NO - listen to Runtime , startup create all that can be created
-      // listen to Runtime - create new for anything which appears to be new and
-      // can be created
-      // attach a simulator to a virtual device
-      // which listens on a serial port
-      // virtual.attach(jme3);
-
-      // NO NO NO X 2 - there is no spatial information @ Runtime nor when a
-      // service is newly created
-      // So it would be better if the "Simulator" could ingest configuration and
-      // bind its objects by name
-      // 'binding' - bind by name, but a typed reference is a good start
-
-      // jme3.create(servo);
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
-  public void rotateTo(String name, double degrees) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "rotateTo";
-    msg.data = new Object[] { name, degrees };
-    addMsg(msg);
-  }
-
-  public void rotateOnAxis(String name, String axis, double degrees) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "rotateOnAxis";
-    msg.data = new Object[] { name, axis, (float) degrees };
-    addMsg(msg);
-  }
-
-  public void putNode(String name) {
-    if (nodes.containsKey(name)) {
-      log.error("putNode already has %s", name);
-      return;
-    }
-    Node n = new Node(name);
-    // UserData o = new UserData(this, n);
-    // putNode(name, null, null, null, null, null, 0);
-    rootNode.attachChild(n);
-    // nodes.put(name, o);
-    index(n);
-  }
-
-  public Mapper setMapper(String name, int minx, int maxx, int miny, int maxy) {
-    UserData node = getUserData(name);
-    if (node == null) {
-      error("setMapper %s does not exist", name);
-      return null;
-    }
-    node.mapper = new Mapper(minx, maxx, miny, maxy);
-    return node.mapper;
-  }
-
-  public class Jme3Msg {
-    public String name;
-    public String method;
-    public Object data[];
-  }
-
-  // TODO - need to make thread safe ? JME thread ?
-  // turn it into a jme msg - put it on the update queue ?
-  public void scale(String name, float scale) {
-    UserData node = getUserData(name);
-    if (node != null) {
-      node.scale(scale);
-    } else {
-      error("scale %s does not exist", name);
-    }
-  }
-
-  /**
-   * <pre>
-   *  FIXME - IMPLEMENT
-   public void scaleModels(String dirPath, float scale) {
-     File dir = new File(dirPath);
-     assetManager.registerLocator(dirPath, FileLocator.class);
-     File[] files = dir.listFiles();
-     for (File file : files) {
-       Jme3Object o = load(file.getAbsolutePath());
-       o.getSpatial().scale(scale);
-       saveNode(o.getName());
-     }
-   }
-   * </pre>
-   */
+  boolean altLeftPressed = false;
 
   transient AnalogListener analog = null;
-  // TODO - make intermediate class - which has common interface to grab
-  // shapes/boxes
+
   transient Jme3App app;
 
-  transient MainMenuState menu;
-  // real JMonkeyEngine parts ...
   transient AssetManager assetManager;
 
+  String assetsDir = getDataDir() + File.separator + "assets";
+
   boolean autoAttach = true;
+
   boolean autoAttachAll = true;
-  transient Camera cameraSettings;
-  transient CameraNode camNode;
+
+  transient BulletAppState bulletAppState;
+
   transient Node camera = new Node("camera");
-  // transient Spatial control = null;
+
+  transient Vector3f cameraDirection = new Vector3f();
+
+  transient Camera cameraSettings;
+
+  transient CameraNode camNode;
+
+  boolean ctrlLeftPressed = false;
+
   String defaultAppType = "Jme3App";
 
   long deltaMs;
 
   DisplayMode displayMode = null;
 
-  // protected Queue<Move> jmeMsgQueue = new ConcurrentLinkedQueue<Move>();
-  protected Queue<Jme3Msg> jmeMsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
-
   transient FlyByCamera flyCam;
 
   String fontColor = "#66ff66"; // green
-
   int fontSize = 14;
 
   boolean fullscreen = false;
+  transient Node guiNode;
 
   Map<String, HudText> guiText = new TreeMap<>();
-
   int height = 768;
-
+  AtomicInteger id = new AtomicInteger();
   transient InputManager inputManager;
+  protected Queue<Jme3Msg> jmeMsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+  final public String KEY_SEPERATOR = "/";
 
   DisplayMode lastDisplayMode = null;
 
-  transient Map<String, Spatial> nodes = new TreeMap<String, Spatial>();
+  transient MainMenuState menu;
+
+  String modelsDir = assetsDir + File.separator + "Models";
+
+  final Map<String, String> nameMappings = new TreeMap<String, String>();
+
+  transient Map<String, Spatial> nodesx = new TreeMap<String, Spatial>();
 
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
   FloatBuffer pointCloudBuffer = null;
@@ -528,43 +208,28 @@ public class JMonkeyEngine extends Service implements ActionListener,
   Mesh pointCloudMesh = new Mesh();
 
   transient Node rootNode;
-  transient Node guiNode;
 
   transient Spatial selected = null;
 
   int selectIndex = 0;
 
+  transient Jme3ServoController servoController;
+
   transient AppSettings settings;
 
-  // FIXME - i suspect "controllers" really should be virtualized not control
-  // services !
-  // the challenge is to have "both" at the same time real & virtualized
-  /*
-   * @Override public VirtualServo createVirtualServo(String name) { return
-   * currentApp.createVirtualServo(name); }
-   */
-  /*
-   * @Override public Object create(ServiceInterface service) { // TODO
-   * Auto-generated method stub return null; }
-   */
+  boolean shiftLeftPressed = false;
 
   long sleepMs;
 
   long startUpdateTs;
+  
+  transient AppStateManager stateManager;
 
-  // transient AnalogListener analogListener;
+  transient Jme3Util util;
+
   transient ViewPort viewPort;
 
   int width = 1024;
-
-  /**
-   * class for doing manipulations of the scene graph with the JME thread do not
-   * call its methods directly
-   */
-  transient Jme3Util util;
-
-  String assetsDir = getDataDir() + File.separator + "assets";
-  String modelsDir = assetsDir + File.separator + "Models";
 
   public JMonkeyEngine(String n) {
     super(n);
@@ -585,12 +250,17 @@ public class JMonkeyEngine extends Service implements ActionListener,
                                      // ground
   }
 
+  // FIXME make method "without" name to be added to the _system_box node ..
   public void addBox(String name, Float width, Float depth, Float height, String color, Boolean fill) {
 
     Node boxNode = null;
-    // FIXME - auto increment ? addWall ??? addFloor
-    if (nodes.containsKey(name)) {
-      boxNode = (Node) nodes.get(name);
+    Spatial check = get(name);
+
+    if (check != null && check instanceof Geometry) {
+      log.error("addBox - scene graph already has {} and it is a Geometry", check);
+      return;
+    } else if (check != null && check instanceof Node) {
+      boxNode = (Node) check;
     } else {
       boxNode = new Node(name);
     }
@@ -612,7 +282,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // wireCube.setMode(Mesh.Mode.LineLoop);
     // box.setMode(Mesh.Mode.Lines);
     // FIXME - geom & matterial always xxx-geometry ? & xxx-material ??
-    Geometry geom = new Geometry(name, box);
+    Geometry geom = new Geometry(String.format("%s._geometry", name), box);
 
     Material mat1 = null;
 
@@ -637,7 +307,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // nodes.put(name, o);
     rootNode.attachChild(boxNode);
     moveTo(name, 0.0f, 0.5f * height, 0.0f);
-    index(boxNode);
+    // index(boxNode);
   }
 
   public void addGrid() {
@@ -654,7 +324,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     Node n = new Node(name);
     n.attachChild(g);
     rootNode.attachChild(n);
-    putNode(n);
+    // putNode(n);
     return g;
   }
 
@@ -677,6 +347,83 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
 
     // backward attach ?
+  }
+
+  public void attachChild(Spatial node) {
+    rootNode.attachChild(node);
+  }
+
+  /**
+   * binds two objects together ...
+   * 
+   * @param child
+   * @param parent
+   */
+  public void bind(String child, String parent) {
+    Jme3Msg msg = new Jme3Msg();
+    msg.method = "bind";
+    msg.data = new Object[] { child, parent };
+    addMsg(msg);
+  }
+
+  public Map<String, UserData> buildTree() {
+    TreeMap<String, UserData> tree = new TreeMap<String, UserData>();
+    return buildTree(tree, "", rootNode, false, false);
+  }
+
+  /**
+   * The buildTree method creates a data structure for quick access and indexing
+   * of nodes - it can build it in two different ways - one which uses full
+   * depth for an access key useDepth=true and another that is a flat model.
+   * Both can have collisions. When the parents of nodes change, the depth model
+   * "should" change to reflect the changes in branches. The flat model does not
+   * need to change, but has a higher likelyhood of collisions.
+   * 
+   * @param tree
+   * @param path
+   * @param spatial
+   * @param useDepthKeys
+   * @return
+   */
+  public Map<String, UserData> buildTree(Map<String, UserData> tree, String path, Spatial spatial, boolean includeGeometries, boolean useDepthKeys) {
+    if (useDepthKeys) {
+      path = path + KEY_SEPERATOR + spatial.getName();
+    } else {
+      path = spatial.getName();
+    }
+    if (tree.containsKey(path)) {
+      UserData s = tree.get(path);
+      log.error("buildTree collision {}", path);
+    }
+
+    // only interested in nodes, since nodes "can" have user data...
+    // Geometries cannot or (should not?)
+    if (!includeGeometries && (spatial instanceof Geometry)) {
+      return tree;
+    }
+
+    // putting both nodes & geometries on the tree
+    tree.put(path, spatial.getUserData("data"));
+
+    if (spatial instanceof Node) {
+      List<Spatial> children = ((Node) spatial).getChildren();
+      for (int i = 0; i < children.size(); ++i) {
+        buildTree(tree, path, children.get(i), includeGeometries, useDepthKeys);
+      }
+    }
+    return tree;
+  }
+
+  public void clone(String name, String newName) {
+
+  }
+
+  public Geometry createBoundingBox(Spatial spatial) {
+    return util.createBoundingBox(spatial);
+  }
+
+  public Node createUnitAxis() {
+    return util.createUnitAxis();
   }
 
   public VirtualMotor createVirtualMotor(String name) {
@@ -714,28 +461,24 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
 
     setSelected(siblings.get(selectIndex));
-
   }
 
-  public void setSelected(Spatial newSelected) {
+  public void enableBoundingBox(Spatial spatial, boolean b) {
+    Node node = getNode(spatial);
+    UserData data = getUserData(node);
+    data.enableBoundingBox(b);
+  }
 
-    // turn off old
-    if (selected != null) {
-      enableBoundingBox(selected, false);
-      enableCoordinateAxes(selected, false);
-    }
+  public void enableBoundingBox(String name, boolean b) {
+    UserData o = getUserData(name);
+    enableBoundingBox(o.getSpatial(), b);
+  }
 
-    // set selected
-    selected = newSelected;
-
-    // display in menu
-    menu.putText(newSelected);
-
-    // turn on new
-    if (newSelected != null) {
-      enableBoundingBox(newSelected, true);
-      enableCoordinateAxes(newSelected, true);
-    }
+  // FIXME !!!! enableCoodinateAxes - same s bb including parent if geometry
+  public void enableCoordinateAxes(Spatial spatial, boolean b) {
+    Node node = getNode(spatial);
+    UserData data = getUserData(node);
+    data.enableCoordinateAxes(b);
   }
 
   public void enableFlyCam(boolean b) {
@@ -781,19 +524,206 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
   }
 
+  public String format(Node node, Integer selected) {
+    StringBuilder sb = new StringBuilder();
+    List<Spatial> children = node.getChildren();
+    sb.append("[");
+    for (int i = 0; i < children.size(); ++i) {
+      if (i != 0) {
+        sb.append(", ");
+      }
+      sb.append(node.getChild(i).getName());
+    }
+    sb.append("]");
+    return sb.toString();
+  }
+
+  public Spatial get(String name) {
+    return get(name, null);
+  }
+
+  /**
+   * the all purpose get by name method
+   * 
+   * @param string
+   * @return
+   */
+  public Spatial get(String name, Node startNode) {
+    if (startNode == null) {
+      startNode = rootNode;
+    }
+    return startNode.getChild(name);
+  }
+
   public Jme3App getApp() {
     return app;
+  }
+
+  public AssetManager getAssetManager() {
+    return assetManager;
+  }
+
+  private String getExt(String name) {
+    int pos = name.lastIndexOf(".");
+    String ext = null;
+    if (pos != -1) {
+      ext = name.substring(pos + 1).toLowerCase();
+    }
+    return ext;
+  }
+
+  public Geometry getGeometry(String name) {
+    return getGeometry(name, null);
+  }
+
+  public Geometry getGeometry(String name, Node startNode) {
+    Spatial spatial = get(name, startNode);
+    if (spatial instanceof Geometry) {
+      return (Geometry) spatial;
+    } else {
+      log.error("could not find Geometry {}", name);
+      return null;
+    }
   }
 
   public Queue<Jme3Msg> getjmeMsgQueue() {
     return jmeMsgQueue;
   }
 
-  // FIXME - getObject
-  /*
-   * public UserData getJme3Object(String name) { if (name != null &&
-   * nodes.containsKey(name)) { return nodes.get(name); } return null; }
+  public String getKeyPath(Spatial spatial) {
+    if (spatial == null) {
+      return null;
+    }
+    StringBuilder sb = new StringBuilder(spatial.getName());
+    Node p = spatial.getParent();
+    while (p != null) {
+      sb.insert(0, String.format("%s%s", p.getName(), KEY_SEPERATOR));
+      p = p.getParent();
+    }
+    return sb.toString();
+  }
+
+  private String getNameNoExt(String name) {
+    int pos = name.lastIndexOf(".");
+    String nameNoExt = name;
+    if (pos != -1) {
+      nameNoExt = name.substring(0, pos);
+    }
+    return nameNoExt;
+  }
+
+  public Node getNode(Spatial spatial) {
+    if (spatial instanceof Geometry) {
+      return spatial.getParent();
+    }
+    return (Node) spatial;
+  }
+
+  public Node getNode(String name) {
+    return getNode(name, null);
+  }
+
+  public Node getNode(String name, Node startNode) {
+    Spatial spatial = get(name, startNode);
+    if (spatial instanceof Node) {
+      return (Node) spatial;
+    } else {
+      log.error("could not find Node {}", name);
+      return null;
+    }
+  }
+
+  public Spatial getRootChild(Spatial spatial) {
+    if (spatial == null) {
+      log.error("spatial is null");
+      return null;
+    }
+    Spatial c = spatial;
+    Spatial p = c.getParent();
+
+    if (spatial == rootNode) {
+      return null;
+    }
+
+    while (p != null && p != rootNode) {
+      c = p;
+      p = c.getParent();
+    }
+
+    if (p != null) {
+      return c;
+    }
+    return spatial;
+  }
+
+  public Node getRootNode() {
+    return rootNode;
+  }
+
+  public Spatial getSelected() {
+    return selected;
+  }
+
+  public AppSettings getSettings() {
+    return settings;
+  }
+
+  public Spatial getTopNode(Spatial spatial) {
+    if (spatial == null) {
+      return null;
+    }
+    Spatial top = spatial;
+    while (top.getParent() != null) {
+      top = top.getParent();
+    }
+    return top;
+  }
+
+  // TODO - possibly Geometries
+  // Unique Naming and map/index
+  public UserData getUserData(Node node) {
+    UserData data = node.getUserData("data");
+    if (data == null) {
+      data = new UserData(this, node);
+      // FIXME - add map/index
+      // getAncestorKey(x) + rootKey if its not root = key
+    }
+    return data;
+  }
+
+  /**
+   * The workhorse - where everyone "searches" for the user data they need. It
+   * works agains a flat or depth key'd tree. If the node is found but the user
+   * data has not been created, it creates it and assigns the references... if
+   * the node cannot be found, it returns null
+   * 
+   * @param path
+   *          - full path for a depth tree, name for a flat map
+   * @return
    */
+  public UserData getUserData(String path /* , boolean useDepth */) {
+    if (nameMappings.containsKey(path)) {
+      path = nameMappings.get(path);
+    }
+
+    Spatial spatial = get(path);
+
+    if (spatial == null) {
+      error("geteUserData %s cannot be found", path);
+      return null;
+    }
+
+    if (spatial instanceof Geometry) {
+      error("geteUserData %s found but is Geometry not Node", path);
+      return null;
+    }
+
+    UserData userData = spatial.getUserData("data");
+    if (userData == null) {
+      userData = new UserData(this, spatial);
+    }
+    return userData;
+  }
 
   public void initPointCloud(PointCloud pc) {
 
@@ -861,18 +791,10 @@ public class JMonkeyEngine extends Service implements ActionListener,
       String ext = getExt(filename);
       String simpleName = getNameNoExt(filename);
 
-      /*
-       * if (nodes.containsKey(simpleName)) { warn("already %s in nodes",
-       * simpleName); return nodes.get(simpleName); }
-       */
-
       if (!ext.equals("json")) {
 
         Spatial spatial = assetManager.loadModel(filename);
         spatial.setName(simpleName);
-
-        // we only deal with Nodes !!!
-        // if this is a mesh only - it needs a node
 
         Node node = null;
 
@@ -883,29 +805,20 @@ public class JMonkeyEngine extends Service implements ActionListener,
           node.attachChild(spatial);
         }
 
-        // FIXME - putNodes .. travel and add Jme3Object ...
-        // use lemur gui.... "loaded xxx " 3 nodes 5 geometries
-        // putText(spatial, 10, 10);
-
         rootNode.attachChild(node);
-        index(node);
-        // selected = spatial;
-        // nodes.put(simpleName, o); // deprecate ...
+
       } else {
 
         // now for the json meta data ....
-
-        String json = FileIO.toString(inFileName);
-        Map<String, Object> list = CodecUtils.fromJson(json, nodes.getClass());
-        for (String name : list.keySet()) {
-          String nodePart = CodecUtils.toJson(list.get(name));
-          UserData node = CodecUtils.fromJson(nodePart, UserData.class);
-          // get/create transient parts
-          // node.setService(Runtime.getService(name));
-          // node.setJme(this);
-          // putN
-          // nodes.put(node.getName(), node);
-        }
+        /*
+         * String json = FileIO.toString(inFileName); Map<String, Object> list =
+         * CodecUtils.fromJson(json, nodes.getClass()); for (String name :
+         * list.keySet()) { String nodePart = CodecUtils.toJson(list.get(name));
+         * UserData node = CodecUtils.fromJson(nodePart, UserData.class); //
+         * get/create transient parts //
+         * node.setService(Runtime.getService(name)); // node.setJme(this); //
+         * putN // nodes.put(node.getName(), node); }
+         */
       }
 
     } catch (Exception e) {
@@ -913,27 +826,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
   }
 
-  private String getExt(String name) {
-    int pos = name.lastIndexOf(".");
-    String ext = null;
-    if (pos != -1) {
-      ext = name.substring(pos + 1).toLowerCase();
-    }
-    return ext;
-  }
+  
 
-  private String getNameNoExt(String name) {
-    int pos = name.lastIndexOf(".");
-    String nameNoExt = name;
-    if (pos != -1) {
-      nameNoExt = name.substring(0, pos);
-    }
-    return nameNoExt;
+  public Spatial loadModel(String assetPath) {
+    return assetManager.loadModel(assetPath);
   }
-
-  // FIXME - get then write directly to Mesh.getBuffer()
-  // then set with mesh.setData(buffer)
-  // https://hub.jmonkeyengine.org/t/updating-mesh-vertices/25088/7
 
   public void loadModels() {
     // load the root data dir
@@ -971,31 +868,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   /**
-   * based on a directory structure - add missing nodes and bindings top node
-   * will be bound to root
-   * 
-   * @param dirPath
-   */
-  public void loadNodes(String dirPath) {
-    File dir = new File(dirPath);
-    if (!dir.isDirectory()) {
-      error("%s is not a directory", dirPath);
-      return;
-    }
-    // get list of files in dir ..
-    File[] files = dir.listFiles();
-
-    // scan for all non json files first ...
-    // initially set them invisible ...
-    for (File f : files) {
-      if (f.isDirectory()) {
-        loadNode(f.getAbsolutePath());
-      }
-    }
-
-  }
-
-  /**
    * load a node with all potential children
    * 
    * @param parentDirPath
@@ -1019,20 +891,20 @@ public class JMonkeyEngine extends Service implements ActionListener,
       }
     }
 
-    Node parentNode = (Node) nodes.get(parentName);
+    Node parentNode = getNode(parentName);
     // parent is a dir - we have processed our children - now we process
     // the parent "if" we don't already have a reference to a node with the same
     // name
     if (parentNode == null) {
       putNode(parentName);
-      parentNode = (Node) nodes.get(parentName);
+      parentNode = putNode(parentName);
 
       for (File f : files) {
         String childname = getNameNoExt(f.getName());
-        if (!nodes.containsKey(childname)) {
+        if (getNode(childname) == null) {
           log.error("loadNode {} can not attach child to {} not found in nodes", parentDirPath, childname);
         } else {
-          parentNode.attachChild(nodes.get(childname));
+          parentNode.attachChild(getNode(childname));
         }
       }
     } else {
@@ -1041,114 +913,53 @@ public class JMonkeyEngine extends Service implements ActionListener,
       // possibly implement - attaching children
     }
 
-    index(parentNode);
+    // index(parentNode);
     // saveNodes();
   }
 
-  // FIXME - remove - just load a json file
-  // NOT TO BE CALLED BY ANY OTHER THREAD BESIDES JME THREAD !!! OR YOU GET A
-  // SPATIAL EXCEPTION !
-  private void loadInMoov() {
+  /**
+   * based on a directory structure - add missing nodes and bindings top node
+   * will be bound to root
+   * 
+   * @param dirPath
+   */
+  public void loadNodes(String dirPath) {
+    File dir = new File(dirPath);
+    if (!dir.isDirectory()) {
+      error("%s is not a directory", dirPath);
+      return;
+    }
+    // get list of files in dir ..
+    File[] files = dir.listFiles();
 
-    /**
-     * <pre>
-     * 
-     * [ { "name":"i01.torso.lowStom", "action":"loadModel",
-     * "args":["Models/mtorso.j3o"]}, { "name":"i01.torso.lowStom",
-     * "action":"setMapper", "args":[0, 180, 120, 60]}, {
-     * "name":"i01.torso.lowStom", "action":"setRotation", "args":["x"]}, {
-     * "name":"i01.torso.lowStom", "action":"rotate", "args":["x"]}, {
-     * "name":"leftS", "action":"putNode", "args":["rightS"]}
-     * 
-     * ]
-     */
-
-    /*
-     * UserData o = putNode("i01.torso.lowStom", "rootNode",
-     * "Models/ltorso.j3o", null, Vector3f.UNIT_X.mult(1), new Vector3f(0, 0,
-     * 0), 0); rootNode.attachChild(o.getNode());
-     * 
-     * // FIXME - bind this to process Peers !!!! "default" "Peer" info in 3D
-     * form
-     * 
-     * putNode("i01.torso.midStom", "i01.torso.lowStom", "Models/mtorso.j3o",
-     * new Mapper(0, 180, 120, 60), Vector3f.UNIT_Y.mult(-1), new Vector3f(0, 0,
-     * 0), 0); putNode("i01.torso.topStom", "i01.torso.midStom",
-     * "Models/ttorso1.j3o", new Mapper(0, 180, 80, 100),
-     * Vector3f.UNIT_Z.mult(1), new Vector3f(0, 105, 10), 0); putNode("rightS",
-     * "i01.torso.topStom", null, null, Vector3f.UNIT_Z.mult(1), new Vector3f(0,
-     * 300, 0), 0);
-     * 
-     * // Vector3f angle = rotationMask.mult((float) Math.toRadians(6));
-     * putNode("i01.rightArm.omoplate", "rightS", "Models/Romoplate1.j3o", new
-     * Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(-1), new Vector3f(-143, 0,
-     * -17), 0);
-     * 
-     * // angle = rotationMask.mult((float) Math.toRadians(-2)); //
-     * node.rotate(angle.x, angle.y, angle.z); <------------ additional rotation
-     * // ... putNode("i01.rightArm.shoulder", "i01.rightArm.omoplate",
-     * "Models/Rshoulder1.j3o", new Mapper(0, 180, 0, 180),
-     * Vector3f.UNIT_X.mult(-1), new Vector3f(-23, -45, 0), 0);
-     * putNode("i01.rightArm.rotate", "i01.rightArm.shoulder",
-     * "Models/rotate1.j3o", new Mapper(0, 180, 40, 180),
-     * Vector3f.UNIT_Y.mult(-1), new Vector3f(-57, -55, 8), 0);
-     * 
-     * // angle = rotationMask.mult((float) Math.toRadians(30)); // additional
-     * // rotate ! // node.rotate(angle.x, angle.y, angle.z);
-     * putNode("i01.rightArm.bicep", "i01.rightArm.rotate",
-     * "Models/Rbicep1.j3o", new Mapper(0, 180, 5, 60),
-     * Vector3f.UNIT_X.mult(-1), new Vector3f(5, -225, -32), 0);
-     * putNode("leftS", "i01.torso.topStom", "Models/Lomoplate1.j3o", null,
-     * Vector3f.UNIT_Z.mult(1), new Vector3f(0, 300, 0), 0);
-     * 
-     * // angle = rotationMask.mult((float) Math.toRadians(4)); //
-     * node.rotate(angle.x, angle.y, angle.z); <-- another rotation ...
-     * putNode("i01.leftArm.omoplate", "leftS", "Models/Lomoplate1.j3o", new
-     * Mapper(0, 180, 10, 70), Vector3f.UNIT_Z.mult(1), new Vector3f(143, 0,
-     * -15), 0); putNode("i01.leftArm.shoulder", "i01.leftArm.omoplate",
-     * "Models/Lshoulder.j3o", new Mapper(0, 180, 0, 180),
-     * Vector3f.UNIT_X.mult(-1), new Vector3f(17, -45, 5), 0);
-     * putNode("i01.leftArm.rotate", "i01.leftArm.shoulder",
-     * "Models/rotate1.j3o", new Mapper(0, 180, 40, 180),
-     * Vector3f.UNIT_Y.mult(1), new Vector3f(65, -58, -3), 0);
-     * 
-     * // angle = rotationMask.mult((float) Math.toRadians(27)); //
-     * node.rotate(angle.x, angle.y, angle.z); <-------------- additional rotate
-     * // !!! putNode("i01.leftArm.bicep", "i01.leftArm.rotate",
-     * "Models/Lbicep.j3o", new Mapper(0, 180, 5, 60), Vector3f.UNIT_X.mult(-1),
-     * new Vector3f(-14, -223, -28), 0);
-     * 
-     * // angle = rotationMask.mult((float) Math.toRadians(-90)); <- Ha .. and
-     * an // additional rotate // node.rotate(angle.x, angle.y, angle.z);
-     * putNode("i01.rightHand.wrist", "i01.rightArm.bicep",
-     * "Models/RWristFinger.j3o", new Mapper(0, 180, 130, 40),
-     * Vector3f.UNIT_X.mult(-1), new Vector3f(15, -290, -10), 0);
-     * 
-     * // angle = rotationMask.mult((float) Math.toRadians(-90)); <--- HA .. and
-     * // additional rotation ! // node.rotate(angle.x, angle.y, angle.z);
-     * putNode("i01.leftHand.wrist", "i01.leftArm.bicep",
-     * "Models/LWristFinger.j3o", new Mapper(0, 180, 40, 130),
-     * Vector3f.UNIT_Y.mult(1), new Vector3f(0, -290, -20), 90);
-     * putNode("i01.head.neck", "i01.torso.topStom", "Models/neck.j3o", new
-     * Mapper(0, 180, 60, 110), Vector3f.UNIT_X.mult(-1), new Vector3f(0,
-     * 452.5f, -45), 0); putNode("i01.head.rollNeck", "i01.head.neck", null, new
-     * Mapper(0, 180, 60, 115), Vector3f.UNIT_Z.mult(1), new Vector3f(0, 0, 0),
-     * 90); putNode("i01.head.rothead", "i01.head.rollNeck", "Models/head.j3o",
-     * new Mapper(0, 180, 150, 30), Vector3f.UNIT_Y.mult(-1), new Vector3f(0,
-     * 10, 20), 90); putNode("i01.head.jaw", "i01.head.rothead",
-     * "Models/jaw.j3o", new Mapper(0, 180, 0, 180), Vector3f.UNIT_X.mult(-1),
-     * new Vector3f(-5, 60, -50), 90);
-     * 
-     * saveToJson("inmoov-jme.json");
-     * 
-     * // Vector3D vector = new Vector3D(7, 3, 120); load("inmoov-jme.json");
-     * 
-     * saveToJson("inmoov-jme1.json"); o.getNode().scale(1 / 400f);
-     */
+    // scan for all non json files first ...
+    // initially set them invisible ...
+    for (File f : files) {
+      if (f.isDirectory()) {
+        loadNode(f.getAbsolutePath());
+      }
+    }
   }
 
-  public Spatial loadModel(String assetPath) {
-    return assetManager.loadModel(assetPath);
+  /**
+   * camera "looks at" - the selected spatial
+   * https://wiki.jmonkeyengine.org/jme3/advanced/traverse_scenegraph.html
+   * 
+   * @param selected2
+   */
+  public void lookAt(Spatial spatial) {
+    cameraDirection.set(cameraSettings.getDirection()).normalizeLocal();
+    // spatial.getWorldTranslation()
+    // ;camera.getWorldCoordinates(screenPos, projectionZPos)
+    // TODO Auto-generated method stub
+    cameraDirection.multLocal(5 * 0.5f);
+    camera.move(cameraDirection);
+    // initial root
+    camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    // camera.move(5, 5, 5);
+    // camNode.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    // rootNode.lookAt(spatial.getLocalTranslation(), Vector3f.UNIT_Y);
+
   }
 
   // relative move
@@ -1164,10 +975,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
     msg.data = new Object[] { name, x, y, z };
     addMsg(msg);
   }
-
-  boolean shiftLeftPressed = false;
-  boolean altLeftPressed = false;
-  boolean ctrlLeftPressed = false;
 
   @Override
   public void onAction(String name, boolean keyPressed, float tpf) {
@@ -1291,11 +1098,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
         setSelected(target);
       }
     } // else if ...
-    /*
-     * if (selected != null) { putText(selected, 10, 10);
-     * menu.putText(selected); }
-     */
-
     menu.putText(selected);
   }
 
@@ -1319,7 +1121,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
     if (pointCloudBuffer == null) {
       initPointCloud(pc);
-      addBox("box-1");
+      // addBox("box-1");
     }
 
     pointCloudBuffer.rewind();
@@ -1352,6 +1154,16 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
   }
 
+  public Node putNode(String name) {
+    Node check = getNode(name);
+    if (check != null) {
+      return check;
+    }
+    Node n = new Node(name);
+    rootNode.attachChild(n);
+    return n;
+  }
+
   public void putText(Spatial spatial, int x, int y) {
     Vector3f xyz = spatial.getWorldTranslation();
     Quaternion q = spatial.getLocalRotation();
@@ -1370,20 +1182,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
 
     putText(sb.toString(), 10, 10);
-  }
-
-  public String format(Node node, Integer selected) {
-    StringBuilder sb = new StringBuilder();
-    List<Spatial> children = node.getChildren();
-    sb.append("[");
-    for (int i = 0; i < children.size(); ++i) {
-      if (i != 0) {
-        sb.append(", ");
-      }
-      sb.append(node.getChild(i).getName());
-    }
-    sb.append("]");
-    return sb.toString();
   }
 
   public void putText(String text, int x, int y) {
@@ -1480,38 +1278,39 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
   }
 
+  public void rename(String name, String newName) {
+    Spatial data = get(name);
+    if (data == null) {
+      error("rename(%s, %s) could not find %s", name, newName, name);
+      return;
+    }
+    data.setName(newName);
+  }
+
   public void rotate(String object, String axis, float degrees) {
     // TODO Auto-generated method stub
 
   }
 
-  // FIXME - rename saveToJson
-  // FIXME - base64 encoding of j3o file - "all in one file" gltf instead ???
-  public boolean saveToJson(String jsonPath) {
-    try {
-      String json = CodecUtils.toJson(nodes);
-      FileIO.toFile(jsonPath, json.getBytes());
-      return true;
-    } catch (Exception e) {
-      error(e);
-    }
-    return false;
+  public void rotateOnAxis(String name, String axis, double degrees) {
+    Jme3Msg msg = new Jme3Msg();
+    msg.method = "rotateOnAxis";
+    msg.data = new Object[] { name, axis, (float) degrees };
+    addMsg(msg);
   }
 
-  public String toJson(Node node) {
-    // get absolute position info
-    return CodecUtils.toJson(node);
-    // save it out
-  }
-
-  public boolean saveNodes() {
-    return saveNode(rootNode.getName(), null);
+  public void rotateTo(String name, double degrees) {
+    Jme3Msg msg = new Jme3Msg();
+    msg.method = "rotateTo";
+    msg.data = new Object[] { name, degrees };
+    addMsg(msg);
   }
 
   public boolean saveNode(String name) {
     return saveNode(name, null);
   }
 
+  // FIXME - fix name - because it can save a Geometry too
   public boolean saveNode(String name, String filename) {
     try {
 
@@ -1521,7 +1320,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
       // not just getchild ... "any node"
       // Spatial spatial = rootNode.getChild(name);
-      Spatial spatial = nodes.get(name);
+      Spatial spatial = get(name);
       if (spatial == null) {
         error("could not save {} - node not found", name);
         return false;
@@ -1547,6 +1346,50 @@ public class JMonkeyEngine extends Service implements ActionListener,
     return false;
   }
 
+  public boolean saveNodes() {
+    return saveNode(rootNode.getName(), null);
+  }
+
+  public void saveSpatial(Spatial toSave) {
+    try {
+      String filename = toSave.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + ".txt";
+      TreeMap<String, UserData> tree = new TreeMap<String, UserData>();
+      buildTree(tree, "", toSave, false, true);
+      // String ret = CodecUtils.toJson(tree);
+      FileOutputStream fos = new FileOutputStream(filename);
+      for (String key : tree.keySet()) {
+        String type = (tree.get(key).getSpatial() != null && tree.get(key).getSpatial() instanceof Node) ? " (Node)" : " (Geometry)";
+        fos.write(String.format("%s\n", key + type).getBytes());
+      }
+      fos.close();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  // FIXME - base64 encoding of j3o file - "all in one file" gltf instead ???
+  public boolean saveToJson(String jsonPath) {
+    try {
+      String json = CodecUtils.toJson(buildTree());
+      FileIO.toFile(jsonPath, json.getBytes());
+      return true;
+    } catch (Exception e) {
+      error(e);
+    }
+    return false;
+  }
+
+  // TODO - need to make thread safe ? JME thread ?
+  // turn it into a jme msg - put it on the update queue ?
+  public void scale(String name, float scale) {
+    UserData node = getUserData(name);
+    if (node != null) {
+      node.scale(scale);
+    } else {
+      error("scale %s does not exist", name);
+    }
+  }
+
   public void setDisplayFps(boolean b) {
     app.setDisplayFps(b);
   }
@@ -1561,6 +1404,46 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   public void setFontSize(int size) {
     fontSize = size;
+  }
+
+  public Mapper setMapper(String name, int minx, int maxx, int miny, int maxy) {
+    UserData node = getUserData(name);
+    if (node == null) {
+      error("setMapper %s does not exist", name);
+      return null;
+    }
+    node.mapper = new Mapper(minx, maxx, miny, maxy);
+    return node.mapper;
+  }
+
+  public void setRotation(String name, String rotation) {
+    UserData o = getUserData(name);
+    if (o == null) {
+      error("setRotation %s could not be found", name);
+      return;
+    }
+    o.rotationMask = util.getUnitVector(rotation);
+  }
+
+  public void setSelected(Spatial newSelected) {
+
+    // turn off old
+    if (selected != null) {
+      enableBoundingBox(selected, false);
+      enableCoordinateAxes(selected, false);
+    }
+
+    // set selected
+    selected = newSelected;
+
+    // display in menu
+    menu.putText(newSelected);
+
+    // turn on new
+    if (newSelected != null) {
+      enableBoundingBox(newSelected, true);
+      enableCoordinateAxes(newSelected, true);
+    }
   }
 
   public void setVisible(boolean b) {
@@ -1591,14 +1474,14 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // after start - these are initialized as "default"
     assetManager = app.getAssetManager();
     inputManager = app.getInputManager();
-    
+
     // disable flycam we are going to use our
     // own camera
     flyCam = app.getFlyByCamera();
     if (flyCam != null) {
       flyCam.setEnabled(false);
     }
-    
+
     cameraSettings = app.getCamera();
     rootNode = app.getRootNode();
     rootNode.setName("root");
@@ -1615,7 +1498,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // camera.setLocation(new Vector3f(0, 1, -1));
     // camNode.setLocalTranslation(-1, 1, -1);
     // camNode.setLocalTranslation(new Vector3f(1f, 1f, 1f));
-    
+
     // camera.setLocalTranslation(-1, 1, -1);
     camera.attachChild(camNode);
     camera.move(0, 1, 2);
@@ -1633,7 +1516,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // cam.setFrustumNear(1.0f);
 
     inputManager.setCursorVisible(true);
- 
+
     // camNode.setLocalTranslation(0, 0, 2f);
     // camera.setLocation(new Vector3f(0f, 0f, 2f));
     // cam.setLocation(new Vector3f(0f, 0f, 0f));
@@ -1674,9 +1557,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
      * </pre>
      */
 
-    // inputManager.addMapping("mouse-click-left", new
-    // MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    // inputManager.addListener(analog, "mouse-click-left");
     inputManager.addMapping("pick-target", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
     inputManager.addListener(analog, "pick-target");
 
@@ -1730,28 +1610,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
-    // FIXME NOT i01 !! - if a InMoov Type has been identified
-    // the InMoov {name} is pulled
-    // FIXME - correct names of types :P
-    // FIXME - INPUT ALL THIS VIA TEXT/yaml/json config !!!
-
-    putNode(rootNode);
-
     menu = new MainMenuState(this);
     menu.loadGui();
-    // menu.initialize(stateManager, app);
-
-    // AH HAA !!! ... so JME thread can only do this :P
-    // loadInMoov();
+    
+    // load models in the default directory
     loadModels();
-  }
-
-  public void putNode(Node node) {
-    if (nodes.containsKey(node.getName())) {
-      error("%s already loaded", node.getName());
-      return;
-    }
-    index(node);
   }
 
   public void simpleUpdate(float tpf) {
@@ -1761,7 +1624,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
     for (HudText hudTxt : guiText.values()) {
       hudTxt.update();
-      // txt.setText("DOOD ITS ALL ABOUT THE THREAD");
     }
 
     while (jmeMsgQueue.size() > 0) {
@@ -1771,15 +1633,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
         // TODO - support relative & absolute moves
         msg = jmeMsgQueue.remove();
         util.invoke(msg);
-
-        /**
-         * <pre>
-         * Jme3Object object = getJme3Object(msg.name);
-         * 
-         * if (object == null) { log.error("no Jme3Object named {}", name); }
-         * object.rotateDegrees(move.getAngle());
-         */
-
       } catch (Exception e) {
         log.error("simpleUpdate failed for {} - targetName", msg, e);
       }
@@ -1871,6 +1724,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   }
 
+  // FIXME - requirements for "re-start" is everything correctly de-initialized ?
   public void stop() {
     if (app != null) {
 
@@ -1901,267 +1755,10 @@ public class JMonkeyEngine extends Service implements ActionListener,
     }
   }
 
-  public Node getNode(Spatial spatial) {
-    if (spatial instanceof Geometry) {
-      return spatial.getParent();
-    }
-    return (Node) spatial;
-  }
-
-  public void enableBoundingBox(Spatial spatial, boolean b) {
-    Node node = getNode(spatial);
-    UserData data = getUserData(node);
-    data.enableBoundingBox(b);
-  }
-
-  // FIXME !!!! enableCoodinateAxes - same s bb including parent if geometry
-  public void enableCoordinateAxes(Spatial spatial, boolean b) {
-    Node node = getNode(spatial);
-    UserData data = getUserData(node);
-    data.enableCoordinateAxes(b);
-  }
-
-  public void enableBoundingBox(String name, boolean b) {
-    UserData o = getUserData(name);
-    enableBoundingBox(o.getSpatial(), b);
-  }
-
-  public AssetManager getAssetManager() {
-    return assetManager;
-  }
-
-  /**
-   * binds two objects together ...
-   * 
-   * @param child
-   * @param parent
-   */
-  public void bind(String child, String parent) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "bind";
-    msg.data = new Object[] { child, parent };
-    addMsg(msg);
-  }
-
-  public void clone(String name, String newName) {
-
-  }
-
-  public void index(Node node) {
-    index(node, false, false);
-  }
-
-  // FIXME - implement
-  // with or w/o Geometry
-  public void index(Spatial spatial, boolean includeGeometries, boolean useDepth) {
-    // FIXME - figure out path - is node connected to root ?
-    /**
-     * if the spatial is connected to the root - then this reprocesses the whole
-     * scene graph which "might" be necessary, if there is a change of branches
-     * (or adding new branches) if the spatial is not connected to the root OR
-     * if the model is flat (vs usDepth) then the ancestor is not needed, but
-     * collisions are more likely to occur
-     */
-    Spatial ancestor = getTopNode(spatial);// <- if the spatial is connected to
-                                           // the root
-    nodes.putAll(buildTree(nodes, "", ancestor, includeGeometries, useDepth));
-  }
-
-  public Spatial getTopNode(Spatial spatial) {
-    if (spatial == null) {
-      return null;
-    }
-    Spatial top = spatial;
-    while (top.getParent() != null) {
-      top = top.getParent();
-    }
-    return top;
-  }
-
-  public void rename(String name, String newName) {
-    UserData data = getUserData(name);
-    if (data == null) {
-      error("rename(%s, %s) could not find %s", name, newName, name);
-    }
-
-    // change name
-    data.spatial.setName(newName);
-    nodes.remove(name);
-    // fix index
-    nodes.put(newName, data.spatial);
-  }
-
-  public void setRotation(String name, String rotation) {
-    UserData o = getUserData(name);
-    if (o == null) {
-      error("setRotation %s could not be found", name);
-      return;
-    }
-    o.rotationMask = util.getUnitVector(rotation);
-  }
-
-  public void attachChild(Spatial node) {
-    rootNode.attachChild(node);
-  }
-
-  public Node getRootNode() {
-    return rootNode;
-  }
-
-  public AppSettings getSettings() {
-    return settings;
-  }
-
-  public Spatial getRootChild(Spatial spatial) {
-    if (spatial == null) {
-      log.error("spatial is null");
-      return null;
-    }
-    Spatial c = spatial;
-    Spatial p = c.getParent();
-
-    if (spatial == rootNode) {
-      return null;
-    }
-
-    while (p != null && p != rootNode) {
-      c = p;
-      p = c.getParent();
-    }
-
-    if (p != null) {
-      return c;
-    }
-    return spatial;
-  }
-
-  public Map<String, Spatial> buildTree() {
-    TreeMap<String, Spatial> tree = new TreeMap<String, Spatial>();
-    return buildTree(tree, "", rootNode, false, false);
-  }
-
-  AtomicInteger id = new AtomicInteger();
-
-  /**
-   * The buildTree method creates a data structure for quick access and indexing
-   * of nodes - it can build it in two different ways - one which uses full
-   * depth for an access key useDepth=true and another that is a flat model.
-   * Both can have collisions. When the parents of nodes change, the depth model
-   * "should" change to reflect the changes in branches. The flat model does not
-   * need to change, but has a higher likelyhood of collisions.
-   * 
-   * @param tree
-   * @param path
-   * @param spatial
-   * @param useDepthKeys
-   * @return
-   */
-  public Map<String, Spatial> buildTree(Map<String, Spatial> tree, String path, Spatial spatial, boolean includeGeometries, boolean useDepthKeys) {
-    if (useDepthKeys) {
-      path = path + KEY_SEPERATOR + spatial.getName();
-    } else {
-      path = spatial.getName();
-    }
-    if (tree.containsKey(path)) {
-      Spatial s = tree.get(path);
-      if (spatial != s) {
-        // if (s instanceof Geometry) {
-        s.setName(String.format("%s-%d", s.getName(), id.incrementAndGet()));
-        // } else {
-        // log.error("buildTree collision [{}] {} already exists - NOT replacing
-        // with {}", path, s, spatial);
-        // return tree;
-        // }
-      }
-      // already exists with correct path
-    }
-
-    if (!includeGeometries && (spatial instanceof Geometry)) {
-      return tree;
-    }
-
-    // putting both nodes & geometries on the tree
-    tree.put(path, spatial);
-
-    if (spatial instanceof Node) {
-      List<Spatial> children = ((Node) spatial).getChildren();
-      for (int i = 0; i < children.size(); ++i) {
-        buildTree(tree, path, children.get(i), includeGeometries, useDepthKeys);
-      }
-    }
-    return tree;
-  }
-
-  public Spatial getSelected() {
-    return selected;
-  }
-
-  public void saveSpatial(Spatial toSave) {
-    try {
-      String filename = toSave.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + ".txt";
-      TreeMap<String, Spatial> tree = new TreeMap<String, Spatial>();
-      buildTree(tree, "", toSave, false, true);
-      // String ret = CodecUtils.toJson(tree);
-      FileOutputStream fos = new FileOutputStream(filename);
-      for (String key : tree.keySet()) {
-        String type = (tree.get(key) instanceof Node) ? " (Node)" : " (Geometry)";
-        fos.write(String.format("%s\n", key + type).getBytes());
-      }
-      fos.close();
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
-  public String getKeyPath(Spatial spatial) {
-    if (spatial == null) {
-      return null;
-    }
-    StringBuilder sb = new StringBuilder(spatial.getName());
-    Node p = spatial.getParent();
-    while (p != null) {
-      sb.insert(0, String.format("%s%s", p.getName(), KEY_SEPERATOR));
-      p = p.getParent();
-    }
-    return sb.toString();
-  }
-
-  /**
-   * The workhorse - where everyone "searches" for the user data they need. It
-   * works agains a flat or depth key'd tree. If the node is found but the user
-   * data has not been created, it creates it and assigns the references... if
-   * the node cannot be found, it returns null
-   * 
-   * @param path
-   *          - full path for a depth tree, name for a flat map
-   * @return
-   */
-  public UserData getUserData(String path /* , boolean useDepth */) {
-    if (nameMappings.containsKey(path)) {
-      path = nameMappings.get(path);
-    }
-    if (!nodes.containsKey(path)) {
-      error("geteUserData %s cannot be found", path);
-      return null;
-    }
-    Spatial spatial = nodes.get(path);
-    UserData userData = spatial.getUserData("data");
-    if (userData == null) {
-      userData = new UserData(this, spatial);
-    }
-    return userData;
-  }
-
-  // TODO - possibly Geometries
-  // Unique Naming and map/index
-  public UserData getUserData(Node node) {
-    UserData data = node.getUserData("data");
-    if (data == null) {
-      data = new UserData(this, node);
-      // FIXME - add map/index
-      // getAncestorKey(x) + rootKey if its not root = key
-    }
-    return data;
+  public String toJson(Node node) {
+    // get absolute position info
+    return CodecUtils.toJson(node);
+    // save it out
   }
 
   @Override
@@ -2170,34 +1767,33 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   }
 
-  public Node createUnitAxis() {
-    return util.createUnitAxis();
-  }
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.init("info");
 
-  public Geometry createBoundingBox(Spatial spatial) {
-    return util.createBoundingBox(spatial);
-  }
-    
+      Runtime.start("gui", "SwingGui");
+      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
 
-  /**
-   * camera "looks at" - the selected spatial
-   * https://wiki.jmonkeyengine.org/jme3/advanced/traverse_scenegraph.html
-   * 
-   * @param selected2
-   */
-  public void lookAt(Spatial spatial) {
-    cameraDirection.set(cameraSettings.getDirection()).normalizeLocal();
-    // spatial.getWorldTranslation()
-    // ;camera.getWorldCoordinates(screenPos, projectionZPos)
-    // TODO Auto-generated method stub
-    cameraDirection.multLocal(5 * 0.5f);
-    camera.move(cameraDirection);
-    // initial root
-    camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
-    // camera.move(5, 5, 5);
-    // camNode.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
-    // rootNode.lookAt(spatial.getLocalTranslation(), Vector3f.UNIT_Y);
+      jme.addGrid();
 
+      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "cccccc", true);
+      jme.moveTo("floor.box.01", 3, 0, 0);
+
+      Spatial spatial = jme.get("floor.box.01");
+      log.info("spatial {}", spatial);
+
+      Servo servo = (Servo) Runtime.start("i01.head.jaw", "Servo");
+      jme.setRotation("i01.head.jaw", "x");
+
+      jme.scale("i01", 0.25f);
+
+      boolean test = true;
+      if (test) {
+        return;
+      }
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }

@@ -330,25 +330,22 @@ public class MainMenuState extends BaseAppState {
     // String type = (spatial instanceof Node) ? "Node" : "Geometry";
 
     title.setText(spatial.toString());
-    Spatial rootChild = jme.getRootChild(spatial);
-
-    /*
-     * StringBuilder sb = new StringBuilder(); if (rootChild != null) {
-     * sb.append(rootChild); sb.append(" > "); sb.append(spatial.getParent());
-     * sb.append(" > "); sb.append(spatial); } else { sb.append(spatial); }
-     */
-
+    // Spatial rootChild = jme.getRootChild(spatial);
+    
     breadCrumbs.setText(jme.getKeyPath(spatial));
-    addChildren(spatial);
+    if (spatial instanceof Node) {
+      putText(((Node)spatial).getChildren());
+    }
   }
 
-  public void addChildren(Spatial spatial) {
+  @SuppressWarnings("unchecked")
+  public void putText(List<Spatial> c) {
     childrenContainer.clearChildren();
     children.clear();
-    boolean isNode = (spatial instanceof Node);
-    if (isNode) {
-      Node node = (Node) spatial;
-      List<Spatial> c = node.getChildren();
+    // boolean isNode = (spatial instanceof Node);
+    //if (isNode) {
+      // Node node = (Node) spatial;
+      // List<Spatial> c = node.getChildren();
       for (Spatial child : c) {
         Button b = new Button(child.toString());
         b.addClickCommands(new Command<Button>() {
@@ -366,7 +363,7 @@ public class MainMenuState extends BaseAppState {
        * for (String key : children.keySet()) {
        * childrenContainer.addChild(children.get(key)); }
        */
-    }
+    //}
   }
 
   public void setBreadCrumb(Spatial spatial) {
