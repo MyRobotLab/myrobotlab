@@ -29,7 +29,6 @@ import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3ServoController;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.jme3.MainMenuState;
-import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -107,6 +106,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
   final Map<String, String> nameMappings = new TreeMap<String, String>();
 
   transient BulletAppState bulletAppState;
+  
+  transient Vector3f cameraDirection = new Vector3f();
 
   final public String KEY_SEPERATOR = "/";
 
@@ -172,11 +173,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
        * jme.rename("head-6", "i01.head.rotHead");
        * jme.setMapper("i01.head.rotHead", 0, 180, -90, 90); // shift 90 degrees
        */
-      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
-      jme.move("floor.box.01", 2, 0);
-
-      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
-      jme.move("floor.box.01", 2, 0);
+      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "cccccc", true);
+      jme.moveTo("floor.box.01", 3, 0, 0);
 
       /*
        * jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
@@ -189,6 +187,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
       Servo servo = (Servo) Runtime.start("i01.head.jaw", "Servo");
       jme.setRotation("i01.head.jaw", "x");
+      
+      jme.scale("i01", 0.0025f);
 
       boolean test = true;
       if (test) {
@@ -351,10 +351,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
       // FIXME - move camera jme.move("camera", x, y , z) // root node...
 
-      Geometry geometry = new Geometry();
-
-      Node node = new Node();
-
+      
       VirtualServoController vsc = (VirtualServoController) Runtime.start("i01.left", "VirtualServoController");
       vsc.attachSimulator(jme);
       vsc = (VirtualServoController) Runtime.start("i01.right", "VirtualServoController");
@@ -492,8 +489,9 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   boolean autoAttach = true;
   boolean autoAttachAll = true;
-  transient Camera camera;
+  transient Camera cameraSettings;
   transient CameraNode camNode;
+  transient Node camera = new Node("camera");
   // transient Spatial control = null;
   String defaultAppType = "Jme3App";
 
@@ -589,10 +587,12 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   public void addBox(String name, Float width, Float depth, Float height, String color, Boolean fill) {
 
+    Node boxNode = null;
     // FIXME - auto increment ? addWall ??? addFloor
     if (nodes.containsKey(name)) {
-      warn("addBox %s already in nodes", name);
-      return;
+      boxNode = (Node) nodes.get(name);
+    } else {
+      boxNode = new Node(name);
     }
 
     if (width == null) {
@@ -629,12 +629,13 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // mat1 = new Material(assetManager, "Common/MatDefs/Light/Deferred.j3md");
     // mat1.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Front);
     geom.setMaterial(mat1);
-    Node boxNode = new Node(name);
+
+    boxNode.attachChild(geom);
 
     // FIXME - optimize rootNode/geom/nodes & jme3Node !
     // UserData o = new UserData(this, boxNode);
     // nodes.put(name, o);
-    rootNode.attachChild(geom);
+    rootNode.attachChild(boxNode);
     moveTo(name, 0.0f, 0.5f * height, 0.0f);
     index(boxNode);
   }
@@ -937,7 +938,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
   public void loadModels() {
     // load the root data dir
     loadModels(modelsDir);
-    // loadNodes(modelsDir);
+    loadNodes(modelsDir);
   }
 
   public void loadModels(String dirPath) {
@@ -992,14 +993,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
       }
     }
 
-    // process structure json files ..
-
-    // breadth first search ...
-    for (File f : files) {
-      if (f.isDirectory()) {
-        loadModels(f.getAbsolutePath());
-      }
-    }
   }
 
   /**
@@ -1008,14 +1001,16 @@ public class JMonkeyEngine extends Service implements ActionListener,
    * @param parentDirPath
    */
   public void loadNode(String parentDirPath) {
-    File parent = new File(parentDirPath);
-    if (!parent.isDirectory()) {
+    File parentFile = new File(parentDirPath);
+    if (!parentFile.isDirectory()) {
       // parent is not a directory ...
       // we are done here ..
       return;
     }
 
-    File[] files = parent.listFiles();
+    String parentName = parentFile.getName();
+
+    File[] files = parentFile.listFiles();
     // depth first search - process all children first
     // to build the tree
     for (File f : files) {
@@ -1024,6 +1019,30 @@ public class JMonkeyEngine extends Service implements ActionListener,
       }
     }
 
+    Node parentNode = (Node) nodes.get(parentName);
+    // parent is a dir - we have processed our children - now we process
+    // the parent "if" we don't already have a reference to a node with the same
+    // name
+    if (parentNode == null) {
+      putNode(parentName);
+      parentNode = (Node) nodes.get(parentName);
+
+      for (File f : files) {
+        String childname = getNameNoExt(f.getName());
+        if (!nodes.containsKey(childname)) {
+          log.error("loadNode {} can not attach child to {} not found in nodes", parentDirPath, childname);
+        } else {
+          parentNode.attachChild(nodes.get(childname));
+        }
+      }
+    } else {
+      // FIXME - it "may" already contain the parent name - but also "may" not
+      // have all sub-children attached
+      // possibly implement - attaching children
+    }
+
+    index(parentNode);
+    // saveNodes();
   }
 
   // FIXME - remove - just load a json file
@@ -1249,8 +1268,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
       CollisionResults results = new CollisionResults();
       // Convert screen click to 3d position
       Vector2f click2d = inputManager.getCursorPosition();
-      Vector3f click3d = camera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
-      Vector3f dir = camera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+      Vector3f click3d = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+      Vector3f dir = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
       // Aim the ray from the clicked spot forwards.
       Ray ray = new Ray(click3d, dir);
       // Collect intersections between ray and all nodes in results list.
@@ -1485,6 +1504,10 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // save it out
   }
 
+  public boolean saveNodes() {
+    return saveNode(rootNode.getName(), null);
+  }
+
   public boolean saveNode(String name) {
     return saveNode(name, null);
   }
@@ -1496,9 +1519,12 @@ public class JMonkeyEngine extends Service implements ActionListener,
         filename = name + ".j3o";
       }
 
-      Spatial spatial = rootNode.getChild(name);
+      // not just getchild ... "any node"
+      // Spatial spatial = rootNode.getChild(name);
+      Spatial spatial = nodes.get(name);
       if (spatial == null) {
         error("could not save {} - node not found", name);
+        return false;
       }
 
       BinaryExporter exporter = BinaryExporter.getInstance();
@@ -1565,23 +1591,36 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // after start - these are initialized as "default"
     assetManager = app.getAssetManager();
     inputManager = app.getInputManager();
+    
+    // disable flycam we are going to use our
+    // own camera
     flyCam = app.getFlyByCamera();
-    camera = app.getCamera();
-
+    if (flyCam != null) {
+      flyCam.setEnabled(false);
+    }
+    
+    cameraSettings = app.getCamera();
     rootNode = app.getRootNode();
     rootNode.setName("root");
+    rootNode.attachChild(camera);
 
     viewPort = app.getViewPort();
     // Setting the direction to Spatial to camera, this means the camera will
     // copy the movements of the Node
-    camNode = new CameraNode("cam", camera);
+    camNode = new CameraNode("cam", cameraSettings);
     camNode.setControlDir(ControlDirection.SpatialToCamera);
+    // camNode.setControlDir(ControlDirection.CameraToSpatial);
     // rootNode.attachChild(camNode);
     // camNode.attachChild(child)
     // camera.setLocation(new Vector3f(0, 1, -1));
-    camNode.setLocalTranslation(-1, 1, -1);
+    // camNode.setLocalTranslation(-1, 1, -1);
     // camNode.setLocalTranslation(new Vector3f(1f, 1f, 1f));
-    camNode.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
+    
+    // camera.setLocalTranslation(-1, 1, -1);
+    camera.attachChild(camNode);
+    camera.move(0, 1, 2);
+    camera.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
+    // camNode.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
     // rootNode.attachChild(camNode);
     // rootNode.attachChild(cam);
 
@@ -1594,9 +1633,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // cam.setFrustumNear(1.0f);
 
     inputManager.setCursorVisible(true);
-    if (flyCam != null) {
-      flyCam.setEnabled(false);
-    }
+ 
     // camNode.setLocalTranslation(0, 0, 2f);
     // camera.setLocation(new Vector3f(0f, 0f, 2f));
     // cam.setLocation(new Vector3f(0f, 0f, 0f));
@@ -2139,6 +2176,28 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   public Geometry createBoundingBox(Spatial spatial) {
     return util.createBoundingBox(spatial);
+  }
+    
+
+  /**
+   * camera "looks at" - the selected spatial
+   * https://wiki.jmonkeyengine.org/jme3/advanced/traverse_scenegraph.html
+   * 
+   * @param selected2
+   */
+  public void lookAt(Spatial spatial) {
+    cameraDirection.set(cameraSettings.getDirection()).normalizeLocal();
+    // spatial.getWorldTranslation()
+    // ;camera.getWorldCoordinates(screenPos, projectionZPos)
+    // TODO Auto-generated method stub
+    cameraDirection.multLocal(5 * 0.5f);
+    camera.move(cameraDirection);
+    // initial root
+    camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    // camera.move(5, 5, 5);
+    // camNode.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    // rootNode.lookAt(spatial.getLocalTranslation(), Vector3f.UNIT_Y);
+
   }
 
 }
