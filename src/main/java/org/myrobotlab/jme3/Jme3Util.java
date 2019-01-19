@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
-import org.myrobotlab.service.JMonkeyEngine.Jme3Msg;
 import org.slf4j.Logger;
 
 import com.jme3.bounding.BoundingBox;
