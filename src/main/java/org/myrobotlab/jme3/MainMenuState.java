@@ -88,6 +88,7 @@ public class MainMenuState extends BaseAppState {
     GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
   }
 
+  @SuppressWarnings("unchecked")
   protected void addInfoTab() {
 
     x = new TextField("0.000");
@@ -134,25 +135,50 @@ public class MainMenuState extends BaseAppState {
     // of the text field
     Container buttons = contents.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
     buttons.setInsets(new Insets3f(5, 5, 5, 5));
-    Button close = new Button("close");
-    close.addClickCommands(new Command<Button>() {
+    
+    // close
+    Button button = new Button("close");
+    button.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
         onDisable();
       }
     });
-    buttons.addChild(close);
-    Button save = new Button("save");
-    save.addClickCommands(new Command<Button>() {
+    buttons.addChild(button);
+    
+    // save
+    button = new Button("save");
+    button.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
         jme.saveSpatial(jme.getSelected());
       }
     });
-    buttons.addChild(save);
-    buttons.addChild(new Button("rename"));
+    buttons.addChild(button);
+    
+    // rename
+    button = new Button("rename");
+    button.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+        // jme.rename(jme.getSelected());
+      }
+    });
+    buttons.addChild(button);
+    
+    // lookat
+    button = new Button("look at");
+    button.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+        jme.lookAt(jme.getSelected());
+      }
+    });
+    buttons.addChild(button);
+      
+    
     buttons.addChild(new Button("hide"));
-    buttons.addChild(new Button("lookat"));
+    
     buttons.addChild(new Button("clone"));
     // buttons.addChild(new Button("rotate"));
     buttons.addChild(new Button("bind"));
