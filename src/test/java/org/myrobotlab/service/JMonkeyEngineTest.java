@@ -4,10 +4,12 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+@Ignore
 public class JMonkeyEngineTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngineTest.class);
@@ -23,7 +25,7 @@ public class JMonkeyEngineTest extends AbstractTest {
   // TODO - getClassifictions publishClassifications
   // TODO - getFaces publishFaces
   // TODO - chaos monkey filter tester
-
+  
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
