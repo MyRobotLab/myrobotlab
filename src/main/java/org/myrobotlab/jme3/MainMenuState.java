@@ -32,7 +32,6 @@ import com.simsilica.lemur.event.ConsumingMouseListener;
 import com.simsilica.lemur.event.CursorEventControl;
 import com.simsilica.lemur.event.DragHandler;
 import com.simsilica.lemur.event.MouseEventControl;
-import com.simsilica.lemur.style.BaseStyles;
 
 public class MainMenuState extends BaseAppState {
   transient JMonkeyEngine jme = null;
@@ -77,15 +76,6 @@ public class MainMenuState extends BaseAppState {
    */
   public MainMenuState(JMonkeyEngine jme) {
     this.jme = jme;
-    app = jme.getApp();
-    guiNode = app.getGuiNode();
-    // Initialize the globals access so that the default
-    // components can find what they need.
-    GuiGlobals.initialize(app);
-    // Load the 'glass' style
-    BaseStyles.loadGlassStyle();
-    // Set 'glass' as the default style when not specified
-    GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
   }
 
   @SuppressWarnings("unchecked")
@@ -103,6 +93,13 @@ public class MainMenuState extends BaseAppState {
 
     search = new TextField("");
     searchButton = new Button("search");
+    searchButton.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+        List<Spatial> results = jme.search(search.getText());
+        putText(results);
+      }
+    });
     childrenContainer = new Container();
 
     Container contents = new Container();
@@ -152,6 +149,7 @@ public class MainMenuState extends BaseAppState {
       @Override
       public void execute(Button source) {
         jme.saveSpatial(jme.getSelected());
+        jme.saveKeys(jme.getSelected());
       }
     });
     buttons.addChild(button);
@@ -220,10 +218,12 @@ public class MainMenuState extends BaseAppState {
 
   @SuppressWarnings("unchecked")
   @Override // part of Lemur "standard"
-  protected void initialize(Application appx) {
-
+  protected void initialize(Application app) {
+    // yucky casting for this - but what can i do ?
+    this.app = (Jme3App)app;
+    guiNode = ((Jme3App)getApplication()).getGuiNode();//app.getGuiNode();
+    
     main = new Container();
-    guiNode = app.getGuiNode();
     guiNode.attachChild(main);
     // main.setPreferredSize(new Vector3f(300, jme.getSettings().getWidth(),
     // 30));
@@ -276,11 +276,6 @@ public class MainMenuState extends BaseAppState {
 
     addInfoTab();
     addHelpTab();
-
-  }
-
-  public void loadGui() {
-    initialize(app);
   }
 
   @Override

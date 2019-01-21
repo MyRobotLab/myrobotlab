@@ -30,6 +30,7 @@ import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3ServoController;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.jme3.MainMenuState;
+import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -76,7 +77,6 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.control.BillboardControl;
@@ -87,6 +87,8 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
+import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.style.BaseStyles;
 
 /**
  * A simulator built on JMonkey 3 Engine.
@@ -94,8 +96,7 @@ import com.jme3.util.BufferUtils;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements ActionListener,
-    SceneGraphVisitor /* , AnalogListener - can't do both jmonkey bug */ {
+public class JMonkeyEngine extends Service implements ActionListener {
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
@@ -127,7 +128,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // meta.addDependency("org.jmonkeyengine", "jme3-bullet-native",
     // jmeVersion);
 
-    meta.addDependency("jme3utilities", "Minie", "0.6.2");
+    // meta.addDependency("jme3utilities", "Minie", "0.6.2");
 
     // "new" physics - ik forward kinematics ...
 
@@ -552,7 +553,11 @@ public class JMonkeyEngine extends Service implements ActionListener,
     if (startNode == null) {
       startNode = rootNode;
     }
-    return startNode.getChild(name);
+    Spatial child = startNode.getChild(name);
+    if (child == null) {
+      error("get(%s) could not find child");
+    }
+    return child;
   }
 
   public Jme3App getApp() {
@@ -845,7 +850,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
       return;
     }
     assetManager.registerLocator(dirPath, FileLocator.class);
-
     // get list of files in dir ..
     File[] files = dir.listFiles();
 
@@ -942,18 +946,20 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   /**
+   * FIXME - should be in Jme3Util and message'd
    * camera "looks at" - the selected spatial
    * https://wiki.jmonkeyengine.org/jme3/advanced/traverse_scenegraph.html
    * 
    * @param selected2
    */
+  @Deprecated // use lookAt(String, String)
   public void lookAt(Spatial spatial) {
-    cameraDirection.set(cameraSettings.getDirection()).normalizeLocal();
+//    cameraDirection.set(cameraSettings.getDirection()).normalizeLocal();
     // spatial.getWorldTranslation()
     // ;camera.getWorldCoordinates(screenPos, projectionZPos)
     // TODO Auto-generated method stub
-    cameraDirection.multLocal(5 * 0.5f);
-    camera.move(cameraDirection);
+//    cameraDirection.multLocal(5 * 0.5f);
+//    camera.move(cameraDirection);
     // initial root
     camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
     // camera.move(5, 5, 5);
@@ -996,7 +1002,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     } else if (name.equals("alt-left")) {
       altLeftPressed = keyPressed;
     } else if ("export".equals(name) && keyPressed) {
-      saveNode(selected.getName());
+      saveSpatial(selected.getName());
     } else {
       warn("%s - key %b %f not found", name, keyPressed, tpf);
     }
@@ -1287,7 +1293,12 @@ public class JMonkeyEngine extends Service implements ActionListener,
     data.setName(newName);
   }
 
-  public void rotate(String object, String axis, float degrees) {
+  /**
+   * use default axis
+   * @param object
+   * @param degrees
+   */
+  public void rotate(String object, float degrees) {
     // TODO Auto-generated method stub
 
   }
@@ -1306,30 +1317,34 @@ public class JMonkeyEngine extends Service implements ActionListener,
     addMsg(msg);
   }
 
-  public boolean saveNode(String name) {
-    return saveNode(name, null);
+  public boolean saveSpatial(String name) {
+    Spatial spatial = get(name);
+    return saveSpatial(spatial, spatial.getName());
+  }
+  
+  public boolean saveSpatial(Spatial spatial) {
+    return saveSpatial(spatial, null);
   }
 
   // FIXME - fix name - because it can save a Geometry too
-  public boolean saveNode(String name, String filename) {
+  public boolean saveSpatial(Spatial spatial, String filename) {
     try {
-
-      if (filename == null) {
-        filename = name + ".j3o";
-      }
-
-      // not just getchild ... "any node"
-      // Spatial spatial = rootNode.getChild(name);
-      Spatial spatial = get(name);
+      
       if (spatial == null) {
-        error("could not save {} - node not found", name);
+        error("cannot save null spatial");
         return false;
       }
 
+      String name = spatial.getName();
+      
+      if (filename == null) {
+        filename = name + ".j3o";
+      }
+      
+      filename = FileIO.cleanFileName(filename);
       BinaryExporter exporter = BinaryExporter.getInstance();
       FileOutputStream out = new FileOutputStream(filename);
-      Node n = (Node) spatial;
-      exporter.save(n.getChild(0), out);
+      exporter.save(spatial, out);
       out.close();
 
       /*
@@ -1347,18 +1362,21 @@ public class JMonkeyEngine extends Service implements ActionListener,
   }
 
   public boolean saveNodes() {
-    return saveNode(rootNode.getName(), null);
+    return saveSpatial(rootNode, null);
   }
+  
+  
 
-  public void saveSpatial(Spatial toSave) {
+  // this just saves keys  !!!
+  public void saveKeys(Spatial toSave) {
     try {
-      String filename = toSave.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_") + ".txt";
+      String filename = FileIO.cleanFileName(toSave.getName()) + ".txt";
       TreeMap<String, UserData> tree = new TreeMap<String, UserData>();
       buildTree(tree, "", toSave, false, true);
       // String ret = CodecUtils.toJson(tree);
       FileOutputStream fos = new FileOutputStream(filename);
       for (String key : tree.keySet()) {
-        String type = (tree.get(key).getSpatial() != null && tree.get(key).getSpatial() instanceof Node) ? " (Node)" : " (Geometry)";
+        String type = (tree.get(key) != null && tree.get(key).getSpatial() != null && tree.get(key).getSpatial() instanceof Node) ? " (Node)" : " (Geometry)";
         fos.write(String.format("%s\n", key + type).getBytes());
       }
       fos.close();
@@ -1385,6 +1403,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     UserData node = getUserData(name);
     if (node != null) {
       node.scale(scale);
+      //node.thatupdateModelBounds() 
     } else {
       error("scale %s does not exist", name);
     }
@@ -1458,6 +1477,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
   public void simpleInitApp() {
 
+    stateManager = app.getStateManager();
     // GuiGlobals.initialize(app);
     // Load the 'glass' style
     // BaseStyles.loadGlassStyle();
@@ -1468,12 +1488,23 @@ public class JMonkeyEngine extends Service implements ActionListener,
 
     setDisplayStatView(false);
 
-    guiNode = app.getGuiNode();
+    //guiNode = app.getGuiNode();
 
     // wtf - assetManager == null - another race condition ?!?!?
     // after start - these are initialized as "default"
     assetManager = app.getAssetManager();
     inputManager = app.getInputManager();
+    // stateManager.attach(state);
+    
+    //app = jme.getApp();
+    guiNode = app.getGuiNode();
+    // Initialize the globals access so that the default
+    // components can find what they need.
+    GuiGlobals.initialize(app);
+    // Load the 'glass' style
+    BaseStyles.loadGlassStyle();
+    // Set 'glass' as the default style when not specified
+    GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
 
     // disable flycam we are going to use our
     // own camera
@@ -1498,11 +1529,10 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // camera.setLocation(new Vector3f(0, 1, -1));
     // camNode.setLocalTranslation(-1, 1, -1);
     // camNode.setLocalTranslation(new Vector3f(1f, 1f, 1f));
-
     // camera.setLocalTranslation(-1, 1, -1);
     camera.attachChild(camNode);
-    camera.move(0, 1, 2);
-    camera.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
+    // camera.move(0, 1, 2);
+    //camera.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
     // camNode.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
     // rootNode.attachChild(camNode);
     // rootNode.attachChild(cam);
@@ -1534,7 +1564,7 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // FIXME - should be moved under ./data/JMonkeyEngine/
     assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
     assetManager.registerLoader(BlenderLoader.class, "blend");
-    stateManager = app.getStateManager();
+    
 
     /**
      * <pre>
@@ -1610,8 +1640,8 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
-    menu = new MainMenuState(this);
-    menu.loadGui();
+    menu = app.getMainMenu();//new MainMenuState(this);
+    // menu.loadGui();
     
     // load models in the default directory
     loadModels();
@@ -1761,24 +1791,58 @@ public class JMonkeyEngine extends Service implements ActionListener,
     // save it out
   }
 
-  @Override
-  public void visit(Spatial spatial) {
-    // TODO Auto-generated method stub
-
+  public void lookAt(String viewer, String viewee) {
+    Jme3Msg msg = new Jme3Msg();
+    msg.method = "lookAt";
+    msg.data = new Object[] { viewer, viewee };
+    addMsg(msg);
   }
 
+  public List<Spatial> search(String text) {
+    return search(text, null, null, null);
+  }
+
+  public List<Spatial> search(String text, Node beginNode, Boolean exactMatch, Boolean includeGeometries) {
+    if (beginNode == null) {
+      beginNode = rootNode;
+    }
+    if (exactMatch == null) {
+      exactMatch = false;
+    }
+    if (includeGeometries == null) {
+      includeGeometries = true;
+    }
+    Search search = new Search(text, exactMatch, includeGeometries);
+    beginNode.breadthFirstTraversal(search);
+    return search.getResults();
+  }
+  
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-
+      InMoovHead i01_head = (InMoovHead)Runtime.start("i01.head", "InMoovHead");
+      // InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
+      // i01.startHead("XX");
+      
       jme.addGrid();
-
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "cccccc", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
-
+      
+      // camera.move(0, 1, 2);
+      
+      jme.rename("i01.head.rollneck", "i01.head.rollNeck");
+      jme.setRotation("i01.head.rollNeck", "z");
+      jme.setRotation("i01.head.neck", "x");
+      jme.moveTo("camera", 0, 1, 4);
+      jme.lookAt("camera", "i01");
+      jme.rotateOnAxis("camera","x", -40);
+      jme.setMapper("i01.head.neck", 0, 180, -90, 90);
+      jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
+      jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
+      
       Spatial spatial = jme.get("floor.box.01");
       log.info("spatial {}", spatial);
 
@@ -1786,8 +1850,9 @@ public class JMonkeyEngine extends Service implements ActionListener,
       jme.setRotation("i01.head.jaw", "x");
 
       jme.scale("i01", 0.25f);
+      
 
-      boolean test = true;
+      boolean test = true; 
       if (test) {
         return;
       }
@@ -1795,5 +1860,6 @@ public class JMonkeyEngine extends Service implements ActionListener,
       log.error("main threw", e);
     }
   }
+  
 
 }

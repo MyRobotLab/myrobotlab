@@ -32,7 +32,7 @@ public class Jme3Util {
   public Jme3Util(JMonkeyEngine jme) {
     this.jme = jme;
   }
-
+  
   static public ColorRGBA toColor(String userColor) {
     if (userColor == null) {
       userColor = defaultColor;
@@ -286,6 +286,12 @@ public class Jme3Util {
     newBb.setMaterial(mat);
 
     return newBb;
+  }
+  
+  public void lookAt(String viewer, String viewee) {
+    Spatial viewerSpatial = jme.get(viewer);
+    Spatial vieweeSpatial = jme.get(viewee);   
+    viewerSpatial.lookAt(vieweeSpatial.getWorldTranslation(), Vector3f.UNIT_Y);    
   }
 
   public Geometry createBoundingBox(Spatial spatial) {
