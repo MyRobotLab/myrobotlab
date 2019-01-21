@@ -144,6 +144,7 @@ public class UserData implements Savable {
     // node.getChildren();
     spatial.scale(scale);
     spatial.updateGeometricState();
+    spatial.updateModelBound();
   }
 
   public void enableCoordinateAxes(boolean b) {
@@ -166,6 +167,13 @@ public class UserData implements Savable {
   }
 
   public void enableBoundingBox(boolean b, String color) {
+    
+    /*
+    boolean disable = true;
+    if (disable) {
+      return;
+    }
+    */
 
     if (spatial instanceof Geometry) {
       UserData data = jme.getUserData(spatial.getParent());
