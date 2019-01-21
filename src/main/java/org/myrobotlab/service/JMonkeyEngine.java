@@ -174,7 +174,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   long deltaMs;
 
-  DisplayMode displayMode = null;
+  transient DisplayMode displayMode = null;
 
   transient FlyByCamera flyCam;
 
@@ -184,14 +184,14 @@ public class JMonkeyEngine extends Service implements ActionListener {
   boolean fullscreen = false;
   transient Node guiNode;
 
-  Map<String, HudText> guiText = new TreeMap<>();
+  transient Map<String, HudText> guiText = new TreeMap<>();
   int height = 768;
-  AtomicInteger id = new AtomicInteger();
+  transient AtomicInteger id = new AtomicInteger();
   transient InputManager inputManager;
   protected Queue<Jme3Msg> jmeMsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
   final public String KEY_SEPERATOR = "/";
 
-  DisplayMode lastDisplayMode = null;
+  transient DisplayMode lastDisplayMode = null;
 
   transient MainMenuState menu;
 
@@ -204,9 +204,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
   FloatBuffer pointCloudBuffer = null;
 
-  Material pointCloudMat = null;
+  transient Material pointCloudMat = null;
 
-  Mesh pointCloudMesh = new Mesh();
+  transient Mesh pointCloudMesh = new Mesh();
 
   transient Node rootNode;
 
@@ -1850,6 +1850,8 @@ public class JMonkeyEngine extends Service implements ActionListener {
       jme.setRotation("i01.head.jaw", "x");
 
       jme.scale("i01", 0.25f);
+      
+      jme.save();
       
 
       boolean test = true; 
