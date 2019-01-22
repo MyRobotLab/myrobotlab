@@ -79,6 +79,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer;
+import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.control.BillboardControl;
 import com.jme3.scene.control.CameraControl.ControlDirection;
 import com.jme3.scene.debug.Grid;
@@ -169,6 +170,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   transient CameraNode camNode;
 
   boolean ctrlLeftPressed = false;
+  boolean mouseLeftPressed = false;
 
   String defaultAppType = "Jme3App";
 
@@ -223,7 +225,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   long sleepMs;
 
   long startUpdateTs;
-  
+
   transient AppStateManager stateManager;
 
   transient Jme3Util util;
@@ -311,11 +313,16 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // index(boxNode);
   }
 
-  public void addGrid() {
-    addGrid("floor-grid", new Vector3f(0, 0, 0), 40, "CCCCCC");
+  public void addGrid(String name) {
+    addGrid(name, new Vector3f(0, 0, 0), 40, "CCCCCC");
   }
 
-  public Geometry addGrid(String name, Vector3f pos, int size, String color) {
+  public void addGrid(String name, Vector3f pos, int size, String color) {
+    Spatial s = get(name);
+    if (s != null) {
+      log.warn("addGrid {} already exists");
+      return;
+    }
     Geometry g = new Geometry("wireframe grid", new Grid(size, size, 1.0f));
     Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     mat.getAdditionalRenderState().setWireframe(true);
@@ -325,8 +332,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
     Node n = new Node(name);
     n.attachChild(g);
     rootNode.attachChild(n);
-    // putNode(n);
-    return g;
   }
 
   public void addMsg(Jme3Msg msg) {
@@ -831,8 +836,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
     }
   }
 
-  
-
   public Spatial loadModel(String assetPath) {
     return assetManager.loadModel(assetPath);
   }
@@ -945,27 +948,17 @@ public class JMonkeyEngine extends Service implements ActionListener {
     }
   }
 
-  /**
-   * FIXME - should be in Jme3Util and message'd
-   * camera "looks at" - the selected spatial
-   * https://wiki.jmonkeyengine.org/jme3/advanced/traverse_scenegraph.html
-   * 
-   * @param selected2
-   */
-  @Deprecated // use lookAt(String, String)
-  public void lookAt(Spatial spatial) {
-//    cameraDirection.set(cameraSettings.getDirection()).normalizeLocal();
-    // spatial.getWorldTranslation()
-    // ;camera.getWorldCoordinates(screenPos, projectionZPos)
-    // TODO Auto-generated method stub
-//    cameraDirection.multLocal(5 * 0.5f);
-//    camera.move(cameraDirection);
-    // initial root
-    camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
-    // camera.move(5, 5, 5);
-    // camNode.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
-    // rootNode.lookAt(spatial.getLocalTranslation(), Vector3f.UNIT_Y);
+  public void cameraLookAt(String name) {
+    Spatial s = get(name);
+    if (s == null) {
+      log.error("cameraLookAt - cannot find {}", name);
+      return;
+    }
+    cameraLookAt(s);
+  }
 
+  public void cameraLookAt(Spatial spatial) {
+    camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
   }
 
   // relative move
@@ -985,12 +978,20 @@ public class JMonkeyEngine extends Service implements ActionListener {
   @Override
   public void onAction(String name, boolean keyPressed, float tpf) {
     log.info("onAction {} {} {}", name, keyPressed, tpf);
+
+    if (name.equals("mouse-click-left") && !mouseLeftPressed) {
+      Geometry target = checkCollision();
+      setSelected(target);
+    }
+
     if ("full-screen".equals(name)) {
       enableFullScreen(true);
     } else if ("menu".equals(name)) {
       menu.setEnabled(true);
     } else if ("select-root".equals(name)) {
       setSelected(rootNode);
+    } else if ("camera".equals(name)) {
+      setSelected("camera");
     } else if ("exit-full-screen".equals(name)) {
       enableFullScreen(false);
     } else if ("cycle".equals(name) && keyPressed) {
@@ -1003,9 +1004,20 @@ public class JMonkeyEngine extends Service implements ActionListener {
       altLeftPressed = keyPressed;
     } else if ("export".equals(name) && keyPressed) {
       saveSpatial(selected.getName());
+    } else if ("mouse-click-left".equals(name)) {
+      mouseLeftPressed = keyPressed;
     } else {
       warn("%s - key %b %f not found", name, keyPressed, tpf);
     }
+  }
+
+  public void setSelected(String name) {
+    Spatial s = get(name);
+    if (s == null) {
+      log.error("setSelected {} is null", name);
+      return;
+    }
+    setSelected(s);
   }
 
   /**
@@ -1016,37 +1028,63 @@ public class JMonkeyEngine extends Service implements ActionListener {
    * @param tpf
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
-    log.info("onAnalog {} {} {}", name, keyPressed, tpf);
+    log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
     if (selected == null) {
-      return;
+      selected = camera;// FIXME "new" selectedMove vs selected
+    }
+    
+    // wheelmouse zoom (done)
+    // alt+ctrl+lmb - zoom <br> (done)
+    // alt+lmb - rotate<br>  (done)
+    // alt+shft+lmb - pan (done)
+    // rotate around selection -
+    // https://www.youtube.com/watch?v=IVZPm9HAMD4&feature=youtu.be
+    // wrap text of breadcrumbs
+    // draggable - resize for menu - what you set is how it stays
+    // when menu active - inputs(hotkey when non-menu) should be deactive
+
+    log.info("{}", keyPressed);
+
+    // ROTATE
+    if (mouseLeftPressed && !altLeftPressed) {
+      if (name.equals("mouse-axis-x")) {
+        selected.rotate(0, -keyPressed, 0);
+      } else if (name.equals("mouse-axis-x-negative")) {
+        selected.rotate(0, keyPressed, 0);
+      } else if (name.equals("mouse-axis-y")) {
+        selected.rotate(-keyPressed, 0, 0);
+      } else if (name.equals("mouse-axis-y-negative")) {
+        selected.rotate(keyPressed, 0, 0);
+      }
     }
 
-    if (name.equals("mouse-click-left")) {
-      // alt + ctrl + lmb = zoom in / zoom out
-      // alt + lmb = orbit
-      // shift + alt + lmb = pan
-
-      // arrow up/down/left/right = pan
-      // shift + up/down = zoom in / zoom out
-
-      if (altLeftPressed && ctrlLeftPressed) {
-        log.info("here");
-        selected.move(0, 0, keyPressed * -1);
-      } else {
-        selected.rotate(0, -keyPressed, 0);
+    // PAN
+    if (mouseLeftPressed && altLeftPressed && shiftLeftPressed) {
+      if (name.equals("mouse-axis-x")) {
+        selected.move(keyPressed*3, 0, 0);
+      } else if (name.equals("mouse-axis-x-negative")) {
+        selected.move(-keyPressed*3, 0, 0);
+      } else if (name.equals("mouse-axis-y")) {
+        selected.move(0, keyPressed*3, 0);
+      } else if (name.equals("mouse-axis-y-negative")) {
+        selected.move(0, -keyPressed*3, 0);
       }
+    }
+    
+    // ZOOM
+    if (mouseLeftPressed && altLeftPressed && ctrlLeftPressed) {
+      if (name.equals("mouse-axis-y")) {
+        selected.move(0, 0, keyPressed*10);
+      } else if (name.equals("mouse-axis-y-negative")) {
+        selected.move(0, 0, -keyPressed*10);
+      }
+    }
 
-      // else SELECT !!!
-
-    } else if (name.equals("mouse-click-right")) {
-      // rotate+= keyPressed;
-      selected.rotate(0, keyPressed, 0);
-      // log.info(rotate);
-    } else if (name.equals("mouse-wheel-up") || name.equals("forward")) {
+    if (name.equals("mouse-wheel-up") || name.equals("forward")) {
       // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
       selected.move(0, 0, keyPressed * -1);
-    } else if (name.equals("mouse-where-down") || name.equals("backward")) {
+    } else if (name.equals("mouse-wheel-down") || name.equals("backward")) {
       // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
       selected.move(0, 0, keyPressed * 1);
     } else if (name.equals("up")) {
@@ -1075,36 +1113,38 @@ public class JMonkeyEngine extends Service implements ActionListener {
         selected.move(keyPressed * 1, 0, 0);
       }
     }
+  }
 
-    if (name.equals("pick-target")) {
-      // Reset results list.
-      CollisionResults results = new CollisionResults();
-      // Convert screen click to 3d position
-      Vector2f click2d = inputManager.getCursorPosition();
-      Vector3f click3d = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
-      Vector3f dir = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
-      // Aim the ray from the clicked spot forwards.
-      Ray ray = new Ray(click3d, dir);
-      // Collect intersections between ray and all nodes in results list.
-      rootNode.collideWith(ray, results);
-      // (Print the results so we see what is going on:)
-      for (int i = 0; i < results.size(); i++) {
-        // (For each “hit”, we know distance, impact point, geometry.)
-        float dist = results.getCollision(i).getDistance();
-        Vector3f pt = results.getCollision(i).getContactPoint();
-        String target = results.getCollision(i).getGeometry().getName();
-        System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
-      }
-      // Use the results -- we rotate the selected geometry.
-      if (results.size() > 0) {
-        // The closest result is the target that the player picked:
-        Geometry target = results.getClosestCollision().getGeometry();
-        // Here comes the action:
-        log.info("you clicked " + target.getName());
-        setSelected(target);
-      }
-    } // else if ...
-    menu.putText(selected);
+  // FIXME make a more general Collision check..
+  public Geometry checkCollision() {
+
+    // Reset results list.
+    CollisionResults results = new CollisionResults();
+    // Convert screen click to 3d position
+    Vector2f click2d = inputManager.getCursorPosition();
+    Vector3f click3d = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+    Vector3f dir = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+    // Aim the ray from the clicked spot forwards.
+    Ray ray = new Ray(click3d, dir);
+    // Collect intersections between ray and all nodes in results list.
+    rootNode.collideWith(ray, results);
+    // (Print the results so we see what is going on:)
+    for (int i = 0; i < results.size(); i++) {
+      // (For each “hit”, we know distance, impact point, geometry.)
+      float dist = results.getCollision(i).getDistance();
+      Vector3f pt = results.getCollision(i).getContactPoint();
+      String target = results.getCollision(i).getGeometry().getName();
+      System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+    }
+    // Use the results -- we rotate the selected geometry.
+    if (results.size() > 0) {
+      // The closest result is the target that the player picked:
+      Geometry target = results.getClosestCollision().getGeometry();
+      // Here comes the action:
+      log.info("you clicked " + target.getName());
+      return target;
+    }
+    return null;
   }
 
   /**
@@ -1295,6 +1335,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   /**
    * use default axis
+   * 
    * @param object
    * @param degrees
    */
@@ -1321,7 +1362,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     Spatial spatial = get(name);
     return saveSpatial(spatial, spatial.getName());
   }
-  
+
   public boolean saveSpatial(Spatial spatial) {
     return saveSpatial(spatial, null);
   }
@@ -1329,18 +1370,18 @@ public class JMonkeyEngine extends Service implements ActionListener {
   // FIXME - fix name - because it can save a Geometry too
   public boolean saveSpatial(Spatial spatial, String filename) {
     try {
-      
+
       if (spatial == null) {
         error("cannot save null spatial");
         return false;
       }
 
       String name = spatial.getName();
-      
+
       if (filename == null) {
         filename = name + ".j3o";
       }
-      
+
       filename = FileIO.cleanFileName(filename);
       BinaryExporter exporter = BinaryExporter.getInstance();
       FileOutputStream out = new FileOutputStream(filename);
@@ -1364,10 +1405,8 @@ public class JMonkeyEngine extends Service implements ActionListener {
   public boolean saveNodes() {
     return saveSpatial(rootNode, null);
   }
-  
-  
 
-  // this just saves keys  !!!
+  // this just saves keys !!!
   public void saveKeys(Spatial toSave) {
     try {
       String filename = FileIO.cleanFileName(toSave.getName()) + ".txt";
@@ -1403,7 +1442,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     UserData node = getUserData(name);
     if (node != null) {
       node.scale(scale);
-      //node.thatupdateModelBounds() 
+      // node.thatupdateModelBounds()
     } else {
       error("scale %s does not exist", name);
     }
@@ -1488,15 +1527,15 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
     setDisplayStatView(false);
 
-    //guiNode = app.getGuiNode();
+    // guiNode = app.getGuiNode();
 
     // wtf - assetManager == null - another race condition ?!?!?
     // after start - these are initialized as "default"
     assetManager = app.getAssetManager();
     inputManager = app.getInputManager();
     // stateManager.attach(state);
-    
-    //app = jme.getApp();
+
+    // app = jme.getApp();
     guiNode = app.getGuiNode();
     // Initialize the globals access so that the default
     // components can find what they need.
@@ -1532,7 +1571,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // camera.setLocalTranslation(-1, 1, -1);
     camera.attachChild(camNode);
     // camera.move(0, 1, 2);
-    //camera.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
+    // camera.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
     // camNode.lookAt(rootNode.getLocalTranslation(), Vector3f.UNIT_Y);
     // rootNode.attachChild(camNode);
     // rootNode.attachChild(cam);
@@ -1564,7 +1603,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // FIXME - should be moved under ./data/JMonkeyEngine/
     assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
     assetManager.registerLoader(BlenderLoader.class, "blend");
-    
 
     /**
      * <pre>
@@ -1587,27 +1625,44 @@ public class JMonkeyEngine extends Service implements ActionListener {
      * </pre>
      */
 
-    inputManager.addMapping("pick-target", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    inputManager.addListener(analog, "pick-target");
+    // wheelmouse zoom (check)
+    // alt+ctrl+lmb - zoom <br>
+    // alt+lmb - rotate<br>
+    // alt+shft+lmb - pan
+    // rotate around selection -
+    // https://www.youtube.com/watch?v=IVZPm9HAMD4&feature=youtu.be
+    // wrap text of breadcrumbs
+    // draggable - resize for menu - what you set is how it stays
+    // when menu active - inputs(hotkey when non-menu) should be deactive
+
+    inputManager.addMapping("mouse-click-left", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+    inputManager.addListener(this, "mouse-click-left");
 
     inputManager.addMapping("mouse-click-right", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
-    inputManager.addListener(analog, "mouse-click-right");
+    inputManager.addListener(this, "mouse-click-right");
+
     inputManager.addMapping("mouse-wheel-up", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
     inputManager.addListener(analog, "mouse-wheel-up");
-    inputManager.addMapping("mouse-where-down", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
-    inputManager.addListener(analog, "mouse-where-down");
+    inputManager.addMapping("mouse-wheel-down", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
+    inputManager.addListener(analog, "mouse-wheel-down");
 
-    inputManager.addMapping("left", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT));
-    inputManager.addMapping("right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT));
-    inputManager.addMapping("up", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP));
-    inputManager.addMapping("down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN));
-    inputManager.addMapping("forward", new KeyTrigger(KeyInput.KEY_J));
-    inputManager.addMapping("backward", new KeyTrigger(KeyInput.KEY_K));
+    inputManager.addMapping("mouse-axis-x", new MouseAxisTrigger(MouseInput.AXIS_X, true));
+    inputManager.addListener(analog, "mouse-axis-x");
 
-    inputManager.addListener(analog, new String[] { "left", "right", "up", "down", "forward", "backward" });
+    inputManager.addMapping("mouse-axis-x-negative", new MouseAxisTrigger(MouseInput.AXIS_X, false));
+    inputManager.addListener(analog, "mouse-axis-x-negative");
+
+    inputManager.addMapping("mouse-axis-y", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
+    inputManager.addListener(analog, "mouse-axis-y");
+
+    inputManager.addMapping("mouse-axis-y-negative", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
+    inputManager.addListener(analog, "mouse-axis-y-negative");
 
     inputManager.addMapping("select-root", new KeyTrigger(KeyInput.KEY_R));
     inputManager.addListener(this, "select-root");
+
+    inputManager.addMapping("camera", new KeyTrigger(KeyInput.KEY_C));
+    inputManager.addListener(this, "camera");
 
     inputManager.addMapping("menu", new KeyTrigger(KeyInput.KEY_M));
     inputManager.addListener(this, "menu");
@@ -1623,6 +1678,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
     inputManager.addListener(this, "ctrl-left");
     inputManager.addMapping("alt-left", new KeyTrigger(KeyInput.KEY_LMENU));
     inputManager.addListener(this, "alt-left");
+    // inputManager.addMapping("mouse-left", new
+    // KeyTrigger(MouseInput.BUTTON_LEFT));
+    // inputManager.addListener(this, "mouse-left");
 
     inputManager.addMapping("export", new KeyTrigger(KeyInput.KEY_E));
     inputManager.addListener(this, "export");
@@ -1640,9 +1698,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
-    menu = app.getMainMenu();//new MainMenuState(this);
+    menu = app.getMainMenu();// new MainMenuState(this);
     // menu.loadGui();
-    
+
     // load models in the default directory
     loadModels();
   }
@@ -1754,7 +1812,8 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   }
 
-  // FIXME - requirements for "re-start" is everything correctly de-initialized ?
+  // FIXME - requirements for "re-start" is everything correctly de-initialized
+  // ?
   public void stop() {
     if (app != null) {
 
@@ -1816,45 +1875,47 @@ public class JMonkeyEngine extends Service implements ActionListener {
     beginNode.breadthFirstTraversal(search);
     return search.getResults();
   }
-  
+
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-      InMoovHead i01_head = (InMoovHead)Runtime.start("i01.head", "InMoovHead");
+      InMoovHead i01_head = (InMoovHead) Runtime.start("i01.head", "InMoovHead");
       // InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
       // i01.startHead("XX");
-      
-      jme.addGrid();
+
+      jme.enableGrid(true);
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "cccccc", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
-      
+
       // camera.move(0, 1, 2);
-      
-      jme.rename("i01.head.rollneck", "i01.head.rollNeck");
+
+      // jme.rename("i01.head.rollneck", "i01.head.rollNeck");
       jme.setRotation("i01.head.rollNeck", "z");
       jme.setRotation("i01.head.neck", "x");
       jme.moveTo("camera", 0, 1, 4);
       jme.lookAt("camera", "i01");
-      jme.rotateOnAxis("camera","x", -40);
+      jme.rotateOnAxis("camera", "x", -40);
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
-      
+
       Spatial spatial = jme.get("floor.box.01");
       log.info("spatial {}", spatial);
 
       Servo servo = (Servo) Runtime.start("i01.head.jaw", "Servo");
       jme.setRotation("i01.head.jaw", "x");
 
-      jme.scale("i01", 0.25f);
-      
-      jme.save();
-      
+      Service.sleep(2000);
 
-      boolean test = true; 
+      jme.cameraLookAtRoot();
+      jme.scale("i01", 0.25f);
+
+      jme.save();
+
+      boolean test = true;
       if (test) {
         return;
       }
@@ -1862,6 +1923,22 @@ public class JMonkeyEngine extends Service implements ActionListener {
       log.error("main threw", e);
     }
   }
-  
+
+  public void cameraLookAtRoot() {
+    cameraLookAt(rootNode);
+  }
+
+  public void enableGrid(boolean b) {
+    Spatial s = get("floor-grid");
+    if (s == null) {
+      addGrid("floor-grid");
+      s = get("floor-grid");
+    }
+    if (b) {
+      s.setCullHint(CullHint.Never);
+    } else {
+      s.setCullHint(CullHint.Always);
+    }
+  }
 
 }

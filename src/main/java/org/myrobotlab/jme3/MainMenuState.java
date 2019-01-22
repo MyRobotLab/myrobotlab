@@ -64,6 +64,8 @@ public class MainMenuState extends BaseAppState {
 
   Button update;
   Button searchButton;
+  
+  Button grid;
 
   Container childrenContainer;
   // Map<String, Button> children = new TreeMap<String, Button>();
@@ -165,14 +167,42 @@ public class MainMenuState extends BaseAppState {
     buttons.addChild(button);
     
     // lookat
+    button = new Button("load");
+    button.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+        //jme.cameraLookAt(jme.getSelected());
+        // FIXME - child model with text
+        // jme.load(inFileName);
+      }
+    });
+    buttons.addChild(button);
+    
+    // lookat
     button = new Button("look at");
     button.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
-        jme.lookAt(jme.getSelected());
+        jme.cameraLookAt(jme.getSelected());
       }
     });
     buttons.addChild(button);
+     
+    // addGrid
+    grid = new Button("grid on");
+    grid.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+        if (grid.getText().equals("grid on")) {
+        jme.enableGrid(true);
+        grid.setText("grid off");
+      } else {
+        jme.enableGrid(false);
+        grid.setText("grid on");
+      }
+      }
+    });
+    buttons.addChild(grid);
       
     
     buttons.addChild(new Button("hide"));

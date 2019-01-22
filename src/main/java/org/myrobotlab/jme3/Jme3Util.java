@@ -289,8 +289,17 @@ public class Jme3Util {
   }
   
   public void lookAt(String viewer, String viewee) {
+    log.info("lookAt({}, {})", viewer, viewee);
     Spatial viewerSpatial = jme.get(viewer);
     Spatial vieweeSpatial = jme.get(viewee);   
+    if (viewerSpatial == null) {
+      log.error("could not find {}", viewer);
+      return;
+    }
+    if (vieweeSpatial == null) {
+      log.error("could not find {}", viewee);
+      return;
+    }
     viewerSpatial.lookAt(vieweeSpatial.getWorldTranslation(), Vector3f.UNIT_Y);    
   }
 

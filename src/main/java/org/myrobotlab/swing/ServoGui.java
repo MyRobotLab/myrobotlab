@@ -57,6 +57,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.swing.widget.ComponentResizer;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;
@@ -386,8 +387,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     powerMain.add(enableButton);
     powerMain.add(autoDisable);
     powerMain.add(disableDelayIfVelocity);
-
-    // powerMain.add(powerMainSub);
+        
 
     JPanel extra = new JPanel(new GridLayout(1, 1));
     Border settingsborder = BorderFactory.createTitledBorder("Extra :");
