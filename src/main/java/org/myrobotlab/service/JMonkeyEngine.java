@@ -212,7 +212,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   transient Node rootNode;
 
-  transient Spatial selected = null;
+  transient Spatial selectedForView = null;
+  
+  transient Spatial selectedForMovement = null;
 
   int selectIndex = 0;
 
@@ -442,12 +444,12 @@ public class JMonkeyEngine extends Service implements ActionListener {
    */
   public void cycle() {
 
-    if (selected == null) {
+    if (selectedForView == null) {
       Spatial s = rootNode.getChild(0);
       setSelected(s);
     }
 
-    Node parent = selected.getParent();
+    Node parent = selectedForView.getParent();
     if (parent == null) {
       return;
     }
@@ -671,7 +673,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public Spatial getSelected() {
-    return selected;
+    return selectedForView;
   }
 
   public AppSettings getSettings() {
@@ -1003,7 +1005,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     } else if (name.equals("alt-left")) {
       altLeftPressed = keyPressed;
     } else if ("export".equals(name) && keyPressed) {
-      saveSpatial(selected.getName());
+      saveSpatial(selectedForView.getName());
     } else if ("mouse-click-left".equals(name)) {
       mouseLeftPressed = keyPressed;
     } else {
@@ -1030,8 +1032,8 @@ public class JMonkeyEngine extends Service implements ActionListener {
   public void onAnalog(String name, float keyPressed, float tpf) {
     log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
-    if (selected == null) {
-      selected = camera;// FIXME "new" selectedMove vs selected
+    if (selectedForMovement == null) {
+      selectedForMovement = camera;// FIXME "new" selectedMove vs selected
     }
     
     // wheelmouse zoom (done)
@@ -1047,71 +1049,46 @@ public class JMonkeyEngine extends Service implements ActionListener {
     log.info("{}", keyPressed);
 
     // ROTATE
-    if (mouseLeftPressed && !altLeftPressed) {
+    if (mouseLeftPressed && altLeftPressed && !shiftLeftPressed) {
       if (name.equals("mouse-axis-x")) {
-        selected.rotate(0, -keyPressed, 0);
+        selectedForMovement.rotate(0, -keyPressed, 0);
       } else if (name.equals("mouse-axis-x-negative")) {
-        selected.rotate(0, keyPressed, 0);
+        selectedForMovement.rotate(0, keyPressed, 0);
       } else if (name.equals("mouse-axis-y")) {
-        selected.rotate(-keyPressed, 0, 0);
+        selectedForMovement.rotate(-keyPressed, 0, 0);
       } else if (name.equals("mouse-axis-y-negative")) {
-        selected.rotate(keyPressed, 0, 0);
+        selectedForMovement.rotate(keyPressed, 0, 0);
       }
     }
 
     // PAN
     if (mouseLeftPressed && altLeftPressed && shiftLeftPressed) {
       if (name.equals("mouse-axis-x")) {
-        selected.move(keyPressed*3, 0, 0);
+        selectedForMovement.move(keyPressed*3, 0, 0);
       } else if (name.equals("mouse-axis-x-negative")) {
-        selected.move(-keyPressed*3, 0, 0);
+        selectedForMovement.move(-keyPressed*3, 0, 0);
       } else if (name.equals("mouse-axis-y")) {
-        selected.move(0, keyPressed*3, 0);
+        selectedForMovement.move(0, keyPressed*3, 0);
       } else if (name.equals("mouse-axis-y-negative")) {
-        selected.move(0, -keyPressed*3, 0);
+        selectedForMovement.move(0, -keyPressed*3, 0);
       }
     }
     
     // ZOOM
     if (mouseLeftPressed && altLeftPressed && ctrlLeftPressed) {
       if (name.equals("mouse-axis-y")) {
-        selected.move(0, 0, keyPressed*10);
+        selectedForMovement.move(0, 0, keyPressed*10);
       } else if (name.equals("mouse-axis-y-negative")) {
-        selected.move(0, 0, -keyPressed*10);
+        selectedForMovement.move(0, 0, -keyPressed*10);
       }
     }
 
     if (name.equals("mouse-wheel-up") || name.equals("forward")) {
       // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
-      selected.move(0, 0, keyPressed * -1);
+      selectedForMovement.move(0, 0, keyPressed * -1);
     } else if (name.equals("mouse-wheel-down") || name.equals("backward")) {
       // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
-      selected.move(0, 0, keyPressed * 1);
-    } else if (name.equals("up")) {
-      if (ctrlLeftPressed) {
-        selected.move(0, 0, keyPressed * 1);
-      } else {
-        selected.move(0, keyPressed * 1, 0);
-      }
-    } else if (name.equals("down")) {
-
-      if (ctrlLeftPressed) {
-        selected.move(0, 0, keyPressed * -1);
-      } else {
-        selected.move(0, -keyPressed * 1, 0);
-      }
-    } else if (name.equals("left")) {
-      if (ctrlLeftPressed) {
-        selected.rotate(0, -keyPressed, 0);
-      } else {
-        selected.move(-keyPressed * 1, 0, 0);
-      }
-    } else if (name.equals("right")) {
-      if (ctrlLeftPressed) {
-        selected.rotate(0, keyPressed, 0);
-      } else {
-        selected.move(keyPressed * 1, 0, 0);
-      }
+      selectedForMovement.move(0, 0, keyPressed * 1);
     }
   }
 
@@ -1486,13 +1463,13 @@ public class JMonkeyEngine extends Service implements ActionListener {
   public void setSelected(Spatial newSelected) {
 
     // turn off old
-    if (selected != null) {
-      enableBoundingBox(selected, false);
-      enableCoordinateAxes(selected, false);
+    if (selectedForView != null) {
+      enableBoundingBox(selectedForView, false);
+      enableCoordinateAxes(selectedForView, false);
     }
 
     // set selected
-    selected = newSelected;
+    selectedForView = newSelected;
 
     // display in menu
     menu.putText(newSelected);
@@ -1505,11 +1482,11 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void setVisible(boolean b) {
-    if (selected != null) {
+    if (selectedForView != null) {
       if (b) {
-        selected.setCullHint(Spatial.CullHint.Inherit);
+        selectedForView.setCullHint(Spatial.CullHint.Inherit);
       } else {
-        selected.setCullHint(Spatial.CullHint.Always);
+        selectedForView.setCullHint(Spatial.CullHint.Always);
       }
     }
   }
@@ -1837,7 +1814,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void toggleVisible() {
-    if (Spatial.CullHint.Always == selected.getCullHint()) {
+    if (Spatial.CullHint.Always == selectedForView.getCullHint()) {
       setVisible(true);
     } else {
       setVisible(false);
