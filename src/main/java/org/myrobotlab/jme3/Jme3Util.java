@@ -239,28 +239,29 @@ public class Jme3Util {
 
   public Node createUnitAxis() {
 
-    Node n = new Node("_axis");
+    Node n = new Node("axis");
     Arrow arrow = new Arrow(Vector3f.UNIT_X);
-    arrow.setLineWidth(4); // make arrow thicker
-    addAxis(n, arrow, ColorRGBA.Red);
+    arrow.setLineWidth(4); // make arrow thicker    
+    n.attachChild(createAxis("y", arrow, ColorRGBA.Red));
 
     arrow = new Arrow(Vector3f.UNIT_Y);
     arrow.setLineWidth(4); // make arrow thicker
-    addAxis(n, arrow, ColorRGBA.Green);
+    n.attachChild(createAxis("y", arrow, ColorRGBA.Green));
 
     arrow = new Arrow(Vector3f.UNIT_Z);
     arrow.setLineWidth(4); // make arrow thicker
-    addAxis(n, arrow, ColorRGBA.Blue);
+    n.attachChild(createAxis("z", arrow, ColorRGBA.Blue));
     return n;
   }
 
-  private void addAxis(Node n, Mesh shape, ColorRGBA color) {
-    Geometry g = new Geometry("_coordinate axis", shape);
+  // FIXME !!! - string of object name type ...
+  public Geometry createAxis(String name, Mesh shape, ColorRGBA color) {
+    Geometry g = new Geometry(name, shape);
     Material mat = new Material(jme.getApp().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
     mat.getAdditionalRenderState().setWireframe(true);
     mat.setColor("Color", color);
     g.setMaterial(mat);
-    n.attachChild(g);
+    return g;
   }
 
   public Geometry createBoundingBox(Spatial spatial, String color) {

@@ -23,12 +23,11 @@ import com.jme3.scene.Spatial.CullHint;
 public class UserData implements Savable {
   public final static Logger log = LoggerFactory.getLogger(UserData.class);
 
-  // public String name;
-
   public String parentName;
 
   public transient JMonkeyEngine jme;
 
+  @Deprecated
   public transient ServiceInterface service;
 
   public transient Spatial spatial;
@@ -40,13 +39,16 @@ public class UserData implements Savable {
 
   public Mapper mapper;
 
-  public Vector3f rotationMask;
-  public Vector3f localTranslation; // transitory ? init only ? INIT !!!
+  transient public Vector3f rotationMask;
+  
+  transient public Vector3f localTranslation; // transitory ? init only ? INIT !!!
                                     // probably - which means its local first
                                     // loaded
 
-  public Vector3f initialRotation;
+  transient public Vector3f initialRotation;
 
+  transient Node meta;
+  
   public Double currentAngle;
 
   public String assetPath;
@@ -56,17 +58,12 @@ public class UserData implements Savable {
   /**
    * bucket to hold the unit axis
    */
-  public Node axis;
-
-  public UserData(JMonkeyEngine jme, String name) {
-    this.jme = jme;
-    this.spatial = new Node(name);
-    spatial.setUserData("data", this);
-  }
+  transient public Node axis;
 
   public UserData(JMonkeyEngine jme, Spatial spatial) {
     this.jme = jme;
     this.spatial = spatial;
+    this.meta = new Node("_meta");
     spatial.setUserData("data", this);
   }
 
@@ -135,7 +132,8 @@ public class UserData implements Savable {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append(spatial.getName());
+    sb.append(spatial);
+    //sb.append(" ") TODO - other parts
     return sb.toString();
   }
 
@@ -148,11 +146,13 @@ public class UserData implements Savable {
   }
 
   public void enableCoordinateAxes(boolean b) {
+    /** mmm - may be a bad idea - but may need to figure solution out..
     if (spatial instanceof Geometry) {
       UserData data = jme.getUserData(spatial.getParent());
       data.enableCoordinateAxes(b);
       return;
     }
+    */
     if (axis == null) {
       axis = jme.createUnitAxis();
       axis.setLocalTranslation(spatial.getWorldTranslation());
@@ -175,11 +175,13 @@ public class UserData implements Savable {
     }
     */
 
+    /* mmm - may be a bad idea
     if (spatial instanceof Geometry) {
       UserData data = jme.getUserData(spatial.getParent());
       data.enableBoundingBox(b, color);
       return;
     }
+    */
 
     if (color == null) {
       color = Jme3Util.defaultColor;

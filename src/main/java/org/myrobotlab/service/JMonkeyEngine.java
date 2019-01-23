@@ -213,7 +213,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   transient Node rootNode;
 
   transient Spatial selectedForView = null;
-  
+
   transient Spatial selectedForMovement = null;
 
   int selectIndex = 0;
@@ -557,6 +557,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
    * @return
    */
   public Spatial get(String name, Node startNode) {
+    if (name.equals("root")) {
+      return rootNode;
+    }
     if (startNode == null) {
       startNode = rootNode;
     }
@@ -960,7 +963,16 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void cameraLookAt(Spatial spatial) {
-    camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    
+    // INTERESTING BUG - DO NOT DIRECTLY LOOK AT BECAUSE WHEN WE PUT COMMANDS IN ORDER
+    // ROTATING (to lookAt) IS NOT TRANSITIVE, AND THIS HAPPENS BEFORE ANY PREVIOUS MOVE :P
+    // SO IT DOES NOT WORK - solution is to process the lookAt with the JME thread processing
+    // all the other moves & rotations ! 
+    // camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    Jme3Msg msg = new Jme3Msg();
+    msg.method = "lookAt";
+    msg.data = new Object[] { "camera", spatial.getName() };
+    addMsg(msg);
   }
 
   // relative move
@@ -981,7 +993,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   public void onAction(String name, boolean keyPressed, float tpf) {
     log.info("onAction {} {} {}", name, keyPressed, tpf);
 
-    if (name.equals("mouse-click-left") && !mouseLeftPressed) {
+    if (name.equals("mouse-click-right")) {
       Geometry target = checkCollision();
       setSelected(target);
     }
@@ -1035,10 +1047,10 @@ public class JMonkeyEngine extends Service implements ActionListener {
     if (selectedForMovement == null) {
       selectedForMovement = camera;// FIXME "new" selectedMove vs selected
     }
-    
+
     // wheelmouse zoom (done)
     // alt+ctrl+lmb - zoom <br> (done)
-    // alt+lmb - rotate<br>  (done)
+    // alt+lmb - rotate<br> (done)
     // alt+shft+lmb - pan (done)
     // rotate around selection -
     // https://www.youtube.com/watch?v=IVZPm9HAMD4&feature=youtu.be
@@ -1064,22 +1076,26 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // PAN
     if (mouseLeftPressed && altLeftPressed && shiftLeftPressed) {
       if (name.equals("mouse-axis-x")) {
-        selectedForMovement.move(keyPressed*3, 0, 0);
+        selectedForMovement.move(keyPressed * 3, 0, 0);
       } else if (name.equals("mouse-axis-x-negative")) {
-        selectedForMovement.move(-keyPressed*3, 0, 0);
+        selectedForMovement.move(-keyPressed * 3, 0, 0);
       } else if (name.equals("mouse-axis-y")) {
-        selectedForMovement.move(0, keyPressed*3, 0);
+        selectedForMovement.move(0, keyPressed * 3, 0);
       } else if (name.equals("mouse-axis-y-negative")) {
-        selectedForMovement.move(0, -keyPressed*3, 0);
+        selectedForMovement.move(0, -keyPressed * 3, 0);
       }
     }
-    
+
     // ZOOM
     if (mouseLeftPressed && altLeftPressed && ctrlLeftPressed) {
+
+      // FIXME - zoom where cursor is :P - it becomes a rotate and zoom
+      log.info("zoom - cursor is currently {}", inputManager.getCursorPosition());
+
       if (name.equals("mouse-axis-y")) {
-        selectedForMovement.move(0, 0, keyPressed*10);
+        selectedForMovement.move(0, 0, keyPressed * 10);
       } else if (name.equals("mouse-axis-y-negative")) {
-        selectedForMovement.move(0, 0, -keyPressed*10);
+        selectedForMovement.move(0, 0, -keyPressed * 10);
       }
     }
 
@@ -1759,12 +1775,15 @@ public class JMonkeyEngine extends Service implements ActionListener {
       Future<String> future = app.enqueue(callable);
       try {
         future.get();
+        moveTo("camera", 0, 1, 4);
+        cameraLookAtRoot();
       } catch (Exception e) {
         log.warn("future threw", e);
       }
       return app;
     }
     info("already started app %s", appType);
+    
     return app;
   }
 
@@ -1859,22 +1878,23 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
+      
+      boolean test = true;
+      if (test) {
+        return;
+      }
+      
       InMoovHead i01_head = (InMoovHead) Runtime.start("i01.head", "InMoovHead");
       // InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
       // i01.startHead("XX");
 
       jme.enableGrid(true);
-      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "cccccc", true);
+      jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
-
-      // camera.move(0, 1, 2);
-
-      // jme.rename("i01.head.rollneck", "i01.head.rollNeck");
+      
       jme.setRotation("i01.head.rollNeck", "z");
       jme.setRotation("i01.head.neck", "x");
-      jme.moveTo("camera", 0, 1, 4);
-      jme.lookAt("camera", "i01");
-      jme.rotateOnAxis("camera", "x", -40);
+ 
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
@@ -1887,15 +1907,10 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
       Service.sleep(2000);
 
-      jme.cameraLookAtRoot();
       jme.scale("i01", 0.25f);
 
-      jme.save();
-
-      boolean test = true;
-      if (test) {
-        return;
-      }
+      // previous end
+     
     } catch (Exception e) {
       log.error("main threw", e);
     }
