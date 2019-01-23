@@ -64,7 +64,7 @@ public class MainMenuState extends BaseAppState {
 
   Button update;
   Button searchButton;
-  
+
   Button grid;
 
   Container childrenContainer;
@@ -134,7 +134,7 @@ public class MainMenuState extends BaseAppState {
     // of the text field
     Container buttons = contents.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
     buttons.setInsets(new Insets3f(5, 5, 5, 5));
-    
+
     // close
     Button button = new Button("close");
     button.addClickCommands(new Command<Button>() {
@@ -144,7 +144,7 @@ public class MainMenuState extends BaseAppState {
       }
     });
     buttons.addChild(button);
-    
+
     // save
     button = new Button("save");
     button.addClickCommands(new Command<Button>() {
@@ -155,7 +155,7 @@ public class MainMenuState extends BaseAppState {
       }
     });
     buttons.addChild(button);
-    
+
     // rename
     button = new Button("rename");
     button.addClickCommands(new Command<Button>() {
@@ -165,19 +165,19 @@ public class MainMenuState extends BaseAppState {
       }
     });
     buttons.addChild(button);
-    
+
     // lookat
     button = new Button("load");
     button.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
-        //jme.cameraLookAt(jme.getSelected());
+        // jme.cameraLookAt(jme.getSelected());
         // FIXME - child model with text
         // jme.load(inFileName);
       }
     });
     buttons.addChild(button);
-    
+
     // lookat
     button = new Button("look at");
     button.addClickCommands(new Command<Button>() {
@@ -187,33 +187,35 @@ public class MainMenuState extends BaseAppState {
       }
     });
     buttons.addChild(button);
-     
+
     // addGrid
     grid = new Button("grid on");
     grid.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
         if (grid.getText().equals("grid on")) {
-        jme.enableGrid(true);
-        grid.setText("grid off");
-      } else {
-        jme.enableGrid(false);
-        grid.setText("grid on");
-      }
+          jme.enableGrid(true);
+          grid.setText("grid off");
+        } else {
+          jme.enableGrid(false);
+          grid.setText("grid on");
+        }
       }
     });
     buttons.addChild(grid);
-      
-    
+
     buttons.addChild(new Button("hide"));
-    
+
     buttons.addChild(new Button("clone"));
     // buttons.addChild(new Button("rotate"));
     buttons.addChild(new Button("bind"));
 
     // --------children--------------
-    contents.addChild(search);
-    contents.addChild(searchButton);
+    Container searchBar = contents.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
+    searchBar.addChild(search);
+    searchBar.addChild(searchButton);
+
+    contents.addChild(searchBar);
     contents.addChild(new Label("children"));
     contents.addChild(childrenContainer);
     // children = contents.addChild(new Label(""));
@@ -225,17 +227,22 @@ public class MainMenuState extends BaseAppState {
   protected void addHelpTab() {
 
     Container contents = new Container();
-    contents.addChild(new Label("Control Keys:"));
-    contents.addChild(new Label("forward      ctrl + ↑"));
-    contents.addChild(new Label("back         ctrl + ↓"));
-    contents.addChild(new Label("pan up              ↑"));
-    contents.addChild(new Label("pan down            ↓"));
-    contents.addChild(new Label("pan left            ←"));
-    contents.addChild(new Label("pan right           →"));
-    contents.addChild(new Label("rotate left  ctrl + ←"));
-    contents.addChild(new Label("rotate right ctrl + →"));
-    contents.addChild(new Label("select root node  - R"));
-    // label.setInsets(new Insets3f(5, 5, 5, 5));
+    // contents.addChild(new Label("Control Keys:"));
+    contents.addChild(new Label("View"), 0, 0);
+
+    contents.addChild(new Label("Forward/Back"), 1, 1);
+    contents.addChild(new Label("MouseWheel or CTRL + ALT + LMB"), 1, 2);
+
+    contents.addChild(new Label("Rotate"), 2, 1);
+    contents.addChild(new Label("ALT + LMB"), 2, 2);
+    
+    contents.addChild(new Label("Pan"), 3, 1);
+    contents.addChild(new Label("ALT + SHIFT + LMB"), 3, 2);
+
+    contents.addChild(new Label("Selection"), 4, 0);
+
+    contents.addChild(new Label("Select"), 5, 1);
+    contents.addChild(new Label("RMB"), 5, 2);
 
     tabs.addTab("help", contents);
   }
@@ -250,9 +257,9 @@ public class MainMenuState extends BaseAppState {
   @Override // part of Lemur "standard"
   protected void initialize(Application app) {
     // yucky casting for this - but what can i do ?
-    this.app = (Jme3App)app;
-    guiNode = ((Jme3App)getApplication()).getGuiNode();//app.getGuiNode();
-    
+    this.app = (Jme3App) app;
+    guiNode = ((Jme3App) getApplication()).getGuiNode();// app.getGuiNode();
+
     main = new Container();
     guiNode.attachChild(main);
     // main.setPreferredSize(new Vector3f(300, jme.getSettings().getWidth(),
@@ -356,10 +363,10 @@ public class MainMenuState extends BaseAppState {
 
     title.setText(spatial.toString());
     // Spatial rootChild = jme.getRootChild(spatial);
-    
+
     breadCrumbs.setText(jme.getKeyPath(spatial));
     if (spatial instanceof Node) {
-      putText(((Node)spatial).getChildren());
+      putText(((Node) spatial).getChildren());
     }
   }
 
@@ -368,27 +375,27 @@ public class MainMenuState extends BaseAppState {
     childrenContainer.clearChildren();
     children.clear();
     // boolean isNode = (spatial instanceof Node);
-    //if (isNode) {
-      // Node node = (Node) spatial;
-      // List<Spatial> c = node.getChildren();
-      for (Spatial child : c) {
-        Button b = new Button(child.toString());
-        b.addClickCommands(new Command<Button>() {
-          @Override
-          public void execute(Button source) {
-            if (child != null) {
-              jme.setSelected(child);
-            }
+    // if (isNode) {
+    // Node node = (Node) spatial;
+    // List<Spatial> c = node.getChildren();
+    for (Spatial child : c) {
+      Button b = new Button(child.toString());
+      b.addClickCommands(new Command<Button>() {
+        @Override
+        public void execute(Button source) {
+          if (child != null) {
+            jme.setSelected(child);
           }
-        });
-        // children.put(child.toString(), b);
-        childrenContainer.addChild(b);
-      }
-      /*
-       * for (String key : children.keySet()) {
-       * childrenContainer.addChild(children.get(key)); }
-       */
-    //}
+        }
+      });
+      // children.put(child.toString(), b);
+      childrenContainer.addChild(b);
+    }
+    /*
+     * for (String key : children.keySet()) {
+     * childrenContainer.addChild(children.get(key)); }
+     */
+    // }
   }
 
   public void setBreadCrumb(Spatial spatial) {
