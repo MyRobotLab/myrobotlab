@@ -93,7 +93,7 @@ public class MainMenuState extends BaseAppState {
 
     update = new Button("update");
 
-    search = new TextField("");
+    search = new TextField("search text");
     searchButton = new Button("search");
     searchButton.addClickCommands(new Command<Button>() {
       @Override
@@ -211,9 +211,11 @@ public class MainMenuState extends BaseAppState {
     buttons.addChild(new Button("bind"));
 
     // --------children--------------
-    Container searchBar = contents.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
-    searchBar.addChild(search);
-    searchBar.addChild(searchButton);
+    // Container searchBar = contents.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
+    Container searchBar = new Container();
+   //  searchBar.addChild(search, 0, 0);
+    contents.addChild(search);
+    searchBar.addChild(searchButton, 0, 5);
 
     contents.addChild(searchBar);
     contents.addChild(new Label("children"));

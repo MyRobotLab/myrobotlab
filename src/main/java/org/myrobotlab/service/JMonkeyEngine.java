@@ -63,6 +63,7 @@ import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -171,6 +172,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   boolean ctrlLeftPressed = false;
   boolean mouseLeftPressed = false;
+  boolean mouseRightPressed = false;
 
   String defaultAppType = "Jme3App";
 
@@ -336,8 +338,8 @@ public class JMonkeyEngine extends Service implements ActionListener {
     rootNode.attachChild(n);
   }
 
-  public void addMsg(Jme3Msg msg) {
-    jmeMsgQueue.add(msg);
+  public void addMsg(String method, Object... params) {
+    jmeMsgQueue.add(new Jme3Msg(method, params));
   }
 
   public void attach(Attachable service) throws Exception {
@@ -368,10 +370,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
    * @param parent
    */
   public void bind(String child, String parent) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "bind";
-    msg.data = new Object[] { child, parent };
-    addMsg(msg);
+    addMsg("bind", child, parent);
   }
 
   public Map<String, UserData> buildTree() {
@@ -426,17 +425,12 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   }
 
-  public Geometry createBoundingBox(Spatial spatial) {
-    return util.createBoundingBox(spatial);
+  public Geometry createBoundingBox(Spatial spatial, String color) {
+    return util.createBoundingBox(spatial, color);
   }
 
-  public Node createUnitAxis() {
-    return util.createUnitAxis();
-  }
-
-  public VirtualMotor createVirtualMotor(String name) {
-    // TODO Auto-generated method stub
-    return null;
+  public Node createUnitAxis(String name) {
+    return util.createUnitAxis(name);
   }
 
   /**
@@ -472,21 +466,114 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void enableBoundingBox(Spatial spatial, boolean b) {
-    Node node = getNode(spatial);
-    UserData data = getUserData(node);
-    data.enableBoundingBox(b);
+    enableBoundingBox(spatial, b, null);
   }
 
-  public void enableBoundingBox(String name, boolean b) {
-    UserData o = getUserData(name);
-    enableBoundingBox(o.getSpatial(), b);
+  public void enableBoundingBox(Spatial spatial, boolean b, String color) {
+    if (spatial == null) {
+      log.error("enableBoundingBox(null) - spatial cannot be null");
+      return;
+    }
+
+    String name = spatial.getName();
+
+    if (name.startsWith("_")) {
+      log.warn("enableBoundingBox(%s) begins with \"_\" is a meta node - will not create new bounding box", name);
+      // might not be desirable to simply return - might need to "turn off" an
+      // existing bounding box
+      return;
+    }
+
+    if (color == null) {
+      color = Jme3Util.defaultColor;
+    }
+
+    // we need the geometry's parent
+    Node parent = spatial.getParent();
+    // we need to check to see if this uniquely named Geometry's bb exists ..
+    String geoBbName = getBbName(spatial); //
+    Spatial bb = find(geoBbName, parent);
+    if (bb == null) {
+      bb = createBoundingBox(spatial, color);
+      if (bb == null) {
+        log.info("bb for {} could not be created", spatial.getName());
+        return;
+      }
+    }
+    // now we have the bb
+
+    // BB is a "new" object - and you can't add nodes to a Geometry,
+    // so current strategy is to grab the Geometry's parent and add
+    // a name "unique" BB for that Geometry
+    if (spatial instanceof Geometry) {
+      parent.attachChild(bb);
+    } else {
+      // spatial is a node - attach it directly
+      ((Node) spatial).attachChild(bb);
+    }
+
+    if (b) {
+      bb.setCullHint(CullHint.Never);
+    } else {
+      bb.setCullHint(CullHint.Always);
+    }
   }
 
   // FIXME !!!! enableCoodinateAxes - same s bb including parent if geometry
-  public void enableCoordinateAxes(Spatial spatial, boolean b) {
-    Node node = getNode(spatial);
-    UserData data = getUserData(node);
-    data.enableCoordinateAxes(b);
+  public void enableAxes(Spatial spatial, boolean b) {
+
+    /**
+     * mmm - may be a bad idea - but may need to figure solution out.. if
+     * (spatial instanceof Geometry) { UserData data =
+     * jme.getUserData(spatial.getParent()); data.enableCoordinateAxes(b);
+     * return; }
+     */
+    
+    if (spatial.getName().startsWith("_")) {
+      log.warn("enableAxes(%s) a meta object not creating/enabling", spatial.getName());
+      return;
+    }
+
+    // String name = getCoorAxesName(spatial);
+
+    // we need the geometry's parent
+    Node parent = spatial.getParent();
+    // we need to check to see if this uniquely named Geometry's bb exists ..
+    String axesName = getCoorAxesName(spatial); //
+    Spatial axis = find(axesName, parent);
+    if (axis == null) {
+      axis = createUnitAxis(axesName);
+    }
+
+    if (spatial instanceof Geometry) {
+      parent.attachChild(axis);
+    } else {
+      // spatial is a node - attach it directly
+      ((Node) spatial).attachChild(axis);
+    }
+    /*
+     * if (axis == null) { axis = jme.createUnitAxis();
+     * axis.setLocalTranslation(spatial.getWorldTranslation()); << ???
+     * axis.setLocalRotation(spatial.getWorldRotation()); ((Node)
+     * spatial).attachChild(axis); }
+     */
+    if (b) {
+      axis.setCullHint(CullHint.Never);
+    } else {
+      axis.setCullHint(CullHint.Always);
+    }
+  }
+
+  public String getType(Spatial spatial) {
+    if (spatial instanceof Node) {
+      return "n";
+    } else {
+      return "g";
+    }
+  }
+
+  public void enableBoundingBox(String name, boolean b) {
+    enableBoundingBox(get(name), b, null);
   }
 
   public void enableFlyCam(boolean b) {
@@ -551,12 +638,31 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   /**
-   * the all purpose get by name method
+   * wrapper of "find" which "expects" a spatial back otherwise its an error
+   * 
+   * @param name
+   * @param startNode
+   * @return
+   */
+  public Spatial get(String name, Node startNode) {
+    Spatial ret = find(name, startNode);
+    if (ret == null) {
+      error("get(%s) could not find child", name);
+    }
+    return ret;
+  }
+
+  public Spatial find(String name) {
+    return find(name, null);
+  }
+
+  /**
+   * the all purpose find by name method
    * 
    * @param string
    * @return
    */
-  public Spatial get(String name, Node startNode) {
+  public Spatial find(String name, Node startNode) {
     if (name.equals("root")) {
       return rootNode;
     }
@@ -564,9 +670,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
       startNode = rootNode;
     }
     Spatial child = startNode.getChild(name);
-    if (child == null) {
-      error("get(%s) could not find child");
-    }
     return child;
   }
 
@@ -963,16 +1066,16 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void cameraLookAt(Spatial spatial) {
-    
-    // INTERESTING BUG - DO NOT DIRECTLY LOOK AT BECAUSE WHEN WE PUT COMMANDS IN ORDER
-    // ROTATING (to lookAt) IS NOT TRANSITIVE, AND THIS HAPPENS BEFORE ANY PREVIOUS MOVE :P
-    // SO IT DOES NOT WORK - solution is to process the lookAt with the JME thread processing
-    // all the other moves & rotations ! 
+
+    // INTERESTING BUG - DO NOT DIRECTLY LOOK AT BECAUSE WHEN WE PUT COMMANDS IN
+    // ORDER
+    // ROTATING (to lookAt) IS NOT TRANSITIVE, AND THIS HAPPENS BEFORE ANY
+    // PREVIOUS MOVE :P
+    // SO IT DOES NOT WORK - solution is to process the lookAt with the JME
+    // thread processing
+    // all the other moves & rotations !
     // camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "lookAt";
-    msg.data = new Object[] { "camera", spatial.getName() };
-    addMsg(msg);
+    addMsg("lookAt", "camera", spatial.getName());
   }
 
   // relative move
@@ -983,10 +1086,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void moveTo(String name, float x, float y, float z) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "moveTo";
-    msg.data = new Object[] { name, x, y, z };
-    addMsg(msg);
+    addMsg("moveTo", name, x, y, z);
   }
 
   @Override
@@ -994,8 +1094,11 @@ public class JMonkeyEngine extends Service implements ActionListener {
     log.info("onAction {} {} {}", name, keyPressed, tpf);
 
     if (name.equals("mouse-click-right")) {
-      Geometry target = checkCollision();
-      setSelected(target);
+      mouseRightPressed = keyPressed;
+      if (mouseRightPressed) {
+        Geometry target = checkCollision();
+        setSelected(target);
+      }
     }
 
     if ("full-screen".equals(name)) {
@@ -1338,17 +1441,11 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void rotateOnAxis(String name, String axis, double degrees) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "rotateOnAxis";
-    msg.data = new Object[] { name, axis, (float) degrees };
-    addMsg(msg);
+    addMsg("rotateOnAxis", name, axis, (float) degrees);
   }
 
   public void rotateTo(String name, double degrees) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "rotateTo";
-    msg.data = new Object[] { name, degrees };
-    addMsg(msg);
+    addMsg("rotateTo", name, (float) degrees);
   }
 
   public boolean saveSpatial(String name) {
@@ -1432,13 +1529,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   // TODO - need to make thread safe ? JME thread ?
   // turn it into a jme msg - put it on the update queue ?
   public void scale(String name, float scale) {
-    UserData node = getUserData(name);
-    if (node != null) {
-      node.scale(scale);
-      // node.thatupdateModelBounds()
-    } else {
-      error("scale %s does not exist", name);
-    }
+    addMsg("scale", name, scale);  
   }
 
   public void setDisplayFps(boolean b) {
@@ -1481,7 +1572,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // turn off old
     if (selectedForView != null) {
       enableBoundingBox(selectedForView, false);
-      enableCoordinateAxes(selectedForView, false);
+      enableAxes(selectedForView, false);
     }
 
     // set selected
@@ -1493,7 +1584,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // turn on new
     if (newSelected != null) {
       enableBoundingBox(newSelected, true);
-      enableCoordinateAxes(newSelected, true);
+      enableAxes(newSelected, true);
     }
   }
 
@@ -1775,15 +1866,19 @@ public class JMonkeyEngine extends Service implements ActionListener {
       Future<String> future = app.enqueue(callable);
       try {
         future.get();
+
+        // default positioning
         moveTo("camera", 0, 1, 4);
         cameraLookAtRoot();
+        enableGrid(true);
+
       } catch (Exception e) {
         log.warn("future threw", e);
       }
       return app;
     }
     info("already started app %s", appType);
-    
+
     return app;
   }
 
@@ -1847,10 +1942,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void lookAt(String viewer, String viewee) {
-    Jme3Msg msg = new Jme3Msg();
-    msg.method = "lookAt";
-    msg.data = new Object[] { viewer, viewee };
-    addMsg(msg);
+    addMsg("lookAt", viewer, viewee);
   }
 
   public List<Spatial> search(String text) {
@@ -1878,12 +1970,12 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-      
+
       boolean test = true;
       if (test) {
         return;
       }
-      
+
       InMoovHead i01_head = (InMoovHead) Runtime.start("i01.head", "InMoovHead");
       // InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
       // i01.startHead("XX");
@@ -1891,10 +1983,10 @@ public class JMonkeyEngine extends Service implements ActionListener {
       jme.enableGrid(true);
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
-      
+
       jme.setRotation("i01.head.rollNeck", "z");
       jme.setRotation("i01.head.neck", "x");
- 
+
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
@@ -1910,9 +2002,26 @@ public class JMonkeyEngine extends Service implements ActionListener {
       jme.scale("i01", 0.25f);
 
       // previous end
-     
+
     } catch (Exception e) {
       log.error("main threw", e);
+    }
+  }
+
+  public void show(String name) {
+    setVisible(name, false);
+  }
+
+  public void hide(String name) {
+    setVisible(name, true);
+  }
+
+  public void setVisible(String name, boolean b) {
+    Spatial s = get(name);
+    if (b) {
+      s.setCullHint(CullHint.Never);
+    } else {
+      s.setCullHint(CullHint.Always);
     }
   }
 
@@ -1920,8 +2029,10 @@ public class JMonkeyEngine extends Service implements ActionListener {
     cameraLookAt(rootNode);
   }
 
+  // FYI - not done with the JME thread ..
+  // TODO - addGrid called from enableFloorGrid
   public void enableGrid(boolean b) {
-    Spatial s = get("floor-grid");
+    Spatial s = find("floor-grid");
     if (s == null) {
       addGrid("floor-grid");
       s = get("floor-grid");
@@ -1931,6 +2042,22 @@ public class JMonkeyEngine extends Service implements ActionListener {
     } else {
       s.setCullHint(CullHint.Always);
     }
+  }
+
+  public String getBbName(Spatial spatial) {
+    if (spatial.getName().startsWith("_")) {
+      return null;
+    }
+    String geoBbName = String.format("_bb-%s-%s", getType(spatial), spatial.getName());
+    return geoBbName;
+  }
+
+  public String getCoorAxesName(Spatial spatial) {
+    if (spatial.getName().startsWith("_")) {
+      return null;
+    }
+    String geoBbName = String.format("_axis-%s-%s", getType(spatial), spatial.getName());
+    return geoBbName;
   }
 
 }

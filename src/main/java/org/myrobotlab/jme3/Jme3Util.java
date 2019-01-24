@@ -237,9 +237,9 @@ public class Jme3Util {
     log(childNode);
   }
 
-  public Node createUnitAxis() {
-
-    Node n = new Node("axis");
+  public Node createUnitAxis(String name) {
+    
+    Node n = new Node(name);
     Arrow arrow = new Arrow(Vector3f.UNIT_X);
     arrow.setLineWidth(4); // make arrow thicker    
     n.attachChild(createAxis("y", arrow, ColorRGBA.Red));
@@ -269,14 +269,15 @@ public class Jme3Util {
     // spatial.getWorldBound());
     BoundingVolume bv = spatial.getWorldBound();
     if (bv == null) {
-      error("createBoundingBox(%s) world bounds is null", spatial.getName());
+      log.warn("createBoundingBox({}) has no volume", spatial.getName());
       return null;
     }
 
     Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
     // Material mat = new Material(jme.getAssetManager(),
     // "Common/MatDefs/Light/PBRLighting.j3md");
-    newBb.setName(String.format("_bb-%s", spatial.getName()));
+        
+    newBb.setName(jme.getBbName(spatial));
 
     Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
     mat.setColor("Color", toColor(color));
