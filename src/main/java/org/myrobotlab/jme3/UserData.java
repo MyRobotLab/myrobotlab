@@ -67,10 +67,6 @@ public class UserData implements Savable {
     spatial.setUserData("data", this);
   }
 
-  public void enableBoundingBox(boolean b) {
-    enableBoundingBox(b, null);
-  }
-
   public String getName() {
     return spatial.getName();
   }
@@ -136,80 +132,13 @@ public class UserData implements Savable {
     //sb.append(" ") TODO - other parts
     return sb.toString();
   }
-
+/*
   // scales a node and all its children
   public void scale(float scale) {
-    // node.getChildren();
     spatial.scale(scale);
     spatial.updateGeometricState();
     spatial.updateModelBound();
   }
-
-  public void enableCoordinateAxes(boolean b) {
-    /** mmm - may be a bad idea - but may need to figure solution out..
-    if (spatial instanceof Geometry) {
-      UserData data = jme.getUserData(spatial.getParent());
-      data.enableCoordinateAxes(b);
-      return;
-    }
-    */
-    if (axis == null) {
-      axis = jme.createUnitAxis();
-      axis.setLocalTranslation(spatial.getWorldTranslation());
-      axis.setLocalRotation(spatial.getWorldRotation());
-      ((Node) spatial).attachChild(axis);
-    }
-    if (b) {
-      axis.setCullHint(CullHint.Never);
-    } else {
-      axis.setCullHint(CullHint.Always);
-    }
-  }
-
-  public void enableBoundingBox(boolean b, String color) {
-    
-    /*
-    boolean disable = true;
-    if (disable) {
-      return;
-    }
-    */
-
-    /* mmm - may be a bad idea
-    if (spatial instanceof Geometry) {
-      UserData data = jme.getUserData(spatial.getParent());
-      data.enableBoundingBox(b, color);
-      return;
-    }
-    */
-
-    if (color == null) {
-      color = Jme3Util.defaultColor;
-    }
-
-    if (bb == null) {
-      bb = jme.createBoundingBox(spatial);
-      if (bb != null) {
-        ((Node) spatial).attachChild(bb);
-      } else {
-        return;
-      }
-    }
-
-    if (!color.equals(bbColor)) {
-      Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-      mat.setColor("Color", Jme3Util.toColor(color));
-      mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-      bb.setMaterial(mat);
-      bbColor = color;
-    }
-
-    if (b && bb != null) {
-      bb.setCullHint(CullHint.Never);
-    } else if (!b && bb != null) {
-      bb.setCullHint(CullHint.Always);
-    }
-
-  }
+  */
 
 }
