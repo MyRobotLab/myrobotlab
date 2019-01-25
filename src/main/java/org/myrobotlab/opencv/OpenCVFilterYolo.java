@@ -65,8 +65,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
 
-  private transient final Object lock = new Object();
-
   DecimalFormat df2 = new DecimalFormat("#.###");
 
   // TODO: store these somewhere as a resource / dependency ..
@@ -87,17 +85,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   public OpenCVFilterYolo(String name) {
     super(name);
-    // start classifier thread
-    synchronized (lock) {
-      if (classifier == null) {
-        classifier = new Thread(this, "ctor-YoloClassifierThread");
-        classifier.start();
-        try {
-          lock.wait();
-        } catch (InterruptedException e) {
-        }
-      }
-    }
     log.info("Yolo Classifier thread started : {}", this.name);
   }
 
@@ -242,9 +229,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   @Override
   public void run() {
-    int count = 0;
-    long start = System.currentTimeMillis();
-    synchronized (lock) {
+    try {
+      int count = 0;
+      long start = System.currentTimeMillis();
+
       loadYolo();
       log.info("Starting the Yolo classifier thread...");
       // in a loop, grab the current image and classify it and update the
@@ -252,58 +240,56 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       running = true;
       // loading the model takes a lot of time, we want to block enable/disable
       // until we are actually running - then we notifyAll
-      lock.notifyAll();
-    }
-    while (running) {
-      if (!pending) {
-        log.debug("Skipping frame");
-        try {
-          // prevent thrashing of the cpu ...
+
+      while (running) {
+        if (!pending) {
+          log.debug("Skipping frame");
+
           Thread.sleep(10);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-          break;
-        }
-        continue;
-      }
-      // only classify this if we haven't already classified it.
-      if (lastImage != null) {
-        // lastResult = dl4j.classifyImageVGG16(lastImage);
-        log.debug("Doing yolo...");
-        lastResult = yoloFrame(lastImage);
-        // log.info("Yolo done.");
-        // we processed, next object we'll pick up.
-        pending = false;
-        count++;
-        if (count % 10 == 0) {
-          double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
-          log.info("Yolo Classification Rate : {}", rate);
-        }
 
-        Map<String, List<Classification>> ret = new TreeMap<>();
-        for (Classification c : lastResult) {
-          List<Classification> nl = null;
-          if (ret.containsKey(c.getLabel())) {
-            nl = ret.get(c.getLabel());
-          } else {
-            nl = new ArrayList<>();
-            ret.put(c.getLabel(), nl);
+          continue;
+        }
+        // only classify this if we haven't already classified it.
+        if (lastImage != null) {
+          // lastResult = dl4j.classifyImageVGG16(lastImage);
+          log.debug("Doing yolo...");
+          lastResult = yoloFrame(lastImage);
+          // log.info("Yolo done.");
+          // we processed, next object we'll pick up.
+          pending = false;
+          count++;
+          if (count % 10 == 0) {
+            double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
+            log.info("Yolo Classification Rate : {}", rate);
           }
-          nl.add(c);
-        }
 
-        invoke("publishClassification", ret);
-      } else {
-        log.info("No Image to classify...");
-      }
-      // TODO: see why there's a race condition. i seem to need a little delay
-      // here o/w the recognition never seems to start.
-      // maybe lastImage needs to be marked as volatile ?
-      try {
+          Map<String, List<Classification>> ret = new TreeMap<>();
+          for (Classification c : lastResult) {
+            List<Classification> nl = null;
+            if (ret.containsKey(c.getLabel())) {
+              nl = ret.get(c.getLabel());
+            } else {
+              nl = new ArrayList<>();
+              ret.put(c.getLabel(), nl);
+            }
+            nl.add(c);
+          }
+
+          invoke("publishClassification", ret);
+        } else {
+          log.info("No Image to classify...");
+        }
+        // TODO: see why there's a race condition. i seem to need a little delay
+        // here o/w the recognition never seems to start.
+        // maybe lastImage needs to be marked as volatile ?
+
         Thread.sleep(1);
-      } catch (InterruptedException e) {
-        /* dont care */}
+      }
+
+    } catch (Exception e) {
+      log.error("yolo thread threw", e);
     }
+    running = false;
     log.info("yolo exiting classifier thread");
   }
 
@@ -432,41 +418,30 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   @Override
-  public void release() {
-    synchronized (lock) {
-      running = false;
-      classifier = null;
-      Service.sleep(500);
-      if (net != null) {
-        net.deallocate();
-      }
+  synchronized public void release() {
+    running = false;
+    classifier = null;
+    // bleed out the thread before deallocating
+    Service.sleep(500);
+    if (net != null) {
+      net.deallocate();
     }
   }
 
   @Override
-  public void enable() {
-    synchronized (lock) {
-      super.enable();
-      if (classifier == null) {
-        classifier = new Thread(this, "YoloClassifierThread");
-        classifier.start();
-        try {
-          lock.wait();
-        } catch (InterruptedException e) {
-        }
-      }
+  synchronized public void enable() {
+    super.enable();
+    if (classifier == null) {
+      classifier = new Thread(this, "YoloClassifierThread");
+      classifier.start();
     }
   }
 
   @Override
-  public void disable() {
-    synchronized (lock) {
-      super.disable();
-      running = false;
-      classifier = null;
-      // wait until running thread bleeds out
-      Service.sleep(1500);
-    }
+  synchronized public void disable() {
+    super.disable();
+    running = false;
+    classifier = null;
   }
 
   @Override

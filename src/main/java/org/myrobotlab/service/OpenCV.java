@@ -478,28 +478,21 @@ public class OpenCV extends AbstractComputerVision {
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     // cv.setGrabberType("OpenKinect");
-    cv.setStreamerEnabled(true);
+    // cv.setStreamerEnabled(true);
     // cv.setGrabberType("OpenCV");
-    /*
-     * OpenCVFilter yoloFilter = new
-     * OpenCVFilterYolo("yolo");//cv.addFilter("Yolo"); yoloFilter.disable();
-     * cv.addFilter(yoloFilter);
-     */
-
-    /**
-     * <pre>
-     *  good enable/disable test
+    
+   
+    // TODO - chaos monkey yolo
      OpenCVFilter yoloFilter = cv.addFilter("yolo");
     
-     yoloFilter.disable();
+     // yoloFilter.disable();
      cv.capture();
      yoloFilter.enable();
      yoloFilter.disable();
      yoloFilter.enable();
      yoloFilter.disable();
      yoloFilter.enable();
-     * </pre>
-     */
+    
     // cv.load();
 
     // single kinect image file

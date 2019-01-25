@@ -19,11 +19,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
+import org.myrobotlab.opencv.OpenCVFilter;
 import org.slf4j.Logger;
 
 // TODO: re-enable this unit test.. but for now it's just too slow ..
 // it also opens a swing gui which isn't good.
-@Ignore
+
+@Ignore // dependes on swing ? it shouldn't ! 
 public class OpenCVTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
@@ -203,7 +205,8 @@ public class OpenCVTest extends AbstractTest {
     cv.reset();
     cv.setGrabberType("ImageFile");
     cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    cv.addFilter("yolo");
+    OpenCVFilter f = cv.addFilter("yolo");
+    f.enable();
     Map<String, List<Classification>> classifications = cv.getClassifications();
     assertNotNull(classifications);
     assertTrue(classifications.containsKey("person"));
