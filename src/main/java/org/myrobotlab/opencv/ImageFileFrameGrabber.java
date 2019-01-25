@@ -81,7 +81,9 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     ++frameCounter;
 
     if (frameCounter > 1) {
-      lastImage.release();
+      if (lastImage != null) {
+        lastImage.release();
+      }
     }
 
     lastImage = image;
