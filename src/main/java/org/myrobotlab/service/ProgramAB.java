@@ -41,17 +41,14 @@ import org.slf4j.Logger;
  */
 public class ProgramAB extends Service implements TextListener, TextPublisher {
 
-  static final long serialVersionUID = 1L;
-  transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
-
   // Internal class for the program ab response.
   public static class Response {
-    public String msg;
-    transient public List<OOBPayload> payloads;
     // FIXME - timestamps are usually longs System.currentTimeMillis()
     public Date timestamp;
     public String botName;
     public String userName;
+    public String msg;
+    public List<OOBPayload> payloads;
 
     public Response(String userName, String botName, String msg, List<OOBPayload> payloads, Date timestamp) {
       this.botName = botName;
@@ -62,25 +59,44 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     public String toString() {
-      return String.format("%d %s %s %s", timestamp.getTime(), userName, botName, msg);
+      StringBuilder str = new StringBuilder();
+      str.append("[");
+      str.append("Time:" + timestamp.getTime() + ", ");
+      str.append("Bot:" + botName + ", ");
+      str.append("User:" + userName + ", ");
+      str.append("Msg:"+msg + ", ");
+      str.append("Payloads:[");
+      if (payloads != null) {
+        for (OOBPayload payload : payloads) {
+          str.append(payload.toString() + ", ");
+        }
+      }
+      str.append("]]");
+      return str.toString();
     }
+    
   }
 
+  static final long serialVersionUID = 1L;
+  transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
   // The current bot
   transient Bot bot = null;
   private String path = "ProgramAB";
   // Mapping a bot to a username and chat session
   transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
-
-  // TODO: this is not/should not be a guaranteed bot we have
-  // ProgramAB default bot should be Alice.
+  // TODO: ProgramAB default bot should be Alice-en_US we should name the rest of the language specific default bots.
   private String currentBotName = "en-US";
   // This is the default username that is chatting with the bot.
   private String currentUserName = "default";
-  public int savePredicatesInterval = 300000; // every 5 minutes
+  public int savePredicatesInterval = 5000; // TODO: every 5 minutes  (currently 5 seconds.)
+  // TODO: move the implementation from the gui to this class so it can be used across web and swing gui properly. 
   boolean visualDebug = true;
-  // private HashSet<String> availableBots = new HashSet<String>();
 
+  /**
+   * Default constructor for the program ab service.
+   * 
+   * @param name
+   */
   public ProgramAB(String name) {
     super(name);
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
@@ -122,12 +138,18 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return sessions.get(getCurrentBotName()).get(getCurrentUserName()).maxConversationDelay;
   }
 
+  /**
+   * This is the main method that will ask for the current bot's chat session to respond to
+   * It returns a Response object.
+   * @param text
+   * @return
+   */
   public Response getResponse(String text) {
     return getResponse(getCurrentUserName(), text);
   }
 
   /**
-   * 
+   * This method has the side effect of switching which bot your are currently chatting with.
    * @param text
    *          - the query string to the bot brain
    * @param username
@@ -136,45 +158,68 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    *          - the name of the bot you which to get the response from
    * @return the response for a user from a bot given the input text.
    */
-  public Response getResponse(String username, String botName, String text) {
-    this.setCurrentBotName(botName);
-    return getResponse(username, text);
+  public Response getResponse(String username, String text) {
+    return getResponse(username, getCurrentBotName(), text);
   }
 
-  public Response getResponse(String userName, String text) {
-    log.info("Get Response for : user {} bot {} : {}", userName, getCurrentBotName(), text);
+  /**
+   * Full get response method .  Using this method will update the current user/bot name if different from the current session.
+   * @param userName
+   * @param botName
+   * @param text
+   * @return
+   */
+  public Response getResponse(String userName, String botName, String text) {
+    return getResponse(userName, botName, text, true);    
+  }
+  
+  /**
+   * Gets a response and optionally update if this is the current bot session that's active globally.
+   * 
+   * @param userName
+   * @param botName
+   * @param text
+   * @param updateCurrentSession (specify if the currentbot/currentuser name should be updated in the programab service.)
+   * @return
+   */
+  public Response getResponse(String userName, String botName, String text, boolean updateCurrentSession) {
+    // error check the input.
+    log.info("Get Response for : user {} bot {} : {}", userName, botName, text);
+    if (userName == null || botName == null || text == null) {
+      String error = "ERROR: Username , botName or text was null. no response.";
+      error(error);
+      return new Response(userName, botName, error, null, new Date());
+    }
+    // update the current session if we want to change which bot is at attention.
+    if (updateCurrentSession) {
+      updateCurrentSession(userName, botName);
+    }
     if (bot == null) {
       String error = "ERROR: Core not loaded, please load core before chatting.";
       error(error);
-      return new Response(userName, getCurrentBotName(), error, null, new Date());
+      return new Response(userName, botName, error, null, new Date());
     }
-
-    if (text.isEmpty()) {
-      return new Response(userName, getCurrentBotName(), "", null, new Date());
+    // Auto start a new session from the current path that the programAB service is operating out of.
+    if (!sessions.containsKey(botName) || !sessions.get(botName).containsKey(userName)) {
+      startSession(getPath(), userName, botName);
     }
-
-    if (!sessions.containsKey(getCurrentBotName()) || !sessions.get(getCurrentBotName()).containsKey(userName)) {
-      startSession(getPath(), userName, getCurrentBotName());
-    }
-
-    ChatData chatData = sessions.get(getCurrentBotName()).get(userName);
-    String res = getChat(userName, getCurrentBotName()).multisentenceRespond(text);
+    ChatData chatData = sessions.get(botName).get(userName);
+    // Get the actual bots aiml based response.
+    String res = getChat(userName, botName).multisentenceRespond(text);
     // grab and update the time when this response came in.
     chatData.lastResponseTime = new Date();
-
     // Check the AIML response to see if there is OOB (out of band data)
-    // If so, publish that data independent of the text response.
+    // If so, process those oob messages.
     List<OOBPayload> payloads = null;
     if (chatData.processOOB) {
       payloads = processOOB(res);
     }
-
     // OOB text should not be published as part of the response text.
     if (payloads != null) {
       res = OOBPayload.removeOOBFromString(res).trim();
     }
-
-    Response response = new Response(userName, getCurrentBotName(), res, payloads, chatData.lastResponseTime);
+    // create the response object to return
+    Response response = new Response(userName, botName, res, payloads, chatData.lastResponseTime);
     // Now that we've said something, lets create a timer task to wait for N
     // seconds
     // and if nothing has been said.. try say something else.
@@ -197,6 +242,22 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return response;
   }
 
+  private void updateCurrentSession(String userName, String botName) {
+    // update the current user/bot name..  
+    if (!botName.equals(getCurrentBotName())) {
+      // update which bot is in the front.. and honestly. we should also set which userName is currently talking to the bot.
+      this.setCurrentBotName(botName);
+    }
+    if (!userName.equals(getCurrentUserName())) {
+      // update which bot is in the front.. and honestly. we should also set which userName is currently talking to the bot.
+      this.setCurrentBotName(botName);
+    }
+  }
+
+  /**
+   * This method specifics how many times the robot will respond with the same thing before forcing a different (default?) response instead.
+   * @param val
+   */
   public void repetitionCount(int val) {
     org.alicebot.ab.MagicNumbers.repetition_count = val;
   }
@@ -272,13 +333,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void setPredicate(String username, String predicateName, String predicateValue) {
-    Predicates preds = getChat(username, getCurrentBotName()).predicates;
-    preds.put(predicateName, predicateValue);
+    setPredicate(username, getCurrentBotName(), predicateName, predicateValue);
   }
 
+  public void setPredicate(String username, String botName, String predicateName, String predicateValue) {
+    Predicates preds = getChat(username, botName).predicates;
+    preds.put(predicateName, predicateValue);
+  }
+  
+  @Deprecated
   public void unsetPredicate(String username, String predicateName) {
-    Predicates preds = getChat(username, getCurrentBotName()).predicates;
-    preds.remove(predicateName);
+    removePredicate(username, getCurrentBotName(), predicateName);
   }
 
   public String getPredicate(String predicateName) {
@@ -286,10 +351,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public String getPredicate(String username, String predicateName) {
-    Predicates preds = getChat(username, getCurrentBotName()).predicates;
-    return preds.get(predicateName);
+    return getPredicate(username, getCurrentBotName(), predicateName);
   }
 
+  public String getPredicate(String username, String botName, String predicateName) {
+    Predicates preds = getChat(username, botName).predicates;
+    return preds.get(predicateName);
+  }
+  
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
@@ -731,16 +800,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
-    // TODO: remove InMoov aiml from this dependency. InMoov AIML should be a
-    // dependency for InMoov service.. Not ProgramAB service
+    // TODO: renamed the bots in the program-ab-data folder to prefix them so we know they are different than the inmoov bots. 
+    // each bot should have their own name, it's confusing that the inmoov bots are named en-US and so are the program ab bots.
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
     meta.addDependency("program-ab", "program-ab-kw", "0.0.8.4");
     meta.addDependency("org.json", "json", "20090211");
     // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
-    // TODO: This is for CJK support in ProgramAB move this into the published
-    // POM for
-    // ProgramAB so they are pulled in transiently.
+    // TODO: This is for CJK support in ProgramAB move this into the published POM for ProgramAB so they are pulled in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
     meta.addCategory("ai", "control");
@@ -749,7 +816,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public static void main(String args[]) {
     Runtime.start("gui", "SwingGui");
-    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+    Runtime.start("brain", "ProgramAB");
   }
 
 }
