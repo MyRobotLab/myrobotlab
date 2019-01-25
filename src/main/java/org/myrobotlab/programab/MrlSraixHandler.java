@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 
 public class MrlSraixHandler implements SraixHandler {
   transient public final static Logger log = LoggerFactory.getLogger(MrlSraixHandler.class);
-  Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-  Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
@@ -49,7 +47,7 @@ public class MrlSraixHandler implements SraixHandler {
   }
 
   private boolean containsOOB(String text) {
-    Matcher oobMatcher = oobPattern.matcher(text);
+    Matcher oobMatcher = OOBPayload.oobPattern.matcher(text);
     return oobMatcher.matches();
   }
 
@@ -58,7 +56,7 @@ public class MrlSraixHandler implements SraixHandler {
     // Find any oob tags
     StringBuilder responseBuilder = new StringBuilder();
     ArrayList<OOBPayload> payloads = new ArrayList<OOBPayload>();
-    Matcher oobMatcher = oobPattern.matcher(text);
+    Matcher oobMatcher = OOBPayload.oobPattern.matcher(text);
     int start = 0;
     while (oobMatcher.find()) {
       // We found some OOB text.
@@ -69,23 +67,11 @@ public class MrlSraixHandler implements SraixHandler {
       // next segment is from the end of this one to the start of the next one.
       start = oobMatcher.end();
       String oobPayload = oobMatcher.group(0);
-      Matcher mrlMatcher = mrlPattern.matcher(oobPayload);
+      Matcher mrlMatcher = OOBPayload.mrlPattern.matcher(oobPayload);
       while (mrlMatcher.find()) {
         String mrlPayload = mrlMatcher.group(0);
         OOBPayload payload = parseOOB(mrlPayload);
-        payloads.add(payload);
-        // grab service and invoke method.
-        ServiceInterface s = Runtime.getService(payload.getServiceName());
-        if (s == null) {
-          log.warn("Service name in OOB/MRL tag unknown. {}", mrlPayload);
-          return null;
-        }
-        Object result = null;
-        if (payload.getParams() != null) {
-          result = s.invoke(payload.getMethodName(), payload.getParams().toArray());
-        } else {
-          result = s.invoke(payload.getMethodName());
-        }
+        Object result = invokeOOBPayloads(payloads, mrlPayload, payload);
         log.info("OOB PROCESSING RESULT: {}", result);
         responseBuilder.append(result);
       }
@@ -97,24 +83,37 @@ public class MrlSraixHandler implements SraixHandler {
     return responseBuilder.toString();
   }
 
+  private Object invokeOOBPayloads(ArrayList<OOBPayload> payloads, String mrlPayload, OOBPayload payload) {
+    payloads.add(payload);
+    // grab service and invoke method.
+    ServiceInterface s = Runtime.getService(payload.getServiceName());
+    if (s == null) {
+      log.warn("Service name in OOB/MRL tag unknown. {}", mrlPayload);
+      return null;
+    }
+    Object result = null;
+    if (payload.getParams() != null) {
+      result = s.invoke(payload.getMethodName(), payload.getParams().toArray());
+    } else {
+      result = s.invoke(payload.getMethodName());
+    }
+    return result;
+  }
+
   private OOBPayload parseOOB(String oobPayload) {
 
     // TODO: fix the damn double encoding issue.
-    // we have user entered text in the service/method
-    // and params values.
+    // we have user entered text in the service/method and params values.
     // grab the service
-    Pattern servicePattern = Pattern.compile("<service>(.*?)</service>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-    Matcher serviceMatcher = servicePattern.matcher(oobPayload);
+    Matcher serviceMatcher = OOBPayload.servicePattern.matcher(oobPayload);
     serviceMatcher.find();
     String serviceName = serviceMatcher.group(1);
 
-    Pattern methodPattern = Pattern.compile("<method>(.*?)</method>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-    Matcher methodMatcher = methodPattern.matcher(oobPayload);
+    Matcher methodMatcher = OOBPayload.methodPattern.matcher(oobPayload);
     methodMatcher.find();
     String methodName = methodMatcher.group(1);
 
-    Pattern paramPattern = Pattern.compile("<param>(.*?)</param>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-    Matcher paramMatcher = paramPattern.matcher(oobPayload);
+    Matcher paramMatcher = OOBPayload.paramPattern.matcher(oobPayload);
     ArrayList<String> params = new ArrayList<String>();
     while (paramMatcher.find()) {
       // We found some OOB text.

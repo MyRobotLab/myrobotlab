@@ -10,9 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
@@ -23,11 +20,8 @@ import org.alicebot.ab.Predicates;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
@@ -47,10 +41,11 @@ import org.slf4j.Logger;
  */
 public class ProgramAB extends Service implements TextListener, TextPublisher {
 
+  static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
 
+  // Internal class for the program ab response.
   public static class Response {
-
     public String msg;
     transient public List<OOBPayload> payloads;
     // FIXME - timestamps are usually longs System.currentTimeMillis()
@@ -71,34 +66,23 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
+  // The current bot
   transient Bot bot = null;
-
   private String path = "ProgramAB";
-
+  // Mapping a bot to a username and chat session
   transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
-  // TODO: better parsing than a regex...
-  transient Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-  transient Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
-  // a guaranteed bot we have
+  // TODO: this is not/should not be a guaranteed bot we have
+  // ProgramAB default bot should be Alice.
   private String currentBotName = "en-US";
-  // this is the username that is chatting with the bot.
+  // This is the default username that is chatting with the bot.
   private String currentUserName = "default";
-
-  static final long serialVersionUID = 1L;
-  static int savePredicatesInterval = 60 * 1000 * 5; // every 5 minutes
-
-  @Deprecated
-  Boolean wasCleanyShutdowned = true;
-  Boolean visualDebug;
-
-  HashSet<String> availableBots = new HashSet<String>();
+  public int savePredicatesInterval = 300000; // every 5 minutes
+  boolean visualDebug = true;
+  // private HashSet<String> availableBots = new HashSet<String>();
 
   public ProgramAB(String name) {
     super(name);
-    getBots();
-    // Tell programAB to persist it's learned predicates about people
-    // every 30 seconds.
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
   }
 
@@ -120,31 +104,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void addTextPublisher(TextPublisher service) {
     subscribe(service.getName(), "publishText");
-  }
-
-  /**
-   * We don't use csv fiiles anymore, just a check there is no more aimlIf
-   * folder Check also if there is Aiml files inside folder...
-   */
-  private boolean checkBrain(String botName) {
-    if (botName == null || botName.isEmpty()) {
-      error("checkBrain: Bot name is null !! please check..");
-      return false;
-    }
-    String aimlPath = getPath() + File.separator + "bots" + File.separator + botName + File.separator + "aiml";
-    String aimlIFPath = getPath() + File.separator + "bots" + File.separator + botName + File.separator + "aimlif";
-    log.info("AIML Files:");
-    File folder = new File(aimlPath);
-    File folderaimlIF = new File(aimlIFPath);
-    if (!folder.exists()) {
-      error("{} does not exist", aimlPath);
-      return false;
-    }
-    if (folderaimlIF.exists()) {
-      folderaimlIF.renameTo(new File(folderaimlIF + ".old"));
-      log.warn("Moving aimlIf folder to old, we don't need it anymore, and can cause issues !");
-    }
-    return true;
   }
 
   private String createSessionPredicateFilename(String username, String botName) {
@@ -211,8 +170,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
 
     // OOB text should not be published as part of the response text.
-    Matcher matcher = oobPattern.matcher(res);
-    res = matcher.replaceAll("").trim();
+    if (payloads != null) {
+      res = OOBPayload.removeOOBFromString(res).trim();
+    }
 
     Response response = new Response(userName, getCurrentBotName(), res, payloads, chatData.lastResponseTime);
     // Now that we've said something, lets create a timer task to wait for N
@@ -234,26 +194,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     invoke("publishResponseText", response);
     invoke("publishText", response.msg);
     info("to: %s - %s", userName, res);
-
-    // if (log.isDebugEnabled()) {
-    // for (String key : sessions.get(session).predicates.keySet()) {
-    // log.debug(session + " " + key + " " +
-    // sessions.get(session).predicates.get(key));
-    // }
-    // }
     return response;
   }
 
-  public void repetition_count(int val) {
+  public void repetitionCount(int val) {
     org.alicebot.ab.MagicNumbers.repetition_count = val;
   }
 
   public Chat getChat(String userName, String botName) {
-    if (!sessions.containsKey(botName) || !sessions.get(botName).containsKey(userName)) {
-      error("%s %S session does not exist", botName, userName);
-      return null;
-    } else {
+    if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       return sessions.get(botName).get(userName).chat;
+    } else {
+      warn("%s %S session does not exist", botName, userName);
+      return null;
     }
   }
 
@@ -266,6 +219,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     preds.remove(predicateName);
   }
 
+  /**
+   * Add a value to a set for the current session
+   * 
+   * @param setName
+   * @param setValue
+   */
   public void addToSet(String setName, String setValue) {
     // add to the set for the bot.
     AIMLSet updateSet = bot.setMap.get(setName);
@@ -284,19 +243,26 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
-  public void addToMap(String mapName, String mapKey, String mapValue) {
+  /**
+   * Add a map / value for the current session
+   * 
+   * @param mapName
+   * @param mapKey
+   * @param mapValue
+   */
+  public void addToMap(String mapName, String key, String value) {
     // add an entry to the map.
     AIMLMap updateMap = bot.mapMap.get(mapName);
-    mapKey = mapKey.toUpperCase().trim();
+    key = key.toUpperCase().trim();
     if (updateMap != null) {
-      updateMap.put(mapKey, mapValue);
+      updateMap.put(key, value);
       // persist to disk!
       updateMap.writeAIMLMap();
     } else {
       log.info("Unknown AIML map: {}.  A new MAP will be created. ", mapName);
       // dynamically create new maps?!
       AIMLMap newMap = new AIMLMap(mapName, bot);
-      newMap.put(mapKey, mapValue);
+      newMap.put(key, value);
       newMap.writeAIMLMap();
     }
   }
@@ -342,9 +308,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     if (delta > delay) {
       return getResponse(userName, text);
     } else {
+      log.info("Skipping response, minimum delay since previous response not reached.");
       return null;
     }
-
   }
 
   public boolean isEnableAutoConversation() {
@@ -356,7 +322,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * Return a list of all patterns that the AIML Bot knows to match against.
+   * Return a list of all patterns that the current AIML Bot knows to match
+   * against.
    * 
    * @param botName
    *          the bots name from which to return it's patterns.
@@ -387,95 +354,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Override
   public void onText(String text) {
-    // What else should we do here? seems reasonable to just do this.
-    // this should actually call getResponse
-    // on input, get the proper response
-    // Response resp = getResponse(text);
     getResponse(text);
-    // push that to the next end point.
-    // invoke("publishText", resp.msg);
-  }
-
-  private OOBPayload parseOOB(String oobPayload) {
-
-    // TODO: fix the damn double encoding issue.
-    // we have user entered text in the service/method
-    // and params values.
-    // grab the service
-    Pattern servicePattern = Pattern.compile("<service>(.*?)</service>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-    Matcher serviceMatcher = servicePattern.matcher(oobPayload);
-    serviceMatcher.find();
-    String serviceName = serviceMatcher.group(1);
-
-    Pattern methodPattern = Pattern.compile("<method>(.*?)</method>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-    Matcher methodMatcher = methodPattern.matcher(oobPayload);
-    methodMatcher.find();
-    String methodName = methodMatcher.group(1);
-
-    Pattern paramPattern = Pattern.compile("<param>(.*?)</param>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
-    Matcher paramMatcher = paramPattern.matcher(oobPayload);
-    ArrayList<String> params = new ArrayList<String>();
-    while (paramMatcher.find()) {
-      // We found some OOB text.
-      // assume only one OOB in the text?
-      String param = paramMatcher.group(1);
-      params.add(param);
-    }
-    OOBPayload payload = new OOBPayload(serviceName, methodName, params);
-    // log.info(payload.toString());
-    return payload;
-
-    // JAXB stuff blows up because the response from program ab is already
-    // xml decoded!
-    //
-    // JAXBContext jaxbContext;
-    // try {
-    // jaxbContext = JAXBContext.newInstance(OOBPayload.class);
-    // Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-    // log.info("OOB PAYLOAD :" + oobPayload);
-    // Reader r = new StringReader(oobPayload);
-    // OOBPayload oobMsg = (OOBPayload) jaxbUnmarshaller.unmarshal(r);
-    // return oobMsg;
-    // } catch (JAXBException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-
-    // log.info("OOB tag found, but it's not an MRL tag. {}", oobPayload);
-    // return null;
+    // TODO: should we publish the response here?
   }
 
   private List<OOBPayload> processOOB(String text) {
     // Find any oob tags
-    ArrayList<OOBPayload> payloads = new ArrayList<OOBPayload>();
-    Matcher oobMatcher = oobPattern.matcher(text);
-    while (oobMatcher.find()) {
-      // We found some OOB text.
-      // assume only one OOB in the text?
-      String oobPayload = oobMatcher.group(0);
-      Matcher mrlMatcher = mrlPattern.matcher(oobPayload);
-      while (mrlMatcher.find()) {
-        String mrlPayload = mrlMatcher.group(0);
-        OOBPayload payload = parseOOB(mrlPayload);
-        payloads.add(payload);
-        // TODO: maybe we dont' want this?
-        // Notifiy endpoints
-        invoke("publishOOBText", mrlPayload);
-        // grab service and invoke method.
-        ServiceInterface s = Runtime.getService(payload.getServiceName());
-        if (s == null) {
-          log.warn("Service name in OOB/MRL tag unknown. {}", mrlPayload);
-          return null;
-        }
-        // TODO: should you be able to be synchronous for this
-        // execution?
-        Object result = null;
-        if (payload.getParams() != null) {
-          result = s.invoke(payload.getMethodName(), payload.getParams().toArray());
-        } else {
-          result = s.invoke(payload.getMethodName());
-        }
-        log.info("OOB PROCESSING RESULT: {}", result);
+    ArrayList<OOBPayload> payloads = OOBPayload.extractOOBPayloads(text, this);
+    // invoke them all.
+    for (OOBPayload payload : payloads) {
+      boolean oobRes = OOBPayload.invokeOOBPayload(payload);
+      if (!oobRes) {
+        // there was a failure invoking
+        log.warn("Failed to invoke OOB/MRL tag : {}", payload.asOOBTag(payload));
       }
     }
     if (payloads.size() > 0) {
@@ -516,6 +407,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Override
   public String publishText(String text) {
+    // TODO: this should not be done here.
     // clean up whitespaces & cariage return
     text = text.replaceAll("\\n", " ");
     text = text.replaceAll("\\r", " ");
@@ -527,6 +419,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return text;
   }
 
+  // TODO: Why do
   public void reloadSession(String session, String botName) {
     reloadSession(getPath(), session, botName);
   }
@@ -591,22 +484,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void startSession() {
-    startSession(null);
+    startSession(currentUserName);
   }
 
   public void startSession(String username) {
     startSession(username, getCurrentBotName());
   }
 
-  /**
-   * Load the AIML 2.0 Bot config and start a chat session. This must be called
-   * after the service is created.
-   * 
-   * @param username
-   *          - The new user name
-   * @param botName
-   *          - The name of the bot to load. (example: alice2)
-   */
   public void startSession(String username, String botName) {
     startSession(getPath(), username, botName);
   }
@@ -615,46 +499,40 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     startSession(path, userName, botName, MagicBooleans.defaultLocale);
   }
 
+  /**
+   * Load the AIML 2.0 Bot config and start a chat session. This must be called
+   * after the service is created.
+   * 
+   * @param path
+   *          - The path to the ProgramAB directory where the bots aiml resides
+   * @param username
+   *          - The new user name
+   * @param botName
+   *          - The name of the bot to load. (example: alice2)
+   * @param locale
+   *          - The locale of the bot to ensure the aiml is loaded (mostly for
+   *          Japanese support)
+   */
   public void startSession(String path, String userName, String botName, Locale locale) {
     // Session is between a user and a bot. key is compound.
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
-      warn("Session %s %s already created", botName, userName);
+      info("Session %s %s already created", botName, userName);
       return;
     }
-
-    ready = false;
-    this.setPath(path);
+    setReady(false);
     info("Starting chat session path: %s username: %s botname: %s", path, userName, botName);
+    this.setPath(path);
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
-
-    // TODO: remove this completely!
-    // Ignore the return value, this checkBrain method doesn't work as expected
-    // for bots defined externally.
-    checkBrain(botName);
-
-    // TODO: manage the bots in a collective pool/hash map.
-    // TODO: check for corrupted aiml inside pAB code -> NPE ! ( blocking inside
-    // standalone jar )
     if (bot == null) {
       bot = new Bot(botName, path, locale);
     } else if (!botName.equalsIgnoreCase(bot.name)) {
       bot = new Bot(botName, path, locale);
     }
-
     // Hijack all the SRAIX requests and implement them as a synchronous call to
-    // a service to
-    // return a string response for programab...
-    MrlSraixHandler sraixHandler = new MrlSraixHandler();
-    bot.setSraixHandler(sraixHandler);
-
+    // a service to return a string response for programab...
+    bot.setSraixHandler(new MrlSraixHandler());
     Chat chat = new Chat(bot);
-    // for (Category c : bot.brain.getCategories()) {
-    // log.info(c.getPattern());
-    // }
-    //
-    // String resp = chat.multisentenceRespond("hello");
-
     // load session specific predicates, these override the default ones.
     String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
     chat.predicates.getPredicateDefaults(sessionPredicateFilename);
@@ -680,7 +558,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       // load those predicates
       chat.predicates.getPredicateDefaultsFromInputStream(FileIO.toInputStream(inputPredicateStream));
     }
-
     // TODO move this inside high level :
     // it is used to know the last username...
     if (sessions.get(botName).containsKey("default") && !userName.equals("default")) {
@@ -695,10 +572,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
         e.printStackTrace();
       }
     }
-    // END TODO
-
     // this.currentBotName = botName;
-    // String userName = chat.predicates.get("name");
     log.info("Started session for bot name:{} , username:{}", botName, userName);
     // TODO: to make sure if the start session is updated, that the button
     // updates in the gui ?
@@ -742,13 +616,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
-  @Deprecated
-  public void writeAIMLIF() {
-    if (bot != null) {
-      bot.writeAIMLIFFiles();
-    }
-  }
-
   /**
    * writeAndQuit will write brain to disk For learn.aiml is concerned
    */
@@ -773,8 +640,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void setPath(String path) {
     if (path != null && !path.equals(this.path)) {
       this.path = path;
-      // path changed, we need to update bots list
-      getBots();
       broadcastState();
     }
   }
@@ -789,9 +654,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public Boolean getVisualDebug() {
-    if (visualDebug == null) {
-      visualDebug = true;
-    }
     return visualDebug;
   }
 
@@ -818,16 +680,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return sessions;
   }
 
+  /**
+   * This method can be used to get a listing of all bots available in the bots
+   * directory.
+   * 
+   * @return
+   */
   public HashSet<String> getBots() {
-    availableBots.clear();
-    File programAbDir = new File(String.format("%s/bots", getPath()));
+    HashSet<String> availableBots = new HashSet<String>();
+    File programAbDir = new File(String.format("%s%sbots", getPath(), File.separator));
     if (!programAbDir.exists() || !programAbDir.isDirectory()) {
       log.info("%s does not exist !!!");
     } else {
       File[] listOfFiles = programAbDir.listFiles();
       for (int i = 0; i < listOfFiles.length; i++) {
         if (listOfFiles[i].isFile()) {
-          // System.out.println("File " + listOfFiles[i].getName());
         } else if (listOfFiles[i].isDirectory()) {
           availableBots.add(listOfFiles[i].getName());
         }
@@ -835,8 +702,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
     return availableBots;
   }
-
-  // Framework
 
   public void attach(Attachable attachable) {
     if (attachable instanceof TextPublisher) {
@@ -866,48 +731,25 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
+    // TODO: remove InMoov aiml from this dependency. InMoov AIML should be a
+    // dependency for InMoov service.. Not ProgramAB service
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
     meta.addDependency("program-ab", "program-ab-kw", "0.0.8.4");
     meta.addDependency("org.json", "json", "20090211");
     // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
-    // This is for CJK support in ProgramAB.
-    // TODO: move this into the published POM for ProgramAB so they are pulled
-    // in transiently.
+    // TODO: This is for CJK support in ProgramAB move this into the published
+    // POM for
+    // ProgramAB so they are pulled in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
     meta.addCategory("ai", "control");
     return meta;
   }
 
-  public static void main(String s[]) throws IOException {
-    try {
-      LoggingFactory.init(Level.INFO);
-      Runtime.start("gui", "SwingGui");
-      // Runtime.start("webgui", "WebGui");
-
-      ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-
-      // logging.setLevel("class org.myrobotlab.service.ProgramAB", "INFO");
-      // //org.myrobotlab.service.ProgramAB
-
-      // WebkitSpeechRecognition ear = (WebkitSpeechRecognition)
-      // Runtime.start("ear", "WebkitSpeechRecognition");
-      // MarySpeech mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
-
-      // mouth.attach(ear);
-      // brain.attach(ear);
-      // brain.attach(mouth);
-
-      // brain.startSession("default", "en-US");
-      // brain.startSession("c:\\dev\\workspace\\pyrobotlab\\home\\kwatters\\harry",
-      // "kevin", "harry");
-
-      // brain.savePredicates();
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-
+  public static void main(String args[]) {
+    Runtime.start("gui", "SwingGui");
+    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
   }
 
 }
