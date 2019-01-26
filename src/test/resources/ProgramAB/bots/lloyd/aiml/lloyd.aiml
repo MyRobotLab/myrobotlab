@@ -27,6 +27,9 @@
 <category><pattern>MY NAME IS *</pattern>
 <template>Nice to meet you <star/>. <think><set name="name"><star/></set></think></template>
 </category>
+<category><pattern>WHAT IS MY NAME</pattern>
+<template><get name="name"/></template>
+</category>
 <category><pattern>SAY MY NAME</pattern>
 <template><random>
         <li><get name="name"/></li>
