@@ -1,52 +1,34 @@
 package org.myrobotlab.programab;
 
-import java.io.File;
 import java.util.ArrayList;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-@XmlRootElement(name = "mrl")
+import org.apache.commons.lang3.StringUtils;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.ProgramAB;
+import org.myrobotlab.service.Runtime;
+import org.slf4j.Logger;
+
 public class OOBPayload {
 
-  private String serviceName;
+  transient public final static Logger log = LoggerFactory.getLogger(OOBPayload.class);
+  // TODO: something better than regex to parse the xml.  (Problem is that the service/method/param values 
+  // could end up double encoded ... So we had to switch to hamd crafting the aiml for the oob/mrl tag.
+  public transient static final Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+  public transient static final Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+  public transient static final Pattern servicePattern = Pattern.compile("<service>(.*?)</service>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+  public transient static final Pattern methodPattern = Pattern.compile("<method>(.*?)</method>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
+  public transient static final Pattern paramPattern = Pattern.compile("<param>(.*?)</param>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
+  private String serviceName;
   private String methodName;
   private ArrayList<String> params;
 
-  public static void main(String[] args) {
-
-    ArrayList<String> params = new ArrayList<String>();
-    params.add("bar");
-    OOBPayload payload = new OOBPayload("foo", "exec", params);
-    File file = new File("C:\\dev\\file.xml");
-    try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(OOBPayload.class);
-      Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-      // output pretty printed
-      jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-      jaxbMarshaller.marshal(payload, file);
-      jaxbMarshaller.marshal(payload, System.out);
-
-      // String xml =
-      // "<mrl><method>exec</method><param>bar</param><service>foo</service></mrl>";
-      // StringReader xmlR = new StringReader(xml);
-      Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-      OOBPayload oob = (OOBPayload) jaxbUnmarshaller.unmarshal(file);
-      System.out.println(oob.getServiceName());
-    } catch (JAXBException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-  }
-
   public OOBPayload() {
-    // TODO : anything?
-  }
+    // TODO: remove the default constructor
+  };
 
   public OOBPayload(String serviceName, String methodName, ArrayList<String> params) {
     this.serviceName = serviceName;
@@ -58,7 +40,6 @@ public class OOBPayload {
     return methodName;
   }
 
-  @XmlElement(name = "param")
   public ArrayList<String> getParams() {
     return params;
   }
@@ -67,7 +48,6 @@ public class OOBPayload {
     return serviceName;
   }
 
-  @XmlElement(name = "method")
   public void setMethodName(String methodName) {
     this.methodName = methodName;
   }
@@ -76,7 +56,6 @@ public class OOBPayload {
     this.params = params;
   }
 
-  @XmlElement(name = "service")
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
   }
@@ -110,4 +89,79 @@ public class OOBPayload {
     return "<sraix>" + OOBPayload.asOOBTag(oobTag) + "</sraix>";
   }
 
+  public static OOBPayload fromString(String oobPayload) {
+
+    // TODO: fix the damn double encoding issue.
+    // we have user entered text in the service/method
+    // and params values.
+    // grab the service
+
+    Matcher serviceMatcher = servicePattern.matcher(oobPayload);
+    serviceMatcher.find();
+    String serviceName = serviceMatcher.group(1);
+
+    Matcher methodMatcher = methodPattern.matcher(oobPayload);
+    methodMatcher.find();
+    String methodName = methodMatcher.group(1);
+
+    Matcher paramMatcher = paramPattern.matcher(oobPayload);
+    ArrayList<String> params = new ArrayList<String>();
+    while (paramMatcher.find()) {
+      // We found some OOB text.
+      // assume only one OOB in the text?
+      String param = paramMatcher.group(1);
+      params.add(param);
+    }
+    OOBPayload payload = new OOBPayload(serviceName, methodName, params);
+    // log.info(payload.toString());
+    return payload;
+  }
+  
+  
+  public static boolean invokeOOBPayload(OOBPayload payload) {
+    ServiceInterface s = Runtime.getService(payload.getServiceName());
+    // the service must exist and the method name must be set.
+    if (s == null || StringUtils.isEmpty(payload.getMethodName())) {
+      return false;
+    }
+    // TODO: should you be able to be synchronous for this
+    // execution?
+    Object result = null;
+    if (payload.getParams() != null) {
+      result = s.invoke(payload.getMethodName(), payload.getParams().toArray());
+    } else {
+      result = s.invoke(payload.getMethodName());
+    }
+    log.info("OOB PROCESSING RESULT: {}", result);
+    return true;
+  }
+
+  public static ArrayList<OOBPayload> extractOOBPayloads(String text, ProgramAB programAB) {
+    ArrayList<OOBPayload> payloads = new ArrayList<OOBPayload>();
+    Matcher oobMatcher = OOBPayload.oobPattern.matcher(text);
+    while (oobMatcher.find()) {
+      // We found some OOB text.
+      // assume only one OOB in the text?
+      String oobPayload = oobMatcher.group(0);
+      Matcher mrlMatcher = OOBPayload.mrlPattern.matcher(oobPayload);
+      while (mrlMatcher.find()) {
+        String mrlPayload = mrlMatcher.group(0);
+        OOBPayload payload = OOBPayload.fromString(mrlPayload);
+        payloads.add(payload);
+        // TODO: maybe we dont' want this?
+        // Notifiy endpoints
+        programAB.invoke("publishOOBText", mrlPayload);
+        // grab service and invoke method.
+
+      }
+    }
+    return payloads;
+  }
+
+  public static String removeOOBFromString(String res) {
+    Matcher matcher = OOBPayload.oobPattern.matcher(res);
+    res = matcher.replaceAll("");
+    return res;
+  }
+  
 }

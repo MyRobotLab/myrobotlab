@@ -246,5 +246,29 @@ public class ProgramABTest extends AbstractServiceTest {
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
   }
+  
+  @Test
+  public void testMultiSession() {
+    ProgramAB lloyd = new ProgramAB("lloyd");
+    // pikachu the service.
+    lloyd.startService();
+    // load the bot brain for the chat with the user
+    lloyd.startSession(path, "user1", "lloyd");
+    Response res = lloyd.getResponse("My name is Kevin");
+    System.out.println(res);
+    lloyd.startSession(path, "user2", "lloyd");
+    res = lloyd.getResponse("My name is Grog");
+    System.out.println(res);
+    lloyd.startSession(path, "user1", "lloyd");
+    Response respA = lloyd.getResponse("What is my name?");
+    System.out.println(respA);
+    lloyd.startSession(path, "user2", "lloyd");
+    Response respB = lloyd.getResponse("What is my name?");
+    System.out.println(respB);
+    
+    assertEquals("Kevin", respA.msg);
+    assertEquals("Grog", respB.msg);
+    
+  }
 
 }
