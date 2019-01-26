@@ -1472,7 +1472,7 @@ public class InMoov extends Service {
     }
     this.attach(chatBot);
     speakBlocking(languagePack.get("CHATBOTACTIVATED"));
-    chatBot.repetition_count(10);
+    chatBot.repetitionCount(10);
     chatBot.setPath("InMoov/chatBot");
     chatBot.startSession("default", getLanguage());
     // reset some parameters to default...
