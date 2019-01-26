@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
@@ -78,7 +77,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       str.append("]]");
       return str.toString();
     }
-
   }
 
   static final long serialVersionUID = 1L;
@@ -447,7 +445,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       boolean oobRes = OOBPayload.invokeOOBPayload(payload);
       if (!oobRes) {
         // there was a failure invoking
-        log.warn("Failed to invoke OOB/MRL tag : {}", payload.asOOBTag(payload));
+        log.warn("Failed to invoke OOB/MRL tag : {}", OOBPayload.asOOBTag(payload));
       }
     }
     if (payloads.size() > 0) {
@@ -464,22 +462,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return oobText;
   }
 
-  /*
-   * publishing method of the pub sub pair - with addResponseListener allowing
-   * subscriptions pub/sub routines have the following pattern
-   * 
-   * publishing routine -&gt; publishX - must be invoked to provide data to
-   * subscribers subscription routine -&gt; addXListener - simply adds a Service
-   * listener to the notify framework any service which subscribes must
-   * implement -&gt; onX(data) - this is where the data will be sent (the
-   * call-back)
-   * 
+  /**
+   * publish a response generated from a session in the programAB service.
+   * @param response
+   * @return
    */
   public Response publishResponse(Response response) {
     return response;
   }
 
-  /*
+  /**
    * Test only publishing point - for simple consumers
    */
   public String publishResponseText(Response response) {
@@ -500,9 +492,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return text;
   }
 
-  // TODO: Why do
-  public void reloadSession(String session, String botName) {
-    reloadSession(getPath(), session, botName);
+  public void reloadSession(String userName, String botName) {
+    reloadSession(getPath(), userName, botName);
   }
 
   /**
@@ -521,13 +512,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       sessions.get(botName).remove(userName);
       log.info("{} session removed", sessions);
     }
-    // TODO: whats the behavior..  if we reload a session
-    // are we reloading the underlying bot and then reloading all of the sessions for that bot?
-    // or just the current session?  this is some tricky business
-    // we should probably reload all sessions for a given botName.. right?
-    Set<String> userSessions = sessions.get(botName).keySet();
+    // reloading a session means to remove restart the bot and then start the session.
     bots.remove(botName.toLowerCase());
-    startSession(path, userName, getCurrentBotName());
+    startSession(path, userName, botName);
+    // Set<String> userSessions = sessions.get(botName).keySet();
     // TODO: we should make sure we keep the same path as before.
     // for (String user : userSessions ) {
     //   startSession(path, user, getCurrentBotName());
@@ -622,11 +610,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
     setReady(false);
     info("Starting chat session path: %s username: %s botname: %s", path, userName, botName);
-    this.setPath(path);
-    this.setCurrentBotName(botName);
-    this.setCurrentUserName(userName);
-
-    // TODO: figure on case insensivity of this map.
+    setPath(path);
+    setCurrentBotName(botName);
+    setCurrentUserName(userName);
     // check if we've already started this bot.
     Bot bot = bots.get(botName.toLowerCase());
     if (bot == null) {
@@ -645,18 +631,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
     chat.predicates.getPredicateDefaults(sessionPredicateFilename);
 
-    // create a new session map for this bot ?  
-    // TODO: this shouldn't be here.. it should be when the bot is created
-    HashMap<String, ChatData> session = new HashMap<String, ChatData>();
-    session.put(userName, new ChatData(chat));
-
-    // take care of not kill other sessions...
-    if (sessions.containsKey(botName)) {
-      sessions.get(botName).putAll(session);
-    } else {
-      sessions.put(botName, session);
+    if (!sessions.containsKey(botName)) {
+      // initialize the sessions for this bot
+      HashMap<String, ChatData> newSet = new HashMap<String, ChatData>();
+      sessions.put(botName, newSet);
     }
+    // put the current user session in the sessions map (overwrite if it was already there.
+    sessions.get(botName).put(userName, new ChatData(chat));
+    initializeChatSession(userName, botName, chat);
+    // this.currentBotName = botName;
+    log.info("Started session for bot name:{} , username:{}", botName, userName);
+    setReady(true);
+  }
 
+  private void initializeChatSession(String userName, String botName, Chat chat) {
     // lets test if the robot knows the name of the person in the session
     String name = chat.predicates.get("name").trim();
     // TODO: this implies that the default value for "name" is default
@@ -682,11 +670,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
         e.printStackTrace();
       }
     }
-    // this.currentBotName = botName;
-    log.info("Started session for bot name:{} , username:{}", botName, userName);
-    // TODO: to make sure if the start session is updated, that the button
-    // updates in the gui ?
-    setReady(true);
   }
 
   public void addCategory(Category c) {
@@ -696,11 +679,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void addCategory(String pattern, String template, String that) {
     log.info("Adding category {} to respond with {} for the that context {}", pattern, template, that);
-    // TODO: expose that / topic / etc..
-    /// TODO: what filename?!
+    // TODO: expose that / topic / filename?!
     int activationCnt = 0;
     String topic = "*";
-    // TODO: what is this used for?
+    // TODO: what is this used for?  can we tell the bot to only write out certain aiml files and leave the rest as
+    // immutable
     String filename = "mrl_added.aiml";
     // clean the pattern
     pattern = pattern.trim().toUpperCase();
@@ -713,7 +696,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * TODO : check things using it
+   * Use startSession instead.
    */
   @Deprecated
   public boolean setUsername(String username) {
@@ -752,8 +735,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
-  // getters - setters
-
   public void setPath(String path) {
     if (path != null && !path.equals(this.path)) {
       this.path = path;
@@ -763,6 +744,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void setCurrentBotName(String currentBotName) {
     this.currentBotName = currentBotName;
+    broadcastState();
   }
 
   public void setVisualDebug(Boolean visualDebug) {
@@ -776,6 +758,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   public void setCurrentUserName(String currentUserName) {
     this.currentUserName = currentUserName;
+    broadcastState();
   }
 
   public String getPath() {
