@@ -22,6 +22,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
@@ -846,6 +847,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public static void main(String args[]) {
+    LoggingFactory.init("INFO");
     Runtime.start("gui", "SwingGui");
     Runtime.start("brain", "ProgramAB");
   }
