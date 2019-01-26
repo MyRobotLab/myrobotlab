@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
@@ -36,11 +37,14 @@ import org.slf4j.Logger;
  *
  * More Info at http://aitools.org/ProgramAB
  * 
+ * The ProgramAB service is the host to many AIML based Bots.
+ * Each bot can maintain a chat session with multiple users.
+ * This association between a bot and a user
+ * 
  * @author kwatters
  *
  */
 public class ProgramAB extends Service implements TextListener, TextPublisher {
-
   // Internal class for the program ab response.
   public static class Response {
     // FIXME - timestamps are usually longs System.currentTimeMillis()
@@ -74,21 +78,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       str.append("]]");
       return str.toString();
     }
-    
+
   }
 
   static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
-  // The current bot
-  transient Bot bot = null;
+  // TODO: this path is really specific to each bot that is loaded.  
+  // right now there is a requirement that all active bots are loaded from the same directory. (defaulting to ProgramAB)
   private String path = "ProgramAB";
+  // bots map is keyed off the lower case version of the bot name.
+  private transient HashMap<String, Bot> bots = new HashMap<String, Bot>();
   // Mapping a bot to a username and chat session
-  transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
+  private transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
   // TODO: ProgramAB default bot should be Alice-en_US we should name the rest of the language specific default bots.
+  // initial default values for the current bot/and user
   private String currentBotName = "en-US";
   // This is the default username that is chatting with the bot.
   private String currentUserName = "default";
-  public int savePredicatesInterval = 5000; // TODO: every 5 minutes  (currently 5 seconds.)
+  public int savePredicatesInterval = 300000; // every 5 minutes
   // TODO: move the implementation from the gui to this class so it can be used across web and swing gui properly. 
   boolean visualDebug = true;
 
@@ -172,7 +179,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public Response getResponse(String userName, String botName, String text) {
     return getResponse(userName, botName, text, true);    
   }
-  
+
   /**
    * Gets a response and optionally update if this is the current bot session that's active globally.
    * 
@@ -194,6 +201,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     if (updateCurrentSession) {
       updateCurrentSession(userName, botName);
     }
+
+    Bot bot = bots.get(botName.toLowerCase());
     if (bot == null) {
       String error = "ERROR: Core not loaded, please load core before chatting.";
       error(error);
@@ -288,6 +297,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public void addToSet(String setName, String setValue) {
     // add to the set for the bot.
+    Bot bot = bots.get(getCurrentBotName().toLowerCase());
     AIMLSet updateSet = bot.setMap.get(setName);
     setValue = setValue.toUpperCase().trim();
     if (updateSet != null) {
@@ -313,6 +323,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public void addToMap(String mapName, String key, String value) {
     // add an entry to the map.
+    Bot bot = bots.get(getCurrentBotName().toLowerCase());
     AIMLMap updateMap = bot.mapMap.get(mapName);
     key = key.toUpperCase().trim();
     if (updateMap != null) {
@@ -340,7 +351,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     Predicates preds = getChat(username, botName).predicates;
     preds.put(predicateName, predicateValue);
   }
-  
+
   @Deprecated
   public void unsetPredicate(String username, String predicateName) {
     removePredicate(username, getCurrentBotName(), predicateName);
@@ -358,7 +369,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     Predicates preds = getChat(username, botName).predicates;
     return preds.get(predicateName);
   }
-  
+
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
@@ -400,6 +411,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public ArrayList<String> listPatterns(String botName) {
     ArrayList<String> patterns = new ArrayList<String>();
+    Bot bot = bots.get(botName.toLowerCase());
     for (Category c : bot.brain.getCategories()) {
       patterns.add(c.getPattern());
     }
@@ -493,6 +505,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     reloadSession(getPath(), session, botName);
   }
 
+  /**
+   * This method will close the current bot, and reload it from AIML
+   * It then will then re-establish only the session associated with userName.
+   * 
+   * @param path
+   * @param userName
+   * @param botName
+   */
   public void reloadSession(String path, String userName, String botName) {
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
@@ -501,9 +521,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       sessions.get(botName).remove(userName);
       log.info("{} session removed", sessions);
     }
-    bot = null;
-    // TODO: we should make sure we keep the same path as before.
+    // TODO: whats the behavior..  if we reload a session
+    // are we reloading the underlying bot and then reloading all of the sessions for that bot?
+    // or just the current session?  this is some tricky business
+    // we should probably reload all sessions for a given botName.. right?
+    Set<String> userSessions = sessions.get(botName).keySet();
+    bots.remove(botName.toLowerCase());
     startSession(path, userName, getCurrentBotName());
+    // TODO: we should make sure we keep the same path as before.
+    // for (String user : userSessions ) {
+    //   startSession(path, user, getCurrentBotName());
+    // }
   }
 
   /**
@@ -513,31 +541,35 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public void savePredicates() throws IOException {
     for (String botName : sessions.keySet()) {
       for (String userName : sessions.get(botName).keySet()) {
-        String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
-        File sessionPredFile = new File(sessionPredicateFilename);
-        // if the file doesn't exist.. we should create it.. (and make the
-        // directories for it.)
-        if (!sessionPredFile.getParentFile().exists()) {
-          // create the directory.
-          log.info("Creating the directory {}", sessionPredFile.getParentFile());
-          sessionPredFile.getParentFile().mkdirs();
-        }
-        Chat chat = getChat(userName, botName);
-        // overwrite the original file , this should always be a full set.
-        log.info("Writing predicate file for session {} {}", botName, userName);
-        StringBuilder sb = new StringBuilder();
-        for (String predicate : chat.predicates.keySet()) {
-          String value = chat.predicates.get(predicate);
-          sb.append(predicate + ":" + value + "\n");
-        }
-        FileWriter predWriter = new FileWriter(sessionPredFile, false);
-        BufferedWriter bw = new BufferedWriter(predWriter);
-        bw.write(sb.toString());
-        bw.close();
-        log.info("Saved predicates to file {}", sessionPredFile.getAbsolutePath());
+        savePredicates(botName, userName);
       }
     }
     log.info("Done saving predicates.");
+  }
+
+  private void savePredicates(String botName, String userName) throws IOException {
+    String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
+    File sessionPredFile = new File(sessionPredicateFilename);
+    // if the file doesn't exist.. we should create it.. (and make the
+    // directories for it.)
+    if (!sessionPredFile.getParentFile().exists()) {
+      // create the directory.
+      log.info("Creating the directory {}", sessionPredFile.getParentFile());
+      sessionPredFile.getParentFile().mkdirs();
+    }
+    Chat chat = getChat(userName, botName);
+    // overwrite the original file , this should always be a full set.
+    log.info("Writing predicate file for session {} {}", botName, userName);
+    StringBuilder sb = new StringBuilder();
+    for (String predicate : chat.predicates.keySet()) {
+      String value = chat.predicates.get(predicate);
+      sb.append(predicate + ":" + value + "\n");
+    }
+    FileWriter predWriter = new FileWriter(sessionPredFile, false);
+    BufferedWriter bw = new BufferedWriter(predWriter);
+    bw.write(sb.toString());
+    bw.close();
+    log.info("Saved predicates to file {}", sessionPredFile.getAbsolutePath());
   }
 
   public void setEnableAutoConversation(boolean enableAutoConversation) {
@@ -593,19 +625,28 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     this.setPath(path);
     this.setCurrentBotName(botName);
     this.setCurrentUserName(userName);
+
+    // TODO: figure on case insensivity of this map.
+    // check if we've already started this bot.
+    Bot bot = bots.get(botName.toLowerCase());
     if (bot == null) {
+      // create a new bot if we haven't started it yet.
       bot = new Bot(botName, path, locale);
-    } else if (!botName.equalsIgnoreCase(bot.name)) {
-      bot = new Bot(botName, path, locale);
-    }
-    // Hijack all the SRAIX requests and implement them as a synchronous call to
-    // a service to return a string response for programab...
-    bot.setSraixHandler(new MrlSraixHandler());
+      // Hijack all the SRAIX requests and implement them as a synchronous call to
+      // a service to return a string response for programab...
+      bot.setSraixHandler(new MrlSraixHandler());
+      // put the bot into the bots map/cache referenced by it's lowercase botName.
+      bots.put(botName.toLowerCase(), bot);
+    } 
+
+    // create a chat session from the bot.
     Chat chat = new Chat(bot);
     // load session specific predicates, these override the default ones.
     String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
     chat.predicates.getPredicateDefaults(sessionPredicateFilename);
 
+    // create a new session map for this bot ?  
+    // TODO: this shouldn't be here.. it should be when the bot is created
     HashMap<String, ChatData> session = new HashMap<String, ChatData>();
     session.put(userName, new ChatData(chat));
 
@@ -649,6 +690,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   public void addCategory(Category c) {
+    Bot bot = bots.get(getCurrentBotName().toLowerCase());
     bot.brain.addCategory(c);
   }
 
@@ -675,13 +717,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   @Deprecated
   public boolean setUsername(String username) {
-    startSession(this.getPath(), username, this.getCurrentBotName());
+    startSession(getPath(), username, getCurrentBotName());
     return true;
   }
 
   public void writeAIML() {
-    if (bot != null) {
-      bot.writeAIMLFiles();
+    // TODO: revisit this method to make sure 
+    for (Bot bot : bots.values()) {
+      if (bot != null) {
+        bot.writeAIMLFiles();
+      }
     }
   }
 
@@ -689,19 +734,22 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * writeAndQuit will write brain to disk For learn.aiml is concerned
    */
   public void writeAndQuit() {
-    if (bot == null) {
-      log.info("no bot - don't need to write and quit");
-      return;
+    // write out all bots aiml & save all predicates for all sessions?
+    for (Bot bot : bots.values()) {
+      if (bot == null) {
+        log.info("no bot - don't need to write and quit");
+        continue;
+      }
+      try {
+        savePredicates();
+        // important to save learnf.aiml
+        writeAIML();
+      } catch (IOException e1) {
+        // TODO Auto-generated catch block
+        e1.printStackTrace();
+      }
+      bot.writeQuit();
     }
-    try {
-      savePredicates();
-      // important to save learnf.aiml
-      writeAIML();
-    } catch (IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    bot.writeQuit();
   }
 
   // getters - setters
