@@ -485,13 +485,17 @@ public class OpenCV extends AbstractComputerVision {
     // TODO - chaos monkey yolo
      OpenCVFilter yoloFilter = cv.addFilter("yolo");
     
-     // yoloFilter.disable();
+     yoloFilter.enable();
      cv.capture();
-     yoloFilter.enable();
-     yoloFilter.disable();
-     yoloFilter.enable();
-     yoloFilter.disable();
-     yoloFilter.enable();
+//     for (int i = 0 ; i < 10; i++) {
+//       yoloFilter.enable();
+//       yoloFilter.disable();
+//     }
+    //  Thread.sleep(2000);
+//     yoloFilter.enable();
+    // cv.capture();
+//     yoloFilter.disable();
+//     yoloFilter.enable();
     
     // cv.load();
 
@@ -1964,5 +1968,31 @@ public class OpenCV extends AbstractComputerVision {
   public PointCloud getPointCloud() {
     return lastPointCloud;
   }
-
+  
+  // Filter enable/disable helper methods.
+  public void enableFilter(String name) {
+    OpenCVFilter f = filters.get(name);
+    if (!f.isEnabled()) {
+      f.enable();
+      broadcastState();
+    }
+  }
+  
+  public void disableFilter(String name) {
+    OpenCVFilter f = filters.get(name);
+    if (f.isEnabled()) {
+      f.disable();
+      broadcastState();
+    }
+  }
+  
+  public void toggleFilter(String name) {
+    OpenCVFilter f = filters.get(name); 
+    if (f.isEnabled())
+      f.disable();
+    else
+      f.enable();
+    broadcastState();
+  }
+  
 }
