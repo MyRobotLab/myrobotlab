@@ -553,7 +553,8 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
           int index = theList.locationToIndex(mouseEvent.getPoint());
           if (index >= 0) {
             Object o = theList.getModel().getElementAt(index);
-            System.out.println("Double-clicked on: " + o.toString());
+            log.info("Double-clicked on: {} Toggling filter enabled.", o);
+            send("toggleFilter", o.toString());
           }
         }
       }
