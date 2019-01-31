@@ -25,6 +25,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.AnalogHandler;
 import org.myrobotlab.jme3.HudText;
+import org.myrobotlab.jme3.Interpolator;
 import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3ServoController;
@@ -39,7 +40,8 @@ import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.virtual.VirtualMotor;
+import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
@@ -63,7 +65,6 @@ import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
-import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -79,8 +80,8 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.Spatial.CullHint;
+import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.control.BillboardControl;
 import com.jme3.scene.control.CameraControl.ControlDirection;
 import com.jme3.scene.debug.Grid;
@@ -98,7 +99,7 @@ import com.simsilica.lemur.style.BaseStyles;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements ActionListener {
+public class JMonkeyEngine extends Service implements ActionListener, Simulator {
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
@@ -113,7 +114,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
    * 
    */
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(JMonkeyEngine.class.getCanonicalName());
+    ServiceType meta = new ServiceType(JMonkeyEngine.class);
     meta.addDescription("is a 3d game engine, used for simulators");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // TODO: extract version numbers like this into a constant/enum
@@ -169,11 +170,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   transient Camera cameraSettings;
 
   transient CameraNode camNode;
-
   boolean ctrlLeftPressed = false;
-  boolean mouseLeftPressed = false;
-  boolean mouseRightPressed = false;
-
   String defaultAppType = "Jme3App";
 
   long deltaMs;
@@ -183,15 +180,17 @@ public class JMonkeyEngine extends Service implements ActionListener {
   transient FlyByCamera flyCam;
 
   String fontColor = "#66ff66"; // green
+
   int fontSize = 14;
-
   boolean fullscreen = false;
-  transient Node guiNode;
 
+  transient Node guiNode;
   transient Map<String, HudText> guiText = new TreeMap<>();
+
   int height = 768;
   transient AtomicInteger id = new AtomicInteger();
   transient InputManager inputManager;
+  transient Interpolator interpolator;
   protected Queue<Jme3Msg> jmeMsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
   final public String KEY_SEPERATOR = "/";
 
@@ -200,6 +199,10 @@ public class JMonkeyEngine extends Service implements ActionListener {
   transient MainMenuState menu;
 
   String modelsDir = assetsDir + File.separator + "Models";
+
+  boolean mouseLeftPressed = false;
+
+  boolean mouseRightPressed = false;
 
   final Map<String, String> nameMappings = new TreeMap<String, String>();
 
@@ -214,9 +217,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   transient Node rootNode;
 
-  transient Spatial selectedForView = null;
-
   transient Spatial selectedForMovement = null;
+
+  transient Spatial selectedForView = null;
 
   int selectIndex = 0;
 
@@ -244,6 +247,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     d.mkdirs();
     util = new Jme3Util(this);
     analog = new AnalogHandler(this);
+    interpolator = new Interpolator(this);
     servoController = new Jme3ServoController(this);
   }
 
@@ -261,7 +265,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   public void addBox(String name, Float width, Float depth, Float height, String color, Boolean fill) {
 
     Node boxNode = null;
-    Spatial check = get(name);
+    Spatial check = find(name);
 
     if (check != null && check instanceof Geometry) {
       log.error("addBox - scene graph already has {} and it is a Geometry", check);
@@ -322,7 +326,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
   }
 
   public void addGrid(String name, Vector3f pos, int size, String color) {
-    Spatial s = get(name);
+    Spatial s = find(name);
     if (s != null) {
       log.warn("addGrid {} already exists");
       return;
@@ -421,6 +425,64 @@ public class JMonkeyEngine extends Service implements ActionListener {
     return tree;
   }
 
+  public void cameraLookAt(Spatial spatial) {
+
+    // INTERESTING BUG - DO NOT DIRECTLY LOOK AT BECAUSE WHEN WE PUT COMMANDS IN
+    // ORDER
+    // ROTATING (to lookAt) IS NOT TRANSITIVE, AND THIS HAPPENS BEFORE ANY
+    // PREVIOUS MOVE :P
+    // SO IT DOES NOT WORK - solution is to process the lookAt with the JME
+    // thread processing
+    // all the other moves & rotations !
+    // camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    addMsg("lookAt", "camera", spatial.getName());
+  }
+
+  public void cameraLookAt(String name) {
+    Spatial s = get(name);
+    if (s == null) {
+      log.error("cameraLookAt - cannot find {}", name);
+      return;
+    }
+    cameraLookAt(s);
+  }
+
+  public void cameraLookAtRoot() {
+    cameraLookAt(rootNode);
+  }
+
+  // FIXME make a more general Collision check..
+  public Geometry checkCollision() {
+
+    // Reset results list.
+    CollisionResults results = new CollisionResults();
+    // Convert screen click to 3d position
+    Vector2f click2d = inputManager.getCursorPosition();
+    Vector3f click3d = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+    Vector3f dir = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+    // Aim the ray from the clicked spot forwards.
+    Ray ray = new Ray(click3d, dir);
+    // Collect intersections between ray and all nodes in results list.
+    rootNode.collideWith(ray, results);
+    // (Print the results so we see what is going on:)
+    for (int i = 0; i < results.size(); i++) {
+      // (For each “hit”, we know distance, impact point, geometry.)
+      float dist = results.getCollision(i).getDistance();
+      Vector3f pt = results.getCollision(i).getContactPoint();
+      String target = results.getCollision(i).getGeometry().getName();
+      System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+    }
+    // Use the results -- we rotate the selected geometry.
+    if (results.size() > 0) {
+      // The closest result is the target that the player picked:
+      Geometry target = results.getClosestCollision().getGeometry();
+      // Here comes the action:
+      log.info("you clicked " + target.getName());
+      return target;
+    }
+    return null;
+  }
+
   public void clone(String name, String newName) {
 
   }
@@ -465,6 +527,51 @@ public class JMonkeyEngine extends Service implements ActionListener {
     setSelected(siblings.get(selectIndex));
   }
 
+  // FIXME !!!! enableCoodinateAxes - same s bb including parent if geometry
+  public void enableAxes(Spatial spatial, boolean b) {
+
+    /**
+     * mmm - may be a bad idea - but may need to figure solution out.. if
+     * (spatial instanceof Geometry) { UserData data =
+     * jme.getUserData(spatial.getParent()); data.enableCoordinateAxes(b);
+     * return; }
+     */
+
+    if (spatial.getName().startsWith("_")) {
+      log.warn("enableAxes(%s) a meta object not creating/enabling", spatial.getName());
+      return;
+    }
+
+    // String name = getCoorAxesName(spatial);
+
+    // we need the geometry's parent
+    Node parent = spatial.getParent();
+    // we need to check to see if this uniquely named Geometry's bb exists ..
+    String axesName = getCoorAxesName(spatial); //
+    Spatial axis = find(axesName, parent);
+    if (axis == null) {
+      axis = createUnitAxis(axesName);
+    }
+
+    if (spatial instanceof Geometry) {
+      parent.attachChild(axis);
+    } else {
+      // spatial is a node - attach it directly
+      ((Node) spatial).attachChild(axis);
+    }
+    /*
+     * if (axis == null) { axis = jme.createUnitAxis();
+     * axis.setLocalTranslation(spatial.getWorldTranslation()); << ???
+     * axis.setLocalRotation(spatial.getWorldRotation()); ((Node)
+     * spatial).attachChild(axis); }
+     */
+    if (b) {
+      axis.setCullHint(CullHint.Never);
+    } else {
+      axis.setCullHint(CullHint.Always);
+    }
+  }
+
   public void enableBoundingBox(Spatial spatial, boolean b) {
     enableBoundingBox(spatial, b, null);
   }
@@ -505,6 +612,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // BB is a "new" object - and you can't add nodes to a Geometry,
     // so current strategy is to grab the Geometry's parent and add
     // a name "unique" BB for that Geometry
+
     if (spatial instanceof Geometry) {
       parent.attachChild(bb);
     } else {
@@ -512,63 +620,16 @@ public class JMonkeyEngine extends Service implements ActionListener {
       ((Node) spatial).attachChild(bb);
     }
 
+    // FIXME !!! - so it turns out scale is correct if NOT attached to the
+    // node/tree system which has been scaled :P
+    // the following gives an accurately sized bounding box - BUT it will not
+    // move with the node in question :(
+    // rootNode.attachChild(bb);
+
     if (b) {
       bb.setCullHint(CullHint.Never);
     } else {
       bb.setCullHint(CullHint.Always);
-    }
-  }
-
-  // FIXME !!!! enableCoodinateAxes - same s bb including parent if geometry
-  public void enableAxes(Spatial spatial, boolean b) {
-
-    /**
-     * mmm - may be a bad idea - but may need to figure solution out.. if
-     * (spatial instanceof Geometry) { UserData data =
-     * jme.getUserData(spatial.getParent()); data.enableCoordinateAxes(b);
-     * return; }
-     */
-    
-    if (spatial.getName().startsWith("_")) {
-      log.warn("enableAxes(%s) a meta object not creating/enabling", spatial.getName());
-      return;
-    }
-
-    // String name = getCoorAxesName(spatial);
-
-    // we need the geometry's parent
-    Node parent = spatial.getParent();
-    // we need to check to see if this uniquely named Geometry's bb exists ..
-    String axesName = getCoorAxesName(spatial); //
-    Spatial axis = find(axesName, parent);
-    if (axis == null) {
-      axis = createUnitAxis(axesName);
-    }
-
-    if (spatial instanceof Geometry) {
-      parent.attachChild(axis);
-    } else {
-      // spatial is a node - attach it directly
-      ((Node) spatial).attachChild(axis);
-    }
-    /*
-     * if (axis == null) { axis = jme.createUnitAxis();
-     * axis.setLocalTranslation(spatial.getWorldTranslation()); << ???
-     * axis.setLocalRotation(spatial.getWorldRotation()); ((Node)
-     * spatial).attachChild(axis); }
-     */
-    if (b) {
-      axis.setCullHint(CullHint.Never);
-    } else {
-      axis.setCullHint(CullHint.Always);
-    }
-  }
-
-  public String getType(Spatial spatial) {
-    if (spatial instanceof Node) {
-      return "n";
-    } else {
-      return "g";
     }
   }
 
@@ -619,6 +680,48 @@ public class JMonkeyEngine extends Service implements ActionListener {
     }
   }
 
+  // FYI - not done with the JME thread ..
+  // TODO - addGrid called from enableFloorGrid
+  public void enableGrid(boolean b) {
+    Spatial s = find("floor-grid");
+    if (s == null) {
+      addGrid("floor-grid");
+      s = get("floor-grid");
+    }
+    if (b) {
+      s.setCullHint(CullHint.Never);
+    } else {
+      s.setCullHint(CullHint.Always);
+    }
+  }
+
+  public Spatial find(String name) {
+    return find(name, null);
+  }
+
+  /**
+   * the all purpose find by name method
+   * 
+   * @param string
+   * @return
+   */
+  public Spatial find(String name, Node startNode) {
+    if (name.equals("root")) {
+      return rootNode;
+    }
+    if (startNode == null) {
+      startNode = rootNode;
+    }
+
+    // FIXME - is this needed ?
+    if (nameMappings.containsKey(name)) {
+      name = nameMappings.get(name);
+    }
+
+    Spatial child = startNode.getChild(name);
+    return child;
+  }
+
   public String format(Node node, Integer selected) {
     StringBuilder sb = new StringBuilder();
     List<Spatial> children = node.getChildren();
@@ -652,25 +755,39 @@ public class JMonkeyEngine extends Service implements ActionListener {
     return ret;
   }
 
-  public Spatial find(String name) {
-    return find(name, null);
-  }
-
   /**
-   * the all purpose find by name method
+   * get default axis local rotation in degrees
    * 
-   * @param string
+   * @param name
    * @return
    */
-  public Spatial find(String name, Node startNode) {
-    if (name.equals("root")) {
-      return rootNode;
+  public Float getAngle(String name) {
+    return getAngle(name, null);
+  }
+
+  public Float getAngle(String name, String axis) {
+    Spatial s = get(name);
+    if (s == null) {
+      return null;
     }
-    if (startNode == null) {
-      startNode = rootNode;
+    Quaternion q = s.getLocalRotation();
+    float[] angles = new float[3];
+    q.toAngles(angles);
+    UserData data = getUserData(name);
+    // default rotation is around Y axis unless specified
+    Vector3f rotMask = util.getUnitVector(axis); // Vector3f.UNIT_Y;
+    if (rotMask != null) {
+      rotMask = data.rotationMask;
     }
-    Spatial child = startNode.getChild(name);
-    return child;
+
+    int axisIndex = Jme3Util.getIndexFromUnitVector(rotMask);
+    float rawAngle = angles[axisIndex] * 180 / FastMath.PI;
+
+    float result = rawAngle;
+    if (data.mapper != null) {
+      result = (float) data.mapper.calcInput(rawAngle);
+    }
+    return result;
   }
 
   public Jme3App getApp() {
@@ -679,6 +796,22 @@ public class JMonkeyEngine extends Service implements ActionListener {
 
   public AssetManager getAssetManager() {
     return assetManager;
+  }
+
+  public String getBbName(Spatial spatial) {
+    if (spatial.getName().startsWith("_")) {
+      return null;
+    }
+    String geoBbName = String.format("_bb-%s-%s", getType(spatial), spatial.getName());
+    return geoBbName;
+  }
+
+  public String getCoorAxesName(Spatial spatial) {
+    if (spatial.getName().startsWith("_")) {
+      return null;
+    }
+    String geoBbName = String.format("_axis-%s-%s", getType(spatial), spatial.getName());
+    return geoBbName;
   }
 
   private String getExt(String name) {
@@ -782,6 +915,14 @@ public class JMonkeyEngine extends Service implements ActionListener {
     return selectedForView;
   }
 
+  /**
+   * get the servo controller - that belongs to the servo (name)
+   */
+  @Override
+  public ServoController getServoController() {
+    return servoController;
+  }
+
   public AppSettings getSettings() {
     return settings;
   }
@@ -795,6 +936,14 @@ public class JMonkeyEngine extends Service implements ActionListener {
       top = top.getParent();
     }
     return top;
+  }
+
+  public String getType(Spatial spatial) {
+    if (spatial instanceof Node) {
+      return "n";
+    } else {
+      return "g";
+    }
   }
 
   // TODO - possibly Geometries
@@ -820,9 +969,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
    * @return
    */
   public UserData getUserData(String path /* , boolean useDepth */) {
-    if (nameMappings.containsKey(path)) {
-      path = nameMappings.get(path);
-    }
 
     Spatial spatial = get(path);
 
@@ -841,6 +987,10 @@ public class JMonkeyEngine extends Service implements ActionListener {
       userData = new UserData(this, spatial);
     }
     return userData;
+  }
+
+  public void hide(String name) {
+    setVisible(name, true);
   }
 
   public void initPointCloud(PointCloud pc) {
@@ -1056,26 +1206,8 @@ public class JMonkeyEngine extends Service implements ActionListener {
     }
   }
 
-  public void cameraLookAt(String name) {
-    Spatial s = get(name);
-    if (s == null) {
-      log.error("cameraLookAt - cannot find {}", name);
-      return;
-    }
-    cameraLookAt(s);
-  }
-
-  public void cameraLookAt(Spatial spatial) {
-
-    // INTERESTING BUG - DO NOT DIRECTLY LOOK AT BECAUSE WHEN WE PUT COMMANDS IN
-    // ORDER
-    // ROTATING (to lookAt) IS NOT TRANSITIVE, AND THIS HAPPENS BEFORE ANY
-    // PREVIOUS MOVE :P
-    // SO IT DOES NOT WORK - solution is to process the lookAt with the JME
-    // thread processing
-    // all the other moves & rotations !
-    // camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
-    addMsg("lookAt", "camera", spatial.getName());
+  public void lookAt(String viewer, String viewee) {
+    addMsg("lookAt", viewer, viewee);
   }
 
   // relative move
@@ -1128,15 +1260,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
     }
   }
 
-  public void setSelected(String name) {
-    Spatial s = get(name);
-    if (s == null) {
-      log.error("setSelected {} is null", name);
-      return;
-    }
-    setSelected(s);
-  }
-
   /**
    * onAnalog
    * 
@@ -1145,7 +1268,7 @@ public class JMonkeyEngine extends Service implements ActionListener {
    * @param tpf
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
-    log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
+    // log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
     if (selectedForMovement == null) {
       selectedForMovement = camera;// FIXME "new" selectedMove vs selected
@@ -1160,8 +1283,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
     // wrap text of breadcrumbs
     // draggable - resize for menu - what you set is how it stays
     // when menu active - inputs(hotkey when non-menu) should be deactive
-
-    log.info("{}", keyPressed);
 
     // ROTATE
     if (mouseLeftPressed && altLeftPressed && !shiftLeftPressed) {
@@ -1209,38 +1330,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
       // selected.setLocalScale(selected.getLocalScale().mult(1.0f));
       selectedForMovement.move(0, 0, keyPressed * 1);
     }
-  }
-
-  // FIXME make a more general Collision check..
-  public Geometry checkCollision() {
-
-    // Reset results list.
-    CollisionResults results = new CollisionResults();
-    // Convert screen click to 3d position
-    Vector2f click2d = inputManager.getCursorPosition();
-    Vector3f click3d = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
-    Vector3f dir = cameraSettings.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
-    // Aim the ray from the clicked spot forwards.
-    Ray ray = new Ray(click3d, dir);
-    // Collect intersections between ray and all nodes in results list.
-    rootNode.collideWith(ray, results);
-    // (Print the results so we see what is going on:)
-    for (int i = 0; i < results.size(); i++) {
-      // (For each “hit”, we know distance, impact point, geometry.)
-      float dist = results.getCollision(i).getDistance();
-      Vector3f pt = results.getCollision(i).getContactPoint();
-      String target = results.getCollision(i).getGeometry().getName();
-      System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
-    }
-    // Use the results -- we rotate the selected geometry.
-    if (results.size() > 0) {
-      // The closest result is the target that the player picked:
-      Geometry target = results.getClosestCollision().getGeometry();
-      // Here comes the action:
-      log.info("you clicked " + target.getName());
-      return target;
-    }
-    return null;
   }
 
   /**
@@ -1294,6 +1383,10 @@ public class JMonkeyEngine extends Service implements ActionListener {
       }
       attach(service);
     }
+  }
+
+  public void onRegistered(Servo servo) throws Exception {
+    attach(servo);
   }
 
   public Node putNode(String name) {
@@ -1429,28 +1522,45 @@ public class JMonkeyEngine extends Service implements ActionListener {
     data.setName(newName);
   }
 
-  /**
-   * use default axis
-   * 
-   * @param object
-   * @param degrees
-   */
-  public void rotate(String object, float degrees) {
-    // TODO Auto-generated method stub
-
-  }
-
   public void rotateOnAxis(String name, String axis, double degrees) {
     addMsg("rotateOnAxis", name, axis, (float) degrees);
   }
 
+  /**
+   * rotate on the "default" axis to a location without using speed
+   * 
+   * @param name
+   * @param degrees
+   */
   public void rotateTo(String name, double degrees) {
     addMsg("rotateTo", name, (float) degrees);
   }
 
-  public boolean saveSpatial(String name) {
-    Spatial spatial = get(name);
-    return saveSpatial(spatial, spatial.getName());
+  public void rotateTo(String name, double degrees, double speed) {
+    interpolator.addAnimation(name, "rotateTo", (float) degrees, (float) speed);
+    // addMsg("rotateTo", name, (float) degrees, (float)speed);
+  }
+
+  // this just saves keys !!!
+  public void saveKeys(Spatial toSave) {
+    try {
+      String filename = FileIO.cleanFileName(toSave.getName()) + ".txt";
+      TreeMap<String, UserData> tree = new TreeMap<String, UserData>();
+      buildTree(tree, "", toSave, false, true);
+      // String ret = CodecUtils.toJson(tree);
+      FileOutputStream fos = new FileOutputStream(filename);
+      for (String key : tree.keySet()) {
+        String type = (tree.get(key) != null && tree.get(key).getSpatial() != null && tree.get(key).getSpatial() instanceof Node) ? " (Node)" : " (Geometry)";
+        fos.write(String.format("%s\n", key + type).getBytes());
+      }
+      fos.close();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public boolean saveNodes() {
+    return saveSpatial(rootNode, null);
   }
 
   public boolean saveSpatial(Spatial spatial) {
@@ -1492,26 +1602,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
     return false;
   }
 
-  public boolean saveNodes() {
-    return saveSpatial(rootNode, null);
-  }
-
-  // this just saves keys !!!
-  public void saveKeys(Spatial toSave) {
-    try {
-      String filename = FileIO.cleanFileName(toSave.getName()) + ".txt";
-      TreeMap<String, UserData> tree = new TreeMap<String, UserData>();
-      buildTree(tree, "", toSave, false, true);
-      // String ret = CodecUtils.toJson(tree);
-      FileOutputStream fos = new FileOutputStream(filename);
-      for (String key : tree.keySet()) {
-        String type = (tree.get(key) != null && tree.get(key).getSpatial() != null && tree.get(key).getSpatial() instanceof Node) ? " (Node)" : " (Geometry)";
-        fos.write(String.format("%s\n", key + type).getBytes());
-      }
-      fos.close();
-    } catch (Exception e) {
-      error(e);
-    }
+  public boolean saveSpatial(String name) {
+    Spatial spatial = get(name);
+    return saveSpatial(spatial, spatial.getName());
   }
 
   // FIXME - base64 encoding of j3o file - "all in one file" gltf instead ???
@@ -1529,7 +1622,26 @@ public class JMonkeyEngine extends Service implements ActionListener {
   // TODO - need to make thread safe ? JME thread ?
   // turn it into a jme msg - put it on the update queue ?
   public void scale(String name, float scale) {
-    addMsg("scale", name, scale);  
+    addMsg("scale", name, scale);
+  }
+
+  public List<Spatial> search(String text) {
+    return search(text, null, null, null);
+  }
+
+  public List<Spatial> search(String text, Node beginNode, Boolean exactMatch, Boolean includeGeometries) {
+    if (beginNode == null) {
+      beginNode = rootNode;
+    }
+    if (exactMatch == null) {
+      exactMatch = false;
+    }
+    if (includeGeometries == null) {
+      includeGeometries = true;
+    }
+    Search search = new Search(text, exactMatch, includeGeometries);
+    beginNode.breadthFirstTraversal(search);
+    return search.getResults();
   }
 
   public void setDisplayFps(boolean b) {
@@ -1588,6 +1700,15 @@ public class JMonkeyEngine extends Service implements ActionListener {
     }
   }
 
+  public void setSelected(String name) {
+    Spatial s = get(name);
+    if (s == null) {
+      log.error("setSelected {} is null", name);
+      return;
+    }
+    setSelected(s);
+  }
+
   public void setVisible(boolean b) {
     if (selectedForView != null) {
       if (b) {
@@ -1596,6 +1717,19 @@ public class JMonkeyEngine extends Service implements ActionListener {
         selectedForView.setCullHint(Spatial.CullHint.Always);
       }
     }
+  }
+
+  public void setVisible(String name, boolean b) {
+    Spatial s = get(name);
+    if (b) {
+      s.setCullHint(CullHint.Never);
+    } else {
+      s.setCullHint(CullHint.Always);
+    }
+  }
+
+  public void show(String name) {
+    setVisible(name, false);
   }
 
   public void simpleInitApp() {
@@ -1798,6 +1932,8 @@ public class JMonkeyEngine extends Service implements ActionListener {
       hudTxt.update();
     }
 
+    interpolator.generateMoves();
+
     while (jmeMsgQueue.size() > 0) {
       Jme3Msg msg = null;
       try {
@@ -1868,8 +2004,9 @@ public class JMonkeyEngine extends Service implements ActionListener {
         future.get();
 
         // default positioning
-        moveTo("camera", 0, 1, 4);
+        moveTo("camera", 0, 3, 6);
         cameraLookAtRoot();
+        rotateOnAxis("camera", "x", -20);
         enableGrid(true);
 
       } catch (Exception e) {
@@ -1900,7 +2037,6 @@ public class JMonkeyEngine extends Service implements ActionListener {
         }
       }
     }
-
   }
 
   // FIXME - requirements for "re-start" is everything correctly de-initialized
@@ -1940,124 +2076,103 @@ public class JMonkeyEngine extends Service implements ActionListener {
     return CodecUtils.toJson(node);
     // save it out
   }
-
-  public void lookAt(String viewer, String viewee) {
-    addMsg("lookAt", viewer, viewee);
-  }
-
-  public List<Spatial> search(String text) {
-    return search(text, null, null, null);
-  }
-
-  public List<Spatial> search(String text, Node beginNode, Boolean exactMatch, Boolean includeGeometries) {
-    if (beginNode == null) {
-      beginNode = rootNode;
-    }
-    if (exactMatch == null) {
-      exactMatch = false;
-    }
-    if (includeGeometries == null) {
-      includeGeometries = true;
-    }
-    Search search = new Search(text, exactMatch, includeGeometries);
-    beginNode.breadthFirstTraversal(search);
-    return search.getResults();
-  }
-
+  
+  
   public static void main(String[] args) {
     try {
+
+      // FIXME - onRegister race condition
+      // FIXME - STOOPID lastPos 90 failure !!!
+      // FIXME - make "load" work ..
+      
       LoggingFactory.init("info");
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
 
-      boolean test = true;
-      if (test) {
-        return;
-      }
+      // jme.addMapping("")
+      jme.rename("i01.leftHand.thumb1", "i01.leftHand.thumb");
+      jme.rename("i01.leftHand.ringFinger1", "i01.leftHand.ringFinger");
+      jme.rename("i01.leftHand.index1", "i01.leftHand.index");
+      jme.rename("i01.rightHand.majeure1", "i01.leftHand.majeure");
+      jme.rename("i01.leftHand.pinky1", "i01.leftHand.thumb");
 
-      InMoovHead i01_head = (InMoovHead) Runtime.start("i01.head", "InMoovHead");
-      // InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
-      // i01.startHead("XX");
+      jme.rename("i01.rightHand.thumb1", "i01.rightHand.thumb");
+      jme.rename("i01.rightHand.ringFinger1", "i01.rightHand.ringFinger");
+      jme.rename("i01.rightHand.index1", "i01.rightHand.index");
+      jme.rename("i01.rightHand.majeure1", "i01.rightHand.majeure");
+      jme.rename("i01.rightHand.pinky1", "i01.rightHand.thumb");
 
-      jme.enableGrid(true);
+      // new default axis
+
+      // inmoov "fix ups"
+      jme.rename("VinMoov2", "i01");
+      jme.scale("i01", 0.25f);
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
 
-      jme.setRotation("i01.head.rollNeck", "z");
-      jme.setRotation("i01.head.neck", "x");
+      // FIXME - make non-kludgy method of integrating NON ARDUINO !!
 
+      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+
+      // FIXME - turn into json file 
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
+//       jme.setMapper("i01.head.jaw", 0, 180, -10, 5); // is this true ? clipping vs attenuation .. should "not" min/max
+      jme.setMapper("i01.head.jaw", 0, 180, -10, 170); // is this true ? clipping vs attenuation .. should "not" min/max
+      jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
+      jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -180);
+      jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -180);
+      jme.setMapper("i01.rightArm.shoulder", 0, 180, -30, 150);
+      jme.setMapper("i01.leftArm.shoulder", 0, 180, -30, 150); // 124 = 29  & rest = 30
+      jme.setMapper("i01.rightArm.rotate", 0, 180, 90, 270);      
+      jme.setMapper("i01.leftArm.rotate", 0, 180, -90, 90);
+      // i01_rightArm_shoulder.rest()
+      // i01_leftArm_shoulder.rest()
 
-      Spatial spatial = jme.get("floor.box.01");
-      log.info("spatial {}", spatial);
 
-      Servo servo = (Servo) Runtime.start("i01.head.jaw", "Servo");
       jme.setRotation("i01.head.jaw", "x");
+      jme.setRotation("i01.head.rollNeck", "z");
+      jme.setRotation("i01.head.neck", "x");
+      jme.setRotation("i01.rightArm.bicep", "x");
+      jme.setRotation("i01.leftArm.bicep", "x");
+      // jme.setRotation("i01.rightArm.rotate", "y");
+      // jme.setRotation("i01.leftArm.rotate", "y");
+      jme.setRotation("i01.rightArm.shoulder", "z");
+      jme.setRotation("i01.leftArm.shoulder", "z");
+      
+      /*
+      InMoovHead head = (InMoovHead)Runtime.create("i01.head", "InMoovHead");
+      head.setController(jme.getServoController("blah")); // FIXME - look at this
+      head.startService();
+      */
+      ServoController sc = jme.getServoController();
+      i01.startHead(sc);
+      i01.startArm("left", sc);
+      i01.startArm("right", sc);
+      i01.startHand("left", sc);
+      i01.startHand("right", sc);
+      i01.startTorso(sc);
+      Runtime.start("i01.mouth", "NaturalReaderSpeech");
+      i01.startMouth();
+      i01.startMouthControl();
+      
+      // i01.setHead(head);      
+      
+      // i01.moveHead(10, 20, 90);
+      // i01.moveHead(30, 20, 10);
+      // Service.sleep(2000);
+      //i01.rest();
+      // Service.sleep(2000);
 
-      Service.sleep(2000);
+      // i01.startAll(null, null);
 
-      jme.scale("i01", 0.25f);
-
-      // previous end
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
 
-  public void show(String name) {
-    setVisible(name, false);
-  }
-
-  public void hide(String name) {
-    setVisible(name, true);
-  }
-
-  public void setVisible(String name, boolean b) {
-    Spatial s = get(name);
-    if (b) {
-      s.setCullHint(CullHint.Never);
-    } else {
-      s.setCullHint(CullHint.Always);
-    }
-  }
-
-  public void cameraLookAtRoot() {
-    cameraLookAt(rootNode);
-  }
-
-  // FYI - not done with the JME thread ..
-  // TODO - addGrid called from enableFloorGrid
-  public void enableGrid(boolean b) {
-    Spatial s = find("floor-grid");
-    if (s == null) {
-      addGrid("floor-grid");
-      s = get("floor-grid");
-    }
-    if (b) {
-      s.setCullHint(CullHint.Never);
-    } else {
-      s.setCullHint(CullHint.Always);
-    }
-  }
-
-  public String getBbName(Spatial spatial) {
-    if (spatial.getName().startsWith("_")) {
-      return null;
-    }
-    String geoBbName = String.format("_bb-%s-%s", getType(spatial), spatial.getName());
-    return geoBbName;
-  }
-
-  public String getCoorAxesName(Spatial spatial) {
-    if (spatial.getName().startsWith("_")) {
-      return null;
-    }
-    String geoBbName = String.format("_axis-%s-%s", getType(spatial), spatial.getName());
-    return geoBbName;
-  }
 
 }

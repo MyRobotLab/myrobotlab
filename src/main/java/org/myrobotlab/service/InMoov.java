@@ -2283,8 +2283,20 @@ public class InMoov extends Service {
 
     // For IntegratedMovement
     meta.addPeer("integratedMovement", "IntegratedMovement", "Inverse kinematic type movement");
-
     return meta;
+  }
+
+  public void setHead(InMoovHead head) {
+    this.head = head;
+  }
+
+  public InMoovHead startHead(ServoController controller) {
+    speakBlocking(languagePack.get("STARTINGHEAD"));
+    head = (InMoovHead) startPeer("head");
+    head.setController(controller);
+    // arduinos.put(port, head.controller); // FIXME - silly used by PIR -
+    // refactor out ..
+    return head;
   }
 
   public static void main(String[] args) throws Exception {
@@ -2323,4 +2335,38 @@ public class InMoov extends Service {
     i01.startOpenCV();
     i01.execGesture("BREAKITdaVinci()");
   }
+
+  public InMoovArm startArm(String side, ServoController controller) throws Exception {
+    // speakBlocking(languagePack.get("STARTINGLEFTARM"));
+    InMoovArm arm = (InMoovArm) startPeer(String.format("%sArm", side));
+    arm.setController(controller);
+    arms.put(side, arm);
+    arm.setSide(side);// FIXME WHO USES SIDE - THIS SHOULD BE NAME !!!
+    if ("left".equals(side)) {
+      leftArm = arm;
+    } else  if ("right".equals(side)) {
+      rightArm = arm;
+    }
+    return arm;
+  }
+
+  public InMoovHand startHand(String side, ServoController sc) {
+    InMoovHand hand = (InMoovHand) startPeer(String.format("%sHand", side));
+    hand.setSide(side);
+    hands.put(side, hand);
+    hand.setController(sc);
+    if ("left".equals(side)) {
+      leftHand = hand;
+    } else  if ("right".equals(side)) {
+      rightHand = hand;
+    }
+    return hand;
+  }
+
+  public InMoovTorso startTorso(ServoController controller) throws Exception {
+    torso = (InMoovTorso) startPeer("torso");
+    torso.setController(controller);
+    return torso;
+  }
+
 }

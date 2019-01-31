@@ -55,12 +55,12 @@ public class MrlMotor extends Device {
   // config size
   boolean attach(int pin, int initPosUs, int initVelocity, String name) {
     // msg->publishDebug("MrlMotor.deviceAttach !");
-    Simulator sim = virtual.getSimulator();
-    if (sim != null) {
-      motor = sim.createVirtualMotor(name);
-    } else {
+    // Simulator sim = virtual.getSimulator();
+    // if (sim != null) {
+    //   motor = sim.createVirtualMotor(name);
+    // } else {
       motor = new HardwareMotor();
-    }
+    // }
     motor.move(initPosUs);
     currentPosUs = initPosUs;
     targetPosUs = initPosUs;

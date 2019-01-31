@@ -67,7 +67,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * @throws Exception
    *           e
    */
-  void attachServoController(ServoController controller) throws Exception;
+  void attachServoController(Attachable controller) throws Exception;
 
   /**
    * the one and only one which detaches a 'specific' ServoControl from
@@ -78,7 +78,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * @throws Exception
    *           e
    */
-  void detachServoController(ServoController controller) throws Exception;
+  void detachServoController(Attachable controller) throws Exception;
 
   /**
    * determines if a 'specific' controller is currently attached

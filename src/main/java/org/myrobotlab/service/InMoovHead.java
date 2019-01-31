@@ -38,7 +38,6 @@ public class InMoovHead extends Service {
     rothead = (Servo) createPeer("rothead");
     neck = (Servo) createPeer("neck");
     rollNeck = (Servo) createPeer("rollNeck");
-    controller = (ServoController) createPeer("arduino");
 
     neck.setMinMax(20, 160);
     rollNeck.setMinMax(20, 160);
@@ -441,8 +440,11 @@ public class InMoovHead extends Service {
   @Override
   public void startService() {
     super.startService();
-    // arduino.startService();
-    startPeer("arduino");
+
+    if (controller == null) {
+      controller = (ServoController) startPeer("arduino");
+    }
+
     jaw.startService();
     eyeX.startService();
     eyeY.startService();
@@ -545,6 +547,10 @@ public class InMoovHead extends Service {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public void setController(ServoController controller) {
+    this.controller = controller;
   }
 
 }
