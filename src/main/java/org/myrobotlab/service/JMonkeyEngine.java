@@ -2114,6 +2114,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       // FIXME - make non-kludgy method of integrating NON ARDUINO !!
 
       InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+      Servo.eventsEnabledDefault(false);
 
       // FIXME - turn into json file 
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
@@ -2142,6 +2143,20 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       jme.setRotation("i01.rightArm.shoulder", "z");
       jme.setRotation("i01.leftArm.shoulder", "z");
       
+      Servo leftBicep = (Servo)Runtime.start("i01.leftArm.bicep", "Servo");
+      
+      // leftBicep.eventsEnabled();
+      leftBicep.moveTo(90);
+      leftBicep.moveTo(90);
+      leftBicep.moveTo(180);
+      leftBicep.moveTo(90);
+      leftBicep.moveTo(90);
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
       /*
       InMoovHead head = (InMoovHead)Runtime.create("i01.head", "InMoovHead");
       head.setController(jme.getServoController("blah")); // FIXME - look at this
@@ -2150,13 +2165,16 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       ServoController sc = jme.getServoController();
       i01.startHead(sc);
       i01.startArm("left", sc);
-      i01.startArm("right", sc);
+      InMoovArm leftArm = i01.startArm("right", sc);
       i01.startHand("left", sc);
       i01.startHand("right", sc);
       i01.startTorso(sc);
       Runtime.start("i01.mouth", "NaturalReaderSpeech");
       i01.startMouth();
       i01.startMouthControl();
+      
+      // leftArm.moveTo(90, 15, 20, omoplate);
+      
       
       // i01.setHead(head);      
       
