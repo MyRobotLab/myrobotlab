@@ -232,6 +232,9 @@ public class Servo extends Service implements ServoControl {
    */
   boolean isEventsEnabled = true;
   boolean isIKEventEnabled = false;
+  
+  // "default" for all subsquent created servos
+  static Boolean isEventsEnabledDefault = null;
 
   Double maxVelocity;
 
@@ -305,6 +308,9 @@ public class Servo extends Service implements ServoControl {
     refreshControllers();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
+    if (isEventsEnabledDefault != null) {
+      isEventsEnabled = isEventsEnabledDefault;
+    }
 
     // here we define default values if not inside servo.json
     if (mapper == null) {
@@ -428,6 +434,11 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
     return b;
   }
+  
+  static public boolean eventsEnabledDefault(boolean b) {
+    isEventsEnabledDefault = b;
+    return b;
+  }
 
   public boolean isEventsEnabled() {
     return isEventsEnabled;
@@ -544,14 +555,14 @@ public class Servo extends Service implements ServoControl {
 
     lastActivityTime = System.currentTimeMillis();
 
-   // if (lastPos != pos) {
+   if (lastPos != pos || !isEventsEnabled) { // recently changed - jme does not want to use ServoEvents 
       // take care if servo will disable soon
       if (autoDisableTimer != null) {
         autoDisableTimer.cancel();
         autoDisableTimer = null;
       }
       controller.servoMoveTo(this);
-  //   }
+    }
     if (!isEventsEnabled || lastPos == pos) {
       lastPos = targetPos;
       broadcastState();
@@ -648,7 +659,9 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void startService() {
     super.startService();
-    this.addServoEventListener(this);
+    if (isEventsEnabled) {
+      this.addServoEventListener(this);
+    }
   }
 
   public void rest() {
