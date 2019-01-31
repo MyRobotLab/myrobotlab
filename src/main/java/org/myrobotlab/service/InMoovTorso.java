@@ -50,7 +50,7 @@ public class InMoovTorso extends Service {
     topStom = (Servo) createPeer("topStom");
     midStom = (Servo) createPeer("midStom");
     lowStom = (Servo) createPeer("lowStom");
-    controller = (ServoController) createPeer("arduino");
+    // controller = (ServoController) createPeer("arduino");
 
     topStom.setMinMax(60, 120);
     midStom.setMinMax(0, 180);
@@ -113,6 +113,10 @@ public class InMoovTorso extends Service {
     topStom.broadcastState();
     midStom.broadcastState();
     lowStom.broadcastState();
+  }
+  
+  public void setController(ServoController controller) {
+    this.controller = controller;
   }
 
   public boolean connect(String port) throws Exception {
@@ -233,9 +237,6 @@ public class InMoovTorso extends Service {
   }
 
   public void rest() {
-
-    // setSpeed(1.0, 1.0, 1.0);
-
     topStom.rest();
     midStom.rest();
     lowStom.rest();
@@ -293,7 +294,9 @@ public class InMoovTorso extends Service {
     midStom.startService();
     lowStom.startService();
     // arduino.startService();
-    controller = (ServoController) startPeer("arduino");
+    if (controller == null) {
+      controller = (ServoController) startPeer("arduino");
+    }
   }
 
   public void test() {

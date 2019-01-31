@@ -52,8 +52,7 @@ public class Jme3ServoController implements ServoController {
 
   @Override
   public void detach(Attachable service) {
-    // TODO Auto-generated method stub
-
+    servos.remove(service.getName());
   }
 
   @Override
@@ -145,8 +144,12 @@ public class Jme3ServoController implements ServoController {
       log.error("servoMoveTo({})", servo);
       return;
     }
+    float velocity = (float)servo.getVelocity();
+    if (velocity == -1) {
+      velocity = 20;
+    }
     // UserData d = servos.get(name).data;
-    jme.rotateTo(name, (float) servo.getPos());
+    jme.rotateTo(name, (float) servo.getPos(), velocity);
   }
 
   @Override

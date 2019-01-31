@@ -26,34 +26,30 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
 /**
@@ -548,14 +544,14 @@ public class Servo extends Service implements ServoControl {
 
     lastActivityTime = System.currentTimeMillis();
 
-    if (lastPos != pos) {
+   // if (lastPos != pos) {
       // take care if servo will disable soon
       if (autoDisableTimer != null) {
         autoDisableTimer.cancel();
         autoDisableTimer = null;
       }
       controller.servoMoveTo(this);
-    }
+  //   }
     if (!isEventsEnabled || lastPos == pos) {
       lastPos = targetPos;
       broadcastState();
@@ -636,6 +632,9 @@ public class Servo extends Service implements ServoControl {
 
   public List<String> refreshControllers() {
     controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+    // FIXME should be Runtime.getServiceNamesFromInterface(Simulator.class)
+    controllers.addAll(Runtime.getServiceNamesFromInterface(Simulator.class));
+    // controllers.add("i01.head.rothead");
     return controllers;
   }
 
@@ -836,34 +835,47 @@ public class Servo extends Service implements ServoControl {
    * 
    * https://www.google.com/search?q=attach+myrobotlab&oq=attach+myrobotlab
    */
-  public void attachServoController(ServoController controller) throws Exception {
-    if (!(controller == null)) {
-      if (isAttachedServoController(controller)) {
-        log.info("{} servo is already attached to controller {}", getName(), this.controller.getName());
-        return;
-      } else if (this.controller != null && this.controller != controller) {
-        // we're switching controllers - need to detach first
-        detach();
-      }
-
-      targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
-
-      // now attach the controller the controller better have
-      // isAttach(ServoControl) to prevent an infinite loop
-      // if controller.attach(this) is not successful, this should throw
-      controller.attachServoControl(this);
-
-      // set the controller
-      this.controller = controller;
-      this.controllerName = controller.getName();
-
-      // the controller is attached now
-      // its time to attach the pin
-      enable(pin);
-      broadcastState();
-    } else {
-      error("Can't attach to null co controler !");
+  public void attachServoController(Attachable attachable) throws Exception {
+    
+    ServoController sc = null;
+    if (attachable == null){
+      return;
     }
+    
+    // find servo controller - 
+    if (attachable instanceof ServoController) {
+      sc = (ServoController)attachable;
+    } else if (attachable instanceof Simulator) {
+      sc = ((Simulator)attachable).getServoController();
+    } else {
+      log.error("{} unsupported type {}", attachable.getName(), Attachable.class.getCanonicalName());
+      return;
+    }
+    
+    if (isAttachedServoController((ServoController)sc)) {
+      log.info("{} servo is already attached to attachable {}", getName(), this.controller.getName());
+      return;
+    } else if (this.controller != null && this.controller != sc) {
+      // we're switching controllers - need to detach first
+      detach();
+    }
+
+    targetOutput = getTargetOutput();// mapper.calcOutput(targetPos);
+
+    // now attach the attachable the attachable better have
+    // isAttach(ServoControl) to prevent an infinite loop
+    // if attachable.attach(this) is not successful, this should throw
+    sc.attachServoControl(this);
+
+    // set the controller
+    this.controller = sc;
+    this.controllerName = sc.getName();
+
+    // the controller is attached now
+    // its time to attach the pin
+    enable(pin);
+    broadcastState();
+    
   }
 
   public void attach() throws Exception {
@@ -901,7 +913,7 @@ public class Servo extends Service implements ServoControl {
   public void attach(String controllerName, Integer pin, Double pos) throws Exception {
     this.pin = pin;
     this.targetPos = pos;
-    attachServoController((ServoController) Runtime.getService(controllerName));
+    attachServoController(Runtime.getService(controllerName));
   }
 
   /**
@@ -936,26 +948,35 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public void detach(String controllerName) {
-    detachServoController((ServoController) Runtime.getService(controllerName));
+    detachServoController(Runtime.getService(controllerName));
   }
 
   @Override
-  public void detachServoController(ServoController controller) {
-    if (this.controller == controller) {
-      // disable pwm
-      if (this.controller != null) {
-        controller.servoDetachPin(this);
-        // detach the this device from the controller
-        controller.detach(this);
-        // remove the this controller's reference
-      }
-      this.controller = null;
-      // this.controllerName = null;
-      this.enabled = false;
-      broadcastState();
+  public void detachServoController(Attachable controller) {
+    ServoController sc = null;
+    
+    if (controller == null){
+      return;
     }
+    
+    if (controller instanceof ServoController) {
+      sc = (ServoController)controller;
+    } else if (controller instanceof Simulator) {
+      sc = ((Simulator)controller).getServoController();
+    } else {
+      log.error("{} unsupported type {}", controller.getName(), Attachable.class.getCanonicalName());
+      return;
+    }
+    
+    // shutdown pwm
+    sc.servoDetachPin(this);
+    sc.detach(this);
+    
+    this.controller = null;
+    this.enabled = false;
+    broadcastState();
   }
-
+  
   public void setMaxVelocity(double velocity) {
     this.maxVelocity = velocity;
   }
@@ -1262,13 +1283,19 @@ public class Servo extends Service implements ServoControl {
     if (targetPos == null) {
       targetPos = rest;
     }
-    targetOutput = mapper.calcOutput(targetPos);
+    if (mapper != null) {
+      targetOutput = mapper.calcOutput(targetPos);
+    } else {
+      targetOutput = targetPos;
+    }
+    if (targetOutput == null) {
+      targetOutput = 0.0;
+    }
     return targetOutput;
   }
 
   @Override
   public String getControllerName() {
-
     return controllerName;
   }
 
