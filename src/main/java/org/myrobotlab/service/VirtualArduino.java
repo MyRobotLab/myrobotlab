@@ -48,7 +48,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   /**
    * Blender, JMonkey, other ...
    */
-  transient Simulator simulator;
+  //transient Simulator simulator;
 
   /**
    * our emulated electronic UART
@@ -239,17 +239,16 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public void clearPinQueue(int address) {
     mrlComm.pinList.clear();
   }
-
+/*
   public Simulator getSimulator() {
     return simulator;
   }
 
-  /*
-   * TODO - promote to interface
-   */
+  
   public void attachSimulator(Simulator simulator) {
     this.simulator = simulator;
   }
+  */
 
   public MrlComm getMrlComm() {
     return mrlComm;

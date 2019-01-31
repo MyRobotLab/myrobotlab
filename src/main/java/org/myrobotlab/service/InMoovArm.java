@@ -36,6 +36,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   transient public Servo shoulder;
   transient public Servo omoplate;
   transient public ServoController controller;
+
   String side;
 
   public InMoovArm(String n) throws Exception {
@@ -46,7 +47,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate = (Servo) createPeer("rotate");
     shoulder = (Servo) createPeer("shoulder");
     omoplate = (Servo) createPeer("omoplate");
-    controller = (ServoController) createPeer("arduino");
+    // controller = (ServoController) createPeer("arduino");
 
     bicep.setMinMax(5, 90);
     rotate.setMinMax(40, 180);
@@ -355,7 +356,9 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.startService();
     shoulder.startService();
     omoplate.startService();
-    controller = (ServoController) startPeer("arduino");
+    if (controller == null) {
+      controller = (ServoController) startPeer("arduino");
+    }
     // arduino.startService();
   }
 
@@ -505,6 +508,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.rotate.setVelocity(rotate);
     this.shoulder.setVelocity(shoulder);
     this.omoplate.setVelocity(omoplate);
+  }
+
+  public void setController(ServoController controller) {
+    this.controller = controller;
   }
 
 }

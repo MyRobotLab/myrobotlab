@@ -54,12 +54,12 @@ public class MrlServo extends Device {
   // config size
   boolean attach(int pin, int initPosUs, int initVelocity, String name) {
     // msg->publishDebug("MrlServo.deviceAttach !");
-    Simulator sim = virtual.getSimulator();
-    if (sim != null) {
-      servo = sim.createVirtualServo(name);
-    } else {
+    // Simulator sim = virtual.getSimulator();
+    // if (sim != null) {
+    //   servo = sim.createVirtualServo(name);
+    // } else {
       servo = new HardwareServo();
-    }
+    // }
     servo.writeMicroseconds(initPosUs);
     currentPosUs = initPosUs;
     targetPosUs = initPosUs;

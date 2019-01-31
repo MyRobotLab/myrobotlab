@@ -32,7 +32,7 @@ public class Jme3Util {
   public Jme3Util(JMonkeyEngine jme) {
     this.jme = jme;
   }
-  
+
   static public ColorRGBA toColor(String userColor) {
     if (userColor == null) {
       userColor = defaultColor;
@@ -103,6 +103,9 @@ public class Jme3Util {
   }
 
   public Vector3f getUnitVector(String axis) {
+    if (axis == null) {
+      return Vector3f.UNIT_Y; // default Y
+    }
     Vector3f unitVector = null;
     axis = axis.toLowerCase().trim();
 
@@ -141,10 +144,10 @@ public class Jme3Util {
     o.getNode().rotate(rot.x, rot.y, rot.z);
   }
 
-  static Integer getIndexFromUnitVector(Vector3f vector) {
+  public static Integer getIndexFromUnitVector(Vector3f vector) {
     if (vector == null) {
-      log.error("getIndexFromVector(null) not valid");
-      return null;
+      // default is Y
+      return 1;
     }
 
     if (vector.equals(Vector3f.UNIT_X)) {
@@ -165,24 +168,23 @@ public class Jme3Util {
    * @param name
    * @param degrees
    */
-  public void rotateTo(String name, Double degreesIn) {
-    float degrees = degreesIn.floatValue();
-    log.info(String.format("rotateTo %s, degrees %.2f", name, degrees));
-
+  public void rotateTo(String name, Float degrees) {
     UserData o = jme.getUserData(name);
     if (o == null) {
       jme.error("no user data for %s", name);
       return;
     }
-    Vector3f rotMask = o.rotationMask;
-    if (rotMask == null) {
-      rotMask = Vector3f.UNIT_Y;// new Vector3f(0, 1, 0); // default rotate
-                                // around "y" axis
+
+    // default rotation is around Y axis unless specified
+    Vector3f rotMask = Vector3f.UNIT_Y;
+    if (o.rotationMask != null) {
+      rotMask = o.rotationMask;
     }
 
-    int angleIndex = getIndexFromUnitVector(rotMask);
+    log.info("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);    
+    // int angleIndex = getIndexFromUnitVector(rotMask);
     if (o.mapper != null) {
-      degrees = (float) o.mapper.calcOutput(degreesIn);
+      degrees = (float) o.mapper.calcOutput(degrees);
       log.info(String.format("rotateTo map %s, degrees %.2f", name, degrees));
     }
 
@@ -191,7 +193,8 @@ public class Jme3Util {
     Quaternion q = n.getLocalRotation();
     float[] angles = new float[3];
     q.toAngles(angles);
-    log.info(String.format("before %s, %.2f", name, angles[angleIndex] * 180 / FastMath.PI));
+    // log.info(String.format("rotate - before %s, %.2f", name,
+    // angles[angleIndex] * 180 / FastMath.PI));
 
     q.fromAngleAxis(((degrees) * FastMath.PI / 180), rotMask);// FIXME optimize
                                                               // final Y_AXIS =
@@ -201,7 +204,8 @@ public class Jme3Util {
     // apply map if it exists (shifted)
     n.setLocalRotation(q);
     q.toAngles(angles);
-    log.info(String.format("after %s, %.2f", name, angles[angleIndex] * 180 / FastMath.PI));
+    // log.info(String.format("rotate - after %s, %.2f", name,
+    // angles[angleIndex] * 180 / FastMath.PI));
   }
 
   public void bind(String child, String parent) {
@@ -238,10 +242,10 @@ public class Jme3Util {
   }
 
   public Node createUnitAxis(String name) {
-    
+
     Node n = new Node(name);
     Arrow arrow = new Arrow(Vector3f.UNIT_X);
-    arrow.setLineWidth(4); // make arrow thicker    
+    arrow.setLineWidth(4); // make arrow thicker
     n.attachChild(createAxis("y", arrow, ColorRGBA.Red));
 
     arrow = new Arrow(Vector3f.UNIT_Y);
@@ -276,7 +280,7 @@ public class Jme3Util {
     Geometry newBb = WireBox.makeGeometry((BoundingBox) spatial.getWorldBound());
     // Material mat = new Material(jme.getAssetManager(),
     // "Common/MatDefs/Light/PBRLighting.j3md");
-        
+
     newBb.setName(jme.getBbName(spatial));
 
     Material mat = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
@@ -289,11 +293,11 @@ public class Jme3Util {
 
     return newBb;
   }
-  
+
   public void lookAt(String viewer, String viewee) {
     log.info("lookAt({}, {})", viewer, viewee);
     Spatial viewerSpatial = jme.get(viewer);
-    Spatial vieweeSpatial = jme.get(viewee);   
+    Spatial vieweeSpatial = jme.get(viewee);
     if (viewerSpatial == null) {
       log.error("could not find {}", viewer);
       return;
@@ -302,11 +306,17 @@ public class Jme3Util {
       log.error("could not find {}", viewee);
       return;
     }
-    viewerSpatial.lookAt(vieweeSpatial.getWorldTranslation(), Vector3f.UNIT_Y);    
+    viewerSpatial.lookAt(vieweeSpatial.getWorldTranslation(), Vector3f.UNIT_Y);
   }
 
   public Geometry createBoundingBox(Spatial spatial) {
     return createBoundingBox(spatial, defaultColor);
+  }
+
+  public void scale(String name, float scale) {
+    Spatial s = jme.get(name);
+    log.info("rescaling {} to {}", name, scale);
+    s.scale(scale);
   }
 
 }
