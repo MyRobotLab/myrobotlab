@@ -945,7 +945,8 @@ public class Agent extends Service {
     log.info("spawning -> [{}]", sb.toString());
 
     ProcessBuilder builder = new ProcessBuilder(cmdLine);
-
+    // handle stderr as a direct pass through to System.err
+    builder.redirectErrorStream(true);
     // setting working directory to wherever the jar is...
     String spawnDir = new File(pd.jarPath).getParent();
     builder.directory(new File(spawnDir));
