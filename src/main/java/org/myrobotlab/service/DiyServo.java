@@ -32,6 +32,7 @@ import java.util.TimerTask;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
@@ -930,13 +931,13 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   // DiyServo uses a Motor peer
 
   @Override
-  public void attachServoController(ServoController controller) throws Exception {
+  public void attachServoController(Attachable controller) throws Exception {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void detachServoController(ServoController controller) throws Exception {
+  public void detachServoController(Attachable controller) throws Exception {
     // TODO Auto-generated method stub
 
   }

@@ -3,7 +3,15 @@ package org.myrobotlab.math;
 import java.io.Serializable;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.InMoovArm;
+import org.myrobotlab.service.InMoovHead;
+import org.myrobotlab.service.JMonkeyEngine;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
+
+import com.jme3.scene.Spatial;
 
 public final class Mapper implements Serializable {
 
@@ -162,5 +170,24 @@ public final class Mapper implements Serializable {
       setInverted(true);
     }
   }
+  
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.init("info");
+
+      Mapper m = new Mapper(0, 180, 90, -90);
+      log.info("in {} out {} inverse {}", 5, m.calcOutput(5), m.calcInput(m.calcOutput(5)));
+      log.info("in {} out {} inverse {}", -5, m.calcOutput(-5), m.calcInput(m.calcOutput(-5)));
+      log.info("in {} out {} inverse {}", 270, m.calcOutput(270), m.calcInput(m.calcOutput(270)));
+      m = new Mapper(0, 360, 180, -180);
+      log.info("in {} out {} inverse {}", 5, m.calcOutput(5), m.calcInput(m.calcOutput(5)));
+      log.info("in {} out {} inverse {}", -5, m.calcOutput(-5), m.calcInput(m.calcOutput(-5)));
+      log.info("in {} out {} inverse {}", 270, m.calcOutput(270), m.calcInput(m.calcOutput(270)));
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
 
 }

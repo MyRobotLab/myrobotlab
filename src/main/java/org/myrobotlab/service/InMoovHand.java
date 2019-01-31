@@ -81,7 +81,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     pinky = (Servo) createPeer("pinky");
     wrist = (Servo) createPeer("wrist");
     // FIXME should interfaces be started here ?
-    controller = (ServoController) createPeer("arduino");
+    // controller = (ServoController) createPeer("arduino");
 
     thumb.setRest(2);
     index.setRest(2);
@@ -551,6 +551,9 @@ public class InMoovHand extends Service implements LeapDataListener {
     ringFinger.startService();
     pinky.startService();
     wrist.startService();
+    if (controller == null) {
+      controller = (ServoController) createPeer("arduino");
+    }
     // arduino.startService();
   }
 
@@ -637,6 +640,10 @@ public class InMoovHand extends Service implements LeapDataListener {
     this.ringFinger.setVelocity(ringFinger);
     this.pinky.setVelocity(pinky);
     this.wrist.setVelocity(wrist);
+  }
+
+  public void setController(ServoController servoController) {
+    this.controller = servoController;
   }
 
 }

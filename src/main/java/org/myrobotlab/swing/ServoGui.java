@@ -622,8 +622,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
         ServoController sc = servo.getController();
 
         if (sc != null) {
-          controller.setSelectedItem(sc.getName());
-
+          controller.setSelectedItem(sc.getName());          
         }
         Integer servoPin = servo.getPin();
 

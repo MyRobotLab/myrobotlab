@@ -1,8 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.virtual.VirtualMotor;
-import org.myrobotlab.virtual.VirtualServo;
 
 /**
  * The purpose of this is to provide simulation or 3d graphic systems a common
@@ -14,13 +12,19 @@ import org.myrobotlab.virtual.VirtualServo;
  *
  */
 
+// FIXME !!! refactor this stuff out - create an AbstractSimulator ... 
 public interface Simulator extends NameProvider {
 
   // Generalized create ??? a good thing - router for ObjectFactory??
   // public Object create(ServiceInterface service);
 
+  /*
   public VirtualServo createVirtualServo(String name);
 
   public VirtualMotor createVirtualMotor(String name);
+  */
+  
+  ServoController getServoController();
+  
 
 }
