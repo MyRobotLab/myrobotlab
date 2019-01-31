@@ -418,30 +418,47 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   @Override
-  synchronized public void release() {
-    running = false;
-    classifier = null;
-    // bleed out the thread before deallocating
-    Service.sleep(500);
-    if (net != null) {
-      net.deallocate();
+  public void release() {
+    synchronized (lock) {
+      running = false;
+      if (classifier != null) {
+        classifier.interrupt();
+        classifier = null;
+      }
+
+      // bleed out the thread before deallocating
+      Service.sleep(500);
+      if (net != null) {
+        net.deallocate();
+      }
+    }
+  }
+
+  volatile Object lock = new Object();
+
+  @Override
+  public void enable() {
+    synchronized (lock) {
+      super.enable();
+      if (classifier == null) {
+        classifier = new Thread(this, "YoloClassifierThread");
+        classifier.start();
+      }
     }
   }
 
   @Override
-  synchronized public void enable() {
-    super.enable();
-    if (classifier == null) {
-      classifier = new Thread(this, "YoloClassifierThread");
-      classifier.start();
+  public void disable() {
+    synchronized (lock) {
+      super.disable();
+      if (classifier != null) {
+        classifier.interrupt();        
+      }      
+      running = false;
+      // give half a second to bleed out
+      Service.sleep(500);
+      classifier = null;
     }
-  }
-
-  @Override
-  synchronized public void disable() {
-    super.disable();
-    running = false;
-    classifier = null;
   }
 
   @Override
