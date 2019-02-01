@@ -22,25 +22,27 @@ public class LloydIKTest {
   public void testIK() {
 
     LoggingFactory.init("INFO");
+    
+    String partName = "myArm";
 
     // Ok.,., i want to start an IK service.. and play around with it.
     // and then compare a mock output from controller position / orientation to
     // how the arm reacts.
     InverseKinematics3D leftIK = (InverseKinematics3D) Runtime.start("leftIK", "InverseKinematics3D");
-    leftIK.setCurrentArm(InMoovArm.getDHRobotArm());
-    leftIK.centerAllJoints();
-    Point position = leftIK.currentPosition();
+    leftIK.setCurrentArm(partName, InMoovArm.getDHRobotArm());
+    leftIK.centerAllJoints(partName);
+    Point position = leftIK.currentPosition(partName);
     log.info("Left IK center position is : {}", position);
 
-    int numLinks = leftIK.getCurrentArm().getNumLinks();
+    int numLinks = leftIK.getCurrentArm(partName).getNumLinks();
     // let's iterate the joints. set the approproate angles.. and validate the
     // position to make sure our math is right.
     // test angles
     // IK "rest" input angles
     double omoplate = MathUtils.degrees2radian(-90);
-    // arm straight down
+    // partName straight down
     double shoulder = MathUtils.degrees2radian(90);
-    // arm straight forward
+    // partName straight forward
     // double shoulder = MathUtils.degrees2radian(180);
     double rotate = MathUtils.degrees2radian(0);
     double bicep = MathUtils.degrees2radian(90);
@@ -57,7 +59,7 @@ public class LloydIKTest {
     // double rotateDelta = 90;
     // double bicepDelta = -90;
 
-    DHRobotArm arm = leftIK.getCurrentArm();
+    DHRobotArm arm = leftIK.getCurrentArm(partName);
 
     // centered ..
     for (DHLink l : arm.getLinks()) {
@@ -74,7 +76,7 @@ public class LloydIKTest {
     log.info("Left IK rest position is : {}", position);
 
     // for iteration.. let's try to solve it from center position
-    leftIK.centerAllJoints();
+    leftIK.centerAllJoints(partName);
 
     // (x=-0.272, y=-0.338, z=-0.274 (should be close to rest position +/-)
     // double x = -0.272;
@@ -89,9 +91,9 @@ public class LloydIKTest {
     // TODO: z axis is reversed between the reference frames?! i'm confused.
     leftIK.createInputScale(1000.0, 1000.0, -1000.0);
 
-    leftIK.moveTo(x, y, z);
+    leftIK.moveTo(partName, x, y, z);
 
-    log.info("After Move To Position: {}", leftIK.currentPosition());
+    log.info("After Move To Position: {}", leftIK.currentPosition(partName));
 
     // now we need to print the angles leftIK.g
     printArmDetails(arm);
