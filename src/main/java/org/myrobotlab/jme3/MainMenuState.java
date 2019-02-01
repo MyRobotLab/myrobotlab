@@ -37,7 +37,7 @@ public class MainMenuState extends BaseAppState {
   transient JMonkeyEngine jme = null;
   transient Jme3App app;
   transient Container main;
-  transient Label breadCrumbs;
+  transient Label breadCrumbsx;
   transient Node guiNode;
 
   VersionedReference<TabbedPanel.Tab> selectionRef;
@@ -68,8 +68,7 @@ public class MainMenuState extends BaseAppState {
   Button grid;
 
   Container childrenContainer;
-  // Map<String, Button> children = new TreeMap<String, Button>();
-  List<Button> children = new ArrayList<Button>();
+  Container parentContainer;
 
   final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
@@ -289,9 +288,9 @@ public class MainMenuState extends BaseAppState {
         return spatial.getParent();
       }
     });
-
-    breadCrumbs = new Label("                                        ");
-    north.addChild(breadCrumbs);
+    
+    parentContainer = new Container();
+    north.addChild(parentContainer);
 
     parentButton = center.addChild(new Button("parent:"));
     // Button floor = center.addChild(new Button("floor"));
@@ -361,25 +360,21 @@ public class MainMenuState extends BaseAppState {
 
     Vector3f sc = spatial.getLocalScale();
     scale.setText(sc.toString());
-    // String type = (spatial instanceof Node) ? "Node" : "Geometry";
 
     title.setText(spatial.toString());
-    // Spatial rootChild = jme.getRootChild(spatial);
 
-    breadCrumbs.setText(jme.getKeyPath(spatial));
     if (spatial instanceof Node) {
       putText(((Node) spatial).getChildren());
+    } else {
+      // geometries don't have children
+      childrenContainer.clearChildren();
     }
+    
   }
 
   @SuppressWarnings("unchecked")
   public void putText(List<Spatial> c) {
     childrenContainer.clearChildren();
-    children.clear();
-    // boolean isNode = (spatial instanceof Node);
-    // if (isNode) {
-    // Node node = (Node) spatial;
-    // List<Spatial> c = node.getChildren();
     for (Spatial child : c) {
       Button b = new Button(child.toString());
       b.addClickCommands(new Command<Button>() {
@@ -390,14 +385,8 @@ public class MainMenuState extends BaseAppState {
           }
         }
       });
-      // children.put(child.toString(), b);
       childrenContainer.addChild(b);
     }
-    /*
-     * for (String key : children.keySet()) {
-     * childrenContainer.addChild(children.get(key)); }
-     */
-    // }
   }
 
   public void setBreadCrumb(Spatial spatial) {
@@ -408,7 +397,7 @@ public class MainMenuState extends BaseAppState {
     sb.append(spatial.getParent().getName());
     sb.append(" > ");
     sb.append(spatial.getName());
-    breadCrumbs.setText(sb.toString());
+    // breadCrumbs.setText(sb.toString());
   }
 
 }
