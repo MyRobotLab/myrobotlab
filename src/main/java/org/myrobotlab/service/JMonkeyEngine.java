@@ -2129,6 +2129,9 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       jme.setMapper("i01.leftArm.shoulder", 0, 180, -30, 150); // 124 = 29  & rest = 30
       jme.setMapper("i01.rightArm.rotate", 0, 180, 90, 270);      
       jme.setMapper("i01.leftArm.rotate", 0, 180, -90, 90);
+
+      jme.setMapper("i01.rightArm.omoplate", 0, 180, 0, -180);      
+      // jme.setMapper("i01.leftArm.omoplate", 0, 180, -90, 90);
       // i01_rightArm_shoulder.rest()
       // i01_leftArm_shoulder.rest()
 
@@ -2142,26 +2145,11 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       // jme.setRotation("i01.leftArm.rotate", "y");
       jme.setRotation("i01.rightArm.shoulder", "z");
       jme.setRotation("i01.leftArm.shoulder", "z");
+      jme.setRotation("i01.rightArm.omoplate", "z");
+      jme.setRotation("i01.leftArm.omoplate", "z");
       
       Servo leftBicep = (Servo)Runtime.start("i01.leftArm.bicep", "Servo");
-      
-      // leftBicep.eventsEnabled();
-      leftBicep.moveTo(90);
-      leftBicep.moveTo(90);
-      leftBicep.moveTo(180);
-      leftBicep.moveTo(90);
-      leftBicep.moveTo(90);
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
-      
-      /*
-      InMoovHead head = (InMoovHead)Runtime.create("i01.head", "InMoovHead");
-      head.setController(jme.getServoController("blah")); // FIXME - look at this
-      head.startService();
-      */
+  
       ServoController sc = jme.getServoController();
       i01.startHead(sc);
       i01.startArm("left", sc);
