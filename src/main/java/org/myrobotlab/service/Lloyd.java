@@ -450,12 +450,14 @@ public class Lloyd extends Service {
   }
 
   public void startIK() {
+    String partName = "currentArm";
+    
     leftIK = (InverseKinematics3D) Runtime.start("leftIK", "InverseKinematics3D");
     rightIK = (InverseKinematics3D) Runtime.start("rightIK", "InverseKinematics3D");
 
     // TODO : proper IK models for left & right.
-    leftIK.setCurrentArm(InMoovArm.getDHRobotArm());
-    rightIK.setCurrentArm(InMoovArm.getDHRobotArm());
+    leftIK.setCurrentArm(partName, InMoovArm.getDHRobotArm());
+    rightIK.setCurrentArm(partName, InMoovArm.getDHRobotArm());
 
     // specify the input scaling factors TODO: what should these be?
     // z axis is inverted!
@@ -468,13 +470,13 @@ public class Lloyd extends Service {
     rightIK.createInputMatrix(0, 0, 0, 0, 0, 0);
 
     // we should probably put the joint angles in the middle.
-    leftIK.centerAllJoints();
-    rightIK.centerAllJoints();
+    leftIK.centerAllJoints(partName);
+    rightIK.centerAllJoints(partName);
 
     // TODO: our palm position when we're centered.. probably could be
     // calibration for input translate/rotate / scale matrix?
-    Point leftHandPos = leftIK.getCurrentArm().getPalmPosition();
-    Point rightHandPos = rightIK.getCurrentArm().getPalmPosition();
+    Point leftHandPos = leftIK.getCurrentArm(partName).getPalmPosition();
+    Point rightHandPos = rightIK.getCurrentArm(partName).getPalmPosition();
 
     // Initial position of left hand
     log.info("Initial Left Hand Position : {}", leftHandPos);
