@@ -529,8 +529,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public void savePredicates() throws IOException {
     for (String botName : sessions.keySet()) {
-      for (String userName : sessions.get(botName).keySet()) {
-        savePredicates(botName, userName);
+      // TODO: gael is seeing an exception here.. only was is if botName doesn't have any sessions.
+      if (sessions.containsKey(botName)) {
+        for (String userName : sessions.get(botName).keySet()) {
+          savePredicates(botName, userName);
+        }
+      } else {
+        log.warn("Bot {} had no sessions to save predicates for.", botName);
       }
     }
     log.info("Done saving predicates.");
@@ -538,6 +543,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   private void savePredicates(String botName, String userName) throws IOException {
     String sessionPredicateFilename = createSessionPredicateFilename(userName, botName);
+    log.info("Bot : {} User : {} Predicates Filename : {} ", botName, userName, sessionPredicateFilename);
     File sessionPredFile = new File(sessionPredicateFilename);
     // if the file doesn't exist.. we should create it.. (and make the
     // directories for it.)
