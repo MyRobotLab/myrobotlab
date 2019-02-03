@@ -279,9 +279,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public void rest() {
-
-    // setSpeed(1.0, 1.0, 1.0, 1.0);
-
     bicep.rest();
     rotate.rest();
     shoulder.rest();

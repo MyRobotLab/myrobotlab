@@ -2081,42 +2081,35 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
   public static void main(String[] args) {
     try {
 
-      // FIXME - onRegister race condition
-      // FIXME - STOOPID lastPos 90 failure !!!
       // FIXME - make "load" work ..
       
       LoggingFactory.init("info");
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-
-      // jme.addMapping("")
-      jme.rename("i01.leftHand.thumb1", "i01.leftHand.thumb");
-      jme.rename("i01.leftHand.ringFinger1", "i01.leftHand.ringFinger");
-      jme.rename("i01.leftHand.index1", "i01.leftHand.index");
-      jme.rename("i01.rightHand.majeure1", "i01.leftHand.majeure");
-      jme.rename("i01.leftHand.pinky1", "i01.leftHand.thumb");
-
-      jme.rename("i01.rightHand.thumb1", "i01.rightHand.thumb");
-      jme.rename("i01.rightHand.ringFinger1", "i01.rightHand.ringFinger");
-      jme.rename("i01.rightHand.index1", "i01.rightHand.index");
-      jme.rename("i01.rightHand.majeure1", "i01.rightHand.majeure");
-      jme.rename("i01.rightHand.pinky1", "i01.rightHand.thumb");
-
-      // new default axis
-
-      // inmoov "fix ups"
-      jme.rename("VinMoov2", "i01");
+      
+      jme.rename("i01-9", "i01");
       jme.scale("i01", 0.25f);
+      
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
 
       // FIXME - make non-kludgy method of integrating NON ARDUINO !!
 
       InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-      Servo.eventsEnabledDefault(false);
+      Servo.eventsEnabledDefault(false); 
+      
+      Spatial rotate = jme.get("i01.leftArm.rotate");
+      log.info("rotate world {}", rotate.getLocalTranslation());
+      log.info("rotate local {}", rotate.getWorldTranslation());
+      Spatial rotateFull = jme.get("i01.leftArm.rotate.full");
+      log.info("rotateFull world {}", rotateFull.getLocalTranslation());
+      log.info("rotateFull local {}", rotateFull.getWorldTranslation());
+      
+      // jme.bind("i01.leftArm.rotate.full", "i01.leftArm.shoulder");
+      jme.bind("i01.leftArm.rotate", "i01.leftArm.shoulder");
 
-      // FIXME - turn into json file 
+      // FIXME - turn into json file - support scale, rename, bind, mapping, setRotation
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
@@ -2129,24 +2122,22 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       jme.setMapper("i01.leftArm.shoulder", 0, 180, -30, 150); // 124 = 29  & rest = 30
       jme.setMapper("i01.rightArm.rotate", 0, 180, 90, 270);      
       jme.setMapper("i01.leftArm.rotate", 0, 180, -90, 90);
-
-      jme.setMapper("i01.rightArm.omoplate", 0, 180, 0, -180);      
-      // jme.setMapper("i01.leftArm.omoplate", 0, 180, -90, 90);
-      // i01_rightArm_shoulder.rest()
-      // i01_leftArm_shoulder.rest()
-
-
+      jme.setMapper("i01.rightArm.omoplate", 0, 180, 0, -180);   
+      
       jme.setRotation("i01.head.jaw", "x");
       jme.setRotation("i01.head.rollNeck", "z");
       jme.setRotation("i01.head.neck", "x");
       jme.setRotation("i01.rightArm.bicep", "x");
       jme.setRotation("i01.leftArm.bicep", "x");
-      // jme.setRotation("i01.rightArm.rotate", "y");
-      // jme.setRotation("i01.leftArm.rotate", "y");
       jme.setRotation("i01.rightArm.shoulder", "z");
       jme.setRotation("i01.leftArm.shoulder", "z");
       jme.setRotation("i01.rightArm.omoplate", "z");
       jme.setRotation("i01.leftArm.omoplate", "z");
+      
+      // jme.bind(child, parent);
+      
+      
+      // FIXME - i01.startAll();
       
       Servo leftBicep = (Servo)Runtime.start("i01.leftArm.bicep", "Servo");
   
@@ -2161,19 +2152,20 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       i01.startMouth();
       i01.startMouthControl();
       
-      // leftArm.moveTo(90, 15, 20, omoplate);
+      List<String> servos = Runtime.getServiceNamesFromInterface("ServoControl");
+      for (String servo : servos) {
+        Spatial spatial = jme.get(servo);
+        if (spatial == null) {
+          log.error("cannot find {}", servo);
+        }
+      }
       
+      log.info("here");
       
-      // i01.setHead(head);      
-      
+
       // i01.moveHead(10, 20, 90);
       // i01.moveHead(30, 20, 10);
-      // Service.sleep(2000);
-      //i01.rest();
-      // Service.sleep(2000);
-
-      // i01.startAll(null, null);
-
+  
 
     } catch (Exception e) {
       log.error("main threw", e);
