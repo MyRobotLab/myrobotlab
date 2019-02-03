@@ -237,8 +237,10 @@ public class Jme3Util {
     
     // moving one object to another object 
  
-    Vector3f worldPos1 = c.getWorldTranslation().clone();
-    log.info("worldPos1 {}", worldPos1);
+    Vector3f childWorld1 = c.getWorldTranslation().clone();
+    log.info("worldPos1 {}", childWorld1);
+    
+    Vector3f parentWorld1 = p.getWorldTranslation();
     /*
     log.info("worldPos1 {}", worldPos1);
     Vector3f inverse = worldPos1.mult(-1);
@@ -270,14 +272,14 @@ public class Jme3Util {
     // parentNode.getNode().attachChild(newNode);
     p.attachChild(c);
     // Vector3f newLocal = c.getLocalTranslation();
-    Vector3f worldPos2 = c.getWorldTranslation();
-    log.info("worldPos2 {}", worldPos2);
+    Vector3f childWorld2 = c.getWorldTranslation();
+    log.info("worldPos2 {}", childWorld2);
     // worldPos2.subtract(worldPos1);
-    log.info("worldPos2 - worldPos1 {}", worldPos2.subtract(worldPos1));
-    log.info("worldPos2 {}", worldPos2);
+    log.info("worldPos2 - worldPos1 {}", childWorld2.subtract(childWorld1));
+    log.info("worldPos2 {}", childWorld2);
     Vector3f childLocal = c.getLocalTranslation();
-    Vector3f diff = childLocal.subtract(parentWorld);
-    c.setLocalTranslation(worldPos2.subtract(worldPos1));
+    Vector3f diff = childLocal.subtract(parentWorld);    
+    c.setLocalTranslation(c.getLocalTranslation().subtract(parentWorld1));
     // c.setLocalTransform();
     // parentNode.getNode().updateModelBound();
     // parentNode.getNode().updateGeometricState();
