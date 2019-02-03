@@ -869,6 +869,9 @@ public class Runtime extends Service implements MessageListener {
   }
 
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
+    if (!interfaze.contains(".")) {
+      interfaze = "org.myrobotlab.service.interfaces."+interfaze;
+    }
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 

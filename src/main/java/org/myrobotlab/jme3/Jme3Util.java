@@ -210,19 +210,57 @@ public class Jme3Util {
 
   public void bind(String child, String parent) {
     log.info("binding {} to {}", child, parent);
-    UserData childNode = jme.getUserData(child);
+    Spatial childNode = jme.get(child);
     if (childNode == null) {
       log.error("bind child {} not found", child);
       return;
     }
-    UserData parentNode = jme.getUserData(parent);
+    Spatial parentNode = jme.get(parent);
     if (parentNode == null) {
       log.error("bind parent {} not found", parent);
       return;
     }
+    
+    if (parentNode instanceof Geometry) {
+      log.error("parent {} must be of type Node !!! - cannot bind Geometry");
+      return;
+    }
 
-    log(parentNode);
-    log(childNode);
+    if (childNode instanceof Geometry) {
+      log.error("child {} must be of type Node !!! - cannot bind Geometry");
+      return;
+    }
+
+    
+    Node p = (Node)parentNode;
+    Node c = (Node)childNode;
+    
+    // moving one object to another object 
+ 
+    Vector3f worldPos1 = c.getWorldTranslation().clone();
+    log.info("worldPos1 {}", worldPos1);
+    /*
+    log.info("worldPos1 {}", worldPos1);
+    Vector3f inverse = worldPos1.mult(-1);
+    log.info("inverse {}", inverse);
+    log.info("worldPos1 + inverse {}", worldPos1.add(inverse));
+    // worldPos1.mult(new Vector3f(03, -20, 5));
+    // worldPos1.add(new Vector3f(03, -10, 5));
+    log.info("worldPos1 {}", worldPos1);
+    */
+
+//     Quaternion worldRot = c.getWorldRotation();
+
+ 
+//    c.setLocalTranslation(worldPos1);
+
+//     object.setLocalRotation(worldRot);
+
+//     p.attachChild(c);
+   //  c.setLocalTranslation(new Vector3f(03, -10, 5));
+
+    Vector3f parentWorld = p.getWorldTranslation();
+
     // log.info("child {} {}", childNode.getNode().getChildren().size(),
     // childNode.getNode().getChild(0).getName());
     // parentNode.getNode().attachChild(childNode.getSpatial());
@@ -230,15 +268,25 @@ public class Jme3Util {
     // newNode.attachChild(childNode.getNode());
     // parentNode.getNode().attachChild(childNode.getNode().getChild(0));
     // parentNode.getNode().attachChild(newNode);
-    parentNode.getNode().attachChild(childNode.getNode());
+    p.attachChild(c);
+    // Vector3f newLocal = c.getLocalTranslation();
+    Vector3f worldPos2 = c.getWorldTranslation();
+    log.info("worldPos2 {}", worldPos2);
+    // worldPos2.subtract(worldPos1);
+    log.info("worldPos2 - worldPos1 {}", worldPos2.subtract(worldPos1));
+    log.info("worldPos2 {}", worldPos2);
+    Vector3f childLocal = c.getLocalTranslation();
+    Vector3f diff = childLocal.subtract(parentWorld);
+    c.setLocalTranslation(worldPos2.subtract(worldPos1));
+    // c.setLocalTransform();
     // parentNode.getNode().updateModelBound();
     // parentNode.getNode().updateGeometricState();
 
     // childNode.getNode().updateModelBound();
     // childNode.getNode().updateGeometricState();
     // childNode.getNode().updateGeometricState();
-    log(parentNode);
-    log(childNode);
+    // log(parentNode);
+    // log(childNode);
   }
 
   public Node createUnitAxis(String name) {

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -35,6 +36,7 @@ import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.Servo.ServoEventData;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Pin;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -62,7 +64,7 @@ import com.jme3.system.AppSettings;
 // TODO ATTACH THINGS ...
 // TODO implement generic bodypart to remove lot of things from here
 
-public class InMoov extends Service {
+public class InMoov extends Service implements IKJointAngleListener {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InMoov.class);
@@ -2367,6 +2369,12 @@ public class InMoov extends Service {
     torso = (InMoovTorso) startPeer("torso");
     torso.setController(controller);
     return torso;
+  }
+
+  @Override
+  public void onJointAngles(Map<String, Double> angleMap) {
+    // TODO Auto-generated method stub
+    log.info("onJointAngles {}", angleMap);
   }
 
 }
