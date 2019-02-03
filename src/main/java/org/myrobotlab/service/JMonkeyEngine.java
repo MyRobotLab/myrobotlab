@@ -48,7 +48,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
-import com.jme3.bullet.BulletAppState;
 // import com.jme3.bullet.animation.DynamicAnimControl;
 import com.jme3.collision.CollisionResults;
 import com.jme3.export.binary.BinaryExporter;
@@ -127,9 +126,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
     meta.addDependency("com.simsilica", "lemur", "1.11.0");
     meta.addDependency("com.simsilica", "lemur-proto", "1.10.0");
 
-    // meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
-    // meta.addDependency("org.jmonkeyengine", "jme3-bullet-native",
-    // jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
 
     // meta.addDependency("jme3utilities", "Minie", "0.6.2");
 
@@ -161,7 +159,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
 
   boolean autoAttachAll = true;
 
-  transient BulletAppState bulletAppState;
+  //transient BulletAppState bulletAppState;
 
   transient Node camera = new Node("camera");
 
@@ -2020,34 +2018,38 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
   }
 
   public void startService() {
-    super.startService();
-    // start the jmonkey app - if you want a diferent Jme3App
-    // config should be set at before this time
-    start();
-    // notify me if new services are created
-    subscribe(Runtime.getRuntimeName(), "registered");
+    try {
+      super.startService();
+      // start the jmonkey app - if you want a diferent Jme3App
+      // config should be set at before this time
+      start();
+      // notify me if new services are created
+      subscribe(Runtime.getRuntimeName(), "registered");
 
-    if (autoAttach) {
-      List<ServiceInterface> services = Runtime.getServices();
-      for (ServiceInterface si : services) {
-        try {
-          attach(si);
-        } catch (Exception e) {
-          error(e);
+      if (autoAttach) {
+        List<ServiceInterface> services = Runtime.getServices();
+        for (ServiceInterface si : services) {
+          try {
+            attach(si);
+          } catch (Exception e) {
+            error(e);
+          }
         }
       }
+    } catch (Exception e) {
+      log.error("{} startService exploded", getName(), e);
     }
   }
 
   // FIXME - requirements for "re-start" is everything correctly de-initialized
   // ?
-  public void stop() {
+  synchronized public void stop() {
     if (app != null) {
 
       // why ?
       app.getRootNode().detachAllChildren();
       app.getGuiNode().detachAllChildren();
-      app.stop();
+      app.stop(true);
       // app.destroy(); not for "us"
       app = null;
     }
@@ -2076,54 +2078,59 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
     return CodecUtils.toJson(node);
     // save it out
   }
-  
-  
+
   public static void main(String[] args) {
     try {
 
       // FIXME - make "load" work ..
-      
+
       LoggingFactory.init("info");
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-      
+
       jme.rename("i01-9", "i01");
       jme.scale("i01", 0.25f);
-      
+
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
 
       // FIXME - make non-kludgy method of integrating NON ARDUINO !!
 
       InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-      Servo.eventsEnabledDefault(false); 
-      
+      Servo.eventsEnabledDefault(false);
+
       Spatial rotate = jme.get("i01.leftArm.rotate");
       log.info("rotate world {}", rotate.getLocalTranslation());
       log.info("rotate local {}", rotate.getWorldTranslation());
       Spatial rotateFull = jme.get("i01.leftArm.rotate.full");
       log.info("rotateFull world {}", rotateFull.getLocalTranslation());
       log.info("rotateFull local {}", rotateFull.getWorldTranslation());
-      
+
       // jme.bind("i01.leftArm.rotate.full", "i01.leftArm.shoulder");
       jme.bind("i01.leftArm.rotate", "i01.leftArm.shoulder");
 
-      // FIXME - turn into json file - support scale, rename, bind, mapping, setRotation
+      // FIXME - turn into json file - support scale, rename, bind, mapping,
+      // setRotation
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
-//       jme.setMapper("i01.head.jaw", 0, 180, -10, 5); // is this true ? clipping vs attenuation .. should "not" min/max
-      jme.setMapper("i01.head.jaw", 0, 180, -10, 170); // is this true ? clipping vs attenuation .. should "not" min/max
+      // jme.setMapper("i01.head.jaw", 0, 180, -10, 5); // is this true ?
+      // clipping vs attenuation .. should "not" min/max
+      jme.setMapper("i01.head.jaw", 0, 180, -10, 170); // is this true ?
+                                                       // clipping vs
+                                                       // attenuation .. should
+                                                       // "not" min/max
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
       jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -180);
       jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -180);
       jme.setMapper("i01.rightArm.shoulder", 0, 180, -30, 150);
-      jme.setMapper("i01.leftArm.shoulder", 0, 180, -30, 150); // 124 = 29  & rest = 30
-      jme.setMapper("i01.rightArm.rotate", 0, 180, 90, 270);      
+      jme.setMapper("i01.leftArm.shoulder", 0, 180, -30, 150); // 124 = 29 &
+                                                               // rest = 30
+      jme.setMapper("i01.rightArm.rotate", 0, 180, 90, 270);
       jme.setMapper("i01.leftArm.rotate", 0, 180, -90, 90);
-      jme.setMapper("i01.rightArm.omoplate", 0, 180, 0, -180);   
-      
+      jme.setMapper("i01.rightArm.omoplate", 0, 180, 0, -180);
+
       jme.setRotation("i01.head.jaw", "x");
       jme.setRotation("i01.head.rollNeck", "z");
       jme.setRotation("i01.head.neck", "x");
@@ -2133,14 +2140,13 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       jme.setRotation("i01.leftArm.shoulder", "z");
       jme.setRotation("i01.rightArm.omoplate", "z");
       jme.setRotation("i01.leftArm.omoplate", "z");
-      
+
       // jme.bind(child, parent);
-      
-      
+
       // FIXME - i01.startAll();
-      
-      Servo leftBicep = (Servo)Runtime.start("i01.leftArm.bicep", "Servo");
-  
+
+      Servo leftBicep = (Servo) Runtime.start("i01.leftArm.bicep", "Servo");
+
       ServoController sc = jme.getServoController();
       i01.startHead(sc);
       i01.startArm("left", sc);
@@ -2151,7 +2157,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       Runtime.start("i01.mouth", "NaturalReaderSpeech");
       i01.startMouth();
       i01.startMouthControl();
-      
+
       List<String> servos = Runtime.getServiceNamesFromInterface("ServoControl");
       for (String servo : servos) {
         Spatial spatial = jme.get(servo);
@@ -2159,18 +2165,15 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
           log.error("cannot find {}", servo);
         }
       }
-      
+
       log.info("here");
-      
 
       // i01.moveHead(10, 20, 90);
       // i01.moveHead(30, 20, 10);
-  
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
-
 
 }
