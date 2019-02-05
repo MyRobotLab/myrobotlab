@@ -1,7 +1,10 @@
 package org.myrobotlab.jme3;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
+
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
@@ -40,6 +43,9 @@ public class MainMenuState extends BaseAppState {
   transient Label breadCrumbsx;
   transient Node guiNode;
 
+  // TODO - perhaps 1 tab is "movement/selection" - another tab is after being selected "moving" the object
+  // e.g. 1 is navigation the other is modification (with save)
+  
   VersionedReference<TabbedPanel.Tab> selectionRef;
   private Label statusLabel;
 
@@ -173,6 +179,15 @@ public class MainMenuState extends BaseAppState {
         // jme.cameraLookAt(jme.getSelected());
         // FIXME - child model with text
         // jme.load(inFileName);
+        JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+
+        int returnValue = jfc.showOpenDialog(null);
+        // int returnValue = jfc.showSaveDialog(null);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+          File selectedFile = jfc.getSelectedFile();
+          System.out.println(selectedFile.getAbsolutePath());
+        }
       }
     });
     buttons.addChild(button);
