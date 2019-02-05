@@ -12,8 +12,6 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
-import com.jme3.scene.Spatial;
-
 public class Jme3ServoController implements ServoController {
 
   JMonkeyEngine jme = null;
@@ -21,6 +19,7 @@ public class Jme3ServoController implements ServoController {
   public final static Logger log = LoggerFactory.getLogger(VirtualServoController.class);
 
   Map<String, ServoData> servos = new TreeMap<String, ServoData>();
+  Map<String, String[]> multiMapped = null;
 
   class ServoData {
 
@@ -35,6 +34,7 @@ public class Jme3ServoController implements ServoController {
 
   public Jme3ServoController(JMonkeyEngine jme) {
     this.jme = jme;
+    this.multiMapped = jme.getMultiMapped();
   }
 
   @Override
@@ -144,12 +144,21 @@ public class Jme3ServoController implements ServoController {
       log.error("servoMoveTo({})", servo);
       return;
     }
-    float velocity = (float)servo.getVelocity();
+    float velocity = (float) servo.getVelocity();
     if (velocity == -1) {
       velocity = 20;
     }
-    // UserData d = servos.get(name).data;
-    jme.rotateTo(name, (float) servo.getPos(), velocity);
+
+    // jme.getAttached()
+
+    String[] multi = multiMapped.get(name);
+    if (multi != null) {
+      for (String nodeName : multi) {
+        jme.rotateTo(nodeName, (float) servo.getPos(), velocity);
+      }
+    } else {
+      jme.rotateTo(name, (float) servo.getPos(), velocity);
+    }
   }
 
   @Override
