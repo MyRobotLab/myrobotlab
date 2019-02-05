@@ -5,7 +5,9 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -159,7 +161,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
 
   boolean autoAttachAll = true;
 
-  //transient BulletAppState bulletAppState;
+  // transient BulletAppState bulletAppState;
 
   transient Node camera = new Node("camera");
 
@@ -189,7 +191,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
   transient AtomicInteger id = new AtomicInteger();
   transient InputManager inputManager;
   transient Interpolator interpolator;
-  protected Queue<Jme3Msg> jmeMsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+  protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
   final public String KEY_SEPERATOR = "/";
 
   transient DisplayMode lastDisplayMode = null;
@@ -341,14 +343,37 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
   }
 
   public void addMsg(String method, Object... params) {
-    jmeMsgQueue.add(new Jme3Msg(method, params));
+    jme3MsgQueue.add(new Jme3Msg(method, params));
   }
 
   public void attach(Attachable service) throws Exception {
+    attach(service, (String[]) null);
+  }
 
-    app.attach(service);
+  public void attach(Attachable service, String... nodeNames) throws Exception {
+    attach(service.getName(), nodeNames);
+  }
+  
+  Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
+
+  public void attach(String serviceName, String... nodeNames) throws Exception {
+    
+    if (nodeNames != null) {
+      multiMapped.put(serviceName, nodeNames);
+    }
+
+    ServiceInterface service = Runtime.getService(serviceName);
+    
+    if (service == null) {
+      log.info("late binding with service {}", serviceName);
+      return;
+    }
+    
+    // app.attach(service);
+    
 
     // Cv Publisher ..
+    // FIXME - send type in a string ...
     if (service instanceof AbstractComputerVision) {
       AbstractComputerVision cv = (AbstractComputerVision) service;
       subscribe(service.getName(), "publishCvData");
@@ -836,7 +861,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
   }
 
   public Queue<Jme3Msg> getjmeMsgQueue() {
-    return jmeMsgQueue;
+    return jme3MsgQueue;
   }
 
   public String getKeyPath(Spatial spatial) {
@@ -1074,6 +1099,14 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
         rootNode.attachChild(node);
 
       } else {
+        
+        String json = FileIO.toString(filename);
+        Jme3Msg[] msgs = CodecUtils.fromJson(json, Jme3Msg[].class);
+        log.info("adding {} msgs", msgs.length);
+        for (Jme3Msg msg : msgs) {
+          jme3MsgQueue.add(msg);
+        }
+        
 
         // now for the json meta data ....
         /*
@@ -1115,7 +1148,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
     // scan for all non json files first ...
     // initially set them invisible ...
     for (File f : files) {
-      if (!f.isDirectory() && !"json".equals(getExt(f.getName()))) {
+      if (!f.isDirectory()) { // && !"json".equals(getExt(f.getName()))) {
         load(f.getAbsolutePath());
       }
     }
@@ -1920,6 +1953,16 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
     // load models in the default directory
     loadModels();
   }
+  
+  List<Jme3Msg> history = new ArrayList<Jme3Msg>();
+  boolean saveHistory = true;
+  
+  public void saveMsgs() throws IOException {
+    List<Jme3Msg> temp = history;
+    history = new ArrayList<Jme3Msg>();
+    String data = CodecUtils.toJson(temp);
+    FileIO.toFile(String.format("jme3-msg-history-%d.json", System.currentTimeMillis()), data);
+  }
 
   public void simpleUpdate(float tpf) {
 
@@ -1932,12 +1975,15 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
 
     interpolator.generateMoves();
 
-    while (jmeMsgQueue.size() > 0) {
+    while (jme3MsgQueue.size() > 0) {
       Jme3Msg msg = null;
       try {
 
         // TODO - support relative & absolute moves
-        msg = jmeMsgQueue.remove();
+        msg = jme3MsgQueue.remove();
+        if (saveHistory) {
+          history.add(msg);
+        }
         util.invoke(msg);
       } catch (Exception e) {
         log.error("simpleUpdate failed for {} - targetName", msg, e);
@@ -2090,14 +2136,15 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
 
       jme.rename("i01-9", "i01");
-      jme.scale("i01", 0.25f);
+      jme.scale("i01", 0.25f);      
 
       jme.addBox("floor.box.01", 1.0f, 1.0f, 1.0f, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
 
       // FIXME - make non-kludgy method of integrating NON ARDUINO !!
 
-      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+      // Runtime.start("i01.leftHand", "InMoovHand");
+      
       Servo.eventsEnabledDefault(false);
 
       Spatial rotate = jme.get("i01.leftArm.rotate");
@@ -2107,20 +2154,16 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       log.info("rotateFull world {}", rotateFull.getLocalTranslation());
       log.info("rotateFull local {}", rotateFull.getWorldTranslation());
 
-      // jme.bind("i01.leftArm.rotate.full", "i01.leftArm.shoulder");
-      jme.bind("i01.leftArm.rotate", "i01.leftArm.shoulder");
-
       // FIXME - turn into json file - support scale, rename, bind, mapping,
       // setRotation
+      /*
       jme.setMapper("i01.head.neck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
       // jme.setMapper("i01.head.jaw", 0, 180, -10, 5); // is this true ?
       // clipping vs attenuation .. should "not" min/max
-      jme.setMapper("i01.head.jaw", 0, 180, -10, 170); // is this true ?
-                                                       // clipping vs
-                                                       // attenuation .. should
-                                                       // "not" min/max
+      jme.setMapper("i01.head.jaw", 0, 180, -10, 170);
+
       jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
       jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -180);
       jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -180);
@@ -2131,6 +2174,20 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       jme.setMapper("i01.leftArm.rotate", 0, 180, -90, 90);
       jme.setMapper("i01.rightArm.omoplate", 0, 180, 0, -180);
 
+      jme.attach("i01.leftHand.index", "i01.leftHand.index", "i01.leftHand.index2", "i01.leftHand.index3");
+      jme.setRotation("i01.leftHand.index", "x");
+      jme.setRotation("i01.leftHand.index2", "x");
+      jme.setRotation("i01.leftHand.index3", "x");
+      
+      jme.setMapper("i01.leftHand.index", 0, 180, -90, -270);
+      jme.setMapper("i01.leftHand.index2", 0, 180, -90, -270);
+      jme.setMapper("i01.leftHand.index3", 0, 180, -90, -270);
+
+      jme.attach("i01.leftHand.ringFinger", "i01.leftHand.ringFinger", "i01.leftHand.ringFinger2", "i01.leftHand.ringFinger3");
+      jme.setRotation("i01.leftHand.ringFinger", "x");
+      jme.setRotation("i01.leftHand.ringFinger2", "x");
+      jme.setRotation("i01.leftHand.ringFinger3", "x");
+            
       jme.setRotation("i01.head.jaw", "x");
       jme.setRotation("i01.head.rollNeck", "z");
       jme.setRotation("i01.head.neck", "x");
@@ -2140,18 +2197,131 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       jme.setRotation("i01.leftArm.shoulder", "z");
       jme.setRotation("i01.rightArm.omoplate", "z");
       jme.setRotation("i01.leftArm.omoplate", "z");
+      */
 
       // jme.bind(child, parent);
+      
+      jme.setRotation("i01.head.jaw", "x");
+      jme.setRotation("i01.head.neck", "x");
+      jme.setRotation("i01.head.rollNeck", "z");
+      jme.setRotation("i01.head.eyeY", "x");
+      jme.setRotation("i01.torso.topStom", "z");
+      jme.setRotation("i01.torso.lowStom", "x");
+      jme.setRotation("i01.rightArm.bicep", "x");
+      jme.setRotation("i01.leftArm.bicep", "x");
+      jme.setRotation("i01.rightArm.shoulder", "x");
+      jme.setRotation("i01.leftArm.shoulder", "x");
+      jme.setRotation("i01.rightArm.rotate", "y");
+      jme.setRotation("i01.leftArm.rotate", "y");
+      jme.setRotation("i01.rightArm.omoplate", "z");
+      jme.setRotation("i01.leftArm.omoplate", "z");
 
-      // FIXME - i01.startAll();
+      jme.setRotation("i01.rightHand.index", "x");
+      jme.setRotation("i01.rightHand.majeure", "x");
+
+      jme.setRotation("i01.leftHand.index", "x");
+      jme.setRotation("i01.leftHand.majeure", "x");
+
+      jme.setMapper("i01.head.jaw", 0, 180, -5, 80);
+      jme.setMapper("i01.head.neck", 0, 180, -20, 20);
+      jme.setMapper("i01.head.rollNeck", 0, 180, -30, 30);
+      jme.setMapper("i01.head.eyeY", 0, 180, 30, 175);
+      jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
+      jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
+
+      jme.setMapper("i01.rightArm.shoulder", 0, 180, 30, -150);
+      jme.setMapper("i01.leftArm.shoulder", 0, 180, 30, -150);
+      jme.setMapper("i01.rightArm.rotate", 0, 180, 80, -80)     ;
+      jme.setMapper("i01.leftArm.rotate", 0, 180, -80, 80);
+      jme.setMapper("i01.rightArm.omoplate", 0, 180, 10, -180);
+      jme.setMapper("i01.leftArm.omoplate", 0, 180, -10, 180);
+
+      jme.setMapper("i01.rightHand.index", 0, 180, 90, -90);
+      jme.setMapper("i01.rightHand.majeure", 0, 180, 90, -90);
+      jme.setMapper("i01.rightHand.wrist", 0, 180, -20, 60);
+
+      jme.setMapper("i01.leftHand.index", 0, 180, 90, -90);
+      jme.setMapper("i01.leftHand.majeure", 0, 180, 90, -90);
+      jme.setMapper("i01.leftHand.wrist", 0, 180, 20, -60);
+
+      jme.setMapper("i01.torso.topStom", 0, 180, -30, 30);
+      jme.setMapper("i01.torso.midStom", 0, 180, 50, 130);
+      jme.setMapper("i01.torso.lowStom", 0, 180, -30, 30);
+      
+      // ============== Gael End =================================
+      
+      /*
+      jme.attach("i01.leftHand.thumb", "i01.leftHand.thumb", "i01.leftHand.thumb2", "i01.leftHand.thumb3");
+      jme.setRotation("i01.leftHand.thumb", "x");
+      jme.setRotation("i01.leftHand.thumb2", "x");
+      jme.setRotation("i01.leftHand.thumb3", "x");
+      */
+
+      jme.attach("i01.leftHand.index", "i01.leftHand.index", "i01.leftHand.index2", "i01.leftHand.index3");
+      jme.setRotation("i01.leftHand.index", "x");
+      jme.setRotation("i01.leftHand.index2", "x");
+      jme.setRotation("i01.leftHand.index3", "x");
+
+      jme.attach("i01.leftHand.majeure", "i01.leftHand.majeure", "i01.leftHand.majeure2", "i01.leftHand.majeure3");
+      jme.setRotation("i01.leftHand.majeure", "x");
+      jme.setRotation("i01.leftHand.majeure2", "x");
+      jme.setRotation("i01.leftHand.majeure3", "x");
+
+      jme.attach("i01.leftHand.ringFinger", "i01.leftHand.ringfinger0", "i01.leftHand.ringFinger2", "i01.leftHand.ringFinger3");
+      jme.setRotation("i01.leftHand.ringfinger0", "x");
+      jme.setRotation("i01.leftHand.ringFinger2", "x");
+      jme.setRotation("i01.leftHand.ringFinger3", "x");
+
+      jme.attach("i01.leftHand.pinky", "i01.leftHand.pinky", "i01.leftHand.pinky2", "i01.leftHand.pinky3");
+      jme.setRotation("i01.leftHand.pinky", "x");
+      jme.setRotation("i01.leftHand.pinky2", "x");
+      jme.setRotation("i01.leftHand.pinky3", "x");
+      
+       // right
+      jme.attach("i01.rightHand.index", "i01.rightHand.index", "i01.rightHand.index2", "i01.rightHand.index3");
+      jme.setRotation("i01.rightHand.index", "x");
+      jme.setRotation("i01.rightHand.index2", "x");
+      jme.setRotation("i01.rightHand.index3", "x");
+
+      jme.attach("i01.rightHand.majeure", "i01.rightHand.majeure", "i01.rightHand.majeure2", "i01.rightHand.majeure3");
+      jme.setRotation("i01.rightHand.majeure", "x");
+      jme.setRotation("i01.rightHand.majeure2", "x");
+      jme.setRotation("i01.rightHand.majeure3", "x");
+
+      jme.attach("i01.rightHand.ringFinger", "i01.rightHand.ringfinger0", "i01.rightHand.ringFinger2", "i01.rightHand.ringFinger3");
+      jme.setRotation("i01.rightHand.ringfinger0", "x");
+      jme.setRotation("i01.rightHand.ringFinger2", "x");
+      jme.setRotation("i01.rightHand.ringFinger3", "x");
+
+      jme.attach("i01.rightHand.pinky", "i01.rightHand.pinky", "i01.rightHand.pinky2", "i01.rightHand.pinky3");
+      jme.setRotation("i01.rightHand.pinky", "x");
+      jme.setRotation("i01.rightHand.pinky2", "x");
+      jme.setRotation("i01.rightHand.pinky3", "x");
+      
+      ServoController sc = jme.getServoController();
+      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+      i01.startHead(sc);
+      i01.startArm("left", sc);
+      i01.startArm("right", sc);
+      i01.startHand("left", sc);
+      i01.startHand("right", sc);
+      i01.startTorso(sc);
+      Runtime.start("i01.mouth", "NaturalReaderSpeech");
+      i01.startMouth();
+      i01.startMouthControl();
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       Servo leftBicep = (Servo) Runtime.start("i01.leftArm.bicep", "Servo");
 
-      ServoController sc = jme.getServoController();
+
       i01.startHead(sc);
       i01.startArm("left", sc);
       InMoovArm leftArm = i01.startArm("right", sc);
-      i01.startHand("left", sc);
+//       i01.startHand("left", sc);
       i01.startHand("right", sc);
       i01.startTorso(sc);
       Runtime.start("i01.mouth", "NaturalReaderSpeech");
@@ -2174,6 +2344,10 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+  
+  public Map<String,String[]> getMultiMapped(){
+    return multiMapped;
   }
 
 }
