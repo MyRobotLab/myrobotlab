@@ -2147,12 +2147,14 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator 
       
       Servo.eventsEnabledDefault(false);
 
+      /*
       Spatial rotate = jme.get("i01.leftArm.rotate");
       log.info("rotate world {}", rotate.getLocalTranslation());
       log.info("rotate local {}", rotate.getWorldTranslation());
       Spatial rotateFull = jme.get("i01.leftArm.rotate.full");
       log.info("rotateFull world {}", rotateFull.getLocalTranslation());
       log.info("rotateFull local {}", rotateFull.getWorldTranslation());
+      */
 
       // FIXME - turn into json file - support scale, rename, bind, mapping,
       // setRotation
