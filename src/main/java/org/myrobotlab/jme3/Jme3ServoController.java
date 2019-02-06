@@ -154,10 +154,10 @@ public class Jme3ServoController implements ServoController {
     String[] multi = multiMapped.get(name);
     if (multi != null) {
       for (String nodeName : multi) {
-        jme.rotateTo(nodeName, (float) servo.getPos(), velocity);
+        jme.rotateTo(nodeName, servo.getPos(), velocity);
       }
     } else {
-      jme.rotateTo(name, (float) servo.getPos(), velocity);
+      jme.rotateTo(name, servo.getPos(), velocity);
     }
   }
 

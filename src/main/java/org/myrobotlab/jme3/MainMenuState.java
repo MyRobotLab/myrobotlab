@@ -75,6 +75,8 @@ public class MainMenuState extends BaseAppState {
 
   Container childrenContainer;
   Container parentContainer;
+  
+  boolean ikToggle = false;
 
   final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
@@ -201,9 +203,25 @@ public class MainMenuState extends BaseAppState {
       }
     });
     buttons.addChild(button);
+    
+    // ik
+    button = new Button("ik");
+    button.addClickCommands(new Command<Button>() {
+      @Override
+      public void execute(Button source) {
+        if (ikToggle) {
+          ikToggle = false;
+          jme.enableIk(ikToggle);
+        } else {
+          ikToggle = true;
+          jme.enableIk(ikToggle);
+        }
+      }
+    });
+    buttons.addChild(button);
 
     // addGrid
-    grid = new Button("grid on");
+    grid = new Button("grid off");
     grid.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {

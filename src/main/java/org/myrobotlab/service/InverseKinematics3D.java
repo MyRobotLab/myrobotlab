@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Matrix;
@@ -15,6 +16,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PointsListener;
 import org.slf4j.Logger;
@@ -217,7 +219,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       log.info("Rot/Translated input {}", p);
     }
     boolean success = arms.get(name).moveToGoal(p);
-
+success = true; // FIXME change object to send error tolerance - let the robot determine if it was success or not
     if (success) {
       publishTelemetry(name);
     } else {
@@ -268,7 +270,14 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   public void setCurrentArm(String name, DHRobotArm arm) {
+    arm.setIk3D(this);
     this.arms.put(name, arm);
+  }
+  
+  public void attach(Attachable attachable) {
+    if (attachable instanceof IKJointAngleListener) {
+      addListener("publishJointAngles", attachable.getName(), "onJointAngles");
+    }
   }
 
   public static void main(String[] args) throws Exception {
@@ -280,9 +289,9 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
     InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
-    inversekinematics.setCurrentArm(arm, InMoovArm.getDHRobotArm());
+    inversekinematics.setCurrentArm(arm, InMoovArm.getDHRobotArm("i01", "left"));
     //
-    inversekinematics.getCurrentArm(arm).setIk3D(inversekinematics);
+    // inversekinematics.getCurrentArm(arm).setIk3D(inversekinematics);
     // Create a new DH Arm.. simpler for initial testing.
     // d , r, theta , alpha
     // DHRobotArm testArm = new DHRobotArm();

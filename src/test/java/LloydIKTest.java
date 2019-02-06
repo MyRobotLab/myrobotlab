@@ -29,7 +29,7 @@ public class LloydIKTest {
     // and then compare a mock output from controller position / orientation to
     // how the arm reacts.
     InverseKinematics3D leftIK = (InverseKinematics3D) Runtime.start("leftIK", "InverseKinematics3D");
-    leftIK.setCurrentArm(partName, InMoovArm.getDHRobotArm());
+    leftIK.setCurrentArm(partName, InMoovArm.getDHRobotArm("i01", "left"));
     leftIK.centerAllJoints(partName);
     Point position = leftIK.currentPosition(partName);
     log.info("Left IK center position is : {}", position);
