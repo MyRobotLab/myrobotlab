@@ -23,7 +23,7 @@ public class InverseKinematics3DTest {
   public void testForwardKinematics() {
     InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InMoovArm ia = new InMoovArm("i01");
-    ik3d.setCurrentArm(arm, InMoovArm.getDHRobotArm());
+    ik3d.setCurrentArm(arm, InMoovArm.getDHRobotArm("i01", "left"));
     ik3d.centerAllJoints(arm);
     System.out.println(ik3d.getCurrentArm(arm).getPalmPosition());
   }
@@ -32,7 +32,7 @@ public class InverseKinematics3DTest {
   public void testIK3D() throws Exception {
     InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InMoovArm ia = new InMoovArm("i01");
-    ik3d.setCurrentArm(arm, InMoovArm.getDHRobotArm());
+    ik3d.setCurrentArm(arm, InMoovArm.getDHRobotArm("i01", "left"));
     // start from a centered joint configuration so we can iterate without
     // loosing rank
     // in our jacobian!

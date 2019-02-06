@@ -14,8 +14,8 @@ public class Interpolator {
   public class Move {
     String name;
     String type;
-    float newPos;
-    float speed;
+    double newPos;
+    double speed;
     long startTs;
     long nextMoveTs;
     long estimatedEndTs;
@@ -38,7 +38,7 @@ public class Interpolator {
 
   // external thread does a request
   // processed into a data object which generates the next Msg
-  public void addAnimation(String name, String type, float newPos, float speed) {
+  public void addAnimation(String name, String type, double newPos, double speed) {
     
     // TODO Auto-generated method stub
     Move move = new Move();
@@ -77,7 +77,7 @@ public class Interpolator {
       long deltaTime = System.currentTimeMillis() - move.startTs; // milliseconds
 
       // total difference in our move - degrees per second
-      float interPos = move.startPos + (move.direction * deltaTime * move.speed / 1000);
+      double interPos = move.startPos + (move.direction * deltaTime * move.speed / 1000);
 
       log.info(String.format("%s deltaTime %d ms new position %.2f", move.name, deltaTime, interPos));
 

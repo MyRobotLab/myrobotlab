@@ -35,8 +35,10 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.Servo.ServoEventData;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -64,7 +66,7 @@ import com.jme3.system.AppSettings;
 // TODO ATTACH THINGS ...
 // TODO implement generic bodypart to remove lot of things from here
 
-public class InMoov extends Service implements IKJointAngleListener {
+public class InMoov extends Service implements IKJointAngleListener, JoystickListener {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InMoov.class);
@@ -2344,9 +2346,9 @@ public class InMoov extends Service implements IKJointAngleListener {
     log.info("onJointAngles {}", angleMap);
   }
   
-  public void startIK3d() {
+  public void startIK3d() throws Exception {
     ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
-    ik3d.setCurrentArm("rightArm", InMoovArm.getDHRobotArm());
+    ik3d.setCurrentArm("rightArm", InMoovArm.getDHRobotArm(getName(), "left"));
     
   // Runtime.createAndStart("gui", "SwingGui");
   // OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
@@ -2363,14 +2365,16 @@ public class InMoov extends Service implements IKJointAngleListener {
   /*
    * SwingGui gui = new SwingGui("gui"); gui.startService();
    */
-
+/*
   Joystick joystick = (Joystick) Runtime.start("joystick", "Joystick");
   joystick.setController(2);
 
   // joystick.startPolling();
 
   // attach the joystick input to the ik3d service.
-  joystick.addInputListener(ik3d);
+  // joystick.addInputListener(ik3d);
+  joystick.attach(this);
+  */
   }
   
   public static void main(String[] args) throws Exception {
@@ -2413,6 +2417,12 @@ public class InMoov extends Service implements IKJointAngleListener {
     i01.startVinMoov();
     i01.startOpenCV();
     i01.execGesture("BREAKITdaVinci()");
+  }
+
+  @Override
+  public void onJoystickInput(JoystickData input) throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 }

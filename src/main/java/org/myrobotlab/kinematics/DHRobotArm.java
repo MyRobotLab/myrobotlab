@@ -20,7 +20,7 @@ public class DHRobotArm implements Serializable {
 
   public String name;
 
-  // for debugging ..
+  // for debugging .. hmmm
   public transient InverseKinematics3D ik3D = null;
 
   public DHRobotArm() {

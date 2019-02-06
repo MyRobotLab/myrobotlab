@@ -88,7 +88,7 @@ public class Jme3Util {
     log.info(sb.toString());
   }
 
-  public void moveTo(String name, float x, float y, float z) {
+  public void moveTo(String name, double x, double y, double z) {
     log.info(String.format("moveTo %s, %.2f,%.2f,%.2f", name, x, y, z));
     UserData o = jme.getUserData(name);
     if (o == null) {
@@ -99,7 +99,7 @@ public class Jme3Util {
       log.error("moveTo %s node is null !!!", name);
       return;
     }
-    o.getNode().setLocalTranslation(x, y, z);
+    o.getNode().setLocalTranslation((float)x, (float)y, (float)z);
   }
 
   public Vector3f getUnitVector(String axis) {
@@ -135,12 +135,12 @@ public class Jme3Util {
   }
 
   // TODO - generalized rotate("-x", 39.3f) which uses default rotation mask
-  public void rotateOnAxis(String name, String axis, float degrees) {
+  public void rotateOnAxis(String name, String axis, double degrees) {
     log.info(String.format("rotateOnAxis %s, %s %.2f", name, axis, degrees));
     UserData o = jme.getUserData(name);
-    float angle = degrees * FastMath.PI / 180;
+    double angle = degrees * FastMath.PI / 180;
     Vector3f uv = getUnitVector(axis);
-    Vector3f rot = uv.mult(angle);
+    Vector3f rot = uv.mult((float)angle);
     o.getNode().rotate(rot.x, rot.y, rot.z);
   }
 
@@ -168,7 +168,7 @@ public class Jme3Util {
    * @param name
    * @param degrees
    */
-  public void rotateTo(String name, Float degrees) {
+  public void rotateTo(String name, double degrees) {
     UserData o = jme.getUserData(name);
     if (o == null) {
       jme.error("no user data for %s", name);
@@ -191,19 +191,23 @@ public class Jme3Util {
     // get current local rotations
     Node n = o.getNode();
     Quaternion q = n.getLocalRotation();
-    float[] angles = new float[3];
-    q.toAngles(angles);
+    // float[] angles = new float[3];
+    // q.toAngles(angles);
     // log.info(String.format("rotate - before %s, %.2f", name,
     // angles[angleIndex] * 180 / FastMath.PI));
 
-    q.fromAngleAxis(((degrees) * FastMath.PI / 180), rotMask);// FIXME optimize
+    // q.fromAngles(((float)degrees) * FastMath.PI / 180, 0, 0);
+    q.fromAngleAxis((((float)degrees) * FastMath.PI / 180), rotMask);
+    // q.fromAngleNormalAxis ((((float)degrees) * FastMath.PI / 180), rotMask);
+    
+    // FIXME optimize
                                                               // final Y_AXIS =
                                                               // new
                                                               // Vector3f(0,1,0)
 
     // apply map if it exists (shifted)
     n.setLocalRotation(q);
-    q.toAngles(angles);
+    // q.toAngles(angles);
     // log.info(String.format("rotate - after %s, %.2f", name,
     // angles[angleIndex] * 180 / FastMath.PI));
   }
@@ -363,10 +367,13 @@ public class Jme3Util {
     return createBoundingBox(spatial, defaultColor);
   }
 
-  public void scale(String name, float scale) {
+  public void scale(String name, Double scale) {
     Spatial s = jme.get(name);
+    if (s == null || scale == null) {
+      return;
+    }
     log.info("rescaling {} to {}", name, scale);
-    s.scale(scale);
+    s.scale(scale.floatValue());
   }
 
 }
