@@ -149,7 +149,9 @@ public class InMoov extends Service implements IKJointAngleListener {
   transient public Arduino neopixelArduino;
   transient public UltrasonicSensor ultrasonicSensor;
   transient public ProgramAB chatBot;
-  private IntegratedMovement integratedMovement;
+  transient private IntegratedMovement integratedMovement;
+  transient private InverseKinematics3D ik3d;
+  transient private Joystick joystick;
 
   // ---------------------------------------------------------------
   // end services reservations
@@ -2301,42 +2303,7 @@ public class InMoov extends Service implements IKJointAngleListener {
     return head;
   }
 
-  public static void main(String[] args) throws Exception {
-
-    LoggingFactory.init(Level.INFO);
-
-    String leftPort = "COM3";
-    String rightPort = "COM4";
-
-    VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
-    VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
-    vleft.connect(leftPort);
-    vright.connect(rightPort);
-    Runtime.start("gui", "SwingGui");
-    Runtime.start("python", "Python");
-    InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-    i01.setLanguage("en-US");
-    i01.startMouth();
-    // i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear",
-    // "AndroidSpeechRecognition");
-    i01.startEar();
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    webgui.startService();
-    webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
-    HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-    i01.chatBot = (ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
-    i01.chatBot.addTextListener(htmlFilter);
-    htmlFilter.addListener("publishText", "i01", "speak");
-    i01.chatBot.attach((Attachable) i01.ear);
-    i01.startBrain();
-    i01.startHead(leftPort);
-    i01.startMouthControl(i01.head.jaw, i01.mouth);
-    i01.loadGestures("InMoov/gestures");
-    i01.startVinMoov();
-    i01.startOpenCV();
-    i01.execGesture("BREAKITdaVinci()");
-  }
+ 
 
   public InMoovArm startArm(String side, ServoController controller) throws Exception {
     // speakBlocking(languagePack.get("STARTINGLEFTARM"));
@@ -2375,6 +2342,77 @@ public class InMoov extends Service implements IKJointAngleListener {
   public void onJointAngles(Map<String, Double> angleMap) {
     // TODO Auto-generated method stub
     log.info("onJointAngles {}", angleMap);
+  }
+  
+  public void startIK3d() {
+    ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
+    ik3d.setCurrentArm("rightArm", InMoovArm.getDHRobotArm());
+    
+  // Runtime.createAndStart("gui", "SwingGui");
+  // OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
+  // OpenCVFilterAffine aff1 = new OpenCVFilterAffine("aff1");
+  // aff1.setAngle(270);
+  // aff1.setDx(-80);
+  // aff1.setDy(-80);
+  // cv1.addFilter(aff1);
+  //
+  // cv1.setCameraIndex(0);
+  // cv1.capture();
+  // cv1.undockDisplay(true);
+
+  /*
+   * SwingGui gui = new SwingGui("gui"); gui.startService();
+   */
+
+  Joystick joystick = (Joystick) Runtime.start("joystick", "Joystick");
+  joystick.setController(2);
+
+  // joystick.startPolling();
+
+  // attach the joystick input to the ik3d service.
+  joystick.addInputListener(ik3d);
+  }
+  
+  public static void main(String[] args) throws Exception {
+
+    LoggingFactory.init(Level.INFO);
+    
+    boolean done = true;
+    if (done) {
+      return;
+    }
+
+    String leftPort = "COM3";
+    String rightPort = "COM4";
+
+    VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
+    VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
+    vleft.connect(leftPort);
+    vright.connect(rightPort);
+    Runtime.start("gui", "SwingGui");
+    Runtime.start("python", "Python");
+    InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+    i01.setLanguage("en-US");
+    i01.startMouth();
+    // i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear",
+    // "AndroidSpeechRecognition");
+    i01.startEar();
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+    webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
+    HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
+    i01.chatBot = (ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
+    i01.chatBot.addTextListener(htmlFilter);
+    htmlFilter.addListener("publishText", "i01", "speak");
+    i01.chatBot.attach((Attachable) i01.ear);
+    i01.startBrain();
+    i01.startHead(leftPort);
+    i01.startMouthControl(i01.head.jaw, i01.mouth);
+    i01.loadGestures("InMoov/gestures");
+    i01.startVinMoov();
+    i01.startOpenCV();
+    i01.execGesture("BREAKITdaVinci()");
   }
 
 }
