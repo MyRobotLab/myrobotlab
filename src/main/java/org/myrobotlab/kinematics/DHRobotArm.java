@@ -14,7 +14,7 @@ public class DHRobotArm implements Serializable {
 
   transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
 
-  private int maxIterations = 1000;
+  private int maxIterations = 10000;
 
   private ArrayList<DHLink> links;
 
@@ -226,7 +226,7 @@ public class DHRobotArm implements Serializable {
   public void centerAllJoints() {
     for (DHLink link : links) {
       double center = (link.getMax() + link.getMin()) / 2.0;
-      log.info("Centering Servo {} to {} degrees", link.getName(), center);
+      log.debug("Centering Servo {} to {} degrees", link.getName(), center);
       link.setTheta(center);
     }
   }
@@ -234,9 +234,9 @@ public class DHRobotArm implements Serializable {
   public boolean moveToGoal(Point goal) {
     // we know where we are.. we know where we want to go.
     int numSteps = 0;
-    double iterStep = 0.25;
-    // we're in millimeters.. one centimeter is pretty decent i think?
-    double errorThreshold = 10.0;
+    double iterStep = 0.05;
+    // we're in millimeters.. 
+    double errorThreshold = 2.0;
     // what's the current point
     while (true) {
       numSteps++;

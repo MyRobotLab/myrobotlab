@@ -445,29 +445,45 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     DHRobotArm arm = new DHRobotArm();
     // d , r, theta , alpha
 
+    
+//    HashMap<String, Double> calibMap = new HashMap<String, Double>();
+//    calibMap.put("i01.leftArm.omoplate", 90.0);
+//    calibMap.put("i01.leftArm.shoulder", -90.0+45);
+//    calibMap.put("i01.leftArm.rotate", 0.0);
+//    calibMap.put("i01.leftArm.bicep", -90.0);
+    
     // TODO: the DH links should take into account the encoder offsets and
     // calibration maps
     DHLink link1 = new DHLink(String.format("%s.%sArm.omoplate", name, side), 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
     // dh model + 90 degrees = real
     link1.setMin(MathUtils.degToRad(-90));
     link1.setMax(MathUtils.degToRad(0));
+    link1.setOffset(90);
 
     // -80 vs +80 difference between left/right arm.
-    DHLink link2 = new DHLink(String.format("%s.%sArm.shoulder", name, side), -80, 0, MathUtils.degToRad(90), MathUtils.degToRad(90));
+    double shoulderWidth = 80;
+    if (side.equalsIgnoreCase("right")) {
+      // TODO: there are probably other differnces between the 2 arms.
+      shoulderWidth = -80;
+    }
+    DHLink link2 = new DHLink(String.format("%s.%sArm.shoulder", name, side), shoulderWidth, 0, MathUtils.degToRad(90), MathUtils.degToRad(90));
     // TODO: this is actually 90 to -90 ? validate if inverted.
     // this link is inverted :-/
     link2.setMin(MathUtils.degToRad(-90));
     link2.setMax(MathUtils.degToRad(90));
+    link2.setOffset(-45);
 
     DHLink link3 = new DHLink(String.format("%s.%sArm.rotate", name, side), 280, 0, MathUtils.degToRad(0), MathUtils.degToRad(90));
     // TODO: check if this is inverted. i think it is.
-    link3.setMin(MathUtils.degToRad(0));
-    link3.setMax(MathUtils.degToRad(180));
-
+    link3.setMin(MathUtils.degToRad(-90));
+    link3.setMax(MathUtils.degToRad(90));
+    link3.setOffset(0);
+    
     DHLink link4 = new DHLink(String.format("%s.%sArm.bicep", name, side), 0, 280, MathUtils.degToRad(90), MathUtils.degToRad(0));
     // TODO: this is probably inverted? should be 90 to 0...
     link4.setMin(MathUtils.degToRad(90));
     link4.setMax(MathUtils.degToRad(180));
+    link4.setOffset(-90);
 
     arm.addLink(link1);
     arm.addLink(link2);
