@@ -237,7 +237,9 @@ success = true; // FIXME change object to send error tolerance - let the robot d
       double theta = l.getTheta();
       // angles between 0 - 360 degrees.. not sure what people will really want?
       // - 180 to + 180 ?
-      angleMap.put(jointName, (double) MathUtils.radToDeg(theta) % 360.0F);
+      double angle = MathUtils.radToDeg(theta) + l.getOffset();
+      angleMap.put(jointName, (double) angle % 360.0F);
+      log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
     invoke("publishJointAngles", angleMap);
     // we want to publish the joint positions

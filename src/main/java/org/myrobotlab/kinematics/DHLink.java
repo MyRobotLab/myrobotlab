@@ -44,15 +44,20 @@ public class DHLink implements Serializable {
   private double velocity; // FIXME - is this set by IK being dp/dt ? .. it
   // should be
   private int state = Servo.SERVO_EVENT_STOPPED; // FIXME - no servo info
-  private double targetPos;
+  public double targetPos;
   public boolean hasServo = false; // FIXME - no servo info
   public double servoMin;
   public double servoMax;
-  private double currentPos = 0.0;
+  public double currentPos = 0.0;
+  public double offset = 0.0;
 
   // private Matrix m;
   // TODO: add max/min angle
   public DHLink(String name, double d, double r, double theta, double alpha) {
+    this(name, d, r, theta, alpha, 0);
+  }
+
+  public DHLink(String name, double d, double r, double theta, double alpha, double offset) {
     super();
     // The name of the servo that we are controlling.
     this.name = name;
@@ -61,6 +66,7 @@ public class DHLink implements Serializable {
     this.theta = theta;
     initialTheta = theta;
     this.alpha = alpha;
+    this.offset = offset;
     //
     this.type = DHLinkType.REVOLUTE;
     // m = resolveMatrix();
@@ -244,7 +250,7 @@ public class DHLink implements Serializable {
       // I suppose this means min/max are in radians..
       if (destAngle > max || destAngle < min) {
         // we're out of range
-        // log.info("Link {} angle out of range {} ", name, destAngle);
+        //log.info("Link {} angle out of range {} ", name, destAngle);
       } else {
         this.theta = destAngle;
       }
@@ -359,5 +365,18 @@ public class DHLink implements Serializable {
     if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
       initialTheta = alpha;
     }
+  }
+
+  public void setOffset(double offset) {
+    this.offset = offset;
+  }
+  
+  /**
+   * This represents the difference in angles between the DH model and the real world encoder/joint angle for the link.
+   * This value will be added to the IK solved angles prior to invoking publishJointAngles.
+   * @return
+   */
+  public double getOffset() {
+    return offset ;
   }
 }
