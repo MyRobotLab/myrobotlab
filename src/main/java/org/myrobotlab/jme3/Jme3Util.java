@@ -190,14 +190,16 @@ public class Jme3Util {
 
     // get current local rotations
     Node n = o.getNode();
-    Quaternion q = n.getLocalRotation();
+//     Quaternion q = n.getLocalRotation();
+    Quaternion q = new Quaternion();
     // float[] angles = new float[3];
     // q.toAngles(angles);
     // log.info(String.format("rotate - before %s, %.2f", name,
     // angles[angleIndex] * 180 / FastMath.PI));
-
+    q.normalizeLocal();
     // q.fromAngles(((float)degrees) * FastMath.PI / 180, 0, 0);
-    q.fromAngleAxis((((float)degrees) * FastMath.PI / 180), rotMask);
+    q.fromAngleNormalAxis((((float)degrees) * FastMath.PI / 180), rotMask);
+    // q.fromAngleAxis((((float)degrees) * FastMath.PI / 180), rotMask);
     // q.fromAngleNormalAxis ((((float)degrees) * FastMath.PI / 180), rotMask);
     
     // FIXME optimize
@@ -210,7 +212,29 @@ public class Jme3Util {
     // q.toAngles(angles);
     // log.info(String.format("rotate - after %s, %.2f", name,
     // angles[angleIndex] * 180 / FastMath.PI));
+    
+    /* PICK TOOL 
+    Quaternion startRotate = n.getLocalRotation().clone();
+    Quaternion startWorldRotate = n.getWorldRotation().clone();    
+    Quaternion rotation = startRotate.mult(getRotation(startWorldRotate.inverse()));
+    n.setLocalRotation(rotation);
+    */
+    // lastRotate = rotation;
+    
   }
+  
+  /* PICK TOOL
+  public Quaternion getRotation(Quaternion transform) {
+    
+    Vector3f v1, v2;
+    v1 = transform.mult(startPickLoc.subtract(startSpatialLocation).normalize());
+    v2 = transform.mult(finalPickLoc.subtract(startSpatialLocation).normalize());
+    Vector3f axis = v1.cross(v2);
+    float angle = v1.angleBetween(v2);
+    return new Quaternion().fromAngleAxis(angle, axis);
+    
+  }
+  */
 
   public void bind(String child, String parent) {
     log.info("binding {} to {}", child, parent);
