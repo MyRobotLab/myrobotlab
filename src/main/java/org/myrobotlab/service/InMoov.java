@@ -27,6 +27,7 @@ import org.myrobotlab.inmoov.Vision;
 import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.GravityCenter;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -153,6 +154,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   transient public ProgramAB chatBot;
   transient private IntegratedMovement integratedMovement;
   transient private InverseKinematics3D ik3d;
+  transient private JMonkeyEngine jme; // TODO - should probably be a Simulator
+                                       // interface
   transient private Joystick joystick;
 
   // ---------------------------------------------------------------
@@ -1674,6 +1677,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       vision.init();
     }
     vision.instance = this;
+
     // TODO : use locale it-IT,fi-FI
     languages.put("en-US", "English - United States");
     languages.put("fr-FR", "French - France");
@@ -2285,7 +2289,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     meta.addPeer("pid", "Pid", "Pid service");
 
     // For VirtualInMoov
-    meta.addPeer("jmonkeyEngine", "JMonkeyEngine", "Virtual inmoov");
+    meta.addPeer("jme", "JMonkeyEngine", "Virtual inmoov");
+    meta.addPeer("ik3d", "InverseKinematics3D", "Virtual inmoov");
 
     // For IntegratedMovement
     meta.addPeer("integratedMovement", "IntegratedMovement", "Inverse kinematic type movement");
@@ -2305,8 +2310,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     return head;
   }
 
- 
-
   public InMoovArm startArm(String side, ServoController controller) throws Exception {
     // speakBlocking(languagePack.get("STARTINGLEFTARM"));
     InMoovArm arm = (InMoovArm) startPeer(String.format("%sArm", side));
@@ -2315,7 +2318,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     arm.setSide(side);// FIXME WHO USES SIDE - THIS SHOULD BE NAME !!!
     if ("left".equals(side)) {
       leftArm = arm;
-    } else  if ("right".equals(side)) {
+    } else if ("right".equals(side)) {
       rightArm = arm;
     }
     return arm;
@@ -2328,7 +2331,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     hand.setController(sc);
     if ("left".equals(side)) {
       leftHand = hand;
-    } else  if ("right".equals(side)) {
+    } else if ("right".equals(side)) {
       rightHand = hand;
     }
     return hand;
@@ -2344,43 +2347,53 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   public void onJointAngles(Map<String, Double> angleMap) {
     // TODO Auto-generated method stub
     log.info("onJointAngles {}", angleMap);
+    
+    // here we can make decisions on what ik sets we want to use and
+    // what body parts are to move
+    
+    for (String name : angleMap.keySet()) {
+      ServiceInterface si = Runtime.getService(name);
+      if (si instanceof Servo) {
+        ((Servo)si).moveTo(angleMap.get(name));
+      }
+    }
+    
   }
-  
+
   public void startIK3d() throws Exception {
     ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     ik3d.setCurrentArm("rightArm", InMoovArm.getDHRobotArm(getName(), "left"));
-    
-  // Runtime.createAndStart("gui", "SwingGui");
-  // OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
-  // OpenCVFilterAffine aff1 = new OpenCVFilterAffine("aff1");
-  // aff1.setAngle(270);
-  // aff1.setDx(-80);
-  // aff1.setDy(-80);
-  // cv1.addFilter(aff1);
-  //
-  // cv1.setCameraIndex(0);
-  // cv1.capture();
-  // cv1.undockDisplay(true);
 
-  /*
-   * SwingGui gui = new SwingGui("gui"); gui.startService();
-   */
-/*
-  Joystick joystick = (Joystick) Runtime.start("joystick", "Joystick");
-  joystick.setController(2);
+    // Runtime.createAndStart("gui", "SwingGui");
+    // OpenCV cv1 = (OpenCV)Runtime.createAndStart("cv1", "OpenCV");
+    // OpenCVFilterAffine aff1 = new OpenCVFilterAffine("aff1");
+    // aff1.setAngle(270);
+    // aff1.setDx(-80);
+    // aff1.setDy(-80);
+    // cv1.addFilter(aff1);
+    //
+    // cv1.setCameraIndex(0);
+    // cv1.capture();
+    // cv1.undockDisplay(true);
 
-  // joystick.startPolling();
-
-  // attach the joystick input to the ik3d service.
-  // joystick.addInputListener(ik3d);
-  joystick.attach(this);
-  */
+    /*
+     * SwingGui gui = new SwingGui("gui"); gui.startService();
+     */
+    /*
+     * Joystick joystick = (Joystick) Runtime.start("joystick", "Joystick");
+     * joystick.setController(2);
+     * 
+     * // joystick.startPolling();
+     * 
+     * // attach the joystick input to the ik3d service. //
+     * joystick.addInputListener(ik3d); joystick.attach(this);
+     */
   }
-  
+
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    
+
     boolean done = true;
     if (done) {
       return;
@@ -2422,7 +2435,164 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   @Override
   public void onJoystickInput(JoystickData input) throws Exception {
     // TODO Auto-generated method stub
-    
+
+  }
+
+  Point ikPoint = null;
+
+  public void startSimulator() throws Exception {
+    if (jme == null) {
+      jme = (JMonkeyEngine) startPeer("jme");
+    }
+
+    // disable the frustrating servo events ...
+    Servo.eventsEnabledDefault(false);
+
+    // ========== gael's calibrations begin ======================
+    jme.setRotation("i01.head.jaw", "x");
+    jme.setRotation("i01.head.neck", "x");
+    jme.setRotation("i01.head.rollNeck", "z");
+    jme.setRotation("i01.head.eyeY", "x");
+    jme.setRotation("i01.torso.topStom", "z");
+    jme.setRotation("i01.torso.lowStom", "x");
+    jme.setRotation("i01.rightArm.bicep", "x");
+    jme.setRotation("i01.leftArm.bicep", "x");
+    jme.setRotation("i01.rightArm.shoulder", "x");
+    jme.setRotation("i01.leftArm.shoulder", "x");
+    jme.setRotation("i01.rightArm.rotate", "y");
+    jme.setRotation("i01.leftArm.rotate", "y");
+    jme.setRotation("i01.rightArm.omoplate", "z");
+    jme.setRotation("i01.leftArm.omoplate", "z");
+
+    jme.setRotation("i01.rightHand.index", "x");
+    jme.setRotation("i01.rightHand.majeure", "x");
+
+    jme.setRotation("i01.leftHand.index", "x");
+    jme.setRotation("i01.leftHand.majeure", "x");
+
+    jme.setMapper("i01.head.jaw", 0, 180, -5, 80);
+    jme.setMapper("i01.head.neck", 0, 180, -20, 20);
+    jme.setMapper("i01.head.rollNeck", 0, 180, -30, 30);
+    jme.setMapper("i01.head.eyeY", 0, 180, 30, 175);
+    jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
+    jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
+
+    jme.setMapper("i01.rightArm.shoulder", 0, 180, 30, -150);
+    jme.setMapper("i01.leftArm.shoulder", 0, 180, 30, -150);
+    jme.setMapper("i01.rightArm.rotate", 0, 180, 80, -80);
+    jme.setMapper("i01.leftArm.rotate", 0, 180, -80, 80);
+    jme.setMapper("i01.rightArm.omoplate", 0, 180, 10, -180);
+    jme.setMapper("i01.leftArm.omoplate", 0, 180, -10, 180);
+
+    jme.setMapper("i01.rightHand.index", 0, 180, 90, -90);
+    jme.setMapper("i01.rightHand.majeure", 0, 180, 90, -90);
+    jme.setMapper("i01.rightHand.wrist", 0, 180, -20, 60);
+
+    jme.setMapper("i01.leftHand.index", 0, 180, 90, -90);
+    jme.setMapper("i01.leftHand.majeure", 0, 180, 90, -90);
+    jme.setMapper("i01.leftHand.wrist", 0, 180, 20, -60);
+
+    jme.setMapper("i01.torso.topStom", 0, 180, -30, 30);
+    jme.setMapper("i01.torso.midStom", 0, 180, 50, 130);
+    jme.setMapper("i01.torso.lowStom", 0, 180, -30, 30);
+
+    // ========== gael's calibrations end ======================
+
+    // ========== 3 joint finger mapping and attaching begin ===
+
+    jme.attach("i01.leftHand.thumb", "i01.leftHand.thumb1", "i01.leftHand.thumb3");
+    jme.setRotation("i01.leftHand.thumb", "x");
+    jme.setRotation("i01.leftHand.thumb1", "x");
+    jme.setRotation("i01.leftHand.thumb3", "x");
+
+    jme.attach("i01.leftHand.index", "i01.leftHand.index", "i01.leftHand.index2", "i01.leftHand.index3");
+    jme.setRotation("i01.leftHand.index", "x");
+    jme.setRotation("i01.leftHand.index2", "x");
+    jme.setRotation("i01.leftHand.index3", "x");
+
+    jme.attach("i01.leftHand.majeure", "i01.leftHand.majeure", "i01.leftHand.majeure2", "i01.leftHand.majeure3");
+    jme.setRotation("i01.leftHand.majeure", "x");
+    jme.setRotation("i01.leftHand.majeure2", "x");
+    jme.setRotation("i01.leftHand.majeure3", "x");
+
+    jme.attach("i01.leftHand.ringFinger", "i01.leftHand.ringfinger0", "i01.leftHand.ringFinger2", "i01.leftHand.ringFinger3");
+    jme.setRotation("i01.leftHand.ringfinger0", "x");
+    jme.setRotation("i01.leftHand.ringFinger2", "x");
+    jme.setRotation("i01.leftHand.ringFinger3", "x");
+
+    jme.attach("i01.leftHand.pinky", "i01.leftHand.pinky", "i01.leftHand.pinky2", "i01.leftHand.pinky3");
+    jme.setRotation("i01.leftHand.pinky", "x");
+    jme.setRotation("i01.leftHand.pinky2", "x");
+    jme.setRotation("i01.leftHand.pinky3", "x");
+
+    jme.attach("i01.rightHand.index", "i01.rightHand.index", "i01.rightHand.index2", "i01.rightHand.index3");
+    jme.setRotation("i01.rightHand.index", "x");
+    jme.setRotation("i01.rightHand.index2", "x");
+    jme.setRotation("i01.rightHand.index3", "x");
+
+    jme.attach("i01.rightHand.majeure", "i01.rightHand.majeure", "i01.rightHand.majeure2", "i01.rightHand.majeure3");
+    jme.setRotation("i01.rightHand.majeure", "x");
+    jme.setRotation("i01.rightHand.majeure2", "x");
+    jme.setRotation("i01.rightHand.majeure3", "x");
+
+    jme.attach("i01.rightHand.ringFinger", "i01.rightHand.ringfinger0", "i01.rightHand.ringFinger2", "i01.rightHand.ringFinger3");
+    jme.setRotation("i01.rightHand.ringfinger0", "x");
+    jme.setRotation("i01.rightHand.ringFinger2", "x");
+    jme.setRotation("i01.rightHand.ringFinger3", "x");
+
+    jme.attach("i01.rightHand.pinky", "i01.rightHand.pinky", "i01.rightHand.pinky2", "i01.rightHand.pinky3");
+    jme.setRotation("i01.rightHand.pinky", "x");
+    jme.setRotation("i01.rightHand.pinky2", "x");
+    jme.setRotation("i01.rightHand.pinky3", "x");
+
+    // additional experimental mappings
+    /*
+     * jme.attach("i01.leftHand.pinky", "i01.leftHand.index2");
+     * jme.attach("i01.leftHand.thumb", "i01.leftHand.index3");
+     * jme.setRotation("i01.leftHand.index2", "x");
+     * jme.setRotation("i01.leftHand.index3", "x");
+     * jme.setMapper("i01.leftHand.index", 0, 180, -90, -270);
+     * jme.setMapper("i01.leftHand.index2", 0, 180, -90, -270);
+     * jme.setMapper("i01.leftHand.index3", 0, 180, -90, -270);
+     */
+
+    // creating a virtual inmoov with virtual servo controller
+    ServoController sc = jme.getServoController();
+    InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+    i01.startHead(sc);
+    i01.startArm("left", sc);
+    i01.startArm("right", sc);
+    i01.startHand("left", sc);
+    i01.startHand("right", sc);
+    i01.startTorso(sc);
+    i01.startMouth();
+    i01.startMouthControl();
+
+  }
+
+  // ======== possibly beginning of ik interface =================
+  public void setIkPoint(double x, double y, double z) {
+    if (ikPoint == null) {
+      ikPoint = new Point(x, y, z);
+      jme.addBox("ikPoint", x, y, z, "cc0000", true);
+    }
+    // move target marker
+    jme.moveTo("ikPoint", x, y, z);
+
+    if (ik3d == null) {
+      ik3d = (InverseKinematics3D) startPeer("ik3d");
+      ik3d.setCurrentArm("i01.leftArm", InMoovArm.getDHRobotArm("i01", "left"));
+      ik3d.attach(this);
+    }
+    // move arm to target
+    ik3d.moveTo("i01.leftArm", ikPoint);
+  }
+
+  public JMonkeyEngine getSimulator() {
+    if (jme == null) {
+      jme = (JMonkeyEngine) startPeer("jme");
+    }
+    return jme;
   }
 
 }

@@ -211,10 +211,10 @@ public class MainMenuState extends BaseAppState {
       public void execute(Button source) {
         if (ikToggle) {
           ikToggle = false;
-          jme.enableIk(ikToggle);
+          // jme.enableIk(ikToggle); TBD - if we do this ...
         } else {
           ikToggle = true;
-          jme.enableIk(ikToggle);
+          // jme.enableIk(ikToggle);
         }
       }
     });

@@ -45,7 +45,6 @@ import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.Simulator;
-import org.python.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
@@ -95,7 +94,6 @@ import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
-import org.myrobotlab.kinematics.Point;
 
 /**
  * A simulator built on JMonkey 3 Engine.
@@ -2133,22 +2131,21 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       // FIXME - make "load" work ..
 
       LoggingFactory.init("info");
-
+      
       Runtime.start("gui", "SwingGui");
-      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-
-      jme.rename("i01-9", "i01");
-      jme.scale("i01", 0.25f);
+      Runtime.start("i01.mouth", "NaturalReaderSpeech");
+      InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
+      i01.startSimulator();
+      JMonkeyEngine jme = i01.getSimulator();
+      jme.rename("VinMoov4", "i01");
+      // jme.scale("i01", 0.25f);
 
       jme.addBox("floor.box.01", 1.0, 1.0, 1.0, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
       
-      // FIXME - make non-kludgy method of integrating NON ARDUINO !!
-
-      // Runtime.start("i01.leftHand", "InMoovHand");
-
-      Servo.eventsEnabledDefault(false);
-
+      i01.setIkPoint(0.05, 0.05, 0.05);
+      i01.setIkPoint(1, 2.5, 0);
+      
       /*
        * Spatial rotate = jme.get("i01.leftArm.rotate");
        * log.info("rotate world {}", rotate.getLocalTranslation());
@@ -2158,189 +2155,15 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
        * log.info("rotateFull local {}", rotateFull.getWorldTranslation());
        */
 
-      // FIXME - turn into json file - support scale, rename, bind, mapping,
-      // setRotation
-      /*
-       * jme.setMapper("i01.head.neck", 0, 180, -90, 90);
-       * jme.setMapper("i01.head.rollNeck", 0, 180, -90, 90);
-       * jme.setMapper("i01.head.rothead", 0, 180, -90, 90); //
-       * jme.setMapper("i01.head.jaw", 0, 180, -10, 5); // is this true ? //
-       * clipping vs attenuation .. should "not" min/max
-       * jme.setMapper("i01.head.jaw", 0, 180, -10, 170);
-       * 
-       * jme.setMapper("i01.head.rothead", 0, 180, -90, 90);
-       * jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -180);
-       * jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -180);
-       * jme.setMapper("i01.rightArm.shoulder", 0, 180, -30, 150);
-       * jme.setMapper("i01.leftArm.shoulder", 0, 180, -30, 150); // 124 = 29 &
-       * // rest = 30 jme.setMapper("i01.rightArm.rotate", 0, 180, 90, 270);
-       * jme.setMapper("i01.leftArm.rotate", 0, 180, -90, 90);
-       * jme.setMapper("i01.rightArm.omoplate", 0, 180, 0, -180);
-       * 
-       * jme.attach("i01.leftHand.index", "i01.leftHand.index",
-       * "i01.leftHand.index2", "i01.leftHand.index3");
-       * jme.setRotation("i01.leftHand.index", "x");
-       * jme.setRotation("i01.leftHand.index2", "x");
-       * jme.setRotation("i01.leftHand.index3", "x");
-       * 
-       * jme.setMapper("i01.leftHand.index", 0, 180, -90, -270);
-       * jme.setMapper("i01.leftHand.index2", 0, 180, -90, -270);
-       * jme.setMapper("i01.leftHand.index3", 0, 180, -90, -270);
-       * 
-       * jme.attach("i01.leftHand.ringFinger", "i01.leftHand.ringFinger",
-       * "i01.leftHand.ringFinger2", "i01.leftHand.ringFinger3");
-       * jme.setRotation("i01.leftHand.ringFinger", "x");
-       * jme.setRotation("i01.leftHand.ringFinger2", "x");
-       * jme.setRotation("i01.leftHand.ringFinger3", "x");
-       * 
-       * jme.setRotation("i01.head.jaw", "x");
-       * jme.setRotation("i01.head.rollNeck", "z");
-       * jme.setRotation("i01.head.neck", "x");
-       * jme.setRotation("i01.rightArm.bicep", "x");
-       * jme.setRotation("i01.leftArm.bicep", "x");
-       * jme.setRotation("i01.rightArm.shoulder", "z");
-       * jme.setRotation("i01.leftArm.shoulder", "z");
-       * jme.setRotation("i01.rightArm.omoplate", "z");
-       * jme.setRotation("i01.leftArm.omoplate", "z");
-       */
-
       // jme.bind(child, parent);
 
-      jme.setRotation("i01.head.jaw", "x");
-      jme.setRotation("i01.head.neck", "x");
-      jme.setRotation("i01.head.rollNeck", "z");
-      jme.setRotation("i01.head.eyeY", "x");
-      jme.setRotation("i01.torso.topStom", "z");
-      jme.setRotation("i01.torso.lowStom", "x");
-      jme.setRotation("i01.rightArm.bicep", "x");
-      jme.setRotation("i01.leftArm.bicep", "x");
-      jme.setRotation("i01.rightArm.shoulder", "x");
-      jme.setRotation("i01.leftArm.shoulder", "x");
-      jme.setRotation("i01.rightArm.rotate", "y");
-      jme.setRotation("i01.leftArm.rotate", "y");
-      jme.setRotation("i01.rightArm.omoplate", "z");
-      jme.setRotation("i01.leftArm.omoplate", "z");
-
-      jme.setRotation("i01.rightHand.index", "x");
-      jme.setRotation("i01.rightHand.majeure", "x");
-
-      jme.setRotation("i01.leftHand.index", "x");
-      jme.setRotation("i01.leftHand.majeure", "x");
-
-      jme.setMapper("i01.head.jaw", 0, 180, -5, 80);
-      jme.setMapper("i01.head.neck", 0, 180, -20, 20);
-      jme.setMapper("i01.head.rollNeck", 0, 180, -30, 30);
-      jme.setMapper("i01.head.eyeY", 0, 180, 30, 175);
-      jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
-      jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
-
-      jme.setMapper("i01.rightArm.shoulder", 0, 180, 30, -150);
-      jme.setMapper("i01.leftArm.shoulder", 0, 180, 30, -150);
-      jme.setMapper("i01.rightArm.rotate", 0, 180, 80, -80);
-      jme.setMapper("i01.leftArm.rotate", 0, 180, -80, 80);
-      jme.setMapper("i01.rightArm.omoplate", 0, 180, 10, -180);
-      jme.setMapper("i01.leftArm.omoplate", 0, 180, -10, 180);
-
-      jme.setMapper("i01.rightHand.index", 0, 180, 90, -90);
-      jme.setMapper("i01.rightHand.majeure", 0, 180, 90, -90);
-      jme.setMapper("i01.rightHand.wrist", 0, 180, -20, 60);
-
-      jme.setMapper("i01.leftHand.index", 0, 180, 90, -90);
-      jme.setMapper("i01.leftHand.majeure", 0, 180, 90, -90);
-      jme.setMapper("i01.leftHand.wrist", 0, 180, 20, -60);
-
-      jme.setMapper("i01.torso.topStom", 0, 180, -30, 30);
-      jme.setMapper("i01.torso.midStom", 0, 180, 50, 130);
-      jme.setMapper("i01.torso.lowStom", 0, 180, -30, 30);
-
-      // ============== Gael End =================================
-      /*
-       * 
-       * jme.attach("i01.leftHand.thumb", "i01.leftHand.thumb1",
-       * "i01.leftHand.thumb3"); jme.setRotation("i01.leftHand.thumb", "x");
-       * jme.setRotation("i01.leftHand.thumb1", "x");
-       * jme.setRotation("i01.leftHand.thumb3", "x");
-       * 
-       * jme.attach("i01.leftHand.index", "i01.leftHand.index",
-       * "i01.leftHand.index2", "i01.leftHand.index3");
-       * jme.setRotation("i01.leftHand.index", "x");
-       * jme.setRotation("i01.leftHand.index2", "x");
-       * jme.setRotation("i01.leftHand.index3", "x");
-       * 
-       * jme.attach("i01.leftHand.majeure", "i01.leftHand.majeure",
-       * "i01.leftHand.majeure2", "i01.leftHand.majeure3");
-       * jme.setRotation("i01.leftHand.majeure", "x");
-       * jme.setRotation("i01.leftHand.majeure2", "x");
-       * jme.setRotation("i01.leftHand.majeure3", "x");
-       * 
-       * jme.attach("i01.leftHand.ringFinger", "i01.leftHand.ringfinger0",
-       * "i01.leftHand.ringFinger2", "i01.leftHand.ringFinger3");
-       * jme.setRotation("i01.leftHand.ringfinger0", "x");
-       * jme.setRotation("i01.leftHand.ringFinger2", "x");
-       * jme.setRotation("i01.leftHand.ringFinger3", "x");
-       * 
-       * jme.attach("i01.leftHand.pinky", "i01.leftHand.pinky",
-       * "i01.leftHand.pinky2", "i01.leftHand.pinky3");
-       * jme.setRotation("i01.leftHand.pinky", "x");
-       * jme.setRotation("i01.leftHand.pinky2", "x");
-       * jme.setRotation("i01.leftHand.pinky3", "x");
-       * 
-       * 
-       * // right jme.attach("i01.rightHand.index", "i01.rightHand.index",
-       * "i01.rightHand.index2", "i01.rightHand.index3");
-       * jme.setRotation("i01.rightHand.index", "x");
-       * jme.setRotation("i01.rightHand.index2", "x");
-       * jme.setRotation("i01.rightHand.index3", "x");
-       * 
-       * jme.attach("i01.rightHand.majeure", "i01.rightHand.majeure",
-       * "i01.rightHand.majeure2", "i01.rightHand.majeure3");
-       * jme.setRotation("i01.rightHand.majeure", "x");
-       * jme.setRotation("i01.rightHand.majeure2", "x");
-       * jme.setRotation("i01.rightHand.majeure3", "x");
-       * 
-       * jme.attach("i01.rightHand.ringFinger", "i01.rightHand.ringfinger0",
-       * "i01.rightHand.ringFinger2", "i01.rightHand.ringFinger3");
-       * jme.setRotation("i01.rightHand.ringfinger0", "x");
-       * jme.setRotation("i01.rightHand.ringFinger2", "x");
-       * jme.setRotation("i01.rightHand.ringFinger3", "x");
-       * 
-       * jme.attach("i01.rightHand.pinky", "i01.rightHand.pinky",
-       * "i01.rightHand.pinky2", "i01.rightHand.pinky3");
-       * jme.setRotation("i01.rightHand.pinky", "x");
-       * jme.setRotation("i01.rightHand.pinky2", "x");
-       * jme.setRotation("i01.rightHand.pinky3", "x");
-       */
-
-      // jme.attach("i01.leftHand.index", "i01.leftHand.index",
-      // "i01.leftHand.index2", "i01.leftHand.index3");
-      // jme.attach("i01.leftHand.index", "i01.leftHand.index");//,
-      jme.attach("i01.leftHand.pinky", "i01.leftHand.index2");
-      jme.attach("i01.leftHand.thumb", "i01.leftHand.index3");
-      jme.setRotation("i01.leftHand.index2", "x");
-      jme.setRotation("i01.leftHand.index3", "x");
-      jme.setMapper("i01.leftHand.index", 0, 180, -90, -270);
-      jme.setMapper("i01.leftHand.index2", 0, 180, -90, -270);
-      jme.setMapper("i01.leftHand.index3", 0, 180, -90, -270);
-
-      ServoController sc = jme.getServoController();
-      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-      i01.startHead(sc);
-      i01.startArm("left", sc);
-      i01.startArm("right", sc);
-      i01.startHand("left", sc);
-      i01.startHand("right", sc);
-      i01.startTorso(sc);
-      Runtime.start("i01.mouth", "NaturalReaderSpeech");
-      i01.startMouth();
-      i01.startMouthControl();
-      jme.setIkPoint(0.5, 1.5, 0.5);
-      jme.enableIk(true);
 
       boolean done = true;
       if (done) {
         return;
       }
 
+      // find missing mapped servos ...
       List<String> servos = Runtime.getServiceNamesFromInterface("ServoControl");
       for (String servo : servos) {
         Spatial spatial = jme.get(servo);
@@ -2363,32 +2186,6 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     return multiMapped;
   }
   
-  Node ikPoint = null;
-  
-  public void setIkPoint(double x, double y, double z) {
-    // ikPoint = new Point3df((float)x, (float)y, (float)z);
-    if (ikPoint == null) {
-      ikPoint = addBox("ikPoint", 0.05, 0.05, 0.05, "cc0000", true);
-    }
-    moveTo("ikPoint", x, y, z);
-  }
-
-  // FIXME - only implement publishing & attaching - remove direct reference
-  boolean usingIK = true;
-  transient private InverseKinematics3D ik3d;
-
-  public void enableIk(boolean b) {
-    usingIK = b;
-    if (ik3d == null) {
-      ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
-      ik3d.setCurrentArm("i01.leftArm", InMoovArm.getDHRobotArm("i01","left"));
-      ik3d.attach(this);
-    }
-    Vector3f v = ikPoint.getWorldTranslation();    
-    Point p = new Point(v.x, v.y, v.z, 0.0, 0.0, 0.0);
-    ik3d.moveTo("i01.leftArm", p);
-  }
-
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
     for (String name : angleMap.keySet()) {
