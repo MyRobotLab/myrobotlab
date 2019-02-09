@@ -181,11 +181,11 @@ public class Jme3Util {
       rotMask = o.rotationMask;
     }
 
-    log.info("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);    
+    log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);    
     // int angleIndex = getIndexFromUnitVector(rotMask);
     if (o.mapper != null) {
       degrees = (float) o.mapper.calcOutput(degrees);
-      log.info(String.format("rotateTo map %s, degrees %.2f", name, degrees));
+      log.debug(String.format("rotateTo map %s, degrees %.2f", name, degrees));
     }
 
     // get current local rotations

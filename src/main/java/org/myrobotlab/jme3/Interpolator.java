@@ -60,7 +60,7 @@ public class Interpolator {
 
     move.startTs = System.currentTimeMillis();
     
-    log.info("addAnimation {} {} from {} to {} @ {} degrees/sec", name, type, move.startPos, newPos, speed);
+    log.debug("addAnimation {} {} from {} to {} @ {} degrees/sec", name, type, move.startPos, newPos, speed);
     futureMoves.put(name, move);
   }
 
@@ -79,7 +79,7 @@ public class Interpolator {
       // total difference in our move - degrees per second
       double interPos = move.startPos + (move.direction * deltaTime * move.speed / 1000);
 
-      log.info(String.format("%s deltaTime %d ms new position %.2f", move.name, deltaTime, interPos));
+      log.debug(String.format("%s deltaTime %d ms new position %.2f", move.name, deltaTime, interPos));
 
       // instantaneous api to rotate - don't generate an animation from an
       // animation
@@ -88,7 +88,7 @@ public class Interpolator {
       if (Math.abs(interPos - move.newPos) < 0.5 /* if we're close enough */
           || /* or we overrun */ (move.direction < 0 && interPos < move.newPos)
           || /* or we overrun */ (move.direction > 0 && interPos > move.newPos)) {
-        log.info("removing animation {}", move);
+        log.debug("removing animation {}", move);
         futureMoves.remove(move.name);
       }
     }
