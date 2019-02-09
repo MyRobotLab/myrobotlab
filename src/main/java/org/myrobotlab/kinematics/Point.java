@@ -60,6 +60,10 @@ public class Point implements Serializable {
     this.yaw = copy.yaw;
   }
 
+  public Point(double x, double y, double z) {
+    this(x, y, z, 0.0, 0.0, 0.0);
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
