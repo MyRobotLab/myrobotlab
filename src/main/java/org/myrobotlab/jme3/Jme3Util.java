@@ -88,60 +88,31 @@ public class Jme3Util {
     log.info(sb.toString());
   }
 
-  public void moveTo(String name, double x, double y, double z) {
-    log.info(String.format("moveTo %s, %.2f,%.2f,%.2f", name, x, y, z));
-    UserData o = jme.getUserData(name);
-    if (o == null) {
-      log.error("moveTo %s jme3object is null !!!", name);
-      return;
-    }
-    if (o.getNode() == null) {
-      log.error("moveTo %s node is null !!!", name);
-      return;
-    }
-    o.getNode().setLocalTranslation((float)x, (float)y, (float)z);
+  public void setTransform(String name, double x, double y, double z, double xRot, double yRot, double zRot) {
+    setTranslation(name, x, y, z);
+    setRotation(name, xRot, yRot, zRot);
   }
 
-  public Vector3f getUnitVector(String axis) {
-    if (axis == null) {
-      return Vector3f.UNIT_Y; // default Y
+  public void setTranslation(String name, double x, double y, double z) {
+    log.info(String.format("setTranslation %s, %.2f,%.2f,%.2f", name, x, y, z));
+    Spatial s = jme.get(name);
+    s.setLocalTranslation((float) x, (float) y, (float) z);
+    if (currentMenuView != null && s == selectedForView) {
+      currentMenuView.putText(selectedForView);
     }
-    Vector3f unitVector = null;
-    axis = axis.toLowerCase().trim();
-
-    // get axis
-    String unitAxis = axis.substring(axis.length() - 1);
-
-    axis = axis.substring(0, axis.length() - 1);
-    Float multiplier = null;
-    // rest should be a float unless its just "-"
-    if ("-".equals(axis)) {
-      multiplier = -1f;
-    } else if ("".equals(axis)) {
-      multiplier = 1f;
-    } else {
-      multiplier = Float.parseFloat(axis);
-    }
-
-    // TODO - handle multiple
-    if (unitAxis.contains("x")) {
-      unitVector = Vector3f.UNIT_X.mult(multiplier);
-    } else if (unitAxis.contains("y")) {
-      unitVector = Vector3f.UNIT_Y.mult(multiplier);
-    } else if (unitAxis.contains("z")) {
-      unitVector = Vector3f.UNIT_Z.mult(multiplier);
-    }
-    return unitVector;
   }
 
-  // TODO - generalized rotate("-x", 39.3f) which uses default rotation mask
-  public void rotateOnAxis(String name, String axis, double degrees) {
-    log.info(String.format("rotateOnAxis %s, %s %.2f", name, axis, degrees));
-    UserData o = jme.getUserData(name);
-    double angle = degrees * FastMath.PI / 180;
-    Vector3f uv = getUnitVector(axis);
-    Vector3f rot = uv.mult((float)angle);
-    o.getNode().rotate(rot.x, rot.y, rot.z);
+  public void setRotation(String name, double xRot, double yRot, double zRot) {
+    Spatial s = jme.get(name);
+    Quaternion q = new Quaternion();
+    float xRotInit = (float) xRot * FastMath.DEG_TO_RAD;
+    float yRotInit = (float) yRot * FastMath.DEG_TO_RAD;
+    float zRotInit = (float) zRot * FastMath.DEG_TO_RAD;
+    q.fromAngles(zRotInit, xRotInit, yRotInit);
+    s.setLocalRotation(q);
+    if (currentMenuView != null && s == selectedForView) {
+      currentMenuView.putText(selectedForView);
+    }
   }
 
   public static Integer getIndexFromUnitVector(Vector3f vector) {
@@ -168,7 +139,7 @@ public class Jme3Util {
    * @param name
    * @param degrees
    */
-  public void rotateTo(String name, double degrees) {
+  public void rotateTo(String name, String axis, double degrees) {
     UserData o = jme.getUserData(name);
     if (o == null) {
       jme.error("no user data for %s", name);
@@ -181,7 +152,12 @@ public class Jme3Util {
       rotMask = o.rotationMask;
     }
 
-    log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);    
+    // highest priority override is if the parameter is supplied
+    if (axis != null) {
+      rotMask = getUnitVector(axis);
+    }
+
+    log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);
     // int angleIndex = getIndexFromUnitVector(rotMask);
     if (o.mapper != null) {
       degrees = (float) o.mapper.calcOutput(degrees);
@@ -190,51 +166,22 @@ public class Jme3Util {
 
     // get current local rotations
     Node n = o.getNode();
-//     Quaternion q = n.getLocalRotation();
-    Quaternion q = new Quaternion();
-    // float[] angles = new float[3];
-    // q.toAngles(angles);
-    // log.info(String.format("rotate - before %s, %.2f", name,
-    // angles[angleIndex] * 180 / FastMath.PI));
-    q.normalizeLocal();
-    // q.fromAngles(((float)degrees) * FastMath.PI / 180, 0, 0);
-    q.fromAngleNormalAxis((((float)degrees) * FastMath.PI / 180), rotMask);
-    // q.fromAngleAxis((((float)degrees) * FastMath.PI / 180), rotMask);
-    // q.fromAngleNormalAxis ((((float)degrees) * FastMath.PI / 180), rotMask);
-    
-    // FIXME optimize
-                                                              // final Y_AXIS =
-                                                              // new
-                                                              // Vector3f(0,1,0)
 
-    // apply map if it exists (shifted)
+    // convert current local to euler representation
+    Quaternion q = n.getLocalRotation();
+    float[] euler = new float[3];
+    q.toAngles(euler);
+
+    // find the masking axis - replace that value with desired value
+    int indexOfAxisRotation = getIndexFromUnitVector(rotMask);
+    euler[indexOfAxisRotation] = ((float) degrees) * FastMath.PI / 180;
+    q.fromAngles(euler[0], euler[1], euler[2]);
     n.setLocalRotation(q);
-    // q.toAngles(angles);
-    // log.info(String.format("rotate - after %s, %.2f", name,
-    // angles[angleIndex] * 180 / FastMath.PI));
-    
-    /* PICK TOOL 
-    Quaternion startRotate = n.getLocalRotation().clone();
-    Quaternion startWorldRotate = n.getWorldRotation().clone();    
-    Quaternion rotation = startRotate.mult(getRotation(startWorldRotate.inverse()));
-    n.setLocalRotation(rotation);
-    */
-    // lastRotate = rotation;
-    
+
+    if (currentMenuView != null && n == selectedForView) {
+      currentMenuView.putText(selectedForView);
+    }
   }
-  
-  /* PICK TOOL
-  public Quaternion getRotation(Quaternion transform) {
-    
-    Vector3f v1, v2;
-    v1 = transform.mult(startPickLoc.subtract(startSpatialLocation).normalize());
-    v2 = transform.mult(finalPickLoc.subtract(startSpatialLocation).normalize());
-    Vector3f axis = v1.cross(v2);
-    float angle = v1.angleBetween(v2);
-    return new Quaternion().fromAngleAxis(angle, axis);
-    
-  }
-  */
 
   public void bind(String child, String parent) {
     log.info("binding {} to {}", child, parent);
@@ -248,75 +195,27 @@ public class Jme3Util {
       log.error("bind parent {} not found", parent);
       return;
     }
-    
+
     if (parentNode instanceof Geometry) {
       log.error("parent {} must be of type Node !!! - cannot bind Geometry");
       return;
     }
 
-    if (childNode instanceof Geometry) {
-      log.error("child {} must be of type Node !!! - cannot bind Geometry");
-      return;
-    }
+    Node p = (Node) parentNode;
+    Spatial c = childNode;
 
-    
-    Node p = (Node)parentNode;
-    Node c = (Node)childNode;
-    
-    // moving one object to another object 
- 
+    // moving one object to another object
+
     Vector3f childWorld1 = c.getWorldTranslation().clone();
     log.info("worldPos1 {}", childWorld1);
-    
+
     Vector3f parentWorld1 = p.getWorldTranslation();
-    /*
-    log.info("worldPos1 {}", worldPos1);
-    Vector3f inverse = worldPos1.mult(-1);
-    log.info("inverse {}", inverse);
-    log.info("worldPos1 + inverse {}", worldPos1.add(inverse));
-    // worldPos1.mult(new Vector3f(03, -20, 5));
-    // worldPos1.add(new Vector3f(03, -10, 5));
-    log.info("worldPos1 {}", worldPos1);
-    */
-
-//     Quaternion worldRot = c.getWorldRotation();
-
- 
-//    c.setLocalTranslation(worldPos1);
-
-//     object.setLocalRotation(worldRot);
-
-//     p.attachChild(c);
-   //  c.setLocalTranslation(new Vector3f(03, -10, 5));
-
     Vector3f parentWorld = p.getWorldTranslation();
 
-    // log.info("child {} {}", childNode.getNode().getChildren().size(),
-    // childNode.getNode().getChild(0).getName());
-    // parentNode.getNode().attachChild(childNode.getSpatial());
-    // Node newNode = new Node("meta");
-    // newNode.attachChild(childNode.getNode());
-    // parentNode.getNode().attachChild(childNode.getNode().getChild(0));
-    // parentNode.getNode().attachChild(newNode);
     p.attachChild(c);
-    // Vector3f newLocal = c.getLocalTranslation();
-    Vector3f childWorld2 = c.getWorldTranslation();
-    log.info("worldPos2 {}", childWorld2);
-    // worldPos2.subtract(worldPos1);
-    log.info("worldPos2 - worldPos1 {}", childWorld2.subtract(childWorld1));
-    log.info("worldPos2 {}", childWorld2);
-    Vector3f childLocal = c.getLocalTranslation();
-    Vector3f diff = childLocal.subtract(parentWorld);    
-    c.setLocalTranslation(c.getLocalTranslation().subtract(parentWorld1));
-    // c.setLocalTransform();
-    // parentNode.getNode().updateModelBound();
-    // parentNode.getNode().updateGeometricState();
 
-    // childNode.getNode().updateModelBound();
-    // childNode.getNode().updateGeometricState();
-    // childNode.getNode().updateGeometricState();
-    // log(parentNode);
-    // log(childNode);
+    // FIXME - possibly subtract out the parents "world" transform & rotation ???
+
   }
 
   public Node createUnitAxis(String name) {
@@ -398,6 +297,69 @@ public class Jme3Util {
     }
     log.info("rescaling {} to {}", name, scale);
     s.scale(scale.floatValue());
+  }
+
+  public Vector3f getLocalUnitVector(Spatial spatial, String axis) {
+    // FIXME !!!!
+    Vector3f rootUnitVector = getUnitVector(axis);
+
+    // find the delta between the two axis
+    Quaternion wr = spatial.getWorldRotation();
+    Vector3f[] axes = new Vector3f[3];
+    wr.toAxes(axes);
+    // rootUnitVector.subtract(vec)
+    // return axes[0];
+    return rootUnitVector; // FIXME - THIS IS NOT CORRECT !
+  }
+
+  public Vector3f getUnitVector(String axis) {
+    if (axis == null) {
+      return Vector3f.UNIT_Y; // default Y
+    }
+    Vector3f unitVector = null;
+    axis = axis.toLowerCase().trim();
+
+    // get axis
+    String unitAxis = axis.substring(axis.length() - 1);
+
+    axis = axis.substring(0, axis.length() - 1);
+    Float multiplier = null;
+    // rest should be a float unless its just "-"
+    if ("-".equals(axis)) {
+      multiplier = -1f;
+    } else if ("".equals(axis)) {
+      multiplier = 1f;
+    } else {
+      multiplier = Float.parseFloat(axis);
+    }
+
+    // TODO - handle multiple
+    if (unitAxis.contains("x")) {
+      unitVector = Vector3f.UNIT_X.mult(multiplier);
+    } else if (unitAxis.contains("y")) {
+      unitVector = Vector3f.UNIT_Y.mult(multiplier);
+    } else if (unitAxis.contains("z")) {
+      unitVector = Vector3f.UNIT_Z.mult(multiplier);
+    }
+    return unitVector;
+  }
+
+  Spatial selectedForView;
+  MainMenuState currentMenuView;
+
+  public void setSelectedForView(MainMenuState menu, Spatial selectedForView) {
+    this.currentMenuView = menu;
+    this.selectedForView = selectedForView;
+  }
+
+  public void addNode(String name) {
+    Spatial s = jme.find(name);
+    if (s != null) {
+      log.error("addNode({}} already exists", name);
+      return;
+    }
+    Node n = new Node(name);
+    jme.getRootNode().attachChild(n);
   }
 
 }

@@ -387,9 +387,9 @@ public class MainMenuState extends BaseAppState {
     z.setText(String.format("%.3f", xyz.z));
 
     // 2012 and the javadoc is still wrong ?
-    zRot.setText(String.format("%.3f", angles[0] * FastMath.RAD_TO_DEG));
-    xRot.setText(String.format("%.3f", angles[1] * FastMath.RAD_TO_DEG));
-    yRot.setText(String.format("%.3f", angles[2] * FastMath.RAD_TO_DEG));
+    xRot.setText(String.format("%.3f", angles[0] * FastMath.RAD_TO_DEG));
+    yRot.setText(String.format("%.3f", angles[1] * FastMath.RAD_TO_DEG));
+    zRot.setText(String.format("%.3f", angles[2] * FastMath.RAD_TO_DEG));
 
     Vector3f sc = spatial.getLocalScale();
     scale.setText(sc.toString());

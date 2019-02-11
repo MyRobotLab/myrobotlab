@@ -164,7 +164,10 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
   // transient BulletAppState bulletAppState;
 
-  transient Node camera = new Node("camera");
+  final static String CAMERA = "camera";
+  final static String ROOT = "root";
+
+  transient Node camera = new Node(CAMERA);
 
   transient Vector3f cameraDirection = new Vector3f();
 
@@ -251,8 +254,12 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     d.mkdirs();
     util = new Jme3Util(this);
     analog = new AnalogHandler(this);
-    interpolator = new Interpolator(this);
+    interpolator = new Interpolator(this, util);
     servoController = new Jme3ServoController(this);
+  }
+
+  public void addNode(String name) {
+    addMsg("addNode", name);
   }
 
   public void addBox(String boxName) {
@@ -324,7 +331,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     rootNode.attachChild(boxNode);
     moveTo(name, 0.0f, 0.5f * height, 0.0f);
     // index(boxNode);
-    
+
     return boxNode;
   }
 
@@ -464,7 +471,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     // thread processing
     // all the other moves & rotations !
     // camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
-    addMsg("lookAt", "camera", spatial.getName());
+    addMsg("lookAt", CAMERA, spatial.getName());
   }
 
   public void cameraLookAt(String name) {
@@ -735,7 +742,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
    * @return
    */
   public Spatial find(String name, Node startNode) {
-    if (name.equals("root")) {
+    if (name.equals(ROOT)) {
       return rootNode;
     }
     if (startNode == null) {
@@ -804,8 +811,11 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     q.toAngles(angles);
     UserData data = getUserData(name);
     // default rotation is around Y axis unless specified
-    Vector3f rotMask = util.getUnitVector(axis); // Vector3f.UNIT_Y;
-    if (rotMask != null) {
+    Vector3f rotMask = null;
+
+    if (axis != null) {
+      rotMask = util.getUnitVector(axis); // Vector3f.UNIT_Y;
+    } else {
       rotMask = data.rotationMask;
     }
 
@@ -1252,7 +1262,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   }
 
   public void moveTo(String name, double x, double y, double z) {
-    addMsg("moveTo", name, x, y, z);
+    setTranslation(name, x, y, z);
   }
 
   @Override
@@ -1273,8 +1283,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       menu.setEnabled(true);
     } else if ("select-root".equals(name)) {
       setSelected(rootNode);
-    } else if ("camera".equals(name)) {
-      setSelected("camera");
+    } else if (CAMERA.equals(name)) {
+      setSelected(CAMERA);
     } else if ("exit-full-screen".equals(name)) {
       enableFullScreen(false);
     } else if ("cycle".equals(name) && keyPressed) {
@@ -1318,6 +1328,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     // draggable - resize for menu - what you set is how it stays
     // when menu active - inputs(hotkey when non-menu) should be deactive
 
+    // FIXME - do jme.rotateTo or "new" jme.rotate for all these input driven controls
+    
     // ROTATE
     if (mouseLeftPressed && altLeftPressed && !shiftLeftPressed) {
       if (name.equals("mouse-axis-x")) {
@@ -1556,10 +1568,6 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     data.setName(newName);
   }
 
-  public void rotateOnAxis(String name, String axis, double degrees) {
-    addMsg("rotateOnAxis", name, axis, degrees);
-  }
-
   /**
    * rotate on the "default" axis to a location without using speed
    * 
@@ -1567,12 +1575,40 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
    * @param degrees
    */
   public void rotateTo(String name, double degrees) {
-    addMsg("rotateTo", name, degrees);
+    addMsg("rotateTo", name, null, degrees);
   }
 
+  /**
+   * rotate on the "default" axis using speed
+   * 
+   * @param name
+   * @param degrees
+   * @param speed
+   */
   public void rotateTo(String name, double degrees, double speed) {
-    interpolator.addAnimation(name, "rotateTo", degrees, speed);
-    // addMsg("rotateTo", name, (float) degrees, (float)speed);
+    interpolator.addAnimation("rotateTo", name, null, degrees, speed);
+  }
+
+  /**
+   * instant rotation on an particular axis
+   * 
+   * @param name
+   * @param axis
+   * @param degrees
+   */
+  public void rotateOnAxis(String name, String axis, double degrees) {
+    addMsg("rotateTo", name, axis, degrees);
+  }
+
+  /**
+   * incremental movement on an axis with a speed
+   * 
+   * @param name
+   * @param axis
+   * @param degrees
+   */
+  public void rotateOnAxis(String name, String axis, double degrees, double speed) {
+    interpolator.addAnimation("rotateTo", name, axis, degrees, speed);
   }
 
   // this just saves keys !!!
@@ -1710,7 +1746,9 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       error("setRotation %s could not be found", name);
       return;
     }
-    o.rotationMask = util.getUnitVector(rotation);
+    // WRONG !!!! - getLocalUnitVector
+    // o.rotationMask = util.getUnitVector(rotation);
+    o.rotationMask = util.getLocalUnitVector(o.getSpatial(), rotation);
   }
 
   public void setSelected(Spatial newSelected) {
@@ -1723,6 +1761,12 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
     // set selected
     selectedForView = newSelected;
+
+    // send the movement utility info on the current selected item & current
+    // view
+    // so that it can update the view with changes on the item
+    // TODO - optimize for when there is no view
+    util.setSelectedForView(menu, selectedForView);
 
     // display in menu
     menu.putText(newSelected);
@@ -1806,7 +1850,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
     cameraSettings = app.getCamera();
     rootNode = app.getRootNode();
-    rootNode.setName("root");
+    rootNode.setName(ROOT);
     rootNode.attachChild(camera);
 
     viewPort = app.getViewPort();
@@ -1913,8 +1957,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     inputManager.addMapping("select-root", new KeyTrigger(KeyInput.KEY_R));
     inputManager.addListener(this, "select-root");
 
-    inputManager.addMapping("camera", new KeyTrigger(KeyInput.KEY_C));
-    inputManager.addListener(this, "camera");
+    inputManager.addMapping(CAMERA, new KeyTrigger(KeyInput.KEY_C));
+    inputManager.addListener(this, CAMERA);
 
     inputManager.addMapping("menu", new KeyTrigger(KeyInput.KEY_M));
     inputManager.addListener(this, "menu");
@@ -2048,9 +2092,9 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
         future.get();
 
         // default positioning
-        moveTo("camera", 0, 3, 6);
+        moveTo(CAMERA, 0, 3, 6);
         cameraLookAtRoot();
-        rotateOnAxis("camera", "x", -20);
+        rotateOnAxis(CAMERA, "x", -20);
         enableGrid(true);
 
       } catch (Exception e) {
@@ -2128,24 +2172,88 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   public static void main(String[] args) {
     try {
 
+      // FIXME - fix menu input system - use jme.rotate/rotateTo/move/moveTo etc.
+      // FIXME - node/userdata can have a Map<String, String> of reservedRotations from different controllers
       // FIXME - make "load" work ..
-
       LoggingFactory.init("info");
-      
+
       Runtime.start("gui", "SwingGui");
+      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
+ 
+      // FIXME - fix what you have broken but deprecate sc related rotation info
+      /*
+      jme.addNode("xRot");
+      jme.addNode("yRot");
+      jme.addNode("zRot");
+      jme.setRotation("xRot", "x");
+      jme.setRotation("yRot", "y");
+      jme.setRotation("zRot", "z");
+
+      jme.bind("xRot", CAMERA);
+      jme.bind("yRot", CAMERA);
+      jme.bind("zRot", CAMERA);
+      */
+      
+      // jme.setTransform(CAMERA, 0, 3, 6, -20, -180, 0);
+      jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429, 47.488);
+
+      Jme3ServoController sc = (Jme3ServoController) jme.getServoController();
+      // FIXME WRONG WAY - 
+      // setting controllers axis - FIXME - do in more general way
+      // jme.setRotation sets a "node"
+      // this is the "control" "to" the Node so its "per" control - if the
+      // control can support getName()
+      /*
+      sc.setRotation("xRot", "x"); // <-- not a property of sc? FIXME - NO! add
+                                   // new node !!!
+      sc.setRotation("yRot", "y");
+      sc.setRotation("zRot", "z");
+
+      // mapping 3 servos to 3 axis of the camera
+      jme.attach("xRot", CAMERA);
+      jme.attach("yRot", CAMERA);
+      jme.attach("zRot", CAMERA);
+      */
+
+      // jme.setTransform(CAMERA, 0, 0, 0, 0, 0, 0);
+
+      // works - can reproduce same view, but when asked to rotate about a
+      // specific
+      // axis - other axis are resetting :(
+      // jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429,
+      // 47.488);
+
+      // Servo xRot = (Servo) Runtime.start("xRot", "Servo");
+      // Servo yRot = (Servo) Runtime.start("yRot", "Servo");
+      // Servo zRot = (Servo) Runtime.start("zRot", "Servo");
+
+      boolean done = false;
+      if (done) {
+        return;
+      }
+
+      /*
+       * jme.setRotation("i01.leftHand.index", "x");
+       * jme.rotateTo("i01.leftHand.index", 20);
+       * jme.rotateTo("i01.leftHand.index", 120);
+       * jme.rotateTo("i01.leftHand.index", 20);
+       * jme.rotateTo("i01.leftHand.index", 120);
+       */
+
       Runtime.start("i01.mouth", "NaturalReaderSpeech");
-      InMoov i01 = (InMoov)Runtime.start("i01", "InMoov");
+      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
       i01.startSimulator();
-      JMonkeyEngine jme = i01.getSimulator();
+      jme = i01.getSimulator();
       jme.rename("VinMoov4", "i01");
       // jme.scale("i01", 0.25f);
 
       jme.addBox("floor.box.01", 1.0, 1.0, 1.0, "003300", true);
       jme.moveTo("floor.box.01", 3, 0, 0);
-      
-      i01.setIkPoint(0.05, 0.05, 0.05);
-      i01.setIkPoint(1, 2.5, 0);
-      
+
+      // ik fun
+      // i01.setIkPoint(0.05, 0.05, 0.05);
+      // i01.setIkPoint(1, 2.5, 0);
+
       /*
        * Spatial rotate = jme.get("i01.leftArm.rotate");
        * log.info("rotate world {}", rotate.getLocalTranslation());
@@ -2156,12 +2264,6 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
        */
 
       // jme.bind(child, parent);
-
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // find missing mapped servos ...
       List<String> servos = Runtime.getServiceNamesFromInterface("ServoControl");
@@ -2174,24 +2276,33 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
       log.info("here");
 
-      // i01.moveHead(10, 20, 90);
-      // i01.moveHead(30, 20, 10);
-
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
 
+  public void setTransform(String name, double x, double y, double z, double xRot, double yRot, double zRot) {
+    addMsg("setTransform", name, x, y, z, xRot, yRot, zRot);
+  }
+
+  public void setTranslation(String name, double x, double y, double z) {
+    addMsg("setTranslation", name, x, y, z);
+  }
+
+  public void setRotation(String name, double xRot, double yRot, double zRot) {
+    addMsg("setRotation", name, xRot, yRot, zRot);
+  }
+
   public Map<String, String[]> getMultiMapped() {
     return multiMapped;
   }
-  
+
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
     for (String name : angleMap.keySet()) {
       ServiceInterface si = Runtime.getService(name);
       if (si instanceof Servo) {
-        ((Servo)si).moveTo(angleMap.get(name));
+        ((Servo) si).moveTo(angleMap.get(name));
       }
     }
   }
