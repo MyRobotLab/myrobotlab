@@ -7,7 +7,6 @@ import java.util.TreeMap;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
-import org.myrobotlab.service.VirtualServoController;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -16,21 +15,12 @@ public class Jme3ServoController implements ServoController {
 
   JMonkeyEngine jme = null;
 
-  public final static Logger log = LoggerFactory.getLogger(VirtualServoController.class);
+  public final static Logger log = LoggerFactory.getLogger(Jme3ServoController.class);
 
-  Map<String, ServoData> servos = new TreeMap<String, ServoData>();
+  Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
   Map<String, String[]> multiMapped = null;
-
-  class ServoData {
-
-    ServoControl servo;
-    UserData data;
-
-    public ServoData(ServoControl servo, UserData data) {
-      this.servo = servo;
-      this.data = data;
-    }
-  }
+  @Deprecated // remove - this should be done by creating a "new" Node .. e.g. jme.addNode(x)
+  Map<String, String> rotationMap = new TreeMap<String, String>();
 
   public Jme3ServoController(JMonkeyEngine jme) {
     this.jme = jme;
@@ -99,13 +89,8 @@ public class Jme3ServoController implements ServoController {
   @Override
   public void attachServoControl(ServoControl servo) throws Exception {
     String name = servo.getName();
-    if (!servos.containsKey(name)) {
-      // FIXME - mapping
-      UserData data = jme.getUserData(name);
-      if (data == null) {
-        log.error("attachServoControl - cannot find node for servo {}", name);
-      }
-      servos.put(name, new ServoData(servo, data));
+    if (!servos.containsKey(name)) {      
+      servos.put(name, servo);
       servo.attach(this);
     }
   }
@@ -149,15 +134,15 @@ public class Jme3ServoController implements ServoController {
       velocity = 20;
     }
 
-    // jme.getAttached()
+    String axis = rotationMap.get(name);
 
     String[] multi = multiMapped.get(name);
     if (multi != null) {
       for (String nodeName : multi) {
-        jme.rotateTo(nodeName, servo.getPos(), velocity);
+        jme.rotateOnAxis(nodeName, axis, servo.getPos(), velocity);
       }
     } else {
-      jme.rotateTo(name, servo.getPos(), velocity);
+      jme.rotateOnAxis(name, axis, servo.getPos(), velocity);
     }
   }
 
@@ -195,6 +180,10 @@ public class Jme3ServoController implements ServoController {
   public void disablePin(Integer i) {
     // TODO Auto-generated method stub
 
+  }
+
+  public void setRotation(String name, String axis) {
+    rotationMap.put(name, axis);
   }
 
 }
