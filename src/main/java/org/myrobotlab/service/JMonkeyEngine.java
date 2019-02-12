@@ -2195,7 +2195,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       */
       
       // jme.setTransform(CAMERA, 0, 3, 6, -20, -180, 0);
-      jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429, 47.488);
+      // jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429, 47.488);
 
       Jme3ServoController sc = (Jme3ServoController) jme.getServoController();
       // FIXME WRONG WAY - 

@@ -2446,7 +2446,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     }
 
     // disable the frustrating servo events ...
-    Servo.eventsEnabledDefault(false);
+ //    Servo.eventsEnabledDefault(false);
 
     // ========== gael's calibrations begin ======================
     jme.setRotation("i01.head.jaw", "x");
@@ -2471,8 +2471,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.leftHand.majeure", "x");
 
     jme.setMapper("i01.head.jaw", 0, 180, -5, 80);
-    jme.setMapper("i01.head.neck", 0, 180, -20, 20);
-    jme.setMapper("i01.head.rollNeck", 0, 180, -30, 30);
+    jme.setMapper("i01.head.neck", 0, 180, 20, -20);
+    jme.setMapper("i01.head.rollNeck", 0, 180, 30, -30);
     jme.setMapper("i01.head.eyeY", 0, 180, 30, 175);
     jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
@@ -2610,6 +2610,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     i01.startTorso(sc);
     i01.startMouth();
     i01.startMouthControl();
+    
+    i01.rest();
 
   }
 
