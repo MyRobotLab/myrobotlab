@@ -9,6 +9,10 @@ import org.slf4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/**
+ * The base json serialization utility for MRL.  This uses GSON to serialize object to and from JSON.
+ *
+ */
 public class CodecJson extends Codec {
 
   public final static Logger log = LoggerFactory.getLogger(CodecJson.class);
@@ -17,23 +21,21 @@ public class CodecJson extends Codec {
   // HH:mm:ss.SSS").disableHtmlEscaping().create();
 
   static public String encode(Object obj) {
-    return mapper.toJson(obj);
+    String json = null;
+    synchronized(obj) {
+      json = mapper.toJson(obj);
+    }
+    return json;
   }
 
   @Override
   public void encode(OutputStream out, Object obj) throws IOException {
-
-    String json = mapper.toJson(obj);
-
-    // if (log.isDebugEnabled()){
-    // log.warn("<< {}", json); - great for debugging !
-    // }
-
-    // if (recorder != null){
-    // recorder.write(String.format("message << %s\n", json).getBytes());
-    // }
-
-    out.write(json.getBytes());
+    String json = null;
+    synchronized(obj) {
+      json = mapper.toJson(obj);
+    }
+    if (json != null)
+      out.write(json.getBytes());
   }
 
   @Override
@@ -41,7 +43,10 @@ public class CodecJson extends Codec {
     // ITS GOT TO BE STRING - it just has to be !!! :)
     String instr = (String) data;
     // array of Strings ? - don't want to double encode !
-    Object[] ret = mapper.fromJson(instr, Object[].class);
+    Object[] ret = null;
+    synchronized (data) {
+      ret = mapper.fromJson(instr, Object[].class);
+    }
     return ret;
   }
 
@@ -52,7 +57,11 @@ public class CodecJson extends Codec {
       log.error("trying to decode null data");
       return null;
     }
-    return mapper.fromJson(data.toString(), type);
+    Object o = null;
+    synchronized (data) {
+      o = mapper.fromJson(data.toString(), type);
+    }
+    return o;
   }
 
   @Override
