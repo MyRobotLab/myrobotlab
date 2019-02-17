@@ -37,6 +37,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -364,10 +365,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       frame.setTitle("myrobotlab - " + getName() + " " + Runtime.getVersion().trim());
 
       frame.add(tabPanel);
-
-      URL url = getClass().getResource(Util.getRessourceDir() + "/mrl_logo_36_36.png");
+      String logoFile = Util.getRessourceDir() + File.separator + "mrl_logo_36_36.png";
       Toolkit kit = Toolkit.getDefaultToolkit();
-      Image img = kit.createImage(url);
+      Image img = kit.createImage(logoFile);
       frame.setIconImage(img);
 
       // menu
