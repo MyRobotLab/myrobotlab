@@ -53,6 +53,7 @@ import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.OpenCV;
 
@@ -164,11 +165,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // and save it for later.
     //
     if (facemask == null) {
-      File filterfile = new File("resource/facerec/Filter.png");
-      if (!filterfile.exists()) {
-        // work around to fix this so it works in eclipse
-        filterfile = new File("src/main/resources/resource/facerec/Filter.png");
-      }
+      File filterfile = new File(Util.getRessourceDir() + "/facerec/Filter.png");
       //
       // Face mask used to mask edges of face pictures to eliminate noise around
       // the edges

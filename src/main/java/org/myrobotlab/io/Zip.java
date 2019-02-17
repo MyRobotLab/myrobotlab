@@ -16,6 +16,7 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -207,7 +208,7 @@ public class Zip {
 
     LoggingFactory.init(Level.INFO);
 
-    ArrayList<String> files = listDirectoryContents("myrobotlab.jar", "resource/Python/");
+    ArrayList<String> files = listDirectoryContents("myrobotlab.jar", Util.getRessourceDir() + "/Python/");
     for (int i = 0; i < files.size(); ++i) {
       log.info(files.get(i));
     }

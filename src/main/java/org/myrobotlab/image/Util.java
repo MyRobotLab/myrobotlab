@@ -228,7 +228,7 @@ public class Util {
 
   public static ImageIcon getImageIcon(String path) {
     ImageIcon icon = null;
-    String resourcePath = String.format("/resource/%s", path);
+    String resourcePath = String.format(Util.getRessourceDir() + "/%s", path);
     java.net.URL imgURL = Util.class.getResource(resourcePath);
     if (imgURL != null) {
       icon = new ImageIcon(imgURL);
@@ -243,10 +243,18 @@ public class Util {
    * @return current resource directory
    */
   public static String getRessourceDir() {
-    String ressourceDir = System.getProperty("user.dir") + File.separator + "resource" + File.separator;
-    if (!FileIO.isJar()) {
-      ressourceDir = System.getProperty("user.dir") + File.separator + "src/main/resources/resource" + File.separator;
+    // first try for the resource.dir system property
+    String resourceDir = System.getProperty("resource.dir");
+    log.info("Resource DIR: {}" , resourceDir);
+    if (resourceDir != null) {
+      return resourceDir;
     }
+    
+    String ressourceDir = System.getProperty("user.dir") + File.separator + "resource";
+    if (!FileIO.isJar()) {
+      ressourceDir = System.getProperty("user.dir") + File.separator + "src/main/resources/resource";
+    }
+    log.info("Resource DIR: {}" , resourceDir);
     return ressourceDir;
   }
 
@@ -256,7 +264,7 @@ public class Util {
    * @return boolean
    */
   public static Boolean isExistRessourceElement(String element) {
-    File f = new File(getRessourceDir() + element);
+    File f = new File(getRessourceDir() + File.separator + element);
     if (!f.exists()) {
       return false;
     }
@@ -266,12 +274,12 @@ public class Util {
   public static final ImageIcon getResourceIcon(String path) {
     ImageIcon icon = null;
 
-    String imgURL = getRessourceDir() + path;
+    String imgURL = path;
     if (isExistRessourceElement(path)) {
-      icon = new ImageIcon(imgURL);
+      icon = new ImageIcon(Util.getRessourceDir() + File.separator + imgURL);
       return icon;
     } else {
-      log.error("Couldn't find file: " + path);
+      log.error("Couldn't find file: {}" ,  path);
       return null;
     }
   }
@@ -378,7 +386,7 @@ public class Util {
   {
     BufferedImage bi;
     try {
-      bi = ImageIO.read(Util.class.getResource("/resource/" + path));
+      bi = ImageIO.read(Util.class.getResource(Util.getRessourceDir() + "/" + path));
     } catch (IOException e) {
       log.error("could not find image " + path);
       return null;

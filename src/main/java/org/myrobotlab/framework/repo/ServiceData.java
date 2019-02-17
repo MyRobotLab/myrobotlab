@@ -15,6 +15,7 @@ import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -82,17 +83,17 @@ public class ServiceData implements Serializable {
         localInstance = CodecUtils.fromJson(data, ServiceData.class);
         return localInstance;
       } catch (FileNotFoundException fe) {
+        String extractFrom = Util.getRessourceDir() + "/framework/serviceData.json";
         try {
           log.info("could not find {}", serviceDataCacheFileName);
           jsonFile.getParentFile().mkdirs();
-          String extractFrom = "/resource/framework/serviceData.json";
           log.info("try #2 {} not found - extracting from {}", jsonFile.getName(), extractFrom);
           FileIO.extract(extractFrom, jsonFile.getAbsolutePath());
           String data = FileIO.toString(jsonFile);
           localInstance = CodecUtils.fromJson(data, ServiceData.class);
         } catch (Exception e) {
-          log.info("could not extract from {}", "/resource/framework/serviceData.json");
-          String newJson = FileIO.gluePaths(FileIO.getRoot(), "/resource/framework/serviceData.json");
+          log.info("could not extract from {}", extractFrom);
+          String newJson =  Util.getRessourceDir() + File.separator + "serviceData.json";
           log.info("try #3 serviceData.json not found in resource ! - generating and putting it in {}", newJson);
           if (FileIO.isJar()) {
             log.error("we are in a jar!  This is very bad!");
@@ -349,7 +350,7 @@ public class ServiceData implements Serializable {
         path = ".";
       }
 
-      String filename = FileIO.gluePaths(path, "serviceData.json");
+      String filename = path + File.separator + "serviceData.json";
       log.info("generating {}", filename);
       if (path.length() > 0) {
         new File(path).mkdirs();

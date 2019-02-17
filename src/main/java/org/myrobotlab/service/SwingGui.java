@@ -365,7 +365,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
       frame.add(tabPanel);
 
-      URL url = getClass().getResource("/resource/mrl_logo_36_36.png");
+      URL url = getClass().getResource(Util.getRessourceDir() + "/mrl_logo_36_36.png");
       Toolkit kit = Toolkit.getDefaultToolkit();
       Image img = kit.createImage(url);
       frame.setIconImage(img);
@@ -514,7 +514,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   public void noWorky() {
     // String img =
-    // SwingGui.class.getResource("/resource/expert.jpg").toString();
+    // SwingGui.class.getResource(Util.getRessourceDir() + "/expert.jpg").toString();
     String logon = (String) JOptionPane.showInputDialog(getFrame(),
         "<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of experts,<br> please type your myrobotlab.org user</p></html>", "No Worky!",
         JOptionPane.WARNING_MESSAGE, Util.getResourceIcon("expert.jpg"), null, null);

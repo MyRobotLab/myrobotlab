@@ -20,6 +20,7 @@ import javax.swing.event.DocumentListener;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -392,7 +393,7 @@ public class ServoOrchestrator extends Service {
 
   public void play_playclick() {
     try {
-      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream("/resource/ServoOrchestrator/click.wav"));
+      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream(Util.getRessourceDir() + "/ServoOrchestrator/click.wav"));
       Clip clip = AudioSystem.getClip();
       clip.open(audioInputStream);
       clip.start();
