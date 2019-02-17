@@ -41,6 +41,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.IpCamera;
 import org.myrobotlab.service.Runtime;
@@ -171,9 +172,9 @@ public class IpCameraGui extends ServiceGui implements ListSelectionListener {
     display.add(config, BorderLayout.SOUTH);
 
     // connected = new JLabel(new
-    // ImageIcon(IPCameraGUI.class.getResource("/resource/bullet_ball_glass_green.png")));
+    // ImageIcon(IPCameraGUI.class.getResource(Util.getRessourceDir() +"/bullet_ball_glass_green.png")));
     // notConnected = new JLabel(new
-    // ImageIcon(IPCameraGUI.class.getResource("/resource/bullet_ball_glass_grey.png")));
+    // ImageIcon(IPCameraGUI.class.getResource(Util.getRessourceDir() +"/bullet_ball_glass_grey.png")));
     // display.add(notConnected, gc);
     // display.add(connected, gc);
     // connected.setVisible(false);
