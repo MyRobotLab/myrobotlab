@@ -436,13 +436,13 @@ public class AudioFile extends Service {
         player.silence();
 
         // player.playResource("Clock/tick.mp3");
-        player.playResource(Util.getRessourceDir() + "/Clock/tick.mp3");
-        player.playResource(Util.getRessourceDir() + "/Clock/tick.mp3");
-        player.playResource(Util.getRessourceDir() + "/Clock/tick.mp3");
-        player.playResource(Util.getRessourceDir() + "/Clock/tick.mp3");
-        player.playResource(Util.getRessourceDir() + "/Clock/tick.mp3");
-        player.playResource(Util.getRessourceDir() + "/Clock/tick.mp3");
-        player.playResource(Util.getRessourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
       }
     } catch (Exception e) {
       Logging.logError(e);

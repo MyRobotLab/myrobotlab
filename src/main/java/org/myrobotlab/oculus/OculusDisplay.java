@@ -152,12 +152,12 @@ public class OculusDisplay implements Runnable {
 
   static {
     try {
-      UNIT_QUAD_VS = Resources.toString(Resources.getResource(Util.getRessourceDir() + "/oculus/unitQuad.vs"), Charsets.UTF_8);
-      UNIT_QUAD_FS = Resources.toString(Resources.getResource(Util.getRessourceDir() + "/oculus/unitQuad.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource(Util.getRessourceDir() + "/oculus/Textured.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource(Util.getRessourceDir() + "/oculus/Textured.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource(Util.getRessourceDir() + "/oculus/CubeMap.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource(Util.getRessourceDir() + "/oculus/CubeMap.fs"), Charsets.UTF_8);
+      UNIT_QUAD_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + "/oculus/unitQuad.vs"), Charsets.UTF_8);
+      UNIT_QUAD_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + "/oculus/unitQuad.fs"), Charsets.UTF_8);
+      SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + "/oculus/Textured.fs"), Charsets.UTF_8);
+      SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + "/oculus/Textured.vs"), Charsets.UTF_8);
+      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + "/oculus/CubeMap.vs"), Charsets.UTF_8);
+      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + "/oculus/CubeMap.fs"), Charsets.UTF_8);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

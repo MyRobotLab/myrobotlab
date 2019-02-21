@@ -365,7 +365,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       frame.setTitle("myrobotlab - " + getName() + " " + Runtime.getVersion().trim());
 
       frame.add(tabPanel);
-      String logoFile = Util.getRessourceDir() + File.separator + "mrl_logo_36_36.png";
+      String logoFile = Util.getResourceDir() + File.separator + "mrl_logo_36_36.png";
       Toolkit kit = Toolkit.getDefaultToolkit();
       Image img = kit.createImage(logoFile);
       frame.setIconImage(img);

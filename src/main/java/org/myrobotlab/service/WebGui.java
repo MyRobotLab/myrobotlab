@@ -173,7 +173,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   private static SSLContext createSSLContext2() {
     try {
-      InputStream keyStoreStream = Security.class.getResourceAsStream(Util.getRessourceDir() + "/keys/selfsigned.jks");
+      InputStream keyStoreStream = Security.class.getResourceAsStream(Util.getResourceDir() + "/keys/selfsigned.jks");
       char[] keyStorePassword = "changeit".toCharArray();
       KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(keyStoreStream, keyStorePassword);

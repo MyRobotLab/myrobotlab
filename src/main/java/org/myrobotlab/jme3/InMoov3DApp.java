@@ -517,8 +517,8 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
 
     // poc monitor declaration
 
-    Texture2D textureBackGround = (Texture2D) assetManager.loadTexture(Util.getRessourceDir() + "/InMoov/monitor/monitor_back.png");
-    Picture BackGround = new Picture(Util.getRessourceDir() + "/InMoov/monitor/monitor_back.png");
+    Texture2D textureBackGround = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + "/InMoov/monitor/monitor_back.png");
+    Picture BackGround = new Picture(Util.getResourceDir() + "/InMoov/monitor/monitor_back.png");
     BackGround.setTexture(assetManager, textureBackGround, true);
     BackGround.setWidth(settings.getWidth());
     BackGround.setHeight(settings.getHeight());
@@ -538,23 +538,23 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     onRecognized.setLocalTranslation((settings.getWidth() / 2) - 180, settings.getHeight() - 20, 0.0F);
     onRecognized.setText("Listening...");
 
-    Texture2D texture = (Texture2D) assetManager.loadTexture(Util.getRessourceDir() + "/InMoov/monitor/microOn.png");
-    microOn = new Picture(Util.getRessourceDir() + "/InMoov/monitor/microOn.png");
+    Texture2D texture = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + "/InMoov/monitor/microOn.png");
+    microOn = new Picture(Util.getResourceDir() + "/InMoov/monitor/microOn.png");
     microOn.setTexture(assetManager, texture, true);
     microOn.setWidth(Math.round(texture.getImage().getWidth() / widthCoef));
     microOn.setHeight(Math.round(texture.getImage().getHeight() / heightCoef));
     microOn.setLocalTranslation(10F, settings.getHeight() - 50, 0.0F);
 
-    Texture2D textureOff = (Texture2D) assetManager.loadTexture(Util.getRessourceDir() + "/InMoov/monitor/microOff.png");
-    microOff = new Picture(Util.getRessourceDir() + "/InMoov/monitor/microOff.png");
+    Texture2D textureOff = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + "/InMoov/monitor/microOff.png");
+    microOff = new Picture(Util.getResourceDir() + "/InMoov/monitor/microOff.png");
     microOff.setTexture(assetManager, textureOff, true);
     microOff.setWidth(Math.round(textureOff.getImage().getWidth() / widthCoef));
     microOff.setHeight(Math.round(textureOff.getImage().getHeight() / heightCoef));
     microOff.setLocalTranslation(10F, settings.getHeight() - 50, 0.0F);
 
     for (int i = 0; i <= 100; i += 20) {
-      textureBat[i] = (Texture2D) assetManager.loadTexture(Util.getRessourceDir() + "/InMoov/monitor/bat_" + i + ".png");
-      battery[i] = new Picture(Util.getRessourceDir() + "/InMoov/monitor/bat_" + i + ".png");
+      textureBat[i] = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + "/InMoov/monitor/bat_" + i + ".png");
+      battery[i] = new Picture(Util.getResourceDir() + "/InMoov/monitor/bat_" + i + ".png");
       battery[i].setTexture(assetManager, textureBat[i], true);
       battery[i].setWidth(Math.round(textureBat[i].getImage().getWidth() / widthCoef));
       battery[i].setHeight(Math.round(textureBat[i].getImage().getHeight() / heightCoef));
