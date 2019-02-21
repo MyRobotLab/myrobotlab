@@ -111,7 +111,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
         } else {
           // resource in jar default
           info(String.format("grammar /resource/Sphinx/simple.xml"));
-          cm = new ConfigurationManager(this.getClass().getResource(Util.getRessourceDir() + "/Sphinx/simple.xml"));
+          cm = new ConfigurationManager(this.getClass().getResource(Util.getResourceDir() + "/Sphinx/simple.xml"));
         }
 
         info("starting recognizer");

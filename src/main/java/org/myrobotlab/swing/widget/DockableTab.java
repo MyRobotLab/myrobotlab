@@ -232,7 +232,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
         undocked.getContentPane().add(display);
 
         // icon
-        URL url = getClass().getResource(Util.getRessourceDir() + "/mrl_logo_36_36.png");
+        URL url = getClass().getResource(Util.getResourceDir() + "/mrl_logo_36_36.png");
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(url);
         undocked.setIconImage(img);

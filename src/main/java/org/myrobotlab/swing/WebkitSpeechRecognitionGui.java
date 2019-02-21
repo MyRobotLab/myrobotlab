@@ -39,8 +39,8 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
   public final static Logger log = LoggerFactory.getLogger(WebkitSpeechRecognitionGui.class);
 
   private JTextField onRecognized = new JTextField("Waiting orders...", 24);
-  BufferedImage microOn = ImageIO.read(FileIO.class.getResource(Util.getRessourceDir() +"/InMoov/monitor/microOn.png"));
-  BufferedImage microOff = ImageIO.read(FileIO.class.getResource(Util.getRessourceDir() +"/InMoov/monitor/microOff.png"));
+  BufferedImage microOn = ImageIO.read(FileIO.class.getResource(Util.getResourceDir() +"/InMoov/monitor/microOn.png"));
+  BufferedImage microOff = ImageIO.read(FileIO.class.getResource(Util.getResourceDir() +"/InMoov/monitor/microOff.png"));
 
   private JButton micro = new JButton(new ImageIcon(microOn));
   JComboBox comboLanguage = new JComboBox();

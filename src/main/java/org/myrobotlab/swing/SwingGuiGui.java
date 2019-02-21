@@ -343,7 +343,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       }
 
       mxCell v1 = (mxCell) graph.insertVertex(parent, null, new SwingGraphVertex(serviceName, canonicalName, displayName, toolTip, SwingGraphVertex.Type.SERVICE), x, y, 100, 50,
-          "shape=image;image="+Util.getRessourceDir() +"/" + canonicalName + ".png");
+          "shape=image;image="+Util.getResourceDir() +"/" + canonicalName + ".png");
       // "ROUNDED;fillColor=" + blockColor);
 
       // graphComponent.getGraphControl().scrollRectToVisible(new

@@ -2064,9 +2064,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
       String mrlCommFiles = null;
       if (FileIO.isJar()) {
-        mrlCommFiles = Util.getRessourceDir() + "/Arduino/MrlComm";
+        mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
         // FIXME - don't do this every time :P
-        Zip.extractFromSelf(Util.getRessourceDir() + "/Arduino/MrlComm", "resource/Arduino/MrlComm");
+        Zip.extractFromSelf(Util.getResourceDir() + "/Arduino/MrlComm", "resource/Arduino/MrlComm");
       } else {
         // running in IDE ?
         mrlCommFiles = "src/main/resources/resource/Arduino/MrlComm";

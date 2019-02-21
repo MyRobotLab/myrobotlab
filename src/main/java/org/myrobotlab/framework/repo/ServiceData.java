@@ -58,7 +58,7 @@ public class ServiceData implements Serializable {
 
   static private ServiceData localInstance = null;
 
-  static private String serviceDataCacheFileName = String.format("%s%sserviceData.json", FileIO.getCfgDir(), File.separator);
+  static private String serviceDataCacheFileName = FileIO.getCfgDir() + File.separator + "serviceData.json";
 
   static public ServiceData getLocalInstance() {
     if (localInstance == null) {
@@ -73,7 +73,19 @@ public class ServiceData implements Serializable {
       // getRoot()/resource/framework/serviceData.json
 
       File jsonFile = new File(serviceDataCacheFileName);
-
+      // TODO:What is getRoot when we are in eclipse vs running on the command line? 
+      if (!jsonFile.exists()) {
+        if (FileIO.isJar()) {
+          log.info("Extracting resources... We are in a jar and the serviceData.json file doesn't exist, so we must extract!");
+          FileIO.extractResources();
+          try {
+            FileIO.copy(Util.getResourceDir() + File.separator + "serviceData.json", FileIO.getCfgDir() + File.separator + "serviceData.json");
+          } catch (IOException e) {
+            log.error("Error copying serviceData to .myrobotlab/serviceData.json.", e);
+          }
+        } 
+      }
+      
       try {
         log.info("try #1 loading local file {}", jsonFile);
         String data = FileIO.toString(jsonFile);
@@ -83,7 +95,8 @@ public class ServiceData implements Serializable {
         localInstance = CodecUtils.fromJson(data, ServiceData.class);
         return localInstance;
       } catch (FileNotFoundException fe) {
-        String extractFrom = Util.getRessourceDir() + "/framework/serviceData.json";
+        // This is the path to the resource in the myrobotlab.jar file for the serviceData.json
+        String extractFrom = "/resource/framework/serviceData.json";
         try {
           log.info("could not find {}", serviceDataCacheFileName);
           jsonFile.getParentFile().mkdirs();
@@ -93,7 +106,7 @@ public class ServiceData implements Serializable {
           localInstance = CodecUtils.fromJson(data, ServiceData.class);
         } catch (Exception e) {
           log.info("could not extract from {}", extractFrom);
-          String newJson =  Util.getRessourceDir() + File.separator + "serviceData.json";
+          String newJson =  Util.getResourceDir() + File.separator + "serviceData.json";
           log.info("try #3 serviceData.json not found in resource ! - generating and putting it in {}", newJson);
           if (FileIO.isJar()) {
             log.error("we are in a jar!  This is very bad!");

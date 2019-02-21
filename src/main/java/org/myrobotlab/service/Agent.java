@@ -1036,7 +1036,7 @@ public class Agent extends Service {
     log.info("update({})", branch);
     // so we need to get the version of the jar contained in the {branch}
     // directory ..
-    FileIO.extract(String.format("%s/myrobotlab.jar", branch), Util.getRessourceDir() + "/version.txt", String.format("%s/version.txt", branch));
+    FileIO.extract(String.format("%s/myrobotlab.jar", branch), Util.getResourceDir() + "/version.txt", String.format("%s/version.txt", branch));
 
     String currentVersion = FileIO.toString(String.format("%s/version.txt", branch));
     if (currentVersion == null) {
