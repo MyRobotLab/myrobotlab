@@ -77,7 +77,7 @@ public class ArduinoUtils {
    */
   public static boolean uploadSketch(String port, String boardKey, String arduinoPath) throws IOException, InterruptedException {
     FileIO.extractResources();
-    String sketchFilename = Util.getRessourceDir() + "/Arduino/MRLComm/MRLComm.ino";
+    String sketchFilename = Util.getResourceDir() + "/Arduino/MRLComm/MRLComm.ino";
     File sketch = new File(sketchFilename);
     if (!sketch.exists()) {
       // trying to use development version
