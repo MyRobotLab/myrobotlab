@@ -203,7 +203,7 @@ public class Util {
     if (isExistRessourceElement(path)) {
       try {
         icon = ImageIO.read(imgURL);
-        log.info(imgURL.getPath());
+        //log.info("getImage({})", imgURL.getPath());
         return icon;
       } catch (IOException e) {
         log.error("getImage threw", e);
@@ -251,8 +251,8 @@ public class Util {
       return resourceDir;
     }
     if (!FileIO.isJar()) {
-      log.info("Not in a jar...you're running in an IDE likely.");
-      resourceDir = System.getProperty("user.dir") + File.separator + "src/main/resources/resource";
+      // log.info("Not in a jar...you're running in an IDE likely.");
+      resourceDir = System.getProperty("user.dir") + File.separator + "src"+File.separator+"main"+File.separator+"resources"+File.separator+"resource";
     } else {
       resourceDir = System.getProperty("user.dir") + File.separator + "resource";
     }
