@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -127,7 +128,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
         reportArea.setText("");
         setVisible(true);
         actionText.setText("downloading components");
-        spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource(Util.getResourceDir() + "/progressBar.gif")));
+        spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource(Util.getResourceDir() + File.separator + "progressBar.gif")));
       }
     });
   }
