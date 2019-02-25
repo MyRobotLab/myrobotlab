@@ -128,7 +128,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
         reportArea.setText("");
         setVisible(true);
         actionText.setText("downloading components");
-        spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource(Util.getResourceDir() + File.separator + "progressBar.gif")));
+        spinner.setIcon(Util.getImageIcon("progressBar.gif"));
       }
     });
   }
@@ -143,7 +143,7 @@ public class ProgressDialog extends JDialog implements ActionListener {
         reportArea.setText("");
         setVisible(true);
         actionText.setText("checking for updates");
-        spinner.setIcon(new ImageIcon(ProgressDialog.class.getResource(Util.getResourceDir() + "/progressBar.gif")));
+        spinner.setIcon(Util.getImageIcon("progressBar.gif"));
       }
     });
   }
