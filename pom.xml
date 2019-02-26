@@ -1746,8 +1746,8 @@
 					<mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
 					<classpathScope>test</classpathScope>
 					<arguments>
-						<!-- TODO: fix this with the proper location -->
-			            <argument>src/main/resources/resource/framework/</argument>
+					<!-- generate it into the target directory for inclusion in the jar -->
+					<argument>target/classes/resource/framework</argument>
           			</arguments>
 				</configuration>
 			</plugin>

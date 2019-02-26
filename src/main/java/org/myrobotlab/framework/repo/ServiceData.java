@@ -96,7 +96,7 @@ public class ServiceData implements Serializable {
         if (FileIO.isJar()) {
           log.info("Extracting serviceData.json from myrobotlab.jar");
           // extract it from the jar.
-          String extractFrom = "/resource/serviceData.json";
+          String extractFrom = "/resource/framework/serviceData.json";
           jsonFile.getParentFile().mkdirs();
           try {
             FileIO.extract(extractFrom, jsonFile.getAbsolutePath());
@@ -117,11 +117,13 @@ public class ServiceData implements Serializable {
         } else {
           // we are running in an IDE and haven't generated/saved the serviceData.json yet.
           try {
+            // This must only be run as part of the build or from your IDE.  It will not work when running from a jar.
             localInstance = ServiceData.generate();
             localInstance.save();
             log.info("saved generated serviceData.json to {}", serviceDataCacheFileName);
           } catch (IOException e1) {
             log.error("Unable to generate the serivceData.json file!!");
+            // This is a fatal issue. I think we should exit the jvm here.
           }
           return localInstance;
         }
@@ -145,7 +147,7 @@ public class ServiceData implements Serializable {
    * @throws IOException
    *           e
    */
-  static public ServiceData generate() throws IOException {
+  static public synchronized ServiceData generate() throws IOException {
     log.info("================ generating serviceData.json begin ================");
     ServiceData sd = new ServiceData();
 
@@ -371,9 +373,13 @@ public class ServiceData implements Serializable {
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
       ServiceData sd = generate();
-      FileOutputStream fos = new FileOutputStream(filename);
-      fos.write(CodecUtils.toJson(sd).getBytes());
-      fos.close();
+      // save a copy to the resources folder so it can be bundled in the jar.
+      sd.save(filename);
+      // save to the .myrobotlab directory also..
+      sd.save();
+//      FileOutputStream fos = new FileOutputStream(filename);
+//      fos.write(CodecUtils.toJson(sd).getBytes());
+//      fos.close();
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
 
     } catch (Exception e) {
