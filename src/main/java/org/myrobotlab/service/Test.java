@@ -211,7 +211,7 @@ public class Test extends Service implements StatusListener {
 
   public final static Logger log = LoggerFactory.getLogger(Test.class);
 
-  static final transient ServiceData serviceData = ServiceData.getLocalInstance();
+  //static final transient ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
    * This static method returns all the details of the class without it having
@@ -375,7 +375,7 @@ public class Test extends Service implements StatusListener {
          * t.append("\n"); t.append("# start the service\n");
          */
 
-        ServiceType st = serviceData.getServiceType(String.format("org.myrobotlab.service.%s", service));
+        ServiceType st = ServiceData.getLocalInstance().getServiceType(String.format("org.myrobotlab.service.%s", service));
 
         t.append("#########################################\n");
         t.append(String.format("# %s.py\n", service));
@@ -400,7 +400,7 @@ public class Test extends Service implements StatusListener {
   }
 
   public List<String> getAllServiceNames() {
-    String[] x = serviceData.getServiceTypeNames();
+    String[] x = ServiceData.getLocalInstance().getServiceTypeNames();
     List<String> serviceNames = new ArrayList<String>();
     for (int i = 0; i < x.length; ++i) {
     }
@@ -414,7 +414,7 @@ public class Test extends Service implements StatusListener {
       HashSet<String> serviceTypes = new HashSet<String>();
 
       pythonScripts = new TreeMap<String, String>();
-      List<ServiceType> sts = serviceData.getServiceTypes();
+      List<ServiceType> sts = ServiceData.getLocalInstance().getServiceTypes();
       for (int i = 0; i < sts.size(); ++i) {
         ServiceType st = sts.get(i);
         serviceTypes.add(st.getSimpleName());
@@ -441,7 +441,7 @@ public class Test extends Service implements StatusListener {
   }
 
   public List<ServiceType> getServices() {
-    return serviceData.getServiceTypes(showUnavailableServices);
+    return ServiceData.getLocalInstance().getServiceTypes(showUnavailableServices);
   }
 
   public List<String> getServicesWithOutScripts(String branch) {
@@ -457,7 +457,7 @@ public class Test extends Service implements StatusListener {
 
   public List<String> getServicesWithOutServicePages() throws ClientProtocolException, IOException {
     ArrayList<String> ret = new ArrayList<String>();
-    List<ServiceType> serviceTypes = serviceData.getServiceTypes();
+    List<ServiceType> serviceTypes = ServiceData.getLocalInstance().getServiceTypes();
     HttpClient http = (HttpClient) startPeer("http");
     for (int i = 0; i < serviceTypes.size(); ++i) {
       ServiceType serviceType = serviceTypes.get(i);
@@ -513,7 +513,7 @@ public class Test extends Service implements StatusListener {
    */
   public void loadDefaultTests() {
 
-    List<ServiceType> types = serviceData.getServiceTypes();
+    List<ServiceType> types = ServiceData.getLocalInstance().getServiceTypes();
     for (int i = 0; i < types.size(); ++i) {
       ServiceType type = types.get(i);
       log.info("adding {}", type.getSimpleName());
