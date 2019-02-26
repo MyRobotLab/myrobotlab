@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -198,11 +199,11 @@ public class Util {
 
   public static Image getImage(String path, String defaultImage) {
     Image icon = null;
-    File imgURL = new File(getRessourceDir() + path);
+    File imgURL = new File(getResourceDir() + File.separator + path);
     if (isExistRessourceElement(path)) {
       try {
         icon = ImageIO.read(imgURL);
-        // log.info(imgURL.getPath());
+        //log.info("getImage({})", imgURL.getPath());
         return icon;
       } catch (IOException e) {
         log.error("getImage threw", e);
@@ -210,7 +211,7 @@ public class Util {
     }
 
     // trying default image
-    imgURL = new File(getRessourceDir() + defaultImage);
+    imgURL = new File(getResourceDir() + File.separator + defaultImage);
 
     if (imgURL != null) {
       try {
@@ -221,33 +222,42 @@ public class Util {
       }
     }
 
-    log.error("Couldn't find file: " + path + " or default " + defaultImage);
+    log.error("Get Image : Couldn't find file: " + path + " or default " + defaultImage);
     return null;
 
   }
 
   public static ImageIcon getImageIcon(String path) {
     ImageIcon icon = null;
-    String resourcePath = String.format("/resource/%s", path);
-    java.net.URL imgURL = Util.class.getResource(resourcePath);
-    if (imgURL != null) {
-      icon = new ImageIcon(imgURL);
-      return icon;
-    } else {
-      log.error("Couldn't find file: {}", resourcePath);
-      return null;
-    }
+    String resourcePath = String.format(Util.getResourceDir() + File.separator + path);
+    // ImageIcon requries forward slash in the filename (unix/internet style convention)
+    resourcePath = resourcePath.replaceAll("\\\\", "/");
+    icon = new ImageIcon(resourcePath);
+    return icon;
   }
 
   /**
+   * by default will take the resource.dir property if set.
+   * If mrl is running inside of a jar it will use the user.dir + "resource" as the directory.
+   * If mrl is not in a jar, it will use src/main/resources/resource  
+   * 
    * @return current resource directory
    */
-  public static String getRessourceDir() {
-    String ressourceDir = System.getProperty("user.dir") + File.separator + "resource" + File.separator;
-    if (!FileIO.isJar()) {
-      ressourceDir = System.getProperty("user.dir") + File.separator + "src/main/resources/resource" + File.separator;
+  public static String getResourceDir() {
+    // first try for the resource.dir system property
+    String resourceDir = System.getProperty("resource.dir");
+    if (resourceDir != null) {
+      // log.info("Returning {}", resourceDir);
+      return resourceDir;
     }
-    return ressourceDir;
+    if (!FileIO.isJar()) {
+      // log.info("Not in a jar...you're running in an IDE likely.");
+      resourceDir = System.getProperty("user.dir") + File.separator + "src"+File.separator+"main"+File.separator+"resources"+File.separator+"resource";
+    } else {
+      resourceDir = System.getProperty("user.dir") + File.separator + "resource";
+    }
+    // log.info("Returning {}", resourceDir);
+    return resourceDir;
   }
 
   /**
@@ -256,7 +266,7 @@ public class Util {
    * @return boolean
    */
   public static Boolean isExistRessourceElement(String element) {
-    File f = new File(getRessourceDir() + element);
+    File f = new File(getResourceDir() + File.separator + element);
     if (!f.exists()) {
       return false;
     }
@@ -266,12 +276,12 @@ public class Util {
   public static final ImageIcon getResourceIcon(String path) {
     ImageIcon icon = null;
 
-    String imgURL = getRessourceDir() + path;
+    String imgURL = path;
     if (isExistRessourceElement(path)) {
-      icon = new ImageIcon(imgURL);
+      icon = new ImageIcon(Util.getResourceDir() + File.separator + imgURL);
       return icon;
     } else {
-      log.error("Couldn't find file: " + path);
+      log.error("Get Resource Icon - Couldn't find file: {}" ,  path);
       return null;
     }
   }
@@ -378,7 +388,7 @@ public class Util {
   {
     BufferedImage bi;
     try {
-      bi = ImageIO.read(Util.class.getResource("/resource/" + path));
+      bi = ImageIO.read(Util.class.getResource(Util.getResourceDir() + File.separator + path));
     } catch (IOException e) {
       log.error("could not find image " + path);
       return null;

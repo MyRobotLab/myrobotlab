@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -76,11 +77,11 @@ public class ArduinoUtils {
    */
   public static boolean uploadSketch(String port, String boardKey, String arduinoPath) throws IOException, InterruptedException {
     FileIO.extractResources();
-    String sketchFilename = "resource/Arduino/MRLComm/MRLComm.ino";
+    String sketchFilename = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MRLComm"+File.separator+"MRLComm.ino";
     File sketch = new File(sketchFilename);
     if (!sketch.exists()) {
       // trying to use development version
-      sketchFilename = "src/main/resources/resource/Arduino/MRLComm/MRLComm.ino";
+      sketchFilename = "src"+File.separator+"main"+File.separator+"resources"+File.separator+"resource"+File.separator+"Arduino"+File.separator+"MRLComm"+File.separator+"MRLComm.ino";
       sketch = new File(sketchFilename);
     }
     // Create the command to run (and it's args.)

@@ -13,6 +13,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import org.myrobotlab.image.Util;
+
 public class DirectionWidget extends JPanel implements KeyListener {
 
   public class ButtonActionListener implements ActionListener {
@@ -75,8 +77,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnNw = new JButton("");
     btnNw.setBackground(new Color(173, 255, 47));
-    btnNw.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_left_grey.png")));
-    btnNw.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_left_green.png")));
+    btnNw.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_up_left_grey.png")));
+    btnNw.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_up_left_green.png")));
     btnNw.addActionListener(bal);
     GridBagConstraints gbc_btnNw = new GridBagConstraints();
     gbc_btnNw.insets = new Insets(0, 0, 0, 0);
@@ -89,8 +91,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnN = new JButton("");
     btnN.setBackground(new Color(173, 255, 47));
-    btnN.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_grey.png")));
-    btnN.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_green.png")));
+    btnN.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_up_grey.png")));
+    btnN.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_up_green.png")));
     btnN.addActionListener(bal);
     GridBagConstraints gbc_btnN = new GridBagConstraints();
     gbc_btnN.insets = new Insets(0, 0, 0, 0);
@@ -102,8 +104,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnNe = new JButton("");
     btnNe.setBackground(new Color(173, 255, 47));
-    btnNe.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_right_grey.png")));
-    btnNe.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_up_right_green.png")));
+    btnNe.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_up_right_grey.png")));
+    btnNe.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_up_right_green.png")));
     btnNe.addActionListener(bal);
     GridBagConstraints gbc_btnNe = new GridBagConstraints();
     gbc_btnNe.insets = new Insets(0, 0, 0, 0);
@@ -116,8 +118,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnW = new JButton("");
     btnW.setBackground(new Color(173, 255, 47));
-    btnW.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_left_grey.png")));
-    btnW.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_left_green.png")));
+    btnW.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_left_grey.png")));
+    btnW.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_left_green.png")));
     btnW.addActionListener(bal);
     GridBagConstraints gbc_btnW = new GridBagConstraints();
     gbc_btnW.insets = new Insets(0, 0, 0, 0);
@@ -128,8 +130,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
     btnW.setActionCommand("w");
 
     btnStop = new JButton("");
-    btnStop.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/bullet_square_grey.png")));
-    btnStop.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/bullet_square_green.png")));
+    btnStop.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/bullet_square_grey.png")));
+    btnStop.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/bullet_square_green.png")));
     btnStop.setBackground(new Color(173, 255, 47));
     btnStop.addActionListener(bal);
     GridBagConstraints gbc_btnSt = new GridBagConstraints();
@@ -142,8 +144,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnE = new JButton("");
     btnE.setBackground(new Color(173, 255, 47));
-    btnE.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_right_grey.png")));
-    btnE.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_right_green.png")));
+    btnE.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_right_grey.png")));
+    btnE.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_right_green.png")));
     btnE.addActionListener(bal);
     GridBagConstraints gbc_btnE = new GridBagConstraints();
     gbc_btnE.insets = new Insets(0, 0, 0, 0);
@@ -155,8 +157,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnSw = new JButton("");
     btnSw.setBackground(new Color(173, 255, 47));
-    btnSw.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_down_left_grey.png")));
-    btnSw.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_down_left_green.png")));
+    btnSw.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_down_left_grey.png")));
+    btnSw.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_down_left_green.png")));
     btnSw.addActionListener(bal);
     GridBagConstraints gbc_btnSw = new GridBagConstraints();
     gbc_btnSw.insets = new Insets(0, 0, 0, 0);
@@ -169,8 +171,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnS = new JButton("");
     btnS.setBackground(new Color(173, 255, 47));
-    btnS.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_down_grey.png")));
-    btnS.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_down_green.png")));
+    btnS.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_down_grey.png")));
+    btnS.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_down_green.png")));
     btnS.addActionListener(bal);
     GridBagConstraints gbc_btnS = new GridBagConstraints();
     gbc_btnS.insets = new Insets(0, 0, 0, 0);
@@ -182,8 +184,8 @@ public class DirectionWidget extends JPanel implements KeyListener {
 
     btnSe = new JButton("");
     btnSe.setBackground(new Color(173, 255, 47));
-    btnSe.setIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_down_right_grey.png")));
-    btnSe.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource("/resource/arrow_down_right_green.png")));
+    btnSe.setIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_down_right_grey.png")));
+    btnSe.setPressedIcon(new ImageIcon(DirectionWidget.class.getResource(Util.getResourceDir() + "/arrow_down_right_green.png")));
     btnSe.addActionListener(bal);
     GridBagConstraints gbc_btnSe = new GridBagConstraints();
     gbc_btnSe.insets = new Insets(0, 0, 0, 0);
