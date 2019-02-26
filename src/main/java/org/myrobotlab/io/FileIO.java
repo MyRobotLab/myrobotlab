@@ -53,6 +53,7 @@ import java.util.zip.ZipException;
 
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -143,7 +144,7 @@ public class FileIO {
         }
       } else {
         // when dst exists - then whole directory src is copied into dst
-        copy(src, new File(gluePaths(dst.getPath(), src.getName())));
+        copy(src, new File(dst.getPath() + File.separator + src.getName()));
       }
 
     }
@@ -347,7 +348,7 @@ public class FileIO {
   }
 
   static public final void extractResource(String src, String dst, boolean overwrite) throws IOException {
-    extract(getRoot(), gluePaths("/resource/", src), dst, overwrite);
+    extract(getRoot(), Util.getResourceDir() + File.separator + src + File.separator + dst + File.separator + overwrite);
   }
 
   /**
@@ -395,10 +396,11 @@ public class FileIO {
    *           e
    */
   static public final boolean extractResources(boolean overwrite) throws IOException {
+    // This is the path in the uber jar file that contains the resources.
     String resourceName = "resource";
-    File check = new File(resourceName);
+    File check = new File(Util.getResourceDir());
     if (check.exists() && !overwrite) {
-      log.warn("{} aleady exists - not extracting", resourceName);
+      log.warn("Resources aleady exist: not extracting -- Dir : {} Jar : {}", Util.getResourceDir(), resourceName);
       return false;
     }
 
@@ -418,8 +420,8 @@ public class FileIO {
    */
   static public final String getCfgDir() {
     try {
-      String dirName = String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
-
+      // TODO: is user.dir the same as MRL_HOME / install dir?
+      String dirName = System.getProperty("user.dir") + File.separator + ".myrobotlab";
       File dir = new File(dirName);
 
       if (!dir.exists()) {
@@ -503,7 +505,8 @@ public class FileIO {
     return classes;
   }
 
-  static public final String gluePaths(String path1, String path2) {
+  @Deprecated
+  static public final String gluePathsA(String path1, String path2) {
     // normalize to 'real' network slash direction ;)
     // jar internals probably do not handle back-slash
     // most file access even on 'windows' machine can interface correctly
@@ -637,7 +640,7 @@ public class FileIO {
     }
 
     if (!isJar(root)) {
-      String rootPath = gluePaths(root, src);
+      String rootPath = root + File.separator + src;
       File srcFile = new File(rootPath);
       if (!srcFile.exists()) {
         log.error("{} does not exist", srcFile);
@@ -885,16 +888,16 @@ public class FileIO {
     copy("dir1", "dir2");
 
     // JUNIT BEGIN
-    String result = gluePaths("/", "/a/");
+    String result = "/" + File.separator + "/a/";
     // assert /a/
-    result = gluePaths("/a/", "\\b\\");
+    result = "/a/" + File.separator + "\\b\\";
     // assert /a/b/
     log.info(result);
-    result = gluePaths("/a", "\\b\\");
+    result = "/a" + File.separator + "\\b\\";
     // assert /a/b/
-    result = gluePaths("\\a\\", "\\b\\");
+    result = "\\a\\" + File.separator + "\\b\\";
     // assert /a/b/
-    result = gluePaths("\\a\\", "b\\");
+    result = "\\a\\" + File.separator + "b\\";
     // assert /a/b/
 
     /*
@@ -996,7 +999,7 @@ public class FileIO {
       List<URL> urls = null;
 
       log.info("findPackageContents resource/Python/examples");
-      urls = listContents(root, "resource/Python/examples");
+      urls = listContents(root, Util.getResourceDir() + "/Python/examples");
 
       log.info("findPackageContents resource/Python/examples {}", urls.size());
 
@@ -1006,8 +1009,8 @@ public class FileIO {
        * log.info("{}", test); }
        */
 
-      urls = listContents(getRoot(), "resource/Python/examples");
-      log.info("findPackageContents resource/Python/examples {}", urls.size());
+      urls = listContents(getRoot(), Util.getResourceDir() + "/Python/examples");
+      log.info("findPackageContents {}/Python/examples {}", Util.getResourceDir() , urls.size());
 
       urls = listContents(src);
       log.info("findPackageContents {} {}", src, urls.size());
@@ -1131,17 +1134,19 @@ public class FileIO {
    */
   static public final byte[] resourceToByteArray(String src) {
 
-    String filename = String.format(gluePaths("/resource/", src));
-
+    // this path assumes in a jar ?
+    String filename = "/resource/" + src;
     log.info("looking for {}", filename);
     InputStream isr = null;
     if (isJar()) {
       isr = FileIO.class.getResourceAsStream(filename);
     } else {
+      String localFilename = Util.getResourceDir() + File.separator + src;
       try {
-        isr = new FileInputStream(String.format("%sresource/%s", getRoot(), src));
+        isr = new FileInputStream(localFilename);
       } catch (Exception e) {
         Logging.logError(e);
+        log.error("File not found. {}", localFilename, e);
         return null;
       }
     }

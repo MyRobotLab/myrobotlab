@@ -36,6 +36,7 @@ import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.lwjgl.LWJGLException;
@@ -46,6 +47,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
@@ -151,12 +153,12 @@ public class OculusDisplay implements Runnable {
 
   static {
     try {
-      UNIT_QUAD_VS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.vs"), Charsets.UTF_8);
-      UNIT_QUAD_FS = Resources.toString(Resources.getResource("resource/oculus/unitQuad.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource("resource/oculus/Textured.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource("resource/oculus/Textured.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource("resource/oculus/CubeMap.fs"), Charsets.UTF_8);
+      UNIT_QUAD_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"unitQuad.vs"), Charsets.UTF_8);
+      UNIT_QUAD_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"unitQuad.fs"), Charsets.UTF_8);
+      SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"Textured.fs"), Charsets.UTF_8);
+      SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"Textured.vs"), Charsets.UTF_8);
+      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"CubeMap.vs"), Charsets.UTF_8);
+      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"CubeMap.fs"), Charsets.UTF_8);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

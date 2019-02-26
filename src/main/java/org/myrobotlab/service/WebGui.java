@@ -50,6 +50,7 @@ import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -172,7 +173,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   private static SSLContext createSSLContext2() {
     try {
-      InputStream keyStoreStream = Security.class.getResourceAsStream("resource/keys/selfsigned.jks");
+      InputStream keyStoreStream = Security.class.getResourceAsStream(Util.getResourceDir() + "/keys/selfsigned.jks");
       char[] keyStorePassword = "changeit".toCharArray();
       KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(keyStoreStream, keyStorePassword);
@@ -385,6 +386,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         .resource("/stream", stream)
         // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
+        // for the inmmoov 
+        .resource("../myrobotlab/src/main/resources/resource/WebGui")
+        
         // for debugging
         .resource("./src/main/resources/resource/WebGui").resource("./src/main/resources/resource")
         // for runtime - after extractions

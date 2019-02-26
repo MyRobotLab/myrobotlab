@@ -254,10 +254,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // update the current user/bot name..  
     if (!botName.equals(getCurrentBotName())) {
       // update which bot is in the front.. and honestly. we should also set which userName is currently talking to the bot.
+      log.info("Setting {} as the current bot.", botName);
       this.setCurrentBotName(botName);
     }
     if (!userName.equals(getCurrentUserName())) {
       // update which bot is in the front.. and honestly. we should also set which userName is currently talking to the bot.
+      log.info("Setting {} user as the currnt user.", userName);
       this.setCurrentUserName(userName);
     }
   }
@@ -611,7 +613,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public void startSession(String path, String userName, String botName, Locale locale) {
     // if update the current user/bot name globally. (bring this bot/user session to attention.)
-    // log.info("Start Session Path: {} User: {} Bot: {} Locale: {}", path, userName, botName, locale);
+    log.info("Start Session Path: {} User: {} Bot: {} Locale: {}", path, userName, botName, locale);
     updateCurrentSession(userName, botName);
     // Session is between a user and a bot. key is compound.
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {

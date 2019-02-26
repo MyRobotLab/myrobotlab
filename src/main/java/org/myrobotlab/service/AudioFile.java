@@ -34,6 +34,7 @@ import java.util.Map;
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -282,7 +283,7 @@ public class AudioFile extends Service {
 
   public List<File> getFiles(String subDir, boolean recurse) {
     try {
-      String dir = FileIO.gluePaths("audioFile", subDir);
+      String dir = "audioFile" + File.separator + subDir;
       return FileIO.getFileList(dir, true);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -435,13 +436,13 @@ public class AudioFile extends Service {
         player.silence();
 
         // player.playResource("Clock/tick.mp3");
-        player.playResource("/resource/Clock/tick.mp3");
-        player.playResource("/resource/Clock/tick.mp3");
-        player.playResource("/resource/Clock/tick.mp3");
-        player.playResource("/resource/Clock/tick.mp3");
-        player.playResource("/resource/Clock/tick.mp3");
-        player.playResource("/resource/Clock/tick.mp3");
-        player.playResource("/resource/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
+        player.playResource(Util.getResourceDir() + "/Clock/tick.mp3");
       }
     } catch (Exception e) {
       Logging.logError(e);

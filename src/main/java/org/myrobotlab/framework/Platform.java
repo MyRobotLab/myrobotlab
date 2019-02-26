@@ -150,7 +150,7 @@ public class Platform implements Serializable {
        * 
        * try { BufferedReader br = new BufferedReader(new
        * InputStreamReader(Platform.class.getResourceAsStream(
-       * "/resource/version.txt"), "UTF-8")); for (int c = br.read(); c != -1; c
+       * Util.getRessourceDir() + "/version.txt"), "UTF-8")); for (int c = br.read(); c != -1; c
        * = br.read()) { sb.append((char) c); } if (sb.length() > 0) {
        * platform.mrlVersion = sb.toString(); } } catch (Exception e) { // no
        * logging silently die }
