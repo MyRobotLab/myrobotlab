@@ -6,12 +6,14 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggingFactory;
 
 // Grr.. TODO: too hard a test for our weak jenkins oven in the cloud :(
-
+// this unit test is very noisy!  TODO: remove this ignore once we sort out the logging..
+@Ignore
 public class InMoovScriptTest {
 
   private static final String V_PORT_1 = "COM99";
