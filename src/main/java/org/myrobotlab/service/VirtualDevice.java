@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
   public void createVirtualArduino(String portName) throws IOException {
     createVirtualSerial(portName);
-    String newCode = FileIO.resourceToString("VirtualDevice/Arduino.py");
+    String newCode = FileIO.resourceToString("VirtualDevice"+File.separator+"Arduino.py");
     log.info(newCode);
     logic.openScript("Arduino.py", newCode);
     logic.exec(newCode);

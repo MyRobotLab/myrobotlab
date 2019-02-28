@@ -34,6 +34,7 @@ import boofcv.visualize.PointCloudViewer;
 import boofcv.visualize.VisualizeData;
 import georegression.struct.point.Point3D_F64;
 import org.ddogleg.struct.FastQueue;
+import org.myrobotlab.image.Util;
 
 import java.awt.*;
 import java.io.File;
@@ -49,7 +50,7 @@ public class DisplayKinectPointCloudApp {
 
   public static void main(String args[]) throws IOException {
     // String baseDir = UtilIO.pathExample("kinect/basket");
-    String baseDir = "src/main/resources/resource/BoofCv";
+    String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
     String nameRgb = "basket_rgb.png";
     String nameDepth = "basket_depth.png";
     String nameCalib = "intrinsic.yaml";
