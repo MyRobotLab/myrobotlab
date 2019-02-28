@@ -26,6 +26,8 @@ import boofcv.struct.calib.VisualDepthParameters;
 
 import java.io.File;
 
+import org.myrobotlab.image.Util;
+
 /**
  * Loads an intrinsic parameters file for the RGB camera and creates a
  * VisualDepthParameters for the Kinect.
@@ -36,7 +38,7 @@ public class IntrinsicToDepthParameters {
 
   public static void main(String args[]) {
     // String baseDir = UtilIO.pathExample("kinect/basket");
-    String baseDir = "src/main/resources/resource/BoofCv";
+    String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
 
     CameraPinholeRadial intrinsic = CalibrationIO.load(new File(baseDir, "intrinsic.yaml"));
 

@@ -2,6 +2,7 @@ package org.myrobotlab.deeplearning4j;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.factory.Nd4jBackend.NoAvailableBackendException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;
@@ -106,7 +108,7 @@ public class SolrDataSetIteratorTest {
     CustomModel newMod = dl4j.loadComputationGraph(filename);
     // TODO: load am image!
     // a test image
-    String path = "C:\\dev\\workspace\\myrobotlab\\src\\main\\resources\\resource\\OpenCV\\testData\\rachel.jpg";
+    String path = Util.getResourceDir() + File.separator + "OpenCV"+File.separator+"testData"+File.separator+"rachel.jpg";
     IplImage image = cvLoadImage(path);
     Map<String, Double> results = dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
     for (String key : results.keySet()) {

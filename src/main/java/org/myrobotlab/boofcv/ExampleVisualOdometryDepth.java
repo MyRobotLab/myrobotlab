@@ -53,9 +53,11 @@ import boofcv.struct.image.Planar;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import org.ejml.data.DMatrixRMaj;
+import org.myrobotlab.image.Util;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -92,7 +94,7 @@ public class ExampleVisualOdometryDepth {
     MediaManager media = DefaultMediaManager.INSTANCE;
 
     // String directory = UtilIO.pathExample("kinect/straight");
-    String directory = toAbsolutePath("src/main/resources/resource/BoofCv/");
+    String directory = Util.getResourceDir() + File.separator + "BoofCv"+ File.separator;
     Log.info("Using directory ", directory);
 
     // load camera description and the video sequence
