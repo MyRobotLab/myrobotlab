@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * The purpose of this class is to retrieve all the detailed information
@@ -25,6 +27,7 @@ import java.util.jar.Manifest;
 public class Platform implements Serializable {
 
   private static final long serialVersionUID = 1L;
+  // public static Logger log = LoggerFactory.getLogger(Platform.class);
 
   // VM Names
   public final static String VM_DALVIK = "dalvik";
@@ -306,10 +309,11 @@ public class Platform implements Serializable {
     try {
 
       String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-      System.out.println("getRoot " + source);
+      // log.info("getRoot {}", source);
       return source;
     } catch (Exception e) {
-      System.out.println("getRoot threw " + e.getMessage());
+      e.printStackTrace();
+      //log.info("getRoot threw {}", e.getMessage());
       return null;
     }
   }
@@ -324,7 +328,7 @@ public class Platform implements Serializable {
       InputStream in = null;
 
       if (!classPath.startsWith("jar")) {
-        System.out.println(String.format("manifest is \"not\" in jar - using file %s/META-INF/MANIFEST.MF", f.getAbsolutePath()));
+        // log.info("manifest is \"not\" in jar - using file {}/META-INF/MANIFEST.MF", f.getAbsolutePath());
         // File file = new
         // File(classLoader.getResource("file/test.xml").getFile());
         in = clazz.getResource("/META-INF/MANIFEST.MF").openStream();
@@ -332,7 +336,7 @@ public class Platform implements Serializable {
       } else {
         String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
         URL url = new URL(manifestPath);
-        System.out.println("jar url " + url);
+        // log.info("jar url {}", url);
         in = url.openStream();
       }
 
@@ -348,7 +352,8 @@ public class Platform implements Serializable {
 
       in.close();
     } catch (Exception e) {
-      System.out.println(String.format("getManifest threw %s", e));
+      e.printStackTrace();
+      //log.warn("getManifest threw", e);
     }
     return ret;
   }
@@ -366,7 +371,7 @@ public class Platform implements Serializable {
         partKey = String.format("%s.%s", part, key);
       }
 
-      System.out.println(partKey + ":  " + value);
+      // log.info( "{}: {}", value,partKey);
       if (value != null) {
         data.put(partKey, value.toString());
       }
@@ -383,14 +388,15 @@ public class Platform implements Serializable {
     try {
 
       Platform platform = Platform.getLocalInstance();
-      System.out.println("platform : " + platform.toString());
-      System.out.println("build " + platform.getBuild());
-      System.out.println("branch " + platform.getBranch());
-      System.out.println("commit " + platform.getCommit());
-      System.out.println("toString " + platform.toString());
+//      log.info("platform : {}", platform.toString());
+//      log.info("build {}", platform.getBuild());
+//      log.info("branch {}", platform.getBranch());
+//      log.info("commit {}", platform.getCommit());
+//      log.info("toString {}", platform.toString());
 
     } catch (Exception e) {
-      System.out.println(e);
+      e.printStackTrace();
+      // log.info("Exception: ", e);
     }
   }
 

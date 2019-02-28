@@ -188,7 +188,7 @@ public class MainMenuState extends BaseAppState {
 
         if (returnValue == JFileChooser.APPROVE_OPTION) {
           File selectedFile = jfc.getSelectedFile();
-          System.out.println(selectedFile.getAbsolutePath());
+          log.info(selectedFile.getAbsolutePath());
         }
       }
     });
@@ -331,7 +331,7 @@ public class MainMenuState extends BaseAppState {
     parentButton.addClickCommands(new Command<Button>() {
       @Override
       public void execute(Button source) {
-        System.out.println("nav mode");
+        log.info("nav mode");
         Spatial selected = jme.getSelected();
         if (selected != null) {
           jme.setSelected(selected.getParent());

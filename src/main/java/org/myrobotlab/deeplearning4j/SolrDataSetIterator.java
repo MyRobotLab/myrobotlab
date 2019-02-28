@@ -237,11 +237,11 @@ public class SolrDataSetIterator implements DataSetIterator {
       INDArray arr = null;
       // arr = dataSet.getFeatures().getRow(0).getRow(0).reshape(channels,
       // height, width);
-      // System.out.println("Dataset feature length: "
+      // log.info("Dataset feature length: "
       // +dataSet.getFeatures().length());
       arr = dataSet.getFeatures().getRow(0).reshape(channels, height, width);
 
-      // System.out.println("ARR feature length: " +arr.length());
+      // log.info("ARR feature length: " +arr.length());
       // INDArray arr =
       // dataSet.getFeatures().getRow(0).getRow(0).reshape(channels, height,
       // width);
@@ -251,8 +251,8 @@ public class SolrDataSetIterator implements DataSetIterator {
       labels.putRow(i, dataSet.getLabels());
     }
 
-    // System.out.println("Total Number of inputs in array :" +inputs.length());
-    // System.out.println(inputs.shapeInfoToString());
+    // log.info("Total Number of inputs in array :" +inputs.length());
+    // log.info(inputs.shapeInfoToString());
     // TODO: something goofy going on here.
     final INDArray inputsShaped = inputs.reshape(numFound, channels, height, width);
     return new DataSet(inputsShaped, labels);

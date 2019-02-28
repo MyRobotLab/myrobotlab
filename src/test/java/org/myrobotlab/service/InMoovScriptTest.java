@@ -11,7 +11,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggingFactory;
 
 // Grr.. TODO: too hard a test for our weak jenkins oven in the cloud :(
-
 public class InMoovScriptTest {
 
   private static final String V_PORT_1 = "COM99";

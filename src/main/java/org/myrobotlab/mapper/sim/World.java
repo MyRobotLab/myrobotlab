@@ -59,6 +59,9 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.geometry.Sphere;
 
@@ -74,6 +77,8 @@ import com.sun.j3d.utils.geometry.Sphere;
  */
 public class World {
 
+  public final static Logger log = LoggerFactory.getLogger(World.class);
+  
   /** J3D universe */
   VirtualUniverse universe;
   /** The content branch. */
@@ -330,10 +335,10 @@ public class World {
 
     // display j3d info
     Map map = canvas3d.queryProperties();
-    System.out.println("doubleBufferAvailable = " + map.get("doubleBufferAvailable"));
-    System.out.println("sceneAntialiasingNumPasses = " + map.get("sceneAntialiasingNumPasses"));
-    System.out.println("sceneAntialiasingAvailable = " + map.get("sceneAntialiasingAvailable"));
-    System.out.println("texture3DAvailable = " + map.get("texture3DAvailable"));
+    log.info("doubleBufferAvailable = " + map.get("doubleBufferAvailable"));
+    log.info("sceneAntialiasingNumPasses = " + map.get("sceneAntialiasingNumPasses"));
+    log.info("sceneAntialiasingAvailable = " + map.get("sceneAntialiasingAvailable"));
+    log.info("texture3DAvailable = " + map.get("texture3DAvailable"));
 
   }
 
@@ -443,17 +448,17 @@ public class World {
    *          the environment description.
    */
   private void createUniverse(EnvironmentDescription ed) {
-    System.out.println("create Universe");
+    log.info("create Universe");
     // show infos
     Map map = VirtualUniverse.getProperties();
-    System.out.println("----------------------------------------");
-    System.out.println("j3d.version = " + map.get("j3d.version"));
-    System.out.println("j3d.vendor = " + map.get("j3d.vendor"));
-    System.out.println("j3d.specification.version = " + map.get("j3d.specification.version"));
-    System.out.println("j3d.specification.vendor = " + map.get("j3d.specification.vendor"));
-    System.out.println("j3d.renderer = " + map.get("j3d.renderer"));
-    System.out.println("J3DThreadPriority = " + VirtualUniverse.getJ3DThreadPriority());
-    System.out.println("----------------------------------------");
+    log.info("----------------------------------------");
+    log.info("j3d.version = " + map.get("j3d.version"));
+    log.info("j3d.vendor = " + map.get("j3d.vendor"));
+    log.info("j3d.specification.version = " + map.get("j3d.specification.version"));
+    log.info("j3d.specification.vendor = " + map.get("j3d.specification.vendor"));
+    log.info("j3d.renderer = " + map.get("j3d.renderer"));
+    log.info("J3DThreadPriority = " + VirtualUniverse.getJ3DThreadPriority());
+    log.info("----------------------------------------");
 
     createCanvas3D();
     createSceneBranch(ed);

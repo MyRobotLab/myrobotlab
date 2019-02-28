@@ -1,5 +1,8 @@
 package org.myrobotlab.openni;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /* -*- mode: java; c-basic-offset: 2; indent-tabs-mode: nil -*- */
 
 /*
@@ -27,6 +30,8 @@ package org.myrobotlab.openni;
  */
 public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
 
+  public final static Logger log = LoggerFactory.getLogger(PMatrix3D.class);
+      
   public float m00, m01, m02, m03;
 
   public float m10, m11, m12, m13;
@@ -444,7 +449,7 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
 
   public void print() {
     /*
-     * System.out.println(m00 + " " + m01 + " " + m02 + " " + m03 + "\n" + m10 +
+     * log.info(m00 + " " + m01 + " " + m02 + " " + m03 + "\n" + m10 +
      * " " + m11 + " " + m12 + " " + m13 + "\n" + m20 + " " + m21 + " " + m22 +
      * " " + m23 + "\n" + m30 + " " + m31 + " " + m32 + " " + m33 + "\n");
      */
@@ -460,23 +465,23 @@ public final class PMatrix3D /* implements PMatrix3D , PConstants */ {
     }
 
     /*
-     * System.out.println(PApplet.nfs(m00, digits, 4) + " " + PApplet.nfs(m01,
+     * log.info(PApplet.nfs(m00, digits, 4) + " " + PApplet.nfs(m01,
      * digits, 4) + " " + PApplet.nfs(m02, digits, 4) + " " + PApplet.nfs(m03,
      * digits, 4));
      * 
-     * System.out.println(PApplet.nfs(m10, digits, 4) + " " + PApplet.nfs(m11,
+     * log.info(PApplet.nfs(m10, digits, 4) + " " + PApplet.nfs(m11,
      * digits, 4) + " " + PApplet.nfs(m12, digits, 4) + " " + PApplet.nfs(m13,
      * digits, 4));
      * 
-     * System.out.println(PApplet.nfs(m20, digits, 4) + " " + PApplet.nfs(m21,
+     * log.info(PApplet.nfs(m20, digits, 4) + " " + PApplet.nfs(m21,
      * digits, 4) + " " + PApplet.nfs(m22, digits, 4) + " " + PApplet.nfs(m23,
      * digits, 4));
      * 
-     * System.out.println(PApplet.nfs(m30, digits, 4) + " " + PApplet.nfs(m31,
+     * log.info(PApplet.nfs(m30, digits, 4) + " " + PApplet.nfs(m31,
      * digits, 4) + " " + PApplet.nfs(m32, digits, 4) + " " + PApplet.nfs(m33,
      * digits, 4));
      */
-    System.out.println(digits);
+    log.info("Digits: {}", digits);
   }
 
   public void reset() {

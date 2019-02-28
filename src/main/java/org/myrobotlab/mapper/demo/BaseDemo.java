@@ -24,6 +24,7 @@ package org.myrobotlab.mapper.demo;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.mapper.sim.Agent;
 import org.myrobotlab.mapper.sim.Arch;
 import org.myrobotlab.mapper.sim.Box;
@@ -31,6 +32,7 @@ import org.myrobotlab.mapper.sim.CameraSensor;
 import org.myrobotlab.mapper.sim.RangeSensorBelt;
 import org.myrobotlab.mapper.sim.RobotFactory;
 import org.myrobotlab.mapper.sim.Wall;
+import org.slf4j.Logger;
 
 /**
  * A Basic demo with camera sensor, sonars and bumpers. The robot wanders and
@@ -39,6 +41,8 @@ import org.myrobotlab.mapper.sim.Wall;
  */
 public class BaseDemo extends Demo {
 
+  public final static Logger log = LoggerFactory.getLogger(BaseDemo.class);
+  
   public class Robot extends Agent {
     RangeSensorBelt sonars;
     CameraSensor camera;
@@ -71,7 +75,7 @@ public class BaseDemo extends Demo {
 
       // print front sonar every 100 frames
       if (getCounter() % 100 == 0)
-        System.out.println("Sonar num 0  = " + sonars.getMeasurement(0));
+        log.info("Sonar num 0  = " + sonars.getMeasurement(0));
 
     }
   }

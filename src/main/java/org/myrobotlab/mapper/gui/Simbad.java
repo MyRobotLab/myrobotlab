@@ -37,6 +37,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.mapper.demo.DemoManager;
 import org.myrobotlab.mapper.sim.Agent;
 import org.myrobotlab.mapper.sim.BaseObject;
@@ -44,6 +45,7 @@ import org.myrobotlab.mapper.sim.EnvironmentDescription;
 import org.myrobotlab.mapper.sim.SimpleAgent;
 import org.myrobotlab.mapper.sim.Simulator;
 import org.myrobotlab.mapper.sim.World;
+import org.slf4j.Logger;
 
 //import javax.swing.UIManager;
 
@@ -53,6 +55,8 @@ import org.myrobotlab.mapper.sim.World;
  */
 public class Simbad extends JFrame implements ActionListener {
 
+  public final static Logger log = LoggerFactory.getLogger(Simbad.class);
+  
   private static final long serialVersionUID = 1L;
 
   static final String version = "1.4";
@@ -198,10 +202,10 @@ public class Simbad extends JFrame implements ActionListener {
   private void runBackgroundMode() {
     // TODO pb with collision , pb with camera in this mode.
     setTitle(this.getTitle() + " - Background Mode");
-    System.out.println("---------------------------------------------");
-    System.out.println("Simbad is running in 'Background Mode");
-    System.out.println("World is rendered very rarely. UI is disabled");
-    System.out.println("--------------------------------------------");
+    log.info("---------------------------------------------");
+    log.info("Simbad is running in 'Background Mode");
+    log.info("World is rendered very rarely. UI is disabled");
+    log.info("--------------------------------------------");
     // slow down
     agentInspector.setFramesPerSecond(0.5f);
     // Show a small indication window

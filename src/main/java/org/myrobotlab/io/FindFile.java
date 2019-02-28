@@ -101,7 +101,7 @@ public final class FindFile { // implements FilenameFilter
 
   public static void main(String... aArgs) throws FileNotFoundException {
     LoggingFactory.init(Level.ERROR);
-
+    Logger log = LoggerFactory.getLogger(FindFile.class);
     try {
       List<File> files = FindFile.findDirs("./bin");
       for (File file : files) {
@@ -120,7 +120,7 @@ public final class FindFile { // implements FilenameFilter
         String name = file.getName();
         name = name.substring(name.indexOf("-") + 1);
         name = name.substring(0, name.indexOf("-"));
-        System.out.println(name);
+        log.info(name);
       }
 
     } catch (Exception e) {
