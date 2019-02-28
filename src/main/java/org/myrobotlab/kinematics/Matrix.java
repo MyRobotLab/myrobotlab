@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * Encapsulates a 4x4 matrix
  *
@@ -11,6 +14,8 @@ import java.text.NumberFormat;
  */
 public class Matrix implements Serializable {
 
+  public final static Logger log = LoggerFactory.getLogger(Matrix.class);
+  
   private static final long serialVersionUID = 1L;
 
   protected int numRows;
@@ -154,7 +159,7 @@ public class Matrix implements Serializable {
    */
   public Matrix addTo(Matrix m) {
     if (numRows != m.numRows || numCols != m.numCols) {
-      System.out.println("dimensions bad in addTo()");
+      log.info("dimensions bad in addTo()");
       return null;
     }
     Matrix ret = new Matrix(numRows, numCols);
@@ -176,7 +181,7 @@ public class Matrix implements Serializable {
    */
   public Double dot(Matrix m) {
     if (numRows != m.numRows || numCols != m.numCols) {
-      System.out.println("dimensions bad in dot()");
+      log.info("dimensions bad in dot()");
       return 0.0;
     }
     double sum = 0;
@@ -232,7 +237,7 @@ public class Matrix implements Serializable {
   public Matrix multiply(Matrix m) {
     Matrix ret = new Matrix(numRows, m.numCols);
     if (numCols != m.numRows) {
-      System.out.println("dimensions bad in multiply()");
+      log.info("dimensions bad in multiply()");
       return ret;
     }
 
@@ -317,7 +322,7 @@ public class Matrix implements Serializable {
   public Matrix subtractFrom(Matrix m) {
     Matrix ret = new Matrix(numRows, numCols);
     if (numRows != m.numRows || numCols != m.numCols) {
-      System.out.println("dimensions bad in substractFrom()");
+      log.info("dimensions bad in substractFrom()");
       return ret;
     }
 

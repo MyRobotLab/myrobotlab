@@ -889,7 +889,7 @@ public abstract class RoombaComm {
   }
 
   public void println(String s) {
-    System.out.println(s);
+    log.info(s);
   }
 
   /**

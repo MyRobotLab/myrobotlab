@@ -4,8 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 public class ObjectCloner {
+  
+  public final static Logger log = LoggerFactory.getLogger(ObjectCloner.class);
+
   // returns a deep copy of an object
   static public Object deepCopy(Object oldObj) throws Exception {
     ObjectOutputStream oos = null;
@@ -21,7 +26,7 @@ public class ObjectCloner {
       // return the new object
       return ois.readObject(); // G
     } catch (Exception e) {
-      System.out.println("Exception in ObjectCloner = " + e);
+      log.info("Exception in ObjectCloner = {}", e);
       throw (e);
     } finally {
       oos.close();

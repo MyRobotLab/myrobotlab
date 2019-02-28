@@ -10,16 +10,20 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.mapper.sim.Agent;
 import org.myrobotlab.mapper.sim.Box;
 import org.myrobotlab.mapper.sim.CherryAgent;
 import org.myrobotlab.mapper.sim.SimpleAgent;
+import org.slf4j.Logger;
 
 /**
  * This demo show a robot picking cherries. When touched, the cherries are
  * either removed or repaint.
  */
 public class PickCherriesDemo extends Demo {
+  public final static Logger log = LoggerFactory.getLogger(PickCherriesDemo.class);
+  
   /** The robot used in the demo. */
   public class Robot extends Agent {
 
@@ -52,7 +56,7 @@ public class PickCherriesDemo extends Demo {
         if (agent instanceof CherryAgent) {
           // detach it from te scene graph so it is no more visible.
           agent.detach();
-          System.out.println("cherry picked !");
+          log.info("cherry picked !");
         }
         // or change the color of the agent.
         // ((CherryAgent) agent).setColor(yellow);

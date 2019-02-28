@@ -50,7 +50,7 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
   }
 
   public Point2df onPoint2Df(Point2df point) {
-    System.out.println("Receinvig");
+    // System.out.println("Receinvig");
     return point;
   }
 

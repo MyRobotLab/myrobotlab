@@ -39,7 +39,7 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
   public abstract void setConfig(ConnectorConfig config);
 
   public void feed(Document doc) {
-    // System.out.println("Feeding document " + doc.getId());
+    // log.info("Feeding document " + doc.getId());
     // TODO: add batching and change this to publishDocuments (as a list)
     // Batching for this sort of stuff is a very good thing.
     if (batchSize <= 1) {

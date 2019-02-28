@@ -3,14 +3,18 @@ package org.myrobotlab.mapper.gui;
 
 import javax.vecmath.Vector3d;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.mapper.sim.Agent;
 import org.myrobotlab.mapper.sim.EnvironmentDescription;
 import org.myrobotlab.mapper.sim.Wall;
+import org.slf4j.Logger;
 
 /**
  * Test of the batch mode - test Simbatch class.
  */
 public class TestSimbatch extends EnvironmentDescription {
+
+  public final static Logger log = LoggerFactory.getLogger(TestSimbatch.class);
 
   public class MyRobot extends Agent {
 
@@ -36,7 +40,7 @@ public class TestSimbatch extends EnvironmentDescription {
         setRotationalVelocity(0);
       }
       if (getCounter() % 100000 == 0)
-        System.out.println("Counter " + getCounter());
+        log.info("Counter {}", getCounter());
     }
   }
 

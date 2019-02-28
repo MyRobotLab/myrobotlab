@@ -28,14 +28,18 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.mapper.sim.Agent;
 import org.myrobotlab.mapper.sim.Box;
 import org.myrobotlab.mapper.sim.RangeSensorBelt;
 import org.myrobotlab.mapper.sim.RobotFactory;
+import org.slf4j.Logger;
 
 /** A collision avoidance demo. */
 public class SingleAvoiderDemo extends Demo {
 
+  public final static Logger log = LoggerFactory.getLogger(SingleAvoiderDemo.class);
+  
   public class Robot extends Agent {
     Point3d coords = new Point3d();
     Point3d prev = new Point3d();
@@ -93,9 +97,9 @@ public class SingleAvoiderDemo extends Demo {
       getCoords(coords);
       if ((coords.x < -5.1) || (coords.x > 5.1) || (coords.z < -5.1) || (coords.z > 5.1)) {
         // stop = true;
-        System.out.println(coords.toString() + "prev-->" + prev.toString());
+        log.info(coords.toString() + "prev-->" + prev.toString());
         getTranslationTransform(t3d);
-        System.out.println("scale :" + t3d.getScale());
+        log.info("scale :" + t3d.getScale());
         this.moveToStartPosition();
       }
 
