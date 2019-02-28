@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.MotorDualPwm;
