@@ -49,7 +49,7 @@ public class ArduinoMotorPotTest {
   private String additionalEnv = "";
   // platform dependent... (doesn't seem to require the .exe on windows)
   private String arduinoExecutable = "arduino";
-  private String sketchFilename = "src\\resource\\Arduino\\MRLComm.c";
+  private String sketchFilename = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MRLComm.c";
   // in order for arduino to update a sketch it needs to end in .ino and
   // it needs to be in its own directory.
   private String destFilename = "\\MRLComm\\MRLComm.ino";

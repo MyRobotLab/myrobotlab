@@ -506,7 +506,7 @@ public class FileIO {
   }
 
   @Deprecated
-  static public final String gluePathsA(String path1, String path2) {
+  static public final String gluePaths(String path1, String path2) {
     // normalize to 'real' network slash direction ;)
     // jar internals probably do not handle back-slash
     // most file access even on 'windows' machine can interface correctly

@@ -52,6 +52,7 @@ import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.OpenCV;
@@ -99,7 +100,7 @@ public abstract class OpenCVFilter implements Serializable {
 
     // source/ide
     // e.g. src\main\resources\resource\OpenCV
-    tryfile = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "resource" + File.separator + OpenCV.class.getSimpleName() + File.separator
+    tryfile = Util.getResourceDir() + File.separator + OpenCV.class.getSimpleName() + File.separator
         + infile;
     f = new File(tryfile);
     if (f.exists()) {
@@ -108,7 +109,7 @@ public abstract class OpenCVFilter implements Serializable {
       log.warn("could load Mat {}", tryfile);
     }
 
-    // src\test\resources\OpenCV
+    // src\test\resources\OpenCV 
     tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
     f = new File(tryfile);
     if (f.exists()) {
@@ -137,7 +138,7 @@ public abstract class OpenCVFilter implements Serializable {
     }
 
     // service resources - when jar extracts ?
-    tryfile = "resource" + File.separator + infile;
+    tryfile = Util.getResourceDir() + File.separator + infile;
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);

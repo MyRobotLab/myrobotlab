@@ -229,7 +229,7 @@ public class Util {
 
   public static ImageIcon getImageIcon(String path) {
     ImageIcon icon = null;
-    String resourcePath = String.format(Util.getResourceDir() + File.separator + path);
+    String resourcePath = Util.getResourceDir() + File.separator + path;
     // ImageIcon requries forward slash in the filename (unix/internet style convention)
     resourcePath = resourcePath.replaceAll("\\\\", "/");
     icon = new ImageIcon(resourcePath);
