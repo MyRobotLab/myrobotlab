@@ -9,6 +9,7 @@ import java.net.URI;
 import org.junit.Test;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class ApiFactoryTest {
 
   @Test
   public void testProcessString() {
+    LoggingFactory.init("WARN");
     try {
 
       Runtime runtime = (Runtime) Runtime.getInstance();

@@ -81,7 +81,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       String[] portNames = SerialPortList.getPortNames();
       for (int i = 0; i < portNames.length; i++) {
         ret.add(portNames[i]);
-        System.out.println(portNames[i]);
+        log.info(portNames[i]);
       }
     } catch (Exception e) {
       Logging.logError(e);

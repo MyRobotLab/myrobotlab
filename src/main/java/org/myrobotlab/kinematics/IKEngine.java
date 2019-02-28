@@ -1,5 +1,8 @@
 package org.myrobotlab.kinematics;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * class IKEngine
  *
@@ -7,6 +10,8 @@ package org.myrobotlab.kinematics;
  */
 public class IKEngine {
 
+  public final static Logger log = LoggerFactory.getLogger(IKEngine.class);
+  
   /**
    * Used to synchronize the methods w/ the animating thread
    */
@@ -86,7 +91,7 @@ public class IKEngine {
       // System.out.println("x" + i + " " + x2);
       // System.out.println("y" + i + " " + z2);
       angles[i] = Math.toDegrees(Math.atan((z2 - z1) / (x2 - x1)));
-      System.out.println("angle" + i + " " + angles[i]);
+      log.info("angle {} {}" , i , angles[i]);
       x1 = x2;
       z1 = z2;
 
@@ -97,7 +102,7 @@ public class IKEngine {
   public double getBaseAngle() {
     double bas;
     bas = Math.toDegrees(Math.atan2(myy, myx));
-    System.out.println("base angle is: " + bas);
+    log.info("base angle is: " + bas);
     return bas;
 
   }
