@@ -216,7 +216,7 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
       // Make an image of the results
       for (int i = 0; i < maxCorners.get(); i++) {
         if (featuresFound.get(i) == 0 || featureErrors.get(i) > 550) {
-          System.out.println("Error is " + featureErrors.get(i) + "/n");
+          log.info("Error is " + featureErrors.get(i) + "/n");
           continue;
         }
         corners.position(i);

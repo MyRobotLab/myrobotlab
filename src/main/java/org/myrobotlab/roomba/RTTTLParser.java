@@ -5,11 +5,16 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  *
  */
 public class RTTTLParser {
-
+  
+  public final static Logger log = LoggerFactory.getLogger(RTTTLParser.class);
+  
   public static HashMap<String, Integer> noteToNum;
 
   static {
@@ -35,18 +40,18 @@ public class RTTTLParser {
 
   public static void main(String[] args) {
     if (args.length == 0) {
-      System.out.println("usage: roombacomm.RTTTLParser <rttlstring>");
+      log.info("usage: roombacomm.RTTTLParser <rttlstring>");
       System.exit(0);
     }
     String rtttl = args[0];
     ArrayList<Note> notelist = parse(rtttl);
     for (int i = 0; i < notelist.size(); i++) {
-      System.out.println("notelist[" + i + "]=" + notelist.get(i));
+      log.info("notelist[" + i + "]=" + notelist.get(i));
     }
   }
 
   public static ArrayList<Note> parse(String rtttl) {
-    System.out.println("parsing: " + rtttl);
+    log.info("parsing: " + rtttl);
     String rtttl_working = rtttl.toLowerCase();
     String parts[] = rtttl_working.split(":");
     // String name = parts[0];
@@ -78,7 +83,7 @@ public class RTTTLParser {
         } catch (Exception e) {
         }
     }
-    System.out.println("bpm:" + bpm + ",octave:" + octave + ",duration:" + duration);
+    log.info("bpm:" + bpm + ",octave:" + octave + ",duration:" + duration);
 
     for (int i = 0; i < notes.length; i++) {
       Matcher m = Pattern.compile("(\\d+)*(.+?)(\\d)*(\\.)*").matcher(notes[i]);

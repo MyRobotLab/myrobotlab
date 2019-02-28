@@ -1,9 +1,12 @@
 package org.myrobotlab.logging;
 
 import org.myrobotlab.framework.Instantiator;
+import org.slf4j.Logger;
 
 public class LoggingFactory {
 
+  public final static Logger log = LoggerFactory.getLogger(LoggingFactory.class);
+  
   static String logFileName = "myrobotlab.log";
 
   public static Logging getInstance() {
@@ -13,7 +16,7 @@ public class LoggingFactory {
       Logging logging = (Logging) Instantiator.getNewInstance("org.myrobotlab.logging.LoggingSLF4J");
       return logging;
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      log.warn("Exception In Get instance!!!",e);
       Logging.logError(e); //
       e.printStackTrace();
     }

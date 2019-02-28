@@ -24,6 +24,9 @@ package org.myrobotlab.roomba;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /*
  Play RTTL formatted ringtones on the Roomba.
  <p>
@@ -43,6 +46,8 @@ import java.util.ArrayList;
  */
 public class RTTTLPlay {
 
+  public final static Logger log = LoggerFactory.getLogger(RTTTLPlay.class);
+  
   static String usage = "Usage: \n" + "  roombacomm.RTTTLPlay <serialportname> [protocol] <rttl string> [options]\n" + "where:\n" + "protocol (optional) is SCI or OI\n"
       + "rttl string is a string of notes\n" + "[options] can be one or more of:\n" + " -debug       -- turn on debug output\n"
       + " -hwhandshake -- use hardware-handshaking, for Windows Bluetooth\n" + " -nohwhandshake -- don't use hardware-handshaking\n"
@@ -54,7 +59,7 @@ public class RTTTLPlay {
 
   public static void main(String[] args) {
     if (args.length < 2) {
-      System.out.println(usage);
+      log.info(usage);
       System.exit(0);
     }
 
@@ -83,22 +88,22 @@ public class RTTTLPlay {
 
     roombacomm.connect(portname);
 
-    System.out.println("Roomba startup on port" + portname);
+    log.info("Roomba startup on port" + portname);
     roombacomm.startup();
     roombacomm.control();
     roombacomm.pause(30);
 
-    System.out.println("Checking for Roomba... ");
+    log.info("Checking for Roomba... ");
     if (roombacomm.updateSensors())
-      System.out.println("Roomba found!");
+      log.info("Roomba found!");
     else
-      System.out.println("No Roomba. :(  Is it turned on?");
+      log.info("No Roomba. :(  Is it turned on?");
 
     ArrayList<Note> notelist = RTTTLParser.parse(rtttl);
     int songsize = notelist.size();
     // if within the size of a roomba song, make the nsong, then play
     if (songsize <= 16) {
-      System.out.println("creating a song with createSong()");
+      log.info("creating a song with createSong()");
       int notearray[] = new int[songsize * 2];
       int j = 0;
       for (int i = 0; i < songsize; i++) {
@@ -112,7 +117,7 @@ public class RTTTLPlay {
     }
     // otherwise, try to play it in realtime
     else {
-      System.out.println("playing song in realtime with playNote()");
+      log.info("playing song in realtime with playNote()");
       int fudge = 20;
       for (int i = 0; i < songsize; i++) {
         Note note = (Note) notelist.get(i);
@@ -125,9 +130,9 @@ public class RTTTLPlay {
         roombacomm.pause(duration + fudge);
       }
     }
-    System.out.println("Disconnecting");
+    log.info("Disconnecting");
     roombacomm.disconnect();
 
-    System.out.println("Done");
+    log.info("Done");
   }
 }
