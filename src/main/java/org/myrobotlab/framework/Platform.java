@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 public class Platform implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(Platform.class);
+  // public static Logger log = LoggerFactory.getLogger(Platform.class);
 
   // VM Names
   public final static String VM_DALVIK = "dalvik";
@@ -309,10 +309,11 @@ public class Platform implements Serializable {
     try {
 
       String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-      log.info("getRoot {}", source);
+      // log.info("getRoot {}", source);
       return source;
     } catch (Exception e) {
-      log.info("getRoot threw {}", e.getMessage());
+      e.printStackTrace();
+      //log.info("getRoot threw {}", e.getMessage());
       return null;
     }
   }
@@ -327,7 +328,7 @@ public class Platform implements Serializable {
       InputStream in = null;
 
       if (!classPath.startsWith("jar")) {
-        log.info("manifest is \"not\" in jar - using file {}/META-INF/MANIFEST.MF", f.getAbsolutePath());
+        // log.info("manifest is \"not\" in jar - using file {}/META-INF/MANIFEST.MF", f.getAbsolutePath());
         // File file = new
         // File(classLoader.getResource("file/test.xml").getFile());
         in = clazz.getResource("/META-INF/MANIFEST.MF").openStream();
@@ -335,7 +336,7 @@ public class Platform implements Serializable {
       } else {
         String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
         URL url = new URL(manifestPath);
-        log.info("jar url {}", url);
+        // log.info("jar url {}", url);
         in = url.openStream();
       }
 
@@ -351,7 +352,8 @@ public class Platform implements Serializable {
 
       in.close();
     } catch (Exception e) {
-      log.info("getManifest threw {}", e);
+      e.printStackTrace();
+      //log.warn("getManifest threw", e);
     }
     return ret;
   }
@@ -369,7 +371,7 @@ public class Platform implements Serializable {
         partKey = String.format("%s.%s", part, key);
       }
 
-      log.info( "{}: {}", value,partKey);
+      // log.info( "{}: {}", value,partKey);
       if (value != null) {
         data.put(partKey, value.toString());
       }
@@ -386,14 +388,15 @@ public class Platform implements Serializable {
     try {
 
       Platform platform = Platform.getLocalInstance();
-      log.info("platform : {}", platform.toString());
-      log.info("build {}", platform.getBuild());
-      log.info("branch {}", platform.getBranch());
-      log.info("commit {}", platform.getCommit());
-      log.info("toString {}", platform.toString());
+//      log.info("platform : {}", platform.toString());
+//      log.info("build {}", platform.getBuild());
+//      log.info("branch {}", platform.getBranch());
+//      log.info("commit {}", platform.getCommit());
+//      log.info("toString {}", platform.toString());
 
     } catch (Exception e) {
-      log.info("Exception: ", e);
+      e.printStackTrace();
+      // log.info("Exception: ", e);
     }
   }
 
