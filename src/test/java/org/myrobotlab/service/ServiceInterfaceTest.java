@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -93,7 +94,7 @@ public class ServiceInterfaceTest {
 
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.createAndStart("python", "Python");
-    String testScriptDirectory = "./src/resource/Python/examples/";
+    String testScriptDirectory = Util.getResourceDir() + File.separator + "Python"+File.separator+"examples/";
     List<String> servicesToTest = listAllServices();
     // List<String> servicesToTest = new ArrayList<String>();
     // servicesToTest.add("Cli");

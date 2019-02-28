@@ -81,7 +81,7 @@ public class ArduinoUtils {
     File sketch = new File(sketchFilename);
     if (!sketch.exists()) {
       // trying to use development version
-      sketchFilename = "src"+File.separator+"main"+File.separator+"resources"+File.separator+"resource"+File.separator+"Arduino"+File.separator+"MRLComm"+File.separator+"MRLComm.ino";
+      sketchFilename = Util.getResourceDir()+File.separator+"Arduino"+File.separator+"MRLComm"+File.separator+"MRLComm.ino";
       sketch = new File(sketchFilename);
     }
     // Create the command to run (and it's args.)

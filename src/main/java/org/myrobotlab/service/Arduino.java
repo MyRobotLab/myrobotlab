@@ -2066,10 +2066,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       if (FileIO.isJar()) {
         mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
         // FIXME - don't do this every time :P
-        Zip.extractFromSelf(Util.getResourceDir() + "/Arduino/MrlComm", "resource/Arduino/MrlComm");
+        Zip.extractFromSelf(Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm", "resource/Arduino/MrlComm");
       } else {
         // running in IDE ?
-        mrlCommFiles = "src/main/resources/resource/Arduino/MrlComm";
+        mrlCommFiles = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm";
       }
       File mrlCommDir = new File(mrlCommFiles);
       if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
@@ -2148,7 +2148,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     List<BoardType> boardTypes = new ArrayList<BoardType>();
     try {
-      String b = FileIO.resourceToString("Arduino/boards.txt");
+      String b = FileIO.resourceToString("Arduino"+File.separator+"boards.txt");
       Properties boardProps = new Properties();
       boardProps.load(new ByteArrayInputStream(b.getBytes()));
 
