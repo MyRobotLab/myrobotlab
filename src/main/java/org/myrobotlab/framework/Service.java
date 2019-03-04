@@ -1282,7 +1282,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
 
   public String getServiceResourceFile(String subpath) {
-    return FileIO.resourceToString(String.format("%s/%s", this.getSimpleName(), subpath));
+    return FileIO.resourceToString(getSimpleName() + File.separator + subpath);
   }
 
   @Override

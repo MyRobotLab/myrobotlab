@@ -2,13 +2,20 @@ package org.myrobotlab.kinematics;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 public class DHRobotArmTest {
   public final static Logger log = LoggerFactory.getLogger(DHRobotArmTest.class);
 
+  @Before
+  public void setUp() throws Exception {
+    LoggingFactory.init("WARN");
+  }
+  
   // @Test
   public void testDHArm() {
 

@@ -7,17 +7,17 @@ import org.datavec.api.writable.Writable;
 
 public class MRLLabelGenerator extends ParentPathLabelGenerator {
 
+  private static final long serialVersionUID = 1L;
+
   @Override
   public Writable getLabelForPath(String path) {
     Writable w = super.getLabelForPath(path);
-    // System.out.println("Path:" + path);
     return w;
   }
 
   @Override
   public Writable getLabelForPath(URI uri) {
     Writable w = super.getLabelForPath(uri);
-    // System.out.println("URL: " + uri.toString());
     return w;
   }
 

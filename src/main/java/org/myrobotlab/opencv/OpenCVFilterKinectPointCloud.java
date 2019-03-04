@@ -40,6 +40,7 @@ import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
 import org.bytedeco.javacv.Parallel;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point;
@@ -114,7 +115,7 @@ public class OpenCVFilterKinectPointCloud extends OpenCVFilter {
   public OpenCVFilterKinectPointCloud(String name) {
     super(name);
 
-    String baseDir = "src/main/resources/resource/BoofCv";
+    String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
     String nameCalib = "intrinsic.yaml";
 
     CameraPinholeRadial param = CalibrationIO.load(new File(baseDir, nameCalib));

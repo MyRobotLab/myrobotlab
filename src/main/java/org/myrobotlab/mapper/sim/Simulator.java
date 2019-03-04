@@ -32,6 +32,9 @@ import javax.media.j3d.VirtualUniverse;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * The Simulator class. It manages the list of agents and performs the
  * simulation steps. For each agent a simulation step is is as follow: update
@@ -45,6 +48,8 @@ import javax.swing.JInternalFrame;
  */
 public class Simulator {
 
+  public final static Logger log = LoggerFactory.getLogger(Simulator.class);
+      
   private class SimulatorThread extends Thread {
 
     private boolean stopped;
@@ -63,7 +68,7 @@ public class Simulator {
       VirtualUniverse.setJ3DThreadPriority(Thread.MIN_PRIORITY);
       int count = 0;
       int rendererRate = 100000;
-      System.out.println("[SIM] Starting Background mode");
+      log.info("[SIM] Starting Background mode");
       try {
         // First wait a bit so J3d is settled ?
         sleep(1000);
@@ -96,7 +101,7 @@ public class Simulator {
           }
         }
       }
-      System.out.println("[SIM] Stopping Background mode");
+      log.info("[SIM] Stopping Background mode");
       world.startRendering();
     }
   }
@@ -276,7 +281,7 @@ public class Simulator {
   /** Perform a single step of simulation */
   public synchronized void performSimulationStep() {
     stopSimulation();
-    System.out.println("[SIM] Step ...");
+    log.info("[SIM] Step ...");
     simulateOneStep();
   }
 
@@ -289,7 +294,7 @@ public class Simulator {
       agent.reset();
     }
     unlock();
-    System.out.println("[SIM] reset ...");
+    log.info("[SIM] reset ...");
   }
 
   /** Simulator control. */
@@ -297,7 +302,7 @@ public class Simulator {
     stopSimulation();
     resetSimulation();
     startSimulation();
-    System.out.println("[SIM] restart ...");
+    log.info("[SIM] restart ...");
   }
 
   public void setApplicationComponent(JComponent component) {
@@ -320,7 +325,7 @@ public class Simulator {
    *          : factor to use typical value 1.0 (default) , 2.0 or 0.5
    */
   public void setVirtualTimeFactor(float fact) {
-    System.out.println("[SIM] virtualTimeFactor = " + fact);
+    log.info("[SIM] virtualTimeFactor = " + fact);
     virtualTimeFactor = fact;
   }
 
@@ -336,7 +341,7 @@ public class Simulator {
     // Print memory info (rarely)
     if (counter % 100000 == 0) {
       Runtime.getRuntime().gc();
-      System.out.println("Memory heap total: " + Runtime.getRuntime().totalMemory() / 1024 + "k  max: " + Runtime.getRuntime().maxMemory() / 1024 + "k  free: "
+      log.info("Memory heap total: " + Runtime.getRuntime().totalMemory() / 1024 + "k  max: " + Runtime.getRuntime().maxMemory() / 1024 + "k  free: "
           + Runtime.getRuntime().freeMemory() / 1024 + "k");
     }
     counter++;
@@ -419,7 +424,7 @@ public class Simulator {
     stopSimulation();
     initBehaviors();
     timer = new Timer();
-    System.out.println("[SIM] start ...");
+    log.info("[SIM] start ...");
     timer.scheduleAtFixedRate(new TimerTask() {
 
       @Override
@@ -439,7 +444,7 @@ public class Simulator {
   public synchronized void stopSimulation() {
     if (timer != null)
       timer.cancel();
-    System.out.println("[SIM] stop ...");
+    log.info("[SIM] stop ...");
   }
 
   /** Release simulator critical resources. */

@@ -36,7 +36,7 @@ public class SolrLabelGenerator extends ParentPathLabelGenerator {
   @Override
   public Writable getLabelForPath(URI uri) {
     Writable w = super.getLabelForPath(uri);
-    // System.out.println("URL: " + uri.toString());
+    // log.info("URL: " + uri.toString());
     return w;
   }
 

@@ -232,7 +232,7 @@ public class PointsShape extends Shape3D implements GeometryUpdater {
   } // end of createGeometry()
 
   private void printCoord(float[] coords, int xIdx) {
-    System.out.println("" + xIdx + ". depth coord (x,y,z): (" + coords[xIdx] + ", " + coords[xIdx + 1] + ", " + coords[xIdx + 2] + ")");
+    log.info("" + xIdx + ". depth coord (x,y,z): (" + coords[xIdx] + ", " + coords[xIdx + 1] + ", " + coords[xIdx + 2] + ")");
   }
 
   /**
