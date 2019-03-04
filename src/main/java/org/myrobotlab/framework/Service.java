@@ -921,12 +921,20 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
   }
 
-  public void addTask(int intervalMs, String method) {
+  public void addTask(long intervalMs, String method) {
     addTask(intervalMs, method, new Object[] {});
   }
 
-  public void addTask(int intervalMs, String method, Object... params) {
+  public void addTask(long intervalMs, String method, Object... params) {
     addTask(method, intervalMs, 0, method, params);
+  }
+  
+  public void putTask(long intervalMs, String method) {
+    putTask(intervalMs, method, new Object[] {});
+  }
+
+  public void putTask(long intervalMs, String method, Object... params) {
+    putTask(method, intervalMs, 0, method, params);
   }
 
   public void addTaskOneShot(int delay, String method, Object... params) {
@@ -947,7 +955,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param params
    *          the params to pass
    */
-  public void addTask(String taskName, int intervalMs, int delay, String method, Object... params) {
+  public void addTask(String taskName, long intervalMs, int delay, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
       log.warn("already have active task \"{}\"", taskName);
       return;
@@ -957,6 +965,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
     Task task = new Task(this, taskName, intervalMs, msg);
     timer.schedule(task, delay);
     tasks.put(taskName, timer);
+  }
+  
+  public void putTask(String taskName, long intervalMs, int delay, String method, Object... params) {
+    if (tasks.containsKey(taskName)) {
+      log.info("replacing task \"{}\"", taskName);
+      purgeTask(taskName);
+    }
+    addTask(taskName, intervalMs, delay, method, params);
   }
 
   public HashMap<String, Timer> getTasks() {
@@ -2428,7 +2444,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   @Override
   public void attach(Attachable service) throws Exception {
-    log.info("Service.attach does not know how to attach {} to a {}", service.getClass().getSimpleName(), this.getClass().getSimpleName());
+    info(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
   }
 
   public void setVirtual(boolean b) {
