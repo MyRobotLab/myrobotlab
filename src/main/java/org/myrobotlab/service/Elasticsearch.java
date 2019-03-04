@@ -37,7 +37,7 @@ public class Elasticsearch extends Service {
     // (single instance)
 
     elastic = EmbeddedElastic.builder().withElasticVersion(version).withSetting(PopularProperties.TRANSPORT_TCP_PORT, 9350)
-        .withSetting(PopularProperties.CLUSTER_NAME, "my_cluster")
+        .withSetting(PopularProperties.CLUSTER_NAME, "mrl_cluster")
         // .withPlugin("analysis-stempel")
         .withIndex("index")
         /*
@@ -53,6 +53,8 @@ public class Elasticsearch extends Service {
          * .build())
          */
         .build().start();
+    
+    elastic.createIndex("test");
   }
 
   public void release() {
@@ -98,7 +100,7 @@ public class Elasticsearch extends Service {
       Elasticsearch elastic = (Elasticsearch) Runtime.start("elastic", "Elasticsearch");
       elastic.install();
       // Runtime.start("servo", "Servo");
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       elastic.release();
 
     } catch (Exception e) {

@@ -86,8 +86,6 @@ angular.module('mrlapp.service.AgentGui', [])
     }
     ;
     
-    
-    //mrl.subscribe($scope.service.name, 'pulse');
     msg.subscribe('pulse');
     msg.subscribe(this);
 }

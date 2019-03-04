@@ -51,8 +51,8 @@ public class Cli extends Service {
   Map<String, Pipe> pipes = new HashMap<String, Pipe>();
 
   // my "real" std:in & std:out
-  transient Decoder in;
-  transient OutputStream myOutstream;
+  transient Decoder decoder;
+  transient OutputStream os;
 
   ArrayList<String> history = new ArrayList<String>();
 
@@ -238,7 +238,7 @@ public class Cli extends Service {
       line = line.replace(" ", "/"); // formats for api call
       String path = String.format("/%s/%s/runtime/%s", Api.PREFIX_API, ApiFactory.API_TYPE_SERVICE, line);
       try {
-        Object ret = api.process(myOutstream, path);
+        Object ret = api.process(os, path);
       } catch (Exception e) {
         log.error("shutdown threw", e);
       }
@@ -280,7 +280,7 @@ public class Cli extends Service {
       log.info(path);
       try {
 
-        Object ret = api.process(myOutstream, path);
+        Object ret = api.process(os, path);
         write("\n".getBytes());
 
       } catch (Exception e) {
@@ -373,8 +373,8 @@ public class Cli extends Service {
             // when this one is active it "double" posts and adds crap
             // write(String.format("%s\n", line).getBytes());
 
-            myOutstream.write(String.format("%s\n", line).getBytes());
-            myOutstream.flush();
+            os.write(String.format("%s\n", line).getBytes());
+            os.flush();
 
           } else {
             // noop - write to /dev/null
@@ -438,7 +438,7 @@ public class Cli extends Service {
   public Cli(String n) {
     super(n);
     api = ApiFactory.getInstance(this);
-    myOutstream = new CliOutputStream();
+    os = new CliOutputStream();
   }
 
   /**
@@ -492,9 +492,9 @@ public class Cli extends Service {
 
   // FIXME - remove - do in constructor or "start"
   public void attachStdIO() {
-    if (in == null) {
-      in = new Decoder(this, System.in);
-      in.start();
+    if (decoder == null) {
+      decoder = new Decoder(this, System.in);
+      decoder.start();
     } else {
       log.info("stdin already attached");
     }
@@ -536,8 +536,8 @@ public class Cli extends Service {
   }
 
   public void detachStdIO() {
-    if (in != null) {
-      in.interrupt();
+    if (decoder != null) {
+      decoder.interrupt();
     }
   }
 
@@ -577,18 +577,10 @@ public class Cli extends Service {
   }
 
   public void write(byte[] data) throws IOException {
-
-    // if (Runtime.isAgent()) {
-    if (myOutstream != null) {
-      myOutstream.write(data);
-      myOutstream.flush();
+    if (os != null) {
+      os.write(data);
+      os.flush();
     }
-
-    /*
-     * if (fos != null) { fos.write(data); fos.flush(); }
-     */
-    // }
-
   }
 
   /**
@@ -618,15 +610,15 @@ public class Cli extends Service {
     try {
 
       // shutdown my i/o
-      if (in != null) {
-        in.interrupt();
+      if (decoder != null) {
+        decoder.interrupt();
       }
 
-      in = null;
-      if (myOutstream != null) {
-        myOutstream.close();
+      decoder = null;
+      if (os != null) {
+        os.close();
       }
-      myOutstream = null;
+      os = null;
 
       // shutdown all remote io
       for (Pipe pipe : pipes.values()) {
@@ -662,10 +654,10 @@ public class Cli extends Service {
 
   public void releaseService() {
     super.releaseService();
-    if (in != null) {
-      in.isRunning = false;
+    if (decoder != null) {
+      decoder.isRunning = false;
       // in.interrupt();
-      in = null;
+      decoder = null;
     }
   }
 

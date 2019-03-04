@@ -3,24 +3,34 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.image.DisplayedImage;
+import org.myrobotlab.fsm.api.Event;
+import org.myrobotlab.fsm.api.EventHandler;
+import org.myrobotlab.fsm.api.SimpleEvent;
+import org.myrobotlab.fsm.api.State;
+import org.myrobotlab.fsm.core.SimpleTransition;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.StateListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 // emotionListener
-public class Emoji extends Service implements TextListener {
+public class Emoji extends Service
+    implements TextListener, EventHandler, StateListener /* , StateHandler */ {
 
   private static final long serialVersionUID = 1L;
 
@@ -28,13 +38,15 @@ public class Emoji extends Service implements TextListener {
 
   transient ImageDisplay display = null;
   transient HttpClient http = null;
+  transient FiniteStateMachine emotionalState = null;
+  
+  int defaultSize = 32;//px
 
-  transient DisplayedImage view = null;
+  Map<String, String> descriptionIndex = new TreeMap<String, String>();
 
-  Map<String, EmojiData> emojis = new TreeMap<String, EmojiData>();
-  Map<String, EmojiData> descriptionIndex = new TreeMap<String, EmojiData>();
-  Map<String, EmojiData> emoticonIndex = new TreeMap<String, EmojiData>();
-  Map<String, EmojiData> unicodeIndex = new TreeMap<String, EmojiData>();
+  State lastState = null;
+
+  String mode =  "small";
 
   static public class EmojiData {
     String name;
@@ -44,90 +56,312 @@ public class Emoji extends Service implements TextListener {
     String emoticon;
   }
 
+  // FIXME ! - emoji are multi-unicode !!! - create unicode key
   public Emoji(String n) {
     super(n);
+
+    if (emotionalState == null) {
+      emotionalState = (FiniteStateMachine) startPeer("fsm");
+    }
+
+    // build the emotional finite state machine
+    addEmojis("neutral", "1f610", "ecstasy", "1f923", "joy", "1f602", "serenity", "1f60c", "admiration", "1f929", "trust", "1f642", "acceptance", "1f642", "terror", "1f631",
+        "fear", "1f628", "apprehension", "1f627", "amazement", "1f92f", "surprise", "1f92d", "distraction", "1f928", "grief", "1f62d", "sadness", "1f622", "pensiveness", "1f614",
+        "loathing", "1f61d", "disgust", "1f623", "boredem", "1f644", "rage", "1f620", "anger", "1f621", "annoyance", "2639", "vigilance", "1f914", "anticipation", "1f914",
+        "interest", "1f914 ", "vomiting", "1f92e", "sick", "1f922", "ill", "1f912");
+
+    // serenity-ecstasy axis
+    emotionalState.addTransition("neutral", "serenity-event", "serenity");
+    emotionalState.addTransition("serenity", "serenity-event", "joy");
+    emotionalState.addTransition("joy", "serenity-event", "ecstasy");
+
+    emotionalState.addTransition("serenity", "clear-event", "neutral");
+    emotionalState.addTransition("joy", "clear-event", "serenity");
+    emotionalState.addTransition("ecstasy", "clear-event", "joy");
+
+    // acceptance-admiration axis
+    emotionalState.addTransition("neutral", "acceptance-event", "acceptance");
+    emotionalState.addTransition("acceptance", "acceptance-event", "trust");
+    emotionalState.addTransition("trust", "acceptance-event", "admiration");
+
+    emotionalState.addTransition("acceptance", "clear-event", "neutral");
+    emotionalState.addTransition("trust", "clear-event", "acceptance");
+    emotionalState.addTransition("admiration", "clear-event", "trust");
+
+    // apprehension-terror axis
+    emotionalState.addTransition("neutral", "apprehension-event", "apprehension");
+    emotionalState.addTransition("apprehension", "apprehension-event", "fear");
+    emotionalState.addTransition("fear", "apprehension-event", "terror");
+
+    emotionalState.addTransition("apprehension", "clear-event", "neutral");
+    emotionalState.addTransition("fear", "clear-event", "apprehension");
+    emotionalState.addTransition("terror", "clear-event", "fear");
+
+    // distraction-amazement axis
+    emotionalState.addTransition("neutral", "distraction-event", "distraction");
+    emotionalState.addTransition("distraction", "distraction-event", "surprise");
+    emotionalState.addTransition("surprise", "distraction-event", "amazement");
+
+    emotionalState.addTransition("distraction", "clear-event", "neutral");
+    emotionalState.addTransition("surprise", "clear-event", "distraction");
+    emotionalState.addTransition("amazement", "clear-event", "surprise");
+
+    // pensiveness-grief axis
+    emotionalState.addTransition("neutral", "pensiveness-event", "pensiveness");
+    emotionalState.addTransition("pensiveness", "pensiveness-event", "sadness");
+    emotionalState.addTransition("sadness", "pensiveness-event", "grief");
+
+    emotionalState.addTransition("pensiveness", "clear-event", "neutral");
+    emotionalState.addTransition("sadness", "clear-event", "pensiveness");
+    emotionalState.addTransition("grief", "clear-event", "sadness");
+
+    // boredom-loathing axis
+    emotionalState.addTransition("neutral", "boredom-event", "boredom");
+    emotionalState.addTransition("boredom", "boredom-event", "disgust");
+    emotionalState.addTransition("disgust", "boredom-event", "loathing");
+
+    emotionalState.addTransition("boredom", "clear-event", "neutral");
+    emotionalState.addTransition("disgust", "clear-event", "boredom");
+    emotionalState.addTransition("loathing", "clear-event", "disgust");
+
+    // annoyance-rage axis
+    emotionalState.addTransition("neutral", "annoyance-event", "annoyance");
+    emotionalState.addTransition("annoyance", "annoyance-event", "anger");
+    emotionalState.addTransition("anger", "annoyance-event", "rage");
+
+    emotionalState.addTransition("annoyance", "clear-event", "neutral");
+    emotionalState.addTransition("anger", "clear-event", "annoyance");
+    emotionalState.addTransition("rage", "clear-event", "anger");
+
+    // interest-vigilance axis
+    emotionalState.addTransition("neutral", "interest-event", "interest");
+    emotionalState.addTransition("interest", "interest-event", "anticipation");
+    emotionalState.addTransition("anticipation", "interest-event", "vigilance");
+
+    emotionalState.addTransition("interest", "clear-event", "neutral");
+    emotionalState.addTransition("anticipation", "clear-event", "interest");
+    emotionalState.addTransition("vigilance", "clear-event", "anticipation");
+
+    // ill-vomiting axis
+    emotionalState.addTransition("neutral", "ill-event", "ill");
+    emotionalState.addTransition("ill", "ill-event", "sick");
+    emotionalState.addTransition("sick", "ill-event", "vomiting");
+
+    emotionalState.addTransition("ill", "clear-event", "neutral");
+    emotionalState.addTransition("sick", "clear-event", "ill");
+    emotionalState.addTransition("vomiting", "clear-event", "sick");
+
+    emotionalState.addScheduledEvent("clear-event", 1000 * 30);
+    // emotionalState.addScheduledEvent("clear-event", 1000);
+    
+    // FIXME - DUMP INFO sorted tree map based on source state !
+    log.info(emotionalState.getFsmMap());
+
+    // loopback on state publishing...
+    // subscribe(getName(),"publishState");
+    try {
+      emotionalState.attach(this);
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public void addEmojis(String... states) {
+    // check for %2
+    for (int i = 0; i < states.length; i += 2) {
+      addEmoji(states[i], states[i + 1]);
+    }
+  }
+
+  public void addEmoji(String keyword, String unicode) {
+    descriptionIndex.put(keyword, unicode);
+    emotionalState.addState(keyword);
   }
 
   public void startService() {
     super.startService();
-    display = (ImageDisplay) startPeer("display");
-    http = (HttpClient) startPeer("http");
-    // display.setBackground(Color.BLACK);
+    if (display == null) {
+      display = (ImageDisplay) startPeer("display");
+    }
+    if (http == null) {
+      http = (HttpClient) startPeer("http");
+    }
+    if (emotionalState == null) {
+      emotionalState = (FiniteStateMachine) startPeer("fsm");
+    } else {
+      emotionalState.startService();
+    }
+
+    // subscribing to errors
+    subscribe("*", "publishStatus");
   }
 
-  // 1f609
-  public void display(String value) {
-    // :shortcut: | unicode | emoticon | url
-    // FIXME - android, applet .. eg.. cache file
-    // https://images.emojiterra.com/google/android-oreo/512px/1f613.png
-    // https://images.emojiterra.com/google/android-oreo/512px/1f613.png
-    // display.displayFullScreen(String.format("https://images.emojiterra.com/google/android-oreo/512px/%s.png",
-    // value));
-    // display.displayFullScreen("https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Noto_Emoji_KitKat_1f613.svg/480px-Noto_Emoji_KitKat_1f613.svg.png");
-    // display.displayFullScreen("C:\\github\\twemoji\\72x72\\1f681.png");
-    // display.displayFullScreen("https://www.charbase.com/images/glyph/128565");
-
-    // display.displayFullScreen("data:image/png;base64,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");
-    display.display(
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAACBUExURUdwTO2RAO2RABkZGO2RAO2RAO2RAO2RAO2RAO2RAP7jK/alF+2QAP/lK////vzcJ++WAvnEHPGfBPjTJPi0GzQvH+54cfOvCN1FBFVHH3FhHd/EKMqvJJSBIufk3uJmTvXDcrKdI0hHR7u5topLRfriuvKvQ4+Qj/jRkm1tbbyFE20z2/wAAAAKdFJOUwCI0/+8aaAe7UyCylCnAAAEeUlEQVRYw+WY63ajIBCAVxNjNFBQZA3eUnNt8/4PuMNFRGOi2dM/e3bSnqY6fM4NBvz16/+UMIwCz9uAeF4QheHfQSJv42+3yMp262+8KHyXAhA5mqZpmoPAH6po/jusMFAUICSMESOMJcCTrHWwDBV6vqIkLMY4xrH+0V8BJln+ElQAGJonRA59ELhGEunkOpozZ7PVmOeCAQUOei+NisCcVFoTx7OoV0YF0hwSLxCWQ6SiV5wkXiRgFEXb4CknXciRAu5NkySHzUTngTThXaQ4MsN4FqZ1MJAe4xT62i/MynLGLhyXVcUUiaL1uAo2Os64LPhKtAy/sKas+WolSknKEPIeHNN5L1ZSiuqZUZi0QqvI/0g+ClO41gGKY6214nWJp70Ci5UI9VyWovUgYwiZxNcrI6IlDyjMat7dr/WlbGCSNMgUtKM69g+TStjH1CaMJHXjDRGylUjKulPntRN0xytetKV9RuKatLEGqRGstYGoOv8wa2344CLuvU3RxnoGKXOLLWZVbR+ugw5lYc2sSuYWbY780IaaMnu9bOtC2DiteKVBfXjgmijq3lSoymDCs7ZnqJiWxD6gcG/x2gbV+gazw3pWOsqiqPrJAs44aZAkW2h5l7ewzxmurJ6bmT6yVW9W5eRNg6I+RLgUOgiDzAxL27gobGkwiiIT6z5EGB4JlBfzX7lYCGcKQZB0tD0XhKETktkFibhPApBnkqYnPiGmdS1Zs7EdIJcAnba1ThqTbT6RTXoWAw08kQ08zYhJmwMiqd506G1Dlkikbfym+0P/l4Dc7CiQaTpDEMT+et11GqCjJJVcJfCVUuTc3l2vVPsyAGF2R58fTXP5+vxUQGrHIOcbVYDr59fl0nxc6F0V0wgEKW0+jADwcvn6Aqgj8D9cbRqrdSr4I0itjcebVZqV5vTNYZ64run040oWLP8+LWKdbke1iBI3/aYgiVlxjnOsBijcmW+2IAPVQUjc9jP7eDs1zRPI99HOW6HGsW6KwKRNVJ0U7lLEj9+32wl4Rk4nyTgOlqs2luOSbtLKZURVXDXQMjx+lML5xL1CF6xdRqAZ5bp269U7wis9yi5scqnV7FK8A6r1IKeNwOIvJxZMreoNUsG0JAhF/ZYmN1enwjQtojRDnHYkfUuY/rQjEhfiDCLGwRaVGQA52ww2NXLdgN+kdTvF+Xz4beRwFgOO1oejgNuy5SYi6cTGifcULT2qKK36cF8D25rc3sp0vxYjjEJx3Rwzq7wb7rTAJJr1cocaP+/3hxHqcNjvYcYXVZZYVTdC3Z7WIe3u9V7LwYq5UNwdvexxh+yhIWmH0H5CEN1l8mO00ofNqHQOpbuhjFkIjRTk0SacOBjRMWnnNoPHm/AkP5w+0kwoS6GTV+Eh2+jZ4egJaZKDnnAUCaU/wNEkuoxDXx38IOJrtMg92d7X4dzheBYlUzlzODbn45coVRGzx3X9HkJ1+XSaojBL30UE663eMaQjCH3nlYZ5VeNvB/ub7pWN/xcvbH7itc9Pvoj69+UP1r62tqOuGjIAAAAASUVORK5CYII=");
-    display.displayFullScreen("https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/129/rolling-on-the-floor-laughing_1f923.png");
-
-    // display.displayFullScreen("https://www.charbase.com/images/glyph/128565");
-
-    // display.displayFullScreen(String.format("https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/google/146/winking-face_%s.png",
-    // value));
+  public void onStatus(org.myrobotlab.framework.Status status) {
+    if (status.isError()) {
+      fire("ill-event");
+    }
   }
 
-  public void cacheEmojis() throws IOException {
-    File dir = new File("emoji");
-    dir.mkdirs();
-    // String url = "file:///etc/fstab";
-    Document doc = Jsoup.parse(new File("wikipediaEmoji.html"), "UTF-8");
-    // Document doc = Jsoup.connect(url).get();
-    Elements links = doc.select("a[href]");
-    Elements media = doc.select("[src]");
-    Elements imports = doc.select("link[href]");
+  public String fire(String event) {
+    try {
+      emotionalState.fire(event);
+      return event;
+    } catch (Exception e) {
+      log.error("onStatus threw", e);
+    }
+    return event;
+  }
 
-    print("\nMedia: (%d)", media.size());
-    for (Element srcLink : media) {
-      String tag = srcLink.tagName();
-      if (tag.equals("img")) {
-        String src = srcLink.attr("abs:src");
-        if (src.contains("Noto_Emoji_Oreo")) {
-          src = src.replace("48px", "1024px");
-          byte[] image = http.getBytes(src);
-          String filename = "emoji" + src.substring(src.lastIndexOf("/"));
+  public void display(String source) {
+    display(new State(source)); 
+  }
 
-          FileOutputStream fos = new FileOutputStream(filename);
-          fos.write(image);
-          fos.close();
-        }
-        print(" * %s: <%s> %sx%s (%s)", tag, srcLink.attr("abs:src"), srcLink.attr("width"), srcLink.attr("height"), trim(srcLink.attr("alt"), 20));
-      } else {
-        print(" * %s: <%s>", srcLink.tagName(), srcLink.attr("abs:src"));
+  public void display(State state) {
+    String source = state.getId();
+    log.info("display source {} fullscreen {}", source);
+    String filename = null;
+
+    // check if file (absolute file exists)
+
+    // check for unicode name
+    // if unicode file does not exist - populate cache
+    File unicodeDir = new File(getEmojiCacheDir());
+    if (!unicodeDir.exists()) {
+      try {
+        cacheEmojis();
+      } catch (IOException e) {
+        log.error("caching problem", e);
       }
     }
 
-    print("\nImports: (%d)", imports.size());
-    for (Element link : imports) {
-      print(" * %s <%s> (%s)", link.tagName(), link.attr("abs:href"), link.attr("rel"));
+    // check for keyword
+    if (descriptionIndex.containsKey(source)) {
+      String unicodeFileName = getEmojiCacheDir() + File.separator + descriptionIndex.get(source) + ".png";
+      if (new File(unicodeFileName).exists()) {
+        filename = unicodeFileName;
+      }
     }
 
-    print("\nLinks: (%d)", links.size());
-    for (Element link : links) {
-      print(" * a: <%s>  (%s)", link.attr("abs:href"), trim(link.text(), 35));
+    if (filename == null) {
+      String unicodeFileName = getEmojiCacheDir() + File.separator + source + ".png";
+      if (new File(unicodeFileName).exists()) {
+        filename = unicodeFileName;
+      }
+    }
+
+    // hail mary - just assign what its been told to display
+    if (filename == null) {
+      filename = source;
+    }
+    
+    // defaults 
+        // worke = fullscreen, black bg, single frame
+        // small = 32px, no window, always on top (work on moving image)
+    
+    // common display attributes
+    display.setMultiFrame(false);
+
+    if (mode.equals("small")) {
+      defaultSize = 32;
+      display.setAlwaysOnTop(true);
+      display.setFullScreen(false);      
+    } else {
+      defaultSize = 1024;
+      display.setAlwaysOnTop(false);
+      display.setFullScreen(true);
+      display.setColor("#000");
+      display.setColor("#000000");
+    }
+
+    // FIXME implement
+    display.setColor("#000");
+    try {
+      display.display2(filename);
+    } catch (Exception e) {
+      log.error("displayFullScreen threw", e);
     }
   }
 
-  private static void print(String msg, Object... args) {
-    System.out.println(String.format(msg, args));
+  public String getEmojiCacheDir() {
+    return getDataDir() + File.separator + defaultSize + "px";
   }
 
-  private static String trim(String s, int width) {
-    if (s.length() > width)
-      return s.substring(0, width - 1) + ".";
-    else
-      return s;
+  public void cacheEmojis() throws IOException {
+    info("downloading and caching emojis into [%s]", getEmojiCacheDir());
+    String wikimediaEmojiList = getEmojiCacheDir() + File.separator + "wikimedia-emoji.html";
+    String emojiKeywordIndex = getEmojiCacheDir() + File.separator + "wikimedia-emoji.properties";
+
+    File dir = new File(getEmojiCacheDir());
+    dir.mkdirs();
+
+    String emojiList = null;
+
+    try {
+      emojiList = FileIO.toString(wikimediaEmojiList);
+    } catch (Exception e) {
+      log.info("could not find file {} will attempt to download it", wikimediaEmojiList);
+    }
+
+    if (emojiList == null) {
+      Connection.Response html = Jsoup.connect("https://commons.wikimedia.org/wiki/Emoji").execute();
+      Files.write(Paths.get(wikimediaEmojiList), html.body().getBytes());
+    }
+
+    emojiList = FileIO.toString(new File(wikimediaEmojiList));
+
+    if (emojiList == null) {
+      log.error("tried locally, and tried remotely .. giving up . no https://commons.wikimedia.org/wiki/Emoji available");
+      return;
+    }
+
+    Document doc = Jsoup.parse(new File(wikimediaEmojiList), "UTF-8");
+
+    Element table = doc.select("table").get(0); // select the first table.
+    Elements rows = table.select("tr");
+
+    int emojiFound = 0;
+
+    // FIXME - handle multi-unicode streams !!
+
+    for (int i = 1; i < rows.size(); i++) {
+      Element row = rows.get(i);
+      ++emojiFound;
+      // 3 == Noto Color Emoji, Oreo
+      // src means we have an image
+      if (row.select("td").get(3).select("[src]").size() != 0) {
+        // String index = row.select("th").get(0).ownText();
+        String unicode = row.select("code").get(0).ownText();
+        String[] keywords = row.select("small").get(0).ownText().replace("(", "").replace(")", "").toLowerCase().trim().split(",");
+
+        Element notoOreo = row.select("td").get(3);
+        Element imgSrc = notoOreo.select("img").first();
+
+        String size = defaultSize + "px";
+        // change size - we want the big one ..
+        String src = imgSrc.absUrl("src").replace("48px", size);
+        byte[] image = http.getBytes(src);
+
+        String filename = getEmojiCacheDir() + File.separator + unicode + ".png";
+        FileOutputStream fos = new FileOutputStream(filename);
+        fos.write(image);
+        fos.close();
+
+        fos = new FileOutputStream(emojiKeywordIndex, true);
+        for (String keyword : keywords) {
+          keyword = keyword.toLowerCase().trim();
+          fos.write(String.format("%s=%s\n", keyword, unicode).getBytes());
+          if (!descriptionIndex.containsKey(keyword)) {
+            descriptionIndex.put(keyword.toLowerCase().trim(), unicode);
+          }
+        }
+        fos.close();
+      } else {
+        log.info("skipping row {}", i);
+      }
+    }
+
+    log.info("emojis found {}", emojiFound);
+
   }
 
   /**
@@ -142,37 +376,51 @@ public class Emoji extends Service implements TextListener {
 
     ServiceType meta = new ServiceType(Emoji.class);
     meta.addDescription("used as a general template");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-
-    // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
-    // meta.addDependency("orgId", "artifactId", "2.4.0");
-    // meta.addDependency("org.bytedeco.javacpp-presets", "artoolkitplus",
-    // "2.3.1-1.4");
-    // meta.addDependency("org.bytedeco.javacpp-presets",
-    // "artoolkitplus-platform", "2.3.1-1.4");
-
-    // meta.addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
 
     meta.addPeer("display", "ImageDisplay", "image display");
     meta.addPeer("http", "HttpClient", "downloader");
+    meta.addPeer("fsm", "FiniteStateMachine", "emotional state machine");
 
     meta.setAvailable(false);
     meta.addCategory("general");
     return meta;
   }
 
-  public void renameFiles() {
-    File dir = new File("emoji-gerty");
-    // File dir = new File("emoji-gerty-rename");
-    File[] files = dir.listFiles();
-    for (File file : files) {
-      int len = "1024px-Noto_Emoji_Oreo_".length();
-      String unicode = file.getName().substring(len, file.getName().indexOf("."));
-      File rename = new File(String.format("emoji-gerty/%s.png", unicode));
-      file.renameTo(rename);
-    }
+  @Override
+  public void onText(String text) {
+    // FIXME - look for emotional words
+
   }
+
+  // FIXME - publish events if desired...
+  @Override
+  public void handleEvent(Event event) throws Exception {
+    log.info("handleEvent {}", event);
+    SimpleEvent se = (SimpleEvent) event;
+    SimpleTransition transition = (SimpleTransition) se.getTransition();
+    EmojiData emoji = new EmojiData();
+    emoji.name = transition.getTargetState().getId();
+    emoji.unicode = descriptionIndex.get(emoji.name);
+    invoke("publishEmoji", emoji);
+    display(transition.getTargetState());
+    // emotionalState.getCurrentState().getName();
+  }
+
+  public State getCurrentState() {
+    return emotionalState.getCurrentState();
+  }
+
+  public void publishEmoji(EmojiData emoji) {
+    log.info("publishEmoji {}", emoji);
+  }
+
+  @Override
+  public void onState(State state) {
+    // check display properties fullscreen / popfront / icon / vs toolbar icon ?
+    display(state); // it
+  }
+  
+
 
   public static void main(String[] args) {
     try {
@@ -191,27 +439,82 @@ public class Emoji extends Service implements TextListener {
       LoggingFactory.init(Level.INFO);
 
       Emoji emoji = (Emoji) Runtime.start("emoji", "Emoji");
-      // emoji.cacheEmojis();
-      emoji.renameFiles();
-      // Runtime.start("gui", "SwingGui");
+      emoji.fire("ill-event");
+      /*
+      emoji.fire("clear-event");
+      Service.sleep(2000);
+      emoji.fire("ill-event");
+      Service.sleep(2000);
+      emoji.fire("ill-event");
+      Service.sleep(2000);
+      emoji.fire("ill-event");
+      */
+
+      /**
+       * <pre>
+       * State state = emoji.getCurrentState();
+       * emoji.display(state.getName());
+       * log.info("state {}", state);
+       * 
+       * emoji.fire("ill-event");
+       * log.info("state {}", emoji.getCurrentState());
+       * 
+       * emoji.fire("ill-event");
+       * log.info("state {}", emoji.getCurrentState());
+       * 
+       * emoji.fire("ill-event");
+       * log.info("state {}", emoji.getCurrentState());
+       * 
+       * emoji.fire("ill-event");
+       * log.info("state {}", emoji.getCurrentState());
+       * 
+       * emoji.fire("ill-event");
+       * log.info("state {}", emoji.getCurrentState());
+       * 
+       * // emoji.cacheEmojis(); - FIXME - fix caching
+       * for (int i = 0; i < 100; ++i) {
+       *   emoji.display("1f610");
+       *   Service.sleep(1000);
+       *   emoji.display("1f627");
+       *   Service.sleep(1000);
+       *   emoji.display("1f628");
+       *   Service.sleep(1000);
+       *   emoji.display("1f631");
+       *   Service.sleep(1000);
+       *   emoji.display("1f92e");
+       *   Service.sleep(1000);
+       *   emoji.display("1f610");
+       *   Service.sleep(1000);
+       *   emoji.display("2639");
+       *   Service.sleep(1000);
+       *   emoji.display("2639");
+       *   Service.sleep(1000);
+       *   emoji.display("1f621");
+       *   Service.sleep(1000);
+       *   emoji.display("1f620");
+       *   Service.sleep(1000);
+       *   // FIXME - underlying does not use httpclient - so redirect FAILS !!!
+       *   // -
+       *   // should use httpclient & cache !!!
+       *   // FIXME - url or file vs unicode addEmoji("happy",
+       *   // "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/vollmer1hr-1534611173.jpg")
+       *   emoji.display("https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/vollmer1hr-1534611173.jpg");
+       *   Service.sleep(1000);
+       * 
+       * }
+       * </pre>
+       */
 
       // FIXME cache file
-      for (int i = 609; i < 999; ++i) {
-        // emoji.display("1f609");
-
-        emoji.display(String.format("1f%03d", i));
-      }
+      /*
+       * for (int i = 609; i < 999; ++i) { // emoji.display("1f609");
+       * 
+       * emoji.display(String.format("1f%03d", i)); }
+       */
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
 
-  @Override
-  public void onText(String text) {
-    // TODO Auto-generated method stub
-
-  }
 }
-
-// yum yum ...

@@ -7,13 +7,13 @@ public class Task extends TimerTask {
 
   String taskName;
   Message msg;
-  int interval = 0;
+  long interval = 0;
   Service myService;
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
 
-  public Task(Service myService, String taskName, int interval, Message msg) {
+  public Task(Service myService, String taskName, long interval, Message msg) {
     this.myService = myService;
     this.taskName = taskName;
     this.interval = interval;

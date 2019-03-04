@@ -22,6 +22,8 @@ public class Jme3ServoController implements ServoController {
   @Deprecated // remove - this should be done by creating a "new" Node .. e.g. jme.addNode(x)
   Map<String, String> rotationMap = new TreeMap<String, String>();
 
+  double defaultServoSpeed = 60;
+
   public Jme3ServoController(JMonkeyEngine jme) {
     this.jme = jme;
     this.multiMapped = jme.getMultiMapped();
@@ -131,7 +133,7 @@ public class Jme3ServoController implements ServoController {
     }
     float velocity = (float) servo.getVelocity();
     if (velocity == -1) {
-      velocity = 20;
+      velocity = (float)defaultServoSpeed;
     }
 
     String axis = rotationMap.get(name);
@@ -184,6 +186,10 @@ public class Jme3ServoController implements ServoController {
 
   public void setRotation(String name, String axis) {
     rotationMap.put(name, axis);
+  }
+
+  public void setDefaultServoSpeed(Double speed) {
+    defaultServoSpeed = speed;
   }
 
 }
