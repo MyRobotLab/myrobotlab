@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -1328,8 +1330,9 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     // draggable - resize for menu - what you set is how it stays
     // when menu active - inputs(hotkey when non-menu) should be deactive
 
-    // FIXME - do jme.rotateTo or "new" jme.rotate for all these input driven controls
-    
+    // FIXME - do jme.rotateTo or "new" jme.rotate for all these input driven
+    // controls
+
     // ROTATE
     if (mouseLeftPressed && altLeftPressed && !shiftLeftPressed) {
       if (name.equals("mouse-axis-x")) {
@@ -2171,49 +2174,45 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
   public static void main(String[] args) {
     try {
-
-      // FIXME - fix menu input system - use jme.rotate/rotateTo/move/moveTo etc.
-      // FIXME - node/userdata can have a Map<String, String> of reservedRotations from different controllers
+  
+      // FIXME - fix menu input system - use jme.rotate/rotateTo/move/moveTo
+      // etc.
+      // FIXME - node/userdata can have a Map<String, String> of
+      // reservedRotations from different controllers
       // FIXME - make "load" work ..
       LoggingFactory.init("info");
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
- 
+
       // FIXME - fix what you have broken but deprecate sc related rotation info
       /*
-      jme.addNode("xRot");
-      jme.addNode("yRot");
-      jme.addNode("zRot");
-      jme.setRotation("xRot", "x");
-      jme.setRotation("yRot", "y");
-      jme.setRotation("zRot", "z");
+       * jme.addNode("xRot"); jme.addNode("yRot"); jme.addNode("zRot");
+       * jme.setRotation("xRot", "x"); jme.setRotation("yRot", "y");
+       * jme.setRotation("zRot", "z");
+       * 
+       * jme.bind("xRot", CAMERA); jme.bind("yRot", CAMERA); jme.bind("zRot",
+       * CAMERA);
+       */
 
-      jme.bind("xRot", CAMERA);
-      jme.bind("yRot", CAMERA);
-      jme.bind("zRot", CAMERA);
-      */
-      
       // jme.setTransform(CAMERA, 0, 3, 6, -20, -180, 0);
-      // jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429, 47.488);
+      // jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429,
+      // 47.488);
 
       Jme3ServoController sc = (Jme3ServoController) jme.getServoController();
-      // FIXME WRONG WAY - 
+      // FIXME WRONG WAY -
       // setting controllers axis - FIXME - do in more general way
       // jme.setRotation sets a "node"
       // this is the "control" "to" the Node so its "per" control - if the
       // control can support getName()
       /*
-      sc.setRotation("xRot", "x"); // <-- not a property of sc? FIXME - NO! add
-                                   // new node !!!
-      sc.setRotation("yRot", "y");
-      sc.setRotation("zRot", "z");
-
-      // mapping 3 servos to 3 axis of the camera
-      jme.attach("xRot", CAMERA);
-      jme.attach("yRot", CAMERA);
-      jme.attach("zRot", CAMERA);
-      */
+       * sc.setRotation("xRot", "x"); // <-- not a property of sc? FIXME - NO!
+       * add // new node !!! sc.setRotation("yRot", "y"); sc.setRotation("zRot",
+       * "z");
+       * 
+       * // mapping 3 servos to 3 axis of the camera jme.attach("xRot", CAMERA);
+       * jme.attach("yRot", CAMERA); jme.attach("zRot", CAMERA);
+       */
 
       // jme.setTransform(CAMERA, 0, 0, 0, 0, 0, 0);
 
@@ -2307,4 +2306,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     }
   }
 
+  public void setDefaultServoSpeed(Double speed) {
+    servoController.setDefaultServoSpeed(speed);
+  }
 }

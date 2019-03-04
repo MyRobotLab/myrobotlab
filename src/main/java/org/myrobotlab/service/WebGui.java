@@ -64,6 +64,11 @@ import org.myrobotlab.service.interfaces.Gateway;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.providers.netty.NettyAsyncHttpProvider;
+import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
+
 /**
  * 
  * WebGui - This service is the AngularJS based GUI TODO - messages &amp;
@@ -229,6 +234,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public Integer port;
+  
+  String address = "0.0.0.0";
 
   public Integer sslPort;
 
@@ -363,6 +370,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // ================ Broadcaster end ===========================
 
   public Config.Builder getConfig() {
+    
     Config.Builder configBuilder = new Config.Builder();
     try {
       boolean secureTest = false;
@@ -401,12 +409,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         // if Jetty is in the classpath it will use it by default - we
         // want to use Netty
-        // .initParam("org.atmosphere.websocket.maxTextMessageSize",
-        // "100000")
-        // .initParam("org.atmosphere.websocket.maxBinaryMessageSize",
-        // "100000")
+        /*org.atmosphere.websocket.maxTextMessageSize*/
+        /* noWorky :(
+        .initParam("org.atmosphere.websocket.maxTextMessageSize","-1")
+        .initParam("org.atmosphere.websocket.maxBinaryMessageSize","-1")
+        
+        .initParam(ApplicationConfig.WEBSOCKET_MAXTEXTSIZE,"-1")
+        .initParam(ApplicationConfig.WEBSOCKET_MAXBINARYSIZE,"-1")
+        .initParam(ApplicationConfig.WEBSOCKET_BUFFER_SIZE,"1000000")
+        */
+        
+        
         .initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
-        .initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host("0.0.0.0"); // all
+        .initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
     // ips
 
     SSLContext sslContext = createSSLContext();
@@ -898,7 +913,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         info("{} currently running on port {} - stop first, then start");
         return;
       }
-
+      
+      
       nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
       sleep(1000); // needed ?
 
@@ -995,6 +1011,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
   }
+  
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
@@ -1015,7 +1035,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.setRuntimeName("george");
       WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
       webgui.autoStartBrowser(true);
-      Runtime.start("mary", "MarySpeech");
+      // Runtime.start("mary", "MarySpeech");
 
     } catch (Exception e) {
       Logging.logError(e);

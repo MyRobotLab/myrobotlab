@@ -129,6 +129,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       info("creating inTopic {} outTopic {}", inTopic, outTopic);
     } catch (Exception e) {
       error("codec failed to initialize");
+      log.error("codec failed to initialize", e);
     }
   }
 
@@ -479,6 +480,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
       Runtime.start("gui", "SwingGui");
       Mqtt mqtt01 = (Mqtt) Runtime.start("mqtt01", "Mqtt");
+      mqtt01.connect("tcp://iot.eclipse.org:1883");
 
       // Message msg = Message.createMessage("mqtt", "servo01", "moveTo", new
       // Object[] { 20.0 });

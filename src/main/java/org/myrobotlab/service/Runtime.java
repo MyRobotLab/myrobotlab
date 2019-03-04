@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
@@ -33,6 +35,15 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import org.atmosphere.wasync.Client;
+import org.atmosphere.wasync.ClientFactory;
+import org.atmosphere.wasync.Decoder;
+import org.atmosphere.wasync.Encoder;
+import org.atmosphere.wasync.Event;
+import org.atmosphere.wasync.Function;
+import org.atmosphere.wasync.Request;
+import org.atmosphere.wasync.RequestBuilder;
+import org.atmosphere.wasync.Socket;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
@@ -870,7 +881,7 @@ public class Runtime extends Service implements MessageListener {
 
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
     if (!interfaze.contains(".")) {
-      interfaze = "org.myrobotlab.service.interfaces."+interfaze;
+      interfaze = "org.myrobotlab.service.interfaces." + interfaze;
     }
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
@@ -1567,6 +1578,55 @@ public class Runtime extends Service implements MessageListener {
 
     return ret;
   }
+  
+  static public void connectTo(String url) throws IOException {
+    connectTo(url, null);
+  }
+
+  static public void connectTo(String url, String body) throws IOException {
+
+    // connect via websocket
+    Client<?,?,?> client = ClientFactory.getDefault().newClient();
+
+    RequestBuilder<?> request = client.newRequestBuilder()
+            .method(Request.METHOD.GET)
+            .uri(url)
+            .encoder(new Encoder<String, Reader>() {        // Stream the request body
+                @Override
+                public Reader encode(String s) {
+                    return new StringReader(s);
+                }
+            })
+            .decoder(new Decoder<String, Reader>() {
+                @Override
+                public Reader decode(Event type, String s) {
+                    return new StringReader(s);
+                }
+            })
+            .transport(Request.TRANSPORT.WEBSOCKET)                        // Try WebSocket
+            .transport(Request.TRANSPORT.LONG_POLLING);                    // Fallback to Long-Polling
+  
+    
+    Socket socket = client.create();
+    socket.on(new Function<Reader>() {
+      @Override
+      public void on(Reader r) {
+        // Read the response
+        log.info("on(Reader) here");
+        // r.read(cbuf, off, len);
+      }
+    }).on(new Function<IOException>() {
+
+      @Override
+      public void on(IOException ioe) {
+        // Some IOException occurred
+        log.info("on(IOException) here");
+      }
+
+    }).open(request.build()).fire("echo").fire("bong");
+    
+//     client.w
+  }
 
   public static void setRuntimeName(String inName) {
     runtimeName = inName;
@@ -1634,6 +1694,7 @@ public class Runtime extends Service implements MessageListener {
         fos.write(pid.getBytes());
         fos.close();
       }
+
     } catch (Exception e) {
       log.error("pid file creation failed", e);
     }
