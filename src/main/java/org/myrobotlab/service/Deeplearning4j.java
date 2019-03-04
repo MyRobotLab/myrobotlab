@@ -363,8 +363,8 @@ public class Deeplearning4j extends Service {
     scaler.transform(image);
     // Pass through to neural Net
     INDArray output = network.output(image);
-    System.out.println(output);
-    System.out.println(networkLabels);
+    log.info("File: {}", output);
+    log.info("Labels: {}", networkLabels);
     // TODO: I suppose we could create a map of probabilities and return that
     // ...
     // this map could be large
@@ -472,7 +472,7 @@ public class Deeplearning4j extends Service {
     Labels labels = new DarknetLabels();
     List<List<ClassPrediction>> predictions = labels.decodePredictions(result, 10);
     // check output labels of result
-    System.out.println(predictions.toString());
+    log.info(predictions.toString());
     return predictions;
   }
 
@@ -498,7 +498,7 @@ public class Deeplearning4j extends Service {
     Labels labels = new DarknetLabels();
     List<List<ClassPrediction>> predictions = labels.decodePredictions(result, 10);
     // check output labels of result
-    System.out.println(predictions.toString());
+    log.info(predictions.toString());
     return predictions;
   }
 
@@ -544,7 +544,7 @@ public class Deeplearning4j extends Service {
         log.info("Null decode...");
         continue;
       }
-      // System.out.println(obj.toString() + " " + classPrediction);
+      // log.info(obj.toString() + " " + classPrediction);
       if (classPrediction.getProbability() > threshold) {
         // this is a good one..
         int w = iplImage.width();
@@ -861,9 +861,9 @@ public class Deeplearning4j extends Service {
       // By default support native CPU execution.
       meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);
     } else {
-      System.out.println("-------------------------------");
-      System.out.println("----- DL4J CUDA!         ------");
-      System.out.println("-------------------------------");
+      log.info("-------------------------------");
+      log.info("----- DL4J CUDA!         ------");
+      log.info("-------------------------------");
       // Use this if you want cuda 9.1 NVidia GPU support
       // TODO: figure out the cuDNN stuff.
       meta.addDependency("org.nd4j", "nd4j-cuda-9.2-platform", dl4jVersion);
@@ -905,7 +905,7 @@ public class Deeplearning4j extends Service {
     // // Frame frame = grabberConverter.convert(img);
     // dl4j.evaluateModel(testIm);
     // // dl4j.evaluateModel(img);
-    // System.out.println("Done evaluating the model.");
+    // log.info("Done evaluating the model.");
     // System.exit(0);
   }
 

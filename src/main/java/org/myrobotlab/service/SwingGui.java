@@ -37,6 +37,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -364,10 +365,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       frame.setTitle("myrobotlab - " + getName() + " " + Runtime.getVersion().trim());
 
       frame.add(tabPanel);
-
-      URL url = getClass().getResource("/resource/mrl_logo_36_36.png");
+      String logoFile = Util.getResourceDir() + File.separator + "mrl_logo_36_36.png";
       Toolkit kit = Toolkit.getDefaultToolkit();
-      Image img = kit.createImage(url);
+      Image img = kit.createImage(logoFile);
       frame.setIconImage(img);
 
       // menu
@@ -514,7 +514,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   public void noWorky() {
     // String img =
-    // SwingGui.class.getResource("/resource/expert.jpg").toString();
+    // SwingGui.class.getResource(Util.getRessourceDir() + "/expert.jpg").toString();
     String logon = (String) JOptionPane.showInputDialog(getFrame(),
         "<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of experts,<br> please type your myrobotlab.org user</p></html>", "No Worky!",
         JOptionPane.WARNING_MESSAGE, Util.getResourceIcon("expert.jpg"), null, null);

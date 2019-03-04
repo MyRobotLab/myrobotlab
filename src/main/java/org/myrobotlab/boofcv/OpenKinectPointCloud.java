@@ -35,6 +35,7 @@ import georegression.struct.point.Point3D_F64;
 import com.sun.jna.NativeLibrary;
 
 import org.ddogleg.struct.FastQueue;
+import org.myrobotlab.image.Util;
 import org.openkinect.freenect.*;
 import org.python.jline.internal.Log;
 
@@ -66,7 +67,7 @@ public class OpenKinectPointCloud {
   boolean firstVideo = true;
   boolean firstImage = true;
 
-  String baseDir = "src/main/resources/resource/BoofCv";
+  String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
   String nameCalib = "intrinsic.yaml";
 
   Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);

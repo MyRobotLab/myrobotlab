@@ -29,6 +29,7 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -1040,7 +1041,7 @@ public class Agent extends Service {
     log.info("update({})", branch);
     // so we need to get the version of the jar contained in the {branch}
     // directory ..
-    FileIO.extract(String.format("%s/myrobotlab.jar", branch), "resource/version.txt", String.format("%s/version.txt", branch));
+    FileIO.extract(String.format("%s/myrobotlab.jar", branch), Util.getResourceDir() + "/version.txt", String.format("%s/version.txt", branch));
 
     String currentVersion = FileIO.toString(String.format("%s/version.txt", branch));
     if (currentVersion == null) {

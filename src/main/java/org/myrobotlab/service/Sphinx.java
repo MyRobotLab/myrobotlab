@@ -43,6 +43,7 @@ import java.util.HashSet;
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -110,7 +111,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
         } else {
           // resource in jar default
           info(String.format("grammar /resource/Sphinx/simple.xml"));
-          cm = new ConfigurationManager(this.getClass().getResource("/resource/Sphinx/simple.xml"));
+          cm = new ConfigurationManager(this.getClass().getResource(Util.getResourceDir() + "/Sphinx/simple.xml"));
         }
 
         info("starting recognizer");

@@ -146,7 +146,7 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
       float b = a2 * c1 - a1 * c2;
       float c = a1 * b2 - b1 * a2;
       float d = (-a * p1.x - b * p1.y - c * p1.z);
-      System.out.println("equation of plane is " + a + " x + " + b + " y + " + c + " z + " + d + " = 0.");
+      log.info("equation of plane is " + a + " x + " + b + " y + " + c + " z + " + d + " = 0.");
 
       return depth;
     }

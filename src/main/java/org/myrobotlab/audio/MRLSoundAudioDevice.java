@@ -19,7 +19,6 @@ public class MRLSoundAudioDevice extends JavaSoundAudioDevice {
       super.write(paramArrayOfShort, paramInt1, paramInt2);
     } else {
       // so some digital signal processing!!! woot!
-      // System.out.print(".");
       short[] volumeAdjusted = new short[paramArrayOfShort.length];
       for (int i = 0; i < paramArrayOfShort.length; i++) {
         // Multiplication is volume control! amplify the signal by the gain

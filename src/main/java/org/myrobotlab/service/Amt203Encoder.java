@@ -56,7 +56,7 @@ public class Amt203Encoder extends AbstractEncoder implements EncoderControl {
     ard.attach(encoder);
     Thread.sleep(10000);
     encoder.setZeroPoint();
-    System.out.println("Here we are..");
+    log.info("Here we are..");
   }
 
 }

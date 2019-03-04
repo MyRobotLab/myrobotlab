@@ -48,6 +48,7 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.Style;
@@ -342,7 +343,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       }
 
       mxCell v1 = (mxCell) graph.insertVertex(parent, null, new SwingGraphVertex(serviceName, canonicalName, displayName, toolTip, SwingGraphVertex.Type.SERVICE), x, y, 100, 50,
-          "shape=image;image=/resource/" + canonicalName + ".png");
+          "shape=image;image="+Util.getResourceDir() +"/" + canonicalName + ".png");
       // "ROUNDED;fillColor=" + blockColor);
 
       // graphComponent.getGraphControl().scrollRectToVisible(new

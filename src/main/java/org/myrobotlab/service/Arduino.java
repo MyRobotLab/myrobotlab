@@ -30,6 +30,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.i2c.I2CBus;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
@@ -2063,20 +2064,20 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
       String mrlCommFiles = null;
       if (FileIO.isJar()) {
-        mrlCommFiles = "resource/Arduino/MrlComm";
+        mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
         // FIXME - don't do this every time :P
-        Zip.extractFromSelf("resource/Arduino/MrlComm", "resource/Arduino/MrlComm");
+        Zip.extractFromSelf(Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm", "resource/Arduino/MrlComm");
       } else {
         // running in IDE ?
-        mrlCommFiles = "src/main/resources/resource/Arduino/MrlComm";
+        mrlCommFiles = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm";
       }
       File mrlCommDir = new File(mrlCommFiles);
       if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
         error("mrlcomm script directory %s is not a valid", mrlCommDir);
         return;
       }
-      String exePath = FileIO.gluePaths(arduinoPath, ArduinoUtils.getExeName());
-      String inoPath = FileIO.gluePaths(mrlCommDir.getAbsolutePath(), "/MrlComm.ino");
+      String exePath = arduinoPath + File.separator + ArduinoUtils.getExeName();
+      String inoPath = mrlCommDir.getAbsolutePath() + File.separator + "/MrlComm.ino";
       List<String> cmd = new ArrayList<String>();
       cmd.add(exePath);
       cmd.add(inoPath);
@@ -2147,7 +2148,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     List<BoardType> boardTypes = new ArrayList<BoardType>();
     try {
-      String b = FileIO.resourceToString("Arduino/boards.txt");
+      String b = FileIO.resourceToString("Arduino"+File.separator+"boards.txt");
       Properties boardProps = new Properties();
       boardProps.load(new ByteArrayInputStream(b.getBytes()));
 

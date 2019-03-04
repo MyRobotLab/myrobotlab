@@ -29,7 +29,9 @@ import java.io.Serializable;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.slf4j.Logger;
 
 /**
  * A generalized Pin
@@ -41,6 +43,8 @@ import org.myrobotlab.logging.LoggingFactory;
  *
  */
 public class Pin implements Serializable {
+  public final static Logger log = LoggerFactory.getLogger(Pin.class);
+  
   private static final long serialVersionUID = 1L;
 
   public static final int DIGITAL_VALUE = 1; // normalized with data coming
@@ -91,9 +95,9 @@ public class Pin implements Serializable {
       pin.pin = 5;
       pin.source = "here";
       pin.value = 1;
-      System.out.print(pin);
+      log.info("Pin:", pin);
     } catch (Exception e) {
-      System.out.print(e.getMessage());
+      log.info(e.getMessage());
     }
   }
 

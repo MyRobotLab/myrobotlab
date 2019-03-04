@@ -30,6 +30,7 @@ import org.apache.http.util.EntityUtils;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -830,7 +831,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     try {
 
       log.info("loading default properties");
-      properties.load(PickToLight.class.getResourceAsStream("/resource/PickToLight/pickToLight.properties"));
+      properties.load(PickToLight.class.getResourceAsStream(Util.getResourceDir() + "/PickToLight/pickToLight.properties"));
 
       log.info("loading mes properties");
       input = new FileInputStream("/boot/pickToLight.properties");
