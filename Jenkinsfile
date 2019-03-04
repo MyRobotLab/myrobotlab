@@ -46,10 +46,7 @@ node {
    stage('Results') {
       junit '**/target/surefire-reports/TEST-*.xml'
       archive 'target/*.jar'      
-      jacoco(execPattern: 'target/*.exec',
-      classPattern: 'target/classes',
-      sourcePattern: 'src/main/java',
-      exclusionPattern: 'src/test*')
+      //jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes',sourcePattern: 'src/main/java',exclusionPattern: 'src/test*')
    } 
    stage('Publish') {
    
