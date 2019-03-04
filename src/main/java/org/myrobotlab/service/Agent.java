@@ -127,7 +127,7 @@ public class Agent extends Service {
 
   static Set<String> dependencies = new HashSet<String>();
 
-  static Map<String, ProcessData> processes = new ConcurrentHashMap<String, ProcessData>();
+  final Map<String, ProcessData> processes = new ConcurrentHashMap<String, ProcessData>();
 
   static transient SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd.HHmmssSSS");
 
@@ -166,7 +166,11 @@ public class Agent extends Service {
 
   static String latestRemote;
 
+  // singleton for security purposes
   static Agent agent;
+
+  static String address = "127.0.0.1";
+  static Integer port = 8887;
 
   public Agent(String n) {
     super(n);
@@ -257,13 +261,16 @@ public class Agent extends Service {
     }
   }
 
+  // not a peer - but static - explode on next time its called ?
   static public void startWebGui() {
     try {
       // no reference at all to WebGui
       // look ma no reference !
       WebGui webgui = (WebGui) Runtime.create("webmin", "WebGui");
       // send("webmin", "setPort", 8887);
-      webgui.setPort(8887);
+      webgui.setPort(port);
+      webgui.setAddress(address);
+      webgui.autoStartBrowser(false);
       Runtime.start("webmin", "WebGui");
 
     } catch (Exception e) {
@@ -283,7 +290,7 @@ public class Agent extends Service {
    *           e
    * 
    */
-  static synchronized public void processUpdates() throws IOException, URISyntaxException, InterruptedException {
+  synchronized public void processUpdates() throws IOException, URISyntaxException, InterruptedException {
 
     String remoteVersion = getLatestRemoteVersion(currentBranch);
     if (remoteVersion == null) {
@@ -330,7 +337,7 @@ public class Agent extends Service {
    *           e
    * 
    */
-  static public synchronized void restart(String id) throws IOException, URISyntaxException, InterruptedException {
+  public synchronized void restart(String id) throws IOException, URISyntaxException, InterruptedException {
     log.info("restarting process {}", id);
     // ProcessData pd2 = copy(id);
     // pd.setRestarting();
@@ -339,7 +346,7 @@ public class Agent extends Service {
     spawn2(id);
   }
 
-  private static void spawn2(String id) {
+  private void spawn2(String id) {
     try {
       if (processes.containsKey(id)) {
         spawn2(processes.get(id));
@@ -359,7 +366,7 @@ public class Agent extends Service {
    * @return process data
    * 
    */
-  static public ProcessData copy(Integer id) {
+  public ProcessData copy(String id) {
     if (!processes.containsKey(id)) {
       log.error("cannot copy %s does not exist", id);
       return null;
@@ -368,8 +375,17 @@ public class Agent extends Service {
     ProcessData pd2 = new ProcessData(pd);
     pd2.startTs = null;
     pd2.stopTs = null;
-    // pd2.id = getNextProcessId();
-    pd2.id = null;
+    String[] parts = id.split("\\.");
+    if (parts.length == 4) {
+      try {
+        int instance = Integer.parseInt(parts[3]);
+        ++instance;
+      } catch (Exception e) {
+      }
+    } else {
+      pd2.id = id + ".0";
+    }
+
     processes.put(pd2.id, pd2);
     if (agent != null) {
       agent.broadcastState();
@@ -377,7 +393,7 @@ public class Agent extends Service {
     return pd2;
   }
 
-  static public void copyAndStart(Integer id) throws IOException {
+  public void copyAndStart(String id) throws IOException {
     // returns a non running copy with new process id
     // on the processes list
     ProcessData pd2 = copy(id);
@@ -423,7 +439,7 @@ public class Agent extends Service {
    * @return integer
    * 
    */
-  static public String getId(String name) {
+  public String getId(String name) {
     for (String pid : processes.keySet()) {
       if (pid.equals(name)) {
         return processes.get(pid).id;
@@ -453,7 +469,7 @@ public class Agent extends Service {
    *          e
    * @return string
    */
-  static public String getName(String id) {
+  public String getName(String id) {
     for (String pid : processes.keySet()) {
       if (pid.equals(id)) {
         return processes.get(pid).name;
@@ -461,17 +477,6 @@ public class Agent extends Service {
     }
 
     return null;
-  }
-
-  static synchronized public Integer getNextProcessId() {
-    Integer ret = 0;
-    for (int i = 0; i < processes.size(); ++i) {
-      if (!processes.containsKey(ret)) {
-        return ret;
-      }
-      ret += 1;
-    }
-    return ret;
   }
 
   static public Set<String> getRemoteBranches() {
@@ -562,12 +567,12 @@ public class Agent extends Service {
    * 
    * @return hash map, int to process data
    */
-  static public Map<String, ProcessData> getProcesses() {
+  public Map<String, ProcessData> getProcesses() {
     return processes;
   }
 
   // by id (or by pid?)
-  static public String kill(String id) {
+  public String kill(String id) {
     // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
     // !!
     if (processes.containsKey(id)) {
@@ -608,7 +613,7 @@ public class Agent extends Service {
    * return kill(getId(name)); }
    */
 
-  static public void killAll() {
+  public void killAll() {
     // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
     // !!
     for (String id : processes.keySet()) {
@@ -620,7 +625,7 @@ public class Agent extends Service {
     }
   }
 
-  static public void killAndRemove(String id) {
+  public void killAndRemove(String id) {
     if (processes.containsKey(id)) {
       kill(id);
       processes.remove(id);
@@ -635,7 +640,7 @@ public class Agent extends Service {
    * 
    * @return lp ?
    */
-  static public String[] lp() {
+  public String[] lp() {
     Object[] objs = processes.keySet().toArray();
     String[] pd = new String[objs.length];
     for (int i = 0; i < objs.length; ++i) {
@@ -646,7 +651,7 @@ public class Agent extends Service {
     return pd;
   }
 
-  static public String publishTerminated(String id) {
+  public String publishTerminated(String id) {
     log.info("publishTerminated - terminated %s %s - restarting", id, getName(id));
 
     if (!processes.containsKey(id)) {
@@ -688,7 +693,7 @@ public class Agent extends Service {
    * @return list of status
    * 
    */
-  static public List<Status> serviceTest() {
+  public List<Status> serviceTest() {
 
     List<Status> ret = new ArrayList<Status>();
     // CLEAN FOR TEST METHOD
@@ -842,7 +847,7 @@ public class Agent extends Service {
     return env;
   }
 
-  static public void shutdown() {
+  public void shutdown() {
     // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
     // !!
     log.info("terminating others");
@@ -852,11 +857,11 @@ public class Agent extends Service {
     Runtime.shutdown();
   }
 
-  static public synchronized Process spawn() throws IOException, URISyntaxException, InterruptedException {
+  public synchronized Process spawn() throws IOException, URISyntaxException, InterruptedException {
     return spawn(new String[] {});
   }
 
-  static public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
+  public synchronized Process spawn(String[] in) throws IOException, URISyntaxException, InterruptedException {
 
     // runtime vs develop time
     String jarPath = null;
@@ -867,10 +872,10 @@ public class Agent extends Service {
     } else {
       // develop time (post build)
       log.info("I am not a jar - must be develop time");
-      String test = "build/lib/myrobotlab.jar";
+      String test = "target/myrobotlab.jar";
       File recentlyBuilt = new File(test);
       if (!recentlyBuilt.exists()) {
-        log.error("umm .. I need to start a jar - would you mind building one with build.xml");
+        log.error("umm .. I need to start a jar - would you mind building one ?");
         log.error("perhaps in the future I can change all the classpaths etc to start an instances with the bin classes - but no time to do that now");
         log.error("adios... hope we meet again...");
         System.exit(-1);
@@ -898,7 +903,7 @@ public class Agent extends Service {
    * @throws InterruptedException
    *           e
    */
-  static public synchronized Process spawn(String jarPath, String[] in) throws IOException, URISyntaxException, InterruptedException {
+  public synchronized Process spawn(String jarPath, String[] in) throws IOException, URISyntaxException, InterruptedException {
 
     // handle url to path utf-8 crazyness here
     // getCodeSource().getLocation().toURI().getPath()
@@ -928,7 +933,7 @@ public class Agent extends Service {
     return spawn2(pd);
   }
 
-  static public synchronized Process spawn2(ProcessData pd) throws IOException {
+  public synchronized Process spawn2(ProcessData pd) throws IOException {
 
     log.info("============== spawn begin ==============");
 
@@ -1007,7 +1012,7 @@ public class Agent extends Service {
    *           e
    * 
    */
-  static public void start(Integer id) throws IOException, URISyntaxException, InterruptedException {
+  public void start(Integer id) throws IOException, URISyntaxException, InterruptedException {
     if (!processes.containsKey(id)) {
       log.error("start process %s can not start - process does not exist", id);
       return;
@@ -1154,7 +1159,8 @@ public class Agent extends Service {
       Process p = null;
 
       if (cmdline.containsKey("-test")) {
-        serviceTest();
+        Agent agent = (Agent) Runtime.start("agent", "Agent");
+        agent.serviceTest();
       } else {
 
         // if we aren't forking then we create an agent
@@ -1175,7 +1181,8 @@ public class Agent extends Service {
           }
         }
         if (!cmdline.containsKey("-client")) {
-          p = spawn(args); // <-- agent's is now in charge of first
+          Agent agent = (Agent) Runtime.start("agent", "Agent");
+          p = agent.spawn(args); // <-- agent's is now in charge of first
         } else {
           Runtime.start("cli", "Cli");
         }
@@ -1185,7 +1192,8 @@ public class Agent extends Service {
       // as soon as the mrl processes starts
       if (cmdline.containsKey("-install")) {
         p.waitFor();
-        shutdown();
+        Agent agent = (Agent) Runtime.start("agent", "Agent");
+        agent.shutdown();
       }
 
     } catch (Exception e) {
