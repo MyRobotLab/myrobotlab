@@ -1,10 +1,14 @@
 package org.myrobotlab.service;
 
+import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -16,25 +20,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.imageio.ImageIO;
 import javax.swing.WindowConstants;
+
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.request.QueryRequest;
-import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.apache.solr.search.QueryResult;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Java2DFrameConverter;
@@ -55,16 +57,10 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
-
 import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
-
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 
 /**
  * SolrService - MyRobotLab This is an integration of Solr into MyRobotLab. Solr
@@ -982,6 +978,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
+      /*
       doc.setField("id", "Doc1");
       doc.setField("title", "My title");
       doc.setField("content", "This is the text field, for a sample document in myrobotlab.  ");
@@ -989,6 +986,18 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       solr.addDocument(doc);
       // commit the index
       solr.commit();
+      */
+      
+      doc = new SolrInputDocument();
+      doc.setField("id", "Doc3");
+      doc.setField("title", "My title 3");
+      doc.setField("content", "This is the text field, for a sample document in myrobotlab. 2 ");
+      doc.setField("annoyance", 1);
+      // add the document to the index
+      solr.addDocument(doc);
+      // commit the index
+      solr.commit();
+      
       // search for the word myrobotlab
       String queryString = "myrobotlab";
       QueryResponse resp = solr.search(queryString);

@@ -128,11 +128,6 @@ public class ProcessData implements Serializable {
         this.in.add(pd.in.get(i));
       }
     }
-
-    // this.process = pd.process;
-    // this.startTs = System.currentTimeMillis();
-    // monitor = new Monitor(this);
-    // monitor.start();
   }
 
   /*
@@ -151,11 +146,6 @@ public class ProcessData implements Serializable {
     ProcessData.service = service;
     this.jarPath = jarPath;
 
-    // String protectedDomain =
-    // URLDecoder.decode(Agent.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(),
-    // "UTF-8");
-    // log.info("protected domain {}", protectedDomain);
-
     // convert to ArrayList to process
     in = new ArrayList<String>();
 
@@ -167,8 +157,6 @@ public class ProcessData implements Serializable {
         continue;
       }
 
-      // if (inCmdLine.containsKey("-jvm") && inCmdLine.getArgumentCount("-jvm")
-      // > 0) {
       if (cmd.equals("-jvm")) {
         String tmp = inCmdLine.getArgument("-jvm", 0);
         jvm = tmp.split(" ");

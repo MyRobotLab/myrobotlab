@@ -113,7 +113,9 @@ public abstract class Api {
 
     if (parts.length < 4) {
       // /api/service OR /api/service/
-      msg.method = "getEnvironments";
+      msg.method = "getEnvironments"; // Big one - webgui client depends on .. 
+      // msg.method = "getServiceNames";
+      // msg.method = "getPlatform";
     } else if (parts.length == 4) {
       msg.name = "runtime";
       if (requestUri.endsWith("/")) {

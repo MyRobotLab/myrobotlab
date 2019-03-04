@@ -10,8 +10,8 @@
 // http://blog.thoughtram.io/angularjs/2015/01/14/exploring-angular-1.3-speed-up-with-applyAsync.html
 // https://strongloop.com/strongblog/promises-in-node-js-with-q-an-alternative-to-callbacks/
 // communication begins with a synchronous /api/messages/getLocalServices
-// the remote application will need to know 
-// #1 what service gateway we are attached too & 
+// the remote application will need to know
+// #1 what service gateway we are attached too &
 // #2 - runtime name
 // TODO - gateways should make a hello() method available through their interface
 // infomation returned - gateway name - mrl protokey ? & Runtime name
@@ -41,7 +41,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     var deferred = null;
     var msgInterfaces = {};
     // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
-    // See the following link for all websocket configuration 
+    // See the following link for all websocket configuration
     // https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js
     this.request = {
         url: document.location.origin.toString() + '/api/messages',
@@ -51,10 +51,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         fallbackTransport: 'long-polling',
         // trackMessageLength: true,
         // maxTextMessageSize: 10000000,
-        //maxBinaryMessageSize: 10000000,
+        // maxBinaryMessageSize: 10000000,
         logLevel: 'info'
     };
-    // connectivity related end 
+    // connectivity related end
     var msgCount = 0;
     // map of service names to callbacks
     var nameCallbackMap = {};
@@ -62,7 +62,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     var typeCallbackMap = {};
     // map of method names to callbacks
     var methodCallbackMap = {};
-    // specific name & method callback 
+    // specific name & method callback
     // will be used by framework
     var nameMethodCallbackMap = {};
     if (typeof String.prototype.startsWith != 'function') {
@@ -130,7 +130,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         if (msg.data != null && msg.data.length > 0) {
             // reverse encoding - pop off undefined
             // to shrink paramter length
-            // js implementation - 
+            // js implementation -
             var pos = msg.data.length - 1;
             for (i = pos; i > -1; --i) {
                 // WTF? - why do this ? - it's a bug for overloaded method
@@ -154,7 +154,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
     ;
     // since framework does not have a hello() onHello() defined
-    // protocol - we are using Runtime.onLocalServices to do 
+    // protocol - we are using Runtime.onLocalServices to do
     // initial processing of data after a connect
     this.onLocalServices = function(msg) {
         console.log('getEnvironments:');
@@ -219,8 +219,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
     }
     // onMessage gets all messaging from the Nettophere server
-    // all asynchronous callbacks will be routhed here.  All
-    // messages will be in a Message strucutre except for the 
+    // all asynchronous callbacks will be routed here.  All
+    // messages will be in a Message strucutre except for the
     // Atmosphere heartbeat
     this.onMessage = function(response) {
         ++msgCount;
@@ -240,9 +240,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                         cbs[i](msg);
                     }
                 }
-                // serviceName.methodName callback    
+                // serviceName.methodName callback
                 // framework subscribes to (name).onMethodMap to build all
-                // underlying structured methods based on Java reflected descriptions        
+                // underlying structured methods based on Java reflected descriptions
                 // console.log('nameMethodCallbackMap');
                 var key = msg.sender + '.' + msg.method;
                 if (nameMethodCallbackMap.hasOwnProperty(key)) {
@@ -408,7 +408,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.register = function(service) {
         registry[service.name] = {};
         registry[service.name] = service;
-        // broadcast callback 
+        // broadcast callback
         for (var i = 0; i < callbacks.length; i++) {
             callbacks[i](service);
         }
@@ -424,7 +424,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         for (var i = 0; i < onOpenCallbacks.length; i++) {
             onOpenCallbacks[i]();
         }
-        // TODO - chain the onLocalServices / hello with defer.resolve 
+        // TODO - chain the onLocalServices / hello with defer.resolve
         // at the end
     }
     ;
@@ -468,7 +468,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // the special $get method called when
     // a service gets instantiated for the 1st time?
     // it also represents config's view of the provider
-    // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to 
+    // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to
     // retrieve the object to inject
     this.$get = function($q, $log) {
         this.connect = function(url, proxy) {
@@ -480,7 +480,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (url != undefined && url != null) {
                 this.url = url;
             }
-            // FIXME - make a hello() protocol !!                       
+            // FIXME - make a hello() protocol !!
             // setting up initial callback - this possibly will change
             // when the framework creates a "hello()" method
             // FIXME - optimize and subscribe on {gatewayName}.onLocalService ???
@@ -517,7 +517,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 //left kind of a mess here (e.g. temp and mod below), MaVo
                 var deferred = $q.defer();
                 if (!msgInterfaces.hasOwnProperty(name)) {
-                    //console.log(name + ' getMsgInterface ');               
+                    //console.log(name + ' getMsgInterface ');
                     msgInterfaces[name] = {
                         "name": name,
                         "temp": {},
@@ -555,7 +555,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 // console.log('onMethodMap Yay !!');
                                 // method maps are dynamically created binding functions
                                 // created to allow direct access from html views to a msg.{method}
-                                // bound to a service 
+                                // bound to a service
                                 try {
                                     var methodMap = msg.data[0];
                                     for (var method in methodMap) {
@@ -623,7 +623,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
                                 _self.sendTo(name, "broadcastState");
                                 // below we subscribe to the Angular callbacks - where anything sent
-                                // back from the webgui with our service's name on the message - send 
+                                // back from the webgui with our service's name on the message - send
                                 // it to our onMsg method
                                 var controller = arguments[0];
                                 //console.log(this);
@@ -691,7 +691,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 if (connected) {
                     return true;
                 }
-                _self.connect();        
+                _self.connect();
                 return deferred.promise;
             },
             isConnected: function() {
@@ -726,7 +726,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeToMethod: _self.subscribeToMethod,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
             promise: _self.promise // FIXME - no sql like interface
-            // put/get value to and from webgui service            
+            // put/get value to and from webgui service
         }
         return service;
     }
