@@ -12,6 +12,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 
@@ -232,10 +233,17 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
         undocked.getContentPane().add(display);
 
         // icon
-        URL url = getClass().getResource(Util.getResourceDir() + "/mrl_logo_36_36.png");
-        Toolkit kit = Toolkit.getDefaultToolkit();
-        Image img = kit.createImage(url);
-        undocked.setIconImage(img);
+        // URL url = getClass().getResource(Util.getResourceDir() +
+        // "/mrl_logo_36_36.png");
+        URL url = null;
+        try {
+          url = new URL("file:///" + Util.getResourceDir() + File.separator + "mrl_logo_36_36.png");
+          Toolkit kit = Toolkit.getDefaultToolkit();
+          Image img = kit.createImage(url);
+          undocked.setIconImage(img);
+        } catch (Exception e) {
+          log.error("could not find icon", e);
+        }
 
         if (tabData.x != 0 || tabData.y != 0) {
           undocked.setLocation(tabData.x, tabData.y);
