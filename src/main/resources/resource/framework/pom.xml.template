@@ -117,7 +117,7 @@
 					<classpathScope>test</classpathScope>
 					<arguments>
 						<!-- TODO: fix this with the proper location -->
-			            <argument>src/main/resources/resource/framework/</argument>
+			            <argument>target/classes/resource/framework</argument>
           			</arguments>
 				</configuration>
 			</plugin>
