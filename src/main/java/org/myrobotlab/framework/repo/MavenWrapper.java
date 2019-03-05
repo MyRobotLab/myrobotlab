@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -130,6 +131,7 @@ public class MavenWrapper extends Repo implements Serializable {
 
     deps.append("<dependencies>\n\n");
 
+    Set<String> listedDeps = new HashSet<String>();
     for (String serviceType : serviceTypes) {
       ServiceType service = sd.getServiceType(serviceType);
 
@@ -143,7 +145,12 @@ public class MavenWrapper extends Repo implements Serializable {
       StringBuilder dep = new StringBuilder();
       dep.append(String.format("<!-- %s begin -->\n", service.getSimpleName()));
       for (ServiceDependency dependency : dependencies) {
-
+        String depKey = dependency.getOrgId() + "-" + dependency.getArtifactId() + "-" + dependency.getVersion();
+        if (listedDeps.contains(depKey)) {
+          dep.append("<!-- Duplicate entry for " + depKey + " skipping -->\n");
+          continue;
+        }
+        listedDeps.add(depKey);
         dep.append("  <dependency>\n");
         dep.append(String.format("    <groupId>%s</groupId>\n", dependency.getOrgId()));
         dep.append(String.format("    <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
