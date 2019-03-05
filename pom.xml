@@ -360,13 +360,7 @@
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-  <dependency>
-    <groupId>inmoov.fr</groupId>
-    <artifactId>inmoov</artifactId>
-    <version>1.1.5</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- Duplicate entry for inmoov.fr-inmoov-1.1.8 skipping -->
 <!-- Duplicate entry for inmoov.fr-jm3-model-1.0.0 skipping -->
 <!-- IntegratedMovement end -->
 
@@ -1537,7 +1531,7 @@
 					<classpathScope>test</classpathScope>
 					<arguments>
 						<!-- TODO: fix this with the proper location -->
-			            <argument>src/main/resources/resource/framework/</argument>
+			            <argument>target/classes/resource/framework</argument>
           			</arguments>
 				</configuration>
 			</plugin>
