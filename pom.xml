@@ -45,7 +45,7 @@
         <repository>
           <id>bintray2</id>
           <name>bintray2</name>
-          <url>https://dl.bintray.com/stephengold/jme3utilities</url>
+          <url>https://dl.bintray.com</url>
         </repository>
         <!-- all other mrl deps  -->
         <repository>
@@ -250,33 +250,6 @@
   </dependency>
 <!-- Deeplearning4j end -->
 
-<!-- Deeplearning4j2 begin -->
-  <dependency>
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta3</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- Deeplearning4j2 end -->
-
 <!-- DocumentPipeline begin -->
   <dependency>
     <groupId>org.apache.tika</groupId>
@@ -341,21 +314,11 @@
     <version>1.8.3</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-lang3</artifactId>
-    <version>3.3.2</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- HtmlFilter end -->
 
 <!-- HtmlParser begin -->
-  <dependency>
-    <groupId>org.jsoup</groupId>
-    <artifactId>jsoup</artifactId>
-    <version>1.8.3</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.jsoup-jsoup-1.8.3 skipping -->
 <!-- HtmlParser end -->
 
 <!-- ImapEmailConnector begin -->
@@ -392,35 +355,19 @@
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
   <dependency>
     <groupId>inmoov.fr</groupId>
     <artifactId>inmoov</artifactId>
-    <version>1.1.8</version>
+    <version>1.1.5</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
-  <dependency>
-    <groupId>inmoov.fr</groupId>
-    <artifactId>jm3-model</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- Duplicate entry for inmoov.fr-jm3-model-1.0.0 skipping -->
 <!-- IntegratedMovement end -->
 
 <!-- JFugue begin -->
@@ -458,54 +405,27 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
-  <groupId>com.simsilica</groupId>
-  <artifactId>lemur</artifactId>
-  <version>1.11.0</version>
-  <type>pom</type>
-</dependency>
-<dependency>
-  <groupId>com.simsilica</groupId>
-  <artifactId>lemur-proto</artifactId>
-  <version>1.10.0</version>
-  <type>pom</type>
-</dependency>  
-
+    <groupId>com.simsilica</groupId>
+    <artifactId>lemur</artifactId>
+    <version>1.11.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.simsilica</groupId>
+    <artifactId>lemur-proto</artifactId>
+    <version>1.10.0</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-bullet</artifactId>
     <version>3.2.2-stable</version>
     <scope>provided</scope>
   </dependency>
- 
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-bullet-native</artifactId>
     <version>3.2.2-stable</version>
-    <scope>provided</scope>
-  </dependency>  
-  
-  <!-- 
-  <dependency>
-    <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-jbullet</artifactId>
-    <version>3.2.2-stable</version>
-    <scope>provided</scope>
-  </dependency>    
-   -->
-  
-  
-  <!-- 
-  <dependency>
- 	 <groupId>jme3utilities</groupId>
- 	 <artifactId>Minie</artifactId>
- 	 <version>0.6.2</version>
- 	 <type>pom</type>
-  </dependency>
-   -->
-  <dependency>
-    <groupId>de.jarnbjo</groupId>
-    <artifactId>j-ogg-all</artifactId>
-    <version>1.0.0</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -515,9 +435,9 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-plugins</artifactId>
-    <version>3.2.2-stable</version>
+    <groupId>de.jarnbjo</groupId>
+    <artifactId>j-ogg-all</artifactId>
+    <version>1.0.0</version>
     <scope>provided</scope>
   </dependency>
 <!-- JMonkeyEngine end -->
@@ -563,28 +483,33 @@
     <version>2.1.3</version>
     <scope>provided</scope>
   </dependency>
-<!-- LeapMotion end -->
-
-<!-- LocalSpeech begin -->
   <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
+    <groupId>leapmotion</groupId>
+    <artifactId>leap-win64</artifactId>
+    <version>2.1.3</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
   <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
+    <groupId>leapmotion</groupId>
+    <artifactId>leap-mac64</artifactId>
+    <version>2.1.3</version>
     <scope>provided</scope>
+    <type>zip</type>
   </dependency>
   <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
+    <groupId>leapmotion</groupId>
+    <artifactId>leap-linux64</artifactId>
+    <version>2.1.3</version>
     <scope>provided</scope>
+    <type>zip</type>
   </dependency>
+<!-- LeapMotion end -->
+
+<!-- LocalSpeech begin -->
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.microsoft</groupId>
     <artifactId>tts</artifactId>
@@ -595,25 +520,9 @@
 <!-- LocalSpeech end -->
 
 <!-- MarySpeech begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>marytts</artifactId>
@@ -932,25 +841,9 @@
 <!-- MarySpeech end -->
 
 <!-- MimicSpeech begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>mycroftai.mimic</groupId>
     <artifactId>mimic_win64</artifactId>
@@ -979,25 +872,9 @@
 <!-- MyoThalmic end -->
 
 <!-- NaturalReaderSpeech begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
 <!-- NaturalReaderSpeech end -->
 
 <!-- OculusRift begin -->
@@ -1066,12 +943,7 @@
     <version>0.3.10</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-lang3</artifactId>
-    <version>3.3.2</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
   <dependency>
     <groupId>net.sf.jipcam</groupId>
     <artifactId>jipcam</artifactId>
@@ -1098,6 +970,13 @@
     <groupId>opencv</groupId>
     <artifactId>opencv_classifiers</artifactId>
     <version>0.0.1</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
+    <groupId>opencv</groupId>
+    <artifactId>opencv_facedetectdnn</artifactId>
+    <version>1.0.0</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
@@ -1151,25 +1030,9 @@
 <!-- Osc end -->
 
 <!-- Polly begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-core</artifactId>
@@ -1194,22 +1057,7 @@
     <version>1.11.118</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-lang3</artifactId>
-    <version>3.3.2</version>
-    <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpcore</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-        </exclusion>
-      </exclusions>
-  </dependency>
+<!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- Polly end -->
 
 <!-- ProgramAB begin -->
@@ -1226,12 +1074,7 @@
     <version>0.0.8.4</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.json</groupId>
-    <artifactId>json</artifactId>
-    <version>20090211</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.json-json-20090211 skipping -->
   <dependency>
     <groupId>commons-io</groupId>
     <artifactId>commons-io</artifactId>
@@ -1380,12 +1223,7 @@
     <version>7.4.0</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>commons-io</groupId>
-    <artifactId>commons-io</artifactId>
-    <version>2.5</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
   <dependency>
     <groupId>mrl-solr</groupId>
     <artifactId>mrl-solr-data</artifactId>
@@ -1446,25 +1284,13 @@
     <version>1.8.0</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.tensorflow</groupId>
-    <artifactId>libtensorflow</artifactId>
-    <version>1.8.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.tensorflow</groupId>
-    <artifactId>libtensorflow_jni_gpu</artifactId>
-    <version>1.8.0</version>
-    <scope>provided</scope>
-  </dependency>
 <!-- Tensorflow end -->
 
 <!-- TesseractOcr begin -->
   <dependency>
     <groupId>org.bytedeco.javacpp-presets</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>3.05.01-1.4.1</version>
+    <version>4.0.0-rc2-1.4.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- TesseractOcr end -->
@@ -1497,25 +1323,9 @@
 <!-- Twitter end -->
 
 <!-- VoiceRss begin -->
-  <dependency>
-    <groupId>org.myrobotlab.audio</groupId>
-    <artifactId>voice-effects</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
-  <dependency>
-    <groupId>javazoom</groupId>
-    <artifactId>jlayer</artifactId>
-    <version>1.0.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.googlecode.soundlibs</groupId>
-    <artifactId>mp3spi</artifactId>
-    <version>1.9.5.4</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.voicerss</groupId>
     <artifactId>tts</artifactId>
@@ -1563,12 +1373,7 @@
 <!-- Wii end -->
 
 <!-- WiiDar begin -->
-  <dependency>
-    <groupId>wiiusej</groupId>
-    <artifactId>wiiusej</artifactId>
-    <version>wiiusej</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for wiiusej-wiiusej-wiiusej skipping -->
 <!-- WiiDar end -->
 
 <!-- WikiDataFetcher begin -->
@@ -1604,24 +1409,9 @@
         </exclusion>
       </exclusions>
   </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.9.5</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.9.5</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-annotations</artifactId>
-    <version>2.9.5</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.9.5 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.9.5 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.9.5 skipping -->
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->
@@ -1746,8 +1536,8 @@
 					<mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
 					<classpathScope>test</classpathScope>
 					<arguments>
-					<!-- generate it into the target directory for inclusion in the jar -->
-					<argument>target/classes/resource/framework</argument>
+						<!-- TODO: fix this with the proper location -->
+			            <argument>src/main/resources/resource/framework/</argument>
           			</arguments>
 				</configuration>
 			</plugin>
