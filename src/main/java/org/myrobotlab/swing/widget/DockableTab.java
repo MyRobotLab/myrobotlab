@@ -237,7 +237,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
         // "/mrl_logo_36_36.png");
         URL url = null;
         try {
-          url = new URL("file:///" + Util.getResourceDir() + File.separator + "mrl_logo_36_36.png");
+          url = new URL("file:///" + Util.getResourceDir() + "/mrl_logo_36_36.png");
           Toolkit kit = Toolkit.getDefaultToolkit();
           Image img = kit.createImage(url);
           undocked.setIconImage(img);
