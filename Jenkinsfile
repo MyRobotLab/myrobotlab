@@ -1,3 +1,5 @@
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
+
 node {
    // for examples :
    // https://jenkins.io/doc/pipeline/examples/
@@ -9,9 +11,9 @@ node {
    def mvnHome
    stage('Preparation') { // for display purposes
       // Get some code from a GitHub repository
-      // checkout scm
+      checkout scm
       // git 'https://github.com/MyRobotLab/myrobotlab.git'
-      git url: 'https://github.com/MyRobotLab/myrobotlab.git', branch: 'develop'
+      // git url: 'https://github.com/MyRobotLab/myrobotlab.git', branch: 'develop'
       
       sh 'git rev-parse --abbrev-ref HEAD > GIT_BRANCH'
       git_branch = readFile('GIT_BRANCH').trim()
