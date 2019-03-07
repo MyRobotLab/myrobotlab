@@ -443,7 +443,7 @@ public class RemoteAdapter extends Service implements Gateway {
     meta.addCategory("connectivity", "network", "framework");
     // 2.1.3
     // meta.addDependency("org.atmosphere.nettosphere", "2.3.0");
-    meta.addDependency("org.atmosphere", "wasync", "2.1.3");
+    // meta.addDependency("org.atmosphere", "wasync", "2.1.3"); provided by Runtime
     return meta;
   }
 
