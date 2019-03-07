@@ -1,0 +1,13 @@
+<div>
+   <div class="col-xs-3">
+    <button ng-click="connect()"  class="btn btn-default" ng-init="count=0">{{connectText}}</button><br>
+     battery level {{batteryLevel}}<br>
+     locked {{locked}}<br>
+   </div>
+   <div class="col-xs-3">pitch {{myoData.pitch}}<br> roll {{myoData.roll}}<br> yaw {{myoData.yaw}}
+    <! -- input type="text" class="form-control" ng-model="connectUrl" ng-disabled="intervalDisabled" /-->
+   </div>
+   <div class="col-xs-3">timestamp {{myoData.timestamp}}<br>pose {{pose}}
+    <!-- input type="text" class="form-control" ng-type="number" ng-model="interval" ng-disabled="intervalDisabled" / -->
+   </div>
+</div>

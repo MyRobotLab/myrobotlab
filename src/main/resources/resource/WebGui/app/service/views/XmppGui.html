@@ -1,0 +1,49 @@
+
+<div class="row">
+<!--
+<div class="col-md-1">
+ <img ng-src="../{{isConnectedImage}}.png" />
+</div>
+-->
+
+<div class="col-md-6">
+    <img width="20" ng-src="../{{isConnectedImage}}.png" /> {{username}}<br/>
+    host <input class="form-control" type="text" ng-model="hostname" ng-disabled="isConnected"/>
+    port <input class="form-control" type="text" ng-model="port" size="3" ng-disabled="isConnected"/>
+    username <input class="form-control" type="text" ng-model="username" ng-disabled="isConnected"/>
+    password <input class="form-control" type="password" ng-model="password" ng-disabled="isConnected"/>
+</div>
+
+<div class="col-md-6">
+contacts
+<table class="table">
+  <tr ng-repeat="contact in contacts">    
+    <td><input type="checkbox"  ng-model="sendToContacts[contact.user]"></td>
+    <td>{{ contact.user }}</td>
+    <!-- <td>{{ contact.presence }}</td> -->
+    <td><img ng-src="{{contact.presence == 'available' && '../connected.png' || '../disconnected.png'}}"/ width="20"></td>
+  </tr>
+</table>
+{{sendToContacts}}
+</div>
+</div>
+
+<div class="row">
+  <div class="col-md-2">    
+    <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(hostname, port, username, password)">connect</button></span>
+    <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="msg.disconnect()">disconnect</button></span>
+    <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="prepareSend()">send</button></span>
+  </div>
+  <div class="col-md-10">    
+  </div>
+</div>
+<div class="row">
+    <div class="col-md-12">        
+          <textarea class="form-control" ng-model="sendInput" rows="5" id="sendInput"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">        
+          <textarea class="form-control" ng-model="log" rows="5" id="log" ng-disabled="true"></textarea>
+    </div>
+</div>

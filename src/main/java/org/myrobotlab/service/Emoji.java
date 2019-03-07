@@ -29,6 +29,8 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 // emotionListener
+// Links
+// - http://googleemotionalindex.com/
 public class Emoji extends Service
     implements TextListener, EventHandler, StateListener /* , StateHandler */ {
 

@@ -1,0 +1,24 @@
+<div class="modal-header">
+    <!--header-->
+    <h3 class="modal-title">
+        <img ng-src="{{::panel.simpleName}}.png" alt="" width="24">
+        <b>{{::panel.name}}</b>
+        <div class="pull-right">{{::panel.simpleName}}</div>
+    </h3>
+</div>
+<div class="modal-body">
+    <!--body-->
+    <div ng-if="panel.templatestatus == 'loaded'">
+        <div service-body panel="panel"></div>
+    </div>
+    <div ng-if="panel.templatestatus == 'notfound'">
+        <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;&nbsp;servicegui not found
+    </div>
+    <div ng-if="panel.templatestatus == 'loading'">
+        <i class="glyphicon glyphicon-refresh"></i>&nbsp;&nbsp;loading servicegui ...
+    </div>
+</div>
+<div class="modal-footer">
+    <!--footer-->
+    <button class="btn btn-primary" ng-click="close()">close</button>
+</div>

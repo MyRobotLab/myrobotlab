@@ -1,0 +1,36 @@
+<div class="row">
+  <div class="col-lg-12">
+
+   <!-- simple dropdown -->
+  <div class="input-group">
+  
+   <span class="input-group-btn">
+         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName,deviceBus,deviceAddress)">attach</button>  
+         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
+   </span>
+   
+  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerLabel"><!-- FIXME - type-ahead -->          
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{controllerName}}<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)">{{possibleController}}</li>
+      </ul>
+  </span>
+
+  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBusLabel"><!-- FIXME - type-ahead -->        
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceBus}}<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibledeviceBus in deviceBusList" ng-click="setDeviceBus(possibledeviceBus)">{{possibledeviceBus}}</li>
+      </ul>
+  </span>
+  
+  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddressLabel"><!-- FIXME - type-ahead -->     
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+    <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceAddress}}<span class="caret"></span></a>
+    <ul uib-dropdown-menu>
+    <li ng-repeat="possibleDeviceAddress in deviceAddressList" ng-click="setDeviceAddress(possibleDeviceAddress)">{{possibleDeviceAddress}}</li>
+    </ul>
+  </span>
+         
+  </div>

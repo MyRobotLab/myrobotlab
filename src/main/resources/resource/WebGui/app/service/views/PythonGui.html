@@ -1,0 +1,74 @@
+<!-- file menu button bar begin -->
+<div class="btn-group">
+<div ng-intro-options="IntroOptions" ng-intro-method="CallMe"
+		     ng-intro-oncomplete="CompletedEvent" ng-intro-onexit="ExitEvent"
+		     ng-intro-onchange="ChangeEvent" ng-intro-onbeforechange="BeforeChangeEvent"
+		     ng-intro-onafterchange="AfterChangeEvent"
+		     ng-intro-autostart="ShouldAutoStart"></div>
+
+    <!-- python example resource scripts begin -->
+    <div class="btn-group" uib-dropdown is-open="status.isopen">
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>	
+    <ul uib-dropdown-menu>
+      <li ng-repeat="(key, value) in service.exampleUrls" ng-class="navClass('{{key}}')"> <a href='' ng-click="msg.loadPyRobotLabServiceScript(key)">{{key}}</a>       
+        </li>
+    </ul>
+	</div>
+    <!-- python example resource scripts end -->
+
+    <!-- python open resource scripts begin -->
+    <div class="btn-group" uib-dropdown is-open="status.isopen">
+    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">open</button>	
+    <ul uib-dropdown-menu>      
+      <li ng-repeat="script in service.localPythonFiles" ng-class="navClass('{{script}}')"> <a href='' ng-click="msg.loadUserScript(script)">{{script}}</a>       
+        </li>
+    </ul>
+	</div>
+    <!-- python open resource files end -->
+
+    <!-- python example resource files end -->
+
+  <button type="button" class="btn btn-default" ng-click="exec()"><span class="glyphicon glyphicon-play"></span>execute</button>
+  <button type="button" class="btn btn-default" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
+  <button type="button" class="btn btn-default" ng-click="msg.saveCurrentScript()"><span class="glyphicon glyphicon-save"></span>save</button>
+  
+</div>
+<!-- file menu button bar end theme:'twilight',--> 
+<br/>
+
+<form class="form-inline">
+  <div class="form-group">
+    <label for="location">script location</label>
+    <input type="text" class="form-control" id="location" ng-model="service.localScriptDir"/>
+    <button type="button" class="btn btn-default" ng-click="msg.setLocalScriptDir(service.localScriptDir)">update</button>
+  </div>
+</form>
+
+<br/>
+Active index: {{ activeTabIndex  }}  script count: {{ Object.keys(scripts).length }} <br />
+            
+<input class="btn btn-default" type="button" value="Add Script" ng-click="addScript()" />
+
+<uib-tabset active="activeTabIndex">
+	<uib-tab ng-repeat="(key, value) in scripts" index="$index + 1" heading="{{key}}" select="tabSelected(value)">
+	 
+		<div ng-model="scripts[key].code" style="height: 300px;width: 100%;" id="$index" ui-ace="{
+		                                       useWrapMode : false,
+		                                       showGutter: true,		                                       
+                                               theme:'chrome',
+		                                       mode: 'python',
+		                                       firstLineNumber: 1,
+		                                       onLoad: aceLoaded,		                                       
+		                                       onChange: aceChanged}"></div>
+		
+	</uib-tab>
+</uib-tabset>
+
+<!-- {{activeScript}} -->
+
+<!-- FIXME - make debug window directive -->
+<hr/>
+
+<textarea ng-model="output" id="output" class="col-lg-12" readonly scroll-glue></textarea>	
+<textarea  id="x" class="col-lg-12"/>
+

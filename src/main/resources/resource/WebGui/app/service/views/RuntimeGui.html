@@ -1,0 +1,18 @@
+<div class="col-lg-12">
+    <b>{{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}</b>
+</div>
+<div class="col-lg-12">
+    <form class="form-inline">
+        <input class="form-control" type="text" ng-model="newName" placeholder="name">
+        <input class="form-control" type="text"
+               ng-model="newType"
+               placeholder="Service Type"
+               uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}"
+               typeahead-min-length="0"
+               typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+        <button class="btn btn-default" ng-click="msg.start(newName, newType.name); newName = ''; newType = '';">start service</button>
+    </form>
+</div>
+<div class="col-lg-12">
+    <button class="btn btn-default" ng-click="msg.install()">install all services</button>
+</div>

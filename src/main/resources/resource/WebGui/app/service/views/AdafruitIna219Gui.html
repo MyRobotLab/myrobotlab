@@ -1,0 +1,51 @@
+<div class="row">
+  <div class="col-lg-12">
+
+   <!-- simple dropdown -->
+  <div class="input-group">
+  
+   <span class="input-group-btn">
+         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName,deviceBus,deviceAddress)">attach</button>  
+         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
+   </span>
+   
+  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerLabel"><!-- FIXME - type-ahead -->          
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{controllerName}}<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)">{{possibleController}}</li>
+      </ul>
+  </span>
+
+  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBusLabel"><!-- FIXME - type-ahead -->        
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceBus}}<span class="caret"></span></a>
+      <ul uib-dropdown-menu>
+        <li ng-repeat="possibledeviceBus in deviceBusList" ng-click="setDeviceBus(possibledeviceBus)">{{possibledeviceBus}}</li>
+      </ul>
+  </span>
+  
+  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddressLabel"><!-- FIXME - type-ahead -->     
+  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
+    <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceAddress}}<span class="caret"></span></a>
+    <ul uib-dropdown-menu>
+    <li ng-repeat="possibleDeviceAddress in deviceAddressList" ng-click="setDeviceAddress(possibleDeviceAddress)">{{possibleDeviceAddress}}</li>
+    </ul>
+   </span>
+   
+   <span class="input-group-btn"
+     <button class="btn btn-default" ng-disabled="!isAttached"  ng-click="msg.refresh()">refresh</button>
+   </span>
+
+  </div>
+
+<div class="input-group">
+  <span class="input-group-addon">busVoltage</span>
+  <input type="text" class="form-control" ng-readonly="true" ng-model="busVoltage" uib-tooltip="Voltage in mV">
+  <span class="input-group-addon">shuntVoltage</span>
+  <input type="text" class="form-control" ng-readonly="true" ng-model="shuntVoltage" uib-tooltip="Voltage across the shunt in mV">
+  <span class="input-group-addon">current</span>
+  <input type="text" class="form-control" ng-readonly="true" ng-model="current" uib-tooltip="Current in mA">
+  <span class="input-group-addon">power</span>
+  <input type="text" class="form-control" ng-readonly="true" ng-model="power" uib-tooltip="Power in mW">
+</div>
