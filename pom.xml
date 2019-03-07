@@ -1124,15 +1124,6 @@
   </dependency>
 <!-- Rekognition end -->
 
-<!-- RemoteAdapter begin -->
-  <dependency>
-    <groupId>org.atmosphere</groupId>
-    <artifactId>wasync</artifactId>
-    <version>2.1.3</version>
-    <scope>provided</scope>
-  </dependency>
-<!-- RemoteAdapter end -->
-
 <!-- Runtime begin -->
   <dependency>
     <groupId>com.google.code.gson</groupId>
@@ -1150,9 +1141,9 @@
     <version>4.5.2</version>
   </dependency>
   <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpcore</artifactId>
-    <version>4.4.6</version>
+    <groupId>org.atmosphere</groupId>
+    <artifactId>wasync</artifactId>
+    <version>2.1.3</version>
   </dependency>
 <!-- Runtime end -->
 
@@ -1403,9 +1394,24 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.9.5 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.9.5 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.9.5 skipping -->
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.9.5</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->
