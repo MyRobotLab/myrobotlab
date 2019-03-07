@@ -1,0 +1,43 @@
+.popover{
+	width:auto!important; 
+	max-width: none
+}
+
+#statusDisplay{
+    margin: 0 !important;
+    padding: 0 !important;  
+}
+
+.navbar{	 
+	 margin: 0 !important;
+   /* padding: 0 !important;  */
+}
+
+#newService{
+ left:0;
+ width:470px;   
+}
+
+.panel-default{
+}    
+
+.poptop{
+	overflow: visible;
+	/* position:relative;*/
+	background-color: orchid;
+    z-index: 99999999999999;
+}
+
+.panel-footer{
+
+}
+
+body {
+  width: 100%;
+}
+
+table, th, td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}

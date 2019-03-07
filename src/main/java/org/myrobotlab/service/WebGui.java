@@ -234,7 +234,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public Integer port;
-  
+
   String address = "0.0.0.0";
 
   public Integer sslPort;
@@ -256,7 +256,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // FIXME - allow Protobuf/Thrift/Avro
   // FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
-  public String startURL = "http://localhost:%d";
+  public String startURL = "http://localhost:%d/#/main";
 
   transient final ConcurrentHashMap<String, HttpSession> sessions = new ConcurrentHashMap<String, HttpSession>();
 
@@ -370,7 +370,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // ================ Broadcaster end ===========================
 
   public Config.Builder getConfig() {
-    
+
     Config.Builder configBuilder = new Config.Builder();
     try {
       boolean secureTest = false;
@@ -385,23 +385,48 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     configBuilder
         /*
-         * did not work :( .resource(
+         * FIXME - need a JarServlet handler to extract during runtime (not
+         * worth it) did not work :( .resource(
          * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource")
          * .resource(
          * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGui" )
          */
+        // .mappingPath("/app")
+    
+        // FIXME - find out how collisions of resources (priority) is handled ???
 
         .resource("/stream", stream)
         // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
-        // for the inmmoov 
-        .resource("../myrobotlab/src/main/resources/resource/WebGui")
-        
-        // for debugging
-        .resource("./src/main/resources/resource/WebGui").resource("./src/main/resources/resource")
-        // for runtime - after extractions
-        .resource("./resource/WebGui").resource("./resource")
+        // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources :(
+        // for access after extracting
+        .resource("./resource/WebGui/app").resource("./resource")
 
+        // for debugging
+        //v- this makes http://localhost:8888/#/main worky
+        .resource("./src/main/resources/resource/WebGui/app") 
+        //v- this makes http://localhost:8888/react/index.html worky
+        .resource("./src/main/resources/resource/WebGui") 
+        //v- this makes http://localhost:8888/Runtime.png worky
+        .resource("./src/main/resources/resource")
+        
+
+        // for future references of resource - keep the html/js reference to
+        // "resource/x" not "/resource/x" which breaks moving the app
+        // FUTURE !!!
+        .resource("./src/main/resources")
+
+        // can't seem to make this work .mappingPath("resource/")
+
+        // TO SUPPORT LEGACY - BEGIN
+        // for debugging
+        /*
+        .resource("./src/main/resources/resource/WebGui/app")
+        .resource("./resource/WebGui/app")
+        */
+
+        
+        
         // Support 2 APIs
         // REST - http://host/object/method/param0/param1/...
         // synchronous DO NOT SUSPEND
@@ -409,17 +434,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         // if Jetty is in the classpath it will use it by default - we
         // want to use Netty
-        /*org.atmosphere.websocket.maxTextMessageSize*/
-        /* noWorky :(
-        .initParam("org.atmosphere.websocket.maxTextMessageSize","-1")
-        .initParam("org.atmosphere.websocket.maxBinaryMessageSize","-1")
-        
-        .initParam(ApplicationConfig.WEBSOCKET_MAXTEXTSIZE,"-1")
-        .initParam(ApplicationConfig.WEBSOCKET_MAXBINARYSIZE,"-1")
-        .initParam(ApplicationConfig.WEBSOCKET_BUFFER_SIZE,"1000000")
-        */
-        
-        
+        /* org.atmosphere.websocket.maxTextMessageSize */
+        /*
+         * noWorky :(
+         * .initParam("org.atmosphere.websocket.maxTextMessageSize","-1")
+         * .initParam("org.atmosphere.websocket.maxBinaryMessageSize","-1")
+         * 
+         * .initParam(ApplicationConfig.WEBSOCKET_MAXTEXTSIZE,"-1")
+         * .initParam(ApplicationConfig.WEBSOCKET_MAXBINARYSIZE,"-1")
+         * .initParam(ApplicationConfig.WEBSOCKET_BUFFER_SIZE,"1000000")
+         */
+
         .initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
         .initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
     // ips
@@ -913,8 +938,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         info("{} currently running on port {} - stop first, then start");
         return;
       }
-      
-      
+
       nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
       sleep(1000); // needed ?
 
@@ -1011,7 +1035,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
   }
-  
+
   public void setAddress(String address) {
     this.address = address;
   }
