@@ -960,7 +960,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   E-Stop(Latching): causes the Roboclaw to shutdown until the unit is power cycled.
   E-Stop: Holds the Roboclaw in shutdown until the E-Stop signal is cleared.
   Voltage Clamp: Sets the signal pin as an output to drive an external voltage clamp circuit
-  Home(M1 & M2): will trigger the specific motor to stop and the encoder count to reset to 0.
+  Home(M1 and M2): will trigger the specific motor to stop and the encoder count to reset to 0.
    * </pre>
    */
   public void setModes(int s3, int s4, int s5) {
@@ -1486,9 +1486,9 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * returned as requested then the byte array is returned. Synchronized on the
    * single serial resource.
    * 
-   * @param readDataSize
-   * @param sendData
-   * @return
+   * @param bytesRequested - bytes requested
+   * @param sendData - parameter values
+   * @return the byte array 
    */
   synchronized public byte[] sendReadPacket(int bytesRequested, int... sendData) {
     try {
@@ -2344,8 +2344,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   /**
    * <pre>
-  67 - Buffered Drive M1 & M2 with signed Speed, Accel, Deccel and Position
-  Move M1 & M2 positions from their current positions to the specified new positions and hold the
+  67 - Buffered Drive M1 and M2 with signed Speed, Accel, Deccel and Position
+  Move M1 and M2 positions from their current positions to the specified new positions and hold the
   new positions. Accel sets the acceleration value and deccel the decceleration value. QSpeed sets
   the speed in quadrature pulses the motor will run at after acceleration and before decceleration.
   Send: [Address, 67, AccelM1(4 bytes), SpeedM1(4 Bytes), DeccelM1(4 bytes),

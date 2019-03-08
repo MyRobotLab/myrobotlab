@@ -329,6 +329,7 @@ public abstract class OpenCVFilter implements Serializable {
 
   /**
    * put'ing all the data into output and/or display
+   * @param processed - the already processed image
    */
   public void postProcess(IplImage processed) {
     data.put(processed);

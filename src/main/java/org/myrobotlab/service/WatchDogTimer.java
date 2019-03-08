@@ -266,9 +266,7 @@ public class WatchDogTimer extends Service {
    * default method to "check-in" - a service calls this function to say
    * "everything is ok"
    * 
-   * @watchDogName
-   * 
-   * @return
+   * @param watchDogTimerName - name of timer
    */
   public void checkPoint(String watchDogTimerName) {
     checkPoint(watchDogTimerName, getName());
@@ -279,7 +277,6 @@ public class WatchDogTimer extends Service {
    * "everything is ok"
    * 
    * @param checkPointName
-   * @return
    */
 
   public void checkPoint(String watchDogTimerName, String checkPointName) {
@@ -291,9 +288,8 @@ public class WatchDogTimer extends Service {
    * "everything is ok" the next time it will "check-in" is in future
    * milliseconds
    * 
-   * @param timerName
-   * @param future
-   * @return
+   * @param timerName - name of timer
+   * @return - the timer
    */
   public Timer onCheckPoint(String timerName) {
 

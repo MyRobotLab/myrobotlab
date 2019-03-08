@@ -252,20 +252,12 @@ public class Servo extends Service implements ServoControl {
   /**
    * defaultDisableDelayNoVelocity this make sense if velocity == -1 a timer is
    * launched to delay disable
-   * 
-   * @param defaultDisableDelayNoVelocity
-   *          - milliSeconds
-   * @default - 10000
    */
   public Integer disableDelayNoVelocity;
 
   /**
-   * disableDelayIfVelocity this make sense if velocity > 0 a timer is launched
+   * disableDelayIfVelocity this make sense if velocity &gt; 0 a timer is launched
    * for an extra delay to disable
-   * 
-   * @param disableDelayIfVelocity
-   *          - milliSeconds
-   * @default - 1000
    */
   public Integer disableDelay;
   private boolean moving;
@@ -839,14 +831,14 @@ public class Servo extends Service implements ServoControl {
 
   /**
    * The attachServoController method is used to "attach" 2 services together,
-   * the ServoControl & the ServoController. All the necessary data needed to
+   * the ServoControl and the ServoController. All the necessary data needed to
    * attach this Servo to the servo controller should be available. First we
    * check to see if this controller is already attached. If it is we are done.
    * If not we proceed to attach the controller and at the end of the function
    * we call the controller.attach(this) to give the controller an opportunity
    * to do its attach logic.
    * 
-   * https://www.google.com/search?q=attach+myrobotlab&oq=attach+myrobotlab
+   * https://www.google.com/search?q=attach+myrobotlab and oq=attach+myrobotlab
    */
   public void attachServoController(Attachable attachable) throws Exception {
     
@@ -1375,13 +1367,7 @@ public class Servo extends Service implements ServoControl {
     subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
-  /**
-   * unsynchronize 2 sevos. If the servo is running in sync already, this method
-   * will stop the synchronization
-   * 
-   * @param args
-   * @throws InterruptedException
-   */
+
   public void unsync(ServoControl sc) {
     // remove
     this.removeServoEventListener(this);

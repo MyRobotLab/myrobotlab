@@ -109,7 +109,10 @@ public class CharacterIterator implements DataSetIterator {
     initializeOffsets();
   }
 
-  /** A minimal character set, with a-z, A-Z, 0-9 and common punctuation etc */
+  /** A minimal character set, with a-z, A-Z, 0-9 and common punctuation etc 
+   * 
+   * @return - the minimal char set
+   */
   public static char[] getMinimalCharacterSet() {
     List<Character> validChars = new LinkedList<>();
     for (char c = 'a'; c <= 'z'; c++)
@@ -128,7 +131,10 @@ public class CharacterIterator implements DataSetIterator {
     return out;
   }
 
-  /** As per getMinimalCharacterSet(), but with a few extra characters */
+  /** As per getMinimalCharacterSet(), but with a few extra characters
+   * 
+   * @return - the default char set
+   */
   public static char[] getDefaultCharacterSet() {
     List<Character> validChars = new LinkedList<>();
     for (char c : getMinimalCharacterSet())

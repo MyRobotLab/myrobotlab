@@ -816,7 +816,7 @@ public class Deeplearning4j extends Service {
    * Fit a model against a training set Note: iterator is reset before fitting
    * 
    * @param trainIter
-   * @param vgg16Transfer
+   * @param model
    */
   public void runFitter(DataSetIterator trainIter, ComputationGraph model) {
     trainIter.reset();

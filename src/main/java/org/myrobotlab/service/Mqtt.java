@@ -102,9 +102,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
   /**
    * Two types of connection are supported tcp:// for a TCP connection and
-   * ssl:// , which is weird, that its not mqtt:// & mqtts:// :P
+   * ssl:// , which is weird, that its not mqtt:// and mqtts:// :P
    */
-  // String url = "tcp://iot.eclipse.org:1883";
   String url = "tcp://broker.hivemq.com:1883";
 
   /**

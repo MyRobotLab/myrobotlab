@@ -152,7 +152,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
    * creating a new sub-class classifier..
    * 
    * e.g. if their is a directory of "fruit" a person can quickly make
-   * subdirectories of apples, banannas, & oranges
+   * subdirectories of apples, banannas, and oranges
    * 
    * the filter will see these subdirectores - make and train a classifier then
    * dump incoming classified data back into the directory with an underscore

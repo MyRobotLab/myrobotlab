@@ -267,7 +267,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
   }
 
   /**
-   * FIXME - do we want to publish 2 channels ? events & states ? - states has a
+   * FIXME - do we want to publish 2 channels ? events and states ? - states has a
    * superset of info, state not as much state change - new state is published
    * 
    * @param state - incoming state to handle

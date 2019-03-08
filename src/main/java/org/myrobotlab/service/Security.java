@@ -208,7 +208,7 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * get a key/secret from the secure store
    * 
-   * @param keyName
+   * @param name - the name of the security key
    * @return
    */
   public String getKey(String name) {
