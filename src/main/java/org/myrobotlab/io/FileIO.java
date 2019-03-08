@@ -1135,10 +1135,12 @@ public class FileIO {
   static public final byte[] resourceToByteArray(String src) {
 
     // this path assumes in a jar ?
-    String filename = "/resource/" + src;
-    log.info("looking for {}", filename);
+    //  String filename = "/resource/" + src;
+    log.info("looking for Resource {}", src);
     InputStream isr = null;
     if (isJar()) {
+      //  this path assumes in a jar ?  ensure it's forward slashes
+      String filename = "/resource/" + src.replace("\\", "/");
       isr = FileIO.class.getResourceAsStream(filename);
     } else {
       String localFilename = Util.getResourceDir() + File.separator + src;
@@ -1153,7 +1155,7 @@ public class FileIO {
     byte[] data = null;
     try {
       if (isr == null) {
-        log.error("can not find resource [{}]", filename);
+        log.error("can not find resource [{}]", src);
         return null;
       }
       data = toByteArray(isr);
