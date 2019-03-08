@@ -442,7 +442,7 @@ public class Emoji extends Service
 
       Emoji emoji = (Emoji) Runtime.start("emoji", "Emoji");
       emoji.fire("ill-event");
-      /*
+      
       emoji.fire("clear-event");
       Service.sleep(2000);
       emoji.fire("ill-event");
@@ -450,7 +450,7 @@ public class Emoji extends Service
       emoji.fire("ill-event");
       Service.sleep(2000);
       emoji.fire("ill-event");
-      */
+     
 
       /**
        * <pre>
