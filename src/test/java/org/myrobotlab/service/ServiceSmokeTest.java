@@ -24,7 +24,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-@Ignore
+
 public class ServiceSmokeTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
@@ -65,6 +65,7 @@ public class ServiceSmokeTest {
 
     // just don't want a swing gui opening up in the unit test.
     blacklist.add("org.myrobotlab.service.SwingGui");
+    blacklist.add("org.myrobotlab.service.DiyServo");
 
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();
