@@ -256,12 +256,7 @@ public class WatchDogTimer extends Service {
   }
 
   /**
-   * default method to "check-in" - a service calls this function to say
-   * "everything is ok"
-   * 
-   * @watchDogName
-   * 
-   * @return
+   * default checkpoint sent
    */
   public void checkPoint() {
     checkPoint(getName(), getName());

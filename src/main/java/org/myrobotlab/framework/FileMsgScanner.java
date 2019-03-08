@@ -67,11 +67,7 @@ public class FileMsgScanner extends Thread {
     return filesExist;
   }
 
-  /**
-   * @param is
-   *          IntputStream to byte array
-   * @return byte array
-   */
+  
   static public final byte[] toByteArray(File file) {
     FileInputStream is = null;
     ByteArrayOutputStream baos = new ByteArrayOutputStream();

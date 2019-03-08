@@ -270,8 +270,8 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
    * FIXME - do we want to publish 2 channels ? events & states ? - states has a
    * superset of info, state not as much state change - new state is published
    * 
-   * @param event
-   * @throws Exception
+   * @param state - incoming state to handle
+   * @throws Exception - possible state exception
    */
   @Override
   public void handleState(State state) throws Exception {

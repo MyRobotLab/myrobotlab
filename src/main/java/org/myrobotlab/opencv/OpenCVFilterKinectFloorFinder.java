@@ -116,7 +116,7 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
    *    a(x-x0) + b(y-y0) + c(z-z0) = 0
    *    
    *    x0,y0,z0 is a point on the plane
-   *    <a,b,c> : vector perpendicular to the plane
+   *    a,b,c : vector perpendicular to the plane
    * 
    * 
    * &#64;param depth

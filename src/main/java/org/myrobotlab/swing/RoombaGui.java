@@ -82,10 +82,14 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
   Roomba roombacomm; // in MRL'land can't have direct access to this - must
   // message it
 
-  /** Returns an ImageIcon, or null if the path was invalid. */
+  /**
+   * Returns an ImageIcon, or null if the path was invalid.
+   * @param path - path to the location of the image
+   * @param description - description of the image
+   * @return the image
+   */
   protected static ImageIcon createImageIcon(String path, String description) {
-
-    return Util.getImageIcon("Roomba/" + path);
+    return Util.getImageIcon("Roomba/" + path, description);
   }
 
   public RoombaGui(final String boundServiceName, final SwingGui myService) {

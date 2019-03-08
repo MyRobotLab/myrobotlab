@@ -39,11 +39,11 @@ public interface Mapper {
    * Merges non null values of "other" mapper with this mapper's null fields.
    * useful for setting values in MotorControl from "default" values in
    * MotorControllers. Since the MotorControl doesn't know what would be an
-   * appropriate mapping value e.g -1,1 => ?,? the minY & maxY are left null
+   * appropriate mapping value e.g -1,1 =&lt; ?,? the minY and maxY are left null
    * until a "merge" is done in the attach of the AbstractMotorController.
    * 
    * When a Sabertooth motor controller is "attached" to a MotorControl the
-   * merge produces -1,1 => -127, 127 which is appropriate.
+   * merge produces -1,1 =&lt; -127, 127 which is appropriate.
    * 
    * @param mapperInterface
    */
