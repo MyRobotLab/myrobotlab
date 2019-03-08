@@ -10,7 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
@@ -134,74 +133,6 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
    * one and only full screen
    */
   transient JFrame fullscreen = null;
-
-  // Displays an image in FullScreen mode.
-  // @param source = path.
-  /*
-   * public void displayFullScreen(String source) {
-   * 
-   * BufferedImage image = loadImage(source);
-   * 
-   * if (fullscreen == null) { fullscreen = new JFrame();
-   * 
-   * JPanel imagePanel = new JPanel(new BorderLayout()); ImageIcon imageIcon =
-   * new ImageIcon(image); fullscreenImageLabel = new JLabel(imageIcon); //
-   * fullscreenImageLabel = new JLabel(); imagePanel.add(fullscreenImageLabel,
-   * BorderLayout.CENTER); imagePanel.setBackground(Color.BLACK); // FIXME -
-   * variable color
-   * 
-   * fullscreen.add(imagePanel);
-   * 
-   * // FIXME - some of these can be "reset" with member values // so they will
-   * need to be out of this null checking if statement
-   * fullscreen.setUndecorated(true); // TODO - look into the details of this //
-   * even for non-fullscreen fullscreen.setBackground(new Color(1.0f, 1.0f,
-   * 1.0f, 0.5f)); fullscreen.setBackground(Color.BLACK);
-   * fullscreen.getContentPane().setBackground(Color.BLACK); // It sets the size
-   * of the Frame to the size of the picture, if not it // will // be build a
-   * boarder to the right end of the screen. //
-   * fullscreen.setSize(image.getWidth() + wOffset, image.getHeight() + //
-   * hOffset); // getResolution(); // fullscreen.setLocation(image.getwOffset(),
-   * image.gethOffset()); fullscreen.toFront();
-   * gd.setFullScreenWindow(fullscreen); //
-   * fullscreen.setLocation(image.getwOffset(), image.gethOffset());
-   * fullscreen.setVisible(true);
-   * 
-   * // Exit program on mouse click fullscreen.addMouseListener(new
-   * MouseListener() { public void mouseClicked(MouseEvent e) {
-   * gd.setFullScreenWindow(null); fullscreen.dispose(); }
-   * 
-   * @Override public void mouseEntered(MouseEvent arg0) { // TODO
-   * Auto-generated method stub
-   * 
-   * }
-   * 
-   * @Override public void mouseExited(MouseEvent arg0) { // TODO Auto-generated
-   * method stub
-   * 
-   * }
-   * 
-   * @Override public void mousePressed(MouseEvent arg0) { // TODO
-   * Auto-generated method stub
-   * 
-   * }
-   * 
-   * @Override public void mouseReleased(MouseEvent arg0) { // TODO
-   * Auto-generated method stub
-   * 
-   * } });
-   * 
-   * }
-   * 
-   * ImageIcon icon = null;
-   * 
-   * try { icon = new ImageIcon(image); } catch (Exception e) {
-   * log.error("could not set image icon to {}", source); return; }
-   * 
-   * fullscreenImageLabel.setIcon(icon);
-   * 
-   * // frames.add(f); }
-   */
 
   transient JLabel fullscreenImageLabel = null;
 
@@ -430,12 +361,12 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
 
   @Override
   public void mouseEntered(MouseEvent e) {
-    log.info("mouseEntered {}", e);
+    log.debug("mouseEntered {}", e);
   }
 
   @Override
   public void mouseExited(MouseEvent e) {
-    log.info("mouseExited {}", e);
+    log.debug("mouseExited {}", e);
   }
 
   Cursor lastCursor = null;
@@ -488,29 +419,26 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
  
   int mouseXoffset = 0;
   int mouseYoffset = 0;
-
-  private Point initialDragPoint;
   
   @Override
   public void mousePressed(MouseEvent e) {
-    log.info("mousePressed {}", e);
+    log.debug("mousePressed {}", e);
     mouseXoffset=e.getX();
     mouseYoffset=e.getY();
     lastCursor = currentFrame.getCursor();
     currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
-    initialDragPoint = e.getPoint();
   }
   
   @Override
   public void mouseDragged(MouseEvent e) {
-    log.info("mouseDragged {}", e);  
+    log.debug("mouseDragged {}", e);  
     currentFrame.setLocation(currentFrame.getX()+e.getX()-mouseXoffset, currentFrame.getY()+e.getY()-mouseYoffset);
     currentFrame.repaint();
   }
 
   @Override
   public void mouseMoved(MouseEvent e) {
-    log.info("mouseMoved {}", e);
+    log.debug("mouseMoved {}", e);
   }
 
   public static void main(String[] args) {
