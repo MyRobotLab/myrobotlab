@@ -90,7 +90,7 @@ public class ServiceSmokeTest {
       String serviceName = serviceType.toLowerCase();
       ServiceInterface s = Runtime.start(serviceName, serviceType);
       assertNotNull(s);
-      log.error("serviceType {}", s.getName());
+      // log.error("serviceType {}", s.getName());
       testSerialization(s);
       // TODO: validate the service is released!
       s.releaseService();
