@@ -841,8 +841,8 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * add filter by type e.g. addFilter("Canny","Canny")
    * 
-   * @param filterType
-   * @return
+   * @param filterName - name of filter
+   * @return the filter
    */
   public OpenCVFilter addFilter(String filterName) {
     String filterType = filterName.substring(0, 1).toUpperCase() + filterName.substring(1);

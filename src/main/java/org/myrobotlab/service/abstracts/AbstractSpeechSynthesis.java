@@ -238,12 +238,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * Set a key & value for some required key info, can be both user as a key and
+   * Set a key and value for some required key info, can be both user as a key and
    * key secret - required keys are returned by getKeyNames() For Cloud Speech
    * Synthesis systems which typically require keys
-   * 
-   * @param keyId
-   * @param keyIdSecret
+   * @param keyName key name
+   * @param keyValue the value
    */
   public void setKey(String keyName, String keyValue) {
     Security security = Security.getInstance();
@@ -556,10 +555,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * process speaking - generate the text to be spoken or play a cache file if
    * appropriate
    * 
-   * @param toSpeak
-   * @param block
-   * @return
-   * @throws UnsupportedEncodingException
+   * @param audioData - the audoData for parameters
+   * @param speak - the text to speak
+   * @return block - to block or not
    */
   public AudioData process(AudioData audioData, String speak, boolean block) {
 

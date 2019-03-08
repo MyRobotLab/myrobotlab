@@ -73,7 +73,7 @@ import javax.swing.JComponent;
 /**
  * Example demonstrating how to process and display data from the Kinect.
  *
- * @author Peter Abeles & Mats Önnerby
+ * @author Peter Abeles and Mats Önnerby
  * 
  *         This program currently calculates the Odometry ( how much the camera
  *         has moved as translations and rotations ). Second stage is to

@@ -29,6 +29,8 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 // emotionListener
+// Links
+// - http://googleemotionalindex.com/
 public class Emoji extends Service
     implements TextListener, EventHandler, StateListener /* , StateHandler */ {
 
@@ -276,7 +278,7 @@ public class Emoji extends Service
     // FIXME implement
     display.setColor("#000");
     try {
-      display.display2(filename);
+      display.display(filename);
     } catch (Exception e) {
       log.error("displayFullScreen threw", e);
     }
@@ -440,7 +442,7 @@ public class Emoji extends Service
 
       Emoji emoji = (Emoji) Runtime.start("emoji", "Emoji");
       emoji.fire("ill-event");
-      /*
+      
       emoji.fire("clear-event");
       Service.sleep(2000);
       emoji.fire("ill-event");
@@ -448,7 +450,7 @@ public class Emoji extends Service
       emoji.fire("ill-event");
       Service.sleep(2000);
       emoji.fire("ill-event");
-      */
+     
 
       /**
        * <pre>

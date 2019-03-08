@@ -237,9 +237,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public boolean isAttached = false;
 
   /**
-   * @Mats - added by GroG - was wondering if this would help, probably you need
+   * @author Mats - added by GroG - was wondering if this would help, probably you need
    *       a reverse index too ?
-   * @GroG - I only need servoNameToPin yet. To be able to move at a set speed a
+   * @author GroG - I only need servoNameToPin yet. To be able to move at a set speed a
    *       few extra values are needed
    */
 

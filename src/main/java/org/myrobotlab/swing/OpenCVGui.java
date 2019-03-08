@@ -446,7 +446,10 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
    * the gui is operating "out of process" a serialized (zombie) process is sent
    * to provide the updated state information. Typically "publishState" is the
    * function which provides the event for onState.
-   */
+   * 
+   *  @param opencv - the OpenCV service
+   *  
+   */  
   public void onState(final OpenCV opencv) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override

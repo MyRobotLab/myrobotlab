@@ -1,0 +1,32 @@
+<div class="container-fluid">
+    <div class="row">
+        <div ng-repeat="panel in panels"
+             service-ctrl-directive
+             panel="panel">
+            <!--maybe move this to somewhere general?-->
+        </div>
+        <!--1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right-->
+        <!--migrate to Angular UI Bootstrap when they offer one-->
+        <div class="col-sm-2">
+            <ul class="nav nav-tabs nav-stacked nav-pills" role="tablist">
+                <li ng-repeat="panel in panels"
+                    ng-class="{'active': view_tab == panel.name}">
+                    <!--maybe move this to somewhere general? - seperate from tabs first-->
+                    <a class="btn pull-left" ng-click="changeTab(panel.name)" href="">
+                        <img ng-src="{{::panel.simpleName}}.png" alt="" width="16">
+                        <b>{{::panel.name}}</b>
+                        <!-- div class="pull-right">{{::panel.simpleName}}</div -->
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-sm-10">
+            <div class="tab-content">
+                <div ng-repeat="panel in panels" ng-show="view_tab == panel.name"
+                     service-body
+                     panel="panel">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

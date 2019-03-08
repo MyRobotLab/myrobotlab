@@ -307,12 +307,14 @@ public class Agent extends SimpleAgent {
     frameMeter.setUpdateRate(rate);
   }
 
-  /** Sets the kinematic model for this agent */
+  /**
+   * Sets the kinematic model for this agen
+   * @param kinematicModel - the model to set
+   */
   protected void setKinematicModel(KinematicModel kinematicModel) {
     this.kinematicModel = kinematicModel;
   }
 
-  /** set acceleration applied by motors . */
   @Override
   protected void setMotorsAcceleration(double dt) {
 
@@ -335,8 +337,8 @@ public class Agent extends SimpleAgent {
   }
 
   /**
-   * @param rv
-   *          Sets rotational velocity in radians per second.
+   * Sets rotational velocity in radians per second.
+   * @param rv - the rv to set
    */
   public final void setRotationalVelocity(double rv) {
     // because it's one of the default kinematic fucntions we provide it in

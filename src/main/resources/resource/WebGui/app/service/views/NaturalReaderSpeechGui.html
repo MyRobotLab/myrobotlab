@@ -1,0 +1,21 @@
+{{service.voice.name}}
+
+<input type="text" class="form-control" ng-model="text"/>
+
+<nav class="navbar >
+    <div class="dropdown navbar-nav">
+        <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+    </div>
+
+    <div class="dropdown navbar-nav">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">voices &nbsp;<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li ng-repeat="voice in service.voices">
+                <a href="#" ng-click="setVoice(voice)">{{voice.name}} {{voice.gender}} {{voice.local}}  {{voice.description}}</a>
+            </li>            
+        </ul>
+    </div>
+</nav>
+
+

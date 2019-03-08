@@ -475,8 +475,9 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     if (scripts.containsKey(currentScriptName)) {
       EditorPanel p = scripts.get(currentScriptName);
       // FIXME - don't create if not necessary
-      if (FileUtil.saveAs(jframe, p.getText(), currentScriptName)) {
+      if (FileUtil.saveAs(jframe, p.getText(), currentScriptName) != null) {
         currentScriptName = FileUtil.getLastFileSaved();
+        // FIXME - single method :( (check save()
         scripts.remove(p);
         editorTabs.removeTab(currentScriptName);
         EditorPanel np = addNewEditorPanel(new Script(currentScriptName, p.getText()));
@@ -492,17 +493,11 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     String oldName = getSelected();
     EditorPanel p = scripts.get(oldName);
     FileUtil.save(jframe, p.getText(), oldName);
-    /*
-     * if (scripts.containsKey(oldName)) { EditorPanel p = scripts.get(oldName);
-     * if (FileUtil.save(jframe, p.getText(), oldName)) {
-     * 
-     * String currentScriptName = FileUtil.getLastFileSaved();
-     * scripts.remove(p); editorTabs.remove(p.getDisplay()); EditorPanel np =
-     * addNewEditorPanel(new Script(currentScriptName, p.getText()));
-     * editorTabs.setSelectedComponent(np.getDisplay()); log.info("here");
-     * 
-     * } } else { log.error(String.format("cant saveFile %s", oldName)); }
-     */
+    String currentScriptName = FileUtil.getLastFileSaved();
+    scripts.remove(oldName);
+    editorTabs.removeTab(oldName);
+    EditorPanel np = addNewEditorPanel(new Script(currentScriptName, p.getText()));
+    editorTabs.setSelectedComponent(np.getDisplay());   
   }
 
 }

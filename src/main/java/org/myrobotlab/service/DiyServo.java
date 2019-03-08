@@ -292,7 +292,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   /**
    * Round pos values based on this digit count useful later to compare
-   * target>pos
+   * target &gt; pos
    */
   int roundPos = 0;
 
@@ -391,10 +391,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   transient Object moveToBlocked = new Object();
   /**
    * disableDelayGrace : a timer is launched after targetpos reached
-   * 
-   * @param disableDelayGrace
-   *          - milliSeconds
-   * @default - 1000
    */
   public int disableDelayGrace = 1000;
 
@@ -1239,8 +1235,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * unsynchronize 2 sevos. If the servo is running in sync already, this method
    * will stop the synchronization
    * 
-   * @param args
-   * @throws InterruptedException
+   * @param sc - servo control
    */
   public void unsync(ServoControl sc) {
     // remove
