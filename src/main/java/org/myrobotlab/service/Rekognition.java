@@ -108,8 +108,9 @@ public class Rekognition extends Service {
   /**
    * returns label from file
    * 
-   * @param filename
-   * @return
+   * 
+   * @param path - the path
+   * @return - labels
    * @throws FileNotFoundException
    * @throws IOException
    * @throws URISyntaxException
@@ -133,11 +134,11 @@ public class Rekognition extends Service {
   }
 
   /**
-   * 
-   * @param file
-   *          - image file
-   * @throws IOException
+   * get labels
+   * @param inputStream - the stream of data
+   * @return - labels found
    * @throws FileNotFoundException
+   * @throws IOException
    */
   public List<Label> getLabels(InputStream inputStream) throws FileNotFoundException, IOException {
     ByteBuffer imageBytes;

@@ -284,7 +284,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   /**
    * setAutoDisable tell the servo to disable when position reached this make
-   * sense only if velocity > 0 if velocity == -1 : a timer is launched to delay
+   * sense only if velocity &gt; 0 if velocity == -1 : a timer is launched to delay
    * disable
    * 
    * @param autoDisable
@@ -304,8 +304,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * - 180 a global moveToBlocking is a method that use multiple servo at same
    * time and wait every servo for last position arrived
    * 
-   * @param pos
-   *          - position to move to
    */
   void waitTargetPos();
 

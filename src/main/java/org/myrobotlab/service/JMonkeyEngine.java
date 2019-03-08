@@ -740,7 +740,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   /**
    * the all purpose find by name method
    * 
-   * @param string
+   * @param name - name of node
+   * @param startNode - the node to start search
    * @return
    */
   public Spatial find(String name, Node startNode) {

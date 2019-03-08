@@ -66,7 +66,7 @@ import org.slf4j.Logger;
  * cv.input.Frame
  * cv.input.IplImage        =&gt; 
  * cv.canny.IplImage        =&gt; result of canny filter
- * cv.canny.BufferedImage   =&gt; conversion of IplImage -> BufferedImage
+ * cv.canny.BufferedImage   =&gt; conversion of IplImage -&gt; BufferedImage
  * cv.display.BufferedImage &lt;= result of conversion
  * cv.output.IplImage
  * 
@@ -193,10 +193,10 @@ public class OpenCVData extends CvData {
   }
 
   /**
-   * Order of fetching a display try => displayFilterName try => output try =>
+   * Order of fetching a display try =&gt; displayFilterName try =&gt; output try =&gt;
    * input
    * 
-   * @return
+   * @return - the buffered image
    */
   public BufferedImage getBufferedImage() {
     return getBufferedImage(null);
@@ -227,7 +227,7 @@ public class OpenCVData extends CvData {
    * FIXME - logic to convert from selected or convert from input should
    * probably NOT be here, but be controlled by the filters more directly
    * 
-   * @return
+   * @return - the buffered image
    */
   public BufferedImage getDisplay() {
     BufferedImage bi = null;
@@ -282,7 +282,7 @@ public class OpenCVData extends CvData {
    * exist it return the original input - most other type converters should use
    * this method
    * 
-   * @return
+   * @return the image
    */
   public IplImage getImage(String filterKey) {
 
@@ -321,7 +321,7 @@ public class OpenCVData extends CvData {
   /**
    * gets kinect depth image
    * 
-   * @return
+   * @return - the kinect image in opencv form
    */
   public IplImage getKinectDepth() {
     return (IplImage) sources.get(String.format("%s.depth", OpenCV.INPUT_KEY));
@@ -330,7 +330,7 @@ public class OpenCVData extends CvData {
   /**
    * gets kinect rgb image
    * 
-   * @return
+   * @return - the kinect rgb image in opencv form
    */
   public IplImage getKinectVideo() {
     return (IplImage) sources.get(String.format("%s.video", OpenCV.INPUT_KEY));
@@ -406,8 +406,8 @@ public class OpenCVData extends CvData {
    * This is the typical method filters will use to store their output, it has a
    * key with their filter's name and an "output" reference.
    * 
-   * @param keyPart
-   * @param object
+   * @param keyPart - the key of interest
+   * @param object - the value
    */
   public void put(String keyPart, Object object) {
     sources.put(String.format("%s.output.%s", name, keyPart), object);

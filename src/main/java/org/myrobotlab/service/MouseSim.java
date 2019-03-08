@@ -72,7 +72,7 @@ public class MouseSim extends Service {
    * simulate pressing and releasing several mouse buttns after the desired
    * duration The buttons are released in reverse order they were pressed.
    * 
-   * @param keycode
+   * @param keycodes
    *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
    *          is your button)
    * @param duration
@@ -87,7 +87,7 @@ public class MouseSim extends Service {
   /**
    * simulate pressing several mouse buttons (does NOT release the buttons!)
    * 
-   * @param keycode
+   * @param keycodes
    *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
    *          is your button)
    */
@@ -100,7 +100,7 @@ public class MouseSim extends Service {
   /**
    * simulate releasing several mouse buttons (does NOT press the buttons!)
    * 
-   * @param keycode
+   * @param keycodes
    *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
    *          is your button)
    */
@@ -114,7 +114,7 @@ public class MouseSim extends Service {
    * simulate releasing several mouse buttons (does NOT press the buttons!)
    * Releases buttons in reversed order they were specified.
    * 
-   * @param keycode
+   * @param keycodes
    *          array of buttoncodes of buttons (use InputEvent.VK_XXX, where XXX
    *          is your button)
    */

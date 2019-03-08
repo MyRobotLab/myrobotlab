@@ -156,12 +156,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   /**
    * This method has the side effect of switching which bot your are currently chatting with.
-   * @param text
-   *          - the query string to the bot brain
    * @param username
+   *          - the query string to the bot brain
+   * @param text
    *          - the user that is sending the query
-   * @param botName
-   *          - the name of the bot you which to get the response from
    * @return the response for a user from a bot given the input text.
    */
   public Response getResponse(String username, String text) {
@@ -318,9 +316,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Add a map / value for the current session
    * 
-   * @param mapName
-   * @param mapKey
-   * @param mapValue
+   * @param mapName - the map name
+   * @param key - the key 
+   * @param value - the value
    */
   public void addToMap(String mapName, String key, String value) {
     // add an entry to the map.
@@ -374,13 +372,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
-   * @param username
-   *          - current username
-   * @param text
-   *          - text to get a response for
-   * @param delay
-   *          - min amount of time that must have transpired since the last
-   *          response.
+   * @param userName - current username
+   * @param text - text to get a response
+   * @param delay - min amount of time that must have transpired since the last
    * @return the response
    */
   public Response getResponse(String userName, String text, Long delay) {
@@ -601,14 +595,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * Load the AIML 2.0 Bot config and start a chat session. This must be called
    * after the service is created.
    * 
-   * @param path
-   *          - The path to the ProgramAB directory where the bots aiml resides
-   * @param username
-   *          - The new user name
-   * @param botName
-   *          - The name of the bot to load. (example: alice2)
-   * @param locale
-   *          - The locale of the bot to ensure the aiml is loaded (mostly for
+   * @param path - he path to the ProgramAB directory where the bots aiml resides
+   * @param userName - The new user name
+   * @param botName - The name of the bot to load. (example: alice2)
+   * @param locale - The locale of the bot to ensure the aiml is loaded (mostly for
    *          Japanese support)
    */
   public void startSession(String path, String userName, String botName, Locale locale) {

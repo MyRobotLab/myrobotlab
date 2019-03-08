@@ -84,7 +84,7 @@ public class GoogleCloud extends Service {
    * Detects entities,sentiment and syntax in a document using the Vision API.
    * @param args input args
    * @throws Exception on errors while closing the client.
-   * @throws IOExceptionon Input/Output errors.
+   * @throws IOException errors.
    */
   public static void main(String[] args) throws Exception, IOException {
     argsHelper(args, System.out);

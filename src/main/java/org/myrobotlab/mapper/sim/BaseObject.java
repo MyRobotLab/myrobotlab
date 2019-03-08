@@ -246,7 +246,10 @@ public abstract class BaseObject {
     material.setAmbientColor(color);
   }
 
-  /** Sets the containing world. */
+  /** Sets the containing world.
+   * 
+   * @param world - the world
+   */
   protected void setWorld(World world) {
     this.world = world;
   }

@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 /**
  * Local OS speech service
  * 
- * windows & macos compatible
+ * windows and macos compatible
  *
  * @author moz4r
  *
@@ -100,7 +100,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * overridden because mac is silly for not being mp3 & ms tts is a mess
+   * overridden because mac is silly for not being mp3 and ms tts is a mess
    * because it appends 0.mp3 :P
    */
   public String getAudioCacheExtension() {

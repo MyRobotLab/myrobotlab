@@ -1758,6 +1758,14 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.0.1</version>
+        <configuration>
+           <groups>
+            <group>
+              <title>MyRobotLab Services</title>
+              <packages>org.myrobotlab.service</packages>
+            </group>
+           </groups>
+    	</configuration>
       </plugin>
     </plugins>
     </reporting>

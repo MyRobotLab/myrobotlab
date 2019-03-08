@@ -45,7 +45,7 @@ public interface Mapper {
    * When a Sabertooth motor controller is "attached" to a MotorControl the
    * merge produces -1,1 =&lt; -127, 127 which is appropriate.
    * 
-   * @param mapperInterface
+   * @param other - other mapper
    */
   void merge(Mapper other);
 

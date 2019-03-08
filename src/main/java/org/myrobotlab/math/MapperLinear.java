@@ -167,7 +167,7 @@ public final class MapperLinear implements Serializable, Mapper {
   }
 
   /**
-   * sets mapping and both input & output limits
+   * sets mapping and both input and output limits
    */
   @Override
   public void map(Double minX, Double maxX, Double minY, Double maxY) {

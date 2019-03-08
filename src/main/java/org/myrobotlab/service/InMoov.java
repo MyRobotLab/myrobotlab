@@ -2177,7 +2177,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
    * TODO : use system locale set language for InMoov service used by chatbot +
    * ear + mouth
    * 
-   * @param i
+   * @param l
    *          - format : java Locale
    */
   public boolean setLanguage(String l) {

@@ -1709,7 +1709,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   /**
    * Arduino's servo.attach(pin) which is just energizing on a pin To be
-   * consistent & transparent - method should be servoEnable
+   * consistent and transparent - method should be servoEnable
    */
   @Override
   @Deprecated
@@ -1720,7 +1720,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   /**
-   * Stops the pwm on the pin. To be consistent & transparent - method should be
+   * Stops the pwm on the pin. To be consistent and transparent - method should be
    * servoDisable
    */
   @Override

@@ -107,7 +107,7 @@ public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
   /**
    * <pre>
    * 
-   * FIXME - THIS STILL SUFFERS FROM POLAR => CARTESIAN ERROR !!!
+   * FIXME - THIS STILL SUFFERS FROM POLAR =&gt; CARTESIAN ERROR !!!
    * 
    * function to try to derive the floor plane as a set of 
    * average x, y, depth
