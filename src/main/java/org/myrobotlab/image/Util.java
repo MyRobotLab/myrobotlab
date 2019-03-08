@@ -254,6 +254,22 @@ public class Util {
     // log.info("Returning {}", resourceDir);
     return resourceDir;
   }
+  
+  /**
+   * by default will take the data.dir property if set.
+   * If mrl is running inside of a jar it will use the user.dir + "data" as the directory.
+   * 
+   * @return current data directory
+   */
+  public static String getDataDir() {
+    // first try for the data.dir system property
+    String dataDir = System.getProperty("data.dir");
+    if (dataDir != null) {
+      return dataDir;
+    }    
+    return System.getProperty("user.dir") + File.separator + "data";
+  }
+
 
   /**
    * Check if file exist from current resource directory
