@@ -98,7 +98,7 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
       // 0.0278f);
       // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
       // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
-      display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
+      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -193,8 +193,8 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     frames.clear();
   }
 
-  public void display2(String src) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, null, null, null);
+  public void display(String src) throws MalformedURLException, AWTException {
+    display(src, null, null, null, null, null, null, null);
   }
 
   // FIXME - setIcon
@@ -207,7 +207,7 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   // FIXME - gif animation
   // FIXME - from http/https/localfile OR Resource !!! use getResourceDir
   // FIXME - cache locally /data/DisplayImage/ -> boolean cacheFiles = true;
-  public void display2(String src, Boolean fullscreen, String bgColorStr, Integer width, Integer height, Double scaling, Float alpha, Boolean fadeIn)
+  public void display(String src, Boolean fullscreen, String bgColorStr, Integer width, Integer height, Double scaling, Float alpha, Boolean fadeIn)
       throws MalformedURLException, AWTException {
     Color bgColor = defaultColor;
     if (bgColorStr != null) {
@@ -320,13 +320,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   // @param source = path.
   // @param alpha = Value how much the image is faded float from 0.0 to 1.0.
   public void displayAlpha(String src, float alpha) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, null, alpha, null);
+    display(src, null, null, null, null, null, alpha, null);
   }
 
   // Displays an image by Fading it in.
   // @param source = path.
   public void displayFadeIn(String src) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, null, null, true);
+    display(src, null, null, null, null, null, null, true);
     /*
      * DisplayedImage image = new DisplayedImage(source);
      * log.info("Loading image done"); buildFrame(image);
@@ -337,14 +337,14 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   // @param source = path.
   // @param alpha = Value how much the image is faded float from 0.0 to 1.0.
   public void displayFullScreen(String src) throws MalformedURLException, AWTException {
-    display2(src, true, null, null, null, null, null, null);
+    display(src, true, null, null, null, null, null, null);
   }
 
   // Displays a resized image in FullScreen mode.
   // @param source = path.
   // @param scaling = scale factor to resize the image.
   public void displayScaled(String src, double scaling) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, scaling, null, null);
+    display(src, null, null, null, null, scaling, null, null);
   }
 
   // Exits the Fullscreen mode.
