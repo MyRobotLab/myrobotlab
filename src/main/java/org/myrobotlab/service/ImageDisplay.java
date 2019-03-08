@@ -82,6 +82,29 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     return gd.getDisplayMode().getWidth();
   }
 
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+      // FIXME - get gifs working
+      display.setAlwaysOnTop(true);
+      // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
+      // display.display2("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
+      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png");
+      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
+      // display.displayScaled("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png",
+      // 0.0278f);
+      // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
+      // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
+      display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
   private static BufferedImage resizeImage(BufferedImage originalImage, int width, int height, Integer type) {
     if (type == null) {
       type = originalImage.getType();
@@ -111,7 +134,7 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
 
   float currentAlpha = 0.0f;
 
-  private JFrame currentFrame;
+  transient private JFrame currentFrame;
 
   boolean defaultAlwaysOnTop = false;
 
@@ -138,7 +161,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
 
   int hOffset = 0;
 
-  Timer timer = null;
+  transient Cursor lastCursor = null;
+
+  int mouseXoffset = 0;
+
+  int mouseYoffset = 0;
+
+  transient Timer timer = null;
 
   int wOffset = 0;
 
@@ -360,6 +389,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   }
 
   @Override
+  public void mouseDragged(MouseEvent e) {
+    log.debug("mouseDragged {}", e);  
+    currentFrame.setLocation(currentFrame.getX()+e.getX()-mouseXoffset, currentFrame.getY()+e.getY()-mouseYoffset);
+    currentFrame.repaint();
+  }
+
+  @Override
   public void mouseEntered(MouseEvent e) {
     log.debug("mouseEntered {}", e);
   }
@@ -369,7 +405,19 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     log.debug("mouseExited {}", e);
   }
 
-  Cursor lastCursor = null;
+  @Override
+  public void mouseMoved(MouseEvent e) {
+    log.debug("mouseMoved {}", e);
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+    log.debug("mousePressed {}", e);
+    mouseXoffset=e.getX();
+    mouseYoffset=e.getY();
+    lastCursor = currentFrame.getCursor();
+    currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+  }
 
   @Override
   public void mouseReleased(MouseEvent e) {
@@ -382,20 +430,20 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     return resizeImage(image, scaledWidth, scaledHeight, null);
   }
 
+ 
   public void setAlwaysOnTop(boolean b) {
     defaultAlwaysOnTop = b;
   }
-
   // FIXME - connect !!!
   public void setColor(String string) {
     // TODO Auto-generated method stub
 
   }
-
+  
   public void setFullScreen(boolean b) {
     defaultFullScreen = b;
   }
-
+  
   public void setMultiFrame(boolean b) {
     defaultMultiFrame = b;
   }
@@ -414,53 +462,5 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   public void stopService() {
     super.stopService();
     closeAll();
-  }
-
- 
-  int mouseXoffset = 0;
-  int mouseYoffset = 0;
-  
-  @Override
-  public void mousePressed(MouseEvent e) {
-    log.debug("mousePressed {}", e);
-    mouseXoffset=e.getX();
-    mouseYoffset=e.getY();
-    lastCursor = currentFrame.getCursor();
-    currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
-  }
-  
-  @Override
-  public void mouseDragged(MouseEvent e) {
-    log.debug("mouseDragged {}", e);  
-    currentFrame.setLocation(currentFrame.getX()+e.getX()-mouseXoffset, currentFrame.getY()+e.getY()-mouseYoffset);
-    currentFrame.repaint();
-  }
-
-  @Override
-  public void mouseMoved(MouseEvent e) {
-    log.debug("mouseMoved {}", e);
-  }
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-
-      ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
-      // FIXME - get gifs working
-      display.setAlwaysOnTop(true);
-      // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
-      // display.display2("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
-      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png");
-      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
-      // display.displayScaled("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png",
-      // 0.0278f);
-      // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
-      // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
-      display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
   }
 }

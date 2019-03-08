@@ -25,7 +25,6 @@ import org.slf4j.Logger;
  *
  */
 
-@Ignore
 public class ServiceSmokeTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
@@ -91,6 +90,7 @@ public class ServiceSmokeTest {
       String serviceName = serviceType.toLowerCase();
       ServiceInterface s = Runtime.start(serviceName, serviceType);
       assertNotNull(s);
+      log.error("serviceType {}", s.getName());
       testSerialization(s);
       // TODO: validate the service is released!
       s.releaseService();
