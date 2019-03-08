@@ -239,7 +239,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
    * publishStartSpeaking text since publishStartSpeaking is after a
    * pre-processor/parser
    * 
-   * @param toSpeak
+   * @param toSpeak - speech requested to speak
    */
   public void onSpeechRequested(String toSpeak) {
     lastUtterance.setText(toSpeak);

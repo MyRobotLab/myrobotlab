@@ -1167,9 +1167,7 @@ public class PImage implements PConstants, Cloneable {
     this.cache = null;
   }
 
-  /**
-   * Check to see if two rectangles intersect one another
-   */
+
   protected boolean intersect(int sx1, int sy1, int sx2, int sy2, int dx1, int dy1, int dx2, int dy2) {
     int sw = sx2 - sx1 + 1;
     int sh = sy2 - sy1 + 1;

@@ -64,10 +64,10 @@ import org.slf4j.Logger;
  * <pre>
  * 
  * cv.input.Frame
- * cv.input.IplImage        => 
- * cv.canny.IplImage        => result of canny filter
- * cv.canny.BufferedImage   => conversion of IplImage -> BufferedImage
- * cv.display.BufferedImage <= result of conversion
+ * cv.input.IplImage        =&gt; 
+ * cv.canny.IplImage        =&gt; result of canny filter
+ * cv.canny.BufferedImage   =&gt; conversion of IplImage -> BufferedImage
+ * cv.display.BufferedImage &lt;= result of conversion
  * cv.output.IplImage
  * 
  * 

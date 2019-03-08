@@ -48,7 +48,7 @@ import java.util.List;
 /**
  * Example demonstrating how to process and display data from the Kinect.
  *
- * @author Peter Abeles & Mats Önnerby
+ * @author Peter Abeles and Mats Önnerby
  */
 public class OpenKinectPointCloud {
 

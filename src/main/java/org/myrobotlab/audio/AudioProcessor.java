@@ -323,7 +323,7 @@ public class AudioProcessor extends Thread {
   /**
    * number of samples currently queued to be played
    * 
-   * @return
+   * @return - number of queued samples
    */
   public int getTrackSize() {
     return queue.size();

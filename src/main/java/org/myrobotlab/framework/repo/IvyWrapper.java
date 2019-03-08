@@ -102,7 +102,9 @@ public class IvyWrapper extends Repo implements Serializable {
    * 
    * </pre>
    * 
-   * @return
+   * @param location - location of work directory
+   * @param serviceTypes - list of services to process
+   * 
    */
   public void createBuildFiles(String location, String[] serviceTypes) {
     try {

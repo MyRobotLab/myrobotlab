@@ -233,10 +233,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   /**
    * Returns a document given the doc id from the index if it exists otherwise
-   * null
-   * 
-   * @throws IOException
-   * @throws SolrServerException
+   * @Return - the solr document
    */
   public SolrDocument getDocById(String docId) {
     SolrQuery query = new SolrQuery();

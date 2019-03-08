@@ -228,12 +228,7 @@ public class Util {
   }
 
   public static ImageIcon getImageIcon(String path) {
-    ImageIcon icon = null;
-    String resourcePath = Util.getResourceDir() + File.separator + path;
-    // ImageIcon requries forward slash in the filename (unix/internet style convention)
-    resourcePath = resourcePath.replaceAll("\\\\", "/");
-    icon = new ImageIcon(resourcePath);
-    return icon;
+    return getImageIcon(path, null);
   }
 
   /**
@@ -262,7 +257,7 @@ public class Util {
 
   /**
    * Check if file exist from current resource directory
-   * 
+   * @param element - element to be tested
    * @return boolean
    */
   public static Boolean isExistRessourceElement(String element) {
@@ -460,6 +455,15 @@ public class Util {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  public static ImageIcon getImageIcon(String path, String description) {
+    ImageIcon icon = null;
+    String resourcePath = Util.getResourceDir() + File.separator + path;
+    // ImageIcon requires forward slash in the filename (unix/internet style convention)
+    resourcePath = resourcePath.replaceAll("\\\\", "/");
+    icon = new ImageIcon(resourcePath, description);
+    return icon;
   }
 
 }

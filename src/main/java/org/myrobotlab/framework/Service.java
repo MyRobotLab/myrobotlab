@@ -862,7 +862,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * new overload - mqtt uses this for json encoded MrlListener to process
    * subscriptions
    * 
-   * @param data
+   * @param data - listener callback info
    */
   public void addListener(Map data) {
     // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
@@ -2463,7 +2463,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * resource/{ServiceType} (mrl's static resource directory) 3. check absolute
    * path
    * 
-   * @return
+   * @param filename - file name to get
+   * @return the file to returned or null if does not exist
    */
   public File getFile(String filename) {
     File file = new File(getDataDir() + File.separator + filename);

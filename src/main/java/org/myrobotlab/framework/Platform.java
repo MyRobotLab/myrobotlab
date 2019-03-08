@@ -77,7 +77,7 @@ public class Platform implements Serializable {
    * If the local instance is desired. If its from a serialized instance, the
    * "getters" will be retrieving appropriate info for that serialized instance.
    * 
-   * @return
+   * @return - return the local instance of the current platform
    */
   public static Platform getLocalInstance() {
 
@@ -384,6 +384,23 @@ public class Platform implements Serializable {
     return String.format("%s.%d.%s", arch, bitness, os);
   }
 
+  public String getId() {
+    return id;
+  }
+
+  public String getHostname() {
+    return hostname;
+  }
+
+  public void setId(String newId) {
+    id = newId;
+  }
+
+  public Date getStartTime() {
+    return startTime;
+  }
+  
+
   public static void main(String[] args) {
     try {
 
@@ -398,27 +415,6 @@ public class Platform implements Serializable {
       e.printStackTrace();
       // log.info("Exception: ", e);
     }
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public String getHostname() {
-    return hostname;
-  }
-
-  /**
-   * the one place where the "id" can be set
-   * 
-   * @param argument
-   */
-  public void setId(String newId) {
-    id = newId;
-  }
-
-  public Date getStartTime() {
-    return startTime;
   }
 
 }
