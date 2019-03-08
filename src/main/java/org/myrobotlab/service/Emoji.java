@@ -278,7 +278,7 @@ public class Emoji extends Service
     // FIXME implement
     display.setColor("#000");
     try {
-      display.display2(filename);
+      display.display(filename);
     } catch (Exception e) {
       log.error("displayFullScreen threw", e);
     }
