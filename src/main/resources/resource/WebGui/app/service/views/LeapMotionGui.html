@@ -1,0 +1,102 @@
+<div class="row">
+  <h3>Leap Motion Gui!</h3>
+  This gui publishes the finger angles for either hand. It also provides
+  a relative x,y,z position for the palm. <br />
+
+  <table>
+    <tr>
+      <td>
+        <table>
+          <thead>
+            <tr>
+              <td>Left Hand</td>
+              <td>Angle/Value</td>
+            </tr>
+          </thead>
+          <tr>
+            <td>X</td>
+            <td>{{leapData.leftHand.posX}}</td>
+          </tr>
+          <tr>
+            <td>Y</td>
+            <td>{{leapData.leftHand.posY}}</td>
+          </tr>
+          <tr>
+            <td>Z</td>
+            <td>{{leapData.leftHand.posZ}}</td>
+          </tr>
+          <tr>
+            <td>Thumb</td>
+            <td>{{leapData.leftHand.thumb}}</td>
+          </tr>
+          <tr>
+            <td>Index</td>
+            <td>{{leapData.leftHand.index}}</td>
+          </tr>
+          <tr>
+            <td>Middle</td>
+            <td>{{leapData.leftHand.middle}}</td>
+          </tr>
+          <tr>
+            <td>Ring</td>
+            <td>{{leapData.leftHand.ring}}</td>
+          </tr>
+          <tr>
+            <td>Pinky</td>
+            <td>{{leapData.leftHand.pinky}}</td>
+          </tr>
+
+        </table>
+      </td>
+      <td>
+        <table>
+          <thead>
+            <tr>
+              <td>Right Hand</td>
+              <td>Angle/Value</td>
+            </tr>
+          </thead>
+          <tr>
+            <td>X</td>
+            <td>{{leapData.rightHand.posX}}</td>
+          </tr>
+          <tr>
+            <td>Y</td>
+            <td>{{leapData.rightHand.posY}}</td>
+          </tr>
+          <tr>
+            <td>Z</td>
+            <td>{{leapData.rightHand.posZ}}</td>
+          </tr>
+          <tr>
+            <td>Thumb</td>
+            <td>{{leapData.rightHand.thumb}}</td>
+          </tr>
+          <tr>
+            <td>Index</td>
+            <td>{{leapData.rightHand.index}}</td>
+          </tr>
+          <tr>
+            <td>Middle</td>
+            <td>{{leapData.rightHand.middle}}</td>
+          </tr>
+          <tr>
+            <td>Ring</td>
+            <td>{{leapData.rightHand.ring}}</td>
+          </tr>
+          <tr>
+            <td>Pinky</td>
+            <td>{{leapData.rightHand.pinky}}</td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+
+  <!--     <tr><td>Roll</td><td>{{leapData.leftHand.roll}}</td></tr>
+    <tr><td>Pitch</td><td>{{leapData.leftHand.pitch}}</td></tr>
+    <tr><td>Yaw</td><td>{{leapData.leftHand.yaw}}</td></tr>  -->
+
+</div>

@@ -1,0 +1,70 @@
+<div>
+	<h3>Inverse Kinematics 3D!</h3>
+	<!-- three js stuff in here? -->
+    <h4>Reset Configuration</h4>
+    <input type="submit" ng-click="centerAllJoints()" value="Center All Joints" />
+    <br/>
+	<div id='canvas' />
+	<br />
+	<form novalidate class="search-form">
+		X,Y,Z: <input type="text" ng-model="x" value="1" /><input type="text"
+			ng-model="y" value="1" /><input type="text" ng-model="z" value="1" />
+		<input type="submit" ng-click="moveTo(x,y,z)" value="MoveTo" />
+	</form>
+
+	<br />
+	<!--  Positions : {{positions}}  -->
+	<h3>Positions</h3>
+	<table>
+		<tr ng-repeat="rowContent in positions track by $index">
+			<td>Link</td>
+			<td>x:{{rowContent[0]}}</td>
+			<td>y:{{rowContent[1]}}</td>
+			<td>z:{{rowContent[2]}}</td>
+		</tr>
+	</table>
+	<h3>Angles</h3>
+	<table>
+		<tr ng-repeat="(name,value) in angles">
+			<td>{{name}}</td>
+			<td>{{value}}</td>
+		</tr>
+	</table>
+	<br />
+
+	<h4>Input Calibration (Translation/Rotation Matrix)</h4>
+	<form novalidate class="search-form">
+		<table>
+			<tr>
+				<td>dX</td>
+				<td>dY</td>
+				<td>dZ</td>
+      </tr>
+			<tr>
+				<td><input type="text" ng-model="dx" value="0" /></td>
+				<td><input type="text" ng-model="dy" value="0" /></td>
+				<td><input type="text" ng-model="dz" value="0" /></td>
+		  </tr>
+      <tr>
+        <td>Roll</td>
+        <td>Pitch</td>
+        <td>Yaw</td>
+      </tr>
+			<tr>
+				<td><input type="text" ng-model="roll" value="0" /></td>
+				<td><input type="text" ng-model="pitch" value="0" /></td>
+				<td><input type="text" ng-model="yaw" value="0" /></td>
+			</tr>
+			<tr>
+				<td><input type="submit"
+					ng-click="createInputMatrix(dx,dy,dz,roll,pitch,yaw)" value="Calibrate!" /></td>
+			</tr>
+		</table>
+	</form>
+
+    <h4>TRACKING</h4>  
+    
+    {{tracking}}
+    
+	<br/> That's All Folks!
+</div>

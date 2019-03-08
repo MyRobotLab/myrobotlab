@@ -1,0 +1,158 @@
+<div class="navbar navbar-inverse container-fluid" role="navigation">
+	<!--Status (incl. LED)-->
+	<ul class="nav navbar-nav navbar-left">
+		<li>
+			<!--TODO - green png if connected - if not re-connect button--> <span
+			class="pull-left" ng-if="connected"><img
+				src="../../connected.png" alt=""></span> <span class="pull-left"
+			ng-if="!connected"><img src="../../disconnected.png" alt=""></span>
+			<a class="navbar-brand" href="/">MyRobotLab</a>
+		</li>
+		<li><a href="http://myrobotlab.org"> <!--{{platform.branch}}-->{{platform.arch}}.{{platform.bitness}}.{{platform.os}}
+				{{platform.mrlVersion}}
+		</a></li>
+	</ul>
+
+	<ul class="nav navbar-nav">
+		<!--TODO: Do something! Too many elements in the navbar! -> navbar stacks! -> occupying screen-space! (not everyone has a very big screen)-->
+		<!--quick-start a service-->
+		<li class="dropdown" dropdown=""><a href="#"
+			class="dropdown-toggle" dropdown-toggle="" data-toggle="dropdown">New
+				Service<b class="caret"></b>
+		</a>
+			<ul class="dropdown-menu" role="menu">
+				<li><a href="#">Start a new service</a></li>
+				<li id="newService">
+					<form class="navbar-form">
+						<div class="input-group">
+							<div class="input-group-btn">
+								<input class="form-control" type="text" ng-model="newName"
+									placeholder="name"> <input class="form-control"
+									type="text" ng-model="newType" placeholder="Service Type"
+									uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}"
+									typeahead-min-length="0"
+									typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+								<button class="btn btn-default"
+									ng-click="start(newName, newType);">start</button>
+							</div>
+						</div>
+					</form>
+				</li>
+			</ul> <!-- end of dropdown --></li>
+
+
+		<!--Great Search MaVo !-->
+		<li>
+			<form class="navbar-form" role="search">
+				<div class="input-group">
+					<div class="input-group-btn">
+						<button class="btn btn-default" type="button"
+							tooltip-placement="bottom" uib-tooltip="Hide All"
+							ng-click="showAll(false)">
+							<i class="glyphicon glyphicon-eye-close"></i>
+						</button>
+						<button class="btn btn-default" type="button"
+							tooltip-placement="bottom" uib-tooltip="Show All"
+							ng-click="showAll(true)">
+							<i class="glyphicon glyphicon-eye-open"></i>
+						</button>
+					</div>
+					<input type="text" class="form-control"
+						ng-model="searchSelectedPanel" placeholder="Search"
+						uib-typeahead="panel as panel.name for panel in panels | filter:{name:$viewValue}"
+						typeahead-min-length="0"
+						typeahead-template-url="nav/templates/searchtemplate.html"
+						typeahead-on-select='searchOnSelect($item, $model, $label)'>
+					<div class="input-group-btn">
+						<button class="btn btn-default" type="submit"
+							tooltip-placement="bottom" uib-tooltip="Search">
+							<i class="glyphicon glyphicon-search"></i>
+						</button>
+					</div>
+				</div>
+			</form>
+		</li>
+		<!--Shutdown/Restart-->
+		<li>
+			<form class="navbar-form">
+				<div class="btn-group" uib-dropdown>
+					<button type="button" class="btn btn-default"
+						ng-click="shutdown('shutdown')">
+						<i class="glyphicon glyphicon-off"></i>
+					</button>
+					<button type="button" class="btn btn-default" uib-dropdown-toggle>
+						<span class="caret"></span>
+					</button>
+					<ul uib-dropdown-menu>
+						<li><a href="" ng-click="shutdown('shutdown')"><i
+								class="glyphicon glyphicon-off"></i>&nbsp;&nbsp;Shutdown</a></li>
+						<li><a href="" ng-click="shutdown('restart')"><s><i
+									class="glyphicon glyphicon-repeat"></i>&nbsp;&nbsp;Restart</s></a></li>
+					</ul>
+				</div>
+			</form>
+		</li>
+		<!--More features-->
+		<!-- - About-->
+		<!-- - Help-->
+		<li>
+			<form class="navbar-form">
+				<div class="btn-group" uib-dropdown>
+					<div uib-dropdown-toggle>
+						<button class="btn btn-default" type="submit"
+							tooltip-placement="bottom" uib-tooltip="More features">
+							<i class="glyphicon glyphicon-option-horizontal"></i>
+						</button>
+					</div>
+					<ul uib-dropdown-menu>
+						<li><a href="" ng-click="about()"><i
+								class="glyphicon glyphicon-info-sign"></i>&nbsp;&nbsp;About</a></li>
+						<li><a href="" ng-click="help()"><i
+								class="glyphicon glyphicon-question-sign"></i>&nbsp;&nbsp;Help</a></li>
+						<li><a href="" ng-click="noWorky()"><i
+								class="glyphicon glyphicon-alert"></i>&nbsp;&nbsp;No Worky !</a></li>
+						<li><a href="" ng-click="stateGo('main')"><i
+								class="glyphicon glyphicon-th"></i>&nbsp;&nbsp;Switch to Main</a></li>
+						<li><a href="" ng-click="stateGo('tabs')"><i
+								class="glyphicon glyphicon-th-list"></i>&nbsp;&nbsp;Switch to
+								Tabs</a></li>
+					</ul>
+				</div>
+			</form>
+		</li>		
+	</ul>
+</div><!-- div navbar navbar-inverse container-fluid -->
+
+<!-- end navbar navbar-inverse container-fluid -->
+<div align="center" id="statusDisplay"><span class="label label-info">{{status.level}}</span>&nbsp;&nbsp;&nbsp;{{status.name}} : {{status.detail}}</div>
+<!--
+<div ng-repeat="status in statusList">
+		<div>
+			<span class="label label-info">{{status.level}}</span>&nbsp;&nbsp;&nbsp;{{status.name}} : {{status.detail}}
+		</div>
+</div>
+-->
+
+<!--Background Texts-->
+<!--
+<div
+	style="position: absolute; left: 300px; top: 300px; z-index: -1; height: 10px; transform: rotate(-45deg); font-size: 75px;">
+	MyRobotLab</div>
+<div
+	style="position: absolute; left: 380px; top: 370px; z-index: -1; height: 10px; transform: rotate(-45deg); font-size: 25px;">
+	{{platform.branch}}
+	{{platform.arch}}.{{platform.bitness}}.{{platform.os}}
+	{{platform.mrlVersion}}</div>
+-->
+<!--min-list-->
+<!--
+<div
+	style="height: 80vh; width: 200px; z-index: 100; position: fixed; right: 200px; background-color: lightgray;"
+	ng-show="showminlist" sticky offset="50">
+	<div ng-repeat="panel in minlist" panel-drctv panel="panel">
+	</div>
+</div>
+-->
+
+
+

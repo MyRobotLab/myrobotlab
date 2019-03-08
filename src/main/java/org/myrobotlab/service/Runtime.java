@@ -96,7 +96,7 @@ import org.slf4j.Logger;
  * Thread.currentThread().getStackTrace(); final String mainClassName =
  * stackTrace[stackTrace.length - 1].getClassName();
  *
- * check for 64 bit OS & 32 bit JVM -> is64bit()
+ * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
 public class Runtime extends Service implements MessageListener {

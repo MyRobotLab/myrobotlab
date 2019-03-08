@@ -65,7 +65,7 @@ public class OpenWeatherMap extends HttpClient {
 
   /**
    * retrieve a string list of weather for the period indicated by hourPeriod 1
-   * >= hourPeriod is 3 hours per index -> 24 hours is 8.
+   * greater or equal hourPeriod is 3 hours per index is 24 hours is 8.
    */
   public String[] fetchForecast() {
     String[] result = new String[11];

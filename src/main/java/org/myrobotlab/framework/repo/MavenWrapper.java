@@ -203,16 +203,8 @@ public class MavenWrapper extends Repo implements Serializable {
   }
 
   /**
-   * <pre>
-   * generates all ivy related build files based on Service.getMetaData
-   * 
-   * ivy.xml
-   * ivysettings.xml 
-   * build.xml
-   * 
-   * </pre>
-   * 
-   * @return
+   * (non-Javadoc)
+   * @see org.myrobotlab.framework.repo.Repo#createBuildFiles(java.lang.String, java.lang.String[])
    */
   public void createBuildFiles(String location, String[] serviceTypes) {
     try {

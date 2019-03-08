@@ -1,0 +1,8 @@
+<h3>{{pulseData}}</h3>
+<div class="col-xs-3">
+    <button class="btn btn-default" ng-if="!service.isClockRunning" ng-click="msg.setInterval(toNumber(service.interval)); msg.startClock();">Start</button>
+    <button class="btn btn-default" ng-if="service.isClockRunning" ng-click="msg.stopClock();">Stop</button>
+</div>
+<div class="col-xs-3">
+    <input class="form-control" type="text" ng-model="service.interval" ng-disabled="service.isClockRunning" ng-trim="false" unit-ms/>
+</div>

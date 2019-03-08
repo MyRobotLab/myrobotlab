@@ -61,6 +61,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -778,19 +779,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public String getDataDir() {
-    return "data" + File.separator + getClass().getSimpleName();
+    return Util.getDataDir() + File.separator + getClass().getSimpleName();
   }
 
   public String getDataInstanceDir() {
-    return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
+    return Util.getDataDir() + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
 
   public String getResourceDir() {
-    return "data" + File.separator + getClass().getSimpleName();
+    return Util.getResourceDir() + File.separator + getClass().getSimpleName();
   }
 
   public String getResourceInstanceDir() {
-    return "data" + File.separator + getClass().getSimpleName() + File.separator + getName();
+    return Util.getResourceDir() + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
 
   // FIXME - make a static initialization part !!!
@@ -862,7 +863,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * new overload - mqtt uses this for json encoded MrlListener to process
    * subscriptions
    * 
-   * @param data
+   * @param data - listener callback info
    */
   public void addListener(Map data) {
     // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
@@ -2463,7 +2464,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * resource/{ServiceType} (mrl's static resource directory) 3. check absolute
    * path
    * 
-   * @return
+   * @param filename - file name to get
+   * @return the file to returned or null if does not exist
    */
   public File getFile(String filename) {
     File file = new File(getDataDir() + File.separator + filename);

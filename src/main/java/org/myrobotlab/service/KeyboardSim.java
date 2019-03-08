@@ -49,8 +49,6 @@ public class KeyboardSim extends Service {
    * 
    * @param keycode
    *          keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
-   * @param duration
-   *          key press duration in milliseconds
    */
   public void press(int keycode) {
     robot.keyPress(keycode);
@@ -61,8 +59,6 @@ public class KeyboardSim extends Service {
    * 
    * @param keycode
    *          keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
-   * @param duration
-   *          key press duration in milliseconds
    */
   public void release(int keycode) {
     robot.keyRelease(keycode);
@@ -72,7 +68,7 @@ public class KeyboardSim extends Service {
    * simulate pressing and releasing several keyboard keys after the desired
    * duration The keys are released in reverse order they were pressed.
    * 
-   * @param keycode
+   * @param keycodes
    *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
    *          key)
    * @param duration
@@ -87,7 +83,7 @@ public class KeyboardSim extends Service {
   /**
    * simulate pressing several keyboard keys (does NOT release the keys!)
    * 
-   * @param keycode
+   * @param keycodes
    *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
    *          key)
    */
@@ -100,7 +96,7 @@ public class KeyboardSim extends Service {
   /**
    * simulate releasing several keyboard keys (does NOT press the keys!)
    * 
-   * @param keycode
+   * @param keycodes
    *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
    *          key)
    */
@@ -114,7 +110,7 @@ public class KeyboardSim extends Service {
    * simulate releasing several keyboard keys (does NOT press the keys!)
    * Releases keys in reversed order they were specified.
    * 
-   * @param keycode
+   * @param keycodes
    *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
    *          key)
    */

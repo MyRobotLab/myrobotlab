@@ -36,7 +36,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-/**
+/*
  * This is the base class for all kinds of physical agents. <br>
  * Implementation note : the agent doesnt have synchronized methods. All thread
  * refering to the agent should do explicit synchronization with
@@ -44,87 +44,87 @@ import javax.vecmath.Vector3d;
  */
 public class SimpleAgent extends BaseObject {
 
-  /** Agent's printable name */
+  /* Agent's printable name */
   protected String name;
-  /** Collision flag */
+  /* Collision flag */
   boolean collisionDetected;
-  /** Interagent interaction indicator */
+  /* Interagent interaction indicator */
   boolean interactionDetected;
 
-  /**
+  /*
    * Keeps track of agent in physical contact with this agent. null most of the
    * time
    */
   SimpleAgent veryNearAgent;
 
-  /** Parent simulator. */
+  /* Parent simulator. */
   private Simulator simulator;
-  /** The agent's sensors */
+  /* The agent's sensors */
   private ArrayList<SensorDevice> sensors;
-  /** The agent's actuators */
+  /* The agent's actuators */
   private ArrayList<ActuatorDevice> actuators;
 
-  /** Bounds for collision detection */
+  /* Bounds for collision detection */
   private PickBounds collisionPickBounds;
   private BoundingSphere collisionBounds;
   private Point3d collisionBoundsCenter;
 
-  /** for intermediate computations and to minimize Gargabe collection */
+  /* for intermediate computations and to minimize Gargabe collection */
   protected Vector3d v1 = new Vector3d();
   protected Transform3D t3d1 = new Transform3D();
   protected Transform3D t3d2 = new Transform3D();
   protected Transform3D t3d3 = new Transform3D();
 
-  /** List of currently interacting agent */
+  /* List of currently interacting agent */
   // private ArrayList interactingAgents;
-  /** Start and restart position of the agent */
+  /* Start and restart position of the agent */
   private Vector3d startPosition;
-  /** Counter incremented on each simulation step */
+  /* Counter incremented on each simulation step */
   private int counter;
-  /** Lifetime in seconds since last reset */
+  /* Lifetime in seconds since last reset */
   private double lifetime;
 
   protected double odometer;
 
-  /** Position has changed between two steps. */
+  /* Position has changed between two steps. */
   protected boolean positionChanged;
 
   protected Node body;
 
   // Physical parameters
 
-  /** Agent's Height in meters */
+  /* Agent's Height in meters */
   protected float height;
 
-  /** Agent's radius in meters */
+  /* Agent's radius in meters */
   protected float radius;
 
-  /** Agent's mass in kilogram */
+  /* Agent's mass in kilogram */
   protected float mass;
 
-  /** Agent's static friction coefficient - 0 = no friction */
+  /* Agent's static friction coefficient - 0 = no friction */
   protected float staticFrictionCoefficient;
   protected float dynamicFrictionCoefficient;
 
-  /** Current linear acceleration of the center of mass. */
+  /* Current linear acceleration of the center of mass. */
   protected Vector3d linearAcceleration = new Vector3d();
-  /** Current angular acceleration about the center of mass. */
+  /* Current angular acceleration about the center of mass. */
   protected Vector3d angularAcceleration = new Vector3d();
-  /** Current linear velocity of the center of mass. */
+  /* Current linear velocity of the center of mass. */
   protected Vector3d linearVelocity = new Vector3d();
 
-  /** Current angular velocity about the center of mass. */
+  /* Current angular velocity about the center of mass. */
   protected Vector3d angularVelocity = new Vector3d();
-  /** Current translation step. */
+  /* Current translation step. */
   protected Vector3d instantTranslation = new Vector3d();
-  /** Current rotation step. */
+  /* Current rotation step. */
   protected Vector3d instantRotation = new Vector3d();
 
-  /** Used for collision picking */
+  /* Used for collision picking */
   protected double collisionDistance[] = new double[1];
   protected double collisionRadius;
 
-  /**
+  /*
    * Constructs a SimpleAgent.
    * 
    * @param pos
@@ -149,7 +149,7 @@ public class SimpleAgent extends BaseObject {
 
   }
 
-  /**
+  /*
    * Adds a actuator device to the agent.
    * 
    * @param num
@@ -172,7 +172,7 @@ public class SimpleAgent extends BaseObject {
     return actuators.size() - 1;
   }
 
-  /**
+  /*
    * Adds a sensor device to the agent.
    * 
    * @param num
@@ -195,7 +195,7 @@ public class SimpleAgent extends BaseObject {
     return sensors.size() - 1;
   }
 
-  /**
+  /*
    * @return true if this agent is in physical contact with an other
    *         SimpleAgent.
    */
@@ -203,7 +203,7 @@ public class SimpleAgent extends BaseObject {
     return (veryNearAgent != null);
   }
 
-  /**
+  /*
    * Returns printable description of the agent. This may be multiline and
    * complex in subclasses.
    * 
@@ -213,7 +213,7 @@ public class SimpleAgent extends BaseObject {
     return name;
   }
 
-  /**
+  /*
    * Checks for 3D geometrical collisions Note : this is used in case
    * PhysicalEngine is disabled. Precondition : instantTranslation and
    * instantRotaion are computed for the current step.
@@ -264,12 +264,12 @@ public class SimpleAgent extends BaseObject {
     body.setPickable(true);
   }
 
-  /** called back by simulator to clear physical interaction other agent. */
+  /* called back by simulator to clear physical interaction other agent. */
   protected void clearVeryNear() {
     veryNearAgent = null;
   }
 
-  /**
+  /*
    * Returns the state of the geometric collision indicator.
    * 
    * @return collision indicator.
@@ -278,7 +278,7 @@ public class SimpleAgent extends BaseObject {
     return collisionDetected;
   }
 
-  /** Creation phase - called once by the simulator. */
+  /* Creation phase - called once by the simulator. */
   protected void create() {
     create3D();
     // setup on the floor
@@ -288,18 +288,18 @@ public class SimpleAgent extends BaseObject {
   protected void create3D() { /* Overide */
   };
 
-  /** Dispose all resources */
+  /* Dispose all resources */
   protected void dispose() {
   }
 
-  /** returns the distance from agent base to ground . */
+  /* returns the distance from agent base to ground . */
   protected double distanceToGround() {
 
     translation.get(v1);
     return (v1.y - this.height / 2);
   }
 
-  /**
+  /*
    * Returns the actuator device designated by num. User will have to cast to
    * the appropriate class.
    * 
@@ -321,7 +321,7 @@ public class SimpleAgent extends BaseObject {
     coord.set(t.x, t.y, t.z);
   }
 
-  /**
+  /*
    * Returns the agent counter. Counter is incrementented at each simulation
    * step.
    * 
@@ -331,7 +331,7 @@ public class SimpleAgent extends BaseObject {
     return counter;
   }
 
-  /**
+  /*
    * Returns the number of behavior step per second, ie the nummber of time the
    * performBehavior is called per second
    * 
@@ -341,7 +341,7 @@ public class SimpleAgent extends BaseObject {
     return simulator.getFramesPerSecond();
   }
 
-  /**
+  /*
    * Returns the agent's height in meters.
    * 
    * @return the agent height in meters.
@@ -350,7 +350,7 @@ public class SimpleAgent extends BaseObject {
     return height;
   }
 
-  /**
+  /*
    * Returns the agent total lifetime since last reset (in seconds).
    * 
    * @return lifetime in seconds.
@@ -359,7 +359,7 @@ public class SimpleAgent extends BaseObject {
     return lifetime;
   }
 
-  /**
+  /*
    * @return Gets the agent's mass.
    */
   public float getMass() {
@@ -367,7 +367,7 @@ public class SimpleAgent extends BaseObject {
 
   }
 
-  /**
+  /*
    * Returns the agent's name.
    * 
    * @return agent's name .
@@ -376,7 +376,7 @@ public class SimpleAgent extends BaseObject {
     return name;
   }
 
-  /**
+  /*
    * Returns the agent's radius in meters.
    * 
    * @return the agent radius in meters.
@@ -385,7 +385,7 @@ public class SimpleAgent extends BaseObject {
     return radius;
   }
 
-  /**
+  /*
    * Returns the sensor device designated by num. User will have to cast to the
    * appropriate class.
    * 
@@ -403,20 +403,20 @@ public class SimpleAgent extends BaseObject {
     return sensors;
   }
 
-  /** @return the currently touched agent - null if no agent near. */
+  /* @return the currently touched agent - null if no agent near. */
   public SimpleAgent getVeryNearAgent() {
     return veryNearAgent;
   }
 
-  /** called by simulator init */
+  /* called by simulator init */
   protected void initBehavior() {
   }
 
-  /** called by simulator init */
+  /* called by simulator init */
   protected void initPreBehavior() {
   }
 
-  /** Perform velocities integration step */
+  /* Perform velocities integration step */
   protected void integratesPositionChange(double dt) {
 
     instantTranslation.set(linearVelocity);
@@ -425,7 +425,7 @@ public class SimpleAgent extends BaseObject {
     instantRotation.scale(dt);
   }
 
-  /** Perform acceleration integration step . */
+  /* Perform acceleration integration step . */
   protected void integratesVelocities(double dt) {
     v1.set(linearAcceleration);
     v1.scale(dt);
@@ -435,7 +435,7 @@ public class SimpleAgent extends BaseObject {
     angularVelocity.add(v1);
   }
 
-  /**
+  /*
    * Returns true if an interaction has been detected.
    * 
    * @return interaction indicator.
@@ -444,7 +444,7 @@ public class SimpleAgent extends BaseObject {
     return interactionDetected;
   }
 
-  /**
+  /*
    * Go to given XZ position. Y coords is left unchanged. the new position.
    * 
    * @param x
@@ -458,7 +458,7 @@ public class SimpleAgent extends BaseObject {
     resetPositionAt(position);
   }
 
-  /**
+  /*
    * Go to given position. Caution : set y coords to agent.height/2 you want the
    * agent to touch the floor.
    * 
@@ -470,7 +470,7 @@ public class SimpleAgent extends BaseObject {
     resetPositionAt(position);
   }
 
-  /**
+  /*
    * Go to the start position of the agent.
    */
   public void moveToStartPosition() {
@@ -478,15 +478,15 @@ public class SimpleAgent extends BaseObject {
     resetPosition();
   }
 
-  /** called by simulator loop */
+  /* called by simulator loop */
   protected void performBehavior() {
   }
 
-  /** called by simulator loop */
+  /* called by simulator loop */
   protected void performPreBehavior() {
   }
 
-  /** Resets agent variables and position */
+  /* Resets agent variables and position */
   protected void reset() {
     veryNearAgent = null;
     collisionRadius = radius;
@@ -498,7 +498,7 @@ public class SimpleAgent extends BaseObject {
     resetDevices();
   }
 
-  /** Resets all devices */
+  /* Resets all devices */
   protected void resetDevices() {
     for (int i = 0; i < sensors.size(); i++) {
       SensorDevice sd = (SensorDevice) sensors.get(i);
@@ -528,19 +528,26 @@ public class SimpleAgent extends BaseObject {
     translateTo(newPosition);
   }
 
-  /** set acceleration applied by motors . */
+  /* set acceleration applied by motors . 
+   * @param dt - the acceleration
+   */
   protected void setMotorsAcceleration(double dt) {
     // no motor by default
     linearAcceleration.set(0, 0, 0);
     angularAcceleration.set(0, 0, 0);
   }
 
-  /** Sets the simulator in charge of this agent. */
+  /* Sets the simulator in charge of this agent.
+   * @param simulator - the simulator
+   */
   protected void setSimulator(Simulator simulator) {
     this.simulator = simulator;
   }
 
-  /** Update actuators phase - called on each simulation step. */
+  /* Update actuators phase - called on each simulation step.
+   * 
+   * @param elapsedSecond - the elapsed second
+   */
   protected void updateActuators(double elapsedSecond) {
     for (int i = 0; i < actuators.size(); i++) {
       ActuatorDevice ad = (ActuatorDevice) actuators.get(i);
@@ -553,13 +560,16 @@ public class SimpleAgent extends BaseObject {
   // ////////////////////////////////////////////////////////////////////
   // / Agent contact related methods
 
-  /** Update all counters on each step. */
+  /* Update all counters on each step. 
+   * 
+   * @param elapsedSecond - the elapsed second
+   */
   protected void updateCounters(double elapsedSecond) {
     counter++;
     lifetime += elapsedSecond;
   }
 
-  /**
+  /*
    * Update the agent's position with instantTranslation and instantRotation
    */
   protected void updatePosition() {
@@ -593,7 +603,7 @@ public class SimpleAgent extends BaseObject {
     }
   }
 
-  /** Update sensor phase - called on each simulation step. */
+  /* Update sensor phase - called on each simulation step. */
   protected void updateSensors(double elapsedSecond, BranchGroup pickableSceneBranch) {
 
     // don't want to sense its own body while picking (cause unnecessary
@@ -612,7 +622,7 @@ public class SimpleAgent extends BaseObject {
     body.setPickable(true);
   }
 
-  /**
+  /*
    * called back by simulator when a physical interaction as occured with an
    * other agent.
    */

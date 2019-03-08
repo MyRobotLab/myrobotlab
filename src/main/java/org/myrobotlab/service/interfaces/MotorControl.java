@@ -36,7 +36,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
   void detachMotorController(MotorController controller);
 
   /**
-   * the raw non-computed input range is -1.0 <---> 1.0
+   * the raw non-computed input range is -1.0 &lt;---&gt; 1.0
    * 
    * @return input range
    */
@@ -44,7 +44,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 
   /**
    * grog says, BAD METHOD - needs to be a solid range interface between
-   * MotorControl & MotorControllers where the range can be guaranteed -1.0
+   * MotorControl and MotorControllers where the range can be guaranteed -1.0
    * --to-- 1.0 it's MotorControllers job to change this if needed into specific
    * values (not MotorControl's job)
    * 

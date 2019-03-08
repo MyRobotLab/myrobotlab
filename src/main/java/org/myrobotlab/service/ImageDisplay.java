@@ -10,7 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
@@ -83,6 +82,29 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     return gd.getDisplayMode().getWidth();
   }
 
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+      // FIXME - get gifs working
+      display.setAlwaysOnTop(true);
+      // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
+      // display.display2("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
+      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png");
+      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
+      // display.displayScaled("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png",
+      // 0.0278f);
+      // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
+      // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
+      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
   private static BufferedImage resizeImage(BufferedImage originalImage, int width, int height, Integer type) {
     if (type == null) {
       type = originalImage.getType();
@@ -112,7 +134,7 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
 
   float currentAlpha = 0.0f;
 
-  private JFrame currentFrame;
+  transient private JFrame currentFrame;
 
   boolean defaultAlwaysOnTop = false;
 
@@ -135,79 +157,17 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
    */
   transient JFrame fullscreen = null;
 
-  // Displays an image in FullScreen mode.
-  // @param source = path.
-  /*
-   * public void displayFullScreen(String source) {
-   * 
-   * BufferedImage image = loadImage(source);
-   * 
-   * if (fullscreen == null) { fullscreen = new JFrame();
-   * 
-   * JPanel imagePanel = new JPanel(new BorderLayout()); ImageIcon imageIcon =
-   * new ImageIcon(image); fullscreenImageLabel = new JLabel(imageIcon); //
-   * fullscreenImageLabel = new JLabel(); imagePanel.add(fullscreenImageLabel,
-   * BorderLayout.CENTER); imagePanel.setBackground(Color.BLACK); // FIXME -
-   * variable color
-   * 
-   * fullscreen.add(imagePanel);
-   * 
-   * // FIXME - some of these can be "reset" with member values // so they will
-   * need to be out of this null checking if statement
-   * fullscreen.setUndecorated(true); // TODO - look into the details of this //
-   * even for non-fullscreen fullscreen.setBackground(new Color(1.0f, 1.0f,
-   * 1.0f, 0.5f)); fullscreen.setBackground(Color.BLACK);
-   * fullscreen.getContentPane().setBackground(Color.BLACK); // It sets the size
-   * of the Frame to the size of the picture, if not it // will // be build a
-   * boarder to the right end of the screen. //
-   * fullscreen.setSize(image.getWidth() + wOffset, image.getHeight() + //
-   * hOffset); // getResolution(); // fullscreen.setLocation(image.getwOffset(),
-   * image.gethOffset()); fullscreen.toFront();
-   * gd.setFullScreenWindow(fullscreen); //
-   * fullscreen.setLocation(image.getwOffset(), image.gethOffset());
-   * fullscreen.setVisible(true);
-   * 
-   * // Exit program on mouse click fullscreen.addMouseListener(new
-   * MouseListener() { public void mouseClicked(MouseEvent e) {
-   * gd.setFullScreenWindow(null); fullscreen.dispose(); }
-   * 
-   * @Override public void mouseEntered(MouseEvent arg0) { // TODO
-   * Auto-generated method stub
-   * 
-   * }
-   * 
-   * @Override public void mouseExited(MouseEvent arg0) { // TODO Auto-generated
-   * method stub
-   * 
-   * }
-   * 
-   * @Override public void mousePressed(MouseEvent arg0) { // TODO
-   * Auto-generated method stub
-   * 
-   * }
-   * 
-   * @Override public void mouseReleased(MouseEvent arg0) { // TODO
-   * Auto-generated method stub
-   * 
-   * } });
-   * 
-   * }
-   * 
-   * ImageIcon icon = null;
-   * 
-   * try { icon = new ImageIcon(image); } catch (Exception e) {
-   * log.error("could not set image icon to {}", source); return; }
-   * 
-   * fullscreenImageLabel.setIcon(icon);
-   * 
-   * // frames.add(f); }
-   */
-
   transient JLabel fullscreenImageLabel = null;
 
   int hOffset = 0;
 
-  Timer timer = null;
+  transient Cursor lastCursor = null;
+
+  int mouseXoffset = 0;
+
+  int mouseYoffset = 0;
+
+  transient Timer timer = null;
 
   int wOffset = 0;
 
@@ -233,8 +193,8 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     frames.clear();
   }
 
-  public void display2(String src) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, null, null, null);
+  public void display(String src) throws MalformedURLException, AWTException {
+    display(src, null, null, null, null, null, null, null);
   }
 
   // FIXME - setIcon
@@ -247,7 +207,7 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   // FIXME - gif animation
   // FIXME - from http/https/localfile OR Resource !!! use getResourceDir
   // FIXME - cache locally /data/DisplayImage/ -> boolean cacheFiles = true;
-  public void display2(String src, Boolean fullscreen, String bgColorStr, Integer width, Integer height, Double scaling, Float alpha, Boolean fadeIn)
+  public void display(String src, Boolean fullscreen, String bgColorStr, Integer width, Integer height, Double scaling, Float alpha, Boolean fadeIn)
       throws MalformedURLException, AWTException {
     Color bgColor = defaultColor;
     if (bgColorStr != null) {
@@ -360,13 +320,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   // @param source = path.
   // @param alpha = Value how much the image is faded float from 0.0 to 1.0.
   public void displayAlpha(String src, float alpha) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, null, alpha, null);
+    display(src, null, null, null, null, null, alpha, null);
   }
 
   // Displays an image by Fading it in.
   // @param source = path.
   public void displayFadeIn(String src) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, null, null, true);
+    display(src, null, null, null, null, null, null, true);
     /*
      * DisplayedImage image = new DisplayedImage(source);
      * log.info("Loading image done"); buildFrame(image);
@@ -377,14 +337,14 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   // @param source = path.
   // @param alpha = Value how much the image is faded float from 0.0 to 1.0.
   public void displayFullScreen(String src) throws MalformedURLException, AWTException {
-    display2(src, true, null, null, null, null, null, null);
+    display(src, true, null, null, null, null, null, null);
   }
 
   // Displays a resized image in FullScreen mode.
   // @param source = path.
   // @param scaling = scale factor to resize the image.
   public void displayScaled(String src, double scaling) throws MalformedURLException, AWTException {
-    display2(src, null, null, null, null, scaling, null, null);
+    display(src, null, null, null, null, scaling, null, null);
   }
 
   // Exits the Fullscreen mode.
@@ -429,16 +389,35 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   }
 
   @Override
+  public void mouseDragged(MouseEvent e) {
+    log.debug("mouseDragged {}", e);  
+    currentFrame.setLocation(currentFrame.getX()+e.getX()-mouseXoffset, currentFrame.getY()+e.getY()-mouseYoffset);
+    currentFrame.repaint();
+  }
+
+  @Override
   public void mouseEntered(MouseEvent e) {
-    log.info("mouseEntered {}", e);
+    log.debug("mouseEntered {}", e);
   }
 
   @Override
   public void mouseExited(MouseEvent e) {
-    log.info("mouseExited {}", e);
+    log.debug("mouseExited {}", e);
   }
 
-  Cursor lastCursor = null;
+  @Override
+  public void mouseMoved(MouseEvent e) {
+    log.debug("mouseMoved {}", e);
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+    log.debug("mousePressed {}", e);
+    mouseXoffset=e.getX();
+    mouseYoffset=e.getY();
+    lastCursor = currentFrame.getCursor();
+    currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+  }
 
   @Override
   public void mouseReleased(MouseEvent e) {
@@ -451,20 +430,20 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     return resizeImage(image, scaledWidth, scaledHeight, null);
   }
 
+ 
   public void setAlwaysOnTop(boolean b) {
     defaultAlwaysOnTop = b;
   }
-
   // FIXME - connect !!!
   public void setColor(String string) {
     // TODO Auto-generated method stub
 
   }
-
+  
   public void setFullScreen(boolean b) {
     defaultFullScreen = b;
   }
-
+  
   public void setMultiFrame(boolean b) {
     defaultMultiFrame = b;
   }
@@ -483,56 +462,5 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   public void stopService() {
     super.stopService();
     closeAll();
-  }
-
- 
-  int mouseXoffset = 0;
-  int mouseYoffset = 0;
-
-  private Point initialDragPoint;
-  
-  @Override
-  public void mousePressed(MouseEvent e) {
-    log.info("mousePressed {}", e);
-    mouseXoffset=e.getX();
-    mouseYoffset=e.getY();
-    lastCursor = currentFrame.getCursor();
-    currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
-    initialDragPoint = e.getPoint();
-  }
-  
-  @Override
-  public void mouseDragged(MouseEvent e) {
-    log.info("mouseDragged {}", e);  
-    currentFrame.setLocation(currentFrame.getX()+e.getX()-mouseXoffset, currentFrame.getY()+e.getY()-mouseYoffset);
-    currentFrame.repaint();
-  }
-
-  @Override
-  public void mouseMoved(MouseEvent e) {
-    log.info("mouseMoved {}", e);
-  }
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-
-      ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
-      // FIXME - get gifs working
-      display.setAlwaysOnTop(true);
-      // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
-      // display.display2("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
-      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png");
-      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
-      // display.displayScaled("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png",
-      // 0.0278f);
-      // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
-      // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
-      display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
   }
 }

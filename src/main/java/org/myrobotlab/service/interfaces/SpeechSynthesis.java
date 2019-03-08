@@ -53,7 +53,7 @@ public interface SpeechSynthesis extends NameProvider {
    * Change audioData volume
    * 
    * @param volume
-   *          - double between 0 & 1.
+   *          - double between 0 and 1.
    */
   public void setVolume(double volume);
 

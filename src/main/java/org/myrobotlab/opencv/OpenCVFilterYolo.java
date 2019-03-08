@@ -201,28 +201,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     return image;
   }
 
-  /**
-   * <pre>
-   * private void displayResult(IplImage image, ArrayList<Classification> result) {
-   *   DecimalFormat df2 = new DecimalFormat("#.###");
-   *   for (Classification obj : result) {
-   *     CvPoint leftCorner = cvPoint(obj.boundingBox.x(), obj.boundingBox.y());
-   *     String label = obj.label + " (" + df2.format(obj.confidence * 100) + "%)";
-   * 
-   *     cvDrawRect(image, leftCorner, cvPoint(obj.boundingBox.x() + 30 * obj.label.length(), obj.boundingBox.y() - 20), CvScalar.BLUE, CV_FILLED, 0, 0);
-   *     // TODO - hashcode related color
-   *     // CvScalar objColor = cvColorToScalar(obj.label.hashCode(), CV_8U);
-   *     cvPutText(image, label, cvPoint(obj.boundingBox.x() + 6, obj.boundingBox.y() - 6), font, CvScalar.YELLOW);
-   *     drawRect(image, obj.boundingBox, CvScalar.BLUE);
-   *   }
-   * }
-   * 
-   * public void drawRect(IplImage image, Rect rect, CvScalar color) {
-   *   cvDrawRect(image, cvPoint(rect.x(), rect.y()), cvPoint(rect.x() + rect.width(), rect.y() + rect.height()), color, 1, 1, 0);
-   * }
-   * </pre>
-   */
-
   @Override
   public void imageChanged(IplImage image) {
   }
