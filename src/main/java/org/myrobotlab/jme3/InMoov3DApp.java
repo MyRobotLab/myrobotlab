@@ -1,6 +1,5 @@
 package org.myrobotlab.jme3;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
@@ -8,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Point;
@@ -517,9 +515,9 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     maps.put("jaw", new Mapper(0, 180, -10, 5));
 
     // poc monitor declaration
-    String fs = File.separator;
-    Texture2D textureBackGround = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + String.format("%sInMoov%smonitor%smonitor_back.png",fs,fs,fs));
-    Picture BackGround = new Picture(Util.getResourceDir() + String.format("%sInMoov%smonitor%smonitor_back.png", fs, fs, fs));
+
+    Texture2D textureBackGround = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/monitor_back.png");
+    Picture BackGround = new Picture("/resource/InMoov/monitor/monitor_back.png");
     BackGround.setTexture(assetManager, textureBackGround, true);
     BackGround.setWidth(settings.getWidth());
     BackGround.setHeight(settings.getHeight());
@@ -539,23 +537,23 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     onRecognized.setLocalTranslation((settings.getWidth() / 2) - 180, settings.getHeight() - 20, 0.0F);
     onRecognized.setText("Listening...");
 
-    Texture2D texture = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + String.format("%sInMoov%smonitor%smicroOn.png",fs,fs,fs));
-    microOn = new Picture(Util.getResourceDir() + String.format("%sInMoov%smonitor%smicroOn.png", fs,fs,fs));
+    Texture2D texture = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOn.png");
+    microOn = new Picture("/resource/InMoov/monitor/microOn.png");
     microOn.setTexture(assetManager, texture, true);
     microOn.setWidth(Math.round(texture.getImage().getWidth() / widthCoef));
     microOn.setHeight(Math.round(texture.getImage().getHeight() / heightCoef));
     microOn.setLocalTranslation(10F, settings.getHeight() - 50, 0.0F);
 
-    Texture2D textureOff = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + String.format("%sInMoov%smonitor%smicroOff.png", fs,fs,fs));
-    microOff = new Picture(Util.getResourceDir() + String.format("%sInMoov%smonitor%smicroOff.png", fs,fs,fs));
+    Texture2D textureOff = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/microOff.png");
+    microOff = new Picture("/resource/InMoov/monitor/microOff.png");
     microOff.setTexture(assetManager, textureOff, true);
     microOff.setWidth(Math.round(textureOff.getImage().getWidth() / widthCoef));
     microOff.setHeight(Math.round(textureOff.getImage().getHeight() / heightCoef));
     microOff.setLocalTranslation(10F, settings.getHeight() - 50, 0.0F);
 
     for (int i = 0; i <= 100; i += 20) {
-      textureBat[i] = (Texture2D) assetManager.loadTexture(Util.getResourceDir() + String.format("%sInMoov%smonitor%sbat_" + i + ".png", fs,fs,fs));
-      battery[i] = new Picture(Util.getResourceDir() + String.format("%sInMoov%smonitor%sbat_" + i + ".png", fs,fs,fs));
+      textureBat[i] = (Texture2D) assetManager.loadTexture("/resource/InMoov/monitor/bat_" + i + ".png");
+      battery[i] = new Picture("/resource/InMoov/monitor/bat_" + i + ".png");
       battery[i].setTexture(assetManager, textureBat[i], true);
       battery[i].setWidth(Math.round(textureBat[i].getImage().getWidth() / widthCoef));
       battery[i].setHeight(Math.round(textureBat[i].getImage().getHeight() / heightCoef));
@@ -670,7 +668,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
           guiNode.detachChild(battery[i]);
         }
 
-        // picture = new Picture(Util.getRessourceDir() + "/InMoov/monitor/bat_80.png");
+        // picture = new Picture("/resource/InMoov/monitor/bat_80.png");
 
         guiNode.attachChild(picture);
         for (int i = 0; i <= 100; i += 20) {
