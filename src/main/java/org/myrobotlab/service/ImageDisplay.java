@@ -91,15 +91,15 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
       // FIXME - get gifs working
       display.setAlwaysOnTop(true);
       // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
-      // display.display2("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
-      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png");
+      // display.display("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
+      // display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
       // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
       // display.displayScaled("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png",
       // 0.0278f);
       // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
       // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
-      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
-
+      // display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
+      display.display("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRl_1J1bmqyQCzmm5rJxQIManVbQJ1xu1emnJHbRmEqOFlv2OteTA");
     } catch (Exception e) {
       log.error("main threw", e);
     }
@@ -163,9 +163,9 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
 
   transient Cursor lastCursor = null;
 
-  int mouseXoffset = 0;
+  // int mouseXoffset = 0;
 
-  int mouseYoffset = 0;
+  // int mouseYoffset = 0;
 
   transient Timer timer = null;
 
@@ -391,7 +391,24 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   @Override
   public void mouseDragged(MouseEvent e) {
     log.debug("mouseDragged {}", e);  
-    currentFrame.setLocation(currentFrame.getX()+e.getX()-mouseXoffset, currentFrame.getY()+e.getY()-mouseYoffset);
+    if (absMouseX == null) {
+      absMouseX = e.getXOnScreen();
+      offsetX = e.getX();
+    }
+    
+    if (absMouseY == null) {
+      absMouseY = e.getYOnScreen();
+      offsetY = e.getY();
+    }
+
+    absLastMouseX = absMouseX;
+    absLastMouseY = absMouseY;
+    absMouseX = e.getXOnScreen();
+    absMouseY = e.getYOnScreen();
+    log.info("current x,y ({},{}) - offsets ({},{}) abs last/new X {}, {} ", currentFrame.getX(), currentFrame.getY(), offsetX, offsetY, absLastMouseX, absMouseX);
+    log.info("new pos X {}", currentFrame.getX() - offsetX - (absLastMouseX - absMouseX));
+    // currentFrame.setLocation(currentFrame.getX() - offsetX - (absLastMouseX - absMouseX), currentFrame.getY() - offsetY - (absLastMouseY - absMouseY));
+    currentFrame.setLocation(absMouseX - offsetX, absMouseY - offsetY);
     currentFrame.repaint();
   }
 
@@ -409,14 +426,39 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   public void mouseMoved(MouseEvent e) {
     log.debug("mouseMoved {}", e);
   }
+  
+  Integer offsetX = null;
+  Integer offsetY = null;
+  Integer absMouseX = null;
+  Integer absMouseY = null;
+  Integer absLastMouseX = null;
+  Integer absLastMouseY = null;
+  
 
   @Override
   public void mousePressed(MouseEvent e) {
     log.debug("mousePressed {}", e);
-    mouseXoffset=e.getX();
-    mouseYoffset=e.getY();
+    // relative to jframe
+    
+    /*
+    if (absMouseX == null) {
+      absMouseX = e.getXOnScreen();
+      offsetX = e.getX();
+    }
+    
+    if (absMouseY == null) {
+      absMouseY = e.getYOnScreen();
+      offsetY = e.getY();
+    }
+
+    absLastMouseX = absMouseX;
+    absLastMouseY = absMouseY;
+    absMouseX = e.getXOnScreen();
+    absMouseY = e.getYOnScreen();
+    */
     lastCursor = currentFrame.getCursor();
     currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+    
   }
 
   @Override
