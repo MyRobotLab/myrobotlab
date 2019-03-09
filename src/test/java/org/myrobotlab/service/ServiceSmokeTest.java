@@ -25,6 +25,7 @@ import org.slf4j.Logger;
  *
  */
 
+@Ignore
 public class ServiceSmokeTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
