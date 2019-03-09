@@ -92,13 +92,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
       display.setAlwaysOnTop(true);
       // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
       // display.display("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
-      // display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
-      // display.display2("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
+      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
+      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/32px-Noto_Emoji_Pie_1f62c.svg.png");
       // display.displayScaled("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/1024px-Noto_Emoji_Pie_1f62c.svg.png",
       // 0.0278f);
-      // display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
+      //display.displayFullScreen("http://r.ddmcdn.com/w_830/s_f/o_1/cx_0/cy_220/cw_1255/ch_1255/APL/uploads/2014/11/dog-breed-selector-australian-shepherd.jpg");
       // display.display2("C:\\Users\\grperry\\Desktop\\tenor.gif");
-      // display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
+      display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/300px-Rotating_earth_%28large%29.gif");
       display.display("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRl_1J1bmqyQCzmm5rJxQIManVbQJ1xu1emnJHbRmEqOFlv2OteTA");
     } catch (Exception e) {
       log.error("main threw", e);
@@ -438,24 +438,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   @Override
   public void mousePressed(MouseEvent e) {
     log.debug("mousePressed {}", e);
+    currentFrame = (JFrame)e.getSource();
     // relative to jframe
-    
-    /*
-    if (absMouseX == null) {
-      absMouseX = e.getXOnScreen();
-      offsetX = e.getX();
-    }
-    
-    if (absMouseY == null) {
-      absMouseY = e.getYOnScreen();
-      offsetY = e.getY();
-    }
-
-    absLastMouseX = absMouseX;
-    absLastMouseY = absMouseY;
     absMouseX = e.getXOnScreen();
+    offsetX = e.getX();
     absMouseY = e.getYOnScreen();
-    */
+    offsetY = e.getY();
+    
     lastCursor = currentFrame.getCursor();
     currentFrame.setCursor(new Cursor(Cursor.MOVE_CURSOR));
     
