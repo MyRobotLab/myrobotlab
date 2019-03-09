@@ -2394,11 +2394,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     LoggingFactory.init(Level.INFO);
 
-    boolean done = true;
-    if (done) {
-      return;
-    }
-
     String leftPort = "COM3";
     String rightPort = "COM4";
 

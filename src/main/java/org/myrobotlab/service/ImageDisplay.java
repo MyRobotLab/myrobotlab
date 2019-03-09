@@ -30,6 +30,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -386,6 +387,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     // gd.setFullScreenWindow(null);
     // fullscreen.dispose();
     log.info("mouseClicked {}", e);
+    if (SwingUtilities.isRightMouseButton(e)) {
+      JFrame frame = (JFrame)e.getSource();
+      // TODO options on hiding or disposing or 
+      // creating a popup menu etc..
+      frame.setVisible(false);
+      frame.dispose();
+    }
   }
 
   @Override
@@ -405,8 +413,8 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     absLastMouseY = absMouseY;
     absMouseX = e.getXOnScreen();
     absMouseY = e.getYOnScreen();
-    log.info("current x,y ({},{}) - offsets ({},{}) abs last/new X {}, {} ", currentFrame.getX(), currentFrame.getY(), offsetX, offsetY, absLastMouseX, absMouseX);
-    log.info("new pos X {}", currentFrame.getX() - offsetX - (absLastMouseX - absMouseX));
+    // log.info("current x,y ({},{}) - offsets ({},{}) abs last/new X {}, {} ", currentFrame.getX(), currentFrame.getY(), offsetX, offsetY, absLastMouseX, absMouseX);
+    // log.info("new pos X {}", currentFrame.getX() - offsetX - (absLastMouseX - absMouseX));
     // currentFrame.setLocation(currentFrame.getX() - offsetX - (absLastMouseX - absMouseX), currentFrame.getY() - offsetY - (absLastMouseY - absMouseY));
     currentFrame.setLocation(absMouseX - offsetX, absMouseY - offsetY);
     currentFrame.repaint();

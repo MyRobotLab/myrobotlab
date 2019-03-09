@@ -967,7 +967,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       subscribe(runtime.getName(), "registered");
       subscribe(runtime.getName(), "released");
 
-      if (autoStartBrowser && GraphicsEnvironment.isHeadless()) {
+      if (autoStartBrowser && !GraphicsEnvironment.isHeadless()) {
         log.info("auto starting default browser");
         BareBonesBrowserLaunch.openURL(String.format(startURL, port));
       }
