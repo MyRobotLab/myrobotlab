@@ -156,8 +156,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(WebGui.class);
 
-  private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
-  private static final TrustManager DUMMY_TRUST_MANAGER = new X509TrustManager() {
+  transient private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
+  transient private static final TrustManager DUMMY_TRUST_MANAGER = new X509TrustManager() {
     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
     }
 
