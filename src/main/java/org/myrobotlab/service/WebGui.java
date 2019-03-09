@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.awt.GraphicsEnvironment;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -63,11 +64,6 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 //import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
-
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.providers.netty.NettyAsyncHttpProvider;
-import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
 /**
  * 
@@ -971,7 +967,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       subscribe(runtime.getName(), "registered");
       subscribe(runtime.getName(), "released");
 
-      if (autoStartBrowser) {
+      if (autoStartBrowser && GraphicsEnvironment.isHeadless()) {
         log.info("auto starting default browser");
         BareBonesBrowserLaunch.openURL(String.format(startURL, port));
       }
