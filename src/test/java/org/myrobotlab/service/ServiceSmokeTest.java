@@ -25,6 +25,7 @@ import org.slf4j.Logger;
  *
  */
 
+
 public class ServiceSmokeTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
@@ -55,6 +56,7 @@ public class ServiceSmokeTest {
     blacklist.add("org.myrobotlab.service.Cli");
     blacklist.add("org.myrobotlab.service.WebGui");
     blacklist.add("org.myrobotlab.service.JMonkeyEngine");
+    blacklist.add("org.myrobotlab.service.ImageDisplay");
 
     // this seems to start webgui also as a peer.. eek!
     blacklist.add("org.myrobotlab.service.GoogleAssistant");
