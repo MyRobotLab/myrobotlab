@@ -160,7 +160,7 @@ public class ServiceData implements Serializable {
     for (int i = 0; i < services.size(); ++i) {
 
       String fullClassName = services.get(i);
-      log.info("querying {}", fullClassName);
+      log.debug("querying {}", fullClassName);
       try {
         Class<?> theClass = Class.forName(fullClassName);
         Method method = theClass.getMethod("getMetaData");
@@ -349,7 +349,7 @@ public class ServiceData implements Serializable {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init();
+      // LoggingFactory.init(); - don't change logging for mvn
       String path = "";
       if (args.length > 0) {
         path = args[0];
