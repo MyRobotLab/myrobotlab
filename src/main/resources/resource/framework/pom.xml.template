@@ -261,6 +261,9 @@
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
+					<excludes>
+						<exclude>org/myrobotlab/test/integration**/*Test.java</exclude>
+					</excludes>
 				</configuration>
 				<version>2.9</version>
 			</plugin>
