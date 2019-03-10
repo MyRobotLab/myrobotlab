@@ -8,7 +8,6 @@ import java.net.URI;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUri;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.test.AbstractTest;
 
 public class EncoderTest extends AbstractTest {

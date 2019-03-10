@@ -17,6 +17,20 @@ public class MockDocumentListener extends Service implements DocumentListener {
 
   }
 
+  public String[] getCategories() {
+    // TODO Auto-generated method stub
+    return new String[] { "testing" };
+  }
+
+  public int getCount() {
+    return count;
+  }
+
+  @Override
+  public String getDescription() {
+    return "A Mock document listener for testing";
+  }
+
   @Override
   public String getName() {
     return super.getName();
@@ -34,20 +48,6 @@ public class MockDocumentListener extends Service implements DocumentListener {
     // TODO Auto-generated method stub
     count += docs.size();
     return ProcessingStatus.OK;
-  }
-
-  public int getCount() {
-    return count;
-  }
-
-  public String[] getCategories() {
-    // TODO Auto-generated method stub
-    return new String[] { "testing" };
-  }
-
-  @Override
-  public String getDescription() {
-    return "A Mock document listener for testing";
   }
 
   @Override

@@ -5,8 +5,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.opencv.OpenCVFilterKinectNavigate;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;

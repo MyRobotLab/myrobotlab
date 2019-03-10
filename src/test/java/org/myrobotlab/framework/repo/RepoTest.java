@@ -9,20 +9,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -31,17 +23,15 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();
 
-  @Before
-  public void setUp() throws Exception {
-    // LoggingFactory.init("WARN");
-    Repo repo = Repo.getInstance();
-    repo.clear();
+  @Override
+  public void broadcastStatus(Status status) {
+    log.info(status.toString());
   }
 
-  @Test
-  public void testGetLocalInstance() {
-    Repo repo = Repo.getInstance();
-    assertTrue(repo != null);
+  @Override
+  public Status publishStatus(Status status) {
+    log.info(status.toString());
+    return status;
   }
 
   /*
@@ -51,11 +41,11 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
    * @Test public void testRepo() { // fail("Not yet implemented"); }
    */
 
-  @Test
-  public void testAddStatusListener() throws ParseException, IOException {
+  @Before
+  public void setUp() throws Exception {
+    // LoggingFactory.init("WARN");
     Repo repo = Repo.getInstance();
-    repo.addStatusPublisher(this);
-    repo.install("Arduino");
+    repo.clear();
   }
 
   /*
@@ -83,6 +73,13 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
    */
 
   @Test
+  public void testAddStatusListener() throws ParseException, IOException {
+    Repo repo = Repo.getInstance();
+    repo.addStatusPublisher(this);
+    repo.install("Arduino");
+  }
+
+  @Test
   public void testClear() {
     Repo repo = Repo.getInstance();
     repo.clear();
@@ -91,13 +88,9 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
   }
 
   @Test
-  public void testSave() {
+  public void testGetLocalInstance() {
     Repo repo = Repo.getInstance();
-    FileIO.rm(Repo.REPO_STATE_FILE_NAME);
-    assertFalse(new File(Repo.REPO_STATE_FILE_NAME).exists());
-    // Repo repo = Repo.getInstance();
-    repo.save();
-    assertTrue(new File(Repo.REPO_STATE_FILE_NAME).exists());
+    assertTrue(repo != null);
   }
 
   @Test
@@ -118,15 +111,14 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
     assertTrue(repo.isInstalled("Arduino"));
   }
 
-  @Override
-  public Status publishStatus(Status status) {
-    log.info(status.toString());
-    return status;
-  }
-
-  @Override
-  public void broadcastStatus(Status status) {
-    log.info(status.toString());
+  @Test
+  public void testSave() {
+    Repo repo = Repo.getInstance();
+    FileIO.rm(Repo.REPO_STATE_FILE_NAME);
+    assertFalse(new File(Repo.REPO_STATE_FILE_NAME).exists());
+    // Repo repo = Repo.getInstance();
+    repo.save();
+    assertTrue(new File(Repo.REPO_STATE_FILE_NAME).exists());
   }
 
 }

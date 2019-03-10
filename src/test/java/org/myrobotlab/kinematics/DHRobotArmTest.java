@@ -5,18 +5,53 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 public class DHRobotArmTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(DHRobotArmTest.class);
 
+  public DHRobotArm createArm() {
+    log.info("createArm");
+
+    DHRobotArm arm = new DHRobotArm();
+    // d , r, theta , alpha
+    DHLink link1 = new DHLink(null, 0, 1, 45 * Math.PI / 180, 0);
+    arm.addLink(link1);
+    DHLink link2 = new DHLink(null, 0.0, 0.2, 45 * Math.PI / 180, 90 * Math.PI / 180);
+    arm.addLink(link2);
+    return arm;
+  }
+
+  public DHRobotArm createInMoovLeftArm() {
+    log.info("createInMoovLeftArm");
+    DHRobotArm arm = new DHRobotArm();
+    // d , r, theta , alpha
+
+    DHLink link1 = new DHLink(null, 200, 100, degToRad(0), degToRad(90));
+    DHLink link2 = new DHLink(null, 0, 100, degToRad(-66), degToRad(-90));
+    DHLink link3 = new DHLink(null, 50, 1, degToRad(47), degToRad(90));
+    DHLink link4 = new DHLink(null, 100, 0, degToRad(-148), degToRad(90));
+    DHLink link5 = new DHLink(null, 0, 100, degToRad(22), degToRad(180));
+
+    arm.addLink(link1);
+    arm.addLink(link2);
+    arm.addLink(link3);
+    arm.addLink(link4);
+    arm.addLink(link5);
+
+    return arm;
+  }
+
+  public double degToRad(double degrees) {
+    return degrees * Math.PI / 180.0;
+  }
+
   @Before
   public void setUp() throws Exception {
     // LoggingFactory.init("WARN");
   }
-  
+
   // @Test
   public void testDHArm() {
 
@@ -76,42 +111,6 @@ public class DHRobotArmTest extends AbstractTest {
       i++;
       log.info("Link : " + i + " " + link.getThetaDegrees());
     }
-  }
-
-  public DHRobotArm createArm() {
-    log.info("createArm");
-
-    DHRobotArm arm = new DHRobotArm();
-    // d , r, theta , alpha
-    DHLink link1 = new DHLink(null, 0, 1, 45 * Math.PI / 180, 0);
-    arm.addLink(link1);
-    DHLink link2 = new DHLink(null, 0.0, 0.2, 45 * Math.PI / 180, 90 * Math.PI / 180);
-    arm.addLink(link2);
-    return arm;
-  }
-
-  public double degToRad(double degrees) {
-    return degrees * Math.PI / 180.0;
-  }
-
-  public DHRobotArm createInMoovLeftArm() {
-    log.info("createInMoovLeftArm");
-    DHRobotArm arm = new DHRobotArm();
-    // d , r, theta , alpha
-
-    DHLink link1 = new DHLink(null, 200, 100, degToRad(0), degToRad(90));
-    DHLink link2 = new DHLink(null, 0, 100, degToRad(-66), degToRad(-90));
-    DHLink link3 = new DHLink(null, 50, 1, degToRad(47), degToRad(90));
-    DHLink link4 = new DHLink(null, 100, 0, degToRad(-148), degToRad(90));
-    DHLink link5 = new DHLink(null, 0, 100, degToRad(22), degToRad(180));
-
-    arm.addLink(link1);
-    arm.addLink(link2);
-    arm.addLink(link3);
-    arm.addLink(link4);
-    arm.addLink(link5);
-
-    return arm;
   }
 
 }

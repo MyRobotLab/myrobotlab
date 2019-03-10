@@ -3,8 +3,6 @@ package org.myrobotlab.document.connector;
 import org.junit.Ignore;
 import org.myrobotlab.document.transformer.StageConfiguration;
 import org.myrobotlab.document.transformer.WorkflowConfiguration;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.DocumentPipeline;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.XMLConnector;

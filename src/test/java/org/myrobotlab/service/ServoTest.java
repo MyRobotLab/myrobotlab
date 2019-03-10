@@ -12,15 +12,15 @@ import org.myrobotlab.test.AbstractTest;
 
 public class ServoTest extends AbstractTest {
 
-  private static final String V_PORT_1 = "test_port_1";
-  private static final String V_PORT_2 = "test_port_2";
-
   static public Arduino ard1;
   static public Arduino ard2;
 
+  private static final String V_PORT_1 = "test_port_1";
+  private static final String V_PORT_2 = "test_port_2";
+
   @BeforeClass
   static public void setup() throws Exception {
-    
+
     VirtualArduino va1 = (VirtualArduino) Runtime.start("servoTest-va1", "VirtualArduino");
     VirtualArduino va2 = (VirtualArduino) Runtime.start("ServoTest-va2", "VirtualArduino");
     va1.connect(V_PORT_1);
@@ -30,65 +30,6 @@ public class ServoTest extends AbstractTest {
     ard1.connect(V_PORT_1);
     ard2 = (Arduino) Runtime.start("servoTest-arduino02", "Arduino");
     ard2.connect(V_PORT_2);
-  }
-
-  @Test
-  public void testServo() throws Exception {
-    // this basic test will create a servo and attach it to an arduino.
-    // then detach
-    Servo s = (Servo) Runtime.start("ser1", "Servo");
-    Integer pin = 1;
-    // the pin should always be set to something.
-    s.setPin(pin);
-    assertEquals(pin, s.getPin());
-
-    s.attach(ard1);
-
-    // maybe remove this interface
-    s.attachServoController(ard1);
-    // s.attachServoController(ard1);
-    s.disable();
-
-    s.attach(ard2, pin);
-
-    // This is broken
-    // assertTrue(s.controller == ard2);
-    s.rest();
-    assertEquals(s.getRest(), 90.0, 0.0);
-
-    s.setRest(12.2);
-    assertEquals(s.getRest(), 12.2, 0.0);
-
-    s.rest();
-
-    // depricated. i feel like if you do
-    s.attach();
-    s.enable();
-    s.moveTo(90);
-    // test moving to the same position
-    s.moveTo(90);
-    // new position
-    s.moveTo(91.0);
-    s.disable();
-
-    assertFalse(s.isEnabled());
-    s.enable();
-    assertTrue(s.isEnabled());
-
-    // detach the servo.
-    // ard2.detach(s);
-    s.detachServoController(ard2);
-    assertFalse(s.isAttached());
-
-    //
-    s.attach(ard1, 10, 1);
-    assertTrue(s.isEnabled());
-    s.disable();
-    assertFalse(s.isEnabled());
-
-    s.detachServoController(ard1);
-    assertFalse(s.isAttached());
-
   }
 
   // @Test
@@ -259,6 +200,65 @@ public class ServoTest extends AbstractTest {
     servo02.moveTo(130);
     servo02.moveTo(30);
     servo02.moveTo(130);
+
+  }
+
+  @Test
+  public void testServo() throws Exception {
+    // this basic test will create a servo and attach it to an arduino.
+    // then detach
+    Servo s = (Servo) Runtime.start("ser1", "Servo");
+    Integer pin = 1;
+    // the pin should always be set to something.
+    s.setPin(pin);
+    assertEquals(pin, s.getPin());
+
+    s.attach(ard1);
+
+    // maybe remove this interface
+    s.attachServoController(ard1);
+    // s.attachServoController(ard1);
+    s.disable();
+
+    s.attach(ard2, pin);
+
+    // This is broken
+    // assertTrue(s.controller == ard2);
+    s.rest();
+    assertEquals(s.getRest(), 90.0, 0.0);
+
+    s.setRest(12.2);
+    assertEquals(s.getRest(), 12.2, 0.0);
+
+    s.rest();
+
+    // depricated. i feel like if you do
+    s.attach();
+    s.enable();
+    s.moveTo(90);
+    // test moving to the same position
+    s.moveTo(90);
+    // new position
+    s.moveTo(91.0);
+    s.disable();
+
+    assertFalse(s.isEnabled());
+    s.enable();
+    assertTrue(s.isEnabled());
+
+    // detach the servo.
+    // ard2.detach(s);
+    s.detachServoController(ard2);
+    assertFalse(s.isAttached());
+
+    //
+    s.attach(ard1, 10, 1);
+    assertTrue(s.isEnabled());
+    s.disable();
+    assertFalse(s.isEnabled());
+
+    s.detachServoController(ard1);
+    assertFalse(s.isAttached());
 
   }
 

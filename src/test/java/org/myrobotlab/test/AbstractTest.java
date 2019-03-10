@@ -1,6 +1,5 @@
 package org.myrobotlab.test;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.After;
@@ -13,26 +12,31 @@ import org.slf4j.Logger;
 
 public class AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
+  private static long coolDownTimeMs = 2000;
   /**
    * cached internet test value for tests
    */
   static Boolean hasInternet = null;
 
+  public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
+
+  static private boolean logTestHeader = true;
+
+  private static boolean releaseRemainingServices = true;
+
+  private static boolean releaseRemainingThreads = true;
+
   static transient Set<Thread> threadSetStart = null;
 
-  static public void sleep(int sleepMs) {
-    try {
-      Thread.sleep(sleepMs);
-    } catch (InterruptedException e) {
-      // don't care
+  static public boolean hasInternet() {
+    if (hasInternet == null) {
+      hasInternet = Runtime.hasInternet();
     }
+    return hasInternet;
   }
-
   static public boolean isHeadless() {
     return Runtime.isHeadless();
   }
-
   static public boolean isVirtual() {
     boolean isVirtual = true;
     String isVirtualProp = System.getProperty("junit.isVirtual");
@@ -42,29 +46,21 @@ public class AbstractTest {
     }
     return isVirtual;
   }
+  public static void main(String[] args) {
+    try {
+      AbstractTest test = new AbstractTest();
+      // LoggingFactory.init("INFO");
 
-  static public boolean hasInternet() {
-    if (hasInternet == null) {
-      hasInternet = Runtime.hasInternet();
+      ChaosMonkey.giveToMonkey(test, "testFunction");
+      ChaosMonkey.giveToMonkey(test, "testFunction");
+      ChaosMonkey.giveToMonkey(test, "testFunction");
+      ChaosMonkey.startMonkeys();
+      ChaosMonkey.monkeyReport();
+      log.info("here");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
     }
-    return hasInternet;
-  }
-
-  static private boolean logTestHeader = true;
-  private static long coolDownTimeMs = 2000;
-  private static boolean releaseRemainingServices = true;
-  private static boolean releaseRemainingThreads = true;
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  public void testFunction() {
-    log.info("tested testFunction");
   }
 
   // super globals - probably better not to use the mixin - but just initialize
@@ -82,6 +78,22 @@ public class AbstractTest {
     log.info("setUpAbstractTest");
     if (threadSetStart == null) {
       threadSetStart = Thread.getAllStackTraces().keySet();
+    }
+  }
+
+  static public void sleep(int sleepMs) {
+    try {
+      Thread.sleep(sleepMs);
+    } catch (InterruptedException e) {
+      // don't care
+    }
+  }
+
+  public static void sleep(long sleepTimeMs) {
+    try {
+      Thread.sleep(coolDownTimeMs);
+    } catch (Exception e) {
+
     }
   }
 
@@ -109,29 +121,21 @@ public class AbstractTest {
       }
     }
 
-    
-      // check threads - kill stragglers
-      // Set<Thread> stragglers = new HashSet<Thread>();
-      Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
-      for (Thread thread : threadSetEnd) {
-        if (!threadSetStart.contains(thread)) {
-          log.warn("thread {} marked as straggler - to be killed", thread.getName());
-          if (releaseRemainingThreads) {
-            log.warn("killing {}", thread.getName());
-            thread.interrupt();
-          }
+    // check threads - kill stragglers
+    // Set<Thread> stragglers = new HashSet<Thread>();
+    Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
+    for (Thread thread : threadSetEnd) {
+      if (!threadSetStart.contains(thread)) {
+        if (releaseRemainingThreads) {
+          log.warn("killing thread {}", thread.getName());
+          thread.interrupt();
+        } else {
+          log.warn("thread {} marked as straggler - should be killed", thread.getName());
         }
       }
-    
-    log.warn("=========== finished test ===========");
-  }
-
-  public static void sleep(long sleepTimeMs) {
-    try {
-      Thread.sleep(coolDownTimeMs);
-    } catch (Exception e) {
-
     }
+
+    log.warn("=========== finished test ===========");
   }
 
   public AbstractTest() {
@@ -140,21 +144,16 @@ public class AbstractTest {
     }
   }
 
-  public static void main(String[] args) {
-    try {
-      AbstractTest test = new AbstractTest();
-      // LoggingFactory.init("INFO");
+  @Before
+  public void setUp() throws Exception {
+  }
 
-      ChaosMonkey.giveToMonkey(test, "testFunction");
-      ChaosMonkey.giveToMonkey(test, "testFunction");
-      ChaosMonkey.giveToMonkey(test, "testFunction");
-      ChaosMonkey.startMonkeys();
-      ChaosMonkey.monkeyReport();
-      log.info("here");
+  @After
+  public void tearDown() throws Exception {
+  }
 
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
+  public void testFunction() {
+    log.info("tested testFunction");
   }
 
 }

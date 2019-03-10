@@ -1,7 +1,8 @@
 package org.myrobotlab.document.transformer;
 
-import org.myrobotlab.document.Document;
 import static org.junit.Assert.assertEquals;
+
+import org.myrobotlab.document.Document;
 
 public class JSoupExtractorTest extends AbstractStageTest {
 

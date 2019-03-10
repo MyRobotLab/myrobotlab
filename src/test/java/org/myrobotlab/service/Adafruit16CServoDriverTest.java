@@ -16,8 +16,8 @@ import org.myrobotlab.test.AbstractTest;
 @Ignore
 public class Adafruit16CServoDriverTest extends AbstractTest {
 
-  static Adafruit16CServoDriver driver = null;
   static Arduino arduino = null;
+  static Adafruit16CServoDriver driver = null;
   static SerialDevice serial = null;
   static VirtualDevice virtual = null;
 

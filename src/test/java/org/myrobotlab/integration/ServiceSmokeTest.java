@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-
 
 public class ServiceSmokeTest extends AbstractTest {
 

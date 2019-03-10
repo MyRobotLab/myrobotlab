@@ -23,22 +23,60 @@ import org.slf4j.Logger;
 // TODO: re-enable this unit test.. but for now it's just too slow ..
 // it also opens a swing gui which isn't good.
 
-
 public class OpenCVTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
-
   static OpenCV cv = null;
+
+  public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
   static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/OpenCV/";
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
-  static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
   static final String TEST_INPUT_DIR = "src/test/resources/OpenCV/kinect-data";
+  static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
 
   // TODO - getClassifictions publishClassifications
   // TODO - getFaces publishFaces
   // TODO - chaos monkey filter tester
+
+  public static void main(String[] args) {
+    try {
+      // // LoggingFactory.init("INFO");
+
+      setUpBeforeClass();
+
+      OpenCVTest test = new OpenCVTest();
+
+      test.testGetClassifications();
+
+      boolean quitNow = true;
+      if (quitNow) {
+        return;
+      }
+
+      test.testAllFilterTypes();
+      /*
+       * cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");// red pill
+       * // green pill cv.capture(0); cv.stopCapture();
+       * cv.setGrabberType("Sarxos"); cv.capture(0);
+       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+       * cv.capture(0);
+       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+       * cv.capture(0);
+       */
+
+      test.chaosCaptureTest();
+
+      // test.testAllCaptures();
+
+      // run junit as java app
+      JUnitCore junit = new JUnitCore();
+      Result result = junit.run(OpenCVTest.class);
+      log.info("Result failures: {}", result.getFailureCount());
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -47,7 +85,13 @@ public class OpenCVTest extends AbstractTest {
       swing = (SwingGui) Runtime.start("gui", "SwingGui");
     }
   }
-  
+
+  // FIXME - do the following test
+  // test all frame grabber types
+  // test all filters !
+  // test remote file source
+  // test mpeg streamer
+
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     Runtime.release("cv"); // <-- DONT NEED TO DO THIS - Abstract will !
@@ -61,13 +105,6 @@ public class OpenCVTest extends AbstractTest {
     // clean up all services
     // TODO - these utilities should be in base class !
   }
-
-
-  // FIXME - do the following test
-  // test all frame grabber types
-  // test all filters !
-  // test remote file source
-  // test mpeg streamer
 
   @Test
   public final void chaosCaptureTest() throws Exception {
@@ -159,6 +196,8 @@ public class OpenCVTest extends AbstractTest {
 
   }
 
+  // TODO test enable disable & enableDisplay
+
   /**
    * minimally all filters should have the ability to load and run by themselves
    * for a second
@@ -185,8 +224,6 @@ public class OpenCVTest extends AbstractTest {
     log.info("done with all filters");
   }
 
-  // TODO test enable disable & enableDisplay
-
   @Test
   public final void testGetClassifications() {
     log.info("=======OpenCVTest testGetClassifications=======");
@@ -199,44 +236,5 @@ public class OpenCVTest extends AbstractTest {
     Map<String, List<Classification>> classifications = cv.getClassifications();
     assertNotNull(classifications);
     assertTrue(classifications.containsKey("person"));
-  }
-
-  public static void main(String[] args) {
-    try {
-      // // LoggingFactory.init("INFO");
-
-      setUpBeforeClass();
-
-      OpenCVTest test = new OpenCVTest();
-
-      test.testGetClassifications();
-
-      boolean quitNow = true;
-      if (quitNow) {
-        return;
-      }
-
-      test.testAllFilterTypes();
-      /*
-       * cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");// red pill
-       * // green pill cv.capture(0); cv.stopCapture();
-       * cv.setGrabberType("Sarxos"); cv.capture(0);
-       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-       * cv.capture(0);
-       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-       * cv.capture(0);
-       */
-
-      test.chaosCaptureTest();
-
-      // test.testAllCaptures();
-
-      // run junit as java app
-      JUnitCore junit = new JUnitCore();
-      Result result = junit.run(OpenCVTest.class);
-      log.info("Result failures: {}", result.getFailureCount());
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
   }
 }

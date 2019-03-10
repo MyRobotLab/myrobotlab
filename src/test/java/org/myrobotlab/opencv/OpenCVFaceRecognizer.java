@@ -1,24 +1,20 @@
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
+import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.IntBuffer;
 
-import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
-import static org.bytedeco.javacpp.opencv_core.CV_8UC1;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
-
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
-import org.bytedeco.javacpp.opencv_face.FisherFaceRecognizer;
-import org.bytedeco.javacpp.opencv_face.EigenFaceRecognizer;
-import org.bytedeco.javacpp.opencv_face.LBPHFaceRecognizer;
-import org.myrobotlab.test.AbstractTest;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.MatVector;
+import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
+import org.bytedeco.javacpp.opencv_face.FisherFaceRecognizer;
+import org.myrobotlab.test.AbstractTest;
 
 /**
  * I couldn't find any tutorial on how to perform face recognition using OpenCV

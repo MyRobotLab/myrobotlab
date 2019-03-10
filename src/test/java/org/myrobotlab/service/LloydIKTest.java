@@ -1,30 +1,38 @@
 package org.myrobotlab.service;
+
+import org.junit.Ignore;
+import org.junit.Test;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.InMoovArm;
-import org.myrobotlab.service.InverseKinematics3D;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 import marytts.util.math.MathUtils;
-
-import org.junit.Ignore;
-import org.junit.Test;
 
 @Ignore
 public class LloydIKTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovArm.class);
 
+  private void printArmDetails(DHRobotArm arm) {
+    int numLinks = arm.getNumLinks();
+    for (int i = 0; i < numLinks; i++) {
+      DHLink link = arm.getLink(i);
+      String name = link.getName();
+      Point p = arm.getJointPosition(i);
+      Double theta = MathUtils.radian2degrees(link.getTheta());
+      // log.info("{}",link);
+      log.info("Link : {} POS: {} THETA: {}", name, p, theta);
+    }
+  }
+
   @Test
   public void testIK() {
 
     // LoggingFactory.init("INFO");
-    
+
     String partName = "myArm";
 
     // Ok.,., i want to start an IK service.. and play around with it.
@@ -101,17 +109,5 @@ public class LloydIKTest extends AbstractTest {
     printArmDetails(arm);
 
     log.info("Done.");
-  }
-
-  private void printArmDetails(DHRobotArm arm) {
-    int numLinks = arm.getNumLinks();
-    for (int i = 0; i < numLinks; i++) {
-      DHLink link = arm.getLink(i);
-      String name = link.getName();
-      Point p = arm.getJointPosition(i);
-      Double theta = MathUtils.radian2degrees(link.getTheta());
-      // log.info("{}",link);
-      log.info("Link : {} POS: {} THETA: {}", name, p, theta);
-    }
   }
 }

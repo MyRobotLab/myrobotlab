@@ -17,8 +17,6 @@ public abstract class AbstractConnectorTest extends AbstractTest {
 
   public abstract MockDocumentListener createListener();
 
-  public abstract void validate(MockDocumentListener listener);
-
   @Test
   public void test() {
     AbstractConnector connector = createConnector();
@@ -50,4 +48,6 @@ public abstract class AbstractConnectorTest extends AbstractTest {
     Assert.assertTrue(listener.getCount() > 0);
 
   }
+
+  public abstract void validate(MockDocumentListener listener);
 }
