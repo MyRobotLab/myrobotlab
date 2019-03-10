@@ -10,14 +10,15 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB.Response;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
-import org.junit.Test;
 
-public class ProgramABTest extends AbstractServiceTest {
+public class ProgramABTest extends AbstractTest {
 
   private ProgramAB testService;
   private String username = "testUser";
@@ -215,7 +216,8 @@ public class ProgramABTest extends AbstractServiceTest {
     assertTrue(contains);
   }
 
-  @Override
+  // @Test
+  @Ignore
   public void testService() throws Exception {
     // run each of the test methods.
     testProgramAB();

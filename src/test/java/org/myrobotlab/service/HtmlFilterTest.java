@@ -3,8 +3,9 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
-public class HtmlFilterTest {
+public class HtmlFilterTest extends AbstractTest {
 
   @Test
   public void testHtmlFilter() {

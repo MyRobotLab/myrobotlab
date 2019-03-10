@@ -1758,7 +1758,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         }
       }
     } else {
-      log.error("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
+      log.info("removeListener requested {}.{} to be removed - but does not exist", serviceName, outMethod);
     }
   }
 

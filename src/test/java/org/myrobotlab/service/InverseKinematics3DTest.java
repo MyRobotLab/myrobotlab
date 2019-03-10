@@ -6,9 +6,10 @@ import org.junit.Test;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class InverseKinematics3DTest {
+public class InverseKinematics3DTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(InverseKinematics3DTest.class);
   

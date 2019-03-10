@@ -15,9 +15,10 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class MessageTest implements NameProvider {
+public class MessageTest extends AbstractTest implements NameProvider {
   public final static Logger log = LoggerFactory.getLogger(MessageTest.class);
 
   static TestCatcher catcher;

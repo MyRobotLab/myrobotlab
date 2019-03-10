@@ -1,4 +1,4 @@
-package org.myrobotlab.service;
+package org.myrobotlab.opencv;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -7,10 +7,13 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterKinectNavigate;
+import org.myrobotlab.service.OpenCV;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 @Ignore
-public class OpenCVFilterKinectNavigateTest {
+public class OpenCVFilterKinectNavigateTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectNavigateTest.class);
 
   @Before

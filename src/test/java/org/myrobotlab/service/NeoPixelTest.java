@@ -8,14 +8,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.NeoPixelController;
+import org.myrobotlab.test.AbstractTest;
 
 /**
  * @author chris
  *
  */
-public class NeoPixelTest {
+public class NeoPixelTest extends AbstractTest {
   private static final String V_PORT_1 = "test_port_1";
   public Arduino ard;
   private NeoPixel neopixel;

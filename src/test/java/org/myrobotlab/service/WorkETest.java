@@ -13,11 +13,11 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 @Ignore
-public class WorkETest {
+public class WorkETest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(WorkETest.class);
 

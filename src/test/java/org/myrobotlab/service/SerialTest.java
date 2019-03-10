@@ -25,9 +25,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.serial.Port;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class SerialTest {
+public class SerialTest extends AbstractTest {
 
   // TODO - https://github.com/junit-team/junit/wiki/Parameterized-tests
   // -

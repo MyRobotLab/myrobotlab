@@ -3,33 +3,32 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.myrobotlab.logging.LoggingFactory;
 
-public class ServoTest {
+import java.util.List;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
+
+public class ServoTest extends AbstractTest {
 
   private static final String V_PORT_1 = "test_port_1";
   private static final String V_PORT_2 = "test_port_2";
 
-  public Arduino ard1;
-  public Arduino ard2;
+  static public Arduino ard1;
+  static public Arduino ard2;
 
-  @Before
-  public void setup() throws Exception {
-    // setup the test environment , and create an arduino with a virtual backend
-    // for it.
-    // LoggingFactory.init("WARN");
-    // initialize 2 serial ports (virtual arduino)
-    VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
-    VirtualArduino va2 = (VirtualArduino) Runtime.start("va2", "VirtualArduino");
+  @BeforeClass
+  static public void setup() throws Exception {
+    
+    VirtualArduino va1 = (VirtualArduino) Runtime.start("servoTest-va1", "VirtualArduino");
+    VirtualArduino va2 = (VirtualArduino) Runtime.start("ServoTest-va2", "VirtualArduino");
     va1.connect(V_PORT_1);
     va2.connect(V_PORT_2);
     // initialize an arduino
-    ard1 = (Arduino) Runtime.start("ard1", "Arduino");
+    ard1 = (Arduino) Runtime.start("servoTest-arduino01", "Arduino");
     ard1.connect(V_PORT_1);
-    ard2 = (Arduino) Runtime.start("ard2", "Arduino");
+    ard2 = (Arduino) Runtime.start("servoTest-arduino02", "Arduino");
     ard2.connect(V_PORT_2);
   }
 

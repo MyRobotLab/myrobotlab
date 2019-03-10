@@ -4,10 +4,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.document.Document;
-import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public abstract class AbstractStageTest {
+public abstract class AbstractStageTest extends AbstractTest {
 
   @Before
   public void init() {

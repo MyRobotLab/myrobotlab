@@ -5,10 +5,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 @Ignore
-public abstract class AbstractConnectorTest {
+public abstract class AbstractConnectorTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractConnectorTest.class);
 

@@ -7,38 +7,29 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
-
-import org.datavec.api.split.InputSplit;
-import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.deeplearning4j.nn.graph.ComputationGraph;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.myrobotlab.image.Util;
+import org.myrobotlab.service.Deeplearning4j;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Solr;
+import org.myrobotlab.test.AbstractTest;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
-import org.nd4j.linalg.dataset.api.preprocessor.VGG16ImagePreProcessor;
-import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.factory.Nd4jBackend.NoAvailableBackendException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.myrobotlab.image.Util;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Deeplearning4j;
-import org.myrobotlab.service.Runtime;
 
 @Ignore
-public class SolrDataSetIteratorTest {
+public class SolrDataSetIteratorTest extends AbstractTest {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   protected static long seed = 42;
@@ -59,6 +50,7 @@ public class SolrDataSetIteratorTest {
   private Solr solr;
   private Deeplearning4j dl4j;
 
+  
   private void initServices() throws SolrServerException, IOException {
     solr = (Solr) Runtime.start("solr", "Solr");
     solr.startEmbedded();

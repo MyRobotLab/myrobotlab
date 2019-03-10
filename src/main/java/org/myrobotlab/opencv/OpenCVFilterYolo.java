@@ -263,7 +263,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
         Thread.sleep(1);
       }
-
+    } catch (InterruptedException e) {
+      // dont care
     } catch (Exception e) {
       log.error("yolo thread threw", e);
     }

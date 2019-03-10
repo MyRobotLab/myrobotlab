@@ -13,11 +13,11 @@ import org.junit.Test;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class Arduino2Test {
+public class Arduino2Test extends AbstractTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino2Test.class);
 

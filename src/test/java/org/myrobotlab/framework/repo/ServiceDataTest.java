@@ -15,11 +15,12 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ArduinoTest;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class ServiceDataTest {
+public class ServiceDataTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
+  public final static Logger log = LoggerFactory.getLogger(ServiceDataTest.class);
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {

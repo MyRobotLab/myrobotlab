@@ -643,6 +643,12 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               IntPointer label = new IntPointer(1);
               DoublePointer confidence = new DoublePointer(1);
               OpenCVClassifier classifier = classifiers.get(facesSubclass);
+              if (classifier.recognizer == null) {
+                log.warn("no recognizer");
+                confidence.close();
+                label.close();
+                return image;
+              }
               classifier.recognizer.predict(toMat(merged), label, confidence);
 
               // IF HIGH ENOUGH CONFIDENCE GO TO APPROPRIATE DIRECTORIES

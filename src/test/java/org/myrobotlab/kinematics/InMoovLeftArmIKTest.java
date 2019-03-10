@@ -4,14 +4,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.InMoovArm;
-import org.myrobotlab.service.InverseKinematics3D;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class InMoovLeftArmIKTest {
+public class InMoovLeftArmIKTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(InMoovLeftArmIKTest.class);
 
   @Test

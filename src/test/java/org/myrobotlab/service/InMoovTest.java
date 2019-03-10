@@ -15,6 +15,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 /**
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class InMoovTest implements PinArrayListener {
+public class InMoovTest extends AbstractTest implements PinArrayListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovTest.class);
 
