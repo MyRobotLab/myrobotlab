@@ -400,13 +400,13 @@ public class FileIO {
     String resourceName = "resource";
     File check = new File(Util.getResourceDir());
     if (check.exists() && !overwrite) {
-      log.warn("Resources aleady exist: not extracting -- Dir : {} Jar : {}", Util.getResourceDir(), resourceName);
+      log.info("Resources aleady exist: not extracting -- Dir : {} Jar : {}", Util.getResourceDir(), resourceName);
       return false;
     }
 
     // FIXME - this should just copy sources if not a jar
     if (!isJar() && !overwrite) {
-      log.warn("mrl is not operating in a jar - not extracting ");
+      log.info("mrl is not operating in a jar - not extracting ");
       return false;
     }
 

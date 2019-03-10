@@ -32,14 +32,14 @@ public class AbstractTest {
   static public boolean isHeadless() {
     return Runtime.isHeadless();
   }
-  
+
   static public boolean isVirtual() {
     boolean isVirtual = true;
     String isVirtualProp = System.getProperty("junit.isVirtual");
-    
+
     if (isVirtualProp != null) {
       isVirtual = Boolean.parseBoolean(isVirtualProp);
-    }     
+    }
     return isVirtual;
   }
 
@@ -51,6 +51,9 @@ public class AbstractTest {
   }
 
   static private boolean logTestHeader = true;
+  private static long coolDownTimeMs = 2000;
+  private static boolean releaseRemainingServices = true;
+  private static boolean releaseRemainingThreads = true;
 
   @Before
   public void setUp() throws Exception {
@@ -86,24 +89,49 @@ public class AbstractTest {
   public static void tearDownAbstractTest() throws Exception {
     log.warn("tearDownAbstractTest");
 
-    // services to be
-    String[] services = Runtime.getServiceNames();
-    for (String service : services) {
-      if (!"runtime".equals(service)) {
-        log.warn("service {} left in registry - releasing", service);
-        Runtime.releaseService(service);
+    if (releaseRemainingServices) {
+      // services to be cleaned up/released
+      StringBuilder sb = new StringBuilder();
+      String[] services = Runtime.getServiceNames();
+      for (String service : services) {
+        if (!"runtime".equals(service)) {
+          sb.append(service);
+          sb.append(" ");
+          log.warn("service {} left in registry - releasing", service);
+          Runtime.releaseService(service);
+        }
+      }
+
+      if (sb.length() > 0) {
+        log.warn("had to release the following services {}", sb.toString());
+        log.warn("cooling down for {}ms for dependencies with asynchronous shutdown");
+        sleep(coolDownTimeMs);
       }
     }
 
-    // check threads - kill stragglers
-    Set<Thread> stragglers = new HashSet<Thread>();
-    Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
-    for (Thread thread : threadSetEnd) {
-      if (!threadSetStart.contains(thread)) {
-        log.warn("thread {} marked as straggler - to be killed", thread.getName());
+    
+      // check threads - kill stragglers
+      // Set<Thread> stragglers = new HashSet<Thread>();
+      Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
+      for (Thread thread : threadSetEnd) {
+        if (!threadSetStart.contains(thread)) {
+          log.warn("thread {} marked as straggler - to be killed", thread.getName());
+          if (releaseRemainingThreads) {
+            log.warn("killing {}", thread.getName());
+            thread.interrupt();
+          }
+        }
       }
+    
+    log.warn("=========== finished test ===========");
+  }
+
+  public static void sleep(long sleepTimeMs) {
+    try {
+      Thread.sleep(coolDownTimeMs);
+    } catch (Exception e) {
+
     }
-    log.warn("=========== fisnished test ===========");
   }
 
   public AbstractTest() {
