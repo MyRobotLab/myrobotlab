@@ -1,3 +1,4 @@
+package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,12 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.MotorDualPwm;
-import org.myrobotlab.service.Pid;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.SensorData;
-import org.myrobotlab.test.TestUtils;
 import org.slf4j.Logger;
 
 @Ignore
@@ -98,7 +94,7 @@ public class ArduinoMotorPotTest {
     boolean enableLoadTiming = false;
     // Runtime.create("gui", "SwingGui");
     // initialize the logger
-    TestUtils.initEnvirionment();
+
     // Create the pid controller
     pid = (Pid) Runtime.createAndStart("pid", "Pid");
     // # set the pid parameters KP KI KD (for now just porportial control)

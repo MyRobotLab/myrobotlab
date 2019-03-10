@@ -1582,10 +1582,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.record();
   }
 
-  /*
-   * public void refresh() { serial.getPortNames(); broadcastState(); }
-   */
-
   @Override
   public void releaseService() {
     super.releaseService();

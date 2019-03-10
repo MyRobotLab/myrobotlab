@@ -6,26 +6,24 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.test.AbstractTest;
+import org.myrobotlab.test.ChaosMonkey;
 import org.slf4j.Logger;
 
 // TODO: re-enable this unit test.. but for now it's just too slow ..
 // it also opens a swing gui which isn't good.
 
-@Ignore // dependes on swing ? it shouldn't ! 
+
 public class OpenCVTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
@@ -44,17 +42,15 @@ public class OpenCVTest extends AbstractTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    // LoggingFactory.init("WARN");
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    // // Runtime.setLogLevel("info");
     if (!isHeadless()) {
       swing = (SwingGui) Runtime.start("gui", "SwingGui");
     }
   }
-
+  
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
-    Runtime.release("cv");
+    Runtime.release("cv"); // <-- DONT NEED TO DO THIS - Abstract will !
     if (!isHeadless()) {
       // Runtime.release("gui");
     }
@@ -66,13 +62,6 @@ public class OpenCVTest extends AbstractTest {
     // TODO - these utilities should be in base class !
   }
 
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
 
   // FIXME - do the following test
   // test all frame grabber types
@@ -83,18 +72,18 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void chaosCaptureTest() throws Exception {
     log.info("=======OpenCVTest chaosCaptureTest=======");
-    giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
-    giveToMonkey(cv, "capture");
-    giveToMonkey(cv, "stopCapture");
+    ChaosMonkey.giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
+    ChaosMonkey.giveToMonkey(cv, "capture");
+    ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (hasInternet()) {
       // red pill green pill
-      giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=I9VA-U69yaY");
-      giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+      ChaosMonkey.giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=I9VA-U69yaY");
+      ChaosMonkey.giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
     }
-    giveToMonkey(cv, "stopCapture");
-    giveToMonkey(cv, "capture", 0); // if hasHardware
-    startMonkeys();
-    monkeyReport();
+    ChaosMonkey.giveToMonkey(cv, "stopCapture");
+    ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
+    ChaosMonkey.startMonkeys();
+    ChaosMonkey.monkeyReport();
 
     // check after the monkeys have pounded on it - it still works !
     cv.reset();

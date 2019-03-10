@@ -1,3 +1,4 @@
+package org.myrobotlab.service;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;

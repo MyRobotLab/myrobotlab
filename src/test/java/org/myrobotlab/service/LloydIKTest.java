@@ -1,3 +1,4 @@
+package org.myrobotlab.service;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.kinematics.Point;
@@ -6,6 +7,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.InMoovArm;
 import org.myrobotlab.service.InverseKinematics3D;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 import marytts.util.math.MathUtils;
@@ -14,7 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 @Ignore
-public class LloydIKTest {
+public class LloydIKTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovArm.class);
 

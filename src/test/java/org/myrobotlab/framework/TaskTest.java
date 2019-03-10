@@ -10,9 +10,10 @@ import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class TaskTest {
+public class TaskTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(TaskTest.class);
 

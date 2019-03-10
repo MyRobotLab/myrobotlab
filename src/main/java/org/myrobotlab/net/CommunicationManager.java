@@ -67,7 +67,7 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
 
     ServiceInterface sw = Runtime.getService(msg.getName());
     if (sw == null) {
-      log.error("could not find service {} to process {} from sender {} - tearing down route", msg.name, msg.method, msg.sender);
+      log.info("could not find service {} to process {} from sender {} - tearing down route", msg.name, msg.method, msg.sender);
       ServiceInterface sender = Runtime.getService(msg.sender);
       if (sender != null) {
         sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);

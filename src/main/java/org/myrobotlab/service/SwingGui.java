@@ -686,11 +686,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   @Override
   public void stopService() {
+    super.stopService();
     if (frame != null) {
       frame.dispose();
     }
     active = false;
-    super.stopService();
   }
 
   public void explode() {

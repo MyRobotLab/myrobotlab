@@ -8,18 +8,17 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 //TODO: re-enable this test when we figure out why it fails from the
 // command line ant build...
 
 @Ignore
-public class UltrasonicSensorTest {
+public class UltrasonicSensorTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
   static UltrasonicSensor sensor = null;

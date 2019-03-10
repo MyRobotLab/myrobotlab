@@ -6,9 +6,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public class InMoovArmTest {
+public class InMoovArmTest extends AbstractTest {
 
   // private InMoovArm testArm;
   private String port = "COM21";

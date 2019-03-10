@@ -1,4 +1,4 @@
-package org.myrobotlab;
+package org.myrobotlab.opencv;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -16,6 +16,7 @@ import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_face.FisherFaceRecognizer;
 import org.bytedeco.javacpp.opencv_face.EigenFaceRecognizer;
 import org.bytedeco.javacpp.opencv_face.LBPHFaceRecognizer;
+import org.myrobotlab.test.AbstractTest;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.MatVector;
 
@@ -42,7 +43,7 @@ import org.bytedeco.javacpp.opencv_core.MatVector;
  *
  * @author Petter Christian Bjelland
  */
-public class OpenCVFaceRecognizer {
+public class OpenCVFaceRecognizer extends AbstractTest {
   public static void main(String[] args) {
     String trainingDir = args[0];
     Mat testImage = imread(args[1], CV_LOAD_IMAGE_GRAYSCALE);

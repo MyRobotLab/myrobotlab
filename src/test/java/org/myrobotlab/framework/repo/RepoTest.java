@@ -23,9 +23,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class RepoTest implements StatusPublisher {
+public class RepoTest extends AbstractTest implements StatusPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();

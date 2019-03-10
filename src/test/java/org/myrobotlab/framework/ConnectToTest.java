@@ -24,13 +24,14 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Agent;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
-public class ConnectToTest {
+public class ConnectToTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(ConnectToTest.class);
 
   @BeforeClass

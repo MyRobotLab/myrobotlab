@@ -6,29 +6,20 @@ import java.util.Locale;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-@Ignore
-public class LocaleTest {
+public class LocaleTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(LocaleTest.class);
 
   @Test
   public void testLocale() {
-    // TODO Auto-generated method stub
+
     Locale locale = Locale.getDefault();
-    /*
-     * Method[] methods = locale.getClass().getMethods(); for (Method method :
-     * methods) { Class<?>[] paramTypes = method.getParameterTypes(); if
-     * (paramTypes.length == 0) { System.out.println(String.
-     * format("log.info(\"locale.%s() [{}]\", locale.%s());",
-     * method.getName(),method.getName())); } else { System.out.println(String.
-     * format("log.info(\"locale.%s(xxx) [{}]\", locale.%s(xxx));",
-     * method.getName(),method.getName())); } }
-     */
 
     Locale def = Locale.getDefault();
 

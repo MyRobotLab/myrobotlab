@@ -3,7 +3,7 @@ package org.myrobotlab.document.transformer;
 import org.myrobotlab.document.Document;
 import static org.junit.Assert.assertEquals;
 
-public class JSoupExtractorText extends AbstractStageTest {
+public class JSoupExtractorTest extends AbstractStageTest {
 
   @Override
   public Document createDocument() {

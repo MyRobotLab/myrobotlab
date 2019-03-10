@@ -1,4 +1,4 @@
-package org.myrobotlab.service;
+package org.myrobotlab.integration;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,17 +15,18 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Python;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-@Ignore
-public class ServiceInterfaceTest {
+public class ServiceInterfaceTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
 

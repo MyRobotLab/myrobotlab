@@ -1,4 +1,4 @@
-package org.myrobotlab.service;
+package org.myrobotlab.integration;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -8,10 +8,15 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.InMoov;
+import org.myrobotlab.service.Python;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.test.AbstractTest;
 
 // Grr.. TODO: too hard a test for our weak jenkins oven in the cloud :(
-public class InMoovScriptTest {
+public class InMoovScriptTest extends AbstractTest {
 
   private static final String V_PORT_1 = "COM99";
   private static final String V_PORT_2 = "COM100";
@@ -46,9 +51,8 @@ public class InMoovScriptTest {
     String script = FileIO.toString(inmoovScript);
     // String script = new String(FileIO.toByteArray(is));
     Python python = (Python) Runtime.createAndStart("python", "Python");
-    python.createPythonInterpreter();
     // python.execAndWait(script);
-    python.interp.exec(script);
+    python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
     // Assert something
     assertNotNull(i01);
@@ -66,7 +70,7 @@ public class InMoovScriptTest {
     Python python = (Python) Runtime.createAndStart("python", "Python");
     python.createPythonInterpreter();
     // python.execAndWait(script);
-    python.interp.exec(script);
+    python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
     // Assert something
     assertNotNull(i01);
@@ -84,7 +88,7 @@ public class InMoovScriptTest {
     Python python = (Python) Runtime.createAndStart("python", "Python");
     python.createPythonInterpreter();
     // python.execAndWait(script);
-    python.interp.exec(script);
+    python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
     // Assert something
     assertNotNull(i01);
@@ -102,7 +106,7 @@ public class InMoovScriptTest {
     Python python = (Python) Runtime.createAndStart("python", "Python");
     python.createPythonInterpreter();
     // python.execAndWait(script);
-    python.interp.exec(script);
+    python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
     // Assert something
     assertNotNull(i01);
@@ -120,7 +124,7 @@ public class InMoovScriptTest {
     Python python = (Python) Runtime.createAndStart("python", "Python");
     python.createPythonInterpreter();
     // python.execAndWait(script);
-    python.interp.exec(script);
+    python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
     // Assert something
     assertNotNull(i01);

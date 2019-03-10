@@ -21,9 +21,10 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Solr;
 import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public class VisionMemoryTest {
+public class VisionMemoryTest extends AbstractTest {
 
   @Test
   public void inboxOutboxMemoryTest() throws Exception {

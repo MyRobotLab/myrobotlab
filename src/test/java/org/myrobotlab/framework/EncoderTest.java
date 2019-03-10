@@ -9,8 +9,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUri;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 
-public class EncoderTest {
+public class EncoderTest extends AbstractTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
