@@ -13,20 +13,39 @@ import org.slf4j.Logger;
 @Ignore
 public class JMonkeyEngineTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(JMonkeyEngineTest.class);
-
   static JMonkeyEngine jme = null;
+
+  public final static Logger log = LoggerFactory.getLogger(JMonkeyEngineTest.class);
   static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/JMonkeyEngine/";
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/JMonkeyEngine/multipleFaces.jpg";
-  static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/JMonkeyEngine/transparent-bubble.png";
   static final String TEST_INPUT_DIR = "src/test/resources/JMonkeyEngine/kinect-data";
+  static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/JMonkeyEngine/transparent-bubble.png";
 
   // TODO - getClassifictions publishClassifications
   // TODO - getFaces publishFaces
   // TODO - chaos monkey filter tester
-  
+
+  public static void main(String[] args) {
+    try {
+      // // LoggingFactory.init("INFO");
+
+      setUpBeforeClass();
+
+      JMonkeyEngineTest test = new JMonkeyEngineTest();
+
+      test.putTextTest();
+
+      boolean quitNow = true;
+      if (quitNow) {
+        return;
+      }
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
@@ -43,20 +62,6 @@ public class JMonkeyEngineTest extends AbstractTest {
       // Runtime.release("gui");
     }
   }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  // FIXME - do the following test
-  // test all frame grabber types
-  // test all filters !
-  // test remote file source
-  // test mpeg streamer
 
   @Test
   public final void putTextTest() throws Exception {
@@ -137,22 +142,17 @@ public class JMonkeyEngineTest extends AbstractTest {
 
   }
 
-  public static void main(String[] args) {
-    try {
-      // // LoggingFactory.init("INFO");
+  // FIXME - do the following test
+  // test all frame grabber types
+  // test all filters !
+  // test remote file source
+  // test mpeg streamer
 
-      setUpBeforeClass();
+  @Before
+  public void setUp() throws Exception {
+  }
 
-      JMonkeyEngineTest test = new JMonkeyEngineTest();
-
-      test.putTextTest();
-
-      boolean quitNow = true;
-      if (quitNow) {
-        return;
-      }
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
+  @After
+  public void tearDown() throws Exception {
   }
 }

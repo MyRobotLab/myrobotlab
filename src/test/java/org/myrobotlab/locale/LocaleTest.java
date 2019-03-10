@@ -3,7 +3,6 @@ package org.myrobotlab.locale;
 import java.util.HashMap;
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;

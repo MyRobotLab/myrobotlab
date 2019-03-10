@@ -35,30 +35,86 @@ import org.slf4j.Logger;
  *
  */
 
-public class ArduinoTest extends AbstractTest implements PinArrayListener  {
+public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
-  public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
+  public static class JUnitListener extends RunListener {
 
-  // TODO: read the value of this off a property off a config file (maybe a
-  // properties file for the mrl test framework.)
-  static boolean useVirtualHardware = true;
-  static String port = "COM25";
+    public void testAssumptionFailure(Failure failure) {
+      log.info("testAssumptionFailure");
+    }
+
+    public void testFailure(Failure failure) {
+      log.info("testFailure");
+    }
+
+    public void testFinished(Description description) {
+      log.info("testFinished");
+    }
+
+    public void testIgnored(Description description) {
+      log.info("testIgnored");
+    }
+
+    public void testRunFinished(Result result) {
+      log.info("testRunFinished");
+    }
+
+    public void testRunStarted(Description description) {
+      log.info("testRunStarted");
+    }
+
+    public void testStarted(Description description) {
+      log.info("testStarted");
+    }
+  }
 
   // things to test
   static Arduino arduino = null;
+  public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
+
+  static String port = "COM25";
   static Serial serial = null;
+
+  static SerialDevice uart = null;
+  // TODO: read the value of this off a property off a config file (maybe a
+  // properties file for the mrl test framework.)
+  static boolean useVirtualHardware = true;
 
   // virtual hardware
   static VirtualArduino virtual = null;
-  static SerialDevice uart = null;
-
-  int servoPin = 7;
   String enablePin = "A1";
-  int writeAddress = 6;
-
   Map<Integer, PinData> pinData = new HashMap<Integer, PinData>();
   // FIXME - test for re-entrant !!!!
   // FIXME - single switch for virtual versus "real" hardware
+
+  int servoPin = 7;
+
+  int writeAddress = 6;
+
+  private void assertVirtualPinValue(int address, int value) {
+    if (virtual != null) {
+      assertTrue(virtual.readBlocking(address, 50) == value);
+      virtual.clearPinQueue(address);
+    }
+  }
+
+  @Override
+  public String getName() {
+    return "arduinoTest";
+  }
+
+  @Override
+  public boolean isLocal() {
+    return true;
+  }
+
+  @Override
+  public void onPinArray(PinData[] pindata) {
+    log.debug("onPinArray size {}", pindata.length);
+    for (int i = 0; i < pindata.length; ++i) {
+      pinData.put(pindata[i].address, pindata[i]);
+    }
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -86,30 +142,6 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener  {
      */
   }
 
-  // TODO : broken in ANT but not in eclipse!
-  // @Test
-  public void testConnectResetAndClear() {
-
-    arduino.connect(port);
-    arduino.reset();
-
-    serial.clear();
-    serial.setTimeout(100);
-
-    uart.clear();
-    uart.setTimeout(100);
-
-    pinData.clear();
-  }
-
-  // TODO: broken from ant build due to file not founds (not broken in eclipse.)
-  // @Test
-  public void testReleaseService() {
-    arduino.releaseService();
-    // better re-start it
-    arduino = (Arduino) Runtime.start("arduino", "Arduino");
-  }
-
   // TODO: fix this test method.
   // @Test
   public final void testAnalogWrite() throws InterruptedException, IOException {
@@ -130,11 +162,31 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener  {
     arduino.error("test");
   }
 
-  private void assertVirtualPinValue(int address, int value) {
-    if (virtual != null) {
-      assertTrue(virtual.readBlocking(address, 50) == value);
-      virtual.clearPinQueue(address);
-    }
+  @Test
+  public final void testConnect() throws IOException {
+    log.info("testConnect - begin");
+    arduino.disconnect();
+    arduino.connect(port);
+    sleep(10);
+    assertTrue(arduino.isConnected());
+    assertEquals(Msg.MRLCOMM_VERSION, arduino.getBoardInfo().getVersion().intValue());
+    log.info("testConnect - end");
+  }
+
+  // TODO : broken in ANT but not in eclipse!
+  // @Test
+  public void testConnectResetAndClear() {
+
+    arduino.connect(port);
+    arduino.reset();
+
+    serial.clear();
+    serial.setTimeout(100);
+
+    uart.clear();
+    uart.setTimeout(100);
+
+    pinData.clear();
   }
 
   @Test
@@ -182,7 +234,6 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener  {
     // assert basic re-connect worky
     arduino.digitalWrite(10, 1);
   }
-  
 
   @Test
   public void testEnableBoardStatus() {
@@ -221,17 +272,6 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener  {
     assertTrue(boardInfo.getVersion().intValue() == Msg.MRLCOMM_VERSION);
   }
 
-  @Test
-  public final void testConnect() throws IOException {
-    log.info("testConnect - begin");
-    arduino.disconnect();
-    arduino.connect(port);
-    sleep(10);
-    assertTrue(arduino.isConnected());
-    assertEquals(Msg.MRLCOMM_VERSION, arduino.getBoardInfo().getVersion().intValue());
-    log.info("testConnect - end");
-  }
-
   // TODO: fails in unit test in ant , not in eclipse.
   // @Test
   public final void testGetSketch() {
@@ -252,6 +292,13 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener  {
     assertEquals(Msg.MRLCOMM_VERSION, arduino.getBoardInfo().getVersion().intValue());
   }
 
+  @Test
+  public final void testPinModeIntegerInteger() {
+    log.info("testPinModeIntegerInteger");
+    arduino.pinMode(8, Arduino.OUTPUT);
+    // assertEquals("pinMode/8/1\n", uart.decode());
+  }
+
   // If we enable this test, it should assert something.
   // @Test
   public final void testPinModeIntString() {
@@ -261,11 +308,12 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener  {
     // TODO: add an assert here.
   }
 
-  @Test
-  public final void testPinModeIntegerInteger() {
-    log.info("testPinModeIntegerInteger");
-    arduino.pinMode(8, Arduino.OUTPUT);
-    // assertEquals("pinMode/8/1\n", uart.decode());
+  // TODO: broken from ant build due to file not founds (not broken in eclipse.)
+  // @Test
+  public void testReleaseService() {
+    arduino.releaseService();
+    // better re-start it
+    arduino = (Arduino) Runtime.start("arduino", "Arduino");
   }
 
   // TODO: re-enable this when it's worky.
@@ -423,55 +471,6 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener  {
     assertEquals(20, pins.size());
 
     arduino.setBoard(boardType);
-  }
-
-  public static class JUnitListener extends RunListener {
-
-    public void testAssumptionFailure(Failure failure) {
-      log.info("testAssumptionFailure");
-    }
-
-    public void testFailure(Failure failure) {
-      log.info("testFailure");
-    }
-
-    public void testFinished(Description description) {
-      log.info("testFinished");
-    }
-
-    public void testIgnored(Description description) {
-      log.info("testIgnored");
-    }
-
-    public void testRunFinished(Result result) {
-      log.info("testRunFinished");
-    }
-
-    public void testRunStarted(Description description) {
-      log.info("testRunStarted");
-    }
-
-    public void testStarted(Description description) {
-      log.info("testStarted");
-    }
-  }
-
-  @Override
-  public boolean isLocal() {
-    return true;
-  }
-
-  @Override
-  public String getName() {
-    return "arduinoTest";
-  }
-
-  @Override
-  public void onPinArray(PinData[] pindata) {
-    log.debug("onPinArray size {}", pindata.length);
-    for (int i = 0; i < pindata.length; ++i) {
-      pinData.put(pindata[i].address, pindata[i]);
-    }
   }
 
   // public static void main(String[] args) {

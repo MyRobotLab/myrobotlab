@@ -31,30 +31,54 @@ import org.slf4j.LoggerFactory;
 @Ignore
 public class SolrDataSetIteratorTest extends AbstractTest {
 
-  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  protected static long seed = 42;
+  protected static int batch = 20;
   // VGG16 specifications.
   protected static int channels = 3;
-  protected static int height = 224;
-  protected static int width = 224;
-  // training params
-  protected static int maxEpochs = 5;
-  protected static int batch = 20;
   // the output layer name for vgg16
   protected static String featureExtractionLayer = "fc2";
-  // training details
-  double trainPerc = 0.5;
-  double targetAccuracy = 0.90;
-
+  protected static int height = 224;
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  // training params
+  protected static int maxEpochs = 5;
+  protected static long seed = 42;
+  protected static int width = 224;
+  private Deeplearning4j dl4j;
   // The solr and dl4j services
   private Solr solr;
-  private Deeplearning4j dl4j;
 
-  
+  double targetAccuracy = 0.90;
+  // training details
+  double trainPerc = 0.5;
+
   private void initServices() throws SolrServerException, IOException {
     solr = (Solr) Runtime.start("solr", "Solr");
     solr.startEmbedded();
     dl4j = (Deeplearning4j) Runtime.start("dl4j", "Deeplearning4j");
+  }
+
+  // return the sorted set of labels for this training set.
+  private List<String> resolveLabels(QueryResponse resp) {
+    FacetField labelFacet = resp.getFacetField("label");
+    // maintain sort order with a linked hash set
+    List<String> labels = new ArrayList<String>();
+    for (Count c : labelFacet.getValues()) {
+      labels.add(c.getName());
+    }
+    Collections.sort(labels);
+    return labels;
+  }
+
+  private void testNewModel(String filename) throws IOException {
+    // Ok. now let's see can we load the model up and ask it to predict?
+    CustomModel newMod = dl4j.loadComputationGraph(filename);
+    // TODO: load am image!
+    // a test image
+    String path = Util.getResourceDir() + File.separator + "OpenCV" + File.separator + "testData" + File.separator + "rachel.jpg";
+    IplImage image = cvLoadImage(path);
+    Map<String, Double> results = dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
+    for (String key : results.keySet()) {
+      log.info("label: {} : {} ", key, results.get(key));
+    }
   }
 
   // @Test
@@ -93,31 +117,6 @@ public class SolrDataSetIteratorTest extends AbstractTest {
     CustomModel custModel = dl4j.trainModel(labels, trainIter, testIter, filename, maxEpochs, targetAccuracy, featureExtractionLayer);
     dl4j.saveModel(custModel, filename);
     testNewModel(filename);
-  }
-
-  private void testNewModel(String filename) throws IOException {
-    // Ok. now let's see can we load the model up and ask it to predict?
-    CustomModel newMod = dl4j.loadComputationGraph(filename);
-    // TODO: load am image!
-    // a test image
-    String path = Util.getResourceDir() + File.separator + "OpenCV"+File.separator+"testData"+File.separator+"rachel.jpg";
-    IplImage image = cvLoadImage(path);
-    Map<String, Double> results = dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
-    for (String key : results.keySet()) {
-      log.info("label: {} : {} ", key, results.get(key));
-    }
-  }
-
-  // return the sorted set of labels for this training set.
-  private List<String> resolveLabels(QueryResponse resp) {
-    FacetField labelFacet = resp.getFacetField("label");
-    // maintain sort order with a linked hash set
-    List<String> labels = new ArrayList<String>();
-    for (Count c : labelFacet.getValues()) {
-      labels.add(c.getName());
-    }
-    Collections.sort(labels);
-    return labels;
   }
 
 }

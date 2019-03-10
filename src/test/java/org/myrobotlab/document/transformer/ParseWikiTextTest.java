@@ -1,6 +1,5 @@
 package org.myrobotlab.document.transformer;
 
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.myrobotlab.document.Document;

@@ -19,6 +19,12 @@ public class InMoovArmTest extends AbstractTest {
 
   }
 
+  @After
+  public void tearDown() throws IOException {
+    System.out.println("Done.. press any key to exit.");
+    System.in.read();
+  }
+
   @Test
   public void testInMoovArm() throws Exception {
     // Runtime.createAndStart("webgui", "WebGui");
@@ -29,11 +35,5 @@ public class InMoovArmTest extends AbstractTest {
     python.exec(script);
     // testArm.connect(port);
 
-  }
-
-  @After
-  public void tearDown() throws IOException {
-    System.out.println("Done.. press any key to exit.");
-    System.in.read();
   }
 }

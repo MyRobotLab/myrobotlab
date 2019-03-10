@@ -9,16 +9,14 @@ import org.myrobotlab.test.AbstractTest;
 @Ignore
 public abstract class AbstractStageTest extends AbstractTest {
 
-  @Before
-  public void init() {
-    // LoggingFactory.init("WARN");
-  }
-  
   public abstract Document createDocument();
 
   public abstract AbstractStage createStage();
 
-  public abstract void validate(Document doc);
+  @Before
+  public void init() {
+    // LoggingFactory.init("WARN");
+  }
 
   @Test
   public void test() {
@@ -27,5 +25,7 @@ public abstract class AbstractStageTest extends AbstractTest {
     stage.processDocument(doc);
     validate(doc);
   }
+
+  public abstract void validate(Document doc);
 
 }

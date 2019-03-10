@@ -25,15 +25,16 @@ public class RuntimeTest extends AbstractTest {
   }
 
   @Test
-  public void testGetUptime() {
-    String res = Runtime.getUptime();
-    Assert.assertTrue(res.contains("hour"));
-  }
-
-  @Test
-  public void testGetLocalServices() {
-    ServiceEnvironment se = Runtime.getLocalServices();
-    Assert.assertNotNull(se);
+  public void testGetExternalIPAddress() throws Exception {
+    if (hasInternet()) {
+      try {
+        String externalIP = Runtime.getExternalIp();
+        Assert.assertNotNull(externalIP);
+        Assert.assertEquals(4, externalIP.split("\\.").length);
+      } catch (Exception e) {
+        log.error("testGetExternalIPAddress failed", e);
+      }
+    }
   }
 
   @Test
@@ -49,16 +50,15 @@ public class RuntimeTest extends AbstractTest {
   }
 
   @Test
-  public void testGetExternalIPAddress() throws Exception {
-    if (hasInternet()) {
-      try {
-        String externalIP = Runtime.getExternalIp();
-        Assert.assertNotNull(externalIP);
-        Assert.assertEquals(4, externalIP.split("\\.").length);
-      } catch (Exception e) {
-        log.error("testGetExternalIPAddress failed", e);
-      }
-    }
+  public void testGetLocalServices() {
+    ServiceEnvironment se = Runtime.getLocalServices();
+    Assert.assertNotNull(se);
+  }
+
+  @Test
+  public void testGetUptime() {
+    String res = Runtime.getUptime();
+    Assert.assertTrue(res.contains("hour"));
   }
 
   // @Test

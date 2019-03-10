@@ -10,19 +10,19 @@ import org.myrobotlab.test.AbstractTest;
 public class MapperTest extends AbstractTest {
 
   @Test
-  public void testMapper() {
-    Mapper myMapper = new Mapper(10, 18, 100, 180);
-    // TODO: validate something here.
-    myMapper.getMaxX();
-  }
-
-  @Test
   public void testCalc() {
     double testValue = 15;
     double expectedResult = 150;
     Mapper myMapper = new Mapper(10, 18, 100, 180);
     double actualResult = myMapper.calcOutput(testValue);
     assertEquals("calc(15) should return 150", expectedResult, actualResult, 3);
+  }
+
+  @Test
+  public void testGetMaxOutput() {
+    double testValue = 180;
+    Mapper myMapper = new Mapper(10, 18, 100, testValue);
+    assertEquals("getMaxOutput should return fourth parameter", myMapper.getMaxOutput(), testValue, 3);
   }
 
   @Test
@@ -37,6 +37,13 @@ public class MapperTest extends AbstractTest {
     double testValue = 180;
     Mapper myMapper = new Mapper(10, 18, 100, testValue);
     assertEquals("getMaxY should return fourth parameter", myMapper.getMaxY(), testValue, 3);
+  }
+
+  @Test
+  public void testGetMinOutput() {
+    double testValue = 100;
+    Mapper myMapper = new Mapper(10, 18, testValue, 180);
+    assertEquals("getMinOutput should return third parameter", myMapper.getMinOutput(), testValue, 3);
   }
 
   @Test
@@ -64,17 +71,10 @@ public class MapperTest extends AbstractTest {
   }
 
   @Test
-  public void testGetMinOutput() {
-    double testValue = 100;
-    Mapper myMapper = new Mapper(10, 18, testValue, 180);
-    assertEquals("getMinOutput should return third parameter", myMapper.getMinOutput(), testValue, 3);
-  }
-
-  @Test
-  public void testGetMaxOutput() {
-    double testValue = 180;
-    Mapper myMapper = new Mapper(10, 18, 100, testValue);
-    assertEquals("getMaxOutput should return fourth parameter", myMapper.getMaxOutput(), testValue, 3);
+  public void testMapper() {
+    Mapper myMapper = new Mapper(10, 18, 100, 180);
+    // TODO: validate something here.
+    myMapper.getMaxX();
   }
 
 }

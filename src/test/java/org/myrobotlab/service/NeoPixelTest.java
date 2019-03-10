@@ -36,44 +36,6 @@ public class NeoPixelTest extends AbstractTest {
 
   /**
    * Test method for
-   * {@link org.myrobotlab.service.NeoPixel#setPixel(int, int, int, int)}.
-   */
-  @Test
-  public void testSetPixelIntIntIntInt() {
-    neopixel.setPixel(2, 255, 0, 0);
-    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 255, 0, 0)));
-  }
-
-  /**
-   * Test method for
-   * {@link org.myrobotlab.service.NeoPixel#sendPixel(int, int, int, int)}.
-   */
-  @Test
-  public void testSendPixelIntIntIntInt() {
-    neopixel.sendPixel(2, 0, 255, 0);
-    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 255, 0)));
-  }
-
-  /**
-   * Test method for {@link org.myrobotlab.service.NeoPixel#writeMatrix()}.
-   */
-  @Test
-  public void testWriteMatrix() {
-    neopixel.writeMatrix();
-  }
-
-  /**
-   * Test method for {@link org.myrobotlab.service.NeoPixel#turnOff()}.
-   */
-  @Test
-  public void testTurnOff() {
-    neopixel.turnOff();
-    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 0, 0)));
-    neopixel.turnOn();
-  }
-
-  /**
-   * Test method for
    * {@link org.myrobotlab.service.NeoPixel#attach(org.myrobotlab.service.interfaces.NeoPixelController, int, int)}.
    */
   @Test
@@ -95,11 +57,49 @@ public class NeoPixelTest extends AbstractTest {
 
   /**
    * Test method for
+   * {@link org.myrobotlab.service.NeoPixel#sendPixel(int, int, int, int)}.
+   */
+  @Test
+  public void testSendPixelIntIntIntInt() {
+    neopixel.sendPixel(2, 0, 255, 0);
+    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 255, 0)));
+  }
+
+  /**
+   * Test method for
    * {@link org.myrobotlab.service.NeoPixel#setAnimation(java.lang.String, int, int, int, int)}.
    */
   @Test
   public void testSetAnimationStringIntIntIntInt() {
     neopixel.setAnimation("Theater Chase Rainbow", 0, 0, 255, 1);
+  }
+
+  /**
+   * Test method for
+   * {@link org.myrobotlab.service.NeoPixel#setPixel(int, int, int, int)}.
+   */
+  @Test
+  public void testSetPixelIntIntIntInt() {
+    neopixel.setPixel(2, 255, 0, 0);
+    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 255, 0, 0)));
+  }
+
+  /**
+   * Test method for {@link org.myrobotlab.service.NeoPixel#turnOff()}.
+   */
+  @Test
+  public void testTurnOff() {
+    neopixel.turnOff();
+    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 0, 0)));
+    neopixel.turnOn();
+  }
+
+  /**
+   * Test method for {@link org.myrobotlab.service.NeoPixel#writeMatrix()}.
+   */
+  @Test
+  public void testWriteMatrix() {
+    neopixel.writeMatrix();
   }
 
 }

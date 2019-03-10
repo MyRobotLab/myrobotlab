@@ -69,6 +69,23 @@ public class VisionMemoryTest extends AbstractTest {
 
   }
 
+  public void printDoc(SolrDocument doc) {
+    System.out.println("---------------------------");
+    System.out.println("DocID: " + doc.getFieldValue("id"));
+    for (String field : doc.getFieldNames()) {
+      if (field.equalsIgnoreCase("id"))
+        continue;
+      System.out.print(field + ": ");
+      ArrayList<String> strVals = new ArrayList<String>();
+      for (Object o : doc.getFieldValues(field)) {
+        strVals.add(o.toString());
+      }
+      String values = StringUtils.join(",", strVals);
+      System.out.println(values);
+    }
+
+  }
+
   public void searchAndPrintResult(Solr solr) {
 
     SolrQuery query = new SolrQuery();
@@ -91,23 +108,6 @@ public class VisionMemoryTest extends AbstractTest {
       // }
       // }
     }
-  }
-
-  public void printDoc(SolrDocument doc) {
-    System.out.println("---------------------------");
-    System.out.println("DocID: " + doc.getFieldValue("id"));
-    for (String field : doc.getFieldNames()) {
-      if (field.equalsIgnoreCase("id"))
-        continue;
-      System.out.print(field + ": ");
-      ArrayList<String> strVals = new ArrayList<String>();
-      for (Object o : doc.getFieldValues(field)) {
-        strVals.add(o.toString());
-      }
-      String values = StringUtils.join(",", strVals);
-      System.out.println(values);
-    }
-
   }
 
   // @Test

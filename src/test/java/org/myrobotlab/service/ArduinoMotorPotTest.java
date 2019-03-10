@@ -1,4 +1,5 @@
 package org.myrobotlab.service;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,127 +17,59 @@ import org.slf4j.Logger;
 @Ignore
 public class ArduinoMotorPotTest {
 
-  // public boolean uploadSketch = false;
-  public boolean uploadSketch = false;
-
   public final static Logger log = LoggerFactory.getLogger(ArduinoMotorPotTest.class);
-  private String port = "COM30";
-  private String boardType = "uno";
-  private int leftPwm = 6;
-  private int rightPwm = 7;
 
-  // A0
-  private int potPin = 0;
-
-  private double kp = 0.050;
-  private double ki = 0.020;
-  private double kd = 0.020;
-
-  private Pid pid;
-  private String key = "test";
-  private MotorDualPwm motor;
-
-  private int count = 0;
-  private int rate = 5;
-
-  private double tolerance = 1.5;
-  private Arduino arduino;
-  private String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
-  private String commandPath = "";
   private String additionalEnv = "";
+  private Arduino arduino;
   // platform dependent... (doesn't seem to require the .exe on windows)
   private String arduinoExecutable = "arduino";
-  private String sketchFilename = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MRLComm.c";
+  private String arduinoPath = "c:\\dev\\arduino-1.6.8\\";
+  private String boardType = "uno";
+
+  private String commandPath = "";
+
+  private int count = 0;
   // in order for arduino to update a sketch it needs to end in .ino and
   // it needs to be in its own directory.
   private String destFilename = "\\MRLComm\\MRLComm.ino";
+  private double kd = 0.020;
 
-  // A helper function to upload the MRLComm sketch to the Arduino.
-  // using the command line utilities.
-  public void uploadMRLComm(String port, String board) throws IOException, InterruptedException {
-    if (!(board.equals("uno") || board.equals("mega"))) {
-      // TODO: validate the proper set of values.
-      System.out.println("Invalid board type");
-      return;
-    }
-    File src = new File(sketchFilename);
-    File dest = new File(arduinoPath + destFilename);
-    System.out.println("Copy from " + src.getAbsolutePath() + " to " + dest.getAbsolutePath());
-    // copy MRLComm.c to MRLComm/MRLComm.ino for compilation and upload.
-    FileUtils.copyFile(src, dest);
-    // Create the command to run (and it's args.)
-    String arduinoExe = arduinoPath + arduinoExecutable;
-    ArrayList<String> args = new ArrayList<String>();
-    // args.add("--verbose");
-    args.add("--upload");
-    args.add("--port");
-    args.add(port);
-    args.add("--board");
-    args.add("arduino:avr:" + board);
-    args.add(dest.getAbsolutePath());
-    // run the command.
-    String result = runCommand(arduinoExe, args);
-    // print stdout/err from running the command
-    System.out.println("Result..." + result);
+  private String key = "test";
+  private double ki = 0.020;
+  private double kp = 0.050;
 
-    System.out.println("Uploaded Sketch.");
-    System.out.flush();
-    // take a breath... We think it probably worked? but not sure..
-    Thread.sleep(2000);
+  private int leftPwm = 6;
+  private MotorDualPwm motor;
+
+  private Pid pid;
+  private String port = "COM30";
+  // A0
+  private int potPin = 0;
+  private int rate = 5;
+  private int rightPwm = 7;
+  private String sketchFilename = Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MRLComm.c";
+  private double tolerance = 1.5;
+  // public boolean uploadSketch = false;
+  public boolean uploadSketch = false;
+
+  public boolean isLocal() {
+    // TODO Auto-generated method stub
+    return true;
   }
 
-  @Test
-  public void testArduinoMotPot() throws Exception {
-
-    if (uploadSketch)
-      uploadMRLComm(port, boardType);
-
-    boolean enableLoadTiming = false;
-    // Runtime.create("gui", "SwingGui");
-    // initialize the logger
-
-    // Create the pid controller
-    pid = (Pid) Runtime.createAndStart("pid", "Pid");
-    // # set the pid parameters KP KI KD (for now just porportial control)
-    pid.setPID(key, kp, ki, kd);
-    int direction = 1;
-    pid.setControllerDirection(key, direction);
-    pid.setMode(key, 1);
-    // clip the output values from the pid control to a range between -1 and 1.
-    pid.setOutputRange(key, -1.0, 1.0);
-    // This is the desired sample value from the potentiometer 512 = ~ 90
-    // degrees
-    int desiredValue = 512;
-    pid.setSetpoint(key, desiredValue);
-    pid.setSampleTime(key, 40);
-    // Start the arduino and the feedback potentiometer polling
-    arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
-    // make arduino connect blocking (or at least as long as "getVersion()"
-    // takes.
-    arduino.connect(port);
-    // wait for the arduino to actually connect!
-    // Start the motor and attach it to the arduino.
-    motor = (MotorDualPwm) Runtime.createAndStart("motor", "Motor");
-    motor.setPwmPins(leftPwm, rightPwm);
-    motor.attachMotorController(arduino);
-    // Sensor callback
-    // arduino.analogReadPollingStart(potPin);
-    // arduino.sensorAttach(this);
-
-    // pin zero sample rate 1. (TODO: fix the concept of a sample rate!)
-    // we actually want it to be specified in Hz.. not cycles ...
-    // AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
-    // feedbackPot.addSensorDataListener(this); // null config is this right ?
-    // arduino.sensorAttach(feedbackPot);
-
-    if (enableLoadTiming) {
-      arduino.enableBoardInfo(true);
+  // TODO: this should be on a string utils static class.
+  private String join(ArrayList<String> list, String joinChar) {
+    StringBuilder sb = new StringBuilder();
+    int i = 0;
+    int size = list.size();
+    for (String part : list) {
+      i++;
+      sb.append(part);
+      if (i != size) {
+        sb.append(joinChar);
+      }
     }
-    // stop the motor initially
-    motor.move(0);
-    System.out.println("Press the any key to exit.");
-    System.in.read();
-
+    return sb.toString();
   }
 
   public void onSensorData(SensorData event) {
@@ -168,6 +101,30 @@ public class ArduinoMotorPotTest {
       }
     }
 
+  }
+
+  /**
+   * Helper function to run a program , return the stderr / stdout as a string
+   * and to catch any exceptions that occur
+   * 
+   * @param cmd
+   * @param args
+   * @return
+   */
+  protected String RunAndCatch(String cmd, ArrayList<String> args) {
+    String returnValue;
+    try {
+      returnValue = runCommand(cmd, args);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      returnValue = e.getMessage();
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      returnValue = e.getMessage();
+      e.printStackTrace();
+    }
+    return returnValue;
   }
 
   /**
@@ -243,48 +200,92 @@ public class ArduinoMotorPotTest {
     return outputBuilder.toString();
   }
 
-  /**
-   * Helper function to run a program , return the stderr / stdout as a string
-   * and to catch any exceptions that occur
-   * 
-   * @param cmd
-   * @param args
-   * @return
-   */
-  protected String RunAndCatch(String cmd, ArrayList<String> args) {
-    String returnValue;
-    try {
-      returnValue = runCommand(cmd, args);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      returnValue = e.getMessage();
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      returnValue = e.getMessage();
-      e.printStackTrace();
+  @Test
+  public void testArduinoMotPot() throws Exception {
+
+    if (uploadSketch)
+      uploadMRLComm(port, boardType);
+
+    boolean enableLoadTiming = false;
+    // Runtime.create("gui", "SwingGui");
+    // initialize the logger
+
+    // Create the pid controller
+    pid = (Pid) Runtime.createAndStart("pid", "Pid");
+    // # set the pid parameters KP KI KD (for now just porportial control)
+    pid.setPID(key, kp, ki, kd);
+    int direction = 1;
+    pid.setControllerDirection(key, direction);
+    pid.setMode(key, 1);
+    // clip the output values from the pid control to a range between -1 and 1.
+    pid.setOutputRange(key, -1.0, 1.0);
+    // This is the desired sample value from the potentiometer 512 = ~ 90
+    // degrees
+    int desiredValue = 512;
+    pid.setSetpoint(key, desiredValue);
+    pid.setSampleTime(key, 40);
+    // Start the arduino and the feedback potentiometer polling
+    arduino = (Arduino) Runtime.createAndStart("arduino", "Arduino");
+    // make arduino connect blocking (or at least as long as "getVersion()"
+    // takes.
+    arduino.connect(port);
+    // wait for the arduino to actually connect!
+    // Start the motor and attach it to the arduino.
+    motor = (MotorDualPwm) Runtime.createAndStart("motor", "Motor");
+    motor.setPwmPins(leftPwm, rightPwm);
+    motor.attachMotorController(arduino);
+    // Sensor callback
+    // arduino.analogReadPollingStart(potPin);
+    // arduino.sensorAttach(this);
+
+    // pin zero sample rate 1. (TODO: fix the concept of a sample rate!)
+    // we actually want it to be specified in Hz.. not cycles ...
+    // AnalogPinSensor feedbackPot = new AnalogPinSensor(0,1);
+    // feedbackPot.addSensorDataListener(this); // null config is this right ?
+    // arduino.sensorAttach(feedbackPot);
+
+    if (enableLoadTiming) {
+      arduino.enableBoardInfo(true);
     }
-    return returnValue;
+    // stop the motor initially
+    motor.move(0);
+    System.out.println("Press the any key to exit.");
+    System.in.read();
+
   }
 
-  // TODO: this should be on a string utils static class.
-  private String join(ArrayList<String> list, String joinChar) {
-    StringBuilder sb = new StringBuilder();
-    int i = 0;
-    int size = list.size();
-    for (String part : list) {
-      i++;
-      sb.append(part);
-      if (i != size) {
-        sb.append(joinChar);
-      }
+  // A helper function to upload the MRLComm sketch to the Arduino.
+  // using the command line utilities.
+  public void uploadMRLComm(String port, String board) throws IOException, InterruptedException {
+    if (!(board.equals("uno") || board.equals("mega"))) {
+      // TODO: validate the proper set of values.
+      System.out.println("Invalid board type");
+      return;
     }
-    return sb.toString();
-  }
+    File src = new File(sketchFilename);
+    File dest = new File(arduinoPath + destFilename);
+    System.out.println("Copy from " + src.getAbsolutePath() + " to " + dest.getAbsolutePath());
+    // copy MRLComm.c to MRLComm/MRLComm.ino for compilation and upload.
+    FileUtils.copyFile(src, dest);
+    // Create the command to run (and it's args.)
+    String arduinoExe = arduinoPath + arduinoExecutable;
+    ArrayList<String> args = new ArrayList<String>();
+    // args.add("--verbose");
+    args.add("--upload");
+    args.add("--port");
+    args.add(port);
+    args.add("--board");
+    args.add("arduino:avr:" + board);
+    args.add(dest.getAbsolutePath());
+    // run the command.
+    String result = runCommand(arduinoExe, args);
+    // print stdout/err from running the command
+    System.out.println("Result..." + result);
 
-  public boolean isLocal() {
-    // TODO Auto-generated method stub
-    return true;
+    System.out.println("Uploaded Sketch.");
+    System.out.flush();
+    // take a breath... We think it probably worked? but not sure..
+    Thread.sleep(2000);
   }
 
 }
