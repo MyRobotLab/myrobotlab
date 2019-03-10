@@ -1347,12 +1347,14 @@ public class Runtime extends Service implements MessageListener {
       rt.info("%s already released", name);
       return false;
     }
-
-    // send msg to service to self terminate
-    rt.send(name, "releaseService");
-
+    
     // get reference from registry
     ServiceInterface sw = registry.get(name);
+    
+    // FIXME - TODO  invoke and or blocking on preRelease - Future
+    
+    // send msg to service to self terminate
+    rt.send(name, "releaseService");
 
     // you have to send released before removing from registry
     rt.invoke("released", sw);

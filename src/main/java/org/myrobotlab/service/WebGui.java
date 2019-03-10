@@ -212,9 +212,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     meta.addCategory("connectivity", "display");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("org.atmosphere", "nettosphere", "2.3.0");
-    //meta.addDependency("org.atmosphere", "wasync", "2.1.3"); provided in Runtime now.
-
+    // meta.addDependency("org.atmosphere", "nettosphere", "2.3.0");
+    meta.addDependency("org.atmosphere", "nettosphere", "3.0.11");
+    
     // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
     // hence these following dependencies are zipped with myrobotlab.jar !
     // and are NOT listed as dependencies, because they are already included
@@ -391,7 +391,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // .mappingPath("/app")
     
         // FIXME - find out how collisions of resources (priority) is handled ???
-
+        
         .resource("/stream", stream)
         // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
@@ -1007,7 +1007,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
            * nettosphere.framework().resetStates();
            * nettosphere.framework().destroy();
            */
+          log.error("==== nettosphere stopping  ====");
+          // nettosphere.framework().
+          // nettosphere.framework().destroy();
           nettosphere.stop();
+          log.error("==== nettosphere STOPPED ====");
         }
       }).start();
       sleep(1000);
@@ -1054,12 +1058,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("arduino", "Arduino");
       // Runtime.start("srf05", "UltrasonicSensor");
       // Runtime.setRuntimeName("george");
+      Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
       webgui.autoStartBrowser(true);
+      
+      // webgui.releaseService();
       // Runtime.start("mary", "MarySpeech");
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 
