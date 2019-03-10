@@ -62,7 +62,7 @@ public class MRLCommTest {
   // try {
   //
   // LoggingFactory.getInstance().configure();
-  // LoggingFactory.getInstance().setLevel(Level.INFO);
+  // // LoggingFactory.getInstance().setLevel(Level.INFO);
   //
   // ArduinoTest.setUpBeforeClass();
   // ArduinoTest test = new ArduinoTest();

@@ -18,7 +18,7 @@ public class MotorTest2 {
 
   @Before
   public void setUp() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test

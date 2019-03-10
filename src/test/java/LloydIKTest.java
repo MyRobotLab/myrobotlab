@@ -21,7 +21,7 @@ public class LloydIKTest {
   @Test
   public void testIK() {
 
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO");
     
     String partName = "myArm";
 

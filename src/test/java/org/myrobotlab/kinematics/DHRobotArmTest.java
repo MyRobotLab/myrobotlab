@@ -13,7 +13,7 @@ public class DHRobotArmTest {
 
   @Before
   public void setUp() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
   
   // @Test

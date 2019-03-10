@@ -28,7 +28,7 @@ public abstract class AbstractServiceTest {
   @Test
   public void testServiceInternal() throws Exception {
     // set up the logging level ?
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     service = createService();
     testService();
     releaseService();

@@ -29,7 +29,7 @@ public class ProgramABTest extends AbstractServiceTest {
 
   @Before
   public void setUp() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   public Service createService() {

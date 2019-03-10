@@ -35,7 +35,7 @@ public class HarryTest {
   // @Test
   public void testDynamic() throws SolrServerException, IOException, InterruptedException {
 
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO");
     // create memory
     Solr solr = (Solr) Runtime.start("solr", "Solr");
     solr.startEmbedded();
@@ -111,7 +111,7 @@ public class HarryTest {
   @Test
   public void testHarry() throws Exception {
 
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     // create memory
     Solr solr = (Solr) Runtime.start("solr", "Solr");
     solr.startEmbedded();

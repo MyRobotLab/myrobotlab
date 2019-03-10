@@ -16,7 +16,7 @@ public class InverseKinematics3DTest {
 
   @Before
   public void setUp() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test

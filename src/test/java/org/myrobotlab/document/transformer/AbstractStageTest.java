@@ -11,7 +11,7 @@ public abstract class AbstractStageTest {
 
   @Before
   public void init() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
   
   public abstract Document createDocument();

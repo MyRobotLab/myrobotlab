@@ -230,7 +230,7 @@ public class AbstractTest {
   public static void main(String[] args) {
     try {
       AbstractTest test = new AbstractTest();
-      LoggingFactory.init("INFO");
+      // LoggingFactory.init("INFO");
 
       giveToMonkey(test, "testFunction");
       giveToMonkey(test, "testFunction");

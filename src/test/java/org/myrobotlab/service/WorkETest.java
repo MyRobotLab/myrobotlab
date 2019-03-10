@@ -108,7 +108,7 @@ public class WorkETest {
 
   public static void main(String[] args) {
     try {
-      LoggingFactory.init("WARN");
+      // LoggingFactory.init("WARN");
 
       // run junit as java app
       JUnitCore junit = new JUnitCore();

@@ -38,7 +38,7 @@ public class InMoovTest implements PinArrayListener {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     log.info("setUpBeforeClass");
     // FIXME - needs a seemless switch
     if (useVirtualHardware) {

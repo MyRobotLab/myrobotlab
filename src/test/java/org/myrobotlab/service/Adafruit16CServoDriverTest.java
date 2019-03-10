@@ -21,7 +21,7 @@ public class Adafruit16CServoDriverTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO");
     driver = (Adafruit16CServoDriver) Runtime.start("driver", "Adafruit16CServoDriver");
     // arduino = driver.getArduino();
     arduino = (Arduino) Runtime.start("arduino", "Arduino");

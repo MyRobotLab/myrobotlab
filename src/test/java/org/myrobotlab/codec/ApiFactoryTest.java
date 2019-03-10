@@ -20,7 +20,7 @@ public class ApiFactoryTest {
 
   @Test
   public void testProcessString() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     try {
 
       Runtime runtime = (Runtime) Runtime.getInstance();

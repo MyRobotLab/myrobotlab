@@ -46,7 +46,7 @@ public class SerialTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
 
     log.info("setUpBeforeClass");
 

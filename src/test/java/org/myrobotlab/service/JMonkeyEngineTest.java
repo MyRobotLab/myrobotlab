@@ -29,7 +29,7 @@ public class JMonkeyEngineTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-    Runtime.setLogLevel("info");
+    // Runtime.setLogLevel("info");
     if (!isHeadless()) {
       swing = (SwingGui) Runtime.start("gui", "SwingGui");
     }
@@ -138,7 +138,7 @@ public class JMonkeyEngineTest extends AbstractTest {
 
   public static void main(String[] args) {
     try {
-      // LoggingFactory.init("INFO");
+      // // LoggingFactory.init("INFO");
 
       setUpBeforeClass();
 

@@ -15,11 +15,12 @@ public class LoggingTest {
     Logger log = LoggerFactory.getLogger(LoggingTest.class);
     String originalLogLevel = LoggingFactory.getLogLevel();
     log.info("original log level is {}", originalLogLevel);
-    LoggingFactory.init();
+    // LoggingFactory.init();
     originalLogLevel = LoggingFactory.getLogLevel();
     log.info("log level afer init {}", originalLogLevel);
     Assert.assertEquals(LoggingFactory.getLogLevel(), "DEBUG");
-    LoggingFactory.setLevel("WARN");
+    // LoggingFactory.setLevel("WARN"); FIXME TOO DANGERIOUS AND NOT ACTUALLY "TESTING" ANYTHING IE NO ASSERT !!
+    // IF YOU CHANGE LOG LEVEL YOU BETTER SAVE THE OLD ONE !!
     log.warn("set to warn level");
     log.info("this should not be logged");
     log.debug("nor this");

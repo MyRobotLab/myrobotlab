@@ -13,7 +13,7 @@ public class DruppIKSolverTest {
   @Test
   public void testDrupp() throws Exception {
     
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     
     DruppIKSolver solver = new DruppIKSolver();
 

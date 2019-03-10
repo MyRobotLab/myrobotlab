@@ -2454,6 +2454,10 @@ public class Runtime extends Service implements MessageListener {
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.atmosphere", "wasync", "2.1.3");
     
+    // all your logging needs
+    meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
+    meta.addDependency("ch.qos.logback", "logback-classic", "1.0.13");
+    
     // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");
     // meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
 

@@ -99,9 +99,6 @@ public class Keyboard extends Service {
 
   public Keyboard(String n) {
     super(n);
-
-    java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GlobalScreen.class.getPackage().getName());
-    logger.setLevel(java.util.logging.Level.WARNING);
   }
 
   public void startListening() throws NativeHookException {
