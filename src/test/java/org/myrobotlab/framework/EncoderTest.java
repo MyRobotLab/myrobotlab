@@ -14,7 +14,7 @@ public class EncoderTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test

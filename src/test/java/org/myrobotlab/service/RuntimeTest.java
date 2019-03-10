@@ -21,7 +21,7 @@ public class RuntimeTest extends AbstractTest {
 
   @Before
   public void setUp() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test

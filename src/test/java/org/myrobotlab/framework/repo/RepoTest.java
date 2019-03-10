@@ -32,7 +32,7 @@ public class RepoTest implements StatusPublisher {
 
   @Before
   public void setUp() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     Repo repo = Repo.getInstance();
     repo.clear();
   }

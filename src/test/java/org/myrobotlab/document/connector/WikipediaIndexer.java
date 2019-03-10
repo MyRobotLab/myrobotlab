@@ -26,7 +26,7 @@ public class WikipediaIndexer {
     // it's like a 50GB xml file.. gah..
     System.setProperty("jdk.xml.totalEntitySizeLimit", String.valueOf(Integer.MAX_VALUE));
     org.apache.log4j.BasicConfigurator.configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    // LoggingFactory.getInstance().setLevel(Level.INFO);
     // wikipedia xml file. ( freely available via wiki-dumps )
 
     XMLConnector wikipediaConnector = (XMLConnector) Runtime.start("wikipediaConnector", "XMLConnector");

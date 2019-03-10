@@ -29,7 +29,7 @@ public class VisionMemoryTest {
   public void inboxOutboxMemoryTest() throws Exception {
 
     // basic log level stuff
-    Runtime.setLogLevel("INFO");
+    // Runtime.setLogLevel("INFO");
     // for debugging
     Runtime.createAndStart("gui", "SwingGui");
     // start up the embedded solr server
@@ -112,7 +112,7 @@ public class VisionMemoryTest {
   // @Test
   public void testVisionMemory() throws InterruptedException, SolrServerException, IOException {
     // basic log level stuff
-    Runtime.setLogLevel("INFO");
+    // Runtime.setLogLevel("INFO");
     // for debugging
     Runtime.createAndStart("gui", "SwingGui");
     // start up the embedded solr server

@@ -132,14 +132,6 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void configure() {
-    // LoggerFactory.getILoggerFactory();
-    // BasicConfigurator.configureDefaultContext();
-    // http://www.mkyong.com/logging/logback-duplicate-log-messages/
-    // BasicConfigurator.configureDefaultContext();
-    // LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-    // BasicConfigurator.configure(lc);
-    // BasicConfigurator.configure(null);
-
     LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
     JoranConfigurator configurator = new JoranConfigurator();
     configurator.setContext(context);
@@ -148,13 +140,6 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public String getLevel() {
-    /*
-     * Map<String,String> levels=newTreeMap(); LoggerContext
-     * context=(LoggerContext)LoggerFactory.getILoggerFactory(); for ( Logger
-     * logger : context.getLoggerList()) { if (logger.getLevel() != null) {
-     * levels.put(logger.getName(),logger.getLevel().toString()); } }
-     */
-
     Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     Level level = logger.getLevel();
     if (level.equals(Level.DEBUG)) {

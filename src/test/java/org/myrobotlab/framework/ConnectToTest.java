@@ -152,7 +152,7 @@ public class ConnectToTest {
 
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
+    // LoggingFactory.init(Level.INFO);
 
     try {
 

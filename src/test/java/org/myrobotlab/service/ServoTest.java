@@ -20,7 +20,7 @@ public class ServoTest {
   public void setup() throws Exception {
     // setup the test environment , and create an arduino with a virtual backend
     // for it.
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
     VirtualArduino va2 = (VirtualArduino) Runtime.start("va2", "VirtualArduino");

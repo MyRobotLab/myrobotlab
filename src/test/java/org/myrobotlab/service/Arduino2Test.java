@@ -27,7 +27,7 @@ public class Arduino2Test {
   @Before
   public void setup() throws IOException {
 
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     VirtualArduino va01 = (VirtualArduino) Runtime.start("va01", "VirtualArduino");
     VirtualArduino va02 = (VirtualArduino) Runtime.start("va02", "VirtualArduino");
 

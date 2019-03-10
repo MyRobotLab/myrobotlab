@@ -25,7 +25,7 @@ public class InMoovScriptTest {
   public void setup() throws Exception {
     // setup the test environment ,and create an arduino with a virtual backend
     // for it.
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     // initialize 2 serial ports (virtual arduino)
     VirtualArduino va1 = (VirtualArduino) Runtime.createAndStart("va1", "VirtualArduino");
     VirtualArduino va2 = (VirtualArduino) Runtime.createAndStart("va2", "VirtualArduino");

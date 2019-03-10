@@ -24,7 +24,7 @@ public class NeoPixelTest {
   public void setUp() throws Exception {
     // setup the test environment , and create an arduino with a virtual backend
     // for it.
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     VirtualArduino va1 = (VirtualArduino) Runtime.createAndStart("va1", "VirtualArduino");
     va1.connect(V_PORT_1);
     ard = (Arduino) Runtime.createAndStart("ard", "Arduino");

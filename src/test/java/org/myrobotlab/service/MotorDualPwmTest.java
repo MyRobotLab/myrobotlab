@@ -25,7 +25,7 @@ public class MotorDualPwmTest {
 
   @Before
   public void setUp() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test

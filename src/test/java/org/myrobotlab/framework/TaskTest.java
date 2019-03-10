@@ -5,13 +5,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.slf4j.Logger;
@@ -22,7 +18,8 @@ public class TaskTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("WARN");
+    // // LoggingFactory.init("WARN"); <- do not do this .. changing log levels
+    // should be done in 1 place - in the framework that calls this test
   }
 
   @Test

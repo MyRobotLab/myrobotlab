@@ -62,7 +62,7 @@ public class ArduinoTest implements PinArrayListener {
 
   @Before
   public void setUp() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     // setup the virtual port (if enabled)
     // FIXME - needs a seemless switch
     if (useVirtualHardware) {
@@ -484,7 +484,7 @@ public class ArduinoTest implements PinArrayListener {
 
   // public static void main(String[] args) {
   // try {
-  // LoggingFactory.init("INFO");
+  // // LoggingFactory.init("INFO");
   //
   // Runtime.start("webgui", "WebGui");
   // // Runtime.start("gui", "SwingGui");

@@ -17,7 +17,7 @@ public class InMoovLeftArmIKTest {
   @Test
   public void testDHArm() {
 
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO");
     DHRobotArm arm = InMoovArm.getDHRobotArm("i01", "left");
     //  Point palm = arm.getPalmPosition();
     //  System.out.println(palm);
