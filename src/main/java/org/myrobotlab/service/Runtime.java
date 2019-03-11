@@ -1039,8 +1039,11 @@ public class Runtime extends Service implements MessageListener {
     // java.awt.GraphicsEnvironment.isHeadless()
     // String nm = System.getProperty("java.awt.headless");
     // should return true if Linux != display
+    /*
     String b = System.getProperty("java.awt.headless");
     return Boolean.parseBoolean(b);
+    */
+    return java.awt.GraphicsEnvironment.isHeadless();
   }
 
   public static boolean isLocal(String serviceName) {
