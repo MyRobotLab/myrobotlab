@@ -1000,16 +1000,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void stop() {
     if (nettosphere != null) {
-
-      log.info("stopping nettosphere");
+      log.warn("==== nettosphere STOPPING ====");
+      nettosphere.stop();
       // Must not be called from a I/O-Thread to prevent deadlocks!
+      /*
       (new Thread("stopping nettophere") {
         public void run() {
-          /*
-           * nettosphere.framework().removeAllAtmosphereHandler();
-           * nettosphere.framework().resetStates();
-           * nettosphere.framework().destroy();
-           */
+          
           log.error("==== nettosphere stopping  ====");
           // nettosphere.framework().
           // nettosphere.framework().destroy();
@@ -1018,6 +1015,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
       }).start();
       sleep(1000);
+      */
+      log.warn("==== nettosphere STOPPED ====");
     }
   }
 
