@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 public class AbstractTest {
 
-  private static long coolDownTimeMs = 2000;
+  private static long coolDownTimeMs = 5000;
   /**
    * cached internet test value for tests
    */
@@ -117,7 +117,7 @@ public class AbstractTest {
 
       if (sb.length() > 0) {
         log.warn("had to release the following services {}", sb.toString());
-        log.warn("cooling down for {}ms for dependencies with asynchronous shutdown");
+        log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
         sleep(coolDownTimeMs);
       }
     }
