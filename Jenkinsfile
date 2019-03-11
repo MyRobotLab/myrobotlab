@@ -9,7 +9,7 @@ node {
    // agent any
    
    def mvnHome
-   stage('Preparation') { // for display purposes
+   stage('preparation') { // for display purposes
       // Get some code from a GitHub repository
       checkout scm
       // git 'https://github.com/MyRobotLab/myrobotlab.git'
@@ -33,34 +33,41 @@ node {
       sh 'java -version'
       echo sh(script: 'env|sort', returnStdout: true)
    }
-   stage('Build') {
+   stage('compile') {
       echo git_commit
       echo "git_commit=$git_commit"
       // Run the maven build
       if (isUnix()) {
          // --debug 
          // sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch  -Dmaven.test.failure.ignore clean install"
-         sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -q clean install"
+         // sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -q clean install"
+         sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -q clean compile"
+          
       } else {
-         bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean package/)
+         bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean compile/)
       }
    }
-   stage('Docs'){
+   stage('verify'){
+	   if (isUnix()) {
+	     sh "'${mvnHome}/bin/mvn' verify"
+	   } else {
+	     bat(/"${mvnHome}\bin\mvn" verify/)
+	   }
+   }
+   stage('docs'){
 	   if (isUnix()) {
 	     sh "'${mvnHome}/bin/mvn' javadoc:javadoc"
 	   } else {
 	     bat(/"${mvnHome}\bin\mvn" javadoc:javadoc/)
 	   }
    }
-   stage('Results') {
+   stage('results') {
       junit '**/target/surefire-reports/TEST-*.xml'
       archive 'target/*.jar'      
       jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes',sourcePattern: 'src/main/java',exclusionPattern: 'src/test*')
    } 
-   stage('Publish') {
+   stage('publish') {
    
-   
-
 //    	def server = Artifactory.server 'artifactory01' 
 //    	def uploadSpec = """{
 // 								"files": [
