@@ -27,7 +27,7 @@ public class AbstractTest {
   private static boolean releaseRemainingThreads = true;
 
   static transient Set<Thread> threadSetStart = null;
-  private static boolean useDeprecatedThreadStop = true;
+  private static boolean useDeprecatedThreadStop = false;
 
   static public boolean hasInternet() {
     if (hasInternet == null) {
