@@ -26,17 +26,17 @@ public class Arduino2Test extends AbstractTest {
 
   @Before
   public void setup() throws IOException {
+    if (isVirtual()) {
 
-    // LoggingFactory.init("WARN");
-    VirtualArduino va01 = (VirtualArduino) Runtime.start("va01", "VirtualArduino");
-    VirtualArduino va02 = (VirtualArduino) Runtime.start("va02", "VirtualArduino");
+      VirtualArduino va01 = (VirtualArduino) Runtime.start("va01", "VirtualArduino");
+      VirtualArduino va02 = (VirtualArduino) Runtime.start("va02", "VirtualArduino");
 
-    va01.connect(V_PORT_1);
-    va02.connect(V_PORT_2);
+      va01.connect(V_PORT_1);
+      va02.connect(V_PORT_2);
 
-    assertTrue(va01.isConnected());
-    assertTrue(va02.isConnected());
-
+      assertTrue(va01.isConnected());
+      assertTrue(va02.isConnected());
+    }
   }
 
   @Test
