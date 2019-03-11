@@ -27,6 +27,7 @@ public class AbstractTest {
   private static boolean releaseRemainingThreads = true;
 
   static transient Set<Thread> threadSetStart = null;
+  private static boolean useDeprecatedThreadStop = true;
 
   static public boolean hasInternet() {
     if (hasInternet == null) {
@@ -129,6 +130,9 @@ public class AbstractTest {
         if (releaseRemainingThreads) {
           log.warn("killing thread {}", thread.getName());
           thread.interrupt();
+          if (useDeprecatedThreadStop ) {
+            thread.stop();
+          }
         } else {
           log.warn("thread {} marked as straggler - should be killed", thread.getName());
         }
