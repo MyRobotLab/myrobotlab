@@ -262,7 +262,7 @@
 						<include>**/*Test.java</include>
 					</includes>
 					<excludes>
-						<exclude>org/myrobotlab/test/integration**/*Test.java</exclude>
+						<exclude>**/integration/*</exclude>
 					</excludes>
 				</configuration>
 				<version>2.9</version>

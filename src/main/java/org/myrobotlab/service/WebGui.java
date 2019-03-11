@@ -213,7 +213,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     meta.includeServiceInOneJar(true);
     // meta.addDependency("org.atmosphere", "nettosphere", "2.3.0");
-    meta.addDependency("org.atmosphere", "nettosphere", "3.0.11");
+    // meta.addDependency("org.atmosphere", "nettosphere", "3.0.11");
+    meta.addDependency("org.atmosphere", "nettosphere", "3.0.12-SNAPSHOT");
+    
+    
     
     // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
     // hence these following dependencies are zipped with myrobotlab.jar !
@@ -1062,8 +1065,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
       webgui.autoStartBrowser(true);
       
-      // webgui.releaseService();
+      webgui.releaseService();
       // Runtime.start("mary", "MarySpeech");
+      
+      log.info("leaving main");
 
     } catch (Exception e) {
       log.error("main threw", e);
