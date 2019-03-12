@@ -1,18 +1,17 @@
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.repo.Repo;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.OpenCV;
-
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.*;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 public class OpenCVFilterFaceDetectDNNTest {
 
@@ -20,7 +19,7 @@ public class OpenCVFilterFaceDetectDNNTest {
 
   @Before
   public void setUp() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test

@@ -475,12 +475,12 @@ public class WiiDar extends Service {
 
   @Override
   public void stopService() {
+    super.stopService();
     if (sweep != null)
       sweep.done = true;
 
     sweeperThread = null;
 
-    super.stopService();
   }
 
   public void stopSweep() {

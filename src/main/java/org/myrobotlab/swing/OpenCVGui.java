@@ -159,7 +159,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
         if (value instanceof OpenCVFilterGui) {
           OpenCVFilterGui filter = (OpenCVFilterGui) value;
 
-          if (opencv.getFilter(filter.name).isEnabled()) {
+          if (opencv != null && opencv.getFilter(filter.name) != null && opencv.getFilter(filter.name).isEnabled()) {
             setBackground(Color.GREEN);
           } else {
             setBackground(Color.WHITE);

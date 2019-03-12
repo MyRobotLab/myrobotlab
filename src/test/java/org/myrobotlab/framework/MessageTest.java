@@ -15,12 +15,13 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class MessageTest implements NameProvider {
-  public final static Logger log = LoggerFactory.getLogger(MessageTest.class);
-
+public class MessageTest extends AbstractTest implements NameProvider {
   static TestCatcher catcher;
+
+  public final static Logger log = LoggerFactory.getLogger(MessageTest.class);
   static TestThrower thrower;
 
   @BeforeClass
@@ -30,19 +31,17 @@ public class MessageTest implements NameProvider {
   }
 
   @Test
-  public void simpleSubscribeAndThrow() throws Exception {
-    log.info("simpleSubscribeAndThrow");
-
+  final public void badNameTest() throws Exception {
+    log.info("badNameTest");
     catcher.clear();
-    catcher.subscribe("thrower", "pitch");
-    // ROUTE MUST STABALIZE - BEFORE MSGS - otherwise they will be missed
-    Service.sleep(100);
-
-    thrower.pitchInt(1000);
-    BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
-
-    log.warn(String.format("caught %d balls", balls.size()));
-    log.warn(String.format("left balls %d ", catcher.msgs.size()));
+    TestCatcher catcher2 = null;
+    try {
+      Runtime.create("myName/isGeorge", "TestCatcher");
+    } catch (Exception e) {
+      // Logging.logError(e);
+      log.info("good bad name threw");
+    }
+    assertNull(catcher2);
   }
 
   // @Test
@@ -109,18 +108,9 @@ public class MessageTest implements NameProvider {
 
   }
 
-  @Test
-  final public void badNameTest() throws Exception {
-    log.info("badNameTest");
-    catcher.clear();
-    TestCatcher catcher2 = null;
-    try {
-      Runtime.create("myName/isGeorge", "TestCatcher");
-    } catch (Exception e) {
-      // Logging.logError(e);
-      log.info("good bad name threw");
-    }
-    assertNull(catcher2);
+  @Override
+  public String getName() {
+    return "tester";
   }
 
   @Test
@@ -174,9 +164,20 @@ public class MessageTest implements NameProvider {
     assertNotNull(ret);
   }
 
-  @Override
-  public String getName() {
-    return "tester";
+  @Test
+  public void simpleSubscribeAndThrow() throws Exception {
+    log.info("simpleSubscribeAndThrow");
+
+    catcher.clear();
+    catcher.subscribe("thrower", "pitch");
+    // ROUTE MUST STABALIZE - BEFORE MSGS - otherwise they will be missed
+    Service.sleep(100);
+
+    thrower.pitchInt(1000);
+    BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
+
+    log.warn(String.format("caught %d balls", balls.size()));
+    log.warn(String.format("left balls %d ", catcher.msgs.size()));
   }
 
 }

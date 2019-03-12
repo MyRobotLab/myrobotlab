@@ -1039,8 +1039,11 @@ public class Runtime extends Service implements MessageListener {
     // java.awt.GraphicsEnvironment.isHeadless()
     // String nm = System.getProperty("java.awt.headless");
     // should return true if Linux != display
+    /*
     String b = System.getProperty("java.awt.headless");
     return Boolean.parseBoolean(b);
+    */
+    return java.awt.GraphicsEnvironment.isHeadless();
   }
 
   public static boolean isLocal(String serviceName) {
@@ -1347,16 +1350,42 @@ public class Runtime extends Service implements MessageListener {
       rt.info("%s already released", name);
       return false;
     }
-
-    // send msg to service to self terminate
-    rt.send(name, "releaseService");
-
+    
     // get reference from registry
     ServiceInterface sw = registry.get(name);
+    if (sw == null) {
+      log.warn("cannot release {} - not in registry");
+      return false;
+    }
+    
+    // FIXME - TODO  invoke and or blocking on preRelease - Future
+    
+    // send msg to service to self terminate
+    if (sw.isLocal()) {
+      sw.releaseService();
+    } else {
+      rt.send(name, "releaseService");
+    }
+    
+    unregister(name);
 
+    return true;
+  }
+  
+  synchronized public static void unregister(String name) {
+    log.info("unregister {}", name);
+    Runtime rt = getInstance();
+    
+    // get reference from registry
+    ServiceInterface sw = registry.get(name);
+    if (sw == null) {
+      log.warn("cannot unregister {} - not in registry", name);
+      return;
+    }
+    
     // you have to send released before removing from registry
     rt.invoke("released", sw);
-
+    
     // remove from registry
     registry.remove(name);
 
@@ -1365,7 +1394,6 @@ public class Runtime extends Service implements MessageListener {
     se.serviceDirectory.remove(name);
 
     log.info("released {}", name);
-    return true;
   }
 
   public static boolean release(URI url) /* release process environment */
@@ -2453,6 +2481,10 @@ public class Runtime extends Service implements MessageListener {
     meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.atmosphere", "wasync", "2.1.3");
+    
+    // all your logging needs
+    meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
+    meta.addDependency("ch.qos.logback", "logback-classic", "1.0.13");
     
     // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");
     // meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");

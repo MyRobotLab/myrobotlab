@@ -13,11 +13,11 @@ import org.junit.Test;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino.Sketch;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class Arduino2Test {
+public class Arduino2Test extends AbstractTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino2Test.class);
 
@@ -26,17 +26,17 @@ public class Arduino2Test {
 
   @Before
   public void setup() throws IOException {
+    if (isVirtual()) {
 
-    LoggingFactory.init("WARN");
-    VirtualArduino va01 = (VirtualArduino) Runtime.start("va01", "VirtualArduino");
-    VirtualArduino va02 = (VirtualArduino) Runtime.start("va02", "VirtualArduino");
+      VirtualArduino va01 = (VirtualArduino) Runtime.start("va01", "VirtualArduino");
+      VirtualArduino va02 = (VirtualArduino) Runtime.start("va02", "VirtualArduino");
 
-    va01.connect(V_PORT_1);
-    va02.connect(V_PORT_2);
+      va01.connect(V_PORT_1);
+      va02.connect(V_PORT_2);
 
-    assertTrue(va01.isConnected());
-    assertTrue(va02.isConnected());
-
+      assertTrue(va01.isConnected());
+      assertTrue(va02.isConnected());
+    }
   }
 
   @Test
@@ -79,35 +79,6 @@ public class Arduino2Test {
   }
 
   @Test
-  public void testBoardInfo() {
-    Arduino ard = (Arduino) Runtime.start("ard01", "Arduino");
-    ard.connect(V_PORT_1);
-    assertNotNull(ard.getBoard());
-    ard.setBoard("uno");
-    assertEquals(ard.getBoard(), "uno");
-    ard.setBoard("mega");
-    assertEquals(ard.getBoard(), "mega");
-  }
-
-  // TODO: this is broken! but not in eclipse!
-  // @Test
-  public void testSketch() {
-    Arduino ard = (Arduino) Runtime.start("ard01", "Arduino");
-    Sketch s = ard.getSketch();
-    assertNotNull(s.name);
-    assertNotNull(s.data);
-  }
-
-  // TODO: this seems broken.
-  // @Test
-  // public void testResetArduino() {
-  // Arduino ard = (Arduino) Runtime.createAndStart("ard01", "Arduino");
-  // // TODO: add some devices and then validate that the device list is empty
-  // ard.reset();
-  // assertEquals(ard.deviceList.size(), 0);
-  // }
-
-  @Test
   public void testArduinoPorts() {
     Arduino ard = (Arduino) Runtime.start("ard01", "Arduino");
     ard.connect(V_PORT_1);
@@ -124,6 +95,35 @@ public class Arduino2Test {
     log.info("testArduinoPorts.getPortNames {}", sb.toString());
     assertTrue(ports.contains(V_PORT_1));
     assertTrue(ports.contains(V_PORT_2));
+  }
+
+  @Test
+  public void testBoardInfo() {
+    Arduino ard = (Arduino) Runtime.start("ard01", "Arduino");
+    ard.connect(V_PORT_1);
+    assertNotNull(ard.getBoard());
+    ard.setBoard("uno");
+    assertEquals(ard.getBoard(), "uno");
+    ard.setBoard("mega");
+    assertEquals(ard.getBoard(), "mega");
+  }
+
+  // TODO: this seems broken.
+  // @Test
+  // public void testResetArduino() {
+  // Arduino ard = (Arduino) Runtime.createAndStart("ard01", "Arduino");
+  // // TODO: add some devices and then validate that the device list is empty
+  // ard.reset();
+  // assertEquals(ard.deviceList.size(), 0);
+  // }
+
+  // TODO: this is broken! but not in eclipse!
+  // @Test
+  public void testSketch() {
+    Arduino ard = (Arduino) Runtime.start("ard01", "Arduino");
+    Sketch s = ard.getSketch();
+    assertNotNull(s.name);
+    assertNotNull(s.data);
   }
 
 }

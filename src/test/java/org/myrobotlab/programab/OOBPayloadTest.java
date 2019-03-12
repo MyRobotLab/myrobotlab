@@ -5,8 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
-public class OOBPayloadTest {
+public class OOBPayloadTest extends AbstractTest {
 
   @Test
   public void basicTestOOBPayload() {

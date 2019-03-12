@@ -170,6 +170,7 @@ public class Osc extends Service implements OSCListener {
   }
 
   public void stopService() {
+    super.stopService();
     stopListening();
   }
 

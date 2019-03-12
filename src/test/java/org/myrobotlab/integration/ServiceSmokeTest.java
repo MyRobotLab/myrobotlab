@@ -1,4 +1,4 @@
-package org.myrobotlab.service;
+package org.myrobotlab.integration;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -7,13 +7,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 /**
@@ -25,8 +26,7 @@ import org.slf4j.Logger;
  *
  */
 
-@Ignore
-public class ServiceSmokeTest {
+public class ServiceSmokeTest extends AbstractTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
 

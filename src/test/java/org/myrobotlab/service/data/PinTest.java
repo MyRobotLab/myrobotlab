@@ -4,8 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
-public class PinTest {
+public class PinTest extends AbstractTest {
 
   @Test
   public void testPin() {

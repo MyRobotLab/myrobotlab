@@ -21,15 +21,16 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Solr;
 import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public class VisionMemoryTest {
+public class VisionMemoryTest extends AbstractTest {
 
   @Test
   public void inboxOutboxMemoryTest() throws Exception {
 
     // basic log level stuff
-    Runtime.setLogLevel("INFO");
+    // Runtime.setLogLevel("INFO");
     // for debugging
     Runtime.createAndStart("gui", "SwingGui");
     // start up the embedded solr server
@@ -68,6 +69,23 @@ public class VisionMemoryTest {
 
   }
 
+  public void printDoc(SolrDocument doc) {
+    System.out.println("---------------------------");
+    System.out.println("DocID: " + doc.getFieldValue("id"));
+    for (String field : doc.getFieldNames()) {
+      if (field.equalsIgnoreCase("id"))
+        continue;
+      System.out.print(field + ": ");
+      ArrayList<String> strVals = new ArrayList<String>();
+      for (Object o : doc.getFieldValues(field)) {
+        strVals.add(o.toString());
+      }
+      String values = StringUtils.join(",", strVals);
+      System.out.println(values);
+    }
+
+  }
+
   public void searchAndPrintResult(Solr solr) {
 
     SolrQuery query = new SolrQuery();
@@ -92,27 +110,10 @@ public class VisionMemoryTest {
     }
   }
 
-  public void printDoc(SolrDocument doc) {
-    System.out.println("---------------------------");
-    System.out.println("DocID: " + doc.getFieldValue("id"));
-    for (String field : doc.getFieldNames()) {
-      if (field.equalsIgnoreCase("id"))
-        continue;
-      System.out.print(field + ": ");
-      ArrayList<String> strVals = new ArrayList<String>();
-      for (Object o : doc.getFieldValues(field)) {
-        strVals.add(o.toString());
-      }
-      String values = StringUtils.join(",", strVals);
-      System.out.println(values);
-    }
-
-  }
-
   // @Test
   public void testVisionMemory() throws InterruptedException, SolrServerException, IOException {
     // basic log level stuff
-    Runtime.setLogLevel("INFO");
+    // Runtime.setLogLevel("INFO");
     // for debugging
     Runtime.createAndStart("gui", "SwingGui");
     // start up the embedded solr server

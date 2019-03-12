@@ -5,13 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.myrobotlab.logging.LoggingFactory;
 
 public class PidTest {
 
   @Before
   public void setUp() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test

@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 public class RuntimeTest extends AbstractTest {
@@ -21,19 +21,20 @@ public class RuntimeTest extends AbstractTest {
 
   @Before
   public void setUp() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test
-  public void testGetUptime() {
-    String res = Runtime.getUptime();
-    Assert.assertTrue(res.contains("hour"));
-  }
-
-  @Test
-  public void testGetLocalServices() {
-    ServiceEnvironment se = Runtime.getLocalServices();
-    Assert.assertNotNull(se);
+  public void testGetExternalIPAddress() throws Exception {
+    if (hasInternet()) {
+      try {
+        String externalIP = Runtime.getExternalIp();
+        Assert.assertNotNull(externalIP);
+        Assert.assertEquals(4, externalIP.split("\\.").length);
+      } catch (Exception e) {
+        log.error("testGetExternalIPAddress failed", e);
+      }
+    }
   }
 
   @Test
@@ -49,16 +50,15 @@ public class RuntimeTest extends AbstractTest {
   }
 
   @Test
-  public void testGetExternalIPAddress() throws Exception {
-    if (hasInternet()) {
-      try {
-        String externalIP = Runtime.getExternalIp();
-        Assert.assertNotNull(externalIP);
-        Assert.assertEquals(4, externalIP.split("\\.").length);
-      } catch (Exception e) {
-        log.error("testGetExternalIPAddress failed", e);
-      }
-    }
+  public void testGetLocalServices() {
+    ServiceEnvironment se = Runtime.getLocalServices();
+    Assert.assertNotNull(se);
+  }
+
+  @Test
+  public void testGetUptime() {
+    String res = Runtime.getUptime();
+    Assert.assertTrue(res.contains("hour"));
   }
 
   // @Test

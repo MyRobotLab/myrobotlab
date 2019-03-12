@@ -3,8 +3,6 @@ package org.myrobotlab.document.connector;
 import org.junit.Ignore;
 import org.myrobotlab.document.transformer.StageConfiguration;
 import org.myrobotlab.document.transformer.WorkflowConfiguration;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.DocumentPipeline;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.XMLConnector;
@@ -26,7 +24,7 @@ public class WikipediaIndexer {
     // it's like a 50GB xml file.. gah..
     System.setProperty("jdk.xml.totalEntitySizeLimit", String.valueOf(Integer.MAX_VALUE));
     org.apache.log4j.BasicConfigurator.configure();
-    LoggingFactory.getInstance().setLevel(Level.INFO);
+    // LoggingFactory.getInstance().setLevel(Level.INFO);
     // wikipedia xml file. ( freely available via wiki-dumps )
 
     XMLConnector wikipediaConnector = (XMLConnector) Runtime.start("wikipediaConnector", "XMLConnector");

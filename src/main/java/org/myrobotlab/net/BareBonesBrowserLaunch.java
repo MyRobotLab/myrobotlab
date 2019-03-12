@@ -1,5 +1,7 @@
 package org.myrobotlab.net;
 
+import java.awt.GraphicsEnvironment;
+
 /////////////////////////////////////////////////////////
 // Thank you Dem Pilafian ! @
 // http://www.centerkey.com/java/browser/
@@ -29,7 +31,13 @@ public class BareBonesBrowserLaunch {
   static final String errMsg = "Error attempting to launch web browser";
 
   public static void openURL(String url) {
-    try { // attempt to use Desktop library from JDK 1.6+
+    try { 
+      
+      if (GraphicsEnvironment.isHeadless()) {
+        log.warn("graphical browser requested but currently no display");
+      }
+      
+      // attempt to use Desktop library from JDK 1.6+
       Class<?> d = Class.forName("java.awt.Desktop");
       d.getDeclaredMethod("browse", new Class[] { java.net.URI.class }).invoke(d.getDeclaredMethod("getDesktop").invoke(null), new Object[] { java.net.URI.create(url) });
       // above code mimicks: java.awt.Desktop.getDesktop().browse()

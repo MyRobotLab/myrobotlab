@@ -2,14 +2,14 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
 import marytts.exceptions.SynthesisException;
 
 // KW_ TODO: this is ignored now, for some reason this locks up on me...
-@Ignore
-public class MarySpeechTest {
+
+public class MarySpeechTest extends AbstractTest {
 
   @Test
   public void testMarySpeech() throws IOException, SynthesisException, InterruptedException {
