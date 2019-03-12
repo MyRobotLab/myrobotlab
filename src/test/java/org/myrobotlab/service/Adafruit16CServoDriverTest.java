@@ -3,17 +3,14 @@ package org.myrobotlab.service;
 import static org.myrobotlab.service.Adafruit16CServoDriver.SERVOMAX;
 import static org.myrobotlab.service.Adafruit16CServoDriver.SERVOMIN;
 
-import java.io.IOException;
-
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.io.FileIO.FileComparisonException;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.test.AbstractTest;
 
-
+@Ignore
 public class Adafruit16CServoDriverTest extends AbstractTest {
 
   static Arduino arduino = null;
