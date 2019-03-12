@@ -129,12 +129,14 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
           ino.loop();
 
           Thread.sleep(1);
+        } catch(InterruptedException e1) {
+          isRunning = false;
         } catch (Exception e) {
           log.error("mrlcomm threw", e);
-          isRunning = false;
-          log.error("leaving InoScriptRunner");
+          isRunning = false;          
         }
       }
+      log.error("leaving InoScriptRunner");
     }
   }
 
