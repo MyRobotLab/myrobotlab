@@ -753,7 +753,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > getBoardInfo
   public BoardInfo getBoardInfo() {
     // msg.getBoardInfo(); do not do this -
-    // results in a serial infinit loop
+    // results in a serial infinit loop 
     // msg.getBoardInfo();
     return boardInfo;
   }

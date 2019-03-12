@@ -21,7 +21,6 @@ import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
 /**
@@ -224,10 +223,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void releaseService() {
-    super.releaseService();
     if (runner != null) {
       runner.isRunning = false;
     }
+    super.releaseService();
   }
 
   public SerialDevice getSerial() {
@@ -438,6 +437,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
   
   public void stopService() {
+    super.stopService();
     stop();
   }
 
