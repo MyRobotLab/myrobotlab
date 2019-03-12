@@ -437,7 +437,7 @@ public class OpenCVFilterMouse extends OpenCVFilter {
 
     invoke("publish", (Object) path);
 
-    log.error("{}", path.size());
+    log.info("{}", path.size());
     return image;
   }
 
