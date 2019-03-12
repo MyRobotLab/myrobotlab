@@ -98,7 +98,7 @@ public class LocaleTest extends AbstractTest {
       // log.info("locale.getExtension(xxx) [{}]", locale.getExtension(xxx));
       log.info("locale.getExtensionKeys() [{}]", locale.getExtensionKeys());
       log.info("locale.getISO3Country() [{}]", locale.getISO3Country());
-      log.info("locale.getISO3Language() [{}]", locale.getISO3Language());
+      // log.info("locale.getISO3Language() [{}]", locale.getISO3Language()); - throws java.util.MissingResourceException: Couldn't find 3-letter language code for en-us
       log.info("locale.getISOCountries() [{}]", Locale.getISOCountries());
       log.info("locale.getISOLanguages() [{}]", Locale.getISOLanguages());
       log.info("locale.getScript() [{}]", locale.getScript());
