@@ -81,9 +81,9 @@ public class OpenCVTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    if (!isHeadless()) {
+    // if (!isHeadless()) { - no longer needed I believe - SwingGui now handles it
       swing = (SwingGui) Runtime.start("gui", "SwingGui");
-    }
+    // }
   }
 
   // FIXME - do the following test
@@ -95,9 +95,6 @@ public class OpenCVTest extends AbstractTest {
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     Runtime.release("cv"); // <-- DONT NEED TO DO THIS - Abstract will !
-    if (!isHeadless()) {
-      // Runtime.release("gui");
-    }
 
     // FIXME - helper - all threads not in my initial thread set.. tear down
     // TODO - remove all services ??? DL4J others ? Runtime ?

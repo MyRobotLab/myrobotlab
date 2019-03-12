@@ -16,16 +16,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.junit.Ignore;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
-import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -43,7 +42,7 @@ import org.slf4j.Logger;
  *         References : http://www.ladyada.net/make/mshield/use.html
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
-
+@Ignore
 public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController {
 
   /**
