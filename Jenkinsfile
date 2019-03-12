@@ -8,6 +8,8 @@ node {
    // for declaritive
    // agent any
    
+   // withEnv(javaEnv) {
+   
    def mvnHome
    stage('preparation') { // for display purposes
       // Get some code from a GitHub repository
@@ -63,7 +65,7 @@ node {
    }
    stage('results') {
       junit '**/target/surefire-reports/TEST-*.xml'
-      archive 'target/*.jar'      
+      archiveArtifacts 'target/*.jar'      
       jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes',sourcePattern: 'src/main/java',exclusionPattern: 'src/test*')
    } 
    stage('publish') {
