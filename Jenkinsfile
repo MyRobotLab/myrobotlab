@@ -54,7 +54,7 @@ node {
 	     bat(/"${mvnHome}\bin\mvn" verify/)
 	   }
    }
-   stage('docs'){
+   stage('javadoc'){
 	   if (isUnix()) {
 	     sh "'${mvnHome}/bin/mvn' javadoc:javadoc"
 	   } else {

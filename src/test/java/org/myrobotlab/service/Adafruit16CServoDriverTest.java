@@ -13,13 +13,13 @@ import org.myrobotlab.io.FileIO.FileComparisonException;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.test.AbstractTest;
 
-@Ignore
+
 public class Adafruit16CServoDriverTest extends AbstractTest {
 
   static Arduino arduino = null;
   static Adafruit16CServoDriver driver = null;
   static SerialDevice serial = null;
-  static VirtualDevice virtual = null;
+  static VirtualArduino virtual = null;
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -28,18 +28,19 @@ public class Adafruit16CServoDriverTest extends AbstractTest {
     // arduino = driver.getArduino();
     arduino = (Arduino) Runtime.start("arduino", "Arduino");
     serial = arduino.getSerial();
+    virtual = (VirtualArduino)Runtime.start("virtual", "VirtualArduino");
+    virtual.connect("COM99");
   }
 
   @Test
-  public final void test() throws IOException, FileComparisonException {
+  public final void test() throws Exception {
     // virtual.create
-    virtual.createVirtualSerial("v1");
+    
     // FIXME - make virtual UART
 
-    Serial uart = virtual.getUart("v1");
-    uart.open("v1");
-    uart.record();
-    arduino.connect("v0");
+    arduino.connect("COM99");
+    driver.attach(arduino);
+
 
     driver.setServo(0, SERVOMIN);
     driver.setServo(0, SERVOMAX);
@@ -79,7 +80,7 @@ public class Adafruit16CServoDriverTest extends AbstractTest {
     // stop recording
     arduino.disconnect();
     // cable.close();
-    uart.stopRecording();
+    // uart.stopRecording();
 
     FileIO.compareFiles("test/Adafruit16CServoDriver/test.rx", "test/Adafruit16CServoDriver/control/test.rx");
 
