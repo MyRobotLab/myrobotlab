@@ -33,7 +33,7 @@ public class BareBonesBrowserLaunch {
   public static void openURL(String url) {
     try { 
       
-      if (!GraphicsEnvironment.isHeadless()) {
+      if (GraphicsEnvironment.isHeadless()) {
         log.warn("graphical browser requested but currently no display");
       }
       
