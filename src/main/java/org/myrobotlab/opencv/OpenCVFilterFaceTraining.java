@@ -26,6 +26,16 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.javacpp.helper.opencv_objdetect.cvHaarDetectObjects;
+import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
+import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
+import static org.bytedeco.javacpp.opencv_core.cvCopy;
+import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
+import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
+import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
+import static org.bytedeco.javacpp.opencv_core.cvGetSize;
+import static org.bytedeco.javacpp.opencv_core.cvLoad;
+import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvSetZero;
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_objdetect.CV_HAAR_DO_CANNY_PRUNING;
@@ -51,7 +61,6 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
@@ -64,29 +73,11 @@ import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.MatVector;
 import org.bytedeco.javacpp.opencv_face.EigenFaceRecognizer;
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
-import org.bytedeco.javacpp.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacpp.opencv_objdetect.CvHaarClassifierCascade;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
-import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
-
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
 
 public class OpenCVFilterFaceTraining extends OpenCVFilter {
 
@@ -413,6 +404,9 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
     if (scanTimer != null) {
       scanTimer.cancel();
       scanTimer = null;
+    }
+    if (timer != null) {
+      timer.cancel();
     }
   }
 
