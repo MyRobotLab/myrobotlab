@@ -930,14 +930,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     addTask(method, intervalMs, 0, method, params);
   }
   
-  public void putTask(long intervalMs, String method) {
-    putTask(intervalMs, method, new Object[] {});
-  }
-
-  public void putTask(long intervalMs, String method, Object... params) {
-    putTask(method, intervalMs, 0, method, params);
-  }
-
   public void addTaskOneShot(int delay, String method, Object... params) {
     addTask(method, 0, delay, method, params);
   }
@@ -956,7 +948,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @param params
    *          the params to pass
    */
-  public void addTask(String taskName, long intervalMs, int delay, String method, Object... params) {
+  synchronized public void addTask(String taskName, long intervalMs, int delay, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
       log.warn("already have active task \"{}\"", taskName);
       return;
@@ -968,14 +960,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     tasks.put(taskName, timer);
   }
   
-  public void putTask(String taskName, long intervalMs, int delay, String method, Object... params) {
-    if (tasks.containsKey(taskName)) {
-      log.info("replacing task \"{}\"", taskName);
-      purgeTask(taskName);
-    }
-    addTask(taskName, intervalMs, delay, method, params);
-  }
-
   public HashMap<String, Timer> getTasks() {
     return tasks;
   }
@@ -984,7 +968,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return tasks.containsKey(taskName);
   }
 
-  public void purgeTask(String taskName) {
+  synchronized public void purgeTask(String taskName) {
     if (tasks.containsKey(taskName)) {
       log.info("remove task {}", taskName);
       Timer timer = tasks.get(taskName);
@@ -1008,10 +992,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Timer timer = tasks.get(taskName);
       if (timer != null) {
         try {
-          timer.cancel();
           timer.purge();
-          timer = null;
-          tasks.remove(taskName);
+          timer.cancel();
+          timer = null;          
         } catch (Exception e) {
           log.info(e.getMessage());
         }
@@ -1702,7 +1685,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Method method = theClass.getMethod("getMetaData");
       ServiceType serviceType = (ServiceType) method.invoke(null);
       Map<String, ServiceReservation> peers = serviceType.getPeers();
-      // FIXME - recursively release peers
+      for (String s : peers.keySet()) {        
+        Runtime.release(getPeerKey(s));
+      }
 
     } catch (Exception e) {
       log.debug("{} does not have a getPeers", serviceClass);
@@ -1736,7 +1721,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     purgeTasks();
 
-    Runtime.release(getName());
+    // Runtime.release(getName()); infinite loop with peers ! :(
+    
+    Runtime.unregister(getName());
   }
 
   /**

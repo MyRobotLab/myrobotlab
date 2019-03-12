@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 public class AbstractTest {
 
-  private static long coolDownTimeMs = 25000;
+  private static long coolDownTimeMs = 2000;
   /**
    * cached internet test value for tests
    */
@@ -24,9 +24,10 @@ public class AbstractTest {
 
   private static boolean releaseRemainingServices = true;
 
-  private static boolean releaseRemainingThreads = true;
+  private static boolean releaseRemainingThreads = false;
 
   static transient Set<Thread> threadSetStart = null;
+  
   private static boolean useDeprecatedThreadStop = false;
 
   static public boolean hasInternet() {
@@ -35,9 +36,11 @@ public class AbstractTest {
     }
     return hasInternet;
   }
+
   static public boolean isHeadless() {
     return Runtime.isHeadless();
   }
+
   static public boolean isVirtual() {
     boolean isVirtual = true;
     String isVirtualProp = System.getProperty("junit.isVirtual");
@@ -47,6 +50,7 @@ public class AbstractTest {
     }
     return isVirtual;
   }
+
   public static void main(String[] args) {
     try {
       AbstractTest test = new AbstractTest();
@@ -128,9 +132,9 @@ public class AbstractTest {
     for (Thread thread : threadSetEnd) {
       if (!threadSetStart.contains(thread)) {
         if (releaseRemainingThreads) {
-          log.warn("killing thread {}", thread.getName());
+          log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
-          if (useDeprecatedThreadStop ) {
+          if (useDeprecatedThreadStop) {
             thread.stop();
           }
         } else {
