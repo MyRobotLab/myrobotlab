@@ -150,8 +150,6 @@ public class OpenCVFilterMouse extends OpenCVFilter {
         // pattern
         switch (lastWall) {
           case SOUTH: {
-            // check SOUTHEAST
-            // Log.error("SOUTHEAST");
             if ((mousePos.x() + 1 > width || mousePos.y() + 1 > height) || cvGet2D(src, mousePos.y() + 1, mousePos.x() + 1).getVal(0) != BLACK) {
               // wall - check next
               lastWall = SOUTHEAST;

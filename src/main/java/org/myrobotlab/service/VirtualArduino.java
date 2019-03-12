@@ -21,7 +21,6 @@ import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
 /**
@@ -84,7 +83,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   /**
    * thread to run the script
    */
-  transient InoScriptRunner runner = null;
+  transient final InoScriptRunner runner;
 
   transient FileOutputStream record = null;
 
@@ -95,15 +94,30 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    * @author GroG
    *
    */
-  public static class InoScriptRunner extends Thread {
+  public static class InoScriptRunner implements Runnable {
     boolean isRunning = false;
     VirtualArduino virtual;
     MrlCommIno ino;
+    Thread myThread = null;
 
     InoScriptRunner(VirtualArduino virtual, MrlCommIno ino) {
-      super(String.format("%s.mrlcomm", virtual.getName()));
       this.virtual = virtual;
       this.ino = ino;
+    }
+    
+    synchronized public void start() {
+      if (myThread == null) {
+        myThread = new Thread(this, String.format("%s.mrlcomm", virtual.getName()));
+        myThread.start();
+      }
+    }
+    
+    synchronized public void stop() {
+      if (myThread != null) {
+        isRunning = false;
+        myThread.interrupt();
+        myThread = null;
+      }
     }
 
     public void run() {
@@ -117,6 +131,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
           Thread.sleep(1);
         } catch (Exception e) {
           log.error("mrlcomm threw", e);
+          isRunning = false;
+          log.error("leaving InoScriptRunner");
         }
       }
     }
@@ -125,6 +141,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public VirtualArduino(String n) {
     super(n);
 
+    
     if (board == null) {
       board = "uno";
     }
@@ -137,6 +154,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     boardInfo = mrlComm.boardInfo;
     // boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
     setBoard(Arduino.BOARD_TYPE_UNO);
+    
+    runner = new InoScriptRunner(this, ino);
   }
 
   public void connect(String portName) throws IOException {
@@ -165,23 +184,14 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return board;
   }
 
-  public void start() {
-    if (runner != null) {
-      log.warn("running ino script already");
-      return;
-    }
-    runner = new InoScriptRunner(this, ino);
+  public void start() {    
     runner.start();
   }
 
   public boolean usedByInmoov = false;
 
   public void stop() {
-    if (runner != null) {
-      runner.isRunning = false;
-      runner.interrupt();
-      runner = null;
-    }
+    runner.stop();
   }
 
   /*
@@ -213,10 +223,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void releaseService() {
-    super.releaseService();
     if (runner != null) {
       runner.isRunning = false;
     }
+    super.releaseService();
   }
 
   public SerialDevice getSerial() {
@@ -424,6 +434,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+  
+  public void stopService() {
+    super.stopService();
+    stop();
   }
 
   @Override

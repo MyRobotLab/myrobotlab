@@ -4,9 +4,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public class AudioFileTest {
+public class AudioFileTest extends AbstractTest {
 
   @Test
   public final void testPlay() {

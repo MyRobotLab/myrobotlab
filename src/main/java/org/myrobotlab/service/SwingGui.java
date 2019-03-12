@@ -355,6 +355,10 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   }
 
   public JFrame createJFrame(boolean fullscreen) {
+    if (Runtime.isHeadless()) {
+      log.warn("{} SwingGui is in headless environment", getName());
+      return null;
+    }
     if (frame != null) {
       frame.dispose();
     }
@@ -686,11 +690,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   @Override
   public void stopService() {
+    super.stopService();
     if (frame != null) {
       frame.dispose();
     }
     active = false;
-    super.stopService();
   }
 
   public void explode() {

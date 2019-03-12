@@ -9,9 +9,10 @@ import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Solr;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public class YoloFilterTest {
+public class YoloFilterTest extends AbstractTest {
 
   @Test
   public void testYolo() throws SolrServerException, IOException {

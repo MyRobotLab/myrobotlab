@@ -9,18 +9,18 @@ import java.net.URI;
 import org.junit.Test;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class ApiFactoryTest {
+public class ApiFactoryTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ApiFactoryTest.class);
 
   @Test
   public void testProcessString() {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     try {
 
       Runtime runtime = (Runtime) Runtime.getInstance();

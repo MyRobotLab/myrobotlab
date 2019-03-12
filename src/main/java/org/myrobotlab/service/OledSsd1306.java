@@ -948,7 +948,7 @@ public class OledSsd1306 extends Service implements I2CControl {
 
   @Override
   public void stopService() {
-
+    super.stopService();
     if (isAttached(controller)) {
       controller.detachI2CControl(this);
     }

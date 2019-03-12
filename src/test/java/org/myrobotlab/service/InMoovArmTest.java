@@ -6,9 +6,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public class InMoovArmTest {
+public class InMoovArmTest extends AbstractTest {
 
   // private InMoovArm testArm;
   private String port = "COM21";
@@ -16,6 +17,12 @@ public class InMoovArmTest {
   @Before
   public void setUp() throws Exception {
 
+  }
+
+  @After
+  public void tearDown() throws IOException {
+    System.out.println("Done.. press any key to exit.");
+    System.in.read();
   }
 
   @Test
@@ -28,11 +35,5 @@ public class InMoovArmTest {
     python.exec(script);
     // testArm.connect(port);
 
-  }
-
-  @After
-  public void tearDown() throws IOException {
-    System.out.println("Done.. press any key to exit.");
-    System.in.read();
   }
 }

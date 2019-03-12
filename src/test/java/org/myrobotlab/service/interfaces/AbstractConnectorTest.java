@@ -5,18 +5,17 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 @Ignore
-public abstract class AbstractConnectorTest {
+public abstract class AbstractConnectorTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractConnectorTest.class);
 
   public abstract AbstractConnector createConnector();
 
   public abstract MockDocumentListener createListener();
-
-  public abstract void validate(MockDocumentListener listener);
 
   @Test
   public void test() {
@@ -49,4 +48,6 @@ public abstract class AbstractConnectorTest {
     Assert.assertTrue(listener.getCount() > 0);
 
   }
+
+  public abstract void validate(MockDocumentListener listener);
 }

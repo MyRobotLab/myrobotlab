@@ -13,44 +13,49 @@ import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 @Ignore
-public class WorkETest {
+public class WorkETest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(WorkETest.class);
 
-  static WorkE worke = null;
+  final static byte[] M1_FORWARD_POWER_LEVEL_12 = new byte[] { 6, -128, 0, 12 };
+  final static byte[] M1_FORWARD_POWER_LEVEL_20 = new byte[] { 12, -128, 0, 20 };
+  final static byte[] M1_FORWARD_POWER_LEVEL_3 = new byte[] { -86, -128, 0, 3 };
+
+  final static byte[] M1_FORWARD_POWER_LEVEL_6 = new byte[] { 3, -128, 0, 6 };
+
   static SwingGui swing = null;
+
   static Serial uart = null;
 
+  static WorkE worke = null;
+
+  public static void main(String[] args) {
+    try {
+      // LoggingFactory.init("WARN");
+
+      // run junit as java app
+      JUnitCore junit = new JUnitCore();
+      Result result = junit.run(WorkETest.class);
+      log.info("Result failures: {}", result.getFailureCount());
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     if (!Runtime.isHeadless()) {
       // swing = (SwingGui) Runtime.start("swing", "SwingGui");
     }
   }
-
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     // Runtime.shutdown(); - this shuts down junit which will be considered a
     // "failure"
   }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  final static byte[] M1_FORWARD_POWER_LEVEL_3 = new byte[] { -86, -128, 0, 3 };
-  final static byte[] M1_FORWARD_POWER_LEVEL_6 = new byte[] { 3, -128, 0, 6 };
-  final static byte[] M1_FORWARD_POWER_LEVEL_12 = new byte[] { 6, -128, 0, 12 };
-  final static byte[] M1_FORWARD_POWER_LEVEL_20 = new byte[] { 12, -128, 0, 20 };
-
   @Test
   public final void integrationTest() throws Exception {
 
@@ -106,16 +111,11 @@ public class WorkETest {
 
   }
 
-  public static void main(String[] args) {
-    try {
-      LoggingFactory.init("WARN");
+  @Before
+  public void setUp() throws Exception {
+  }
 
-      // run junit as java app
-      JUnitCore junit = new JUnitCore();
-      Result result = junit.run(WorkETest.class);
-      log.info("Result failures: {}", result.getFailureCount());
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
+  @After
+  public void tearDown() throws Exception {
   }
 }

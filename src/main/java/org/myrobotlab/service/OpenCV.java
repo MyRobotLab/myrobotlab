@@ -51,7 +51,6 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.apache.hadoop.hdfs.protocol.proto.ClientDatanodeProtocolProtos.GetDatanodeInfoRequestProto;
 import org.bytedeco.javacpp.opencv_core.CvPoint;
 import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -1057,12 +1056,12 @@ public class OpenCV extends AbstractComputerVision {
       }
     }
     if (grabberType != null && (grabberType.equals("FFmpeg") || grabberType.equals("ImageFile")) && inputSource.equals(INPUT_SOURCE_CAMERA)) {
-      log.warn("invalid state of ffmpeg and input source camera - setting to OpenCV frame grabber");
+      log.info("invalid state of ffmpeg and input source camera - setting to OpenCV frame grabber");
       grabberType = "OpenCV";
     }
 
     if (grabberType != null && grabberType.equals("OpenCV") && inputSource.equals(INPUT_SOURCE_FILE)) {
-      log.warn("invalid state of opencv and input source file - setting to FFmpeg frame grabber");
+      log.info("invalid state of opencv and input source file - setting to FFmpeg frame grabber");
       if (ext != null && videoFileExt.contains(ext)) {
         grabberType = "FFmpeg";
       } else {

@@ -1,3 +1,5 @@
+package org.myrobotlab.service;
+
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -6,12 +8,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.arduino.ArduinoUtils;
 import org.myrobotlab.framework.MRLException;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Motor;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Servo;
 
 import com.pi4j.jni.Serial;
 
@@ -23,7 +19,7 @@ public class ArduinoChaosTest {
 
     boolean upload = false;
 
-    // // LoggingFactory.init(Level.INFO);
+    // // // LoggingFactory.init(Level.INFO);
 
     String port = "COM30";
     String board = Arduino.BOARD_TYPE_UNO;

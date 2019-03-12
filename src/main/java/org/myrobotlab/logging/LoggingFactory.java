@@ -15,7 +15,6 @@ public class LoggingFactory {
       return logging;
     } catch (Exception e) {
       System.out.println("Exception In Get instance!!!"+e);
-      Logging.logError(e); //
       e.printStackTrace();
     }
 

@@ -1,8 +1,6 @@
 package org.myrobotlab.audio;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -285,7 +283,7 @@ public class AudioProcessor extends Thread {
       isRunning = false;
     }
     // default waits on queued audio requests
-
+    log.info("audio processor {} exiting", getName());
   }
 
   public void setVolume(double volume) {

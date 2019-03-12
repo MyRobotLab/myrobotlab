@@ -1,20 +1,20 @@
 package org.myrobotlab.kinematics;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
-import org.junit.Assert;
 
-public class DruppIKSolverTest {
+public class DruppIKSolverTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(DruppIKSolverTest.class);
-  
+
   @Test
   public void testDrupp() throws Exception {
-    
-    LoggingFactory.init("WARN");
-    
+
+    // LoggingFactory.init("WARN");
+
     DruppIKSolver solver = new DruppIKSolver();
 
     double roll = 0.0;

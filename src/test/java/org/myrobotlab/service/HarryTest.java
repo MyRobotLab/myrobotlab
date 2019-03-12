@@ -1,3 +1,5 @@
+package org.myrobotlab.service;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,20 +13,7 @@ import org.apache.solr.common.SolrDocument;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
-import org.myrobotlab.service.HtmlFilter;
-import org.myrobotlab.service.InMoov;
-import org.myrobotlab.service.MarySpeech;
-import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.service.ProgramAB;
-import org.myrobotlab.service.ProgramABTest;
-import org.myrobotlab.service.RSSConnector;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.ServoMixer;
-import org.myrobotlab.service.Solr;
-import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.WebkitSpeechRecognition;
 import org.slf4j.Logger;
 
 @Ignore
@@ -32,26 +21,40 @@ public class HarryTest {
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
 
-  // @Test
-  public void testDynamic() throws SolrServerException, IOException, InterruptedException {
+  private void createAIML() throws IOException {
+    // TODO Auto-generated method stub
+    // we should create a bot directory, and put sme aiml in it.
+    // also maybe config..
+    // TODO: pick a test subdirectory
+    File f = new File("testbots/bots/test/aiml");
+    f.mkdirs();
+    File aimlFile = new File("testbots/bots/test/aiml/test.aiml");
+    FileWriter fw = new FileWriter(aimlFile);
+    // create test aiml
+    String pattern = "*";
+    String template = "ok";
+    String category = createCategory(pattern, template);
 
-    LoggingFactory.init("INFO");
-    // create memory
-    Solr solr = (Solr) Runtime.start("solr", "Solr");
-    solr.startEmbedded();
-    createAIML();
-    ProgramAB harry = (ProgramAB) Runtime.start("harry", "ProgramAB");
-    harry.startSession("testbots", "username", "test");
+    StringBuilder b = new StringBuilder();
+    b.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><aiml>");
+    b.append(category);
+    b.append("</aiml>");
+    fw.write(b.toString());
+    fw.close();
+  }
 
-    goLearnStuff(solr, harry);
-
-    Thread.sleep(1000);
-
-    Runtime.start("gui", "SwingGui");
-
-    System.out.println("Any key");
-    System.in.read();
-
+  // TODO: make some generic aiml tools that can be reused
+  private String createCategory(String pattern, String template) {
+    StringBuilder b = new StringBuilder();
+    b.append("<category>");
+    b.append("  <pattern>");
+    b.append(pattern);
+    b.append("</pattern>");
+    b.append("  <template>");
+    b.append(template);
+    b.append("</template>");
+    b.append("</category>");
+    return b.toString();
   }
 
   private void goLearnStuff(Solr solr, ProgramAB harry) throws InterruptedException {
@@ -67,6 +70,19 @@ public class HarryTest {
     // run a search and add a new category to programab.
     queryToCategory(solr, harry);
     // TODO: pass the category in directly.
+  }
+
+  private void printResponse(QueryResponse res) {
+    // TODO Auto-generated method stub
+    for (SolrDocument d : res.getResults()) {
+      System.out.println("################################################");
+      System.out.println(d);
+    }
+
+    for (org.apache.solr.client.solrj.response.FacetField f : res.getFacetFields()) {
+      System.out.println("FACET: " + f.toString());
+    }
+    System.out.println("end");
   }
 
   public void queryToCategory(Solr solr, ProgramAB ab) {
@@ -108,10 +124,42 @@ public class HarryTest {
 
   }
 
+  private void setupVirtualArduinos(String leftPort, String rightPort) throws IOException {
+    // TODO Auto-generated method stub
+    VirtualArduino leftVirtual = (VirtualArduino) Runtime.start("leftVirtual", "VirtualArduino");
+    leftVirtual.getSerial().setTimeout(100);
+    leftVirtual.connect(leftPort);
+    VirtualArduino rightVirtual = (VirtualArduino) Runtime.start("rightVirtual", "VirtualArduino");
+    rightVirtual.getSerial().setTimeout(100);
+    rightVirtual.connect(rightPort);
+  }
+
+  // @Test
+  public void testDynamic() throws SolrServerException, IOException, InterruptedException {
+
+    // LoggingFactory.init("INFO");
+    // create memory
+    Solr solr = (Solr) Runtime.start("solr", "Solr");
+    solr.startEmbedded();
+    createAIML();
+    ProgramAB harry = (ProgramAB) Runtime.start("harry", "ProgramAB");
+    harry.startSession("testbots", "username", "test");
+
+    goLearnStuff(solr, harry);
+
+    Thread.sleep(1000);
+
+    Runtime.start("gui", "SwingGui");
+
+    System.out.println("Any key");
+    System.in.read();
+
+  }
+
   @Test
   public void testHarry() throws Exception {
 
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
     // create memory
     Solr solr = (Solr) Runtime.start("solr", "Solr");
     solr.startEmbedded();
@@ -195,64 +243,5 @@ public class HarryTest {
     System.out.println("Any key");
     System.in.read();
 
-  }
-
-  private void setupVirtualArduinos(String leftPort, String rightPort) throws IOException {
-    // TODO Auto-generated method stub
-    VirtualArduino leftVirtual = (VirtualArduino) Runtime.start("leftVirtual", "VirtualArduino");
-    leftVirtual.getSerial().setTimeout(100);
-    leftVirtual.connect(leftPort);
-    VirtualArduino rightVirtual = (VirtualArduino) Runtime.start("rightVirtual", "VirtualArduino");
-    rightVirtual.getSerial().setTimeout(100);
-    rightVirtual.connect(rightPort);
-  }
-
-  private void printResponse(QueryResponse res) {
-    // TODO Auto-generated method stub
-    for (SolrDocument d : res.getResults()) {
-      System.out.println("################################################");
-      System.out.println(d);
-    }
-
-    for (org.apache.solr.client.solrj.response.FacetField f : res.getFacetFields()) {
-      System.out.println("FACET: " + f.toString());
-    }
-    System.out.println("end");
-  }
-
-  private void createAIML() throws IOException {
-    // TODO Auto-generated method stub
-    // we should create a bot directory, and put sme aiml in it.
-    // also maybe config..
-    // TODO: pick a test subdirectory
-    File f = new File("testbots/bots/test/aiml");
-    f.mkdirs();
-    File aimlFile = new File("testbots/bots/test/aiml/test.aiml");
-    FileWriter fw = new FileWriter(aimlFile);
-    // create test aiml
-    String pattern = "*";
-    String template = "ok";
-    String category = createCategory(pattern, template);
-
-    StringBuilder b = new StringBuilder();
-    b.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><aiml>");
-    b.append(category);
-    b.append("</aiml>");
-    fw.write(b.toString());
-    fw.close();
-  }
-
-  // TODO: make some generic aiml tools that can be reused
-  private String createCategory(String pattern, String template) {
-    StringBuilder b = new StringBuilder();
-    b.append("<category>");
-    b.append("  <pattern>");
-    b.append(pattern);
-    b.append("</pattern>");
-    b.append("  <template>");
-    b.append(template);
-    b.append("</template>");
-    b.append("</category>");
-    return b.toString();
   }
 }

@@ -6,72 +6,84 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.test.AbstractTest;
+import org.myrobotlab.test.ChaosMonkey;
 import org.slf4j.Logger;
 
 // TODO: re-enable this unit test.. but for now it's just too slow ..
 // it also opens a swing gui which isn't good.
 
-@Ignore // dependes on swing ? it shouldn't ! 
 public class OpenCVTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
-
   static OpenCV cv = null;
+
+  public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
   static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/OpenCV/";
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
-  static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
   static final String TEST_INPUT_DIR = "src/test/resources/OpenCV/kinect-data";
+  static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
 
   // TODO - getClassifictions publishClassifications
   // TODO - getFaces publishFaces
   // TODO - chaos monkey filter tester
 
+  public static void main(String[] args) {
+    try {
+      // // LoggingFactory.init("INFO");
+
+      setUpBeforeClass();
+
+      OpenCVTest test = new OpenCVTest();
+
+      test.testGetClassifications();
+
+      boolean quitNow = true;
+      if (quitNow) {
+        return;
+      }
+
+      test.testAllFilterTypes();
+      /*
+       * cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");// red pill
+       * // green pill cv.capture(0); cv.stopCapture();
+       * cv.setGrabberType("Sarxos"); cv.capture(0);
+       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+       * cv.capture(0);
+       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
+       * cv.capture(0);
+       */
+
+      test.chaosCaptureTest();
+
+      // test.testAllCaptures();
+
+      // run junit as java app
+      JUnitCore junit = new JUnitCore();
+      Result result = junit.run(OpenCVTest.class);
+      log.info("Result failures: {}", result.getFailureCount());
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("WARN");
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    // Runtime.setLogLevel("info");
-    if (!isHeadless()) {
+    // if (!isHeadless()) { - no longer needed I believe - SwingGui now handles it
       swing = (SwingGui) Runtime.start("gui", "SwingGui");
-    }
-  }
-
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-    Runtime.release("cv");
-    if (!isHeadless()) {
-      // Runtime.release("gui");
-    }
-
-    // FIXME - helper - all threads not in my initial thread set.. tear down
-    // TODO - remove all services ??? DL4J others ? Runtime ?
-    // clean up all threads
-    // clean up all services
-    // TODO - these utilities should be in base class !
-  }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
+    // }
   }
 
   // FIXME - do the following test
@@ -80,21 +92,32 @@ public class OpenCVTest extends AbstractTest {
   // test remote file source
   // test mpeg streamer
 
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    Runtime.release("cv"); // <-- DONT NEED TO DO THIS - Abstract will !
+
+    // FIXME - helper - all threads not in my initial thread set.. tear down
+    // TODO - remove all services ??? DL4J others ? Runtime ?
+    // clean up all threads
+    // clean up all services
+    // TODO - these utilities should be in base class !
+  }
+
   @Test
   public final void chaosCaptureTest() throws Exception {
     log.info("=======OpenCVTest chaosCaptureTest=======");
-    giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
-    giveToMonkey(cv, "capture");
-    giveToMonkey(cv, "stopCapture");
+    ChaosMonkey.giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
+    ChaosMonkey.giveToMonkey(cv, "capture");
+    ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (hasInternet()) {
       // red pill green pill
-      giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=I9VA-U69yaY");
-      giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+      ChaosMonkey.giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=I9VA-U69yaY");
+      ChaosMonkey.giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
     }
-    giveToMonkey(cv, "stopCapture");
-    giveToMonkey(cv, "capture", 0); // if hasHardware
-    startMonkeys();
-    monkeyReport();
+    ChaosMonkey.giveToMonkey(cv, "stopCapture");
+    ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
+    ChaosMonkey.startMonkeys();
+    ChaosMonkey.monkeyReport();
 
     // check after the monkeys have pounded on it - it still works !
     cv.reset();
@@ -170,6 +193,8 @@ public class OpenCVTest extends AbstractTest {
 
   }
 
+  // TODO test enable disable & enableDisplay
+
   /**
    * minimally all filters should have the ability to load and run by themselves
    * for a second
@@ -196,8 +221,6 @@ public class OpenCVTest extends AbstractTest {
     log.info("done with all filters");
   }
 
-  // TODO test enable disable & enableDisplay
-
   @Test
   public final void testGetClassifications() {
     log.info("=======OpenCVTest testGetClassifications=======");
@@ -210,44 +233,5 @@ public class OpenCVTest extends AbstractTest {
     Map<String, List<Classification>> classifications = cv.getClassifications();
     assertNotNull(classifications);
     assertTrue(classifications.containsKey("person"));
-  }
-
-  public static void main(String[] args) {
-    try {
-      // LoggingFactory.init("INFO");
-
-      setUpBeforeClass();
-
-      OpenCVTest test = new OpenCVTest();
-
-      test.testGetClassifications();
-
-      boolean quitNow = true;
-      if (quitNow) {
-        return;
-      }
-
-      test.testAllFilterTypes();
-      /*
-       * cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");// red pill
-       * // green pill cv.capture(0); cv.stopCapture();
-       * cv.setGrabberType("Sarxos"); cv.capture(0);
-       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-       * cv.capture(0);
-       * cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk");
-       * cv.capture(0);
-       */
-
-      test.chaosCaptureTest();
-
-      // test.testAllCaptures();
-
-      // run junit as java app
-      JUnitCore junit = new JUnitCore();
-      Result result = junit.run(OpenCVTest.class);
-      log.info("Result failures: {}", result.getFailureCount());
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
   }
 }

@@ -212,8 +212,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     meta.addCategory("connectivity", "display");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("org.atmosphere", "nettosphere", "2.3.0");
-    //meta.addDependency("org.atmosphere", "wasync", "2.1.3"); provided in Runtime now.
+    // meta.addDependency("org.atmosphere", "nettosphere", "2.3.0");
+    // meta.addDependency("org.atmosphere", "nettosphere", "3.0.11");
+    meta.addDependency("org.atmosphere", "nettosphere", "3.0.12-SNAPSHOT");
 
     // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
     // hence these following dependencies are zipped with myrobotlab.jar !
@@ -389,24 +390,25 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
          * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGui" )
          */
         // .mappingPath("/app")
-    
-        // FIXME - find out how collisions of resources (priority) is handled ???
+
+        // FIXME - find out how collisions of resources (priority) is handled
+        // ???
 
         .resource("/stream", stream)
         // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
-        // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources :(
+        // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources
+        // :(
         // for access after extracting
         .resource("./resource/WebGui/app").resource("./resource")
 
         // for debugging
-        //v- this makes http://localhost:8888/#/main worky
-        .resource("./src/main/resources/resource/WebGui/app") 
-        //v- this makes http://localhost:8888/react/index.html worky
-        .resource("./src/main/resources/resource/WebGui") 
-        //v- this makes http://localhost:8888/Runtime.png worky
+        // v- this makes http://localhost:8888/#/main worky
+        .resource("./src/main/resources/resource/WebGui/app")
+        // v- this makes http://localhost:8888/react/index.html worky
+        .resource("./src/main/resources/resource/WebGui")
+        // v- this makes http://localhost:8888/Runtime.png worky
         .resource("./src/main/resources/resource")
-        
 
         // for future references of resource - keep the html/js reference to
         // "resource/x" not "/resource/x" which breaks moving the app
@@ -418,12 +420,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // TO SUPPORT LEGACY - BEGIN
         // for debugging
         /*
-        .resource("./src/main/resources/resource/WebGui/app")
-        .resource("./resource/WebGui/app")
-        */
+         * .resource("./src/main/resources/resource/WebGui/app")
+         * .resource("./resource/WebGui/app")
+         */
 
-        
-        
         // Support 2 APIs
         // REST - http://host/object/method/param0/param1/...
         // synchronous DO NOT SUSPEND
@@ -967,7 +967,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       subscribe(runtime.getName(), "registered");
       subscribe(runtime.getName(), "released");
 
-      if (autoStartBrowser && !GraphicsEnvironment.isHeadless()) {
+      if (autoStartBrowser) {
         log.info("auto starting default browser");
         BareBonesBrowserLaunch.openURL(String.format(startURL, port));
       }
@@ -989,7 +989,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     try {
       extract();
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("webgui start service threw", e);
     }
 
     start();
@@ -997,20 +997,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void stop() {
     if (nettosphere != null) {
-
-      log.info("stopping nettosphere");
+      log.warn("==== nettosphere STOPPING ====");
+      nettosphere.stop();
       // Must not be called from a I/O-Thread to prevent deadlocks!
-      (new Thread("stopping nettophere") {
-        public void run() {
-          /*
-           * nettosphere.framework().removeAllAtmosphereHandler();
-           * nettosphere.framework().resetStates();
-           * nettosphere.framework().destroy();
-           */
-          nettosphere.stop();
-        }
-      }).start();
-      sleep(1000);
+      /*
+       * (new Thread("stopping nettophere") { public void run() {
+       * 
+       * log.error("==== nettosphere stopping  ===="); //
+       * nettosphere.framework(). // nettosphere.framework().destroy();
+       * nettosphere.stop(); log.error("==== nettosphere STOPPED ===="); }
+       * }).start(); sleep(1000);
+       */
+      log.warn("==== nettosphere STOPPED ====");
     }
   }
 
@@ -1054,12 +1052,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("arduino", "Arduino");
       // Runtime.start("srf05", "UltrasonicSensor");
       // Runtime.setRuntimeName("george");
+      Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
       webgui.autoStartBrowser(true);
+
+      webgui.releaseService();
       // Runtime.start("mary", "MarySpeech");
 
+      log.info("leaving main");
+
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 

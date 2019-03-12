@@ -5,9 +5,10 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.test.AbstractTest;
 
 @Ignore
-public class IKInMoovArmTest {
+public class IKInMoovArmTest extends AbstractTest {
 
   private InMoovArm testArm;
 

@@ -180,6 +180,7 @@ public class Sprinkler extends Service {
 
   @Override
   public void stopService() {
+    super.stopService();
     if (arduino != null) {
       arduino.disconnect();
       arduino.stopService();

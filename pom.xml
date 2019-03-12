@@ -1145,6 +1145,16 @@
     <artifactId>wasync</artifactId>
     <version>2.1.3</version>
   </dependency>
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>1.7.21</version>
+  </dependency>
+  <dependency>
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-classic</artifactId>
+    <version>1.0.13</version>
+  </dependency>
 <!-- Runtime end -->
 
 <!-- Serial begin -->
@@ -1323,7 +1333,7 @@
   <dependency>
     <groupId>org.atmosphere</groupId>
     <artifactId>nettosphere</artifactId>
-    <version>2.3.0</version>
+    <version>3.0.12-SNAPSHOT</version>
   </dependency>
 <!-- WebGui end -->
 
@@ -1654,6 +1664,9 @@
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
+					<excludes>
+						<exclude>**/integration/*</exclude>
+					</excludes>
 				</configuration>
 				<version>2.9</version>
 			</plugin>
@@ -1758,14 +1771,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.0.1</version>
-        <configuration>
-           <groups>
-            <group>
-              <title>MyRobotLab Services</title>
-              <packages>org.myrobotlab.service</packages>
-            </group>
-           </groups>
-    	</configuration>
       </plugin>
     </plugins>
     </reporting>

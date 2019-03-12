@@ -75,7 +75,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
   }
 
   public void addScheduledEvent(String eventId, int millis) {
-    putTask(millis, "fire", new Object[] { eventId });
+    addTask(millis, "fire", new Object[] { eventId });
   }
 
   public void addState(String state) {

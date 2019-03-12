@@ -4,23 +4,28 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.InMoovArm;
-import org.myrobotlab.service.InverseKinematics3D;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class InMoovLeftArmIKTest {
+public class InMoovLeftArmIKTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(InMoovLeftArmIKTest.class);
+
+  private void moveArm(DHRobotArm arm, double omoplate, double shoulder, double rotate, double bicep) {
+    arm.getLink(0).setTheta(MathUtils.degToRad(omoplate));
+    arm.getLink(1).setTheta(MathUtils.degToRad(shoulder));
+    arm.getLink(2).setTheta(MathUtils.degToRad(rotate));
+    arm.getLink(3).setTheta(MathUtils.degToRad(bicep));
+  }
 
   @Test
   public void testDHArm() {
 
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO");
     DHRobotArm arm = InMoovArm.getDHRobotArm("i01", "left");
-    //  Point palm = arm.getPalmPosition();
-    //  System.out.println(palm);
+    // Point palm = arm.getPalmPosition();
+    // System.out.println(palm);
     // well known configurations.
 
     // arm down to the side
@@ -40,7 +45,7 @@ public class InMoovLeftArmIKTest {
     Point three = arm.getPalmPosition();
 
     System.out.println("straight in front : " + arm.getPalmPosition());
-    
+
     // straight up configuration.
     moveArm(arm, -90, -90, 90, 90);
     Point four = arm.getPalmPosition();
@@ -48,7 +53,7 @@ public class InMoovLeftArmIKTest {
     System.out.println("Straight up : " + arm.getPalmPosition());
 
     // arm down to the side, but bicep bent forward.
-    moveArm(arm, -90, 90, 0 , 180);
+    moveArm(arm, -90, 90, 0, 180);
     Point five = arm.getPalmPosition();
 
     System.out.println("Down to the side bicep bent forward : " + arm.getPalmPosition());
@@ -59,9 +64,10 @@ public class InMoovLeftArmIKTest {
 
     System.out.println("Down to the side bicep up and pointing to the left : " + arm.getPalmPosition());
 
-   // InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
-    
-   // ik3d.setCurrentArm("i01.leftArm", arm);
+    // InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d",
+    // "InverseKinematics3D");
+
+    // ik3d.setCurrentArm("i01.leftArm", arm);
     arm.centerAllJoints();
     assertTrue(arm.moveToGoal(one));
     arm.centerAllJoints();
@@ -77,14 +83,5 @@ public class InMoovLeftArmIKTest {
     // now get where the palm is
 
   }
-
-  private void moveArm(DHRobotArm arm, double omoplate, double shoulder, double rotate, double bicep) {
-    arm.getLink(0).setTheta(MathUtils.degToRad(omoplate));
-    arm.getLink(1).setTheta(MathUtils.degToRad(shoulder));
-    arm.getLink(2).setTheta(MathUtils.degToRad(rotate));
-    arm.getLink(3).setTheta(MathUtils.degToRad(bicep));
-  }
-
-
 
 }

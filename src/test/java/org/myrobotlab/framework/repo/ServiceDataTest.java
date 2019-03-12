@@ -6,33 +6,28 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.ArduinoTest;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class ServiceDataTest {
+public class ServiceDataTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
+  public final static Logger log = LoggerFactory.getLogger(ServiceDataTest.class);
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    LoggingFactory.init("WARN");
+    // LoggingFactory.init("WARN");
   }
 
   @Test
-  public void testGetLocalInstance() {
+  public void testAdd() {
     ServiceData sd = ServiceData.getLocalInstance();
-    String[] srn = sd.getServiceTypeNames();
-    log.info("{}", srn.length);
-    assertNotNull(srn);
-    assertTrue(srn.length > 0);
+    // TODO: add a valid assert for this test.
+    List<ServiceType> types = sd.getAvailableServiceTypes();
+    assertTrue(types.size() > 0);
   }
 
   @Test
@@ -44,11 +39,12 @@ public class ServiceDataTest {
   }
 
   @Test
-  public void testAdd() {
+  public void testGetLocalInstance() {
     ServiceData sd = ServiceData.getLocalInstance();
-    // TODO: add a valid assert for this test.
-    List<ServiceType> types = sd.getAvailableServiceTypes();
-    assertTrue(types.size() > 0);
+    String[] srn = sd.getServiceTypeNames();
+    log.info("{}", srn.length);
+    assertNotNull(srn);
+    assertTrue(srn.length > 0);
   }
 
 }

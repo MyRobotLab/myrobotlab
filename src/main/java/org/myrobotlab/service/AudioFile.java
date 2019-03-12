@@ -107,6 +107,14 @@ public class AudioFile extends Service {
       // log.info("switching to track %s", trackName);
     }
   }
+  
+  @Override
+  public void stopService() {
+    super.stopService();
+    for (AudioProcessor p : processors.values()) {
+      p.interrupt();
+    }
+  }
 
   // TODO test with jar://resource/AudioFile/tick.mp3 & https://host/mp3 :
   // localfile
