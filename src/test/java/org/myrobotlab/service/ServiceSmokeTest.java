@@ -4,21 +4,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 /**
- * This test will iterate all possible services (execpt for the blacklisted
+ * This test will iterate all possible services (except for the blacklisted
  * ones) it will create an instance of that service and pass the service to the
  * json serializer to ensure it doesn't blow up.
  * 
@@ -30,13 +28,10 @@ public class ServiceSmokeTest extends AbstractTest {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
 
-  @Before
-  public void setUp() {
-    LoggingFactory.init("WARN");
-  }
-
   @Test
-  public void testAllServiceSerialization() throws IOException {
+  public void testAllServiceSerialization() throws IOException, ParseException {
+
+    installAll();
 
     // known problematic services?! TODO: fix them and remove from the following
     // list.

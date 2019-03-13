@@ -501,7 +501,7 @@ public class Runtime extends Service implements MessageListener {
     return cli;
   }
 
-  static public CmdLine getCMDLine() {
+  static public CmdLine getCmdLine() {
     return cmdline;
   }
 
@@ -584,7 +584,7 @@ public class Runtime extends Service implements MessageListener {
     return false;
   }
 
-  static public List<String> getJVMArgs() {
+  static public List<String> getJvmArgs() {
     RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
     return runtimeMxBean.getInputArguments();
   }
@@ -1744,7 +1744,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("============== args begin ==============");
     StringBuffer sb = new StringBuffer();
 
-    jvmArgs = getJVMArgs();
+    jvmArgs = getJvmArgs();
     args = new ArrayList<String>();
     if (globalArgs != null) {
       for (int i = 0; i < globalArgs.length; ++i) {
