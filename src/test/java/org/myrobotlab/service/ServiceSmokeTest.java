@@ -63,7 +63,12 @@ public class ServiceSmokeTest extends AbstractTest {
     // just don't want a swing gui opening up in the unit test.
     blacklist.add("org.myrobotlab.service.SwingGui");
     // blacklist.add("org.myrobotlab.service.DiyServo");
+    
+    //  anything which has Keyboard as a service - explodes on Linux
     blacklist.add("org.myrobotlab.service.EddieControlBoard");
+    blacklist.add("org.myrobotlab.service.Keyboard");
+    
+    
     
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();
