@@ -220,7 +220,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     whiteListServices.add("Sabertooth");
     // NPE in serial
     whiteListServices.add("VirtualDevice");
-    whiteListServices.add("OpenNI");
+    whiteListServices.add("OpenNi");
     whiteListServices.add("Runtime");
 
     // start up python so we have it available to do some testing with.
