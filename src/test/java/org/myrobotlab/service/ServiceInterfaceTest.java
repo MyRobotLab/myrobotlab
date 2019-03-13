@@ -1,4 +1,4 @@
-package org.myrobotlab.integration;
+package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
