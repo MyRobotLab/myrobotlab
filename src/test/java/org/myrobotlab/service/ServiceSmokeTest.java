@@ -1,4 +1,4 @@
-package org.myrobotlab.integration;
+package org.myrobotlab.service;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
