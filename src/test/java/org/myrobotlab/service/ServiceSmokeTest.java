@@ -84,6 +84,7 @@ public class ServiceSmokeTest extends AbstractTest {
         log.info("Skipping known problematic service {}", serviceType);
         continue;
       }
+      log.warn("Testing service type {}", serviceType);
       String serviceName = serviceType.toLowerCase();
       ServiceInterface s = Runtime.start(serviceName, serviceType);
       assertNotNull(s);
