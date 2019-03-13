@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.GraphicsEnvironment;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;

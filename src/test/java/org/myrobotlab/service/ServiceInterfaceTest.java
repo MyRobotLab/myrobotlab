@@ -240,6 +240,8 @@ public class ServiceInterfaceTest extends AbstractTest {
     int numScriptsWorky = 0;
     int numStartable = 0;
     log.info("----------------------------------------------");
+    // FIXME - subscribe to all errors of all new services !!! - a prefix script !
+    
     for (String service : servicesToTest) {
       System.out.println("SYSTEM TESTING " + service);
       System.out.flush();
@@ -303,6 +305,9 @@ public class ServiceInterfaceTest extends AbstractTest {
       }
       // log.info("SERVICE TESTED WAS :" + service);
       log.info("----------------------------------------------");
+      
+      // CLEAN-UP !!!
+      releaseServices();
       // System.out.println("Next?");
       // try {
       // System.in.read();

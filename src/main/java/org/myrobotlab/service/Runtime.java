@@ -1682,13 +1682,14 @@ public class Runtime extends Service implements MessageListener {
       if (runtime == null) {
         runtime = this;
       }
-
-      if (runtime.platform == null) {
-        runtime.platform = Platform.getLocalInstance();
-      }
     }
 
     locale = Locale.getDefault();
+    
+
+    if (runtime.platform == null) {
+      runtime.platform = Platform.getLocalInstance();
+    }
 
     // 3 states
     // isAgent == make default directory (with pid) if custom not supplied
