@@ -221,6 +221,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     // NPE in serial
     whiteListServices.add("VirtualDevice");
     whiteListServices.add("OpenNI");
+    whiteListServices.add("Runtime");
 
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.createAndStart("python", "Python");
@@ -241,6 +242,8 @@ public class ServiceInterfaceTest extends AbstractTest {
     int numStartable = 0;
     log.info("----------------------------------------------");
     // FIXME - subscribe to all errors of all new services !!! - a prefix script !
+    // FIXME - must have different thread (prefix script) which runs a timer - 
+    // script REQUIRED to complete in 4 minutes ... or BOOM it fails
     
     for (String service : servicesToTest) {
       System.out.println("SYSTEM TESTING " + service);

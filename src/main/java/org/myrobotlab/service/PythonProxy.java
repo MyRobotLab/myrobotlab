@@ -166,6 +166,13 @@ public class PythonProxy extends Service {
     meta.addCategory("bridge");
     return addMetaData(meta);
   }
+  
+  public void stopService() {
+    super.stopService();
+    if (inputQueueThread != null) {
+      inputQueueThread.interrupt();
+    }
+  }
 
   public void startService() {
     super.startService();
