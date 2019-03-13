@@ -1,5 +1,7 @@
 package org.myrobotlab.test;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Set;
 
 import org.junit.After;
@@ -27,7 +29,7 @@ public class AbstractTest {
   private static boolean releaseRemainingThreads = false;
 
   static transient Set<Thread> threadSetStart = null;
-  
+
   private static boolean useDeprecatedThreadStop = false;
 
   static public boolean hasInternet() {
@@ -107,23 +109,34 @@ public class AbstractTest {
     log.warn("tearDownAbstractTest");
 
     if (releaseRemainingServices) {
-      // services to be cleaned up/released
-      StringBuilder sb = new StringBuilder();
-      String[] services = Runtime.getServiceNames();
-      for (String service : services) {
-        if (!"runtime".equals(service)) {
-          sb.append(service);
-          sb.append(" ");
-          log.warn("service {} left in registry - releasing", service);
-          Runtime.releaseService(service);
-        }
-      }
+      releaseServices();
+    }
 
-      if (sb.length() > 0) {
-        log.warn("had to release the following services {}", sb.toString());
-        log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
-        sleep(coolDownTimeMs);
+    log.warn("=========== finished test ===========");
+  }
+  
+  protected void installAll() throws ParseException, IOException {
+   Runtime.install();
+  }
+
+  public static void releaseServices() {
+
+    // services to be cleaned up/released
+    StringBuilder sb = new StringBuilder();
+    String[] services = Runtime.getServiceNames();
+    for (String service : services) {
+      if (!"runtime".equals(service)) {
+        sb.append(service);
+        sb.append(" ");
+        log.warn("service {} left in registry - releasing", service);
+        Runtime.releaseService(service);
       }
+    }
+
+    if (sb.length() > 0) {
+      log.warn("had to release the following services {}", sb.toString());
+      log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
+      sleep(coolDownTimeMs);
     }
 
     // check threads - kill stragglers
@@ -142,8 +155,6 @@ public class AbstractTest {
         }
       }
     }
-
-    log.warn("=========== finished test ===========");
   }
 
   public AbstractTest() {
