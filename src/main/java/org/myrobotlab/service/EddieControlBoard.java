@@ -48,17 +48,6 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     }
   }
 
-  class Simulator extends Thread {
-    @Override
-    public void run() {
-      while (isRunning()) {
-        // how to auto correct & read the various parts
-        // you know how to do this - ORIGINAL InputStream API Argggg !
-
-      }
-    }
-  }
-
   private static final long serialVersionUID = 1L;
 
   // Peers
