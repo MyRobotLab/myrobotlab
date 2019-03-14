@@ -127,12 +127,9 @@ public class AbstractTest {
     for (String service : services) {
       // don't kill runtime - although in the future i hope this is possible
       if (!"runtime".equals(service)) {
-        if ("webmin".equals(service) || "webgui".equals(service)) {
-          log.info("killing webgui");
-        }
         sb.append(service);
         sb.append(" ");
-        log.warn("service {} left in registry - releasing", service);
+        log.info("service {} left in registry - releasing", service);
         Runtime.releaseService(service);
       }
     }
