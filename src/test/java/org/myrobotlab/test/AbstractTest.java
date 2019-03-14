@@ -125,7 +125,11 @@ public class AbstractTest {
     StringBuilder sb = new StringBuilder();
     String[] services = Runtime.getServiceNames();
     for (String service : services) {
+      // don't kill runtime - although in the future i hope this is possible
       if (!"runtime".equals(service)) {
+        if ("webmin".equals(service) || "webgui".equals(service)) {
+          log.info("killing webgui");
+        }
         sb.append(service);
         sb.append(" ");
         log.warn("service {} left in registry - releasing", service);
@@ -134,7 +138,7 @@ public class AbstractTest {
     }
 
     if (sb.length() > 0) {
-      log.warn("had to release the following services {}", sb.toString());
+      log.warn("attempted to release the following services [{}]", sb.toString());
       log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
       sleep(coolDownTimeMs);
     }
@@ -143,7 +147,7 @@ public class AbstractTest {
     // Set<Thread> stragglers = new HashSet<Thread>();
     Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
     for (Thread thread : threadSetEnd) {
-      if (!threadSetStart.contains(thread)) {
+      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
           log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
@@ -155,6 +159,7 @@ public class AbstractTest {
         }
       }
     }
+    log.info("finished the killing ...");
   }
 
   public AbstractTest() {
