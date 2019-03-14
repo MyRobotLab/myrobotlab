@@ -1379,7 +1379,7 @@ public class Runtime extends Service implements MessageListener {
     // get reference from registry
     ServiceInterface sw = registry.get(name);
     if (sw == null) {
-      log.warn("cannot unregister {} - not in registry", name);
+      log.info("{} already unregistered", name);
       return;
     }
     
@@ -2481,7 +2481,7 @@ public class Runtime extends Service implements MessageListener {
     meta.addDependency("com.google.code.gson", "gson", "2.8.5");
     meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.atmosphere", "wasync", "2.1.3");
+    meta.addDependency("org.atmosphere", "wasync", "2.1.5");
     
     // all your logging needs
     meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
