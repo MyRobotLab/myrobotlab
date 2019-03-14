@@ -15,17 +15,16 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Python;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
-
+@Ignore // temporarily ignoring to evaluate mvn logging
 public class ServiceInterfaceTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
@@ -371,6 +370,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     // TODO: this blows stuff up too much.
 
     String testScriptFile = testScriptDirectory + service + ".py";
+    String prefix = "virtual = True\n";
     File script = new File(testScriptFile);
     if (!script.exists()) {
       log.warn("No default script for Service {}", script);
