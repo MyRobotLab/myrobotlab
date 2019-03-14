@@ -58,9 +58,9 @@ node {
    }
    stage('javadoc'){
 	   if (isUnix()) {
-	     sh "'${mvnHome}/bin/mvn' javadoc:javadoc"
+	     sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
 	   } else {
-	     bat(/"${mvnHome}\bin\mvn" javadoc:javadoc/)
+	     bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
 	   }
    }
    stage('results') {
