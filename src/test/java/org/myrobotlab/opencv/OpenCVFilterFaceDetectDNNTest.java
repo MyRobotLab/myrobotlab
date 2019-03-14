@@ -8,52 +8,39 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.service.OpenCV;
 
-public class OpenCVFilterFaceDetectDNNTest {
-
-  boolean debug = false;
+public class OpenCVFilterFaceDetectDNNTest  extends AbstractOpenCVFilterTest {
 
   @Before
-  public void setUp() {
-    // LoggingFactory.init("WARN");
+  public void setup() {
+    debug = false;
   }
 
-  @Test
-  public void testFaceFilterDNN() throws IOException {
-
-    // opencv needs to be installed if it's not
-    if (!Repo.getInstance().isInstalled("OpenCV"))
-      Repo.getInstance().install("OpenCV");
-
+  @Override
+  public OpenCVFilter createFilter() {
     OpenCVFilterFaceDetectDNN filter = new OpenCVFilterFaceDetectDNN("filter");
+    return filter;
+  }
+
+  @Override
+  public IplImage createTestImage() {
     String filename = "src/test/resources/OpenCV/multipleFaces.jpg";
-    // String filename = "pose.jpg";
-    // String filename = "pose2.jpg";
-    // String filename = "pose3.jpg";
-    // String filename = "pose4.jpg";
-
     IplImage image = cvLoadImage(filename);
-    filter.setData(new OpenCVData(filename, 0, 0, OpenCV.toFrame(image)));
-    assertNotNull(image);
-    if (debug)
-      filter.show(image, "Image");
-    IplImage result = filter.process(image);
-    if (debug) {
-      filter.enabled = true;
-      filter.displayEnabled = true;
-      BufferedImage bi = filter.processDisplay();
-      IplImage displayVal = OpenCV.toImage(bi);
-      filter.show(displayVal, "Resulting image");
-      System.out.println("Press the any key...");
-      System.in.read();
-    }
-    int numFound = filter.bb.size();
-    assertEquals(numFound, 5);
+    return image;
+  }
 
+  @Override
+  public void verify(OpenCVFilter filter, IplImage input, IplImage output) {
+    // Make sure we found 5 faces.
+    int numFound = ((OpenCVFilterFaceDetectDNN)filter).bb.size();
+    assertEquals(5, numFound);
+    
+    // waitOnAnyKey();
   }
 
 }

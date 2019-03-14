@@ -387,15 +387,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     return image;
   }
 
-  // helper method to show an image. (todo; convert it to a Mat )
-  public void show(final IplImage image, final String title) {
-    final IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
-    cvCopy(image, image1);
-    CanvasFrame canvas = new CanvasFrame(title, 1);
-    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(converterToIpl.convert(image1));
-  }
-
   @Override
   public void release() {
     synchronized (lock) {
