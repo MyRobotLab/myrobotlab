@@ -120,7 +120,9 @@ public class OpenCVTest extends AbstractTest {
       ChaosMonkey.giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
-    ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
+    if (!isVirtual()) {
+      ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
+    }
     ChaosMonkey.startMonkeys();
     ChaosMonkey.monkeyReport();
 
@@ -134,7 +136,7 @@ public class OpenCVTest extends AbstractTest {
   }
 
   @Test
-  public final void simplteFaceDetect() {
+  public final void simpleFaceDetect() {
     log.warn("=======OpenCVTest simplteFaceDetect=======");
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
