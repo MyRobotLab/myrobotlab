@@ -2,7 +2,9 @@ package org.myrobotlab.test;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -31,11 +33,18 @@ public class AbstractTest {
   private static boolean releaseRemainingThreads = false;
 
   static transient Set<Thread> threadSetStart = null;
+  
+  protected boolean printMethods = true;
 
-  private static boolean useDeprecatedThreadStop = false;
+  // private static boolean useDeprecatedThreadStop = false;
   
   @Rule
   public final TestName testName = new TestName();
+  static public String simpleName;
+  
+  public String getSimpleName() {
+    return simpleName;
+  }
   
   protected String getName() {
     return testName.getMethodName();
@@ -121,7 +130,7 @@ public class AbstractTest {
       releaseServices();
     }
 
-    log.warn("=========== finished test ===========");
+    log.warn("=========== finished test {} ===========", simpleName);
   }
   
   protected void installAll() throws ParseException, IOException {
@@ -131,20 +140,19 @@ public class AbstractTest {
   public static void releaseServices() {
 
     // services to be cleaned up/released
-    StringBuilder sb = new StringBuilder();
     String[] services = Runtime.getServiceNames();
+    Set<String> releaseServices = new TreeSet<>();
     for (String service : services) {
       // don't kill runtime - although in the future i hope this is possible
       if (!"runtime".equals(service)) {
-        sb.append(service);
-        sb.append(" ");
+        releaseServices.add(service);
         log.info("service {} left in registry - releasing", service);
         Runtime.releaseService(service);
       }
     }
 
-    if (sb.length() > 0) {
-      log.warn("attempted to release the following services [{}]", sb.toString());
+    if (releaseServices.size() > 0) {
+      log.warn("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
       log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
       sleep(coolDownTimeMs);
     }
@@ -152,23 +160,31 @@ public class AbstractTest {
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();
     Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
+    Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
       if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
           log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
+          /*
           if (useDeprecatedThreadStop) {
             thread.stop();
           }
+          */
         } else {
-          log.warn("thread {} marked as straggler - should be killed", thread.getName());
+          // log.warn("thread {} marked as straggler - should be killed", thread.getName());
+          threadsRemaining.add(thread.getName());
         }
       }
+    }
+    if (threadsRemaining.size() > 0) {
+      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
     log.info("finished the killing ...");
   }
 
   public AbstractTest() {
+    simpleName = this.getClass().getSimpleName();
     if (logTestHeader) {
       log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
     }

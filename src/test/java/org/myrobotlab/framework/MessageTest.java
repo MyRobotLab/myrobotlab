@@ -32,7 +32,7 @@ public class MessageTest extends AbstractTest implements NameProvider {
 
   @Test
   final public void badNameTest() throws Exception {
-    log.info("badNameTest");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     catcher.clear();
     TestCatcher catcher2 = null;
     try {

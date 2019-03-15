@@ -83,7 +83,7 @@ public class SolrDataSetIteratorTest extends AbstractTest {
 
   // @Test
   public void testSolrTransferLearningVGG16() throws IOException, NoAvailableBackendException, SolrServerException {
-    // LoggingFactory.init("INFO");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     System.out.println(System.getProperty("java.library.path"));
     // Nd4jBackend.load();
     // start solr and dl4j service.

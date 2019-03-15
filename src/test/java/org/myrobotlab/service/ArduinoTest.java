@@ -145,7 +145,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   // TODO: fix this test method.
   // @Test
   public final void testAnalogWrite() throws InterruptedException, IOException {
-    log.info("testAnalogWrite");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
 
     arduino.analogWrite(10, 0);
     assertVirtualPinValue(10, 0);
@@ -164,6 +164,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public final void testConnect() throws IOException {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     log.info("testConnect - begin");
     arduino.disconnect();
     arduino.connect(port);
@@ -173,10 +174,9 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     log.info("testConnect - end");
   }
 
-  // TODO : broken in ANT but not in eclipse!
-  // @Test
+  @Test
   public void testConnectResetAndClear() {
-
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     arduino.connect(port);
     arduino.reset();
 
@@ -191,6 +191,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public void testConnectString() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     for (int i = 0; i < 20; ++i) {
       // arduino.connect(port);
       // arduino.enableAck(true);
@@ -200,11 +201,11 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
        */
       // arduino.disconnect();
     }
-    log.info("here");
   }
 
   @Test
   public final void testDigitalWrite() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     log.info("testDigitalWrite");
     arduino.digitalWrite(10, 1);
     // assertEquals("digitalWrite/10/1\n", uart.decode());
@@ -216,6 +217,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public final void testDisconnect() throws IOException {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     log.info("testDisconnect");
     // shutdown mrlcomm
     // disconnect
@@ -237,6 +239,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public void testEnableBoardStatus() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     org.myrobotlab.service.Test test = (org.myrobotlab.service.Test) Runtime.start("test", "Test");
     test.subscribe(arduino.getName(), "publishBoardStatus");
     arduino.enableBoardInfo(true);
@@ -245,17 +248,8 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   }
 
   @Test
-  public void testEnableBoardStatusInt() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public void testEnabledHeartbeat() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
   public void testEnablePinInt() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     // set board type
     arduino.enablePin(enablePin);
     arduino.attach(this);
@@ -266,6 +260,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public void testGetBoardInfo() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     arduino.connect(port);
     BoardInfo boardInfo = arduino.getBoardInfo();
     // assertTrue(boardInfo.isValid());
@@ -275,7 +270,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   // TODO: fails in unit test in ant , not in eclipse.
   // @Test
   public final void testGetSketch() {
-    log.info("testGetSketch");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Sketch sketch = arduino.getSketch();
     assertNotNull(sketch);
     assertTrue(sketch.data.length() > 0);
@@ -287,14 +282,14 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public final void testGetVersion() {
-    log.info("testGetVersion");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     arduino.connect(port);
     assertEquals(Msg.MRLCOMM_VERSION, arduino.getBoardInfo().getVersion().intValue());
   }
 
   @Test
   public final void testPinModeIntegerInteger() {
-    log.info("testPinModeIntegerInteger");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     arduino.pinMode(8, Arduino.OUTPUT);
     // assertEquals("pinMode/8/1\n", uart.decode());
   }
@@ -302,24 +297,23 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   // If we enable this test, it should assert something.
   // @Test
   public final void testPinModeIntString() {
-    log.info("testPinModeIntString");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     arduino.pinMode(8, "OUTPUT");
     // assertEquals("pinMode/8/1\n", uart.decode());
     // TODO: add an assert here.
   }
 
-  // TODO: broken from ant build due to file not founds (not broken in eclipse.)
-  // @Test
+  @Test
   public void testReleaseService() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     arduino.releaseService();
     // better re-start it
     arduino = (Arduino) Runtime.start("arduino", "Arduino");
   }
 
-  // TODO: re-enable this when it's worky.
-  // @Test
+  @Test
   public final void testServoAttachServoInteger() throws Exception {
-    log.info("testServoAttachServoInteger");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Servo servo = null;
 
     // make sure we're connected
@@ -442,10 +436,9 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   }
 
-  // TODO: re-enable when worky
-  // @Test
+  @Test
   public void testSetBoardMega() {
-    log.info("testSetBoardMega");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String boardType = arduino.getBoard();
 
     arduino.setBoardMega();
@@ -460,7 +453,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public void testSetBoardUno() {
-    log.info("testSetBoardUno");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String boardType = arduino.getBoard();
 
     arduino.setBoardUno();
@@ -472,79 +465,5 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
     arduino.setBoard(boardType);
   }
-
-  // public static void main(String[] args) {
-  // try {
-  // // LoggingFactory.init("INFO");
-  //
-  // Runtime.start("webgui", "WebGui");
-  // // Runtime.start("gui", "SwingGui");
-  //
-  // // test a "real" arduino
-  // useVirtualHardware = false;
-  // port = "COM5";
-  // // port = "COM4";
-  // // port = "COM99";
-  //
-  // ArduinoTest test = new ArduinoTest();
-  // ArduinoTest.setUpBeforeClass();
-  //
-  // Pir pir = (Pir)Runtime.start("pir","Pir");
-  // pir.attach(arduino, 7);
-  //
-  // // arduino.record();
-  //
-  // if (virtual != null) {
-  // virtual.connect(port);
-  // }
-  // arduino.connect(port);
-  //
-  // arduino.setDebug(true);
-  // //arduino.enableAck(false);
-  //
-  // test.testConnectString();
-  //
-  // Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
-  // Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
-  //
-  // servo01.setMinMax(10, 175);
-  // servo01.setInverted(true);
-  // servo01.setRest(157);
-  // servo02.setRest(140);
-  //
-  // servo01.setInverted(true);
-  //
-  // servo01.attach(arduino, 7);
-  // arduino.attach(servo01, 7);
-  // arduino.attach(servo01, 8);
-  //
-  // // arduino.disconnect();
-  //
-  // boolean b = true;
-  // if (b) {
-  // return;
-  // }
-  //
-  // test.testGetVersion();
-  // test.testServoAttachServoInteger();
-  // test.testEnableBoardStatus();
-  // test.testEnablePinInt();
-  //
-  //
-  //
-  // // test specific method
-  // test.testServoAttachServoInteger();
-  //
-  // // run junit as java app
-  // JUnitCore junit = new JUnitCore();
-  // Result result = junit.run(ArduinoTest.class);
-  // log.info("Result was: {}", result);
-  //
-  // // Runtime.dump();
-  //
-  // } catch (Exception e) {
-  // Logging.logError(e);
-  // }
-  // }
 
 }
