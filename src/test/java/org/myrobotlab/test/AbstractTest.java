@@ -40,6 +40,7 @@ public class AbstractTest {
   @Rule
   public final TestName testName = new TestName();
   static public String simpleName;
+  private static boolean lineFeedFooter = true;
   
   public String getSimpleName() {
     return simpleName;
@@ -131,6 +132,10 @@ public class AbstractTest {
 
     if (logWarnTestHeader) {
       log.warn("=========== finished test {} ===========", simpleName);
+    }
+    
+    if (lineFeedFooter ) {
+      System.out.println();
     }
   }
   
