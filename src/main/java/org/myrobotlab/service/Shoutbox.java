@@ -226,6 +226,10 @@ public class Shoutbox extends Service {
   public void loadShouts() {
     try {
       File latest = null;
+      if (!new File(getName()).exists()) {
+        log.info("{} does not exist - will not load previous shouts", getName());
+        return;
+      }
       // restore the last file back into memory
       List<File> files = FindFile.find(getName(), "shouts.*.js", false, false);
 

@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -9,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.framework.Service;
@@ -335,7 +336,12 @@ public class Lloyd extends Service {
     // ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
 
     // before we do this. let's disable the yolo stuff
-
+    File fileTest = new File(yoloPersonImageRecognizerModelFilename);
+    if (!fileTest.exists()) {
+      log.warn("model file {} does not exist", yoloPersonImageRecognizerModelFilename);
+      return;
+    }
+    
     CustomModel imageRecognizer = visualCortex.trainModel(labels, trainIter, testIter, yoloPersonImageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
     // update the cv filter with the new model
     // ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).setModel(imageRecognizer);
@@ -406,6 +412,7 @@ public class Lloyd extends Service {
   }
 
   public void startEyes() {
+    
     // TODO: enable right eye / config
     // rightEye = (OpenCV)Runtime.start("rightEye", "OpenCV");
     leftEye = (OpenCV) Runtime.start("leftEye", "OpenCV");
@@ -432,7 +439,9 @@ public class Lloyd extends Service {
 
     leftEye.cameraIndex = leftEyeCameraIndex;
     // TODO: ?
-    leftEye.capture();
+    if (!isVirtual()) {
+      leftEye.capture();
+    }
   }
 
   public void startOculus() {

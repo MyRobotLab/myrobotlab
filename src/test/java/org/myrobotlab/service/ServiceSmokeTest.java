@@ -85,15 +85,17 @@ public class ServiceSmokeTest extends AbstractTest {
 
       long start = System.currentTimeMillis();
 
-      log.info("Testing service type {}", serviceType);
       if (blacklist.contains(serviceType)) {
-        log.info("Skipping known problematic service {}", serviceType);
+        log.warn("Skipping known problematic service {}", serviceType);
         continue;
       }
       log.warn("Testing service type {}", serviceType);
       String serviceName = serviceType.toLowerCase();
-      ServiceInterface s = Runtime.start(serviceName, serviceType);
-      assertNotNull(s);
+      ServiceInterface s = Runtime.create(serviceName, serviceType);
+      s.setVirtual(true);
+      assertNotNull(String.format("could not create %s",  serviceName), s);
+      s = Runtime.start(serviceName, serviceType);
+      assertNotNull(String.format("could not start %s",  serviceName), s);
       // log.error("serviceType {}", s.getName());
       testSerialization(s);
       // TODO: validate the service is released!
@@ -101,7 +103,6 @@ public class ServiceSmokeTest extends AbstractTest {
 
       long delta = System.currentTimeMillis() - start;
       log.info("Done testing serialization of {} in {} ms", serviceType, delta);
-      // System.in.read();
 
     }
 

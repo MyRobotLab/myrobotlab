@@ -27,6 +27,19 @@ public interface ServiceInterface
    *          c
    * 
    */
+  
+  /**
+   * virtualize the service, in this mode the service should not use any "real" hardware
+   * @param b
+   */
+  public void setVirtual(boolean b);
+  
+  /**
+   * check to see if the service is running in a virtual mode
+   * @return
+   */
+  public boolean isVirtual();
+  
   public void addListener(String localTopic, String otherService, String callback);
 
   public void removeListener(String localTopic, String otherService, String callback);
