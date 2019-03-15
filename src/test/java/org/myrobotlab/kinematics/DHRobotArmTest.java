@@ -98,7 +98,7 @@ public class DHRobotArmTest extends AbstractTest {
     log.info("testJacobian");
     DHRobotArm testArm = createInMoovLeftArm();
     Matrix jInverse = testArm.getJInverse();
-    System.out.println(jInverse);
+    log.info("{}", jInverse);
     // now, the deltaPosition array has the delta x,y,z coordinates
     // what's the instantaneous rate of change for each of those
     // compute the rate of change for this

@@ -950,7 +950,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   synchronized public void addTask(String taskName, long intervalMs, int delay, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
-      log.warn("already have active task \"{}\"", taskName);
+      log.info("already have active task \"{}\"", taskName);
       return;
     }
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));

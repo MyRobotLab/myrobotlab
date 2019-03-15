@@ -7,12 +7,11 @@ import org.myrobotlab.test.AbstractTest;
 
 import marytts.exceptions.SynthesisException;
 
-// KW_ TODO: this is ignored now, for some reason this locks up on me...
-
 public class MarySpeechTest extends AbstractTest {
 
   @Test
   public void testMarySpeech() throws IOException, SynthesisException, InterruptedException {
+    log.warn("this is testing method name {}", getName());
     MarySpeech speech = (MarySpeech) Runtime.createAndStart("speech", "MarySpeech");
     speech.speakBlocking("hello world");
 
