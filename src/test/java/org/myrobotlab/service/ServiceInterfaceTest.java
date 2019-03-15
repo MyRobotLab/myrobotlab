@@ -26,7 +26,7 @@ public class ServiceInterfaceTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
 
   private boolean serviceHasWebPage(String service) {
-    String url = "http://www.myrobotlab.org/service/" + service;
+    String url = "http://myrobotlab.org/service/" + service;
     InputStream in = null;
     try {
       in = new URL(url).openStream();
@@ -83,7 +83,8 @@ public class ServiceInterfaceTest extends AbstractTest {
 
   @Test
   public final void testAllServices() throws ClassNotFoundException {
-
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    
     ArrayList<String> servicesWithoutWebPages = new ArrayList<String>();
     ArrayList<String> servicesWithoutScripts = new ArrayList<String>();
     ArrayList<String> servicesThatDontStartProperly = new ArrayList<String>();
