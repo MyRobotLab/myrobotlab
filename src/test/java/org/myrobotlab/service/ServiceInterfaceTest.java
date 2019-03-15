@@ -3,19 +3,15 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -24,99 +20,10 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
-@Ignore // temporarily ignoring to evaluate mvn logging
+// @Ignore // temporarily ignoring to evaluate mvn logging
 public class ServiceInterfaceTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
-
-  /**
-   * Attempts to list all the classes in the specified package as determined by
-   * the context class loader
-   * 
-   * @param pckgname
-   *          the package name to search
-   * @return a list of classes that exist within that package
-   * @throws ClassNotFoundException
-   *           if something went wrong
-   * 
-   *           Ref:
-   *           http://stackoverflow.com/questions/1498122/java-loop-on-all-the-
-   *           classes-in-the-classpath
-   */
-  private static List<Class<?>> getClassesForPackage(String pckgname) throws ClassNotFoundException {
-    // This will hold a list of directories matching the pckgname. There may be
-    // more than one if a package is split over multiple jars/paths
-    ArrayList<File> directories = new ArrayList<File>();
-    try {
-      ClassLoader cld = Thread.currentThread().getContextClassLoader();
-      if (cld == null) {
-        throw new ClassNotFoundException("Can't get class loader.");
-      }
-      String path = pckgname.replace('.', '/');
-      // Ask for all resources for the path
-      Enumeration<URL> resources = cld.getResources(path);
-      while (resources.hasMoreElements()) {
-        directories.add(new File(URLDecoder.decode(resources.nextElement().getPath(), "UTF-8")));
-      }
-    } catch (NullPointerException x) {
-      throw new ClassNotFoundException(pckgname + " does not appear to be a valid package (Null pointer exception)");
-    } catch (UnsupportedEncodingException encex) {
-      throw new ClassNotFoundException(pckgname + " does not appear to be a valid package (Unsupported encoding)");
-    } catch (IOException ioex) {
-      throw new ClassNotFoundException("IOException was thrown when trying to get all resources for " + pckgname);
-    }
-
-    ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-    // For every directory identified capture all the .class files
-    for (File directory : directories) {
-      if (directory.exists()) {
-        // Get the list of the files contained in the package
-        String[] files = directory.list();
-        for (String file : files) {
-          // we are only interested in .class files
-          if (file.endsWith(".class")) {
-            // removes the .class extension
-            try {
-              classes.add(Class.forName(pckgname + '.' + file.substring(0, file.length() - 6)));
-            } catch (NoClassDefFoundError e) {
-              // do nothing. this class hasn't been found by the loader, and we
-              // don't care.
-            }
-          }
-        }
-      } else {
-        throw new ClassNotFoundException(pckgname + " (" + directory.getPath() + ") does not appear to be a valid package");
-      }
-    }
-    return classes;
-  }
-
-  public static List<String> listAllServices() throws ClassNotFoundException {
-    // TODO: should this be replaced with a call to Runtime ?
-    List<Class<?>> classes = ServiceInterfaceTest.getClassesForPackage("org.myrobotlab.service");
-    List<String> services = new ArrayList<String>();
-    for (Class<?> c : classes) {
-      // System.out.println("CLASS:" + c.toString());
-      HashSet<String> superClasses = new HashSet<String>();
-      Class<?> x = c;
-      while (true) {
-        if (x.getSuperclass() != null) {
-          superClasses.add(x.getSuperclass().toString());
-          x = x.getSuperclass();
-        } else {
-          break;
-        }
-
-      }
-      if (superClasses.contains("class org.myrobotlab.framework.Service")) {
-        // Get just the class name.
-        String[] parts = c.toString().split(" ")[1].split("\\.");
-        services.add(parts[parts.length - 1]);
-        // System.out.println(parts[parts.length-1]);
-      }
-    }
-    return services;
-  }
 
   private boolean serviceHasWebPage(String service) {
     String url = "http://www.myrobotlab.org/service/" + service;
@@ -225,16 +132,10 @@ public class ServiceInterfaceTest extends AbstractTest {
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.createAndStart("python", "Python");
     String testScriptDirectory = Util.getResourceDir() + File.separator + "Python" + File.separator + "examples/";
-    List<String> servicesToTest = listAllServices();
-    // List<String> servicesToTest = new ArrayList<String>();
-    // servicesToTest.add("Cli");
-
-    // Load the service data file
-
-    // TODO: read this from the repo at build time?
     ServiceData sd = ServiceData.getLocalInstance();
-
-    int numServices = servicesToTest.size();
+    List<ServiceType> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
+    
+    int numServices = sts.size();
     int numServicePages = 0;
     int numScripts = 0;
     int numScriptsWorky = 0;
@@ -244,7 +145,8 @@ public class ServiceInterfaceTest extends AbstractTest {
     // FIXME - must have different thread (prefix script) which runs a timer - 
     // script REQUIRED to complete in 4 minutes ... or BOOM it fails
     
-    for (String service : servicesToTest) {
+    for (ServiceType serviceType : sts) {
+      String service = serviceType.getSimpleName();
       System.out.println("SYSTEM TESTING " + service);
       System.out.flush();
       if (whiteListServices.contains(service)) {
@@ -330,15 +232,15 @@ public class ServiceInterfaceTest extends AbstractTest {
     log.info("----------------------------------------------");
 
     for (String s : servicesThatDontStartProperly) {
-      log.info("FAILED ON START:" + s);
+      log.warn("FAILED ON START:" + s);
     }
 
     for (String s : servicesWithoutWebPages) {
-      log.info("NO WEB PAGE    :" + s);
+      log.warn("NO WEB PAGE    :" + s);
     }
 
     for (String s : servicesWithoutScripts) {
-      log.info("NO SCRIPT      :" + s);
+      log.warn("NO SCRIPT      :" + s);
     }
 
     for (String s : servicesNotInServiceDataJson) {
