@@ -2,7 +2,6 @@ package org.myrobotlab.test;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -26,7 +25,7 @@ public class AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
-  static private boolean logTestHeader = true;
+  static private boolean logWarnTestHeader = false;
 
   private static boolean releaseRemainingServices = true;
 
@@ -130,7 +129,9 @@ public class AbstractTest {
       releaseServices();
     }
 
-    log.warn("=========== finished test {} ===========", simpleName);
+    if (logWarnTestHeader) {
+      log.warn("=========== finished test {} ===========", simpleName);
+    }
   }
   
   protected void installAll() throws ParseException, IOException {
@@ -185,7 +186,7 @@ public class AbstractTest {
 
   public AbstractTest() {
     simpleName = this.getClass().getSimpleName();
-    if (logTestHeader) {
+    if (logWarnTestHeader) {
       log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
     }
   }
