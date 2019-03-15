@@ -142,7 +142,7 @@ public class Clock extends Service {
       myClock = new ClockThread();
       invoke("clockStarted");
     } else {
-      log.warn("clock already started");
+      log.info("clock already started");
     }
   }
 
@@ -180,7 +180,7 @@ public class Clock extends Service {
       // broadcastState();
       invoke("clockStopped");
     } else {
-      log.warn("clock already stopped");
+      log.info("clock already stopped");
     }
   }
 
