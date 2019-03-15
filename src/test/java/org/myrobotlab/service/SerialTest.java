@@ -273,16 +273,6 @@ public class SerialTest extends AbstractTest {
   }
 
   @Test
-  public final void testConnectVirtualNullModem() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
-  public final void testConnectVirtualUART() {
-    // fail("Not yet implemented"); // TODO
-  }
-
-  @Test
   public final void testGetDescription() {
     assertTrue(serial.getDescription().length() > 0);
   }
@@ -391,11 +381,6 @@ public class SerialTest extends AbstractTest {
     testReadAndWrite();
     // ==== ascii codec test ===
     testReadAndWrite();
-  }
-
-  @Test
-  public final void testToString() {
-    // fail("Not yet implemented"); // TODO
   }
 
 }

@@ -11,7 +11,7 @@ public class AudioFileTest extends AbstractTest {
 
   @Test
   public final void testPlay() {
-
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     AudioFile af1 = (AudioFile) Runtime.createAndStart("af1", "AudioFile");
     String filename = "Wreck.mp3";
     af1.playFile(filename, false);

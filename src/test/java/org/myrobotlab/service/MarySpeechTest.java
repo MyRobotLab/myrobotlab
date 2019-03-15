@@ -11,9 +11,9 @@ public class MarySpeechTest extends AbstractTest {
 
   @Test
   public void testMarySpeech() throws IOException, SynthesisException, InterruptedException {
-    log.warn("this is testing method name {}", getName());
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     MarySpeech speech = (MarySpeech) Runtime.createAndStart("speech", "MarySpeech");
     speech.speakBlocking("hello world");
-
   }
+
 }
