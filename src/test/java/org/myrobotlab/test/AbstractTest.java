@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -31,6 +33,13 @@ public class AbstractTest {
   static transient Set<Thread> threadSetStart = null;
 
   private static boolean useDeprecatedThreadStop = false;
+  
+  @Rule
+  public final TestName testName = new TestName();
+  
+  protected String getName() {
+    return testName.getMethodName();
+  }
 
   static public boolean hasInternet() {
     if (hasInternet == null) {
@@ -106,7 +115,7 @@ public class AbstractTest {
 
   @AfterClass
   public static void tearDownAbstractTest() throws Exception {
-    log.warn("tearDownAbstractTest");
+    log.info("tearDownAbstractTest");
 
     if (releaseRemainingServices) {
       releaseServices();

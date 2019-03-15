@@ -25,44 +25,44 @@ public class InMoovLeftArmIKTest extends AbstractTest {
     // LoggingFactory.init("INFO");
     DHRobotArm arm = InMoovArm.getDHRobotArm("i01", "left");
     // Point palm = arm.getPalmPosition();
-    // System.out.println(palm);
+    // log.info(palm);
     // well known configurations.
 
     // arm down to the side
     moveArm(arm, -90, 90, 90, 90);
     Point one = arm.getPalmPosition();
 
-    System.out.println("Down to the side : " + one);
+    log.info("Down to the side : " + one);
 
     // this should be arm directly out to the side.
     moveArm(arm, 0, 90, 90, 90);
     Point two = arm.getPalmPosition();
 
-    System.out.println("Out to the left side : " + arm.getPalmPosition());
+    log.info("Out to the left side : " + arm.getPalmPosition());
 
     // this configuration is straight ahead.
     moveArm(arm, -90, 0, 90, 90);
     Point three = arm.getPalmPosition();
 
-    System.out.println("straight in front : " + arm.getPalmPosition());
+    log.info("straight in front : " + arm.getPalmPosition());
 
     // straight up configuration.
     moveArm(arm, -90, -90, 90, 90);
     Point four = arm.getPalmPosition();
 
-    System.out.println("Straight up : " + arm.getPalmPosition());
+    log.info("Straight up : " + arm.getPalmPosition());
 
     // arm down to the side, but bicep bent forward.
     moveArm(arm, -90, 90, 0, 180);
     Point five = arm.getPalmPosition();
 
-    System.out.println("Down to the side bicep bent forward : " + arm.getPalmPosition());
+    log.info("Down to the side bicep bent forward : " + arm.getPalmPosition());
 
     // arm down to the side, bicep up, rotate directly away from inmoov..
     moveArm(arm, -90, 90, -90, 180);
     Point six = arm.getPalmPosition();
 
-    System.out.println("Down to the side bicep up and pointing to the left : " + arm.getPalmPosition());
+    log.info("Down to the side bicep up and pointing to the left : " + arm.getPalmPosition());
 
     // InverseKinematics3D ik3d = (InverseKinematics3D) Runtime.start("ik3d",
     // "InverseKinematics3D");
