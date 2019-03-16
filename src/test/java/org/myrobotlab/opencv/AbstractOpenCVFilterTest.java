@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.CanvasFrame;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
+import org.nd4j.linalg.io.Assert;
 
 // ignore the abstract classes.
 @Ignore
@@ -47,19 +49,33 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     // call process on the filter with the input image.
     long start = System.currentTimeMillis();
     IplImage output = filter.process(input);
+
+    long delta = System.currentTimeMillis() - start;
+    log.info("Process method took {} ms", delta);  
+    filter.enabled = true;
+    filter.displayEnabled = true;
+    // verify that processDisplay doesn't blow up!
+    BufferedImage bi = filter.processDisplay();
+
     if (debug) {
-      long delta = System.currentTimeMillis() - start;
-      log.info("Process method took {} ms", delta);  
-      filter.enabled = true;
-      filter.displayEnabled = true;
-      BufferedImage bi = filter.processDisplay();
       IplImage displayVal = OpenCV.toImage(bi);
       outputImage = filter.show(displayVal, "Output Image");
     }
 
     // TODO: we want to verify the resulting opencv data? and methods that are invoked ?
     verify(filter,input,output);
-
+    
+    // now test the sample point method
+    // TODO: what happens if we pass in nulls and stuff to samplePoint?
+    filter.samplePoint(0, 0);
+    
+    // Ok now we should probably enable / disable 
+    filter.enable();
+    assertTrue(filter.enabled);
+    
+    filter.disable();
+    assertTrue(!filter.enabled);
+    
     filter.release();
     // TODO: release the filter?
     //Runtime.releaseService("opencv");

@@ -85,7 +85,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   public OpenCVFilterYolo(String name) {
     super(name);
-    log.info("Yolo Classifier thread started : {}", this.name);
+  }
+
+  public OpenCVFilterYolo() {
+    super();
   }
 
   private void downloadYoloModel() {
@@ -210,7 +213,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     try {
       int count = 0;
       long start = System.currentTimeMillis();
-
       loadYolo();
       log.info("Starting the Yolo classifier thread...");
       // in a loop, grab the current image and classify it and update the
@@ -222,9 +224,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       while (running) {
         if (!pending) {
           log.debug("Skipping frame");
-
           Thread.sleep(10);
-
           continue;
         }
         // only classify this if we haven't already classified it.
