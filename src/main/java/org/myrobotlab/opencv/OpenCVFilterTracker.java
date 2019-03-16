@@ -185,8 +185,12 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     tracker = createTracker(trackerType);
     // log.info("Init tracker");
     // TODO: I'm worried about thread safety with the "mat" object.
-    synchronized (mat) {
-      tracker.init(mat, boundingBox);
+    if (mat != null) {
+      synchronized (mat) {
+        tracker.init(mat, boundingBox);
+      } 
+    } else {
+      log.warn("Sample point called on a null mat.");
     }
   }
 

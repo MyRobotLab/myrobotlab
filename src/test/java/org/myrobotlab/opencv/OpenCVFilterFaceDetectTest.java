@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Assert;
 
 public class OpenCVFilterFaceDetectTest extends AbstractOpenCVFilterTest {
-
   
   @Before
   public void before() {
