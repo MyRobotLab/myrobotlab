@@ -48,6 +48,10 @@ public class OpenCVFilterFlip extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterFlip() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
     flipped = IplImage.createCompatible(image);

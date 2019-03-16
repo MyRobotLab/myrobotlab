@@ -100,6 +100,10 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterLKOpticalTrack() {
+    super();
+  }
+
   public void clearPoints() {
     clearPoints = true;
   }

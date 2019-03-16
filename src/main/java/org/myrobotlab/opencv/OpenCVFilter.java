@@ -446,10 +446,11 @@ public abstract class OpenCVFilter implements Serializable {
     return (OpenCVFilter) Service.copyShallowFrom(this, other);
   }
 
-  public void show(final IplImage image, final String title) {
+  public CanvasFrame show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(toFrame(image));
+    return canvas;
   }
 
   public void show(final Mat image, final String title) {

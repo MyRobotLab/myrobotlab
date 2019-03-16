@@ -95,6 +95,10 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterFindContours() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
     if (storage == null) {
