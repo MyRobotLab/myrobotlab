@@ -85,6 +85,10 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterKinectDepth() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
   }

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
 
 // TODO: re-enable this unit test.. but for now it's just too slow ..
 // it also opens a swing gui which isn't good.
-
+@Ignore
 public class OpenCVTest extends AbstractTest {
 
   static OpenCV cv = null;

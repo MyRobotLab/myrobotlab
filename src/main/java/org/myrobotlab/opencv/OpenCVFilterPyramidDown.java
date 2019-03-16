@@ -50,6 +50,10 @@ public class OpenCVFilterPyramidDown extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterPyramidDown() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
     dst = cvCreateImage(cvSize(image.width() / 2, image.height() / 2), image.depth(), image.nChannels());
