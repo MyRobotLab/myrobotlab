@@ -27,7 +27,6 @@ package org.myrobotlab.framework;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -39,24 +38,20 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SimpleTimeZone;
 import java.util.Timer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.codec.Recorder;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -145,8 +140,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   transient protected Inbox inbox = null;
 
-  transient Timer timer = null;
-
   /**
    * a more capable task handler
    */
@@ -160,18 +153,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // :P - gson will default convert a HashSet into an Array :(
   // So we need to make it a HashMap in order for gson to convert to an object
   protected Map<String, String> interfaceSet;
-
-  transient protected SimpleDateFormat tsFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-
-  transient protected Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
-
-  // recordings
-  // static private boolean isRecording = false;
-  static private Recorder recorder = null;
-
-  transient public final String MESSAGE_RECORDING_FORMAT_XML = "MESSAGE_RECORDING_FORMAT_XML";
-
-  transient public final String MESSAGE_RECORDING_FORMAT_BINARY = "MESSAGE_RECORDING_FORMAT_BINARY";
 
   // FIXME SecurityProvider
   protected AuthorizationProvider authProvider = null;
@@ -845,17 +826,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
     } else {
       name = reservedKey;
     }
-    // keep MessageService name in sync
-
-    // this.timer = new Timer(String.format("%s_timer", name)); FIXME -
-    // re-implement but only create if there is a task!!
+   
     this.inbox = new Inbox(name);
     this.outbox = new Outbox(this);
     cm = new CommunicationManager(name);
     this.outbox.setCommunicationManager(cm);
-
-    tsFormatter.setCalendar(cal);
-    // load(); removed by GroG
     Runtime.register(this, null);
   }
 
@@ -1911,14 +1886,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     send(msg);
   }
 
-  public void send(Message msg) {
-    if (recorder != null) {
-      try {
-        recorder.write(msg);
-      } catch (IOException e) {
-        log.error("recording failed", e);
-      }
-    }
+  public void send(Message msg) {  
     outbox.add(msg);
   }
 
@@ -2063,20 +2031,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
       isRunning = true;
     } else {
       log.debug("startService request: service {} is already running", name);
-    }
-  }
-
-  public void stopHeartbeat() {
-  }
-
-  public void stopMsgRecording() {
-    log.info("stopped recording");
-    if (recorder != null) {
-      try {
-        recorder.stop();
-      } catch (Exception e) {
-        Logging.logError(e);
-      }
     }
   }
 

@@ -243,9 +243,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    */
 
   class ServoData implements Serializable {
-    /**
-     * 
-     */
+   
     private static final long serialVersionUID = 1L;
     int pin;
     SpeedControl speedcontrol;
@@ -472,28 +470,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return deviceName;
   }
 
-  /**
-   * Start sending pulses to the servo
-   * 
-   */
-  @Override
-  public void servoAttachPin(ServoControl servo, Integer pin) {
-    ServoData servoData = servoMap.get(servo.getName());
-    servoData.pin = pin;
-    servoData.isEnergized = true;
-  }
-
-  /**
-   * Stop sending pulses to the servo, relax
-   */
-  @Override
-  public void servoDetachPin(ServoControl servo) {
-    ServoData servoData = servoMap.get(servo.getName());
-    setPWM(servoData.pin, 4096, 0);
-    servoData.isEnergized = false;
-    log.info("Pin : " + servoData.pin + " detached from " + servo.getName());
-
-  }
 
   public void servoSetMaxVelocity(ServoControl servo) {
     log.warn("servoSetMaxVelocity not implemented in Adafruit16CServoDriver");
@@ -701,20 +677,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       pinMap.put(pindef.getPinName(), pindef);
       pinList.add(pindef);
     }
-
     return list;
   }
-  /*
-   * @Override public boolean isAttached(String name) { return (controller !=
-   * null && controller.getName().equals(name) || servoMap.containsKey(name)); }
-   */
 
   @Override
   public boolean isAttached(Attachable instance) {
-    if (controller != null && controller.getName().equals(instance.getName())) {
+    if (controller != null && controller == instance) {
       return isAttached;
     }
-    ;
     return false;
   }
 
@@ -859,7 +829,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     servoData.isEnergized = true;
     servoData.servo = servo;
     servoMap.put(servo.getName(), servoData);
-    servo.attachServoController(this);
+    servo.attach(this);
   }
 
   // This section contains all the new detach logic
@@ -871,10 +841,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void detach(Attachable service) {
-
+    if (!isAttached(service)) { // we're done
+      return;
+    }
+    
     if (I2CController.class.isAssignableFrom(service.getClass())) {
       detachI2CController((I2CController) service);
-      return;
     }
 
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
@@ -908,7 +880,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     if (servoMap.containsKey(servo.getName())) {
       servoMap.remove(servo.getName());
-      servo.detachServoController(this);
+      servo.detach(this);
     }
   }
 
@@ -942,29 +914,18 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return this.deviceAddress;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.myrobotlab.service.interfaces.ServoController#enablePin(java.lang.
-   * Integer, java.lang.Integer)
-   */
+  
   @Override
-  public void enablePin(Integer sensorPin, Integer i) {
-    // TODO Auto-generated method stub
-
+  public void servoEnable(ServoControl servo) {
+    
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.
-   * Integer)
-   */
+ 
   @Override
-  public void disablePin(Integer i) {
-    // TODO Auto-generated method stub
-
+  public void servoDisable(ServoControl servo) {
+    ServoData servoData = servoMap.get(servo.getName());
+    setPWM(servoData.pin, 4096, 0);
+    servoData.isEnergized = false;
+    log.info("Pin : " + servoData.pin + " detached from " + servo.getName());
   }
 
   // currently not a "real" motor control - it has to wait for merging of Servo

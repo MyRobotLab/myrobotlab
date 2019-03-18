@@ -466,7 +466,11 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
       info("Loaded: " + FileUtil.getLastFileOpened());
       return;
     }
-    info(FileUtil.getLastStatus());
+    if (FileUtil.getLastStatus() == null) {
+      info("no file selected");
+    } else {
+      info(FileUtil.getLastStatus());
+    }
     return;
   }
 
@@ -497,7 +501,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     scripts.remove(oldName);
     editorTabs.removeTab(oldName);
     EditorPanel np = addNewEditorPanel(new Script(currentScriptName, p.getText()));
-    editorTabs.setSelectedComponent(np.getDisplay());   
+    editorTabs.setSelectedComponent(np.getDisplay());
   }
 
 }

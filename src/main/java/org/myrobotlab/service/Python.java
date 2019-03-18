@@ -258,14 +258,14 @@ public class Python extends Service {
   }
 
   /**
-   * pyrobotlab python service urls - created for referencing script
+   * FIXME - buildtime package in resources pyrobotlab python service urls -
+   * created for referencing script
    */
   Map<String, String> exampleUrls = new TreeMap<String, String>();
 
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
   transient InputQueueThread inputQueueThread;
   transient PythonInterpreter interp = null;
-  // transient PIThread interpThread = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
   int interpreterThreadCount = 0;
@@ -296,28 +296,6 @@ public class Python extends Service {
   public Python(String n) {
     super(n);
 
-    log.info(String.format("creating python %s", getName()));
-    // get all currently registered services and add appropriate python
-    // handles
-    Map<String, ServiceInterface> svcs = Runtime.getRegistry();
-    StringBuffer initScript = new StringBuffer();
-    initScript.append("from time import sleep\n");
-    initScript.append("from org.myrobotlab.service import Runtime\n");
-    Iterator<String> it = svcs.keySet().iterator();
-    while (it.hasNext()) {
-      String serviceName = it.next();
-      ServiceInterface sw = svcs.get(serviceName);
-
-      initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
-
-      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", getSafeReferenceName(serviceName), serviceName);
-
-      // get a handle on running service
-      initScript.append(serviceScript);
-    }
-
-    exec(initScript.toString(), false); // FIXME - shouldn't be done in the
-
     subscribe(Runtime.getInstance().getName(), "registered");
     log.info("created python {}", getName());
 
@@ -331,11 +309,15 @@ public class Python extends Service {
     List<ServiceType> sdt = sd.getAvailableServiceTypes();
     for (int i = 0; i < sdt.size(); ++i) {
       ServiceType st = sdt.get(i);
+      // FIXME - cache in "data" dir Or perhaps it should be pulled into
+      // resource directory during build time and packaged with jar
       String url = String.format("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/%s/service/%s.py", p.getBranch(), st.getSimpleName());
       exampleUrls.put(st.getSimpleName(), url);
     }
 
     localPythonFiles = getFileListing();
+
+    createPythonInterpreter();
   }
 
   public void openScript(String scriptName, String code) {
@@ -370,7 +352,11 @@ public class Python extends Service {
   /**
    * 
    */
-  public void createPythonInterpreter() {
+  synchronized public void createPythonInterpreter() {
+    if (interp != null) {
+      log.info("interpreter already created");
+      return;
+    }
     // TODO: If the username on windows contains non-ascii characters
     // the Jython interpreter will blow up.
     // The APPDATA environment variable contains the username.
@@ -417,6 +403,25 @@ public class Python extends Service {
         + String.format("myService = Runtime.getService(\"%s\")\n", getName());
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
+
+    Map<String, ServiceInterface> svcs = Runtime.getRegistry();
+    StringBuffer initScript = new StringBuffer();
+    initScript.append("from time import sleep\n");
+    initScript.append("from org.myrobotlab.service import Runtime\n");
+    Iterator<String> it = svcs.keySet().iterator();
+    while (it.hasNext()) {
+      String serviceName = it.next();
+      ServiceInterface sw = svcs.get(serviceName);
+
+      initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
+
+      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", getSafeReferenceName(serviceName), serviceName);
+
+      // get a handle on running service
+      initScript.append(serviceScript);
+    }
+
+    exec(initScript.toString(), false); // FIXME - shouldn't be done in the
   }
 
   public String eval(String method) {
@@ -443,42 +448,32 @@ public class Python extends Service {
     }
   }
 
-  /*
-   * replaces and executes current Python script
+  /**
+   * execute code
    */
   public void exec(String code) {
     exec(code, true);
   }
 
-  /*
-   * non blocking exec
-   * 
-   */
-  public void exec(String code, boolean replace) {
-    exec(code, replace, false);
-  }
-
   /**
+   * FIXME - isn't "blocking" exec == eval ???
+   * 
    * This method will execute a string that represents a python script. When
    * called with blocking=false, the return code will likely return true even if
    * there is a syntax error because it doesn't wait for the response.
    * 
    * @param code
    *          - the script to execute
-   * @param replace
-   *          - not used! (should be removed.)
    * @param blocking
    *          - if true, this method will wait until all of the code has been
    *          evaluated.
    * @return - returns true if execution of the code was successful. returns
    *         false if there was an exception.
    */
-  public boolean exec(String code, boolean replace, boolean blocking) {
+  public boolean exec(String code, boolean blocking) {
     log.info("exec(String) \n{}", code);
     boolean success = true;
-    if (interp == null) {
-      createPythonInterpreter();
-    }
+
     try {
       if (!blocking) {
         String name = String.format("%s.interpreter.%d", getName(), ++interpreterThreadCount);
@@ -524,18 +519,18 @@ public class Python extends Service {
     } catch (PyException pe) {
       // something specific with a python error
       error(pe.toString());
-      Logging.logError(pe);
+      log.error("evalAndWait threw python exception", pe);
     } catch (Exception e) {
       // more general error handling.
       error(e.getMessage());
       // dump stack trace to log
-      Logging.logError(e);
+      log.error("evalAndWait threw", e);
     }
     return pyOutput;
   }
 
   public void execAndWait(String code) {
-    exec(code, true, true);
+    exec(code, true);
   }
 
   /*

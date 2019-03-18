@@ -5,13 +5,40 @@ import java.util.List;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.service.data.PinData;
 
+/**
+ * 
+ * @author GroG
+ * 
+ * FIXME - support String interface - create AbstractPinArrayControl
+ *
+ */
 public interface PinArrayControl extends NameProvider {
 
-  public List<PinDefinition> getPinList();
+  public void attach(PinArrayListener listener);
+
+  public void attach(PinListener listener, Integer pinAddress);
+
+  // FIXME - maybe support disable(String) for D0 D1 D2 ...
+  public void disablePin(Integer address);
+
+  public void disablePins();
+
+  public void enablePin(Integer address);
+
+  public void enablePin(Integer address, Integer rate);
+
+  public PinDefinition getPin(Integer address);
 
   public PinDefinition getPin(String pinName);
 
-  public PinDefinition getPin(Integer address);
+  public List<PinDefinition> getPinList();
+
+  // FIXME - DEPRECATE - this is "very" Arduino specific
+  public void pinMode(Integer address, String mode);
+
+  public PinData publishPin(PinData pinData);
+
+  public PinData[] publishPinArray(PinData[] pinData);
 
   /*
    * read pin based on index or address of the pin - this is always numeric
@@ -29,29 +56,6 @@ public interface PinArrayControl extends NameProvider {
    */
   public int read(String pinName);
 
-  // FIXME - DEPRECATE - this is "very" Arduino specific
-  public void pinMode(Integer address, String mode);
-
   public void write(Integer address, Integer value);
-
-  public PinData publishPin(PinData pinData);
-
-  public PinData[] publishPinArray(PinData[] pinData);
-
-  // FIXME attach(String listener, null) -> listens to all pins - pin array
-  // comes back ?
-  // public void attach(String listener, int pinAddress);
-
-  public void attach(PinListener listener, Integer pinAddress);
-
-  public void attach(PinArrayListener listener);
-
-  public void enablePin(Integer address);
-
-  public void disablePin(Integer address);
-
-  public void disablePins();
-
-  public void enablePin(Integer address, Integer rate);
 
 }

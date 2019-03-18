@@ -394,9 +394,11 @@ public class Runtime extends Service implements MessageListener {
       }
 
       // create an instance
-      // Object newService = Instantiator.getNewInstance(fullTypeName, name);
       Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
       log.debug("returning {}", fullTypeName);
+      ServiceInterface si = (ServiceInterface) newService;
+      Platform platform = Platform.getLocalInstance();
+      si.setVirtual(platform.isVirtual());
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed", e);

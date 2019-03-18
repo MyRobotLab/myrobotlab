@@ -134,8 +134,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     meta.addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
-    // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT"); GroG-"This should
-    // not be here"
     return meta;
   }
 
@@ -146,7 +144,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    *         (0-180) to microseconds (544-2400)
    * 
    */
-  public Integer degreeToMicroseconds(double degree) {
+  static public Integer degreeToMicroseconds(double degree) {
     // if (degree >= 544) return (int)degree; - G-> I don't think
     // this is a good idea, if they want to use microseconds - then let them
     // use
@@ -636,17 +634,29 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // @Override
   // > deviceDetach/deviceId
   public void detach(Attachable device) {
-    // TODO check / detach - must be careful of infinit loop
-    // if (device.isAttached()){
-    //
-    // }
-    log.info("detaching device {}", device.getName());
-    msg.deviceDetach(getDeviceId(device));
-    if (deviceList.containsKey(device.getName())) {
-      DeviceMapping dm = deviceList.get(device.getName());
-      deviceIndex.remove(dm.getId());
-      deviceList.remove(device.getName());
+    log.info("{} detaching {}", getName(), device.getName());
+    // if this service doesn't think its attached, we are done
+    if (!isAttached(device)) {
+      log.info("device {} not attached", device.getName());
+      return;
     }
+
+    // Servo requirements
+    if (device instanceof ServoControl && device.isAttached(this)) {
+      // if the other service thinks its attached - give it a chance to detach
+      // this is important for Servo - because servo will want to disable()
+      // before
+      // detaching - and it needs the controller to do so...
+      device.detach(this);
+    }
+
+    log.info("detaching device {}", device.getName());
+    Integer id = getDeviceId(device);
+    if (id != null) {
+      msg.deviceDetach(id);
+      deviceIndex.remove(id);
+    }
+    deviceList.remove(device.getName());
   }
 
   /*
@@ -661,11 +671,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     invoke("publishPinDefinition", pinDef);
   }
 
-  // > disablePin/pin
-  public void disablePin(Integer address) {
-    msg.disablePin(address);
-    PinDefinition pinDef = pinIndex.get(address);
-    invoke("publishPinDefinition", pinDef);
+  // > servoDetachPin/deviceId
+  public void servoDisable(ServoControl servo) {
+    msg.servoDetachPin(getDeviceId(servo));
   }
 
   // > disablePins
@@ -755,7 +763,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   // > getBoardInfo
   public BoardInfo getBoardInfo() {
     // msg.getBoardInfo(); do not do this -
-    // results in a serial infinit loop 
+    // results in a serial infinit loop
     // msg.getBoardInfo();
     return boardInfo;
   }
@@ -1623,11 +1631,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.serialAttach(deviceId, controllerAttachAs);
   }
 
-  @Override
   public void attachServoControl(ServoControl servo) throws Exception {
     if (isAttached(servo)) {
-      log.info("servo {} already attached", servo.getName());
-      return;
+      return; // already attached
     }
     // query configuration out
     int pin = servo.getPin();
@@ -1645,10 +1651,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     int uS = degreeToMicroseconds(targetOutput);
     msg.servoAttach(deviceId, pin, uS, (int) velocity, servo.getName());
 
-    // the callback - servo better have a check
-    // isAttached(ServoControl) to prevent infinite loop
-    // servo.attach(this, pin, targetOutput, velocity);
-    servo.attachServoController(this);
+    servo.attach(this);
   }
 
   public static final int MOTOR_TYPE_SIMPLE = 1;
@@ -1705,30 +1708,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     attachServoControl(servo);
   }
 
-  /**
-   * Arduino's servo.attach(pin) which is just energizing on a pin To be
-   * consistent and transparent - method should be servoEnable
-   */
-  @Override
-  @Deprecated
-  // > servoEnablePwm/deviceId/pin
-  public void servoAttachPin(ServoControl servo, Integer pin) {
-    log.info("{}.attachPin({})", servo.getName(), servo.getPin());
-    msg.servoAttachPin(getDeviceId(servo), pin);
-  }
-
-  /**
-   * Stops the pwm on the pin. To be consistent and transparent - method should be
-   * servoDisable
-   */
-  @Override
-  @Deprecated
-  // > servoDisablePwm/deviceId
-  public void servoDetachPin(ServoControl servo) {
-    log.info("{}.detachPin({})", servo.getName(), servo.getPin());
-    msg.servoDetachPin(getDeviceId(servo));
-  }
-
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(ServoControl servo) {
@@ -1779,8 +1758,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void servoWriteMicroseconds(ServoControl servo, int uS) {
     int deviceId = getDeviceId(servo);
     log.debug("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
-    // msg.servoWriteMicroseconds(deviceId, uS);
-    // lets use speed control
     msg.servoMoveToMicroseconds(deviceId, uS);
   }
 
@@ -2037,12 +2014,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   @Override
   public void detach(String controllerName) {
-    // GOOD DESIGN !!! - THIS HAS INPUT STRING - AND WILL
-    // ROUTE WITH THE APPROPRIATE TYPE - AUTO-MAGICALLY !!!
-    invoke("detach", Runtime.getService(controllerName));
+    detach(Runtime.getService(controllerName));
   }
 
-  // GOOD DESIGN !!!
   @Override
   public boolean isAttached(String name) {
     return deviceList.containsKey(name);
@@ -2064,10 +2038,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       if (FileIO.isJar()) {
         mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
         // FIXME - don't do this every time :P
-        Zip.extractFromSelf(Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm", "resource/Arduino/MrlComm");
+        Zip.extractFromSelf(Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm", "resource/Arduino/MrlComm");
       } else {
         // running in IDE ?
-        mrlCommFiles = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm";
+        mrlCommFiles = Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm";
       }
       File mrlCommDir = new File(mrlCommFiles);
       if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
@@ -2146,7 +2120,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     List<BoardType> boardTypes = new ArrayList<BoardType>();
     try {
-      String b = FileIO.resourceToString("Arduino"+File.separator+"boards.txt");
+      String b = FileIO.resourceToString("Arduino" + File.separator + "boards.txt");
       Properties boardProps = new Properties();
       boardProps.load(new ByteArrayInputStream(b.getBytes()));
 
@@ -2243,6 +2217,15 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect(port);
+
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      servo.setPin(8);
+      arduino.attach(servo);
+
+      servo.moveTo(3);
+
+      servo.moveTo(30);
+
       arduino.setBoardMega();
 
       if (isDone) {
@@ -2252,7 +2235,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       adafruit.attach(arduino);
       arduino.attach(adafruit);
 
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
       // servo.attach(arduino, 8, 90);
 
       // Runtime.start("webgui", "WebGui");
@@ -2346,6 +2328,18 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public double motorCalcOutput(MotorControl mc) {
     double value = mc.calcControllerOutput();
     return value;
+  }
+
+  @Override
+  public void servoEnable(ServoControl servo) {
+    int deviceId = getDeviceId(servo);
+    msg.servoAttachPin(deviceId, servo.getPin());
+  }
+
+  @Override
+  public void disablePin(Integer address) {
+    // TODO Auto-generated method stub
+
   }
 
 }
