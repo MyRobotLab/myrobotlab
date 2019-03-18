@@ -831,7 +831,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     try {
 
       log.info("loading default properties");
-      properties.load(PickToLight.class.getResourceAsStream(Util.getResourceDir() + "/PickToLight/pickToLight.properties"));
+      properties.load(new FileInputStream(Util.getResourceDir() + "/PickToLight/pickToLight.properties"));
 
       log.info("loading mes properties");
       input = new FileInputStream("/boot/pickToLight.properties");
