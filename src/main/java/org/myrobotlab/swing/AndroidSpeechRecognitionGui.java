@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -31,8 +32,8 @@ public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionLis
   public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGui.class);
 
   private JTextField onRecognized = new JTextField("Waiting orders...", 24);
-  BufferedImage microOn = ImageIO.read(FileIO.class.getResource(Util.getResourceDir() + "/InMoov/monitor/microOn.png"));
-  BufferedImage microOff = ImageIO.read(FileIO.class.getResource(Util.getResourceDir() + "/InMoov/monitor/microOff.png"));
+  BufferedImage microOn = ImageIO.read(new File(Util.getResourceDir() + "/InMoov/monitor/microOn.png"));
+  BufferedImage microOff = ImageIO.read(new File(Util.getResourceDir() + "/InMoov/monitor/microOff.png"));
 
   private JButton micro = new JButton(new ImageIcon(microOn));
 
