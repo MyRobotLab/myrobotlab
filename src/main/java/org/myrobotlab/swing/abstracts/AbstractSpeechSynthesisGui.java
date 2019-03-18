@@ -64,10 +64,10 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   // FIXME - SSML - adding combo box effects adds tags
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesisGui.class);
 
-  JButton speakButton = new JButton(new ImageIcon(ImageIO.read(FileIO.class.getResource(Util.getResourceDir() + "/Speech.png"))));
+  JButton speakButton = new JButton(new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "Speech.png"))));
 
-  ImageIcon readyOK = new ImageIcon(ImageIO.read(FileIO.class.getResource(Util.getResourceDir() + "/green.png")));
-  ImageIcon readyNOK = new ImageIcon(ImageIO.read(FileIO.class.getResource(Util.getResourceDir() + "/red.png")));
+  ImageIcon readyOK = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "green.png")));
+  ImageIcon readyNOK = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "red.png")));
 
   JLabel speakingState = new JLabel("not speaking");
   JLabel isReadyIcon = new JLabel(readyNOK, JLabel.CENTER);
