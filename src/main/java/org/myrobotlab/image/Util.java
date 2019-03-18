@@ -399,7 +399,7 @@ public class Util {
   {
     BufferedImage bi;
     try {
-      bi = ImageIO.read(Util.class.getResource(Util.getResourceDir() + File.separator + path));
+      bi = ImageIO.read(new File(Util.getResourceDir() + File.separator + path));
     } catch (IOException e) {
       log.error("could not find image " + path);
       return null;
