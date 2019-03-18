@@ -93,6 +93,10 @@ public class AbstractTest {
   // constructor of the AbstractTest
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
+    
+    // make testing environment "virtual"
+    setVirtual(true);
+    
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
       Runtime.setLogLevel(junitLogLevel);
