@@ -31,65 +31,6 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface ServoControl extends AbsolutePositionControl, Attachable, MessageSubscriber {
 
-  // FIXME - do we want to support this & what do we expect from
-  // 1. should it be energsetAbsoluteSpeedized when initially attached?
-  // 2. should the position be set initially on attach ?
-  // 3. should rest be set by pos if its not set already .. ie .. is the pos
-  // passed in on attach the "rest" position of the servo ?
-  // 4. should we 'please' rename servo.attach(pin) to servo.enablePwm(pin)
-  // servo.disablePwm(pin)
-  // !!!!
-
-  /**
-   * The point of the 'attach' is a concept to the user of the Servo. A simple
-   * concept across all services where the "minimal" amount of
-   * complexity/parameters are needed to 'attach' position shall be default to
-   * rest/90 if not specified
-   *
-   * 
-   * speed/velocity shall be defaulted to 'max' ie - no speed control
-   * 
-   * 
-   * @param controller
-   *          c
-   * @param pin
-   *          p
-   * @throws Exception
-   *           e
-   */
-
-  /**
-   * The one and only one attach which does the work we expect attaching a
-   * ServoControl to a ServoController
-   * 
-   * @param controller
-   *          c
-   * @throws Exception
-   *           e
-   */
-  void attachServoController(Attachable controller) throws Exception;
-
-  /**
-   * the one and only one which detaches a 'specific' ServoControl from
-   * ServoController
-   * 
-   * @param controller
-   *          e
-   * @throws Exception
-   *           e
-   */
-  void detachServoController(Attachable controller) throws Exception;
-
-  /**
-   * determines if a 'specific' controller is currently attached
-   * 
-   * @param controller
-   *          c
-   * @return true/false
-   * 
-   */
-  public boolean isAttachedServoController(ServoController controller);
-
   /**
    * attach with different parameters - it should set fields then call the "one
    * and only" single parameter attachServoController(controller)
@@ -110,39 +51,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
 
   /**
-   * attach with different parameters - it should set fields then call the "one
-   * and only" single parameter attachServoController(controller)
-   * 
-   * if no controller is provided, last used is set from json related.
-   * 
-   * @throws Exception
-   *           e
-   */
-  void attach() throws Exception;
-
-  /**
    * @param degreesPerSecond
    *          degrees per second rotational velocity cm per second linear
    *          velocity ?
    * 
    */
-  public void setVelocity(double degreesPerSecond);
-
-  /*
-   * Re-attaches (re-energizes) the servo on its current pin NOT RELATED TO
-   * CONTROLLER ATTACH/DETACH !
-   * 
-   * Deprecated - use enable(pin)
-   */
-  @Deprecated
-  public void attach(int pin);
-
-  /**
-   * detaching a pin (NOT RELATED TO DETACHING A SERVICE !)
-   */
-  @Deprecated // should be explicit from which service is being detached - by
-  // name or reference - this is "too" general
-  public void detach();
+  void setVelocity(double degreesPerSecond);
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not
@@ -154,34 +68,34 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    *          max value
    * 
    */
-  public void setMinMax(double min, double max);
+  void setMinMax(double min, double max);
 
   /**
    * @return min x
    */
-  public double getMin();
+  double getMin();
 
-  public double getMinInput();
+  double getMinInput();
 
   /**
    * @return max x
    */
-  public double getMax();
+  double getMax();
 
-  public double getMaxInput();
+  double getMaxInput();
 
   /**
    * @param speed
    *          fractional speed settings 0.0 to 1.0
    * 
    */
-  public void setSpeed(double speed);
+  void setSpeed(double speed);
 
   /**
    * stops the servo if currently in motion servo must be moving at incremental
    * speed for a stop to work (setSpeed &lt; 1.0)
    */
-  public void stop();
+  void stop();
 
   /**
    * configuration method - a method the controller will call when the servo is
@@ -195,12 +109,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * 
    * @return the pin as an integer
    */
-  public Integer getPin();
+  Integer getPin();
 
   /**
    * command to move to the rest position
    */
-  public void rest();
+  void rest();
 
   /**
    * Unmapped current position of last input. ie. equivalent to the last
@@ -213,7 +127,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * 
    * @return the current position as a double
    */
-  public double getPos();
+  double getPos();
 
   /**
    * the calculated mapper output for the servo - this is <b> ALWAYS ALWAYS in
@@ -223,9 +137,9 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * 
    * @return the target output position
    */
-  public double getTargetOutput();
+  double getTargetOutput();
 
-  public double getMaxVelocity();
+  double getMaxVelocity();
 
   double getVelocity();
 
@@ -241,19 +155,19 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
   /**
    * @return the current acceleration value
    */
-  public double getAcceleration();
+  double getAcceleration();
 
   /*
    * synchronizing servos together e.g. leftEye.sync(rightEye)
    */
-  public void sync(ServoControl sc);
+  void sync(ServoControl sc);
 
   /**
    * unsync a servo
    * 
    * @param sc
    */
-  public void unsync(ServoControl sc);
+  void unsync(ServoControl sc);
 
   /**
    * @param rest
@@ -261,12 +175,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    *          explicitly set. Position the servo will move to when method
    *          servo.rest() is called
    */
-  public void setRest(double rest);
+  void setRest(double rest);
 
   /**
    * @return the current rest position value
    */
-  public double getRest();
+  double getRest();
 
   boolean isInverted();
 
@@ -277,7 +191,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * @param invert
    *          - true is to invert
    */
-  public void setInverted(boolean invert);
+  void setInverted(boolean invert);
 
   // WTF ?
   void addIKServoEventListener(NameProvider service);
@@ -338,9 +252,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   void removeServoEventListener(NameProvider service);
 
-  public void enable();
+  void enable();
 
-  public void disable();
+  /**
+   * disable the pulses to the servo
+   */
+  void disable();
 
   String getControllerName();
 

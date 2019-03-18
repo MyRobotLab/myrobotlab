@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -32,20 +33,21 @@ public class AbstractTest {
   private static boolean releaseRemainingThreads = false;
 
   static transient Set<Thread> threadSetStart = null;
-  
+
   protected boolean printMethods = true;
 
   // private static boolean useDeprecatedThreadStop = false;
-  
+
   @Rule
   public final TestName testName = new TestName();
   static public String simpleName;
   private static boolean lineFeedFooter = true;
-  
+  private static Platform platform = Platform.getLocalInstance();
+
   public String getSimpleName() {
     return simpleName;
   }
-  
+
   protected String getName() {
     return testName.getMethodName();
   }
@@ -61,14 +63,12 @@ public class AbstractTest {
     return Runtime.isHeadless();
   }
 
-  static public boolean isVirtual() {
-    boolean isVirtual = true;
-    String isVirtualProp = System.getProperty("junit.isVirtual");
+  static public void setVirtual(boolean b) {
+    platform.setVirtual(b);
+  }
 
-    if (isVirtualProp != null) {
-      isVirtual = Boolean.parseBoolean(isVirtualProp);
-    }
-    return isVirtual;
+  static public boolean isVirtual() {
+    return platform.isVirtual();
   }
 
   public static void main(String[] args) {
@@ -133,14 +133,14 @@ public class AbstractTest {
     if (logWarnTestHeader) {
       log.warn("=========== finished test {} ===========", simpleName);
     }
-    
-    if (lineFeedFooter ) {
+
+    if (lineFeedFooter) {
       System.out.println();
     }
   }
-  
+
   protected void installAll() throws ParseException, IOException {
-   Runtime.install();
+    Runtime.install();
   }
 
   public static void releaseServices() {
@@ -173,12 +173,11 @@ public class AbstractTest {
           log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
           /*
-          if (useDeprecatedThreadStop) {
-            thread.stop();
-          }
-          */
+           * if (useDeprecatedThreadStop) { thread.stop(); }
+           */
         } else {
-          // log.warn("thread {} marked as straggler - should be killed", thread.getName());
+          // log.warn("thread {} marked as straggler - should be killed",
+          // thread.getName());
           threadsRemaining.add(thread.getName());
         }
       }

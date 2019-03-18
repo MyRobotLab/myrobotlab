@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class PinData implements Serializable {
   private static final long serialVersionUID = 1L;
+  
+  // FIXME - String ? change to pins to support "D0" "A1" ... etc.. 
   public Integer address;
   public Integer value;
 

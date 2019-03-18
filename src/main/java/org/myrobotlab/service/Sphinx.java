@@ -604,14 +604,6 @@ public class Sphinx extends AbstractSpeechRecognizer {
     microphone.startRecording();
   }
 
-  @Override
-  public void stopListening() {
-    isListening = false;
-    if (speechProcessor != null) {
-      speechProcessor.isRunning = false;
-    }
-    speechProcessor = null;
-  }
 
   /**
    * stopRecording - it does "work", however, the speech recognition part seems
@@ -619,9 +611,14 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * stopping the recording, but by not processing what was recognized
    */
   @Override
-  public void stopMsgRecording() {
+  public void stopListening() {
     microphone.stopRecording();
     microphone.clear();
+    isListening = false;
+    if (speechProcessor != null) {
+      speechProcessor.isRunning = false;
+    }
+    speechProcessor = null;
   }
 
   @Override

@@ -445,29 +445,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   /**
-   * Re-attach to servo's current pin. The pin must have be set previously.
-   * Equivalent to Arduino's Servo.attach(currentPin) In this service it stops
-   * the motor and PID is set to manual mode
-   */
-  @Override
-  public void attach() {
-    attach(pin);
-    broadcastState();
-  }
-
-  /**
-   * Equivalent to Arduino's Servo.attach(pin). It energizes the servo sending
-   * pulses to maintain its current position.
-   */
-  @Override
-  public void attach(int pin) {
-    // TODO Activate the motor and PID
-    lastActivityTime = System.currentTimeMillis();
-    isAttached = true;
-    broadcastState();
-  }
-
-  /**
    * Equivalent to Arduino's Servo.detach() it de-energizes the servo
    */
   @Override
@@ -923,27 +900,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   }
 
-  // None of the methods below can or should be implemented in DiyServo
-  // DiyServo uses a Motor peer
-
-  @Override
-  public void attachServoController(Attachable controller) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void detachServoController(Attachable controller) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public boolean isAttachedServoController(ServoController controller) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
   @Override
   public void attach(ServoController controller, int pin) throws Exception {
     // TODO Auto-generated method stub
@@ -1115,6 +1071,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public void enable() {
+    // TODO Activate the motor and PID
+    lastActivityTime = System.currentTimeMillis();
+    isAttached = true;
+    
     motorControl.unlock();
     if (motorUpdater == null) {
       motorUpdater = new MotorUpdater(getName());

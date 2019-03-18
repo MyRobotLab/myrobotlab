@@ -18,6 +18,9 @@ public class ServoTest extends AbstractTest {
   private static final String V_PORT_1 = "test_port_1";
   private static final String V_PORT_2 = "test_port_2";
 
+  // FIXME - test one servo against EVERY TYPE OF CONTROLLER (virtualized) !!!!
+  // iterate through all types
+  
   @BeforeClass
   static public void setup() throws Exception {
 
@@ -98,11 +101,11 @@ public class ServoTest extends AbstractTest {
     arduino.setDebug(true);
 
     // detaching the device
-    servo01.detachServoController(arduino); // test servo02.detach(arduino);
+    servo01.detach(arduino); // test servo02.detach(arduino);
                                             // error ?
     // servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED
     // DID SPLIT BRAIN FIXME
-    servo02.detachServoController(arduino);
+    servo02.detach(arduino);
 
     // errors / boundary cases
     // servo01.attach(arduino, 8, 40);
@@ -139,7 +142,7 @@ public class ServoTest extends AbstractTest {
     servo01.moveTo(130);
 
     // move after detach/re-attach
-    servo01.attach();
+    servo01.enable();
     servo01.moveTo(30);
     servo01.moveTo(130);
     servo01.moveTo(30);
@@ -173,7 +176,7 @@ public class ServoTest extends AbstractTest {
     servo02.moveTo(30);
     servo02.moveTo(130);
 
-    servo02.attach();
+    servo02.enable();
     servo02.moveTo(30);
     servo02.moveTo(130);
     servo02.moveTo(30);
@@ -193,14 +196,19 @@ public class ServoTest extends AbstractTest {
 
     // should re-attach
     // with the same pin & pos
-    servo01.attach();
-    servo02.attach();
+    servo01.enable();
+    servo02.enable();
 
     servo02.moveTo(30);
     servo02.moveTo(130);
     servo02.moveTo(30);
     servo02.moveTo(130);
 
+  }
+  
+  @Test
+  public void testAllControllers() {
+    System.out.println("ServoTest.testAllControllers() -> FIXME - implement !!!"); 
   }
 
   @Test
@@ -216,7 +224,7 @@ public class ServoTest extends AbstractTest {
     s.attach(ard1);
 
     // maybe remove this interface
-    s.attachServoController(ard1);
+    // s.attach(ard1);
     // s.attachServoController(ard1);
     s.disable();
 
@@ -233,7 +241,6 @@ public class ServoTest extends AbstractTest {
     s.rest();
 
     // depricated. i feel like if you do
-    s.attach();
     s.enable();
     s.moveTo(90);
     // test moving to the same position
@@ -248,7 +255,7 @@ public class ServoTest extends AbstractTest {
 
     // detach the servo.
     // ard2.detach(s);
-    s.detachServoController(ard2);
+    s.detach(ard2);
     assertFalse(s.isAttached());
 
     //
@@ -257,7 +264,7 @@ public class ServoTest extends AbstractTest {
     s.disable();
     assertFalse(s.isEnabled());
 
-    s.detachServoController(ard1);
+    s.detach(ard1);
     assertFalse(s.isAttached());
 
   }

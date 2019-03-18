@@ -130,12 +130,6 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     serial.open(port, rate, databits, stopbits, parity);
   }
 
-  @Override
-  public void servoAttachPin(ServoControl servo, Integer pin) {
-    // DUNNO HOW TO RE-ENABLE unless its just a write to current position
-    servoMoveTo(servo);
-  }
-
   public void write(String cmd, Object... params) {
     if (serial == null || !serial.isConnected()) {
       error("must be connected to serial port - connect(port)");
@@ -202,12 +196,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     write(sb.toString());
   }
 
-  @Override
-  public void servoDetachPin(ServoControl servo) {
-    int pin = servo.getPin();
-    write("STOP %d #%dP0 #%dL #%dH", pin, pin, pin, pin);
-  }
-
+  
   @Override
   public void servoSetVelocity(ServoControl servo) {
     // TODO Auto-generated method stub
@@ -263,7 +252,6 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Single parameter attach{type}({type}) - this is where the "real" attach
    * logic is for this service.
    */
-  @Override
   public void attachServoControl(ServoControl servo) throws Exception {
     if (isAttached(servo)) {
       return;
@@ -397,20 +385,14 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Integer, java.lang.Integer)
    */
   @Override
-  public void enablePin(Integer sensorPin, Integer i) {
+  public void servoEnable(ServoControl servo) {
     // TODO Auto-generated method stub
 
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.myrobotlab.service.interfaces.ServoController#disablePin(java.lang.
-   * Integer)
-   */
+  
   @Override
-  public void disablePin(Integer i) {
+  public void servoDisable(ServoControl servo) {
     // TODO Auto-generated method stub
 
   }

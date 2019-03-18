@@ -90,7 +90,6 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
     servo.setSpeed(0);
     Thread.sleep(1000);
-    arduino.servoDetachPin(servo);
     Thread.sleep(1000);
     arduino.enableBoardInfo(true);
     Thread.sleep(1000);

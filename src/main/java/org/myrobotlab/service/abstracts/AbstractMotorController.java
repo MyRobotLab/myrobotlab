@@ -104,7 +104,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   }
 
   public void detach(MotorControl device) {
-    motors.remove(device);
+    motors.remove(device.getName());
   }
 
   /**

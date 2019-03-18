@@ -123,7 +123,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     try {
       LoggingFactory.init();
 
-      SwingGui swing = (SwingGui) Runtime.start("gui", "SwingGui");
+      Runtime.start("gui", "SwingGui");
       RasPi raspi = (RasPi) Runtime.start("raspi", "RasPi");
       AdafruitMotorHat4Pi hat = (AdafruitMotorHat4Pi) Runtime.start("hat", "AdafruitMotorHat4Pi");
       hat.attach(raspi, "1", "0x60");

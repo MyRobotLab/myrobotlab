@@ -16,7 +16,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   boolean enabled = false;
 
   /**
-   * pin mode INPUT or OUTPUT
+   * pin mode INPUT or OUTPUT, other...
    */
   String mode;
 
