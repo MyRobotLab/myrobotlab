@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -831,10 +832,10 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     try {
 
       log.info("loading default properties");
-      properties.load(new FileInputStream(Util.getResourceDir() + "/PickToLight/pickToLight.properties"));
+      properties.load(new FileInputStream(Util.getResourceDir() + String.format("%sPickToLight%spickToLight.properties", File.separator)));
 
       log.info("loading mes properties");
-      input = new FileInputStream("/boot/pickToLight.properties");
+      input = new FileInputStream(String.format("%sboot%spickToLight.properties", File.separator));
       properties.load(input);
 
       if ("true".equalsIgnoreCase(properties.getProperty("xmpp.enabled"))) {
