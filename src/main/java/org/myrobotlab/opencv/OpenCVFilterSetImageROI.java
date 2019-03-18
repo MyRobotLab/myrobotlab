@@ -45,6 +45,10 @@ public class OpenCVFilterSetImageROI extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterSetImageROI() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
   }

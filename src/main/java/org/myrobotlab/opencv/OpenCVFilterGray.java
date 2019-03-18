@@ -49,6 +49,10 @@ public class OpenCVFilterGray extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterGray() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
     gray = cvCreateImage(cvGetSize(image), 8, 1);

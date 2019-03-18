@@ -84,6 +84,10 @@ public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterKinectDepthMask() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
   }

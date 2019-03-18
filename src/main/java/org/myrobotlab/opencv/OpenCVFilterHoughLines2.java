@@ -74,6 +74,10 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
     super(name);
   }
 
+  public OpenCVFilterHoughLines2() {
+    super();
+  }
+
   @Override
   public void imageChanged(IplImage image) {
   }
