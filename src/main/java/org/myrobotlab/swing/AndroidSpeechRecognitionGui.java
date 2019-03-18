@@ -20,7 +20,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AndroidSpeechRecognition;
 import org.myrobotlab.service.SwingGui;
@@ -32,8 +31,8 @@ public class AndroidSpeechRecognitionGui extends ServiceGui implements ActionLis
   public final static Logger log = LoggerFactory.getLogger(_TemplateServiceGui.class);
 
   private JTextField onRecognized = new JTextField("Waiting orders...", 24);
-  BufferedImage microOn = ImageIO.read(new File(Util.getResourceDir() + "/InMoov/monitor/microOn.png"));
-  BufferedImage microOff = ImageIO.read(new File(Util.getResourceDir() + "/InMoov/monitor/microOff.png"));
+  BufferedImage microOn = ImageIO.read(new File(Util.getResourceDir() + File.separator + "InMoov"+File.separator+"monitor"+File.separator+"microOn.png"));
+  BufferedImage microOff = ImageIO.read(new File(Util.getResourceDir() + File.separator+"InMoov"+File.separator+"monitor"+File.separator+"microOff.png"));
 
   private JButton micro = new JButton(new ImageIcon(microOn));
 
