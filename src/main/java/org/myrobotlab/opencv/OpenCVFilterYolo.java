@@ -85,7 +85,10 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   public OpenCVFilterYolo(String name) {
     super(name);
-    log.info("Yolo Classifier thread started : {}", this.name);
+  }
+
+  public OpenCVFilterYolo() {
+    super();
   }
 
   private void downloadYoloModel() {
@@ -210,7 +213,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     try {
       int count = 0;
       long start = System.currentTimeMillis();
-
       loadYolo();
       log.info("Starting the Yolo classifier thread...");
       // in a loop, grab the current image and classify it and update the
@@ -222,9 +224,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       while (running) {
         if (!pending) {
           log.debug("Skipping frame");
-
           Thread.sleep(10);
-
           continue;
         }
         // only classify this if we haven't already classified it.
@@ -385,15 +385,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // This mat should be the cropped image!
 
     return image;
-  }
-
-  // helper method to show an image. (todo; convert it to a Mat )
-  public void show(final IplImage image, final String title) {
-    final IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
-    cvCopy(image, image1);
-    CanvasFrame canvas = new CanvasFrame(title, 1);
-    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(converterToIpl.convert(image1));
   }
 
   @Override

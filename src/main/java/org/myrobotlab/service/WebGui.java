@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -173,7 +174,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   private static SSLContext createSSLContext2() {
     try {
-      InputStream keyStoreStream = Security.class.getResourceAsStream(Util.getResourceDir() + "/keys/selfsigned.jks");
+      InputStream keyStoreStream = new FileInputStream((Util.getResourceDir() + "/keys/selfsigned.jks"));
       char[] keyStorePassword = "changeit".toCharArray();
       KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(keyStoreStream, keyStorePassword);

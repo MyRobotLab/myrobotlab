@@ -37,7 +37,8 @@ public class Sweety extends Service {
   transient public Pid pid;
   transient public Pir pir;
   transient public HtmlFilter htmlFilter;
-
+  transient public OpenCV openCV;
+  
   // Right arm Servomotors
   transient public Servo rightShoulderServo;
   transient public Servo rightArmServo;
@@ -980,8 +981,8 @@ public class Sweety extends Service {
    */
   public void startTrack() throws Exception {
     tracker = (Tracking) Runtime.start("tracker", "Tracking");
-    sleep(1000);
-    tracker.connect(tracker.getOpenCV(), neckPanServo, neckTiltServo);
+    openCV = (OpenCV) Runtime.start("openCv", "OpenCV");
+    sleep(1000);    tracker.connect(openCV, neckPanServo, neckTiltServo);
     // tracker.pid.invert("y");
     // tracker.clearPreFilters();
 
