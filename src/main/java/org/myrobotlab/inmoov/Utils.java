@@ -32,7 +32,7 @@ public class Utils {
       return false;
     }
     // evaluate the scripts in a blocking way.
-    boolean result = p.exec(script, true, true);
+    boolean result = p.exec(script, true);
     if (!result) {
       log.error("Error while loading file {}", f.getAbsolutePath());
       return false;
