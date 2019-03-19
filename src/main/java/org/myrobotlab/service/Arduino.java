@@ -687,7 +687,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       controllerAttachAs = MRL_IO_NOT_DEFINED;
       serial = (Serial) createPeer("serial");
     } else {
-      serial.disconnect();
+      if (serial != null) {
+        serial.disconnect();
+      }
     }
     broadcastState();
   }
