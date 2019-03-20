@@ -79,9 +79,6 @@ public class Python extends Service {
             // sending method, but must call the appropriate method
             // in Sphinx
             StringBuffer msgHandle = new StringBuffer().append("msg_").append(getSafeReferenceName(msg.sender)).append("_").append(msg.sendingMethod);
-
-            // StringBuffer methodSignature ???
-
             PyObject compiledObject = null;
 
             // TODO - getCompiledMethod(msg.method SHOULD BE
@@ -104,31 +101,19 @@ public class Python extends Service {
               methodWithParams.append(")");
               compiledObject = getCompiledMethod(msg.method, methodWithParams.toString(), interp);
             }
-            /*
-             * if (compiledObject == null){ // NEVER NULL - object cache -
-             * builds cache if not there log.error(String.format(
-             * "%s() NOT FOUND", msg.method)); }
-             */
 
-            // commented out recently - no longer using msg handle
-            // for
-            // call-backs :)
-            // log.info(String.format("setting data %s",
-            // msgHandle));
-            // interp.set(msgHandle.toString(), msg);
             interp.exec(compiledObject);
 
           } catch (Exception e) {
-            Logging.logError(e);
+            log.error("InputQueueThread threw", e);
             python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
           }
-
         }
       } catch (Exception e) {
         if (e instanceof InterruptedException) {
           info("shutting down %s", getName());
         } else {
-          Logging.logError(e);
+          log.error("InputQueueThread while loop threw", e);
         }
       }
     }
@@ -195,20 +180,10 @@ public class Python extends Service {
   public final static transient Logger log = LoggerFactory.getLogger(Python.class);
   // TODO this needs to be moved into an actual cache if it is to be used
   // Cache of compile python code
-  private static final transient HashMap<String, PyObject> objectCache;
-
-  /**
-   * current working directory root there are multiple filesystems we can load
-   * scripts from github urls | jar:file /resources | /resource exploded |
-   * .myrobotlab directory | workind directory | root of file system this
-   * variable is to tell which root to begin with
-   */
+  private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
 
-  static {
-    objectCache = new HashMap<String, PyObject>();
-  }
 
   /**
    * Get a compiled version of the python call.
@@ -550,7 +525,6 @@ public class Python extends Service {
    *          - the name of the method
    */
   public void execMethod(String method) {
-    // execMethod(getName(), method, (Object[])null);
     execMethod(method, (Object[]) null);
   }
 
