@@ -341,6 +341,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       attachMotorControl((MotorControl) service);
       return;
     } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
+      // need to determine the encoder type!
       attachEncoderControl((EncoderControl) service);
       return;
     }
@@ -2294,14 +2295,23 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return null;
   }
 
+  /**
+   * Attach an encoder to the arduino
+   * @param encoder - the encoder control to attach
+   * @param type - 0 for AMT203 1 for AS5048A
+   */
   public void attachEncoderControl(EncoderControl encoder) {
     Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
     // send data to micro-controller
     
-    // TODO: we have multiple types of encoders!
-    int type = 0;
     // TODO: update this with some enum of various encoder types..
     // for now it's just AMT203 ...
+    int type = 0;
+    if (encoder instanceof Amt203Encoder) {
+      type = 0;
+    } else if (encoder instanceof As5048AEncoder){
+      type = 1;
+    }
     msg.encoderAttach(deviceId, type, encoder.getPin());
     encoder.setController(this);
 

@@ -1,10 +1,11 @@
 #ifndef MrlAs5048AEncoder_h
 #define MrlAs5048AEncoder_h
 
+#include <SPI.h>
 
 /**
- * AMT203 Encoder by CUI.
- * This is a capactive absolute position 12 bit encoder.
+ * AS5048A Magnetic Encoder
+ * This is a magnetic absolute position 14 bit encoder.
  * It communicates via SPI.
  *
  */
@@ -14,12 +15,13 @@ class MrlAs5048AEncoder : public Device {
   	int csPin; // chip or slave select
 	uint16_t ABSposition;
 	uint16_t ABSposition_last;
-	uint8_t temp[2];    //to hold the incoming reading
 	float deg; // TODO: move this into the update method probably.
 	long lastUpdate;
 	int updateTimer;
 	boolean attached;
-    uint8_t SPI_T(uint8_t msg);
+	SPISettings settings;
+	uint16_t read(SPISettings settings, byte pin, word registerAddress);
+	byte spiCalcEvenParity(word value);
 
   public:
     MrlAs5048AEncoder(int deviceId);

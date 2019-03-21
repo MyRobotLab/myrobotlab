@@ -138,7 +138,7 @@
 > motorMove/deviceId/pwr
 > motorMoveTo/deviceId/pos
 
-# Amt203 / As5048A Encoder methods
+# Amt203=0 / As5048A=1 Encoder methods
 > encoderAttach/deviceId/type/pin
 > setZeroPoint/deviceId
 < publishEncoderPosition/deviceId/b16 position
