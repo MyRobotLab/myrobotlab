@@ -8,6 +8,7 @@
 #include "MrlI2cBus.h"
 #include "MrlUltrasonicSensor.h"
 #include "MrlAmt203Encoder.h"
+#include "MrlAs5048AEncoder.h"
 #include "LinkedList.h"
 #include "MrlComm.h"
 
@@ -553,11 +554,17 @@ unsigned int MrlComm::getCustomMsg() {
  }
 
  // > encoderAttach/deviceId/pin
-void MrlComm::encoderAttach(byte deviceId, byte pin) {
+void MrlComm::encoderAttach(byte deviceId, byte type, byte pin) {
   // create the encoder and add it to the device list.
-  MrlAmt203Encoder* encoder = (MrlAmt203Encoder*) addDevice(new MrlAmt203Encoder(deviceId));
-  // tell the encoder to attach to the pin.
-  encoder->attach(pin);
+  if (type == 0) {
+    MrlAmt203Encoder* encoder = (MrlAmt203Encoder*) addDevice(new MrlAmt203Encoder(deviceId));
+    // tell the encoder to attach to the pin.
+    encoder->attach(pin);
+  } else {
+    MrlAs5048AEncoder* encoder = (MrlAs5048AEncoder*) addDevice(new MrlAs5048AEncoder(deviceId));
+    // tell the encoder to attach to the pin.
+    encoder->attach(pin);
+  }
 }
 
 void MrlComm::setZeroPoint(byte deviceId) {
