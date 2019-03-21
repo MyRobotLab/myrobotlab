@@ -13,16 +13,16 @@
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
-#define DEVICE_TYPE_UNKNOWN		0
-#define DEVICE_TYPE_ARDUINO		1
-#define DEVICE_TYPE_ULTRASONICSENSOR		2
-#define DEVICE_TYPE_STEPPER		3
-#define DEVICE_TYPE_MOTOR		4
-#define DEVICE_TYPE_SERVO		5
-#define DEVICE_TYPE_SERIAL		6
-#define DEVICE_TYPE_I2C		7
-#define DEVICE_TYPE_NEOPIXEL		8
-#define DEVICE_TYPE_ENCODER		9
+#define DEVICE_TYPE_UNKNOWN    0
+#define DEVICE_TYPE_ARDUINO    1
+#define DEVICE_TYPE_ULTRASONICSENSOR    2
+#define DEVICE_TYPE_STEPPER    3
+#define DEVICE_TYPE_MOTOR    4
+#define DEVICE_TYPE_SERVO    5
+#define DEVICE_TYPE_SERIAL    6
+#define DEVICE_TYPE_I2C    7
+#define DEVICE_TYPE_NEOPIXEL    8
+#define DEVICE_TYPE_ENCODER    9
 
 
 // < publishMRLCommError/str errorMsg
@@ -127,7 +127,7 @@
 #define MOTOR_MOVE 50
 // > motorMoveTo/deviceId/pos
 #define MOTOR_MOVE_TO 51
-// > encoderAttach/deviceId/pin
+// > encoderAttach/deviceId/type/pin
 #define ENCODER_ATTACH 52
 // > setZeroPoint/deviceId
 #define SET_ZERO_POINT 53
