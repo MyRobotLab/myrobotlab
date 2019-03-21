@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			58
+#define MRLCOMM_VERSION			59
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
