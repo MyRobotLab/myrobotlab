@@ -58,84 +58,84 @@ Msg* Msg::getInstance() {
  *
  *    PC --serialized--> Msg --de-serialized--> MrlComm.method(parm0, param1, ...)
  *
- 	// > getBoardInfo
-	void getBoardInfo();
-	// > enablePin/address/type/b16 rate
-	void enablePin( byte address,  byte type,  int rate);
-	// > setDebug/bool enabled
-	void setDebug( boolean enabled);
-	// > setSerialRate/b32 rate
-	void setSerialRate( long rate);
-	// > softReset
-	void softReset();
-	// > enableAck/bool enabled
-	void enableAck( boolean enabled);
-	// > echo/f32 myFloat/myByte/f32 secondFloat
-	void echo( float myFloat,  byte myByte,  float secondFloat);
-	// > customMsg/[] msg
-	void customMsg( byte msgSize, const byte*msg);
-	// > deviceDetach/deviceId
-	void deviceDetach( byte deviceId);
-	// > i2cBusAttach/deviceId/i2cBus
-	void i2cBusAttach( byte deviceId,  byte i2cBus);
-	// > i2cRead/deviceId/deviceAddress/size
-	void i2cRead( byte deviceId,  byte deviceAddress,  byte size);
-	// > i2cWrite/deviceId/deviceAddress/[] data
-	void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
-	// > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-	void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
-	// > neoPixelAttach/deviceId/pin/b32 numPixels
-	void neoPixelAttach( byte deviceId,  byte pin,  long numPixels);
-	// > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-	void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
-	// > neoPixelWriteMatrix/deviceId/[] buffer
-	void neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
-	// > disablePin/pin
-	void disablePin( byte pin);
-	// > disablePins
-	void disablePins();
-	// > setTrigger/pin/triggerValue
-	void setTrigger( byte pin,  byte triggerValue);
-	// > setDebounce/pin/delay
-	void setDebounce( byte pin,  byte delay);
-	// > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
-	void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity,  byte nameSize, const char*name);
-	// > servoAttachPin/deviceId/pin
-	void servoAttachPin( byte deviceId,  byte pin);
-	// > servoDetachPin/deviceId
-	void servoDetachPin( byte deviceId);
-	// > servoSetVelocity/deviceId/b16 velocity
-	void servoSetVelocity( byte deviceId,  int velocity);
-	// > servoSweepStart/deviceId/min/max/step
-	void servoSweepStart( byte deviceId,  byte min,  byte max,  byte step);
-	// > servoSweepStop/deviceId
-	void servoSweepStop( byte deviceId);
-	// > servoMoveToMicroseconds/deviceId/b16 target
-	void servoMoveToMicroseconds( byte deviceId,  int target);
-	// > servoSetAcceleration/deviceId/b16 acceleration
-	void servoSetAcceleration( byte deviceId,  int acceleration);
-	// > serialAttach/deviceId/relayPin
-	void serialAttach( byte deviceId,  byte relayPin);
-	// > serialRelay/deviceId/[] data
-	void serialRelay( byte deviceId,  byte dataSize, const byte*data);
-	// > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-	void ultrasonicSensorAttach( byte deviceId,  byte triggerPin,  byte echoPin);
-	// > ultrasonicSensorStartRanging/deviceId
-	void ultrasonicSensorStartRanging( byte deviceId);
-	// > ultrasonicSensorStopRanging/deviceId
-	void ultrasonicSensorStopRanging( byte deviceId);
-	// > setAref/b16 type
-	void setAref( int type);
-	// > motorAttach/deviceId/type/[] pins
-	void motorAttach( byte deviceId,  byte type,  byte pinsSize, const byte*pins);
-	// > motorMove/deviceId/pwr
-	void motorMove( byte deviceId,  byte pwr);
-	// > motorMoveTo/deviceId/pos
-	void motorMoveTo( byte deviceId,  byte pos);
-	// > encoderAttach/deviceId/pin
-	void encoderAttach( byte deviceId,  byte pin);
-	// > setZeroPoint/deviceId
-	void setZeroPoint( byte deviceId);
+   // > getBoardInfo
+  void getBoardInfo();
+  // > enablePin/address/type/b16 rate
+  void enablePin( byte address,  byte type,  int rate);
+  // > setDebug/bool enabled
+  void setDebug( boolean enabled);
+  // > setSerialRate/b32 rate
+  void setSerialRate( long rate);
+  // > softReset
+  void softReset();
+  // > enableAck/bool enabled
+  void enableAck( boolean enabled);
+  // > echo/f32 myFloat/myByte/f32 secondFloat
+  void echo( float myFloat,  byte myByte,  float secondFloat);
+  // > customMsg/[] msg
+  void customMsg( byte msgSize, const byte*msg);
+  // > deviceDetach/deviceId
+  void deviceDetach( byte deviceId);
+  // > i2cBusAttach/deviceId/i2cBus
+  void i2cBusAttach( byte deviceId,  byte i2cBus);
+  // > i2cRead/deviceId/deviceAddress/size
+  void i2cRead( byte deviceId,  byte deviceAddress,  byte size);
+  // > i2cWrite/deviceId/deviceAddress/[] data
+  void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
+  // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
+  void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
+  // > neoPixelAttach/deviceId/pin/b32 numPixels
+  void neoPixelAttach( byte deviceId,  byte pin,  long numPixels);
+  // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
+  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
+  // > neoPixelWriteMatrix/deviceId/[] buffer
+  void neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
+  // > disablePin/pin
+  void disablePin( byte pin);
+  // > disablePins
+  void disablePins();
+  // > setTrigger/pin/triggerValue
+  void setTrigger( byte pin,  byte triggerValue);
+  // > setDebounce/pin/delay
+  void setDebounce( byte pin,  byte delay);
+  // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
+  void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity,  byte nameSize, const char*name);
+  // > servoAttachPin/deviceId/pin
+  void servoAttachPin( byte deviceId,  byte pin);
+  // > servoDetachPin/deviceId
+  void servoDetachPin( byte deviceId);
+  // > servoSetVelocity/deviceId/b16 velocity
+  void servoSetVelocity( byte deviceId,  int velocity);
+  // > servoSweepStart/deviceId/min/max/step
+  void servoSweepStart( byte deviceId,  byte min,  byte max,  byte step);
+  // > servoSweepStop/deviceId
+  void servoSweepStop( byte deviceId);
+  // > servoMoveToMicroseconds/deviceId/b16 target
+  void servoMoveToMicroseconds( byte deviceId,  int target);
+  // > servoSetAcceleration/deviceId/b16 acceleration
+  void servoSetAcceleration( byte deviceId,  int acceleration);
+  // > serialAttach/deviceId/relayPin
+  void serialAttach( byte deviceId,  byte relayPin);
+  // > serialRelay/deviceId/[] data
+  void serialRelay( byte deviceId,  byte dataSize, const byte*data);
+  // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
+  void ultrasonicSensorAttach( byte deviceId,  byte triggerPin,  byte echoPin);
+  // > ultrasonicSensorStartRanging/deviceId
+  void ultrasonicSensorStartRanging( byte deviceId);
+  // > ultrasonicSensorStopRanging/deviceId
+  void ultrasonicSensorStopRanging( byte deviceId);
+  // > setAref/b16 type
+  void setAref( int type);
+  // > motorAttach/deviceId/type/[] pins
+  void motorAttach( byte deviceId,  byte type,  byte pinsSize, const byte*pins);
+  // > motorMove/deviceId/pwr
+  void motorMove( byte deviceId,  byte pwr);
+  // > motorMoveTo/deviceId/pos
+  void motorMoveTo( byte deviceId,  byte pos);
+  // > encoderAttach/deviceId/type/pin
+  void encoderAttach( byte deviceId,  byte type,  byte pin);
+  // > setZeroPoint/deviceId
+  void setZeroPoint( byte deviceId);
 
  */
 
@@ -269,347 +269,349 @@ void Msg::processCommand() {
 	int method = ioCmd[0];
 
 	switch (method) {
-	case GET_BOARD_INFO: { // getBoardInfo
-			mrlComm->getBoardInfo();
-			break;
+  case GET_BOARD_INFO: { // getBoardInfo
+      mrlComm->getBoardInfo();
+      break;
 	}
-	case ENABLE_PIN: { // enablePin
-			byte address = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte type = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int rate = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->enablePin( address,  type,  rate);
-			break;
+  case ENABLE_PIN: { // enablePin
+      byte address = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte type = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int rate = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      mrlComm->enablePin( address,  type,  rate);
+      break;
 	}
-	case SET_DEBUG: { // setDebug
-			boolean enabled = (ioCmd[startPos+1]);
-			startPos += 1;
-			mrlComm->setDebug( enabled);
-			break;
+  case SET_DEBUG: { // setDebug
+      boolean enabled = (ioCmd[startPos+1]);
+      startPos += 1;
+      mrlComm->setDebug( enabled);
+      break;
 	}
-	case SET_SERIAL_RATE: { // setSerialRate
-			long rate = b32(ioCmd, startPos+1);
-			startPos += 4; //b32
-			mrlComm->setSerialRate( rate);
-			break;
+  case SET_SERIAL_RATE: { // setSerialRate
+      long rate = b32(ioCmd, startPos+1);
+      startPos += 4; //b32
+      mrlComm->setSerialRate( rate);
+      break;
 	}
-	case SOFT_RESET: { // softReset
-			mrlComm->softReset();
-			break;
+  case SOFT_RESET: { // softReset
+      mrlComm->softReset();
+      break;
 	}
-	case ENABLE_ACK: { // enableAck
-			boolean enabled = (ioCmd[startPos+1]);
-			startPos += 1;
-			mrlComm->enableAck( enabled);
-			break;
+  case ENABLE_ACK: { // enableAck
+      boolean enabled = (ioCmd[startPos+1]);
+      startPos += 1;
+      mrlComm->enableAck( enabled);
+      break;
 	}
-	case ECHO: { // echo
-			float myFloat = f32(ioCmd, startPos+1);
-			startPos += 4; //f32
-			byte myByte = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			float secondFloat = f32(ioCmd, startPos+1);
-			startPos += 4; //f32
-			mrlComm->echo( myFloat,  myByte,  secondFloat);
-			break;
+  case ECHO: { // echo
+      float myFloat = f32(ioCmd, startPos+1);
+      startPos += 4; //f32
+      byte myByte = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      float secondFloat = f32(ioCmd, startPos+1);
+      startPos += 4; //f32
+      mrlComm->echo( myFloat,  myByte,  secondFloat);
+      break;
 	}
-	case CUSTOM_MSG: { // customMsg
-			const byte* msg = ioCmd+startPos+2;
-			byte msgSize = ioCmd[startPos+1];
-			startPos += 1 + ioCmd[startPos+1];
-			mrlComm->customMsg( msgSize, msg);
-			break;
+  case CUSTOM_MSG: { // customMsg
+      const byte* msg = ioCmd+startPos+2;
+      byte msgSize = ioCmd[startPos+1];
+      startPos += 1 + ioCmd[startPos+1];
+      mrlComm->customMsg( msgSize, msg);
+      break;
 	}
-	case DEVICE_DETACH: { // deviceDetach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->deviceDetach( deviceId);
-			break;
+  case DEVICE_DETACH: { // deviceDetach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->deviceDetach( deviceId);
+      break;
 	}
-	case I2C_BUS_ATTACH: { // i2cBusAttach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte i2cBus = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->i2cBusAttach( deviceId,  i2cBus);
-			break;
+  case I2C_BUS_ATTACH: { // i2cBusAttach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte i2cBus = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->i2cBusAttach( deviceId,  i2cBus);
+      break;
 	}
-	case I2C_READ: { // i2cRead
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte deviceAddress = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte size = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->i2cRead( deviceId,  deviceAddress,  size);
-			break;
+  case I2C_READ: { // i2cRead
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte deviceAddress = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte size = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->i2cRead( deviceId,  deviceAddress,  size);
+      break;
 	}
-	case I2C_WRITE: { // i2cWrite
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte deviceAddress = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			const byte* data = ioCmd+startPos+2;
-			byte dataSize = ioCmd[startPos+1];
-			startPos += 1 + ioCmd[startPos+1];
-			mrlComm->i2cWrite( deviceId,  deviceAddress,  dataSize, data);
-			break;
+  case I2C_WRITE: { // i2cWrite
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte deviceAddress = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      const byte* data = ioCmd+startPos+2;
+      byte dataSize = ioCmd[startPos+1];
+      startPos += 1 + ioCmd[startPos+1];
+      mrlComm->i2cWrite( deviceId,  deviceAddress,  dataSize, data);
+      break;
 	}
-	case I2C_WRITE_READ: { // i2cWriteRead
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte deviceAddress = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte readSize = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte writeValue = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->i2cWriteRead( deviceId,  deviceAddress,  readSize,  writeValue);
-			break;
+  case I2C_WRITE_READ: { // i2cWriteRead
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte deviceAddress = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte readSize = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte writeValue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->i2cWriteRead( deviceId,  deviceAddress,  readSize,  writeValue);
+      break;
 	}
-	case NEO_PIXEL_ATTACH: { // neoPixelAttach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			long numPixels = b32(ioCmd, startPos+1);
-			startPos += 4; //b32
-			mrlComm->neoPixelAttach( deviceId,  pin,  numPixels);
-			break;
+  case NEO_PIXEL_ATTACH: { // neoPixelAttach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      long numPixels = b32(ioCmd, startPos+1);
+      startPos += 4; //b32
+      mrlComm->neoPixelAttach( deviceId,  pin,  numPixels);
+      break;
 	}
-	case NEO_PIXEL_SET_ANIMATION: { // neoPixelSetAnimation
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte animation = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte red = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte green = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte blue = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int speed = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->neoPixelSetAnimation( deviceId,  animation,  red,  green,  blue,  speed);
-			break;
+  case NEO_PIXEL_SET_ANIMATION: { // neoPixelSetAnimation
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte animation = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte red = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte green = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte blue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int speed = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      mrlComm->neoPixelSetAnimation( deviceId,  animation,  red,  green,  blue,  speed);
+      break;
 	}
-	case NEO_PIXEL_WRITE_MATRIX: { // neoPixelWriteMatrix
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			const byte* buffer = ioCmd+startPos+2;
-			byte bufferSize = ioCmd[startPos+1];
-			startPos += 1 + ioCmd[startPos+1];
-			mrlComm->neoPixelWriteMatrix( deviceId,  bufferSize, buffer);
-			break;
+  case NEO_PIXEL_WRITE_MATRIX: { // neoPixelWriteMatrix
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      const byte* buffer = ioCmd+startPos+2;
+      byte bufferSize = ioCmd[startPos+1];
+      startPos += 1 + ioCmd[startPos+1];
+      mrlComm->neoPixelWriteMatrix( deviceId,  bufferSize, buffer);
+      break;
 	}
-	case ANALOG_WRITE: { // analogWrite
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte value = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			analogWrite( pin,  value);
-			break;
+  case ANALOG_WRITE: { // analogWrite
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte value = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      analogWrite( pin,  value);
+      break;
 	}
-	case DIGITAL_WRITE: { // digitalWrite
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte value = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			digitalWrite( pin,  value);
-			break;
+  case DIGITAL_WRITE: { // digitalWrite
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte value = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      digitalWrite( pin,  value);
+      break;
 	}
-	case DISABLE_PIN: { // disablePin
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->disablePin( pin);
-			break;
+  case DISABLE_PIN: { // disablePin
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->disablePin( pin);
+      break;
 	}
-	case DISABLE_PINS: { // disablePins
-			mrlComm->disablePins();
-			break;
+  case DISABLE_PINS: { // disablePins
+      mrlComm->disablePins();
+      break;
 	}
-	case PIN_MODE: { // pinMode
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte mode = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			pinMode( pin,  mode);
-			break;
+  case PIN_MODE: { // pinMode
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte mode = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      pinMode( pin,  mode);
+      break;
 	}
-	case SET_TRIGGER: { // setTrigger
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte triggerValue = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->setTrigger( pin,  triggerValue);
-			break;
+  case SET_TRIGGER: { // setTrigger
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte triggerValue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->setTrigger( pin,  triggerValue);
+      break;
 	}
-	case SET_DEBOUNCE: { // setDebounce
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte delay = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->setDebounce( pin,  delay);
-			break;
+  case SET_DEBOUNCE: { // setDebounce
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte delay = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->setDebounce( pin,  delay);
+      break;
 	}
-	case SERVO_ATTACH: { // servoAttach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int initPos = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			int initVelocity = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			const char* name = (char*)ioCmd+startPos+2;
-			byte nameSize = ioCmd[startPos+1];
-			startPos += 1 + ioCmd[startPos+1];
-			mrlComm->servoAttach( deviceId,  pin,  initPos,  initVelocity,  nameSize, name);
-			break;
+  case SERVO_ATTACH: { // servoAttach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int initPos = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      int initVelocity = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      const char* name = (char*)ioCmd+startPos+2;
+      byte nameSize = ioCmd[startPos+1];
+      startPos += 1 + ioCmd[startPos+1];
+      mrlComm->servoAttach( deviceId,  pin,  initPos,  initVelocity,  nameSize, name);
+      break;
 	}
-	case SERVO_ATTACH_PIN: { // servoAttachPin
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->servoAttachPin( deviceId,  pin);
-			break;
+  case SERVO_ATTACH_PIN: { // servoAttachPin
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->servoAttachPin( deviceId,  pin);
+      break;
 	}
-	case SERVO_DETACH_PIN: { // servoDetachPin
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->servoDetachPin( deviceId);
-			break;
+  case SERVO_DETACH_PIN: { // servoDetachPin
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->servoDetachPin( deviceId);
+      break;
 	}
-	case SERVO_SET_VELOCITY: { // servoSetVelocity
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int velocity = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->servoSetVelocity( deviceId,  velocity);
-			break;
+  case SERVO_SET_VELOCITY: { // servoSetVelocity
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int velocity = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      mrlComm->servoSetVelocity( deviceId,  velocity);
+      break;
 	}
-	case SERVO_SWEEP_START: { // servoSweepStart
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte min = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte max = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte step = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->servoSweepStart( deviceId,  min,  max,  step);
-			break;
+  case SERVO_SWEEP_START: { // servoSweepStart
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte min = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte max = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte step = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->servoSweepStart( deviceId,  min,  max,  step);
+      break;
 	}
-	case SERVO_SWEEP_STOP: { // servoSweepStop
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->servoSweepStop( deviceId);
-			break;
+  case SERVO_SWEEP_STOP: { // servoSweepStop
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->servoSweepStop( deviceId);
+      break;
 	}
-	case SERVO_MOVE_TO_MICROSECONDS: { // servoMoveToMicroseconds
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int target = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->servoMoveToMicroseconds( deviceId,  target);
-			break;
+  case SERVO_MOVE_TO_MICROSECONDS: { // servoMoveToMicroseconds
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int target = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      mrlComm->servoMoveToMicroseconds( deviceId,  target);
+      break;
 	}
-	case SERVO_SET_ACCELERATION: { // servoSetAcceleration
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			int acceleration = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->servoSetAcceleration( deviceId,  acceleration);
-			break;
+  case SERVO_SET_ACCELERATION: { // servoSetAcceleration
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int acceleration = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      mrlComm->servoSetAcceleration( deviceId,  acceleration);
+      break;
 	}
-	case SERIAL_ATTACH: { // serialAttach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte relayPin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->serialAttach( deviceId,  relayPin);
-			break;
+  case SERIAL_ATTACH: { // serialAttach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte relayPin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->serialAttach( deviceId,  relayPin);
+      break;
 	}
-	case SERIAL_RELAY: { // serialRelay
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			const byte* data = ioCmd+startPos+2;
-			byte dataSize = ioCmd[startPos+1];
-			startPos += 1 + ioCmd[startPos+1];
-			mrlComm->serialRelay( deviceId,  dataSize, data);
-			break;
+  case SERIAL_RELAY: { // serialRelay
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      const byte* data = ioCmd+startPos+2;
+      byte dataSize = ioCmd[startPos+1];
+      startPos += 1 + ioCmd[startPos+1];
+      mrlComm->serialRelay( deviceId,  dataSize, data);
+      break;
 	}
-	case ULTRASONIC_SENSOR_ATTACH: { // ultrasonicSensorAttach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte triggerPin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte echoPin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->ultrasonicSensorAttach( deviceId,  triggerPin,  echoPin);
-			break;
+  case ULTRASONIC_SENSOR_ATTACH: { // ultrasonicSensorAttach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte triggerPin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte echoPin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->ultrasonicSensorAttach( deviceId,  triggerPin,  echoPin);
+      break;
 	}
-	case ULTRASONIC_SENSOR_START_RANGING: { // ultrasonicSensorStartRanging
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->ultrasonicSensorStartRanging( deviceId);
-			break;
+  case ULTRASONIC_SENSOR_START_RANGING: { // ultrasonicSensorStartRanging
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->ultrasonicSensorStartRanging( deviceId);
+      break;
 	}
-	case ULTRASONIC_SENSOR_STOP_RANGING: { // ultrasonicSensorStopRanging
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->ultrasonicSensorStopRanging( deviceId);
-			break;
+  case ULTRASONIC_SENSOR_STOP_RANGING: { // ultrasonicSensorStopRanging
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->ultrasonicSensorStopRanging( deviceId);
+      break;
 	}
-	case SET_AREF: { // setAref
-			int type = b16(ioCmd, startPos+1);
-			startPos += 2; //b16
-			mrlComm->setAref( type);
-			break;
+  case SET_AREF: { // setAref
+      int type = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      mrlComm->setAref( type);
+      break;
 	}
-	case MOTOR_ATTACH: { // motorAttach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte type = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			const byte* pins = ioCmd+startPos+2;
-			byte pinsSize = ioCmd[startPos+1];
-			startPos += 1 + ioCmd[startPos+1];
-			mrlComm->motorAttach( deviceId,  type,  pinsSize, pins);
-			break;
+  case MOTOR_ATTACH: { // motorAttach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte type = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      const byte* pins = ioCmd+startPos+2;
+      byte pinsSize = ioCmd[startPos+1];
+      startPos += 1 + ioCmd[startPos+1];
+      mrlComm->motorAttach( deviceId,  type,  pinsSize, pins);
+      break;
 	}
-	case MOTOR_MOVE: { // motorMove
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte pwr = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->motorMove( deviceId,  pwr);
-			break;
+  case MOTOR_MOVE: { // motorMove
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte pwr = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->motorMove( deviceId,  pwr);
+      break;
 	}
-	case MOTOR_MOVE_TO: { // motorMoveTo
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte pos = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->motorMoveTo( deviceId,  pos);
-			break;
+  case MOTOR_MOVE_TO: { // motorMoveTo
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte pos = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->motorMoveTo( deviceId,  pos);
+      break;
 	}
-	case ENCODER_ATTACH: { // encoderAttach
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			byte pin = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->encoderAttach( deviceId,  pin);
-			break;
+  case ENCODER_ATTACH: { // encoderAttach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte type = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->encoderAttach( deviceId,  type,  pin);
+      break;
 	}
-	case SET_ZERO_POINT: { // setZeroPoint
-			byte deviceId = ioCmd[startPos+1]; // bu8
-			startPos += 1;
-			mrlComm->setZeroPoint( deviceId);
-			break;
+  case SET_ZERO_POINT: { // setZeroPoint
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->setZeroPoint( deviceId);
+      break;
 	}
 
 		default:

@@ -780,9 +780,22 @@ public class MrlComm {
     // msg.setAref(aref);
   }
 
-  public void encoderAttach(Integer deviceId, Integer pin) {
+  /**
+   * Attach an encoder of a given type. current supported types are 0
+   * that means only amt203A is supported...  
+   * but soon type =1 will mean as5048a ...  
+   * 
+   * @param deviceId
+   * @param type
+   * @param pin
+   */
+  public void encoderAttach(Integer deviceId, Integer type, Integer pin) {
+    if (type == 0 ) {
     MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
     encoder.attach(pin);
+    } else {
+      MrlAs5048AEncoder encoder = (MrlAs5048AEncoder) getDevice(deviceId);
+    }
   }
 
   public void setZeroPoint(Integer deviceId) {
