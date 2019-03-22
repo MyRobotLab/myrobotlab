@@ -27,7 +27,7 @@ import org.myrobotlab.service.interfaces.EncoderController;
 public class AbstractEncoder extends Service implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
-  public Integer pin;
+  public String pin;
   // default 12 bit encoder is 4096 steps of resolution
   public Integer resolution = 4096;
   public Double lastPosition = 0.0;
@@ -44,7 +44,7 @@ public class AbstractEncoder extends Service implements EncoderControl {
   @Override
   public void attach(EncoderController controller, Integer pin) throws Exception {
     this.controller = controller;
-    this.pin = pin;
+    this.pin = pin.toString();
     controller.attach(this, pin);
     lastUpdate = System.currentTimeMillis();
   }
@@ -57,7 +57,7 @@ public class AbstractEncoder extends Service implements EncoderControl {
   }
 
   @Override
-  public int getPin() {
+  public String getPin() {
     //
     return pin;
   }
@@ -99,8 +99,17 @@ public class AbstractEncoder extends Service implements EncoderControl {
 
   @Override
   public void setController(EncoderController controller) {
-    // TODO Auto-generated method stub
     this.controller = controller;
+  }
+
+  @Override
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public void setPin(int address) {
+    this.pin = String.format("%d", address);
   }
 
 }

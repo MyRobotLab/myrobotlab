@@ -1145,7 +1145,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       Thread.sleep(1000);
       // let's start the encoder!!
       Amt203Encoder encoder = new Amt203Encoder("encoder");
-      encoder.pin = 3;
+      encoder.setPin(3);
 
       arduino.attach(encoder);
       Thread.sleep(1000);
