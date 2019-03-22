@@ -2279,7 +2279,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void attachEncoderControl(EncoderControl encoder) {
     Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
     // send data to micro-controller
-    msg.encoderAttach(deviceId, encoder.getPin());
+    msg.encoderAttach(deviceId, pinMap.get(encoder.getPin()).getAddress());
     encoder.setController(this);
 
   }

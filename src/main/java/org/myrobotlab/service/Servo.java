@@ -311,11 +311,6 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
-  /*
-   * public static class ServoEventData { public String name; public Double pos;
-   * public Integer state; public double velocity; public Double targetPos; //
-   * public int type; }
-   */
   public static class ServoEventData {
     public String name;
     public Double pos;
