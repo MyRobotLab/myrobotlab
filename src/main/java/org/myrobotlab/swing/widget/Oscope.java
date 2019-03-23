@@ -62,11 +62,15 @@ public class Oscope extends ServiceGui implements ActionListener {
     private static final long serialVersionUID = 1L;
     Trace trace;
 
+    int blit = 0;
+
     BufferedImage b0;
     BufferedImage b1;
 
     Graphics2D g0;
     Graphics2D g1;
+
+    boolean paused = false;
 
     int timeDivisor = 1;
 
@@ -92,10 +96,6 @@ public class Oscope extends ServiceGui implements ActionListener {
       // left of view port
       trace.b1Xpos = -1 * b1.getWidth();
 
-      // pinDisplay.getGraphics();
-      // add(pinDisplay, BorderLayout.CENTER);
-      // add(pinInfo, BorderLayout.WEST);
-
       // on the top-level Canvas to prevent AWT from repainting it, as
       // you'll
       // typically be doing this yourself within the animation loop.
@@ -105,49 +105,86 @@ public class Oscope extends ServiceGui implements ActionListener {
       setOpaque(false);
     }
 
-    // drawing should be done on this thread !
-    // 'displaying' should be done on the paint swing thread
+    /**
+     * Drawing is done with the update thread, moving the viewport is done with
+     * the swing thread.
+     * 
+     * the Oscope display composes of 2 screens - and a "viewport" the 2 screens
+     * scroll from left to right in the viewport and the updating and clearing
+     * of the images are done "outside" of the viewport. This keeps the graphics
+     * very clean and the animation without flicker
+     * 
+     * This function updates the offline screen. The moving of the "viewport" is
+     * done with the swing thread in the "paint" routine
+     * 
+     * @param pinData
+     *          - trace updated pin data
+     */
     public void update(PinData pinData) {
+
+      if (paused) {
+        return;
+      }
+
       trace.pinData = pinData;
 
       trace.b0Xpos += timeDivisor;
       trace.b1Xpos += timeDivisor;
-      /*
-       * g2d.drawLine(trace.x, trace.y + h / 2, trace.xpos,trace.pinData.value *
-       * 20 + h / 2); log.info("{},{} - {},{}", trace.x, trace.y + h / 2,
-       * trace.xpos,trace.pinData.value * 20 + h / 2); if (trace.xpos %
-       * (w*timeDivisor) == 0) { trace.xpos = 0; }
-       */
-      // trace.x = trace.xpos;
-      // trace.y = trace.pinData.value;
-      Graphics2D g0 = trace.pinDisplay.g0;
-      Graphics2D g1 = trace.pinDisplay.g1;
 
-      trace.pinInfo.setText(pinData.value + "");
+      if (trace.b0Xpos == 600) {
+        log.info("here");
+      }
+
+      // find active bit blit screen - its the one who's xpos is negative
+      // because its "left" of the current viewing area being scrolled "right"
+      // into view
+      Graphics2D g = (trace.b0Xpos < 0) ? trace.pinDisplay.g0 : trace.pinDisplay.g1;
+
+      g.setPaint(trace.color);
+
+      // find the "drawing point" - this is where the active screen which is
+      // currently
+      // scrolled left point of where it is in view
+      int drawPointX = (trace.b0Xpos < 0) ? (-1 * trace.b0Xpos) : (-1 * trace.b1Xpos);
+
+      g.drawLine(drawPointX, trace.y + h / 2, drawPointX, trace.pinData.value * 20 + h / 2);
+      log.info("{},{} - {},{}", trace.x, trace.y + h / 2, trace.b0Xpos, trace.pinData.value * 20 + h / 2);
+
+      // if b0 is offscreen clear it
+      if (trace.b0Xpos == trace.width) {
+        ++blit;
+        g0.setPaint(Color.GREEN);
+        g0.fillRect(0, 0, b0.getWidth(), b0.getHeight());
+
+        if (blit % 2 == 0) {
+          trace.b0Xpos = 0;
+        } else {
+          trace.b0Xpos = -w;
+        }
+      }
+
+      // if b1 is offscreen clear it
+      if (trace.b1Xpos == trace.width) {
+        ++blit;
+        g1.setPaint(Color.CYAN);
+        g1.fillRect(0, 0, b1.getWidth(), b1.getHeight());
+        if (blit % 2 == 0) {
+          trace.b1Xpos = -w;
+        } else {
+          trace.b1Xpos = 0;
+        }
+      }
+
+      trace.pinInfo.setText(String.format("%d", pinData.value));
       // TODO - NOW IS THE TIME TO UPDATE BUFFERED IMAGES !!!
       // TODO - optimization of shifting the raster data ?
 
-      if (trace.b0Xpos % b0.getWidth() == 0) {
-        trace.b0Xpos = 0;
-      }
+      // set our current draw point as the new last draw point
+      trace.lastXPos = drawPointX;
 
-      if (trace.b1Xpos % b1.getWidth() == 0) {
-        trace.b1Xpos = -b1.getWidth();
-      }
-
-      // draw on our active image (we swap between the two)
-
-      // shift both images and re-draw them
-
-      // ok for ui to update now ..
+      // request a repaint
       repaint();
-      // repaint(new Rectangle(30,30));
-      /*
-       * SwingUtilities.invokeLater(new Runnable() { public void run() { //
-       * Here, we can safely update the GUI // because we'll be called from the
-       * // event dispatch thread trace.pinDisplay.repaint();//("Query: " +
-       * queryNo); } });
-       */
+
     }
 
     @Override
@@ -175,6 +212,7 @@ public class Oscope extends ServiceGui implements ActionListener {
       // new way
       g.drawImage(b0, trace.b0Xpos, 0, b0.getWidth(), b0.getHeight(), this);
       g.drawImage(b1, trace.b1Xpos, 0, b1.getWidth(), b1.getHeight(), this);
+
       // g.drawImage(bufferImage, 0, 0, null); <-- FIXME - update buffer
       // outside of this method
       // g.drawLine(trace.x, trace.y + h / 2, trace.xpos,
@@ -212,6 +250,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 
     PinData pinData;
     PinData lastPinData;
+    int lastXPos = 0;
 
     public Trace(Oscope oscope, PinDefinition pinDef, Color hsv) {
       this.oscope = oscope;
@@ -350,23 +389,6 @@ public class Oscope extends ServiceGui implements ActionListener {
 
   }
 
-  // TODO - is this optimized raster info ?
-  public void initialize() {
-    data = new int[h * w];
-
-    // Fill data array with pure solid black
-    Arrays.fill(data, 0xff000000);
-
-    // Java's endless black magic to get it working
-    DataBufferInt db = new DataBufferInt(data, h * w);
-    ColorModel cm = ColorModel.getRGBdefault();
-    SampleModel sm = cm.createCompatibleSampleModel(w, h);
-    WritableRaster wr = Raster.createWritableRaster(sm, db, null);
-    BufferedImage buffer = new BufferedImage(cm, wr, false, null);
-    SerializableImage sensorImage = new SerializableImage(buffer, "oscope");
-  }
-
-  // ??? - onPaint in extended JPanel or JLabel ???
   public void onPinArray(final PinData[] data) {
     // optimize - test if visible
     for (PinData pinData : data) {

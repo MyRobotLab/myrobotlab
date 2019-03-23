@@ -339,6 +339,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       attachMotorControl((MotorControl) service);
       return;
     } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
+      // need to determine the encoder type!
       attachEncoderControl((EncoderControl) service);
       return;
     }
@@ -459,6 +460,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // test to see if we've been started. the serial might be null
     initSerial();
     try {
+      
+      if (isVirtual()) {
+        VirtualArduino virtual = (VirtualArduino)Runtime.start("v" + getName(), "VirtualArduino");
+        virtual.connect(port);        
+      }
       // FIXME - GroG asks, who put the try here - shouldn't it throw if
       // we
       // can't connect
@@ -717,8 +723,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       addTask("getBoardInfo", 1000, 0, "sendBoardInfoRequest");
     } else {
       purgeTask("getBoardInfo");
-    }
-
+    }    
+    boardInfoEnabled = enabled;
   }
 
   // > enablePin/address/type/b16 rate
@@ -2181,9 +2187,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return boardTypes;
   }
 
-  /*
-   * event to return list of ports of all ports this serial service can see
-   */
   public List<String> publishPortNames(List<String> portNames) {
     return portNames;
   }
@@ -2192,31 +2195,23 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     try {
 
       LoggingFactory.init(Level.INFO);
-      log.info("{}", "nano".hashCode());
 
       boolean virtual = true;
       boolean isDone = true;
-      String port = "COM10";
+      String port = "COM16";
 
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
-      Serial serial = (Serial) Runtime.start("serial", "Serial");
-      log.info("{}", serial.getPortNames());
-      // Runtime.start("cli", "Cli");
-      // RemoteAdapter remote = (RemoteAdapter) Runtime.start("ra",
-      // "RemoteAdapter");
-
-      // Runtime.start("python", "Python");
-
-      if (virtual) {
-        VirtualArduino va = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-        va.connect(port);
-        va.setBoardUno();
-      }
-
+      Runtime.start("gui", "SwingGui");   
+      
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      log.info("port names {}", arduino.getPortNames());     
+      arduino.setVirtual(virtual);
+      arduino.enableBoardInfo(false);
       arduino.connect(port);
+      
+      if (isDone) {
+        return;
+      }
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       servo.setPin(8);
@@ -2225,12 +2220,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
       servo.moveTo(3);
 
       servo.moveTo(30);
+      
+      // arduino.enablePin("A4");
 
-      arduino.setBoardMega();
+      // arduino.setBoardMega();
 
-      if (isDone) {
-        return;
-      }
+      
       Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
       adafruit.attach(arduino);
       arduino.attach(adafruit);
@@ -2276,10 +2271,26 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return null;
   }
 
+  /**
+   * Attach an encoder to the arduino
+   * @param encoder - the encoder control to attach
+   * @param type - 0 for AMT203 1 for AS5048A
+   */
   public void attachEncoderControl(EncoderControl encoder) {
     Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
     // send data to micro-controller
-    msg.encoderAttach(deviceId, pinMap.get(encoder.getPin()).getAddress());
+    
+    // TODO: update this with some enum of various encoder types..
+    // for now it's just AMT203 ...
+    int type = 0;
+    if (encoder instanceof Amt203Encoder) {
+      type = 0;
+    } else if (encoder instanceof As5048AEncoder){
+      type = 1;
+    }
+
+    msg.encoderAttach(deviceId, type, pinMap.get(encoder.getPin()).getAddress());
+
     encoder.setController(this);
 
   }

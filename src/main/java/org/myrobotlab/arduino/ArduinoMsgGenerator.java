@@ -25,7 +25,7 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-  static final Integer MRLCOMM_VERSION = 58;
+  static final Integer MRLCOMM_VERSION = 59;
 
   public void generateDefinitions() throws IOException {
     generateDefinitions(new File("src/main/resources/resource/Arduino/generate/arduinoMsgs.schema"));
@@ -108,9 +108,9 @@ public class ArduinoMsgGenerator {
     StringBuilder javaDeviceTypes = new StringBuilder();
     for (int i = 0; i < deviceList.size(); ++i) {
       String deviceName = deviceList.get(i);
-      deviceTypeToString.append("\t\tcase " + i + " :  {\n\t\t\treturn \"" + deviceName + "\";\n\n\t\t}\n");
-      cppDeviceTypes.append("#define DEVICE_TYPE_" + deviceName.toUpperCase() + "\t\t" + i + "\n");
-      javaDeviceTypes.append("\tpublic static final int DEVICE_TYPE_" + deviceName.toUpperCase() + "\t = \t\t" + i + ";\n");
+      deviceTypeToString.append("    case " + i + " :  {\n      return \"" + deviceName + "\";\n\n    }\n");
+      cppDeviceTypes.append("#define DEVICE_TYPE_" + deviceName.toUpperCase() + "    " + i + "\n");
+      javaDeviceTypes.append("  public static final int DEVICE_TYPE_" + deviceName.toUpperCase() + "   =     " + i + ";\n");
     }
 
     // accumulators
@@ -163,7 +163,7 @@ public class ArduinoMsgGenerator {
 
       Map<String, String> methodData = perMsgMethod(methodIndex, line, dir, name, Arrays.copyOfRange(parts, 1, parts.length));
 
-      methodToString.append("\t\tcase " + CodecUtils.toUnderScore(name) + ":{\n\t\t\treturn \"" + name + "\";\n\t\t}\n");
+      methodToString.append("    case " + CodecUtils.toUnderScore(name) + ":{\n      return \"" + name + "\";\n    }\n");
 
       // mux out
       defines.append(methodData.get("define"));
@@ -366,8 +366,8 @@ public class ArduinoMsgGenerator {
     // type (1
     // byte)
 
-    StringBuilder cppGeneratedCallBack = new StringBuilder("\t// " + line + "\n");
-    cppGeneratedCallBack.append("\tvoid " + name + "(");
+    StringBuilder cppGeneratedCallBack = new StringBuilder("  // " + line + "\n");
+    cppGeneratedCallBack.append("  void " + name + "(");
 
     StringBuilder define = new StringBuilder();
     define.append("// " + line + "\n");
@@ -375,33 +375,33 @@ public class ArduinoMsgGenerator {
     methodSnr.put("define", define.toString());
 
     StringBuilder javaDefine = new StringBuilder();
-    javaDefine.append("\t// " + line + "\n");
-    javaDefine.append("\tpublic final static int " + CodecUtils.toUnderScore(name) + " = " + msgIndex + ";\n");
+    javaDefine.append("  // " + line + "\n");
+    javaDefine.append("  public final static int " + CodecUtils.toUnderScore(name) + " = " + msgIndex + ";\n");
     methodSnr.put("javaDefine", javaDefine.toString());
 
-    StringBuilder javaGeneratedCallback = new StringBuilder("\t// public void " + name + "(");
+    StringBuilder javaGeneratedCallback = new StringBuilder("  // public void " + name + "(");
     StringBuilder javaMethodParameters = new StringBuilder();
     StringBuilder cppMethodParameters = new StringBuilder();
     StringBuilder cppWrite = new StringBuilder("  write(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
-    StringBuilder javaWrite = new StringBuilder("\t\t\twrite(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
+    StringBuilder javaWrite = new StringBuilder("      write(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
 
     String arduinoOrMrlComm = (keywords.contains(name)) ? "" : "mrlComm->";
-    StringBuilder cppCaseHeader = new StringBuilder("\tcase " + CodecUtils.toUnderScore(name) + ": { // " + name + "\n");
+    StringBuilder cppCaseHeader = new StringBuilder("  case " + CodecUtils.toUnderScore(name) + ": { // " + name + "\n");
     StringBuilder cppCaseParams = new StringBuilder();
-    StringBuilder cppCaseArduinoMethod = new StringBuilder("\t\t\t" + arduinoOrMrlComm + name + "(");
+    StringBuilder cppCaseArduinoMethod = new StringBuilder("      " + arduinoOrMrlComm + name + "(");
 
-    StringBuilder javaCaseHeader = new StringBuilder("\t\tcase " + CodecUtils.toUnderScore(name) + ": {\n");
-    StringBuilder javaCaseArduinoMethod = new StringBuilder("\t\t\tif(invoke){");
-    javaCaseArduinoMethod.append("\n\t\t\t\tarduino.invoke(\"" + name + "\"");
+    StringBuilder javaCaseHeader = new StringBuilder("    case " + CodecUtils.toUnderScore(name) + ": {\n");
+    StringBuilder javaCaseArduinoMethod = new StringBuilder("      if(invoke){");
+    javaCaseArduinoMethod.append("\n        arduino.invoke(\"" + name + "\"");
 
-    StringBuilder javaCaseRecord = new StringBuilder("\t\t\tif(record != null){");
-    javaCaseRecord.append("\n\t\t\t\trxBuffer.append(\"< " + name + "\");\n");
+    StringBuilder javaCaseRecord = new StringBuilder("      if(record != null){");
+    javaCaseRecord.append("\n        rxBuffer.append(\"< " + name + "\");\n");
 
-    StringBuilder javaSendRecord = new StringBuilder("\t\t\tif(record != null){");
-    javaSendRecord.append("\n\t\t\t\ttxBuffer.append(\"> " + name + "\");\n");
+    StringBuilder javaSendRecord = new StringBuilder("      if(record != null){");
+    javaSendRecord.append("\n        txBuffer.append(\"> " + name + "\");\n");
 
     // compiler check
-    StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n\t\t\t} else { \n \t\t\t\tarduino." + name + "(");
+    StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n      } else { \n         arduino." + name + "(");
     if (paramaters.length > 0) {
       javaCaseArduinoMethod.append(", ");
     }
@@ -409,8 +409,8 @@ public class ArduinoMsgGenerator {
     StringBuilder javaCaseParams = new StringBuilder();
 
     // ioCmd[1], ioCmd[2]
-    String caseFooter = new String(");\n\t\t\tbreak;\n	}\n");
-    String javaCaseFooter = new String("\n\t\t\tbreak;\n\t\t}\n");
+    String caseFooter = new String(");\n      break;\n	}\n");
+    String javaCaseFooter = new String("\n      break;\n    }\n");
 
     // PER PARAMETER
     // TODO deprecate
@@ -456,18 +456,18 @@ public class ArduinoMsgGenerator {
         javaMethodParameters.append(", ");
       }
 
-      javaCaseRecord.append("\t\t\t\trxBuffer.append(\"/\");\n");
+      javaCaseRecord.append("        rxBuffer.append(\"/\");\n");
       if (idlParamType.equals("[]")) {
-        javaCaseRecord.append("\t\t\t\trxBuffer.append(Arrays.toString(" + paramName + "));\n");
+        javaCaseRecord.append("        rxBuffer.append(Arrays.toString(" + paramName + "));\n");
       } else {
-        javaCaseRecord.append("\t\t\t\trxBuffer.append(" + paramName + ");\n");
+        javaCaseRecord.append("        rxBuffer.append(" + paramName + ");\n");
       }
 
-      javaSendRecord.append("\t\t\t\ttxBuffer.append(\"/\");\n");
+      javaSendRecord.append("        txBuffer.append(\"/\");\n");
       if (idlParamType.equals("[]")) {
-        javaSendRecord.append("\t\t\t\ttxBuffer.append(Arrays.toString(" + paramName + "));\n");
+        javaSendRecord.append("        txBuffer.append(Arrays.toString(" + paramName + "));\n");
       } else {
-        javaSendRecord.append("\t\t\t\ttxBuffer.append(" + paramName + ");\n");
+        javaSendRecord.append("        txBuffer.append(" + paramName + ");\n");
       }
 
       // msgSize += getCppTypeSize(idlParamType);
@@ -477,7 +477,7 @@ public class ArduinoMsgGenerator {
 
         // cppWrite.append(" writestr(" + paramName + ");\n");
         cppWrite.append("  write((byte*)" + paramName + ", " + paramName + "Size);\n");
-        javaWrite.append("\t\t\twrite(" + paramName + ");\n");
+        javaWrite.append("      write(" + paramName + ");\n");
 
         javaWriteMsgSize.append(" + (1 + " + paramName + ".length())");
 
@@ -486,26 +486,26 @@ public class ArduinoMsgGenerator {
       } else if (idlParamType.equals("[]")) {
 
         cppWrite.append("  write((byte*)" + paramName + ", " + paramName + "Size);\n");
-        javaWrite.append("\t\t\twrite(" + paramName + ");\n");
+        javaWrite.append("      write(" + paramName + ");\n");
 
         javaWriteMsgSize.append(" + (1 + " + paramName + ".length)");
 
         cppWriteMsgSize.append(" + (1 + " + paramName + "Size)");
       } else {
         cppWrite.append("  write" + idlParamType + "(" + paramName + ");\n");
-        javaWrite.append("\t\t\twrite" + idlParamType + "(" + paramName + ");\n");
+        javaWrite.append("      write" + idlParamType + "(" + paramName + ");\n");
         cppWriteMsgSize.append(" + " + getCppTypeSize(idlParamType));
         javaWriteMsgSize.append(" + " + getCppTypeSize(idlParamType));
       }
 
       // recv case parameters
       if (idlParamType.equals("")) {
-        cppCaseHeader.append("\t\t\tbyte " + paramName + " = ioCmd[startPos+1]; // bu8\n");
-        cppCaseHeader.append("\t\t\tstartPos += 1;\n");
+        cppCaseHeader.append("      byte " + paramName + " = ioCmd[startPos+1]; // bu8\n");
+        cppCaseHeader.append("      startPos += 1;\n");
         cppCaseParams.append(" " + paramName);
 
-        javaCaseHeader.append("\t\t\tInteger " + paramName + " = ioCmd[startPos+1]; // bu8\n");
-        javaCaseHeader.append("\t\t\tstartPos += 1;\n");
+        javaCaseHeader.append("      Integer " + paramName + " = ioCmd[startPos+1]; // bu8\n");
+        javaCaseHeader.append("      startPos += 1;\n");
         javaCaseParams.append(" " + paramName);
 
         cppGeneratedCallBack.append(" byte " + paramName);
@@ -513,26 +513,26 @@ public class ArduinoMsgGenerator {
       } else if (idlParamType.equals("bool")) {
         // cppCaseParams.append("(bool)ioCmd[" + byteLocation + "]");
 
-        cppCaseHeader.append("\t\t\tboolean " + paramName + " = (ioCmd[startPos+1]);\n");
-        cppCaseHeader.append("\t\t\tstartPos += 1;\n");
+        cppCaseHeader.append("      boolean " + paramName + " = (ioCmd[startPos+1]);\n");
+        cppCaseHeader.append("      startPos += 1;\n");
         cppCaseParams.append(" " + paramName);
 
-        javaCaseHeader.append("\t\t\tBoolean " + paramName + " = (ioCmd[startPos+1] == 0)?false:true;\n");
-        javaCaseHeader.append("\t\t\tstartPos += 1;\n");
+        javaCaseHeader.append("      Boolean " + paramName + " = (ioCmd[startPos+1] == 0)?false:true;\n");
+        javaCaseHeader.append("      startPos += 1;\n");
         javaCaseParams.append(" " + paramName);
 
         cppGeneratedCallBack.append(" boolean " + paramName);
       } else if (idlParamType.equals("str")) {
 
-        cppCaseHeader.append("\t\t\tconst char* " + paramName + " = (char*)ioCmd+startPos+2;\n");
-        cppCaseHeader.append("\t\t\tbyte " + paramName + "Size = ioCmd[startPos+1];\n");
-        cppCaseHeader.append("\t\t\tstartPos += 1 + ioCmd[startPos+1];\n");
+        cppCaseHeader.append("      const char* " + paramName + " = (char*)ioCmd+startPos+2;\n");
+        cppCaseHeader.append("      byte " + paramName + "Size = ioCmd[startPos+1];\n");
+        cppCaseHeader.append("      startPos += 1 + ioCmd[startPos+1];\n");
         cppCaseParams.append(" " + paramName + "Size, " + paramName);
 
         // FIXME - this has to be done everywhere !!!!
         // PERHAPS USE javaTyeLocation as a String !!
-        javaCaseHeader.append("\t\t\tString " + paramName + " = str(ioCmd, startPos+2, ioCmd[startPos+1]);\n");
-        javaCaseHeader.append("\t\t\tstartPos += 1 + ioCmd[startPos+1];\n");
+        javaCaseHeader.append("      String " + paramName + " = str(ioCmd, startPos+2, ioCmd[startPos+1]);\n");
+        javaCaseHeader.append("      startPos += 1 + ioCmd[startPos+1];\n");
         javaCaseParams.append(" " + paramName);
 
         cppGeneratedCallBack.append(" byte " + paramName + "Size, const char*" + paramName);
@@ -549,15 +549,15 @@ public class ArduinoMsgGenerator {
         // cppCaseParams.append("ioCmd[" + (byteLocation) + "] /*" +
         // paramName + "Size*/, (byte*)(ioCmd+" + (++byteLocation) +
         // ")");
-        cppCaseHeader.append("\t\t\tconst byte* " + paramName + " = ioCmd+startPos+2;\n");
-        cppCaseHeader.append("\t\t\tbyte " + paramName + "Size = ioCmd[startPos+1];\n");
-        cppCaseHeader.append("\t\t\tstartPos += 1 + ioCmd[startPos+1];\n");
+        cppCaseHeader.append("      const byte* " + paramName + " = ioCmd+startPos+2;\n");
+        cppCaseHeader.append("      byte " + paramName + "Size = ioCmd[startPos+1];\n");
+        cppCaseHeader.append("      startPos += 1 + ioCmd[startPos+1];\n");
         cppCaseParams.append(" " + paramName + "Size, " + paramName);
 
         byteLocation += getCppTypeSize(idlParamType);
 
-        javaCaseHeader.append("\t\t\tint[] " + paramName + " = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);\n");
-        javaCaseHeader.append("\t\t\tstartPos += 1 + ioCmd[startPos+1];\n");
+        javaCaseHeader.append("      int[] " + paramName + " = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);\n");
+        javaCaseHeader.append("      startPos += 1 + ioCmd[startPos+1];\n");
         javaCaseParams.append(" " + paramName);
 
         cppGeneratedCallBack.append(" byte " + paramName + "Size, const byte*" + paramName);
@@ -569,14 +569,14 @@ public class ArduinoMsgGenerator {
         // byteLocation + ")");
         // javaCaseParams.append(idlParamType + "(ioCmd, startPos+1)");
 
-        cppCaseHeader.append("\t\t\t" + cppType + " " + paramName + " = " + idlParamType + "(ioCmd, startPos+1);\n");
-        cppCaseHeader.append("\t\t\tstartPos += " + getCppTypeSize(idlParamType) + "; //" + idlParamType + "\n");
+        cppCaseHeader.append("      " + cppType + " " + paramName + " = " + idlParamType + "(ioCmd, startPos+1);\n");
+        cppCaseHeader.append("      startPos += " + getCppTypeSize(idlParamType) + "; //" + idlParamType + "\n");
         cppCaseParams.append(" " + paramName);
 
         // FIXME - change to Integer from int
 
-        javaCaseHeader.append("\t\t\t" + javaType + " " + paramName + " = " + idlParamType + "(ioCmd, startPos+1);\n");
-        javaCaseHeader.append("\t\t\tstartPos += " + getCppTypeSize(idlParamType) + "; //" + idlParamType + "\n");
+        javaCaseHeader.append("      " + javaType + " " + paramName + " = " + idlParamType + "(ioCmd, startPos+1);\n");
+        javaCaseHeader.append("      startPos += " + getCppTypeSize(idlParamType) + "; //" + idlParamType + "\n");
         javaCaseParams.append(" " + paramName);
 
         byteLocation += getCppTypeSize(idlParamType);
@@ -597,7 +597,7 @@ public class ArduinoMsgGenerator {
       // javaCaseParams.append(" /*" + paramName + "*/");
 
       if (i != paramaters.length - 1) {
-        // caseParams.append("\n\t\t");
+        // caseParams.append("\n    ");
         cppCaseParams.append(" ");
         javaCaseParams.append(" ");
       }
@@ -608,10 +608,10 @@ public class ArduinoMsgGenerator {
 
     } // end parameter loop
 
-    javaSendRecord.append("\t\t\t\ttxBuffer.append(\"\\n\");\n");
-    javaSendRecord.append("\t\t\t\trecord.write(txBuffer.toString().getBytes());\n");
-    javaSendRecord.append("\t\t\t\ttxBuffer.setLength(0);\n");
-    javaSendRecord.append("\t\t\t}\n");
+    javaSendRecord.append("        txBuffer.append(\"\\n\");\n");
+    javaSendRecord.append("        record.write(txBuffer.toString().getBytes());\n");
+    javaSendRecord.append("        txBuffer.setLength(0);\n");
+    javaSendRecord.append("      }\n");
 
     javaCaseParams.append(");");
     // cpp
@@ -629,7 +629,7 @@ public class ArduinoMsgGenerator {
     snr.put("%javaWrite%", javaWrite.toString());
     snr.put("%javaSendRecord%", javaSendRecord.toString());
 
-    javaSendRecord.append("\t\t\t\trecord.write(txBuffer.toString().getBytes());\n");
+    javaSendRecord.append("        record.write(txBuffer.toString().getBytes());\n");
 
     // process templates
     for (String search : snr.keySet()) {
@@ -638,11 +638,11 @@ public class ArduinoMsgGenerator {
       javaMethod = javaMethod.replace(search, snr.get(search));
     }
 
-    javaCaseRecord.append("\t\t\trxBuffer.append(\"\\n\");\n");
-    javaCaseRecord.append("\t\t\ttry{\n");
-    javaCaseRecord.append("\t\t\t\trecord.write(rxBuffer.toString().getBytes());\n");
-    javaCaseRecord.append("\t\t\t\trxBuffer.setLength(0);\n");
-    javaCaseRecord.append("\t\t\t}catch(IOException e){}\n");
+    javaCaseRecord.append("      rxBuffer.append(\"\\n\");\n");
+    javaCaseRecord.append("      try{\n");
+    javaCaseRecord.append("        record.write(rxBuffer.toString().getBytes());\n");
+    javaCaseRecord.append("        rxBuffer.setLength(0);\n");
+    javaCaseRecord.append("      }catch(IOException e){}\n");
 
     // TODO
     if (dir == '<') {
@@ -652,8 +652,8 @@ public class ArduinoMsgGenerator {
       methodSnr.put("cppHandleCase", "");
       methodSnr.put("cppGeneratedCallBacks", "");
 
-      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n\t\t\t}\n"
-          + javaCaseRecord + "\t\t\t}\n" + javaCaseFooter);
+      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }\n"
+          + javaCaseRecord + "      }\n" + javaCaseFooter);
       methodSnr.put("javaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("javaMethod", "");
 
@@ -676,7 +676,7 @@ public class ArduinoMsgGenerator {
 
       // vJava send methods
       methodSnr.put("vJavaHandleCase",
-          javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n\t\t\t}" + javaCaseFooter);
+          javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }" + javaCaseFooter);
       methodSnr.put("vJavaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("vJavaMethod", "");
 
