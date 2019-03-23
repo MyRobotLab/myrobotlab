@@ -542,11 +542,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       // FIXME !!! - this will have to send a Long for targetPos at some
       // point !!!!
       double target = Math.abs(motor.getTargetPos());
-
+      /*
       int b0 = (int) target & 0xff;
       int b1 = ((int) target >> 8) & 0xff;
       int b2 = ((int) target >> 16) & 0xff;
       int b3 = ((int) target >> 24) & 0xff;
+      */
 
       // TODO FIXME
       // sendMsg(PULSE, deviceList.get(motor.getName()).id, b3, b2, b1,
