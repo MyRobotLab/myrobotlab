@@ -760,7 +760,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
   @Override
   public void onPin(PinData pindata) {
-    int inputValue = pindata.value;
+    double inputValue = pindata.value;
     currentPosInput = 180 * inputValue / resolution;
     // log.debug(String.format("onPin received value %s converted to
     // %s",inputValue, processVariable));

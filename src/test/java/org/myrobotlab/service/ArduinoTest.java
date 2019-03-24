@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -30,6 +31,11 @@ import org.slf4j.Logger;
 /**
  * 
  * @author GroG
+ * 
+ * FIXME - test all types of Arduino's and thier pin definitions uno, mega, nano, pico, decillia
+ * FIXME - make sure the primitives defined in the PinArrayControl are accessable through invoking ... (as per all primitive signature interfaces)
+ * FIXME - test the othe PinArrayControllers .. Pcf8574, Mpr121, RasPi
+ * FIXME - test webgui oscope
  *
  */
 
@@ -52,7 +58,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   String analogPin = "A1";
   String digitalPin = "D0";
 
-  Map<Integer, PinData> pinData = new HashMap<Integer, PinData>();
+  Map<String, PinData> pinData = new HashMap<String, PinData>();
 
   int servoPin01 = 7;
   int servoPin02 = 8;
@@ -78,7 +84,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   public void onPinArray(PinData[] pindata) {
     log.debug("onPinArray size {}", pindata.length);
     for (int i = 0; i < pindata.length; ++i) {
-      pinData.put(pindata[i].address, pindata[i]);
+      pinData.put(pindata[i].pin, pindata[i]);
     }
   }
 
@@ -226,7 +232,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     arduino01.enablePin(analogPin);
     arduino01.attach(this);
     sleep(50);
-    assertTrue(pinData.containsKey(arduino01.pinNameToAddress(analogPin)));
+    assertTrue(pinData.containsKey(arduino01.getPin(analogPin).getPinName()));
     arduino01.disablePin(analogPin);
   }
 
@@ -252,6 +258,11 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     assertNull(arduino01.getSketch());
     arduino01.setSketch(sketch);
     assertEquals(sketch, arduino01.getSketch());
+  }
+  
+  @Test
+  public final void pinArrayTest() {
+    fail("fix me - complete interface test");
   }
 
   @Test
