@@ -5,9 +5,11 @@ import java.io.Serializable;
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 
 public class PinDefinition extends SensorDefinition implements Serializable {
-
+  
   private static final long serialVersionUID = 1L;
-  String pinName;
+  
+  String pin;
+  
   Integer address;
 
   /**
@@ -42,14 +44,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   boolean canWrite = true;
 
-  Integer value;
+  Double value;
 
   GpioPinDigitalMultipurpose gpioPin;
 
-  public PinDefinition(String serviceName, int address, String pinName) {
+  public PinDefinition(String serviceName, int address, String pin) {
     super(serviceName);
     this.address = address;
-    this.pinName = pinName;
+    this.pin = pin;
   }
 
   public PinDefinition(String serviceName, int address) {
@@ -57,15 +59,19 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   }
 
   public Integer getValue() {
-    return value;
+    return value.intValue();
   }
-
-  public void setValue(Integer value) {
+  
+  public void setValue(Double value) {
     this.value = value;
   }
 
+  public void setValue(int value) {
+    this.value = new Double(value);
+  }
+
   public String getPinName() {
-    return pinName;
+    return pin;
   }
 
   public Integer getAddress() {
@@ -85,11 +91,11 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   }
 
   public void setName(int i) {
-    pinName = String.format("%d", i);
+    pin = String.format("%d", i);
   }
 
-  public void setPinName(String pinName) {
-    this.pinName = pinName;
+  public void setPinName(String pin) {
+    this.pin = pin;
   }
 
   public void setAnalog(boolean b) {
@@ -119,7 +125,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("pin def ");
-    sb.append(pinName);
+    sb.append(pin);
     sb.append(" ");
     sb.append(address);
     sb.append(" ");

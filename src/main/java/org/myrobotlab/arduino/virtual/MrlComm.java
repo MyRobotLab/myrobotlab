@@ -2,8 +2,10 @@ package org.myrobotlab.arduino.virtual;
 
 import static org.myrobotlab.arduino.VirtualMsg.MRLCOMM_VERSION;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
@@ -29,7 +31,29 @@ import org.myrobotlab.service.VirtualArduino;
  */
 public class MrlComm {
 
+  static public int getRandom(int min, int max) {
+    return min + (int) (Math.random() * ((max - min) + 1));
+  }
+
+  public
+  // utility methods
+  // int getFreeRam();
+  // Device getDevice(int id);
+
+  boolean ackEnabled = true;
+
   public final BoardInfo boardInfo = new BoardInfo();
+
+  boolean boardStatusEnabled;
+  // performance metrics and load timing
+  // global debug setting, if set to true publishDebug will write to the serial
+  // port.
+  int byteCount;
+  char[] config;
+
+  int[] customMsgBuffer = new int[VirtualMsg.MAX_MSG_SIZE];
+
+  int customMsgSize;
 
   /**
    * "global var"
@@ -38,38 +62,15 @@ public class MrlComm {
   // to the arduino.
   LinkedList<Device> deviceList = new LinkedList<Device>();
 
-  // list of pins currently being read from - can contain both digital and
-  // analog
-  public LinkedList<Pin> pinList = new LinkedList<Pin>();
-
-  char[] config;
-  // performance metrics and load timing
-  // global debug setting, if set to true publishDebug will write to the serial
-  // port.
-  int byteCount;
-  int msgSize;
+  private int digitalChangeWidth = 20;
+  boolean heartbeatEnabled;
 
   // last time board info was published
   long lastBoardInfoUs;
 
-  boolean boardStatusEnabled;
-
   long lastHeartbeatUpdate;
 
-  int[] customMsgBuffer = new int[VirtualMsg.MAX_MSG_SIZE];
-  int customMsgSize;
-
-  // handles all messages to and from pc
-  transient VirtualMsg msg;
-
-  boolean heartbeatEnabled;
-
-  public
-  // utility methods
-  // int getFreeRam();
-  // Device getDevice(int id);
-
-  boolean ackEnabled = true;
+  public long loopCount; // main loop count
 
   // Device addDevice(Device device);
   // void update();
@@ -166,60 +167,16 @@ public class MrlComm {
    * #endif
    */
 
-  public long loopCount; // main loop count
+  // handles all messages to and from pc
+  transient VirtualMsg msg;
 
-  ///////////// utility/support methods begin /////////////
-  String F(String r) {
-    return r;
-  }
+  int msgSize;
 
-  java.lang.String String(long x) {
-    return new String("" + x);
-  }
+  // list of pins currently being read from - can contain both digital and
+  // analog
+  public LinkedList<Pin> pinList = new LinkedList<Pin>();
 
-  java.lang.String String(String x) {
-    return x;
-  }
-
-  java.lang.String String(float x) {
-    return new String("" + x);
-  }
-
-  java.lang.String String(int x) {
-    return new String("" + (x & 0xFF));
-  }
-
-  public void pinMode(int address, int input) {
-    // TODO change mode of pin ... duh
-  }
-
-  public long micros() {
-    return System.nanoTime() / 1000;
-  }
-
-  static public int getRandom(int min, int max) {
-    return min + (int) (Math.random() * ((max - min) + 1));
-  }
-
-  private int digitalRead(int address) {
-    return getRandom(0, 1);
-  }
-
-  private int analogRead(int address) {
-    /*
-     * to simulate longer analogReads :) try{ Thread.sleep(45); }
-     * catch(Exception e){}
-     */
-    return getRandom(0, 1024);
-  }
-
-  private long millis() {
-    return System.currentTimeMillis();
-  }
-
-  ///////////// support methods end ///////////////
-
-  ///////////// MrlCom.cpp ////////////////
+  private Map<Integer, Integer> pinValue = new HashMap<>();
 
   /**
    * <pre>
@@ -246,17 +203,216 @@ public class MrlComm {
     softReset();
   }
 
+  /**
+   * This adds a device to the current set of active devices in the deviceList.
+   * 
+   * FIXME - G: I think dynamic array would work better at least for the
+   * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
+   * Id leaves something to be desired - and the "index" does not spin through
+   * the deviceList to find it .. a dynamic array of pointers would only expand
+   * if it could not accomidate the current number of devices, when a device was
+   * removed - the slot could be re-used by the next device request
+   */
+  Device addDevice(Device device) {
+    deviceList.add(device);
+    return device;
+  }
+
+  private int analogRead(int address) {
+    /*
+     * to simulate longer analogReads :) try{ Thread.sleep(45); }
+     * catch(Exception e){}
+     */
+    return getRandom(0, 1024);
+  }
+
+  public void analogWrite(Integer pin, Integer value) {
+    // TODO Auto-generated method stub
+
+  }
+
+  // void begin(HardwareSerial& serial) {
+  void begin(HardwareSerial serial) {
+
+    // TODO: the arduino service might get a few garbage bytes before we're able
+    // to run, we should consider some additional logic here like a
+    // "publishReset"
+    // publish version on startup so it's immediately available for mrl.
+    // TODO: see if we can purge the current serial port buffers
+
+    while (!serial.ready()) {
+      ; // wait for serial port to connect. Needed for native USB
+    }
+
+    // clear serial
+    serial.flush();
+
+    // msg.begin(serial);
+
+    // send 3 boardInfos to PC to announce,
+    // Hi I'm an Arduino with version x, board type y, and I'm ready :)
+    for (int i = 0; i < 5; ++i) {
+      publishBoardInfo();
+      serial.flush();
+    }
+  }
+
+  public void begin(org.myrobotlab.service.Serial serial) {
+
+  }
+
+  // > customMsg/[] msg
+  // from PC -. loads customMsg buffer
+  public void customMsg(int[] msg) {
+    for (int i = 0; i < msgSize && msgSize < 64; i++) {
+      customMsgBuffer[i] = msg[i]; // *(msg + i);
+    }
+    customMsgSize = msgSize;
+  }
+
+  /**
+   * deviceDetach - get the device if it exists delete it and remove it from the
+   * deviceList
+   * 
+   * @param deviceId
+   *          int for the device id
+   */
+  // > deviceDetach/deviceId
+  public void deviceDetach(Integer deviceId) {
+    for (int i = 0; i < deviceList.size(); ++i) {
+      if (deviceList.get(i).id == deviceId) {
+        deviceList.remove(i);
+        return;
+      }
+    }
+  }
+
+  private int digitalRead(int address) {
+    
+    int value = getRandom(0, 1);
+    if (!pinValue.containsKey(address)) {
+      pinValue.put(address, value);
+    }
+    
+    if (loopCount % digitalChangeWidth == 0) {
+      pinValue.put(address, value);
+    } 
+    return pinValue.get(address);
+  }
+
+  ///////////// support methods end ///////////////
+
+  ///////////// MrlCom.cpp ////////////////
+
+  public void digitalWrite(Integer pin, Integer value) {
+    // TODO Auto-generated method stub
+
+  }
+
+  // > disablePin/pin
+  public void disablePin(Integer pinAddress) {
+    for (int i = 0; i < pinList.size(); ++i) {
+      Pin pin = pinList.get(i);
+      if (pin.address == pinAddress) {
+        pinList.remove(i);
+        return;
+      }
+    }
+  }
+
   // ~MrlComm() {
   // }
 
-  int getFreeRam() {
-    // KW: In the future the arduino might have more than an 32/64k of ram. an
-    // int might not be enough here to return.
-    // extern int __heap_start, *__brkval;
-    // int v;
-    // return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-    return 940 - (deviceList.size() * 20) - getRandom(0, 20); // TODO add size
-    // of device list
+  // > disablePins
+  public void disablePins() {
+    while (pinList.size() > 0) {
+      // delete pinList.pop();
+      pinList.pop();
+    }
+  }
+
+  // > echo/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
+  public void echo(float myFloat, int myByte, float mySecondFloat) {
+    msg.publishDebug(String("echo float " + String(myFloat)));
+    msg.publishDebug(String("echo int " + String(myByte)));
+    msg.publishDebug(String("echo float2 " + String(mySecondFloat)));
+    // msg.publishDebug(String("pi is " + String(3.141529)));
+    msg.publishEcho(myFloat, myByte & 0xFF, mySecondFloat);
+  }
+
+  public void enableAck(boolean enabled) {
+    ackEnabled = enabled;
+  }
+
+  // > enablePin/address/type/b16 rate
+  public void enablePin(int address, int type, int rate) {
+    // don't add it twice
+    for (int i = 0; i < pinList.size(); ++i) {
+      Pin pin = pinList.get(i);
+      if (pin.address == address) {
+        // TODO already exists error?
+        return;
+      }
+    }
+
+    if (type == Pin.DIGITAL) {
+      pinMode(address, Pin.INPUT);
+    }
+    Pin p = new Pin(address, type, rate);
+    p.lastUpdate = 0;
+    pinList.add(p);
+  }
+
+  /**
+   * Attach an encoder of a given type. current supported types are 0 that means
+   * only amt203A is supported... but soon type =1 will mean as5048a ...
+   * 
+   * @param deviceId
+   * @param type
+   * @param pin
+   */
+  public void encoderAttach(Integer deviceId, Integer type, Integer pin) {
+    if (type == 0) {
+      MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
+      encoder.attach(pin);
+    } else {
+      MrlAs5048AEncoder encoder = (MrlAs5048AEncoder) getDevice(deviceId);
+    }
+  }
+
+  ///////////// utility/support methods begin /////////////
+  String F(String r) {
+    return r;
+  }
+
+  /****************************************************************
+   * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are
+   * controlled by arduinoMsgs.schema The implementation contains custom logic -
+   * but the signature is generated
+   *
+   */
+
+  // > getBoardInfo
+  public void getBoardInfo() {
+    // msg.publishBoardInfo(MRLCOMM_VERSION, BOARD);
+    publishBoardInfo();
+  }
+
+  int getCustomMsg() {
+    if (customMsgSize == 0) {
+      return 0;
+    }
+    int retval = customMsgBuffer[0];
+    for (int i = 0; i < customMsgSize - 1; i++) {
+      customMsgBuffer[i] = customMsgBuffer[i + 1];
+    }
+    customMsgBuffer[customMsgSize] = 0;
+    customMsgSize--;
+    return retval;
+  }
+
+  int getCustomMsgSize() {
+    return customMsgSize;
   }
 
   /**
@@ -284,39 +440,308 @@ public class MrlComm {
     // defined is accessed
   }
 
-  /**
-   * This adds a device to the current set of active devices in the deviceList.
-   * 
-   * FIXME - G: I think dynamic array would work better at least for the
-   * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
-   * Id leaves something to be desired - and the "index" does not spin through
-   * the deviceList to find it .. a dynamic array of pointers would only expand
-   * if it could not accomidate the current number of devices, when a device was
-   * removed - the slot could be re-used by the next device request
-   */
-  Device addDevice(Device device) {
-    deviceList.add(device);
-    return device;
+  int getFreeRam() {
+    // KW: In the future the arduino might have more than an 32/64k of ram. an
+    // int might not be enough here to return.
+    // extern int __heap_start, *__brkval;
+    // int v;
+    // return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+    return 940 - (deviceList.size() * 20) - getRandom(0, 20); // TODO add size
+    // of device list
+  }
+
+  public VirtualMsg getMsg() {
+    return msg;
+  }
+
+  public String getName() {
+    return virtual.getName();
+  }
+
+  // > i2cBusAttach/deviceId/i2cBus
+  public void i2cBusAttach(int deviceId, int i2cBus) {
+    MrlI2CBus i2cbus = (MrlI2CBus) addDevice(new MrlI2CBus(deviceId, virtual));
+    i2cbus.attach(i2cBus);
+  }
+
+  // > i2cRead/deviceId/deviceAddress/size
+  public void i2cRead(int deviceId, int deviceAddress, int size) {
+    ((MrlI2CBus) getDevice(deviceId)).i2cRead(deviceAddress, size);
+  }
+
+  // > i2cWrite/deviceId/deviceAddress/[] data
+  public void i2cWrite(int deviceId, int deviceAddress, int[] data) {
+    ((MrlI2CBus) getDevice(deviceId)).i2cWrite(deviceAddress, data.length, data);
+  }
+
+  // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
+  public void i2cWriteRead(int deviceId, int deviceAddress, int readSize, int writeValue) {
+    ((MrlI2CBus) getDevice(deviceId)).i2cWriteRead(deviceAddress, readSize, writeValue);
+  }
+
+  public void invoke(String method, Object... params) {
+    virtual.invokeOn(this, method, params);
+  }
+
+  public long micros() {
+    return System.nanoTime() / 1000;
+  }
+
+  private long millis() {
+    return System.currentTimeMillis();
+  }
+
+  // > motorAttach/deviceId/type/[] pins
+  public void motorAttach(Integer deviceId, Integer type, int[] pins) {
+    MrlMotor servo = new MrlMotor(deviceId, virtual);
+    addDevice(servo);
+    // not your mama's attach - this is attaching/initializing the MrlDevice
+    // servo.attach(type, initialPosUs, velocity, name);
+  }
+
+  // > motorMove/deviceId/pwr
+  public void motorMove(Integer deviceId, Integer pwr) {
+    MrlMotor motor = (MrlMotor) getDevice(deviceId);
+    motor.move(pwr);
+  }
+
+  // > motorMoveTo/deviceId/pos
+  public void motorMoveTo(Integer deviceId, Integer pos) {
+    MrlMotor motor = (MrlMotor) getDevice(deviceId);
+    motor.moveTo(pos);
+  }
+
+  // > neoPixelAttach/pin/b16 numPixels
+  public void neoPixelAttach(int deviceId, int pin, long numPixels) {
+    // msg.publishDebug("MrlNeopixel.deviceAttach!");
+
+    MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId, virtual));
+    msg.publishDebug("id" + String(deviceId));
+    neo.attach(pin, numPixels);
+  }
+
+  // > neoPixelAttach/pin/b16 numPixels
+  public void neoPixelSetAnimation(int deviceId, int animation, int red, int green, int blue, int speed) {
+    msg.publishDebug("MrlNeopixel.setAnimation!");
+    ((MrlNeopixel) getDevice(deviceId)).setAnimation(animation, red, green, blue, speed);
+  }
+
+  // > neoPixelWriteMatrix/deviceId/[] buffer
+  public void neoPixelWriteMatrix(int deviceId, int[] buffer) {
+    ((MrlNeopixel) getDevice(deviceId)).neopixelWriteMatrix(buffer.length, buffer);
+  }
+
+  void onDisconnect() {
+    Iterator<Device> i = deviceList.iterator();
+    while (i.hasNext()) {
+      Device node = i.next();
+      node.onDisconnect();
+      // node = node.next;
+    }
+    boardStatusEnabled = false;
+  }
+
+  public void pinMode(int address, int input) {
+    // TODO change mode of pin ... duh
+  }
+
+  public void processCommand() {
+
+    msg.processCommand();
+    if (ackEnabled) {
+      msg.publishAck(msg.getMethod());
+    }
   }
 
   /***********************************************************************
-   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
-   * device list depending on their type. This method processes each loop.
-   * Typically this "back-end" processing will read data from pins, or change
-   * states of non-blocking pulses, or possibly regulate a motor based on pid
-   * values read from pins
+   * PUBLISH_BOARD_INFO This function updates the average time it took to run
+   * the main loop and reports it back with a publishBoardStatus MRLComm message
+   *
+   * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
+   *
+   * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
    */
-  public void updateDevices() {
 
-    // update self - the first device which
-    // is type Arduino
-    update();
-
-    // iterate through our device list and call update on them.
-    for (int i = 0; i < deviceList.size(); ++i) {
-      Device node = deviceList.get(i);
-      node.update();
+  public void publishBoardInfo() {
+    if (loopCount == 0) {
+      return;
     }
+    int[] deviceSummary = new int[deviceList.size() * 2];
+    for (int i = 0; i < deviceList.size(); ++i) {
+      deviceSummary[i] = deviceList.get(i).id;
+      deviceSummary[i + 1] = deviceList.get(i).type;
+    }
+
+    long now = micros();
+    int load = (int) ((now - lastBoardInfoUs) / loopCount);
+    msg.publishBoardInfo(MRLCOMM_VERSION, Arduino.BOARD_TYPE_ID_UNO, load, getFreeRam(), pinList.size(), deviceSummary);
+    lastBoardInfoUs = now;
+    loopCount = 0;
+  }
+
+  public void publishError(java.lang.String f) {
+    msg.publishMRLCommError(f);
+  }
+
+  boolean readMsg() throws Exception {
+    return msg.readMsg();
+  }
+
+  void sendCustomMsg(int[] customMsg) {
+    msg.publishCustomMsg(customMsg);
+  }
+
+  // TODO - implement
+  // > serialAttach/deviceId/relayPin
+  public void serialAttach(int deviceId, int relayPin) {
+    MrlSerialRelay relay = new MrlSerialRelay(deviceId);
+    addDevice(relay);
+    relay.attach(relayPin);
+  }
+
+  // TODO - implement
+  // > serialRelay/deviceId/[] data
+  public void serialRelay(int deviceId, int[] data) {
+    MrlSerialRelay relay = (MrlSerialRelay) getDevice(deviceId);
+    // msg.publishDebug("serialRelay (" + String(dataSize) + "," +
+    // String(deviceId));
+    relay.write(data, data.length);
+  }
+
+  // > servoAttach/deviceId/pin/targetOutput/b16 velocity
+  public void servoAttach(int deviceId, int pin, int initialPosUs, int velocity, String name) {
+    MrlServo servo = new MrlServo(deviceId, virtual);
+    addDevice(servo);
+    // not your mama's attach - this is attaching/initializing the MrlDevice
+    servo.attach(pin, initialPosUs, velocity, name);
+  }
+
+  // > servoEnablePwm/deviceId/pin
+  public void servoAttachPin(int deviceId, int pin) {
+    MrlServo servo = (MrlServo) getDevice(deviceId);
+    servo.attachPin(pin);
+  }
+
+  // > servoDisablePwm/deviceId
+  public void servoDetachPin(int deviceId) {
+    MrlServo servo = (MrlServo) getDevice(deviceId);
+    servo.detachPin();
+  }
+
+  public void servoMoveToMicroseconds(int deviceId, int target) {
+    MrlServo servo = (MrlServo) getDevice(deviceId);
+    servo.moveToMicroseconds(target);
+  }
+
+  public void servoSetAcceleration(int deviceId, int acceleration) {
+    MrlServo servo = (MrlServo) getDevice(deviceId);
+    servo.setAcceleration(acceleration);
+  }
+
+  // > servoSetVelocity/deviceId/b16 velocity
+  public void servoSetVelocity(int deviceId, int velocity) {
+    MrlServo servo = (MrlServo) getDevice(deviceId);
+    servo.setVelocity(velocity);
+  }
+
+  public void servoSweepStart(int deviceId, int min, int max, int step) {
+    MrlServo servo = (MrlServo) getDevice(deviceId);
+    servo.startSweep(min, max, step);
+  }
+
+  public void servoSweepStop(int deviceId) {
+    MrlServo servo = (MrlServo) getDevice(deviceId);
+    servo.stopSweep();
+  }
+
+  // > enablePin/address/type/b16 rate
+  public void setAref(int aref) {
+    // TODO
+    // msg.setAref(aref);
+  }
+
+  // TODO - implement
+  // > setDebounce/pin/delay
+  public void setDebounce(int pin, int delay) {
+    msg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(delay));
+  }
+
+  public void setDebug(boolean enabled) {
+    msg.debug = enabled;
+  }
+
+  public void setSerialRate(long rate) {
+    msg.publishDebug("setSerialRate " + String(rate));
+  }
+
+  // TODO - implement
+  // > setTrigger/pin/value
+  public void setTrigger(int pin, int triggerValue) {
+    msg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(triggerValue));
+  }
+
+  public void setZeroPoint(Integer deviceId) {
+    // TODO Auto-generated method stub
+    MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
+    encoder.setZeroPoint();
+
+  }
+
+  // > softReset
+  public void softReset() {
+    // removing devices & pins
+    deviceList.clear();
+
+    pinList.clear();
+
+    // resetting variables to default
+    loopCount = 0;
+    boardStatusEnabled = false;
+    msg.debug = false;
+    lastHeartbeatUpdate = 0;
+    for (int i = 0; i < VirtualMsg.MAX_MSG_SIZE; i++) {
+      customMsgBuffer[i] = 0;
+    }
+    customMsgSize = 0;
+    heartbeatEnabled = true;
+  }
+
+  /*
+   * public void setBoardType(String board) { boardInfo.setType(board); }
+   */
+
+  java.lang.String String(float x) {
+    return new String("" + x);
+  }
+
+  java.lang.String String(int x) {
+    return new String("" + (x & 0xFF));
+  }
+
+  java.lang.String String(long x) {
+    return new String("" + x);
+  }
+
+  java.lang.String String(String x) {
+    return x;
+  }
+
+  // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
+  public void ultrasonicSensorAttach(int deviceId, int triggerPin, int echoPin) {
+    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) addDevice(new MrlUltrasonicSensor(deviceId, virtual));
+    sensor.attach(triggerPin, echoPin);
+  }
+
+  // > ultrasonicSensorStartRanging/deviceId
+  public void ultrasonicSensorStartRanging(int deviceId) {
+    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) getDevice(deviceId);
+    sensor.startRanging();
+  }
+
+  // > ultrasonicSensorStopRanging/deviceId
+  public void ultrasonicSensorStopRanging(int deviceId) {
+    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) getDevice(deviceId);
+    sensor.stopRanging();
   }
 
   /***********************************************************************
@@ -376,435 +801,24 @@ public class MrlComm {
     }
   }
 
-  int getCustomMsgSize() {
-    return customMsgSize;
-  }
-
-  public void processCommand() {
-
-    msg.processCommand();
-    if (ackEnabled) {
-      msg.publishAck(msg.getMethod());
-    }
-  }
-
-  public void enableAck(boolean enabled) {
-    ackEnabled = enabled;
-  }
-
-  boolean readMsg() throws Exception {
-    return msg.readMsg();
-  }
-
-  public void publishError(java.lang.String f) {
-    msg.publishMRLCommError(f);
-  }
-
-  // void begin(HardwareSerial& serial) {
-  void begin(HardwareSerial serial) {
-
-    // TODO: the arduino service might get a few garbage bytes before we're able
-    // to run, we should consider some additional logic here like a
-    // "publishReset"
-    // publish version on startup so it's immediately available for mrl.
-    // TODO: see if we can purge the current serial port buffers
-
-    while (!serial.ready()) {
-      ; // wait for serial port to connect. Needed for native USB
-    }
-
-    // clear serial
-    serial.flush();
-
-    // msg.begin(serial);
-
-    // send 3 boardInfos to PC to announce,
-    // Hi I'm an Arduino with version x, board type y, and I'm ready :)
-    for (int i = 0; i < 5; ++i) {
-      publishBoardInfo();
-      serial.flush();
-    }
-  }
-
   /***********************************************************************
-   * PUBLISH_BOARD_INFO This function updates the average time it took to run
-   * the main loop and reports it back with a publishBoardStatus MRLComm message
-   *
-   * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
-   *
-   * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
+   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
+   * device list depending on their type. This method processes each loop.
+   * Typically this "back-end" processing will read data from pins, or change
+   * states of non-blocking pulses, or possibly regulate a motor based on pid
+   * values read from pins
    */
+  public void updateDevices() {
 
-  public void publishBoardInfo() {
-    if (loopCount == 0) {
-      return;
-    }
-    int[] deviceSummary = new int[deviceList.size() * 2];
+    // update self - the first device which
+    // is type Arduino
+    update();
+
+    // iterate through our device list and call update on them.
     for (int i = 0; i < deviceList.size(); ++i) {
-      deviceSummary[i] = deviceList.get(i).id;
-      deviceSummary[i + 1] = deviceList.get(i).type;
+      Device node = deviceList.get(i);
+      node.update();
     }
-
-    long now = micros();
-    int load = (int) ((now - lastBoardInfoUs) / loopCount);
-    msg.publishBoardInfo(MRLCOMM_VERSION, Arduino.BOARD_TYPE_ID_UNO, load, getFreeRam(), pinList.size(), deviceSummary);
-    lastBoardInfoUs = now;
-    loopCount = 0;
-  }
-
-  /****************************************************************
-   * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are
-   * controlled by arduinoMsgs.schema The implementation contains custom logic -
-   * but the signature is generated
-   *
-   */
-
-  // > getBoardInfo
-  public void getBoardInfo() {
-    // msg.publishBoardInfo(MRLCOMM_VERSION, BOARD);
-    publishBoardInfo();
-  }
-
-  // > echo/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
-  public void echo(float myFloat, int myByte, float mySecondFloat) {
-    msg.publishDebug(String("echo float " + String(myFloat)));
-    msg.publishDebug(String("echo int " + String(myByte)));
-    msg.publishDebug(String("echo float2 " + String(mySecondFloat)));
-    // msg.publishDebug(String("pi is " + String(3.141529)));
-    msg.publishEcho(myFloat, myByte & 0xFF, mySecondFloat);
-  }
-
-  // > customMsg/[] msg
-  // from PC -. loads customMsg buffer
-  public void customMsg(int[] msg) {
-    for (int i = 0; i < msgSize && msgSize < 64; i++) {
-      customMsgBuffer[i] = msg[i]; // *(msg + i);
-    }
-    customMsgSize = msgSize;
-  }
-
-  /**
-   * deviceDetach - get the device if it exists delete it and remove it from the
-   * deviceList
-   * 
-   * @param deviceId
-   *          int for the device id
-   */
-  // > deviceDetach/deviceId
-  public void deviceDetach(Integer deviceId) {
-    for (int i = 0; i < deviceList.size(); ++i) {
-      if (deviceList.get(i).id == deviceId) {
-        deviceList.remove(i);
-        return;
-      }
-    }
-  }
-
-  // > disablePin/pin
-  public void disablePin(Integer pinAddress) {
-    for (int i = 0; i < pinList.size(); ++i) {
-      Pin pin = pinList.get(i);
-      if (pin.address == pinAddress) {
-        pinList.remove(i);
-        return;
-      }
-    }
-  }
-
-  // > disablePins
-  public void disablePins() {
-    while (pinList.size() > 0) {
-      // delete pinList.pop();
-      pinList.pop();
-    }
-  }
-
-  // > enablePin/address/type/b16 rate
-  public void enablePin(int address, int type, int rate) {
-    // don't add it twice
-    for (int i = 0; i < pinList.size(); ++i) {
-      Pin pin = pinList.get(i);
-      if (pin.address == address) {
-        // TODO already exists error?
-        return;
-      }
-    }
-
-    if (type == Pin.DIGITAL) {
-      pinMode(address, Pin.INPUT);
-    }
-    Pin p = new Pin(address, type, rate);
-    p.lastUpdate = 0;
-    pinList.add(p);
-  }
-
-  // > i2cBusAttach/deviceId/i2cBus
-  public void i2cBusAttach(int deviceId, int i2cBus) {
-    MrlI2CBus i2cbus = (MrlI2CBus) addDevice(new MrlI2CBus(deviceId, virtual));
-    i2cbus.attach(i2cBus);
-  }
-
-  // > i2cRead/deviceId/deviceAddress/size
-  public void i2cRead(int deviceId, int deviceAddress, int size) {
-    ((MrlI2CBus) getDevice(deviceId)).i2cRead(deviceAddress, size);
-  }
-
-  // > i2cWrite/deviceId/deviceAddress/[] data
-  public void i2cWrite(int deviceId, int deviceAddress, int[] data) {
-    ((MrlI2CBus) getDevice(deviceId)).i2cWrite(deviceAddress, data.length, data);
-  }
-
-  // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-  public void i2cWriteRead(int deviceId, int deviceAddress, int readSize, int writeValue) {
-    ((MrlI2CBus) getDevice(deviceId)).i2cWriteRead(deviceAddress, readSize, writeValue);
-  }
-
-  // > neoPixelAttach/pin/b16 numPixels
-  public void neoPixelAttach(int deviceId, int pin, long numPixels) {
-    // msg.publishDebug("MrlNeopixel.deviceAttach!");
-
-    MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId, virtual));
-    msg.publishDebug("id" + String(deviceId));
-    neo.attach(pin, numPixels);
-  }
-
-  // > neoPixelAttach/pin/b16 numPixels
-  public void neoPixelSetAnimation(int deviceId, int animation, int red, int green, int blue, int speed) {
-    msg.publishDebug("MrlNeopixel.setAnimation!");
-    ((MrlNeopixel) getDevice(deviceId)).setAnimation(animation, red, green, blue, speed);
-  }
-
-  // > neoPixelWriteMatrix/deviceId/[] buffer
-  public void neoPixelWriteMatrix(int deviceId, int[] buffer) {
-    ((MrlNeopixel) getDevice(deviceId)).neopixelWriteMatrix(buffer.length, buffer);
-  }
-
-  // > servoAttach/deviceId/pin/targetOutput/b16 velocity
-  public void servoAttach(int deviceId, int pin, int initialPosUs, int velocity, String name) {
-    MrlServo servo = new MrlServo(deviceId, virtual);
-    addDevice(servo);
-    // not your mama's attach - this is attaching/initializing the MrlDevice
-    servo.attach(pin, initialPosUs, velocity, name);
-  }
-
-  // > servoEnablePwm/deviceId/pin
-  public void servoAttachPin(int deviceId, int pin) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.attachPin(pin);
-  }
-
-  // > servoDisablePwm/deviceId
-  public void servoDetachPin(int deviceId) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.detachPin();
-  }
-
-  // > servoSetVelocity/deviceId/b16 velocity
-  public void servoSetVelocity(int deviceId, int velocity) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.setVelocity(velocity);
-  }
-
-  public void servoSetAcceleration(int deviceId, int acceleration) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.setAcceleration(acceleration);
-  }
-
-  public void servoSweepStart(int deviceId, int min, int max, int step) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.startSweep(min, max, step);
-  }
-
-  public void servoSweepStop(int deviceId) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.stopSweep();
-  }
-
-  public void servoMoveToMicroseconds(int deviceId, int target) {
-    MrlServo servo = (MrlServo) getDevice(deviceId);
-    servo.moveToMicroseconds(target);
-  }
-
-  public void setDebug(boolean enabled) {
-    msg.debug = enabled;
-  }
-
-  public void setSerialRate(long rate) {
-    msg.publishDebug("setSerialRate " + String(rate));
-  }
-
-  // TODO - implement
-  // > setTrigger/pin/value
-  public void setTrigger(int pin, int triggerValue) {
-    msg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(triggerValue));
-  }
-
-  // TODO - implement
-  // > setDebounce/pin/delay
-  public void setDebounce(int pin, int delay) {
-    msg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(delay));
-  }
-
-  // TODO - implement
-  // > serialAttach/deviceId/relayPin
-  public void serialAttach(int deviceId, int relayPin) {
-    MrlSerialRelay relay = new MrlSerialRelay(deviceId);
-    addDevice(relay);
-    relay.attach(relayPin);
-  }
-
-  // TODO - implement
-  // > serialRelay/deviceId/[] data
-  public void serialRelay(int deviceId, int[] data) {
-    MrlSerialRelay relay = (MrlSerialRelay) getDevice(deviceId);
-    // msg.publishDebug("serialRelay (" + String(dataSize) + "," +
-    // String(deviceId));
-    relay.write(data, data.length);
-  }
-
-  // > softReset
-  public void softReset() {
-    // removing devices & pins
-    deviceList.clear();
-
-    pinList.clear();
-
-    // resetting variables to default
-    loopCount = 0;
-    boardStatusEnabled = false;
-    msg.debug = false;
-    lastHeartbeatUpdate = 0;
-    for (int i = 0; i < VirtualMsg.MAX_MSG_SIZE; i++) {
-      customMsgBuffer[i] = 0;
-    }
-    customMsgSize = 0;
-    heartbeatEnabled = true;
-  }
-
-  // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-  public void ultrasonicSensorAttach(int deviceId, int triggerPin, int echoPin) {
-    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) addDevice(new MrlUltrasonicSensor(deviceId, virtual));
-    sensor.attach(triggerPin, echoPin);
-  }
-
-  // > ultrasonicSensorStartRanging/deviceId
-  public void ultrasonicSensorStartRanging(int deviceId) {
-    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) getDevice(deviceId);
-    sensor.startRanging();
-  }
-
-  // > ultrasonicSensorStopRanging/deviceId
-  public void ultrasonicSensorStopRanging(int deviceId) {
-    MrlUltrasonicSensor sensor = (MrlUltrasonicSensor) getDevice(deviceId);
-    sensor.stopRanging();
-  }
-
-  int getCustomMsg() {
-    if (customMsgSize == 0) {
-      return 0;
-    }
-    int retval = customMsgBuffer[0];
-    for (int i = 0; i < customMsgSize - 1; i++) {
-      customMsgBuffer[i] = customMsgBuffer[i + 1];
-    }
-    customMsgBuffer[customMsgSize] = 0;
-    customMsgSize--;
-    return retval;
-  }
-
-  void onDisconnect() {
-    Iterator<Device> i = deviceList.iterator();
-    while (i.hasNext()) {
-      Device node = i.next();
-      node.onDisconnect();
-      // node = node.next;
-    }
-    boardStatusEnabled = false;
-  }
-
-  void sendCustomMsg(int[] customMsg) {
-    msg.publishCustomMsg(customMsg);
-  }
-
-  // > motorAttach/deviceId/type/[] pins
-  public void motorAttach(Integer deviceId, Integer type, int[] pins) {
-    MrlMotor servo = new MrlMotor(deviceId, virtual);
-    addDevice(servo);
-    // not your mama's attach - this is attaching/initializing the MrlDevice
-    // servo.attach(type, initialPosUs, velocity, name);
-  }
-
-  // > motorMove/deviceId/pwr
-  public void motorMove(Integer deviceId, Integer pwr) {
-    MrlMotor motor = (MrlMotor) getDevice(deviceId);
-    motor.move(pwr);
-  }
-
-  // > motorMoveTo/deviceId/pos
-  public void motorMoveTo(Integer deviceId, Integer pos) {
-    MrlMotor motor = (MrlMotor) getDevice(deviceId);
-    motor.moveTo(pos);
-  }
-
-  /*
-   * public void setBoardType(String board) { boardInfo.setType(board); }
-   */
-
-  public void invoke(String method, Object... params) {
-    virtual.invokeOn(this, method, params);
-  }
-
-  public void analogWrite(Integer pin, Integer value) {
-    // TODO Auto-generated method stub
-
-  }
-
-  public void digitalWrite(Integer pin, Integer value) {
-    // TODO Auto-generated method stub
-
-  }
-
-  public String getName() {
-    return virtual.getName();
-  }
-
-  public VirtualMsg getMsg() {
-    return msg;
-  }
-
-  public void begin(org.myrobotlab.service.Serial serial) {
-
-  }
-
-  // > enablePin/address/type/b16 rate
-  public void setAref(int aref) {
-    // TODO
-    // msg.setAref(aref);
-  }
-
-  /**
-   * Attach an encoder of a given type. current supported types are 0
-   * that means only amt203A is supported...  
-   * but soon type =1 will mean as5048a ...  
-   * 
-   * @param deviceId
-   * @param type
-   * @param pin
-   */
-  public void encoderAttach(Integer deviceId, Integer type, Integer pin) {
-    if (type == 0 ) {
-    MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
-    encoder.attach(pin);
-    } else {
-      MrlAs5048AEncoder encoder = (MrlAs5048AEncoder) getDevice(deviceId);
-    }
-  }
-
-  public void setZeroPoint(Integer deviceId) {
-    // TODO Auto-generated method stub
-    MrlAmt203Encoder encoder = (MrlAmt203Encoder) getDevice(deviceId);
-    encoder.setZeroPoint();
-
   }
 
 }

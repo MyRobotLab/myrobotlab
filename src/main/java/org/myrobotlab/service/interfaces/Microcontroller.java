@@ -25,4 +25,8 @@ public interface Microcontroller extends PinArrayControl {
    * @return list of board types
    */
   public List<BoardType> getBoardTypes();
+  
+  public void reset();
+  
+  public String setBoard(String board);
 }

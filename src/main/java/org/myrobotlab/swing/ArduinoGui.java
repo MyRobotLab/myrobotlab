@@ -26,6 +26,7 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -71,8 +72,7 @@ import org.myrobotlab.swing.widget.PortGui;
 
 public class ArduinoGui extends ServiceGui implements ActionListener, ItemListener, PortListener {
   static final long serialVersionUID = 1L;
-  ArduinoGui self;
-
+  
   JLabel status = new JLabel("disconnected");
 
   FileChooser chooser = null;
@@ -97,13 +97,14 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   JTextField arduinoPath = new JTextField(20);
 
   JTextField boardType = new JTextField(5);
+  
   JButton uploadMrlComm = new JButton("Upload MrlComm");
-  // JLabel uploadResult = new JLabel();
 
   JComboBox<BoardType> boardTypes = new JComboBox<BoardType>();
   Map<String, BoardType> boardToBoardType = null;
 
   transient TextEditorPane editor;
+  
   /**
    * current board type of the arduino
    */
@@ -114,6 +115,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   JTextArea uploadResults = new JTextArea(5, 30);
 
   Arduino myArduino;
+  
+  JButton virtual = new JButton("virtual");
+  JButton enableBoardInfo = new JButton("heartbeat");
 
   public ArduinoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
@@ -121,8 +125,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     self = this;
 
     portGui = new PortGui(boundServiceName, myService);
-    addTop(portGui.getDisplay(), boardTypes);
-    addTop(2, status);
+    addTop(portGui.getDisplay(), boardTypes, virtual);
+    addTop(2, status);    
 
     localTabs.setTabPlacementRight();
 
@@ -137,10 +141,23 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
     add(localTabs.getTabs());
 
-    softReset.addActionListener(self);
-    boardTypes.addItemListener(self);
-    openMrlComm.addActionListener(self);
-    uploadMrlComm.addActionListener(self);
+    
+  }
+  
+  void addListeners() {
+    softReset.addActionListener(this);
+    boardTypes.addItemListener(this);
+    openMrlComm.addActionListener(this);
+    uploadMrlComm.addActionListener(this);
+    virtual.addActionListener(this);
+  }
+  
+  void removeListeners() {
+    softReset.removeActionListener(this);
+    boardTypes.removeActionListener(this);
+    openMrlComm.removeActionListener(this);
+    uploadMrlComm.removeActionListener(this);
+    virtual.removeActionListener(this);
   }
 
   /**
@@ -155,12 +172,19 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
       send("softReset");
       return;
     }
-
-    // allow hook ? - or just send directly !!
-    // if (o instanceof PinGui) {
-    // PinGui p = (PinGui) o;
-    // send(p.getMethod(), p.getParams());
-    // }
+    
+    if (o == virtual) {
+      Color c = virtual.getBackground();
+      if (virtual.getText().equals("virtual")) {
+        virtual.setText("virtualized");
+        // virtual.setBackground(Color.PINK);
+        send("setVirtual", true);
+      } else {
+        virtual.setText("virtualized");
+        // virtual.setBackground(Color.PINK);
+        send("setVirtual", false);
+      }
+    }
 
     if (o == openMrlComm) {
       send("openMrlComm", arduinoPath.getText());
@@ -246,10 +270,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
       PinGui p = new PinGui(myArduino, pins.get(i));
       p.showName();
-      // p.showName();
 
       // set up the listeners
-      p.addActionListener(self);
+      p.addActionListener(this);
       pinGuiList.add(p);
 
       if (i < 14) { // digital pins -----------------
@@ -311,7 +334,6 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     uploadPanel.add(top, BorderLayout.NORTH);
 
     editor = new TextEditorPane();
-    // editor.setPreferredSize(new Dimension(500, 400));
     editor.setText(mrlIno);
     editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS);
     editor.setCodeFoldingEnabled(true);
@@ -340,8 +362,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
       @Override
       public void run() {
 
-        // remove listeners
-        boardTypes.removeItemListener(self);
+        removeListeners();
 
         if (boardToBoardType == null) {
           boardToBoardType = new TreeMap<String, BoardType>();
@@ -367,38 +388,24 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
         }
 
         arduinoPath.setText(arduino.getArduinoPath());
-
-        // update panels based on state change
-        // TODO - check what state the panels are to see if a
-        // change is needed
         uploadResults.setText(arduino.uploadSketchResult);
-
-        // re-enabling listeners
-        boardTypes.addItemListener(self);
+        
+        addListeners();
       }
     });
 
   }
 
-  /*
+  /**
    * onState is called when the Arduino service changes state information FIXME
    * - this method is often called by other threads so gui - updates must be
    * done in the swing post method way
-   * 
+   *
+   * @param arduino - the arduino service to update state from
    */
   public void onState(final Arduino arduino) {
     myArduino = arduino;
     update(arduino);
-  }
-
-  public void onPinArray(final PinData[] pins) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-
-      }
-    });
-
   }
 
   @Override
@@ -410,6 +417,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
         send("setBoard", boardType.getBoard());
       }
     }
+  }
+  
+  public void onPinArray(PinData[] pinArray) {
+    // FIXME - not currently doing anything with this callback
   }
 
   @Override
