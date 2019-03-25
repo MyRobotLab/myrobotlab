@@ -160,9 +160,8 @@ public class ServiceInterfaceTest extends AbstractTest {
       if (st == null) {
         System.out.println("NO SERVICE TYPE FOUND!");
         servicesNotInServiceDataJson.add(service);
-      } else {
-        System.out.println("Service Type Found!");
-      }
+      } 
+      
       // System.out.flush();
       // try {
       // System.in.read();
