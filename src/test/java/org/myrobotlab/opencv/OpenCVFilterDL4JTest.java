@@ -2,7 +2,6 @@ package org.myrobotlab.opencv;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.nd4j.linalg.io.Assert;
 
 // This test takes a long time..  TODO: consider a smaller / lighterweight version of this test

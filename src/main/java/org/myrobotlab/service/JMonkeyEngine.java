@@ -738,8 +738,10 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   /**
    * the all purpose find by name method
    * 
-   * @param name - name of node
-   * @param startNode - the node to start search
+   * @param name
+   *          - name of node
+   * @param startNode
+   *          - the node to start search
    * @return
    */
   public Spatial find(String name, Node startNode) {
@@ -2137,13 +2139,16 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   // ?
   synchronized public void stop() {
     if (app != null) {
-
-      // why ?
-      app.getRootNode().detachAllChildren();
-      app.getGuiNode().detachAllChildren();
-      app.stop(true);
-      // app.destroy(); not for "us"
-      app = null;
+      try {
+        // why ?
+        app.getRootNode().detachAllChildren();
+        app.getGuiNode().detachAllChildren();
+        app.stop(true);
+        // app.destroy(); not for "us"
+        app = null;
+      } catch (Exception e) {
+        log.error("stopping jmonkey threw", e);
+      }
     }
   }
 
@@ -2173,7 +2178,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
   public static void main(String[] args) {
     try {
-  
+
       // FIXME - fix menu input system - use jme.rotate/rotateTo/move/moveTo
       // etc.
       // FIXME - node/userdata can have a Map<String, String> of
