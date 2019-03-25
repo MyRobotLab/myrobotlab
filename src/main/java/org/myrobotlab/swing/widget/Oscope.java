@@ -1,12 +1,8 @@
 package org.myrobotlab.swing.widget;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -15,10 +11,8 @@ import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.PinData;

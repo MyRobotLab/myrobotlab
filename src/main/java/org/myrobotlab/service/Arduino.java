@@ -213,6 +213,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   public String uploadSketchResult = "";
 
+  transient private VirtualArduino virtual;
+
   public Arduino(String n) {
     super(n);
 
@@ -540,6 +542,20 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void connect(String port, int rate) throws Exception {
     connect(port, rate, 8, 1, 0);
   }
+  
+  public void setVirtual(boolean b) {
+    if (!b && virtual != null) {
+      virtual.releaseService();    
+      virtual = null;
+    } else if (b && virtual == null) {
+      virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
+    }
+    isVirtual = b;
+  }
+  
+  VirtualArduino getVirtual() {
+    return virtual;
+  }
 
   /**
    * default params to connect to Arduino &amp; MrlComm.ino
@@ -553,8 +569,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       if (isVirtual()) {
-        VirtualArduino virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
-        virtual.connect(port);
+         virtual.connect(port);
       }
       // FIXME - GroG asks, who put the try here - shouldn't it throw if
       // we
