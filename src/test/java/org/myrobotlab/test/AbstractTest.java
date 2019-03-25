@@ -1,5 +1,7 @@
 package org.myrobotlab.test;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Set;
@@ -19,10 +21,13 @@ import org.slf4j.Logger;
 public class AbstractTest {
 
   private static long coolDownTimeMs = 100;
-  /**
-   * cached internet test value for tests
-   */
+
+  /** cached internet test value for tests */
   static Boolean hasInternet = null;
+
+  static boolean install = true;
+
+  static boolean installed = false;
 
   public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
@@ -93,10 +98,10 @@ public class AbstractTest {
   // constructor of the AbstractTest
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
-    
+
     // make testing environment "virtual"
     setVirtual(true);
-    
+
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
       Runtime.setLogLevel(junitLogLevel);
@@ -144,7 +149,10 @@ public class AbstractTest {
   }
 
   protected void installAll() throws ParseException, IOException {
-    Runtime.install();
+    if (!installed) {
+      Runtime.install();
+      installed = true;
+    }
   }
 
   public static void releaseServices() {
@@ -196,6 +204,14 @@ public class AbstractTest {
     simpleName = this.getClass().getSimpleName();
     if (logWarnTestHeader) {
       log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
+    }
+    if (install) {
+      try {
+        installAll();
+      } catch (Exception e) {
+        log.error("installing services failed");
+        fail("installing service failed");
+      }
     }
   }
 
