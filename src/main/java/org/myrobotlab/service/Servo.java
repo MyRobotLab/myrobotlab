@@ -183,6 +183,7 @@ public class Servo extends Service implements ServoControl {
       if (controller != null) {
         ServoController temp = controller;
         controller = null;
+        controllerName = null;
         temp.detach(this);
       }
 
