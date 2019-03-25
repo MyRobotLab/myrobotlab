@@ -10,15 +10,13 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB.Response;
-import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class ProgramABTest extends AbstractTest {
+public class ProgramABTest extends AbstractServiceTest {
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
   private String botname = "lloyd";
@@ -212,8 +210,7 @@ public class ProgramABTest extends AbstractTest {
     assertEquals("FOO IS " + testValue, resp.msg);
   }
 
-  // @Test
-  @Ignore
+  @Override
   public void testService() throws Exception {
     // run each of the test methods.
     testProgramAB();
