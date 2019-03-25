@@ -604,7 +604,6 @@ public class Sphinx extends AbstractSpeechRecognizer {
     microphone.startRecording();
   }
 
-
   /**
    * stopRecording - it does "work", however, the speech recognition part seems
    * to degrade when startRecording is called. I have worked around this by not
@@ -612,8 +611,10 @@ public class Sphinx extends AbstractSpeechRecognizer {
    */
   @Override
   public void stopListening() {
-    microphone.stopRecording();
-    microphone.clear();
+    if (microphone != null) {
+      microphone.stopRecording();
+      microphone.clear();
+    }
     isListening = false;
     if (speechProcessor != null) {
       speechProcessor.isRunning = false;

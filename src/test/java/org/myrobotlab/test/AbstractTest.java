@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 
 public class AbstractTest {
 
-  private static long coolDownTimeMs = 2000;
+  private static long coolDownTimeMs = 100;
   /**
    * cached internet test value for tests
    */

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -121,7 +122,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * connected ports - however the serial service has the ability to "fork"
    * ports where it is connected to 2 or more ports simultaneously
    */
-  transient HashMap<String, Port> connectedPorts = new HashMap<String, Port>();
+  final transient Map<String, Port> connectedPorts = new HashMap<>();
 
   /**
    * used as the "default" port - now that Serial can multiplex with multiple
@@ -577,8 +578,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * disconnect = close + remove listeners all ports on serial network
    */
   public void disconnect() {
-    if (!connectedPorts.containsKey(portName)) {
+    if (portName == null || !connectedPorts.containsKey(portName)) {
       info("disconnect unknown port %s", portName);
+      return;
     }
 
     if (portName == null) {

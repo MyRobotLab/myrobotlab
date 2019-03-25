@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -29,8 +30,8 @@ public class ServiceSmokeTest extends AbstractTest {
   transient public final static Logger log = LoggerFactory.getLogger(ServiceSmokeTest.class);
 
   @Test
-  public void testAllServiceSerialization() throws IOException, ParseException {
-
+  public void testAllServiceSerialization() {
+    try {
     installAll();
 
     // known problematic services?! TODO: fix them and remove from the following
@@ -110,7 +111,10 @@ public class ServiceSmokeTest extends AbstractTest {
 
     log.info("Done with tests..");
 
-    assertTrue(true);
+    } catch(Exception e) {
+      log.error("ServiceSmokeTest threw", e);
+      fail("ServiceSmokeTest threw");
+    }
   }
 
   public void testSerialization(ServiceInterface s) {
