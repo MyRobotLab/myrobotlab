@@ -2055,6 +2055,11 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
   // dynamic create of type... TODO fix name start --> create
   synchronized public SimpleApplication start(String appName, String appType) {
+    if (Runtime.isHeadless()) {
+      log.warn("running in headless mode - will not start jmonkey app");
+      return null;
+    }
+    
     if (app == null) {
       // create app
       if (!appType.contains(".")) {
@@ -2116,7 +2121,11 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       super.startService();
       // start the jmonkey app - if you want a diferent Jme3App
       // config should be set at before this time
-      start();
+      SimpleApplication app = start();
+      if (app == null) {
+        log.warn("jmonkey app not starting");
+        return;
+      }
       // notify me if new services are created
       subscribe(Runtime.getRuntimeName(), "registered");
 
