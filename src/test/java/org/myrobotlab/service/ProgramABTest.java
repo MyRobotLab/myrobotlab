@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,18 +11,26 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
 
 public class ProgramABTest extends AbstractServiceTest {
 
+  @ClassRule
+  public static TemporaryFolder testFolder = new TemporaryFolder();
+  
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
   private String botname = "lloyd";
   // TODO: move this to test resources
-  private String path = "src/test/resources/ProgramAB";
+  private String testResources = "src/test/resources/ProgramAB";
+  private String path = null;
   private ProgramAB testService;
 
   private String username = "testUser";
@@ -82,7 +91,17 @@ public class ProgramABTest extends AbstractServiceTest {
 
   @Before
   public void setUp() {
-    // LoggingFactory.init("WARN");
+    // TODO: set the location for the temp folder via :  System.getProperty("java.io.tmpdir") 
+    // LoggingFactory.init("INFO");
+    //testFolder.getRoot().getAbsolutePath()
+    try {
+      testFolder.create();
+      this.path = testFolder.getRoot().getAbsolutePath() + File.separator + "ProgramAB";
+      FileIO.extract(".", testResources, path);
+    } catch (IOException e) {
+      log.warn("Error extracting resources for test. {}", testResources);
+      Assert.assertNotNull(e);
+    }
   }
 
   public void sraixOOBTest() {
@@ -124,13 +143,16 @@ public class ProgramABTest extends AbstractServiceTest {
 
   @Test
   public void testJapanese() {
+    
     ProgramAB pikachu = new ProgramAB("pikachu");
+    pikachu.setPath(path);
     // pikachu the service.
     pikachu.startService();
     // load the bot brain for the chat with the user
     pikachu.startSession(path, username, "pikachu", new Locale("ja"));
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
+    pikachu.releaseService();
   }
 
   public void testLearn() throws IOException {
@@ -145,6 +167,7 @@ public class ProgramABTest extends AbstractServiceTest {
   @Test
   public void testMultiSession() {
     ProgramAB lloyd = new ProgramAB("lloyd");
+    lloyd.setPath(path);
     // pikachu the service.
     lloyd.startService();
     // load the bot brain for the chat with the user
@@ -163,6 +186,10 @@ public class ProgramABTest extends AbstractServiceTest {
 
     assertEquals("Kevin", respA.msg);
     assertEquals("Grog", respB.msg);
+    
+    // release this service.
+    lloyd.releaseService();
+    
 
   }
 
