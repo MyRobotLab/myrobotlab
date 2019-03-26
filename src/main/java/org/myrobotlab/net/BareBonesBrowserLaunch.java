@@ -35,6 +35,7 @@ public class BareBonesBrowserLaunch {
       
       if (GraphicsEnvironment.isHeadless()) {
         log.warn("graphical browser requested but currently no display");
+        return;
       }
       
       // attempt to use Desktop library from JDK 1.6+
