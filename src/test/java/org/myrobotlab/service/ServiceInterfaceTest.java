@@ -179,10 +179,6 @@ public class ServiceInterfaceTest extends AbstractTest {
         servicesWithoutWebPages.add(service);
       }
 
-      if ("Gps".equals(service)) {
-        log.info("here");
-      }
-
       if (serviceInterfaceTest(service)) {
         numStartable++;
       } else {
