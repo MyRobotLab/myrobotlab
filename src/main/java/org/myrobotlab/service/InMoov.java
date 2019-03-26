@@ -777,7 +777,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void moveHand(String which, double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
+  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     if (!hands.containsKey(which)) {
       error("moveHand %s does not exist", which);
     } else {
@@ -786,10 +786,10 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   public void moveHead(double neck, double rothead) {
-    moveHead(neck, rothead, null, null, null, null);
+      moveHead(neck, rothead, null);
   }
 
-  public void moveHead(double neck, double rothead, double rollNeck) {
+  public void moveHead(Double neck, Double rothead, Double rollNeck) {
     moveHead(neck, rothead, null, null, null, rollNeck);
   }
 
@@ -832,26 +832,18 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   public void moveHeadBlocking(double neck, double rothead) {
-    if (head != null) {
-      head.moveToBlocking(neck, rothead);
-    } else {
-      log.error("moveHead - I have a null head");
-    }
+    moveHeadBlocking(neck, rothead, null);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, double rollNeck) {
-    if (head != null) {
-      head.moveToBlocking(neck, rothead, rollNeck);
-    } else {
-      log.error("moveHead - I have a null head");
-    }
+  public void moveHeadBlocking(double neck, double rothead, Double rollNeck) {
+    moveHeadBlocking(neck, rothead, null, null, null, rollNeck);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw) {
+  public void moveHeadBlocking(double neck, double rothead, Double eyeX, Double eyeY, Double jaw) {
     moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw, Double rollNeck) {
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     if (head != null) {
       head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw, rollNeck);
     } else {

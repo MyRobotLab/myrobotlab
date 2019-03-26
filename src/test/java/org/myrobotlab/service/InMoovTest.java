@@ -36,6 +36,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
   // virtual hardware
   static VirtualArduino virtualLeft = null;
   static VirtualArduino virtualRight = null;
+  static VirtualArduino virtual = null;
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -51,7 +52,14 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
       uart = virtualRight.getSerial();
       uart.setTimeout(100); // don't want to hang when decoding results...
       virtualRight.connect(rightPort);
+
       
+      // for the minimal script.. not sure why i can't just re-use the other 2?
+      virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
+      uart = virtual.getSerial();
+      uart.setTimeout(100); // don't want to hang when decoding results...
+      virtual.connect("COM7");
+
     }
   }
 
@@ -91,7 +99,10 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     // Ok.. now run the test.
     Python python = (Python) Runtime.start("python", "Python");
     HttpClient http = (HttpClient) Runtime.start("http", "HttpClient");
+    
     String code = http.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/home/hairygael/InMoov3.minimal.py");
+    // update the com port and disable the autostart of the webbrowser.
+   // code = code.replace("COM7", "VIRTUAL_LEFT_PORT").replace("webgui.startBrowser", "#webgui.startBrowser");
     python.exec(code);
     
   }
@@ -173,12 +184,17 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     
     i01.moveTorso(90, 90, 90);
     
-    String gestureName = "test-"+ System.currentTimeMillis();
+    String gestureName = "test_"+ System.currentTimeMillis();
     i01.saveGesture(gestureName);
     i01.loadGestures();
     i01.execGesture(gestureName);
     
     i01.rest();
+    
+    
+    
+    // this doesn't seem to have been called yet? really?
+    i01.startMouthControl(); 
     
     
     
@@ -203,7 +219,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     
     
     // move stuff.
-    i01.moveHeadBlocking(90,90,90,90,90);
+    i01.moveHeadBlocking(90,90);
     i01.moveTorsoBlocking(90, 90, 90);
 
     i01.setArmVelocity("left", -1.0,-1.0,-1.0,-1.0);
@@ -212,7 +228,14 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     i01.setHeadVelocity(-1.0,-1.0,-1.0,-1.0,-1.0,-1.0);
     double testVelocity = i01.leftArm.omoplate.getVelocity();
     
+    
+    
     Assert.assertEquals("Omoplate velocity not -1", -1.0, testVelocity, 0.001);
+    
+    i01.setHeadVelocity(-1.0, -1.0);
+    
+    
+    i01.setEyelidsVelocity(-1.0, -1.0);
     
     i01.cameraOff();
     Assert.assertFalse("Camera should be off!", i01.isCameraOn());
@@ -220,6 +243,20 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     
     // if anyhting is attached, this is true.
     i01.isAttached();
+    
+    Assert.assertTrue("InMoov should be mute!", i01.isMute());
+    
+    
+    // save state
+    i01.save();
+    
+    // load it back up?
+    i01.load();
+    
+    
+    // how about a different language
+    i01.setLanguage("en");
+    Assert.assertEquals("en-US", i01.getLanguage());
     
     
 //    i01.releasePeers();
