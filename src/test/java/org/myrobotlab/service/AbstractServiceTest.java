@@ -19,7 +19,7 @@ import org.junit.Ignore;
 public abstract class AbstractServiceTest extends AbstractTest {
 
   // The service object that is created for testing
-  private Service service;
+  public Service service;
 
   // This method should be subclassed and it should return a service object.
   public abstract Service createService();
