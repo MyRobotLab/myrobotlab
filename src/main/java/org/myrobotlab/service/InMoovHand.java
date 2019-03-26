@@ -634,12 +634,18 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    this.thumb.setVelocity(thumb);
-    this.index.setVelocity(index);
-    this.majeure.setVelocity(majeure);
-    this.ringFinger.setVelocity(ringFinger);
-    this.pinky.setVelocity(pinky);
-    this.wrist.setVelocity(wrist);
+    if (thumb != null)
+      this.thumb.setVelocity(thumb);
+    if (index != null)
+      this.index.setVelocity(index);
+    if (majeure != null)
+      this.majeure.setVelocity(majeure);
+    if (ringFinger != null)
+      this.ringFinger.setVelocity(ringFinger);
+    if (pinky != null)
+      this.pinky.setVelocity(pinky);
+    if (wrist != null)
+      this.wrist.setVelocity(wrist);
   }
 
   public void setController(ServoController servoController) {

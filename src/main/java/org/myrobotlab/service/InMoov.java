@@ -786,30 +786,18 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   public void moveHead(double neck, double rothead) {
-    if (head != null) {
-      head.moveTo(neck, rothead);
-    } else {
-      log.error("moveHead - I have a null head");
-    }
+    moveHead(neck, rothead, null, null, null, null);
   }
 
   public void moveHead(double neck, double rothead, double rollNeck) {
-    if (head != null) {
-      head.moveTo(neck, rothead, rollNeck);
-    } else {
-      log.error("moveHead - I have a null head");
-    }
+    moveHead(neck, rothead, null, null, null, rollNeck);
   }
 
   public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw) {
-    if (head != null) {
-      head.moveTo(neck, rothead, eyeX, eyeY, jaw);
-    } else {
-      log.error("I have a null head");
-    }
+    moveHead(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
-  public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw, double rollNeck) {
+  public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     if (head != null) {
       head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
     } else {
@@ -860,14 +848,10 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw) {
-    if (head != null) {
-      head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw);
-    } else {
-      log.error("I have a null head");
-    }
+    moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
   }
 
-  public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw, double rollNeck) {
+  public void moveHeadBlocking(double neck, double rothead, double eyeX, double eyeY, double jaw, Double rollNeck) {
     if (head != null) {
       head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw, rollNeck);
     } else {
@@ -1563,14 +1547,20 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       opencv = (OpenCV) Runtime.loadAndStart(this.getIntanceName() + ".opencv", "OpenCV");
     }
     this.attach(opencv);
-    // test for a worky opencv with hardware
-    if (vision.test()) {
-      broadcastState();
-      return true;
-    } else {
-      speakAlert(languagePack.get("OPENCVNOWORKY"));
-      return false;
-    }
+
+    if (vision.openCVenabled) {
+      // test for a worky opencv with hardware
+      // TODO: revisit this test method.  , maybe it should go away or be done differently?
+      // It forces capture 
+      if (vision.test()) {
+        broadcastState();
+        return true;
+      } else {
+        speakAlert(languagePack.get("OPENCVNOWORKY"));
+        return false;
+      }
+    } 
+    return false;
   }
 
   public OpenNi startOpenNI() throws Exception {
