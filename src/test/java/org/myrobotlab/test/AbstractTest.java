@@ -150,6 +150,7 @@ public class AbstractTest {
 
   protected void installAll() throws ParseException, IOException {
     if (!installed) {
+      log.warn("installing all services");
       Runtime.install();
       installed = true;
     }
