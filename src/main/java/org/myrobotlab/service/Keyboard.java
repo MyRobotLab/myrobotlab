@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import org.jnativehook.GlobalScreen;
+import org.myrobotlab.service.Runtime;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
@@ -31,8 +32,8 @@ public class Keyboard extends Service {
 
   String lastKeyPressed;
 
-  transient final NativeKeyboard keyboard = new NativeKeyboard();
-  transient MouseEvent mouseEvent = new MouseEvent();
+  transient final NativeKeyboard keyboard;
+  transient final MouseEvent mouseEvent;
 
   static public class MouseEvent {
     public Point2df pos = new Point2df();
@@ -99,6 +100,15 @@ public class Keyboard extends Service {
 
   public Keyboard(String n) {
     super(n);
+    if (Runtime.isHeadless()) {
+      log.warn("the Keyboard service requires a DISPLAY to function correctly");
+      keyboard = null;
+      mouseEvent = null;
+      return;
+    }
+    
+    keyboard = new NativeKeyboard();
+    mouseEvent = new MouseEvent();
   }
 
   public void startListening() throws NativeHookException {
@@ -118,7 +128,11 @@ public class Keyboard extends Service {
   public void startService() {
     super.startService();
     try {
-      startListening();
+      if (Runtime.isHeadless()) {
+        log.warn("the Keyboard service requires a DISPLAY to function correctly - will not register hooks");
+      } else {
+        startListening();
+      }
     } catch (Exception e) {
       log.error("could not register", e);
     }
@@ -127,7 +141,11 @@ public class Keyboard extends Service {
   public void stopService() {
     super.stopService();
     try {
-      stopListening();
+      if (Runtime.isHeadless()) {
+        log.warn("the Keyboard service requires a DISPLAY to function correctly - will not un-register hooks");
+      } else {
+        stopListening();
+      }
     } catch (Exception e) {
       log.error("could not unregister", e);
     }
