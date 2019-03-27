@@ -95,7 +95,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // LoggingFactory.init("INFO");
     //testFolder.getRoot().getAbsolutePath()
     try {
-      testFolder.create();
+      //testFolder.create();
       this.path = testFolder.getRoot().getAbsolutePath() + File.separator + "ProgramAB";
       FileIO.extract(".", testResources, path);
     } catch (IOException e) {
