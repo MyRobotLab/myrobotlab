@@ -259,7 +259,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     list.size();
 
     for (String k : list) {
-      log.info("voice-" + k);
+      log.info("voice-{}" , k);
     }
 
     // compare against installer and config files to find more voices

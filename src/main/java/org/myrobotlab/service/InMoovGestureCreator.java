@@ -774,10 +774,10 @@ public class InMoovGestureCreator extends Service {
             i01.moveArm("right", fih.rbicep, fih.rrotate, fih.rshoulder, fih.romoplate);
           }
           if (tabs_main_checkbox_states[3]) {
-            i01.moveHand("left", fih.lthumb, fih.lindex, fih.lmajeure, fih.lringfinger, fih.lpinky, (double) fih.lwrist);
+            i01.moveHand("left", (double)fih.lthumb, (double)fih.lindex, (double)fih.lmajeure, (double)fih.lringfinger, (double)fih.lpinky, (double)fih.lwrist);
           }
           if (tabs_main_checkbox_states[4]) {
-            i01.moveHand("right", fih.rthumb, fih.rindex, fih.rmajeure, fih.rringfinger, fih.rpinky, (double) fih.rwrist);
+            i01.moveHand("right", (double)fih.rthumb, (double)fih.rindex, (double)fih.rmajeure, (double)fih.rringfinger, (double)fih.rpinky, (double)fih.rwrist);
           }
           if (tabs_main_checkbox_states[5]) {
             i01.moveTorso(fih.topStom, fih.midStom, fih.lowStom);
@@ -1287,10 +1287,10 @@ public class InMoovGestureCreator extends Service {
           i01.moveArm("right", fih.rbicep, fih.rrotate, fih.rshoulder, fih.romoplate);
         }
         if (tabs_main_checkbox_states[3]) {
-          i01.moveHand("left", fih.lthumb, fih.lindex, fih.lmajeure, fih.lringfinger, fih.lpinky, (double) fih.lwrist);
+          i01.moveHand("left", (double)fih.lthumb, (double)fih.lindex, (double)fih.lmajeure, (double)fih.lringfinger, (double)fih.lpinky, (double) fih.lwrist);
         }
         if (tabs_main_checkbox_states[4]) {
-          i01.moveHand("right", fih.rthumb, fih.rindex, fih.rmajeure, fih.rringfinger, fih.rpinky, (double) fih.rwrist);
+          i01.moveHand("right", (double)fih.rthumb, (double)fih.rindex, (double)fih.rmajeure, (double)fih.rringfinger, (double)fih.rpinky, (double) fih.rwrist);
         }
         if (tabs_main_checkbox_states[5]) {
           i01.moveTorso(fih.topStom, fih.midStom, fih.lowStom);
@@ -1702,10 +1702,10 @@ public class InMoovGestureCreator extends Service {
         i01.moveArm("right", fih.rbicep, fih.rrotate, fih.rshoulder, fih.romoplate);
       }
       if (tabs_main_checkbox_states[3]) {
-        i01.moveHand("left", fih.lthumb, fih.lindex, fih.lmajeure, fih.lringfinger, fih.lpinky, (double) fih.lwrist);
+        i01.moveHand("left", (double)fih.lthumb, (double)fih.lindex, (double)fih.lmajeure, (double)fih.lringfinger, (double)fih.lpinky, (double) fih.lwrist);
       }
       if (tabs_main_checkbox_states[4]) {
-        i01.moveHand("right", fih.rthumb, fih.rindex, fih.rmajeure, fih.rringfinger, fih.rpinky, (double) fih.rwrist);
+        i01.moveHand("right", (double)fih.rthumb, (double)fih.rindex, (double)fih.rmajeure, (double)fih.rringfinger, (double)fih.rpinky, (double) fih.rwrist);
       }
       if (tabs_main_checkbox_states[5]) {
         i01.moveTorso(fih.topStom, fih.midStom, fih.lowStom);

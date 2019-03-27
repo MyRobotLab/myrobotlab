@@ -27,6 +27,9 @@ public class LanguagePack {
     if (dir.exists()) {
       lpVars.clear();
       for (File f : dir.listFiles()) {
+        if (f.isDirectory()) {
+          continue;
+        }
         if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
           log.info("Inmoov languagePack load : {}", f.getName());
           try {
