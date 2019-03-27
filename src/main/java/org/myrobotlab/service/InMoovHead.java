@@ -222,7 +222,7 @@ public class InMoovHead extends Service {
   }
 
   // TODO IK head moveTo ( neck + rollneck + rothead ? )
-  public void moveTo(double neck, double rothead, double rollNeck) {
+  public void moveTo(Double neck, Double rothead, Double rollNeck) {
     moveTo(neck, rothead, null, null, null, rollNeck);
   }
 
@@ -256,7 +256,7 @@ public class InMoovHead extends Service {
     moveToBlocking(neck, rothead, null, null, null, null);
   }
 
-  public void moveToBlocking(double neck, double rothead, double rollNeck) {
+  public void moveToBlocking(double neck, double rothead, Double rollNeck) {
     moveToBlocking(neck, rothead, null, null, null, rollNeck);
   }
 
