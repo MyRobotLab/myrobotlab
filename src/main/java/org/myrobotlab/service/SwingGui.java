@@ -296,6 +296,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    *          String serviceType, final String lable) then overload
    */
   synchronized public void addTab(final ServiceInterface sw) {
+    
+    if (Runtime.isHeadless()) {
+      log.warn("{} SwingGui is in headless environment", getName());
+      return;
+    }
 
     // scroll.addItem(sw.getName());
 
