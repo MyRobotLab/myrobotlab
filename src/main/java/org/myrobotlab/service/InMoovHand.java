@@ -324,11 +324,16 @@ public class InMoovHand extends Service implements LeapDataListener {
     if (log.isDebugEnabled()) {
       log.debug("{}.moveTo {} {} {} {} {} {}", getName(), thumb, index, majeure, ringFinger, pinky, wrist);
     }
-    this.thumb.moveTo(thumb);
-    this.index.moveTo(index);
-    this.majeure.moveTo(majeure);
-    this.ringFinger.moveTo(ringFinger);
-    this.pinky.moveTo(pinky);
+    if (thumb != null)
+      this.thumb.moveTo(thumb);
+    if (index != null)
+      this.index.moveTo(index);
+    if (majeure != null)
+      this.majeure.moveTo(majeure);
+    if (ringFinger != null)
+      this.ringFinger.moveTo(ringFinger);
+    if (pinky != null)
+      this.pinky.moveTo(pinky);
     if (wrist != null)
       this.wrist.moveTo(wrist);
   }
@@ -634,12 +639,18 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    this.thumb.setVelocity(thumb);
-    this.index.setVelocity(index);
-    this.majeure.setVelocity(majeure);
-    this.ringFinger.setVelocity(ringFinger);
-    this.pinky.setVelocity(pinky);
-    this.wrist.setVelocity(wrist);
+    if (thumb != null)
+      this.thumb.setVelocity(thumb);
+    if (index != null)
+      this.index.setVelocity(index);
+    if (majeure != null)
+      this.majeure.setVelocity(majeure);
+    if (ringFinger != null)
+      this.ringFinger.setVelocity(ringFinger);
+    if (pinky != null)
+      this.pinky.setVelocity(pinky);
+    if (wrist != null)
+      this.wrist.setVelocity(wrist);
   }
 
   public void setController(ServoController servoController) {
