@@ -29,7 +29,7 @@ public class Sweety extends Service {
   transient public Adafruit16CServoDriver adaFruit16cRight;
   transient public Adafruit16CServoDriver adaFruit16cLeft;
   transient public WebkitSpeechRecognition ear;
-  transient public WebGui webGui;
+  transient public WebGui webgui;
   transient public MarySpeech mouth;
   transient public static Tracking tracker;
   transient public ProgramAB chatBot;
@@ -862,7 +862,7 @@ public class Sweety extends Service {
     htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
     mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
     ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
-    webGui = (WebGui) Runtime.start("webGui", "WebGui");
+    webgui = (WebGui) Runtime.start("webgui", "WebGui");
     pir = (Pir) Runtime.start("pir", "Pir");
 
     // configure services
@@ -1090,13 +1090,13 @@ public class Sweety extends Service {
     }
 
     script.append(indentSpace);
-    script.append(String.format("Sweety.setRightArmPosition(%d,%d,%d,%d,%d)\n", rightShoulderServo.getPos(), rightArmServo.getPos(), rightBicepsServo.getPos(),
+    script.append(String.format("Sweety.setRightArmPosition(%f,%f,%f,%f,%f)\n", rightShoulderServo.getPos(), rightArmServo.getPos(), rightBicepsServo.getPos(),
         rightElbowServo.getPos(), rightWristServo.getPos()));
     script.append(indentSpace);
-    script.append(String.format("Sweety.setLeftArmPosition(%d,%d,%d,%d,%d)\n", leftShoulderServo.getPos(), leftArmServo.getPos(), leftBicepsServo.getPos(), leftElbowServo.getPos(),
+    script.append(String.format("Sweety.setLeftArmPosition(%f,%f,%f,%f,%f)\n", leftShoulderServo.getPos(), leftArmServo.getPos(), leftBicepsServo.getPos(), leftElbowServo.getPos(),
         leftWristServo.getPos()));
     script.append(indentSpace);
-    script.append(String.format("Sweety.setHeadPosition(%d,%d)\n", neckTiltServo.getPos(), neckPanServo.getPos()));
+    script.append(String.format("Sweety.setHeadPosition(%f,%f)\n", neckTiltServo.getPos(), neckPanServo.getPos()));
 
     send("python", "appendScript", script.toString());
 

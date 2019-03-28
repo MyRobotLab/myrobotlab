@@ -137,7 +137,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void simpleFaceDetect() {
-    log.warn("=======OpenCVTest simplteFaceDetect=======");
+    log.warn("=======OpenCVTest simpleFaceDetect=======");
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
     OpenCVData data = cv.getFaceDetect();
