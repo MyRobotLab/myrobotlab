@@ -42,6 +42,7 @@ public abstract class AbstractServiceTest extends AbstractTest {
   // finally release the service after the unit test has completed.
   public void releaseService() {
     // TODO: what's the normal way to destroy a service?
+    service.releasePeers();
     service.releaseService();
     // we could potentially do some post checks to make sure the service
     // actually shutdown
