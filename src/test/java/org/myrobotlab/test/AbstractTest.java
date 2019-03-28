@@ -27,7 +27,7 @@ public class AbstractTest {
 
   static boolean install = true;
 
-  static boolean installed = false;
+  protected static boolean installed = false;
 
   public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 

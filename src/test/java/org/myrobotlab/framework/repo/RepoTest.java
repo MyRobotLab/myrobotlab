@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.Status;
@@ -22,6 +23,13 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();
+  
+  @AfterClass
+  public static void lastCleanup() {
+    Repo repo = Repo.getInstance();
+    repo.clear();
+    installed = false;
+  }
 
   @Override
   public void broadcastStatus(Status status) {
