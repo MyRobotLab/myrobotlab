@@ -450,7 +450,10 @@ public class Emoji extends Service
       emoji.fire("ill-event");
       Service.sleep(2000);
       emoji.fire("ill-event");
+      
+      Runtime.release("emoji");
      
+      log.info("here");
 
       /**
        * <pre>
