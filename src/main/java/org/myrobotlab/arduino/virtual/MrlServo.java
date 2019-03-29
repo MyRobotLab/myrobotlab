@@ -186,14 +186,14 @@ public class MrlServo extends Device implements VirtualServo {
 
   @Override
   public void attach(int pin) {
-    System.out.println("mrl.attach");
+    // System.out.println("mrl.attach");
     enabled = true;
     this.pin = pin;
   }
 
   @Override
   public void detach() {
-    System.out.println("mrl.detach");
+    // System.out.println("mrl.detach");
     enabled = false;
   }
 

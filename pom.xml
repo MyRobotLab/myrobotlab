@@ -1667,6 +1667,12 @@
 					<excludes>
 						<exclude>**/integration/*</exclude>
 					</excludes>
+					   <systemPropertyVariables>
+      						<propertyName>java.library.path</propertyName>
+      						<buildDirectory>libraries/native</buildDirectory>
+      						<propertyName>jna.library.path</propertyName>
+      						<buildDirectory>libraries/native</buildDirectory>
+    					</systemPropertyVariables>
 				</configuration>
 				<version>2.9</version>
 			</plugin>
