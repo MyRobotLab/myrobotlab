@@ -55,7 +55,7 @@ public class AudioProcessor extends Thread {
   AudioData currentAudioData = null;
 
   private int repeatCount;
-
+  
   public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
     this.audioFile = audioFile;
@@ -82,6 +82,19 @@ public class AudioProcessor extends Thread {
   // FIXME - AudioData should have InputStream not File !
   public AudioData play(AudioData data) {
 
+
+    if (audioFile.isMute()) {
+      // if we have muted this service, we will skip the playback
+      // TODO: we should consider having a pause or delay here equal
+      // to the length of the track that is/was being played.  
+      // fow now..just invoke the lifecycle and return a no-op of playing the file.
+      audioFile.invoke("publishAudioStart", data);
+      
+      log.info("Audio File service is currently muted.  Skipping file playback. {}" , data);
+      audioFile.invoke("publishAudioEnd", data);      
+      return data;
+    }
+    
     log.info("playing {}", data.toString());
     // FIXME - won't close filehandles :( .. dunno why
     // FileInputStream fis = null;

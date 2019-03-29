@@ -91,6 +91,8 @@ public class AudioFile extends Service {
   String currentTrack = DEFAULT_TRACK;
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
   double volume = 1.0f;
+  // if set to true, playback will become a no-op
+  private boolean mute = false;
 
   public AudioFile(String n) {
     super(n);
@@ -501,6 +503,14 @@ public class AudioFile extends Service {
     file.delete();
   }
 
+  public boolean isMute() {
+    return mute;
+  }
+
+  public void setMute(boolean mute) {
+    this.mute = mute;
+  }
+  
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
