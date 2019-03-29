@@ -435,17 +435,6 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // Scala
   }
 
-  // for debugging.
-  // helper method to show an image. (todo; convert it to a Mat )
-  public void show(IplImage image, final String title) {
-    OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
-    IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
-    cvCopy(image, image1);
-    CanvasFrame canvas = new CanvasFrame(title, 1);
-    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(converterToIpl.convert(image1));
-  }
-
   /**
    * Helper search function that runs a search and returns a specified field
    * from the first result
@@ -622,7 +611,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
     meta.addDescription("Solr Service - Open source search engine");
     meta.addCategory("data", "search");
-    String solrVersion = "7.4.0";
+    String solrVersion = "7.7.1";
     meta.addDependency("org.apache.solr", "solr-core", solrVersion);
     meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
     meta.addDependency("org.apache.solr", "solr-test-framework", solrVersion);
