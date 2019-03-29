@@ -30,7 +30,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
   transient LeapMotionListener listener = null;
 
-  transient Controller controller = new Controller();
+  transient Controller controller = null;
 
   public LeapData lastLeapData = null;
 
@@ -148,6 +148,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
   public void startService() {
     super.startService();
     listener = new LeapMotionListener(this);
+    controller = new Controller();
     // we've been asked to start.. we should start tracking !
     this.startTracking();
   }

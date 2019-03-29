@@ -37,6 +37,7 @@ public class ServiceSmokeTest extends AbstractTest {
     // known problematic services?! TODO: fix them and remove from the following
     // list.
     ArrayList<String> blacklist = new ArrayList<String>();
+    /*
     // kills test if library not found! eek.
     blacklist.add("org.myrobotlab.service.LeapMotion");
     // same..
@@ -68,7 +69,7 @@ public class ServiceSmokeTest extends AbstractTest {
     //  anything which has Keyboard as a service - explodes on Linux
     blacklist.add("org.myrobotlab.service.EddieControlBoard");
     blacklist.add("org.myrobotlab.service.Keyboard");
-    
+    */
     
     
     // the service data!
