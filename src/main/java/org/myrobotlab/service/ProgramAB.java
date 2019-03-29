@@ -97,6 +97,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   public int savePredicatesInterval = 300000; // every 5 minutes
   // TODO: move the implementation from the gui to this class so it can be used across web and swing gui properly. 
   boolean visualDebug = true;
+  // TODO: if true, AIML is written back to disk on shutdown of this service.
+  public boolean writeOnExit = true;
 
   /**
    * Default constructor for the program ab service.
@@ -816,7 +818,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Override
   public void stopService() {
-    writeAndQuit();
+    if (writeOnExit) {
+      writeAndQuit();
+    }
     super.stopService();
   }
 
@@ -840,8 +844,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
     // TODO: This is for CJK support in ProgramAB move this into the published POM for ProgramAB so they are pulled in transiently.
-    meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.4.0");
-    meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.4.0");
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.7.1");
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.7.1");
     meta.addCategory("ai", "control");
     return meta;
   }
