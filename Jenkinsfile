@@ -40,14 +40,14 @@ node {
       echo "git_commit=$git_commit"
       // Run the maven build
       if (isUnix()) {
-         sh "'${mvnHome}/bin/mvn' -Djava.library.path=\"libraries/native\" -Djna.library.path=\"libraries/native\" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile"
+         sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile"
       } else {
-         bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean compile/)
+         bat(/"${mvnHome}\bin\mvn" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile/)
       }
    }
    stage('verify'){
 	   if (isUnix()) {
-	     sh "'${mvnHome}/bin/mvn'  -Djava.library.path=\"libraries/native\" -Djna.library.path=\"libraries/native\" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore  verify"
+	     sh "'${mvnHome}/bin/mvn' verify"
 	   } else {
 	     bat(/"${mvnHome}\bin\mvn" verify/)
 	   }
