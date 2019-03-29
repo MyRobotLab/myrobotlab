@@ -1055,4 +1055,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
 
   }
 
+  @Override
+  public void releaseService() {
+    shutdown();
+    super.releaseService();
+  }
+
 }
