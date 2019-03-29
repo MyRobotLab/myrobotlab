@@ -8,19 +8,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.document.Document;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.image.Util;
@@ -87,18 +92,67 @@ public class SolrTest extends AbstractServiceTest {
     Solr solr = (Solr)service;
     solr.startEmbedded();
     solr.deleteEmbeddedIndex();
-    solr.addDocument(makeTestDoc());
+    solr.addDocument(makeTestDoc("doc_1"));
     solr.commit();
     QueryResponse resp = solr.search("*:*");
     Assert.assertEquals(1, resp.getResults().getNumFound());
+    
+    solr.deleteDocument("doc_1");
+    solr.commit();
+    resp = solr.search("*:*");
+    Assert.assertEquals(0, resp.getResults().getNumFound());
+    
+    ArrayList<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
+    docs.add(makeTestDoc("doc_1"));
+    docs.add(makeTestDoc("doc_2"));
+    solr.addDocuments(docs);
+    solr.commit();
+    SolrDocument res = solr.getDocById("doc_2");
+    Assert.assertEquals("doc_2", res.get("id"));
+    
+    
+    Document mrlDoc = new Document("doc_3");
+    mrlDoc.setField("title", "Mrl Rocks!");
+
+    solr.onDocument(mrlDoc);
+    solr.commit();
+    
+    res = solr.getDocById("doc_3");
+    Assert.assertEquals("doc_3", res.get("id"));
+    
+    // create a message 
+    Message mrlMessage = Message.createMessage(solr, null, "fooMethod", new String[] {"foo", "bar"});
+    
+    solr.onMessage(mrlMessage);
+    
+    solr.commit();
+
+    SolrQuery query = new SolrQuery("message_id:" + mrlMessage.msgId);
+    resp = solr.search(query);
+    
+    Assert.assertEquals(1, resp.getResults().getNumFound());
+    
+    ProgramAB.Response programABResponse = new ProgramAB.Response("joe", "lloyd", "this is a test response.", null, new Date());
+    solr.onResponse(programABResponse);
+    
+    // what other ones?
+    
+    solr.onText("this is some text that was published");
+    
+    solr.commit();
+    
+    query = new SolrQuery("username:joe");
+    resp = solr.search(query);
+    Assert.assertEquals(1, resp.getResults().getNumFound());
+    
   }
 
 
 
-  private SolrInputDocument makeTestDoc() {
+  private SolrInputDocument makeTestDoc(String docId) {
     // TODO Auto-generated method stub
     SolrInputDocument doc = new SolrInputDocument();
-    doc.setField("id", "test_doc");
+    doc.setField("id", docId);
     return doc;
   }
   
