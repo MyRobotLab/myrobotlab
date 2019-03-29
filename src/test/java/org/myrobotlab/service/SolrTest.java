@@ -1,0 +1,105 @@
+package org.myrobotlab.service;
+
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.ThreadLocalRandom;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.myrobotlab.document.Document;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVFilter;
+
+
+// @Ignore
+public class SolrTest extends AbstractServiceTest {
+  
+  //@Test
+  public void testImageStoreFetch() throws SolrServerException, IOException {
+    Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
+    solr.startEmbedded();
+    solr.deleteEmbeddedIndex();
+    // make a document with an IplImage serialized into / out of it.  (maybe used a buffered image instead?!)
+    String docId = "test_image_doc_1";
+    SolrInputDocument imageDoc = makeImageDoc( solr , docId, loadDefaultImage());
+    solr.addDocument(imageDoc);
+    solr.commit();
+    QueryResponse qr = solr.search("id:"+docId);
+    //    solr.
+    IplImage img = solr.fetchImage("id:"+docId);
+    Assert.assertNotNull(img);
+    
+    //System.out.println("Press the any key");
+    //System.out.flush();
+    //System.in.read();
+    
+  }
+
+
+  
+  private SolrInputDocument makeImageDoc(Solr solr , String docId, IplImage image) throws IOException {
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.setField("id", docId);
+    // load an image from file/resource
+    byte[] bytes = solr.imageToBytes(image);
+    doc.setField("bytes", bytes);
+    return doc;
+  }
+
+  private IplImage loadDefaultImage() {
+    String path = "src"+File.separator+"test"+File.separator+"resources"+File.separator+"OpenCV" + File.separator +"lena.png";
+    IplImage image = cvLoadImage(path);
+    return image;
+  }
+
+  @Override
+  public Service createService() {
+    
+    LoggingFactory.init("INFO");
+    
+//    Repo.getInstance().install();
+    Repo.getInstance().install("Solr");
+    LoggingFactory.init("WARN");
+    // TODO Auto-generated method stub
+    Solr solr = (Solr)Runtime.start("solr", "Solr");
+    return solr;
+  }
+
+  @Override
+  public void testService() throws Exception {
+    Solr solr = (Solr)service;
+    solr.startEmbedded();
+    solr.deleteEmbeddedIndex();
+    solr.addDocument(makeTestDoc());
+    solr.commit();
+    QueryResponse resp = solr.search("*:*");
+    Assert.assertEquals(1, resp.getResults().getNumFound());
+  }
+
+
+
+  private SolrInputDocument makeTestDoc() {
+    // TODO Auto-generated method stub
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.setField("id", "test_doc");
+    return doc;
+  }
+  
+}
