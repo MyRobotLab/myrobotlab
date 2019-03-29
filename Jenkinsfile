@@ -42,14 +42,14 @@ node {
       if (isUnix()) {
          sh "'${mvnHome}/bin/mvn' -Djava.library.path=\"libraries/native\" -Djna.library.path=\"libraries/native\" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile"
       } else {
-         bat(/"${mvnHome}\bin\mvn" -Djava.library.path=\"libraries/native\" -Djna.library.path=\"libraries/native\" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile/)
+         bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean compile/)
       }
    }
    stage('verify'){
 	   if (isUnix()) {
 	     sh "'${mvnHome}/bin/mvn'  -Djava.library.path=\"libraries/native\" -Djna.library.path=\"libraries/native\" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore  verify"
 	   } else {
-	     bat(/"${mvnHome}\bin\mvn"  -Djava.library.path=\"libraries/native\" -Djna.library.path=\"libraries/native\" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore  verify/)
+	     bat(/"${mvnHome}\bin\mvn" verify/)
 	   }
    }
    stage('javadoc'){
