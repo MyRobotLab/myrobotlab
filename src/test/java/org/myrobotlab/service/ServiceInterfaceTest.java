@@ -92,6 +92,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     ArrayList<String> servicesNotInServiceDataJson = new ArrayList<String>();
 
     HashSet<String> whiteListServices = new HashSet<String>();
+    /*
     // CLI seems to mess up the console in the unit test so things
     // don't log well anymore.
     whiteListServices.add("Cli");
@@ -129,6 +130,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     whiteListServices.add("VirtualDevice");
     whiteListServices.add("OpenNi");
     whiteListServices.add("Runtime");
+    */
 
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.createAndStart("python", "Python");
