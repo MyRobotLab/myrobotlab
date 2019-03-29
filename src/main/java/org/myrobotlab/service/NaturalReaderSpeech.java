@@ -168,7 +168,6 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     addVoice("Carmen", "female", "ro", "Carmen");
     addVoice("Tatyana", "female", "ru", "Tatyana");
     addVoice("Maxim", "male", "ru", "Maxim");
-    addVoice("Enrique", "male", "es", "Enrique");
     // addVoice("Spanish_Laura", "es-ES_LauraVoice");
     // addVoice("Spanish_Sofia", "es-LA_SofiaVoice");
     addVoice("Astrid", "female", "sv", "Astrid");
