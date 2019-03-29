@@ -98,7 +98,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   // TODO: move the implementation from the gui to this class so it can be used across web and swing gui properly. 
   boolean visualDebug = true;
   // TODO: if true, AIML is written back to disk on shutdown of this service.
-  public boolean writeOnExit = false;
+  public boolean writeOnExit = true;
 
   /**
    * Default constructor for the program ab service.
