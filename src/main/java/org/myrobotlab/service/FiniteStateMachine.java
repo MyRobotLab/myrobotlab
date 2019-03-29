@@ -317,6 +317,10 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     this.states = states;
     currentStates.add(initialState.getId());
   }
+  
+  public SimpleEvent publishEvent(SimpleEvent event) {
+    return event;
+  }
 
   public static void main(String[] args) {
     try {

@@ -59,7 +59,6 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
       uart = virtual.getSerial();
       uart.setTimeout(100); // don't want to hang when decoding results...
       virtual.connect("COM7");
-
     }
   }
 
