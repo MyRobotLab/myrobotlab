@@ -59,13 +59,13 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
         if (archStr.indexOf("86") >= 0) { // 32bit
           libName += "32.dll";
           nativLibPath = getLibraryPathWin();// +
-          // "/SimpleOpenNI/library/";
+          // "libraries/native";
           // recent change
           nativDepLibPath = nativLibPath;// + "win32/"; recent change
         } else if (archStr.indexOf("64") >= 0) {
           libName += "64.dll";
           // nativLibPath = getLibraryPathWin() +
-          // "/SimpleOpenNI/library/";
+          // "libraries/native";
           nativLibPath = getLibraryPathWin();
           // nativDepLibPath = nativLibPath + "win64/"; GroG ...
           // recent change
@@ -75,13 +75,13 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
         System.load(nativDepLibPath + "OpenNI2.dll");
         System.load(nativDepLibPath + "NiTE2.dll");
       } else if (sysStr.indexOf("nix") >= 0 || sysStr.indexOf("linux") >= 0) { // unix
-        nativLibPath = "/SimpleOpenNI/library/linux";
+        nativLibPath = "libraries/nativelinux";
 
         if (archStr.indexOf("86") >= 0) { // 32bit
           libName += "32";
         } else if (archStr.indexOf("64") >= 0) {
           libName = "lib" + libName + "64.so";
-          nativLibPath = getLibraryPathLinux() + "/SimpleOpenNI/library/";
+          nativLibPath = getLibraryPathLinux() + "libraries/native";
           nativDepLibPath = nativLibPath + "linux64/";
         }
 
@@ -90,7 +90,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
         libName = "lib" + libName + ".jnilib";
         // nativLibPath = getLibraryPathLinux() +
-        // "/SimpleOpenNI/library/";
+        // "libraries/native";
         nativLibPath = getLibraryPathMac();
         nativDepLibPath = nativLibPath + "osx/";
 
