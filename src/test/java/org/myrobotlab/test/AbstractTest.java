@@ -215,8 +215,8 @@ public class AbstractTest {
       }
     }
     
-    log.warn("=====java.library.path===== [{}]", System.getProperty("java.library.path"));
-    log.warn("=====jna.library.path===== [{}]", System.getProperty("jna.library.path"));
+    // log.warn("=====java.library.path===== [{}]", System.getProperty("java.library.path"));
+    // log.warn("=====jna.library.path===== [{}]", System.getProperty("jna.library.path"));
     
   }
 
