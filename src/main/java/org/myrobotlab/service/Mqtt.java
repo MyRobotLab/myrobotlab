@@ -109,7 +109,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   /**
    * json msg codec
    */
-  Codec codec;
+  transient Codec codec;
 
   boolean autoSubscribe = true;
   String userName = null;

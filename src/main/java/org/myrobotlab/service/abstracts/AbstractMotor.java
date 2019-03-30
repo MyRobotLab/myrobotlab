@@ -94,7 +94,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   /**
    * a new "un-set" mapper for merging with default motorcontroller
    */
-  Mapper mapper = new MapperLinear();
+  transient Mapper mapper = new MapperLinear();
 
   transient MotorEncoder encoder = null;
 
