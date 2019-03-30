@@ -133,7 +133,7 @@ public class Lloyd extends Service {
   }
 
   public void startMouth() {
-    mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+    mouth = (SpeechSynthesis) Runtime.start("mouth", "MarySpeech");
   }
 
   public void startBrain() {
