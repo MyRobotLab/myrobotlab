@@ -4,6 +4,7 @@ node {
    // for examples :
    // https://jenkins.io/doc/pipeline/examples/
    // https://github.com/jenkinsci/pipeline-examples/tree/master/pipeline-examples
+   agent { label 'new​' }
    
    // for declaritive
    // agent any
