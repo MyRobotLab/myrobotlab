@@ -259,7 +259,7 @@ public class OpenCV extends AbstractComputerVision {
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
       "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
       "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate",
-      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "OpticalFlow", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray",
+      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "OpenPose", "OpticalFlow", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray",
       "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
 
   static final long serialVersionUID = 1L;
@@ -449,6 +449,9 @@ public class OpenCV extends AbstractComputerVision {
     // yolo models
     meta.addDependency("yolo", "yolov2", "v2", "zip");
 
+    // openpose coco and body_25 models..  
+    meta.addDependency("openpose", "openpose-mrl", "0.0.1", "zip");
+    
     return meta;
   }
 

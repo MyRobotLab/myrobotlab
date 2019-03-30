@@ -54,14 +54,11 @@ public class OpenCVFilterOpenPose extends OpenCVFilter {
   // int x0, y0, x1, y1;
   private Net net;
 
-//  public String model = "openpose/pose_iter_584000.caffemodel";
-//  public String protoTxt = "openpose/pose_deploy.prototxt";
+//  public String model = "resource/openpose/pose/body_25/pose_iter_584000.caffemodel";
+//  public String protoTxt = "resource/openpose/pose/body_25/pose_deploy.prototxt";
 
-//  public String model = "openpose/pose/body_25/pose_iter_584000.caffemodel";
-//  public String protoTxt = "openpose/pose/body_25/pose_deploy.prototxt";
-
-  public String model = "data/openpose/pose/coco/pose_iter_440000.caffemodel";
-  public String protoTxt = "data/openpose/pose/coco/pose_deploy_linevec.prototxt";
+  public String model = "resource/openpose/pose/coco/pose_iter_440000.caffemodel";
+  public String protoTxt = "resource/openpose/pose/coco/pose_deploy_linevec.prototxt";
   
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
