@@ -336,10 +336,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * Attach an encoder to the arduino
    * 
-   * @param encoder
-   *          - the encoder control to attach
-   * @param type
-   *          - 0 for AMT203 1 for AS5048A
+   * @param encoder - the encoder control to attach
    */
   public void attachEncoderControl(EncoderControl encoder) {
     Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
@@ -692,7 +689,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * silly Arduino implementation - but keeping it since its familiar >
+   * silly Arduino implementation - but keeping it since its familiar 
    * digitalWrite/pin/value
    */
   public void digitalWrite(int address, int value) {
@@ -706,7 +703,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   *  > disablePin/address
+   *  disablePin/address
    */
   @Override
   public void disablePin(int address) {
@@ -715,7 +712,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     msg.disablePin(address);
   }
 
-  // > disablePins
+  /**
+   * disable all pins
+   */
   public void disablePins() {
     msg.disablePins();
   }
@@ -774,7 +773,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * start polling reads of selected pin > enablePin/address/type/b16 rate
+   * start polling reads of selected pin 
+   * enablePin/address/type/b16 rate
    */
   public void enablePin(String pin, int rate) {
     if (!isConnected()) {
@@ -1348,7 +1348,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * // > neoPixelWriteMatrix/deviceId/[] buffer
+   * neoPixelWriteMatrix/deviceId/[] buffer
    */
   @Override
   public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> data) {
@@ -1600,7 +1600,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * // < publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
+   *  publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
    * 
    * @param myFloat
    * @param myByte
