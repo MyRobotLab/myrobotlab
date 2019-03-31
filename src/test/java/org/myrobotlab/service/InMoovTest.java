@@ -212,7 +212,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     
     
     // start Open NI I guesS
-    i01.startOpenNI();
+    // i01.startOpenNI();
     
     // TODO: starting opencv also starts a capture.
     
