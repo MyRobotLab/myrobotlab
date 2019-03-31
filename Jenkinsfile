@@ -1,14 +1,9 @@
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
-node ('ubuntu') {
-   // for examples :
-   // https://jenkins.io/doc/pipeline/examples/
-   // https://github.com/jenkinsci/pipeline-examples/tree/master/pipeline-examples
-   // agent { label 'new​' } for declaritive :P
-   
-   // for declaritive
-   // agent any
-   
+node { // use any node
+
+// node ('ubuntu') {  // use labels to direct build
+
    // withEnv(javaEnv) {
    
    def mvnHome
