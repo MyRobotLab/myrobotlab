@@ -37,41 +37,9 @@ public class ServiceSmokeTest extends AbstractTest {
     // known problematic services?! TODO: fix them and remove from the following
     // list.
     ArrayList<String> blacklist = new ArrayList<String>();
-    /*
-    // kills test if library not found! eek.
-    blacklist.add("org.myrobotlab.service.LeapMotion");
-    // same..
     blacklist.add("org.myrobotlab.service.OpenNi");
-    // not sure what the heck happens here.
-    blacklist.add("org.myrobotlab.service.Runtime");
-    // more bad stuff happens with this service.
-    blacklist.add("org.myrobotlab.service.SlamBad");
-    // why the heck does this one fail?!
-    // blacklist.add("org.myrobotlab.service._TemplateService");
-
-    // TODO: lets skip a few painful services to test additionally.
-    blacklist.add("org.myrobotlab.service.Cli");
-    blacklist.add("org.myrobotlab.service.WebGui");
-    blacklist.add("org.myrobotlab.service.JMonkeyEngine");
-    blacklist.add("org.myrobotlab.service.ImageDisplay");
-
-    // this seems to start webgui also as a peer.. eek!
-    blacklist.add("org.myrobotlab.service.GoogleAssistant");
-    blacklist.add("org.myrobotlab.service.PickToLight");
-    blacklist.add("org.myrobotlab.service.PythonProxy");
-    blacklist.add("org.myrobotlab.service.Sprinkler");
-    blacklist.add("org.myrobotlab.service._TemplateProxy");
-
-    // just don't want a swing gui opening up in the unit test.
-    blacklist.add("org.myrobotlab.service.SwingGui");
-    // blacklist.add("org.myrobotlab.service.DiyServo");
-    
-    //  anything which has Keyboard as a service - explodes on Linux
-    blacklist.add("org.myrobotlab.service.EddieControlBoard");
-    blacklist.add("org.myrobotlab.service.Keyboard");
-    */
-    
-    
+    blacklist.add("org.myrobotlab.service.LeepMotion");
+  
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();
 
