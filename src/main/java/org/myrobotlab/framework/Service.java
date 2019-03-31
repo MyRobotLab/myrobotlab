@@ -1041,12 +1041,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
    *          r
    * @return service interface
    */
-  /*
-   * public String getPeerName(String key){ if
-   * (!serviceType.peers.containsKey(key)){ return null; } else {
-   * ServiceReservation sr = serviceType.peers.get(key); // TODO !isLocal(){
-   * return gw.getPrefix() + actualName return sr.actualName; } }
-   */
 
   public synchronized ServiceInterface createPeer(String reservedKey) {
     String fullkey = Peers.getPeerKey(getName(), reservedKey);
@@ -1650,7 +1644,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * peers - it should fufill the request
    */
   @Override
-  public void releasePeers() {
+  synchronized public void releasePeers() {
     log.info("dna - {}", dnaPool.toString());
     String myKey = getName();
     log.info("releasePeers ({}, {})", myKey, serviceClass);
@@ -1673,7 +1667,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Releases resources, and unregisters service from the runtime
    */
   @Override
-  public void releaseService() {
+  synchronized public void releaseService() {
 
     // recently added - preference over detach(Runtime.getService(getName()));
     // since this service is releasing - it should be detached from all existing
@@ -2017,10 +2011,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   @Override
-  public void startService() {
+  synchronized public void startService() {
     ServiceInterface si = Runtime.getService(name);
     if (si == null) {
-      Runtime.create(name, getSimpleName());
+      // FIXME - should NOT be create !!!! should be put into registry !
+      // Runtime.create(name, getSimpleName());
+      Runtime.register(this, null);
     }
     if (!isRunning()) {
       outbox.start();
@@ -2038,7 +2034,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * Stops the service. Stops threads.
    */
   @Override
-  public void stopService() {
+  synchronized public void stopService() {
     isRunning = false;
     outbox.stop();
     if (thisThread != null) {
@@ -2437,4 +2433,25 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   public void preShutdown() {
   }
+  
+  /**
+   * determines if current process has internet access - moved to Service recently
+   * because it may become Service specific
+   * 
+   * @return - true if internet is available
+   */
+  public static boolean hasInternet() {
+    return Runtime.getPublicGateway() != null;
+  }
+  
+  /**
+   * true when no display is available - moved from Runtime to Service because it may become
+   * Service specific
+   * 
+   * @return - true when no display is available
+   */
+  static public boolean isHeadless() {
+    return java.awt.GraphicsEnvironment.isHeadless();
+  }
+  
 }

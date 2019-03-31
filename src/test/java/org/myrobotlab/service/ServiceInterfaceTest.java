@@ -20,11 +20,12 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
-// @Ignore // temporarily ignoring to evaluate mvn logging
+
 public class ServiceInterfaceTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
 
+  // FIXME - add to report at end of "all" testing ...
   private boolean serviceHasWebPage(String service) {
     String url = "http://myrobotlab.org/service/" + service;
     InputStream in = null;
@@ -95,45 +96,6 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("OpenNi");
     blacklist.add("LeapMotion");
     blacklist.add("Runtime");
-    /*
-    // CLI seems to mess up the console in the unit test so things
-    // don't log well anymore.
-    blacklist.add("Cli");
-    // gui service will probably blow up if you are running in a console.
-    blacklist.add("SwingGui");
-    // leap motion blows up because java.libary.path not having the leap deps.
-    blacklist.add("LeapMotion");
-    // jna lib path stuff
-    blacklist.add("OculusRift");
-    // plantoid gets a null pointer on tracking service start
-    blacklist.add("Plantoid");
-    // Shoutbox gets an address in use/failed to bind to port 8888
-    blacklist.add("Shoutbox");
-    // jni class path error
-    blacklist.add("SLAMBad");
-    // WebGUI gets an address in use/failed to bind to port 8888
-    blacklist.add("WebGui");
-
-    // dependencies missing in repo
-    blacklist.add("MyoThalmic");
-    // NPE exception.
-    blacklist.add("Tracking");
-
-    // NPE Exception in serial service?
-    blacklist.add("EddieControlBoard");
-    // NPE in serial
-    blacklist.add("GPS");
-    // NPE in regex
-    blacklist.add("Lidar");
-    // starts a webgui and gets bind error
-    blacklist.add("PickToLight");
-    // NPE in serial
-    blacklist.add("Sabertooth");
-    // NPE in serial
-    blacklist.add("VirtualDevice");
-    blacklist.add("OpenNi");
-    blacklist.add("Runtime");
-    */
 
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.createAndStart("python", "Python");
@@ -155,7 +117,7 @@ public class ServiceInterfaceTest extends AbstractTest {
       String service = serviceType.getSimpleName();
       System.out.println("SYSTEM TESTING " + service);
       System.out.flush();
-      if (blacklist.contains(service)) {
+      if (blacklist.contains(service)/* || !serviceType.getSimpleName().equals("Emoji")*/) {
         log.info("White listed testing of service {}", service);
         continue;
       }
@@ -163,19 +125,10 @@ public class ServiceInterfaceTest extends AbstractTest {
 
       ServiceType st = sd.getServiceType("org.myrobotlab.service." + service);
       if (st == null) {
-        System.out.println("NO SERVICE TYPE FOUND!");
+        System.out.println("NO SERVICE TYPE FOUND!"); // perhaps this should throw
         servicesNotInServiceDataJson.add(service);
       } 
       
-      // System.out.flush();
-      // try {
-      // System.in.read();
-      // } catch (IOException e) {
-      // // TODO Auto-generated catch block
-      // e.printStackTrace();
-      // }
-
-      //
       if (serviceHasWebPage(service)) {
         log.info("Service {} has a web page..", service);
         numServicePages++;
