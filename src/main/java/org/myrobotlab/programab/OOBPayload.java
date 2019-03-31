@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
@@ -118,12 +119,20 @@ public class OOBPayload {
   }
   
   
-  public static boolean invokeOOBPayload(OOBPayload payload) {
+  public static boolean invokeOOBPayload(OOBPayload payload, String sender, boolean blocking) {
     ServiceInterface s = Runtime.getService(payload.getServiceName());
     // the service must exist and the method name must be set.
     if (s == null || StringUtils.isEmpty(payload.getMethodName())) {
       return false;
     }
+    
+    
+    if (!blocking) {
+      s.in(Message.createMessage(sender, payload.getServiceName(), payload.getMethodName(), payload.getParams().toArray()));
+      // non-blocking.. fire and forget!
+      return true;
+    }
+    
     // TODO: should you be able to be synchronous for this
     // execution?
     Object result = null;
