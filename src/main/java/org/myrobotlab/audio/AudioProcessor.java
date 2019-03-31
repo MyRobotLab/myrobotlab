@@ -55,7 +55,7 @@ public class AudioProcessor extends Thread {
   AudioData currentAudioData = null;
 
   private int repeatCount;
-
+  
   public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
     this.audioFile = audioFile;
@@ -190,7 +190,11 @@ public class AudioProcessor extends Thread {
           // the buffer of raw data could be published from here
           // if a reference of the service is passed in
 
-          line.write(buffer, 0, nBytesRead);
+          if (audioFile.isMute()) {
+            // NoOp for a mute audioFile.
+          } else {
+            line.write(buffer, 0, nBytesRead);
+          }
 
         }
         // Stop
