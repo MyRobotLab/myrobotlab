@@ -808,7 +808,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * Heart-beat method on time, driven by the Arduino service to get information
    * from the board its currently connected. This is the "last" boardInfo
    * returned from the task inserted with addTask("getBoardInfo", 1000, 0,
-   * "sendBoardInfoRequest"); // > getBoardInfo
+   * "sendBoardInfoRequest"); 
+   * 
+   *  getBoardInfo
    */
   public BoardInfo getBoardInfo() {
     // msg.getBoardInfo(); do not do this -
@@ -1579,16 +1581,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return portName;
   }
 
-  /**
-   * // < publishCustomMsg/[] msg
-   */
+  //  < publishCustomMsg/[] msg
   public int[] publishCustomMsg(int[] msg/* [] */) {
     return msg;
   }
 
-  /**
-   * // < publishDebug/str debugMsg
-   */
+  // < publishDebug/str debugMsg
   public String publishDebug(String debugMsg/* str */) {
     log.info("publishDebug {}", debugMsg);
     return debugMsg;
@@ -1626,8 +1624,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * return heartbeat - prevents resetting // < publishHeartbeat
+   * return heartbeat - prevents resetting 
    */
+  // < publishHeartbeat
   public void publishHeartbeat() {
     heartbeat = true;
   }
@@ -1640,24 +1639,24 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
 
   /**
-   * // < publishI2cData/deviceId/[] data
-   * 
    * @param deviceId
    *          - mrl device identifier
    * @param data
    *          - data to publish from I2c
    */
+  //  < publishI2cData/deviceId/[] data
   public void publishI2cData(Integer deviceId, int[] data) {
     log.info("publishI2cData");
     i2cReturnData(data);
   }
 
   /**
-   * error from mrlcom in string form // < publishMRLCommError/str errorMsg
+   * error from mrlcom in string form 
    * 
    * @param errorMsg
    * @return
    */
+  //  < publishMRLCommError/str errorMsg
   public String publishMRLCommError(String errorMsg/* str */) {
     log.error(errorMsg);
     return errorMsg;
