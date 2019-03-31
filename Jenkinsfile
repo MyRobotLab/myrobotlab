@@ -1,6 +1,6 @@
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
-node ('new') {
+node ('ubuntu') {
    // for examples :
    // https://jenkins.io/doc/pipeline/examples/
    // https://github.com/jenkinsci/pipeline-examples/tree/master/pipeline-examples
