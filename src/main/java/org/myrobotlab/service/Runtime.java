@@ -258,10 +258,6 @@ public class Runtime extends Service implements MessageListener {
     return null;
   }
 
-  static public boolean hasInternet() {
-    return getPublicGateway() != null;
-  }
-
   static public synchronized ServiceInterface create(String name, String type) {
     String fullTypeName;
     if (name.indexOf("/") != -1) {
@@ -1034,18 +1030,6 @@ public class Runtime extends Service implements MessageListener {
       return false;
     }
     return cmdline.containsKey("-isAgent");
-  }
-
-  static public boolean isHeadless() {
-    // String awt = "java.awt.GraphicsEnvironment";
-    // java.awt.GraphicsEnvironment.isHeadless()
-    // String nm = System.getProperty("java.awt.headless");
-    // should return true if Linux != display
-    /*
-    String b = System.getProperty("java.awt.headless");
-    return Boolean.parseBoolean(b);
-    */
-    return java.awt.GraphicsEnvironment.isHeadless();
   }
 
   public static boolean isLocal(String serviceName) {
