@@ -91,45 +91,48 @@ public class ServiceInterfaceTest extends AbstractTest {
 
     ArrayList<String> servicesNotInServiceDataJson = new ArrayList<String>();
 
-    HashSet<String> whiteListServices = new HashSet<String>();
+    HashSet<String> blacklist = new HashSet<String>();
+    blacklist.add("OpenNi");
+    blacklist.add("LeapMotion");
+    blacklist.add("Runtime");
     /*
     // CLI seems to mess up the console in the unit test so things
     // don't log well anymore.
-    whiteListServices.add("Cli");
+    blacklist.add("Cli");
     // gui service will probably blow up if you are running in a console.
-    whiteListServices.add("SwingGui");
+    blacklist.add("SwingGui");
     // leap motion blows up because java.libary.path not having the leap deps.
-    whiteListServices.add("LeapMotion");
+    blacklist.add("LeapMotion");
     // jna lib path stuff
-    whiteListServices.add("OculusRift");
+    blacklist.add("OculusRift");
     // plantoid gets a null pointer on tracking service start
-    whiteListServices.add("Plantoid");
+    blacklist.add("Plantoid");
     // Shoutbox gets an address in use/failed to bind to port 8888
-    whiteListServices.add("Shoutbox");
+    blacklist.add("Shoutbox");
     // jni class path error
-    whiteListServices.add("SLAMBad");
+    blacklist.add("SLAMBad");
     // WebGUI gets an address in use/failed to bind to port 8888
-    whiteListServices.add("WebGui");
+    blacklist.add("WebGui");
 
     // dependencies missing in repo
-    whiteListServices.add("MyoThalmic");
+    blacklist.add("MyoThalmic");
     // NPE exception.
-    whiteListServices.add("Tracking");
+    blacklist.add("Tracking");
 
     // NPE Exception in serial service?
-    whiteListServices.add("EddieControlBoard");
+    blacklist.add("EddieControlBoard");
     // NPE in serial
-    whiteListServices.add("GPS");
+    blacklist.add("GPS");
     // NPE in regex
-    whiteListServices.add("Lidar");
+    blacklist.add("Lidar");
     // starts a webgui and gets bind error
-    whiteListServices.add("PickToLight");
+    blacklist.add("PickToLight");
     // NPE in serial
-    whiteListServices.add("Sabertooth");
+    blacklist.add("Sabertooth");
     // NPE in serial
-    whiteListServices.add("VirtualDevice");
-    whiteListServices.add("OpenNi");
-    whiteListServices.add("Runtime");
+    blacklist.add("VirtualDevice");
+    blacklist.add("OpenNi");
+    blacklist.add("Runtime");
     */
 
     // start up python so we have it available to do some testing with.
@@ -152,7 +155,7 @@ public class ServiceInterfaceTest extends AbstractTest {
       String service = serviceType.getSimpleName();
       System.out.println("SYSTEM TESTING " + service);
       System.out.flush();
-      if (whiteListServices.contains(service)) {
+      if (blacklist.contains(service)) {
         log.info("White listed testing of service {}", service);
         continue;
       }

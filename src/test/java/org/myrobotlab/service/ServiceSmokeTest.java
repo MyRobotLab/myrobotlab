@@ -39,6 +39,7 @@ public class ServiceSmokeTest extends AbstractTest {
     ArrayList<String> blacklist = new ArrayList<String>();
     blacklist.add("org.myrobotlab.service.OpenNi");
     blacklist.add("org.myrobotlab.service.LeepMotion");
+    blacklist.add("org.myrobotlab.service.Runtime");
   
     // the service data!
     ServiceData serviceData = ServiceData.getLocalInstance();
