@@ -43,6 +43,7 @@ public class ProgramABTest extends AbstractServiceTest {
 
   public Service createService() {
 
+    //LoggingFactory.init("INFO");
     log.info("Setting up the Program AB Service ########################################");
     // Load the service under test
     // a test robot
@@ -196,7 +197,19 @@ public class ProgramABTest extends AbstractServiceTest {
   public void testOOBTags() throws Exception {
     Response resp = testService.getResponse(username, "OOB TEST");
     assertEquals("OOB Tag Test", resp.msg);
-    // Thread.sleep(1000);
+    
+    // TODO figure a mock object that can wait on a callback to let us know the python service is started.
+    // wait up to 5 seconds for python service to start
+    long maxWait = 5000;
+    int i = 0;
+    while (Runtime.getService("python") == null) {
+      Thread.sleep(100);
+      log.info("Waiting for python to start...");
+      i++;
+      if (i > maxWait) {
+        Assert.assertFalse("Took too long to process OOB tag", i > maxWait);
+      }
+    }
     Assert.assertNotNull(Runtime.getService("python"));
 
   }

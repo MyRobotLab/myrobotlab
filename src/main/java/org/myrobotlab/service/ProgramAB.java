@@ -441,7 +441,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     ArrayList<OOBPayload> payloads = OOBPayload.extractOOBPayloads(text, this);
     // invoke them all.
     for (OOBPayload payload : payloads) {
-      boolean oobRes = OOBPayload.invokeOOBPayload(payload);
+      // assumption is this is non blocking invoking!
+      boolean oobRes = OOBPayload.invokeOOBPayload(payload, getName(), false);
       if (!oobRes) {
         // there was a failure invoking
         log.warn("Failed to invoke OOB/MRL tag : {}", OOBPayload.asOOBTag(payload));
