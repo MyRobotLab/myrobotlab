@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -832,10 +833,10 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     try {
 
       log.info("loading default properties");
-      properties.load(new FileInputStream(Util.getResourceDir() + String.format("%sPickToLight%spickToLight.properties", File.separator)));
+      properties.load(new FileInputStream(Util.getResourceDir() + String.format("%sPickToLight%spickToLight.properties", File.separator, File.separator)));
 
       log.info("loading mes properties");
-      input = new FileInputStream(String.format("%sboot%spickToLight.properties", File.separator));
+      input = new FileInputStream(String.format("%sboot%spickToLight.properties", File.separator, File.separator));
       properties.load(input);
 
       if ("true".equalsIgnoreCase(properties.getProperty("xmpp.enabled"))) {
@@ -846,6 +847,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
         // FIXME - xmpp.addAuditor("Greg Perry");
       }
 
+    } catch(FileNotFoundException fex) {
+      log.info("could not find properties file");
     } catch (Exception ex) {
       Logging.logError(ex);
     } finally {
@@ -861,7 +864,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     plant = properties.getProperty("mes.plant");
     log.info("operating in plant [{}]", plant);
     if (plant == null) {
-      log.error("invalid plant");
+      log.info("invalid plant");
     }
     return properties;
   }
