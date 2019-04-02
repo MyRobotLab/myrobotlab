@@ -366,13 +366,13 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void addServoEventListener(NameProvider service) {
     isEventsEnabled = true;
-    addListener("publishServoEvent", service.getName(), "onServoEvent");
+    subscribe(getName(), "publishServoEvent");
   }
 
   @Override
   public void removeServoEventListener(NameProvider service) {
     isEventsEnabled = false;
-    removeListener("publishServoEvent", service.getName(), "onServoEvent");
+    unsubscribe(getName(), "publishServoEvent");
   }
 
   public void addIKServoEventListener(NameProvider service) {
@@ -969,7 +969,7 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public void setAutoDisable(boolean autoDisable) {
-    autoDisable = autoDisable;
+    this.autoDisable = autoDisable;
     addServoEventListener(this);
     log.info("setAutoDisable : " + autoDisable);
     delayDisable();
