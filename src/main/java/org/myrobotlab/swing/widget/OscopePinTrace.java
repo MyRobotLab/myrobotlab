@@ -68,7 +68,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   int timeDivisor = 1;
 
   // default trace dimensions
-  int width = 600;
+  int width = 800;
 
   Color inactiveColor;
 

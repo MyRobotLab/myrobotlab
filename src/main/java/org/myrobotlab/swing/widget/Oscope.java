@@ -48,9 +48,12 @@ public class Oscope extends ServiceGui implements ActionListener {
     flow.add(buttonPanel);
     addLeftLine(flow);
 
+    
     flow = new JPanel();
     flow.add(screenPanel);
     add(flow);
+    
+    // add(screenPanel);
 
     // since this is a widget - subscribeGui is not auto-magically called
     // by the framework
