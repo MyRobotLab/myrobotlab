@@ -1,9 +1,11 @@
 package org.myrobotlab.service;
 
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.test.AbstractTest;
+import org.junit.ClassRule;
 import org.junit.Ignore;
 
 /**
@@ -18,8 +20,13 @@ import org.junit.Ignore;
 @Ignore
 public abstract class AbstractServiceTest extends AbstractTest {
 
+  
   // The service object that is created for testing
   public Service service;
+  
+  // a temporary folder for service tests to use
+  @ClassRule
+  public static TemporaryFolder testFolder = new TemporaryFolder();
 
   // This method should be subclassed and it should return a service object.
   public abstract Service createService();

@@ -39,7 +39,8 @@ public class SolrTest extends AbstractServiceTest {
   //@Test
   public void testImageStoreFetch() throws SolrServerException, IOException {
     Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
-    solr.startEmbedded();
+    String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
+    solr.startEmbedded(solrHome);
     solr.deleteEmbeddedIndex();
     // make a document with an IplImage serialized into / out of it.  (maybe used a buffered image instead?!)
     String docId = "test_image_doc_1";
@@ -77,8 +78,6 @@ public class SolrTest extends AbstractServiceTest {
   @Override
   public Service createService() {
     
-    LoggingFactory.init("INFO");
-    
 //    Repo.getInstance().install();
     Repo.getInstance().install("Solr");
     LoggingFactory.init("WARN");
@@ -89,8 +88,10 @@ public class SolrTest extends AbstractServiceTest {
 
   @Override
   public void testService() throws Exception {
+    LoggingFactory.init("INFO");
     Solr solr = (Solr)service;
-    solr.startEmbedded();
+    String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
+    solr.startEmbedded(solrHome);
     solr.deleteEmbeddedIndex();
     solr.addDocument(makeTestDoc("doc_1"));
     solr.commit();

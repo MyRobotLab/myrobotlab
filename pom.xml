@@ -1661,7 +1661,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<!-- <configuration> <skip>true</skip> </configuration> -->
 				<configuration>
-					<argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
+					<argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native ${argLine}</argLine>
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
