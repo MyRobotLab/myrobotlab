@@ -86,7 +86,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     
     Runtime.start("gui", "SwingGui");
     
-    arduino01.setVirtual(false); // <-- useful for debugging "real" Arduino
+    // arduino01.setVirtual(false); // <-- useful for debugging "real" Arduino
     log.error("servo ports {}", arduino01.getPortNames());
     
     log.error("arduino virtual mode is {}", arduino01.isVirtual());   
