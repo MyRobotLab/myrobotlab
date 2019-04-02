@@ -1,34 +1,61 @@
 package org.myrobotlab.test;
 
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class AbstractTest {
 
-  private static long coolDownTimeMs = 2000;
-  /**
-   * cached internet test value for tests
-   */
+  private static long coolDownTimeMs = 100;
+
+  /** cached internet test value for tests */
   static Boolean hasInternet = null;
+
+  static boolean install = true;
+
+  protected static boolean installed = false;
 
   public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
-  static private boolean logTestHeader = true;
+  static private boolean logWarnTestHeader = false;
 
   private static boolean releaseRemainingServices = true;
 
   private static boolean releaseRemainingThreads = false;
 
   static transient Set<Thread> threadSetStart = null;
-  
-  private static boolean useDeprecatedThreadStop = false;
+
+  protected boolean printMethods = true;
+
+  // private static boolean useDeprecatedThreadStop = false;
+
+  @Rule
+  public final TestName testName = new TestName();
+  static public String simpleName;
+  private static boolean lineFeedFooter = true;
+  private static Platform platform = Platform.getLocalInstance();
+
+  public String getSimpleName() {
+    return simpleName;
+  }
+
+  protected String getName() {
+    return testName.getMethodName();
+  }
 
   static public boolean hasInternet() {
     if (hasInternet == null) {
@@ -41,14 +68,12 @@ public class AbstractTest {
     return Runtime.isHeadless();
   }
 
-  static public boolean isVirtual() {
-    boolean isVirtual = true;
-    String isVirtualProp = System.getProperty("junit.isVirtual");
+  static public void setVirtual(boolean b) {
+    platform.setVirtual(b);
+  }
 
-    if (isVirtualProp != null) {
-      isVirtual = Boolean.parseBoolean(isVirtualProp);
-    }
-    return isVirtual;
+  static public boolean isVirtual() {
+    return platform.isVirtual();
   }
 
   public static void main(String[] args) {
@@ -73,6 +98,10 @@ public class AbstractTest {
   // constructor of the AbstractTest
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
+
+    // make testing environment "virtual"
+    setVirtual(true);
+
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
       Runtime.setLogLevel(junitLogLevel);
@@ -104,52 +133,91 @@ public class AbstractTest {
 
   @AfterClass
   public static void tearDownAbstractTest() throws Exception {
-    log.warn("tearDownAbstractTest");
+    log.info("tearDownAbstractTest");
 
     if (releaseRemainingServices) {
-      // services to be cleaned up/released
-      StringBuilder sb = new StringBuilder();
-      String[] services = Runtime.getServiceNames();
-      for (String service : services) {
-        if (!"runtime".equals(service)) {
-          sb.append(service);
-          sb.append(" ");
-          log.warn("service {} left in registry - releasing", service);
-          Runtime.releaseService(service);
-        }
-      }
+      releaseServices();
+    }
 
-      if (sb.length() > 0) {
-        log.warn("had to release the following services {}", sb.toString());
-        log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
-        sleep(coolDownTimeMs);
+    if (logWarnTestHeader) {
+      log.warn("=========== finished test {} ===========", simpleName);
+    }
+
+    if (lineFeedFooter) {
+      System.out.println();
+    }
+  }
+
+  protected void installAll() throws ParseException, IOException {
+    if (!installed) {
+      log.warn("installing all services");
+      Runtime.install();
+      installed = true;
+    }
+  }
+
+  public static void releaseServices() {
+
+    // services to be cleaned up/released
+    String[] services = Runtime.getServiceNames();
+    Set<String> releaseServices = new TreeSet<>();
+    for (String service : services) {
+      // don't kill runtime - although in the future i hope this is possible
+      if (!"runtime".equals(service)) {
+        releaseServices.add(service);
+        log.info("service {} left in registry - releasing", service);
+        Runtime.releaseService(service);
       }
+    }
+
+    if (releaseServices.size() > 0) {
+      log.warn("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
+      log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
+      sleep(coolDownTimeMs);
     }
 
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();
     Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
+    Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
-      if (!threadSetStart.contains(thread)) {
+      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
           log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
-          if (useDeprecatedThreadStop) {
-            thread.stop();
-          }
+          /*
+           * if (useDeprecatedThreadStop) { thread.stop(); }
+           */
         } else {
-          log.warn("thread {} marked as straggler - should be killed", thread.getName());
+          // log.warn("thread {} marked as straggler - should be killed",
+          // thread.getName());
+          threadsRemaining.add(thread.getName());
         }
       }
     }
-
-    log.warn("=========== finished test ===========");
+    if (threadsRemaining.size() > 0) {
+      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+    }
+    log.info("finished the killing ...");
   }
 
   public AbstractTest() {
-    if (logTestHeader) {
+    simpleName = this.getClass().getSimpleName();
+    if (logWarnTestHeader) {
       log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
     }
+    if (install) {
+      try {
+        installAll();
+      } catch (Exception e) {
+        log.error("installing services failed");
+        fail("installing service failed");
+      }
+    }
+    
+    // log.warn("=====java.library.path===== [{}]", System.getProperty("java.library.path"));
+    // log.warn("=====jna.library.path===== [{}]", System.getProperty("jna.library.path"));
+    
   }
 
   @Before

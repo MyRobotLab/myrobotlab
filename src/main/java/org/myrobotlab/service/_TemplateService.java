@@ -60,5 +60,3 @@ public class _TemplateService extends Service {
     }
   }
 }
-
-// yum yum ...

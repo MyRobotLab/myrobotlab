@@ -1,7 +1,7 @@
 package org.myrobotlab.service;
 
 import java.awt.AWTException;
-
+import java.awt.GraphicsEnvironment;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 
@@ -25,7 +25,11 @@ public class MouseSim extends Service {
   public MouseSim(String n) {
     super(n);
     try {
-      robot = new Robot();
+      if (!GraphicsEnvironment.isHeadless()) {
+        robot = new Robot();
+      } else {
+        log.warn("headless environment - but MouseSim requires a display");
+      }
     } catch (Exception e) {
       log.error("could not create java.awt.Robot", e);
     }

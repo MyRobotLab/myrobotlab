@@ -45,7 +45,7 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
 
   HashMap<String, Command> commands = new HashMap<String, Command>();
 
-  private static ServerSocket serverSock;
+  private transient static ServerSocket serverSock;
   // heartBeat is wip
   private transient Timer heartBeat;
   private transient boolean heartBeatFirstMessage = true;
@@ -56,8 +56,8 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
   boolean clientIsConnect = false;
   public int port = 5684;
 
-  private static NewConnectionHandler nch;
-  private static Socket clientSocket = null;
+  transient private static NewConnectionHandler nch;
+  transient private static Socket clientSocket = null;
   public String lastThingRecognized;
   private String serverAdress;
   private boolean listening = false;
@@ -176,8 +176,6 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
 
   public final static Logger log = LoggerFactory.getLogger(AndroidSpeechRecognition.class);
   transient private ClientHandler client;
-
-  private boolean speaking;
 
   // TODO refactor version control
   private final static String VERSION = "1.0b";

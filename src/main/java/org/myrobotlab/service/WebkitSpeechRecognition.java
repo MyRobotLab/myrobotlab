@@ -1,9 +1,9 @@
 package org.myrobotlab.service;
 
 import java.util.HashMap;
+
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;

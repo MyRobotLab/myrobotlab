@@ -4,11 +4,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.SimpleTimeZone;
 
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPException;
@@ -139,7 +142,11 @@ public class Shoutbox extends Service {
   transient FileWriter fw = null;
 
   transient BufferedWriter bw = null;
+  
+  transient protected SimpleDateFormat tsFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
+  transient protected Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
+  
   int maxArchiveRecordCount = 50;
 
   public Shoutbox(String n) {
@@ -226,6 +233,10 @@ public class Shoutbox extends Service {
   public void loadShouts() {
     try {
       File latest = null;
+      if (!new File(getName()).exists()) {
+        log.info("{} does not exist - will not load previous shouts", getName());
+        return;
+      }
       // restore the last file back into memory
       List<File> files = FindFile.find(getName(), "shouts.*.js", false, false);
 

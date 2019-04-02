@@ -12,7 +12,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -72,8 +71,12 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
       for (int i = 0; i < pinArray.length; ++i) {
         PinData pinData = new PinData(i, read(i));
+        // cache last value
+        PinDefinition pinDef = getPin(i);
+        pinDef.setValue(pinData.value);
+        
         pinArray[i] = pinData;
-        int address = pinData.address;
+        int address = pinDef.getAddress();
 
         // handle individual pins
         if (pinListeners.containsKey(address)) {
@@ -544,7 +547,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public int read(Integer address) {
+  public int read(int address) {
     return pinIndex.get(address).getValue();
   }
 
@@ -554,7 +557,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void pinMode(Integer address, String mode) {
+  public void pinMode(int address, String mode) {
     if (mode != null && mode.equalsIgnoreCase("INPUT")) {
     } else {
       log.error("Ads1115 only supports INPUT mode");
@@ -563,15 +566,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void write(Integer address, Integer value) {
-    log.error("Ads1115 only supports read, not write");
-
-  }
-
-  @Override
   public PinData publishPin(PinData pinData) {
-    // caching last value
-    pinIndex.get(pinData.address).setValue(pinData.value);
     return pinData;
   }
 
@@ -588,7 +583,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void attach(PinListener listener, Integer pinAddress) {
+  public void attach(PinListener listener, int pinAddress) {
     String name = listener.getName();
 
     if (listener.isLocal()) {
@@ -619,7 +614,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void enablePin(Integer address) {
+  public void enablePin(int address) {
     if (controller == null) {
       error("must be connected to enable pins");
       return;
@@ -638,7 +633,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public void disablePin(Integer address) {
+  public void disablePin(int address) {
     if (controller == null) {
       log.error("Must be connected to disable pins");
       return;
@@ -736,7 +731,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
 
   @Override
   // TODO Implement individula sample rates per pin
-  public void enablePin(Integer address, Integer rate) {
+  public void enablePin(int address, int rate) {
     setSampleRate(rate);
     enablePin(address);
   }
@@ -861,10 +856,45 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     return null;
   }
 
-  public PinDefinition getPin(Integer address) {
+  public PinDefinition getPin(int address) {
     if (pinIndex.containsKey(address)) {
       return pinIndex.get(address);
     }
     return null;
+  }
+
+  @Override
+  public void attach(PinListener listener, String pin) {
+    attach(listener, getPin(pin).getAddress());
+  }
+
+  @Override
+  public void disablePin(String pin) {
+    disablePin(getPin(pin).getAddress());
+  }
+
+  @Override
+  public void enablePin(String pin) {
+    enablePin(getPin(pin).getAddress());
+  }
+
+  @Override
+  public void enablePin(String pin, int rate) {
+    enablePin(getPin(pin).getAddress(), rate);
+  }
+
+  @Override
+  public void pinMode(String pin, String mode) {
+    pinMode(getPin(pin).getAddress(), mode);
+  }
+
+  @Override
+  public void write(String pin, int value) {
+    write(getPin(pin).getAddress(), value);
+  }
+
+  @Override
+  public void write(int address, int value) {
+    log.error("Mpr121 does not support writing");
   }
 }

@@ -485,19 +485,16 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void setPins(int thumbPin, int indexPin, int majeurePin, int ringFingerPin, int pinkyPin, int wristPin) {
     log.info("setPins {} {} {} {} {} {}", thumbPin, indexPin, majeurePin, ringFingerPin, pinkyPin, wristPin);
-    /*
-     * OLD WAY this.thumb.setPin(thumb); this.index.setPin(index);
-     * this.majeure.setPin(majeure); this.ringFinger.setPin(ringFinger);
-     * this.pinky.setPin(pinky); this.wrist.setPin(wrist);
-     */
-
-    // NEW WAY
-    controller.servoAttachPin(thumb, thumbPin);
-    controller.servoAttachPin(index, indexPin);
-    controller.servoAttachPin(majeure, majeurePin);
-    controller.servoAttachPin(ringFinger, ringFingerPin);
-    controller.servoAttachPin(pinky, pinkyPin);
-    controller.servoAttachPin(wrist, wristPin);
+    try {
+      controller.attach(thumb, thumbPin);
+      controller.attach(index, indexPin);
+      controller.attach(majeure, majeurePin);
+      controller.attach(ringFinger, ringFingerPin);
+      controller.attach(pinky, pinkyPin);
+      controller.attach(wrist, wristPin);
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky) {

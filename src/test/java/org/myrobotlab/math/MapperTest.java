@@ -11,6 +11,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testCalc() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 15;
     double expectedResult = 150;
     Mapper myMapper = new Mapper(10, 18, 100, 180);
@@ -20,6 +21,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testGetMaxOutput() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 180;
     Mapper myMapper = new Mapper(10, 18, 100, testValue);
     assertEquals("getMaxOutput should return fourth parameter", myMapper.getMaxOutput(), testValue, 3);
@@ -27,6 +29,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testGetMaxX() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 18;
     Mapper myMapper = new Mapper(10, testValue, 100, 180);
     assertEquals("getMaxX should return second parameter", myMapper.getMaxX(), testValue, 3);
@@ -34,6 +37,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testGetMaxY() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 180;
     Mapper myMapper = new Mapper(10, 18, 100, testValue);
     assertEquals("getMaxY should return fourth parameter", myMapper.getMaxY(), testValue, 3);
@@ -41,6 +45,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testGetMinOutput() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 100;
     Mapper myMapper = new Mapper(10, 18, testValue, 180);
     assertEquals("getMinOutput should return third parameter", myMapper.getMinOutput(), testValue, 3);
@@ -48,6 +53,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testGetMinX() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 10;
     Mapper myMapper = new Mapper(testValue, 18, 100, 180);
     assertEquals("getMinX should return first parameter", myMapper.getMinX(), testValue, 3);
@@ -55,6 +61,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testGetMinY() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 100;
     Mapper myMapper = new Mapper(10, 18, testValue, 180);
     assertEquals("getMinY should return third parameter", myMapper.getMinY(), testValue, 3);
@@ -62,6 +69,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testIsInverted() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Mapper myMapper = new Mapper(10, 18, 100, 180);
     boolean inverted = myMapper.isInverted();
     assertFalse("Test should return inverted = false", inverted);
@@ -72,6 +80,7 @@ public class MapperTest extends AbstractTest {
 
   @Test
   public void testMapper() {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Mapper myMapper = new Mapper(10, 18, 100, 180);
     // TODO: validate something here.
     myMapper.getMaxX();

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,7 +24,6 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -39,8 +37,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.data.DeviceMapping;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -49,11 +47,9 @@ import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
-import org.myrobotlab.service.interfaces.Microcontroller;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NeoPixelController;
-import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
@@ -68,16 +64,12 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
-public class Arduino extends Service implements Microcontroller, PinArrayControl, I2CBusController, I2CController, SerialDataListener, ServoController, MotorController,
+public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController,
     NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher, EncoderController {
 
-  private static final long serialVersionUID = 1L;
-
-  Mapper motorPowerMapper = new Mapper(-1.0, 1.0, -255.0, 255.0);
-
   public static class I2CDeviceMap {
-    public transient I2CControl control;
     public String busAddress;
+    public transient I2CControl control;
     public String deviceAddress;
   }
 
@@ -92,33 +84,39 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
   }
 
-  public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
-  public transient static final int BOARD_TYPE_ID_MEGA = 1;
-  public transient static final int BOARD_TYPE_ID_UNO = 2;
+  public static final int ANALOG = 1;
+
   public transient static final int BOARD_TYPE_ID_ADK_MEGA = 3;
+
+  public transient static final int BOARD_TYPE_ID_MEGA = 1;
   public transient static final int BOARD_TYPE_ID_NANO = 4;
   public transient static final int BOARD_TYPE_ID_PRO_MINI = 5;
-
+  public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
+  public transient static final int BOARD_TYPE_ID_UNO = 2;
   public transient static final String BOARD_TYPE_MEGA = "mega";
+
   public transient static final String BOARD_TYPE_MEGA_ADK = "megaADK";
-  public transient static final String BOARD_TYPE_UNO = "uno";
   public transient static final String BOARD_TYPE_NANO = "nano";
   public transient static final String BOARD_TYPE_PRO_MINI = "pro mini";
+  public transient static final String BOARD_TYPE_UNO = "uno";
+  public static final int DIGITAL = 0;
 
   public static final int INPUT = 0x0;
-  public static final int OUTPUT = 0x1;
-
   public static final int MOTOR_BACKWARD = 0;
-  public static final int MOTOR_FORWARD = 1;
 
+  public static final int MOTOR_FORWARD = 1;
+  public static final int MOTOR_TYPE_DUAL_PWM = 2;
+
+  public static final int MOTOR_TYPE_SIMPLE = 1;
   public static final int MRL_IO_NOT_DEFINED = 0;
   public static final int MRL_IO_SERIAL_0 = 1;
   public static final int MRL_IO_SERIAL_1 = 2;
   public static final int MRL_IO_SERIAL_2 = 3;
-  public static final int MRL_IO_SERIAL_3 = 4;
 
-  public static final int DIGITAL = 0;
-  public static final int ANALOG = 1;
+  public static final int MRL_IO_SERIAL_3 = 4;
+  public static final int OUTPUT = 0x1;
+
+  private static final long serialVersionUID = 1L;
 
   /**
    * This static method returns all the details of the class without it having
@@ -134,25 +132,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     meta.addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");
     meta.addCategory("microcontroller");
     meta.addPeer("serial", "Serial", "serial device for this Arduino");
-    // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT"); GroG-"This should
-    // not be here"
     return meta;
-  }
-
-  /**
-   * @param degree
-   *          degrees
-   * @return degreeToMicroseconds - convert a value to send to servo from degree
-   *         (0-180) to microseconds (544-2400)
-   * 
-   */
-  public Integer degreeToMicroseconds(double degree) {
-    // if (degree >= 544) return (int)degree; - G-> I don't think
-    // this is a good idea, if they want to use microseconds - then let them
-    // use
-    // the controller.servoWriteMicroseconds method
-    // this method vs mapping I think was a good idea.. :)
-    return (int) Math.round((degree * (2400 - 544) / 180) + 544);
   }
 
   /**
@@ -160,6 +140,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    * gson will not serialize it, and it won't be 'saved()'
    */
   public String arduinoPath;
+
+  String aref;
 
   transient Map<Integer, Arduino> attachedController = new ConcurrentHashMap<Integer, Arduino>();
 
@@ -170,21 +152,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    */
   BoardInfo boardInfo = new BoardInfo();
 
-  ArrayList<BoardType> boardTypes;
-
-  /**
-   * board type - UNO Mega etc..
-   * 
-   * if the user 'connects' first then the info could come from the board .. but
-   * if the user wants to upload first a npe will be thrown so we default it
-   * here to Uno
-   */
-  String board;
-  String aref;
+  boolean boardInfoEnabled = true;
+  
+  private long boardInfoRequestTs;  
 
   int byteCount;
 
   public transient int controllerAttachAs = MRL_IO_NOT_DEFINED;
+
   /**
    * id reference of sensor, key is the MrlComm device id
    */
@@ -202,8 +177,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   boolean heartbeat = false;
 
-  boolean boardInfoEnabled = true;
-
   I2CBus i2cBus = null;
 
   volatile byte[] i2cData = new byte[64];
@@ -219,58 +192,33 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   Map<String, I2CDeviceMap> i2cDevices = new ConcurrentHashMap<String, I2CDeviceMap>();
 
   transient int[] ioCmd = new int[MAX_MSG_SIZE];
-
+  Mapper motorPowerMapper = new Mapper(-1.0, 1.0, -255.0, 255.0);
   public transient Msg msg;
 
   int msgSize;
 
   Integer nextDeviceId = 0;
+
   int numAck = 0;
-  transient Map<String, PinArrayListener> pinArrayListeners = new ConcurrentHashMap<String, PinArrayListener>();
-
-  /**
-   * address index of pinList
-   */
-  Map<Integer, PinDefinition> pinIndex = null;
-
-  /**
-   * name index of pinList
-   */
-  Map<String, PinDefinition> pinMap = null;
-
-  /**
-   * class which contains and manages all pin definitions indexed by address or
-   * pin name
-   */
-  // List<Definition> pinDefs = new PinDefinitions();
-
-  /**
-   * map of pin listeners
-   */
-  transient Map<Integer, List<PinListener>> pinListeners = new ConcurrentHashMap<Integer, List<PinListener>>();
 
   /**
    * Serial service - the Arduino's serial connection
    */
   Serial serial;
 
+  /**
+   * MrlComm sketch
+   */
   public Sketch sketch;
 
   public String uploadSketchResult = "";
 
-  private long boardInfoRequestTs;
+  transient private VirtualArduino virtual;
 
   public Arduino(String n) {
     super(n);
-    // super calls load() - which will load any variables which were
-    // serialized
-    // and are not new'd and assigned in definition
-    // if the boardInfo wasn't saved & loaded (sticky) - we create a new one
-    /*
-     * removed now with the non-complexity of boardTypes if (boardInfo == null)
-     * { boardInfo = new BoardInfo(); }
-     */
 
+    // config - if saved is loaded - if not default to uno
     if (board == null) {
       board = "uno";
     }
@@ -282,50 +230,37 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // get list of board types
     getBoardTypes();
 
+    // FIXME - load from unzipped resource directory ? - no more jar access like
+    // below
     String mrlcomm = FileIO.resourceToString("Arduino/MrlComm/MrlComm.ino");
 
     setSketch(new Sketch("MrlComm", mrlcomm));
 
     // add self as an attached device
-    // to handle pin events and other base
-    // Arduino methods
+    // to handle pin events
     attachDevice(this, (Object[]) null);
   }
 
-  // > analogWrite/pin/value
-  public void analogWrite(int pin, int value) {
-    log.info("analogWrite({},{})", pin, value);
-    msg.analogWrite(pin, value);
+  // > analogWrite/address/value
+  public void analogWrite(int address, int value) {
+    log.info("analogWrite({},{})", address, value);
+    msg.analogWrite(address, value);
   }
 
-  /**
-   * attach a pin listener which listens for an array of all active pins
-   */
-  @Override
-  public void attach(PinArrayListener listener) {
-    pinArrayListeners.put(listener.getName(), listener);
+  public void analogWrite(String pin, Integer value) {
+    PinDefinition pinDef = getPin(pin);
+    analogWrite(pinDef.getAddress(), value);
   }
 
-  /**
-   * attach a pin listener who listens to a specific pin
-   */
-  @Override
-  public void attach(PinListener listener, Integer address) {
-    String name = listener.getName();
-
-    if (listener.isLocal()) {
-      List<PinListener> list = null;
-      if (pinListeners.containsKey(address)) {
-        list = pinListeners.get(address);
-      } else {
-        list = new ArrayList<PinListener>();
-      }
-      list.add(listener);
-      pinListeners.put(address, list);
-
-    } else {
-      addListener("publishPin", name, "onPin");
+  DeviceSummary[] arrayToDeviceSummary(int[] deviceSummary) {
+    DeviceSummary[] ds = new DeviceSummary[deviceSummary.length / 2];
+    for (int i = 0; i < deviceSummary.length / 2; ++i) {
+      int id = deviceSummary[i];
+      int typeId = deviceSummary[i + 1];
+      DeviceSummary ds0 = new DeviceSummary(getDeviceName(id), id, Msg.deviceTypeToString(typeId), typeId);
+      ds[i] = ds0;
     }
+    return ds;
   }
 
   /**
@@ -348,12 +283,45 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
-  /*
+  @Override
+  public void attach(EncoderControl encoder, Integer pin) throws Exception {
+    attachEncoderControl(encoder);
+    // here we want to instruct the arduino via mrl comm to attach an
+    // MrlAmt203Encoder device.
+    // TODO: is this needed?
+    // encoder.attach(this, pin);
+  }
+
+
+  @Override
+  public void attach(ServoControl servo, int pin) throws Exception {
+    servo.setPin(pin);
+    attachServoControl(servo);
+  }
+
+  /**
    * String interface - this allows you to easily use url api requests like
    * /attach/nameOfListener/3
    */
   public void attach(String listener, int address) {
     attach((PinListener) Runtime.getService(listener), address);
+  }
+
+  @Override
+  public void attach(UltrasonicSensorControl sensor, Integer triggerPin, Integer echoPin) throws Exception {
+    // refer to
+    // http://myrobotlab.org/content/control-controller-manifesto
+    if (isAttached(sensor)) {
+      log.info("{} already attached", sensor.getName());
+      return;
+    }
+
+    // critical init code
+    Integer deviceId = attachDevice(sensor, new Object[] { triggerPin, echoPin });
+    msg.ultrasonicSensorAttach(deviceId, triggerPin, echoPin);
+
+    // call the other service's attach
+    sensor.attach(this, triggerPin, echoPin);
   }
 
   synchronized private Integer attachDevice(Attachable device, Object[] attachConfig) {
@@ -365,8 +333,141 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return map.getId();
   }
 
-  // this allow to connect a controller to another controller with Serial1,
-  // Serial2, Serial3 on a mega board
+  /**
+   * Attach an encoder to the arduino
+   * 
+   * @param encoder - the encoder control to attach
+   */
+  public void attachEncoderControl(EncoderControl encoder) {
+    Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
+    // send data to micro-controller
+
+    // TODO: update this with some enum of various encoder types..
+    // for now it's just AMT203 ...
+    int type = 0;
+    if (encoder instanceof Amt203Encoder) {
+      type = 0;
+    } else if (encoder instanceof As5048AEncoder) {
+      type = 1;
+    }
+
+    msg.encoderAttach(deviceId, type, pinMap.get(encoder.getPin()).getAddress());
+
+    encoder.setController(this);
+
+  }
+
+  /**
+   * sends a heartbeat, if not replied from in the next heartbeat disconnects
+   * and resets
+   */
+  // > heartbeat
+  /*
+   * public void heartbeat() { if (!heartbeat) { log.info(
+   * "No answer from controller:{}. Disconnecting...", this.getName());
+   * purgeTask("heartbeat"); if (isConnected()) { disconnect(); } }
+   * 
+   * // resetting to false - publishHeartbeat will set to // true (hopefully
+   * before the next heartbeat) heartbeat = false; msg.heartbeat(); }
+   */
+
+  @Override
+  public void attachI2CControl(I2CControl control) {
+    // Create the i2c bus device in MrlComm the first time this method is
+    // invoked.
+    // Add the i2c device to the list of i2cDevices
+    // Pattern: deviceAttach(device, Object... config)
+    // To add the i2c bus to the deviceList I need an device that represents
+    // the i2c bus here and in MrlComm
+    // This will only handle the creation of i2cBus.
+    if (i2cBus == null) {
+      i2cBus = new I2CBus(String.format("I2CBus%s", control.getDeviceBus()));
+      i2cBusAttach(i2cBus, Integer.parseInt(control.getDeviceBus()));
+    }
+
+    // This part adds the service to the mapping between
+    // busAddress||DeviceAddress
+    // and the service name to be able to send data back to the invoker
+    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
+    I2CDeviceMap devicedata = new I2CDeviceMap();
+    if (i2cDevices.containsKey(key)) {
+      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
+    } else {
+      devicedata.busAddress = control.getDeviceBus();
+      devicedata.deviceAddress = control.getDeviceAddress();
+      devicedata.control = control;
+      i2cDevices.put(key, devicedata);
+      control.attachI2CController(this);
+    }
+  }
+
+  // @Override
+  public void attachMotorControl(MotorControl motor) throws Exception {
+    if (isAttached(motor)) {
+      log.info("motor {} already attached", motor.getName());
+      return;
+    }
+
+    Integer motorType = null;
+    int[] pins = null;
+
+    if (motor.getClass().equals(Motor.class)) {
+      motorType = MOTOR_TYPE_SIMPLE;
+      Motor m = (Motor) motor;
+      pins = new int[] { m.getPwrPin(), m.getDirPin() };
+    } else if (motor.getClass().equals(MotorDualPwm.class)) {
+      motorType = MOTOR_TYPE_DUAL_PWM;
+      MotorDualPwm m = (MotorDualPwm) motor;
+      pins = new int[] { m.getLeftPwmPin(), m.getRightPwmPin() };
+      // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
+
+    } else {
+      throw new IOException(String.format("do not know how to attach Motor type %s", motor.getClass().getSimpleName()));
+    }
+
+    // this saves original "attach" configuration - and maintains internal
+    // data
+    // structures
+    // and does DeviceControl.attach(this)
+    Integer deviceId = attachDevice(motor, new Object[] { motorType, pins });
+
+    // send data to micro-controller - convert degrees to microseconds
+    // int uS = degreeToMicroseconds(targetOutput);
+    msg.motorAttach(deviceId, motorType, pins);
+
+    // the callback - motor better have a check
+    // isAttached(MotorControl) to prevent infinite loop
+    // motor.attach(this, pin, targetOutput, velocity);
+    motor.attachMotorController(this);
+  }
+
+  public void attachServoControl(ServoControl servo) throws Exception {
+    if (isAttached(servo)) {
+      return; // already attached
+    }
+    // query configuration out
+    int pin = servo.getPin();
+    // targetOutput is ALWAYS ALWAYS degrees
+    double targetOutput = servo.getTargetOutput();
+    double velocity = servo.getVelocity();
+
+    // this saves original "attach" configuration - and maintains internal
+    // data
+    // structures
+    // and does DeviceControl.attach(this)
+    Integer deviceId = attachDevice(servo, new Object[] { pin, targetOutput, velocity });
+
+    // send data to micro-controller - convert degrees to microseconds
+    int uS = degreeToMicroseconds(targetOutput);
+    msg.servoAttach(deviceId, pin, uS, (int) velocity, servo.getName());
+
+    servo.attach(this);
+  }
+
+  /**
+   * This will allow a controller to another controller with Serial1, Serial2,
+   * Serial3 on a mega board
+   */
   public void connect(Arduino controller, String serialPort) throws IOException {
     if (controller == null) {
       error("setting null as controller");
@@ -430,26 +531,27 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // GAP broadcastState();
   }
 
-  // @Calamity - I like your method signature - but I think it
-  // should create a MrlSerial device and read and write similar to the I2C
-  // MrlDevice instead of replacing the service's serial service
-  // @grog - I don't mind using a MrlSerial device, as both way will
-  // essentially do the same thing. The difference is only where the
-  // messages will be send in MrlComm (processCommand vs update methods). It
-  // could not be the same way as I2C because I2C read
-  // block and blocking is evil
-  // two thing I had in mind when I did it:
-  // 1- be able to connect MrlComm to a master MrlComm using different
-  // communication protocol (Serial, I2C, bluetooth, wifi)
-  // but this also can be done with different device type
-  // 2- I also had in mind of having the Master arduino and it's slaves (chain
-  // of slave) act as one device. So they could talk
-  // and interract with each other without having to go back to the javaland.
-  // Not sure if it's a good idea or not, but that's
-  // one of the reason I had go that way
-
   public void connect(String port) {
     connect(port, Serial.BAUD_115200, 8, 1, 0);
+  }
+
+  @Override
+  public void connect(String port, int rate) throws Exception {
+    connect(port, rate, 8, 1, 0);
+  }
+  
+  public void setVirtual(boolean b) {
+    if (!b && virtual != null) {
+      virtual.releaseService();    
+      virtual = null;
+    } else if (b && virtual == null) {
+      virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
+    }
+    isVirtual = b;
+  }
+  
+  VirtualArduino getVirtual() {
+    return virtual;
   }
 
   /**
@@ -462,6 +564,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // test to see if we've been started. the serial might be null
     initSerial();
     try {
+
+      if (isVirtual()) {
+         virtual.connect(port);
+      }
       // FIXME - GroG asks, who put the try here - shouldn't it throw if
       // we
       // can't connect
@@ -523,16 +629,313 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     broadcastState();
   }
 
-  private void initSerial() {
-    if (msg == null) {
-      serial = (Serial) startPeer("serial");
-      msg = new Msg(this, serial);
-      // FIXME - dynamically additive - if codec key has never been used - add
-      // key
-      // serial.getOutbox().setBlocking(true);
-      // inbox.setBlocking(true);
-      serial.addByteListener(this);
+  // > customMsg/[] msg
+  public void customMsg(int... params) {
+    msg.customMsg(params);
+  }
+
+  // @Override
+  // > deviceDetach/deviceId
+  public void detach(Attachable device) {
+    log.info("{} detaching {}", getName(), device.getName());
+    // if this service doesn't think its attached, we are done
+    if (!isAttached(device)) {
+      log.info("device {} not attached", device.getName());
+      return;
     }
+
+    // Servo requirements
+    if (device instanceof ServoControl && device.isAttached(this)) {
+      // if the other service thinks its attached - give it a chance to detach
+      // this is important for Servo - because servo will want to disable()
+      // before
+      // detaching - and it needs the controller to do so...
+      device.detach(this);
+    }
+
+    log.info("detaching device {}", device.getName());
+    Integer id = getDeviceId(device);
+    if (id != null) {
+      msg.deviceDetach(id);
+      deviceIndex.remove(id);
+    }
+    deviceList.remove(device.getName());
+  }
+
+  @Override
+  public void detach(String controllerName) {
+    detach(Runtime.getService(controllerName));
+  }
+
+  @Override
+  public void detachI2CControl(I2CControl control) {
+    // This method should delete the i2c device entry from the list of
+    // I2CDevices
+    // The order of the detach is important because the higher level service may
+    // want to execute something that
+    // needs this service to still be availabe
+    if (i2cDevices.containsKey(control.getName())) {
+      i2cDevices.remove(control.getName());
+      control.detachI2CController(this);
+    }
+
+  }
+
+  public void detachI2CControls() {
+    for (Map.Entry<String, I2CDeviceMap> i2cDevice : i2cDevices.entrySet()) {
+      I2CControl i2cControl = i2cDevice.getValue().control;
+      i2cControl.detach(this);
+    }
+  }
+
+  /**
+   * silly Arduino implementation - but keeping it since its familiar 
+   * digitalWrite/pin/value
+   */
+  public void digitalWrite(int address, int value) {
+    log.info("digitalWrite {} {}", address, value);
+    msg.digitalWrite(address, value);
+  }
+
+  public void digitalWrite(String pin, int value) {
+    PinDefinition pinDef = getPin(pin);
+    digitalWrite(pinDef.getAddress(), value);
+  }
+
+  /**
+   *  disablePin/address
+   */
+  @Override
+  public void disablePin(int address) {
+    PinDefinition pinDef = getPin(address);
+    pinDef.setEnabled(false);
+    msg.disablePin(address);
+  }
+
+  /**
+   * disable all pins
+   */
+  public void disablePins() {
+    msg.disablePins();
+  }
+
+  public void disconnect() {
+    // FIXED - all don in 'onDisconnect()'
+    // enableBoardInfo(false);
+    // boardInfo is not valid after disconnect
+    // because we might be connecting to a different Arduino
+    // boardInfo.reset();
+    for (Arduino controller : attachedController.values()) {
+      controller.disconnect();
+    }
+    attachedController.clear();
+    if (controllerAttachAs != MRL_IO_NOT_DEFINED) {
+      controllerAttachAs = MRL_IO_NOT_DEFINED;
+      serial = (Serial) createPeer("serial");
+    } else {
+      if (serial != null) {
+        serial.disconnect();
+      }
+    }
+    broadcastState();
+  }
+
+  public void echo(float myFloat, int myByte, float secondFloat) {
+    msg.echo(myFloat, myByte, secondFloat);
+  }
+
+  // > enableAck/bool enabled
+  public void enableAck(boolean enabled) {
+    msg.enableAcks(enabled);
+  }
+
+  // > enableBoardInfo/bool enabled
+  public void enableBoardInfo(Boolean enabled) {
+    if (enabled) {
+      addTask("getBoardInfo", 1000, 0, "sendBoardInfoRequest");
+    } else {
+      purgeTask("getBoardInfo");
+    }
+    boardInfoEnabled = enabled;
+  }
+
+  @Override
+  public void enablePin(int address) {
+    enablePin(address, 0);
+  }
+
+  // > enablePin/address/type/b16 rate
+  public void enablePin(int address, int rate) {
+    PinDefinition pinDef = getPin(address);
+    msg.enablePin(address, getMrlPinType(pinDef), rate);
+    pinDef.setEnabled(true);
+    invoke("publishPinDefinition", pinDef); // broadcast pin change
+  }
+
+  /**
+   * start polling reads of selected pin 
+   * enablePin/address/type/b16 rate
+   */
+  public void enablePin(String pin, int rate) {
+    if (!isConnected()) {
+      error("must be connected to enable pins");
+      return;
+    }
+
+    PinDefinition pinDef = getPin(pin);
+    enablePin(pinDef.getAddress(), rate);
+  }
+
+  public String getArduinoPath() {
+    return arduinoPath;
+  }
+
+  public String getAref() {
+    return aref;
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    return deviceList.keySet();
+  }
+
+  public int getAttachedCount() {
+    return deviceList.size();
+  }
+
+
+  /**
+   * Heart-beat method on time, driven by the Arduino service to get information
+   * from the board its currently connected. This is the "last" boardInfo
+   * returned from the task inserted with addTask("getBoardInfo", 1000, 0,
+   * "sendBoardInfoRequest"); 
+   * 
+   *  getBoardInfo
+   */
+  public BoardInfo getBoardInfo() {
+    // msg.getBoardInfo(); do not do this -
+    // results in a serial infinit loop
+    // msg.getBoardInfo();
+    return boardInfo;
+  }
+
+  @Override // override to get Arduino board types
+  public List<BoardType> getBoardTypes() {
+
+    List<BoardType> boardTypes = new ArrayList<BoardType>();
+    try {
+      String b = FileIO.resourceToString("Arduino" + File.separator + "boards.txt");
+      Properties boardProps = new Properties();
+      boardProps.load(new ByteArrayInputStream(b.getBytes()));
+
+      Enumeration<?> e = boardProps.propertyNames();
+      Set<String> distinct = new TreeSet<String>();
+      Set<String> hasProcessorTypes = new TreeSet<String>();
+      while (e.hasMoreElements()) {
+        String keyLine = (String) e.nextElement();
+        String[] parts = keyLine.split("\\.");
+        String key = parts[0];
+        if (key.startsWith("menu")) {
+          continue;
+        }
+
+        if (keyLine.contains("menu.cpu")) {
+          hasProcessorTypes.add(key);
+          // split - remove previous
+          if (distinct.contains(key)) {
+            distinct.remove(key);
+          }
+          // for diecimila.atmega328
+          try {
+            key = parts[0] + "." + parts[3];
+          } catch (Exception e2) {
+            log.error("board.txt is weird", e2);
+          }
+          distinct.add(key);
+        } else if (!hasProcessorTypes.contains(key)) {
+          distinct.add(key);
+        }
+      }
+
+      for (String longKey : distinct) {
+
+        String[] parts = longKey.split("\\.");
+        String key = parts[0];
+        String processorType = null;
+        if (parts.length > 1) {
+          processorType = parts[1];
+        }
+
+        BoardType boardType = new BoardType();
+
+        if (processorType != null) {
+          boardType.setName(boardProps.getProperty(String.format("%s.name", key)) + " - " + processorType);
+        } else {
+          boardType.setName(boardProps.getProperty(String.format("%s.name", key)));
+        }
+
+        boardType.setBoard(longKey);
+        boardType.setId(longKey.hashCode());
+        boardTypes.add(boardType);
+      }
+    } catch (Exception e) {
+      log.error("getBoards threw", e);
+    }
+    return boardTypes;
+  }
+
+  @Override
+  public org.myrobotlab.math.interfaces.Mapper getDefaultMapper() {
+    // best guess :P
+    MapperLinear mapper = new MapperLinear();
+    mapper.map(-1.0, 1.0, 0.0, 255.0);
+    return mapper;
+  }
+
+  public Attachable getDevice(Integer deviceId) {
+    return deviceIndex.get(deviceId).getDevice();
+  }
+
+  Integer getDeviceId(NameProvider device) {
+    return getDeviceId(device.getName());
+  }
+
+  Integer getDeviceId(String name) {
+    if (deviceList.containsKey(name)) {
+      Integer id = deviceList.get(name).getId();
+      if (id == null) {
+        error("cannot get device id for %s - device attempetd to attach - but I suspect something went wrong", name);
+      }
+      return id;
+    }
+    log.error("getDeviceId could not find device {}", name);
+    return null;
+  }
+
+  private String getDeviceName(int deviceId) {
+    return getDevice(deviceId).getName();
+  }
+
+  /**
+   * int type to describe the pin defintion to Pin.h 0 digital 1 analog
+   * 
+   */
+  public Integer getMrlPinType(PinDefinition pin) {
+    if (board == null) {
+      error("must have pin board type to determin pin definition");
+      return null;
+    }
+
+    if (pin == null) {
+      log.error("pin definition null");
+      return null;
+    }
+
+    if (pin.isAnalog()) {
+      return 1;
+    }
+
+    return 0;
   }
 
   /**
@@ -541,7 +944,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    * 70 pins &amp; Uno-Like 20 pins (14 digital 6 analog) FIXME - sync with
    * VirtualArduino FIXME - String boardType
    */
-  @Override
+  @Override // override for arduino to get pin list
   public List<PinDefinition> getPinList() {
     // 2 board types have been identified (perhaps this is based on
     // processor?)
@@ -554,8 +957,9 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     // create 2 indexes for fast retrieval
     // based on "name" or "address"
-    pinMap = new TreeMap<String, PinDefinition>();
-    pinIndex = new TreeMap<Integer, PinDefinition>();
+    pinMap.clear();
+    pinIndex.clear();
+
     List<PinDefinition> pinList = new ArrayList<PinDefinition>();
 
     if (board.contains("mega")) {
@@ -583,8 +987,8 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         }
         pindef.setPinName(pinName);
         pindef.setAddress(i);
-        pinIndex.put(i, pindef);
         pinMap.put(pinName, pindef);
+        pinIndex.put(pindef.getAddress(), pindef);
         pinList.add(pindef);
       }
     } else {
@@ -612,11 +1016,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
         }
         pindef.setPinName(pinName);
         pindef.setAddress(i);
-        pinIndex.put(i, pindef);
         pinMap.put(pinName, pindef);
+        pinIndex.put(pindef.getAddress(), pindef);
         pinList.add(pindef);
       }
 
+      // FIXME - nano pico other ???
       if (board.contains("nano")) {
         /*
          * int i = 20; pinName = String.format("A%d", i - 14); PinDefinition
@@ -629,245 +1034,23 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return pinList;
   }
 
-  // > customMsg/[] msg
-  public void customMsg(int... params) {
-    msg.customMsg(params);
-  }
-
-  // @Override
-  // > deviceDetach/deviceId
-  public void detach(Attachable device) {
-    // TODO check / detach - must be careful of infinit loop
-    // if (device.isAttached()){
-    //
-    // }
-    log.info("detaching device {}", device.getName());
-    msg.deviceDetach(getDeviceId(device));
-    if (deviceList.containsKey(device.getName())) {
-      DeviceMapping dm = deviceList.get(device.getName());
-      deviceIndex.remove(dm.getId());
-      deviceList.remove(device.getName());
-    }
-  }
-
-  /*
-   * silly Arduino implementation - but keeping it since its familiar
-   * 
-   */
-  // > digitalWrite/pin/value
-  public void digitalWrite(int pin, int value) {
-    log.info("digitalWrite {} {}", pin, value);
-    msg.digitalWrite(pin, value);
-    PinDefinition pinDef = pinIndex.get(pin); // why ?
-    invoke("publishPinDefinition", pinDef);
-  }
-
-  // > disablePin/pin
-  public void disablePin(Integer address) {
-    msg.disablePin(address);
-    PinDefinition pinDef = pinIndex.get(address);
-    invoke("publishPinDefinition", pinDef);
-  }
-
-  // > disablePins
-  public void disablePins() {
-    msg.disablePins();
-  }
-
-  public void disconnect() {
-    // FIXED - all don in 'onDisconnect()'
-    // enableBoardInfo(false);
-    // boardInfo is not valid after disconnect
-    // because we might be connecting to a different Arduino
-    // boardInfo.reset();
-    for (Arduino controller : attachedController.values()) {
-      controller.disconnect();
-    }
-    attachedController.clear();
-    if (controllerAttachAs != MRL_IO_NOT_DEFINED) {
-      controllerAttachAs = MRL_IO_NOT_DEFINED;
-      serial = (Serial) createPeer("serial");
-    } else {
-      if (serial != null) {
-        serial.disconnect();
-      }
-    }
-    broadcastState();
-  }
-
-  // > enableAck/bool enabled
-  public void enableAck(boolean enabled) {
-    // ackEnabled = enabled;
-    // enable both sides acking Java & MrlComm
-    msg.enableAcks(enabled);
-  }
-
-  // msg
-  // > enableBoardInfo/bool enabled
-  public void enableBoardInfo(Boolean enabled) {
-    // msg.enableBoardInfo(enabled);
-    if (enabled) {
-      addTask("getBoardInfo", 1000, 0, "sendBoardInfoRequest");
-    } else {
-      purgeTask("getBoardInfo");
-    }
-
-  }
-
-  // > enablePin/address/type/b16 rate
-  public void enablePin(Integer address) {
-    enablePin(address, 0);
-  }
-
-  public void enablePin(String pinNameOrAddress) {
-    if (pinMap.containsKey(pinNameOrAddress)) {
-      PinDefinition pd = pinMap.get(pinNameOrAddress);
-      enablePin(pd.getAddress());
-    } else {
-      enablePin(Integer.parseInt(pinNameOrAddress));
-    }
-  }
-
-  public void disablePin(String pinNameOrAddress) {
-    if (pinMap.containsKey(pinNameOrAddress)) {
-      PinDefinition pd = pinMap.get(pinNameOrAddress);
-      disablePin(pd.getAddress());
-    } else {
-      disablePin(Integer.parseInt(pinNameOrAddress));
-    }
-  }
-
-  /**
-   * start polling reads of selected pin
-   *
-   */
-  // > enablePin/address/type/b16 rate
-  public void enablePin(Integer address, Integer rate) {
-    if (!isConnected()) {
-      error("must be connected to enable pins");
-      return;
-    }
-    PinDefinition pin = pinIndex.get(address);
-    msg.enablePin(address, getMrlPinType(pin), rate);
-    pin.setEnabled(true);
-    invoke("publishPinDefinition", pin); // broadcast pin change
-  }
-
-  // > getBoardInfo
-  public BoardInfo getBoardInfo() {
-    // msg.getBoardInfo(); do not do this -
-    // results in a serial infinit loop 
-    // msg.getBoardInfo();
-    return boardInfo;
-  }
-
-  public void sendBoardInfoRequest() {
-    boardInfoRequestTs = System.currentTimeMillis();
-    msg.getBoardInfo();
-  }
-
-  public void setAref(String aref) {
-    aref = aref.toUpperCase();
-    if (this.getBoard().contains("mega")) {
-      if (aref == "INTERNAL") {
-        error("Aref " + aref + " is not compatible with your board " + this.getBoard());
-        aref = "DEFAULT";
-      }
-    } else {
-      if (aref == "INTERNAL1V1" || aref == "INTERNAL2V56") {
-        error("Aref INTERNALxV is not compatible with your board " + this.getBoard());
-        aref = "DEFAULT";
-      }
-    }
-
-    int arefInt = 1;
-    switch (aref) {
-      case "EXTERNAL":
-        arefInt = 0;
-        break;
-      case "DEFAULT":
-        arefInt = 1;
-        break;
-      case "INTERNAL1V1":
-        arefInt = 2;
-        break;
-      case "INTERNAL":
-        arefInt = 3;
-        break;
-      case "INTERNAL2V56":
-        arefInt = 3;
-        break;
-      default:
-        log.error("Aref " + aref + " is unknown");
-    }
-    log.info("set aref to " + aref);
-    this.aref = aref;
-    msg.setAref(arefInt);
-  }
-
-  public String getAref() {
-    return aref;
-  }
-
-  // FIXME - refactored and renamed to "getBoard()"
-  @Override
-  public String getBoard() {
-    return board;
-  }
-
-  // @Override
-  /*
-   * public DeviceController getController() { return this; }
-   */
-
-  public Attachable getDevice(Integer deviceId) {
-    return deviceIndex.get(deviceId).getDevice();
-  }
-
-  Integer getDeviceId(NameProvider device) {
-    return getDeviceId(device.getName());
-  }
-
-  Integer getDeviceId(String name) {
-    if (deviceList.containsKey(name)) {
-      Integer id = deviceList.get(name).getId();
-      if (id == null) {
-        error("cannot get device id for %s - device attempetd to attach - but I suspect something went wrong", name);
-      }
-      return id;
-    }
-    log.error("getDeviceId could not find device {}", name);
-    return null;
-  }
-
-  private String getDeviceName(int deviceId) {
-    return getDevice(deviceId).getName();
-  }
-
-  /*
-   * int type to describe the pin defintion to Pin.h 0 digital 1 analog
-   * 
-   */
-  public Integer getMrlPinType(PinDefinition pin) {
-    if (board == null) {
-      error("must have pin board type to determin pin definition");
-      return null;
-    }
-
-    if (pin == null) {
-      log.error("pin definition null");
-      return null;
-    }
-
-    if (pin.isAnalog()) {
-      return 1;
-    }
-
-    return 0;
-  }
-
   public String getPortName() {
     return serial.getPortName();
+  }
+
+  @Override
+  public List<String> getPortNames() {
+    if (serial != null) {
+      return serial.getPortNames();
+    }
+    return new ArrayList<String>();
+  }
+
+  @Override
+  public List<String> getPorts() {
+    // we use pins not ports
+    List<String> ret = new ArrayList<String>();
+    return ret;
   }
 
   /*
@@ -880,64 +1063,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   public Sketch getSketch() {
     return sketch;
-  }
-
-  /**
-   * sends a heartbeat, if not replied from in the next heartbeat disconnects
-   * and resets
-   */
-  // > heartbeat
-  /*
-   * public void heartbeat() { if (!heartbeat) { log.info(
-   * "No answer from controller:{}. Disconnecting...", this.getName());
-   * purgeTask("heartbeat"); if (isConnected()) { disconnect(); } }
-   * 
-   * // resetting to false - publishHeartbeat will set to // true (hopefully
-   * before the next heartbeat) heartbeat = false; msg.heartbeat(); }
-   */
-
-  @Override
-  public void attachI2CControl(I2CControl control) {
-    // Create the i2c bus device in MrlComm the first time this method is
-    // invoked.
-    // Add the i2c device to the list of i2cDevices
-    // Pattern: deviceAttach(device, Object... config)
-    // To add the i2c bus to the deviceList I need an device that represents
-    // the i2c bus here and in MrlComm
-    // This will only handle the creation of i2cBus.
-    if (i2cBus == null) {
-      i2cBus = new I2CBus(String.format("I2CBus%s", control.getDeviceBus()));
-      i2cBusAttach(i2cBus, Integer.parseInt(control.getDeviceBus()));
-    }
-
-    // This part adds the service to the mapping between
-    // busAddress||DeviceAddress
-    // and the service name to be able to send data back to the invoker
-    String key = String.format("%s.%s", control.getDeviceBus(), control.getDeviceAddress());
-    I2CDeviceMap devicedata = new I2CDeviceMap();
-    if (i2cDevices.containsKey(key)) {
-      log.error("Device {} {} {} already exists.", control.getDeviceBus(), control.getDeviceAddress(), control.getName());
-    } else {
-      devicedata.busAddress = control.getDeviceBus();
-      devicedata.deviceAddress = control.getDeviceAddress();
-      devicedata.control = control;
-      i2cDevices.put(key, devicedata);
-      control.attachI2CController(this);
-    }
-  }
-
-  @Override
-  public void detachI2CControl(I2CControl control) {
-    // This method should delete the i2c device entry from the list of
-    // I2CDevices
-    // The order of the detach is important because the higher level service may
-    // want to execute something that
-    // needs this service to still be availabe
-    if (i2cDevices.containsKey(control.getName())) {
-      i2cDevices.remove(control.getName());
-      control.detachI2CController(this);
-    }
-
   }
 
   /**
@@ -1069,6 +1194,28 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     }
   }
 
+  private void initSerial() {
+    if (msg == null) {
+      serial = (Serial) startPeer("serial");
+      msg = new Msg(this, serial);
+      // FIXME - dynamically additive - if codec key has never been used - add
+      // key
+      // serial.getOutbox().setBlocking(true);
+      // inbox.setBlocking(true);
+      serial.addByteListener(this);
+    }
+  }
+
+  @Override
+  public boolean isAttached(Attachable device) {
+    return deviceList.containsKey(device.getName());
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return deviceList.containsKey(name);
+  }
+
   @Override
   public boolean isConnected() {
     // include that we must have gotten a valid MrlComm version number.
@@ -1087,6 +1234,14 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   @Override
   public boolean isRecording() {
     return msg.isRecording();
+  }
+
+  // not used currently - should be refactored to use these methods for motor
+  // control
+  @Override
+  public double motorCalcOutput(MotorControl mc) {
+    double value = mc.calcControllerOutput();
+    return value;
   }
 
   @Override
@@ -1119,6 +1274,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
   }
 
+  // FIXME - clean or remove ...
   // ========== pulsePin begin =============
   // FIXME - MasterBlaster had a pulse motor which could support MoveTo
   // We need a Motor + encoder (analog or digital) DiyServo does this...
@@ -1193,15 +1349,11 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.neoPixelSetAnimation(getDeviceId(neopixel), animation, red, green, blue, speed);
   }
 
+  /**
+   * neoPixelWriteMatrix/deviceId/[] buffer
+   */
   @Override
-  // > neoPixelWriteMatrix/deviceId/[] buffer
   public void neoPixelWriteMatrix(NeoPixel neopixel, List<Integer> data) {
-    int id = getDeviceId(neopixel);
-    /*
-     * int[] buffer = new int[data.size() + 2]; buffer[0] = id; buffer[1] =
-     * data.size(); for (int i = 0; i < data.size(); i++) { buffer[i + 2] =
-     * data.get(i); }
-     */
     int[] buffer = new int[data.size()];
     for (int i = 0; i < data.size(); ++i) {
       buffer[i] = data.get(i);
@@ -1331,39 +1483,63 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     invoke("publishDisconnect", portName);
   }
 
-  public void pinMode(int pin, int mode) {
-    msg.pinMode(pin, mode);
-    PinDefinition pinDef = pinIndex.get(pin);
-    invoke("publishPinDefinition", pinDef);
-  }
+  public void openMrlComm(String path) {
+    try {
 
-  @Override
-  // > pinMode/pin/mode
-  public void pinMode(Integer address, String mode) {
-    if (mode != null && mode.equalsIgnoreCase("INPUT")) {
-      pinMode(address, INPUT);
-    } else {
-      pinMode(address, OUTPUT);
+      if (!setArduinoPath(path)) {
+        return;
+      }
+
+      String mrlCommFiles = null;
+      if (FileIO.isJar()) {
+        mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
+        // FIXME - don't do this every time :P
+        Zip.extractFromSelf(Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm", "resource/Arduino/MrlComm");
+      } else {
+        // running in IDE ?
+        mrlCommFiles = Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm";
+      }
+      File mrlCommDir = new File(mrlCommFiles);
+      if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
+        error("mrlcomm script directory %s is not a valid", mrlCommDir);
+        return;
+      }
+      String exePath = arduinoPath + File.separator + ArduinoUtils.getExeName();
+      String inoPath = mrlCommDir.getAbsolutePath() + File.separator + "/MrlComm.ino";
+      List<String> cmd = new ArrayList<String>();
+      cmd.add(exePath);
+      cmd.add(inoPath);
+      ProcessBuilder builder = new ProcessBuilder(cmd);
+      builder.start();
+
+    } catch (Exception e) {
+      error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
+      log.error("openMrlComm threw", e);
     }
   }
 
-  /*
+  @Override
+  /**
+   * // > pinMode/pin/mode
+   */
+  public void pinMode(int address, String modeStr) {
+    pinMode(address, modeStr.equalsIgnoreCase("INPUT") ? Arduino.INPUT : Arduino.OUTPUT);
+  }
+
+  public void pinMode(int address, int mode) {
+    msg.pinMode(address, mode);
+  }
+
+  /**
    * With Arduino we want to be able to do pinMode("D7", "INPUT"), but it should
    * not be part of the PinArrayControl interface - because when it comes down
    * to it .. a pin MUST ALWAYS have an address regardless what you label or
    * name it...
    * 
    */
-  public void pinMode(String pinName, String mode) {
-    if (mode != null && mode.equalsIgnoreCase("INPUT")) {
-      pinMode(pinNameToAddress(pinName), mode);
-    } else {
-      pinMode(pinNameToAddress(pinName), mode);
-    }
-  }
-
-  public Integer pinNameToAddress(String pinName) {
-    return pinMap.get(pinName).getAddress();
+  public void pinMode(String pin, String mode) {
+    PinDefinition pinDef = getPin(pin);
+    pinMode(pinDef.getAddress(), mode);
   }
 
   // < publishAck/function
@@ -1376,25 +1552,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     heartbeat = true;
   }
 
-  /*
-   * No longer needed .. Arduino service controls device list - MrlComm does not
-   * public String publishAttachedDevice(int deviceId, String deviceName) {
-   * 
-   * if (!deviceList.containsKey(deviceName)) { error(
-   * "PUBLISH_ATTACHED_DEVICE deviceName %s not found !", deviceName); }
-   * 
-   * DeviceMapping deviceMapping = deviceList.get(deviceName);
-   * deviceMapping.setId(deviceId); deviceIndex.put(deviceId,
-   * deviceList.get(deviceName));
-   * 
-   * // REMOVE invoke("publishAttachedDevice", deviceName);
-   * 
-   * info("==== ATTACHED DEVICE %s WITH MRLDEVICE %d ====", deviceName,
-   * deviceId);
-   * 
-   * return deviceName; }
-   */
-
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[]
   // deviceSummary
   public BoardInfo publishBoardInfo(Integer version/* byte */,
@@ -1403,13 +1560,7 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     long now = System.currentTimeMillis();
 
     log.debug("Version return by Arduino: {}", boardInfo.getVersion());
-    // log.debug("Board type returned by Arduino: {}", boardInfo.getName());
     log.debug("Board type currently set: {}", boardType);
-
-    /*
-     * boolean broadcast = false; if (version != boardInfo.getVersion() ||
-     * boardType != boardInfo.getBoardType()) { broadcast = true; }
-     */
 
     boardInfo.setVersion(version);
     boardInfo.setMicrosPerLoop(microsPerLoop);
@@ -1418,37 +1569,19 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     boardInfo.setDeviceSummary(arrayToDeviceSummary(deviceSummary));
     boardInfo.heartbeatMs = now - boardInfoRequestTs;
 
-    /*
-     * if (boardInfo.isUnknown()) { setBoard(boardInfo.getName());
-     * log.debug("Board type set to: {}", boardType); } else {
-     * log.debug("No change in board type"); }
-     */
-
-    // boardInfo.setType(boardType);
-
     synchronized (boardInfo) {
       boardInfo.notifyAll();
     }
 
-    /*
-     * if (broadcast) { broadcastState(); }
-     */
-
     return boardInfo;
   }
 
-  DeviceSummary[] arrayToDeviceSummary(int[] deviceSummary) {
-    DeviceSummary[] ds = new DeviceSummary[deviceSummary.length / 2];
-    for (int i = 0; i < deviceSummary.length / 2; ++i) {
-      int id = deviceSummary[i];
-      int typeId = deviceSummary[i + 1];
-      DeviceSummary ds0 = new DeviceSummary(getDeviceName(id), id, Msg.deviceTypeToString(typeId), typeId);
-      ds[i] = ds0;
-    }
-    return ds;
+  @Override
+  public String publishConnect(String portName) {
+    return portName;
   }
 
-  // < publishCustomMsg/[] msg
+  //  < publishCustomMsg/[] msg
   public int[] publishCustomMsg(int[] msg/* [] */) {
     return msg;
   }
@@ -1459,46 +1592,74 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return debugMsg;
   }
 
-  // < publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
-  // config/bu32 bui322
-  // < publishEcho/bu32 sInt
+  @Override
+  public String publishDisconnect(String portName) {
+    return portName;
+  }
+
+  /**
+   *  publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
+   * 
+   * @param myFloat
+   * @param myByte
+   * @param secondFloat
+   */
   public void publishEcho(float myFloat, int myByte, float secondFloat) {
     log.info("myFloat {} {} {} ", myFloat, myByte, secondFloat);
   }
 
-  public void echo(float myFloat, int myByte, float secondFloat) {
-    msg.echo(myFloat, myByte, secondFloat);
+  @Override
+  public EncoderData publishEncoderPosition(EncoderData data) {
+    return data;
+  }
+
+  // callback for generated method from arduinoMsg.schema
+  public EncoderData publishEncoderPosition(Integer deviceId, Integer position) {
+    EncoderData data = new EncoderData(getDeviceName(deviceId), position);
+    log.info("Encoder position. {}", data);
+    // DO WE BOTH PUBLISH & CALLBACK ?
+    ((EncoderControl) getDevice(deviceId)).onEncoderData(data);
+    invoke("publishEncoderPosition", data);
+    return data;
   }
 
   /**
-   * return heartbeat - prevents resetting
+   * return heartbeat - prevents resetting 
    */
   // < publishHeartbeat
   public void publishHeartbeat() {
     heartbeat = true;
   }
 
-  // < publishI2cData/deviceId/[] data
+  /*
+   * DeviceControl methods. In this case they represents the I2CBusControl Not
+   * sure if this is good to use the Arduino as an I2CBusControl Exploring
+   * different alternatives. I may have to rethink. Alternate solutions are
+   * welcome. /Mats.
+   */
+
+  /**
+   * @param deviceId
+   *          - mrl device identifier
+   * @param data
+   *          - data to publish from I2c
+   */
+  //  < publishI2cData/deviceId/[] data
   public void publishI2cData(Integer deviceId, int[] data) {
     log.info("publishI2cData");
     i2cReturnData(data);
   }
 
-  // < publishMRLCommError/str errorMsg
+  /**
+   * error from mrlcom in string form 
+   * 
+   * @param errorMsg
+   * @return
+   */
+  //  < publishMRLCommError/str errorMsg
   public String publishMRLCommError(String errorMsg/* str */) {
     log.error(errorMsg);
     return errorMsg;
-  }
-
-  /**
-   * This method is called with Pin data whene a pin value is changed on the
-   * Arduino board the Arduino must be told to poll the desired pin(s). This is
-   * done with a analogReadPollingStart(pin) or digitalReadPollingStart()
-   */
-  public PinData publishPin(PinData pinData) {
-    // caching last value
-    pinIndex.get(pinData.address).setValue(pinData.value);
-    return pinData;
   }
 
   // < publishPinArray/[] data
@@ -1512,9 +1673,13 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
 
     // parse sort reduce ...
     for (int i = 0; i < pinArray.length; ++i) {
-      PinData pinData = new PinData(data[3 * i], Serial.bytesToInt(data, (3 * i) + 1, 2));
+      int address = data[3 * i];
+      PinDefinition pinDef = getPin(address);
+      int value = Serial.bytesToInt(data, (3 * i) + 1, 2);
+      PinData pinData = new PinData(pinDef.getPinName(), value);
+      // update def with last value
+      pinDef.setValue(value);
       pinArray[i] = pinData;
-      int address = pinData.address;
 
       // handle individual pins
       if (pinListeners.containsKey(address)) {
@@ -1537,28 +1702,26 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     return pinArray;
   }
 
-  // FIXME - reconcile - Arduino's input is int[] - this one is not used
-  @Override
-  public PinData[] publishPinArray(PinData[] pinData) {
-    return pinData;
+  public List<String> publishPortNames(List<String> portNames) {
+    return portNames;
   }
 
-  /*
-   * method to communicate changes in pinmode or state changes
+  /**
+   * FIXME - I bet this doesnt work - test it
    * 
+   * @param deviceId
+   * @param data
+   * @return
    */
-  public PinDefinition publishPinDefinition(PinDefinition pinDef) {
-    return pinDef;
-  }
-
   public SerialRelayData publishSerialData(Integer deviceId, int[] data) {
     SerialRelayData serialData = new SerialRelayData(deviceId, data);
     return serialData;
   }
 
-  // FIXME - ask kwatters what he wants PinDefinition A0 ???
-  public PinData publishTrigger(Pin pin) {
-    return null;
+  public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
+    // TODO Auto-generated method stub
+    ((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
+    return currentPos;
   }
 
   // FIXME should be in Control interface - for callback
@@ -1567,16 +1730,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // log.info("echoTime {}", echoTime);
     ((UltrasonicSensor) getDevice(deviceId)).onUltrasonicSensorData(echoTime.doubleValue());
     return echoTime;
-  }
-
-  @Override
-  public int read(Integer address) { // FIXME - block on real read ???
-    return pinIndex.get(address).getValue();
-  }
-
-  @Override
-  public int read(String pinName) {
-    return read(pinNameToAddress(pinName));
   }
 
   // FIXME put recording into generated Msg
@@ -1619,115 +1772,50 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     error_arduino_to_mrl_rx_cnt = 0;
   }
 
+  /**
+   * Requesting board infor from the board
+   */
+  public void sendBoardInfoRequest() {
+    boardInfoRequestTs = System.currentTimeMillis();
+    msg.getBoardInfo();
+  }
+
   public void serialAttach(SerialRelay serialRelay, int controllerAttachAs) {
     Integer deviceId = attachDevice(serialRelay, new Object[] { controllerAttachAs });
     msg.serialAttach(deviceId, controllerAttachAs);
   }
 
-  @Override
-  public void attachServoControl(ServoControl servo) throws Exception {
-    if (isAttached(servo)) {
-      log.info("servo {} already attached", servo.getName());
-      return;
-    }
-    // query configuration out
-    int pin = servo.getPin();
-    // targetOutput is ALWAYS ALWAYS degrees
-    double targetOutput = servo.getTargetOutput();
-    double velocity = servo.getVelocity();
-
-    // this saves original "attach" configuration - and maintains internal
-    // data
-    // structures
-    // and does DeviceControl.attach(this)
-    Integer deviceId = attachDevice(servo, new Object[] { pin, targetOutput, velocity });
-
-    // send data to micro-controller - convert degrees to microseconds
-    int uS = degreeToMicroseconds(targetOutput);
-    msg.servoAttach(deviceId, pin, uS, (int) velocity, servo.getName());
-
-    // the callback - servo better have a check
-    // isAttached(ServoControl) to prevent infinite loop
-    // servo.attach(this, pin, targetOutput, velocity);
-    servo.attachServoController(this);
-  }
-
-  public static final int MOTOR_TYPE_SIMPLE = 1;
-  public static final int MOTOR_TYPE_DUAL_PWM = 2;
-
-  // @Override
-  public void attachMotorControl(MotorControl motor) throws Exception {
-    if (isAttached(motor)) {
-      log.info("motor {} already attached", motor.getName());
-      return;
-    }
-
-    Integer motorType = null;
-    int[] pins = null;
-
-    if (motor.getClass().equals(Motor.class)) {
-      motorType = MOTOR_TYPE_SIMPLE;
-      Motor m = (Motor) motor;
-      pins = new int[] { m.getPwrPin(), m.getDirPin() };
-    } else if (motor.getClass().equals(MotorDualPwm.class)) {
-      motorType = MOTOR_TYPE_DUAL_PWM;
-      MotorDualPwm m = (MotorDualPwm) motor;
-      pins = new int[] { m.getLeftPwmPin(), m.getRightPwmPin() };
-      // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
-
-    } else {
-      throw new IOException(String.format("do not know how to attach Motor type %s", motor.getClass().getSimpleName()));
-    }
-
-    // this saves original "attach" configuration - and maintains internal
-    // data
-    // structures
-    // and does DeviceControl.attach(this)
-    Integer deviceId = attachDevice(motor, new Object[] { motorType, pins });
-
-    // send data to micro-controller - convert degrees to microseconds
-    // int uS = degreeToMicroseconds(targetOutput);
-    msg.motorAttach(deviceId, motorType, pins);
-
-    // the callback - motor better have a check
-    // isAttached(MotorControl) to prevent infinite loop
-    // motor.attach(this, pin, targetOutput, velocity);
-    motor.attachMotorController(this);
-  }
-
-  @Override
-  public boolean isAttached(Attachable device) {
-    return deviceList.containsKey(device.getName());
-  }
-
-  @Override
-  public void attach(ServoControl servo, int pin) throws Exception {
-    servo.setPin(pin);
-    attachServoControl(servo);
-  }
-
-  /**
-   * Arduino's servo.attach(pin) which is just energizing on a pin To be
-   * consistent and transparent - method should be servoEnable
-   */
-  @Override
-  @Deprecated
-  // > servoEnablePwm/deviceId/pin
-  public void servoAttachPin(ServoControl servo, Integer pin) {
-    log.info("{}.attachPin({})", servo.getName(), servo.getPin());
-    msg.servoAttachPin(getDeviceId(servo), pin);
-  }
-
-  /**
-   * Stops the pwm on the pin. To be consistent and transparent - method should be
-   * servoDisable
-   */
-  @Override
-  @Deprecated
-  // > servoDisablePwm/deviceId
-  public void servoDetachPin(ServoControl servo) {
-    log.info("{}.detachPin({})", servo.getName(), servo.getPin());
+  // > servoDetachPin/deviceId
+  public void servoDisable(ServoControl servo) {
     msg.servoDetachPin(getDeviceId(servo));
+  }
+
+  @Override
+  public void servoEnable(ServoControl servo) {
+    int deviceId = getDeviceId(servo);
+    msg.servoAttachPin(deviceId, servo.getPin());
+  }
+
+  /**
+   * servo.write(angle) https://www.arduino.cc/en/Reference/ServoWrite The msg
+   * to mrl will always contain microseconds - but this method will (like the
+   * Arduino Servo.write) accept both degrees or microseconds. The code is
+   * ported from Arduino's Servo.cpp
+   */
+  @Override
+  // > servoWrite/deviceId/target
+  public void servoMoveTo(ServoControl servo) {
+    int deviceId = getDeviceId(servo);
+    // getTargetOutput ALWAYS ALWAYS Degrees !
+    // so we convert to microseconds
+    int us = degreeToMicroseconds(servo.getTargetOutput());
+    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getPos(), us);
+    msg.servoMoveToMicroseconds(deviceId, us);
+  }
+
+  @Override
+  public void servoSetAcceleration(ServoControl servo) {
+    msg.servoSetAcceleration(getDeviceId(servo), (int) servo.getAcceleration());
   }
 
   @Override
@@ -1755,23 +1843,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   }
 
   /**
-   * servo.write(angle) https://www.arduino.cc/en/Reference/ServoWrite The msg
-   * to mrl will always contain microseconds - but this method will (like the
-   * Arduino Servo.write) accept both degrees or microseconds. The code is
-   * ported from Arduino's Servo.cpp
-   */
-  @Override
-  // > servoWrite/deviceId/target
-  public void servoMoveTo(ServoControl servo) {
-    int deviceId = getDeviceId(servo);
-    // getTargetOutput ALWAYS ALWAYS Degrees !
-    // so we convert to microseconds
-    int us = degreeToMicroseconds(servo.getTargetOutput());
-    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getPos(), us);
-    msg.servoMoveToMicroseconds(deviceId, us);
-  }
-
-  /**
    * On standard servos a parameter value of 1000 is fully counter-clockwise,
    * 2000 is fully clockwise, and 1500 is in the middle.
    */
@@ -1780,9 +1851,66 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
   public void servoWriteMicroseconds(ServoControl servo, int uS) {
     int deviceId = getDeviceId(servo);
     log.debug("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
-    // msg.servoWriteMicroseconds(deviceId, uS);
-    // lets use speed control
     msg.servoMoveToMicroseconds(deviceId, uS);
+  }
+
+  public boolean setArduinoPath(String path) {
+
+    path = path.replace("\\", "/");
+    path = path.trim();
+    if (!path.endsWith("/")) {
+      path += "/";
+    }
+
+    File dir = new File(path);
+    if (!dir.exists() || !dir.isDirectory()) {
+      error(String.format("%s is not a valid directory", path));
+      return false;
+    }
+    arduinoPath = path;
+    ArduinoUtils.arduinoPath = arduinoPath; // THIS IS SILLY AND NOT
+    // NORMALIZED !
+    save();
+    return true;
+  }
+
+  public void setAref(String aref) {
+    aref = aref.toUpperCase();
+    if (this.getBoard().contains("mega")) {
+      if (aref == "INTERNAL") {
+        error("Aref " + aref + " is not compatible with your board " + this.getBoard());
+        aref = "DEFAULT";
+      }
+    } else {
+      if (aref == "INTERNAL1V1" || aref == "INTERNAL2V56") {
+        error("Aref INTERNALxV is not compatible with your board " + this.getBoard());
+        aref = "DEFAULT";
+      }
+    }
+
+    int arefInt = 1;
+    switch (aref) {
+      case "EXTERNAL":
+        arefInt = 0;
+        break;
+      case "DEFAULT":
+        arefInt = 1;
+        break;
+      case "INTERNAL1V1":
+        arefInt = 2;
+        break;
+      case "INTERNAL":
+        arefInt = 3;
+        break;
+      case "INTERNAL2V56":
+        arefInt = 3;
+        break;
+      default:
+        log.error("Aref " + aref + " is unknown");
+    }
+    log.info("set aref to " + aref);
+    this.aref = aref;
+    msg.setAref(arefInt);
   }
 
   public String setBoard(String board) {
@@ -1801,24 +1929,17 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     setBoard(BOARD_TYPE_MEGA);
   }
 
-  public void setBoardUno() {
-    setBoard(BOARD_TYPE_UNO);
+  public void setBoardMegaADK() {
+    setBoard(BOARD_TYPE_MEGA_ADK);
   }
 
   public void setBoardNano() {
     setBoard(BOARD_TYPE_NANO);
   }
 
-  public void setBoardMegaADK() {
-    setBoard(BOARD_TYPE_MEGA_ADK);
+  public void setBoardUno() {
+    setBoard(BOARD_TYPE_UNO);
   }
-
-  /*
-   * DeviceControl methods. In this case they represents the I2CBusControl Not
-   * sure if this is good to use the Arduino as an I2CBusControl Exploring
-   * different alternatives. I may have to rethink. Alternate solutions are
-   * welcome. /Mats.
-   */
 
   /*
    * Debounce ensures that only a single signal will be acted upon for a single
@@ -1866,6 +1987,12 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     msg.setTrigger(pin, value);
   }
 
+  @Override
+  public void setZeroPoint(EncoderControl encoder) {
+    // send the set zero point command to the encoder
+    msg.setZeroPoint(getDeviceId(encoder.getName()));
+  }
+
   /**
    * send a reset to MrlComm - all devices removed, all polling is stopped and
    * all other counters are reset
@@ -1895,50 +2022,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     super.stopService();
     detachI2CControls();
     disconnect();
-  }
-
-  public void detachI2CControls() {
-    for (Map.Entry<String, I2CDeviceMap> i2cDevice : i2cDevices.entrySet()) {
-      I2CControl i2cControl = i2cDevice.getValue().control;
-      i2cControl.detach(this);
-    }
-  }
-
-  public void test() {
-    int[] config = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    for (int i = 0; i < 10000; ++i) {
-      // msg.echo("name1", 8, 999999999, 121212, 254, "name2", config,
-      // 5454545);
-      // b32 long int 4 bytes -2,147,483,648 to 2,147,483, 647
-      // bu32 unsigned long long 0 to 4,294,967,295
-
-      // 2147483647
-      // 2139062143
-      // msg.echo(2147483647, "hello", 33, 2147483647L, 32767, 25, "oink
-      // oink", config, 2147483647L);
-      msg.echo(3.14159F, 17, 345.123F);
-      // msg.echo(32767, "hello 1", 127, 2147418111, 32767, 8, "name 2 is
-      // here", config, 534332);
-      // 2147418111
-      // 2147352575
-    }
-  }
-
-  @Override
-  public void attach(UltrasonicSensorControl sensor, Integer triggerPin, Integer echoPin) throws Exception {
-    // refer to
-    // http://myrobotlab.org/content/control-controller-manifesto
-    if (isAttached(sensor)) {
-      log.info("{} already attached", sensor.getName());
-      return;
-    }
-
-    // critical init code
-    Integer deviceId = attachDevice(sensor, new Object[] { triggerPin, echoPin });
-    msg.ultrasonicSensorAttach(deviceId, triggerPin, echoPin);
-
-    // call the other service's attach
-    sensor.attach(this, triggerPin, echoPin);
   }
 
   @Override
@@ -2019,10 +2102,10 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
    * http://codewiki.wikidot.com/c:system-calls:write PinArrayControl method
    */
   @Override
-  public void write(Integer address, Integer value) {
+  public void write(int address, int value) {
     info("write (%d,%d) to %s", address, value, serial.getName());
-    PinDefinition pinDef = pinIndex.get(address);
-    pinMode(address, Arduino.OUTPUT);
+    PinDefinition pinDef = getPin(address);
+    pinMode(address, "OUTPUT");
     if (pinDef.isPwm() && value > 1) { // CHEESEY HACK !!
       analogWrite(address, value);
     } else {
@@ -2031,229 +2114,46 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     // cache value
     pinDef.setValue(value);
   }
-
-  public int getAttachedCount() {
-    return deviceList.size();
-  }
-
-  @Override
-  public void detach(String controllerName) {
-    // GOOD DESIGN !!! - THIS HAS INPUT STRING - AND WILL
-    // ROUTE WITH THE APPROPRIATE TYPE - AUTO-MAGICALLY !!!
-    invoke("detach", Runtime.getService(controllerName));
-  }
-
-  // GOOD DESIGN !!!
-  @Override
-  public boolean isAttached(String name) {
-    return deviceList.containsKey(name);
-  }
-
-  @Override
-  public Set<String> getAttached() {
-    return deviceList.keySet();
-  }
-
-  public void openMrlComm(String path) {
-    try {
-
-      if (!setArduinoPath(path)) {
-        return;
-      }
-
-      String mrlCommFiles = null;
-      if (FileIO.isJar()) {
-        mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
-        // FIXME - don't do this every time :P
-        Zip.extractFromSelf(Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm", "resource/Arduino/MrlComm");
-      } else {
-        // running in IDE ?
-        mrlCommFiles = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MrlComm";
-      }
-      File mrlCommDir = new File(mrlCommFiles);
-      if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
-        error("mrlcomm script directory %s is not a valid", mrlCommDir);
-        return;
-      }
-      String exePath = arduinoPath + File.separator + ArduinoUtils.getExeName();
-      String inoPath = mrlCommDir.getAbsolutePath() + File.separator + "/MrlComm.ino";
-      List<String> cmd = new ArrayList<String>();
-      cmd.add(exePath);
-      cmd.add(inoPath);
-      ProcessBuilder builder = new ProcessBuilder(cmd);
-      builder.start();
-
-    } catch (Exception e) {
-      error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
-      log.error("openMrlComm threw", e);
-    }
-  }
-
-  @Override
-  public void servoSetAcceleration(ServoControl servo) {
-    msg.servoSetAcceleration(getDeviceId(servo), (int) servo.getAcceleration());
-  }
-
-  public boolean setArduinoPath(String path) {
-
-    path = path.replace("\\", "/");
-    path = path.trim();
-    if (!path.endsWith("/")) {
-      path += "/";
-    }
-
-    File dir = new File(path);
-    if (!dir.exists() || !dir.isDirectory()) {
-      error(String.format("%s is not a valid directory", path));
-      return false;
-    }
-    arduinoPath = path;
-    ArduinoUtils.arduinoPath = arduinoPath; // THIS IS SILLY AND NOT
-    // NORMALIZED !
-    save();
-    return true;
-  }
-
-  public String getArduinoPath() {
-    return arduinoPath;
-  }
-
-  public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
-    // TODO Auto-generated method stub
-    ((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
-    return currentPos;
-  }
-
-  @Override
-  public String publishConnect(String portName) {
-    return portName;
-  }
-
-  @Override
-  public String publishDisconnect(String portName) {
-    return portName;
-  }
-
-  @Override
-  public List<String> getPortNames() {
-    if (serial != null) {
-      return serial.getPortNames();
-    }
-    return new ArrayList<String>();
-  }
-
-  // @Override - lame - should be override
-  public List<BoardType> getBoardTypes() {
-
-    List<BoardType> boardTypes = new ArrayList<BoardType>();
-    try {
-      String b = FileIO.resourceToString("Arduino"+File.separator+"boards.txt");
-      Properties boardProps = new Properties();
-      boardProps.load(new ByteArrayInputStream(b.getBytes()));
-
-      Enumeration<?> e = boardProps.propertyNames();
-      Set<String> distinct = new TreeSet<String>();
-      Set<String> hasProcessorTypes = new TreeSet<String>();
-      while (e.hasMoreElements()) {
-        String keyLine = (String) e.nextElement();
-        String[] parts = keyLine.split("\\.");
-        String key = parts[0];
-        if (key.startsWith("menu")) {
-          continue;
-        }
-
-        if (keyLine.contains("menu.cpu")) {
-          hasProcessorTypes.add(key);
-          // split - remove previous
-          if (distinct.contains(key)) {
-            distinct.remove(key);
-          }
-          // for diecimila.atmega328
-          try {
-            key = parts[0] + "." + parts[3];
-          } catch (Exception e2) {
-            log.error("board.txt is weird", e2);
-          }
-          distinct.add(key);
-        } else if (!hasProcessorTypes.contains(key)) {
-          distinct.add(key);
-        }
-
-      }
-
-      for (String longKey : distinct) {
-
-        String[] parts = longKey.split("\\.");
-        String key = parts[0];
-        String processorType = null;
-        if (parts.length > 1) {
-          processorType = parts[1];
-        }
-
-        BoardType boardType = new BoardType();
-
-        if (processorType != null) {
-          boardType.setName(boardProps.getProperty(String.format("%s.name", key)) + " - " + processorType);
-        } else {
-          boardType.setName(boardProps.getProperty(String.format("%s.name", key)));
-        }
-
-        boardType.setBoard(longKey);
-        boardType.setId(longKey.hashCode());
-        boardTypes.add(boardType);
-      }
-    } catch (Exception e) {
-      log.error("getBoards threw", e);
-    }
-    return boardTypes;
-  }
-
-  /*
-   * event to return list of ports of all ports this serial service can see
-   */
-  public List<String> publishPortNames(List<String> portNames) {
-    return portNames;
-  }
+  
 
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
-      log.info("{}", "nano".hashCode());
 
       boolean virtual = true;
       boolean isDone = true;
-      String port = "COM10";
+      String port = "COM16";
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
-      Serial serial = (Serial) Runtime.start("serial", "Serial");
-      log.info("{}", serial.getPortNames());
-      // Runtime.start("cli", "Cli");
-      // RemoteAdapter remote = (RemoteAdapter) Runtime.start("ra",
-      // "RemoteAdapter");
-
-      // Runtime.start("python", "Python");
-
-      if (virtual) {
-        VirtualArduino va = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-        va.connect(port);
-        va.setBoardUno();
-      }
 
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      log.info("port names {}", arduino.getPortNames());
+      arduino.setVirtual(virtual);
+      arduino.enableBoardInfo(false);
       arduino.connect(port);
-      arduino.setBoardMega();
 
       if (isDone) {
         return;
       }
+
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      servo.setPin(8);
+      arduino.attach(servo);
+
+      servo.moveTo(3);
+
+      servo.moveTo(30);
+
+      arduino.enablePin("A4");
+
+      // arduino.setBoardMega();
+
       Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
       adafruit.attach(arduino);
       arduino.attach(adafruit);
 
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
       // servo.attach(arduino, 8, 90);
 
       // Runtime.start("webgui", "WebGui");
@@ -2267,100 +2167,6 @@ public class Arduino extends Service implements Microcontroller, PinArrayControl
     } catch (Exception e) {
       log.error("main threw", e);
     }
-  }
-
-  @Override
-  public void connect(String port, int rate) throws Exception {
-    connect(port, rate, 8, 1, 0);
-  }
-
-  @Override
-  public List<String> getPorts() {
-    // we use pins not ports
-    List<String> ret = new ArrayList<String>();
-    return ret;
-  }
-
-  public PinDefinition getPin(String pinName) {
-    if (pinMap.containsKey(pinName)) {
-      return pinMap.get(pinName);
-    }
-    return null;
-  }
-
-  public PinDefinition getPin(Integer address) {
-    if (pinIndex.containsKey(address)) {
-      return pinIndex.get(address);
-    }
-    return null;
-  }
-
-  /**
-   * Attach an encoder to the arduino
-   * @param encoder - the encoder control to attach
-   * @param type - 0 for AMT203 1 for AS5048A
-   */
-  public void attachEncoderControl(EncoderControl encoder) {
-    Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
-    // send data to micro-controller
-    
-    // TODO: update this with some enum of various encoder types..
-    // for now it's just AMT203 ...
-    int type = 0;
-    if (encoder instanceof Amt203Encoder) {
-      type = 0;
-    } else if (encoder instanceof As5048AEncoder){
-      type = 1;
-    }
-    msg.encoderAttach(deviceId, type, encoder.getPin());
-    encoder.setController(this);
-
-  }
-
-  // callback for generated method from arduinoMsg.schema
-  public EncoderData publishEncoderPosition(Integer deviceId, Integer position) {
-    EncoderData data = new EncoderData(getDeviceName(deviceId), position);
-    log.info("Encoder position. {}", data);
-    // DO WE BOTH PUBLISH & CALLBACK ?
-    ((EncoderControl) getDevice(deviceId)).onEncoderData(data);
-    invoke("publishEncoderPosition", data);
-    return data;
-  }
-
-  @Override
-  public EncoderData publishEncoderPosition(EncoderData data) {
-    return data;
-  }
-
-  @Override
-  public void attach(EncoderControl encoder, Integer pin) throws Exception {
-    attachEncoderControl(encoder);
-    // here we want to instruct the arduino via mrl comm to attach an
-    // MrlAmt203Encoder device.
-    // TODO: is this needed?
-    // encoder.attach(this, pin);
-  }
-
-  @Override
-  public void setZeroPoint(EncoderControl encoder) {
-    // send the set zero point command to the encoder
-    msg.setZeroPoint(getDeviceId(encoder.getName()));
-  }
-
-  @Override
-  public org.myrobotlab.math.interfaces.Mapper getDefaultMapper() {
-    // best guess :P
-    MapperLinear mapper = new MapperLinear();
-    mapper.map(-1.0, 1.0, 0.0, 255.0);
-    return mapper;
-  }
-
-  // not used currently - should be refactored to use these methods for motor
-  // control
-  @Override
-  public double motorCalcOutput(MotorControl mc) {
-    double value = mc.calcControllerOutput();
-    return value;
   }
 
 }

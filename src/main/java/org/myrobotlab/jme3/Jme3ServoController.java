@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
@@ -32,14 +33,18 @@ public class Jme3ServoController implements ServoController {
   @Override
   public void attach(Attachable service) throws Exception {
     if (service instanceof ServoControl) {
-      attachServoControl((ServoControl) service);
+      ServoControl servo = (ServoControl)service;
+      String name = servo.getName();
+      if (!servos.containsKey(name)) {      
+        servos.put(name, servo);
+        servo.attach(this);
+      }      
     }
   }
 
   @Override
   public void attach(String serviceName) throws Exception {
-    // TODO Auto-generated method stub
-
+    attach(Runtime.getService(serviceName));
   }
 
   @Override
@@ -88,28 +93,10 @@ public class Jme3ServoController implements ServoController {
     return jme.getName();
   }
 
-  @Override
-  public void attachServoControl(ServoControl servo) throws Exception {
-    String name = servo.getName();
-    if (!servos.containsKey(name)) {      
-      servos.put(name, servo);
-      servo.attach(this);
-    }
-  }
-
   // FIXME - this should probably be deprecated in the interface !
   @Override
   public void attach(ServoControl servo, int pin) throws Exception {
-    attachServoControl(servo);
-  }
-
-  @Override
-  public void servoAttachPin(ServoControl servo, Integer pin) {
-    try {
-      attachServoControl(servo);
-    } catch (Exception e) {
-      log.error("servoAttachPin threw", e);
-    }
+    attach(servo);
   }
 
   @Override
@@ -155,15 +142,8 @@ public class Jme3ServoController implements ServoController {
   }
 
   @Override
-  public void servoDetachPin(ServoControl servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public void servoSetVelocity(ServoControl servo) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -172,17 +152,6 @@ public class Jme3ServoController implements ServoController {
 
   }
 
-  @Override
-  public void enablePin(Integer sensorPin, Integer i) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void disablePin(Integer i) {
-    // TODO Auto-generated method stub
-
-  }
 
   public void setRotation(String name, String axis) {
     rotationMap.put(name, axis);
@@ -190,6 +159,18 @@ public class Jme3ServoController implements ServoController {
 
   public void setDefaultServoSpeed(Double speed) {
     defaultServoSpeed = speed;
+  }
+
+  @Override // FIXME - enable/disable
+  public void servoEnable(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override // FIXME - enable disable
+  public void servoDisable(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

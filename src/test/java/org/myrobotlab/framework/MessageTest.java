@@ -32,7 +32,7 @@ public class MessageTest extends AbstractTest implements NameProvider {
 
   @Test
   final public void badNameTest() throws Exception {
-    log.info("badNameTest");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     catcher.clear();
     TestCatcher catcher2 = null;
     try {
@@ -83,8 +83,8 @@ public class MessageTest extends AbstractTest implements NameProvider {
     thrower.pitchInt(1000);
     BlockingQueue<Message> balls = catcher.waitForMsgs(1000);
 
-    log.warn(String.format("caught %d balls", balls.size()));
-    log.warn(String.format("left balls %d ", catcher.msgs.size()));
+    log.info(String.format("caught %d balls", balls.size()));
+    log.info(String.format("left balls %d ", catcher.msgs.size()));
 
     Runtime.removeAllSubscriptions();
 

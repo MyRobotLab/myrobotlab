@@ -268,7 +268,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
      * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"
      * )); List<VoiceComponentDescription> moreVoices =
      * installer.getVoiceDescriptions(); for (VoiceComponentDescription k :
-     * moreVoices) { System.out.println("voice-" + k.getName()); }
+     * moreVoices) { log.info("voice-" + k.getName()); }
      * moreVoices.size(); </pre>
      */
 

@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
 
 /**
  * The purpose of this class is to retrieve all the detailed information
@@ -51,6 +49,7 @@ public class Platform implements Serializable {
   String vmName;
   String vmVersion;
   String mrlVersion;
+  boolean isVirtual = false;
 
   /**
    * Static identifier to identify the "instance" of myrobotlab - similar to
@@ -141,23 +140,6 @@ public class Platform implements Serializable {
       if (platform.arch == null) {
         platform.arch = arch;
       }
-
-      // REMOVED EVIL RECURSION - you can't call a file which has static
-      // logging !!
-      // logging calls -> platform calls a util class -> calls logging --
-      // infinite loop
-
-      /*
-       * 
-       * StringBuffer sb = new StringBuffer();
-       * 
-       * try { BufferedReader br = new BufferedReader(new
-       * InputStreamReader(Platform.class.getResourceAsStream(
-       * Util.getRessourceDir() + "/version.txt"), "UTF-8")); for (int c = br.read(); c != -1; c
-       * = br.read()) { sb.append((char) c); } if (sb.length() > 0) {
-       * platform.mrlVersion = sb.toString(); } } catch (Exception e) { // no
-       * logging silently die }
-       */
 
       if (platform.mrlVersion == null) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
@@ -255,14 +237,6 @@ public class Platform implements Serializable {
 
   public int getBitness() {
     return bitness;
-  }
-
-  public String getClassPathSeperator() {
-    if (isWindows()) {
-      return ";";
-    } else {
-      return ":";
-    }
   }
 
   public String getOS() {
@@ -398,6 +372,14 @@ public class Platform implements Serializable {
 
   public Date getStartTime() {
     return startTime;
+  }
+  
+  public boolean isVirtual() {
+    return isVirtual;
+  }
+  
+  public void setVirtual(boolean b) {
+    isVirtual = b;
   }
   
 

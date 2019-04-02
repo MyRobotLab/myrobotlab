@@ -391,20 +391,16 @@ public class InMoovHead extends Service {
 
   public void setpins(int headXPin, int headYPin, int eyeXPin, int eyeYPin, int jawPin, int rollNeckPin) {
     log.info("setPins {} {} {} {} {} {}", headXPin, headYPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
-
-    /*
-     * rothead.setPin(headXPin); neck.setPin(headYPin); eyeX.setPin(eyeXPin);
-     * eyeY.setPin(eyeYPin); jaw.setPin(jawPin); rollNeck.setPin(rollNeckPin);
-     */
-
-    // Calamity: not sure it should be called in the Arduino, should be on the
-    // Servo
-    controller.servoAttachPin(rothead, headXPin);
-    controller.servoAttachPin(neck, headYPin);
-    controller.servoAttachPin(eyeX, eyeXPin);
-    controller.servoAttachPin(eyeY, eyeYPin);
-    controller.servoAttachPin(jaw, jawPin);
-    controller.servoAttachPin(rollNeck, rollNeckPin);
+    try {
+      controller.attach(rothead, headXPin);
+      controller.attach(neck, headYPin);
+      controller.attach(eyeX, eyeXPin);
+      controller.attach(eyeY, eyeYPin);
+      controller.attach(jaw, jawPin);
+      controller.attach(rollNeck, rollNeckPin);
+    } catch (Exception e) {
+      error(e);
+    }
 
   }
 

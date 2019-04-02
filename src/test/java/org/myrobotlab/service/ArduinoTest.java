@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,15 +14,13 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.Description;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlServo;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino.Sketch;
+import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
@@ -32,66 +31,35 @@ import org.slf4j.Logger;
 /**
  * 
  * @author GroG
+ * 
+ * FIXME - test all types of Arduino's and thier pin definitions uno, mega, nano, pico, decillia
+ * FIXME - make sure the primitives defined in the PinArrayControl are accessable through invoking ... (as per all primitive signature interfaces)
+ * FIXME - test the othe PinArrayControllers .. Pcf8574, Mpr121, RasPi
+ * FIXME - test webgui oscope
  *
  */
 
 public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
-  public static class JUnitListener extends RunListener {
-
-    public void testAssumptionFailure(Failure failure) {
-      log.info("testAssumptionFailure");
-    }
-
-    public void testFailure(Failure failure) {
-      log.info("testFailure");
-    }
-
-    public void testFinished(Description description) {
-      log.info("testFinished");
-    }
-
-    public void testIgnored(Description description) {
-      log.info("testIgnored");
-    }
-
-    public void testRunFinished(Result result) {
-      log.info("testRunFinished");
-    }
-
-    public void testRunStarted(Description description) {
-      log.info("testRunStarted");
-    }
-
-    public void testStarted(Description description) {
-      log.info("testStarted");
-    }
-  }
-
-  // things to test
-  static Arduino arduino = null;
+  static Arduino arduino01 = null;
+  static Arduino arduino02 = null;
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
-  static String port = "COM25";
-  static Serial serial = null;
+  static String port01 = "COM1";
+  static String port02 = "COM2";
 
-  static SerialDevice uart = null;
-  // TODO: read the value of this off a property off a config file (maybe a
-  // properties file for the mrl test framework.)
-  static boolean useVirtualHardware = true;
+  static Serial serial01 = null;
+  static Serial serial02 = null;
 
-  // virtual hardware
-  static VirtualArduino virtual = null;
-  String enablePin = "A1";
-  Map<Integer, PinData> pinData = new HashMap<Integer, PinData>();
-  // FIXME - test for re-entrant !!!!
-  // FIXME - single switch for virtual versus "real" hardware
+  String analogPin = "A1";
+  String digitalPin = "D0";
 
-  int servoPin = 7;
+  Map<String, PinData> pinData = new HashMap<String, PinData>();
 
-  int writeAddress = 6;
+  int servoPin01 = 7;
+  int servoPin02 = 8;
 
-  private void assertVirtualPinValue(int address, int value) {
+  private void assertVirtualPinValue(VirtualArduino virtual, int address, int value) {
     if (virtual != null) {
       assertTrue(virtual.readBlocking(address, 50) == value);
       virtual.clearPinQueue(address);
@@ -112,103 +80,99 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   public void onPinArray(PinData[] pindata) {
     log.debug("onPinArray size {}", pindata.length);
     for (int i = 0; i < pindata.length; ++i) {
-      pinData.put(pindata[i].address, pindata[i]);
+      pinData.put(pindata[i].pin, pindata[i]);
     }
   }
 
   @Before
   public void setUp() throws Exception {
-    // LoggingFactory.init("WARN");
-    // setup the virtual port (if enabled)
-    // FIXME - needs a seemless switch
-    if (useVirtualHardware) {
-      virtual = (VirtualArduino) Runtime.start("virtualTest", "VirtualArduino");
-      uart = virtual.getSerial();
-      uart.setTimeout(100); // don't want to hang when decoding results...
-      virtual.connect(port);
-    }
 
     // TODO: Initialize the arduino under test. (potentially do this in each
     // test method vs passing the same one around ..)
-    arduino = (Arduino) Runtime.start("arduinoTest", "Arduino");
+    arduino01 = (Arduino) Runtime.start("arduinoTest", "Arduino");
+    arduino01.setVirtual(true);
     // TODO: have a separate unit test for testing serial. we probably don't
     // want to intermingle that testing here (if we can avoid it.)
-    serial = arduino.getSerial();
-    arduino.connect(port);
-
-    /**
-     * Arduino's expected state before each test is 'connected' with no devices,
-     * no pins enabled
-     */
+    serial01 = arduino01.getSerial();
+    arduino01.connect(port01);
   }
 
   // TODO: fix this test method.
   // @Test
   public final void testAnalogWrite() throws InterruptedException, IOException {
-    log.info("testAnalogWrite");
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
 
-    arduino.analogWrite(10, 0);
-    assertVirtualPinValue(10, 0);
+    arduino01.analogWrite(10, 0);
+    assertVirtualPinValue(arduino01.getVirtual(), 10, 0);
 
-    arduino.analogWrite(10, 127);
-    assertVirtualPinValue(10, 127);
+    arduino01.analogWrite(10, 127);
+    assertVirtualPinValue(arduino01.getVirtual(), 10, 127);
 
-    arduino.analogWrite(10, 128);
-    assertVirtualPinValue(10, 128);
+    arduino01.analogWrite(10, 128);
+    assertVirtualPinValue(arduino01.getVirtual(), 10, 128);
 
-    arduino.analogWrite(10, 255);
-    assertVirtualPinValue(10, 255);
+    arduino01.analogWrite(10, 255);
+    assertVirtualPinValue(arduino01.getVirtual(), 10, 255);
 
-    arduino.error("test");
+    arduino01.error("test");
   }
 
   @Test
   public final void testConnect() throws IOException {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     log.info("testConnect - begin");
-    arduino.disconnect();
-    arduino.connect(port);
+    arduino01.disconnect();
+    arduino01.connect(port01);
     sleep(10);
-    assertTrue(arduino.isConnected());
-    assertEquals(Msg.MRLCOMM_VERSION, arduino.getBoardInfo().getVersion().intValue());
+    assertTrue(arduino01.isConnected());
+    assertEquals(Msg.MRLCOMM_VERSION, arduino01.getBoardInfo().getVersion().intValue());
     log.info("testConnect - end");
   }
 
-  // TODO : broken in ANT but not in eclipse!
-  // @Test
+  @Test
   public void testConnectResetAndClear() {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    arduino01.connect(port01);
+    arduino01.reset();
 
-    arduino.connect(port);
-    arduino.reset();
+    serial01.clear();
+    serial01.setTimeout(100);
 
-    serial.clear();
-    serial.setTimeout(100);
-
-    uart.clear();
-    uart.setTimeout(100);
-
+    if (arduino01.isVirtual()) {
+      SerialDevice uart = arduino01.getVirtual().getSerial();
+      uart.clear();
+      uart.setTimeout(100);
+    }
+    
     pinData.clear();
   }
 
   @Test
   public void testConnectString() {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     for (int i = 0; i < 20; ++i) {
       // arduino.connect(port);
       // arduino.enableAck(true);
-      arduino.echo(90.57F, 129, 30.123F);
+      arduino01.echo(90.57F, 129, 30.123F);
       /*
        * arduino.echo(30003030L + i); arduino.echo(2L); arduino.echo(-1L);
        */
       // arduino.disconnect();
     }
-    log.info("here");
   }
 
   @Test
   public final void testDigitalWrite() {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     log.info("testDigitalWrite");
-    arduino.digitalWrite(10, 1);
+    arduino01.digitalWrite(10, 1);
     // assertEquals("digitalWrite/10/1\n", uart.decode());
-    arduino.digitalWrite(10, 0);
+    arduino01.digitalWrite(10, 0);
     // assertEquals("digitalWrite/10/0\n", uart.decode());
     // arduino.digitalWrite(10, 255);
     // assertEquals("digitalWrite/10/0", uart.decode());
@@ -216,58 +180,58 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Test
   public final void testDisconnect() throws IOException {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     log.info("testDisconnect");
     // shutdown mrlcomm
     // disconnect
-    arduino.disconnect();
+    arduino01.disconnect();
     // clear
-    serial.clear();
-    uart.clear();
+    if (arduino01.isVirtual()) {
+      arduino01.getVirtual().getSerial().clear();
+    }
+    serial01.clear();
     // test disconnected
-    assertTrue(!arduino.isConnected());
+    assertTrue(!arduino01.isConnected());
     // test no data - no exception ?
-    arduino.digitalWrite(10, 1);
+    arduino01.digitalWrite(10, 1);
     // reconnect
-    arduino.connect(port);
+    arduino01.connect(port01);
     // test we are connected
-    assertTrue(arduino.isConnected());
+    assertTrue(arduino01.isConnected());
     // assert basic re-connect worky
-    arduino.digitalWrite(10, 1);
+    arduino01.digitalWrite(10, 1);
   }
 
   @Test
   public void testEnableBoardStatus() {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     org.myrobotlab.service.Test test = (org.myrobotlab.service.Test) Runtime.start("test", "Test");
-    test.subscribe(arduino.getName(), "publishBoardStatus");
-    arduino.enableBoardInfo(true);
+    test.subscribe(arduino01.getName(), "publishBoardStatus");
+    arduino01.enableBoardInfo(true);
     // FIXME notify with timeout
-    arduino.enableBoardInfo(false);
-  }
-
-  @Test
-  public void testEnableBoardStatusInt() {
-    // fail("Not yet implemented");
-  }
-
-  @Test
-  public void testEnabledHeartbeat() {
-    // fail("Not yet implemented");
+    arduino01.enableBoardInfo(false);
   }
 
   @Test
   public void testEnablePinInt() {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     // set board type
-    arduino.enablePin(enablePin);
-    arduino.attach(this);
+    arduino01.enablePin(analogPin);
+    arduino01.attach(this);
     sleep(50);
-    assertTrue(pinData.containsKey(arduino.pinNameToAddress(enablePin)));
-    arduino.disablePin(enablePin);
+    assertTrue(pinData.containsKey(arduino01.getPin(analogPin).getPinName()));
+    arduino01.disablePin(analogPin);
   }
 
   @Test
   public void testGetBoardInfo() {
-    arduino.connect(port);
-    BoardInfo boardInfo = arduino.getBoardInfo();
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    arduino01.connect(port01);
+    BoardInfo boardInfo = arduino01.getBoardInfo();
     // assertTrue(boardInfo.isValid());
     assertTrue(boardInfo.getVersion().intValue() == Msg.MRLCOMM_VERSION);
   }
@@ -275,130 +239,177 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   // TODO: fails in unit test in ant , not in eclipse.
   // @Test
   public final void testGetSketch() {
-    log.info("testGetSketch");
-    Sketch sketch = arduino.getSketch();
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    Sketch sketch = arduino01.getSketch();
     assertNotNull(sketch);
     assertTrue(sketch.data.length() > 0);
-    arduino.setSketch(null);
-    assertNull(arduino.getSketch());
-    arduino.setSketch(sketch);
-    assertEquals(sketch, arduino.getSketch());
+    arduino01.setSketch(null);
+    assertNull(arduino01.getSketch());
+    arduino01.setSketch(sketch);
+    assertEquals(sketch, arduino01.getSketch());
+  }
+  
+  @Test
+  public final void pinArrayTest() {
+    //  fail("fix me - complete interface test");
   }
 
   @Test
   public final void testGetVersion() {
-    log.info("testGetVersion");
-    arduino.connect(port);
-    assertEquals(Msg.MRLCOMM_VERSION, arduino.getBoardInfo().getVersion().intValue());
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    arduino01.connect(port01);
+    assertEquals(Msg.MRLCOMM_VERSION, arduino01.getBoardInfo().getVersion().intValue());
   }
 
   @Test
   public final void testPinModeIntegerInteger() {
-    log.info("testPinModeIntegerInteger");
-    arduino.pinMode(8, Arduino.OUTPUT);
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    arduino01.pinMode(8, Arduino.OUTPUT);
     // assertEquals("pinMode/8/1\n", uart.decode());
   }
 
   // If we enable this test, it should assert something.
   // @Test
   public final void testPinModeIntString() {
-    log.info("testPinModeIntString");
-    arduino.pinMode(8, "OUTPUT");
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    arduino01.pinMode(8, "OUTPUT");
     // assertEquals("pinMode/8/1\n", uart.decode());
     // TODO: add an assert here.
   }
 
-  // TODO: broken from ant build due to file not founds (not broken in eclipse.)
-  // @Test
+  @Test
   public void testReleaseService() {
-    arduino.releaseService();
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    arduino01.releaseService();
     // better re-start it
-    arduino = (Arduino) Runtime.start("arduino", "Arduino");
+    arduino01 = (Arduino) Runtime.start("arduino", "Arduino");
   }
 
-  // TODO: re-enable this when it's worky.
-  // @Test
-  public final void testServoAttachServoInteger() throws Exception {
-    log.info("testServoAttachServoInteger");
-    Servo servo = null;
+  @Test
+  public final void testServo() throws Exception {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
 
-    // make sure we're connected
-    arduino.connect(port);
-    assertTrue(arduino.isConnected());
-    // assertTrue(arduino.getBoardInfo().isValid());
+    Servo servo = (Servo) Runtime.start("servo01", "Servo");
+    arduino01.connect(port01);
+    
+    // TEST AUTO DETACH !!!!
 
-    // reentrancy make code strong !
-    // for (int i = 0; i < 3; ++i) {
-
-    // create a servo
-    servo = (Servo) Runtime.start("servo", "Servo");
+    assertTrue("isConnected", arduino01.isConnected());
 
     // attach it
-    servo.attach(arduino, servoPin);
+    servo.attach(arduino01, servoPin01);
+    sleep(300); // wait for asynchronous creation over serial of an MrlComm
+                // servo
+
+    // get DeviceId
+    DeviceMapping mapping = arduino01.deviceList.get("servo01");
+    assertNotNull("verify arduino mapping exists in device list", mapping);
+    
+    MrlServo mrlservo = null;
+    if (isVirtual()) {
+      Device device = arduino01.getVirtual().getDevice(mapping.getId());
+      assertNotNull("verify virtual device exists", device);
+      assertTrue("verify its a servo", device instanceof MrlServo);
+      mrlservo = (MrlServo)device;
+    }
 
     // verify its attached
-    assertTrue(servo.isAttached());
-    assertTrue(servo.isAttachedServoController(arduino));
-    assertTrue(arduino.getAttached().contains(servo.getName()));
-
+    assertTrue("verify servo is not attached to arduino", servo.isAttached(arduino01));
+    assertTrue("verify arduino is not attached to servo", arduino01.isAttached(servo));
+    assertTrue("verify servo is not attached to arduino by name", servo.isAttached(arduino01.getName()));
+    assertTrue("verify arduino is not attached to servo by name", arduino01.isAttached(servo.getName()));
+    assertTrue("arduino is attached and contains a servo in device list", arduino01.getAttached().contains(servo.getName()));
+    
+    if (isVirtual()) {
+      assertTrue("verifty virtual mrlservo is enabled", mrlservo.enabled);
+    }
+    
+    // move it
+    servo.moveToBlocking(30);    
+    if (isVirtual()) {
+      // FIXME -- fix blocking fix encoders
+      sleep(500); 
+      assertTrue("virtual servo moved blocking to 30", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(30));
+    }
+    
+    servo.moveTo(100);
+    sleep(100);
+    if (isVirtual()) {
+      assertTrue("virtual servo moved to 100", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(100));
+    }
+    
     // detach it
-    arduino.detach(servo);
+    arduino01.detach(servo);
+    sleep(300); // wait for asynchronous removal of MrlServo
+    assertFalse("verify servo is not attached to arduino", servo.isAttached(arduino01));
+    assertFalse("verify arduino is not attached to servo", arduino01.isAttached(servo));
+    assertFalse("verify servo is not attached to arduino by name", servo.isAttached(arduino01.getName()));
+    assertFalse("verify arduino is not attached to servo by name", arduino01.isAttached(servo.getName()));
+    if (arduino01.isVirtual()) {
+      assertNull("verify device has been removed", arduino01.getVirtual().getDevice(mapping.getId()));
+    }
+    assertFalse("verifty servo is disabled", servo.enabled());
+    if (arduino01.isVirtual()) {
+      assertFalse("verifty virtual mrlservo is disabled", mrlservo.enabled);
+    }
 
-    // verify its detached
-    assertFalse(arduino.getAttached().contains(servo.getName()));
-    assertFalse(servo.enabled());
-    assertFalse(servo.isAttachedServoController(arduino));
+    
+    assertFalse(servo.isAttached(arduino01));
 
     // attach it the other way
-    arduino.attach(servo, servoPin);
+    arduino01.attach(servo, servoPin01);
 
     // verify its attached
-    assertTrue(servo.isAttached());
-    assertTrue(servo.isAttachedServoController(arduino));
-    assertTrue(arduino.getAttached().contains(servo.getName()));
+    assertTrue(servo.isAttached(arduino01));
+    assertTrue(arduino01.getAttached().contains(servo.getName()));
 
     // servo should have the correct pin
-    assertTrue(servoPin == servo.getPin());
+    assertTrue(servoPin01 == servo.getPin());
 
     // get its device id
-    int deviceId = arduino.getDeviceId(servo.getName());
+    int deviceId = arduino01.getDeviceId(servo.getName());
 
     // get mrlcom's device id
     // virtualized tests
     MrlServo mrlServo = null;
-    if (virtual != null) {
+    if (arduino01.isVirtual()) {
       Thread.sleep(100);
-      mrlServo = (MrlServo) virtual.getDevice(deviceId);
+      mrlServo = (MrlServo) arduino01.getVirtual().getDevice(deviceId);
       // verify
       assertTrue(deviceId == mrlServo.id);
     }
 
-    // can we attach to a different pin?
-    servo.attach(servoPin + 1);
-    if (virtual != null) {
+    // can we enable to a different pin?
+    servo.enable(servoPin01 + 1);
+    if (arduino01.isVirtual()) {
       sleep(100);
-      assertTrue(mrlServo.pin == servoPin + 1);
+      assertTrue(mrlServo.pin == servoPin01 + 1);
       assertTrue(mrlServo.pin == servo.getPin());
     }
 
     int velocity = 50;
     // degree per second
     servo.setVelocity(velocity);
-    if (virtual != null) {
+    if (arduino01.isVirtual()) {
       sleep(100);
       assertTrue(mrlServo.velocity == velocity);
     }
 
     // attach to the correct pin again
-    servo.attach(servoPin);
+    servo.enable(servoPin01);
     servo.moveTo(30);
     servo.moveTo(130);
     servo.moveTo(30);
     // assertEquals(virtual.servoMoveTo(130));
     servo.rest();
 
-    assertTrue(servo.isAttached());
-    assertEquals(arduino.getName(), servo.getController().getName());
+    assertEquals(arduino01.getName(), servo.getController().getName());
 
     servo.moveTo(0);
     // assertEquals(virtual.servoMoveTo(0));
@@ -411,22 +422,26 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
     // detach
     servo.detach();
+    assertNull("detach did not nullify controller", servo.getController());
+    assertNull("detach did not nullify controller name", servo.getControllerName());
     // assertEquals("servoDetach/7/0\n", uart.decode());
+    arduino01.attach(servo);
+    assertEquals("arduino did not attach to servo correctly", arduino01.getName(), servo.getController().getName());
 
     servo.moveTo(10);
 
     // re-attach
-    servo.attach();
+    servo.enable();
+    assertTrue("servo should be enabled", servo.isEnabled());
     // assertEquals("servoAttach/7/9/5/115/101/114/118/111\n",
     // uart.decode());
-    assertTrue(servo.isAttached());
     // // assertEquals(servoPin, servo.getPin().intValue());
-    assertEquals(arduino.getName(), servo.getController().getName());
+    
 
     servo.moveTo(90);
     // assertEquals("servoWrite/7/90\n", uart.decode());
 
-    arduino.enableBoardInfo(true);
+    arduino01.enableBoardInfo(true);
 
     servo.startService();
 
@@ -436,115 +451,36 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     // notify and process releasing itself from attached
     // services
     servo.releaseService();
-    assertFalse(arduino.getAttached().contains(servo.getName()));
-    assertFalse(servo.isAttached());
-    assertFalse(servo.isAttachedServoController(arduino));
-
+    assertFalse(arduino01.getAttached().contains(servo.getName()));
+    assertFalse(servo.isAttached(arduino01));
   }
 
-  // TODO: re-enable when worky
-  // @Test
+  @Test
   public void testSetBoardMega() {
-    log.info("testSetBoardMega");
-    String boardType = arduino.getBoard();
-
-    arduino.setBoardMega();
-
-    assertEquals(Arduino.BOARD_TYPE_MEGA, arduino.getBoard());
-
-    List<PinDefinition> pins = arduino.getPinList();
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    String boardType = arduino01.getBoard();
+    arduino01.setBoardMega();
+    assertEquals(Arduino.BOARD_TYPE_MEGA, arduino01.getBoard());
+    List<PinDefinition> pins = arduino01.getPinList();
     assertEquals(70, pins.size());
-
-    arduino.setBoard(boardType);
+    arduino01.setBoard(boardType);
   }
 
   @Test
   public void testSetBoardUno() {
-    log.info("testSetBoardUno");
-    String boardType = arduino.getBoard();
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    String boardType = arduino01.getBoard();
 
-    arduino.setBoardUno();
+    arduino01.setBoardUno();
 
-    assertEquals(Arduino.BOARD_TYPE_UNO, arduino.getBoard());
+    assertEquals(Arduino.BOARD_TYPE_UNO, arduino01.getBoard());
 
-    List<PinDefinition> pins = arduino.getPinList();
+    List<PinDefinition> pins = arduino01.getPinList();
     assertEquals(20, pins.size());
 
-    arduino.setBoard(boardType);
+    arduino01.setBoard(boardType);
   }
-
-  // public static void main(String[] args) {
-  // try {
-  // // LoggingFactory.init("INFO");
-  //
-  // Runtime.start("webgui", "WebGui");
-  // // Runtime.start("gui", "SwingGui");
-  //
-  // // test a "real" arduino
-  // useVirtualHardware = false;
-  // port = "COM5";
-  // // port = "COM4";
-  // // port = "COM99";
-  //
-  // ArduinoTest test = new ArduinoTest();
-  // ArduinoTest.setUpBeforeClass();
-  //
-  // Pir pir = (Pir)Runtime.start("pir","Pir");
-  // pir.attach(arduino, 7);
-  //
-  // // arduino.record();
-  //
-  // if (virtual != null) {
-  // virtual.connect(port);
-  // }
-  // arduino.connect(port);
-  //
-  // arduino.setDebug(true);
-  // //arduino.enableAck(false);
-  //
-  // test.testConnectString();
-  //
-  // Servo servo01 = (Servo)Runtime.start("servo01", "Servo");
-  // Servo servo02 = (Servo)Runtime.start("servo02", "Servo");
-  //
-  // servo01.setMinMax(10, 175);
-  // servo01.setInverted(true);
-  // servo01.setRest(157);
-  // servo02.setRest(140);
-  //
-  // servo01.setInverted(true);
-  //
-  // servo01.attach(arduino, 7);
-  // arduino.attach(servo01, 7);
-  // arduino.attach(servo01, 8);
-  //
-  // // arduino.disconnect();
-  //
-  // boolean b = true;
-  // if (b) {
-  // return;
-  // }
-  //
-  // test.testGetVersion();
-  // test.testServoAttachServoInteger();
-  // test.testEnableBoardStatus();
-  // test.testEnablePinInt();
-  //
-  //
-  //
-  // // test specific method
-  // test.testServoAttachServoInteger();
-  //
-  // // run junit as java app
-  // JUnitCore junit = new JUnitCore();
-  // Result result = junit.run(ArduinoTest.class);
-  // log.info("Result was: {}", result);
-  //
-  // // Runtime.dump();
-  //
-  // } catch (Exception e) {
-  // Logging.logError(e);
-  // }
-  // }
 
 }

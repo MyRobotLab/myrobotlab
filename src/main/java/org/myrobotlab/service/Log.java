@@ -72,7 +72,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
   public HashMap<String, ArrayList<MRLListener>> publishLogEventNotifyList = new HashMap<String, ArrayList<MRLListener>>();
 
   boolean isLogging = false;
-  String logLevel = "info";
+  String logLevel = "warn";
 
   public Log(String n) {
     super(n);
@@ -310,6 +310,7 @@ public class Log extends Service implements Appender<ILoggingEvent>, NameProvide
     root.setLevel(ch.qos.logback.classic.Level.INFO);
     root.addAppender(this);
     isLogging = true;
+    setRootLogLevel(logLevel);
   }
 
   public void stopLogging() {

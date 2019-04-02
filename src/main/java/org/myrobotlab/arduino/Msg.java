@@ -252,25 +252,6 @@ public class Msg {
 	transient private Arduino arduino;
 	
 	transient private SerialDevice serial;
-
-	/**
-	 * want to grab it when SerialDevice is created
-	 *
-	 * @param serial
-	 * @return
-	 */
-	/*
-	static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) {
-		if (instance == null) {
-			instance = new Msg();
-		}
-
-		instance.arduino = arduino;
-		instance.serial = serial;
-
-		return instance;
-	}
-	*/
 	
 	public void setInvoke(boolean b){
 	  invoke = b;

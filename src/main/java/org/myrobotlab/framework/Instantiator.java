@@ -18,7 +18,7 @@ public class Instantiator {
     try {
       return getThrowableNewInstance(cast, classname, params);
     } catch (Exception e) {
-      log.info("getNewInstance failed for {} {} {}", cast, classname, e.getClass().getCanonicalName());
+      log.info("getNewInstance failed for {} {} ", cast, classname, e);
     }
     return null;
   }

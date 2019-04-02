@@ -258,10 +258,6 @@ public class Runtime extends Service implements MessageListener {
     return null;
   }
 
-  static public boolean hasInternet() {
-    return getPublicGateway() != null;
-  }
-
   static public synchronized ServiceInterface create(String name, String type) {
     String fullTypeName;
     if (name.indexOf("/") != -1) {
@@ -394,9 +390,11 @@ public class Runtime extends Service implements MessageListener {
       }
 
       // create an instance
-      // Object newService = Instantiator.getNewInstance(fullTypeName, name);
       Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
       log.debug("returning {}", fullTypeName);
+      ServiceInterface si = (ServiceInterface) newService;
+      Platform platform = Platform.getLocalInstance();
+      si.setVirtual(platform.isVirtual());
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed", e);
@@ -501,7 +499,7 @@ public class Runtime extends Service implements MessageListener {
     return cli;
   }
 
-  static public CmdLine getCMDLine() {
+  static public CmdLine getCmdLine() {
     return cmdline;
   }
 
@@ -584,7 +582,7 @@ public class Runtime extends Service implements MessageListener {
     return false;
   }
 
-  static public List<String> getJVMArgs() {
+  static public List<String> getJvmArgs() {
     RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
     return runtimeMxBean.getInputArguments();
   }
@@ -1034,18 +1032,6 @@ public class Runtime extends Service implements MessageListener {
     return cmdline.containsKey("-isAgent");
   }
 
-  static public boolean isHeadless() {
-    // String awt = "java.awt.GraphicsEnvironment";
-    // java.awt.GraphicsEnvironment.isHeadless()
-    // String nm = System.getProperty("java.awt.headless");
-    // should return true if Linux != display
-    /*
-    String b = System.getProperty("java.awt.headless");
-    return Boolean.parseBoolean(b);
-    */
-    return java.awt.GraphicsEnvironment.isHeadless();
-  }
-
   public static boolean isLocal(String serviceName) {
     ServiceInterface sw = getService(serviceName);
     return sw.isLocal();
@@ -1379,7 +1365,7 @@ public class Runtime extends Service implements MessageListener {
     // get reference from registry
     ServiceInterface sw = registry.get(name);
     if (sw == null) {
-      log.warn("cannot unregister {} - not in registry", name);
+      log.info("{} already unregistered", name);
       return;
     }
     
@@ -1682,13 +1668,14 @@ public class Runtime extends Service implements MessageListener {
       if (runtime == null) {
         runtime = this;
       }
-
-      if (runtime.platform == null) {
-        runtime.platform = Platform.getLocalInstance();
-      }
     }
 
     locale = Locale.getDefault();
+    
+
+    if (runtime.platform == null) {
+      runtime.platform = Platform.getLocalInstance();
+    }
 
     // 3 states
     // isAgent == make default directory (with pid) if custom not supplied
@@ -1744,7 +1731,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("============== args begin ==============");
     StringBuffer sb = new StringBuffer();
 
-    jvmArgs = getJVMArgs();
+    jvmArgs = getJvmArgs();
     args = new ArrayList<String>();
     if (globalArgs != null) {
       for (int i = 0; i < globalArgs.length; ++i) {
@@ -2480,7 +2467,7 @@ public class Runtime extends Service implements MessageListener {
     meta.addDependency("com.google.code.gson", "gson", "2.8.5");
     meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.atmosphere", "wasync", "2.1.3");
+    meta.addDependency("org.atmosphere", "wasync", "2.1.5");
     
     // all your logging needs
     meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");

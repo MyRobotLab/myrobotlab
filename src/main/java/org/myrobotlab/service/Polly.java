@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -243,6 +244,8 @@ public class Polly extends AbstractSpeechSynthesis {
     // test overriding default
 
     // test setting Runtime.locale
+    Platform platform = Platform.getLocalInstance();
+    platform.setVirtual(true);
 
     LoggingFactory.init(Level.INFO);
 
