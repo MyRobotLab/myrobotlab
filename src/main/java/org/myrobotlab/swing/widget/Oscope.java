@@ -1,6 +1,5 @@
 package org.myrobotlab.swing.widget;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -21,8 +20,14 @@ import org.myrobotlab.swing.ServiceGui;
 import org.slf4j.Logger;
 
 /**
- * 
  * @author GroG
+ * 
+ * class to display set of pins
+ * 
+ * FIXME - attempt to use completely by self, not embedded in any other service
+ * FIXME - put in AbstractMicrocontroller !
+ * FIXME - update with PinArrayController - all pin states
+ * FIXME - line starts in the wrong direction 
  *
  */
 public class Oscope extends ServiceGui implements ActionListener {
@@ -30,15 +35,10 @@ public class Oscope extends ServiceGui implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(Oscope.class);
 
   JPanel buttonPanel = new JPanel(new GridBagLayout());
+  
   Box screenPanel = Box.createVerticalBox();
 
-  Map<String, OscopeTrace> traces = new HashMap<String, OscopeTrace>();
-
-
-  public void onPinList(List<PinDefinition> pinList) {
-    traces.clear();
-    addButtons(pinList);
-  }
+  Map<String, OscopePinTrace> traces = new HashMap<>();
 
   public Oscope(String boundServiceName, SwingGui myService) {
     super(boundServiceName, myService);
@@ -55,28 +55,14 @@ public class Oscope extends ServiceGui implements ActionListener {
     // since this is a widget - subscribeGui is not auto-magically called
     // by the framework
     subscribeGui();
-    // video.displayFrame(sensorImage);
   }
 
-  public void subscribeGui() {
-    subscribe("publishPinDefinition");
-    subscribe("publishPinArray");
-    subscribe("getPinList");
-  }
-
-  public void unsubscribeGui() {
-    unsubscribe("publishPinDefinition");
-    unsubscribe("publishPinArray");
-    unsubscribe("getPinList");
-  }
-
-  // enabled -> true | false
-  public void onPinDefinition(PinDefinition pinDef) {
-    updatePinDisplay(pinDef);
-  }
-
-  public void updatePinDisplay(PinDefinition pinDef) {
-
+  /**
+   * function for "all" pins, global actions, e.g. clear all pins
+   */
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    Object o = e.getSource();
   }
 
   public void addButtons(List<PinDefinition> pinList) {
@@ -97,8 +83,8 @@ public class Oscope extends ServiceGui implements ActionListener {
 
     for (int i = 0; i < pinList.size(); ++i) {
       PinDefinition pinDef = pinList.get(i);
-      Color hsv = new Color(Color.HSBtoRGB((i * (gradient)), 0.5f, 1.0f));
-      OscopeTrace trace = new OscopeTrace(this, pinDef, hsv);
+      
+      OscopePinTrace trace = new OscopePinTrace(this, pinDef, gradient * i);
       traces.put(pinDef.getPinName(), trace);
       buttonPanel.add(trace.getButtonDisplay(), bgc);
       screenPanel.add(trace.getScreenDisplay());
@@ -109,33 +95,39 @@ public class Oscope extends ServiceGui implements ActionListener {
         bgc.gridx = 0;
         bgc.gridy++;
       }
-
     }
-
   }
 
+  /**
+   * process the pin data for each pin
+   * @param data
+   */
   public void onPinArray(final PinData[] data) {
-
     for (PinData pinData : data) {
-      OscopeTrace trace = traces.get(pinData.pin);
+      OscopePinTrace trace = traces.get(pinData.pin);
       trace.update(pinData);
     }
   }
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    // TODO Add relay ?
-    Object o = e.getSource();
-    if (o instanceof OscopeTrace) {
-      OscopeTrace b = (OscopeTrace) o;
-      PinDefinition pinDef = b.getPinDef();
-      if (pinDef.isEnabled()) {
-        send("disablePin", pinDef.getAddress());
-        b.setVisible(false);
-      } else {
-        send("enablePin", pinDef.getAddress());
-        b.setVisible(true);
-      }
-    }
+  // enabled -> true | false
+  public void onPinDefinition(PinDefinition pinDef) {
+    // updatePinDisplay(pinDef);
+  }
+
+  public void onPinList(List<PinDefinition> pinList) {
+    traces.clear();
+    addButtons(pinList);
+  }
+
+  public void subscribeGui() {
+    subscribe("publishPinDefinition");
+    subscribe("publishPinArray");
+    subscribe("getPinList");
+  }
+
+  public void unsubscribeGui() {
+    unsubscribe("publishPinDefinition");
+    unsubscribe("publishPinArray");
+    unsubscribe("getPinList");
   }
 }
