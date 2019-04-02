@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -671,7 +672,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     // broadcastState(); // FIXME - REMOVE !!! publishPortNames should be used !
     return ports;
   }
-
+  
   SerialControl getPortSource() {
     try {
       hardwareLibrary = getHardwareLibrary();

@@ -10,6 +10,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.slf4j.Logger;
 
 // TODO set pir sensor
@@ -30,7 +31,7 @@ public class Sweety extends Service {
   transient public Adafruit16CServoDriver adaFruit16cLeft;
   transient public WebkitSpeechRecognition ear;
   transient public WebGui webgui;
-  transient public MarySpeech mouth;
+  transient public AbstractSpeechSynthesis mouth;
   transient public static Tracking tracker;
   transient public ProgramAB chatBot;
   transient public static OpenNi openni;

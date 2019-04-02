@@ -120,7 +120,7 @@ public class OpenCVTest extends AbstractTest {
       ChaosMonkey.giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
-    if (!isVirtual()) {
+    if (!cv.isVirtual()) {
       ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
     }
     ChaosMonkey.startMonkeys();

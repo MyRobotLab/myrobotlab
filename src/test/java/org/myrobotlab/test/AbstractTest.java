@@ -72,9 +72,11 @@ public class AbstractTest {
     platform.setVirtual(b);
   }
 
+  /*
   static public boolean isVirtual() {
     return platform.isVirtual();
   }
+  */
 
   public static void main(String[] args) {
     try {

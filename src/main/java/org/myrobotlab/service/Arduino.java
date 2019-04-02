@@ -541,10 +541,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
   
   public void setVirtual(boolean b) {
-    if (!b && virtual != null) {
-      virtual.releaseService();    
-      virtual = null;
-    } else if (b && virtual == null) {
+    if (b) {
       virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
     }
     isVirtual = b;
@@ -1719,8 +1716,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
-    // TODO Auto-generated method stub
-    ((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
+    if (getDevice(deviceId) != null) {
+      ((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
+    } else {
+      error("no servo found at device id %d", deviceId);
+    }
     return currentPos;
   }
 
