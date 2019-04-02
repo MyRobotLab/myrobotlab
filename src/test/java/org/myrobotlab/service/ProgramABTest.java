@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,20 +10,15 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.slf4j.Logger;
 
 public class ProgramABTest extends AbstractServiceTest {
 
-  @ClassRule
-  public static TemporaryFolder testFolder = new TemporaryFolder();
   
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
   private String botname = "lloyd";
