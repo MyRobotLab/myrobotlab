@@ -308,7 +308,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       @Override
       public void run() {
 
-        String name = sw.getName();
+        String name = sw.getName();        
 
         // change tab color based on name
         // it is better to add a new interfaced method I think ?
@@ -329,6 +329,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         // subscribeToServiceMethod(name, newGui); - not needed as the key
         // is "more" unique and called each time a subscribe
         // is used by a ServiceGui
+        if (newGui == null) {
+          log.error("newGui is null");
+        }
         newGui.subscribeGui();
 
         // state and status are both subscribed for the service here
@@ -349,9 +352,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
           guiServiceGui = (SwingGuiGui) newGui;
           guiServiceGui.rebuildGraph();
         }
-        // newGui.getDisplay().setBackground(Color.CYAN);
-
-        tabs.addTab(name, newGui.getDisplay(), Runtime.getService(name).getDescription());
+        
+        tabs.addTab(name, newGui.getDisplay(), sw.getDescription());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
         // pack(); FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!

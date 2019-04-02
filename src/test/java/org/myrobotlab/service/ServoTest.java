@@ -20,7 +20,7 @@ public class ServoTest extends AbstractTest {
 
   // FIXME - test one servo against EVERY TYPE OF CONTROLLER (virtualized) !!!!
   // iterate through all types
-  
+
   @BeforeClass
   static public void setup() throws Exception {
 
@@ -33,6 +33,11 @@ public class ServoTest extends AbstractTest {
     ard1.connect(V_PORT_1);
     ard2 = (Arduino) Runtime.start("servoTest-arduino02", "Arduino");
     ard2.connect(V_PORT_2);
+
+    if (!Runtime.isHeadless()) {
+      Runtime.start("gui", "SwingGui");
+    }
+
   }
 
   // @Test
@@ -102,7 +107,7 @@ public class ServoTest extends AbstractTest {
 
     // detaching the device
     servo01.detach(arduino); // test servo02.detach(arduino);
-                                            // error ?
+                             // error ?
     // servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED
     // DID SPLIT BRAIN FIXME
     servo02.detach(arduino);
@@ -205,10 +210,10 @@ public class ServoTest extends AbstractTest {
     servo02.moveTo(130);
 
   }
-  
+
   @Test
   public void testAllControllers() {
-    System.out.println("ServoTest.testAllControllers() -> FIXME - implement !!!"); 
+    System.out.println("ServoTest.testAllControllers() -> FIXME - implement !!!");
   }
 
   @Test
@@ -267,6 +272,24 @@ public class ServoTest extends AbstractTest {
     s.detach(ard1);
     assertFalse(s.isAttached());
 
+  }
+
+  @Test
+  public void testAutoDisable() throws Exception {
+    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    servo01.detach();
+    servo01.setPin(5);
+    ard2.attach(servo01);
+    sleep(100);
+    assertTrue("verifying servo should be enabled", servo01.isEnabled());
+    servo01.setAutoDisable(false);
+    assertFalse("setting autoDisable false", servo01.getAutoDisable());
+    servo01.setAutoDisable(true);
+    assertTrue("setting autoDisable true", servo01.getAutoDisable());
+    servo01.moveTo(130);
+    sleep(1500); // waiting for disable
+    assertFalse("servo should have been disabled", servo01.isEnabled());
+    
   }
 
 }

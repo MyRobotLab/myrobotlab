@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,16 +39,12 @@ import org.slf4j.Logger;
  */
 
 public class ArduinoTest extends AbstractTest implements PinArrayListener {
-
-  static Arduino arduino01 = null;
-  static Arduino arduino02 = null;
+  
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
-  static String port01 = "COM1";
-  static String port02 = "COM2";
+  static Arduino arduino01 = null;
 
-  static Serial serial01 = null;
-  static Serial serial02 = null;
+  static String port01 = "COM6";
 
   String analogPin = "A1";
   String digitalPin = "D0";
@@ -57,7 +52,6 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   Map<String, PinData> pinData = new HashMap<String, PinData>();
 
   int servoPin01 = 7;
-  int servoPin02 = 8;
 
   private void assertVirtualPinValue(VirtualArduino virtual, int address, int value) {
     if (virtual != null) {
@@ -86,15 +80,18 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Before
   public void setUp() throws Exception {
-
-    // TODO: Initialize the arduino under test. (potentially do this in each
-    // test method vs passing the same one around ..)
-    arduino01 = (Arduino) Runtime.start("arduinoTest", "Arduino");
-    arduino01.setVirtual(true);
-    // TODO: have a separate unit test for testing serial. we probably don't
-    // want to intermingle that testing here (if we can avoid it.)
-    serial01 = arduino01.getSerial();
+    Runtime.setLogLevel("debug");
+    
+    arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    
+    Runtime.start("gui", "SwingGui");
+    
+    arduino01.setVirtual(false); // <-- useful for debugging "real" Arduino
+    log.error("servo ports {}", arduino01.getPortNames());
+    
+    log.error("arduino virtual mode is {}", arduino01.isVirtual());   
     arduino01.connect(port01);
+    assertTrue(String.format("arduino could not connect to port %s", port01), arduino01.isConnected());
   }
 
   // TODO: fix this test method.
@@ -137,9 +134,6 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
       System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     arduino01.connect(port01);
     arduino01.reset();
-
-    serial01.clear();
-    serial01.setTimeout(100);
 
     if (arduino01.isVirtual()) {
       SerialDevice uart = arduino01.getVirtual().getSerial();
@@ -190,7 +184,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     if (arduino01.isVirtual()) {
       arduino01.getVirtual().getSerial().clear();
     }
-    serial01.clear();
+    
     // test disconnected
     assertTrue(!arduino01.isConnected());
     // test no data - no exception ?
@@ -312,7 +306,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     assertNotNull("verify arduino mapping exists in device list", mapping);
     
     MrlServo mrlservo = null;
-    if (isVirtual()) {
+    if (arduino01.isVirtual()) {
       Device device = arduino01.getVirtual().getDevice(mapping.getId());
       assertNotNull("verify virtual device exists", device);
       assertTrue("verify its a servo", device instanceof MrlServo);
@@ -326,13 +320,13 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     assertTrue("verify arduino is not attached to servo by name", arduino01.isAttached(servo.getName()));
     assertTrue("arduino is attached and contains a servo in device list", arduino01.getAttached().contains(servo.getName()));
     
-    if (isVirtual()) {
+    if (arduino01.isVirtual()) {
       assertTrue("verifty virtual mrlservo is enabled", mrlservo.enabled);
     }
     
     // move it
     servo.moveToBlocking(30);    
-    if (isVirtual()) {
+    if (arduino01.isVirtual()) {
       // FIXME -- fix blocking fix encoders
       sleep(500); 
       assertTrue("virtual servo moved blocking to 30", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(30));
@@ -340,7 +334,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     
     servo.moveTo(100);
     sleep(100);
-    if (isVirtual()) {
+    if (arduino01.isVirtual()) {
       assertTrue("virtual servo moved to 100", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(100));
     }
     

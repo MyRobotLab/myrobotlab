@@ -24,10 +24,13 @@ import org.slf4j.Logger;
  * 
  * class to display set of pins
  * 
+ * FIXME - auto-scaling amplitude
+ * FIXME - min / max
  * FIXME - attempt to use completely by self, not embedded in any other service
  * FIXME - put in AbstractMicrocontroller !
  * FIXME - update with PinArrayController - all pin states
  * FIXME - line starts in the wrong direction 
+ * FIXME - make a JButtonToggleImage with insets etc. - make a text one with 2 BG & 2 FG colors (maybe glass like)
  *
  */
 public class Oscope extends ServiceGui implements ActionListener {
@@ -48,7 +51,6 @@ public class Oscope extends ServiceGui implements ActionListener {
     flow.add(buttonPanel);
     addLeftLine(flow);
 
-    
     flow = new JPanel();
     flow.add(screenPanel);
     add(flow);

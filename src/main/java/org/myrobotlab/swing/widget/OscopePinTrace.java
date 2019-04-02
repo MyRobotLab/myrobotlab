@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -57,7 +58,15 @@ public class OscopePinTrace extends JPanel implements ActionListener {
 
   PinDefinition pinDef;
 
-  JLabel pinInfo = new JLabel();
+  JLabel valueLabel = new JLabel();
+  JLabel minLabel = new JLabel("0.00");
+  JLabel maxLabel = new JLabel("0.00");
+  JLabel avgLabel = new JLabel("0.00");
+  
+  Double min;
+  Double max;
+  double avg = 0;
+  double cnt = 0;
 
   JButton pinButton;
   int screen0X;
@@ -68,7 +77,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   int timeDivisor = 1;
 
   // default trace dimensions
-  int width = 800;
+  int width = 600;
 
   Color inactiveColor;
 
@@ -122,9 +131,19 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     screenDisplay.add(this, BorderLayout.CENTER);
 
     JPanel flow = new JPanel();
+    flow.setLayout(new GridLayout(0, 2));
     flow.add(new JLabel(pinDef.getPinName()));
-    flow.add(pinInfo);
+    flow.add(valueLabel);
+    
+    flow.add(new JLabel("min"));
+    flow.add(minLabel);
 
+    flow.add(new JLabel("max"));
+    flow.add(maxLabel);
+
+    flow.add(new JLabel("avg"));
+    flow.add(avgLabel);
+    
     pause = new JButton(Util.getScaledIcon(Util.getImage("pause.png"), 0.25));
     pause.setBorder(BorderFactory.createEmptyBorder());
     pause.setContentAreaFilled(false);
@@ -216,6 +235,15 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     if (paused) {
       return;
     }
+    
+    ++cnt;
+    
+    if (min == null) {
+      min = pinData.value;
+    }
+    if (max == null) {
+      max = pinData.value;
+    }
 
     screen0X += timeDivisor;
     screen1X += timeDivisor;
@@ -267,11 +295,25 @@ public class OscopePinTrace extends JPanel implements ActionListener {
       lastX = drawPointX;
     }
 
-    pinInfo.setText(String.format("%.2f", pinData.value));
+    valueLabel.setText(String.format("%.2f", pinData.value));
     // TODO - NOW IS THE TIME TO UPDATE BUFFERED IMAGES !!!
     // TODO - optimization of shifting the raster data ?
 
     lastY = (int) y;
+    
+    if (pinData.value < min) {
+      min = pinData.value;
+      minLabel.setText(String.format("%.2f", min));
+    }
+    
+    if (pinData.value > max) {
+      max = pinData.value;
+      maxLabel.setText(String.format("%.2f", max));
+    }
+    
+    avg = (cnt * avg + pinData.value)/cnt;
+    avgLabel.setText(String.format("%.2f", avg));
+    
 
     // request a repaint to swing thread
     repaint();
