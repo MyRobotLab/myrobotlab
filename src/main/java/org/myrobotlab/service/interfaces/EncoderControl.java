@@ -11,8 +11,21 @@ public interface EncoderControl extends Attachable {
 
   // TODO: publish encoder data that includes the name/id of the device.
   public void onEncoderData(EncoderData data);
+  
+  /**
+   * for address or pin names - such as D0, D1, A0, ....
+   * at some point the controller will "probably" convert this to an actual address
+   * @param address
+   */
+  public void setPin(String address);
+  
+  /**
+   * integer address or pin number
+   * @param address
+   */
+  public void setPin(int address);
 
   // the cable select pin that enables this encoder.
-  public int getPin();
+  public String getPin();
 
 }

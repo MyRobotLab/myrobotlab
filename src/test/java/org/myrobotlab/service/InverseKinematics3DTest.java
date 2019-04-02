@@ -25,7 +25,7 @@ public class InverseKinematics3DTest extends AbstractTest {
     // InMoovArm ia = new InMoovArm("i01");
     ik3d.setCurrentArm(arm, InMoovArm.getDHRobotArm("i01", "left"));
     ik3d.centerAllJoints(arm);
-    System.out.println(ik3d.getCurrentArm(arm).getPalmPosition());
+    log.info("{}",ik3d.getCurrentArm(arm).getPalmPosition());
   }
 
   @Test

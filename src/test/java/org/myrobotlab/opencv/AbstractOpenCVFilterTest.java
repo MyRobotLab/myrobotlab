@@ -1,21 +1,18 @@
 package org.myrobotlab.opencv;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacv.CanvasFrame;
-
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import org.junit.After;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacv.CanvasFrame;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
-import org.nd4j.linalg.io.Assert;
 
 // ignore the abstract classes.
 @Ignore

@@ -305,7 +305,7 @@ public abstract class OpenCVFilter implements Serializable {
    * This is NOT the filter's image, but really the output of the previous
    * filter ! to be used as input for "this" filters process method
    * 
-   * @return
+   * @return - return IplImage
    */
   public IplImage getImage() {
     return data.getImage();

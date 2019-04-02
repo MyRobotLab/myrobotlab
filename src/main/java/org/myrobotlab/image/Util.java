@@ -296,6 +296,10 @@ public class Util {
       return null;
     }
   }
+  
+  public static ImageIcon getScaledIcon(final String name, final int x, final int y) {
+    return new ImageIcon(getImage(name).getScaledInstance(x, y,  java.awt.Image.SCALE_SMOOTH));
+  }
 
   public static ImageIcon getScaledIcon(final Image image, final double scale) {
     ImageIcon scaledIcon = new ImageIcon(image) {

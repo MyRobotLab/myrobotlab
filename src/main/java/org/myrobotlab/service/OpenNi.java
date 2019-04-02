@@ -32,6 +32,9 @@ import SimpleOpenNI.SimpleOpenNIConstants;
  * 
  *         Service to expose the capabilities of kinect like sensors through a
  *         modified SimpleOpenNI interface
+ *         
+ *         Dependencies 
+ *            on Linux : boost-devel
  * 
  *         References
  * 
@@ -43,6 +46,8 @@ import SimpleOpenNI.SimpleOpenNIConstants;
  *         https://www.youtube.com/watch?v=KKuiuctKGRQ Some snippets are taken
  *         from "Making Things See" a excellent book and I recommend buying it
  *         http://shop.oreilly.com/product/0636920020684.do
+ *         
+ *         
  * 
  */
 public class OpenNi extends Service // implements

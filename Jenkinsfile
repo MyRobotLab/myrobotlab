@@ -1,12 +1,10 @@
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
-node {
-   // for examples :
-   // https://jenkins.io/doc/pipeline/examples/
-   // https://github.com/jenkinsci/pipeline-examples/tree/master/pipeline-examples
-   
-   // for declaritive
-   // agent any
+node { // use any node
+
+// node ('ubuntu') {  // use labels to direct build
+
+   // withEnv(javaEnv) {
    
    def mvnHome
    stage('preparation') { // for display purposes
@@ -38,13 +36,9 @@ node {
       echo "git_commit=$git_commit"
       // Run the maven build
       if (isUnix()) {
-         // --debug 
-         // sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch  -Dmaven.test.failure.ignore clean install"
-         // sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -q clean install"
          sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile"
-          
       } else {
-         bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean compile/)
+         bat(/"${mvnHome}\bin\mvn" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile/)
       }
    }
    stage('verify'){
@@ -56,14 +50,14 @@ node {
    }
    stage('javadoc'){
 	   if (isUnix()) {
-	     sh "'${mvnHome}/bin/mvn' javadoc:javadoc"
+	     sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
 	   } else {
-	     bat(/"${mvnHome}\bin\mvn" javadoc:javadoc/)
+	     bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
 	   }
    }
    stage('results') {
       junit '**/target/surefire-reports/TEST-*.xml'
-      archive 'target/*.jar'      
+      archiveArtifacts 'target/*.jar'      
       jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes',sourcePattern: 'src/main/java',exclusionPattern: 'src/test*')
    } 
    stage('publish') {

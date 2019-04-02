@@ -3,7 +3,6 @@ package org.myrobotlab.arduino.virtual;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.virtual.VirtualServo;
 import org.slf4j.Logger;
 
@@ -11,14 +10,13 @@ import org.slf4j.Logger;
  * copy pasted from MrlServo.h
  *
  */
-public class MrlServo extends Device {
+public class MrlServo extends Device implements VirtualServo {
 
   public final static Logger log = LoggerFactory.getLogger(MrlServo.class);
 
   public static final int SERVO_EVENT_STOPPED = 1;
   public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
-  VirtualServo servo; // servo pointer - in case our device is a servo
   public int pin;
   public boolean isMoving;
   boolean isSweeping;
@@ -31,13 +29,13 @@ public class MrlServo extends Device {
   public int sweepStep;
   public int acceleration;
   public long moveStart;
+  public boolean enabled = false;
+  
 
   public MrlServo(int deviceId, VirtualArduino virtual) {
     super(deviceId, Msg.DEVICE_TYPE_SERVO, virtual);
     isMoving = false;
     isSweeping = false;
-    // create the servo
-    servo = new HardwareServo();
     lastUpdate = 0;
     currentPosUs = 0.0f;
     targetPosUs = 0;
@@ -54,31 +52,21 @@ public class MrlServo extends Device {
   // config size
   boolean attach(int pin, int initPosUs, int initVelocity, String name) {
     // msg->publishDebug("MrlServo.deviceAttach !");
-    // Simulator sim = virtual.getSimulator();
-    // if (sim != null) {
-    //   servo = sim.createVirtualServo(name);
-    // } else {
-      servo = new HardwareServo();
-    // }
-    servo.writeMicroseconds(initPosUs);
-    currentPosUs = initPosUs;
-    targetPosUs = initPosUs;
+    attach(pin);
+    writeMicroseconds(initPosUs);
     velocity = initVelocity;
-    servo.attach(pin);
-    // publishServoEvent(SERVO_EVENT_STOPPED);
     return true;
   }
 
   // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
   public void attachPin(int pin) {
     log.info("servo id {}->attachPin({})", id, pin);
-    this.pin = pin;
-    servo.attach(pin);
+    attach(pin);
   }
 
   public void detachPin() {
     log.info("servo id {}->detachPin()", id);
-    servo.detach();
+    detach();
   }
 
   // FIXME - what happened to events ?
@@ -116,7 +104,7 @@ public class MrlServo extends Device {
           currentPosUs = targetPosUs;
         }
         if (!(previousCurrentPosUs == (int) currentPosUs)) {
-          servo.writeMicroseconds((int) currentPosUs);
+          writeMicroseconds((int) currentPosUs);
           if ((int) currentPosUs == targetPosUs) {
             publishServoEvent(SERVO_EVENT_STOPPED);
           } else {
@@ -139,10 +127,7 @@ public class MrlServo extends Device {
     }
   }
 
-  public void moveToMicroseconds(int posUs) {
-    if (servo == null) {
-      return;
-    }
+  public void moveToMicroseconds(int posUs) {   
     targetPosUs = posUs;
     isMoving = true;
     lastUpdate = millis();
@@ -185,6 +170,31 @@ public class MrlServo extends Device {
 
   private float map(float value, int inMin, int inMax, int outMin, int outMax) {
     return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - outMax);
+  }
+
+  @Override
+  public String getName() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void writeMicroseconds(int posUs) {
+    currentPosUs = posUs;
+    targetPosUs = posUs;
+  }
+
+  @Override
+  public void attach(int pin) {
+    // System.out.println("mrl.attach");
+    enabled = true;
+    this.pin = pin;
+  }
+
+  @Override
+  public void detach() {
+    // System.out.println("mrl.detach");
+    enabled = false;
   }
 
 };

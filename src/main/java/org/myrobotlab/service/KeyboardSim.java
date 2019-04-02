@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.awt.AWTException;
+import java.awt.GraphicsEnvironment;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 
@@ -24,7 +25,11 @@ public class KeyboardSim extends Service {
   public KeyboardSim(String n) {
     super(n);
     try {
-      robot = new Robot();
+      if (!GraphicsEnvironment.isHeadless()) {
+        robot = new Robot();
+      } else {
+        log.warn("headless environment - but KeyboardSim requires a display");
+      }
     } catch (Exception e) {
       log.error("could not create java.awt.Robot", e);
     }

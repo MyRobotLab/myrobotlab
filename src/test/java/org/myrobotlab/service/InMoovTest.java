@@ -59,7 +59,6 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
       uart = virtual.getSerial();
       uart.setTimeout(100); // don't want to hang when decoding results...
       virtual.connect("COM7");
-
     }
   }
 
@@ -213,7 +212,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     
     
     // start Open NI I guesS
-    i01.startOpenNI();
+    // i01.startOpenNI();
     
     // TODO: starting opencv also starts a capture.
     

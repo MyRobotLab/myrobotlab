@@ -8,8 +8,9 @@ import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.Ignore;
+import org.junit.rules.TestName;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
@@ -23,7 +24,7 @@ import org.slf4j.Logger;
 
 // TODO: re-enable this unit test.. but for now it's just too slow ..
 // it also opens a swing gui which isn't good.
-@Ignore
+
 public class OpenCVTest extends AbstractTest {
 
   static OpenCV cv = null;
@@ -78,6 +79,9 @@ public class OpenCVTest extends AbstractTest {
       log.error("main threw", e);
     }
   }
+  
+  @Rule
+  public final TestName testName = new TestName();
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -106,7 +110,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void chaosCaptureTest() throws Exception {
-    log.info("=======OpenCVTest chaosCaptureTest=======");
+    log.warn("=======OpenCVTest chaosCaptureTest=======");
     ChaosMonkey.giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
     ChaosMonkey.giveToMonkey(cv, "capture");
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
@@ -116,7 +120,9 @@ public class OpenCVTest extends AbstractTest {
       ChaosMonkey.giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
-    ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
+    if (!isVirtual()) {
+      ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
+    }
     ChaosMonkey.startMonkeys();
     ChaosMonkey.monkeyReport();
 
@@ -130,8 +136,8 @@ public class OpenCVTest extends AbstractTest {
   }
 
   @Test
-  public final void simplteFaceDetect() {
-    log.info("=======OpenCVTest simplteFaceDetect=======");
+  public final void simpleFaceDetect() {
+    log.warn("=======OpenCVTest simpleFaceDetect=======");
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
     OpenCVData data = cv.getFaceDetect();
@@ -142,7 +148,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void testAllCaptures() throws Exception {
-    log.info("=======OpenCVTest testAllCaptures=======");
+    log.warn("=======OpenCVTest testAllCaptures=======");
 
     OpenCVData data = null;
 
@@ -202,7 +208,7 @@ public class OpenCVTest extends AbstractTest {
    */
   @Test
   public final void testAllFilterTypes() {
-    log.info("=======OpenCVTest testAllFilterTypes=======");
+    log.warn("=======OpenCVTest testAllFilterTypes=======");
 
     log.info("starting all filters test");
     cv.reset();
@@ -224,7 +230,7 @@ public class OpenCVTest extends AbstractTest {
 
   @Test
   public final void testGetClassifications() {
-    log.info("=======OpenCVTest testGetClassifications=======");
+    log.warn("=======OpenCVTest testGetClassifications=======");
 
     cv.reset();
     cv.setGrabberType("ImageFile");

@@ -496,18 +496,8 @@ public class Cli extends Service {
       decoder = new Decoder(this, System.in);
       decoder.start();
     } else {
-      log.info("stdin already attached");
+      log.info("stdin already detached");
     }
-
-    // if I'm not an agent then just writing to System.out is fine
-    // because all of it will be relayed to an Agent if I'm spawned
-    // from an Agent.. or
-    // If I'm without an Agent I'll just do the logging I was directed
-    // to on the command line
-    /*
-     * if (myOutstream == null) { myOutstream = System.out; } else {
-     * log.info("stdout already attached"); }
-     */
   }
 
   public String cd(String path) {
@@ -538,6 +528,7 @@ public class Cli extends Service {
   public void detachStdIO() {
     if (decoder != null) {
       decoder.interrupt();
+      decoder = null;
     }
   }
 
@@ -609,12 +600,9 @@ public class Cli extends Service {
     super.stopService();
     try {
 
-      // shutdown my i/o
-      if (decoder != null) {
-        decoder.interrupt();
-      }
-
-      decoder = null;
+      // shutdown my i/o   
+      detachStdIO();
+      
       if (os != null) {
         os.close();
       }
@@ -627,10 +615,7 @@ public class Cli extends Service {
         pipe.stop();
       }
 
-      /*
-       * if (fos != null) { fos.close(); } fos = null;
-       */
-    } catch (Exception e) {
+     } catch (Exception e) {
       Logging.logError(e);
     }
   }

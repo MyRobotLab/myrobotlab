@@ -37,6 +37,9 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.NodeConfig;
+import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.core.SolrXmlConfig;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Java2DFrameConverter;
@@ -51,6 +54,8 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.image.Util;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -101,13 +106,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   public void startEmbedded() throws SolrServerException, IOException {
-    File resDir = new File("src/main/resources/resource/Solr");
-    if (!resDir.exists()) {
-      // we're using the "Solr" directory
-      startEmbedded(solrHome);
-    } else {
-      startEmbedded("src/main/resources/resource/Solr");
-    }
+    startEmbedded(getDataInstanceDir());
   }
 
   /**
@@ -138,7 +137,10 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * @throws IOException
    */
   public void startEmbedded(String path) throws SolrServerException, IOException {
-    // create and load the cores
+    // let's extract our default configs into the directory/
+    FileIO.extract(Util.getResourceDir() , "Solr/core1", path);
+    FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path + File.separator + "solr.xml");
+    // load up the solr core container and start solr
     Path solrHome = Paths.get(path);
     log.info(solrHome.toFile().getAbsolutePath());
     Path solrXml = solrHome.resolve("solr.xml");
@@ -148,8 +150,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
     // create the actual solr instance with core1
     embeddedSolrServer = new EmbeddedSolrServer(cores, CORE_NAME);
-    // TODO: make sure the embedded server is actually loaded / started fully up
-    // poll perhaps ?
+    // TODO: verify when the embedded solr server has fully started.
   }
 
   /**

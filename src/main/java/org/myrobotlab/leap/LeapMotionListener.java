@@ -136,7 +136,7 @@ public class LeapMotionListener extends Listener {
         double yaw = h.palmNormal().yaw();
         // create the point to publish
         Point palmPoint = new Point(x, y, z, roll, pitch, yaw);
-        ;
+
         // add it to the list of points we publish
         points.add(palmPoint);
       }

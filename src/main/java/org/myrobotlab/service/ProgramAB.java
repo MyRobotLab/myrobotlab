@@ -733,8 +733,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
         // important to save learnf.aiml
         writeAIML();
       } catch (IOException e1) {
-        // TODO Auto-generated catch block
-        e1.printStackTrace();
+        log.error("saving predicates threw", e1);
       }
       bot.writeQuit();
     }

@@ -604,24 +604,22 @@ public class Sphinx extends AbstractSpeechRecognizer {
     microphone.startRecording();
   }
 
-  @Override
-  public void stopListening() {
-    isListening = false;
-    if (speechProcessor != null) {
-      speechProcessor.isRunning = false;
-    }
-    speechProcessor = null;
-  }
-
   /**
    * stopRecording - it does "work", however, the speech recognition part seems
    * to degrade when startRecording is called. I have worked around this by not
    * stopping the recording, but by not processing what was recognized
    */
   @Override
-  public void stopMsgRecording() {
-    microphone.stopRecording();
-    microphone.clear();
+  public void stopListening() {
+    if (microphone != null) {
+      microphone.stopRecording();
+      microphone.clear();
+    }
+    isListening = false;
+    if (speechProcessor != null) {
+      speechProcessor.isRunning = false;
+    }
+    speechProcessor = null;
   }
 
   @Override

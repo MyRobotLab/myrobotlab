@@ -146,7 +146,7 @@ public class TestCatcher extends Service implements SerialDataListener {
       sleep(10);
     }
 
-    log.warn("returned {} msgs in {} ms", interCount, System.currentTimeMillis() - start);
+    log.info("returned {} msgs in {} ms", interCount, System.currentTimeMillis() - start);
     return msgs;
   }
 

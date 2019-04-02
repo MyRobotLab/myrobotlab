@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -9,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.framework.Service;
@@ -44,26 +45,26 @@ public class Lloyd extends Service {
   private static final long serialVersionUID = 1L;
   // TODO: mark for transient needed
   // All of the services that make up harry.
-  private ProgramAB brain;
+  transient private ProgramAB brain;
 
-  private Solr memory;
-  private Solr cloudMemory;
+  transient private Solr memory;
+  transient private Solr cloudMemory;
 
   // the cortex is the part of the brain responsible for image recognition..
   // this seems like a fitting name
-  private Deeplearning4j visualCortex;
+  transient private Deeplearning4j visualCortex;
 
   // speech recognition (the ear!)
-  private SpeechRecognizer ear;
+  transient private SpeechRecognizer ear;
   // Speech Synthesis
-  private SpeechSynthesis mouth;
+  transient private SpeechSynthesis mouth;
   // left and right eyes (camera)
-  private OpenCV leftEye;
+  transient private OpenCV leftEye;
   private int leftEyeCameraIndex = 1;
-  private OpenCV rightEye;
+  transient private OpenCV rightEye;
   private int rightEyeCameraIndex = 0;
   // the oculus for connecting to a remote inmoov
-  private OculusRift oculusRift;
+  transient private OculusRift oculusRift;
 
   private boolean record = true;
   private boolean enableSpeech = true;
@@ -77,8 +78,8 @@ public class Lloyd extends Service {
   // Ok.. let's create 2 ik solvers one for the left hand, one for the right
   // hand.
   // "motor control"
-  private InverseKinematics3D leftIK;
-  private InverseKinematics3D rightIK;
+  transient private InverseKinematics3D leftIK;
+  transient private InverseKinematics3D rightIK;
 
   // oculus settings for telepresence
   public String leftEyeURL = "http://192.168.4.105:8080/?action=stream";
@@ -132,7 +133,7 @@ public class Lloyd extends Service {
   }
 
   public void startMouth() {
-    mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+    mouth = (SpeechSynthesis) Runtime.start("mouth", "MarySpeech");
   }
 
   public void startBrain() {
@@ -335,7 +336,12 @@ public class Lloyd extends Service {
     // ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).unloadModel();
 
     // before we do this. let's disable the yolo stuff
-
+    File fileTest = new File(yoloPersonImageRecognizerModelFilename);
+    if (!fileTest.exists()) {
+      log.warn("model file {} does not exist", yoloPersonImageRecognizerModelFilename);
+      return;
+    }
+    
     CustomModel imageRecognizer = visualCortex.trainModel(labels, trainIter, testIter, yoloPersonImageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
     // update the cv filter with the new model
     // ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).setModel(imageRecognizer);
@@ -406,6 +412,7 @@ public class Lloyd extends Service {
   }
 
   public void startEyes() {
+    
     // TODO: enable right eye / config
     // rightEye = (OpenCV)Runtime.start("rightEye", "OpenCV");
     leftEye = (OpenCV) Runtime.start("leftEye", "OpenCV");
@@ -432,7 +439,9 @@ public class Lloyd extends Service {
 
     leftEye.cameraIndex = leftEyeCameraIndex;
     // TODO: ?
-    leftEye.capture();
+    if (!isVirtual()) {
+      leftEye.capture();
+    }
   }
 
   public void startOculus() {

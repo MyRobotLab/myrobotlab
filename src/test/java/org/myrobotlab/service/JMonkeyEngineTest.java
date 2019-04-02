@@ -99,10 +99,6 @@ public class JMonkeyEngineTest extends AbstractTest {
      * </pre>
      */
 
-    VirtualServoController vsc = (VirtualServoController) Runtime.start("i01.left", "VirtualServoController");
-    vsc.attachSimulator(jme);
-    vsc = (VirtualServoController) Runtime.start("i01.right", "VirtualServoController");
-    vsc.attachSimulator(jme);
 
     InMoov i01 = (InMoov) Runtime.create("i01", "InMoov");// has attach ...
                                                           // runtime does

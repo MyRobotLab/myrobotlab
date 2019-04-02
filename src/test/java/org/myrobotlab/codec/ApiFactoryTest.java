@@ -17,10 +17,11 @@ import org.slf4j.Logger;
 public class ApiFactoryTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ApiFactoryTest.class);
+  
 
   @Test
   public void testProcessString() {
-    // LoggingFactory.init("WARN");
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     try {
 
       Runtime runtime = (Runtime) Runtime.getInstance();

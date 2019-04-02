@@ -43,6 +43,7 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal script.
   @Test
   public void testInMoovMinimal() throws IOException {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     // TODO: move these scripts to test resources
     String inmoovScript = scriptRoot + "/InMoov.minimal.py";
     File f = new File(inmoovScript);
@@ -61,6 +62,7 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalArm() throws IOException {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String inmoovScript = scriptRoot + "/InMoov.minimalArm.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
@@ -79,6 +81,7 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalFingerStarter() throws IOException {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String inmoovScript = scriptRoot + "/InMoov.minimalFingerStarter.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
@@ -97,6 +100,7 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalHead() throws IOException {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String inmoovScript = scriptRoot + "/InMoov.minimalHead.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
@@ -115,6 +119,7 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalTorso() throws IOException {
+    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String inmoovScript = scriptRoot + "/InMoov.minimalTorso.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
