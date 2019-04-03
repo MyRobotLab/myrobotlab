@@ -98,16 +98,13 @@ public class OculusRift extends Service implements PointPublisher {
     super(reservedKey);
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-  }
-
   // Boradcast the state of the peers to notify the gui.
   public void broadcastState() {
     // notify the gui
-    leftOpenCV.broadcastState();
-    rightOpenCV.broadcastState();
+    if (leftOpenCV != null)
+      leftOpenCV.broadcastState();
+    if (rightOpenCV != null)
+      rightOpenCV.broadcastState();
   }
 
   private void setupRift() {
