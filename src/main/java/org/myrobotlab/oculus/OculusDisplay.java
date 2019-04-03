@@ -48,6 +48,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
@@ -152,16 +153,12 @@ public class OculusDisplay implements Runnable {
   public volatile boolean trackHead = true;
 
   static {
-    try {
-      UNIT_QUAD_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"unitQuad.vs"), Charsets.UTF_8);
-      UNIT_QUAD_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"unitQuad.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"Textured.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"Textured.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"CubeMap.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"CubeMap.fs"), Charsets.UTF_8);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+      UNIT_QUAD_VS = FileIO.resourceToString("oculus/unitQuad.vs");
+      UNIT_QUAD_FS = FileIO.resourceToString("oculus"+File.separator+"unitQuad.fs");
+      SHADERS_TEXTURED_FS = FileIO.resourceToString("oculus"+File.separator+"Textured.fs");
+      SHADERS_TEXTURED_VS = FileIO.resourceToString("oculus"+File.separator+"Textured.vs");
+      SHADERS_CUBEMAP_VS = FileIO.resourceToString("oculus"+File.separator+"CubeMap.vs");
+      SHADERS_CUBEMAP_FS = FileIO.resourceToString("oculus"+File.separator+"CubeMap.fs");
   }
 
   private static final Resource SKYBOX[] = { IMAGES_SKY_CITY_XPOS_PNG, IMAGES_SKY_CITY_XNEG_PNG, IMAGES_SKY_CITY_YPOS_PNG, IMAGES_SKY_CITY_YNEG_PNG, IMAGES_SKY_CITY_ZPOS_PNG,
