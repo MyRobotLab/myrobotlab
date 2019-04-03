@@ -76,13 +76,10 @@ public class OculusRift extends Service implements PointPublisher {
   public float rightCameraDy = 0;
   public float rightCameraAngle = 180;
 
-  public String leftEyeURL = "http://192.168.4.104:8080/?action=stream";
-  public String rightEyeURL = "http://192.168.4.104:8081/?action=stream";
+  public String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
+  public String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
 
-  // public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
-  // public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
-
-  public String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
+  public String frameGrabberType = "MJpeg";
   public String cvInputSource = null;
 
   private HmdDesc hmdDesc;
