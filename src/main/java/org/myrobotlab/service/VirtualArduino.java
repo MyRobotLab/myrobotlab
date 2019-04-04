@@ -161,9 +161,16 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void connect(String portName) throws IOException {
-    if (uart != null && uart.isConnected()) {
+    if (portName == null) {
+      log.warn("{}.connect(null) not valid", getName());
+      return;
+    }
+    if (uart != null && uart.isConnected() && (portName + ".UART").equals(uart.getPortName())) {
       log.info("already connected");
       return;
+    }
+    if (uart != null && uart.isConnected()) {
+      uart.disconnect();
     }
     uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
   }

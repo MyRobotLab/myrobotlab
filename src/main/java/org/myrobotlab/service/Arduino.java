@@ -24,6 +24,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -1680,9 +1681,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       // handle individual pins
       if (pinListeners.containsKey(address)) {
-        List<PinListener> list = pinListeners.get(address);
-        for (int j = 0; j < list.size(); ++j) {
-          PinListener pinListner = list.get(j);
+        Set<PinListener> set = pinListeners.get(address);
+        for (PinListener pinListner : set) {
           if (pinListner.isLocal()) {
             pinListner.onPin(pinData);
           } else {
@@ -2120,18 +2120,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       LoggingFactory.init(Level.INFO);
+      Platform.setVirtual(false);
 
-      boolean virtual = true;
       boolean isDone = true;
-      String port = "COM16";
+      String port = "COM6";
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
 
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       log.info("port names {}", arduino.getPortNames());
-      arduino.setVirtual(virtual);
-      arduino.enableBoardInfo(false);
+      // arduino.enableBoardInfo(false);
       arduino.connect(port);
 
       if (isDone) {

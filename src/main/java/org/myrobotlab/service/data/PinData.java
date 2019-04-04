@@ -23,17 +23,17 @@ public class PinData implements Serializable {
   }
 
   public PinData(int pin, int value) {
-    this.pin = String.format("%d", pin);
+    this.pin = String.format("%.2f", pin);
     this.value = new Double(value);
   }
   
   public PinData(int pin, double value) {
-    this.pin = String.format("%d", pin);
+    this.pin = String.format("%.2f", pin);
     this.value = value;
   }
 
   public String toString() {
-    return String.format("address=%d value=%d", pin, value);
+    return String.format("address=%s value=%.2f", pin, value);
   }
 
 }

@@ -378,8 +378,9 @@ public class Platform implements Serializable {
     return isVirtual;
   }
   
-  public void setVirtual(boolean b) {
-    isVirtual = b;
+  public static void setVirtual(boolean b) {
+    Platform p = getLocalInstance();
+    p.isVirtual = b;
   }
   
 
