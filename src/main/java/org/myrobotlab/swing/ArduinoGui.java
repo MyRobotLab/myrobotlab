@@ -118,6 +118,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   
   JButton virtual = new JButton("virtual");
   JButton enableBoardInfo = new JButton("heartbeat");
+  
+  transient Oscope oscope;
 
   public ArduinoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
@@ -134,9 +136,10 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     uploadResults.setEditable(false);
     addMrlCommPanel();
     updatePinTab(myArduino);
-    // Oscope2 oscope = new Oscope2(boundServiceName, myService);
-    Oscope oscope = new Oscope(boundServiceName, myService);
-    oscope.addButtons(myArduino.getPinList());
+
+    oscope = new Oscope(boundServiceName, myService);
+    oscope.setPins(myArduino.getPinList());
+    
     localTabs.addTab("oscope", oscope.getDisplay());
 
     add(localTabs.getTabs());
@@ -154,7 +157,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   
   void removeListeners() {
     softReset.removeActionListener(this);
-    boardTypes.removeActionListener(this);
+    boardTypes.removeItemListener(this);
     openMrlComm.removeActionListener(this);
     uploadMrlComm.removeActionListener(this);
     virtual.removeActionListener(this);
@@ -379,6 +382,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
         // if so - we need to recreate pins pinlists oscope views etc..
         if (!arduino.getBoard().equals(board)) {
           pinList = arduino.getPinList();
+          board = arduino.getBoard();
+          boardTypes.setSelectedItem(board);
+          oscope.setPins(pinList);
         }
 
         if (arduino.isConnected()) {
