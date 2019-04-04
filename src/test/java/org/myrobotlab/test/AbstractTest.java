@@ -47,7 +47,6 @@ public class AbstractTest {
   public final TestName testName = new TestName();
   static public String simpleName;
   private static boolean lineFeedFooter = true;
-  private static Platform platform = Platform.getLocalInstance();
 
   public String getSimpleName() {
     return simpleName;
@@ -67,16 +66,6 @@ public class AbstractTest {
   static public boolean isHeadless() {
     return Runtime.isHeadless();
   }
-
-  static public void setVirtual(boolean b) {
-    platform.setVirtual(b);
-  }
-
-  /*
-  static public boolean isVirtual() {
-    return platform.isVirtual();
-  }
-  */
 
   public static void main(String[] args) {
     try {
@@ -100,9 +89,6 @@ public class AbstractTest {
   // constructor of the AbstractTest
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
-
-    // make testing environment "virtual"
-    setVirtual(true);
 
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
@@ -204,6 +190,10 @@ public class AbstractTest {
   }
 
   public AbstractTest() {
+    
+    // make testing environment "virtual"
+    Platform.setVirtual(true);
+    
     simpleName = this.getClass().getSimpleName();
     if (logWarnTestHeader) {
       log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
