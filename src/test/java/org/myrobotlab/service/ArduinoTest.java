@@ -23,6 +23,7 @@ import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class ArduinoTest extends AbstractTest implements PinArrayListener {
+public class ArduinoTest extends AbstractTest implements PinArrayListener, PinListener {
   
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
 
@@ -46,10 +47,12 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   static String port01 = "COM6";
 
-  String analogPin = "A1";
+  String analogPin = "A1"; // on Arduino this is address 15
   String digitalPin = "D0";
 
   Map<String, PinData> pinData = new HashMap<String, PinData>();
+  
+  PinData[] pinArray = null;
 
   int servoPin01 = 7;
 
@@ -72,6 +75,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Override
   public void onPinArray(PinData[] pindata) {
+    pinArray = pindata;
     log.debug("onPinArray size {}", pindata.length);
     for (int i = 0; i < pindata.length; ++i) {
       pinData.put(pindata[i].pin, pindata[i]);
@@ -80,16 +84,16 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
 
   @Before
   public void setUp() throws Exception {
-    Runtime.setLogLevel("debug");
+    // Runtime.setLogLevel("debug");
     
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     
     Runtime.start("gui", "SwingGui");
     
     // arduino01.setVirtual(false); // <-- useful for debugging "real" Arduino
-    log.error("servo ports {}", arduino01.getPortNames());
     
-    log.error("arduino virtual mode is {}", arduino01.isVirtual());   
+    // log.info("servo ports {}", arduino01.getPortNames());    
+    // log.info("arduino virtual mode is {}", arduino01.isVirtual());   
     arduino01.connect(port01);
     assertTrue(String.format("arduino could not connect to port %s", port01), arduino01.isConnected());
   }
@@ -219,6 +223,18 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     assertTrue(pinData.containsKey(arduino01.getPin(analogPin).getPinName()));
     arduino01.disablePin(analogPin);
   }
+  
+  @Test
+  public void testEnablePinString() {
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    // set board type
+    arduino01.enablePin(analogPin);
+    arduino01.attach(this);
+    sleep(50);
+    assertTrue(pinData.containsKey(arduino01.getPin(analogPin).getPinName()));
+    arduino01.disablePin(analogPin);
+  }
 
   @Test
   public void testGetBoardInfo() {
@@ -246,7 +262,25 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
   
   @Test
   public final void pinArrayTest() {
-    //  fail("fix me - complete interface test");
+    
+    arduino01.connect(port01);
+    pinData.clear();
+    pinArray = null;
+    
+    arduino01.attach((PinArrayListener) this);
+    arduino01.enablePin(10);
+    arduino01.enablePin(12);
+    arduino01.enablePin(13);
+    sleep(100);
+    arduino01.reset();
+    
+    assertNotNull("pin array is null", pinArray);
+    assertTrue("pin array mismatch in pin count", pinArray.length == 3);
+    
+    pinData.containsKey(arduino01.getPin(10).getPinName());
+    pinData.containsKey(arduino01.getPin(12).getPinName());
+    pinData.containsKey(arduino01.getPin(13).getPinName());
+    
   }
 
   @Test
@@ -475,6 +509,36 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener {
     assertEquals(20, pins.size());
 
     arduino01.setBoard(boardType);
+  }
+  
+  @Test
+  public void testPin() {
+    PinDefinition pin = arduino01.getPin(analogPin);
+    
+    pinData.clear();
+    arduino01.setBoardUno(); 
+    arduino01.isConnected();
+    arduino01.connect(port01);
+
+    arduino01.attach((PinListener)this, pin.getAddress());
+    arduino01.enablePin(pin.getAddress());
+    sleep(100);
+    arduino01.disablePin(pin.getAddress());
+    assertTrue("did not receive pin data int", pinData.containsKey(analogPin));
+    
+    pinData.clear();
+
+    arduino01.attach((PinListener)this, analogPin);
+    arduino01.enablePin(analogPin);
+    sleep(100);
+    assertTrue("did not receive pin data from pin", pinData.containsKey(analogPin));
+    
+    pinData.clear();
+  }
+
+  @Override
+  public void onPin(PinData pindata) {
+    pinData.put(pindata.pin, pindata);
   }
 
 }
