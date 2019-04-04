@@ -153,7 +153,7 @@ public class OculusDisplay implements Runnable {
   public volatile boolean trackHead = true;
 
   static {
-      UNIT_QUAD_VS = FileIO.resourceToString("oculus/unitQuad.vs");
+      UNIT_QUAD_VS = FileIO.resourceToString("oculus"+File.separator+"unitQuad.vs");
       UNIT_QUAD_FS = FileIO.resourceToString("oculus"+File.separator+"unitQuad.fs");
       SHADERS_TEXTURED_FS = FileIO.resourceToString("oculus"+File.separator+"Textured.fs");
       SHADERS_TEXTURED_VS = FileIO.resourceToString("oculus"+File.separator+"Textured.vs");
