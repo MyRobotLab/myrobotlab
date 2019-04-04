@@ -37,11 +37,11 @@ public class Oscope extends ServiceGui implements ActionListener {
 
   public final static Logger log = LoggerFactory.getLogger(Oscope.class);
 
-  JPanel buttonPanel = new JPanel(new GridBagLayout());
+  final JPanel buttonPanel = new JPanel(new GridBagLayout());
   
-  Box screenPanel = Box.createVerticalBox();
+  final Box screenPanel = Box.createVerticalBox();
 
-  Map<String, OscopePinTrace> traces = new HashMap<>();
+  final Map<String, OscopePinTrace> traces = new HashMap<>();
 
   public Oscope(String boundServiceName, SwingGui myService) {
     super(boundServiceName, myService);
@@ -62,6 +62,7 @@ public class Oscope extends ServiceGui implements ActionListener {
     subscribeGui();
   }
 
+
   /**
    * function for "all" pins, global actions, e.g. clear all pins
    */
@@ -70,7 +71,10 @@ public class Oscope extends ServiceGui implements ActionListener {
     Object o = e.getSource();
   }
 
-  public void addButtons(List<PinDefinition> pinList) {
+  public void setPins(List<PinDefinition> pinList) {
+    
+    buttonPanel.removeAll();
+    screenPanel.removeAll();
 
     GridBagConstraints bgc = new GridBagConstraints();
     GridBagConstraints sgc = new GridBagConstraints();
@@ -85,6 +89,7 @@ public class Oscope extends ServiceGui implements ActionListener {
     sgc.fill = GridBagConstraints.HORIZONTAL;
     bgc.weighty = bgc.weightx = 1;
     sgc.weighty = sgc.weighty = 1;
+    traces.clear();
 
     for (int i = 0; i < pinList.size(); ++i) {
       PinDefinition pinDef = pinList.get(i);
@@ -121,7 +126,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 
   public void onPinList(List<PinDefinition> pinList) {
     traces.clear();
-    addButtons(pinList);
+    setPins(pinList);
   }
 
   public void subscribeGui() {
