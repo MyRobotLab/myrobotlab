@@ -1914,7 +1914,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public String setBoard(String board) {
-    log.debug("setting board to type {}", board);
+    log.warn("setting board to type {}", board);
     this.board = board;
     // we don't invoke, because
     // it might get into a race condition
@@ -2123,7 +2123,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Platform.setVirtual(false);
 
       boolean isDone = true;
-      String port = "COM6";
+      // String port = "COM6";
+      String port = "COM7";
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
