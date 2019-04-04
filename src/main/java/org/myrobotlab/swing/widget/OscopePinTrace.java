@@ -89,6 +89,8 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   // mapper to provide auto-scaling
   Mapper pinMapper = new Mapper(0, 1, 0, 1);
 
+  boolean newMinOrMax = false;
+
   public OscopePinTrace(Oscope oscope, PinDefinition pinDef, float hsv) {
     super();
     setLayout(new BorderLayout());
@@ -139,16 +141,16 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     JPanel traceControl = new JPanel();
     traceControl.setPreferredSize(new Dimension(140, 40));
     traceControl.setLayout(new GridLayout(0, 2));
-    traceControl.add(new JLabel(pinDef.getPinName()));
+    traceControl.add(new JLabel(" " + pinDef.getPinName()));
     traceControl.add(valueLabel);
     
-    traceControl.add(new JLabel("min"));
+    traceControl.add(new JLabel("  min"));
     traceControl.add(minLabel);
 
-    traceControl.add(new JLabel("max"));
+    traceControl.add(new JLabel("  max"));
     traceControl.add(maxLabel);
 
-    traceControl.add(new JLabel("avg"));
+    traceControl.add(new JLabel("  avg"));
     traceControl.add(avgLabel);
     
     pause = new JButton(Util.getScaledIcon(Util.getImage("pause.png"), 0.25));
@@ -271,11 +273,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     int yHi = height - yMargin;
     int yMaxDelta = yHi - yLow;
     
-    if (pinData.value > max || pinData.value < min) {      
-      
-      max = (max == 0)?1:max;
-      pinMapper = new Mapper(min, max, 0, yMaxDelta);       
-    } 
+    ////////////////////////////////////////////////////
     
     // y = pinMapper.calcOutput(pinData.value) + yMargin;
     y = yHi - pinMapper.calcOutput(pinData.value);
@@ -339,13 +337,18 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     if (pinData.value < min) {
       min = pinData.value;
       minLabel.setText(String.format("%.2f", min));
+      newMinOrMax  = true;
     }
     
     if (pinData.value > max) {
       max = pinData.value;
       maxLabel.setText(String.format("%.2f", max));
+      newMinOrMax = true;
     }
     
+    if (newMinOrMax) {
+      pinMapper = new Mapper(min, max, 0, yMaxDelta);
+    }
     
     avg = ((cnt - 1) * avg + pinData.value)/cnt;
     avgLabel.setText(String.format("%.2f", avg));

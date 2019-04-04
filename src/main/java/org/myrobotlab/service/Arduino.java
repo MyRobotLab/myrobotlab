@@ -2120,7 +2120,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      Platform.setVirtual(false);
 
       boolean isDone = true;
       String port = "COM6";
