@@ -1,8 +1,10 @@
 package org.myrobotlab.service.abstracts;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,7 +45,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   /**
    * map of pin listeners
    */
-  transient protected Map<Integer, List<PinListener>> pinListeners = new ConcurrentHashMap<Integer, List<PinListener>>();
+  transient protected Map<Integer, Set<PinListener>> pinListeners = new ConcurrentHashMap<>();
 
   /**
    * name index of pinList
@@ -86,11 +88,11 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     String name = listener.getName();
 
     if (listener.isLocal()) {
-      List<PinListener> list = null;
+      Set<PinListener> list = null;
       if (pinListeners.containsKey(address)) {
         list = pinListeners.get(address);
       } else {
-        list = new ArrayList<PinListener>();
+        list = new HashSet<PinListener>();
       }
       list.add(listener);
       pinListeners.put(address, list);

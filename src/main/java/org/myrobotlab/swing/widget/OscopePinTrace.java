@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.myrobotlab.image.Util;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinDefinition;
 
@@ -63,8 +64,8 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   JLabel maxLabel = new JLabel("0.00");
   JLabel avgLabel = new JLabel("0.00");
   
-  Double min;
-  Double max;
+  double min = 0;
+  double max = 0;
   double avg = 0;
   double cnt = 0;
 
@@ -81,7 +82,12 @@ public class OscopePinTrace extends JPanel implements ActionListener {
 
   Color inactiveColor;
 
-  private double multiplier = 20.0;
+  double multiplier = 20.0;
+
+  boolean initialized = false;
+  
+  // mapper to provide auto-scaling
+  Mapper pinMapper = new Mapper(0, 1, 0, 1);
 
   public OscopePinTrace(Oscope oscope, PinDefinition pinDef, float hsv) {
     super();
@@ -130,28 +136,29 @@ public class OscopePinTrace extends JPanel implements ActionListener {
 
     screenDisplay.add(this, BorderLayout.CENTER);
 
-    JPanel flow = new JPanel();
-    flow.setLayout(new GridLayout(0, 2));
-    flow.add(new JLabel(pinDef.getPinName()));
-    flow.add(valueLabel);
+    JPanel traceControl = new JPanel();
+    traceControl.setPreferredSize(new Dimension(140, 40));
+    traceControl.setLayout(new GridLayout(0, 2));
+    traceControl.add(new JLabel(pinDef.getPinName()));
+    traceControl.add(valueLabel);
     
-    flow.add(new JLabel("min"));
-    flow.add(minLabel);
+    traceControl.add(new JLabel("min"));
+    traceControl.add(minLabel);
 
-    flow.add(new JLabel("max"));
-    flow.add(maxLabel);
+    traceControl.add(new JLabel("max"));
+    traceControl.add(maxLabel);
 
-    flow.add(new JLabel("avg"));
-    flow.add(avgLabel);
+    traceControl.add(new JLabel("avg"));
+    traceControl.add(avgLabel);
     
     pause = new JButton(Util.getScaledIcon(Util.getImage("pause.png"), 0.25));
     pause.setBorder(BorderFactory.createEmptyBorder());
     pause.setContentAreaFilled(false);
     
-    flow.add(pause);
+    traceControl.add(pause);
     pause.addActionListener(this);
 
-    screenDisplay.add(flow, BorderLayout.WEST);
+    screenDisplay.add(traceControl, BorderLayout.EAST);
     screenDisplay.setVisible(false);
 
   }
@@ -238,15 +245,43 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     
     ++cnt;
     
-    if (min == null) {
+    if (!initialized) {
       min = pinData.value;
-    }
-    if (max == null) {
+      minLabel.setText(String.format("%.2f", min));
+   
       max = pinData.value;
+      maxLabel.setText(String.format("%.2f", max));
+      
+      avg = pinData.value;
+      avgLabel.setText(String.format("%.2f", avg));
+      
+      initialized = true;
     }
 
     screen0X += timeDivisor;
     screen1X += timeDivisor;
+    
+    ////////////////////////////////////////////////////
+    // ======= begin some values here can be initialized once or in some modulus =========
+    // FIXME - if (autoScale) ....
+    // FIXME - this needs to be inspected/refactored
+    double y = 0;
+    int yMargin = 20;
+    int yLow = yMargin;
+    int yHi = height - yMargin;
+    int yMaxDelta = yHi - yLow;
+    
+    if (pinData.value > max || pinData.value < min) {      
+      
+      max = (max == 0)?1:max;
+      pinMapper = new Mapper(min, max, 0, yMaxDelta);       
+    } 
+    
+    // y = pinMapper.calcOutput(pinData.value) + yMargin;
+    y = yHi - pinMapper.calcOutput(pinData.value);
+    
+    ////////////////////////////////////////////////////
+        
 
     // find active bit blit screen - its the one who's xpos is negative
     // because its "left" of the current viewing area being scrolled "right"
@@ -260,15 +295,15 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     // scrolled left point of where it is in view
     int drawPointX = (blit % 2 == 0) ? (-1 * screen1X) : (-1 * screen0X);
 
-    // FIXME - this needs to be inspected/refactored
-    double y = height / 2 - pinData.value * multiplier;
+
+    double yTest = height / 2 - pinData.value * multiplier;
     g.drawLine(lastX, lastY, drawPointX, (int) y);
     // log.info("{},{} - {},{}", lastX, lastY, drawPointX, y);
 
     if (screen0X == width) {
       // if b0 is offscreen clear it
       ++blit;
-      g0.setPaint(bgColor); // GREEN
+      g0.setPaint(bgColor);
       g0.fillRect(0, 0, width, height);
 
       if (blit % 2 == 0) {
@@ -281,7 +316,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     } else if (screen1X == width) {
       // if b1 is offscreen clear it
       ++blit;
-      g1.setPaint(bgColor); // CYAN
+      g1.setPaint(bgColor);
       g1.fillRect(0, 0, width, height);
       if (blit % 2 == 0) {
         screen1X = -width; // starting roll with screen 1
@@ -311,10 +346,11 @@ public class OscopePinTrace extends JPanel implements ActionListener {
       maxLabel.setText(String.format("%.2f", max));
     }
     
-    avg = (cnt * avg + pinData.value)/cnt;
-    avgLabel.setText(String.format("%.2f", avg));
     
-
+    avg = ((cnt - 1) * avg + pinData.value)/cnt;
+    avgLabel.setText(String.format("%.2f", avg));
+  
+    lastPinData = pinData;
     // request a repaint to swing thread
     repaint();
   }
