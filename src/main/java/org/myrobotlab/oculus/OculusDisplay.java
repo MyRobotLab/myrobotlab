@@ -35,10 +35,7 @@ import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
-
 import java.io.File;
-import java.io.IOException;
-
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -47,7 +44,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
@@ -66,9 +62,6 @@ import org.saintandreas.math.Vector2f;
 import org.saintandreas.math.Vector3f;
 import org.saintandreas.resources.Resource;
 import org.slf4j.Logger;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import com.oculusvr.capi.EyeRenderDesc;
 import com.oculusvr.capi.FovPort;
 import com.oculusvr.capi.Hmd;
