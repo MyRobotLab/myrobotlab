@@ -76,8 +76,8 @@ public class OculusRift extends Service implements PointPublisher {
   public float rightCameraDy = 0;
   public float rightCameraAngle = 180;
 
-  public String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
-  public String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
+  public String leftEyeURL = null;
+  public String rightEyeURL = null;
 
   public String frameGrabberType = "MJpeg";
   public String cvInputSource = null;
@@ -516,6 +516,12 @@ public class OculusRift extends Service implements PointPublisher {
     Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
+    String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
+    String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
+    
+    rift.setLeftEyeURL(leftEyeURL);
+    rift.setRightEyeURL(rightEyeURL);
+    
     rift.leftCameraAngle = 0;
     rift.leftCameraDy = 5;
     rift.rightCameraDy = -5;
