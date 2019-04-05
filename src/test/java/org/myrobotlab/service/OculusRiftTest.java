@@ -36,6 +36,15 @@ public class OculusRiftTest extends AbstractServiceTest {
     oculus.setRightCameraAngle(0);
     Assert.assertEquals(0.0, oculus.getRightCameraAngle(), 0.001);
     
+    oculus.setMirrorLeftCamera(false);
+    oculus.initLeftOpenCV();
+    oculus.initRightOpenCV();
+    oculus.addUndistortFilter();
+    oculus.addTransposeFilter();
+    oculus.addAffineFilter();
+    
+    Assert.assertNotNull(oculus.leftOpenCV.getFilter("leftAffine"));
+    Assert.assertNotNull(oculus.rightOpenCV.getFilter("rightAffine"));
     
     oculus.broadcastState();
     
@@ -43,3 +52,4 @@ public class OculusRiftTest extends AbstractServiceTest {
   }
 
 }
+
