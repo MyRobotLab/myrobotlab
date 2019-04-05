@@ -153,12 +153,12 @@ public class OculusDisplay implements Runnable {
   public volatile boolean trackHead = true;
 
   static {
-      UNIT_QUAD_VS = FileIO.resourceToString("oculus"+File.separator+"unitQuad.vs");
-      UNIT_QUAD_FS = FileIO.resourceToString("oculus"+File.separator+"unitQuad.fs");
-      SHADERS_TEXTURED_FS = FileIO.resourceToString("oculus"+File.separator+"Textured.fs");
-      SHADERS_TEXTURED_VS = FileIO.resourceToString("oculus"+File.separator+"Textured.vs");
-      SHADERS_CUBEMAP_VS = FileIO.resourceToString("oculus"+File.separator+"CubeMap.vs");
-      SHADERS_CUBEMAP_FS = FileIO.resourceToString("oculus"+File.separator+"CubeMap.fs");
+      UNIT_QUAD_VS = FileIO.resourceToString("OculusRift"+File.separator+"unitQuad.vs");
+      UNIT_QUAD_FS = FileIO.resourceToString("OculusRift"+File.separator+"unitQuad.fs");
+      SHADERS_TEXTURED_FS = FileIO.resourceToString("OculusRift"+File.separator+"Textured.fs");
+      SHADERS_TEXTURED_VS = FileIO.resourceToString("OculusRift"+File.separator+"Textured.vs");
+      SHADERS_CUBEMAP_VS = FileIO.resourceToString("OculusRift"+File.separator+"CubeMap.vs");
+      SHADERS_CUBEMAP_FS = FileIO.resourceToString("OculusRift"+File.separator+"CubeMap.fs");
   }
 
   private static final Resource SKYBOX[] = { IMAGES_SKY_CITY_XPOS_PNG, IMAGES_SKY_CITY_XNEG_PNG, IMAGES_SKY_CITY_YPOS_PNG, IMAGES_SKY_CITY_YNEG_PNG, IMAGES_SKY_CITY_ZPOS_PNG,
