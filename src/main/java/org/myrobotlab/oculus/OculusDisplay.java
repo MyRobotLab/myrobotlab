@@ -35,10 +35,7 @@ import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
-
 import java.io.File;
-import java.io.IOException;
-
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -47,7 +44,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
-import org.myrobotlab.image.Util;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
@@ -65,9 +62,6 @@ import org.saintandreas.math.Vector2f;
 import org.saintandreas.math.Vector3f;
 import org.saintandreas.resources.Resource;
 import org.slf4j.Logger;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import com.oculusvr.capi.EyeRenderDesc;
 import com.oculusvr.capi.FovPort;
 import com.oculusvr.capi.Hmd;
@@ -152,16 +146,12 @@ public class OculusDisplay implements Runnable {
   public volatile boolean trackHead = true;
 
   static {
-    try {
-      UNIT_QUAD_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"unitQuad.vs"), Charsets.UTF_8);
-      UNIT_QUAD_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"unitQuad.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"Textured.fs"), Charsets.UTF_8);
-      SHADERS_TEXTURED_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"Textured.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_VS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"CubeMap.vs"), Charsets.UTF_8);
-      SHADERS_CUBEMAP_FS = Resources.toString(Resources.getResource(Util.getResourceDir() + File.separator + "oculus"+File.separator+"CubeMap.fs"), Charsets.UTF_8);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+      UNIT_QUAD_VS = FileIO.resourceToString("OculusRift"+File.separator+"unitQuad.vs");
+      UNIT_QUAD_FS = FileIO.resourceToString("OculusRift"+File.separator+"unitQuad.fs");
+      SHADERS_TEXTURED_FS = FileIO.resourceToString("OculusRift"+File.separator+"Textured.fs");
+      SHADERS_TEXTURED_VS = FileIO.resourceToString("OculusRift"+File.separator+"Textured.vs");
+      SHADERS_CUBEMAP_VS = FileIO.resourceToString("OculusRift"+File.separator+"CubeMap.vs");
+      SHADERS_CUBEMAP_FS = FileIO.resourceToString("OculusRift"+File.separator+"CubeMap.fs");
   }
 
   private static final Resource SKYBOX[] = { IMAGES_SKY_CITY_XPOS_PNG, IMAGES_SKY_CITY_XNEG_PNG, IMAGES_SKY_CITY_YPOS_PNG, IMAGES_SKY_CITY_YNEG_PNG, IMAGES_SKY_CITY_ZPOS_PNG,
