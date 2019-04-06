@@ -1564,6 +1564,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         Object saved = CodecUtils.fromJson(json, o.getClass());
 
         copyShallowFrom(o, saved);
+        broadcastState();
         return true;
       }
       log.info("cfg file {} does not exist", filename);
@@ -1820,7 +1821,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // this is a spammy log message
       // info("saving %s", cfg.getName());
       if (this instanceof Runtime) {
-        info("we cant serialize runtime yet");
+        // info("we cant serialize runtime yet");
         return false;
       }
 

@@ -28,8 +28,7 @@ package org.myrobotlab.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -64,6 +63,7 @@ import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortListener;
+import org.myrobotlab.swing.widget.DockableTab;
 import org.myrobotlab.swing.widget.DockableTabPane;
 import org.myrobotlab.swing.widget.FileChooser;
 import org.myrobotlab.swing.widget.Oscope;
@@ -72,7 +72,7 @@ import org.myrobotlab.swing.widget.PortGui;
 
 public class ArduinoGui extends ServiceGui implements ActionListener, ItemListener, PortListener {
   static final long serialVersionUID = 1L;
-  
+
   JLabel status = new JLabel("disconnected");
 
   FileChooser chooser = null;
@@ -97,14 +97,14 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   JTextField arduinoPath = new JTextField(20);
 
   JTextField boardType = new JTextField(5);
-  
+
   JButton uploadMrlComm = new JButton("Upload MrlComm");
 
   JComboBox<BoardType> boardTypes = new JComboBox<BoardType>();
   Map<String, BoardType> boardToBoardType = null;
 
   transient TextEditorPane editor;
-  
+
   /**
    * current board type of the arduino
    */
@@ -115,11 +115,13 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
   JTextArea uploadResults = new JTextArea(5, 30);
 
   Arduino myArduino;
-  
+
   JButton virtual = new JButton("virtual");
   JButton enableBoardInfo = new JButton("heartbeat");
-  
+
   transient Oscope oscope;
+
+  JLabel pathToMrlComm = new JLabel("                             ");
 
   public ArduinoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
@@ -128,7 +130,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
     portGui = new PortGui(boundServiceName, myService);
     addTop(portGui.getDisplay(), boardTypes, virtual);
-    addTop(2, status);    
+    addTop(2, status);
 
     localTabs.setTabPlacementRight();
 
@@ -139,14 +141,20 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
     oscope = new Oscope(boundServiceName, myService);
     oscope.setPins(myArduino.getPinList());
-    
+
     localTabs.addTab("oscope", oscope.getDisplay());
 
     add(localTabs.getTabs());
 
-    
+    // configuration - there are only a small number of layouts for
+    // a large number of board types - for example : mega1280 pin layout
+    // is the same as mega2480 only different is memory
+    // "upload" and gcc parameters may be different, but for board layout
+    // we have config of all the different board types to the more simplistic
+    // board layouts
+
   }
-  
+
   void addListeners() {
     softReset.addActionListener(this);
     boardTypes.addItemListener(this);
@@ -154,7 +162,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     uploadMrlComm.addActionListener(this);
     virtual.addActionListener(this);
   }
-  
+
   void removeListeners() {
     softReset.removeActionListener(this);
     boardTypes.removeItemListener(this);
@@ -175,7 +183,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
       send("softReset");
       return;
     }
-    
+
     if (o == virtual) {
       Color c = virtual.getBackground();
       if (virtual.getText().equals("virtual")) {
@@ -243,19 +251,19 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     // uno & mega
 
     // ALL BOARD HAVING 20 pins 14 digital 6 analog etc..
-    String pinDef = "uno";
+    String boardLayout = "uno";
 
     if (arduino.getBoard().contains("mega")) {
       // ALL BOARDS HAVIN 72 pins .. blah blah blah ...
-      pinDef = "mega";
+      boardLayout = "mega";
     }
 
-    if (pinDef.equals(pinTabBoard)) {
+    if (boardLayout.equals(pinTabBoard)) { // FIXME - check this ?
       // no changes - just return
       return;
     }
 
-    pinTabBoard = pinDef;
+    pinTabBoard = boardLayout;
 
     JLayeredPane imageMap = new JLayeredPane();
     pinGuiList = new ArrayList<PinGui>();
@@ -269,10 +277,32 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
     List<PinDefinition> pins = myArduino.getPinList();
 
+    if (boardLayout.equals("uno")) {
+      createUnoPinDisplay(imageMap, pins);
+    } else if (boardLayout.equals("micro")) {
+      createMicroPinDisplay(imageMap, pins);
+    } else {
+      createMegaPinDisplay(imageMap, pins);
+    }
+
+    DockableTab dockableTab = localTabs.get("pin");
+    if (dockableTab == null) {
+      localTabs.addTab("pin", imageMap);
+    } else {
+      dockableTab.setTab("pin", imageMap);
+    }
+  }
+
+  private void createMicroPinDisplay(JLayeredPane imageMap, List<PinDefinition> pins) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  private void createUnoPinDisplay(JLayeredPane imageMap, List<PinDefinition> pins) {
     for (int i = 0; i < pins.size(); ++i) {
 
       PinGui p = new PinGui(myArduino, pins.get(i));
-      p.showName();
+      // p.showName();
 
       // set up the listeners
       p.addActionListener(this);
@@ -284,56 +314,90 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
           yOffSet = 13; // gap between pins
         }
 
-        p.setBounds(552 - 20 * i - yOffSet, 18, 15, 15);
+        // p.setBounds(552 - 20 * i - yOffSet, 18, 15, 15);
+        p.setLocation(552 - 20 * i - yOffSet, 18);
         imageMap.add(p.getDisplay(), new Integer(2));
       } else {
 
-        p.setBounds(172 + 20 * i, 400, 15, 15);
+        p.setLocation(172 + 20 * i, 400);/* , 15, 15); */
         imageMap.add(p.getDisplay(), new Integer(2));
-
       }
     }
-    localTabs.addTab("pin", imageMap);
+  }
+
+  private void createMegaPinDisplay(JLayeredPane imageMap, List<PinDefinition> pins) {
+    for (int i = 0; i < pins.size(); ++i) {
+
+      PinGui p = new PinGui(myArduino, pins.get(i));
+      // p.showName();
+
+      // set up the listeners
+      p.addActionListener(this);
+      pinGuiList.add(p);
+
+      if (i < 14) { // digital pins -----------------
+        int yOffSet = 0;
+        if (i > 7) {
+          yOffSet = 13; // gap between pins
+        }
+
+        p.setLocation(508 - 19 * i - yOffSet, 18);
+        imageMap.add(p.getDisplay(), new Integer(2));
+      } else if (i < 22) {
+        p.setLocation(260 + 20 * i, 18);
+        imageMap.add(p.getDisplay(), new Integer(2));
+      } else if (i < 54) {
+        if (i % 2 != 0) {
+          p.setLocation(737 + 20, 8 + (int) (9.5 * (i - 20)));
+          imageMap.add(p.getDisplay(), new Integer(2));
+        } else {
+          p.setLocation(737, 8 + (int) (9.5 * (i - 19)));
+          imageMap.add(p.getDisplay(), new Integer(2));
+        }
+      } else if (i < 62) {
+        p.setLocation(19 * i - 612, 380);
+        imageMap.add(p.getDisplay(), new Integer(2));
+      } else {
+        p.setLocation(19 * i - 591, 380);
+        imageMap.add(p.getDisplay(), new Integer(2));
+      }
+    }
   }
 
   public void addMrlCommPanel() {
 
     JPanel uploadPanel = new JPanel(new BorderLayout());
-    String pathToMrlComm = null;
     String mrlIno = null;
     try {
-      pathToMrlComm = Util.getResourceDir() + "/Arduino/MrlComm/MrlComm.ino";
-      mrlIno = FileIO.toString(pathToMrlComm);
+      pathToMrlComm.setText(Util.getResourceDir() + "/Arduino/MrlComm/MrlComm.ino");
+      mrlIno = FileIO.toString(pathToMrlComm.getText());
     } catch (Exception e) {
-      log.warn("MrlComm.ino not found" , e);
+      log.warn("MrlComm.ino not found", e);
     }
 
-    GridBagConstraints gc = new GridBagConstraints();
-    gc.gridx = 0;
-    gc.gridy = 0;
-    JPanel top = new JPanel(new GridBagLayout());
-    top.add(new JLabel("Arduino IDE Path "), gc);
+    JPanel top = new JPanel(new GridLayout(0, 1));
+    
+    JPanel firstLine = new JPanel(new BorderLayout());
+    firstLine.add(new JLabel("Arduino IDE Path "), BorderLayout.WEST);
+    firstLine.add(arduinoPath, BorderLayout.CENTER);
 
-    gc.gridx++;
-    top.add(arduinoPath, gc);
-    gc.gridx++;
+    JPanel flow = new JPanel();
     if (chooser == null) {
       chooser = new FileChooser("browse", arduinoPath);
       chooser.filterDirsOnly();
     }
-    top.add(chooser, gc);
-    gc.gridx++;
-    top.add(openMrlComm, gc);
-    gc.gridx++;
-    top.add(uploadMrlComm, gc);
-    gc.gridx++;
-    gc.gridx = 0;
-    gc.gridy = 1;
-    gc.gridwidth = 2;
-    top.add(new JLabel("MrlComm.ino location "), gc);
-    gc.gridx += 2;
-    top.add(new JLabel(pathToMrlComm), gc);
-
+    flow.add(chooser);
+    flow.add(openMrlComm);
+    firstLine.add(flow, BorderLayout.EAST);
+    
+    top.add(firstLine);
+    
+    JPanel secondLine = new JPanel(new BorderLayout());
+    secondLine.add(new JLabel("MrlComm.ino location :"), BorderLayout.WEST);    
+    top.add(secondLine);
+    
+    top.add(pathToMrlComm);
+    
     uploadPanel.add(top, BorderLayout.NORTH);
 
     editor = new TextEditorPane();
@@ -355,7 +419,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
   }
 
-  /*
+  /**
    * updates ui - called from both initialization &amp; onState
    * 
    */
@@ -393,9 +457,11 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
           status.setText("disconnected");
         }
 
+        updatePinTab(myArduino);
+
         arduinoPath.setText(arduino.getArduinoPath());
         uploadResults.setText(arduino.uploadSketchResult);
-        
+
         addListeners();
       }
     });
@@ -407,7 +473,8 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
    * - this method is often called by other threads so gui - updates must be
    * done in the swing post method way
    *
-   * @param arduino - the arduino service to update state from
+   * @param arduino
+   *          - the arduino service to update state from
    */
   public void onState(final Arduino arduino) {
     myArduino = arduino;
@@ -424,9 +491,9 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
       }
     }
   }
-  
+
   public void onPinArray(PinData[] pinArray) {
-    // FIXME - not currently doing anything with this callback
+    oscope.onPinArray(pinArray);
   }
 
   @Override

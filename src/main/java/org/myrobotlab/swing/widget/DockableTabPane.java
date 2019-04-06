@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
@@ -170,6 +171,14 @@ public class DockableTabPane implements ActionListener {
     } else {
 
     }
+  }
+  
+  public String getSelected() {
+    Component c = tabs.getTabComponentAt(tabs.getSelectedIndex());
+    if (c instanceof JLabel) {
+      return ((JLabel)c).getText();
+    }    
+    return null;
   }
 
   public Map<String, DockableTabData> resetDesktop(String name) {

@@ -33,14 +33,11 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-// import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.Serializable;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -159,6 +156,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * used for "this" reference in anonymous swing utilities calls
    */
   transient SwingGui self;
+  transient private JMenu save;
+  transient private JMenu load;
 
   static public void attachJavaConsole() {
     JFrame j = new JFrame("Java Console");
@@ -263,6 +262,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       status.setOpaque(false);
       status.setText("status:");
     }
+   
 
     if ("unhide all".equals(cmd)) {
       unhideAll();
@@ -281,6 +281,58 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     } else if ("about".equals(cmd)) {
       new AboutDialog(this);
       // display();
+    } else if ("load".equals(cmd)) {
+      // get current focus
+      String tabName = getSelected();
+      ServiceInterface si = Runtime.getService(tabName);
+      if (si == null) {
+        log.info("%s is not a service - please select the service to save", tabName);
+      } else if (si.isLocal()) {
+        si.load();
+      } else {
+        send("%s", tabName, "load");
+      }
+      info("loaded %s", tabName);
+    } else if ("load all".equals(cmd)) {
+      String[] services = Runtime.getServiceNames();
+      for (String service : services) {
+        info("loading %s", service);
+        ServiceInterface si = Runtime.getService(service);
+        if (si == null) {
+          log.info("%s is not a service - please select the service to save", service);
+        } else if (si.isLocal()) {
+          si.load();
+        } else {
+          send("%s", service, "load");
+        }
+      }
+      info("loaded all services");
+    } else if ("save".equals(cmd)) {
+      // get current focus
+      String tabName = getSelected();
+      ServiceInterface si = Runtime.getService(tabName);
+      if (si == null) {
+        log.info("%s is not a service - please select the service to save", tabName);
+      } else if (si.isLocal()) {
+        si.save();
+      } else {
+        send("%s", tabName, "save");
+      }
+      info("saved %s", tabName);
+    } else if ("save all".equals(cmd)) {
+      String[] services = Runtime.getServiceNames();
+      for (String service : services) {
+        info("saving %s", service);
+        ServiceInterface si = Runtime.getService(service);
+        if (si == null) {
+          log.info("%s is not a service - please select the service to save", service);
+        } else if (si.isLocal()) {
+          si.save();
+        } else {
+          send("%s", service, "save");
+        }
+      }
+      info("saved all services");
     } else {
       log.info("unknown command {}", cmd);
     }
@@ -406,12 +458,32 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public JMenuBar createMenu() {
     JMenuBar menuBar = new JMenuBar();
 
+    menuBar.add(search);
+    menuBar.add(Box.createHorizontalGlue());
+
+    save = new JMenu("save");  
+    JMenuItem mi = new JMenuItem("save");
+    mi.addActionListener(this);
+    save.add(mi);
+    mi = new JMenuItem("save all");
+    mi.addActionListener(this);
+    save.add(mi);
+    
+    menuBar.add(save);
+    
+    load = new JMenu("load");  
+    mi = new JMenuItem("load");
+    mi.addActionListener(this);
+    load.add(mi);
+    mi = new JMenuItem("load all");
+    mi.addActionListener(this);
+    load.add(mi);
+    menuBar.add(load);
+    
     JMenu help = new JMenu("help");
     JMenuItem about = new JMenuItem("about");
     about.addActionListener(this);
     help.add(about);
-    menuBar.add(search);
-    menuBar.add(Box.createHorizontalGlue());
     menuBar.add(help);
 
     search.getDocument().addDocumentListener(this);
@@ -651,6 +723,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       tabs.addTab("Welcome", new Welcome("welcome", this).getDisplay());
       // subscribeToServiceMethod("Welcome", new Welcome("welcome", this,
       // tabs));
+      
       /**
        * pack() repaint() works on current selected (non-hidden) tab welcome is
        * the first panel when the UI starts - therefore this controls the
@@ -693,6 +766,10 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       // create gui parts
       createJFrame(fullscreen);
     }
+  }
+  
+  public String getSelected() {
+    return tabs.getSelected();
   }
 
   @Override
