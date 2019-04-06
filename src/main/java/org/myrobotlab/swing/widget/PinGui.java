@@ -28,9 +28,8 @@ package org.myrobotlab.swing.widget;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Rectangle;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -67,7 +66,6 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
   public final static Logger log = LoggerFactory.getLogger(PinGui.class);
 
   PinDefinition pinDef;
-  String boundServiceName;
   JSlider slider;
   JLabel sliderOutput;
   boolean isVertical = false;
@@ -77,9 +75,12 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
   JPopupMenu popup = new JPopupMenu();
   JButton digitalWrite0 = new JButton("0");
   JButton digitalWrite1 = new JButton("1");
-  JButton read = new JButton("  read  ");
+  // JButton read = new JButton(" read ");
 
-  GridBagConstraints gc = new GridBagConstraints();
+  int height = 15;
+  int width = 15;
+
+  // GridBagConstraints gc = new GridBagConstraints();
 
   JPanel display = new JPanel(new GridBagLayout());
 
@@ -97,57 +98,54 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
 
   JPanel popupPanel;
 
-  Rectangle size = new Rectangle(15, 15);
-
   ActionListener relay;
 
   boolean isReading = false;
 
   MessageSender sender;
 
+  // boolean displayAddress = true;
+
   public PinGui(MessageSender service, final PinDefinition pinDef) {
     this.sender = service;
     this.pinDef = pinDef;
-    this.boundServiceName = service.getName();
-    // this.isVertical = isVertical;
-    gc.gridx = gc.gridy = 0;
-    gc.fill = GridBagConstraints.BOTH; // ???
-    // gcCenter.fill = GridBagConstraints.HORIZONTAL;
-    gc.weightx = 1;
-    gc.weighty = 1;
 
-    popupPanel = new JPanel(new GridBagLayout());
+    digitalWrite0.setPreferredSize(new Dimension(30, 30));
+    digitalWrite1.setPreferredSize(new Dimension(30, 30));
+
+    popupPanel = new JPanel(new GridLayout(0, 2));
     popup.add(popupPanel);
 
-    if (pinDef.canWrite()) {
-      digitalWrite0.setBackground(digitalWrite0Bg);
-      digitalWrite0.setForeground(digitalWrite0Fg);
-      digitalWrite0.setBorder(null);
-      digitalWrite0.setOpaque(true);
-      digitalWrite0.setBorderPainted(false);
-      digitalWrite0.addActionListener(this);
-      popupPanel.add(digitalWrite0, gc);
+    // if (pinDef.canWrite()) {
+    digitalWrite0.setBackground(digitalWrite0Bg);
+    digitalWrite0.setForeground(digitalWrite0Fg);
+    digitalWrite0.setBorder(null);
+    digitalWrite0.setOpaque(true);
+    digitalWrite0.setBorderPainted(false);
+    digitalWrite0.addActionListener(this);
+    popupPanel.add(digitalWrite0);
 
-      gc.gridy++;
-      digitalWrite1.setBackground(digitalWrite1Bg);
-      digitalWrite1.setForeground(digitalWrite1Fg);
-      digitalWrite1.setBorder(null);
-      digitalWrite1.setOpaque(true);
-      digitalWrite1.setBorderPainted(false);
-      digitalWrite1.addActionListener(this);
-      popupPanel.add(digitalWrite1, gc);
-    }
+    digitalWrite1.setBackground(digitalWrite1Bg);
+    digitalWrite1.setForeground(digitalWrite1Fg);
+    digitalWrite1.setBorder(null);
+    digitalWrite1.setOpaque(true);
+    digitalWrite1.setBorderPainted(false);
+    digitalWrite1.addActionListener(this);
+    popupPanel.add(digitalWrite1);
+    // }
 
-    if (pinDef.canRead()) {
-      gc.gridy++;
-      read.setBackground(readBg);
-      read.setForeground(readFg);
-      read.setBorder(null);
-      read.setOpaque(true);
-      read.setBorderPainted(false);
-      read.addActionListener(this);
-      popupPanel.add(read, gc);
-    }
+    /*
+     * - PinGui is used by pin maps ... pin maps are nice ways to do
+     * "control/writes" Oscope is the better way to do "status/reads" - lets
+     * make this a clear division so we won't give the option to read
+     *
+     */
+    /*
+     * if (pinDef.canRead()) { read.setBackground(readBg);
+     * read.setForeground(readFg); read.setBorder(null); read.setOpaque(true);
+     * read.setBorderPainted(false); read.addActionListener(this);
+     * popupPanel.add(read); }
+     */
 
     //////////// button begin /////////////////
 
@@ -156,9 +154,17 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
     popupLauncher.setBorder(null);
     popupLauncher.setOpaque(true);
     popupLauncher.setBorderPainted(false);
-    popupLauncher.setBounds(size);
+    popupLauncher.setPreferredSize(new Dimension(30, 30));
+    // popupLauncher.setBounds(size);
     // onOff.setText(pinDef.getName());
     // stateButton.setText("ab");
+    /*
+    if (displayAddress) {
+      popupLauncher.setText(pinDef.getAddress() + "");
+    } else {
+      popupLauncher.setText("");
+    }
+    */
     popupLauncher.addActionListener(this);
 
     //////////// button end /////////////////
@@ -168,22 +174,14 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
       slider = new JSlider(orientation, 0, 255, 0);
       slider.setOpaque(false);
       slider.addChangeListener(this);
-
+      
+      popupPanel.add(slider);
       sliderOutput = new JLabel("0");
-
-      // over one
-      gc.gridy++;
-      popupPanel.add(sliderOutput, gc);
-      // down one
-      gc.gridx++;
-      popupPanel.add(slider, gc);
+      popupPanel.add(sliderOutput);
     }
 
-    gc.weightx = gc.weighty = 1.0;
-    gc.gridx = 0;
-    gc.gridy = 0;
-    popupLauncher.setPreferredSize(new Dimension(15, 15));
-    display.add(popupLauncher, gc);
+    popupLauncher.setPreferredSize(new Dimension(width, height));
+    display.add(popupLauncher);
 
   }
 
@@ -192,7 +190,7 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
   }
 
   public void send(String method, Object... params) {
-    sender.send(boundServiceName, method, params);
+    sender.send(sender.getName(), method, params);
   }
 
   // FIXME - display vs control ---> setDisplayOn
@@ -228,13 +226,10 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
      */
     // simple 2 state at the moment ...
     if (o == popupLauncher) {
-      if (!pinDef.canRead()) {
-        popupPanel.remove(read);
-      }
-      if (!pinDef.canWrite()) {
-        popupPanel.remove(digitalWrite0);
-        popupPanel.remove(digitalWrite1);
-      }
+      /*
+      Color activeSelectingColor = Color.CYAN;
+      popupLauncher.setBackground(activeSelectingColor); 
+      */     
       popup.show(popupLauncher, popupLauncher.getBounds().x, popupLauncher.getBounds().y + popupLauncher.getBounds().height);
       return;
     }
@@ -253,20 +248,25 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
       popupLauncher.setBackground(Color.GREEN);
     }
 
-    if (o == read) {
-      if (!isReading) {
-        send("pinEnable", pinDef.getAddress());
-        popupLauncher.setBackground(readBg);
-        popupLauncher.setText("");
-        popup.setVisible(false);
-        isReading = true;
-      } else {
-        send("pinDisable", pinDef.getAddress());
-        popupLauncher.setBackground(popupLauncherBg);
-        popupLauncher.setText("");
-        isReading = false;
-      }
-    }
+    /**
+     * <pre>
+     * 
+     * if (o == read) {
+     *   if (!isReading) {
+     *     send("enablePin", pinDef.getAddress());
+     *     popupLauncher.setBackground(readBg);
+     *     popupLauncher.setText("");
+     *     popup.setVisible(false);
+     *     isReading = true;
+     *   } else {
+     *     send("disablePin", pinDef.getAddress());
+     *     popupLauncher.setBackground(popupLauncherBg);
+     *     popupLauncher.setText("");
+     *     isReading = false;
+     *   }
+     * }
+     * </pre>
+     */
 
     popup.setVisible(false);
     // relaying the event upwards
@@ -290,5 +290,9 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
   public void stateChanged(ChangeEvent e) {
     sliderOutput.setText(slider.getValue() + "");
     send("analogWrite", pinDef.getAddress(), slider.getValue());
+  }
+
+  public void setLocation(int i, int j) {
+    setBounds(i, j, width, height);
   }
 }

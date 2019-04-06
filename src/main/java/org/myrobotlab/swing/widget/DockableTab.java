@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.net.URL;
 
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
@@ -426,6 +427,15 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
 
   public void setData(DockableTabData tabData) {
     this.tabData = tabData;
+  }
+  
+  public Component getDisplay() {
+    return display;
+  }
+
+  public void setTab(String title, Component display) {   
+    int index = tabs.indexOfTabComponent(getTitleLabel());
+    tabs.setComponentAt(index, display);
   }
 
 }

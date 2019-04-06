@@ -67,17 +67,13 @@ import org.slf4j.Logger;
  *         outputY - is the values sent to the firmware, and should not
  *         necessarily be confused with the inputX which is the input values
  *         sent to the servo
+ *         
+ *         FIXME - inherit from AbstractMotor ..
  * 
  */
 
 public class Servo extends Service implements ServoControl {
 
-  /**
-   * Sweeper - TODO - should be implemented in the arduino code for smoother
-   * function
-   * 
-   * 
-   */
   @Deprecated // create a TimeEncoder to support this functionality
   public class Sweeper extends Thread {
 
@@ -553,12 +549,11 @@ public class Servo extends Service implements ServoControl {
       targetPosBeforeSensorFeebBackCorrection = targetPos;
     }
 
-    targetOutput = getTargetOutput();// mapper.calcOutput(targetPos); //
+    targetOutput = getTargetOutput();
 
     lastActivityTime = System.currentTimeMillis();
 
-    if (lastPos != pos || !isEventsEnabled) { // recently changed - jme does not
-                                              // want to use ServoEvents
+    if (lastPos != pos || !isEventsEnabled) { 
       // take care if servo will disable soon
       if (autoDisableTimer != null) {
         autoDisableTimer.cancel();
