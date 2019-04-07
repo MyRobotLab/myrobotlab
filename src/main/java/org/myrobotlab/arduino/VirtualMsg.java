@@ -212,8 +212,8 @@ public class VirtualMsg {
   public final static int ENCODER_ATTACH = 52;
   // > setZeroPoint/deviceId
   public final static int SET_ZERO_POINT = 53;
-  // < publishEncoderPosition/deviceId/b16 position
-  public final static int PUBLISH_ENCODER_POSITION = 54;
+  // < publishEncoderData/deviceId/b16 position
+  public final static int PUBLISH_ENCODER_DATA = 54;
 
 
 /**
@@ -282,6 +282,25 @@ public class VirtualMsg {
 	transient private MrlComm arduino;
 	
 	transient private SerialDevice serial;
+
+	/**
+	 * want to grab it when SerialDevice is created
+	 *
+	 * @param serial
+	 * @return
+	 */
+	/*
+	static public synchronized Msg getInstance(MrlComm arduino, SerialDevice serial) {
+		if (instance == null) {
+			instance = new Msg();
+		}
+
+		instance.arduino = arduino;
+		instance.serial = serial;
+
+		return instance;
+	}
+	*/
 	
 	public void setInvoke(boolean b){
 	  invoke = b;
@@ -1166,14 +1185,14 @@ public class VirtualMsg {
 	  }
 	}
 
-	public synchronized void publishEncoderPosition(Integer deviceId/*byte*/, Integer position/*b16*/) {
+	public synchronized void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
 		try {
 		  if (ackEnabled){
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
 			write(1 + 1 + 2); // size
-      write(PUBLISH_ENCODER_POSITION); // msgType = 54
+      write(PUBLISH_ENCODER_DATA); // msgType = 54
       write(deviceId);
       writeb16(position);
  
@@ -1183,7 +1202,7 @@ public class VirtualMsg {
        ackRecievedLock.acknowledged = false;
      }
       if(record != null){
-        txBuffer.append("> publishEncoderPosition");
+        txBuffer.append("> publishEncoderData");
         txBuffer.append("/");
         txBuffer.append(deviceId);
         txBuffer.append("/");
@@ -1194,7 +1213,7 @@ public class VirtualMsg {
       }
 
 	  } catch (Exception e) {
-	  			log.error("publishEncoderPosition threw",e);
+	  			log.error("publishEncoderData threw",e);
 	  }
 	}
 
@@ -1360,8 +1379,8 @@ public class VirtualMsg {
     case SET_ZERO_POINT:{
       return "setZeroPoint";
     }
-    case PUBLISH_ENCODER_POSITION:{
-      return "publishEncoderPosition";
+    case PUBLISH_ENCODER_DATA:{
+      return "publishEncoderData";
     }
 
 		default: {

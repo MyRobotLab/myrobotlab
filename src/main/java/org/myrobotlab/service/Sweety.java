@@ -39,7 +39,7 @@ public class Sweety extends Service {
   transient public Pir pir;
   transient public HtmlFilter htmlFilter;
   transient public OpenCV openCV;
-  
+
   // Right arm Servomotors
   transient public Servo rightShoulderServo;
   transient public Servo rightArmServo;
@@ -119,39 +119,68 @@ public class Sweety extends Service {
   int max = 2;
   int rest = 3;
 
+  class ServoConfig {
+    public int pin;
+    public double min;
+    public double max;
+    public double rest;
+
+    public ServoConfig(int pin, double min, double max, double rest) {
+      this.pin = pin;
+      this.min = min;
+      this.max = max;
+      this.rest = rest;
+    }
+
+    public ServoConfig(double[] data) {
+      if (data[0] != -1) {
+        pin = (int) data[0];
+      }
+      if (data[1] != -1) {
+        min = data[1];
+      }
+      if (data[2] != -1) {
+        max = data[2];
+      }
+      if (data[3] != -1) {
+        rest = data[3];
+      }
+    }
+  }
+
   // for arms and hands, the values are pin,min,max,rest
 
   // Right arm
-  int rightShoulder[] = { 34, 0, 180, 0 };
-  int rightArm[] = { 1, 45, 155, 140 };
-  int rightBiceps[] = { 2, 12, 90, 12 };
-  int rightElbow[] = { 3, 8, 90, 8 };
-  int rightWrist[] = { 4, 0, 140, 140 };
+  ServoConfig rightShoulder = new ServoConfig(34, 0, 180, 0);
+  ServoConfig rightArm = new ServoConfig(1, 45, 155, 140);
+  ServoConfig rightBiceps = new ServoConfig(2, 12, 90, 12);
+  ServoConfig rightElbow = new ServoConfig(3, 8, 90, 8);
+  ServoConfig rightWrist = new ServoConfig(4, 0, 140, 140);
 
   // Left arm
-  int leftShoulder[] = { 35, 0, 150, 148 };
-  int leftArm[] = { 1, 0, 85, 0 };
-  int leftBiceps[] = { 2, 60, 140, 140 };
-  int leftElbow[] = { 3, 0, 75, 0 };
-  int leftWrist[] = { 4, 0, 168, 0 };
+  ServoConfig leftShoulder = new ServoConfig(35, 0, 150, 148);
+  ServoConfig leftArm = new ServoConfig(1, 0, 85, 0);
+  ServoConfig leftBiceps = new ServoConfig(2, 60, 140, 140);
+  ServoConfig leftElbow = new ServoConfig(3, 0, 75, 0);
+  ServoConfig leftWrist = new ServoConfig(4, 0, 168, 0);
 
   // Right hand
-  int rightThumb[] = { 5, 170, 75, 170 };
-  int rightIndex[] = { 6, 70, 180, 180 };
-  int rightMiddle[] = { 7, 1, 2, 3 };
-  int rightRing[] = { 8, 15, 130, 15 };
-  int rightPinky[] = { 9, 25, 180, 25 };
+  ServoConfig rightThumb = new ServoConfig(5, 170, 75, 170);
+  ServoConfig rightIndex = new ServoConfig(6, 70, 180, 180);
+  ServoConfig rightMiddle = new ServoConfig(7, 1, 2, 3);
+  ServoConfig rightRing = new ServoConfig(8, 15, 130, 15);
+  ServoConfig rightPinky = new ServoConfig(9, 25, 180, 25);
 
   // Left hand
-  int leftThumb[] = { 5, 40, 105, 40 };
-  int leftIndex[] = { 6, 0, 180, 0 };
-  int leftMiddle[] = { 7, 0, 180, 0 };
-  int leftRing[] = { 8, 10, 180, 180 };
-  int leftPinky[] = { 9, 65, 180, 180 };
+  ServoConfig leftThumb = new ServoConfig(5, 40, 105, 40);
+  ServoConfig leftIndex = new ServoConfig(6, 0, 180, 0);
+  ServoConfig leftMiddle = new ServoConfig(7, 0, 180, 0);
+  ServoConfig leftRing = new ServoConfig(8, 10, 180, 180);
+  ServoConfig leftPinky = new ServoConfig(9, 65, 180, 180);
 
   // Head
-  int neckTilt[] = { 6, 15, 50, 30 };
-  int neckPan[] = { 7, 20, 130, 75 };
+  ServoConfig neckTilt = new ServoConfig(6, 15, 50, 30);
+  ServoConfig neckPan = new ServoConfig(7, 20, 130, 75);
 
   /**
    * Replace the values of an array , if a value == -1 the old value is keep
@@ -183,53 +212,45 @@ public class Sweety extends Service {
    * exemple :
    * sweety.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
    */
-  public void setRightArm(int[] shoulder, int[] arm, int[] biceps, int[] elbow, int[] wrist) {
-    int[][] valuesArray = new int[][] { shoulder, arm, biceps, elbow, wrist, rightShoulder, rightArm, rightBiceps, rightElbow, rightWrist };
-    valuesArray = changeArrayValues(valuesArray);
-    rightShoulder = valuesArray[0];
-    rightArm = valuesArray[1];
-    rightBiceps = valuesArray[2];
-    rightElbow = valuesArray[3];
-    rightWrist = valuesArray[4];
+  public void setRightArm(double[] shoulder, double[] arm, double[] biceps, double[] elbow, double[] wrist) {
+    rightShoulder = new ServoConfig(shoulder);
+    rightArm = new ServoConfig(arm);
+    rightBiceps = new ServoConfig(biceps);
+    rightElbow = new ServoConfig(elbow);
+    rightWrist = new ServoConfig(wrist);
   }
 
   /**
    * Same as setRightArm
    */
-  public void setLefttArm(int[] shoulder, int[] arm, int[] biceps, int[] elbow, int[] wrist) {
-    int[][] valuesArray = new int[][] { shoulder, arm, biceps, elbow, wrist, leftShoulder, leftArm, leftBiceps, leftElbow, leftWrist };
-    valuesArray = changeArrayValues(valuesArray);
-    leftShoulder = valuesArray[0];
-    leftArm = valuesArray[1];
-    leftBiceps = valuesArray[2];
-    leftElbow = valuesArray[3];
-    leftWrist = valuesArray[4];
+  public void setLefttArm(double[] shoulder, double[] arm, double[] biceps, double[] elbow, double[] wrist) {
+    leftShoulder = new ServoConfig(shoulder);
+    leftArm = new ServoConfig(arm);
+    leftBiceps = new ServoConfig(biceps);
+    leftElbow = new ServoConfig(elbow);
+    leftWrist = new ServoConfig(wrist);
   }
 
   /**
    * Same as setRightArm
    */
-  public void setLeftHand(int[] thumb, int[] index, int[] middle, int[] ring, int[] pinky) {
-    int[][] valuesArray = new int[][] { thumb, index, middle, ring, pinky, leftThumb, leftIndex, leftMiddle, leftRing, leftPinky };
-    valuesArray = changeArrayValues(valuesArray);
-    leftThumb = valuesArray[0];
-    leftIndex = valuesArray[1];
-    leftMiddle = valuesArray[2];
-    leftRing = valuesArray[3];
-    leftPinky = valuesArray[4];
+  public void setLeftHand(double[] thumb, double[] index, double[] middle, double[] ring, double[] pinky) {
+    leftThumb = new ServoConfig(thumb);
+    leftIndex = new ServoConfig(index);
+    leftMiddle = new ServoConfig(middle);
+    leftRing = new ServoConfig(ring);
+    leftPinky = new ServoConfig(pinky);
   }
 
   /**
    * Same as setRightArm
    */
-  public void setRightHand(int[] thumb, int[] index, int[] middle, int[] ring, int[] pinky) {
-    int[][] valuesArray = new int[][] { thumb, index, middle, ring, pinky, rightThumb, rightIndex, rightMiddle, rightRing, rightPinky };
-    valuesArray = changeArrayValues(valuesArray);
-    rightThumb = valuesArray[0];
-    rightIndex = valuesArray[1];
-    rightMiddle = valuesArray[2];
-    rightRing = valuesArray[3];
-    rightPinky = valuesArray[4];
+  public void setRightHand(double[] thumb, double[] index, double[] middle, double[] ring, double[] pinky) {
+    rightThumb = new ServoConfig(thumb);
+    rightIndex = new ServoConfig(index);
+    rightMiddle = new ServoConfig(middle);
+    rightRing = new ServoConfig(ring);
+    rightPinky = new ServoConfig(pinky);
   }
 
   /**
@@ -237,11 +258,9 @@ public class Sweety extends Service {
    * change" Exemple setHead({39,1,2,3},{40,1,2,3}) Python exemple :
    * sweety.setHead([1,0,180,90],[2,0,180,0])
    */
-  public void setHead(int[] tilt, int[] pan) {
-    int[][] valuesArray = new int[][] { tilt, pan, neckTilt, neckPan };
-    valuesArray = changeArrayValues(valuesArray);
-    neckTilt = valuesArray[0];
-    neckPan = valuesArray[1];
+  public void setHead(double[] tilt, double[] pan) {
+    neckTilt = new ServoConfig(tilt);
+    neckPan =  new ServoConfig(pan);
   }
 
   // set Adafruit16CServoDriver setup
@@ -284,29 +303,29 @@ public class Sweety extends Service {
   public void attach() throws Exception {
     adaFruit16cLeft.attach("arduino", i2cBus, i2cAdressLeft);
     adaFruit16cRight.attach("arduino", i2cBus, i2cAdressRight);
-    rightElbowServo.attach(adaFruit16cRight, rightElbow[pin]);
-    rightShoulderServo.attach(adaFruit16cRight, rightShoulder[pin]);
-    rightArmServo.attach(adaFruit16cRight, rightArm[pin]);
-    rightBicepsServo.attach(adaFruit16cRight, rightBiceps[pin]);
-    rightElbowServo.attach(adaFruit16cRight, rightElbow[pin]);
-    rightWristServo.attach(adaFruit16cRight, rightWrist[pin]);
-    leftShoulderServo.attach(adaFruit16cLeft, leftShoulder[pin]);
-    leftArmServo.attach(adaFruit16cLeft, leftArm[pin]);
-    leftBicepsServo.attach(adaFruit16cLeft, leftBiceps[pin]);
-    leftElbowServo.attach(adaFruit16cLeft, leftElbow[pin]);
-    leftWristServo.attach(adaFruit16cLeft, leftWrist[pin]);
-    rightThumbServo.attach(adaFruit16cRight, rightThumb[pin]);
-    rightIndexServo.attach(adaFruit16cRight, rightIndex[pin]);
-    rightMiddleServo.attach(adaFruit16cRight, rightMiddle[pin]);
-    rightRingServo.attach(adaFruit16cRight, rightRing[pin]);
-    rightPinkyServo.attach(adaFruit16cRight, rightPinky[pin]);
-    leftThumbServo.attach(adaFruit16cLeft, leftThumb[pin]);
-    leftIndexServo.attach(adaFruit16cLeft, leftIndex[pin]);
-    leftMiddleServo.attach(adaFruit16cLeft, leftMiddle[pin]);
-    leftRingServo.attach(adaFruit16cLeft, leftRing[pin]);
-    leftPinkyServo.attach(adaFruit16cLeft, leftPinky[pin]);
-    neckTiltServo.attach(arduino, neckTilt[pin]);
-    neckPanServo.attach(arduino, neckPan[pin]);
+    rightElbowServo.attach(adaFruit16cRight, rightElbow.pin);
+    rightShoulderServo.attach(adaFruit16cRight, rightShoulder.pin);
+    rightArmServo.attach(adaFruit16cRight, rightArm.pin);
+    rightBicepsServo.attach(adaFruit16cRight, rightBiceps.pin);
+    rightElbowServo.attach(adaFruit16cRight, rightElbow.pin);
+    rightWristServo.attach(adaFruit16cRight, rightWrist.pin);
+    leftShoulderServo.attach(adaFruit16cLeft, leftShoulder.pin);
+    leftArmServo.attach(adaFruit16cLeft, leftArm.pin);
+    leftBicepsServo.attach(adaFruit16cLeft, leftBiceps.pin);
+    leftElbowServo.attach(adaFruit16cLeft, leftElbow.pin);
+    leftWristServo.attach(adaFruit16cLeft, leftWrist.pin);
+    rightThumbServo.attach(adaFruit16cRight, rightThumb.pin);
+    rightIndexServo.attach(adaFruit16cRight, rightIndex.pin);
+    rightMiddleServo.attach(adaFruit16cRight, rightMiddle.pin);
+    rightRingServo.attach(adaFruit16cRight, rightRing.pin);
+    rightPinkyServo.attach(adaFruit16cRight, rightPinky.pin);
+    leftThumbServo.attach(adaFruit16cLeft, leftThumb.pin);
+    leftIndexServo.attach(adaFruit16cLeft, leftIndex.pin);
+    leftMiddleServo.attach(adaFruit16cLeft, leftMiddle.pin);
+    leftRingServo.attach(adaFruit16cLeft, leftRing.pin);
+    leftPinkyServo.attach(adaFruit16cLeft, leftPinky.pin);
+    neckTiltServo.attach(arduino, neckTilt.pin);
+    neckPanServo.attach(arduino, neckPan.pin);
 
     // Inverted servos
     neckTiltServo.setInverted(true);
@@ -682,11 +701,11 @@ public class Sweety extends Service {
    */
   public void posture(String pos) {
     if (pos == "rest") {
-      setLeftArmPosition(leftShoulder[rest], leftArm[rest], leftBiceps[rest], leftElbow[rest], leftWrist[rest]);
-      setRightArmPosition(rightShoulder[rest], rightArm[rest], rightBiceps[rest], rightElbow[rest], rightWrist[rest]);
-      setLeftHandPosition(leftThumb[rest], leftIndex[rest], leftMiddle[rest], leftRing[rest], leftPinky[rest]);
-      setRightHandPosition(rightThumb[rest], rightIndex[rest], rightMiddle[rest], rightRing[rest], rightPinky[rest]);
-      setHeadPosition(neckTilt[rest], neckPan[rest]);
+      setLeftArmPosition(leftShoulder.rest, leftArm.rest, leftBiceps.rest, leftElbow.rest, leftWrist.rest);
+      setRightArmPosition(rightShoulder.rest, rightArm.rest, rightBiceps.rest, rightElbow.rest, rightWrist.rest);
+      setLeftHandPosition(leftThumb.rest, leftIndex.rest, leftMiddle.rest, leftRing.rest, leftPinky.rest);
+      setRightHandPosition(rightThumb.rest, rightIndex.rest, rightMiddle.rest, rightRing.rest, rightPinky.rest);
+      setHeadPosition(neckTilt.rest, neckPan.rest);
     }
     /*
      * Template else if (pos == ""){ setLeftArmPosition(, , , 85, 150);
@@ -901,57 +920,57 @@ public class Sweety extends Service {
     neckPanServo = (Servo) Runtime.start("neckPanServo", "Servo");
 
     // Set min and max angle for each servos
-    rightShoulderServo.setMinMax(rightShoulder[min], rightShoulder[max]);
-    rightArmServo.setMinMax(rightArm[min], rightArm[max]);
-    rightBicepsServo.setMinMax(rightBiceps[min], rightBiceps[max]);
-    rightElbowServo.setMinMax(rightElbow[min], rightElbow[max]);
-    rightWristServo.setMinMax(rightWrist[min], rightWrist[max]);
-    leftShoulderServo.setMinMax(leftShoulder[min], leftShoulder[max]);
-    leftArmServo.setMinMax(leftArm[min], leftArm[max]);
-    leftBicepsServo.setMinMax(leftBiceps[min], leftBiceps[max]);
-    leftElbowServo.setMinMax(leftElbow[min], leftElbow[max]);
-    leftWristServo.setMinMax(leftWrist[min], leftWrist[max]);
-    rightThumbServo.setMinMax(rightThumb[min], rightThumb[max]);
-    rightIndexServo.setMinMax(rightIndex[min], rightIndex[max]);
-    rightMiddleServo.setMinMax(rightMiddle[min], rightMiddle[max]);
-    rightRingServo.setMinMax(rightRing[min], rightRing[max]);
-    rightPinkyServo.setMinMax(rightPinky[min], rightPinky[max]);
-    leftThumbServo.setMinMax(leftThumb[min], leftThumb[max]);
-    leftIndexServo.setMinMax(leftIndex[min], leftIndex[max]);
-    leftMiddleServo.setMinMax(leftMiddle[min], leftMiddle[max]);
-    leftRingServo.setMinMax(leftRing[min], leftRing[max]);
-    leftPinkyServo.setMinMax(leftPinky[min], leftPinky[max]);
-    neckTiltServo.setMinMax(neckTilt[min], neckTilt[max]);
-    neckPanServo.setMinMax(neckPan[min], neckPan[max]);
+    rightShoulderServo.setMinMax(rightShoulder.min, rightShoulder.max);
+    rightArmServo.setMinMax(rightArm.min, rightArm.max);
+    rightBicepsServo.setMinMax(rightBiceps.min, rightBiceps.max);
+    rightElbowServo.setMinMax(rightElbow.min, rightElbow.max);
+    rightWristServo.setMinMax(rightWrist.min, rightWrist.max);
+    leftShoulderServo.setMinMax(leftShoulder.min, leftShoulder.max);
+    leftArmServo.setMinMax(leftArm.min, leftArm.max);
+    leftBicepsServo.setMinMax(leftBiceps.min, leftBiceps.max);
+    leftElbowServo.setMinMax(leftElbow.min, leftElbow.max);
+    leftWristServo.setMinMax(leftWrist.min, leftWrist.max);
+    rightThumbServo.setMinMax(rightThumb.min, rightThumb.max);
+    rightIndexServo.setMinMax(rightIndex.min, rightIndex.max);
+    rightMiddleServo.setMinMax(rightMiddle.min, rightMiddle.max);
+    rightRingServo.setMinMax(rightRing.min, rightRing.max);
+    rightPinkyServo.setMinMax(rightPinky.min, rightPinky.max);
+    leftThumbServo.setMinMax(leftThumb.min, leftThumb.max);
+    leftIndexServo.setMinMax(leftIndex.min, leftIndex.max);
+    leftMiddleServo.setMinMax(leftMiddle.min, leftMiddle.max);
+    leftRingServo.setMinMax(leftRing.min, leftRing.max);
+    leftPinkyServo.setMinMax(leftPinky.min, leftPinky.max);
+    neckTiltServo.setMinMax(neckTilt.min, neckTilt.max);
+    neckPanServo.setMinMax(neckPan.min, neckPan.max);
 
     // Set rest for each servos
-    rightShoulderServo.setRest(rightShoulder[rest]);
-    rightArmServo.setRest(rightArm[rest]);
-    rightBicepsServo.setRest(rightBiceps[rest]);
-    rightElbowServo.setRest(rightElbow[rest]);
-    rightWristServo.setRest(rightWrist[rest]);
-    leftShoulderServo.setRest(leftShoulder[rest]);
-    leftArmServo.setRest(leftArm[rest]);
-    leftBicepsServo.setRest(leftBiceps[rest]);
-    leftElbowServo.setRest(leftElbow[rest]);
-    leftWristServo.setRest(leftWrist[rest]);
-    rightThumbServo.setRest(rightThumb[rest]);
-    rightIndexServo.setRest(rightIndex[rest]);
-    rightMiddleServo.setRest(rightMiddle[rest]);
-    rightRingServo.setRest(rightRing[rest]);
-    rightPinkyServo.setRest(rightPinky[rest]);
-    leftThumbServo.setRest(leftThumb[rest]);
-    leftIndexServo.setRest(leftIndex[rest]);
-    leftMiddleServo.setRest(leftMiddle[rest]);
-    leftRingServo.setRest(leftRing[rest]);
-    leftPinkyServo.setRest(leftPinky[rest]);
-    neckTiltServo.setRest(neckTilt[rest]);
-    neckPanServo.setRest(neckPan[rest]);
+    rightShoulderServo.setRest(rightShoulder.rest);
+    rightArmServo.setRest(rightArm.rest);
+    rightBicepsServo.setRest(rightBiceps.rest);
+    rightElbowServo.setRest(rightElbow.rest);
+    rightWristServo.setRest(rightWrist.rest);
+    leftShoulderServo.setRest(leftShoulder.rest);
+    leftArmServo.setRest(leftArm.rest);
+    leftBicepsServo.setRest(leftBiceps.rest);
+    leftElbowServo.setRest(leftElbow.rest);
+    leftWristServo.setRest(leftWrist.rest);
+    rightThumbServo.setRest(rightThumb.rest);
+    rightIndexServo.setRest(rightIndex.rest);
+    rightMiddleServo.setRest(rightMiddle.rest);
+    rightRingServo.setRest(rightRing.rest);
+    rightPinkyServo.setRest(rightPinky.rest);
+    leftThumbServo.setRest(leftThumb.rest);
+    leftIndexServo.setRest(leftIndex.rest);
+    leftMiddleServo.setRest(leftMiddle.rest);
+    leftRingServo.setRest(leftRing.rest);
+    leftPinkyServo.setRest(leftPinky.rest);
+    neckTiltServo.setRest(neckTilt.rest);
+    neckPanServo.setRest(neckPan.rest);
 
     setVelocity(75);
   }
 
-  void setVelocity(int value) {
+  void setVelocity(double value) {
     rightShoulderServo.setVelocity(value);
     rightArmServo.setVelocity(value);
     rightBicepsServo.setVelocity(value);
@@ -983,7 +1002,8 @@ public class Sweety extends Service {
   public void startTrack() throws Exception {
     tracker = (Tracking) Runtime.start("tracker", "Tracking");
     openCV = (OpenCV) Runtime.start("openCv", "OpenCV");
-    sleep(1000);    tracker.connect(openCV, neckPanServo, neckTiltServo);
+    sleep(1000);
+    tracker.connect(openCV, neckPanServo, neckTiltServo);
     // tracker.pid.invert("y");
     // tracker.clearPreFilters();
 
@@ -1114,12 +1134,12 @@ public class Sweety extends Service {
     }
     // TODO adapt for new design
 
-    int LElbow = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftElbow[max]);
-    int Larm = Math.round(skeleton.leftShoulder.getAngleXY()) - (180 - leftArm[max]);
-    int Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + leftShoulder[min];
-    int RElbow = Math.round(skeleton.rightElbow.getAngleXY()) + rightElbow[min];
-    int Rarm = Math.round(skeleton.rightShoulder.getAngleXY()) + rightArm[min];
-    int Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - (180 - rightShoulder[max]);
+    double LElbow = Math.round(skeleton.leftElbow.getAngleXY()) - (180 - leftElbow.max);
+    double Larm = Math.round(skeleton.leftShoulder.getAngleXY()) - (180 - leftArm.max);
+    double Lshoulder = Math.round(skeleton.leftShoulder.getAngleYZ()) + leftShoulder.min;
+    double RElbow = Math.round(skeleton.rightElbow.getAngleXY()) + rightElbow.min;
+    double Rarm = Math.round(skeleton.rightShoulder.getAngleXY()) + rightArm.min;
+    double Rshoulder = Math.round(skeleton.rightShoulder.getAngleYZ()) - (180 - rightShoulder.max);
 
     // Move the left side
     setLeftArmPosition(Lshoulder, Larm, LElbow, -1, -1);

@@ -252,10 +252,10 @@ void Msg::publishUltrasonicSensorData( byte deviceId,  int echoTime) {
   reset();
 }
 
-void Msg::publishEncoderPosition( byte deviceId,  int position) {
+void Msg::publishEncoderData( byte deviceId,  int position) {
   write(MAGIC_NUMBER);
   write(1 + 1 + 2); // size
-  write(PUBLISH_ENCODER_POSITION); // msgType = 54
+  write(PUBLISH_ENCODER_DATA); // msgType = 54
   write(deviceId);
   writeb16(position);
   flush();

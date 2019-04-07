@@ -1613,12 +1613,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // callback for generated method from arduinoMsg.schema
-  public EncoderData publishEncoderPosition(Integer deviceId, Integer position) {
-    EncoderData data = new EncoderData(getDeviceName(deviceId), position);
-    log.info("Encoder position. {}", data);
-    // DO WE BOTH PUBLISH & CALLBACK ?
-    ((EncoderControl) getDevice(deviceId)).onEncoderData(data);
-    invoke("publishEncoderPosition", data);
+  public EncoderData publishEncoderData(Integer deviceId, Integer position) {
+    EncoderControl ec = (EncoderControl)getDevice(deviceId);
+    EncoderData data = new EncoderData(ec.getName(), ec.getPin(), position);
     return data;
   }
 

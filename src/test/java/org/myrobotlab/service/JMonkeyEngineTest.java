@@ -112,7 +112,7 @@ public class JMonkeyEngineTest extends AbstractTest {
     head.rest(); // <- WRONG should not have to do this .. it should be
                  // assumed :P
     // FIXME - there has to be a "default" speed for virtual servos
-    s.setVelocity(40);
+    s.setVelocity(40.0);
     s.moveTo(0); // goes to 30 for rothead - because "min" <-- WRONG 0 should
                  // be 30 .. but start position should be 90 !!!
     s.moveTo(180);

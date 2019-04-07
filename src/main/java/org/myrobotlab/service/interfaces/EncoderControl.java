@@ -10,7 +10,7 @@ public interface EncoderControl extends Attachable {
   public void setController(EncoderController controller);
 
   // TODO: publish encoder data that includes the name/id of the device.
-  public void onEncoderData(EncoderData data);
+  // public void onEncoderData(EncoderData data);
   
   /**
    * for address or pin names - such as D0, D1, A0, ....

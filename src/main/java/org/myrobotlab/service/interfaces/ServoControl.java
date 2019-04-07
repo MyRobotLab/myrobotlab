@@ -44,11 +44,13 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    * @throws Exception
    *           e
    */
-  void attach(ServoController controller, int pin) throws Exception;
+  void attach(ServoController controller, Integer pin) throws Exception;
 
-  void attach(ServoController controller, int pin, double pos) throws Exception;
+  void attach(ServoController controller, Integer pin, Double pos) throws Exception;
 
-  void attach(ServoController controller, int pin, double pos, double speed) throws Exception;
+  void attach(String controllerName, int pin, double pos) throws Exception;
+
+  void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception;
 
   /**
    * @param degreesPerSecond
@@ -56,7 +58,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    *          velocity ?
    * 
    */
-  void setVelocity(double degreesPerSecond);
+  void setVelocity(Double degreesPerSecond);
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not
@@ -68,7 +70,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    *          max value
    * 
    */
-  void setMinMax(double min, double max);
+  void setMinMax(Double min, Double max);
 
   /**
    * @return min x
@@ -193,9 +195,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    */
   void setInverted(boolean invert);
 
-  // WTF ?
-  void addIKServoEventListener(NameProvider service);
-
   /**
    * setAutoDisable tell the servo to disable when position reached this make
    * sense only if velocity &gt; 0 if velocity == -1 : a timer is launched to delay
@@ -233,16 +232,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    *          - position to move to
    * @return true (why?)
    */
-  boolean moveToBlocking(double pos);
-
-  /**
-   * Sometime we need to override autoDisable : servoGui slider / tracking /
-   * gestures that leave your arms in the air ... so if
-   * overrideautoDisable(true) servo will never autoDisable until
-   * overrideautoDisable(false) ( we need to keep original autoDisable status,
-   * that is the reason )
-   */
-  void setOverrideAutoDisable(boolean overrideAutoDisable);
+  void moveToBlocking(double pos);
 
   void onServoEvent(Integer eventType, double currentPosUs);
 

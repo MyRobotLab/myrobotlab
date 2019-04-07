@@ -4,10 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.EncoderListener;
 
 public class GenericEncoder implements EncoderControl {
@@ -117,26 +116,18 @@ public class GenericEncoder implements EncoderControl {
   }
 
   @Override
-  public void onEncoderData(EncoderData data) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
   public void setPin(String pin) {
     this.pin = pin;
   }
 
   @Override
   public void setPin(int address) {
-    // TODO Auto-generated method stub
-    
+    this.pin = address + "";
   }
 
   @Override
   public String getPin() {
-    // TODO Auto-generated method stub
-    return null;
+    return pin;
   }
 
 }

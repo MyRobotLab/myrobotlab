@@ -25,7 +25,7 @@ public class EncoderTimer extends Thread implements EncoderPublisher {
       isRunning = true;
       while (isRunning) {
 
-        listener.onPulse(null);
+        listener.onEncoderData(null);
         Thread.sleep(100);
 
       }
