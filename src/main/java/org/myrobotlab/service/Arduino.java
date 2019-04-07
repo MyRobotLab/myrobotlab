@@ -937,6 +937,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
+   * FIXME - have local
    * This creates the pin definitions based on boardType Not sure how many pin
    * definition sets there are. Currently there are only 2 supported - Mega-Like
    * 70 pins &amp; Uno-Like 20 pins (14 digital 6 analog) FIXME - sync with
@@ -977,8 +978,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         } else if (i > 53) {
           pinName = String.format("A%d", i - 54);
           pindef.setAnalog(true);
-          pindef.setDigital(false);
-          pindef.canWrite(false);
+          pindef.setDigital(true);
+          pindef.canWrite(true);
         } else {
           pinName = String.format("D%d", i);
           pindef.setPwm(true);
@@ -2123,16 +2124,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Platform.setVirtual(false);
 
       boolean isDone = true;
-      // String port = "COM6";
-      String port = "COM7";
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
 
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-      log.info("port names {}", arduino.getPortNames());
-      // arduino.enableBoardInfo(false);
-      arduino.connect(port);
+      /*
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("COM7");
+      */
+
+      Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
+      uno.connect("COM6");
+      
+      // log.info("port names {}", mega.getPortNames());
 
       if (isDone) {
         return;
@@ -2140,19 +2144,21 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       servo.setPin(8);
-      arduino.attach(servo);
+      /*
+      mega.attach(servo);
 
       servo.moveTo(3);
 
       servo.moveTo(30);
 
-      arduino.enablePin("A4");
+      mega.enablePin("A4");
 
       // arduino.setBoardMega();
 
       Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
-      adafruit.attach(arduino);
-      arduino.attach(adafruit);
+      adafruit.attach(mega);
+      mega.attach(adafruit);
+      */
 
       // servo.attach(arduino, 8, 90);
 

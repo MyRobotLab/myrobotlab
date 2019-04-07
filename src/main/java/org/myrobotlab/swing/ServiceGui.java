@@ -34,6 +34,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -109,6 +110,8 @@ public abstract class ServiceGui implements WindowListener {
     // gcCenter.fill = GridBagConstraints.HORIZONTAL;
     gcCenter.weightx = 1;
     gcCenter.weighty = 1;
+    
+    // addTop(new JButton("save"), new JButton("load"));
   }
 
   public void info(String msg, Object... params) {
