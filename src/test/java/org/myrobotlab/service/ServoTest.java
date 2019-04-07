@@ -15,15 +15,18 @@ import org.myrobotlab.test.AbstractTest;
  * @author GroG
  * FIXME - test one servo against EVERY TYPE OF CONTROLLER (virtualized) !!!!
  *  iterate through all types
+ *  
+ *  FIXME - what is expected behavior when a s1 is attached at pin 3, then a new servo s2 is requested to attach at pin 3 ?
  * 
+ *  FIXME - test attach and isAttached on every controller
  */
 public class ServoTest extends AbstractTest {
+  
+  static final String port01 = "COM6";
+  static final String port02 = "COM7";
 
   static public Arduino arduino01;
   static public Arduino arduino02;
-
-  static final String port01 = "COM6";
-  static final String port02 = "COM7";
 
   @BeforeClass
   static public void setup() throws Exception {
@@ -74,9 +77,9 @@ public class ServoTest extends AbstractTest {
     // servo01.attach(arduino01, 8);
     servo01.moveTo(30);
     servo01.attach(arduino01, 8, 40.0);
-    servo01.attach(arduino01, 8, 30);
+    servo01.attach(arduino01, 8, 30.0);
 
-    servo02.attach(arduino01, 7, 40);
+    servo02.attach(arduino01, 7, 40.0);
     servo01.eventsEnabled(true);
     // FIXME is attach re-entrant ???
     servo01.broadcastState();
@@ -113,8 +116,8 @@ public class ServoTest extends AbstractTest {
 
     // errors / boundary cases
     // servo01.attach(arduino01, 8, 40);
-    servo02.attach(arduino01, 8, 40); // same pin?
-    servo01.attach(arduino01, 7, 40); // already attached ?
+    servo02.attach(arduino01, 8, 40.0); // same pin?
+    servo01.attach(arduino01, 7, 40.0); // already attached ?
 
     servo01.moveTo(130);
     servo02.moveTo(130);
@@ -263,7 +266,7 @@ public class ServoTest extends AbstractTest {
     assertFalse(s.isAttached());
 
     //
-    s.attach(arduino01, 10, 1);
+    s.attach(arduino01, 10, 1.0);
     assertTrue(s.isEnabled());
     s.disable();
     assertFalse(s.isEnabled());
@@ -273,6 +276,24 @@ public class ServoTest extends AbstractTest {
 
   }
   
+  @Test 
+  public void testDefaultEventsEnabled() {
+    
+    Servo.eventsEnabledDefault(true);
+    Servo s1 = (Servo)Runtime.start("s1", "Servo");
+    
+    assertTrue("problem setting default events to true", s1.isEventsEnabled());
+    
+    Servo.eventsEnabledDefault(false);
+    Servo s2 = (Servo)Runtime.start("s2", "Servo");    
+    assertTrue("problem setting default events to false", s2.isEventsEnabled());
+    
+    s1.releaseService();
+    s2.releaseService();
+    
+  }
+  
+  @Test
   public void testServoEvents() {
     
   }

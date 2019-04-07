@@ -615,7 +615,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void setMinMax(double min, double max) {
+  public void setMinMax(Double min, Double max) {
     map(min, max, min, max);
   }
 
@@ -868,7 +868,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void setVelocity(double velocity) {
+  public void setVelocity(Double velocity) {
     warn("TODO !");
   }
 
@@ -889,31 +889,25 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void addIKServoEventListener(NameProvider service) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public void sync(ServoControl sc) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void attach(ServoController controller, int pin) throws Exception {
+  public void attach(ServoController controller, Integer pin) throws Exception {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void attach(ServoController controller, int pin, double pos) throws Exception {
+  public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void attach(ServoController controller, int pin, double pos, double speed) throws Exception {
+  public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
     // TODO Auto-generated method stub
 
   }
@@ -929,20 +923,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public boolean moveToBlocking(double pos) {
+  public void moveToBlocking(double pos) {
 
     targetPos = pos;
     this.moveTo(pos);
     // breakMoveToBlocking=false;
     waitTargetPos();
-    return true;
   }
 
-  @Override
-  public void setOverrideAutoDisable(boolean overrideAutoDisable) {
-    // TODO Auto-generated method stub
-
-  }
 
   @Override
   public void waitTargetPos() {
@@ -1213,6 +1201,18 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   @Override
   public Double getLastPos() {
     return lastPos;
+  }
+
+  @Override
+  public void moveToBlocking(double newPos, long timeoutMs) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void attach(String controllerName, int pin, double pos) throws Exception {
+    // TODO Auto-generated method stub
+    // FIXME - we need an abstract to take care of all this member setting data/conversion stuff
   }
 
 }

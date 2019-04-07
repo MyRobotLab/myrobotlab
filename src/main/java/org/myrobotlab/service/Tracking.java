@@ -283,7 +283,7 @@ public class Tracking extends Service {
       if (sc.servoControl.isAttached()) {
         // avoid dangerous moves
         double velocity = sc.servoControl.getVelocity();
-        sc.servoControl.setVelocity(20);
+        sc.servoControl.setVelocity(20.0);
         sc.servoControl.moveToBlocking(sc.servoControl.getRest());
         sc.servoControl.setVelocity(velocity);
       }

@@ -49,10 +49,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate = (Servo) createPeer("omoplate");
     // controller = (ServoController) createPeer("arduino");
 
-    bicep.setMinMax(5, 90);
-    rotate.setMinMax(40, 180);
-    shoulder.setMinMax(0, 180);
-    omoplate.setMinMax(10, 80);
+    bicep.setMinMax(5.0, 90.0);
+    rotate.setMinMax(40.0, 180.0);
+    shoulder.setMinMax(0.0, 180.0);
+    omoplate.setMinMax(10.0, 80.0);
 
     bicep.setRest(5);
     rotate.setRest(90);
@@ -303,7 +303,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.bicep = bicep;
   }
 
-  public void setLimits(int bicepMin, int bicepMax, int rotateMin, int rotateMax, int shoulderMin, int shoulderMax, int omoplateMin, int omoplateMax) {
+  public void setLimits(double bicepMin, double bicepMax, double rotateMin, double rotateMax, double shoulderMin, double shoulderMax, double omoplateMin, double omoplateMax) {
     bicep.setMinMax(bicepMin, bicepMax);
     rotate.setMinMax(rotateMin, rotateMax);
     shoulder.setMinMax(shoulderMin, shoulderMax);
@@ -316,7 +316,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   // ------------- added set pins
   /*
-   * OLD WAY public void setpins(Integer bicep, Integer rotate, Integer
+   * OLD WAY public void setpins(doubleeger bicep, Integer rotate, Integer
    * shoulder, Integer omoplate) {
    * 
    * log.info(String.format("setPins %d %d %d %d %d %d", bicep, rotate,

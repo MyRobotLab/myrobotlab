@@ -256,7 +256,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   @Override
-  public void onPulse(EncoderData data) {
+  public void onEncoderData(EncoderData data) {
     // TODO Auto-generated method stub
 
   }

@@ -48,7 +48,7 @@ public class AbstractEncoder extends Service implements EncoderControl {
     return angle;
   }
 
-  @Override
+  // FIXME - remove this ...
   public void onEncoderData(EncoderData data) {
     // this is getting published from the arduino and updated here when it comes
     // in..

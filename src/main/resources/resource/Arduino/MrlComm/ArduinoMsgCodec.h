@@ -131,8 +131,8 @@
 #define ENCODER_ATTACH 52
 // > setZeroPoint/deviceId
 #define SET_ZERO_POINT 53
-// < publishEncoderPosition/deviceId/b16 position
-#define PUBLISH_ENCODER_POSITION 54
+// < publishEncoderData/deviceId/b16 position
+#define PUBLISH_ENCODER_DATA 54
 
 
 

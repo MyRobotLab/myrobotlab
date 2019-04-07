@@ -62,7 +62,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     this.servo = servo;
 
     sensor.addRangeListener(this);
-    servo.addServoEventListener(this);
+    // servo.addServoEventListener(this); FIXME - this needs to be addEncoderListener !
     // from the Arduino and send it back in on packet ..
     return true;
   }
@@ -85,19 +85,18 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     invoke("publishPingdar", new Point(lastPos, range));
     lastRange = range;
   }
+  
+  /**FIXME - this needs to be onEncoderData
 
   public Double onServoEvent(Double pos) {
     info("pos %d", pos.intValue());
-    /*
-     * lastPos = pos; if (rangeCount > 0) { Point p = new Point(lastPos,
-     * rangeAvg / rangeCount); rangeAvg = 0; rangeCount = 0;
-     * invoke("publishPingdar", p); }
-     */
+    
 
     invoke("publishPingdar", new Point(pos, lastRange));
     lastPos = pos;
     return lastPos;
   }
+  */
 
   public Point publishPingdar(Point point) {
     return point;
@@ -131,7 +130,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener {
     servo.addServoEventListener(this);
 
     // servo.setSpeed(60);
-    servo.setVelocity(30);
+    servo.setVelocity(30.0);
     servo.eventsEnabled(true);
 
     sensor.startRanging();

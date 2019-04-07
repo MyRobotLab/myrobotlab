@@ -207,7 +207,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
 
   public void setOverrideAutoDisable(Boolean... param) {
     for (int i = 0; i < param.length && i < getAcuators(this.getIntanceName()).size(); i++) {
-      getAcuators(this.getIntanceName()).get(i).setOverrideAutoDisable(param[i]);
+      // getAcuators(this.getIntanceName()).get(i).setOverrideAutoDisable(param[i]);
     }
   }
 

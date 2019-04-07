@@ -141,5 +141,5 @@
 # Amt203=0 / As5048A=1 Encoder methods
 > encoderAttach/deviceId/type/pin
 > setZeroPoint/deviceId
-< publishEncoderPosition/deviceId/b16 position
+< publishEncoderData/deviceId/b16 position
 

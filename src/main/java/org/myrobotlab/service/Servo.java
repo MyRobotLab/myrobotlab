@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -121,6 +122,7 @@ public class Servo extends Service implements ServoControl {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(Servo.class);
+  
 
   /**
    * Routing Attach - routes ServiceInterface.attach(service) to appropriate
@@ -568,7 +570,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public boolean moveToBlocking(double pos) {
+  public void moveToBlocking(double pos) {
     if (velocity < 0) {
       log.info("No effect on moveToBlocking if velocity == -1");
     }
@@ -579,7 +581,6 @@ public class Servo extends Service implements ServoControl {
     this.moveTo(pos);
     // breakMoveToBlocking=false;
     waitTargetPos();
-    return true;
   }
 
   @Override
@@ -669,7 +670,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void setMinMax(double min, double max) {
+  public void setMinMax(Double min, Double max) {
     map(min, max, min, max);
   }
 
@@ -725,7 +726,7 @@ public class Servo extends Service implements ServoControl {
     if (speed >= 1.0) {
       vel = maxVelocity;
     }
-    setVelocity((int) vel);
+    setVelocity(vel);
   }
 
   // choose to handle sweep on arduino or in MRL on host computer thread.
@@ -839,20 +840,25 @@ public class Servo extends Service implements ServoControl {
    * specified
    */
   @Override
-  public void attach(ServoController controller, int pin) throws Exception {
+  public void attach(ServoController controller, Integer pin) throws Exception {
     this.pin = pin;
     attach(controller);
   }
+  
+  @Override
+  public void attach(String name, int pin, double pos) throws Exception {
+    attach((ServoController)Runtime.getService(name), pin, pos);    
+  }
 
   @Override
-  public void attach(ServoController controller, int pin, double pos) throws Exception {
+  public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
     this.pin = pin;
     this.targetPos = pos;
     attach(controller);
   }
 
   @Override
-  public void attach(ServoController controller, int pin, double pos, double velocity) throws Exception {
+  public void attach(ServoController controller, Integer pin, Double pos, Double velocity) throws Exception {
     this.pin = pin;
     this.targetPos = pos;
     this.velocity = velocity;
@@ -871,7 +877,7 @@ public class Servo extends Service implements ServoControl {
     this.maxVelocity = velocity;
   }
 
-  public void setVelocity(double velocity) {
+  public void setVelocity(Double velocity) {
     if (maxVelocity != -1 && velocity > maxVelocity) {
       velocity = maxVelocity;
       log.info("Trying to set velocity to a value greater than max velocity");
@@ -1077,39 +1083,6 @@ public class Servo extends Service implements ServoControl {
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
-  public static void main(String[] args) throws InterruptedException {
-    String arduinoPort = "COM5";
-    LoggingFactory.init(Level.INFO);
-    VirtualArduino virtualArduino = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
-    Runtime.start("python", "Python");
-
-    try {
-      virtualArduino.connect(arduinoPort);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-    arduino.connect(arduinoPort);
-    Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
-    adafruit16CServoDriver.attach(arduino, "0", "0x40");
-
-    Runtime.start("gui", "SwingGui");
-    Servo servo = (Servo) Runtime.start("servo", "Servo");
-    try {
-      servo.attach(adafruit16CServoDriver, 1);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    servo.setVelocity(20);
-    log.info("It should take some time..");
-    servo.moveToBlocking(0);
-    servo.moveToBlocking(180);
-    servo.moveToBlocking(0);
-    log.info("Right?");
-  }
 
   // pasted from inmoov1
   /**
@@ -1173,7 +1146,6 @@ public class Servo extends Service implements ServoControl {
     saveCalibration(null);
   }
 
-  @Override
   public void setOverrideAutoDisable(boolean overrideAutoDisable) {
     this.overrideAutoDisable = overrideAutoDisable;
     if (!overrideAutoDisable) {
@@ -1194,5 +1166,28 @@ public class Servo extends Service implements ServoControl {
   public void preShutdown() {
     detach();
   }
+
+  @Override
+  public void moveToBlocking(double newPos, long timeoutMs) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  public static void main(String[] args) throws InterruptedException {
+    try {
+
+      Runtime.start("gui", "SwingGui");
+      Platform.setVirtual(false);
+
+      Arduino mega = (Arduino)Runtime.start("mega", "Arduino");
+      mega.setBoardMega();
+      Servo servo = (Servo)Runtime.start("servo", "Servo");
+      
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+
 
 }

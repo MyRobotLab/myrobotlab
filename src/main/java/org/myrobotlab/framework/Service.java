@@ -1434,6 +1434,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // if so we need to search
 
       // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
+      if (method.equals("attach")) {
+        log.info("here");
+      }
 
       // SECURITY - ??? can't be implemented here - need a full message
       meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
@@ -1465,7 +1468,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
         } catch (Exception e1) {
           log.error("boom goes method - could not find method in cache {}", mC.getName(), e1);
         }
-
       }
 
       // TODO - build method cache map from errors

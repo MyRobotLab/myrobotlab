@@ -11,5 +11,9 @@ public interface AbsolutePositionControl {
    * 
    */
   public void moveTo(double newPos);
+  
+  public void moveToBlocking(double newPos);
+  
+  public void moveToBlocking(double newPos, long timeoutMs);
 
 }

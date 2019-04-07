@@ -52,9 +52,9 @@ public class InMoovTorso extends Service {
     lowStom = (Servo) createPeer("lowStom");
     // controller = (ServoController) createPeer("arduino");
 
-    topStom.setMinMax(60, 120);
-    midStom.setMinMax(0, 180);
-    lowStom.setMinMax(0, 180);
+    topStom.setMinMax(60.0, 120.0);
+    midStom.setMinMax(0.0, 180.0);
+    lowStom.setMinMax(0.0, 180.0);
 
     topStom.setRest(90);
     midStom.setRest(90);
@@ -251,7 +251,7 @@ public class InMoovTorso extends Service {
     return true;
   }
 
-  public void setLimits(int topStomMin, int topStomMax, int midStomMin, int midStomMax, int lowStomMin, int lowStomMax) {
+  public void setLimits(double topStomMin, double topStomMax, double midStomMin, double midStomMax, double lowStomMin, double lowStomMax) {
     topStom.setMinMax(topStomMin, topStomMax);
     midStom.setMinMax(midStomMin, midStomMax);
     lowStom.setMinMax(lowStomMin, lowStomMax);
