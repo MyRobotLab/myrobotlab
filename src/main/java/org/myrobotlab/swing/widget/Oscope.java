@@ -59,7 +59,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 
     // since this is a widget - subscribeGui is not auto-magically called
     // by the framework
-    subscribeGui();
+    // subscribeGui();
   }
 
 
@@ -129,6 +129,7 @@ public class Oscope extends ServiceGui implements ActionListener {
     setPins(pinList);
   }
 
+  /*
   public void subscribeGui() {
     subscribe("publishPinDefinition");
     subscribe("publishPinArray");
@@ -140,4 +141,5 @@ public class Oscope extends ServiceGui implements ActionListener {
     unsubscribe("publishPinArray");
     unsubscribe("getPinList");
   }
+  */
 }
