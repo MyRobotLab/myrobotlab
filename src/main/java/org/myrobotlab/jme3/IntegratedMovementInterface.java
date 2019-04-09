@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.service.Servo.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoEventData;
 
 import com.jme3.system.AppSettings;
 

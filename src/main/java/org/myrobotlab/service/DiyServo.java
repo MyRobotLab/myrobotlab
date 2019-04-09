@@ -33,7 +33,6 @@ import java.util.TimerTask;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -49,6 +48,8 @@ import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoEventListener;
 import org.slf4j.Logger;
 
 /**
@@ -181,11 +182,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
                   // ok targetPos is reached ( with tolerance )
                   if (nbSamePosInputSinceX >= 3 || getCurrentPosOutput() == targetPos) {
-                    onServoEvent(SERVO_EVENT_STOPPED, getCurrentPosOutput());
+                    publishServoEvent(SERVO_EVENT_STOPPED, getCurrentPosOutput());
                   } else {
 
                     if (getCurrentPosOutput() != targetPos) {
-                      onServoEvent(SERVO_EVENT_POSITION_UPDATE, getCurrentPosOutput());
+                      publishServoEvent(SERVO_EVENT_POSITION_UPDATE, getCurrentPosOutput());
                     }
 
                   }
@@ -410,7 +411,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     initPid();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
     lastActivityTime = System.currentTimeMillis();
-    this.addServoEventListener(this);
   }
 
   /*
@@ -440,7 +440,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void addServoEventListener(NameProvider service) {
+  public void addServoEventListener(ServoEventListener service) {
     addListener("publishServoEvent", service.getName(), "onServoEvent");
   }
 
@@ -951,57 +951,14 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void onServoEvent(Integer eventType, double currentPos) {
-
-    if (eventType == SERVO_EVENT_STOPPED) {
-      moving = false;
-    } else {
-      moving = true;
-    }
-
-    onServoEvent(currentPos);
+  public ServoEventData publishServoEvent(Integer eventType, double currentPos) {
+    ServoEventData se = new ServoEventData();
+    se.name = getName();
+    se.src = this;
+    se.pos = currentPos;
+    return se;
   }
 
-  public void onServoEvent(double currentPos) {
-
-    if (!isMoving() && isEnabled()) {
-      delayDisable();
-    }
-  }
-
-  private void delayDisable() {
-
-    if (!isMoving()) {
-      log.info("AutoDisable called");
-      if (autoDisable) {
-
-        if (autoDisableTimer != null) {
-          autoDisableTimer.cancel();
-          autoDisableTimer = null;
-        }
-        autoDisableTimer = new Timer();
-        autoDisableTimer.schedule(new TimerTask() {
-          @Override
-          public void run() {
-            if (!overrideAutoDisable && !isMoving()) {
-              disable();
-              targetPos = getCurrentPosOutput();
-            }
-            synchronized (moveToBlocked) {
-              moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
-            }
-          }
-        }, (long) disableDelayGrace);
-      } else {
-        synchronized (moveToBlocked) {
-          moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
-        }
-        targetPos = getCurrentPosOutput();
-      }
-    }
-
-    broadcastState();
-  }
 
   /**
    * getCurrentPos() - return the calculated position of the servo use
@@ -1174,7 +1131,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void removeServoEventListener(NameProvider service) {
+  public void removeServoEventListener(ServoEventListener service) {
     isEventsEnabled = false;
     removeListener("publishServoEvent", service.getName(), "onServoEvent");
   }
@@ -1186,11 +1143,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * @param sc - servo control
    */
   public void unsync(ServoControl sc) {
-    // remove
-    this.removeServoEventListener(this);
-    sc.removeServoEventListener(sc);
-
-    unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+    // FIXME - promote Servo2 syncServo to Abstract class
+    // wait until then ...
   }
 
   @Override
@@ -1210,9 +1164,15 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void attach(String controllerName, int pin, double pos) throws Exception {
+  public void attach(String controllerName, Integer pin, Double pos) throws Exception {
     // TODO Auto-generated method stub
     // FIXME - we need an abstract to take care of all this member setting data/conversion stuff
+  }
+
+  @Override
+  public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 }

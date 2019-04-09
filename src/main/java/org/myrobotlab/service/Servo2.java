@@ -34,7 +34,6 @@ import java.util.Timer;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -42,6 +41,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoEventListener;
 import org.slf4j.Logger;
 
 /**
@@ -67,18 +68,8 @@ import org.slf4j.Logger;
  * 
  */
 
-public abstract class Servo2 extends Service implements ServoControl {
+public class Servo2 extends Service implements ServoControl {
 
-  // FIXME - remove - use EncoderData
-  @Deprecated
-  public static class ServoEventData {
-    public String name;
-    public Double pos;
-    Servo2 src;
-    public Integer state;
-    public Double targetPos;
-    public double velocity;
-  }
 
   @Deprecated // create a TimeEncoder to support this functionality
   public class Sweeper extends Thread {
@@ -247,6 +238,8 @@ public abstract class Servo2 extends Service implements ServoControl {
 
   Double velocity;
 
+  Set<ServoControl> syncServos;
+
   public Servo2(String n) {
     super(n);
     refreshControllers();
@@ -284,7 +277,7 @@ public abstract class Servo2 extends Service implements ServoControl {
   }
 
   @Override
-  public void addServoEventListener(NameProvider service) {
+  public void addServoEventListener(ServoEventListener service) {
     isEventsEnabled = true;
     subscribe(getName(), "publishServoEvent");
   }
@@ -666,9 +659,7 @@ public abstract class Servo2 extends Service implements ServoControl {
     if (velocity < 0) {
       log.info("No effect on moveToBlocking if velocity == -1");
     }
-    if (!isEventsEnabled) {
-      this.addServoEventListener(this);
-    }
+    
     targetPos = pos;
     this.moveTo(pos);
     // breakMoveToBlocking=false;
@@ -678,11 +669,6 @@ public abstract class Servo2 extends Service implements ServoControl {
   public void onRegistered(ServiceInterface s) {
     refreshControllers();
     broadcastState();
-  }
-
-  public void onServoEvent(Double position) {
-    // log.info("{}.ServoEvent {}", getName(), position);
-    
   }
 
   public void preShutdown() {
@@ -711,7 +697,7 @@ public abstract class Servo2 extends Service implements ServoControl {
   }
 
   @Override
-  public void removeServoEventListener(NameProvider service) {
+  public void removeServoEventListener(ServoEventListener service) {
     isEventsEnabled = false;
     unsubscribe(getName(), "publishServoEvent");
   }
@@ -730,9 +716,7 @@ public abstract class Servo2 extends Service implements ServoControl {
 
   @Override
   public void setAutoDisable(boolean autoDisable) {
-    this.autoDisable = autoDisable;
-    addServoEventListener(this);
-    log.info("setAutoDisable : " + autoDisable);
+    this.autoDisable = autoDisable;    
     broadcastState();
   }
 
@@ -839,14 +823,6 @@ public abstract class Servo2 extends Service implements ServoControl {
     }
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-    if (isEventsEnabled) {
-      this.addServoEventListener(this);
-    }
-  }
-
   /*
    * (non-Javadoc)
    * 
@@ -910,9 +886,8 @@ public abstract class Servo2 extends Service implements ServoControl {
    * one
    */
   public void sync(ServoControl sc) {
-    this.addServoEventListener(this);
-    sc.addServoEventListener(sc);
-    subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+    // FIXME - implement with multiple control references !!!!
+    syncServos.add(sc);
   }
 
   /**
@@ -929,13 +904,8 @@ public abstract class Servo2 extends Service implements ServoControl {
     return (int) time;
   }
 
-  // FIXME - DO NOT IMPLEMENT WITH SERVO EVENTS
   public void unsync(ServoControl sc) {
-    // remove
-    this.removeServoEventListener(this);
-    sc.removeServoEventListener(sc);
-
-    unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+    syncServos.remove(sc);
   }
 
   
@@ -1012,10 +982,30 @@ public abstract class Servo2 extends Service implements ServoControl {
   }
 
   @Override
-  public void onServoEvent(Integer eventType, double currentPosUs) {
-    // TODO Auto-generated method stub
-    // FIXME - we need an abstract to take care of all this member setting data/conversion stuff
+  public ServoEventData publishServoEvent(Integer eventType, double currentPos) {
+    ServoEventData se = new ServoEventData();
+    se.name = getName();
+    se.src = this;
+    se.pos = currentPos;
+    return se;
+  }
 
+  @Override
+  public void attach(String controllerName, Integer pin) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void attach(String controllerName, Integer pin, Double pos) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 

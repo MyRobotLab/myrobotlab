@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.jme3.IntegratedMovementInterface;
-import org.myrobotlab.service.Servo.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoEventData;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
