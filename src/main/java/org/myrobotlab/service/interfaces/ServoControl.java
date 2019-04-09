@@ -243,7 +243,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    */
   void moveToBlocking(double pos);
 
-  ServoEventData publishServoEvent(Integer eventType, double currentPosUs);
+  ServoData publishServoData(Integer eventType, double currentPosUs);
 
   double getCurrentPosOutput();
 

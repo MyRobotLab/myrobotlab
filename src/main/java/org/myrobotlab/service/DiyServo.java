@@ -48,7 +48,7 @@ import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoEventListener;
 import org.slf4j.Logger;
 
@@ -182,11 +182,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
 
                   // ok targetPos is reached ( with tolerance )
                   if (nbSamePosInputSinceX >= 3 || getCurrentPosOutput() == targetPos) {
-                    publishServoEvent(SERVO_EVENT_STOPPED, getCurrentPosOutput());
+                    publishServoData(SERVO_EVENT_STOPPED, getCurrentPosOutput());
                   } else {
 
                     if (getCurrentPosOutput() != targetPos) {
-                      publishServoEvent(SERVO_EVENT_POSITION_UPDATE, getCurrentPosOutput());
+                      publishServoData(SERVO_EVENT_POSITION_UPDATE, getCurrentPosOutput());
                     }
 
                   }
@@ -951,8 +951,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public ServoEventData publishServoEvent(Integer eventType, double currentPos) {
-    ServoEventData se = new ServoEventData();
+  public ServoData publishServoData(Integer eventType, double currentPos) {
+    ServoData se = new ServoData();
     se.name = getName();
     se.src = this;
     se.pos = currentPos;

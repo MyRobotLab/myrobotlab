@@ -45,7 +45,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoEventListener;
 import org.slf4j.Logger;
 
@@ -506,8 +506,8 @@ public class Servo extends Service implements ServoControl {
     }
   }
 
-  public ServoEventData publishMoveTo() {
-    ServoEventData ret = new ServoEventData();
+  public ServoData publishMoveTo() {
+    ServoData ret = new ServoData();
     ret.src = this;
     return ret;
   }
@@ -886,7 +886,7 @@ public class Servo extends Service implements ServoControl {
     return velocity;
   }
 
-  public ServoEventData publishIKServoEvent(ServoEventData data) {
+  public ServoData publishIKServoEvent(ServoData data) {
     return data;
   }
 
@@ -996,8 +996,8 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public ServoEventData publishServoEvent(Integer eventType, double currentPos) {
-      ServoEventData data = new ServoEventData();
+  public ServoData publishServoData(Integer eventType, double currentPos) {
+      ServoData data = new ServoData();
       data.name = getName();
       data.pos = currentPosInput;
       data.state = eventType;
@@ -1008,7 +1008,7 @@ public class Servo extends Service implements ServoControl {
 
   public void onServoEvent(Integer eventType, Integer currentPosUs, double targetPos) {
     double currentPos = microsecondsToDegree(currentPosUs);
-    publishServoEvent(eventType, currentPos);
+    publishServoData(eventType, currentPos);
   }
 
   public void onIMAngles(Object[] data) {

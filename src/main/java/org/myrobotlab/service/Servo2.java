@@ -41,7 +41,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoEventListener;
 import org.slf4j.Logger;
 
@@ -982,8 +982,8 @@ public class Servo2 extends Service implements ServoControl {
   }
 
   @Override
-  public ServoEventData publishServoEvent(Integer eventType, double currentPos) {
-    ServoEventData se = new ServoEventData();
+  public ServoData publishServoData(Integer eventType, double currentPos) {
+    ServoData se = new ServoData();
     se.name = getName();
     se.src = this;
     se.pos = currentPos;
