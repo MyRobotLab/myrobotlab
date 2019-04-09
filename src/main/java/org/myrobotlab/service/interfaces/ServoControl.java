@@ -27,7 +27,6 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.MessageSubscriber;
-import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface ServoControl extends AbsolutePositionControl, Attachable, MessageSubscriber {
 
@@ -48,9 +47,19 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
 
   void attach(ServoController controller, Integer pin, Double pos) throws Exception;
 
-  void attach(String controllerName, int pin, double pos) throws Exception;
-
   void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception;
+
+  /**
+   * similiar 
+   * @param controllerName
+   * @param pin
+   * @throws Exception
+   */
+  void attach(String controllerName, Integer pin) throws Exception;
+
+  void attach(String controllerName, Integer pin, Double pos) throws Exception;
+
+  void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception;
 
   /**
    * @param degreesPerSecond
@@ -234,13 +243,13 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, Messa
    */
   void moveToBlocking(double pos);
 
-  void onServoEvent(Integer eventType, double currentPosUs);
+  ServoEventData publishServoEvent(Integer eventType, double currentPosUs);
 
   double getCurrentPosOutput();
 
-  void addServoEventListener(NameProvider service);
+  void addServoEventListener(ServoEventListener service);
 
-  void removeServoEventListener(NameProvider service);
+  void removeServoEventListener(ServoEventListener service);
 
   void enable();
 

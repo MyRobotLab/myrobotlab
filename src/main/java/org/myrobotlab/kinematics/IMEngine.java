@@ -15,7 +15,7 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
 import org.myrobotlab.service.Servo;
-import org.myrobotlab.service.Servo.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoEventData;
 import org.slf4j.Logger;
 
 /**

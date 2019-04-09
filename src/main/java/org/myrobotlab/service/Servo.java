@@ -41,13 +41,12 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-
+import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoEventListener;
 import org.slf4j.Logger;
 
 /**
@@ -310,16 +309,6 @@ public class Servo extends Service implements ServoControl {
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
-  public static class ServoEventData {
-    public String name;
-    public Double pos;
-    public Integer state;
-    public double velocity;
-    public Double targetPos;
-    Servo src;
-    // public int type;
-  }
-
   public Servo(String n) {
     super(n);
     refreshControllers();
@@ -362,13 +351,13 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void addServoEventListener(NameProvider service) {
+  public void addServoEventListener(ServoEventListener service) {
     isEventsEnabled = true;
     subscribe(getName(), "publishServoEvent");
   }
 
   @Override
-  public void removeServoEventListener(NameProvider service) {
+  public void removeServoEventListener(ServoEventListener service) {
     isEventsEnabled = false;
     unsubscribe(getName(), "publishServoEvent");
   }
@@ -574,9 +563,7 @@ public class Servo extends Service implements ServoControl {
     if (velocity < 0) {
       log.info("No effect on moveToBlocking if velocity == -1");
     }
-    if (!isEventsEnabled) {
-      this.addServoEventListener(this);
-    }
+    
     targetPos = pos;
     this.moveTo(pos);
     // breakMoveToBlocking=false;
@@ -650,14 +637,6 @@ public class Servo extends Service implements ServoControl {
   public void releaseService() {
     detach(controller);
     super.releaseService();
-  }
-
-  @Override
-  public void startService() {
-    super.startService();
-    if (isEventsEnabled) {
-      this.addServoEventListener(this);
-    }
   }
 
   public void rest() {
@@ -846,7 +825,7 @@ public class Servo extends Service implements ServoControl {
   }
   
   @Override
-  public void attach(String name, int pin, double pos) throws Exception {
+  public void attach(String name, Integer pin, Double pos) throws Exception {
     attach((ServoController)Runtime.getService(name), pin, pos);    
   }
 
@@ -971,7 +950,6 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void setAutoDisable(boolean autoDisable) {
     this.autoDisable = autoDisable;
-    addServoEventListener(this);
     log.info("setAutoDisable : " + autoDisable);
     delayDisable();
     broadcastState();
@@ -1018,30 +996,19 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void onServoEvent(Integer eventType, double currentPos) {
-    currentPosInput = mapper.calcInput(currentPos);
-    if (isIKEventEnabled) {
+  public ServoEventData publishServoEvent(Integer eventType, double currentPos) {
       ServoEventData data = new ServoEventData();
       data.name = getName();
       data.pos = currentPosInput;
       data.state = eventType;
       data.velocity = velocity;
       data.targetPos = this.targetPos;
-      invoke("publishIKServoEvent", data);
-    }
-    if (eventType == SERVO_EVENT_STOPPED) {
-      moving = false;
-    } else {
-      moving = true;
-    }
-    if (isEventsEnabled) {
-      invoke("publishServoEvent", currentPosInput);
-    }
+      return data;
   }
 
   public void onServoEvent(Integer eventType, Integer currentPosUs, double targetPos) {
     double currentPos = microsecondsToDegree(currentPosUs);
-    onServoEvent(eventType, currentPos);
+    publishServoEvent(eventType, currentPos);
   }
 
   public void onIMAngles(Object[] data) {
@@ -1070,17 +1037,12 @@ public class Servo extends Service implements ServoControl {
    * one
    */
   public void sync(ServoControl sc) {
-    this.addServoEventListener(this);
-    sc.addServoEventListener(sc);
-    subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+    // FIXME - implement in abstract - use Servo2 implementation
   }
 
   public void unsync(ServoControl sc) {
     // remove
-    this.removeServoEventListener(this);
-    sc.removeServoEventListener(sc);
-
-    unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
+    // FIXME - implement in abstract - use Servo2 implementation
   }
 
 
@@ -1186,6 +1148,18 @@ public class Servo extends Service implements ServoControl {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public void attach(String controllerName, Integer pin) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 

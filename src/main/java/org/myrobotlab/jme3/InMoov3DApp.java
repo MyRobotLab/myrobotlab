@@ -12,7 +12,7 @@ import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.Servo;
-import org.myrobotlab.service.Servo.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoEventData;
 import org.python.jline.internal.Log;
 
 import com.jme3.app.SimpleApplication;

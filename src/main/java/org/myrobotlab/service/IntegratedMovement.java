@@ -29,9 +29,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
-import org.myrobotlab.service.Servo.ServoEventData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
-import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoEventData;
 import org.slf4j.Logger;
 
 import com.jme3.math.Vector3f;
