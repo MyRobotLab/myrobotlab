@@ -4,6 +4,6 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface ServoEventListener extends NameProvider {
   
-  void onServoEvent(ServoEventData se);
+  void onServoEvent(ServoData se);
   
 }

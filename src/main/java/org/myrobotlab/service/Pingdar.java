@@ -7,7 +7,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangingControl;
-import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoEventListener;
 import org.slf4j.Logger;
 
@@ -224,7 +224,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
   }
 
   @Override
-  public void onServoEvent(ServoEventData se) {
+  public void onServoEvent(ServoData se) {
     // TODO Auto-generated method stub
     
   }

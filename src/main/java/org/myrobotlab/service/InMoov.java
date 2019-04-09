@@ -42,7 +42,7 @@ import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoEventData;
+import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -1987,7 +1987,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     return vinMoovApp;
   }
 
-  public void onIKServoEvent(ServoEventData data) {
+  public void onIKServoEvent(ServoData data) {
     if (vinMoovApp != null) {
       vinMoovApp.updatePosition(data);
     }
