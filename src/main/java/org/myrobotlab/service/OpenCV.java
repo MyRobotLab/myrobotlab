@@ -1107,7 +1107,12 @@ public class OpenCV extends AbstractComputerVision {
     } else {
       prefixPath = "org.bytedeco.javacv.";
     }
-
+    if (isVirtual()) {
+      grabberType = "ImageFile";
+      inputSource = INPUT_SOURCE_FILE;
+      // FIXME - we should put a single image in src/main/resources/resource/ - to be extracted with resources
+      inputFile = "src/test/resources/OpenCV/multipleFaces.jpg";
+    }
     newGrabberType = String.format("%s%sFrameGrabber", prefixPath, grabberType);
 
     log.info(String.format("video source is %s", inputSource));
