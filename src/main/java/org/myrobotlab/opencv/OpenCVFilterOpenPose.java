@@ -139,14 +139,17 @@ public class OpenCVFilterOpenPose extends OpenCVFilter {
     
     double thresh = 0.5;
     Mat src = grabberConverter.convertToMat(grabberConverter.convert(image));
-    Mat srcMat = new Mat();
-    resize(src, srcMat, new Size(320, 240));
-    log.info("Process .. we've got a mat! {}", srcMat);
+   // Mat srcMat = new Mat();
+    // aspect ratio is f'd here.
+  //  resize(src, srcMat, new Size(320, 240));
+  //  log.info("Process .. we've got a mat! {}", srcMat);
     //show(srcMat, "Source image");
     // TODO: this scalar is probably wrong.
     Scalar scalar = new Scalar(0, 0, 0, 0);
     // img, 1.0 / 255, Size(W_in, H_in), Scalar(0, 0, 0), false, false
-    Mat inputBlob = blobFromImage(srcMat, 1.0/255, new Size(w, h), scalar, false, false, CV_32F);
+   // Mat inputBlob = blobFromImage(srcMat, 1.0/255, new Size(w, h), scalar, false, false, CV_32F);
+    Mat inputBlob = blobFromImage(src, 1.0/255, new Size(w, h), scalar, false, false, CV_32F);
+
     log.info("Input blob! {} ", inputBlob);
     net.setInput(inputBlob);
     Mat result = net.forward();
@@ -214,8 +217,11 @@ public class OpenCVFilterOpenPose extends OpenCVFilter {
       return (image);
     }
     //    // find the position of the body parts
-    float SX = (float)(srcMat.cols()) / W;
-    float SY = (float)(srcMat.rows()) / H;
+    // float SX = (float)(srcMat.cols()) / W;
+    // float SY = (float)(srcMat.rows()) / H;
+    float SX = (float)(src.cols()) / W;
+    float SY = (float)(src.rows()) / H;
+
     Point[] points = new Point[22];
     for (int n=0; n<nparts; n++) {
       // Slice heatmap of corresponding body's part.
@@ -265,12 +271,16 @@ public class OpenCVFilterOpenPose extends OpenCVFilter {
       
       log.info("SCALED N:{} - A: ({},{}) B:  ({},{})", n, a.x(), a.y(), b.x(), b.y());
       
-      line(srcMat, a, b, Scalar.RED);
-      circle(srcMat, a, 3, Scalar.GREEN);
-      circle(srcMat, b, 3, Scalar.GREEN);
+//      line(srcMat, a, b, Scalar.RED);
+//      circle(srcMat, a, 3, Scalar.GREEN);
+//      circle(srcMat, b, 3, Scalar.GREEN);
+      
+      line(src, a, b, Scalar.RED);
+      circle(src, a, 3, Scalar.GREEN);
+      circle(src, b, 3, Scalar.GREEN);
     }
 
-    IplImage resImg = grabberConverter.convert(converterToIpl.convert(srcMat));
+    IplImage resImg = grabberConverter.convert(converterToIpl.convert(src));
     return resImg;
 
     

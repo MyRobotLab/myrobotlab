@@ -8,7 +8,7 @@ import org.myrobotlab.service.Runtime;
 import org.springframework.util.Assert;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
-import static org.junit.Assert.assertNotNull;
+
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -17,7 +17,13 @@ public class OpenCVFilterOpenPoseTest extends AbstractOpenCVFilterTest {
 
   @Override
   public OpenCVFilter createFilter() {
-   // debug = true;
+    debug = true;
+//    try {
+//      Runtime.install("OpenCV");
+//    } catch (ParseException | IOException e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
     OpenCVFilterOpenPose filter = new OpenCVFilterOpenPose("filter");
     return filter;
   }
@@ -33,7 +39,10 @@ public class OpenCVFilterOpenPoseTest extends AbstractOpenCVFilterTest {
       return null;
     }
     
-    String imgFilename = "src/test/resources/OpenCV/multipleFaces.jpg";
+    //String imgFilename = "src/test/resources/OpenCV/multipleFaces.jpg";
+    //String imgFilename = "src/test/resources/OpenCV/bettie.jpg";
+    String imgFilename = "src/test/resources/OpenCV/standing-man.jpg";
+   // String imgFilename = "src/test/resources/OpenCV/standing-woman-1.jpg";
     IplImage img = cvLoadImage(imgFilename);
     return img;
   }
@@ -43,7 +52,8 @@ public class OpenCVFilterOpenPoseTest extends AbstractOpenCVFilterTest {
     // TODO: some validation.
     Assert.notNull(filter.data);
     System.out.println(filter.data);
-    //waitOnAnyKey();
+    if (debug)
+      waitOnAnyKey();
     
   }
 

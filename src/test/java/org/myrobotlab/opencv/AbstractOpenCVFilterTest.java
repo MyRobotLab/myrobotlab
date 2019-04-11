@@ -30,7 +30,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
 
   @Test
   public void testFilter() throws InterruptedException {
-
+ 
 
     OpenCVFilter filter = createFilter();
     IplImage input = createTestImage();
@@ -49,6 +49,11 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     // call process on the filter with the input image.
     long start = System.currentTimeMillis();
     IplImage output = filter.process(input);
+    
+    
+    if (debug) {
+       filter.show(output, "Processed Image");
+    }
 
     long delta = System.currentTimeMillis() - start;
     log.info("Process method took {} ms", delta);  
