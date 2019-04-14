@@ -256,8 +256,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
-  JComboBox<String> controller = new JComboBox<String>();
-  JComboBox<Integer> pinList = new JComboBox<Integer>();
+  JComboBox<String> controller = new JComboBox<>();
+  JComboBox<String> pinList = new JComboBox<>();
 
   JTextField posMin = new JTextField("0");
   JTextField posMax = new JTextField("180");
@@ -287,7 +287,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     // myServo = (Servo) Runtime.getService(boundServiceName);
 
     for (int i = 0; i < 54; i++) {
-      pinList.addItem(i);
+      pinList.addItem(i + "");
     }
 
     posMin.setPreferredSize(new Dimension(50, 24));
@@ -624,7 +624,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
         if (sc != null) {
           controller.setSelectedItem(sc.getName());          
         }
-        Integer servoPin = servo.getPin();
+        String servoPin = servo.getPin();
 
         if (servoPin != null)
           pinList.setSelectedItem(servoPin);
@@ -679,8 +679,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
         }
 
         // In the inverted case, these are reversed
-        slider.setMinimum((int) servo.getMin());
-        slider.setMaximum((int) servo.getMax());
+        slider.setMinimum(servo.getMin().intValue());
+        slider.setMaximum(servo.getMax().intValue());
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
@@ -708,12 +708,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
         }
 
         if (servo.getMinOutput() < mapOutputSliderMinValue) {
-          mapOutputSliderMinValue = (int) servo.getMinOutput();
+          mapOutputSliderMinValue = servo.getMinOutput().intValue();
           mapOutputSlider.setMinimum(mapOutputSliderMinValue);
         }
 
         if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-          mapOutputSliderMaxValue = (int) servo.getMaxOutput();
+          mapOutputSliderMaxValue = servo.getMaxOutput().intValue();
           mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
         }
 
@@ -726,8 +726,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
         mapInputSlider.setLowValue((int) servo.getMinInput());
         mapInputSlider.setHighValue((int) servo.getMaxInput());
-        mapOutputSlider.setLowValue((int) servo.getMinOutput());
-        mapOutputSlider.setHighValue((int) servo.getMaxOutput());
+        mapOutputSlider.setLowValue(servo.getMinOutput().intValue());
+        mapOutputSlider.setHighValue(servo.getMaxOutput().intValue());
 
         if (servo.isSweeping()) {
           sweepButton.setText("stop");

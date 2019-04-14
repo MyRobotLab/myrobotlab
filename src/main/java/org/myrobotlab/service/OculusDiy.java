@@ -11,6 +11,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.OrientationListener;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.slf4j.Logger;
 
 /**
@@ -137,7 +138,7 @@ public class OculusDiy extends Service implements OrientationListener {
     return;
   }
 
-  public Arduino getArduino() {
+  public PinArrayControl getArduino() {
     return arduino;
   }
 

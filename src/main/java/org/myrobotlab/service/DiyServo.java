@@ -28,11 +28,8 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -41,6 +38,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.abstracts.AbstractEncoder;
+import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -49,7 +47,7 @@ import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoEventListener;
+import org.myrobotlab.service.interfaces.ServoListener;
 import org.slf4j.Logger;
 
 /**
@@ -79,7 +77,7 @@ import org.slf4j.Logger;
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
-public class DiyServo extends Service implements ServoControl, PinListener {
+public class DiyServo extends AbstractServo implements ServoControl, PinListener {
 
   /**
    * Sweeper - thread used to sweep motor back and forth
@@ -174,19 +172,19 @@ public class DiyServo extends Service implements ServoControl, PinListener {
                 if (isMoving()) {
 
                   // tolerance
-                  if (currentPosInput == lastCurrentPosInput && Math.abs(targetPos - getCurrentPosOutput()) <= targetPosAngleTolerence) {
+                  if (currentPosInput == lastCurrentPosInput && Math.abs(targetPos - getTargetOutput()) <= targetPosAngleTolerence) {
                     nbSamePosInputSinceX += 1;
                   } else {
                     nbSamePosInputSinceX = 0;
                   }
 
                   // ok targetPos is reached ( with tolerance )
-                  if (nbSamePosInputSinceX >= 3 || getCurrentPosOutput() == targetPos) {
-                    publishServoData(SERVO_EVENT_STOPPED, getCurrentPosOutput());
+                  if (nbSamePosInputSinceX >= 3 || getTargetOutput() == targetPos) {
+                    publishServoData(SERVO_EVENT_STOPPED, getTargetOutput());
                   } else {
 
-                    if (getCurrentPosOutput() != targetPos) {
-                      publishServoData(SERVO_EVENT_POSITION_UPDATE, getCurrentPosOutput());
+                    if (getTargetOutput() != targetPos) {
+                      publishServoData(SERVO_EVENT_POSITION_UPDATE, getTargetOutput());
                     }
 
                   }
@@ -268,7 +266,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * List of available pins on the analog input service
    */
   public List<Integer> pinList = new ArrayList<Integer>();
-  public Integer pin;
 
   /**
    * mapper to be able to remap input values
@@ -440,7 +437,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   @Override
-  public void addServoEventListener(ServoEventListener service) {
+  public void attach(ServoListener service) {
     addListener("publishServoEvent", service.getName(), "onServoEvent");
   }
 
@@ -471,11 +468,11 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     return lastActivityTime;
   }
 
-  public double getMax() {
+  public Double getMax() {
     return mapper.getMaxX();
   }
 
-  public double getPos() {
+  public Double getPos() {
     if (targetPos == null) {
       return rest;
     } else {
@@ -483,12 +480,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     }
   }
 
-  public double getRest() {
-    return rest;
-  }
-
   // FIXME - change to enabled()
-  public boolean isAttached() {
+  public Boolean isAttached() {
     return isAttached;
   }
 
@@ -500,7 +493,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     return isPinArrayControlSet;
   }
 
-  public boolean isInverted() {
+  public Boolean isInverted() {
     return mapper.isInverted();
   }
 
@@ -518,7 +511,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * The most important method, that tells the servo what position it should
    * move to
    */
-  public void moveTo(double pos) {
+  public void moveTo(Double pos) {
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
@@ -708,18 +701,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
    * @Override public void setPin(int pin) { this.pin = pin; }
    */
 
-  @Override
-  public Integer getPin() {
-    return this.pin;
-  }
+  
 
   @Override
-  public double getMin() {
-    return mapper.getMinX();
-  }
-
-  @Override
-  public double getTargetOutput() {
+  public Double getTargetOutput() {
     if (targetPos == null) {
       targetPos = rest;
     }
@@ -753,8 +738,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     broadcastState();
   }
 
-  @Override
-  public double getMaxVelocity() {
+  public Double getMaxVelocity() {
     return maxVelocity;
   }
 
@@ -801,7 +785,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     if (pinArrayControl != null) {
       pinControlName = pinArrayControl.getName();
       isPinArrayControlSet = true;
-      this.pin = pin;
+      this.pin = pin + "";
     }
 
     // TODO The resolution is a property of the AD converter and should be
@@ -825,18 +809,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     this.powerLevel = power;
   }
 
-  /**
-   * // A bunch of unimplemented methods from ServoControl. // Perhaps I should
-   * create a new // DiyServoControl interface. // I was hoping to be able to
-   * avoid that, but might be a better solution
-   */
-
-  @Override
-  @Deprecated
-  public void setSpeed(double speed) {
-    log.error("speed is depreciated, use setVelocity instead");
-
-  }
 
   /**
    * This static method returns all the details of the class without it having
@@ -856,74 +828,9 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     return meta;
   }
 
-  @Override
-  public void setPin(int pin) {
-    // This method should never be used in DiyServo since it's a method specific
-    // to the Servo service
-  }
 
   @Override
-  public double getAcceleration() {
-    return 1.0;
-  }
-
-  @Override
-  public void setVelocity(Double velocity) {
-    warn("TODO !");
-  }
-
-  @Override
-  public double getVelocity() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public double getMinInput() {
-    return mapper.getMinInput();
-  }
-
-  @Override
-  public double getMaxInput() {
-    return mapper.getMaxInput();
-  }
-
-  @Override
-  public void sync(ServoControl sc) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void attach(ServoController controller, Integer pin) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void setAutoDisable(boolean autoDisable) {
-    this.autoDisable = autoDisable;
-  }
-
-  @Override
-  public boolean getAutoDisable() {
-    return this.autoDisable;
-  }
-
-  @Override
-  public void moveToBlocking(double pos) {
+  public void moveToBlocking(Double pos) {
 
     targetPos = pos;
     this.moveTo(pos);
@@ -950,11 +857,10 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     }
   }
 
-  @Override
   public ServoData publishServoData(Integer eventType, double currentPos) {
     ServoData se = new ServoData();
     se.name = getName();
-    se.src = this;
+    // se.src = this;
     se.pos = currentPos;
     return se;
   }
@@ -970,20 +876,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     return MathUtils.round(currentPosInput, roundPos);
   }
 
-  @Override
-  public double getCurrentPosOutput() {
-    return MathUtils.round(mapper.calcInput(getCurrentPos()), roundPos);
-  }
-
-  public double getMinOutput() {
-    return mapper.getMinOutput();
-  }
-
-  public double getMaxOutput() {
-    return mapper.getMaxOutput();
-  }
-
-  public boolean isEnabled() {
+  public Boolean isEnabled() {
     return !motorControl.isLocked();
   }
 
@@ -992,8 +885,7 @@ public class DiyServo extends Service implements ServoControl, PinListener {
   }
 
   public boolean isEventsEnabled() {
-    // TODO Auto-generated method stub
-    return false;
+    return true;
   }
 
   /**
@@ -1046,10 +938,8 @@ public class DiyServo extends Service implements ServoControl, PinListener {
     disable();
   }
 
-  @Override
-  public String getControllerName() {
-    // TODO Auto-generated method stub
-    return null;
+  public Double getLastPos() {
+    return lastPos;
   }
 
   public static void main(String[] args) throws InterruptedException {
@@ -1128,51 +1018,6 @@ public class DiyServo extends Service implements ServoControl, PinListener {
       Logging.logError(e);
     }
 
-  }
-
-  @Override
-  public void removeServoEventListener(ServoEventListener service) {
-    isEventsEnabled = false;
-    removeListener("publishServoEvent", service.getName(), "onServoEvent");
-  }
-
-  /**
-   * unsynchronize 2 sevos. If the servo is running in sync already, this method
-   * will stop the synchronization
-   * 
-   * @param sc - servo control
-   */
-  public void unsync(ServoControl sc) {
-    // FIXME - promote Servo2 syncServo to Abstract class
-    // wait until then ...
-  }
-
-  @Override
-  public ServoControl publishMoveTo(ServoControl sc) {
-    return sc;
-  }
-
-  @Override
-  public Double getLastPos() {
-    return lastPos;
-  }
-
-  @Override
-  public void moveToBlocking(double newPos, long timeoutMs) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void attach(String controllerName, Integer pin, Double pos) throws Exception {
-    // TODO Auto-generated method stub
-    // FIXME - we need an abstract to take care of all this member setting data/conversion stuff
-  }
-
-  @Override
-  public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
-    // TODO Auto-generated method stub
-    
   }
 
 }

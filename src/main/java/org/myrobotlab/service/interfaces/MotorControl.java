@@ -86,28 +86,6 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
 
   boolean isLocked();
 
-  /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is
-   * needed in order to provide feedback data
-   * 
-   * FIXME - part of AbsolutePosition interface
-   * 
-   * @param newPos
-   *          the new position to move to
-   */
-  void moveTo(double newPos);
-
-  /**
-   * moveTo moves the motor to a specific location. Typically, an encoder is
-   * needed in order to provide feedback data
-   * 
-   * @param newPos
-   *          new position
-   * @param power
-   *          0-1
-   */
-  void moveTo(double newPos, Double power);
-
   void setEncoder(EncoderPublisher encoder);
 
   /**
@@ -119,8 +97,6 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
    *          true or false
    */
   void setInverted(boolean invert);
-
-  // void setPowerLevel(double power);
 
   /**
    * stop the motor

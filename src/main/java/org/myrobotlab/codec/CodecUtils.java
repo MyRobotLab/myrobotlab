@@ -162,7 +162,7 @@ public class CodecUtils {
     return byteStream.toByteArray();
   }
 
-  static public final String getCallBackName(String topicMethod) {
+  static public final String getCallbackTopicName(String topicMethod) {
     // replacements
     if (topicMethod.startsWith("publish")) {
       return String.format("on%s", capitalize(topicMethod.substring("publish".length())));

@@ -32,6 +32,7 @@ import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -140,12 +141,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public double publishServoEvent(ServoControl servo, Integer eventType, double currentOutput) {
     // TODO Auto-generated method stub
-    servo.publishServoData(eventType, currentOutput);
+    servo.publishServoData(ServoStatus.SERVO_POSITION_UPDATE, currentOutput);
     return currentOutput;
   }
-
-  /** version of the library */
-  static public final String VERSION = "0.9";
 
   private static final long serialVersionUID = 1L;
 
@@ -245,7 +243,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   class ServoData implements Serializable {
    
     private static final long serialVersionUID = 1L;
-    int pin;
+    String pin;
     SpeedControl speedcontrol;
     double velocity = -1;
     double acceleration = -1;
@@ -305,24 +303,49 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
     return controllers;
   }
+  
+  /**
+   * function to convert labeled pins into address locations
+   * pin examples would be D5, D6, ... on an Arduino or some other string value
+   * @param pin
+   * @return
+   */
+  public int getAddress(String pin) {
+    try {
+      return Integer.parseInt(pin);
+    } catch(Exception e) {
+      log.error("could not convert pin labeled as {} to an address", pin);
+    }
+    return 0;
+  }
+  
+  public void setPWM(Integer pinAddress, Integer pulseWidthOn, Integer pulseWidthOff) {
+    setPWM(pinAddress +"", pulseWidthOn, pulseWidthOff);
+  }
 
   /*
    * Set the PWM pulsewidth
    * 
    */
-  public void setPWM(Integer pin, Integer pulseWidthOn, Integer pulseWidthOff) {
+  public void setPWM(String pinLabel, Integer pulseWidthOn, Integer pulseWidthOff) {
+    // TODO - handle pin label mappings if necessary
+    int pin = getAddress(pinLabel);
 
     byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
         (byte) (pulseWidthOff >> 8) };
     log.debug("Writing pin {}, pulesWidthOn {}, pulseWidthOff {}", pin, pulseWidthOn, pulseWidthOff);
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
+  
+  public void setPWMFreq(Integer pin, Integer hz) {
+    setPWMFreq(pin + "", hz);
+  }
 
   /*
    * Set the PWM frequency i.e. the frequency between positive pulses.
    * 
    */
-  public void setPWMFreq(int pin, Integer hz) { // Analog servos run at ~60 Hz
+  public void setPWMFreq(String pin, Integer hz) { // Analog servos run at ~60 Hz
 
     float prescale_value;
 
@@ -387,8 +410,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     log.info("Writing shutdown command to {}", this.getName());
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
+  
+  void setServo(int pin, Integer pulseWidthOff) {
+    setServo(pin + "", pulseWidthOff);
+  }
 
-  void setServo(Integer pin, Integer pulseWidthOff) {
+  void setServo(String pin, Integer pulseWidthOff) {
     // since pulseWidthOff can be larger than > 256 it needs to be
     // sent as 2 bytes
     /*
@@ -430,7 +457,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       // Move at max speed
       if (servoData.velocity == -1) {
         log.debug("Ada move at max speed");
-        servoData.currentOutput = servo.getCurrentPosOutput();
+        servoData.currentOutput = servo.getTargetOutput();
         servoData.targetOutput = servo.getTargetOutput();
         log.debug("servoWrite {} deviceAddress {} targetOutput {}", servo.getName(), deviceAddress, servo.getTargetOutput());
         int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
@@ -455,7 +482,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       setPWMFreq(servoData.pin, defaultPwmFreq);
     }
 
-    int pin = servo.getPin();
+    int pin = getAddress(servo.getPin());
     // 1000 ms => 150, 2000 ms => 600
     int pulseWidthOff = (int) (uS * 0.45) - 300;
     // since pulseWidthOff can be larger than > 256 it needs to be
@@ -585,7 +612,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-  public void setPinValue(int pin, double powerOutput) {
+  public void setPinValue(String pinLabel, double powerOutput) {
+    int pin = getAddress(pinLabel);
     log.info("Adafruit16C setPinValue, pin = {}, powerOutput = {}", pin, powerOutput);
     if (powerOutput < 0) {
       log.error("Adafruit16CServoDriver setPinValue. Value below zero ({}). Defaulting to 0.", powerOutput);
@@ -648,7 +676,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   @Override
   public void servoSetVelocity(ServoControl servo) {
     ServoData servoData = servoMap.get(servo.getName());
-    servoData.velocity = servo.getVelocity();
+    servoData.velocity = servo.getSpeed();
   }
 
   @Override
@@ -718,7 +746,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   // This section contains all the old depreciated methods
-
+/*
   @Deprecated // use attach(ServoControl servo)
   void servoAttach(ServoControl device, Object... conf) {
     ServoControl servo = (ServoControl) device;
@@ -731,6 +759,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     servoMap.put(servoName, servoData);
     invoke("publishAttachedDevice", servoName);
   }
+  */
 
   @Deprecated // use attach(String controllerName, String deviceBus, String
   // deviceAddress)
@@ -825,8 +854,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     ServoData servoData = new ServoData();
     servoData.pin = servo.getPin();
     servoData.targetOutput = servo.getTargetOutput();
-    servoData.currentOutput = servo.getCurrentPosOutput();
-    servoData.velocity = servo.getVelocity();
+    servoData.currentOutput = servo.getTargetOutput();
+    servoData.velocity = servo.getSpeed();
     servoData.isEnergized = true;
     servoData.servo = servo;
     servoMap.put(servo.getName(), servoData);

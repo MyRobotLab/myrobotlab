@@ -45,7 +45,7 @@ public class TimeEncoder extends Service implements EncoderController {
   }
 
   @Override // from EncoderController
-  public EncoderData publishEncoderPosition(EncoderData data) {
+  public EncoderData publishEncoderData(EncoderData data) {
     // TODO Auto-generated method stub
     return null;
   }

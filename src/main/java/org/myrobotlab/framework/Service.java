@@ -857,6 +857,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void addListener(MRLListener listener) {
     addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
   }
+  
+  public void addListener(String topicMethod, String callbackName) {
+    addListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
+  }
 
   /**
    * adds a MRL message listener to this service this is the result of a
@@ -1434,9 +1438,9 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // if so we need to search
 
       // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
-      if (method.equals("attach")) {
-        log.info("here");
-      }
+      // if (method.equals("moveTo")) {
+        // log.info("here");
+      //}
 
       // SECURITY - ??? can't be implemented here - need a full message
       meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
@@ -2049,12 +2053,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   // -------------- Messaging Begins -----------------------
   public void subscribe(NameProvider topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
   }
 
   public void subscribe(String topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getName(), callbackMethod);
   }
 
@@ -2078,12 +2082,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public void unsubscribe(NameProvider topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
   }
 
   public void unsubscribe(String topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName, topicMethod, getName(), callbackMethod);
   }
 

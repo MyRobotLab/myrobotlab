@@ -8,11 +8,11 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.InMoov;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.test.AbstractTest;
 
 // Grr.. TODO: too hard a test for our weak jenkins oven in the cloud :(
@@ -21,8 +21,8 @@ public class InMoovScriptTest extends AbstractTest {
   private static final String V_PORT_1 = "COM99";
   private static final String V_PORT_2 = "COM100";
 
-  public Arduino ard1;
-  public Arduino ard2;
+  public PinArrayControl ard1;
+  public PinArrayControl ard2;
 
   private String scriptRoot = "src/test/resources/InMoov";
 

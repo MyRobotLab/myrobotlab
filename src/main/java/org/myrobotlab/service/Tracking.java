@@ -282,7 +282,7 @@ public class Tracking extends Service {
     for (TrackingServoData sc : servoControls.values()) {
       if (sc.servoControl.isAttached()) {
         // avoid dangerous moves
-        double velocity = sc.servoControl.getVelocity();
+        double velocity = sc.servoControl.getSpeed();
         sc.servoControl.setVelocity(20.0);
         sc.servoControl.moveToBlocking(sc.servoControl.getRest());
         sc.servoControl.setVelocity(velocity);
@@ -345,9 +345,9 @@ public class Tracking extends Service {
             TrackingServoData x = servoControls.get("x");
             TrackingServoData y = servoControls.get("y");
             double xpos = x.servoControl.getPos();
-            if (xpos + x.scanStep >= x.servoControl.getMaxInput() && x.scanStep > 0 || xpos + x.scanStep <= x.servoControl.getMinInput() && x.scanStep < 0) {
+            if (xpos + x.scanStep >= x.servoControl.getMax() && x.scanStep > 0 || xpos + x.scanStep <= x.servoControl.getMin() && x.scanStep < 0) {
               x.scanStep *= -1;
-              double newY = y.servoControl.getMinInput() + (Math.random() * (y.servoControl.getMaxInput() - y.servoControl.getMinInput()));
+              double newY = y.servoControl.getMin() + (Math.random() * (y.servoControl.getMax() - y.servoControl.getMin()));
               y.servoControl.moveTo(newY);
             }
             x.servoControl.moveTo(xpos + x.scanStep);
@@ -520,10 +520,10 @@ public class Tracking extends Service {
     log.info("Connect 2 servos for head tracking!... aye aye captain.  Also.. an open cv instance.");
     attach(opencv);
     attach(x, y);
-    // don't understand this, it should be getMinInput and getMaxInput, no ? but
+    // don't understand this, it should be getMin and getMax, no ? but
     // seem worky..
-    pid.setOutputRange("x", -x.getMaxInput(), x.getMaxInput());
-    pid.setOutputRange("y", -y.getMaxInput(), y.getMaxInput());
+    pid.setOutputRange("x", -x.getMax(), x.getMax());
+    pid.setOutputRange("y", -y.getMax(), y.getMax());
     // target the center !
     pid.setSetpoint("x", 0.5);
     pid.setSetpoint("y", 0.5);

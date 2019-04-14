@@ -90,8 +90,25 @@ public class AbstractEncoder extends Service implements EncoderControl {
   }
 
   @Override
-  public void setPin(int address) {
+  public void setPin(Integer address) {
     this.pin = String.format("%d", address);
   }
 
+  @Override
+  public void disable() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void enable() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public Boolean isEnabled() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

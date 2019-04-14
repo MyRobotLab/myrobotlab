@@ -10,6 +10,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ import org.slf4j.Logger;
 @Ignore
 public class UltrasonicSensorTest extends AbstractTest {
 
-  static Arduino arduino = null;
+  static PinArrayControl arduino = null;
   static TestCatcher catcher = null;
 
   // VirtualArduino setup

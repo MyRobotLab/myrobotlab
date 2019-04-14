@@ -171,7 +171,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     // The total number of milliseconds from where it currently is to a new
     // position
 
-    double velocity = servo.getVelocity();
+    double velocity = servo.getSpeed();
     if (velocity > 0) {
       // sb.append("T").append(velocity * 10); // T is us per second
       sb.append("T").append(velocity * 100);
@@ -188,7 +188,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     StringBuilder sb = new StringBuilder();
     sb.append("#").append(servo.getPin());
     sb.append("P").append(uS);
-    double velocity = servo.getVelocity();
+    double velocity = servo.getSpeed();
     if (velocity > 0) {
       // sb.append("T").append(velocity * 10); // T is us per second
       sb.append("T").append(velocity * 100);

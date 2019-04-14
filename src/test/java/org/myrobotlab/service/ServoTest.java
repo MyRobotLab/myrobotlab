@@ -279,12 +279,12 @@ public class ServoTest extends AbstractTest {
   @Test 
   public void testDefaultEventsEnabled() {
     
-    Servo.eventsEnabledDefault(true);
+    // Servo.eventsEnabledDefault(true);
     Servo s1 = (Servo)Runtime.start("s1", "Servo");
     
     assertTrue("problem setting default events to true", s1.isEventsEnabled());
     
-    Servo.eventsEnabledDefault(false);
+    // Servo.eventsEnabledDefault(false);
     Servo s2 = (Servo)Runtime.start("s2", "Servo");    
     assertTrue("problem setting default events to false", s2.isEventsEnabled());
     

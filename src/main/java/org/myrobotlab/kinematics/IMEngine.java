@@ -583,8 +583,8 @@ public class IMEngine extends Thread implements Genetic {
     for (DHLink l : arm.getLinks()) {
       if (l.getName().equals(data.name)) {
         l.addPositionValue(data.pos);
-        l.setState(data.state);
-        l.setVelocity(data.velocity);
+        // l.setState(data.state);
+        l.setVelocity(data.speed);
         l.setTargetPos(data.targetPos);
         l.setCurrentPos(data.pos);
       }

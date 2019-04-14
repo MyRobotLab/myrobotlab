@@ -161,28 +161,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     broadcastState();
   }
 
-  // FIXME - add velocity? acceleration?
-  @Override
-  public void moveTo(double positionInput, Double powerInput) {
-    this.powerInput = powerInput;
-
-    if (powerInput != null) {
-      this.powerInput = powerInput;
-    }
-
-    if (controller != null) {
-      controller.motorMoveTo(this);
-      broadcastState();
-    } else {
-      error(String.format("%s's controller is not set", getName()));
-    }
-  }
-
-  @Override
-  public void moveTo(double newPos) {
-    moveTo(newPos, null);
-  }
-
   @Override
   public void setInverted(boolean invert) {
     mapper.setInverted(invert);

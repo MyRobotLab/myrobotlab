@@ -171,7 +171,7 @@ public abstract class ServiceGui implements WindowListener {
   }
 
   public void subscribe(String method) {
-    subscribe(method, CodecUtils.getCallBackName(method));
+    subscribe(method, CodecUtils.getCallbackTopicName(method));
   }
 
   public void subscribe(String method, String callback) {
@@ -190,7 +190,7 @@ public abstract class ServiceGui implements WindowListener {
   }
 
   public void unsubscribe(String inOutMethod) {
-    unsubscribe(inOutMethod, CodecUtils.getCallBackName(inOutMethod));
+    unsubscribe(inOutMethod, CodecUtils.getCallbackTopicName(inOutMethod));
   }
 
   public void unsubscribe(String inMethod, String outMethod) {

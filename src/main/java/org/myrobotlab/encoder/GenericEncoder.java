@@ -10,19 +10,22 @@ import org.myrobotlab.service.interfaces.EncoderController;
 import org.myrobotlab.service.interfaces.EncoderListener;
 
 public class GenericEncoder implements EncoderControl {
-  
+
+  String name;
+  String pin;
+  Boolean enabled = true;
   transient EncoderController controller;
   transient Set<EncoderListener> listeners = new HashSet<>();
-  String pin;
 
   @Override
   public void attach(Attachable attachable) throws Exception {
     if (EncoderController.class.isAssignableFrom(attachable.getClass())) {
-      controller = (EncoderController)controller;
+      controller = (EncoderController) controller;
+      name = String.format("%s.encoder", controller.getName());
       controller.attach(this);
     }
     if (EncoderListener.class.isAssignableFrom(attachable.getClass())) {
-      EncoderListener listener = (EncoderListener)attachable;
+      EncoderListener listener = (EncoderListener) attachable;
       listeners.add(listener);
       listener.attach(this);
     }
@@ -43,7 +46,7 @@ public class GenericEncoder implements EncoderControl {
       controller.detach(this);
     }
     if (EncoderListener.class.isAssignableFrom(attachable.getClass())) {
-      EncoderListener listener = (EncoderListener)attachable;
+      EncoderListener listener = (EncoderListener) attachable;
       listeners.remove(listener);
       listener.detach(this);
     }
@@ -56,7 +59,7 @@ public class GenericEncoder implements EncoderControl {
 
   @Override
   public void detach() {
-      detach(this);      
+    detach(this);
   }
 
   @Override
@@ -80,8 +83,8 @@ public class GenericEncoder implements EncoderControl {
       return controller == attachable;
     }
     if (EncoderListener.class.isAssignableFrom(attachable.getClass())) {
-      EncoderListener listener = (EncoderListener)attachable;
-      return listeners.contains(listener);      
+      EncoderListener listener = (EncoderListener) attachable;
+      return listeners.contains(listener);
     }
     return false;
   }
@@ -121,13 +124,30 @@ public class GenericEncoder implements EncoderControl {
   }
 
   @Override
-  public void setPin(int address) {
-    this.pin = address + "";
+  public void setPin(Integer address) {
+    if (address != null) {
+      this.pin = address + "";
+    }
   }
 
   @Override
   public String getPin() {
     return pin;
+  }
+
+  @Override
+  public void enable() {
+    enabled = true;
+  }
+
+  @Override
+  public void disable() {
+    enabled = false;    
+  }
+
+  @Override
+  public Boolean isEnabled() {
+    return enabled;
   }
 
 }

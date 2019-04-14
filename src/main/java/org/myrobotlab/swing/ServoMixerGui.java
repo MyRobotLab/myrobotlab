@@ -64,7 +64,7 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       // TODO: make this lable render vertically
       JideLabel servoLabel = new JideLabel(sc.getName());
       servoLabel.setOrientation(JideLabel.VERTICAL);
-      JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, (int) (sc.getPos()));
+      JSlider servoSlider = new JSlider(JSlider.VERTICAL, 0, 180, sc.getPos().intValue());
       servoSlider.setName(sc.getName());
       servoSlider.addChangeListener(this);
       servoMiniControl.add(servoSlider, BorderLayout.PAGE_START);

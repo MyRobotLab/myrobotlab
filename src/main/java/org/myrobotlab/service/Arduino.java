@@ -65,8 +65,8 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
-public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController,
-    NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher, EncoderController {
+public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
+    UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher, EncoderController {
 
   public static class I2CDeviceMap {
     public String busAddress;
@@ -154,8 +154,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   BoardInfo boardInfo = new BoardInfo();
 
   boolean boardInfoEnabled = true;
-  
-  private long boardInfoRequestTs;  
+
+  private long boardInfoRequestTs;
 
   int byteCount;
 
@@ -293,7 +293,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // encoder.attach(this, pin);
   }
 
-
   @Override
   public void attach(ServoControl servo, int pin) throws Exception {
     servo.setPin(pin);
@@ -337,7 +336,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * Attach an encoder to the arduino
    * 
-   * @param encoder - the encoder control to attach
+   * @param encoder
+   *          - the encoder control to attach
    */
   public void attachEncoderControl(EncoderControl encoder) {
     Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
@@ -415,11 +415,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (motor.getClass().equals(Motor.class)) {
       motorType = MOTOR_TYPE_SIMPLE;
       Motor m = (Motor) motor;
-      pins = new int[] { m.getPwrPin(), m.getDirPin() };
+      pins = new int[] { getAddress(m.getPwrPin()), getAddress(m.getDirPin()) };
     } else if (motor.getClass().equals(MotorDualPwm.class)) {
       motorType = MOTOR_TYPE_DUAL_PWM;
       MotorDualPwm m = (MotorDualPwm) motor;
-      pins = new int[] { m.getLeftPwmPin(), m.getRightPwmPin() };
+      pins = new int[] { getAddress(m.getLeftPwmPin()), getAddress(m.getRightPwmPin()) };
       // } else if (motor.getClass().equals(MotorStepper)){ // FIXME implement
 
     } else {
@@ -447,10 +447,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return; // already attached
     }
     // query configuration out
-    int pin = servo.getPin();
+    int pin = getAddress(servo.getPin());
     // targetOutput is ALWAYS ALWAYS degrees
     double targetOutput = servo.getTargetOutput();
-    double velocity = servo.getVelocity();
+    double velocity = servo.getSpeed();
 
     // this saves original "attach" configuration - and maintains internal
     // data
@@ -540,14 +540,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void connect(String port, int rate) throws Exception {
     connect(port, rate, 8, 1, 0);
   }
-  
+
   public void setVirtual(boolean b) {
     if (b) {
       virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
     }
     isVirtual = b;
   }
-  
+
   VirtualArduino getVirtual() {
     return virtual;
   }
@@ -564,7 +564,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       if (isVirtual()) {
-         virtual.connect(port);
+        virtual.connect(port);
       }
       // FIXME - GroG asks, who put the try here - shouldn't it throw if
       // we
@@ -687,7 +687,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * silly Arduino implementation - but keeping it since its familiar 
+   * silly Arduino implementation - but keeping it since its familiar
    * digitalWrite/pin/value
    */
   public void digitalWrite(int address, int value) {
@@ -700,8 +700,21 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     digitalWrite(pinDef.getAddress(), value);
   }
 
+  @Override
+  public Integer getAddress(String pin) {
+    PinDefinition pinDef = getPin(pin);
+    if (pinDef != null) {
+      return pinDef.getAddress();
+    }
+    try {
+      return Integer.parseInt(pin);
+    } catch (Exception e) {
+    }
+    return null;
+  }
+
   /**
-   *  disablePin/address
+   * disablePin/address
    */
   @Override
   public void disablePin(int address) {
@@ -771,8 +784,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * start polling reads of selected pin 
-   * enablePin/address/type/b16 rate
+   * start polling reads of selected pin enablePin/address/type/b16 rate
    */
   public void enablePin(String pin, int rate) {
     if (!isConnected()) {
@@ -801,14 +813,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return deviceList.size();
   }
 
-
   /**
    * Heart-beat method on time, driven by the Arduino service to get information
    * from the board its currently connected. This is the "last" boardInfo
    * returned from the task inserted with addTask("getBoardInfo", 1000, 0,
-   * "sendBoardInfoRequest"); 
+   * "sendBoardInfoRequest");
    * 
-   *  getBoardInfo
+   * getBoardInfo
    */
   public BoardInfo getBoardInfo() {
     // msg.getBoardInfo(); do not do this -
@@ -937,11 +948,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   * FIXME - have local
-   * This creates the pin definitions based on boardType Not sure how many pin
-   * definition sets there are. Currently there are only 2 supported - Mega-Like
-   * 70 pins &amp; Uno-Like 20 pins (14 digital 6 analog) FIXME - sync with
-   * VirtualArduino FIXME - String boardType
+   * FIXME - have local This creates the pin definitions based on boardType Not
+   * sure how many pin definition sets there are. Currently there are only 2
+   * supported - Mega-Like 70 pins &amp; Uno-Like 20 pins (14 digital 6 analog)
+   * FIXME - sync with VirtualArduino FIXME - String boardType
    */
   @Override // override for arduino to get pin list
   public List<PinDefinition> getPinList() {
@@ -1253,19 +1263,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     if (Motor.class == type) {
       Motor config = (Motor) mc;
-      msg.digitalWrite(config.getDirPin(), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
-      msg.analogWrite(config.getPwrPin(), (int) Math.abs(powerOutput));
+      msg.digitalWrite(getAddress(config.getDirPin()), (powerOutput < 0) ? MOTOR_BACKWARD : MOTOR_FORWARD);
+      msg.analogWrite(getAddress(config.getPwrPin()), (int) Math.abs(powerOutput));
     } else if (MotorDualPwm.class == type) {
       MotorDualPwm config = (MotorDualPwm) mc;
       if (powerOutput < 0) {
-        msg.analogWrite(config.getLeftPwmPin(), 0);
-        msg.analogWrite(config.getRightPwmPin(), (int) Math.abs(powerOutput));
+        msg.analogWrite(getAddress(config.getLeftPwmPin()), 0);
+        msg.analogWrite(getAddress(config.getRightPwmPin()), (int) Math.abs(powerOutput));
       } else if (powerOutput > 0) {
-        msg.analogWrite(config.getRightPwmPin(), 0);
-        msg.analogWrite(config.getLeftPwmPin(), (int) Math.abs(powerOutput));
+        msg.analogWrite(getAddress(config.getRightPwmPin()), 0);
+        msg.analogWrite(getAddress(config.getLeftPwmPin()), (int) Math.abs(powerOutput));
       } else {
-        msg.analogWrite(config.getLeftPwmPin(), 0);
-        msg.analogWrite(config.getRightPwmPin(), 0);
+        msg.analogWrite(getAddress(config.getLeftPwmPin()), 0);
+        msg.analogWrite(getAddress(config.getRightPwmPin()), 0);
       }
     } else {
       error("motorMove for motor type %s not supported", type);
@@ -1326,11 +1336,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     if (Motor.class == type) {
       Motor config = (Motor) mc;
-      msg.analogWrite(config.getPwrPin(), 0);
+      msg.analogWrite(getAddress(config.getPwrPin()), 0);
     } else if (MotorDualPwm.class == type) {
       MotorDualPwm config = (MotorDualPwm) mc;
-      msg.analogWrite(config.getLeftPwmPin(), 0);
-      msg.analogWrite(config.getRightPwmPin(), 0);
+      msg.analogWrite(getAddress(config.getLeftPwmPin()), 0);
+      msg.analogWrite(getAddress(config.getRightPwmPin()), 0);
     }
   }
 
@@ -1580,7 +1590,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return portName;
   }
 
-  //  < publishCustomMsg/[] msg
+  // < publishCustomMsg/[] msg
   public int[] publishCustomMsg(int[] msg/* [] */) {
     return msg;
   }
@@ -1597,7 +1607,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
-   *  publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
+   * publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
    * 
    * @param myFloat
    * @param myByte
@@ -1608,19 +1618,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public EncoderData publishEncoderPosition(EncoderData data) {
+  public EncoderData publishEncoderData(EncoderData data) {
     return data;
   }
 
   // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
-    EncoderControl ec = (EncoderControl)getDevice(deviceId);
+    EncoderControl ec = (EncoderControl) getDevice(deviceId);
     EncoderData data = new EncoderData(ec.getName(), ec.getPin(), position);
     return data;
   }
 
   /**
-   * return heartbeat - prevents resetting 
+   * return heartbeat - prevents resetting
    */
   // < publishHeartbeat
   public void publishHeartbeat() {
@@ -1640,19 +1650,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * @param data
    *          - data to publish from I2c
    */
-  //  < publishI2cData/deviceId/[] data
+  // < publishI2cData/deviceId/[] data
   public void publishI2cData(Integer deviceId, int[] data) {
     log.info("publishI2cData");
     i2cReturnData(data);
   }
 
   /**
-   * error from mrlcom in string form 
+   * error from mrlcom in string form
    * 
    * @param errorMsg
    * @return
    */
-  //  < publishMRLCommError/str errorMsg
+  // < publishMRLCommError/str errorMsg
   public String publishMRLCommError(String errorMsg/* str */) {
     log.error(errorMsg);
     return errorMsg;
@@ -1791,7 +1801,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public void servoEnable(ServoControl servo) {
     int deviceId = getDeviceId(servo);
-    msg.servoAttachPin(deviceId, servo.getPin());
+    msg.servoAttachPin(deviceId, getAddress(servo.getPin()));
   }
 
   /**
@@ -1813,14 +1823,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void servoSetAcceleration(ServoControl servo) {
-    msg.servoSetAcceleration(getDeviceId(servo), (int) servo.getAcceleration());
+    if (servo.getAcceleration() != null) {
+      msg.servoSetAcceleration(getDeviceId(servo), servo.getAcceleration().intValue());
+    }
   }
 
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(ServoControl servo) {
-    log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), (int) servo.getVelocity());
-    msg.servoSetVelocity(getDeviceId(servo), (int) servo.getVelocity());
+    log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), (int) servo.getSpeed().intValue());
+    msg.servoSetVelocity(getDeviceId(servo), (int) servo.getSpeed().intValue());
   }
 
   // FIXME - this needs fixing .. should be microseconds - but interface still
@@ -1830,8 +1842,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoSweepStart/deviceId/min/max/step
   public void servoSweepStart(ServoControl servo) {
     int deviceId = getDeviceId(servo);
-    log.info("servoSweep {} id {} min {} max {} step {}", servo.getName(), deviceId, servo.getMin(), servo.getMax(), servo.getVelocity());
-    msg.servoSweepStart(deviceId, (int) servo.getMin(), (int) servo.getMax(), (int) servo.getVelocity());
+    log.info("servoSweep {} id {} min {} max {} step {}", servo.getName(), deviceId, servo.getMin(), servo.getMax(), servo.getSpeed().intValue());
+    msg.servoSweepStart(deviceId, servo.getMin().intValue(), servo.getMax().intValue(), servo.getSpeed().intValue());
   }
 
   @Override
@@ -2112,7 +2124,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // cache value
     pinDef.setValue(value);
   }
-  
 
   public static void main(String[] args) {
     try {
@@ -2125,37 +2136,48 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
 
-      /*
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.setBoardMega();
       mega.connect("COM7");
-      */
 
-      Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
-      uno.connect("COM6");
-      
+      /*
+       * Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
+       * uno.connect("COM6");
+       */
+
       // log.info("port names {}", mega.getPortNames());
+
+      HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
+      // servo.setPin(8);
+      servo.attach(mega, 8);
+
+      servo.moveTo(3);
+      servo.moveTo(130);
+      servo.moveTo(0);
+
+      // minmax checking
+
+      servo.invoke("moveTo", 3);
 
       if (isDone) {
         return;
       }
 
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-      servo.setPin(8);
       /*
-      mega.attach(servo);
-
-      servo.moveTo(3);
-
-      servo.moveTo(30);
-
-      mega.enablePin("A4");
-
-      // arduino.setBoardMega();
-
-      Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver) Runtime.start("adafruit", "Adafruit16CServoDriver");
-      adafruit.attach(mega);
-      mega.attach(adafruit);
-      */
+       * mega.attach(servo);
+       * 
+       * servo.moveTo(3);
+       * 
+       * servo.moveTo(30);
+       * 
+       * mega.enablePin("A4");
+       * 
+       * // arduino.setBoardMega();
+       * 
+       * Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver)
+       * Runtime.start("adafruit", "Adafruit16CServoDriver");
+       * adafruit.attach(mega); mega.attach(adafruit);
+       */
 
       // servo.attach(arduino, 8, 90);
 

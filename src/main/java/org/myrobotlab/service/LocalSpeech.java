@@ -184,6 +184,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     Runtime.start("gui", "SwingGui");
 
     LocalSpeech speech = (LocalSpeech) Runtime.start("speech", "LocalSpeech");
+    speech.speakBlocking("hello my name is sam, sam i am");
     // speech.parseEffects("#OINK##OINK# hey I thought #DOH# that was funny
     // #LAUGH01_F# very funny");
     // speech.getVoices();

@@ -398,7 +398,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     assertTrue(arduino01.getAttached().contains(servo.getName()));
 
     // servo should have the correct pin
-    assertTrue(servoPin01 == servo.getPin());
+    assertTrue(servoPin01 + "" == servo.getPin());
 
     // get its device id
     int deviceId = arduino01.getDeviceId(servo.getName());
@@ -418,7 +418,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     if (arduino01.isVirtual()) {
       sleep(100);
       assertTrue(mrlServo.pin == servoPin01 + 1);
-      assertTrue(mrlServo.pin == servo.getPin());
+      assertTrue(mrlServo.pin + ""== servo.getPin());
     }
 
     double velocity = 50;
