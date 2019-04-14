@@ -39,6 +39,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.HttpData;
+import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
@@ -49,7 +51,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class TestCatcher extends Service implements SerialDataListener {
+public class TestCatcher extends Service implements SerialDataListener, HttpDataListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -310,6 +312,12 @@ public class TestCatcher extends Service implements SerialDataListener {
     meta.addCategory("testing", "framework");
 
     return meta;
+  }
+
+  @Override
+  public void onHttpData(HttpData data) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

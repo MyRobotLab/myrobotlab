@@ -532,11 +532,11 @@ public class InMoovHand extends Service implements LeapDataListener {
     if (leap == null) {
       leap = (LeapMotion) startPeer("leap");
     }
-    this.index.map(90, 0, this.index.getMin(), this.index.getMax());
-    this.thumb.map(90, 50, this.thumb.getMin(), this.thumb.getMax());
-    this.majeure.map(90, 0, this.majeure.getMin(), this.majeure.getMax());
-    this.ringFinger.map(90, 0, this.ringFinger.getMin(), this.ringFinger.getMax());
-    this.pinky.map(90, 0, this.pinky.getMin(), this.pinky.getMax());
+    this.index.map(90.0, 0.0, this.index.getMin(), this.index.getMax());
+    this.thumb.map(90.0, 50.0, this.thumb.getMin(), this.thumb.getMax());
+    this.majeure.map(90.0, 0.0, this.majeure.getMin(), this.majeure.getMax());
+    this.ringFinger.map(90.0, 0.0, this.ringFinger.getMin(), this.ringFinger.getMax());
+    this.pinky.map(90.0, 0.0, this.pinky.getMin(), this.pinky.getMax());
     leap.addLeapDataListener(this);
     leap.startTracking();
     return;

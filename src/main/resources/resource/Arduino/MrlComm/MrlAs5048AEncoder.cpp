@@ -65,7 +65,7 @@ void MrlAs5048AEncoder::update() {
     ABSposition_last = ABSposition;    //set last position to current position
     // deg = ABSposition;
     // float deg = ABSposition * 0.02197265625;    // 360/16384  degrees to 12 bit resolution
-    this->publishEncoderPosition(ABSposition);
+    this->publishEncoderData(ABSposition);
   }
 }
 
@@ -130,7 +130,7 @@ byte MrlAs5048AEncoder::spiCalcEvenParity(word value) {
 }
 
 
-void MrlAs5048AEncoder::publishEncoderPosition(float deg) {
+void MrlAs5048AEncoder::publishEncoderData(float deg) {
   // publish an mrl message with the current encoder position.
-  msg->publishEncoderPosition(id, deg);
+  msg->publishEncoderData(id, deg);
 }

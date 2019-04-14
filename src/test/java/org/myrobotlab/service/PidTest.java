@@ -4,17 +4,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.myrobotlab.framework.Service;
 
-public class PidTest {
+public class PidTest extends AbstractServiceTest {
 
   @Before
   public void setUp() throws Exception {
     // LoggingFactory.init("WARN");
   }
 
-  @Test
-  public void testCompute() {
+  @Override
+  public Service createService() {
+    return (Service) Runtime.start("pid", "Pid");
+  }
+
+  @Override
+  public void testService() throws Exception {
     Pid pid = (Pid) Runtime.start("pid", "Pid");
 
     // pid.init("x");
@@ -50,7 +55,7 @@ public class PidTest {
     } else {
       assertTrue("No calculation done", calculated);
     }
-
+    
   }
 
 }

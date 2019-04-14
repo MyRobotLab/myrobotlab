@@ -581,7 +581,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
         Status error = Status.error(e);
-        Message msg = Message.createMessage(this, getName(), CodecUtils.getCallBackName("getStatus"), error);
+        Message msg = Message.createMessage(this, getName(), CodecUtils.getCallbackTopicName("getStatus"), error);
         if (ApiFactory.API_TYPE_SERVICE.equals(apiKey)) {
           // for the purpose of only returning the data
           // e.g. http://api/services/runtime/getUptime -> return the uptime

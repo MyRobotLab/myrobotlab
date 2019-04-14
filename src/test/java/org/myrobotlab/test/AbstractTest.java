@@ -4,8 +4,11 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -14,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -36,8 +40,12 @@ public class AbstractTest {
   private static boolean releaseRemainingServices = true;
 
   private static boolean releaseRemainingThreads = false;
+  
+  protected transient Queue<Object> queue = new LinkedBlockingQueue<>();
 
   static transient Set<Thread> threadSetStart = null;
+  
+  protected Set<Attachable> attached = new HashSet<>();
 
   protected boolean printMethods = true;
 
@@ -52,7 +60,7 @@ public class AbstractTest {
     return simpleName;
   }
 
-  protected String getName() {
+  public String getName() {
     return testName.getMethodName();
   }
 
@@ -223,5 +231,56 @@ public class AbstractTest {
   public void testFunction() {
     log.info("tested testFunction");
   }
+
+  /*
+  @Override
+  public void attach(Attachable service) throws Exception {
+    attached.add(service);
+  }
+
+  @Override
+  public void attach(String serviceName) throws Exception {
+    attach(Runtime.getService(serviceName));
+  }
+
+  @Override
+  public void detach(Attachable service) {
+    attached.remove(service);
+  }
+
+  @Override
+  public void detach(String serviceName) {
+    detach(Runtime.getService(serviceName));
+  }
+
+  @Override
+  public void detach() {
+    attached.clear();
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    Set<String> ret = new HashSet<>();
+    for (Attachable a : attached) {
+      ret.add(a.getName());
+    }
+    return ret;
+  }
+
+  @Override
+  public boolean isAttached(Attachable instance) {
+    return attached.contains(instance);
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return isAttached(Runtime.getService(name));
+  }
+
+  @Override
+  public boolean isLocal() {
+    return true;
+  }
+  */
 
 }

@@ -1,8 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.framework.interfaces.NameProvider;
-
-public interface RelativePositionControl extends NameProvider {
+public interface RelativePositionControl {
 
   /**
    * Move is the most common motor command. The command accepts a parameter of
@@ -15,8 +13,5 @@ public interface RelativePositionControl extends NameProvider {
    *          - new power level
    */
   void move(double power);
-
-  // FIXME - in another interface Remotable ?
-  boolean isLocal();
 
 }

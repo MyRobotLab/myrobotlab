@@ -10,10 +10,22 @@ public interface AbsolutePositionControl {
    *          the new position to move to.
    * 
    */
-  public void moveTo(double newPos);
+  public void moveTo(Integer newPos);
   
-  public void moveToBlocking(double newPos);
+  public void moveTo(Float newPos);
+
+  public void moveTo(Double newPos);
   
-  public void moveToBlocking(double newPos, long timeoutMs);
+  public void moveToBlocking(Integer newPos);
+  
+  public void moveToBlocking(Float newPos);
+
+  public void moveToBlocking(Double newPos);
+  
+  public void moveToBlocking(Integer newPos, Long timeoutMs);
+  
+  public void moveToBlocking(Float newPos, Long timeoutMs);
+  
+  public void moveToBlocking(Double newPos, Long timeoutMs);
 
 }

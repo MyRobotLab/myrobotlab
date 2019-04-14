@@ -26,7 +26,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
 
   transient public final static Logger log = LoggerFactory.getLogger(NaturalReaderSpeech.class);
 
-  transient HttpClient httpClient = null;
+  transient HttpClient http = null;
 
   private int rate = 100;
 
@@ -45,8 +45,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
 
   public void startService() {
     super.startService();
-    if (httpClient == null) {
-      httpClient = (HttpClient) startPeer("httpClient");
+    if (http == null) {
+      http = (HttpClient) startPeer("http");
     }
   }
 
@@ -56,7 +56,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     meta.setCloudService(true);
     meta.addCategory("speech");
     meta.setSponsor("kwatters");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
+    meta.addPeer("http", "HttpClient", "http");
     meta.addCategory("speech", "sound");
     // moz4r : set to hidden / poc only, unstable ...
     meta.setAvailable(true);
@@ -71,6 +71,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     // Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
     NaturalReaderSpeech reader = (NaturalReaderSpeech) Runtime.start("speech", "NaturalReaderSpeech");
+    
+    reader.speakBlocking("hello what the heck is going on");
     // speech.setVoice("US-English_Ronald");
     // TODO: fix the volume control
     // speech.setVolume(0);
@@ -106,14 +108,24 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     Voice voice = getVoice();
 
     String encoded = URLEncoder.encode(HtmlFilter.stripHtml(toSpeak), "UTF-8");
-    String url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId=" + voice.getVoiceProvider().toString() + "&rate=" + rate + "&text=" + encoded + "&outputFormat=mp3";
+    // String url = "http://api.naturalreaders.com/v4/tts/awsspeak?voiceId=" + voice.getVoiceProvider().toString() + "&rate=" + rate + "&text=" + encoded + "&outputFormat=mp3";
 
+    // String url = "https://pw.naturalreaders.com/tts?e=user@naturalreaders.com&l=0&r=21&s=1&v=aca"        
+    String url = "https://pw.naturalreaders.com/tts?e=user@naturalreaders.com&l=0&r=21&s=1&v=aca";
+    // String url = "https://pw.naturalreaders.com/tts?e=user@naturalreaders.com&l=0&r=1&s=1&v=mac";
+    
+    // String json = "{\"t\":\""+"hello what the heck heck is going on here"+"\"}: ";
+    String json = "{\"t\":\""+"hello what the heck heck is going on here"+"\"}";
+    
     byte[] b = null;
 
     log.info("url {}", url);
     // get mp3 file & save to cache
     // cache the mp3 content
-    b = httpClient.getBytes(url);
+    b = http.postJsonToBytes(url, json);
+    String result = new String(b);
+    log.info(result);
+    b = http.getBytes(url);
     if (b == null || b.length == 0) {
       error("%s returned 0 byte file !!! - it may block you", getName());
       b = null;

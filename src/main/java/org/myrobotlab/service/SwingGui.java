@@ -393,8 +393,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
         // this is preparing our routing map for callback
         // so when we receive our callback message we know where to route it
-        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallBackName("publishStatus")), newGui);
-        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallBackName("publishState")), newGui);
+        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallbackTopicName("publishStatus")), newGui);
+        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallbackTopicName("publishState")), newGui);
 
         // send a publishState to the service
         // to initialize the ServiceGui - good for remote stuffs

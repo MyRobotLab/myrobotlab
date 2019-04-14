@@ -17,34 +17,40 @@ public class Motor extends AbstractMotor {
 
   private static final long serialVersionUID = 1L;
 
-  Integer pwrPin;
-  Integer dirPin;
+  String pwrPin;
+  String dirPin;
   Integer pwmFreq;
 
   public Motor(String n) {
     super(n);
   }
-
-  public void setPwrDirPins(int pwrPin, int dirPin) {
+  
+  public void setPwrDirPins(String pwrPin, String dirPin) {
     this.pwrPin = pwrPin;
     this.dirPin = dirPin;
     broadcastState();
   }
 
-  public Integer getPwrPin() {
+  public void setPwrDirPins(int pwrPin, int dirPin) {
+    this.pwrPin = pwrPin +"";
+    this.dirPin = dirPin + "";
+    broadcastState();
+  }
+
+  public String getPwrPin() {
     return pwrPin;
   }
 
   public void setPwrPin(Integer pwrPin) {
-    this.pwrPin = pwrPin;
+    this.pwrPin = pwrPin + "";
   }
 
-  public Integer getDirPin() {
+  public String getDirPin() {
     return dirPin;
   }
 
   public void setDirPin(Integer dirPin) {
-    this.dirPin = dirPin;
+    this.dirPin = dirPin + "";
   }
 
   public Integer getPwmFreq() {
@@ -125,17 +131,11 @@ public class Motor extends AbstractMotor {
       m1.move(1.0);
       m1.move(-1.0);
 
-      // TODO - overload with speed?
-      m1.moveTo(250);
-      m1.moveTo(700);
-      m1.moveTo(250);
-      m1.moveTo(250);
 
       arduino.enableBoardInfo(true);
       arduino.enableBoardInfo(false);
       m1.stop();
       m1.move(0.5);
-      m1.moveTo(200);
       m1.stop();
 
       // Runtime.start("webgui", "WebGui");

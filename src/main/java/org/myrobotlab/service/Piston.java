@@ -6,6 +6,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.slf4j.Logger;
 
 public class Piston extends Service {
@@ -43,7 +44,7 @@ public class Piston extends Service {
       LoggingFactory.init(Level.INFO);
 
       Piston piston = (Piston) Runtime.start("piston", "Piston");
-      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      PinArrayControl arduino = (PinArrayControl) Runtime.start("arduino", "Arduino");
       Runtime.start("gui", "SwingGui");
 
       // piston.attach()

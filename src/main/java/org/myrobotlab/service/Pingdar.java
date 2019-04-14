@@ -8,7 +8,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangingControl;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoEventListener;
+import org.myrobotlab.service.interfaces.ServoListener;
 import org.slf4j.Logger;
 
 /**
@@ -17,7 +17,7 @@ import org.slf4j.Logger;
  * module. The result is a sonar style range finding.
  *
  */
-public class Pingdar extends Service implements RangingControl, RangeListener, ServoEventListener {
+public class Pingdar extends Service implements RangingControl, RangeListener, ServoListener {
 
   public static class Point {
 
@@ -129,7 +129,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
     servo = getServo();
 
     sensor.addRangeListener(this);
-    servo.addServoEventListener(this);
+    servo.attach((ServoListener)this);
 
     // servo.setSpeed(60);
     servo.setVelocity(30.0);

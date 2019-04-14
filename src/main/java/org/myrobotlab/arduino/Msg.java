@@ -49,6 +49,7 @@ import java.util.Arrays;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
@@ -2438,7 +2439,7 @@ public class Msg {
 			virtual.connectVirtualUart(port, port + "UART");
 			*/
 			
-			Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
+			PinArrayControl arduino = (PinArrayControl)Runtime.start("arduino","Arduino");
 			Servo servo01 = (Servo)Runtime.start("servo01","Servo");
 			
 			/*
