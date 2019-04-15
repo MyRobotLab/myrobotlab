@@ -94,8 +94,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public transient static final int BOARD_TYPE_ID_PRO_MINI = 5;
   public transient static final int BOARD_TYPE_ID_UNKNOWN = 0;
   public transient static final int BOARD_TYPE_ID_UNO = 2;
-  public transient static final String BOARD_TYPE_MEGA = "mega";
 
+  public transient static final String BOARD_TYPE_MEGA = "mega.atmega2560";
   public transient static final String BOARD_TYPE_MEGA_ADK = "megaADK";
   public transient static final String BOARD_TYPE_NANO = "nano";
   public transient static final String BOARD_TYPE_PRO_MINI = "pro mini";
@@ -1567,9 +1567,22 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Integer boardType/* byte */, Integer microsPerLoop/* b16 */,
       Integer sram/* b16 */, Integer activePins, int[] deviceSummary/* [] */) {
     long now = System.currentTimeMillis();
+    
+    String boardName = getBoardType(boardType);
 
     log.debug("Version return by Arduino: {}", boardInfo.getVersion());
-    log.debug("Board type currently set: {}", boardType);
+    log.debug("Board type currently set: {} => {}", boardType, boardName);
+
+    if (!lockBoard && !boardName.equals(board)) {
+      log.warn("setting board to type {}", board);
+      this.board = boardName;
+      // we don't invoke, because
+      // it might get into a race condition
+      // in some gui
+      getPinList();
+      // invoke("getPinList");
+      broadcastState();
+    }
 
     boardInfo.setVersion(version);
     boardInfo.setMicrosPerLoop(microsPerLoop);
@@ -1923,18 +1936,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     msg.setAref(arefInt);
   }
 
-  public String setBoard(String board) {
-    log.warn("setting board to type {}", board);
-    this.board = board;
-    // we don't invoke, because
-    // it might get into a race condition
-    // in some gui
-    getPinList();
-    // invoke("getPinList");
-    broadcastState();
-    return board;
-  }
-
   public void setBoardMega() {
     setBoard(BOARD_TYPE_MEGA);
   }
@@ -2054,6 +2055,32 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     uploadSketch(arudinoPath, comPort, getBoard());
   }
 
+  public String getBoardType(int boardId) {
+    String boardName;
+    switch (boardId) {
+      case BOARD_TYPE_ID_MEGA:
+        boardName = BOARD_TYPE_MEGA;
+        break;
+      case BOARD_TYPE_ID_UNO:
+        boardName = BOARD_TYPE_UNO;
+        break;
+      case BOARD_TYPE_ID_ADK_MEGA:
+        boardName = BOARD_TYPE_MEGA_ADK;
+        break;
+      case BOARD_TYPE_ID_NANO:
+        boardName = BOARD_TYPE_NANO;
+        break;
+      case BOARD_TYPE_ID_PRO_MINI:
+        boardName = BOARD_TYPE_PRO_MINI;
+        break;
+      default:
+        // boardName = "unknown";
+        boardName = BOARD_TYPE_UNO;
+        break;
+    }
+    return boardName;
+  }
+
   public void uploadSketch(String arduinoIdePath, String port, String type) throws IOException {
     log.info("uploadSketch ({}, {}, {})", arduinoIdePath, port, type);
 
@@ -2137,7 +2164,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Runtime.start("gui", "SwingGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.setBoardMega();
+      // mega.getBoardTypes();
+      // mega.setBoardMega();
+      // mega.setBoardUno();
       mega.connect("COM7");
 
       /*

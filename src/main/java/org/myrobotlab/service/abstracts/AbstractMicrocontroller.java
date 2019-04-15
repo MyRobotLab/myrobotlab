@@ -29,6 +29,16 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    * here to Uno
    */
   protected String board;
+  
+  /**
+   * Some boards have the ability to send identification which allow identification of the board type
+   * during runtime.  Arduino has the ability to send the BOARD value which is an identifier put into the code
+   * as a define from a compiler directive.  Overall we want to default to "most common" value, allow the board to try to 
+   * set the value, or allow the user to set the value.  If the "user" sets the value, the board should accept that value
+   * and not be changed internally. So after a command to set the board exists, the board will be "locked" meaning
+   * the data will not be reset.
+   */
+  protected boolean lockBoard = false;
 
   /**
    * other services subscribed to pins
@@ -230,6 +240,11 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   @Override
   public String setBoard(String board) {
     log.debug("setting board to type {}", board);
+    // user or program has manuall set the board
+    // from this time forward - do not attempt to "auto-set"
+    lockBoard = true; 
+    
+    log.warn("setting board to type {}", board);
     this.board = board;
     // we don't invoke, because
     // it might get into a race condition
