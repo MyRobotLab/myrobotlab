@@ -830,12 +830,13 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
 
   @Override
-  public void moveToBlocking(Double pos) {
+  public Double moveToBlocking(Double pos) {
 
     targetPos = pos;
     this.moveTo(pos);
     // breakMoveToBlocking=false;
     waitTargetPos();
+    return pos; // FIXME probably incorrect
   }
 
 

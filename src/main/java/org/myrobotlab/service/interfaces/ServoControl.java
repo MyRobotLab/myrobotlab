@@ -268,9 +268,9 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    *          - position to move to
    * @return true (why?)
    */
-  void moveToBlocking(Double pos);
+  Double moveToBlocking(Double pos);
   
-  void moveToBlocking(Integer pos);
+  Double moveToBlocking(Integer pos);
 
   /**
    * control message publishing moveTo

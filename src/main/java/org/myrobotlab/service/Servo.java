@@ -583,7 +583,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void moveToBlocking(Double pos) {
+  public Double moveToBlocking(Double pos) {
     if (velocity < 0) {
       log.info("No effect on moveToBlocking if velocity == -1");
     }
@@ -594,6 +594,7 @@ public class Servo extends Service implements ServoControl {
     this.moveTo(pos);
     // breakMoveToBlocking=false;
     waitTargetPos();
+    return pos;
   }
 
   @Override
@@ -1504,27 +1505,27 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void moveToBlocking(Float newPos) {
+  public Double moveToBlocking(Float newPos) {
     // TODO Auto-generated method stub
-    
+    return null;
   }
 
   @Override
-  public void moveToBlocking(Integer newPos, Long timeoutMs) {
+  public Double moveToBlocking(Integer newPos, Long timeoutMs) {
     // TODO Auto-generated method stub
-    
+    return null;
   }
 
   @Override
-  public void moveToBlocking(Float newPos, Long timeoutMs) {
+  public Double moveToBlocking(Float newPos, Long timeoutMs) {
     // TODO Auto-generated method stub
-    
+    return null;
   }
 
   @Override
-  public void moveToBlocking(Double newPos, Long timeoutMs) {
+  public Double moveToBlocking(Double newPos, Long timeoutMs) {
     // TODO Auto-generated method stub
-    
+    return null;
   }
 
   @Override
@@ -1600,9 +1601,9 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void moveToBlocking(Integer pos) {
+  public Double moveToBlocking(Integer pos) {
     // TODO Auto-generated method stub
-    
+    return null;
   }
 
   @Override

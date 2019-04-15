@@ -16,16 +16,16 @@ public interface AbsolutePositionControl {
 
   public void moveTo(Double newPos);
   
-  public void moveToBlocking(Integer newPos);
+  public Double moveToBlocking(Integer newPos);
   
-  public void moveToBlocking(Float newPos);
+  public Double moveToBlocking(Float newPos);
 
-  public void moveToBlocking(Double newPos);
+  public Double moveToBlocking(Double newPos);
   
-  public void moveToBlocking(Integer newPos, Long timeoutMs);
+  public Double moveToBlocking(Integer newPos, Long timeoutMs);
   
-  public void moveToBlocking(Float newPos, Long timeoutMs);
+  public Double moveToBlocking(Float newPos, Long timeoutMs);
   
-  public void moveToBlocking(Double newPos, Long timeoutMs);
+  public Double moveToBlocking(Double newPos, Long timeoutMs);
 
 }
