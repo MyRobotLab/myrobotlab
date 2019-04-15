@@ -450,7 +450,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     int pin = getAddress(servo.getPin());
     // targetOutput is ALWAYS ALWAYS degrees
     double targetOutput = servo.getTargetOutput();
-    double velocity = servo.getSpeed();
+    double velocity = (servo.getSpeed() == null)?-1:servo.getSpeed();
 
     // this saves original "attach" configuration - and maintains internal
     // data
@@ -2177,6 +2177,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // log.info("port names {}", mega.getPortNames());
 
       HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
+      servo.load();
+      log.info("rest is {}", servo.getRest());
+      servo.save();
       // servo.setPin(8);
       servo.attach(mega, 8);
 
