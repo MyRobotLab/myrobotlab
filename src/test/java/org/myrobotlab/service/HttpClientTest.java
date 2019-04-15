@@ -3,96 +3,69 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
+import org.junit.Test;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.data.HttpData;
+import org.myrobotlab.test.AbstractTest;
 
-public class HttpClientTest extends
-    AbstractServiceTest /* implements HttpDataListener - not useful .. "yet" */ {
+public class HttpClientTest
+    extends AbstractTest /* implements HttpDataListener - not useful .. "yet" */ {
 
-  TestCatcher catcher;
-
-  @Before
-  public void setUp() throws Exception {
-    catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-  }
-
-  @Override
-  public Service createService() {
-    return (Service) Runtime.start("http", "HttpClient");
-  }
-
-  /**
-   * publishHttpData contains more information content type, response code,
-   * etc... need to subscribe to it manually for testing purposes
-   * 
-   */
-  /*
-   * @Override //FIXME - add blocking queue - to verify public void
-   * onHttpData(HttpData data) { log.info(data.toString()); queue.add(data); }
-   */
-
-  /**
-   * for testing purposes
-   * 
-   */
-  /*
-   * @Override //FIXME - add blocking queue - to verify public void
-   * onHttpResponse(String data) { log.info(data); queue.add(data); }
-   */
-
-  @Override
+  @Test
   public void testService() throws Exception {
-    HttpClient http = (HttpClient) Runtime.start("http", "HttpClient");
 
-    // this is how a listener might subscribe
-    // TODO - put dynamically subscribing into framework
-    // with interface inspection ??
+    if (hasInternet()) {
+      TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
+      HttpClient http = (HttpClient) Runtime.start("http", "HttpClient");
 
-    // FIXME - add make the attach !
-    http.attach(catcher);
+      // this is how a listener might subscribe
+      // TODO - put dynamically subscribing into framework
+      // with interface inspection ??
 
-    catcher.clear();
-    String data = http.get("https://postman-echo.com/get?foo1=bar1&foo2=bar2");
-    log.info(data);
-    Message msg = catcher.getMsg(1000);
-    assertNotNull("msg from get is null", msg);
-    assertTrue("didn't get HttpData", HttpData.class.equals(msg.data[0].getClass()));
-    assertTrue("response code != 200", ((HttpData) (msg.data[0])).responseCode == 200);
+      // FIXME - add make the attach !
+      http.attach(catcher);
 
-    // curl --location --request POST "https://postman-echo.com/post" --data
-    // "foo1=bar1&foo2=bar2"
-    http.postForm("https://postman-echo.com/post", "foo1", "bar1", "foo2", "bar2", "foo3", "bar with spaces");
-    log.info(data);
+      catcher.clear();
+      String data = http.get("https://postman-echo.com/get?foo1=bar1&foo2=bar2");
+      log.info(data);
+      Message msg = catcher.getMsg(1000);
+      assertNotNull("msg from get is null", msg);
+      assertTrue("didn't get HttpData", HttpData.class.equals(msg.data[0].getClass()));
+      assertTrue("response code != 200", ((HttpData) (msg.data[0])).responseCode == 200);
 
-    // TODO - getByteArray(...)
-    data = http.get("https://www.cs.tut.fi/~jkorpela/forms/testing.html");
-    log.info(data);
+      // curl --location --request POST "https://postman-echo.com/post" --data
+      // "foo1=bar1&foo2=bar2"
+      http.postForm("https://postman-echo.com/post", "foo1", "bar1", "foo2", "bar2", "foo3", "bar with spaces");
+      log.info(data);
 
-    String response = http.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
+      // TODO - getByteArray(...)
+      data = http.get("https://www.cs.tut.fi/~jkorpela/forms/testing.html");
+      log.info(data);
 
-    log.info(response);
+      String response = http.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
 
-    response = http.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
-    log.info(response);
+      log.info(response);
 
-    response = http.get("http://www.google.com/search?hl=en&q=myrobotlab&btnG=Google+Search&aq=f&oq=");
-    log.info(response);
+      response = http.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
+      log.info(response);
 
-    // <host>[:port] [passphrase]
-    // InstallCert.main(new String[] { "searx.laquadrature.net:443" });
+      response = http.get("http://www.google.com/search?hl=en&q=myrobotlab&btnG=Google+Search&aq=f&oq=");
+      log.info(response);
 
-    // http.installCert("https://searx.laquadrature.net");
-    String json = http.get("https://searx.laquadrature.net/?q=cat&format=json");
-    log.info(json);
+      // <host>[:port] [passphrase]
+      // InstallCert.main(new String[] { "searx.laquadrature.net:443" });
 
-    http.detach(catcher);
-    // FIXME test if successfully detached
-    
-    // FIXME - test false isAttached
+      // http.installCert("https://searx.laquadrature.net");
+      String json = http.get("https://searx.laquadrature.net/?q=cat&format=json");
+      log.info(json);
 
-    // FIXME - implement http.isAttached(this);
+      http.detach(catcher);
+      // FIXME test if successfully detached
+
+      // FIXME - test false isAttached
+
+      // FIXME - implement http.isAttached(this);
+    }
 
   }
 

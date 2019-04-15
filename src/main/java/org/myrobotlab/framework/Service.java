@@ -1438,10 +1438,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // if so we need to search
 
       // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
-      // if (method.equals("moveTo")) {
-        // log.info("here");
-      //}
-
+     
       // SECURITY - ??? can't be implemented here - need a full message
       meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
       retobj = meth.invoke(obj, params);
