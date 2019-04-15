@@ -1,6 +1,7 @@
 package org.myrobotlab.service.abstracts;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Platform;
@@ -759,6 +760,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
     syncedServos.remove(sc.getName());
   }
+  
+  @Override
+  public List<String> refreshControllers() {
+    return Runtime.getServiceNamesFromInterface(ServoController.class);
+  }
+
 
   @Override
   public void waitTargetPos() {

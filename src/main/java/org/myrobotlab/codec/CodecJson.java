@@ -22,18 +22,18 @@ public class CodecJson extends Codec {
 
   static public String encode(Object obj) {
     String json = null;
-    synchronized(obj) {
+    // synchronized(obj) {
       json = mapper.toJson(obj);
-    }
+    // }
     return json;
   }
 
   @Override
   public void encode(OutputStream out, Object obj) throws IOException {
     String json = null;
-    synchronized(obj) {
+    // synchronized(obj) {
       json = mapper.toJson(obj);
-    }
+   //  }
     if (json != null)
       out.write(json.getBytes());
   }

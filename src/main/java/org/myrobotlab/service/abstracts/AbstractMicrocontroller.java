@@ -154,7 +154,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     if (pinMap.containsKey(pinName)) {
       return pinMap.get(pinName);
     }
-    log.error("pinMap does not contain pin {}", pinName);
+    // log.error("pinMap does not contain pin {}", pinName);
     return null;
   }
 
