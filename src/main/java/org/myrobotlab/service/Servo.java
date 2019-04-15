@@ -57,7 +57,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
-import org.myrobotlab.service.interfaces.ServoListener;
+import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -1540,7 +1540,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void attach(ServoListener listener) {
+  public void attach(ServoDataListener listener) {
     // TODO Auto-generated method stub
     
   }
@@ -1564,7 +1564,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void detach(ServoListener service) {
+  public void detach(ServoDataListener service) {
     // TODO Auto-generated method stub
     
   }

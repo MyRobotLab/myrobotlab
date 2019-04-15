@@ -16,7 +16,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
-import org.myrobotlab.service.interfaces.ServoListener;
+import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -290,7 +290,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public void attach(ServoListener service) {
+  public void attach(ServoDataListener service) {
     listeners.add(service.getName());
   }
 
@@ -346,7 +346,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public void detach(ServoListener service) {
+  public void detach(ServoDataListener service) {
     if (service != null) {
       listeners.remove(service.getName());
     }
