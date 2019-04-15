@@ -324,14 +324,6 @@ public class DHLink implements Serializable {
     this.velocity = velocity;
   }
 
-  public Integer getState() {
-    return 0;
-  }
-
-  public void setState(Integer state) {
-    // this.state = state;
-  }
-
   /**
    * @return the targetPos
    */
