@@ -58,7 +58,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * @param service
    *          - the listener
    */
-  void attach(ServoListener listener);
+  void attach(ServoDataListener listener);
 
   void attach(String controllerName, Integer pin) throws Exception;
 
@@ -79,7 +79,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * @param service
    *          - to remove
    */
-  void detach(ServoListener service);
+  void detach(ServoDataListener service);
 
   /**
    * disable the pulses to the servo
@@ -174,7 +174,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * Unmapped current position of the servo. This can be incrementally updated
    * by an encoder.
    * 
-   * A possible better solution might be to use ServoEvent(s) to get the
+   * A possible better solution might be to use ServoData to get the
    * position through time which a controller with speed control can provide, so
    * as the servo is told incrementally where to go - it sends that command back
    * as an event which sets the "current" position.

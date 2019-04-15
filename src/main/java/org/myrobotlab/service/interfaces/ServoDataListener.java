@@ -2,8 +2,8 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
 
-public interface ServoListener extends NameProvider {
+public interface ServoDataListener extends NameProvider {
   
-  void onServoEvent(ServoData se);
+  void onServoData(ServoData se);
   
 }

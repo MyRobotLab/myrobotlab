@@ -47,7 +47,7 @@ import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoListener;
+import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -437,7 +437,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   @Override
-  public void attach(ServoListener service) {
+  public void attach(ServoDataListener service) {
     addListener("publishServoEvent", service.getName(), "onServoEvent");
   }
 
