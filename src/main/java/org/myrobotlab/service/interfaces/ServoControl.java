@@ -25,6 +25,7 @@
 
 package org.myrobotlab.service.interfaces;
 
+import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -292,6 +293,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * command to move to the rest position
    */
   void rest();
+  
+  /**
+   * return a list of possible controllers 
+   * @return
+   */
+  public List<String> refreshControllers() ;
 
   /**
    * Set the acceleration of the servo

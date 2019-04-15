@@ -56,28 +56,26 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.HobbyServo;
 import org.myrobotlab.service.SwingGui;
-import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.swing.widget.ComponentResizer;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;
 
 /**
- * HobbyServo SwingGui - displays details of HobbyServo state Lesson learned ! Servos to
- * properly function need to be attached to a controller This gui previously
- * sent messages to the controller. To simplify things its important to send
- * messages only to the bound HobbyServo - and let it attach to the controller versus
- * sending messages directly to the controller. 1 display - 1 service - keep it
- * simple
+ * HobbyServo SwingGui - displays details of HobbyServo state Lesson learned !
+ * Servos to properly function need to be attached to a controller This gui
+ * previously sent messages to the controller. To simplify things its important
+ * to send messages only to the bound HobbyServo - and let it attach to the
+ * controller versus sending messages directly to the controller. 1 display - 1
+ * service - keep it simple
  *
  */
 public class HobbyServoGui extends ServiceGui implements ActionListener {
 
   boolean mousePressed;
 
-  private class SliderListener implements ChangeListener, MouseListener {
+  private class SliderListener implements ChangeListener {
 
-    @Override
+    @Override // TODO - check for single event
     public void stateChanged(javax.swing.event.ChangeEvent e) {
       if (mousePressed) {
         if (swingGui != null) {
@@ -89,35 +87,6 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
       }
     }
 
-    @Override
-    public void mousePressed(MouseEvent e) {
-      mousePressed = true;
-      send("setOverrideAutoDisable", true);
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-      mousePressed = false;
-      send("setOverrideAutoDisable", false);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
   }
 
   private class MapInputSliderListener implements ChangeListener, MouseListener {
@@ -231,8 +200,14 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
   JLabel disableDelayIfVelocityL = new JLabel("Extra delay ( ms ): ");
   JLabel defaultDisableDelayNoVelocityL = new JLabel("Max velocity delay ( ms ) : ");
 
-  ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif"); // FIXME - change to abstract ?
-  ImageIcon movingIconNoVelocityControl = Util.getImageIcon("Servo/gifRed.gif");// FIXME - change to abstract ?
+  ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif"); // FIXME - change
+                                                               // to abstract ?
+  ImageIcon movingIconNoVelocityControl = Util.getImageIcon("Servo/gifRed.gif");// FIXME
+                                                                                // -
+                                                                                // change
+                                                                                // to
+                                                                                // abstract
+                                                                                // ?
 
   JLabel moving = new JLabel(movingIcon);
 
@@ -264,7 +239,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
   JTextField maxOutput = new JTextField("180");
 
   JButton sweepButton = new JButton("sweep");
-  //JButton eventsButton = new JButton("events");
+  // JButton eventsButton = new JButton("events");
 
   JLabel imageenabled = new JLabel();
   JLabel velocityPic = new JLabel();
@@ -307,8 +282,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
 
     velocity.setPreferredSize(new Dimension(50, 24));
     velocity.setSize(new Dimension(50, 24));
-    
-   
+
     boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
     boundPos.setHorizontalAlignment(JLabel.RIGHT);
     imageenabled.setIcon(enabled);
@@ -384,15 +358,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
     powerMain.add(enableButton);
     powerMain.add(autoDisable);
 
-        
-
     JPanel extra = new JPanel(new GridLayout(1, 1));
     Border settingsborder = BorderFactory.createTitledBorder("Extra :");
     extra.setBorder(settingsborder);
     JPanel sweep = new JPanel(new GridLayout(3, 2));
     sweep.add(setInverted);
     sweep.add(sweepButton);
-    //sweep.add(eventsButton);
+    // sweep.add(eventsButton);
     sweep.add(new JSeparator(), BorderLayout.PAGE_END);
     sweep.add(restButton);
     sweep.add(rest);
@@ -576,11 +548,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
         }
 
         /*
-        if (o == eventsButton) {
-          send("eventsEnabled", !eventsEnabled);
-          return;
-        }
-        */
+         * if (o == eventsButton) { send("eventsEnabled", !eventsEnabled);
+         * return; }
+         */
 
       }
     });
@@ -606,11 +576,11 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
         removeListeners();
         String controllerName = servo.getControllerName();
         lastControllerUsed = controllerName;
-        
+
         refreshControllers();
 
         if (controllerName != null) {
-          controller.setSelectedItem(controllerName);          
+          controller.setSelectedItem(controllerName);
         }
         String servoPin = servo.getPin();
 
@@ -637,8 +607,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
         }
 
         // FIXME - implement isMoving()
-//        if (servo.isMoving() && servo.getSpeed() > -0) {
-        if (servo.getSpeed() != null) {        
+        // if (servo.isMoving() && servo.getSpeed() > -0) {
+        if (servo.getSpeed() != null) {
           moving.setIcon(movingIcon);
           moving.setVisible(true);
           // no velocity control==no magic
@@ -716,13 +686,11 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
         mapOutputSlider.setLowValue(servo.getMinOutput().intValue());
         mapOutputSlider.setHighValue(servo.getMaxOutput().intValue());
 
-        /** <pre> FIXME - implement
-        if (servo.isSweeping()) {
-          sweepButton.setText("stop");
-        } else {
-          sweepButton.setText("sweep");
-        }
-        */
+        /**
+         * <pre>
+         * FIXME - implement if (servo.isSweeping()) {
+         * sweepButton.setText("stop"); } else { sweepButton.setText("sweep"); }
+         */
 
         restoreListeners();
       }
@@ -755,7 +723,6 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
     controller.removeActionListener(this);
     pinList.removeActionListener(this);
     slider.removeChangeListener(sliderListener);
-    slider.removeMouseListener(sliderListener);
     mapInputSlider.removeChangeListener(mapInputSliderListener);
     mapOutputSlider.removeChangeListener(mapOutputSliderListener);
     mapInputSlider.removeMouseListener(mapInputSliderListener);
@@ -766,7 +733,6 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
     controller.addActionListener(this);
     pinList.addActionListener(this);
     slider.addChangeListener(sliderListener);
-    slider.addMouseListener(sliderListener);
     mapInputSlider.addChangeListener(mapInputSliderListener);
     mapOutputSlider.addChangeListener(mapOutputSliderListener);
     mapInputSlider.addMouseListener(mapInputSliderListener);

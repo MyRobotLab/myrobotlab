@@ -62,6 +62,7 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialRelayListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
@@ -1736,9 +1737,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return serialData;
   }
 
+  @Deprecated /* Controllers should publish EncoderData - Servos can change that into ServoData and publish */
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
-      ((Servo) getDevice(deviceId)).onServoEvent(eventType, currentPos, targetPos);
+      ((ServoControl) getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE, (double)targetPos);//(eventType, currentPos, targetPos);
     } else {
       error("no servo found at device id %d", deviceId);
     }
@@ -2181,15 +2183,18 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.info("rest is {}", servo.getRest());
       servo.save();
       // servo.setPin(8);
-      servo.attach(mega, 8);
+      servo.attach(mega, 13);
 
       servo.moveTo(3);
+      sleep(300);
       servo.moveTo(130);
-      servo.moveTo(0);
+      sleep(300);
+      servo.moveTo(90);
+      sleep(300);
 
       // minmax checking
 
-      servo.invoke("moveTo", 3);
+      servo.invoke("moveTo", 120);
 
       if (isDone) {
         return;
