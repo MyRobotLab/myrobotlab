@@ -503,7 +503,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * @param isBlocking
    * @param timeout
    */
-  public void moveTo(Double newPos, Boolean isBlocking, Long timeoutMs) {
+  public Double moveTo(Double newPos, Boolean isBlocking, Long timeoutMs) {
     // FIXME - implement encoder blocking ...
     // FIXME - when and what should a servo publish and when ?
 
@@ -514,7 +514,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     if (controllers.size() == 0) {
       error(String.format("%s's controller is not set", getName()));
-      return;
+      return pos;
     }
 
     if (newPos < mapper.getMinX()) {
@@ -551,6 +551,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       broadcastState(); // publishServo vs publishServoData .. GAH ! :P
     }
 
+    return pos;
   }
 
   @Override
@@ -564,33 +565,33 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public void moveToBlocking(Double pos) {
-    moveTo(pos, true, null);
+  public Double moveToBlocking(Double pos) {
+    return moveTo(pos, true, null);
   }
 
   @Override
-  public void moveToBlocking(Double newPos, Long timeoutMs) {
-    moveTo(newPos, true, timeoutMs);
+  public Double moveToBlocking(Double newPos, Long timeoutMs) {
+    return moveTo(newPos, true, timeoutMs);
   }
 
   @Override
-  public void moveToBlocking(Float newPos) {
-    moveTo(newPos.doubleValue(), true, null);
+  public Double moveToBlocking(Float newPos) {
+    return moveTo(newPos.doubleValue(), true, null);
   }
 
   @Override
-  public void moveToBlocking(Float newPos, Long timeoutMs) {
-    moveTo(newPos.doubleValue(), true, timeoutMs);
+  public Double moveToBlocking(Float newPos, Long timeoutMs) {
+    return moveTo(newPos.doubleValue(), true, timeoutMs);
   }
 
   @Override
-  public void moveToBlocking(Integer newPos) {
-    moveTo(newPos.doubleValue(), true, null);
+  public Double moveToBlocking(Integer newPos) {
+    return moveTo(newPos.doubleValue(), true, null);
   }
 
   @Override
-  public void moveToBlocking(Integer newPos, Long timeoutMs) {
-    moveTo(newPos.doubleValue(), true, timeoutMs);
+  public Double moveToBlocking(Integer newPos, Long timeoutMs) {
+    return moveTo(newPos.doubleValue(), true, timeoutMs);
   }
 
   @Override
