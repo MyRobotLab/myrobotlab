@@ -79,7 +79,7 @@ public class ServoTest extends AbstractTest {
     servo01.attach(arduino01, 8, 40.0);
     servo01.attach(arduino01, 8, 30.0);
     
-    servo01.setVelocity(3);
+    
 
     servo02.attach(arduino01, 7, 40.0);
     servo01.eventsEnabled(true);
@@ -102,8 +102,10 @@ public class ServoTest extends AbstractTest {
     servo01.moveTo(31);
     servo01.moveTo(30);
 
+    servo01.setVelocity(3);
     servo01.moveTo(130);
     servo02.moveTo(130);
+    servo01.setSpeed(30);
     servo01.moveTo(30);
     servo02.moveTo(30);
 

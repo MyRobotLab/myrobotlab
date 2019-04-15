@@ -177,7 +177,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * input mapper
    */
-  protected Mapper mapper;
+  protected Mapper mapper = new Mapper(0, 180, 0, 180);
 
   /**
    * maximum speed
@@ -202,12 +202,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * default rest is 90 default target position will be 90 if not specified
    */
-  protected Double rest;
+  protected Double rest = 90.0;
 
   /**
-   * speed of the servo
+   * speed of the servo - null is no speed control
    */
-  protected Double speed;
+  protected Double speed = null;
 
   protected int sweepDelay = 100;
 
@@ -462,6 +462,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public Double getTargetOutput() {
+    if (targetPos == null) {
+      targetPos = rest;
+    }
+    targetOutput = mapper.calcOutput(targetPos);
     return targetOutput;
   }
 
