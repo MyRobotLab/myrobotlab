@@ -76,13 +76,10 @@ public class OculusRift extends Service implements PointPublisher {
   public float rightCameraDy = 0;
   public float rightCameraAngle = 180;
 
-  public String leftEyeURL = "http://192.168.4.104:8080/?action=stream";
-  public String rightEyeURL = "http://192.168.4.104:8081/?action=stream";
+  public String leftEyeURL = null;
+  public String rightEyeURL = null;
 
-  // public String leftEyeURL = "http://192.168.4.102:8001/camera/mjpeg";
-  // public String rightEyeURL = "http://192.168.4.102:8000/camera/mjpeg";
-
-  public String frameGrabberType = "org.myrobotlab.opencv.MJpegFrameGrabber";
+  public String frameGrabberType = "MJpeg";
   public String cvInputSource = null;
 
   private HmdDesc hmdDesc;
@@ -101,16 +98,13 @@ public class OculusRift extends Service implements PointPublisher {
     super(reservedKey);
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-  }
-
   // Boradcast the state of the peers to notify the gui.
   public void broadcastState() {
     // notify the gui
-    leftOpenCV.broadcastState();
-    rightOpenCV.broadcastState();
+    if (leftOpenCV != null)
+      leftOpenCV.broadcastState();
+    if (rightOpenCV != null)
+      rightOpenCV.broadcastState();
   }
 
   private void setupRift() {
@@ -153,53 +147,16 @@ public class OculusRift extends Service implements PointPublisher {
       // create and start the open cv services
       // TODO: start via runtime?
       // leftOpenCV = new OpenCV(getName() + "." + LEFT_OPEN_CV);
-      leftOpenCV = (OpenCV) Runtime.start(getName() + "." + LEFT_OPEN_CV, "OpenCV");
-      leftOpenCV.startService();
-      // TODO: remove me this is a work around for opencv
-      leftOpenCV.setStreamerEnabled(false);
-      leftOpenCV.setCameraIndex(leftCameraIndex);
-      if (frameGrabberType != null) {
-        leftOpenCV.setGrabberType(frameGrabberType);
-      }
-      if (cvInputSource != null) {
-        leftOpenCV.setInputSource(cvInputSource);
-      }
-      if (leftEyeURL != null) {
-        leftOpenCV.setInputFileName(leftEyeURL);
-        leftOpenCV.setInputSource(OpenCV.INPUT_SOURCE_FILE);
-      }
-      subscribe(leftOpenCV.getName(), "publishDisplay");
+      initLeftOpenCV();
 
       // start the right eye
       if (!mirrorLeftCamera) {
-        String serviceName = getName() + "." + RIGHT_OPEN_CV;
-        // rightOpenCV = new OpenCV(serviceName);
-        rightOpenCV = (OpenCV) Runtime.start(serviceName, "OpenCV");
-        rightOpenCV.startService();
-        // TODO: remove me this is a work around for opencv
-        rightOpenCV.setStreamerEnabled(false);
-        rightOpenCV.setCameraIndex(rightCameraIndex);
-        if (frameGrabberType != null) {
-          rightOpenCV.setGrabberType(frameGrabberType);
-        }
-        if (rightEyeURL != null) {
-          rightOpenCV.setInputFileName(rightEyeURL);
-          rightOpenCV.setInputSource(OpenCV.INPUT_SOURCE_FILE);
-        }
-        if (cvInputSource != null) {
-          rightOpenCV.setInputSource(cvInputSource);
-        }
-        subscribe(rightOpenCV.getName(), "publishDisplay");
+        initRightOpenCV();
       }
 
       boolean addUndistort = true;
       if (addUndistort) {
-        OpenCVFilterUndistort ud1 = new OpenCVFilterUndistort("ud1");
-        leftOpenCV.addFilter(ud1);
-        if (!mirrorLeftCamera) {
-          OpenCVFilterUndistort ud2 = new OpenCVFilterUndistort("ud2");
-          rightOpenCV.addFilter(ud2);
-        }
+        addUndistortFilter();
       }
 
       // if the cameras are mounted at 90 degrees rotation, transpose the
@@ -207,15 +164,7 @@ public class OculusRift extends Service implements PointPublisher {
       boolean addTransposeEyes = false;
       if (addTransposeEyes) {
         // left eye
-        OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1");
-        t1.flipCode = 1;
-        leftOpenCV.addFilter(t1);
-        // right eye
-        if (!mirrorLeftCamera) {
-          OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2");
-          t2.flipCode = 1;
-          rightOpenCV.addFilter(t2);
-        }
+        addTransposeFilter();
       }
 
       // OpenCVFilterResize leftResizeFilter = new
@@ -236,36 +185,16 @@ public class OculusRift extends Service implements PointPublisher {
       // configure the affine filters to calibrate image position and
       // rotation.
       // leftAffine.setDx(200);
-      leftAffine.setDx(leftCameraDx);
-      leftAffine.setDy(leftCameraDy);
-      leftAffine.setAngle(leftCameraAngle);
-      // the affine is always on top i guess
-      leftOpenCV.addFilter(leftAffine);
-      // leftOpenCV.setDisplayFilter("left");
-      // start the left camera.
-      leftOpenCV.capture();
-      if (!mirrorLeftCamera) {
-        rightAffine.setDx(rightCameraDx);
-        rightAffine.setDy(rightCameraDy);
-        rightAffine.setAngle(rightCameraAngle);
-        rightOpenCV.addFilter(rightAffine);
-        // rightOpenCV.setDisplayFilter("right");
-        // start the right camera
-        rightOpenCV.capture();
-      }
+      addAffineFilter();
 
+      // start the left camera.
+      capture();
+      
+      
       // TODO: handle the "end of the pipeline" as the input source.
       boolean addYolo = false;
       if (addYolo) {
-        OpenCVFilterYolo yoloLeft = new OpenCVFilterYolo("left");
-        leftOpenCV.addFilter(yoloLeft);
-        leftOpenCV.setDisplayFilter("left");
-        if (!mirrorLeftCamera) {
-          OpenCVFilterYolo yoloRight = new OpenCVFilterYolo("right");
-          // TODO: consider what it means to add this to both eyes.
-          rightOpenCV.addFilter(yoloRight);
-          rightOpenCV.setDisplayFilter("right");
-        }
+        addYoloFilter();
       }
 
       // Now turn on the camras.
@@ -287,6 +216,101 @@ public class OculusRift extends Service implements PointPublisher {
     } else {
       log.info("Rift interface already initialized.");
     }
+  }
+
+  public void addAffineFilter() {
+    leftAffine.setDx(leftCameraDx);
+    leftAffine.setDy(leftCameraDy);
+    leftAffine.setAngle(leftCameraAngle);
+    // the affine is always on top i guess
+    leftOpenCV.addFilter(leftAffine);
+    // leftOpenCV.setDisplayFilter("left");
+    if (!mirrorLeftCamera) {
+      rightAffine.setDx(rightCameraDx);
+      rightAffine.setDy(rightCameraDy);
+      rightAffine.setAngle(rightCameraAngle);
+      rightOpenCV.addFilter(rightAffine);
+    }
+  }
+
+  public void capture() {
+    leftOpenCV.capture();
+    if (!mirrorLeftCamera) {
+      rightOpenCV.capture();
+    }
+  }
+
+  public void addYoloFilter() {
+    OpenCVFilterYolo yoloLeft = new OpenCVFilterYolo("left");
+    leftOpenCV.addFilter(yoloLeft);
+    leftOpenCV.setDisplayFilter("left");
+    if (!mirrorLeftCamera) {
+      OpenCVFilterYolo yoloRight = new OpenCVFilterYolo("right");
+      // TODO: consider what it means to add this to both eyes.
+      rightOpenCV.addFilter(yoloRight);
+      rightOpenCV.setDisplayFilter("right");
+    }
+  }
+
+  public void addTransposeFilter() {
+    OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1");
+    t1.flipCode = 1;
+    leftOpenCV.addFilter(t1);
+    // right eye
+    if (!mirrorLeftCamera) {
+      OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2");
+      t2.flipCode = 1;
+      rightOpenCV.addFilter(t2);
+    }
+  }
+
+  public void addUndistortFilter() {
+    OpenCVFilterUndistort ud1 = new OpenCVFilterUndistort("ud1");
+    leftOpenCV.addFilter(ud1);
+    if (!mirrorLeftCamera) {
+      OpenCVFilterUndistort ud2 = new OpenCVFilterUndistort("ud2");
+      rightOpenCV.addFilter(ud2);
+    }
+  }
+
+  public void initRightOpenCV() {
+    String serviceName = getName() + "." + RIGHT_OPEN_CV;
+    // rightOpenCV = new OpenCV(serviceName);
+    rightOpenCV = (OpenCV) Runtime.start(serviceName, "OpenCV");
+    rightOpenCV.startService();
+    // TODO: remove me this is a work around for opencv
+    rightOpenCV.setStreamerEnabled(false);
+    rightOpenCV.setCameraIndex(rightCameraIndex);
+    if (frameGrabberType != null) {
+      rightOpenCV.setGrabberType(frameGrabberType);
+    }
+    if (rightEyeURL != null) {
+      rightOpenCV.setInputFileName(rightEyeURL);
+      rightOpenCV.setInputSource(OpenCV.INPUT_SOURCE_FILE);
+    }
+    if (cvInputSource != null) {
+      rightOpenCV.setInputSource(cvInputSource);
+    }
+    subscribe(rightOpenCV.getName(), "publishDisplay");
+  }
+
+  public void initLeftOpenCV() {
+    leftOpenCV = (OpenCV) Runtime.start(getName() + "." + LEFT_OPEN_CV, "OpenCV");
+    leftOpenCV.startService();
+    // TODO: remove me this is a work around for opencv
+    leftOpenCV.setStreamerEnabled(false);
+    leftOpenCV.setCameraIndex(leftCameraIndex);
+    if (frameGrabberType != null) {
+      leftOpenCV.setGrabberType(frameGrabberType);
+    }
+    if (cvInputSource != null) {
+      leftOpenCV.setInputSource(cvInputSource);
+    }
+    if (leftEyeURL != null) {
+      leftOpenCV.setInputFileName(leftEyeURL);
+      leftOpenCV.setInputSource(OpenCV.INPUT_SOURCE_FILE);
+    }
+    subscribe(leftOpenCV.getName(), "publishDisplay");
   }
 
   public void updateAffine() {
@@ -522,6 +546,12 @@ public class OculusRift extends Service implements PointPublisher {
     Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
+    String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
+    String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
+    
+    rift.setLeftEyeURL(leftEyeURL);
+    rift.setRightEyeURL(rightEyeURL);
+    
     rift.leftCameraAngle = 0;
     rift.leftCameraDy = 5;
     rift.rightCameraDy = -5;
