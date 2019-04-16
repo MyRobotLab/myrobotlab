@@ -2,7 +2,6 @@ package org.myrobotlab.service.abstracts;
 
 import java.io.File;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +12,7 @@ import java.util.TreeMap;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
@@ -238,11 +238,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * Set a key and value for some required key info, can be both user as a key and
-   * key secret - required keys are returned by getKeyNames() For Cloud Speech
-   * Synthesis systems which typically require keys
-   * @param keyName key name
-   * @param keyValue the value
+   * Set a key and value for some required key info, can be both user as a key
+   * and key secret - required keys are returned by getKeyNames() For Cloud
+   * Speech Synthesis systems which typically require keys
+   * 
+   * @param keyName
+   *          key name
+   * @param keyValue
+   *          the value
    */
   public void setKey(String keyName, String keyValue) {
     Security security = Security.getInstance();
@@ -416,7 +419,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       // FIXME - I don't under why URLEncoder is here ...
       // URLEncoder.encode(getVoice().getName(), "UTF-8")
-      filename += getClass().getSimpleName() + File.separator + getVoice().getName() + File.separator + MathUtils.md5(toSpeak) + getAudioCacheExtension();
+      filename += getClass().getSimpleName() + File.separator + FileIO.cleanFileName(getVoice().getName()) + File.separator + MathUtils.md5(toSpeak) + getAudioCacheExtension();
 
       // create subdirectories if necessary
       File f = new File(filename);
@@ -555,8 +558,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * process speaking - generate the text to be spoken or play a cache file if
    * appropriate
    * 
-   * @param audioData - the audoData for parameters
-   * @param speak - the text to speak
+   * @param audioData
+   *          - the audoData for parameters
+   * @param speak
+   *          - the text to speak
    * @return block - to block or not
    */
   public AudioData process(AudioData audioData, String speak, boolean block) {
