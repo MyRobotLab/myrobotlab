@@ -24,6 +24,9 @@ import org.slf4j.Logger;
  * 
  *         Linux possibilities
  *         https://launchpad.net/ubuntu/precise/+source/svox/
+ *         
+ *         More Voices can be found for Windows at
+ *         https://www.microsoft.com/en-us/download/details.aspx?id=3971
  * 
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
@@ -137,32 +140,36 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
 
       log.info("cmd {}", voicesText);
-
-      // String[] lines =
-      // voicesText.split(System.getProperty("line.separator"));
-      String[] lines = voicesText.split("\n");
+           
+      String[] lines = voicesText.split(System.getProperty("line.separator"));
       for (String line : lines) {
         // String[] parts = cmd.split(" ");
         // String gender = "female"; // unknown
-        // String lang = "en-US"; // unknown
+        String lang = "en-US"; // unknown
+        
 
         if (line.startsWith("Exit")) {
           break;
         }
         String[] parts = line.split(" ");
-        if (parts.length < 3) {
+        if (parts.length < 6) {
           continue;
         }
         // lame-ass parsing ..
         String voiceProvider = parts[0];
-        String voiceName = line.substring(voiceProvider.length());
+        String voiceName = parts[2];//line.trim();
         // is line start with a number ? yes it's ( maybe ) a voice...
+        String langName = parts[5];
+        if ("French".equals(langName)) {
+          lang = "fr";
+        }
+        
         try {
           // verify integer
           Integer.parseInt(voiceProvider);
           // voice name cause issues because of spaces or (null), let's just use
           // original number as name...
-          addVoice(voiceName, null, null, voiceProvider);
+          addVoice(voiceName, null, lang, voiceProvider);
         } catch (Exception e) {
           continue;
         }
