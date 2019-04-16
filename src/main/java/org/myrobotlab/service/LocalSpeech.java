@@ -140,30 +140,51 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
 
       log.info("cmd {}", voicesText);
-           
+
       String[] lines = voicesText.split(System.getProperty("line.separator"));
       for (String line : lines) {
         // String[] parts = cmd.split(" ");
         // String gender = "female"; // unknown
         String lang = "en-US"; // unknown
-        
 
         if (line.startsWith("Exit")) {
           break;
         }
         String[] parts = line.split(" ");
-        if (parts.length < 6) {
+        if (parts.length < 2) { // some voices are not based on a standard pattern
           continue;
         }
         // lame-ass parsing ..
+        // standard sapi pattern is 5 parameters :
+        // INDEX PROVIDER VOICE_NAME PLATEFORM - LANG
+        // we need INDEX, VOICE_NAME, LANG
+        // but .. some voices dont use it, we will try to detect pattern and adapt if no respect about it :
+
+        // INDEX :
         String voiceProvider = parts[0];
-        String voiceName = parts[2];//line.trim();
-        // is line start with a number ? yes it's ( maybe ) a voice...
-        String langName = parts[5];
-        if ("French".equals(langName)) {
-          lang = "fr";
+
+        // VOICE_NAME
+        String voiceName = "Unknown" + voiceProvider; //default name if there is an issue
+        // it is standard, cool
+        if (parts.length >= 6) {
+          voiceName = parts[2];//line.trim();
         }
-        
+        // almost standard, we have INDEX PROVIDER VOICE_NAME
+        else if (parts.length > 2) {
+          voiceName = line.split(" ")[2];
+        }
+        // non standard at all ... but we catch it !
+        else {
+          voiceName = line.split(" ")[1];
+        }
+
+        // LANG ( we just detect for a keyword inside the whole string, because position is random sometime )
+        // TODO: locale converter from keyword somewhere ?
+
+        if (line.toLowerCase().contains("french") || line.toLowerCase().contains("français")) {
+          lang = "fr-FR";
+        }
+
         try {
           // verify integer
           Integer.parseInt(voiceProvider);
