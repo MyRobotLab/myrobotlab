@@ -24,6 +24,9 @@ import org.slf4j.Logger;
  * 
  *         Linux possibilities
  *         https://launchpad.net/ubuntu/precise/+source/svox/
+ *         
+ *         More Voices can be found for Windows at
+ *         https://www.microsoft.com/en-us/download/details.aspx?id=3971
  * 
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
@@ -122,6 +125,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    */
   @Override
   protected void loadVoices() {
+
+    if (voices.size() > 0) {
+      log.info("already loaded voices");
+      return;
+    }
+
     Platform platform = Platform.getLocalInstance();
 
     // voices returned from local app
@@ -129,27 +138,40 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     if (platform.isWindows()) {
       voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
-      log.info("cmd {}", voicesText);
 
+      log.info("cmd {}", voicesText);
+           
       String[] lines = voicesText.split(System.getProperty("line.separator"));
       for (String line : lines) {
         // String[] parts = cmd.split(" ");
-        String gender = "female"; // unknown
+        // String gender = "female"; // unknown
         String lang = "en-US"; // unknown
+        
 
         if (line.startsWith("Exit")) {
           break;
         }
+        String[] parts = line.split(" ");
+        if (parts.length < 6) {
+          continue;
+        }
         // lame-ass parsing ..
-        String voiceProvider = line.split(" ", 2)[0];
+        String voiceProvider = parts[0];
+        String voiceName = parts[2];//line.trim();
         // is line start with a number ? yes it's ( maybe ) a voice...
+        String langName = parts[5];
+        if ("French".equals(langName)) {
+          lang = "fr";
+        }
+        
         try {
-          int isItaVoice = Integer.parseInt(voiceProvider);
+          // verify integer
+          Integer.parseInt(voiceProvider);
           // voice name cause issues because of spaces or (null), let's just use
           // original number as name...
-          addVoice(voiceProvider, gender, lang, voiceProvider);
+          addVoice(voiceName, null, lang, voiceProvider);
         } catch (Exception e) {
-          break;
+          continue;
         }
       }
     } else if (platform.isMac()) {
