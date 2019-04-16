@@ -122,6 +122,12 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    */
   @Override
   protected void loadVoices() {
+
+    if (voices.size() > 0) {
+      log.info("already loaded voices");
+      return;
+    }
+
     Platform platform = Platform.getLocalInstance();
 
     // voices returned from local app
@@ -129,27 +135,36 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     if (platform.isWindows()) {
       voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
+
       log.info("cmd {}", voicesText);
 
-      String[] lines = voicesText.split(System.getProperty("line.separator"));
+      // String[] lines =
+      // voicesText.split(System.getProperty("line.separator"));
+      String[] lines = voicesText.split("\n");
       for (String line : lines) {
         // String[] parts = cmd.split(" ");
-        String gender = "female"; // unknown
-        String lang = "en-US"; // unknown
+        // String gender = "female"; // unknown
+        // String lang = "en-US"; // unknown
 
         if (line.startsWith("Exit")) {
           break;
         }
+        String[] parts = line.split(" ");
+        if (parts.length < 3) {
+          continue;
+        }
         // lame-ass parsing ..
-        String voiceProvider = line.split(" ", 2)[0];
+        String voiceProvider = parts[0];
+        String voiceName = line.substring(voiceProvider.length());
         // is line start with a number ? yes it's ( maybe ) a voice...
         try {
-          int isItaVoice = Integer.parseInt(voiceProvider);
+          // verify integer
+          Integer.parseInt(voiceProvider);
           // voice name cause issues because of spaces or (null), let's just use
           // original number as name...
-          addVoice(voiceProvider, gender, lang, voiceProvider);
+          addVoice(voiceName, null, null, voiceProvider);
         } catch (Exception e) {
-          break;
+          continue;
         }
       }
     } else if (platform.isMac()) {
@@ -184,6 +199,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     Runtime.start("gui", "SwingGui");
 
     LocalSpeech speech = (LocalSpeech) Runtime.start("speech", "LocalSpeech");
+    speech.speakBlocking("hello my name is sam, sam i am");
     // speech.parseEffects("#OINK##OINK# hey I thought #DOH# that was funny
     // #LAUGH01_F# very funny");
     // speech.getVoices();
