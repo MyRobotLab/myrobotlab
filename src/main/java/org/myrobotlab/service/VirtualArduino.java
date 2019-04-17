@@ -186,7 +186,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   public String setBoard(String board) {
     log.info("setting board to type {}", board);
-
+    this.board = board;
+    mrlComm.boardType = Arduino.getBoardTypeId(board);
     // Zxcv npinDefs = Arduino.getPinList(board);
 
     broadcastState();

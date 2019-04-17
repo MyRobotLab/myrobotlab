@@ -32,8 +32,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -74,7 +72,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   boolean mousePressed;
   // if (!source.getValueIsAdjusting()) {
-
+/*
   private class SliderListener implements ChangeListener {
 
     @Override // TODO - check for single event
@@ -90,7 +88,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     }
 
   }
-
+*/
 
  
   public final static Logger log = LoggerFactory.getLogger(HobbyServoGui.class);
@@ -505,7 +503,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           moving.setIcon(movingIcon);
           moving.setVisible(true);
           // no velocity control==no magic
-        } else if (servo.isEnabled() && servo.getSpeed() <= 0) {
+        } else if (servo.isEnabled() && (servo.getSpeed() == null || servo.getSpeed() <= 0)) {
           moving.setIcon(movingIconNoVelocityControl);
           moving.setVisible(true);
         } else {

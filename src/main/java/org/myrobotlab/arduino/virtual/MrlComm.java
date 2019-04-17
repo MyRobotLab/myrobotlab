@@ -196,6 +196,8 @@ public class MrlComm {
 
   VirtualArduino virtual;
 
+  public Integer boardType;
+
   public MrlComm(VirtualArduino virtual) {
     // msg = VirtualMsg.getInstance();
     this.virtual = virtual;
@@ -574,7 +576,7 @@ public class MrlComm {
 
     long now = micros();
     int load = (int) ((now - lastBoardInfoUs) / loopCount);
-    msg.publishBoardInfo(MRLCOMM_VERSION, Arduino.BOARD_TYPE_ID_UNO, load, getFreeRam(), pinList.size(), deviceSummary);
+    msg.publishBoardInfo(MRLCOMM_VERSION, boardType, load, getFreeRam(), pinList.size(), deviceSummary);
     lastBoardInfoUs = now;
     loopCount = 0;
   }
