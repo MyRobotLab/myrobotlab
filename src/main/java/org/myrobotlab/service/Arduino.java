@@ -2057,7 +2057,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     uploadSketch(arudinoPath, comPort, getBoard());
   }
 
-  public String getBoardType(int boardId) {
+  static public String getBoardType(int boardId) {
     String boardName;
     switch (boardId) {
       case BOARD_TYPE_ID_MEGA:
@@ -2081,6 +2081,32 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         break;
     }
     return boardName;
+  }
+  
+  static public int getBoardTypeId(String boardName) {
+    Integer boardId = null;
+    switch (boardName) {
+      case BOARD_TYPE_MEGA:
+        boardId = BOARD_TYPE_ID_MEGA;
+        break;
+      case BOARD_TYPE_UNO:
+        boardId = BOARD_TYPE_ID_UNO;
+        break;
+      case BOARD_TYPE_MEGA_ADK:
+        boardId = BOARD_TYPE_ID_ADK_MEGA;
+        break;
+      case BOARD_TYPE_NANO:
+        boardId = BOARD_TYPE_ID_NANO;
+        break;
+      case BOARD_TYPE_PRO_MINI:
+        boardId = BOARD_TYPE_ID_PRO_MINI;
+        break;
+      default:
+        // boardName = "unknown";
+        boardId = BOARD_TYPE_ID_UNO;
+        break;
+    }
+    return boardId;
   }
 
   public void uploadSketch(String arduinoIdePath, String port, String type) throws IOException {
@@ -2159,6 +2185,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
+    
 
       boolean isDone = true;
 
@@ -2166,6 +2193,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Runtime.start("gui", "SwingGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      if (mega.isVirtual()) {
+        VirtualArduino vmega = mega.getVirtual();
+        vmega.setBoardMega();
+      }
       // mega.getBoardTypes();
       // mega.setBoardMega();
       // mega.setBoardUno();
