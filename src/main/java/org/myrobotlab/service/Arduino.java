@@ -2184,9 +2184,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      Platform.setVirtual(false);
     
-
       boolean isDone = true;
 
       // Runtime.start("webgui", "WebGui");
@@ -2216,16 +2215,21 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // servo.setPin(8);
       servo.attach(mega, 13);
 
+      servo.moveTo(90);
+      
+      /*
       servo.moveTo(3);
       sleep(300);
       servo.moveTo(130);
       sleep(300);
       servo.moveTo(90);
       sleep(300);
+      
 
       // minmax checking
 
       servo.invoke("moveTo", 120);
+      */
 
       if (isDone) {
         return;

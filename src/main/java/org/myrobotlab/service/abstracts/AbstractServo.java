@@ -548,9 +548,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
         if (si.isLocal()) {
           ((ServoController) Runtime.getService(controller)).servoMoveTo(this);
         } else {
-          send(controller, "servoMoveTo", this);
+          send(controller, "servoMoveTo", this);          
         }
       }
+      pos = newPos;
+      lastPos = pos; // what is the point of this ???
     }
 
     if (lastPos == newPos) {
@@ -558,6 +560,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       broadcastState(); // publishServo vs publishServoData .. GAH ! :P
     }
 
+    invoke("publishMoveTo", this);
     return pos;
   }
 

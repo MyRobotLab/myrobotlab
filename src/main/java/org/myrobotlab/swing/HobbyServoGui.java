@@ -115,14 +115,14 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   JLabel moving = new JLabel(movingIcon);
 
-  JButton SaveButton = new JButton("Save");
+  JButton SaveButton = new JButton("save");
   JButton enableButton = new JButton("enable");
   JCheckBox autoDisable = new JCheckBox("autoDisable");
   JCheckBox setInverted = new JCheckBox("setInverted");
   JSlider moveTo = new JSlider(0, 180, 90);
   RangeSlider mapInputSlider = new RangeSlider();
-  JLabel InputL = new JLabel("Input MAP :");
-  JLabel OutputL = new JLabel("Output MAP : ");
+  JLabel InputL = new JLabel("input map :");
+  JLabel OutputL = new JLabel("output map : ");
   Integer mapInputSliderMinValue = 0;
   Integer mapInputSliderMaxValue = 180;
   Integer mapOutputSliderMinValue = 0;
@@ -184,8 +184,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     velocityPic.setIcon(velocityPng);
     autoDisable.setSelected(false);
     setInverted.setSelected(false);
-    defaultDisableDelayNoVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
-    disableDelayIfVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
+    
 
     moveTo.setForeground(Color.white);
     moveTo.setBackground(Color.DARK_GRAY);
@@ -449,14 +448,26 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   @Override
   public void subscribeGui() {
+    subscribe("publishMoveTo");
     subscribe("refreshControllers");
   }
 
   // FIXME - runtime should handle all unsubscribe of teardown
   @Override
   public void unsubscribeGui() {
-    unsubscribe("refreshControllers");
+    unsubscribe("publishMoveTo");
   }
+  
+  public void onMoveTo(final HobbyServo servo) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        boundPos.setText(servo.getPos() + "");
+      }
+    });
+
+   }
+  
 
   synchronized public void onState(final HobbyServo servo) {
 
@@ -629,7 +640,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   @Override
   public void stateChanged(ChangeEvent e) {
     Object o = e.getSource();
-    if (!((JSlider) o).getValueIsAdjusting()) {
+    /*if (!((JSlider) o).getValueIsAdjusting()) */ {
       if (moveTo.equals(o)) {
         moving.setVisible(true);
         send("moveTo", moveTo.getValue());
