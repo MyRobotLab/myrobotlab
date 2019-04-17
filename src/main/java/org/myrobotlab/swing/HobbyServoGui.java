@@ -49,6 +49,7 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
@@ -69,9 +70,10 @@ import com.jidesoft.swing.RangeSlider;
  * service - keep it simple
  *
  */
-public class HobbyServoGui extends ServiceGui implements ActionListener {
+public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeListener {
 
   boolean mousePressed;
+  // if (!source.getValueIsAdjusting()) {
 
   private class SliderListener implements ChangeListener {
 
@@ -80,7 +82,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
       if (mousePressed) {
         if (swingGui != null) {
           moving.setVisible(true);
-          swingGui.send(boundServiceName, "moveTo", Integer.valueOf(slider.getValue()));
+          swingGui.send(boundServiceName, "moveTo", Integer.valueOf(moveTo.getValue()));
         } else {
           log.error("can not send message myService is null");
         }
@@ -89,104 +91,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
 
   }
 
-  private class MapInputSliderListener implements ChangeListener, MouseListener {
 
-    @Override
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
-
-      minInput.setText(String.format("%d", mapInputSlider.getLowValue()));
-      maxInput.setText(String.format("%d", mapInputSlider.getHighValue()));
-
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-      if (swingGui != null) {
-        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
-      } else {
-        log.error("can not send message myService is null");
-      }
-
-    }
-  }
-
-  private class MapOutputSliderListener implements ChangeListener, MouseListener {
-
-    @Override
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
-      if (mousePressed) {
-        if (mapOutputSlider.getInverted()) {
-          minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-          maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-        } else {
-          minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-          maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-        }
-      }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-      mousePressed = true;
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-      mousePressed = false;
-      if (swingGui != null) {
-        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
-      } else {
-        log.error("can not send message myService is null");
-      }
-
-    }
-  }
-
+ 
   public final static Logger log = LoggerFactory.getLogger(HobbyServoGui.class);
   private String lastControllerUsed;
   static final long serialVersionUID = 1L;
@@ -215,7 +121,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
   JButton enableButton = new JButton("enable");
   JCheckBox autoDisable = new JCheckBox("autoDisable");
   JCheckBox setInverted = new JCheckBox("setInverted");
-  JSlider slider = new JSlider(0, 180, 90);
+  JSlider moveTo = new JSlider(0, 180, 90);
   RangeSlider mapInputSlider = new RangeSlider();
   JLabel InputL = new JLabel("Input MAP :");
   JLabel OutputL = new JLabel("Output MAP : ");
@@ -246,18 +152,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
   ImageIcon enabled = Util.getImageIcon("enabled.png");
   ImageIcon velocityPng = Util.getImageIcon("velocity.png");
 
-  // HobbyServo myServox = null;
-
-  SliderListener sliderListener = new SliderListener();
-  MapInputSliderListener mapInputSliderListener = new MapInputSliderListener();
-  MapOutputSliderListener mapOutputSliderListener = new MapOutputSliderListener();
-
-  // boolean eventsEnabled;
-
   public HobbyServoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
-    // myServo = (HobbyServo) Runtime.getService(boundServiceName);
-
+    
     for (int i = 0; i < 54; i++) {
       pinList.addItem(i + "");
     }
@@ -292,17 +189,17 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
     defaultDisableDelayNoVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
     disableDelayIfVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
 
-    slider.setForeground(Color.white);
-    slider.setBackground(Color.DARK_GRAY);
+    moveTo.setForeground(Color.white);
+    moveTo.setBackground(Color.DARK_GRAY);
     left.setForeground(Color.white);
     left.setBackground(Color.DARK_GRAY);
     right.setForeground(Color.white);
     right.setBackground(Color.DARK_GRAY);
-    slider.setMajorTickSpacing(30);
-    slider.setPaintTicks(true);
-    slider.setPaintTicks(true);
-    slider.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-    slider.setPaintLabels(true);
+    moveTo.setMajorTickSpacing(30);
+    moveTo.setPaintTicks(true);
+    moveTo.setPaintTicks(true);
+    moveTo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+    moveTo.setPaintLabels(true);
 
     mapInputSlider.setBackground(new Color(188, 208, 244));
     mapOutputSlider.setBackground(new Color(200, 238, 206));
@@ -414,12 +311,11 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
     centerPanelStatus.add(extra);
 
     centerPanel.add(centerPanelStatus);
-    centerPanel.add(slider);
+    centerPanel.add(moveTo);
     centerPanel.setMinimumSize(new Dimension(50, 200));
     centerPanel.setSize(new Dimension(50, 200));
     display.add(centerPanel, BorderLayout.CENTER);
     display.add(left, BorderLayout.WEST);
-
     display.add(map, BorderLayout.SOUTH);
 
     refreshControllers();
@@ -463,7 +359,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
 
         if (o == attachButton) {
           if (attachButton.getText().equals("attach")) {
-            send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), new Double(slider.getValue()));
+            send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), new Double(moveTo.getValue()));
           } else {
             send("detach", controller.getSelectedItem());
           }
@@ -514,16 +410,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
               Double.parseDouble(maxOutput.getText()));
           send("setVelocity", Double.parseDouble(velocity.getText()));
           send("save");
-          Integer delayIfV = 1000;
-          Integer delayNoV = 10000;
-
           send("setRest", Double.parseDouble(rest.getText()));
           info("HobbyServo config saved !");
           return;
         }
 
         if (o == right) {
-          slider.setValue(slider.getValue() + 1);
+          moveTo.setValue(moveTo.getValue() + 1);
           return;
         }
 
@@ -534,7 +427,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
         }
 
         if (o == left) {
-          slider.setValue(slider.getValue() - 1);
+          moveTo.setValue(moveTo.getValue() - 1);
           return;
         }
 
@@ -590,12 +483,12 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
           attachButton.setText("detach");
           controller.setEnabled(false);
           pinList.setEnabled(false);
-          slider.setEnabled(true);
+          moveTo.setEnabled(true);
         } else {
           attachButton.setText("attach");
           controller.setEnabled(true);
           pinList.setEnabled(true);
-          slider.setEnabled(false);
+          moveTo.setEnabled(false);
         }
 
         if (servo.isEnabled()) {
@@ -635,12 +528,12 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
         Double pos = servo.getPos();
         if (pos != null) {
           boundPos.setText(Double.toString(pos));
-          slider.setValue(pos.intValue());
+          moveTo.setValue(pos.intValue());
         }
 
         // In the inverted case, these are reversed
-        slider.setMinimum(servo.getMin().intValue());
-        slider.setMaximum(servo.getMax().intValue());
+        moveTo.setMinimum(servo.getMin().intValue());
+        moveTo.setMaximum(servo.getMax().intValue());
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
@@ -722,20 +615,47 @@ public class HobbyServoGui extends ServiceGui implements ActionListener {
   public void removeListeners() {
     controller.removeActionListener(this);
     pinList.removeActionListener(this);
-    slider.removeChangeListener(sliderListener);
-    mapInputSlider.removeChangeListener(mapInputSliderListener);
-    mapOutputSlider.removeChangeListener(mapOutputSliderListener);
-    mapInputSlider.removeMouseListener(mapInputSliderListener);
-    mapOutputSlider.removeMouseListener(mapOutputSliderListener);
+    moveTo.removeChangeListener(this);
+    mapInputSlider.removeChangeListener(this);
+    mapOutputSlider.removeChangeListener(this);
   }
 
   public void restoreListeners() {
     controller.addActionListener(this);
     pinList.addActionListener(this);
-    slider.addChangeListener(sliderListener);
-    mapInputSlider.addChangeListener(mapInputSliderListener);
-    mapOutputSlider.addChangeListener(mapOutputSliderListener);
-    mapInputSlider.addMouseListener(mapInputSliderListener);
-    mapOutputSlider.addMouseListener(mapOutputSliderListener);
+    moveTo.addChangeListener(this);
+    mapInputSlider.addChangeListener(this);
+    mapOutputSlider.addChangeListener(this);
   }
-}
+
+  @Override
+  public void stateChanged(ChangeEvent e) {
+    Object o = e.getSource();
+    if (!((JSlider) o).getValueIsAdjusting()) {
+      if (moveTo.equals(o)) {
+        moving.setVisible(true);
+        send("moveTo", moveTo.getValue());
+      }
+      
+      if (mapInputSlider.equals(o)) {
+        minInput.setText(String.format("%d", mapInputSlider.getLowValue()));
+        maxInput.setText(String.format("%d", mapInputSlider.getHighValue()));
+        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
+            Double.parseDouble(maxOutput.getText()));
+      }
+      
+      if (mapOutputSlider.equals(o)) {
+        if (mapOutputSlider.getInverted()) {
+          minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+          maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+        } else {
+          minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+          maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+        }
+        
+        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
+            Double.parseDouble(maxOutput.getText()));
+      }
+    }
+    }
+  }

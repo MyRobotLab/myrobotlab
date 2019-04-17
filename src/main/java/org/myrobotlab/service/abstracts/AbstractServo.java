@@ -375,6 +375,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
         send(controller, "servoEnable", this);
       }
     }
+    enabled = true;
   }
 
   @Override
@@ -532,7 +533,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
     targetPos = newPos;
 
     if (!isEnabled()) {
-      if (newPos != lastPos || !getAutoDisable()) {
+      // if (newPos != lastPos || !getAutoDisable()) {
+      if (newPos != lastPos || !isEnabled()) {      
         enable();
       }
     }
