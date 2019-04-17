@@ -2158,7 +2158,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(false);
+      Platform.setVirtual(true);
 
       boolean isDone = true;
 
