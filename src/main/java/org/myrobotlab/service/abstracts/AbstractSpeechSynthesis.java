@@ -104,10 +104,25 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       }
     }
 
+    /**
+     * build a clean string key from parts
+     */
     public String toString() {
-      // return String.format("%s %s %s %s", name, gender, locale,
-      // voiceProvider);
-      return String.format("%s %s %s", name, gender, locale);
+
+      StringBuilder sb = new StringBuilder();
+      if (name != null) {
+        sb.append(name);
+      }
+      if (gender != null) {
+        sb.append(" ");
+        sb.append(gender);
+      }
+      if (locale != null) {
+        sb.append(" ");
+        sb.append(locale);
+      }
+
+      return sb.toString();
     }
 
     public void setInstalled(boolean b) {
@@ -200,6 +215,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   // FIXME - why is this in english - does it make sense ? - should probably not
   // be here
   public String confirmationString = "did you say %s ?";
+
+  protected Map<String, Voice> voiceKeyIndex = new TreeMap<String, Voice>();
 
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
@@ -844,6 +861,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       broadcastState();
       return true;
     }
+
+    if (voiceKeyIndex.containsKey(name)) {
+      voice = voiceKeyIndex.get(name);
+      broadcastState();
+      return true;
+    }
     error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
     return false;
   }
@@ -871,6 +894,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       warn(String.format("%s was already added %s", v.getName(), v));
     }
     voices.put(name, v);
+    voiceKeyIndex.put(v.toString(), v);
     if (v.locale != null) {
       String langDisplay = v.locale.getDisplayLanguage();
       String langCode = v.locale.getLanguage();
@@ -903,27 +927,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public void stop() {
     audioFile.stop();
   }
-
-  /*
-   * public boolean cacheContains(String filename) { File file = new
-   * File(globalFileCacheDir + File.separator + filename); return file.exists();
-   * }
-   * 
-   * public AudioData playCachedFile(String filename) { return
-   * audioFile.play(globalFileCacheDir + File.separator + filename); }
-   * 
-   * public void cache(String filename, byte[] data, String toSpeak) throws
-   * IOException { File file = new File(globalFileCacheDir + File.separator +
-   * filename); File parentDir = new File(file.getParent()); if
-   * (!parentDir.exists()) { parentDir.mkdirs(); } FileOutputStream fos = new
-   * FileOutputStream(globalFileCacheDir + File.separator + filename);
-   * fos.write(data); fos.close(); // Now append the journal entry to the
-   * journal.txt file FileWriter journal = new FileWriter(globalFileCacheDir +
-   * File.separator + journalFilename, true); journal.append(filename + "," +
-   * toSpeak + "\r\n"); journal.close(); }
-   * 
-   * public static String getGlobalFileCacheDir() { return globalFileCacheDir; }
-   */
 
   public String setAudioEffects(String audioEffects) {
     return audioEffects;
