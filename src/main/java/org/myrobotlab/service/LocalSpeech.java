@@ -135,44 +135,43 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     // voices returned from local app
     String voicesText = null;
-
+    
     if (platform.isWindows()) {
       voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
 
       log.info("cmd {}", voicesText);
-           
+
       String[] lines = voicesText.split(System.getProperty("line.separator"));
       for (String line : lines) {
-        // String[] parts = cmd.split(" ");
-        // String gender = "female"; // unknown
-        String lang = "en-US"; // unknown
-        
 
         if (line.startsWith("Exit")) {
           break;
         }
+        
         String[] parts = line.split(" ");
-        if (parts.length < 6) {
-          continue;
-        }
-        // lame-ass parsing ..
+
+        // first piece of data better be a digit
         String voiceProvider = parts[0];
-        String voiceName = parts[2];//line.trim();
-        // is line start with a number ? yes it's ( maybe ) a voice...
-        String langName = parts[5];
-        if ("French".equals(langName)) {
-          lang = "fr";
+        try {
+          Integer.parseInt(voiceProvider);
+        } catch(Exception e) {
+          log.error("expecting voice to start with id [{}]", line);
+          continue;
         }
         
-        try {
-          // verify integer
-          Integer.parseInt(voiceProvider);
-          // voice name cause issues because of spaces or (null), let's just use
-          // original number as name...
-          addVoice(voiceName, null, lang, voiceProvider);
-        } catch (Exception e) {
-          continue;
+        // Because there is such variation in what is returned we can't safely parse the data
+        // and it just becomes easier to send the whole line back - the "voice" will need to be specified as such.
+        // This at least promotes clarity with what is going on.
+        
+        String lang = null;
+        if (line.toLowerCase().contains("french") || line.toLowerCase().contains("français")) {
+          lang = "fr-FR";
         }
+        if (line.toLowerCase().contains("english")) {
+          lang = "en";
+        }
+
+        addVoice(line, null, lang, voiceProvider);
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772

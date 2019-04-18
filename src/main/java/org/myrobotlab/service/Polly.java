@@ -244,8 +244,7 @@ public class Polly extends AbstractSpeechSynthesis {
     // test overriding default
 
     // test setting Runtime.locale
-    Platform platform = Platform.getLocalInstance();
-    platform.setVirtual(true);
+    Platform.setVirtual(true);
 
     LoggingFactory.init(Level.INFO);
 
@@ -259,6 +258,7 @@ public class Polly extends AbstractSpeechSynthesis {
 
     // polly.setLanguage("de");
     log.info("polly voice is {}", polly.getVoice());
+    polly.speak("allo there my name is nicole");
 
     boolean b = true;
     if (b) {
