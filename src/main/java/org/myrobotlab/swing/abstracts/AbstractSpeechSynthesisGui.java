@@ -48,7 +48,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.image.Util;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.Runtime;
@@ -262,11 +261,11 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
       public void run() {
         Object o = event.getSource();
         if (o == voices) {
-          String v = (String) voices.getSelectedItem();
-          if (v.length() > 0) {
-            String[] vparts = v.split(" ");
-            send("setVoice", vparts[0]);
-          }
+          String voiceKey = (String) voices.getSelectedItem();
+          // if (v.length() > 0) {
+           //  String[] vparts = v.split(" ");
+            send("setVoice", voiceKey);
+          // }
         }
 
         if (o == voiceEffectFiles) {
@@ -317,11 +316,14 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   // from locale)
   // FIXME - display Locale as en-GB vs en_GB
   String display(Voice voice) {
+    /*
     StringBuilder display = new StringBuilder();
     display.append(voice.getName());
     display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal().toLanguageTag());
     display.append((voice.getGender() == null) ? "" : " " + voice.getGender());
     return display.toString();
+    */
+    return voice.toString();
   }
 
   // FIXME - CERTAINLY SHOULDN"T BE PROCESSED EVERY TIME IT SPEAKS !!!
