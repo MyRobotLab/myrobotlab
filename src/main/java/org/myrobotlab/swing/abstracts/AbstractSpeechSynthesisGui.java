@@ -48,7 +48,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 
 import org.myrobotlab.image.Util;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.Runtime;

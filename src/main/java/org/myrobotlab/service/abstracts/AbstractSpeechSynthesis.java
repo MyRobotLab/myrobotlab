@@ -891,7 +891,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     Voice v = new Voice(name, gender, lang, voiceProvider);
     log.info("adding voice {}", v);
     if (voices.containsKey(name)) {
-      warn(String.format("%s was already added %s", v.getName(), v));
+      log.info(String.format("%s was already added %s", v.getName(), v));
     }
     voices.put(name, v);
     voiceKeyIndex.put(v.toString(), v);
