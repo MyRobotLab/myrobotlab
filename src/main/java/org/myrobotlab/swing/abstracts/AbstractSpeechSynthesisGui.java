@@ -238,7 +238,8 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
    * publishStartSpeaking text since publishStartSpeaking is after a
    * pre-processor/parser
    * 
-   * @param toSpeak - speech requested to speak
+   * @param toSpeak
+   *          - speech requested to speak
    */
   public void onSpeechRequested(String toSpeak) {
     lastUtterance.setText(toSpeak);
@@ -262,10 +263,7 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
         Object o = event.getSource();
         if (o == voices) {
           String voiceKey = (String) voices.getSelectedItem();
-          // if (v.length() > 0) {
-           //  String[] vparts = v.split(" ");
-            send("setVoice", voiceKey);
-          // }
+          send("setVoice", voiceKey);
         }
 
         if (o == voiceEffectFiles) {
@@ -288,14 +286,6 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           send("stop");
         }
 
-        /*
-         * wont work because AudioProcessor wont close file :( <pre> if (o ==
-         * purgeCache) { send("purgeCache"); }
-         * 
-         * if (o == purgeFile) { send("purgeFile", lastAudioData.getFileName());
-         * } </pre>
-         */
-
         if (o == save) {
           // save keys if any
           for (String keyName : keys.keySet()) {
@@ -314,17 +304,6 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
 
   // TODO - add country flag instead of code - could add language name (it comes
   // from locale)
-  // FIXME - display Locale as en-GB vs en_GB
-  String display(Voice voice) {
-    /*
-    StringBuilder display = new StringBuilder();
-    display.append(voice.getName());
-    display.append((voice.getLocal() == null) ? "" : " " + voice.getLocal().toLanguageTag());
-    display.append((voice.getGender() == null) ? "" : " " + voice.getGender());
-    return display.toString();
-    */
-    return voice.toString();
-  }
 
   // FIXME - CERTAINLY SHOULDN"T BE PROCESSED EVERY TIME IT SPEAKS !!!
   public void onState(AbstractSpeechSynthesis speech) {
@@ -342,12 +321,12 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
           for (Voice voice : vs) {
             // formatting display
             // TODO add flags for language
-            voices.addItem(display(voice));
+            voices.addItem(voice.toString());
           }
         }
 
         if (voices.getItemCount() > 0 && speech.getVoice() != null && !speech.getVoice().getName().equals(voices.getSelectedItem())) {
-          voices.setSelectedItem(display(speech.getVoice()));
+          voices.setSelectedItem(speech.getVoice().toString());
         }
 
         // keys
