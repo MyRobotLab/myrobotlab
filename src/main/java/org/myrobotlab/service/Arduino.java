@@ -66,6 +66,8 @@ import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
+import akka.event.AddressTerminatedTopic;
+
 public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
     UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher, EncoderController {
 
@@ -279,19 +281,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return;
     } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
       // need to determine the encoder type!
-      attachEncoderControl((EncoderControl) service);
+      attach((EncoderControl) service);
       return;
     }
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
-  }
-
-  @Override
-  public void attach(EncoderControl encoder, Integer pin) throws Exception {
-    attachEncoderControl(encoder);
-    // here we want to instruct the arduino via mrl comm to attach an
-    // MrlAmt203Encoder device.
-    // TODO: is this needed?
-    // encoder.attach(this, pin);
   }
 
   @Override
@@ -339,23 +332,30 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * @param encoder
    *          - the encoder control to attach
+   * @throws Exception 
    */
-  public void attachEncoderControl(EncoderControl encoder) {
-    Integer deviceId = attachDevice(encoder, new Object[] { encoder.getPin() });
+  @Override
+  public void attach(EncoderControl encoder) throws Exception {
+    Integer deviceId =  null; 
     // send data to micro-controller
 
     // TODO: update this with some enum of various encoder types..
     // for now it's just AMT203 ...
     int type = 0;
+    Integer address = null;
     if (encoder instanceof Amt203Encoder) {
       type = 0;
+      address = getAddress(((Amt203Encoder)encoder).getPin());
     } else if (encoder instanceof As5048AEncoder) {
       type = 1;
+      address = getAddress(((As5048AEncoder)encoder).getPin());
+    } else {
+      error("unknown encoder type {}", encoder.getClass().getName());
     }
+    attachDevice(encoder, new Object[] { address }); // FIXME - don't know why this is necessary - Attachable is only needed
+    msg.encoderAttach(deviceId, type, address);
 
-    msg.encoderAttach(deviceId, type, pinMap.get(encoder.getPin()).getAddress());
-
-    encoder.setController(this);
+    encoder.attach(this);
 
   }
 
@@ -1639,7 +1639,18 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
-    EncoderData data = new EncoderData(ec.getName(), ec.getPin(), position);
+    String pin = null;
+    if (ec instanceof Amt203Encoder) {
+      // type = 0;
+      pin = ((Amt203Encoder)ec).getPin();
+    } else if (ec instanceof As5048AEncoder) {
+      // type = 1;
+      pin = ((As5048AEncoder)ec).getPin();
+    } else {
+      error("unknown encoder type {}", ec.getClass().getName());
+    }
+    
+    EncoderData data = new EncoderData(ec.getName(), pin, position);
     return data;
   }
 
@@ -2184,10 +2195,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(false);
+      Platform.setVirtual(true);
     
-      boolean isDone = true;
-
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
 
@@ -2199,7 +2208,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // mega.getBoardTypes();
       // mega.setBoardMega();
       // mega.setBoardUno();
-      mega.connect("COM7");
+      mega.connect("COM8");
 
       /*
        * Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
@@ -2209,7 +2218,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // log.info("port names {}", mega.getPortNames());
 
       HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
-      servo.load();
+      // servo.load();
       log.info("rest is {}", servo.getRest());
       servo.save();
       // servo.setPin(8);
@@ -2230,6 +2239,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
       servo.invoke("moveTo", 120);
       */
+
+      boolean isDone = true;
 
       if (isDone) {
         return;

@@ -27,8 +27,6 @@ package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,131 +58,90 @@ import org.slf4j.Logger;
 import com.jidesoft.swing.RangeSlider;
 
 /**
+ * <pre>
  * HobbyServo SwingGui - displays details of HobbyServo state Lesson learned !
  * Servos to properly function need to be attached to a controller This gui
  * previously sent messages to the controller. To simplify things its important
  * to send messages only to the bound HobbyServo - and let it attach to the
  * controller versus sending messages directly to the controller. 1 display - 1
  * service - keep it simple
+ * 
+ * FIXME - iterate through controller types
+ * FIXME - test "inverted" and changing max/min input/output
+ * FIXME - stay true (especially to position) of position desired vs position reported (depending on encoder)
  *
+ * </pre>
  */
 public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeListener {
-
-  boolean mousePressed;
-  // if (!source.getValueIsAdjusting()) {
-/*
-  private class SliderListener implements ChangeListener {
-
-    @Override // TODO - check for single event
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
-      if (mousePressed) {
-        if (swingGui != null) {
-          moving.setVisible(true);
-          swingGui.send(boundServiceName, "moveTo", Integer.valueOf(moveTo.getValue()));
-        } else {
-          log.error("can not send message myService is null");
-        }
-      }
-    }
-
-  }
-*/
-
- 
-  public final static Logger log = LoggerFactory.getLogger(HobbyServoGui.class);
-  private String lastControllerUsed;
   static final long serialVersionUID = 1L;
 
-  JLabel boundPos = new JLabel("90");
-  JButton attachButton = new JButton("attach");
-  JButton export = new JButton("Export");
-  JButton restButton = new JButton("Rest :");
-  JTextField velocity = new JTextField("-1");
-  JTextField rest = new JTextField("");
-  JLabel disableDelayIfVelocityL = new JLabel("Extra delay ( ms ): ");
-  JLabel defaultDisableDelayNoVelocityL = new JLabel("Max velocity delay ( ms ) : ");
+  public final static Logger log = LoggerFactory.getLogger(HobbyServoGui.class);
 
-  ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif"); // FIXME - change
-                                                               // to abstract ?
-  ImageIcon movingIconNoVelocityControl = Util.getImageIcon("Servo/gifRed.gif");// FIXME
-                                                                                // -
-                                                                                // change
-                                                                                // to
-                                                                                // abstract
-                                                                                // ?
+  String lastController;
+
+  JLabel targetPos = new JLabel();
+  JLabel currentPos = new JLabel("90.0");
+  
+  JButton attach = new JButton("attach");
+  JButton attachEncoder = new JButton("attach");
+  JButton export = new JButton("export");
+  JButton restButton = new JButton("rest");
+  JTextField velocity = new JTextField("         ");
+  JTextField rest = new JTextField("");
+
+  ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif");
 
   JLabel moving = new JLabel(movingIcon);
 
-  JButton SaveButton = new JButton("save");
-  JButton enableButton = new JButton("enable");
-  JCheckBox autoDisable = new JCheckBox("autoDisable");
-  JCheckBox setInverted = new JCheckBox("setInverted");
+  JButton save = new JButton("save");
+  JButton enable = new JButton("enable");
+  JCheckBox autoDisable = new JCheckBox("auto disable");
+  JCheckBox setInverted = new JCheckBox("set inverted");
   JSlider moveTo = new JSlider(0, 180, 90);
-  RangeSlider mapInputSlider = new RangeSlider();
-  JLabel InputL = new JLabel("input map :");
-  JLabel OutputL = new JLabel("output map : ");
-  Integer mapInputSliderMinValue = 0;
-  Integer mapInputSliderMaxValue = 180;
-  Integer mapOutputSliderMinValue = 0;
-  Integer mapOutputSliderMaxValue = 180;
-  RangeSlider mapOutputSlider = new RangeSlider();
+
+  RangeSlider mapInput = new RangeSlider();
+  RangeSlider mapOutput = new RangeSlider();
 
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
   JComboBox<String> controller = new JComboBox<>();
+  JComboBox<String> encoder = new JComboBox<>();
   JComboBox<String> pinList = new JComboBox<>();
 
-  JTextField posMin = new JTextField("0");
-  JTextField posMax = new JTextField("180");
   JTextField minInput = new JTextField("0");
   JTextField maxInput = new JTextField("180");
   JTextField minOutput = new JTextField("0");
   JTextField maxOutput = new JTextField("180");
 
   JButton sweepButton = new JButton("sweep");
-  // JButton eventsButton = new JButton("events");
 
-  JLabel imageenabled = new JLabel();
-  JLabel velocityPic = new JLabel();
-  ImageIcon enabled = Util.getImageIcon("enabled.png");
-  ImageIcon velocityPng = Util.getImageIcon("velocity.png");
+  JLabel enabled = new JLabel();
+  
+  JSlider powerSlider = new JSlider(JSlider.VERTICAL, 0, 20, 4);
 
   public HobbyServoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
-    
+
     for (int i = 0; i < 54; i++) {
       pinList.addItem(i + "");
     }
 
-    posMin.setPreferredSize(new Dimension(50, 24));
-    posMax.setPreferredSize(new Dimension(50, 24));
-    minInput.setPreferredSize(new Dimension(50, 24));
-    maxInput.setPreferredSize(new Dimension(50, 24));
-    minOutput.setPreferredSize(new Dimension(50, 24));
-    maxOutput.setPreferredSize(new Dimension(50, 24));
+    mapInput.setMinimum(0);
+    mapInput.setMaximum(180);
 
-    minInput.setBackground(new Color(188, 208, 244));
-    maxInput.setBackground(new Color(188, 208, 244));
-    minOutput.setBackground(new Color(200, 238, 206));
-    maxOutput.setBackground(new Color(200, 238, 206));
+    mapOutput.setMinimum(0);
+    mapOutput.setMaximum(180);
 
-    mapInputSlider.setMinimum(0);
-    mapInputSlider.setMaximum(180);
+    targetPos.setFont(targetPos.getFont().deriveFont(32.0f));
+    targetPos.setHorizontalAlignment(JLabel.RIGHT);
+    
+    enabled.setIcon(Util.getImageIcon("enabled.png"));
+    currentPos.setFont(targetPos.getFont().deriveFont(32.0f));
+    currentPos.setForeground(Color.LIGHT_GRAY);
 
-    mapOutputSlider.setMinimum(0);
-    mapOutputSlider.setMaximum(180);
-
-    velocity.setPreferredSize(new Dimension(50, 24));
-    velocity.setSize(new Dimension(50, 24));
-
-    boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
-    boundPos.setHorizontalAlignment(JLabel.RIGHT);
-    imageenabled.setIcon(enabled);
-    velocityPic.setIcon(velocityPng);
     autoDisable.setSelected(false);
     setInverted.setSelected(false);
-    
 
     moveTo.setForeground(Color.white);
     moveTo.setBackground(Color.DARK_GRAY);
@@ -194,128 +151,90 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     right.setBackground(Color.DARK_GRAY);
     moveTo.setMajorTickSpacing(30);
     moveTo.setPaintTicks(true);
-    moveTo.setPaintTicks(true);
     moveTo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     moveTo.setPaintLabels(true);
 
-    mapInputSlider.setBackground(new Color(188, 208, 244));
-    mapOutputSlider.setBackground(new Color(200, 238, 206));
-
+    // FIXME shouldn't all this be in addListener() ?
     export.addActionListener(this);
-    SaveButton.addActionListener(this);
+    save.addActionListener(this);
     left.addActionListener(this);
     right.addActionListener(this);
     controller.addActionListener(this);
-    attachButton.addActionListener(this);
-    enableButton.addActionListener(this);
+    attach.addActionListener(this);
+    enable.addActionListener(this);
     autoDisable.addActionListener(this);
     setInverted.addActionListener(this);
     sweepButton.addActionListener(this);
-    // eventsButton.addActionListener(this);
     pinList.addActionListener(this);
     restButton.addActionListener(this);
+    
+    // JPanel north = new JPanel(new GridLayout(0, 3));
+    north.setLayout(new GridLayout(0, 3));
+    // JPanel controllerPanel = new JPanel(new GridLayout(0, 4));
+    JPanel controllerPanel = new JPanel();
+    controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
+    controllerPanel.add(attach);
+    controllerPanel.add(controller);
+    controllerPanel.add(new JLabel(" pin"));
+    controllerPanel.add(pinList);
+    
+    JPanel encoderPanel = new JPanel();
+    encoderPanel.setBorder(BorderFactory.createTitledBorder("encoder"));
+    encoderPanel.add(attachEncoder);
+    encoderPanel.add(encoder);
 
-    // addTopLeft(2, boundPos, 3, s,velocity,setVelocity );
+    JPanel powerPanel = new JPanel();
+    powerPanel.setBorder(BorderFactory.createTitledBorder("power"));
+    powerPanel.add(new JLabel("speed"));
+    powerPanel.add(velocity);
+    powerPanel.add(enable);
+    powerPanel.add(autoDisable);
+    
+    north.add(controllerPanel);
+    north.add(encoderPanel);
+    north.add(powerPanel);
 
-    JPanel controllerP = new JPanel();
-    Border borderController = BorderFactory.createTitledBorder("Controller");
-    controllerP.setBorder(borderController);
-    JLabel pinlabel = new JLabel("< pin");
+    //////////////////////////
 
-    controllerP.add(attachButton);
-    controllerP.add(controller);
-    controllerP.add(pinList);
-    controllerP.add(pinlabel);
+    south.setLayout(new GridLayout(0, 2));
+    Border bordermap = BorderFactory.createTitledBorder("limits");
+    south.setBorder(bordermap);
+    south.add(mapInput);
+    south.add(mapOutput);
+    south.add(new JLabel("input map"));
+    south.add(new JLabel("output map"));
+    south.add(minInput);
+    south.add(minOutput);
+    south.add(maxInput);
+    south.add(maxOutput);
+    south.add(save);
+    south.add(export);
 
-    JPanel map = new JPanel(new GridLayout(5, 2));
-    Border bordermap = BorderFactory.createTitledBorder("HobbyServo limits :");
-    map.setBorder(bordermap);
-    map.add(mapInputSlider);
-    map.add(mapOutputSlider);
-    map.add(InputL);
-    map.add(OutputL);
-    map.add(minInput);
-    map.add(minOutput);
-    map.add(maxInput);
-    map.add(maxOutput);
-    SaveButton.setBackground(Color.RED);
-    map.add(SaveButton);
-    map.add(export);
-    // map.add(updateMapButton);
-
-    // powerSettings.add(disableDelayIfVelocityL);
-
-    // powerSettings.add(defaultDisableDelayNoVelocityL);
-    // powerSettings.add(defaultDisableDelayNoVelocity);
-
-    JPanel powerMain = new JPanel();
-    powerMain.add(enableButton);
-    powerMain.add(autoDisable);
-
-    JPanel extra = new JPanel(new GridLayout(1, 1));
-    Border settingsborder = BorderFactory.createTitledBorder("Extra :");
-    extra.setBorder(settingsborder);
-    JPanel sweep = new JPanel(new GridLayout(3, 2));
-    sweep.add(setInverted);
-    sweep.add(sweepButton);
-    // sweep.add(eventsButton);
-    sweep.add(new JSeparator(), BorderLayout.PAGE_END);
-    sweep.add(restButton);
-    sweep.add(rest);
-    sweep.setBackground(Color.WHITE);
-
-    JPanel velocityP = new JPanel();
-    Border borderVelocityP = BorderFactory.createTitledBorder("Velocity :");
-    velocityP.setBorder(borderVelocityP);
-    velocityP.setBackground(Color.WHITE);
-
-    JPanel velocityPicP = new JPanel();
-    velocityPicP.add(velocityPic);
-    velocityPicP.setBackground(Color.WHITE);
-
-    JPanel velocitySetings = new JPanel();
-    velocitySetings.add(velocity);
-
-    velocitySetings.setBackground(Color.WHITE);
-    velocityP.add(velocitySetings);
-    velocityP.add(velocityPicP);
-
-    extra.add(sweep);
-
-    extra.setBackground(Color.WHITE);
-
-    JPanel power = new JPanel(new GridLayout(1, 1));
-    Border extraborder = BorderFactory.createTitledBorder("Power");
-    power.setBorder(extraborder);
-    power.add(powerMain);
-
-    JPanel northPanel = new JPanel(new GridLayout());
-    northPanel.add(controllerP);
-    northPanel.add(power);
-
-    display.add(northPanel, BorderLayout.NORTH);
-    display.add(right, BorderLayout.EAST);
-
-    JPanel centerPanel = new JPanel(new GridLayout(2, 1));
-
-    JPanel centerPanelStatus = new JPanel(new GridLayout(1, 4));
-    centerPanelStatus.setBackground(Color.white);
-    centerPanelStatus.add(boundPos);
-    centerPanelStatus.add(imageenabled);
+    JPanel centerPanelStatus = new JPanel(new GridLayout(0, 5));
+    centerPanelStatus.setBackground(Color.WHITE);
+    centerPanelStatus.add(targetPos);
+    centerPanelStatus.add(enabled);
     centerPanelStatus.add(moving);
+    centerPanelStatus.add(currentPos);
+    centerPanelStatus.add(powerSlider);
 
-    centerPanelStatus.add(velocityP);
-    centerPanelStatus.add(extra);
+    center.setLayout(new GridLayout(0,1));
+    center.add(centerPanelStatus);
+    center.add(moveTo);
 
-    centerPanel.add(centerPanelStatus);
-    centerPanel.add(moveTo);
-    centerPanel.setMinimumSize(new Dimension(50, 200));
-    centerPanel.setSize(new Dimension(50, 200));
-    display.add(centerPanel, BorderLayout.CENTER);
+    // FIXUP -----------------
+    south.add(setInverted);
+    south.add(sweepButton);
+    south.add(new JSeparator(), BorderLayout.PAGE_END);
+    south.add(restButton);
+    south.add(rest);
+
+    // FIXUP -----------------
+
+    display.add(right, BorderLayout.EAST);
     display.add(left, BorderLayout.WEST);
-    display.add(map, BorderLayout.SOUTH);
-
-    refreshControllers();
+  
+    refresh();
   }
 
   // SwingGui's action processing section - data from user
@@ -325,37 +244,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       @Override
       public void run() {
         Object o = event.getSource();
-        // log.error(o.toString());
-        if (o == controller) {
-          String controllerName = (String) controller.getSelectedItem();
-          log.debug("controller event {}", controllerName);
-          if (controllerName != null && controllerName.length() > 0) {
 
-            // NOT WORTH IT - JUST BUILD 48 PINS !!!
-            // ServoController sc = (ServoController)
-            // Runtime.getService(controllerName);
-
-            // NOT WORTH THE TROUBLE !!!!
-            // @SuppressWarnings("unchecked")
-            // ArrayList<Pin> pinList = (ArrayList<Pin>)
-            // myService.sendBlocking(controllerName, "getPinList");
-            // log.info("{}", pinList.size());
-
-            // FIXME - get Local services relative to the servo
-            // pinModel.removeAllElements();
-            // pinModel.addElement(null);
-
-            // for (int i = 0; i < pinList.size(); ++i) {
-            // pinModel.addElement(pinList.get(i).pin);
-            // }
-
-            // pin.invalidate();
-
-          }
-        }
-
-        if (o == attachButton) {
-          if (attachButton.getText().equals("attach")) {
+        if (o == attach) {
+          if (attach.getText().equals("attach")) {
             send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), new Double(moveTo.getValue()));
           } else {
             send("detach", controller.getSelectedItem());
@@ -363,17 +254,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           return;
         }
 
-        if (o == enableButton) {
-          if (enableButton.getText().equals("enable")) {
-            if (!attachButton.getText().equals("attach")) {
-              send("enable");
-              imageenabled.setVisible(true);
-            } else {
-              log.error("HobbyServo is not attached");
-            }
+        if (o == enable) {
+          if (enable.getText().equals("enable")) {
+            send("enable");
+            enable.setText("disable");
           } else {
             send("disable");
-            imageenabled.setVisible(false);
+            enable.setText("enable");
           }
           return;
         }
@@ -402,7 +289,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           return;
         }
 
-        if (o == SaveButton) {
+        if (o == save) {
           send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
               Double.parseDouble(maxOutput.getText()));
           send("setVelocity", Double.parseDouble(velocity.getText()));
@@ -449,25 +336,26 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   @Override
   public void subscribeGui() {
     subscribe("publishMoveTo");
+    subscribe("refreshEncoders");
     subscribe("refreshControllers");
   }
 
-  // FIXME - runtime should handle all unsubscribe of teardown
   @Override
   public void unsubscribeGui() {
     unsubscribe("publishMoveTo");
+    unsubscribe("refreshEncoders");
+    unsubscribe("refreshControllers");
   }
-  
+
   public void onMoveTo(final HobbyServo servo) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        boundPos.setText(servo.getPos() + "");
+        targetPos.setText(servo.getPos() + "");
       }
     });
 
-   }
-  
+  }
 
   synchronized public void onState(final HobbyServo servo) {
 
@@ -477,9 +365,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
         removeListeners();
         String controllerName = servo.getControllerName();
-        lastControllerUsed = controllerName;
+        lastController = controllerName;
 
-        refreshControllers();
+        refresh();
 
         if (controllerName != null) {
           controller.setSelectedItem(controllerName);
@@ -489,33 +377,27 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         if (servoPin != null)
           pinList.setSelectedItem(servoPin);
         if (servo.isAttached()) {
-          attachButton.setText("detach");
+          attach.setText("detach");
           controller.setEnabled(false);
           pinList.setEnabled(false);
           moveTo.setEnabled(true);
         } else {
-          attachButton.setText("attach");
+          attach.setText("attach");
           controller.setEnabled(true);
           pinList.setEnabled(true);
           moveTo.setEnabled(false);
         }
 
         if (servo.isEnabled()) {
-          enableButton.setText("disable");
-          imageenabled.setVisible(true);
+          enable.setText("disable");
+          enabled.setVisible(true);
         } else {
-          enableButton.setText("enable");
-          imageenabled.setVisible(false);
+          enable.setText("enable");
+          enabled.setVisible(false);
         }
 
-        // FIXME - implement isMoving()
-        // if (servo.isMoving() && servo.getSpeed() > -0) {
         if (servo.getSpeed() != null) {
           moving.setIcon(movingIcon);
-          moving.setVisible(true);
-          // no velocity control==no magic
-        } else if (servo.isEnabled() && (servo.getSpeed() == null || servo.getSpeed() <= 0)) {
-          moving.setIcon(movingIconNoVelocityControl);
           moving.setVisible(true);
         } else {
           moving.setVisible(false);
@@ -536,7 +418,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         rest.setText(servo.getRest() + "");
         Double pos = servo.getPos();
         if (pos != null) {
-          boundPos.setText(Double.toString(pos));
+          targetPos.setText(Double.toString(pos));
           moveTo.setValue(pos.intValue());
         }
 
@@ -544,19 +426,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         moveTo.setMinimum(servo.getMin().intValue());
         moveTo.setMaximum(servo.getMax().intValue());
 
-        posMin.setText(servo.getMin() + "");
-        posMax.setText(servo.getMax() + "");
-        velocity.setText(servo.getSpeed() + "");
+        velocity.setText((servo.getSpeed() == null) ? "           " : servo.getSpeed() + "");
 
-        if (servo.getMin() < mapInputSliderMinValue) {
-          mapInputSliderMinValue = servo.getMin().intValue();
-          mapInputSlider.setMinimum(mapInputSliderMinValue);
-        }
-
-        if (servo.getMax() > mapInputSliderMaxValue) {
-          mapInputSliderMaxValue = servo.getMax().intValue();
-          mapInputSlider.setMaximum(mapInputSliderMaxValue);
-        }
+        mapInput.setMinimum(servo.getMin().intValue());
+        mapInput.setMaximum(servo.getMax().intValue());
 
         double minOutputTmp = servo.getMinOutput();
         double maxOutputTmp = servo.getMaxOutput();
@@ -566,35 +439,21 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           maxOutputTmp = servo.getMinOutput();
         }
 
-        if (servo.getMinOutput() < mapOutputSliderMinValue) {
-          mapOutputSliderMinValue = servo.getMinOutput().intValue();
-          mapOutputSlider.setMinimum(mapOutputSliderMinValue);
-        }
-
-        if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-          mapOutputSliderMaxValue = servo.getMaxOutput().intValue();
-          mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
-        }
-
-        mapOutputSlider.setInverted(servo.isInverted());
+        mapOutput.setMinimum(servo.getMinOutput().intValue());
+        mapOutput.setMaximum(servo.getMaxOutput().intValue());
+        mapOutput.setInverted(servo.isInverted());
 
         minInput.setText(servo.getMin() + "");
         maxInput.setText(servo.getMax() + "");
         minOutput.setText(minOutputTmp + "");
         maxOutput.setText(maxOutputTmp + "");
 
-        mapInputSlider.setLowValue(servo.getMin().intValue());
-        mapInputSlider.setHighValue(servo.getMax().intValue());
-        mapOutputSlider.setLowValue(servo.getMinOutput().intValue());
-        mapOutputSlider.setHighValue(servo.getMaxOutput().intValue());
+        mapInput.setLowValue(servo.getMin().intValue());
+        mapInput.setHighValue(servo.getMax().intValue());
+        mapOutput.setLowValue(servo.getMinOutput().intValue());
+        mapOutput.setHighValue(servo.getMaxOutput().intValue());
 
-        /**
-         * <pre>
-         * FIXME - implement if (servo.isSweeping()) {
-         * sweepButton.setText("stop"); } else { sweepButton.setText("sweep"); }
-         */
-
-        restoreListeners();
+        addListeners();
       }
     });
 
@@ -610,61 +469,81 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         for (int i = 0; i < c.size(); ++i) {
           controller.addItem(c.get(i));
         }
-        String controllerName = (currentControllerName != null) ? currentControllerName : lastControllerUsed;
+        String controllerName = (currentControllerName != null) ? currentControllerName : lastController;
         controller.setSelectedItem(controllerName);
         controller.addActionListener((HobbyServoGui) self);
       }
     });
   }
+  
+  public void onRefreshEncoders(final ArrayList<String> c) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        encoder.removeActionListener((HobbyServoGui) self);
+        String currentControllerName = (String) encoder.getSelectedItem();
+        encoder.removeAllItems();
+        for (int i = 0; i < c.size(); ++i) {
+          encoder.addItem(c.get(i));
+        }
+        String encoderName = (currentControllerName != null) ? currentControllerName : lastController;
+        encoder.setSelectedItem(encoderName);
+        encoder.addActionListener((HobbyServoGui) self);
+      }
+    });
+  }
+  
 
-  public void refreshControllers() {
+  public void refresh() {
+    send("refreshEncoders");
     send("refreshControllers");
+    send("broadcastState");
   }
 
   public void removeListeners() {
     controller.removeActionListener(this);
     pinList.removeActionListener(this);
     moveTo.removeChangeListener(this);
-    mapInputSlider.removeChangeListener(this);
-    mapOutputSlider.removeChangeListener(this);
+    mapInput.removeChangeListener(this);
+    mapOutput.removeChangeListener(this);
   }
 
-  public void restoreListeners() {
+  public void addListeners() {
     controller.addActionListener(this);
     pinList.addActionListener(this);
     moveTo.addChangeListener(this);
-    mapInputSlider.addChangeListener(this);
-    mapOutputSlider.addChangeListener(this);
+    mapInput.addChangeListener(this);
+    mapOutput.addChangeListener(this);
   }
 
   @Override
   public void stateChanged(ChangeEvent e) {
     Object o = e.getSource();
-    /*if (!((JSlider) o).getValueIsAdjusting()) */ {
+    /* if (!((JSlider) o).getValueIsAdjusting()) */ {
       if (moveTo.equals(o)) {
         moving.setVisible(true);
         send("moveTo", moveTo.getValue());
       }
-      
-      if (mapInputSlider.equals(o)) {
-        minInput.setText(String.format("%d", mapInputSlider.getLowValue()));
-        maxInput.setText(String.format("%d", mapInputSlider.getHighValue()));
+
+      if (mapInput.equals(o)) {
+        minInput.setText(String.format("%d", mapInput.getLowValue()));
+        maxInput.setText(String.format("%d", mapInput.getHighValue()));
         send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
             Double.parseDouble(maxOutput.getText()));
       }
-      
-      if (mapOutputSlider.equals(o)) {
-        if (mapOutputSlider.getInverted()) {
-          minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-          maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
+
+      if (mapOutput.equals(o)) {
+        if (mapOutput.getInverted()) {
+          minOutput.setText(String.format("%d", mapOutput.getHighValue()));
+          maxOutput.setText(String.format("%d", mapOutput.getLowValue()));
         } else {
-          minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-          maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
+          minOutput.setText(String.format("%d", mapOutput.getLowValue()));
+          maxOutput.setText(String.format("%d", mapOutput.getHighValue()));
         }
-        
+
         send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
             Double.parseDouble(maxOutput.getText()));
       }
-    }
     }
   }
+}

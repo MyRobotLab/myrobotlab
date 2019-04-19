@@ -1631,6 +1631,12 @@ public class Servo extends Service implements ServoControl {
     // TODO Auto-generated method stub
     
   }
+
+  @Override
+  public List<String> refreshEncoders() {
+    // TODO Auto-generated method stub
+    return null;
+  }
   
   //////////  ServoControl methods end  ////////////////////
 

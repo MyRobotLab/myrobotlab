@@ -277,6 +277,12 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * return a list of possible controllers 
    * @return
    */
+  public List<String> refreshEncoders() ;
+  
+  /**
+   * return a list of possible controllers 
+   * @return
+   */
   public List<String> refreshControllers() ;
 
   /**
