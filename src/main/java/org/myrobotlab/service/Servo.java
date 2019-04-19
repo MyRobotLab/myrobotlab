@@ -52,6 +52,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -79,7 +81,7 @@ import org.slf4j.Logger;
  *         necessarily be confused with the inputX which is the input values
  *         sent to the servo
  * 
- */
+ */ 
 
 public class Servo extends Service implements ServoControl {
 
@@ -1005,7 +1007,7 @@ public class Servo extends Service implements ServoControl {
     return maxVelocity;
   }
 
-  public double getVelocity() {
+  public Double getVelocity() {
     return velocity;
   }
 
@@ -1426,7 +1428,6 @@ public class Servo extends Service implements ServoControl {
       } else {
         calibrationWriter.write("# " + this.getName() + ".setPin(" + this.getPin() + ")\n");
       }
-
       // save the servo map
       calibrationWriter.write(this.getName() + ".map(" + this.getMinInput() + "," + this.getMaxInput() + "," + this.getMinOutput() + "," + this.getMaxOutput() + ")\n");
       // if there's a controller reattach it at rest
@@ -1528,38 +1529,9 @@ public class Servo extends Service implements ServoControl {
     return null;
   }
 
-  @Override
-  public void attach(ServoController controller, Integer pin) throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
 
   @Override
   public void attach(ServoDataListener listener) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void attach(String controllerName, Integer pin) throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void detach(ServoController controller) {
     // TODO Auto-generated method stub
     
   }
@@ -1571,19 +1543,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void enable(String pin) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
   public Set<String> getControllers() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Double getMaxSpeed() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -1595,12 +1555,6 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void map(Integer minX, Integer maxX, Integer minY, Integer maxY) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
   public Double moveToBlocking(Integer pos) {
     // TODO Auto-generated method stub
     return null;
@@ -1608,72 +1562,72 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public ServoData publishServoData(ServoStatus eventType, Double currentPosUs) {
-    // TODO Auto-generated method stub
-    return null;
+    ServoData sd = new ServoData(eventType, this.getName(), currentPosUs, this.targetPos , this.getSpeed() );
+    return sd;
   }
 
   @Override
   public void setAcceleration(Double acceleration) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void setAcceleration(Integer acceleration) {
-    // TODO Auto-generated method stub
-    
+    this.acceleration = acceleration;
   }
 
   @Override
   public void setInverted(Boolean invert) {
-    // TODO Auto-generated method stub
-    
+    // TODO: this method should probably go away.. and just be implied if the output min/max are reversed.
+    mapper.setInverted(invert);    
   }
 
   @Override
   public void setMinMax(Integer min, Integer max) {
-    // TODO Auto-generated method stub
-    
+    // TODO Which min/max is this.. input min/max or output min/max?
+    mapper.setMinMaxInput(min, max);
   }
 
   @Override
   public void setPin(Integer pin) {
-    // TODO Auto-generated method stub
-    
+    setPin(""+pin);
   }
 
   @Override
   public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public void setVelocity(Double speed) { 
+    this.velocity = speed;
+  }
+
+  @Override
+  public void setMapper(Mapper m) {
+    this.mapper = m;
+  }
+
+  @Override
+  public Mapper getMapper(Mapper m) {
+    return mapper;
+  }
+
+  @Override
+  public void setOverrideAutoDisable(Boolean val) {
     // TODO Auto-generated method stub
     
   }
 
   @Override
-  public void setRest(Integer rest) {
+  public void addIKServoEventListener(IKJointAngleListener listener) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addIKServoEventListener(IKJointAnglePublisher publisher) {
     // TODO Auto-generated method stub
     
   }
 
   @Override
   public void setSpeed(Double speed) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void setSpeed(Integer speed) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void setVelocity(Double speed) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void setVelocity(Integer speed) {
     // TODO Auto-generated method stub
     
   }

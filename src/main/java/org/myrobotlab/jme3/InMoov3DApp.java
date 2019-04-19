@@ -12,6 +12,7 @@ import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.python.jline.internal.Log;
 
@@ -734,17 +735,17 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   // FIXME - race condition, if this method is called before JME is fully
   // initialized :(
   // the result is no servos are successfully added
-  public void addServo(String partName, Servo servo) {
+  public void addServo(String partName, ServoControl servo) {
     if (nodes.containsKey(partName)) {
       Node node = nodes.get(partName);
       Mapper map = maps.get(partName);
-      map.setMinMaxInput(servo.getMinInput(), servo.getMaxInput());
-      double angle = -map.calcOutput(servo.getRest()) + map.calcOutput(servo.getCurrentPos());
+      map.setMinMaxInput(servo.getMin(), servo.getMax());
+      double angle = -map.calcOutput(servo.getRest()) + map.calcOutput(servo.getPos());
       angle *= Math.PI / 180;
       Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));
       Vector3f rotAngle = rotMask.mult((float) angle);
       node.rotate(rotAngle.x, rotAngle.y, rotAngle.z);
-      node.setUserData("currentAngle", (float) map.calcOutput(servo.getCurrentPos()));
+      node.setUserData("currentAngle", (float) map.calcOutput(servo.getPos()));
       nodes.put(partName, node);
       servoToNode.put(servo.getName(), node);
       maps.put(partName, map);
