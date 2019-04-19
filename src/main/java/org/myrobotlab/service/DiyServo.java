@@ -41,6 +41,8 @@ import org.myrobotlab.service.abstracts.AbstractEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.EncoderControl;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
@@ -1019,6 +1021,37 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       Logging.logError(e);
     }
 
+  }
+
+  @Override
+  public Double getVelocity() {
+    return currentVelocity;
+  }
+
+  @Override
+  public void setOverrideAutoDisable(Boolean val) {
+    // TODO WTF    
+  }
+
+  @Override
+  public void addIKServoEventListener(IKJointAngleListener listener) {
+    // TODO WTF
+  }
+
+  @Override
+  public void addIKServoEventListener(IKJointAnglePublisher publisher) {
+    // TODO WTF  
+  }
+
+  @Override
+  public void setSpeed(Double speed) {
+    // TODO WTF
+  }
+
+  @Override
+  public ServoController getController() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

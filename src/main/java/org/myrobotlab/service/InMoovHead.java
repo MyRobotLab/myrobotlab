@@ -8,6 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -22,12 +23,12 @@ public class InMoovHead extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovHead.class);
 
-  transient public Servo jaw;
-  transient public Servo eyeX;
-  transient public Servo eyeY;
-  transient public Servo rothead;
-  transient public Servo neck;
-  transient public Servo rollNeck;
+  transient public ServoControl jaw;
+  transient public ServoControl eyeX;
+  transient public ServoControl eyeY;
+  transient public ServoControl rothead;
+  transient public ServoControl neck;
+  transient public ServoControl rollNeck;
   transient public ServoController controller;
 
   public InMoovHead(String n) {
@@ -46,12 +47,12 @@ public class InMoovHead extends Service {
     jaw.setMinMax(10.0, 25.0);
     eyeX.setMinMax(60.0, 100.0);
     eyeY.setMinMax(50.0, 100.0);
-    neck.setRest(90);
-    rollNeck.setRest(90);
-    rothead.setRest(90);
-    jaw.setRest(10);
-    eyeX.setRest(80);
-    eyeY.setRest(90);
+    neck.setRest(90.0);
+    rollNeck.setRest(90.0);
+    rothead.setRest(90.0);
+    jaw.setRest(10.0);
+    eyeX.setRest(80.0);
+    eyeY.setRest(90.0);
 
     setVelocity(45.0, 45.0, -1.0, -1.0, -1.0, 45.0);
 
@@ -124,12 +125,12 @@ public class InMoovHead extends Service {
         error("controller for head is not connected");
       }
     }
-    neck.attach(controller, headYPin, neck.getRest(), neck.getVelocity());
-    rothead.attach(controller, headXPin, rothead.getRest(), rothead.getVelocity());
-    jaw.attach(controller, jawPin, jaw.getRest(), jaw.getVelocity());
-    eyeX.attach(controller, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
-    eyeY.attach(controller, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
-    rollNeck.attach(controller, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
+    ((Servo)neck).attach(controller, headYPin, neck.getRest(), neck.getVelocity());
+    ((Servo)rothead).attach(controller, headXPin, rothead.getRest(), rothead.getVelocity());
+    ((Servo)jaw).attach(controller, jawPin, jaw.getRest(), jaw.getVelocity());
+    ((Servo)eyeX).attach(controller, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
+    ((Servo)eyeY).attach(controller, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
+    ((Servo)rollNeck).attach(controller, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
     broadcastState();
 
     enableAutoEnable(true);
