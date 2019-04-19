@@ -25,8 +25,12 @@
 
 package org.myrobotlab.service;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.service.abstracts.AbstractServo;
+import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
+import org.myrobotlab.service.interfaces.ServoController;
 
 /**
  * @author GroG
@@ -74,6 +78,69 @@ public class HobbyServo extends AbstractServo {
     meta.addCategory("motor", "control");
 
     return meta;
+  }
+  
+  public static void main(String[] args) throws InterruptedException {
+    try {
+
+      Runtime.start("gui", "SwingGui");
+      Platform.setVirtual(false);
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.setBoardMega();
+      HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
+      servo.setPin(12);
+      servo.sweepDelay = 3;
+      // servo.save();
+      servo.load();
+      servo.save();
+      log.info("sweepDely {}", servo.sweepDelay);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  @Override
+  public Double getVelocity() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public long getLastActivityTime() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public void setOverrideAutoDisable(Boolean val) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addIKServoEventListener(IKJointAngleListener listener) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addIKServoEventListener(IKJointAnglePublisher publisher) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setSpeed(Double speed) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public ServoController getController() {
+    // TODO Auto-generated method stub
+    return null;
   }
   
 }

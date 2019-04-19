@@ -30,6 +30,7 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.slf4j.Logger;
 
@@ -221,78 +222,78 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // move by the input degree
     Servo mtorso = (Servo) Runtime.start("mtorso", "Servo");
     mtorso.attach(arduino, 26, 90.0);
-    mtorso.map(15, 165, 148, 38);
+    mtorso.map(15.0, 165.0, 148.0, 38.0);
     // mtorso.map(89.9,90.1,93.1,92.9);
-    mtorso.setRest(90);
+    mtorso.setRest(90.0);
     // #mtorso.setMinMax(35,150);
     mtorso.setVelocity(13.0);
     mtorso.moveTo(90);
     Servo ttorso = (Servo) Runtime.start("ttorso", "Servo");
     ttorso.attach(arduino, 7, 90.0);
-    ttorso.map(80, 100, 92, 118);
+    ttorso.map(80.0, 100.0, 92.0, 118.0);
     // ttorso.setInverted(False)
     // #ttorso.setMinMax(85,125)
     ttorso.setVelocity(13.0);
     ttorso.moveTo(90);
     Servo omoplate = (Servo) Runtime.start("omoplate", "Servo");
     omoplate.attach(arduino, 11, 10.0);
-    omoplate.map(10, 70, 10, 70);
+    omoplate.map(10.0, 70.0, 10.0, 70.0);
     omoplate.setVelocity(15.0);
     // #omoplate.setMinMax(10,70)
     omoplate.moveTo(10);
     Servo Romoplate = (Servo) Runtime.start("Romoplate", "Servo");
     Romoplate.attach(arduino, 31, 10.0);
-    Romoplate.map(10, 70, 10, 70);
+    Romoplate.map(10.0, 70.0, 10.0, 70.0);
     Romoplate.setVelocity(15.0);
     // #omoplate.setMinMax(10,70)
     Romoplate.moveTo(10);
     Servo shoulder = (Servo) Runtime.start("shoulder", "Servo");
     shoulder.attach(arduino, 26, 30.0);
-    shoulder.map(0, 180, 0, 180);
+    shoulder.map(0.0, 180.0, 0.0, 180.0);
     // #shoulder.setMinMax(0,180)
     shoulder.setVelocity(14.0);
     shoulder.moveTo(30);
     Servo Rshoulder = (Servo) Runtime.start("Rshoulder", "Servo");
     Rshoulder.attach(arduino, 6, 30.0);
-    Rshoulder.map(0, 180, 0, 180);
+    Rshoulder.map(0.0, 180.0, 0.0, 180.0);
     // #shoulder.setMinMax(0,180)
     Rshoulder.setVelocity(14.0);
     Rshoulder.moveTo(30);
     Servo rotate = (Servo) Runtime.start("rotate", "Servo");
     rotate.attach(arduino, 9, 90.0);
-    rotate.map(46, 160, 46, 160);
+    rotate.map(46.0, 160.0, 46.0, 160.0);
     // #rotate.setMinMax(46,180)
     rotate.setVelocity(18.0);
     rotate.moveTo(90);
     Servo Rrotate = (Servo) Runtime.start("Rrotate", "Servo");
     Rrotate.attach(arduino, 29, 90.0);
-    Rrotate.map(46, 160, 46, 160);
+    Rrotate.map(46.0, 160.0, 46.0, 160.0);
     // #rotate.setMinMax(46,180)
     Rrotate.setVelocity(18.0);
     Rrotate.moveTo(90);
     Servo bicep = (Servo) Runtime.start("bicep", "Servo");
     bicep.attach(arduino, 8, 10.0);
-    bicep.map(5, 60, 5, 80);
+    bicep.map(5.0, 60.0, 5.0, 80.0);
     bicep.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
     bicep.moveTo(10);
     Servo Rbicep = (Servo) Runtime.start("Rbicep", "Servo");
     Rbicep.attach(arduino, 28, 10.0);
-    Rbicep.map(5, 60, 5, 80);
+    Rbicep.map(5.0, 60.0, 5.0, 80.0);
     Rbicep.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
     Rbicep.moveTo(10);
     Servo wrist = (Servo) Runtime.start("wrist", "Servo");
     wrist.attach(arduino, 7, 90.0);
     // #wrist.map(45,135,45,135)
-    wrist.map(0, 180, 0, 180);
+    wrist.map(0.0, 180.0, 0.0, 180.0);
     wrist.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
     wrist.moveTo(90);
     Servo Rwrist = (Servo) Runtime.start("Rwrist", "Servo");
     Rwrist.attach(arduino, 27, 90.0);
     // #wrist.map(45,135,45,135)
-    wrist.map(0, 180, 0, 180);
+    wrist.map(0.0, 180.0, 0.0, 180.0);
     Rwrist.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
     Rwrist.moveTo(90);
@@ -550,11 +551,11 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     }
   }
 
-  public void setDHLink(String arm, Servo servo, double d, double theta, double r, double alpha) {
-    setDHLink(arm, servo, d, theta, r, alpha, servo.getMinInput(), servo.getMaxInput());
+  public void setDHLink(String arm, ServoControl servo, double d, double theta, double r, double alpha) {
+    setDHLink(arm, servo, d, theta, r, alpha, servo.getMin(), servo.getMax());
   }
 
-  public void setDHLink(String arm, Servo servo, double d, double theta, double r, double alpha, double minAngle, double maxAngle) {
+  public void setDHLink(String arm, ServoControl servo, double d, double theta, double r, double alpha, double minAngle, double maxAngle) {
     if (engines.containsKey(arm)) {
       IMEngine engine = engines.get(arm);
       DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
@@ -573,7 +574,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       engine.setDHRobotArm(dhArm);
       engines.put(arm, engine);
       servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
-      Mapper map = new Mapper(servo.getMinInput(), servo.getMaxInput(), minAngle, maxAngle);
+      Mapper map = new Mapper(servo.getMin(), servo.getMax(), minAngle, maxAngle);
       maps.put(servo.getName(), map);
     } else {
       log.error("Unknow DH arm {}", arm);

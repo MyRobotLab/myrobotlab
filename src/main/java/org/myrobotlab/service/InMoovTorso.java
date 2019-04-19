@@ -9,6 +9,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -23,9 +24,9 @@ public class InMoovTorso extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovTorso.class);
 
-  transient public Servo topStom;
-  transient public Servo midStom;
-  transient public Servo lowStom;
+  transient public ServoControl topStom;
+  transient public ServoControl midStom;
+  transient public ServoControl lowStom;
   transient public ServoController controller;
 
   static public void main(String[] args) {
@@ -56,9 +57,9 @@ public class InMoovTorso extends Service {
     midStom.setMinMax(0.0, 180.0);
     lowStom.setMinMax(0.0, 180.0);
 
-    topStom.setRest(90);
-    midStom.setRest(90);
-    lowStom.setRest(90);
+    topStom.setRest(90.0);
+    midStom.setRest(90.0);
+    lowStom.setRest(90.0);
 
     setVelocity(5.0, 5.0, 5.0);
 
@@ -134,9 +135,9 @@ public class InMoovTorso extends Service {
       }
     }
 
-    topStom.attach(controller, 27, topStom.getRest(), topStom.getVelocity());
-    midStom.attach(controller, 28, midStom.getRest(), midStom.getVelocity());
-    lowStom.attach(controller, 29, lowStom.getRest(), lowStom.getVelocity());
+    ((Servo)topStom).attach(controller, 27, topStom.getRest(), topStom.getVelocity());
+    ((Servo)midStom).attach(controller, 28, midStom.getRest(), midStom.getVelocity());
+    ((Servo)lowStom).attach(controller, 29, lowStom.getRest(), lowStom.getVelocity());
 
     enableAutoEnable(true);
 

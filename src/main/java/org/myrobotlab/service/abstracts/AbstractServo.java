@@ -95,27 +95,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   private static final long serialVersionUID = 1L;
 
-  public static void main(String[] args) throws InterruptedException {
-    try {
-
-      Runtime.start("gui", "SwingGui");
-      Platform.setVirtual(false);
-
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.setBoardMega();
-      HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
-      servo.setPin(12);
-      servo.sweepDelay = 3;
-      // servo.save();
-      servo.load();
-      servo.save();
-      log.info("sweepDely {}", servo.sweepDelay);
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
   /**
    * acceleration of servo - not really implemented
    */
@@ -251,21 +230,27 @@ public abstract class AbstractServo extends Service implements ServoControl {
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
 
-  @Override
+  //@Override
   public void attach(ServoController controller, Integer pin) throws Exception {
     attach(controller, pin, null);
   }
 
-  @Override
+  //@Override
   public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
     attach(controller, pin, null, null);
   }
 
+ // @Override
+  public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
+    // default to no acceleration
+    attach(controller, pin, pos, speed, 0.0);
+  }
   /**
    * maximum complexity attach with reference to controller
    */
-  @Override
-  public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
+  //@Override
+  public void attach(ServoController controller, Integer pin, Double pos, Double speed, Double acceleration) throws Exception {
+
     if (controller == null) {
       log.error("{}.attach(null)", getName());
       return;
@@ -290,7 +275,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     // update speed if non-null value supplied
     if (speed != null) {
-      setSpeed(speed);
+      setVelocity(speed);
+    }
+    
+    if (acceleration != null) {
+      setAcceleration(acceleration);
     }
 
     controllers.add(controller.getName());
@@ -302,22 +291,27 @@ public abstract class AbstractServo extends Service implements ServoControl {
     listeners.add(service.getName());
   }
 
-  @Override
+ // @Override
   public void attach(String controllerName, Integer pin) throws Exception {
     attach(controllerName, pin, null);
   }
 
-  @Override
+  //@Override
   public void attach(String controllerName, Integer pin, Double pos) throws Exception {
     attach(controllerName, pin, pos, null);
   }
 
+  //@Override
+  public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
+    attach(controllerName, pin, pos, speed, 0.0);
+  }
+  
   /**
    * maximum complexity attach with "name" of controller - look for errors then
    * call maximum complexity attach with reference to controller
    */
-  @Override
-  public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
+ // @Override
+  public void attach(String controllerName, Integer pin, Double pos, Double speed, Double acceleration) throws Exception {
     ServiceInterface si = Runtime.getService(controllerName);
     if (si == null) {
       error("{}.attach({}) cannot find {} in runtime registry", getName(), controllerName, controllerName);
@@ -345,7 +339,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
   }
 
-  @Override
+  // @Override
   public void detach(ServoController controller) {
     if (controller == null) {
       return;
@@ -395,18 +389,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public void enable(Integer pin) {
-    setPin(pin);
-    enable();
-  }
-
-  @Override
-  public void enable(String pin) {
-    setPin(pin);
-    enable();
-  }
-
-  @Override
   public Double getAcceleration() {
     return acceleration;
   }
@@ -438,11 +420,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public Double getMaxOutput() {
     return mapper.getMaxOutput();
-  }
-
-  @Override
-  public Double getMaxSpeed() {
-    return maxSpeed;
   }
 
   @Override
@@ -506,11 +483,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void map(Double minX, Double maxX, Double minY, Double maxY) {
     mapper = new Mapper(minX, maxX, minY, maxY);
     broadcastState();
-  }
-
-  @Override
-  public void map(Integer minX, Integer maxX, Integer minY, Integer maxY) {
-    map(minX, maxX, minY, maxY);
   }
 
   @Override
@@ -678,11 +650,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public void setAcceleration(Integer acceleration) {
-    this.acceleration = acceleration.doubleValue();
-  }
-
-  @Override
   public void setAutoDisable(Boolean autoDisable) {
     this.autoDisable = autoDisable;
   }
@@ -718,12 +685,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public void setRest(Integer rest) {
-    this.rest = rest.doubleValue();
-  }
-
-  @Override
-  public void setSpeed(Double degreesPerSecond) {
+  public void setVelocity(Double degreesPerSecond) {
     if (maxSpeed != -1 && degreesPerSecond > maxSpeed) {
       speed = maxSpeed;
       log.info("Trying to set speed to a value greater than max speed");
@@ -738,23 +700,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
       }
     }
     broadcastState();
-  }
-
-  @Override
-  public void setSpeed(Integer degreesPerSecond) {
-    setSpeed(degreesPerSecond.doubleValue());
-  }
-
-  @Override
-  @Deprecated /* use setSpeed */
-  public void setVelocity(Double speed) {
-    setSpeed(speed);
-  }
-
-  @Override
-  @Deprecated /* use setSpeed */
-  public void setVelocity(Integer speed) {
-    setSpeed(speed);
   }
 
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
@@ -810,8 +755,23 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public void waitTargetPos() {
-    // TODO Auto-generated method stub
+    // 
+    //while (this.pos != this.targetPos) {
+      // Some sleep perhaps?
+      // TODO:
+    //}
 
   }
+
+  @Override
+  public void setMapper(Mapper mapper) {
+    this.mapper = mapper;
+  }
+
+  @Override
+  public Mapper getMapper(Mapper m) {
+    return mapper;
+  }
+
 
 }
