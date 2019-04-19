@@ -888,6 +888,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return false;
     }
     voice = voiceList.get(index);
+    broadcastState();
     return true;
   }
 
