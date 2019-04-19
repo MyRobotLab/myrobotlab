@@ -59,7 +59,7 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
     meta.addPeer("http", "HttpClient", "http");
     meta.addCategory("speech", "sound");
     // moz4r : set to hidden / poc only, unstable ...
-    meta.setAvailable(true);
+    meta.setAvailable(false);
     return meta;
   }
 
