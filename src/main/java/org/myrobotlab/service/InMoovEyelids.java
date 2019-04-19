@@ -91,8 +91,8 @@ public class InMoovEyelids extends Service {
     eyelidleft = (Servo) createPeer("eyelidleft");
     eyelidright = (Servo) createPeer("eyelidright");
 
-    eyelidleft.setRest(0);
-    eyelidright.setRest(0);
+    eyelidleft.setRest(0.0);
+    eyelidright.setRest(0.0);
 
     setVelocity(50.0, 50.0);
 

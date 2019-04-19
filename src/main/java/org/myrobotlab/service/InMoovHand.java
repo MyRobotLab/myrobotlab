@@ -11,6 +11,7 @@ import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -31,12 +32,12 @@ public class InMoovHand extends Service implements LeapDataListener {
    * peer services
    */
   transient public LeapMotion leap;
-  transient public Servo thumb;
-  transient public Servo index;
-  transient public Servo majeure;
-  transient public Servo ringFinger;
-  transient public Servo pinky;
-  transient public Servo wrist;
+  transient public ServoControl thumb;
+  transient public ServoControl index;
+  transient public ServoControl majeure;
+  transient public ServoControl ringFinger;
+  transient public ServoControl pinky;
+  transient public ServoControl wrist;
   transient public ServoController controller;
   private String side;
 
@@ -83,12 +84,12 @@ public class InMoovHand extends Service implements LeapDataListener {
     // FIXME should interfaces be started here ?
     // controller = (ServoController) createPeer("arduino");
 
-    thumb.setRest(2);
-    index.setRest(2);
-    majeure.setRest(2);
-    ringFinger.setRest(2);
-    pinky.setRest(2);
-    wrist.setRest(90);
+    thumb.setRest(2.0);
+    index.setRest(2.0);
+    majeure.setRest(2.0);
+    ringFinger.setRest(2.0);
+    pinky.setRest(2.0);
+    wrist.setRest(90.0);
 
     setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
 
@@ -172,12 +173,12 @@ public class InMoovHand extends Service implements LeapDataListener {
       }
     }
 
-    thumb.attach(controller, 2, thumb.getRest(), thumb.getVelocity());
-    index.attach(controller, 3, index.getRest(), index.getVelocity());
-    majeure.attach(controller, 4, majeure.getRest(), majeure.getVelocity());
-    ringFinger.attach(controller, 5, ringFinger.getRest(), ringFinger.getVelocity());
-    pinky.attach(controller, 6, pinky.getRest(), pinky.getVelocity());
-    wrist.attach(controller, 7, wrist.getRest(), wrist.getVelocity());
+    ((Servo)thumb).attach(controller, 2, thumb.getRest(), thumb.getVelocity());
+    ((Servo)index).attach(controller, 3, index.getRest(), index.getVelocity());
+    ((Servo)majeure).attach(controller, 4, majeure.getRest(), majeure.getVelocity());
+    ((Servo)ringFinger).attach(controller, 5, ringFinger.getRest(), ringFinger.getVelocity());
+    ((Servo)pinky).attach(controller, 6, pinky.getRest(), pinky.getVelocity());
+    ((Servo)wrist).attach(controller, 7, wrist.getRest(), wrist.getVelocity());
 
     enableAutoEnable(true);
 
@@ -307,7 +308,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     return attached;
   }
 
-  public void map(int minX, int maxX, int minY, int maxY) {
+  public void map(double minX, double maxX, double minY, double maxY) {
     thumb.map(minX, maxX, minY, maxY);
     index.map(minX, maxX, minY, maxY);
     majeure.map(minX, maxX, minY, maxY);

@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -31,10 +32,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   /**
    * peer services
    */
-  transient public Servo bicep;
-  transient public Servo rotate;
-  transient public Servo shoulder;
-  transient public Servo omoplate;
+  transient public ServoControl bicep;
+  transient public ServoControl rotate;
+  transient public ServoControl shoulder;
+  transient public ServoControl omoplate;
   transient public ServoController controller;
 
   String side;
@@ -43,10 +44,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     super(n);
     // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
     // FRAMEWORK !!!!!
-    bicep = (Servo) createPeer("bicep");
-    rotate = (Servo) createPeer("rotate");
-    shoulder = (Servo) createPeer("shoulder");
-    omoplate = (Servo) createPeer("omoplate");
+    bicep = (ServoControl) createPeer("bicep");
+    rotate = (ServoControl) createPeer("rotate");
+    shoulder = (ServoControl) createPeer("shoulder");
+    omoplate = (ServoControl) createPeer("omoplate");
     // controller = (ServoController) createPeer("arduino");
 
     bicep.setMinMax(5.0, 90.0);
@@ -54,10 +55,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     shoulder.setMinMax(0.0, 180.0);
     omoplate.setMinMax(10.0, 80.0);
 
-    bicep.setRest(5);
-    rotate.setRest(90);
-    shoulder.setRest(30);
-    omoplate.setRest(10);
+    bicep.setRest(5.0);
+    rotate.setRest(90.0);
+    shoulder.setRest(30.0);
+    omoplate.setRest(10.0);
 
     setVelocity(20.0, 20.0, 20.0, 20.0);
 
@@ -133,10 +134,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       }
     }
 
-    bicep.attach(controller, 8, bicep.getRest(), bicep.getVelocity());
-    rotate.attach(controller, 9, rotate.getRest(), rotate.getVelocity());
-    shoulder.attach(controller, 10, shoulder.getRest(), shoulder.getVelocity());
-    omoplate.attach(controller, 11, omoplate.getRest(), omoplate.getVelocity());
+    ((Servo)bicep).attach(controller, 8, bicep.getRest(), bicep.getVelocity());
+    ((Servo)rotate).attach(controller, 9, rotate.getRest(), rotate.getVelocity());
+    ((Servo)shoulder).attach(controller, 10, shoulder.getRest(), shoulder.getVelocity());
+    ((Servo)omoplate).attach(controller, 11, omoplate.getRest(), omoplate.getVelocity());
 
     enableAutoEnable(true);
 
@@ -185,7 +186,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return controller;
   }
 
-  public Servo getBicep() {
+  public ServoControl getBicep() {
     return bicep;
   }
 
@@ -201,11 +202,11 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return lastActivityTime;
   }
 
-  public Servo getOmoplate() {
+  public ServoControl getOmoplate() {
     return omoplate;
   }
 
-  public Servo getRotate() {
+  public ServoControl getRotate() {
     return rotate;
   }
 
@@ -214,7 +215,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
         omoplate.getPos());
   }
 
-  public Servo getShoulder() {
+  public ServoControl getShoulder() {
     return shoulder;
   }
 
@@ -299,7 +300,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.controller = arduino;
   }
 
-  public void setBicep(Servo bicep) {
+  public void setBicep(ServoControl bicep) {
     this.bicep = bicep;
   }
 
@@ -310,7 +311,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate.setMinMax(omoplateMin, omoplateMax);
   }
 
-  public void setOmoplate(Servo omoplate) {
+  public void setOmoplate(ServoControl omoplate) {
     this.omoplate = omoplate;
   }
 
@@ -325,11 +326,11 @@ public class InMoovArm extends Service implements IKJointAngleListener {
    * this.omoplate.setPin(omoplate); }
    */
 
-  public void setRotate(Servo rotate) {
+  public void setRotate(ServoControl rotate) {
     this.rotate = rotate;
   }
 
-  public void setShoulder(Servo shoulder) {
+  public void setShoulder(ServoControl shoulder) {
     this.shoulder = shoulder;
   }
 

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
 public interface ServoControl extends AbsolutePositionControl, Attachable {
@@ -46,11 +47,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * @throws Exception
    *           e
    */
-  void attach(ServoController controller, Integer pin) throws Exception;
-
-  void attach(ServoController controller, Integer pin, Double pos) throws Exception;
-
-  void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception;
 
   /**
    * Servo events types are yet to be standardized - but probably movement,
@@ -61,48 +57,24 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    */
   void attach(ServoDataListener listener);
 
-  void attach(String controllerName, Integer pin) throws Exception;
-
-  void attach(String controllerName, Integer pin, Double pos) throws Exception;
-
-  void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception;
-
-  /**
-   * detaches the control from the controller
-   * 
-   * @param controller
-   */
-  void detach(ServoController controller);
-
   /**
    * remove the servo listener
    * 
    * @param service
    *          - to remove
    */
-  void detach(ServoDataListener service);
+  void detach(ServoDataListener listener);
 
   /**
-   * disable the pulses to the servo
-   */
-  void disable();
-
-  /**
-   * enable the pulses to the servo
+   * enable the PWM pulses/power to the servo
    */
   void enable();
-  
-  void enable(Integer pin);
-  
-  void enable(String pin);
-  
-  /**
-   * acceleration of the servo
-   * 
-   * @return the acceleration
-   */
-  Double getAcceleration();
 
+  /**
+   * disable the PWM pulses/power to the servo/motor
+   */
+  void disable();
+  
   /**
    * getAutoDisable return value set by setAutoDisable
    * 
@@ -142,7 +114,7 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * 
    * @return - speed
    */
-  Double getMaxSpeed();
+  // Double getMaxSpeed();
 
   /**
    * gets the min X of the mapper (input)
@@ -206,6 +178,13 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
   Double getSpeed();
 
   /**
+   * acceleration of the servo
+   * 
+   * @return the acceleration
+   */
+  Double getAcceleration();
+
+  /**
    * This value is for the ServoController to consume.
    * 
    * The calculated mapper output for the servo - this is <b> ALWAYS ALWAYS in
@@ -255,8 +234,10 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    */
   void map(Double minX, Double maxX, Double minY, Double maxY);
   
-  void map(Integer minX, Integer maxX, Integer minY, Integer maxY);
-
+  void setMapper(Mapper m);
+  
+  Mapper getMapper(Mapper m);
+  
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
    * valid range but can be adjusted and / or re-mapped with min / max and map
@@ -270,8 +251,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * @return true (why?)
    */
   Double moveToBlocking(Double pos);
-  
-  Double moveToBlocking(Integer pos);
 
   /**
    * control message publishing moveTo
@@ -307,8 +286,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    */
   void setAcceleration(Double acceleration);
   
-  void setAcceleration(Integer acceleration);
-
   /**
    * setAutoDisable tell the servo to disable when position reached this make
    * sense only if speed &gt; 0 if speed == -1 : a timer is launched to delay
@@ -378,21 +355,16 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    */
   void setRest(Double rest);
 
-  void setRest(Integer rest);
-
   /**
    * @param speed
    *          degrees per second rotational speed cm per second linear
    * 
    */
-  void setSpeed(Double speed);
-  
-  void setSpeed(Integer speed);
-
-  @Deprecated
+  // TODO: re-eable this 
+//  void setSpeed(Double speed);
+  // kill this i guess?
   void setVelocity(Double speed);
-  @Deprecated
-  void setVelocity(Integer speed);
+  Double getVelocity();
 
   /**
    * stops the servo if currently in motion servo must be moving at incremental
@@ -420,4 +392,28 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    */
   void waitTargetPos();
 
+  /**
+   * The last time the servo was asked to move (system current time in ms?)
+   * @return
+   */
+  long getLastActivityTime();
+  
+  // TODO: these are place holders to keep things compiling as we remove these interfaces/methods.
+  boolean save();
+  void startService();
+  void releaseService();
+  void broadcastState();
+  void setOverrideAutoDisable(Boolean val);
+  // wtf.. these need to go away.
+  void addIKServoEventListener(IKJointAngleListener listener);
+  // wtf..
+  void addIKServoEventListener(IKJointAnglePublisher publisher);
+  // TODO: kill this interface once everything is converted from old style speed control to a degrees/second measurement.
+  @Deprecated
+  void setSpeed(Double speed);
+  ServoController getController();
+
+  void subscribe(String name, String string, String name2, String string2);
+  
+  
 }
