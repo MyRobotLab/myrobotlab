@@ -57,7 +57,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.swing.widget.ComponentResizer;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;

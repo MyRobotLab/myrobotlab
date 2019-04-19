@@ -37,7 +37,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.abstracts.AbstractEncoder;
+import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -225,7 +225,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       // value up to date..
       // effectively this replaces onPin ...
       while (true) {
-        currentPosInput = ((AbstractEncoder) encoderControl).lastPosition;
+        currentPosInput = ((AbstractPinEncoder) encoderControl).lastPosition;
         try {
           // someting to keep the cpu from thrashing.
           pid.setInput(pidKey, currentPosInput);
@@ -235,11 +235,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
           e.printStackTrace();
           break;
         }
-
       }
-
     }
-
   }
 
   private static final long serialVersionUID = 1L;
