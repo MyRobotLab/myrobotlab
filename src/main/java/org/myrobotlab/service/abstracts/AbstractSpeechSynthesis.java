@@ -216,7 +216,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   // be here
   public String confirmationString = "did you say %s ?";
 
-  protected Map<String, Voice> voiceKeyIndex = new TreeMap<String, Voice>();
+  protected Map<String, Voice> voiceKeyIndex = new TreeMap<>();
+  
+  private Map<String, Voice> voiceProviderIndex = new TreeMap<>();
+  
+  private List<Voice> voiceList = new ArrayList<>();
 
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
@@ -867,8 +871,24 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       broadcastState();
       return true;
     }
+    
+    if (voiceProviderIndex.containsKey(name)) {
+      voice = voiceProviderIndex.get(name);
+      broadcastState();
+      return true;
+    }
+       
     error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
     return false;
+  }
+  
+  public boolean setVoice(Integer index) {
+    if (index > voiceList.size() || index < 0) {
+      error("setVoice({}) not valid pick range 0 to {}", index, voiceList.size());
+      return false;
+    }
+    voice = voiceList.get(index);
+    return true;
   }
 
   public List<String> getVoiceNames() {
@@ -892,9 +912,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     log.info("adding voice {}", v);
     if (voices.containsKey(name)) {
       log.info(String.format("%s was already added %s", v.getName(), v));
+      return;
     }
+    voiceList.add(v);
     voices.put(name, v);
     voiceKeyIndex.put(v.toString(), v);
+    if (voiceProvider != null) {
+      voiceProviderIndex.put(voiceProvider.toString(), v);
+    }
     if (v.locale != null) {
       String langDisplay = v.locale.getDisplayLanguage();
       String langCode = v.locale.getLanguage();
