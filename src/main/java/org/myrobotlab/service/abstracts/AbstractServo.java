@@ -198,7 +198,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   protected String pin;
 
-  private Double pos;
+  /**
+   * the "current" position of the servo - this never gets updated from "command" methods such as
+   * moveTo - its always status information, and its typically updated from an encoder of some form
+   */
+  protected Double currentPos;
 
   /**
    * default rest is 90 default target position will be 90 if not specified
@@ -242,6 +246,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public AbstractServo(String reservedKey) {
     super(reservedKey);
 
+    // this servo is interested in new services which support either ServoControllers or EncoderControl interfaces
+    // we subscribe to runtime here for new services
+    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
 
   @Override
@@ -363,6 +370,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
         send(controller, "servoDisable", this);
       }
     }
+    if (enabled) {
+      // if changing state then broadcast
+      broadcastState();
+    }
+    enabled = false;
   }
 
   @Override
@@ -374,6 +386,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
       } else {
         send(controller, "servoEnable", this);
       }
+    }
+    if (!enabled) {
+      // if changing state then broadcast
+      broadcastState();
     }
     enabled = true;
   }
@@ -449,7 +465,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   @Override
   public Double getPos() {
-    return pos;
+    return currentPos;
   }
 
   @Override
@@ -512,6 +528,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public Double moveTo(Double newPos, Boolean isBlocking, Long timeoutMs) {
     // FIXME - implement encoder blocking ...
     // FIXME - when and what should a servo publish and when ?
+    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of the servo, targetPos is 
+    // the desired position of the servo - currentPos should NEVER be set in this function 
+    // even with no hardware encoder a servo can have a TimeEncoder from which position would be guessed - but
+    // it would not be "set" here !
 
     // breakMoveToBlocking=true;
     // synchronized (moveToBlocked) {
@@ -520,14 +540,14 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     if (controllers.size() == 0) {
       error(String.format("%s's controller is not set", getName()));
-      return pos;
+      return currentPos;
     }
 
     if (newPos < mapper.getMinX()) {
-      pos = mapper.getMinX();
+      currentPos = mapper.getMinX();  // FIXME !!! - WRONG !!! pos is never set by a moveTo command !!! unless there is no encoder !
     }
     if (newPos > mapper.getMaxX()) {
-      pos = mapper.getMaxX();
+      currentPos = mapper.getMaxX();
     }
 
     targetPos = newPos;
@@ -551,8 +571,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
           send(controller, "servoMoveTo", this);          
         }
       }
-      pos = newPos;
-      lastPos = pos; // what is the point of this ???
+      currentPos = newPos;
+      lastPos = currentPos; // what is the point of this ???
     }
 
     if (lastPos == newPos) {
@@ -561,7 +581,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
 
     invoke("publishMoveTo", this);
-    return pos;
+    return currentPos;
   }
 
   @Override
@@ -602,6 +622,17 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public Double moveToBlocking(Integer newPos, Long timeoutMs) {
     return moveTo(newPos.doubleValue(), true, timeoutMs);
+  }
+  
+  /**
+   * call back to hand new services registered
+   * we want to update our list of possible controllers & encoders
+   * @param s
+   */
+  public void onRegistered(ServiceInterface s) {
+    refreshControllers();
+    refreshEncoders();
+    broadcastState();
   }
 
   @Override
@@ -769,6 +800,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public List<String> refreshControllers() {
     return Runtime.getServiceNamesFromInterface(ServoController.class);
+  }
+  
+  @Override
+  public List<String> refreshEncoders() {
+    return Runtime.getServiceNamesFromInterface(EncoderControl.class);
   }
 
 
