@@ -11,6 +11,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -24,8 +25,8 @@ public class InMoovEyelids extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovEyelids.class);
 
-  transient public Servo eyelidleft;
-  transient public Servo eyelidright;
+  transient public ServoControl eyelidleft;
+  transient public ServoControl eyelidright;
   private transient ServoController controller;
   // todo : make this deprecated
 
@@ -118,8 +119,8 @@ public class InMoovEyelids extends Service {
     }
     this.controller = controller;
 
-    eyelidleft.attach(controller, eyeLidLeftPin);
-    eyelidright.attach(controller, eyeLidRightPin);
+    ((Servo)eyelidleft).attach(controller, eyeLidLeftPin);
+    ((Servo)eyelidright).attach(controller, eyeLidRightPin);
   }
 
   public void detach(ServoController controller) throws Exception {
