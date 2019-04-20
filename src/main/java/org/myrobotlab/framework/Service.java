@@ -594,7 +594,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
               actualName = String.format("%s.%s", myKey, template.actualName);
             }
 
-            sr = new ServiceReservation(fullKey, actualName, template.fullTypeName, template.comment, template.isRoot);
+            sr = new ServiceReservation(fullKey, actualName, template.fullTypeName, template.comment, template.isRoot, template.autoStart);
 
             // we have to recursively move things if we moved a root
             // of some complex peer (the root and all its branches)
@@ -2093,6 +2093,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
         targetField.setAccessible(true);
 
         if (peers.containsKey(f.getName())) {
+          ServiceReservation sr = peers.get(f.getName());
+          
+          if (sr.autoStart == null || sr.autoStart == false) {
+            log.info("peer defined - but configured to not autoStart");
+            continue;
+          }
           
           if (f.get(this) != null) {
             log.info("peer {} already assigned", f.getName());

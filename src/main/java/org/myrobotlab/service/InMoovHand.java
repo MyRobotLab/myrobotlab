@@ -591,7 +591,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     meta.addPeer("pinky", "Servo", "Pinky servo");
     meta.addPeer("wrist", "Servo", "Wrist servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service");
+    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
 
     return meta;
   }
