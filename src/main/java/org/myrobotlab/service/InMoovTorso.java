@@ -40,7 +40,7 @@ public class InMoovTorso extends Service {
       Runtime.start("webgui", "WebGui");
       torso.test();
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 
@@ -48,9 +48,9 @@ public class InMoovTorso extends Service {
     super(n);
     // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
     // FRAMEWORK !!!!!
-    topStom = (Servo) createPeer("topStom");
-    midStom = (Servo) createPeer("midStom");
-    lowStom = (Servo) createPeer("lowStom");
+    topStom = (ServoControl) createPeer("topStom");
+    midStom = (ServoControl) createPeer("midStom");
+    lowStom = (ServoControl) createPeer("lowStom");
     // controller = (ServoController) createPeer("arduino");
 
     topStom.setMinMax(60.0, 120.0);

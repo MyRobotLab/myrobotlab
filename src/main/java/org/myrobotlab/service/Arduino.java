@@ -2195,7 +2195,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      Platform.setVirtual(false);
     
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
@@ -2208,7 +2208,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // mega.getBoardTypes();
       // mega.setBoardMega();
       // mega.setBoardUno();
-      mega.connect("COM8");
+      mega.connect("COM7");
 
       /*
        * Arduino uno = (Arduino) Runtime.start("uno", "Arduino");

@@ -149,13 +149,13 @@ public class InMoovHand extends Service implements LeapDataListener {
         return false;
       }
     }
-
-    ((Servo)thumb).attach(controller, 2, thumb.getRest(), thumb.getVelocity());
-    ((Servo)index).attach(controller, 3, index.getRest(), index.getVelocity());
-    ((Servo)majeure).attach(controller, 4, majeure.getRest(), majeure.getVelocity());
-    ((Servo)ringFinger).attach(controller, 5, ringFinger.getRest(), ringFinger.getVelocity());
-    ((Servo)pinky).attach(controller, 6, pinky.getRest(), pinky.getVelocity());
-    ((Servo)wrist).attach(controller, 7, wrist.getRest(), wrist.getVelocity());
+    
+    thumb.attach(controller);
+    index.attach(controller);
+    majeure.attach(controller);
+    ringFinger.attach(controller);
+    pinky.attach(controller);
+    wrist.attach(controller);
 
     enableAutoEnable(true);
 

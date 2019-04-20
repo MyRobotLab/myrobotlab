@@ -97,12 +97,14 @@ public class InMoovHead extends Service {
         error("controller for head is not connected");
       }
     }
-    ((Servo) neck).attach(controller, headYPin, neck.getRest(), neck.getVelocity());
-    ((Servo) rothead).attach(controller, headXPin, rothead.getRest(), rothead.getVelocity());
-    ((Servo) jaw).attach(controller, jawPin, jaw.getRest(), jaw.getVelocity());
-    ((Servo) eyeX).attach(controller, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
-    ((Servo) eyeY).attach(controller, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
-    ((Servo) rollNeck).attach(controller, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
+    
+    neck.attach(controller);
+    rothead.attach(controller);
+    jaw.attach(controller);
+    eyeX.attach(controller);
+    eyeY.attach(controller);
+    rollNeck.attach(controller);
+    
     broadcastState();
 
     return true;

@@ -28,9 +28,6 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.service.abstracts.AbstractServo;
-import org.myrobotlab.service.interfaces.IKJointAngleListener;
-import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
-import org.myrobotlab.service.interfaces.ServoController;
 
 /**
  * @author GroG
@@ -87,7 +84,7 @@ public class HobbyServo extends AbstractServo {
       Platform.setVirtual(false);
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.setBoardMega();
+      // mega.setBoardMega();
       HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
       servo.setPin(12);
       servo.sweepDelay = 3;

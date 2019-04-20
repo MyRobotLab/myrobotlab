@@ -119,10 +119,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
     setVelocity(20.0, 20.0, 20.0, 20.0);
 
-    ((Servo)bicep).attach(controller, 8, bicep.getRest(), bicep.getVelocity());
-    ((Servo)rotate).attach(controller, 9, rotate.getRest(), rotate.getVelocity());
-    ((Servo)shoulder).attach(controller, 10, shoulder.getRest(), shoulder.getVelocity());
-    ((Servo)omoplate).attach(controller, 11, omoplate.getRest(), omoplate.getVelocity());
+    bicep.attach(controller);
+    rotate.attach(controller);
+    shoulder.attach(controller);
+    omoplate.attach(controller);    
 
     enableAutoEnable(true);
 
