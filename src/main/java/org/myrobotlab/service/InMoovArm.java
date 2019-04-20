@@ -243,8 +243,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate.waitTargetPos();
   }
 
-  // FIXME - releasePeers()
-  public void release() {
+  public void releaseService() {
+    super.releaseService();
     disable();
   }
 
