@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
@@ -226,26 +227,33 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // we subscribe to runtime here for new services
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
+  
+  public void attach(Attachable service) throws Exception {
+    if (ServoController.class.isAssignableFrom(service.getClass())) {
+      attach((ServoController)service, null, null, null);
+    } else {
+      warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
+    }
+  }
+  
+  public void attach(ServoController controller) throws Exception {
+    attach(controller, null, null, null);
+  }
 
-  //@Override
   public void attach(ServoController controller, Integer pin) throws Exception {
-    attach(controller, pin, null);
+    attach(controller, pin, null, null, null);
   }
 
-  //@Override
   public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
-    attach(controller, pin, null, null);
+    attach(controller, pin, null, null, null);
   }
 
- // @Override
   public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
-    // default to no acceleration
-    attach(controller, pin, pos, speed, 0.0);
+    attach(controller, pin, pos, speed, null);
   }
   /**
    * maximum complexity attach with reference to controller
    */
-  //@Override
   public void attach(ServoController controller, Integer pin, Double pos, Double speed, Double acceleration) throws Exception {
 
     if (controller == null) {

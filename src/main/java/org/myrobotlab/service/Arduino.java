@@ -66,8 +66,6 @@ import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 
-import akka.event.AddressTerminatedTopic;
-
 public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
     UltrasonicSensorController, PortConnector, RecordControl, SerialRelayListener, PortListener, PortPublisher, EncoderController {
 
@@ -549,7 +547,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     isVirtual = b;
   }
 
-  VirtualArduino getVirtual() {
+  public VirtualArduino getVirtual() {
     return virtual;
   }
 

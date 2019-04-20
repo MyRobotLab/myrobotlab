@@ -671,7 +671,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           sweepButton.setText("sweep");
         }
 
-        eventsEnabled = servo.isEventsEnabled();
+        // eventsEnabled = servo.isEventsEnabled();
 
         restoreListeners();
       }

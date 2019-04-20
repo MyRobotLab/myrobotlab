@@ -46,6 +46,8 @@ public class ServiceSmokeTest extends AbstractTest {
 
     // we need to load a service for each service type we have.
     String[] x = serviceData.getServiceTypeNames();
+    
+    // String[] x = new String[] {"org.myrobotlab.service.DiyServo"};
 
     for (String serviceType : x) {
       log.info("Service Type: {}", serviceType);
