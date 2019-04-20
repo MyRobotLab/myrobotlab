@@ -108,9 +108,12 @@ public class InMoovEyelids extends Service {
       eyelidright.detach();
     }
     this.controller = controller;
+    
+    eyelidleft.setPin(eyeLidLeftPin);
+    eyelidright.setPin(eyeLidRightPin);
 
-    ((Servo)eyelidleft).attach(controller, eyeLidLeftPin);
-    ((Servo)eyelidright).attach(controller, eyeLidRightPin);
+    eyelidleft.attach(controller);
+    eyelidright.attach(controller);
   }
 
   public void detach(ServoController controller) throws Exception {
