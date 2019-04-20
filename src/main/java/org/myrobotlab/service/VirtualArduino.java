@@ -83,7 +83,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   /**
    * thread to run the script
    */
-  transient final InoScriptRunner runner;
+  transient InoScriptRunner runner;
 
   transient FileOutputStream record = null;
 
@@ -142,22 +142,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   public VirtualArduino(String n) {
     super(n);
-
-    
-    if (board == null) {
-      board = "uno";
-    }
-
-    uart = (Serial) createPeer("uart");
-    ino = new MrlCommIno(this);
-    mrlComm = ino.getMrlComm();
-    msg = mrlComm.getMsg();
-    msg.setInvoke(false);
-    boardInfo = mrlComm.boardInfo;
-    // boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
-    setBoard(Arduino.BOARD_TYPE_UNO);
-    
-    runner = new InoScriptRunner(this, ino);
   }
 
   public void connect(String portName) throws IOException {
@@ -227,7 +211,22 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   @Override
   public void startService() {
     super.startService();
-    uart = (Serial) startPeer("uart");
+    
+    if (board == null) {
+      board = "uno";
+    }
+
+    log.info("uart {}", uart);
+    
+    ino = new MrlCommIno(this);
+    mrlComm = ino.getMrlComm();
+    msg = mrlComm.getMsg();
+    msg.setInvoke(false);
+    boardInfo = mrlComm.boardInfo;
+    // boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
+    setBoard(Arduino.BOARD_TYPE_UNO);
+    
+    runner = new InoScriptRunner(this, ino);
     uart.addPortListener(getName());
     start();
   }

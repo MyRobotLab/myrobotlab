@@ -826,7 +826,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     } else {
       name = reservedKey;
     }
-   
+
     this.inbox = new Inbox(name);
     this.outbox = new Outbox(this);
     cm = new CommunicationManager(name);
@@ -838,7 +838,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * new overload - mqtt uses this for json encoded MrlListener to process
    * subscriptions
    * 
-   * @param data - listener callback info
+   * @param data
+   *          - listener callback info
    */
   public void addListener(Map data) {
     // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
@@ -857,7 +858,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void addListener(MRLListener listener) {
     addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
   }
-  
+
   public void addListener(String topicMethod, String callbackName) {
     addListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
   }
@@ -908,7 +909,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void addTask(long intervalMs, String method, Object... params) {
     addTask(method, intervalMs, 0, method, params);
   }
-  
+
   public void addTaskOneShot(int delay, String method, Object... params) {
     addTask(method, 0, delay, method, params);
   }
@@ -938,7 +939,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     timer.schedule(task, delay);
     tasks.put(taskName, timer);
   }
-  
+
   public HashMap<String, Timer> getTasks() {
     return tasks;
   }
@@ -973,7 +974,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         try {
           timer.purge();
           timer.cancel();
-          timer = null;          
+          timer = null;
         } catch (Exception e) {
           log.info(e.getMessage());
         }
@@ -1438,7 +1439,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       // if so we need to search
 
       // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
-     
+
       // SECURITY - ??? can't be implemented here - need a full message
       meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
       retobj = meth.invoke(obj, params);
@@ -1658,7 +1659,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Method method = theClass.getMethod("getMetaData");
       ServiceType serviceType = (ServiceType) method.invoke(null);
       Map<String, ServiceReservation> peers = serviceType.getPeers();
-      for (String s : peers.keySet()) {        
+      for (String s : peers.keySet()) {
         Runtime.release(getPeerKey(s));
       }
 
@@ -1695,7 +1696,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     purgeTasks();
 
     // Runtime.release(getName()); infinite loop with peers ! :(
-    
+
     Runtime.unregister(getName());
   }
 
@@ -1884,7 +1885,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     send(msg);
   }
 
-  public void send(Message msg) {  
+  public void send(Message msg) {
     outbox.add(msg);
   }
 
@@ -2017,11 +2018,13 @@ public abstract class Service extends MessageService implements Runnable, Serial
   @Override
   synchronized public void startService() {
     ServiceInterface si = Runtime.getService(name);
+    // if not registered - register
     if (si == null) {
-      // FIXME - should NOT be create !!!! should be put into registry !
-      // Runtime.create(name, getSimpleName());
       Runtime.register(this, null);
     }
+
+    startPeers();
+
     if (!isRunning()) {
       outbox.start();
       if (thisThread == null) {
@@ -2031,6 +2034,80 @@ public abstract class Service extends MessageService implements Runnable, Serial
       isRunning = true;
     } else {
       log.debug("startService request: service {} is already running", name);
+    }
+  }
+
+  public void startPeers() {
+    log.info("starting peers");
+    Map<String, ServiceReservation> peers = null;
+
+    try {
+      Method method = this.getClass().getMethod("getMetaData");
+      ServiceType st = (ServiceType) method.invoke(null);
+      peers = st.getPeers();
+    } catch (Exception e) {
+    }
+
+    if (peers == null) {
+      return;
+    }
+    
+    Set<Class<?>> ancestry = new HashSet<Class<?>>();
+    Class<?> targetClass = this.getClass();
+
+    // if we are a org.myrobotlab object climb up the ancestry to
+    // copy all super-type fields ...
+    // GroG says: I wasn't comfortable copying of "Service" - because its never
+    // been tested before - so we copy all definitions from
+    // other superclasses e.g. - org.myrobotlab.service.abstracts
+    // it might be safe in the future to copy all the way up without stopping...
+    while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
+      ancestry.add(targetClass);
+      targetClass = targetClass.getSuperclass();
+    }
+
+    for (Class<?> sourceClass : ancestry) {
+
+    Field fields[] = sourceClass.getDeclaredFields();
+    for (int j = 0, m = fields.length; j < m; j++) {
+      try {
+        Field f = fields[j];
+
+        /**
+         * <pre>
+         * int modifiers = f.getModifiers();
+         * String fname = f.getName();
+         * if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+         *   log.debug("skipping {}", f.getName());
+         *   continue;
+         * } else {
+         *   log.debug("copying {}", f.getName());
+         * }
+         * 
+         * Type t = f.getType();
+         * </pre>
+         */
+
+        f.setAccessible(true);
+        Field targetField = sourceClass.getDeclaredField(f.getName());
+        targetField.setAccessible(true);
+
+        if (peers.containsKey(f.getName())) {
+          
+          if (f.get(this) != null) {
+            log.info("peer {} already assigned", f.getName());
+            continue;
+          }
+          log.info("assinging {}.{} = startPeer({})", sourceClass.getSimpleName(), f.getName(), f.getName());
+          Object o = startPeer(f.getName());
+          
+          targetField.set(this, o);
+        }
+
+      } catch (Exception e) {
+        log.error("copy failed", e);
+      }
+    } // for each field in class
     }
   }
 
@@ -2405,7 +2482,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * resource/{ServiceType} (mrl's static resource directory) 3. check absolute
    * path
    * 
-   * @param filename - file name to get
+   * @param filename
+   *          - file name to get
    * @return the file to returned or null if does not exist
    */
   public File getFile(String filename) {
@@ -2437,25 +2515,25 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   public void preShutdown() {
   }
-  
+
   /**
-   * determines if current process has internet access - moved to Service recently
-   * because it may become Service specific
+   * determines if current process has internet access - moved to Service
+   * recently because it may become Service specific
    * 
    * @return - true if internet is available
    */
   public static boolean hasInternet() {
     return Runtime.getPublicGateway() != null;
   }
-  
+
   /**
-   * true when no display is available - moved from Runtime to Service because it may become
-   * Service specific
+   * true when no display is available - moved from Runtime to Service because
+   * it may become Service specific
    * 
    * @return - true when no display is available
    */
   static public boolean isHeadless() {
     return java.awt.GraphicsEnvironment.isHeadless();
   }
-  
+
 }

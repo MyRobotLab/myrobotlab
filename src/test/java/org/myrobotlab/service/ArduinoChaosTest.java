@@ -88,7 +88,7 @@ public class ArduinoChaosTest {
     // TODO: why does this blow up
     // arduino.servoWriteMicroseconds(servo);
     Thread.sleep(1000);
-    servo.setSpeed(0);
+    servo.setSpeed(0.0);
     Thread.sleep(1000);
     Thread.sleep(1000);
     arduino.enableBoardInfo(true);

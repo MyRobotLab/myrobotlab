@@ -493,6 +493,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * max complexity moveTo
    * 
+   * FIXME - move is more general and could be the "max" complexity method with positional information supplied
+   * 
    * @param newPos
    * @param isBlocking
    * @param timeout
@@ -509,6 +511,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // synchronized (moveToBlocked) {
     // moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     // }
+    
+    // enableAutoEnable is "always" on - if you want to stop a motor from working use .lock() 
+    // which is part of the motor command set ... once you lock a motor you can't do anything until you unlock it
 
     if (controllers.size() == 0) {
       error(String.format("%s's controller is not set", getName()));

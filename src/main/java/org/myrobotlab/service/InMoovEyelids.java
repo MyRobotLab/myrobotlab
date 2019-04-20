@@ -87,16 +87,6 @@ public class InMoovEyelids extends Service {
 
   public InMoovEyelids(String n) {
     super(n);
-    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
-    // FRAMEWORK !!!!!
-    eyelidleft = (Servo) createPeer("eyelidleft");
-    eyelidright = (Servo) createPeer("eyelidright");
-
-    eyelidleft.setRest(0.0);
-    eyelidright.setRest(0.0);
-
-    setVelocity(50.0, 50.0);
-
   }
 
   public void autoBlink(boolean param) {
@@ -210,14 +200,6 @@ public class InMoovEyelids extends Service {
   // FIXME - releasePeers()
   public void release() {
     disable();
-    if (eyelidleft != null) {
-      eyelidleft.releaseService();
-      eyelidleft = null;
-    }
-    if (eyelidright != null) {
-      eyelidright.releaseService();
-      eyelidright = null;
-    }
   }
 
   public void rest() {
@@ -236,8 +218,9 @@ public class InMoovEyelids extends Service {
   @Override
   public void startService() {
     super.startService();
-    eyelidleft.startService();
-    eyelidright.startService();
+    eyelidleft.setRest(0.0);
+    eyelidright.setRest(0.0);
+    setVelocity(50.0, 50.0);
   }
 
   public void setAutoDisable(Boolean param) {
@@ -245,14 +228,9 @@ public class InMoovEyelids extends Service {
     eyelidright.setAutoDisable(param);
   }
 
-  public void setOverrideAutoDisable(Boolean param) {
-    eyelidleft.setOverrideAutoDisable(param);
-    eyelidright.setOverrideAutoDisable(param);
-  }
-
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(InMoovEyelids.class.getCanonicalName());
+    ServiceType meta = new ServiceType(InMoovEyelids.class);
     meta.addDescription("InMoov Eyelids");
     meta.addCategory("robot");
 

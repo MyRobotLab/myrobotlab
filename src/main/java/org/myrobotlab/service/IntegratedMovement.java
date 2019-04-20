@@ -559,7 +559,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     if (engines.containsKey(arm)) {
       IMEngine engine = engines.get(arm);
       DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-      servo.addIKServoEventListener(this);
+      // servo.addIKServoEventListener(this);
       dhLink.addPositionValue(servo.getPos());
       dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
       dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
@@ -573,7 +573,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       dhArm.addLink(dhLink);
       engine.setDHRobotArm(dhArm);
       engines.put(arm, engine);
-      servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
+      // servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
       Mapper map = new Mapper(servo.getMin(), servo.getMax(), minAngle, maxAngle);
       maps.put(servo.getName(), map);
     } else {

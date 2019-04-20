@@ -29,10 +29,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.StateSaver;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
-public interface ServoControl extends AbsolutePositionControl, Attachable {
+public interface ServoControl extends AbsolutePositionControl, Attachable, StateSaver, org.myrobotlab.framework.interfaces.StatePublisher {
 
   /**
    * Attaches a servo controller with this servo control, supports a variety of
@@ -402,24 +403,10 @@ public interface ServoControl extends AbsolutePositionControl, Attachable {
    * The last time the servo was asked to move (system current time in ms?)
    * @return
    */
+  @Deprecated /* use an encoder ! */
   long getLastActivityTime();
   
-  // TODO: these are place holders to keep things compiling as we remove these interfaces/methods.
-  boolean save();
-  void startService();
-  void releaseService();
-  void broadcastState();
-  void setOverrideAutoDisable(Boolean val);
-  // wtf.. these need to go away.
-  void addIKServoEventListener(IKJointAngleListener listener);
-  // wtf..
-  void addIKServoEventListener(IKJointAnglePublisher publisher);
-  // TODO: kill this interface once everything is converted from old style speed control to a degrees/second measurement.
-  @Deprecated
-  void setSpeed(Double speed);
-  ServoController getController();
-
-  void subscribe(String name, String string, String name2, String string2);
+  public void setSpeed(Double d);
   
   
 }

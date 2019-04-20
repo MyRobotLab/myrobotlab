@@ -237,7 +237,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public AbstractSpeechSynthesis(String reservedKey) {
     super(reservedKey);
     setReady(false);
-    audioFile = (AudioFile) createPeer("audioFile");
+    // audioFile = (AudioFile) createPeer("audioFile");
 
     // for json loading
 
@@ -458,7 +458,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void startService() {
     super.startService();
-    audioFile = (AudioFile) startPeer("audioFile");
+    // audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
     getVoices();
