@@ -47,8 +47,6 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
-import com.jme3.system.AppSettings;
-
 /**
  * InMoov - The InMoov Service.
  * 

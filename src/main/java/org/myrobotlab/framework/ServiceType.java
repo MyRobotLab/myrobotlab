@@ -135,6 +135,10 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
     // peers.put(name, new ServiceReservation(name, peerType, comment));
     mergePeer(new ServiceReservation(name.trim(), peerType.trim(), comment));
   }
+  
+  public void addPeer(String name, String peerType, String comment, boolean autoStart) {
+    mergePeer(new ServiceReservation(name.trim(), peerType.trim(), comment, autoStart));
+  }
 
   /**
    * sharing means sharePeer is forced - while addPeer will check before adding
@@ -153,7 +157,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   }
 
   public void addRootPeer(String actualName, String peerType, String comment) {
-    peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true));
+    peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true, true));
   }
 
   /**
@@ -257,4 +261,5 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
     lastDependency.add(new ServiceArtifact(orgId, classifierId));
   }
 
+ 
 }
