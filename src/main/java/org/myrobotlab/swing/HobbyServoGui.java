@@ -38,7 +38,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
@@ -49,10 +48,18 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.HobbyServo;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.interfaces.EncoderControl;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;
@@ -84,7 +91,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   JButton attach = new JButton("attach");
   JButton attachEncoder = new JButton("attach");
-  JButton export = new JButton("export");
+  // JButton export = new JButton("export"); - restore() ?
   JButton restButton = new JButton("rest");
   JTextField velocity = new JTextField("         ");
   JTextField rest = new JTextField("");
@@ -155,7 +162,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     moveTo.setPaintLabels(true);
 
     // FIXME shouldn't all this be in addListener() ?
-    export.addActionListener(this);
+    //export.addActionListener(this);
     save.addActionListener(this);
     left.addActionListener(this);
     right.addActionListener(this);
@@ -208,7 +215,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     south.add(max);
     south.add(maxOutput);
     south.add(save);
-    south.add(export);
+    //south.add(export);
 
     JPanel centerPanelStatus = new JPanel(new GridLayout(0, 5));
     centerPanelStatus.setBackground(Color.WHITE);
@@ -283,15 +290,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           return;
         }
 
+        /**<pre>
         if (o == export) {
           send("saveCalibration");
           JOptionPane.showMessageDialog(null, "HobbyServo file generated");
           return;
         }
+        </pre>*/
 
         if (o == save) {
-          send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()),
-              Double.parseDouble(maxOutput.getText()));
+          send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
           send("setVelocity", Double.parseDouble(velocity.getText()));
           send("save");
           send("setRest", Double.parseDouble(rest.getText()));
@@ -422,8 +430,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
         velocity.setText((servo.getSpeed() == null) ? "           " : servo.getSpeed() + "");
 
-//        mapInput.setMinimum(servo.getMin().intValue());
-//        mapInput.setMaximum(servo.getMax().intValue());
+        if (mapInput.getLowValue() != servo.getMin().intValue()) {
+          mapInput.setLowValue(servo.getMin().intValue());
+        }
+
+        if (mapInput.getHighValue() != servo.getMax().intValue()) {
+          mapInput.setHighValue(servo.getMax().intValue());
+        }
 
         double minOutputTmp = servo.getMinOutput();
         double maxOutputTmp = servo.getMaxOutput();
@@ -433,9 +446,19 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           maxOutputTmp = servo.getMinOutput();
         }
 
-        mapOutput.setMinimum(servo.getMinOutput().intValue());
-        mapOutput.setMaximum(servo.getMaxOutput().intValue());
-        mapOutput.setInverted(servo.isInverted());
+        // FIXME - invert gui components so the next moveTo will not go crazy
+        // !!!
+        if (servo.isInverted() != mapOutput.getInverted()) {
+          mapOutput.setInverted(servo.isInverted());
+        }
+
+        if (mapOutput.getLowValue() != servo.getMinOutput().intValue()) {
+          mapOutput.setLowValue(servo.getMinOutput().intValue());
+        }
+
+        if (mapOutput.getHighValue() != servo.getMaxOutput().intValue()) {
+          mapOutput.setHighValue(servo.getMaxOutput().intValue());
+        }
 
         min.setText(servo.getMin() + "");
         max.setText(servo.getMax() + "");
@@ -522,8 +545,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       if (mapInput.equals(o)) {
         min.setText(String.format("%d", mapInput.getLowValue()));
         max.setText(String.format("%d", mapInput.getHighValue()));
-        send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
+        send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
       }
 
       if (mapOutput.equals(o)) {
@@ -535,9 +557,45 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           maxOutput.setText(String.format("%d", mapOutput.getHighValue()));
         }
 
-        send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
+        send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
       }
     } // if adjusting
   }
+  
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      Platform.setVirtual(false);
+    
+      // Runtime.start("webgui", "WebGui");
+      Runtime.start("gui", "SwingGui");
+      EncoderControl encoder = (EncoderControl)Runtime.start("encoder", "TimeEncoder");
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      if (mega.isVirtual()) {
+        VirtualArduino vmega = mega.getVirtual();
+        vmega.setBoardMega();
+      }
+      // mega.getBoardTypes();
+      // mega.setBoardMega();
+      // mega.setBoardUno();
+      mega.connect("COM7");
+
+      ServoControl servo = (ServoControl)Runtime.start("servo", "HobbyServo");
+      // servo.load();
+      servo.setPin(13);
+      log.info("rest is {}", servo.getRest());
+      servo.save();
+      // servo.setPin(8);
+      servo.attach(mega);
+      servo.attach(encoder);
+      servo.moveTo(90);
+      
+    
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+  
 }

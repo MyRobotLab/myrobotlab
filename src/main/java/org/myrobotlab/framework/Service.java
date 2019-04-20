@@ -2228,6 +2228,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   @Override
   public Status info(String format, Object... args) {
     Status status = Status.info(format, args);
+    log.info(status.toString());
     invoke("publishStatus", status);
     return status;
   }

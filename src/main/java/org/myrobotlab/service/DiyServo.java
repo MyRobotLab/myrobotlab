@@ -266,49 +266,18 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   public List<Integer> pinList = new ArrayList<Integer>();
 
-  /**
-   * mapper to be able to remap input values
-   */
-  Mapper mapper;
-
-  Double rest = 90.0;
-
-  long lastActivityTime = 0;
 
   double currentVelocity = 0;
 
-  /**
-   * the requested INPUT position of the servo
-   */
-  Double targetPos;
 
   /**
-   * the calculated output for the servo
-   */
-  double targetOutput;
-
-  /**
-   * Round pos values based on this digit count useful later to compare
-   * target &gt; pos
+   * Round pos values based on this digit count useful later to compare target
+   * &gt; pos
    */
   int roundPos = 0;
 
-  /**
-   * list of names of possible controllers
-   */
-  public List<String> controllers;
-
-  // FIXME - currently is only computer control - needs to be either
-  // microcontroller or computer
-  boolean isSweeping = false;
   double sweepMin = 0.0;
   double sweepMax = 180.0;
-  int sweepDelay = 1;
-
-  double sweepStep = 1.0;
-  boolean sweepOneWay = false;
-  double lastPos;
-  transient Thread sweeper = null;
 
   /**
    * feedback of both incremental position and stops. would allow blocking
@@ -334,26 +303,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   private double ki = 0.001; // 0.020;
   private double kd = 0.0; // 0.020;
   public double setPoint = 90.0; // Intial
-  // setpoint
-  // corresponding
-  // to
-  // a
-  // centered
-  // servo
-  // The
-  // pinListener
-  // value
-  // depends
-  // on
-  // the
-  // hardwawe
-  // behind
-  // it,
-  // so
-  // the
-  // value
-  // from
-  // the
+ 
   /**
    * AD converter needs to be remapped to 0 - 180. D1024 is the default for the
    * Arduino
@@ -377,14 +327,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
   public String defaultDisableDelayNoVelocity;
 
-  Double currentPosInput = 0.0;
-
   double deltaVelocity = 1;
 
-  private boolean moving = false;
-  private boolean autoDisable;
-  private boolean overrideAutoDisable = false;
-  private transient Timer autoDisableTimer;
   transient Object moveToBlocked = new Object();
   /**
    * disableDelayGrace : a timer is launched after targetpos reached
@@ -523,7 +467,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
 
     if (!isEnabled()) {
-      if (pos != lastPosInput || overrideAutoDisable || !getAutoDisable()) {
+      if (pos != lastPosInput || !getAutoDisable()) {
         enable();
       }
     }
@@ -700,8 +644,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * @Override public void setPin(int pin) { this.pin = pin; }
    */
 
-  
-
   @Override
   public Double getTargetOutput() {
     if (targetPos == null) {
@@ -808,7 +750,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     this.powerLevel = power;
   }
 
-
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -827,7 +768,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return meta;
   }
 
-
   @Override
   public Double moveToBlocking(Double pos) {
 
@@ -837,7 +777,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     waitTargetPos();
     return pos; // FIXME probably incorrect
   }
-
 
   @Override
   public void waitTargetPos() {
@@ -865,7 +804,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return se;
   }
 
-
   /**
    * getCurrentPos() - return the calculated position of the servo use
    * lastActivityTime and velocity for the computation
@@ -884,9 +822,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return isSweeping;
   }
 
-  public boolean isEventsEnabled() {
-    return true;
-  }
 
   /**
    * getCurrentVelocity() - return Current velocity ( realtime / based on
@@ -911,7 +846,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // TODO Activate the motor and PID
     lastActivityTime = System.currentTimeMillis();
     isAttached = true;
-    
+
     motorControl.unlock();
     if (motorUpdater == null) {
       motorUpdater = new MotorUpdater(getName());

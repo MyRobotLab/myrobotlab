@@ -1801,7 +1801,7 @@ public class Runtime extends Service implements MessageListener {
     // System.getProperty("pi4j.armhf")
 
     log.info("java.home [{}]", System.getProperty("java.home"));
-    log.info("java.class.path [{}]", System.getProperty("java.class.path"));
+    log.debug("java.class.path [{}]", System.getProperty("java.class.path"));
     log.info("java.library.path [{}]", libararyPath);
     log.info("user.dir [{}]", userDir);
 
