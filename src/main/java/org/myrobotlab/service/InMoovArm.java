@@ -42,26 +42,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public InMoovArm(String n) throws Exception {
     super(n);
-    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
-    // FRAMEWORK !!!!!
-    bicep = (ServoControl) createPeer("bicep");
-    rotate = (ServoControl) createPeer("rotate");
-    shoulder = (ServoControl) createPeer("shoulder");
-    omoplate = (ServoControl) createPeer("omoplate");
-    // controller = (ServoController) createPeer("arduino");
-
-    bicep.setMinMax(5.0, 90.0);
-    rotate.setMinMax(40.0, 180.0);
-    shoulder.setMinMax(0.0, 180.0);
-    omoplate.setMinMax(10.0, 80.0);
-
-    bicep.setRest(5.0);
-    rotate.setRest(90.0);
-    shoulder.setRest(30.0);
-    omoplate.setRest(10.0);
-
-    setVelocity(20.0, 20.0, 20.0, 20.0);
-
   }
 
   /*
@@ -101,13 +81,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate.setAutoDisable(param);
   }
 
-  public void setOverrideAutoDisable(Boolean param) {
-    bicep.setOverrideAutoDisable(param);
-    rotate.setOverrideAutoDisable(param);
-    shoulder.setOverrideAutoDisable(param);
-    omoplate.setOverrideAutoDisable(param);
-  }
-
   @Override
   public void broadcastState() {
     // notify the gui
@@ -133,6 +106,18 @@ public class InMoovArm extends Service implements IKJointAngleListener {
         error("arm %s could not connect on port %s", getName(), port);
       }
     }
+    
+    bicep.setMinMax(5.0, 90.0);
+    rotate.setMinMax(40.0, 180.0);
+    shoulder.setMinMax(0.0, 180.0);
+    omoplate.setMinMax(10.0, 80.0);
+
+    bicep.setRest(5.0);
+    rotate.setRest(90.0);
+    shoulder.setRest(30.0);
+    omoplate.setRest(10.0);
+
+    setVelocity(20.0, 20.0, 20.0, 20.0);
 
     ((Servo)bicep).attach(controller, 8, bicep.getRest(), bicep.getVelocity());
     ((Servo)rotate).attach(controller, 9, rotate.getRest(), rotate.getVelocity());
@@ -261,22 +246,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   // FIXME - releasePeers()
   public void release() {
     disable();
-    if (bicep != null) {
-      bicep.releaseService();
-      bicep = null;
-    }
-    if (rotate != null) {
-      rotate.releaseService();
-      rotate = null;
-    }
-    if (shoulder != null) {
-      shoulder.releaseService();
-      shoulder = null;
-    }
-    if (omoplate != null) {
-      omoplate.releaseService();
-      omoplate = null;
-    }
   }
 
   public void rest() {
@@ -349,11 +318,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   @Override
   public void startService() {
-    super.startService();
-    bicep.startService();
-    rotate.startService();
-    shoulder.startService();
-    omoplate.startService();
+    super.startService();    
     if (controller == null) {
       controller = (ServoController) startPeer("arduino");
     }

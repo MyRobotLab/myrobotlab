@@ -75,24 +75,6 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public InMoovHand(String n) {
     super(n);
-    thumb = (Servo) createPeer("thumb");
-    index = (Servo) createPeer("index");
-    majeure = (Servo) createPeer("majeure");
-    ringFinger = (Servo) createPeer("ringFinger");
-    pinky = (Servo) createPeer("pinky");
-    wrist = (Servo) createPeer("wrist");
-    // FIXME should interfaces be started here ?
-    // controller = (ServoController) createPeer("arduino");
-
-    thumb.setRest(2.0);
-    index.setRest(2.0);
-    majeure.setRest(2.0);
-    ringFinger.setRest(2.0);
-    pinky.setRest(2.0);
-    wrist.setRest(90.0);
-
-    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
-
   }
 
   /*
@@ -128,12 +110,7 @@ public class InMoovHand extends Service implements LeapDataListener {
   @Override
   public void broadcastState() {
     // notify the gui
-    thumb.broadcastState();
-    index.broadcastState();
-    majeure.broadcastState();
-    ringFinger.broadcastState();
-    pinky.broadcastState();
-    wrist.broadcastState();
+    Runtime.broadcastStates();
   }
 
   public void close() {
@@ -248,15 +225,6 @@ public class InMoovHand extends Service implements LeapDataListener {
     ringFinger.setAutoDisable(param);
     pinky.setAutoDisable(param);
     wrist.setAutoDisable(param);
-  }
-
-  public void setOverrideAutoDisable(Boolean param) {
-    thumb.setOverrideAutoDisable(param);
-    index.setOverrideAutoDisable(param);
-    majeure.setOverrideAutoDisable(param);
-    ringFinger.setOverrideAutoDisable(param);
-    pinky.setOverrideAutoDisable(param);
-    wrist.setOverrideAutoDisable(param);
   }
 
   public void devilHorns() {
@@ -452,18 +420,9 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void release() {
     disable();
-    thumb.releaseService();
-    index.releaseService();
-    majeure.releaseService();
-    ringFinger.releaseService();
-    pinky.releaseService();
-    wrist.releaseService();
   }
 
   public void rest() {
-    // initial positions
-    // setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-
     thumb.rest();
     index.rest();
     majeure.rest();
@@ -544,20 +503,21 @@ public class InMoovHand extends Service implements LeapDataListener {
   }
 
   @Override
-  public void startService() { // FIXME - all are wrong they just should do
-    // startPeer
+  public void startService() { 
     super.startService();
-    thumb = (Servo) startPeer("thumb");
-    thumb.startService();
-    index.startService();
-    majeure.startService();
-    ringFinger.startService();
-    pinky.startService();
-    wrist.startService();
+    
+    thumb.setRest(2.0);
+    index.setRest(2.0);
+    majeure.setRest(2.0);
+    ringFinger.setRest(2.0);
+    pinky.setRest(2.0);
+    wrist.setRest(90.0);
+
+    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
+
     if (controller == null) {
-      controller = (ServoController) createPeer("arduino");
+      controller = (ServoController) startPeer("arduino");
     }
-    // arduino.startService();
   }
 
   public void stopLeapTracking() {

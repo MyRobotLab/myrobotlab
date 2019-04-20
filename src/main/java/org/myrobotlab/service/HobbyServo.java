@@ -103,8 +103,7 @@ public class HobbyServo extends AbstractServo {
 
   @Override
   public Double getVelocity() {
-    // TODO Auto-generated method stub
-    return null;
+    return speed;
   }
 
   @Override
@@ -114,33 +113,22 @@ public class HobbyServo extends AbstractServo {
   }
 
   @Override
-  public void setOverrideAutoDisable(Boolean val) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void addIKServoEventListener(IKJointAngleListener listener) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void addIKServoEventListener(IKJointAnglePublisher publisher) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
+  @Deprecated /* bleh - speed is the right method name */
   public void setSpeed(Double speed) {
-    // TODO Auto-generated method stub
+    // These 2 values can be tweaked for a slightly different curve that
+    // fits the observed data.
+    double slope = 3.25;
+    double intercept = 1;
+
+    double vel = Math.exp(slope * speed + intercept);
+    // set velocity to 0.0 if the speed = 1.0.. This skips the velocity
+    // calculation logic.
+    if (speed >= 1.0) {
+      vel = maxSpeed;
+    }
     
+    setVelocity(vel);
   }
 
-  @Override
-  public ServoController getController() {
-    // TODO Auto-generated method stub
-    return null;
-  }
   
 }

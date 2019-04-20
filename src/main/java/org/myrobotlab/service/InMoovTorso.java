@@ -102,18 +102,10 @@ public class InMoovTorso extends Service {
     lowStom.setAutoDisable(param);
   }
 
-  public void setOverrideAutoDisable(Boolean param) {
-    topStom.setOverrideAutoDisable(param);
-    midStom.setOverrideAutoDisable(param);
-    lowStom.setOverrideAutoDisable(param);
-  }
-
   @Override
   public void broadcastState() {
     // notify the gui
-    topStom.broadcastState();
-    midStom.broadcastState();
-    lowStom.broadcastState();
+    Runtime.broadcastStates();
   }
   
   public void setController(ServoController controller) {
@@ -220,23 +212,6 @@ public class InMoovTorso extends Service {
     lowStom.waitTargetPos();
   }
 
-  // FIXME - releasePeers()
-  public void release() {
-    disable();
-    if (topStom != null) {
-      topStom.releaseService();
-      topStom = null;
-    }
-    if (midStom != null) {
-      midStom.releaseService();
-      midStom = null;
-    }
-    if (lowStom != null) {
-      lowStom.releaseService();
-      lowStom = null;
-    }
-  }
-
   public void rest() {
     topStom.rest();
     midStom.rest();
@@ -281,23 +256,6 @@ public class InMoovTorso extends Service {
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);
     this.lowStom.setSpeed(lowStom);
-  }
-
-  /*
-   * public boolean load() { super.load(); topStom.load(); midStom.load();
-   * lowStom.load(); return true; }
-   */
-
-  @Override
-  public void startService() {
-    super.startService();
-    topStom.startService();
-    midStom.startService();
-    lowStom.startService();
-    // arduino.startService();
-    if (controller == null) {
-      controller = (ServoController) startPeer("arduino");
-    }
   }
 
   public void test() {

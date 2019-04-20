@@ -704,7 +704,7 @@ public class Servo extends Service implements ServoControl {
    * setSpeed is deprecated, new function for speed control is setVelocity()
    */
   @Deprecated
-  public void setSpeed(double speed) {
+  public void setSpeed(Double speed) {
 
     // KWATTERS: The realtionship between the old set speed value and actual
     // angular velocity was exponential.
@@ -1606,30 +1606,6 @@ public class Servo extends Service implements ServoControl {
   @Override
   public Mapper getMapper(Mapper m) {
     return mapper;
-  }
-
-  @Override
-  public void setOverrideAutoDisable(Boolean val) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void addIKServoEventListener(IKJointAngleListener listener) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void addIKServoEventListener(IKJointAnglePublisher publisher) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void setSpeed(Double speed) {
-    // TODO Auto-generated method stub
-    
   }
 
   @Override

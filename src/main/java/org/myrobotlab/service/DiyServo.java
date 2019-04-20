@@ -1026,29 +1026,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   @Override
-  public void setOverrideAutoDisable(Boolean val) {
-    // TODO WTF    
-  }
-
-  @Override
-  public void addIKServoEventListener(IKJointAngleListener listener) {
-    // TODO WTF
-  }
-
-  @Override
-  public void addIKServoEventListener(IKJointAnglePublisher publisher) {
-    // TODO WTF  
-  }
-
-  @Override
-  public void setSpeed(Double speed) {
-    // TODO WTF
-  }
-
-  @Override
-  public ServoController getController() {
-    // TODO Auto-generated method stub
-    return null;
+  public void setSpeed(Double d) {
+    setVelocity(d);
   }
 
 }

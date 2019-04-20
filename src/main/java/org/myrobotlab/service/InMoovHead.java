@@ -33,29 +33,6 @@ public class InMoovHead extends Service {
 
   public InMoovHead(String n) {
     super(n);
-    jaw = (Servo) createPeer("jaw");
-    eyeX = (Servo) createPeer("eyeX");
-    eyeY = (Servo) createPeer("eyeY");
-    rothead = (Servo) createPeer("rothead");
-    neck = (Servo) createPeer("neck");
-    rollNeck = (Servo) createPeer("rollNeck");
-
-    neck.setMinMax(20.0, 160.0);
-    rollNeck.setMinMax(20.0, 160.0);
-    rothead.setMinMax(30.0, 150.0);
-    // reset by mouth control
-    jaw.setMinMax(10.0, 25.0);
-    eyeX.setMinMax(60.0, 100.0);
-    eyeY.setMinMax(50.0, 100.0);
-    neck.setRest(90.0);
-    rollNeck.setRest(90.0);
-    rothead.setRest(90.0);
-    jaw.setRest(10.0);
-    eyeX.setRest(80.0);
-    eyeY.setRest(90.0);
-
-    setVelocity(45.0, 45.0, -1.0, -1.0, -1.0, 45.0);
-
   }
 
   /*
@@ -102,12 +79,7 @@ public class InMoovHead extends Service {
   @Override
   public void broadcastState() {
     // notify the gui
-    rothead.broadcastState();
-    rollNeck.broadcastState();
-    neck.broadcastState();
-    eyeX.broadcastState();
-    eyeY.broadcastState();
-    jaw.broadcastState();
+    Runtime.broadcastStates();    
   }
 
   // FIXME - make interface for Arduino / Servos !!!
@@ -125,15 +97,13 @@ public class InMoovHead extends Service {
         error("controller for head is not connected");
       }
     }
-    ((Servo)neck).attach(controller, headYPin, neck.getRest(), neck.getVelocity());
-    ((Servo)rothead).attach(controller, headXPin, rothead.getRest(), rothead.getVelocity());
-    ((Servo)jaw).attach(controller, jawPin, jaw.getRest(), jaw.getVelocity());
-    ((Servo)eyeX).attach(controller, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
-    ((Servo)eyeY).attach(controller, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
-    ((Servo)rollNeck).attach(controller, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
+    ((Servo) neck).attach(controller, headYPin, neck.getRest(), neck.getVelocity());
+    ((Servo) rothead).attach(controller, headXPin, rothead.getRest(), rothead.getVelocity());
+    ((Servo) jaw).attach(controller, jawPin, jaw.getRest(), jaw.getVelocity());
+    ((Servo) eyeX).attach(controller, eyeXPin, eyeX.getRest(), eyeX.getVelocity());
+    ((Servo) eyeY).attach(controller, eyeYPin, eyeY.getRest(), eyeY.getVelocity());
+    ((Servo) rollNeck).attach(controller, rollNeckPin, rollNeck.getRest(), rollNeck.getVelocity());
     broadcastState();
-
-    enableAutoEnable(true);
 
     return true;
   }
@@ -287,12 +257,6 @@ public class InMoovHead extends Service {
 
   public void release() {
     disable();
-    rothead.releaseService();
-    neck.releaseService();
-    eyeX.releaseService();
-    eyeY.releaseService();
-    jaw.releaseService();
-    rollNeck.releaseService();
   }
 
   public void rest() {
@@ -318,21 +282,10 @@ public class InMoovHead extends Service {
     return true;
   }
 
-  @Deprecated
-  public void enableAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
-    setAutoDisable(rotheadParam, neckParam, rollNeckParam);
-  }
-
-  @Deprecated
-  public void enableAutoDisable(Boolean param) {
-    setAutoDisable(param);
-  }
-
   public void setAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
     rothead.setAutoDisable(rotheadParam);
     rollNeck.setAutoDisable(rollNeckParam);
     neck.setAutoDisable(neckParam);
-
   }
 
   public void setAutoDisable(Boolean param) {
@@ -342,24 +295,6 @@ public class InMoovHead extends Service {
     eyeY.setAutoDisable(param);
     jaw.setAutoDisable(param);
     rollNeck.setAutoDisable(param);
-  }
-
-  @Deprecated
-  public void enableAutoEnable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
-    enableAutoEnable(true);
-  }
-
-  @Deprecated
-  public void enableAutoEnable(Boolean param) {
-  }
-
-  public void setOverrideAutoDisable(Boolean param) {
-    rothead.setOverrideAutoDisable(param);
-    neck.setOverrideAutoDisable(param);
-    eyeX.setOverrideAutoDisable(param);
-    eyeY.setOverrideAutoDisable(param);
-    jaw.setOverrideAutoDisable(param);
-    rollNeck.setOverrideAutoDisable(param);
   }
 
   public void setAcceleration(Double headXSpeed, Double headYSpeed, Double rollNeckSpeed) {
@@ -377,8 +312,8 @@ public class InMoovHead extends Service {
     rollNeck.setAcceleration(speed);
   }
 
-  public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin, double jawMax, double rollNeckMin,
-      double rollNeckMax) {
+  public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin,
+      double jawMax, double rollNeckMin, double rollNeckMax) {
     rothead.setMinMax(headXMin, headXMax);
     neck.setMinMax(headYMin, headYMax);
     eyeX.setMinMax(eyeXMin, eyeXMax);
@@ -438,22 +373,49 @@ public class InMoovHead extends Service {
   public void startService() {
     super.startService();
 
+    // part of the "start" life-cycle - these services "check" on late binding
+    // meaning if "stuff is already setup - we don't mess with it", otherwise
+    // configure with defaults
+
     if (controller == null) {
       controller = (ServoController) startPeer("arduino");
     }
 
-    jaw.startService();
-    eyeX.startService();
-    eyeY.startService();
-    rothead.startService();
-    neck.startService();
-    rollNeck.startService();
-  }
+    if (jaw == null) {
+      jaw = (ServoControl) startPeer("jaw");
+      jaw.setMinMax(10.0, 25.0);
+      jaw.setRest(10.0);
+    }
+    if (eyeX == null) {
+      eyeX = (ServoControl) startPeer("eyeX");
+      eyeX.setMinMax(60.0, 100.0);
+      eyeX.setRest(80.0);
+    }
+    if (eyeY == null) {
+      eyeY = (ServoControl) startPeer("eyeY");
+      eyeY.setMinMax(50.0, 100.0);
+      eyeY.setRest(90.0);
+    }
+    if (rollNeck == null) {
+      rollNeck = (ServoControl) startPeer("rollNeck");
+      rollNeck.setMinMax(20.0, 160.0);
+      rollNeck.setRest(90.0);
 
-  /*
-   * public boolean load(){ super.load(); rothead.load(); neck.load();
-   * eyeX.load(); eyeY.load(); jaw.load(); return true; }
-   */
+    }
+    if (neck == null) {
+      neck = (ServoControl) startPeer("neck");
+      neck.setMinMax(20.0, 160.0);
+      neck.setRest(90.0);
+    }
+
+    if (rothead == null) {
+      rothead = (ServoControl) startPeer("rothead");
+      rothead.setMinMax(20.0, 160.0);
+      rothead.setRest(90.0);
+    }
+
+    setVelocity(45.0, 45.0, null, null, null, 45.0);
+  }
 
   public void test() {
 
@@ -511,19 +473,10 @@ public class InMoovHead extends Service {
     }
     rothead.setVelocity(headXSpeed);
     neck.setVelocity(headYSpeed);
-    // it's possible to pass null for the eye and jaw speeds
-    if (eyeXSpeed != null) {
-      eyeX.setVelocity(eyeXSpeed);
-    }
-    if (eyeYSpeed != null) {
-      eyeY.setVelocity(eyeYSpeed);
-    }
-    if (jawSpeed != null) {
-      jaw.setVelocity(jawSpeed);
-    }
-    if (rollNeckSpeed != null) {
-      rollNeck.setVelocity(rollNeckSpeed);
-    }
+    eyeX.setVelocity(eyeXSpeed);
+    eyeY.setVelocity(eyeYSpeed);
+    jaw.setVelocity(jawSpeed);
+    rollNeck.setVelocity(rollNeckSpeed);
   }
 
   public static void main(String[] args) {

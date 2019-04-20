@@ -105,7 +105,7 @@ public class ServoTest extends AbstractTest {
     servo01.setVelocity(3);
     servo01.moveTo(130);
     servo02.moveTo(130);
-    servo01.setSpeed(30);
+    servo01.setSpeed(30.0);
     servo01.moveTo(30);
     servo02.moveTo(30);
 
