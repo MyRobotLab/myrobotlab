@@ -143,7 +143,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    *
    */
 
-  transient Map<String, List<ServiceGui>> nameMethodCallbackMap;
+  transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
+  
+  /**
+   * normalized set of ServiceGui(s)
+   */
+  transient Map<String,ServiceGui> serviceGuis = new TreeMap<>();
 
   transient JTextField status = new JTextField("status:");
   transient JButton statusClear = new JButton("clear");
@@ -346,6 +351,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * 
    *          FIXME - full parameter of addTab(final String serviceName, final
    *          String serviceType, final String lable) then overload
+   *          
+   *          FIXME - this method should be named onRegistered
    */
   synchronized public void addTab(final ServiceInterface sw) {
     
@@ -353,6 +360,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       log.warn("{} SwingGui is in headless environment", getName());
       return;
     }
+    
+    
+    // let all current "tabs" handle a new service - possibly by refreshing sets 
+    // of controllers, encoders or other possible "attachables"
+/// xxx    for (ServiceGui serviceGuis)
 
     // scroll.addItem(sw.getName());
 
@@ -409,6 +421,14 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
         // pack(); FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
+        
+        // spin through all service guis
+        for (ServiceGui sg : serviceGuis.values()) {
+          sg.onRegistered(sw);
+        }
+        
+        // simple normalized data structure
+        serviceGuis.put(name, newGui);
       }
     });
   }
@@ -491,8 +511,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     return menuBar;
   }
 
-  /*
-   * puts unique service.method and ServiceGui into map also in mrl.js
+  /**
+   * This method puts unique service.method key and ServiceGui into map also in mrl.js
    * 
    * the format of the key needs to be {name}.method
    * 
@@ -658,6 +678,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   // FIXME - when a service is 'being' released Runtime should
   // manage the releasing of the subscriptions !!!
   synchronized public void removeTab(final ServiceInterface si) {
+    
+    serviceGuis.remove(si.getName());
+    
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -712,8 +735,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     if (!active) {
       active = true;
 
-      nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
-
       // ===== build tab panels begin ======
       // builds all the service tabs for the first time called when
       // SwingGui
@@ -721,8 +742,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
       // add welcome table - weird - this needs to be involved in display
       tabs.addTab("Welcome", new Welcome("welcome", this).getDisplay());
-      // subscribeToServiceMethod("Welcome", new Welcome("welcome", this,
-      // tabs));
       
       /**
        * pack() repaint() works on current selected (non-hidden) tab welcome is

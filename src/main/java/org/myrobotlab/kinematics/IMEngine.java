@@ -587,8 +587,8 @@ public class IMEngine extends Thread implements Genetic {
       if (l.getName().equals(data.name)) {
         l.addPositionValue(data.pos);
         // l.setState(data.state);
-        l.setVelocity(data.speed);
-        l.setTargetPos(data.targetPos);
+        // l.setVelocity(data.speed);
+        // l.setTargetPos(data.targetPos);
         l.setCurrentPos(data.pos);
       }
     }

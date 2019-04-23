@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -33,7 +32,7 @@ import org.myrobotlab.framework.interfaces.StateSaver;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
-public interface ServoControl extends AbsolutePositionControl, Attachable, StateSaver, org.myrobotlab.framework.interfaces.StatePublisher {
+public interface ServoControl extends AbsolutePositionControl, EncoderListener, Attachable, StateSaver, org.myrobotlab.framework.interfaces.StatePublisher {
 
   /**
    * Attaches a servo controller with this servo control, supports a variety of
@@ -275,18 +274,6 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, State
   void rest();
   
   /**
-   * return a list of possible controllers 
-   * @return
-   */
-  public List<String> refreshEncoders() ;
-  
-  /**
-   * return a list of possible controllers 
-   * @return
-   */
-  public List<String> refreshControllers() ;
-
-  /**
    * Set the acceleration of the servo
    * 
    * @param acceleration
@@ -407,6 +394,11 @@ public interface ServoControl extends AbsolutePositionControl, Attachable, State
   long getLastActivityTime();
   
   public void setSpeed(Double d);
-  
+
+  Double getTargetPos();
+
+  void setPosition(Integer i);
+
+  EncoderControl getEncoder();  
   
 }

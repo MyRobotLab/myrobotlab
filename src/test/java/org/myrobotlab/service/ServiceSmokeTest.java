@@ -45,16 +45,16 @@ public class ServiceSmokeTest extends AbstractTest {
     ServiceData serviceData = ServiceData.getLocalInstance();
 
     // we need to load a service for each service type we have.
-    String[] x = serviceData.getServiceTypeNames();
+    String[] serviceTypes = serviceData.getServiceTypeNames();
     
-    // String[] x = new String[] {"org.myrobotlab.service.DiyServo"};
+    // String[] serviceTypes = new String[] {"org.myrobotlab.service.InMoov"};
 
-    for (String serviceType : x) {
+    for (String serviceType : serviceTypes) {
       log.info("Service Type: {}", serviceType);
     }
     log.info("Press any key to continue");
     // System.in.read();
-    for (String serviceType : x) {
+    for (String serviceType : serviceTypes) {
 
       long start = System.currentTimeMillis();
 

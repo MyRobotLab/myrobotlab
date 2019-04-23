@@ -30,7 +30,7 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -49,6 +49,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -60,6 +61,8 @@ import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoData;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;
@@ -73,9 +76,20 @@ import com.jidesoft.swing.RangeSlider;
  * controller versus sending messages directly to the controller. 1 display - 1
  * service - keep it simple
  * 
+ * Operating Speed - is often calculated in time in 60 degrees
+ * Avg speed seems to be about 0.12 seconds to rotate 60 degrees
+ * 500 degrees/second
+ * 0.5 degrees / ms
+ * 1 degree per 2 ms
+ * 
  * FIXME - iterate through controller types
  * FIXME - test "inverted" and changing max/min input/output
  * FIXME - stay true (especially to position) of position desired vs position reported (depending on encoder)
+ * 
+ * FIXME - too slow ... logging ??
+ * FIXME - if integer resolution then if (Math.round(x) == currentPos) - don't send "new" pos
+ * FIXME - global speed
+ * FIXME - set all timer's values in one shot that is ServoControl agnostic
  *
  * </pre>
  */
@@ -102,6 +116,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   JButton save = new JButton("save");
   JButton enable = new JButton("enable");
+  JCheckBox speedControl = new JCheckBox();
   JCheckBox autoDisable = new JCheckBox("auto disable");
   JCheckBox setInverted = new JCheckBox("set inverted");
   JSlider moveTo = new JSlider(0, 180, 90);
@@ -174,6 +189,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     sweepButton.addActionListener(this);
     pinList.addActionListener(this);
     restButton.addActionListener(this);
+    speedControl.addActionListener(this);
 
     // JPanel north = new JPanel(new GridLayout(0, 3));
     north.setLayout(new GridLayout(0, 3));
@@ -191,12 +207,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     encoderPanel.add(encoder);
 
     JPanel powerPanel = new JPanel();
-    powerPanel.setBorder(BorderFactory.createTitledBorder("power"));
+    powerPanel.setBorder(BorderFactory.createTitledBorder("speed control"));
+    powerPanel.add(speedControl);
     powerPanel.add(new JLabel("speed"));
     powerPanel.add(velocity);
     powerPanel.add(enable);
     powerPanel.add(autoDisable);
-
+    
     north.add(controllerPanel);
     north.add(encoderPanel);
     north.add(powerPanel);
@@ -241,7 +258,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     display.add(right, BorderLayout.EAST);
     display.add(left, BorderLayout.WEST);
 
-    refresh();
+    refreshControllers();
+    refreshEncoders();
   }
 
   // SwingGui's action processing section - data from user
@@ -338,25 +356,35 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   @Override
   public void subscribeGui() {
     subscribe("publishMoveTo");
-    subscribe("refreshEncoders");
-    subscribe("refreshControllers");
+    subscribe("publishServoData");
+    // subscribe("refreshEncoders");
+    // subscribe("refreshControllers");
   }
 
   @Override
   public void unsubscribeGui() {
     unsubscribe("publishMoveTo");
-    unsubscribe("refreshEncoders");
-    unsubscribe("refreshControllers");
+    unsubscribe("publishServoData");
+    // unsubscribe("refreshEncoders");
+    // unsubscribe("refreshControllers");
   }
 
   public void onMoveTo(final HobbyServo servo) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        targetPos.setText(servo.getPos() + "");
+        targetPos.setText(servo.getTargetPos() + "");
       }
     });
-
+  }
+  
+  public void onServoData(final ServoData data) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        currentPos.setText(data.pos + "");
+      }
+    });
   }
 
   synchronized public void onState(final HobbyServo servo) {
@@ -374,6 +402,21 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         if (controllerName != null) {
           controller.setSelectedItem(controllerName);
         }
+        
+        EncoderControl inEncoder = servo.getEncoder();
+        if (inEncoder != null) {
+          String encoderName = inEncoder.getName();
+          if (encoderName != null) {
+            encoder.setSelectedItem(encoderName);
+            encoder.setEnabled(false);
+            attachEncoder.setText("detach");
+          }
+        } else {
+          encoder.setSelectedItem("");
+          encoder.setEnabled(false);
+          attachEncoder.setText("attach");
+        }
+        
         String servoPin = servo.getPin();
 
         if (servoPin != null)
@@ -476,10 +519,11 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   }
 
-  public void onRefreshControllers(final ArrayList<String> c) {
+  public void refreshControllers() {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
+        List<String> c = Runtime.getServiceNamesFromInterface(ServoController.class);
         controller.removeActionListener((HobbyServoGui) self);
         String currentControllerName = (String) controller.getSelectedItem();
         controller.removeAllItems();
@@ -493,27 +537,22 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     });
   }
 
-  public void onRefreshEncoders(final ArrayList<String> c) {
+  public void refreshEncoders() {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         encoder.removeActionListener((HobbyServoGui) self);
-        String currentControllerName = (String) encoder.getSelectedItem();
+        String currentEncoderName = (String) encoder.getSelectedItem();
         encoder.removeAllItems();
+        List<String> c = Runtime.getServiceNamesFromInterface(EncoderControl.class);
         for (int i = 0; i < c.size(); ++i) {
           encoder.addItem(c.get(i));
         }
-        String encoderName = (currentControllerName != null) ? currentControllerName : lastController;
+        String encoderName = (currentEncoderName != null) ? currentEncoderName : lastController;
         encoder.setSelectedItem(encoderName);
         encoder.addActionListener((HobbyServoGui) self);
       }
     });
-  }
-
-  public void refresh() {
-    send("refreshEncoders");
-    send("refreshControllers");
-    send("broadcastState");
   }
 
   public void removeListeners() {
@@ -562,15 +601,26 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     } // if adjusting
   }
   
+  /**
+   * call back to hand new services registered we want to update our list of
+   * possible controllers & encoders
+   * 
+   * @param s
+   */
+  public void onRegistered(ServiceInterface s) {
+    refreshControllers();
+    refreshEncoders();
+  }
+  
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(false);
+      Platform.setVirtual(true);
     
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
-      EncoderControl encoder = (EncoderControl)Runtime.start("encoder", "TimeEncoder");
+      EncoderControl encoder = (EncoderControl)Runtime.start("encoder", "TimeEncoderFactory");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       if (mega.isVirtual()) {
@@ -585,11 +635,14 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       ServoControl servo = (ServoControl)Runtime.start("servo", "HobbyServo");
       // servo.load();
       servo.setPin(13);
+      servo.setPosition(90);
       log.info("rest is {}", servo.getRest());
       servo.save();
       // servo.setPin(8);
       servo.attach(mega);
       servo.attach(encoder);
+      servo.moveTo(120);
+      log.info("here");
       servo.moveTo(90);
       
     
