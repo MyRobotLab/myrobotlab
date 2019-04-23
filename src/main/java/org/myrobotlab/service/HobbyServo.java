@@ -28,6 +28,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.service.abstracts.AbstractServo;
+import org.myrobotlab.service.interfaces.EncoderControl;
 
 /**
  * @author GroG

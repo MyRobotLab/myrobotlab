@@ -638,8 +638,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   public void onIKServoEvent(ServoData data) {
     Mapper map = maps.get(data.name);
-    data.pos = map.calcOutput(data.pos);
-    data.targetPos = map.calcOutput(data.targetPos);
+    // data.pos = map.calcOutput(data.pos);
+    // data.targetPos = map.calcOutput(data.targetPos);
     for (IMEngine e : engines.values()) {
       e.updateLinksPosition(data);
     }

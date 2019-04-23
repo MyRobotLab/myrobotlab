@@ -26,6 +26,7 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -34,7 +35,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,6 +44,7 @@ import javax.swing.border.TitledBorder;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
@@ -449,6 +450,33 @@ public abstract class ServiceGui implements WindowListener {
 
   public void onStatus(Status inStatus) {
     swingGui.setStatus(inStatus);
+  }
+  
+  /**
+   * onRegistered is called on all service guis when a ne service is registered.
+   * To be overriden if the ServiceGui designer wants to be notified of new services.
+   * @param sw
+   */
+  public void onRegistered(final ServiceInterface sw) {
+    
+  }
+  
+  /**
+   * method to enable or disable all the children of a container - useful when a single checkbox
+   * or button controls many other sub-configuration elements
+   * 
+   * @param container
+   * @param enabled
+   */
+  static public void setEnabled(Container container, boolean enabled) {
+    Component[] children = container.getComponents();
+    for (int i = 0; i < children.length; ++i) {
+      Component c = children[i];
+      if (c instanceof Container) {
+        setEnabled((Container)c, enabled);
+      }
+      c.setEnabled(enabled);
+    }    
   }
 
 }

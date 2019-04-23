@@ -9,6 +9,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -133,7 +134,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * TimerEncoder, however there is
    * 
    */
-  EncoderControl encoder;
+  protected EncoderControl encoder;
 
   protected boolean isSweeping = false;
 
@@ -145,7 +146,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * servo's last position
    */
-  protected Double lastPos;
+  protected Double lastTargetPos;
 
   /**
    * list of servo listeners names
@@ -176,8 +177,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
   protected String pin;
 
   /**
-   * the "current" position of the servo - this never gets updated from "command" methods such as
-   * moveTo - its always status information, and its typically updated from an encoder of some form
+   * the "current" position of the servo - this never gets updated from
+   * "command" methods such as moveTo - its always status information, and its
+   * typically updated from an encoder of some form
    */
   protected Double currentPos;
 
@@ -220,22 +222,33 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   Integer timeoutMs = 30000;
 
+  /**
+   * status only field - updated by encoder
+   */
+  boolean isMoving = false;
+
   public AbstractServo(String reservedKey) {
     super(reservedKey);
 
-    // this servo is interested in new services which support either ServoControllers or EncoderControl interfaces
+    // this servo is interested in new services which support either
+    // ServoControllers or EncoderControl interfaces
     // we subscribe to runtime here for new services
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
   }
-  
+
+  /**
+   * overloaded routing attach
+   */
   public void attach(Attachable service) throws Exception {
     if (ServoController.class.isAssignableFrom(service.getClass())) {
-      attach((ServoController)service, null, null, null);
+      attach((ServoController) service, null, null, null);
+    } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
+      attach((EncoderControl) service);
     } else {
       warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
     }
   }
-  
+
   public void attach(ServoController controller) throws Exception {
     attach(controller, null, null, null);
   }
@@ -251,6 +264,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
     attach(controller, pin, pos, speed, null);
   }
+
   /**
    * maximum complexity attach with reference to controller
    */
@@ -275,14 +289,14 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // update pos if non-null value supplied
     if (pos != null) {
       targetPos = pos;
-      lastPos = targetPos;
+      lastTargetPos = targetPos;
     }
 
     // update speed if non-null value supplied
     if (speed != null) {
       setVelocity(speed);
     }
-    
+
     if (acceleration != null) {
       setAcceleration(acceleration);
     }
@@ -290,32 +304,50 @@ public abstract class AbstractServo extends Service implements ServoControl {
     controllers.add(controller.getName());
     controller.attach(this);
   }
+  
+  /**
+   * max complexity - minimal parameter EncoderControl attach
+   * @param encoder
+   * @throws Exception 
+   */
+  public void attach(EncoderControl service) throws Exception {
+    if (service == null) {
+      log.warn("encoder is null");
+      return;
+    }
+    if (service.equals(encoder)) {
+      log.info("encoder {} already attached", service.getName());
+      return;
+    }
+    encoder = service;
+    service.attach(this);
+  }
 
   @Override
   public void attach(ServoDataListener service) {
     listeners.add(service.getName());
   }
 
- // @Override
+  // @Override
   public void attach(String controllerName, Integer pin) throws Exception {
     attach(controllerName, pin, null);
   }
 
-  //@Override
+  // @Override
   public void attach(String controllerName, Integer pin, Double pos) throws Exception {
     attach(controllerName, pin, pos, null);
   }
 
-  //@Override
+  // @Override
   public void attach(String controllerName, Integer pin, Double pos, Double speed) throws Exception {
     attach(controllerName, pin, pos, speed, 0.0);
   }
-  
+
   /**
    * maximum complexity attach with "name" of controller - look for errors then
    * call maximum complexity attach with reference to controller
    */
- // @Override
+  // @Override
   public void attach(String controllerName, Integer pin, Double pos, Double speed, Double acceleration) throws Exception {
     ServiceInterface si = Runtime.getService(controllerName);
     if (si == null) {
@@ -498,7 +530,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * max complexity moveTo
    * 
-   * FIXME - move is more general and could be the "max" complexity method with positional information supplied
+   * FIXME - move is more general and could be the "max" complexity method with
+   * positional information supplied
    * 
    * @param newPos
    * @param isBlocking
@@ -507,36 +540,42 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public Double moveTo(Double newPos, Boolean isBlocking, Long timeoutMs) {
     // FIXME - implement encoder blocking ...
     // FIXME - when and what should a servo publish and when ?
-    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of the servo, targetPos is 
-    // the desired position of the servo - currentPos should NEVER be set in this function 
-    // even with no hardware encoder a servo can have a TimeEncoder from which position would be guessed - but
+    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
+    // the servo, targetPos is
+    // the desired position of the servo - currentPos should NEVER be set in
+    // this function
+    // even with no hardware encoder a servo can have a TimeEncoder from which
+    // position would be guessed - but
     // it would not be "set" here !
 
     // breakMoveToBlocking=true;
     // synchronized (moveToBlocked) {
     // moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     // }
-    
-    // enableAutoEnable is "always" on - if you want to stop a motor from working use .lock() 
-    // which is part of the motor command set ... once you lock a motor you can't do anything until you unlock it
+
+    // enableAutoEnable is "always" on - if you want to stop a motor from
+    // working use .lock()
+    // which is part of the motor command set ... once you lock a motor you
+    // can't do anything until you unlock it
 
     if (controllers.size() == 0) {
       error(String.format("%s's controller is not set", getName()));
-      return currentPos;
+      return lastTargetPos;
     }
-
-    if (newPos < mapper.getMinX()) {
-      currentPos = mapper.getMinX();  // FIXME !!! - WRONG !!! pos is never set by a moveTo command !!! unless there is no encoder !
-    }
-    if (newPos > mapper.getMaxX()) {
-      currentPos = mapper.getMaxX();
-    }
-
+    
     targetPos = newPos;
+
+    if (targetPos < mapper.getMinX()) {
+      targetPos = mapper.getMinX(); 
+    }
+    
+    if (targetPos > mapper.getMaxX()) {
+      targetPos = mapper.getMaxX();
+    }
 
     if (!isEnabled()) {
       // if (newPos != lastPos || !getAutoDisable()) {
-      if (newPos != lastPos || !isEnabled()) {      
+      if (targetPos != lastTargetPos || !isEnabled()) {
         enable();
       }
     }
@@ -544,26 +583,27 @@ public abstract class AbstractServo extends Service implements ServoControl {
     targetOutput = getTargetOutput();
     lastActivityTime = System.currentTimeMillis();
 
-    if (lastPos != newPos) {
+    if (lastTargetPos != targetPos) {
       for (String controller : controllers) {
         ServiceInterface si = Runtime.getService(controller);
-        if (si.isLocal()) {
+        if (si.isLocal()) { // FIXME - this "optimization" probably should not be done ...
           ((ServoController) Runtime.getService(controller)).servoMoveTo(this);
         } else {
-          send(controller, "servoMoveTo", this);          
+          send(controller, "servoMoveTo", this);
         }
       }
-      currentPos = newPos;
-      lastPos = currentPos; // what is the point of this ???
+      // if (noEncoder) ...
+      // currentPos = newPos;
+      // lastPos = currentPos; // what is the point of this ??? its wrong ...
     }
 
-    if (lastPos == newPos) {
-      lastPos = targetPos;
-      broadcastState(); // publishServo vs publishServoData .. GAH ! :P
+    if (lastTargetPos != targetPos) {
+      lastTargetPos = targetPos;
+      // broadcastState(); // not Needed with publishMoveTo
     }
 
     invoke("publishMoveTo", this);
-    return currentPos;
+    return currentPos; // if not blocking return null if blocking return currentPos
   }
 
   @Override
@@ -605,17 +645,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public Double moveToBlocking(Integer newPos, Long timeoutMs) {
     return moveTo(newPos.doubleValue(), true, timeoutMs);
   }
-  
-  /**
-   * call back to hand new services registered
-   * we want to update our list of possible controllers & encoders
-   * @param s
-   */
-  public void onRegistered(ServiceInterface s) {
-    refreshControllers();
-    refreshEncoders();
-    broadcastState();
-  }
+
 
   @Override
   public ServoControl publishMoveTo(ServoControl sc) {
@@ -624,12 +654,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public ServoData publishServoData(ServoStatus status, Double pos) {
-    ServoData sd = new ServoData();
-    sd.name = getName();
-    sd.pos = pos;
-    sd.speed = speed;
-    sd.targetPos = targetPos;
-    sd.state = status;
+    ServoData sd = new ServoData(status, getName(), pos);    
     return sd;
   }
 
@@ -751,25 +776,15 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
     syncedServos.remove(sc.getName());
   }
-  
-  @Override
-  public List<String> refreshControllers() {
-    return Runtime.getServiceNamesFromInterface(ServoController.class);
-  }
-  
-  @Override
-  public List<String> refreshEncoders() {
-    return Runtime.getServiceNamesFromInterface(EncoderControl.class);
-  }
 
 
   @Override
   public void waitTargetPos() {
-    // 
-    //while (this.pos != this.targetPos) {
-      // Some sleep perhaps?
-      // TODO:
-    //}
+    //
+    // while (this.pos != this.targetPos) {
+    // Some sleep perhaps?
+    // TODO:
+    // }
 
   }
 
@@ -782,6 +797,34 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public Mapper getMapper(Mapper m) {
     return mapper;
   }
-
+  
+  @Override
+  public void onEncoderData(EncoderData data) {
+    log.info("onEncoderData - {}", data.value);
+    currentPos = data.value;
+    // TODO test on type of encoder to handle differently if necessary
+    if (targetPos == currentPos) {
+      isMoving = false;
+      invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentPos);
+    } else {
+      isMoving = true;
+      invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentPos);
+    }
+  }
+  
+  @Override
+  public Double getTargetPos() {
+    return targetPos;
+  }
+  
+  @Override
+  public void setPosition(Integer pos) {
+   lastTargetPos = currentPos = targetPos = (double)pos;
+  }
+  
+  @Override
+  public EncoderControl getEncoder() {
+    return encoder;
+  }
 
 }

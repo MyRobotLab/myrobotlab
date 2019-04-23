@@ -50,6 +50,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoDataListener;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -459,7 +460,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     deltaVelocity = 1;
-    double lastPosInput = mapper.calcInput(lastPos);
+    double lastPosInput = mapper.calcInput(lastTargetPos);
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
@@ -692,7 +693,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // we need to read here real angle / seconds
     // before try to control velocity
 
-    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - lastPos) * (500 / sampleTime))), roundPos);
+    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - lastTargetPos) * (500 / sampleTime))), roundPos);
 
     // log.info("currentPosInput : " + currentPosInput);
 
@@ -703,11 +704,11 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // offline feedback ! if diy servo is disabled
     // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
     // real lastPos & sync with UI
-    if (!isEnabled() && MathUtils.round(lastPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
-      targetPos = mapper.calcInput(lastPos);
+    if (!isEnabled() && MathUtils.round(lastTargetPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
+      targetPos = mapper.calcInput(lastTargetPos);
       broadcastState();
     }
-    lastPos = currentPosInput;
+    lastTargetPos = currentPosInput;
 
   }
 
@@ -797,11 +798,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public ServoData publishServoData(Integer eventType, double currentPos) {
-    ServoData se = new ServoData();
-    se.name = getName();
-    // se.src = this;
-    se.pos = currentPos;
-    return se;
+    ServoData sd = new ServoData(ServoStatus.SERVO_POSITION_UPDATE, getName(), currentPos);    
+    return sd;
   }
 
   /**
@@ -874,7 +872,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public Double getLastPos() {
-    return lastPos;
+    return lastTargetPos;
   }
 
   public static void main(String[] args) throws InterruptedException {

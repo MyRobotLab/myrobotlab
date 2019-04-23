@@ -51,7 +51,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.PinArrayControl;
@@ -326,8 +328,7 @@ public class Servo extends Service implements ServoControl {
 
   public Servo(String n) {
     super(n);
-    refreshControllers();
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    
     lastActivityTime = System.currentTimeMillis();
 
     // here we define default values if not inside servo.json
@@ -355,11 +356,6 @@ public class Servo extends Service implements ServoControl {
     if (targetPos == null) {
       targetPos = rest;
     }
-  }
-
-  public void onRegistered(ServiceInterface s) {
-    refreshControllers();
-    broadcastState();
   }
 
   
@@ -655,12 +651,7 @@ public class Servo extends Service implements ServoControl {
   public Double publishServoEvent(Double position) {
     return position;
   }
-
-  public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
-    return controllers;
-  }
-
+  
   @Override
   public void releaseService() {
     // disable();
@@ -1562,7 +1553,7 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public ServoData publishServoData(ServoStatus eventType, Double currentPosUs) {
-    ServoData sd = new ServoData(eventType, this.getName(), currentPosUs, this.targetPos , this.getSpeed() );
+    ServoData sd = new ServoData(eventType, this.getName(), currentPosUs);
     return sd;
   }
 
@@ -1609,11 +1600,27 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public List<String> refreshEncoders() {
+  public void onEncoderData(EncoderData data) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  @Override
+  public Double getTargetPos() {
+    return targetPos;
+  }
+
+  @Override
+  public void setPosition(Integer i) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public EncoderControl getEncoder() {
     // TODO Auto-generated method stub
     return null;
   }
   
-  //////////  ServoControl methods end  ////////////////////
 
 }
