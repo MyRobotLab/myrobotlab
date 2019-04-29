@@ -16,6 +16,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.document.Classification;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -1355,7 +1356,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       try {
         return mouth.speakBlocking(toSpeak);
       } catch (Exception e) {
-        Logging.logError(e);
+        log.error("speakBlocking threw", e);
       }
     }
     return null;
@@ -2254,19 +2255,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     String leftPort = "COM3";
     String rightPort = "COM4";
+    
+    Platform.setVirtual(true);
 
-    VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
-    VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
-    vleft.connect(leftPort);
-    vright.connect(rightPort);
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
+    
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
-    // i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear",
-    // "AndroidSpeechRecognition");
     i01.startEar();
+    
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();

@@ -37,6 +37,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -163,6 +164,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   transient SwingGui self;
   transient private JMenu save;
   transient private JMenu load;
+  transient private JMenu refresh;
 
   static public void attachJavaConsole() {
     JFrame j = new JFrame("Java Console");
@@ -286,6 +288,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     } else if ("about".equals(cmd)) {
       new AboutDialog(this);
       // display();
+    } else if ("refresh".equals(cmd)) {      
+      send(getSelected(), "broadcastState");
+    } else if ("refresh all".equals(cmd)) {
+      for (String serviceName : Runtime.getServiceNames()) {
+        send(serviceName, "broadcastState");
+      }
     } else if ("load".equals(cmd)) {
       // get current focus
       String tabName = getSelected();
@@ -295,7 +303,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       } else if (si.isLocal()) {
         si.load();
       } else {
-        send("%s", tabName, "load");
+        send(tabName, "load");
       }
       info("loaded %s", tabName);
     } else if ("load all".equals(cmd)) {
@@ -308,7 +316,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         } else if (si.isLocal()) {
           si.load();
         } else {
-          send("%s", service, "load");
+          send(service, "load");
         }
       }
       info("loaded all services");
@@ -321,7 +329,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       } else if (si.isLocal()) {
         si.save();
       } else {
-        send("%s", tabName, "save");
+        send(tabName, "save");
       }
       info("saved %s", tabName);
     } else if ("save all".equals(cmd)) {
@@ -334,7 +342,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         } else if (si.isLocal()) {
           si.save();
         } else {
-          send("%s", service, "save");
+          send(service, "save");
         }
       }
       info("saved all services");
@@ -382,7 +390,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         log.debug("createTab {} {}", name, guiClass);
         ServiceGui newGui = null;
 
-        newGui = (ServiceGui) Instantiator.getNewInstance(guiClass, name, self);
+       
+        try {
+          newGui = (ServiceGui) Instantiator.getThrowableNewInstance(null, guiClass, name, self);
+        } catch (Exception e) {
+          log.info("could not create a {}", guiClass);
+        }
 
         if (newGui == null) {
           log.info("could not construct a {} object - creating generic template", guiClass);
@@ -500,12 +513,23 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     load.add(mi);
     menuBar.add(load);
     
+    refresh = new JMenu("refresh");  
+    mi = new JMenuItem("refresh");
+    mi.addActionListener(this);
+    refresh.add(mi);
+    mi = new JMenuItem("refresh all");
+    mi.addActionListener(this);
+    refresh.add(mi);   
+    menuBar.add(refresh);
+    
+    
     JMenu help = new JMenu("help");
     JMenuItem about = new JMenuItem("about");
     about.addActionListener(this);
     help.add(about);
     menuBar.add(help);
 
+ 
     search.getDocument().addDocumentListener(this);
     // search.addActionListener(this);
     return menuBar;

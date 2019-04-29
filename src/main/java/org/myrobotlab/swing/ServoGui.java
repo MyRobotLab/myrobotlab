@@ -35,6 +35,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -54,6 +55,7 @@ import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -492,10 +494,13 @@ public class ServoGui extends ServiceGui implements ActionListener {
         }
 
         if (o == attachButton) {
-          if (attachButton.getText().equals("attach")) {
-            send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), new Double(slider.getValue()));
+          if (attachButton.getText().equals("attach")) {           
+            send("setVelocity", controller.getSelectedItem(), new Double(slider.getValue()));
+            send("attach", controller.getSelectedItem(), pinList.getSelectedItem());
+            send("broadcastState");
           } else {
             send("detach", controller.getSelectedItem());
+            send("broadcastState");
           }
           return;
         }
@@ -598,13 +603,13 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    subscribe("refreshControllers");
+    // subscribe("refreshControllers");
   }
 
   // FIXME - runtime should handle all unsubscribe of teardown
   @Override
   public void unsubscribeGui() {
-    unsubscribe("refreshControllers");
+    // unsubscribe("refreshControllers");
   }
 
   synchronized public void onState(final Servo servo) {
@@ -760,7 +765,21 @@ public class ServoGui extends ServiceGui implements ActionListener {
   }
 
   public void refreshControllers() {
-    send("refreshControllers");
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        List<String> c = Runtime.getServiceNamesFromInterface(ServoController.class);
+        controller.removeActionListener((ServoGui) self);
+        String currentControllerName = (String) controller.getSelectedItem();
+        controller.removeAllItems();
+        for (int i = 0; i < c.size(); ++i) {
+          controller.addItem(c.get(i));
+        }
+        String controllerName = (currentControllerName != null) ? currentControllerName : "";
+        controller.setSelectedItem(controllerName);
+        controller.addActionListener((ServoGui) self);
+      }
+    });
   }
 
   public void removeListeners() {

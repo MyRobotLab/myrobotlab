@@ -33,6 +33,29 @@ public class InMoovHead extends Service {
 
   public InMoovHead(String n) {
     super(n);
+    jaw = (ServoControl) createPeer("jaw");
+    eyeX = (ServoControl) createPeer("eyeX");
+    eyeY = (ServoControl) createPeer("eyeY");
+    rothead = (ServoControl) createPeer("rothead");
+    neck = (ServoControl) createPeer("neck");
+    rollNeck = (ServoControl) createPeer("rollNeck");
+
+    neck.setMinMax(20, 160);
+    rollNeck.setMinMax(20, 160);
+    rothead.setMinMax(30, 150);
+    // reset by mouth control
+    jaw.setMinMax(10, 25);
+    eyeX.setMinMax(60, 100);
+    eyeY.setMinMax(50, 100);
+    neck.setRest(90.0);
+    rollNeck.setRest(90.0);
+    rothead.setRest(90.0);
+    jaw.setRest(10.0);
+    eyeX.setRest(80.0);
+    eyeY.setRest(90.0);
+
+    setVelocity(45.0, 45.0, -1.0, -1.0, -1.0, 45.0);
+
   }
 
   /*
@@ -79,7 +102,12 @@ public class InMoovHead extends Service {
   @Override
   public void broadcastState() {
     // notify the gui
-    Runtime.broadcastStates();    
+    rothead.broadcastState();
+    rollNeck.broadcastState();
+    neck.broadcastState();
+    eyeX.broadcastState();
+    eyeY.broadcastState();
+    jaw.broadcastState();
   }
 
   // FIXME - make interface for Arduino / Servos !!!
@@ -88,7 +116,7 @@ public class InMoovHead extends Service {
 
   }
 
-  public boolean connect(String port, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) throws Exception {
+  public boolean connect(String port, Integer neckPin, Integer rotheadPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) throws Exception {
 
     if (controller instanceof PortConnector) {
       PortConnector arduino = (PortConnector) controller;
@@ -97,6 +125,13 @@ public class InMoovHead extends Service {
         error("controller for head is not connected");
       }
     }
+    
+    neck.setPin(neckPin);
+    rothead.setPin(rotheadPin);
+    eyeX.setPin(eyeXPin);
+    eyeY.setPin(eyeYPin);
+    jaw.setPin(jawPin);
+    rollNeck.setPin(rollNeckPin);
     
     neck.attach(controller);
     rothead.attach(controller);
@@ -284,6 +319,16 @@ public class InMoovHead extends Service {
     return true;
   }
 
+  @Deprecated
+  public void enableAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
+    setAutoDisable(rotheadParam, neckParam, rollNeckParam);
+  }
+
+  @Deprecated
+  public void enableAutoDisable(Boolean param) {
+    setAutoDisable(param);
+  }
+
   public void setAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
     rothead.setAutoDisable(rotheadParam);
     rollNeck.setAutoDisable(rollNeckParam);
@@ -298,6 +343,26 @@ public class InMoovHead extends Service {
     jaw.setAutoDisable(param);
     rollNeck.setAutoDisable(param);
   }
+
+  @Deprecated
+  public void enableAutoEnable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
+    enableAutoEnable(true);
+  }
+
+  @Deprecated
+  public void enableAutoEnable(Boolean param) {
+  }
+
+  /*
+  public void setOverrideAutoDisable(Boolean param) {
+    rothead.setOverrideAutoDisable(param);
+    neck.setOverrideAutoDisable(param);
+    eyeX.setOverrideAutoDisable(param);
+    eyeY.setOverrideAutoDisable(param);
+    jaw.setOverrideAutoDisable(param);
+    rollNeck.setOverrideAutoDisable(param);
+  }
+  */
 
   public void setAcceleration(Double headXSpeed, Double headYSpeed, Double rollNeckSpeed) {
     rothead.setAcceleration(headXSpeed);
@@ -383,6 +448,13 @@ public class InMoovHead extends Service {
       controller = (ServoController) startPeer("arduino");
     }
 
+    startPeer("jaw");
+    startPeer("eyeX");
+    startPeer("eyeY");
+    startPeer("rothead");
+    startPeer("neck");
+    startPeer("rollNeck");
+    
     if (jaw == null) {
       jaw = (ServoControl) startPeer("jaw");
       jaw.setMinMax(10.0, 25.0);

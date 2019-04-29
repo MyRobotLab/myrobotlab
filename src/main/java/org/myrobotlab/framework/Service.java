@@ -1990,7 +1990,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       si.startService();
     } catch (Exception e) {
       error(e.getMessage());
-      Logging.logError(e);
+      log.error("startPeer threw", e);
     }
     return si;
   }
@@ -2023,7 +2023,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Runtime.register(this, null);
     }
 
-    startPeers();
+    // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
+    // should be created
+    // currently they are started by the UI vs created - and there is no desire
+    // or current capability of starting it
+    // afterwards
 
     if (!isRunning()) {
       outbox.start();
@@ -2051,7 +2055,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     if (peers == null) {
       return;
     }
-    
+
     Set<Class<?>> ancestry = new HashSet<Class<?>>();
     Class<?> targetClass = this.getClass();
 
@@ -2068,52 +2072,52 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     for (Class<?> sourceClass : ancestry) {
 
-    Field fields[] = sourceClass.getDeclaredFields();
-    for (int j = 0, m = fields.length; j < m; j++) {
-      try {
-        Field f = fields[j];
+      Field fields[] = sourceClass.getDeclaredFields();
+      for (int j = 0, m = fields.length; j < m; j++) {
+        try {
+          Field f = fields[j];
 
-        /**
-         * <pre>
-         * int modifiers = f.getModifiers();
-         * String fname = f.getName();
-         * if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-         *   log.debug("skipping {}", f.getName());
-         *   continue;
-         * } else {
-         *   log.debug("copying {}", f.getName());
-         * }
-         * 
-         * Type t = f.getType();
-         * </pre>
-         */
+          /**
+           * <pre>
+           * int modifiers = f.getModifiers();
+           * String fname = f.getName();
+           * if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+           *   log.debug("skipping {}", f.getName());
+           *   continue;
+           * } else {
+           *   log.debug("copying {}", f.getName());
+           * }
+           * 
+           * Type t = f.getType();
+           * </pre>
+           */
 
-        f.setAccessible(true);
-        Field targetField = sourceClass.getDeclaredField(f.getName());
-        targetField.setAccessible(true);
+          f.setAccessible(true);
+          Field targetField = sourceClass.getDeclaredField(f.getName());
+          targetField.setAccessible(true);
 
-        if (peers.containsKey(f.getName())) {
-          ServiceReservation sr = peers.get(f.getName());
-          
-          if (sr.autoStart == null || sr.autoStart == false) {
-            log.info("peer defined - but configured to not autoStart");
-            continue;
+          if (peers.containsKey(f.getName())) {
+            ServiceReservation sr = peers.get(f.getName());
+
+            if (sr.autoStart == null || sr.autoStart == false) {
+              log.info("peer defined - but configured to not autoStart");
+              continue;
+            }
+
+            if (f.get(this) != null) {
+              log.info("peer {} already assigned", f.getName());
+              continue;
+            }
+            log.info("assinging {}.{} = startPeer({})", sourceClass.getSimpleName(), f.getName(), f.getName());
+            Object o = startPeer(f.getName());
+
+            targetField.set(this, o);
           }
-          
-          if (f.get(this) != null) {
-            log.info("peer {} already assigned", f.getName());
-            continue;
-          }
-          log.info("assinging {}.{} = startPeer({})", sourceClass.getSimpleName(), f.getName(), f.getName());
-          Object o = startPeer(f.getName());
-          
-          targetField.set(this, o);
+
+        } catch (Exception e) {
+          log.error("copy failed", e);
         }
-
-      } catch (Exception e) {
-        log.error("copy failed", e);
-      }
-    } // for each field in class
+      } // for each field in class
     }
   }
 
@@ -2189,7 +2193,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   @Override
   public Status error(String format, Object... args) {
-    Status ret = Status.error(String.format(format, args));
+    Status ret = null;
+    if (format != null) {
+      ret = Status.error(String.format(format, args));
+    } else {
+      ret = Status.error(String.format("", args));
+    }
     ret.name = getName();
     log.error(ret.toString());
     invoke("publishStatus", ret);

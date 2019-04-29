@@ -238,6 +238,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   
   Mapper getMapper(Mapper m);
   
+  void setMaxSpeed(Double speed);
+  
+  Double getMaxSpeed();
+
+  
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
    * valid range but can be adjusted and / or re-mapped with min / max and map
@@ -400,5 +405,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setPosition(Integer i);
 
   EncoderControl getEncoder();  
+
   
 }
