@@ -1,7 +1,6 @@
 package org.myrobotlab.service.abstracts;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Service;
@@ -160,8 +159,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   /**
    * maximum speed
+   * default is 60 degrees per second
    */
-  protected Double maxSpeed;
+  protected Double maxSpeed = 61.0;
 
   /**
    * status if the servo thinks its moving ..
@@ -374,6 +374,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
         send(controller, "detach", this);
       }
     }
+    controllers.clear();
   }
 
   // @Override
@@ -573,7 +574,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       targetPos = mapper.getMaxX();
     }
 
-    if (!isEnabled()) {
+    if (!isEnabled() && autoDisable) { // FIXME - still not right - need to know if this servo was disabled through timer or not
       // if (newPos != lastPos || !getAutoDisable()) {
       if (targetPos != lastTargetPos || !isEnabled()) {
         enable();
@@ -825,6 +826,26 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public EncoderControl getEncoder() {
     return encoder;
+  }
+  
+  @Override
+  public void setMaxSpeed(Double maxSpeed) {
+    this.maxSpeed = maxSpeed;
+  }
+
+  @Override
+  public Double getMaxSpeed() {
+    return maxSpeed;
+  }
+
+  @Override
+  public Double getVelocity() {
+    return speed;
+  }
+  
+  @Override
+  public void setSpeed(Double speed) {
+    this.speed = speed;
   }
 
 }

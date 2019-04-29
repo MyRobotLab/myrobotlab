@@ -71,9 +71,10 @@ public class HobbyServo extends AbstractServo {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Servo.class.getCanonicalName());
+    ServiceType meta = new ServiceType(HobbyServo.class);
     meta.addDescription("General hobby servo control with absolute positioning");
     meta.addCategory("motor", "control");
+    meta.setAvailable(true);
 
     return meta;
   }
@@ -100,33 +101,9 @@ public class HobbyServo extends AbstractServo {
   }
 
   @Override
-  public Double getVelocity() {
-    return speed;
-  }
-
-  @Override
   public long getLastActivityTime() {
     // TODO Auto-generated method stub
     return 0;
   }
-
-  @Override
-  @Deprecated /* bleh - speed is the right method name */
-  public void setSpeed(Double speed) {
-    // These 2 values can be tweaked for a slightly different curve that
-    // fits the observed data.
-    double slope = 3.25;
-    double intercept = 1;
-
-    double vel = Math.exp(slope * speed + intercept);
-    // set velocity to 0.0 if the speed = 1.0.. This skips the velocity
-    // calculation logic.
-    if (speed >= 1.0) {
-      vel = maxSpeed;
-    }
-    
-    setVelocity(vel);
-  }
-
   
 }

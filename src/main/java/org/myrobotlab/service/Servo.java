@@ -147,15 +147,13 @@ public class Servo extends Service implements ServoControl {
    */
   @Override
   public void attach(Attachable service) throws Exception {
-    boolean attached = false;
+
     if (ServoController.class.isAssignableFrom(service.getClass())) {
       attachServoController((ServoController) service);
-      attached = true;
     }
     
     if (PinArrayControl.class.isAssignableFrom(service.getClass())) {
       pinArrayControl = (PinArrayControl) service;
-      attached = true;
     }
 
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
@@ -1271,7 +1269,9 @@ public class Servo extends Service implements ServoControl {
     if (targetPos == null) {
       targetPos = rest;
     }
-    targetOutput = mapper.calcOutput(targetPos);
+    if (targetPos != null) {
+      targetOutput = mapper.calcOutput(targetPos);
+    }
     return targetOutput;
   }
 
@@ -1535,20 +1535,21 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public Set<String> getControllers() {
-    // TODO Auto-generated method stub
-    return null;
+    Set<String> ret = new HashSet<String>();
+    if (controllerName != null) {
+      ret.add(controllerName);
+    }
+    return ret;
   }
 
   @Override
-  public Double getSpeed() {
-    // TODO Auto-generated method stub
-    return null;
+  public Double getSpeed() {    
+    return velocity;
   }
 
   @Override
-  public Double moveToBlocking(Integer pos) {
-    // TODO Auto-generated method stub
-    return null;
+  public Double moveToBlocking(Integer pos) {    
+    return (double)pos;
   }
 
   @Override
@@ -1618,6 +1619,18 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public EncoderControl getEncoder() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setMaxSpeed(Double speed) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public Double getMaxSpeed() {
     // TODO Auto-generated method stub
     return null;
   }

@@ -27,12 +27,15 @@ package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -63,6 +66,8 @@ import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.swing.widget.CheckBoxTitledBorder;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;
@@ -78,7 +83,7 @@ import com.jidesoft.swing.RangeSlider;
  * 
  * Operating Speed - is often calculated in time in 60 degrees
  * Avg speed seems to be about 0.12 seconds to rotate 60 degrees
- * 500 degrees/second
+ * 60 degrees/second
  * 0.5 degrees / ms
  * 1 degree per 2 ms
  * 
@@ -100,6 +105,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   String lastController;
 
+  Double lastSpeed = 60.0;
+
   JLabel targetPos = new JLabel();
   JLabel currentPos = new JLabel("90.0");
 
@@ -107,7 +114,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   JButton attachEncoder = new JButton("attach");
   // JButton export = new JButton("export"); - restore() ?
   JButton restButton = new JButton("rest");
-  JTextField velocity = new JTextField("         ");
+  JTextField speed = new JTextField("         ");
   JTextField rest = new JTextField("");
 
   ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif");
@@ -116,7 +123,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   JButton save = new JButton("save");
   JButton enable = new JButton("enable");
-  JCheckBox speedControl = new JCheckBox();
+  CheckBoxTitledBorder speedControlTitle = new CheckBoxTitledBorder("speed control", false);
+  JCheckBox speedControl = null;
   JCheckBox autoDisable = new JCheckBox("auto disable");
   JCheckBox setInverted = new JCheckBox("set inverted");
   JSlider moveTo = new JSlider(0, 180, 90);
@@ -138,13 +146,34 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   JButton sweepButton = new JButton("sweep");
 
-  JLabel enabled = new JLabel();
+  JLabel enabledIcon = new JLabel();
 
-  JSlider powerSlider = new JSlider(JSlider.VERTICAL, 0, 20, 4);
+  JLabel speedLabel = new JLabel("speed");
+
+  // JSlider powerSlider = new JSlider(JSlider.VERTICAL, 0, 20, 4);
+  JSlider speedSlider = new JSlider(0, 60, 60);
+
+  JPanel controllerPanel;
+  JPanel encoderPanel;
+  JPanel enablePanel;
+  JPanel speedPanel;
+
+  JLabel speedUnits = new JLabel("degrees/s");
+
+  JTextField maxSpeed = new JTextField("   ");
+  JButton setMaxSpeed = new JButton("set");
+  JLabel maxSpeedLabel = new JLabel("max speed");
+
+  JTextField idleTime = new JTextField("3000");
+
+  JLabel idleUnits = new JLabel(" ms");
+
+  JLabel idleTimeLabel = new JLabel("idle time ");
 
   public HobbyServoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
 
+    // FIXME - even though its a pain - this should come from the ServoController
     for (int i = 0; i < 54; i++) {
       pinList.addItem(i + "");
     }
@@ -158,7 +187,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     targetPos.setFont(targetPos.getFont().deriveFont(32.0f));
     targetPos.setHorizontalAlignment(JLabel.RIGHT);
 
-    enabled.setIcon(Util.getImageIcon("enabled.png"));
+    enabledIcon.setIcon(Util.getImageIcon("enabled.png"));
     currentPos.setFont(targetPos.getFont().deriveFont(32.0f));
     currentPos.setForeground(Color.LIGHT_GRAY);
 
@@ -176,47 +205,66 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     moveTo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     moveTo.setPaintLabels(true);
 
-    // FIXME shouldn't all this be in addListener() ?
-    //export.addActionListener(this);
-    save.addActionListener(this);
-    left.addActionListener(this);
-    right.addActionListener(this);
-    controller.addActionListener(this);
-    attach.addActionListener(this);
-    enable.addActionListener(this);
-    autoDisable.addActionListener(this);
-    setInverted.addActionListener(this);
-    sweepButton.addActionListener(this);
-    pinList.addActionListener(this);
-    restButton.addActionListener(this);
-    speedControl.addActionListener(this);
+    speedControl = speedControlTitle.getCheckBox();
 
     // JPanel north = new JPanel(new GridLayout(0, 3));
-    north.setLayout(new GridLayout(0, 3));
+    // north.setLayout(new FlowLayout(FlowLayout., 0, 0));
     // JPanel controllerPanel = new JPanel(new GridLayout(0, 4));
-    JPanel controllerPanel = new JPanel();
+    
+    north.setLayout(new BoxLayout(north, BoxLayout.X_AXIS));
+    
+    controllerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
     controllerPanel.add(attach);
     controllerPanel.add(controller);
     controllerPanel.add(new JLabel(" pin"));
     controllerPanel.add(pinList);
-
-    JPanel encoderPanel = new JPanel();
+    
+    encoderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     encoderPanel.setBorder(BorderFactory.createTitledBorder("encoder"));
     encoderPanel.add(attachEncoder);
     encoderPanel.add(encoder);
 
-    JPanel powerPanel = new JPanel();
-    powerPanel.setBorder(BorderFactory.createTitledBorder("speed control"));
-    powerPanel.add(speedControl);
-    powerPanel.add(new JLabel("speed"));
-    powerPanel.add(velocity);
-    powerPanel.add(enable);
-    powerPanel.add(autoDisable);
+    enablePanel = new JPanel(new GridLayout(0, 2));
+    enablePanel.setBorder(BorderFactory.createTitledBorder("enable"));
     
+    enablePanel.add(enable);
+    enablePanel.add(autoDisable);
+
+    
+    JPanel flow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+    flow.add(idleTimeLabel);   
+    flow.add(idleTime);
+    flow.add(idleUnits);
+    enablePanel.add(new JLabel(" "));
+    enablePanel.add(flow);
+    
+    setIdleTimeEnabled(false);
+    
+    speedPanel = new JPanel(new BorderLayout());
+    speedPanel.setBorder(speedControlTitle);
+    JPanel top = new JPanel();
+
+    // top.add(powerControl);
+    top.add(speedLabel);
+    top.add(speed);
+    top.add(maxSpeedLabel);
+    top.add(maxSpeed);
+    top.add(speedUnits);
+    top.add(setMaxSpeed);
+    
+    // top.add(autoDisable);
+
+    speedPanel.add(top, BorderLayout.NORTH);
+    speedPanel.add(speedSlider, BorderLayout.CENTER);
+    speedPanel.add(new JLabel("     "), BorderLayout.SOUTH);
+    
+    setSpeedControlEnabled(false);
+
     north.add(controllerPanel);
     north.add(encoderPanel);
-    north.add(powerPanel);
+    north.add(enablePanel);
+    north.add(speedPanel);
 
     //////////////////////////
 
@@ -232,15 +280,15 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     south.add(max);
     south.add(maxOutput);
     south.add(save);
-    //south.add(export);
+    // south.add(export);
 
     JPanel centerPanelStatus = new JPanel(new GridLayout(0, 5));
     centerPanelStatus.setBackground(Color.WHITE);
     centerPanelStatus.add(targetPos);
-    centerPanelStatus.add(enabled);
+    centerPanelStatus.add(enabledIcon);
     centerPanelStatus.add(moving);
     centerPanelStatus.add(currentPos);
-    centerPanelStatus.add(powerSlider);
+    // centerPanelStatus.add(powerSlider);
 
     center.setLayout(new GridLayout(0, 1));
     center.add(centerPanelStatus);
@@ -258,24 +306,60 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     display.add(right, BorderLayout.EAST);
     display.add(left, BorderLayout.WEST);
 
+    speedSlider.setEnabled(false);
+    speedLabel.setEnabled(false);
+
     refreshControllers();
-    refreshEncoders();
+    refreshEncoders();    
+    addListeners();
+  }
+  
+  private void setIdleTimeEnabled(boolean b) {
+    idleTime.setEnabled(b);
+    idleUnits.setEnabled(b);
+    idleTimeLabel.setEnabled(b);
+  }
+
+  public void setSpeedControlEnabled(boolean b) {
+    speed.setEnabled(b);
+    maxSpeed.setEnabled(b);
+    setMaxSpeed.setEnabled(b);
+    maxSpeedLabel.setEnabled(b);
+    speedSlider.setEnabled(b);
+    speedLabel.setEnabled(b);
+    speedUnits.setEnabled(b);
   }
 
   // SwingGui's action processing section - data from user
   @Override
   public void actionPerformed(final ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {
+
       @Override
       public void run() {
         Object o = event.getSource();
 
+        if (o == speedControl) {
+          if (speedControl.isSelected()) {
+            setSpeedControlEnabled(true);
+            if (lastSpeed != null) {
+              speed.setText(lastSpeed + "");
+            }
+            send("setMaxSpeed", Double.parseDouble(maxSpeed.getText()));
+          } else {
+            setSpeedControlEnabled(false);
+          }
+        }
+
         if (o == attach) {
           if (attach.getText().equals("attach")) {
-            send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), new Double(moveTo.getValue()));
+            // send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem() + "", new Double(moveTo.getValue()));
+            send("setPin", pinList.getSelectedItem()); // FIXME - get pinList from pinArrayControl
+            send("attach", controller.getSelectedItem());
           } else {
-            send("detach", controller.getSelectedItem());
+            send("detach");
           }
+          send("broadcastState");
           return;
         }
 
@@ -308,17 +392,19 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           return;
         }
 
-        /**<pre>
-        if (o == export) {
-          send("saveCalibration");
-          JOptionPane.showMessageDialog(null, "HobbyServo file generated");
-          return;
-        }
-        </pre>*/
+        /**
+         * <pre>
+         * if (o == export) {
+         *   send("saveCalibration");
+         *   JOptionPane.showMessageDialog(null, "HobbyServo file generated");
+         *   return;
+         * }
+         * </pre>
+         */
 
         if (o == save) {
           send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
-          send("setVelocity", Double.parseDouble(velocity.getText()));
+          send("setVelocity", Double.parseDouble(speed.getText()));
           send("save");
           send("setRest", Double.parseDouble(rest.getText()));
           info("HobbyServo config saved !");
@@ -357,16 +443,12 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   public void subscribeGui() {
     subscribe("publishMoveTo");
     subscribe("publishServoData");
-    // subscribe("refreshEncoders");
-    // subscribe("refreshControllers");
   }
 
   @Override
   public void unsubscribeGui() {
     unsubscribe("publishMoveTo");
     unsubscribe("publishServoData");
-    // unsubscribe("refreshEncoders");
-    // unsubscribe("refreshControllers");
   }
 
   public void onMoveTo(final HobbyServo servo) {
@@ -377,12 +459,17 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       }
     });
   }
-  
+
   public void onServoData(final ServoData data) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         currentPos.setText(data.pos + "");
+        if (ServoStatus.SERVO_POSITION_UPDATE.equals(data.state)) {
+          moving.setVisible(true);
+        } else {
+          moving.setVisible(false);
+        }
       }
     });
   }
@@ -396,13 +483,27 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         removeListeners();
         String controllerName = servo.getControllerName();
         lastController = controllerName;
+        
+        enabledIcon.setVisible(servo.isEnabled());
+        
+        maxSpeed.setText(servo.getMaxSpeed() == null?"60.0":servo.getMaxSpeed()+"");
+        
+        Double currentSpeed = servo.getVelocity();
+        if (currentSpeed == null) {
+          speed.setText("");
+        } else {
+          speed.setText(currentSpeed + "");
+          lastSpeed = currentSpeed;
+        }
 
         // refresh(); - infinite loop
 
         if (controllerName != null) {
           controller.setSelectedItem(controllerName);
+        } else {
+          
         }
-        
+
         EncoderControl inEncoder = servo.getEncoder();
         if (inEncoder != null) {
           String encoderName = inEncoder.getName();
@@ -416,7 +517,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           encoder.setEnabled(false);
           attachEncoder.setText("attach");
         }
-        
+
         String servoPin = servo.getPin();
 
         if (servoPin != null)
@@ -435,17 +536,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
         if (servo.isEnabled()) {
           enable.setText("disable");
-          enabled.setVisible(true);
+          enabledIcon.setVisible(true);
         } else {
           enable.setText("enable");
-          enabled.setVisible(false);
+          enabledIcon.setVisible(false);
         }
 
-        if (servo.getSpeed() != null) {
-          moving.setIcon(movingIcon);
-          moving.setVisible(true);
+        if (servo.getVelocity() != null) {
+
         } else {
-          moving.setVisible(false);
+
         }
 
         if (servo.getAutoDisable()) {
@@ -471,7 +571,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         moveTo.setMinimum(servo.getMin().intValue());
         moveTo.setMaximum(servo.getMax().intValue());
 
-        velocity.setText((servo.getSpeed() == null) ? "           " : servo.getSpeed() + "");
+        speed.setText((servo.getSpeed() == null) ? "           " : servo.getSpeed() + "");
 
         if (mapInput.getLowValue() != servo.getMin().intValue()) {
           mapInput.setLowValue(servo.getMin().intValue());
@@ -512,10 +612,15 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         mapInput.setHighValue(servo.getMax().intValue());
         mapOutput.setLowValue(servo.getMinOutput().intValue());
         mapOutput.setHighValue(servo.getMaxOutput().intValue());
+        
+        
 
         addListeners();
       }
     });
+  }
+
+  public void enableSpeedControl(boolean b) {
 
   }
 
@@ -556,19 +661,41 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   }
 
   public void removeListeners() {
+    attach.removeActionListener(this);
+    autoDisable.removeActionListener(this);
     controller.removeActionListener(this);
-    pinList.removeActionListener(this);
-    moveTo.removeChangeListener(this);
+    enable.removeActionListener(this);
+    left.removeActionListener(this);
     mapInput.removeChangeListener(this);
-    mapOutput.removeChangeListener(this);
+    mapOutput.removeChangeListener(this);    
+    moveTo.removeChangeListener(this);
+    pinList.removeActionListener(this);
+    speedControlTitle.removeActionListener(this);
+    right.removeActionListener(this);
+    save.removeActionListener(this);
+    setInverted.removeActionListener(this);
+    speedSlider.removeChangeListener(this);
+    sweepButton.removeActionListener(this);
+    restButton.removeActionListener(this);        
   }
 
   public void addListeners() {
+    attach.addActionListener(this);
+    autoDisable.addActionListener(this);
     controller.addActionListener(this);
-    pinList.addActionListener(this);
-    moveTo.addChangeListener(this);
+    enable.addActionListener(this);
+    left.addActionListener(this);
     mapInput.addChangeListener(this);
-    mapOutput.addChangeListener(this);
+    mapOutput.addChangeListener(this);    
+    moveTo.addChangeListener(this);
+    pinList.addActionListener(this);
+    speedControlTitle.addActionListener(this);
+    right.addActionListener(this);
+    save.addActionListener(this);
+    setInverted.addActionListener(this);
+    speedSlider.addChangeListener(this);
+    sweepButton.addActionListener(this);
+    restButton.addActionListener(this);
   }
 
   @Override
@@ -578,6 +705,12 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     if (moveTo.equals(o)) {
       moving.setVisible(true);
       send("moveTo", moveTo.getValue());
+    }
+    
+    if (speedSlider.equals(o)) {
+      // speedSlider.setVisible(true);
+      send("setVelocity", (double)speedSlider.getValue());
+      speed.setText(speedSlider.getValue() + "");      
     }
 
     if (!((JSlider) o).getValueIsAdjusting()) {
@@ -600,7 +733,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       }
     } // if adjusting
   }
-  
+
   /**
    * call back to hand new services registered we want to update our list of
    * possible controllers & encoders
@@ -611,16 +744,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     refreshControllers();
     refreshEncoders();
   }
-  
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
-    
+
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
-      EncoderControl encoder = (EncoderControl)Runtime.start("encoder", "TimeEncoderFactory");
+      EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       if (mega.isVirtual()) {
@@ -632,7 +765,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // mega.setBoardUno();
       mega.connect("COM7");
 
-      ServoControl servo = (ServoControl)Runtime.start("servo", "HobbyServo");
+      ServoControl servo = (ServoControl) Runtime.start("servo", "HobbyServo");
       // servo.load();
       servo.setPin(13);
       servo.setPosition(90);
@@ -644,11 +777,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       servo.moveTo(120);
       log.info("here");
       servo.moveTo(90);
-      
-    
+
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
-  
+
 }
