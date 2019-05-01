@@ -28,6 +28,14 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovHand.class);
 
+  // default pins if not specified.
+  private static final Integer DEFAULT_THUMB_PIN = 2;
+  private static final Integer DEFAULT_INDEX_PIN = 3;
+  private static final Integer DEFAULT_MAJEURE_PIN = 4;
+  private static final Integer DEFAULT_RINGFINGER_PIN = 5;
+  private static final Integer DEFAULT_PINKY_PIN = 6;
+  private static final Integer DEFAULT_WRIST_PIN = 7;
+  
   /**
    * peer services
    */
@@ -135,6 +143,9 @@ public class InMoovHand extends Service implements LeapDataListener {
    */
   public boolean connect(String port) throws Exception {
 
+    // justin case we haven't started our peers yet.
+    startPeers();
+    
     if (controller == null) {
       error("controller is invalid");
       return false;
@@ -150,6 +161,10 @@ public class InMoovHand extends Service implements LeapDataListener {
       }
     }
     
+    // set defaults for the servos
+    initServoDefaults();
+    
+    
     thumb.attach(controller);
     index.attach(controller);
     majeure.attach(controller);
@@ -161,6 +176,30 @@ public class InMoovHand extends Service implements LeapDataListener {
 
     broadcastState();
     return true;
+  }
+
+  private void initServoDefaults() {
+    if (thumb.getPin() == null)
+      thumb.setPin(DEFAULT_THUMB_PIN);
+    if (index.getPin() == null)
+      index.setPin(DEFAULT_INDEX_PIN);
+    if (majeure.getPin() == null)
+      majeure.setPin(DEFAULT_MAJEURE_PIN);
+    if (ringFinger.getPin() == null)
+      ringFinger.setPin(DEFAULT_RINGFINGER_PIN);
+    if (pinky.getPin() == null)
+      pinky.setPin(DEFAULT_PINKY_PIN);
+    if (wrist.getPin() == null)
+        wrist.setPin(DEFAULT_WRIST_PIN);    
+    // TOOD: what are the initial velocities?
+    // Initial rest positions?    
+    thumb.setRest(2.0);
+    index.setRest(2.0);
+    majeure.setRest(2.0);
+    ringFinger.setRest(2.0);
+    pinky.setRest(2.0);
+    wrist.setRest(90.0);
+    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
   }
 
   public void count() {
@@ -505,19 +544,11 @@ public class InMoovHand extends Service implements LeapDataListener {
   @Override
   public void startService() { 
     super.startService();
-    
-    thumb.setRest(2.0);
-    index.setRest(2.0);
-    majeure.setRest(2.0);
-    ringFinger.setRest(2.0);
-    pinky.setRest(2.0);
-    wrist.setRest(90.0);
-
-    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
-
-    if (controller == null) {
-      controller = (ServoController) startPeer("arduino");
-    }
+    // Handled lazily on connect method now.
+    // TODO:
+    //    if (controller == null) {
+    //      controller = (ServoController) startPeer("arduino");
+    //    }
   }
 
   public void stopLeapTracking() {
