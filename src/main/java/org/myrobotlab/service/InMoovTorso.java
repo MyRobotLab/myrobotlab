@@ -24,6 +24,11 @@ public class InMoovTorso extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovTorso.class);
 
+  
+  private static final Integer DEFAULT_TOPSTOM_PIN = 27;
+  private static final Integer DEFAULT_MIDSTOM_PIN = 28;
+  private static final Integer DEFAULT_LOWSTOM_PIN = 29;
+  
   transient public ServoControl topStom;
   transient public ServoControl midStom;
   transient public ServoControl lowStom;
@@ -46,23 +51,33 @@ public class InMoovTorso extends Service {
 
   public InMoovTorso(String n) {
     super(n);
-    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
-    // FRAMEWORK !!!!!
-    topStom = (ServoControl) createPeer("topStom");
-    midStom = (ServoControl) createPeer("midStom");
-    lowStom = (ServoControl) createPeer("lowStom");
-    // controller = (ServoController) createPeer("arduino");
+    // TODO: just call startPeers here.
+    //    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
+    //    // FRAMEWORK !!!!!
+    //    topStom = (ServoControl) createPeer("topStom");
+    //    midStom = (ServoControl) createPeer("midStom");
+    //    lowStom = (ServoControl) createPeer("lowStom");
+    //    // controller = (ServoController) createPeer("arduino");
+  }
 
+  private void initServoDefaults() {
+    
+    if (topStom.getPin() == null) 
+      topStom.setPin(DEFAULT_TOPSTOM_PIN);
+    if (midStom.getPin() == null)
+        midStom.setPin(DEFAULT_MIDSTOM_PIN);
+    if (lowStom.getPin() == null)
+      lowStom.setPin(DEFAULT_LOWSTOM_PIN);
+    
     topStom.setMinMax(60.0, 120.0);
     midStom.setMinMax(0.0, 180.0);
     lowStom.setMinMax(0.0, 180.0);
-
     topStom.setRest(90.0);
     midStom.setRest(90.0);
     lowStom.setRest(90.0);
-
+    
     setVelocity(5.0, 5.0, 5.0);
-
+    
   }
 
   /*
@@ -127,10 +142,10 @@ public class InMoovTorso extends Service {
       }
     }
 
-    ((Servo)topStom).attach(controller, 27, topStom.getRest(), topStom.getVelocity());
-    ((Servo)midStom).attach(controller, 28, midStom.getRest(), midStom.getVelocity());
-    ((Servo)lowStom).attach(controller, 29, lowStom.getRest(), lowStom.getVelocity());
-
+    // incase the peers haven't been started, or the peers don't have their defaults set
+    startPeers();
+    initServoDefaults();
+    
     enableAutoEnable(true);
 
     broadcastState();

@@ -29,6 +29,12 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovArm.class);
 
+  // default pins if not specified.
+  private static final Integer DEFAULT_BICEP_PIN = 8;
+  private static final Integer DEFAULT_ROTATE_PIN = 9;
+  private static final Integer DEFAULT_SHOULDER_PIN = 10;
+  private static final Integer DEFAULT_OMOPLATE_PIN = 11;
+
   /**
    * peer services
    */
@@ -91,8 +97,13 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public boolean connect(String port) throws Exception {
-    startService(); // NEEDED? I DONT THINK SO....
 
+    // if the servos haven't been started already.. fire them up!
+    startPeers();
+    // set defaults for the servos
+    initServoDefaults();
+    // we need a default controller  
+    
     if (controller == null) {
       error("controller is invalid");
       return false;
@@ -107,6 +118,30 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       }
     }
     
+
+    
+    bicep.attach(controller);
+    rotate.attach(controller);
+    shoulder.attach(controller);
+    omoplate.attach(controller);    
+
+    enableAutoEnable(true);
+
+    broadcastState();
+    return true;
+  }
+
+  private void initServoDefaults() {
+    if (bicep.getPin() == null)
+      bicep.setPin(DEFAULT_BICEP_PIN);
+    if (rotate.getPin() == null)
+      rotate.setPin(DEFAULT_ROTATE_PIN);
+    if (shoulder.getPin() == null)
+      shoulder.setPin(DEFAULT_SHOULDER_PIN);
+    if (omoplate.getPin() == null)
+      omoplate.setPin(DEFAULT_OMOPLATE_PIN);
+    
+    
     bicep.setMinMax(5.0, 90.0);
     rotate.setMinMax(40.0, 180.0);
     shoulder.setMinMax(0.0, 180.0);
@@ -118,16 +153,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate.setRest(10.0);
 
     setVelocity(20.0, 20.0, 20.0, 20.0);
-
-    bicep.attach(controller);
-    rotate.attach(controller);
-    shoulder.attach(controller);
-    omoplate.attach(controller);    
-
-    enableAutoEnable(true);
-
-    broadcastState();
-    return true;
   }
 
   @Deprecated
@@ -319,9 +344,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   @Override
   public void startService() {
     super.startService();    
-    if (controller == null) {
-      controller = (ServoController) startPeer("arduino");
-    }
+
     // arduino.startService();
   }
 
