@@ -87,11 +87,11 @@ public class MouthControl extends Service {
         // russian а ... <> a
         if ((s == 'a' || s == 'e' || s == 'i' || s == 'o' || s == 'u' || s == 'y' || s == 'é' || s == 'è' || s == 'û' || s == 'и' || s == 'й' || s == 'У' || s == 'я' || s == 'э'
             || s == 'Ы' || s == 'ё' || s == 'ю' || s == 'е' || s == 'а' || s == 'о') && !ison) {
-          jaw.moveTo(mouthOpenedPos); // # move the servo to the
+          jaw.moveTo((double)mouthOpenedPos); // # move the servo to the
           // open spot
           ison = true;
           sleep(delaytime);
-          jaw.moveTo(mouthClosedPos);// #// close the servo
+          jaw.moveTo((double)mouthClosedPos);// #// close the servo
         } else if (s == '.') {
           ison = false;
           sleep(delaytimestop);
@@ -112,7 +112,7 @@ public class MouthControl extends Service {
     // TODO: consider a jaw move to closed position
     // this will only work if the mouth animation ends before it end playing the
     // voice.
-    jaw.moveTo(mouthClosedPos);
+    jaw.moveTo((double)mouthClosedPos);
   }
 
   public void setdelays(Integer d1, Integer d2, Integer d3) {

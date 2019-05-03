@@ -343,17 +343,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
           if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
             if (skeleton.leftElbow.getAngleXY() >= 0) {
-              leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+              leftArm.bicep.moveTo((double)skeleton.leftElbow.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
             if (skeleton.leftShoulder.getAngleXY() >= 0) {
-              leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+              leftArm.omoplate.moveTo((double)skeleton.leftShoulder.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
             if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-              leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ() - 50);
+              leftArm.shoulder.moveTo((double)skeleton.leftShoulder.getAngleYZ() - 50);
             }
           }
         }
@@ -362,17 +362,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
           if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
             if (skeleton.rightElbow.getAngleXY() >= 0) {
-              rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
+              rightArm.bicep.moveTo((double)skeleton.rightElbow.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
             if (skeleton.rightShoulder.getAngleXY() >= 0) {
-              rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
+              rightArm.omoplate.moveTo((double)skeleton.rightShoulder.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
             if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-              rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ() - 50);
+              rightArm.shoulder.moveTo((double)skeleton.rightShoulder.getAngleYZ() - 50);
             }
           }
         }

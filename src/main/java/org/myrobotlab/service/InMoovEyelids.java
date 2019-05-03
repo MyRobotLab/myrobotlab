@@ -61,9 +61,9 @@ public class InMoovEyelids extends Service {
     if (controller == null) {
       error("servo controller is null");
     }
-    eyelidleft.moveTo(179);
+    eyelidleft.moveTo(179.0);
     sleep(300);
-    eyelidright.moveToBlocking(1);
+    eyelidright.moveToBlocking(1.0);
   }
 
   static public void main(String[] args) {

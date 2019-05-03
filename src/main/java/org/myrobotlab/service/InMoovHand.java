@@ -418,27 +418,27 @@ public class InMoovHand extends Service implements LeapDataListener {
     // If the hand data came from a valid frame, update the finger postions.
     // move all fingers
     if (index != null && index.isAttached()) {
-      index.moveTo(h.index);
+      index.moveTo((double)h.index);
     } else {
       log.debug("Index finger isn't attached or is null.");
     }
     if (thumb != null && thumb.isAttached()) {
-      thumb.moveTo(h.thumb);
+      thumb.moveTo((double)h.thumb);
     } else {
       log.debug("Thumb isn't attached or is null.");
     }
     if (pinky != null && pinky.isAttached()) {
-      pinky.moveTo(h.pinky);
+      pinky.moveTo((double)h.pinky);
     } else {
       log.debug("Pinky finger isn't attached or is null.");
     }
     if (ringFinger != null && ringFinger.isAttached()) {
-      ringFinger.moveTo(h.ring);
+      ringFinger.moveTo((double)h.ring);
     } else {
       log.debug("Ring finger isn't attached or is null.");
     }
     if (majeure != null && majeure.isAttached()) {
-      majeure.moveTo(h.middle);
+      majeure.moveTo((double)h.middle);
     } else {
       log.debug("Middle(Majeure) finger isn't attached or is null.");
     }

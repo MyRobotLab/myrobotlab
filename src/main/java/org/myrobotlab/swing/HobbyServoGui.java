@@ -717,7 +717,6 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         send("moveTo", moveTo.getValue());
       }
       
-      
       if (mapInput.equals(o)) {
         min.setText(String.format("%d", mapInput.getLowValue()));
         max.setText(String.format("%d", mapInput.getHighValue()));
@@ -769,18 +768,26 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // mega.setBoardUno();
       mega.connect("COM7");
 
-      ServoControl servo = (ServoControl) Runtime.start("servo", "HobbyServo");
+      ServoControl servo = null;
+      boolean useHobbyServo = false;
+      
+      if (useHobbyServo) {
+        servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");
+      } else {
+        servo = (ServoControl) Runtime.start("servo", "Servo");        
+      }
+      
       // servo.load();
       servo.setPin(13);
-      servo.setPosition(90);
+      servo.setPosition(90.0);
       log.info("rest is {}", servo.getRest());
       servo.save();
       // servo.setPin(8);
       servo.attach(mega);
       servo.attach(encoder);
-      servo.moveTo(120);
+      servo.moveTo(120.0);
       log.info("here");
-      servo.moveTo(90);
+      servo.moveTo(90.0);
 
     } catch (Exception e) {
       log.error("main threw", e);

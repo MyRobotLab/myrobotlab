@@ -309,15 +309,15 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       servo.attach(arduino, 6);
-      servo.moveTo(30);
+      servo.moveTo(30.0);
 
       srf04.startRanging();
 
       for (int i = 0; i < 100; ++i) {
-        servo.moveTo(30);
-        servo.moveTo(160);
-        servo.moveTo(10);
-        servo.moveTo(180);
+        servo.moveTo(30.0);
+        servo.moveTo(160.0);
+        servo.moveTo(10.0);
+        servo.moveTo(180.0);
       }
 
       arduino.setDebug(false);

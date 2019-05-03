@@ -54,7 +54,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
   
   PinData[] pinArray = null;
 
-  int servoPin01 = 7;
+  String servoPin01 = "7";
 
   private void assertVirtualPinValue(VirtualArduino virtual, int address, int value) {
     if (virtual != null) {
@@ -331,7 +331,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     assertTrue("isConnected", arduino01.isConnected());
 
     // attach it
-    servo.attach(arduino01, servoPin01);
+    servo.attach(arduino01, Integer.parseInt(servoPin01));
     sleep(300); // wait for asynchronous creation over serial of an MrlComm
                 // servo
 
@@ -359,14 +359,14 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     }
     
     // move it
-    servo.moveToBlocking(30);    
+    servo.moveToBlocking(30.0);    
     if (arduino01.isVirtual()) {
       // FIXME -- fix blocking fix encoders
       sleep(500); 
       assertTrue("virtual servo moved blocking to 30", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(30));
     }
     
-    servo.moveTo(100);
+    servo.moveTo(100.0);
     sleep(100);
     if (arduino01.isVirtual()) {
       assertTrue("virtual servo moved to 100", mrlservo.targetPosUs == Arduino.degreeToMicroseconds(100));
@@ -391,7 +391,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     assertFalse(servo.isAttached(arduino01));
 
     // attach it the other way
-    arduino01.attach(servo, servoPin01);
+    arduino01.attach(servo, Integer.parseInt(servoPin01));
 
     // verify its attached
     assertTrue(servo.isAttached(arduino01));
@@ -414,10 +414,10 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     }
 
     // can we enable to a different pin?
-    servo.enable(servoPin01 + 1);
+    servo.enable(servoPin01 + 1 + "");
     if (arduino01.isVirtual()) {
       sleep(100);
-      assertTrue(mrlServo.pin == servoPin01 + 1);
+      assertTrue(mrlServo.pin == Integer.parseInt(servoPin01 + 1));
       assertTrue(mrlServo.pin + ""== servo.getPin());
     }
 
@@ -431,21 +431,21 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
     // attach to the correct pin again
     servo.enable(servoPin01);
-    servo.moveTo(30);
-    servo.moveTo(130);
-    servo.moveTo(30);
+    servo.moveTo(30.0);
+    servo.moveTo(130.0);
+    servo.moveTo(30.0);
     // assertEquals(virtual.servoMoveTo(130));
     servo.rest();
 
     assertEquals(arduino01.getName(), servo.getController().getName());
 
-    servo.moveTo(0);
+    servo.moveTo(0.0);
     // assertEquals(virtual.servoMoveTo(0));
-    servo.moveTo(90);
+    servo.moveTo(90.0);
     // assertEquals("servoWrite/7/90\n", uart.decode());
-    servo.moveTo(180);
+    servo.moveTo(180.0);
     // assertEquals("servoWrite/7/180\n", uart.decode());
-    servo.moveTo(0);
+    servo.moveTo(0.0);
     // assertEquals("servoWrite/7/0\n", uart.decode());
 
     // detach
@@ -456,7 +456,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     arduino01.attach(servo);
     assertEquals("arduino did not attach to servo correctly", arduino01.getName(), servo.getController().getName());
 
-    servo.moveTo(10);
+    servo.moveTo(10.0);
 
     // re-attach
     servo.enable();
@@ -466,14 +466,14 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // // assertEquals(servoPin, servo.getPin().intValue());
     
 
-    servo.moveTo(90);
+    servo.moveTo(90.0);
     // assertEquals("servoWrite/7/90\n", uart.decode());
 
     arduino01.enableBoardInfo(true);
 
     servo.startService();
 
-    servo.moveTo(90);
+    servo.moveTo(90.0);
 
     // when we release a service - it should
     // notify and process releasing itself from attached
