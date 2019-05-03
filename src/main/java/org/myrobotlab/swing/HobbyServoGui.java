@@ -702,18 +702,22 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   public void stateChanged(ChangeEvent e) {
     Object o = e.getSource();
     /* if (!((JSlider) o).getValueIsAdjusting()) */
-    if (moveTo.equals(o)) {
-      moving.setVisible(true);
-      send("moveTo", moveTo.getValue());
-    }
-    
+
     if (speedSlider.equals(o)) {
       // speedSlider.setVisible(true);
       send("setVelocity", (double)speedSlider.getValue());
       speed.setText(speedSlider.getValue() + "");      
     }
 
+    // isAdjusting prevent incremental values coming from the slider
     if (!((JSlider) o).getValueIsAdjusting()) {
+      
+      if (moveTo.equals(o)) {
+        moving.setVisible(true);
+        send("moveTo", moveTo.getValue());
+      }
+      
+      
       if (mapInput.equals(o)) {
         min.setText(String.format("%d", mapInput.getLowValue()));
         max.setText(String.format("%d", mapInput.getHighValue()));
@@ -749,7 +753,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      Platform.setVirtual(false);
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");

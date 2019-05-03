@@ -54,6 +54,9 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
     transient Thread myThread = null;
 
     // default max speed
+    // Common servos have operating speeds in the range of 0.05 to 0.2 s/60 degree.
+    // going with 60 degrees in 0.12 s 
+    // 
     double defaultMaxSpeedDegreesPerMs = 0.15;// degrees/ms 0.05 ?
     int sampleIntervalMs = 5;
 
@@ -82,7 +85,7 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
             long beginMoveTs = System.currentTimeMillis();
             long endMoveTs = beginMoveTs + (long) moveTimeMs;
 
-            log.info("at current ts {} starting at {} we are going to travel {} degrees to position {} in {} ms ending at {} ts", beginMoveTs, servo.getPos(), distance,
+            log.info("@ ts {} starting at {} we are going to travel {} degrees to position {} in {} ms ending at {} ts", beginMoveTs, servo.getPos(), distance,
                 servo.getTargetPos(), moveTimeMs, endMoveTs);
 
             double estimatedPos = servo.getPos();
@@ -99,10 +102,12 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
               estimatedPos = beginPos + speedDegreesPerMs * (now - beginMoveTs); // speed has +/- direction
               
               // actual degree increments - TODO - option to disable and publish back sub-degrees
+              /*
               if (Math.round(lastPos) == Math.round(estimatedPos)) {
                 sleep(sampleIntervalMs);
                 continue;
               }
+              */
               
               if (beginPos < targetPos && estimatedPos > targetPos) {
                 estimatedPos = targetPos;
