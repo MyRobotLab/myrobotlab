@@ -133,6 +133,7 @@ public class MrlServo extends Device implements VirtualServo {
     lastUpdate = millis();
     moveStart = lastUpdate;
     publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+    log.info("servo {} -> moveToMicroseconds {}", id, posUs);
   }
 
   void startSweep(int minUs, int maxUs, int step) {

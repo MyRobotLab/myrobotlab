@@ -1506,7 +1506,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         }
       }
 
-      log.error("did not find method - {}.{}({})", obj, method, CodecUtils.getParameterSignature(params));
+      log.error("did not find method - {}.{}({}) {}", obj, method, CodecUtils.getParameterSignature(params), paramTypes);
     } catch (Exception e) {
       log.error("{}", e.getClass().getSimpleName(), e);
     }
