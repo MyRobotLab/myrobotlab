@@ -40,13 +40,13 @@ public class InMoovHead extends Service {
     neck = (ServoControl) createPeer("neck");
     rollNeck = (ServoControl) createPeer("rollNeck");
 
-    neck.setMinMax(20, 160);
-    rollNeck.setMinMax(20, 160);
-    rothead.setMinMax(30, 150);
+    neck.setMinMax((double)20, (double)160);
+    rollNeck.setMinMax((double)20, (double)160);
+    rothead.setMinMax((double)30, (double)150);
     // reset by mouth control
-    jaw.setMinMax(10, 25);
-    eyeX.setMinMax(60, 100);
-    eyeY.setMinMax(50, 100);
+    jaw.setMinMax((double)10, (double)25);
+    eyeX.setMinMax((double)60, (double)100);
+    eyeY.setMinMax((double)50, (double)100);
     neck.setRest(90.0);
     rollNeck.setRest(90.0);
     rothead.setRest(90.0);

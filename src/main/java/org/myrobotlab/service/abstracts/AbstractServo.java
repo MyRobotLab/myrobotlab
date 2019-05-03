@@ -522,10 +522,15 @@ public abstract class AbstractServo extends Service implements ServoControl {
     mapper = new Mapper(minX, maxX, minY, maxY);
     broadcastState();
   }
-
+  
+  @Override
+  public long getLastActivityTime() {
+    return lastActivityTime;
+  }
+  
   @Override
   public void moveTo(Double newPos) {
-    moveTo(newPos, false, null);
+    moveTo(newPos, null, null);
   }
 
   /**
@@ -608,16 +613,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public void moveTo(Float newPos) {
-    moveTo(newPos.doubleValue());
-  }
-
-  @Override
-  public void moveTo(Integer newPos) {
-    moveTo(newPos.doubleValue());
-  }
-
-  @Override
   public Double moveToBlocking(Double pos) {
     return moveTo(pos, true, null);
   }
@@ -626,27 +621,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public Double moveToBlocking(Double newPos, Long timeoutMs) {
     return moveTo(newPos, true, timeoutMs);
   }
-
-  @Override
-  public Double moveToBlocking(Float newPos) {
-    return moveTo(newPos.doubleValue(), true, null);
-  }
-
-  @Override
-  public Double moveToBlocking(Float newPos, Long timeoutMs) {
-    return moveTo(newPos.doubleValue(), true, timeoutMs);
-  }
-
-  @Override
-  public Double moveToBlocking(Integer newPos) {
-    return moveTo(newPos.doubleValue(), true, null);
-  }
-
-  @Override
-  public Double moveToBlocking(Integer newPos, Long timeoutMs) {
-    return moveTo(newPos.doubleValue(), true, timeoutMs);
-  }
-
 
   @Override
   public ServoControl publishMoveTo(ServoControl sc) {
@@ -697,11 +671,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public void setMinMax(Double min, Double max) {
-    mapper.setMinMaxInput(min, max);
-  }
-
-  @Override
-  public void setMinMax(Integer min, Integer max) {
     mapper.setMinMaxInput(min, max);
   }
 
@@ -795,7 +764,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public Mapper getMapper(Mapper m) {
+  public Mapper getMapper() {
     return mapper;
   }
   
@@ -819,8 +788,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
   
   @Override
-  public void setPosition(Integer pos) {
-   lastTargetPos = currentPos = targetPos = (double)pos;
+  public void setPosition(Double pos) {
+   lastTargetPos = currentPos = targetPos = pos;
   }
   
   @Override

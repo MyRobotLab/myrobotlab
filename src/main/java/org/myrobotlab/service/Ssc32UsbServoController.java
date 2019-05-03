@@ -329,15 +329,15 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
        */
 
       /// big.setVelocity(10);
-      big.moveTo(0);
-      big.moveTo(90);
-      big.moveTo(180);
-      big.moveTo(10);
+      big.moveTo(0.0);
+      big.moveTo(90.0);
+      big.moveTo(180.0);
+      big.moveTo(10.0);
       big.disable();
-      big.moveTo(180);
+      big.moveTo(180.0);
       big.enable();
-      big.moveTo(10);
-      big.moveTo(160);
+      big.moveTo(10.0);
+      big.moveTo(160.0);
 
       big.detach(ssc);
 

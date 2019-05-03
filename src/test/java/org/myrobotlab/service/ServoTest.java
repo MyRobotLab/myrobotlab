@@ -75,7 +75,7 @@ public class ServoTest extends AbstractTest {
     // are both these valid ?
     // gut feeling says no - they should not be
     // servo01.attach(arduino01, 8);
-    servo01.moveTo(30);
+    servo01.moveTo(30.0);
     servo01.attach(arduino01, 8, 40.0);
     servo01.attach(arduino01, 8, 30.0);
     
@@ -96,18 +96,18 @@ public class ServoTest extends AbstractTest {
      */
 
     // sub speed single move
-    servo01.moveTo(30);
-    servo01.moveTo(31);
-    servo01.moveTo(30);
-    servo01.moveTo(31);
-    servo01.moveTo(30);
+    servo01.moveTo(30.0);
+    servo01.moveTo(31.0);
+    servo01.moveTo(30.0);
+    servo01.moveTo(31.0);
+    servo01.moveTo(30.0);
 
-    servo01.setVelocity(3);
-    servo01.moveTo(130);
-    servo02.moveTo(130);
+    servo01.setVelocity(3.0);
+    servo01.moveTo(130.0);
+    servo02.moveTo(130.0);
     servo01.setSpeed(30.0);
-    servo01.moveTo(30);
-    servo02.moveTo(30);
+    servo01.moveTo(30.0);
+    servo02.moveTo(30.0);
 
     arduino01.setDebug(true);
 
@@ -123,41 +123,41 @@ public class ServoTest extends AbstractTest {
     servo02.attach(arduino01, 8, 40.0); // same pin?
     servo01.attach(arduino01, 7, 40.0); // already attached ?
 
-    servo01.moveTo(130);
-    servo02.moveTo(130);
-    servo01.moveTo(30);
-    servo02.moveTo(30);
+    servo01.moveTo(130.0);
+    servo02.moveTo(130.0);
+    servo01.moveTo(30.0);
+    servo02.moveTo(30.0);
 
     servo01.broadcastState();
     servo02.broadcastState();
 
     servo01.setSpeed(0.2);
     servo02.setSpeed(0.2);
-    servo01.moveTo(130);
-    servo02.moveTo(130);
-    servo01.moveTo(30);
-    servo02.moveTo(30);
-    servo01.moveTo(130);
+    servo01.moveTo(130.0);
+    servo02.moveTo(130.0);
+    servo01.moveTo(30.0);
+    servo02.moveTo(30.0);
+    servo01.moveTo(130.0);
     servo01.setSpeed(1.0);
-    servo01.moveTo(30);
-    servo01.moveTo(130);
-    servo01.moveTo(30);
-    servo01.moveTo(130);
+    servo01.moveTo(30.0);
+    servo01.moveTo(130.0);
+    servo01.moveTo(30.0);
+    servo01.moveTo(130.0);
 
     servo01.detach();
 
     // no move after detach test
-    servo01.moveTo(30);
-    servo01.moveTo(130);
-    servo01.moveTo(30);
-    servo01.moveTo(130);
+    servo01.moveTo(30.0);
+    servo01.moveTo(130.0);
+    servo01.moveTo(30.0);
+    servo01.moveTo(130.0);
 
     // move after detach/re-attach
     servo01.enable();
-    servo01.moveTo(30);
-    servo01.moveTo(130);
-    servo01.moveTo(30);
-    servo01.moveTo(130);
+    servo01.moveTo(30.0);
+    servo01.moveTo(130.0);
+    servo01.moveTo(30.0);
+    servo01.moveTo(130.0);
 
     // servo02.attach(afdriver, 8);
 
@@ -173,27 +173,27 @@ public class ServoTest extends AbstractTest {
     // servo01.attach(7);
     arduino01.setDebug(true);
 
-    servo01.moveTo(130);
-    servo01.moveTo(30);
-    // servo02.attach(7);
+    servo01.moveTo(130.0);
+    servo01.moveTo(30.0);
+    // servo02.attach(7.0);
 
     // servo move methods
-    servo02.moveTo(30);
-    servo02.moveTo(130);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
 
     servo02.detach();
-    servo02.moveTo(30);
-    servo02.moveTo(130);
-    servo02.moveTo(30);
-    servo02.moveTo(130);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
 
     servo02.enable();
-    servo02.moveTo(30);
-    servo02.moveTo(130);
-    servo02.moveTo(30);
-    servo02.moveTo(130);
-    servo02.moveTo(30);
-    servo02.moveTo(130);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
 
     /*
      * servo01.moveTo(30); servo02.moveTo(30); servo01.moveTo(130);
@@ -210,10 +210,10 @@ public class ServoTest extends AbstractTest {
     servo01.enable();
     servo02.enable();
 
-    servo02.moveTo(30);
-    servo02.moveTo(130);
-    servo02.moveTo(30);
-    servo02.moveTo(130);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
+    servo02.moveTo(30.0);
+    servo02.moveTo(130.0);
 
   }
 
@@ -253,9 +253,9 @@ public class ServoTest extends AbstractTest {
 
     // depricated. i feel like if you do
     s.enable();
-    s.moveTo(90);
+    s.moveTo(90.0);
     // test moving to the same position
-    s.moveTo(90);
+    s.moveTo(90.0);
     // new position
     s.moveTo(91.0);
     s.disable();
@@ -314,7 +314,7 @@ public class ServoTest extends AbstractTest {
     assertFalse("setting autoDisable false", servo01.getAutoDisable());
     servo01.setAutoDisable(true);
     assertTrue("setting autoDisable true", servo01.getAutoDisable());
-    servo01.moveTo(130);
+    servo01.moveTo(130.0);
     sleep(1500); // waiting for disable
     assertFalse("servo should have been disabled", servo01.isEnabled());
     

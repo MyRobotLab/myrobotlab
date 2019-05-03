@@ -236,7 +236,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   
   void setMapper(Mapper m);
   
-  Mapper getMapper(Mapper m);
+  Mapper getMapper();
   
   void setMaxSpeed(Double speed);
   
@@ -317,18 +317,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setMinMax(Double min, Double max);
 
   /**
-   * limits input of servo - to prevent damage or problems if servos should not
-   * move their full range
-   * 
-   * @param min
-   *          min value
-   * @param max
-   *          max value
-   * 
-   */
-  void setMinMax(Integer min, Integer max);
-
-  /**
    * set the pin of the servo this does not 'attach' energize the pin only set
    * the pin value
    * 
@@ -402,7 +390,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   Double getTargetPos();
 
-  void setPosition(Integer i);
+  void setPosition(Double pos);
 
   EncoderControl getEncoder();  
 

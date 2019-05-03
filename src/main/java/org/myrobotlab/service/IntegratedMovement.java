@@ -227,76 +227,76 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     mtorso.setRest(90.0);
     // #mtorso.setMinMax(35,150);
     mtorso.setVelocity(13.0);
-    mtorso.moveTo(90);
+    mtorso.moveTo(90.0);
     Servo ttorso = (Servo) Runtime.start("ttorso", "Servo");
     ttorso.attach(arduino, 7, 90.0);
     ttorso.map(80.0, 100.0, 92.0, 118.0);
     // ttorso.setInverted(False)
     // #ttorso.setMinMax(85,125)
     ttorso.setVelocity(13.0);
-    ttorso.moveTo(90);
+    ttorso.moveTo(90.0);
     Servo omoplate = (Servo) Runtime.start("omoplate", "Servo");
     omoplate.attach(arduino, 11, 10.0);
     omoplate.map(10.0, 70.0, 10.0, 70.0);
     omoplate.setVelocity(15.0);
     // #omoplate.setMinMax(10,70)
-    omoplate.moveTo(10);
+    omoplate.moveTo(10.0);
     Servo Romoplate = (Servo) Runtime.start("Romoplate", "Servo");
     Romoplate.attach(arduino, 31, 10.0);
     Romoplate.map(10.0, 70.0, 10.0, 70.0);
     Romoplate.setVelocity(15.0);
     // #omoplate.setMinMax(10,70)
-    Romoplate.moveTo(10);
+    Romoplate.moveTo(10.0);
     Servo shoulder = (Servo) Runtime.start("shoulder", "Servo");
     shoulder.attach(arduino, 26, 30.0);
     shoulder.map(0.0, 180.0, 0.0, 180.0);
     // #shoulder.setMinMax(0,180)
     shoulder.setVelocity(14.0);
-    shoulder.moveTo(30);
+    shoulder.moveTo(30.0);
     Servo Rshoulder = (Servo) Runtime.start("Rshoulder", "Servo");
     Rshoulder.attach(arduino, 6, 30.0);
     Rshoulder.map(0.0, 180.0, 0.0, 180.0);
     // #shoulder.setMinMax(0,180)
     Rshoulder.setVelocity(14.0);
-    Rshoulder.moveTo(30);
+    Rshoulder.moveTo(30.0);
     Servo rotate = (Servo) Runtime.start("rotate", "Servo");
     rotate.attach(arduino, 9, 90.0);
     rotate.map(46.0, 160.0, 46.0, 160.0);
     // #rotate.setMinMax(46,180)
     rotate.setVelocity(18.0);
-    rotate.moveTo(90);
+    rotate.moveTo(90.0);
     Servo Rrotate = (Servo) Runtime.start("Rrotate", "Servo");
     Rrotate.attach(arduino, 29, 90.0);
     Rrotate.map(46.0, 160.0, 46.0, 160.0);
     // #rotate.setMinMax(46,180)
     Rrotate.setVelocity(18.0);
-    Rrotate.moveTo(90);
+    Rrotate.moveTo(90.0);
     Servo bicep = (Servo) Runtime.start("bicep", "Servo");
     bicep.attach(arduino, 8, 10.0);
     bicep.map(5.0, 60.0, 5.0, 80.0);
     bicep.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
-    bicep.moveTo(10);
+    bicep.moveTo(10.0);
     Servo Rbicep = (Servo) Runtime.start("Rbicep", "Servo");
     Rbicep.attach(arduino, 28, 10.0);
     Rbicep.map(5.0, 60.0, 5.0, 80.0);
     Rbicep.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
-    Rbicep.moveTo(10);
+    Rbicep.moveTo(10.0);
     Servo wrist = (Servo) Runtime.start("wrist", "Servo");
     wrist.attach(arduino, 7, 90.0);
     // #wrist.map(45,135,45,135)
     wrist.map(0.0, 180.0, 0.0, 180.0);
     wrist.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
-    wrist.moveTo(90);
+    wrist.moveTo(90.0);
     Servo Rwrist = (Servo) Runtime.start("Rwrist", "Servo");
     Rwrist.attach(arduino, 27, 90.0);
     // #wrist.map(45,135,45,135)
     wrist.map(0.0, 180.0, 0.0, 180.0);
     Rwrist.setVelocity(26.0);
     // #bicep.setMinMax(5,90)
-    Rwrist.moveTo(90);
+    Rwrist.moveTo(90.0);
     // Servo finger = (Servo) Runtime.start("finger","Servo");
     // finger.attach(arduino,18,90);
     // finger.map(89.999,90.001,89.999,90.001);
@@ -438,31 +438,31 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // ik.jmeApp.addObject();
 
     // need to move a little so the position update
-    mtorso.moveTo(91);
-    ttorso.moveTo(91);
-    Romoplate.moveTo(11);
-    Rshoulder.moveTo(31);
-    Rrotate.moveTo(91);
-    Rbicep.moveTo(6);
-    omoplate.moveTo(11);
-    shoulder.moveTo(31);
-    rotate.moveTo(91);
-    bicep.moveTo(6);
-    wrist.moveTo(91);
-    Rwrist.moveTo(91);
+    mtorso.moveTo(91.0);
+    ttorso.moveTo(91.0);
+    Romoplate.moveTo(11.0);
+    Rshoulder.moveTo(31.0);
+    Rrotate.moveTo(91.0);
+    Rbicep.moveTo(6.0);
+    omoplate.moveTo(11.0);
+    shoulder.moveTo(31.0);
+    rotate.moveTo(91.0);
+    bicep.moveTo(6.0);
+    wrist.moveTo(91.0);
+    Rwrist.moveTo(91.0);
 
-    mtorso.moveTo(90);
-    ttorso.moveTo(90);
-    Romoplate.moveTo(10);
-    Rshoulder.moveTo(30);
-    Rrotate.moveTo(90);
-    Rbicep.moveTo(5);
-    omoplate.moveTo(10);
-    shoulder.moveTo(30);
-    rotate.moveTo(90);
-    bicep.moveTo(5);
-    wrist.moveTo(90);
-    Rwrist.moveTo(90);
+    mtorso.moveTo(90.0);
+    ttorso.moveTo(90.0);
+    Romoplate.moveTo(10.0);
+    Rshoulder.moveTo(30.0);
+    Rrotate.moveTo(90.0);
+    Rbicep.moveTo(5.0);
+    omoplate.moveTo(10.0);
+    shoulder.moveTo(30.0);
+    rotate.moveTo(90.0);
+    bicep.moveTo(5.0);
+    wrist.moveTo(90.0);
+    Rwrist.moveTo(90.0);
 
     // sleep(3000);
     // double[][] jp = ik.createJointPositionMap("leftArm");
