@@ -142,6 +142,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   public VirtualArduino(String n) {
     super(n);
+    uart = (Serial) createPeer("uart");
   }
 
   public void connect(String portName) throws IOException {
@@ -226,7 +227,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     // boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
     setBoard(Arduino.BOARD_TYPE_UNO);
     
-    runner = new InoScriptRunner(this, ino);
+    if (runner == null) {
+      runner = new InoScriptRunner(this, ino);
+    }
+    
+    uart = (Serial) startPeer("uart");
     uart.addPortListener(getName());
     start();
   }
@@ -297,6 +302,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Override
   public boolean isConnected() {
+    if (uart == null) {      
+      return false;
+    }
     return uart.isConnected();
   }
 
@@ -307,6 +315,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Override
   public List<String> getPortNames() {
+    if (uart == null) {
+      return new ArrayList<String>();
+    }
     return uart.getPortNames();
   }
 
