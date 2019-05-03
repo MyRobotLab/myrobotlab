@@ -752,7 +752,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(false);
+      Platform.setVirtual(true);
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");

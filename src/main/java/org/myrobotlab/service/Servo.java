@@ -857,7 +857,12 @@ public class Servo extends Service implements ServoControl {
     this.pin = pin + "";
     attach(controller);
   }
-  
+
+  public void attach(String controller, String pin) throws Exception {
+    this.pin = pin;
+    attach(controller);
+  }
+
   
   public void attach(String name, int pin, double pos) throws Exception {
     attach((ServoController)Runtime.getService(name), pin, pos);    
