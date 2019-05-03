@@ -6,15 +6,16 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.myrobotlab.boofcv.ExampleVisualOdometryDepth;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
@@ -43,6 +44,9 @@ import com.jme3.ui.Picture;
  * @author Christian version 1.0.3
  */
 public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface {
+  
+  transient public final static Logger log = LoggerFactory.getLogger(InMoov3DApp.class);
+
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
   private Queue<ServoData> eventQueue = new ConcurrentLinkedQueue<ServoData>();
   private transient HashMap<String, Node> servoToNode = new HashMap<String, Node>();
@@ -750,7 +754,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       servoToNode.put(servo.getName(), node);
       maps.put(partName, map);
     } else {
-      Log.info(partName + " is not a valid part name for VinMoov");
+      log.info(partName + " is not a valid part name for VinMoov");
     }
   }
 
@@ -856,7 +860,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       map = new Mapper(map.getMinX(), map.getMaxX(), min, max);
       maps.put(partName, map);
     } else {
-      Log.info("No part named " + partName + " found");
+      log.info("No part named " + partName + " found");
     }
   }
 

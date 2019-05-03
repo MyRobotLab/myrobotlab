@@ -6,10 +6,12 @@ package org.myrobotlab.kinematics;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.myrobotlab.jme3.Jme3Servo;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.PVector;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 /**
  * 
@@ -19,6 +21,9 @@ import org.python.jline.internal.Log;
  *
  */
 public class Map3D {
+  
+  transient public final static Logger log = LoggerFactory.getLogger(Map3D.class);
+
 
   public enum CoordStateValue {
     UNDEFINED, EMPTY, FILL;
@@ -162,7 +167,7 @@ public class Map3D {
         i = -1;
       }
     }
-    Log.info("Found {} object(s)", cloudMapGroup.size());
+    log.info("Found {} object(s)", cloudMapGroup.size());
   }
 
   private void addCoordValue(double xpos, double ypos, double zpos, CoordStateValue value) {

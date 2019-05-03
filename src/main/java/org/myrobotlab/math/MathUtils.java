@@ -8,7 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.python.jline.internal.Log;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * A place to have some handy math functions.
@@ -17,6 +18,8 @@ import org.python.jline.internal.Log;
  *
  */
 public class MathUtils {
+  
+  transient public final static Logger log = LoggerFactory.getLogger(MathUtils.class);
 
   // convert degrees to radians.
   static public double degToRad(double degrees) {
@@ -40,7 +43,7 @@ public class MathUtils {
       // Log.debug("math returned "+ sumMaxAvg / howMany);
       return sumMaxAvg / howMany;
     }
-    Log.warn("averageMaxFromArray error");
+    log.warn("averageMaxFromArray error");
     return 0;
   }
 

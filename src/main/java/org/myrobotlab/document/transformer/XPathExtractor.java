@@ -24,7 +24,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;

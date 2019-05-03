@@ -24,6 +24,17 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.ejml.data.DMatrixRMaj;
+import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.LoggerFactory;
+import org.openkinect.freenect.Resolution;
+import org.slf4j.Logger;
+
 import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
 import boofcv.abst.feature.tracker.PointTrackerTwoPass;
 import boofcv.abst.sfm.AccessPointTracks3D;
@@ -37,7 +48,6 @@ import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
 import boofcv.io.MediaManager;
-import boofcv.io.UtilIO;
 import boofcv.io.calibration.CalibrationIO;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.SimpleImageSequence;
@@ -49,21 +59,8 @@ import boofcv.struct.image.GrayS16;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageType;
-import boofcv.struct.image.Planar;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-import org.ejml.data.DMatrixRMaj;
-import org.myrobotlab.image.Util;
-
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.openkinect.freenect.Resolution;
-import org.python.jline.internal.Log;
 
 /**
  * Bare bones example showing how to estimate the camera's ego-motion using a
@@ -73,6 +70,8 @@ import org.python.jline.internal.Log;
  * @author Peter Abeles
  */
 public class ExampleVisualOdometryDepth {
+  
+  transient public final static Logger log = LoggerFactory.getLogger(ExampleVisualOdometryDepth.class);
 
   Resolution resolution = Resolution.MEDIUM;
 
@@ -95,7 +94,7 @@ public class ExampleVisualOdometryDepth {
 
     // String directory = UtilIO.pathExample("kinect/straight");
     String directory = Util.getResourceDir() + File.separator + "BoofCv"+ File.separator;
-    Log.info("Using directory ", directory);
+    log.info("Using directory {}", directory);
 
     // load camera description and the video sequence
     VisualDepthParameters param = CalibrationIO.load(media.openFile(directory + "visualdepth.yaml"));

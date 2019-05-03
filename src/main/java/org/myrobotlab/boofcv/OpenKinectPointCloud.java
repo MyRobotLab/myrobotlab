@@ -18,6 +18,26 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.Dimension;
+import java.io.File;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ddogleg.struct.FastQueue;
+import org.myrobotlab.image.Util;
+import org.openkinect.freenect.Context;
+import org.openkinect.freenect.DepthFormat;
+import org.openkinect.freenect.DepthHandler;
+import org.openkinect.freenect.Device;
+import org.openkinect.freenect.FrameMode;
+import org.openkinect.freenect.Freenect;
+import org.openkinect.freenect.VideoFormat;
+import org.openkinect.freenect.VideoHandler;
+import org.python.jline.internal.Log;
+
+import com.sun.jna.NativeLibrary;
+
 import boofcv.alg.depth.VisualDepthOps;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.gui.image.ShowImages;
@@ -31,19 +51,6 @@ import boofcv.struct.image.Planar;
 import boofcv.visualize.PointCloudViewer;
 import boofcv.visualize.VisualizeData;
 import georegression.struct.point.Point3D_F64;
-
-import com.sun.jna.NativeLibrary;
-
-import org.ddogleg.struct.FastQueue;
-import org.myrobotlab.image.Util;
-import org.openkinect.freenect.*;
-import org.python.jline.internal.Log;
-
-import java.awt.Dimension;
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Example demonstrating how to process and display data from the Kinect.

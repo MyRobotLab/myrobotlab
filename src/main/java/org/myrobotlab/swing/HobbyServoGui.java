@@ -27,7 +27,6 @@ package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -714,7 +713,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       
       if (moveTo.equals(o)) {
         moving.setVisible(true);
-        send("moveTo", moveTo.getValue());
+        send("moveTo", (double)moveTo.getValue());
       }
       
       if (mapInput.equals(o)) {
@@ -769,7 +768,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       mega.connect("COM7");
 
       ServoControl servo = null;
-      boolean useHobbyServo = false;
+      boolean useHobbyServo = true;
       
       if (useHobbyServo) {
         servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");

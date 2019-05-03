@@ -18,6 +18,29 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.Dimension;
+import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ddogleg.struct.FastQueue;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.equation.Equation;
+import org.ejml.equation.Sequence;
+import org.myrobotlab.image.Util;
+import org.openkinect.freenect.Context;
+import org.openkinect.freenect.DepthFormat;
+import org.openkinect.freenect.DepthHandler;
+import org.openkinect.freenect.Device;
+import org.openkinect.freenect.FrameMode;
+import org.openkinect.freenect.Freenect;
+import org.openkinect.freenect.VideoFormat;
+import org.openkinect.freenect.VideoHandler;
+import org.python.jline.internal.Log;
+
 import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
 import boofcv.abst.feature.tracker.PointTrackerTwoPass;
 import boofcv.abst.sfm.AccessPointTracks3D;
@@ -48,27 +71,6 @@ import boofcv.visualize.VisualizeData;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-
-import org.bytedeco.javacpp.opencv_core.Mat;
-import static org.bytedeco.javacpp.opencv_core.CV_64F;
-
-import org.ddogleg.struct.FastQueue;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.equation.Equation;
-import org.ejml.equation.Sequence;
-import org.myrobotlab.image.Util;
-import org.openkinect.freenect.*;
-import org.python.jline.internal.Log;
-
-import java.awt.Dimension;
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JComponent;
 
 /**
  * Example demonstrating how to process and display data from the Kinect.
