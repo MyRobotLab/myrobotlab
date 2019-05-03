@@ -83,6 +83,7 @@ public class HobbyServo extends AbstractServo {
     try {
 
       Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
       Platform.setVirtual(false);
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
