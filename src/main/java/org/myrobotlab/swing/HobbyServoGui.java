@@ -344,13 +344,17 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
             setSpeedControlEnabled(true);
             if (lastSpeed != null) {
               speed.setText(lastSpeed + "");
-            }
-            send("setMaxSpeed", Double.parseDouble(maxSpeed.getText()));
-            
+            }            
           } else {
             setSpeedControlEnabled(false);
+            // disabling speed control
             send("setSpeed", (Double)null);
           }
+        }
+        
+        if (o == setMaxSpeed) {
+          send("setMaxSpeed", Double.parseDouble(maxSpeed.getText()));
+          send("setSpeed", Double.parseDouble(speed.getText()));
         }
 
         if (o == attach) {
@@ -468,7 +472,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        currentPos.setText(data.pos + "");
+        currentPos.setText(String.format("%.1f", data.pos));
         if (ServoStatus.SERVO_POSITION_UPDATE.equals(data.state)) {
           moving.setVisible(true);
         } else {
@@ -682,6 +686,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     speedSlider.removeChangeListener(this);
     sweepButton.removeActionListener(this);
     restButton.removeActionListener(this);
+    setMaxSpeed.removeActionListener(this);
   }
 
   public void addListeners() {
@@ -701,6 +706,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     speedSlider.addChangeListener(this);
     sweepButton.addActionListener(this);
     restButton.addActionListener(this);
+    setMaxSpeed.addActionListener(this);
   }
 
   @Override

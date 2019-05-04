@@ -347,10 +347,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          degrees per second rotational speed cm per second linear
    * 
    */
-  // TODO: re-eable this 
-//  void setSpeed(Double speed);
-  // kill this i guess?
+  @Deprecated
   void setVelocity(Double speed);
+  
+  @Deprecated
   Double getVelocity();
 
   /**
@@ -390,6 +390,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   Double getTargetPos();
 
+  /**
+   * This method sets the position without "moving" the servo. Typically, this is useful for setting the initial position
+   * of the servo during startup
+   * @param pos
+   */
   void setPosition(Double pos);
 
   EncoderControl getEncoder();  
