@@ -1758,10 +1758,12 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   public void saveCalibration() {
-    // saveCalibration(CALIBRATION_FILE);
+    saveCalibration(CALIBRATION_FILE);
   }
+  
+  
 
-  /*
+  
   public void saveCalibration(String calibrationFilename) {
 
     File calibFile = new File(calibrationFilename);
@@ -1798,8 +1800,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
           // save the servo map
           calibrationWriter.write(s.getName() + ".map(" + s.getMin() + "," + s.getMax() + "," + s.getMinOutput() + "," + s.getMaxOutput() + ")\n");
           // if there's a controller reattach it at rest
-          if (s.getController() != null) {
-            String controller = s.getController().getName();
+          if (s.getControllerName() != null) {
+            String controller = s.getControllerName();
             calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
           if (s.getAutoDisable()) {
@@ -1816,7 +1818,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       return;
     }
   }
-  */
+  
 
   // vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing
   // about jme...)

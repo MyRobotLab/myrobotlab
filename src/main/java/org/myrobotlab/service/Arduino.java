@@ -1855,8 +1855,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(ServoControl servo) {
-    log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), (int) servo.getSpeed().intValue());
-    msg.servoSetVelocity(getDeviceId(servo), (int) servo.getSpeed().intValue());
+    int speed = -1;
+    if (servo.getSpeed() == null) {
+      speed = servo.getSpeed().intValue();
+    }
+    log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
+    msg.servoSetVelocity(getDeviceId(servo), speed);
   }
 
   // FIXME - this needs fixing .. should be microseconds - but interface still
