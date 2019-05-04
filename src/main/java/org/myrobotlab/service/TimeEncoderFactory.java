@@ -39,8 +39,6 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
 
   public final static Logger log = LoggerFactory.getLogger(TimeEncoderFactory.class);
 
-  // Set<String> moveToSources = new HashSet<String>();
-
   Map<String, EncoderListener> listeners = new HashMap<>();
 
   Map<String, Timer> encoders = new HashMap<>();
@@ -57,7 +55,7 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
     // Common servos have operating speeds in the range of 0.05 to 0.2 s/60 degree.
     // going with 60 degrees in 0.12 s 
     // 
-    double defaultMaxSpeedDegreesPerMs = 0.15;// degrees/ms 0.05 ?
+    double defaultMaxSpeedDegreesPerMs = 0.5;// degrees/ms 0.5 ?
     int sampleIntervalMs = 5;
 
     public Timer(ServoControl servo) {
@@ -79,7 +77,7 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
             double beginPos = servo.getPos();
             double targetPos = servo.getTargetPos();
             double distance = servo.getTargetPos() - servo.getPos();
-            double tspeed = (servo.getVelocity() == null) ? defaultMaxSpeedDegreesPerMs : servo.getVelocity(); // always positive :P
+            double tspeed = (servo.getVelocity() == null) ? defaultMaxSpeedDegreesPerMs : servo.getVelocity()/1000; // always positive :P
             double speedDegreesPerMs = (beginPos > targetPos)?-1 * tspeed:tspeed;
             double moveTimeMs = Math.abs(distance / speedDegreesPerMs);
             long beginMoveTs = System.currentTimeMillis();

@@ -133,7 +133,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * TimerEncoder, however there is
    * 
    */
-  protected EncoderControl encoder;
+  protected transient EncoderControl encoder; // this does not need to be transient in the future
 
   protected boolean isSweeping = false;
 
@@ -150,7 +150,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * list of servo listeners names
    */
-  protected transient Set<String> listeners = new LinkedHashSet<>();
+  protected Set<String> listeners = new LinkedHashSet<>();
 
   /**
    * input mapper
@@ -159,9 +159,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   /**
    * maximum speed
-   * default is 60 degrees per second
+   * default is 500 degrees per second or operating speed of
+   * 60 degrees in 0.12 seconds 
    */
-  protected Double maxSpeed = 61.0;
+  protected Double maxSpeed = 500.0;
 
   /**
    * status if the servo thinks its moving ..
@@ -205,7 +206,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * synchronized servos - when this one moves, it sends move commands to these
    * servos
    */
-  protected transient Set<String> syncedServos = new LinkedHashSet<>();
+  protected Set<String> syncedServos = new LinkedHashSet<>();
 
   /**
    * the calculated output for the servo
