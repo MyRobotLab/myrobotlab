@@ -100,6 +100,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
     // if the servos haven't been started already.. fire them up!
     startPeers();
+    controller = (ServoController)startPeer("arduino");
     // set defaults for the servos
     initServoDefaults();
     // we need a default controller  
