@@ -117,8 +117,12 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   @Override
   public void broadcastState() {
-    // notify the gui
-    Runtime.broadcastStates();
+    thumb.broadcastState();
+    index.broadcastState();
+    majeure.broadcastState();
+    ringFinger.broadcastState();
+    pinky.broadcastState();
+    wrist.broadcastState();
   }
 
   public void close() {
@@ -145,6 +149,7 @@ public class InMoovHand extends Service implements LeapDataListener {
 
     // justin case we haven't started our peers yet.
     startPeers();
+    controller = (ServoController)startPeer("arduino");
     
     if (controller == null) {
       error("controller is invalid");

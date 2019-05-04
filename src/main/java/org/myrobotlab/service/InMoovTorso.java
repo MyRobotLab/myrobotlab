@@ -120,7 +120,9 @@ public class InMoovTorso extends Service {
   @Override
   public void broadcastState() {
     // notify the gui
-    Runtime.broadcastStates();
+    topStom.broadcastState();
+    midStom.broadcastState();
+    lowStom.broadcastState();
   }
   
   public void setController(ServoController controller) {
@@ -128,6 +130,8 @@ public class InMoovTorso extends Service {
   }
 
   public boolean connect(String port) throws Exception {
+    controller = (ServoController)startPeer("arduino");
+    
     if (controller == null) {
       error("arduino is invalid");
       return false;
