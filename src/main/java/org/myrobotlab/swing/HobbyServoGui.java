@@ -104,7 +104,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   String lastController;
 
-  Double lastSpeed = 60.0;
+  Double lastSpeed = 60.0; // a ui "guess"
 
   JLabel targetPos = new JLabel();
   JLabel currentPos = new JLabel("90.0");
@@ -138,8 +138,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   JComboBox<String> encoder = new JComboBox<>();
   JComboBox<String> pinList = new JComboBox<>();
 
-  JTextField min = new JTextField("0");
-  JTextField max = new JTextField("180");
+  JTextField minPos = new JTextField("0");
+  JTextField maxPos = new JTextField("180");
   JTextField minOutput = new JTextField("0");
   JTextField maxOutput = new JTextField("180");
 
@@ -242,7 +242,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
     speedPanel = new JPanel(new BorderLayout());
     speedPanel.setBorder(speedControlTitle);
-    JPanel top = new JPanel();
+    JPanel top = new JPanel(new GridLayout(0, 6));
 
     // top.add(powerControl);
     top.add(speedLabel);
@@ -275,9 +275,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     south.add(mapOutput);
     south.add(new JLabel("input map"));
     south.add(new JLabel("output map"));
-    south.add(min);
+    south.add(minPos);
     south.add(minOutput);
-    south.add(max);
+    south.add(maxPos);
     south.add(maxOutput);
     south.add(save);
     // south.add(export);
@@ -346,8 +346,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
               speed.setText(lastSpeed + "");
             }
             send("setMaxSpeed", Double.parseDouble(maxSpeed.getText()));
+            
           } else {
             setSpeedControlEnabled(false);
+            send("setSpeed", (Double)null);
           }
         }
 
@@ -405,7 +407,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
          */
 
         if (o == save) {
-          send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+          send("map", Double.parseDouble(minPos.getText()), Double.parseDouble(maxPos.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
           send("setVelocity", Double.parseDouble(speed.getText()));
           send("save");
           send("setRest", Double.parseDouble(rest.getText()));
@@ -488,13 +490,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
         enabledIcon.setVisible(servo.isEnabled());
 
-        maxSpeed.setText(servo.getMaxSpeed() == null ? "60.0" : servo.getMaxSpeed() + "");
+        double maxSpd = (servo.getMaxSpeed() == null)?500.0:servo.getMaxSpeed();
+        maxSpeed.setText(maxSpd + "");
+        speedSlider.setMaximum((int)maxSpd);
 
         Double currentSpeed = servo.getVelocity();
         if (currentSpeed == null) {
           speed.setText("");
         } else {
           speed.setText(currentSpeed + "");
+          speedSlider.setValue(currentSpeed.intValue());
           lastSpeed = currentSpeed;
         }
 
@@ -605,8 +610,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           mapOutput.setHighValue(servo.getMaxOutput().intValue());
         }
 
-        min.setText(servo.getMin() + "");
-        max.setText(servo.getMax() + "");
+        minPos.setText(servo.getMin() + "");
+        maxPos.setText(servo.getMax() + "");
         minOutput.setText(minOutputTmp + "");
         maxOutput.setText(maxOutputTmp + "");
 
@@ -718,9 +723,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       }
 
       if (mapInput.equals(o)) {
-        min.setText(String.format("%d", mapInput.getLowValue()));
-        max.setText(String.format("%d", mapInput.getHighValue()));
-        send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+        minPos.setText(String.format("%d", mapInput.getLowValue()));
+        maxPos.setText(String.format("%d", mapInput.getHighValue()));
+        send("map", Double.parseDouble(minPos.getText()), Double.parseDouble(maxPos.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
       }
 
       if (mapOutput.equals(o)) {
@@ -732,7 +737,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           maxOutput.setText(String.format("%d", mapOutput.getHighValue()));
         }
 
-        send("map", Double.parseDouble(min.getText()), Double.parseDouble(max.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+        send("map", Double.parseDouble(minPos.getText()), Double.parseDouble(maxPos.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
       }
     } // if adjusting
   }
@@ -752,12 +757,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(false);
+      Platform.setVirtual(true);
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
-      // EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
-
+      EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
+      Runtime.getInstance().startPeers();
+      
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       if (mega.isVirtual()) {
         VirtualArduino vmega = mega.getVirtual();
@@ -769,7 +775,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       mega.connect("COM7");
 
       ServoControl servo = null;
-      boolean useHobbyServo = false;
+      boolean useHobbyServo = true;
 
       if (useHobbyServo) {
         servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");
@@ -784,7 +790,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       servo.save();
       // servo.setPin(8);
       servo.attach(mega);
-      // servo.attach(encoder);
+      servo.attach(encoder);
       servo.moveTo(120.0);
       log.info("here");
       servo.moveTo(90.0);

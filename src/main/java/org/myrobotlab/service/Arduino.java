@@ -1856,7 +1856,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoSetVelocity/deviceId/b16 velocity
   public void servoSetVelocity(ServoControl servo) {
     int speed = -1;
-    if (servo.getSpeed() == null) {
+    if (servo.getSpeed() != null) {
       speed = servo.getSpeed().intValue();
     }
     log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
