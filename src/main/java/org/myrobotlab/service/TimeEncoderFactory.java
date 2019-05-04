@@ -79,6 +79,11 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
             double distance = servo.getTargetPos() - servo.getPos();
             double tspeed = (servo.getVelocity() == null) ? defaultMaxSpeedDegreesPerMs : servo.getVelocity()/1000; // always positive :P
             double speedDegreesPerMs = (beginPos > targetPos)?-1 * tspeed:tspeed;
+            if (speedDegreesPerMs == 0) {
+              log.info("speed is 0 - not moving");
+              continue;
+            }
+            
             double moveTimeMs = Math.abs(distance / speedDegreesPerMs);
             long beginMoveTs = System.currentTimeMillis();
             long endMoveTs = beginMoveTs + (long) moveTimeMs;

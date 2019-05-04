@@ -692,20 +692,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public void setVelocity(Double degreesPerSecond) {
-    if (maxSpeed != -1 && degreesPerSecond > maxSpeed) {
-      speed = maxSpeed;
-      log.info("Trying to set speed to a value greater than max speed");
-    }
-    this.speed = degreesPerSecond;
-    for (String controller : controllers) {
-      ServiceInterface si = Runtime.getService(controller);
-      if (si.isLocal()) {
-        ((ServoController) Runtime.getService(controller)).servoSetVelocity(this);
-      } else {
-        send(controller, "servoSetVelocity", this);
-      }
-    }
-    broadcastState();
+    setSpeed(degreesPerSecond);
   }
 
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
@@ -814,8 +801,21 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
   
   @Override
-  public void setSpeed(Double speed) {
-    this.speed = speed;
+  public void setSpeed(Double degreesPerSecond) {
+    if (maxSpeed != -1 && degreesPerSecond > maxSpeed) {
+      speed = maxSpeed;
+      log.info("Trying to set speed to a value greater than max speed");
+    }
+    this.speed = degreesPerSecond;
+    for (String controller : controllers) {
+      ServiceInterface si = Runtime.getService(controller);
+      if (si.isLocal()) {
+        ((ServoController) Runtime.getService(controller)).servoSetVelocity(this);
+      } else {
+        send(controller, "servoSetVelocity", this);
+      }
+    }
+    broadcastState();
   }
 
 }
