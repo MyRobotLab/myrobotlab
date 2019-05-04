@@ -657,7 +657,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
           moving.setIcon(movingIcon);
           moving.setVisible(true);
           // no velocity control==no magic
-        } else if (servo.isEnabled() && servo.getVelocity() <= 0) {
+        } else if (servo.isEnabled() && servo.getVelocity() == null) {
           moving.setIcon(movingIconNoVelocityControl);
           moving.setVisible(true);
         } else {

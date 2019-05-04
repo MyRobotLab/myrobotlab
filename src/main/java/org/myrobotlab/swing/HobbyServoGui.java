@@ -172,7 +172,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   public HobbyServoGui(final String boundServiceName, final SwingGui myService) {
     super(boundServiceName, myService);
 
-    // FIXME - even though its a pain - this should come from the ServoController
+    // FIXME - even though its a pain - this should come from the
+    // ServoController
     for (int i = 0; i < 54; i++) {
       pinList.addItem(i + "");
     }
@@ -209,16 +210,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     // JPanel north = new JPanel(new GridLayout(0, 3));
     // north.setLayout(new FlowLayout(FlowLayout., 0, 0));
     // JPanel controllerPanel = new JPanel(new GridLayout(0, 4));
-    
+
     north.setLayout(new BoxLayout(north, BoxLayout.X_AXIS));
-    
+
     controllerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
     controllerPanel.add(attach);
     controllerPanel.add(controller);
     controllerPanel.add(new JLabel(" pin"));
     controllerPanel.add(pinList);
-    
+
     encoderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     encoderPanel.setBorder(BorderFactory.createTitledBorder("encoder"));
     encoderPanel.add(attachEncoder);
@@ -226,20 +227,19 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
     enablePanel = new JPanel(new GridLayout(0, 2));
     enablePanel.setBorder(BorderFactory.createTitledBorder("enable"));
-    
+
     enablePanel.add(enable);
     enablePanel.add(autoDisable);
 
-    
     JPanel flow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-    flow.add(idleTimeLabel);   
+    flow.add(idleTimeLabel);
     flow.add(idleTime);
     flow.add(idleUnits);
     enablePanel.add(new JLabel(" "));
     enablePanel.add(flow);
-    
+
     setIdleTimeEnabled(false);
-    
+
     speedPanel = new JPanel(new BorderLayout());
     speedPanel.setBorder(speedControlTitle);
     JPanel top = new JPanel();
@@ -251,13 +251,14 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     top.add(maxSpeed);
     top.add(speedUnits);
     top.add(setMaxSpeed);
-    
-    // top.add(autoDisable);
 
+    // top.add(autoDisable);
+    // JPanel flow = new JPanel();
+    
     speedPanel.add(top, BorderLayout.NORTH);
     speedPanel.add(speedSlider, BorderLayout.CENTER);
     speedPanel.add(new JLabel("     "), BorderLayout.SOUTH);
-    
+
     setSpeedControlEnabled(false);
 
     north.add(controllerPanel);
@@ -309,10 +310,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     speedLabel.setEnabled(false);
 
     refreshControllers();
-    refreshEncoders();    
+    refreshEncoders();
     addListeners();
   }
-  
+
   private void setIdleTimeEnabled(boolean b) {
     idleTime.setEnabled(b);
     idleUnits.setEnabled(b);
@@ -352,8 +353,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
         if (o == attach) {
           if (attach.getText().equals("attach")) {
-            // send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem() + "", new Double(moveTo.getValue()));
-            send("setPin", pinList.getSelectedItem()); // FIXME - get pinList from pinArrayControl
+            // send("attach", controller.getSelectedItem(), (int)
+            // pinList.getSelectedItem() + "", new Double(moveTo.getValue()));
+            send("setPin", pinList.getSelectedItem()); // FIXME - get pinList
+                                                       // from pinArrayControl
             send("attach", controller.getSelectedItem());
           } else {
             send("detach");
@@ -482,11 +485,11 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         removeListeners();
         String controllerName = servo.getControllerName();
         lastController = controllerName;
-        
+
         enabledIcon.setVisible(servo.isEnabled());
-        
-        maxSpeed.setText(servo.getMaxSpeed() == null?"60.0":servo.getMaxSpeed()+"");
-        
+
+        maxSpeed.setText(servo.getMaxSpeed() == null ? "60.0" : servo.getMaxSpeed() + "");
+
         Double currentSpeed = servo.getVelocity();
         if (currentSpeed == null) {
           speed.setText("");
@@ -500,7 +503,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         if (controllerName != null) {
           controller.setSelectedItem(controllerName);
         } else {
-          
+
         }
 
         EncoderControl inEncoder = servo.getEncoder();
@@ -611,8 +614,6 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         mapInput.setHighValue(servo.getMax().intValue());
         mapOutput.setLowValue(servo.getMinOutput().intValue());
         mapOutput.setHighValue(servo.getMaxOutput().intValue());
-        
-        
 
         addListeners();
       }
@@ -666,7 +667,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     enable.removeActionListener(this);
     left.removeActionListener(this);
     mapInput.removeChangeListener(this);
-    mapOutput.removeChangeListener(this);    
+    mapOutput.removeChangeListener(this);
     moveTo.removeChangeListener(this);
     pinList.removeActionListener(this);
     speedControlTitle.removeActionListener(this);
@@ -675,7 +676,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     setInverted.removeActionListener(this);
     speedSlider.removeChangeListener(this);
     sweepButton.removeActionListener(this);
-    restButton.removeActionListener(this);        
+    restButton.removeActionListener(this);
   }
 
   public void addListeners() {
@@ -685,7 +686,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     enable.addActionListener(this);
     left.addActionListener(this);
     mapInput.addChangeListener(this);
-    mapOutput.addChangeListener(this);    
+    mapOutput.addChangeListener(this);
     moveTo.addChangeListener(this);
     pinList.addActionListener(this);
     speedControlTitle.addActionListener(this);
@@ -704,18 +705,18 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
     if (speedSlider.equals(o)) {
       // speedSlider.setVisible(true);
-      send("setVelocity", (double)speedSlider.getValue());
-      speed.setText(speedSlider.getValue() + "");      
+      send("setVelocity", (double) speedSlider.getValue());
+      speed.setText(speedSlider.getValue() + "");
     }
 
     // isAdjusting prevent incremental values coming from the slider
     if (!((JSlider) o).getValueIsAdjusting()) {
-      
+
       if (moveTo.equals(o)) {
         moving.setVisible(true);
-        send("moveTo", (double)moveTo.getValue());
+        send("moveTo", (double) moveTo.getValue());
       }
-      
+
       if (mapInput.equals(o)) {
         min.setText(String.format("%d", mapInput.getLowValue()));
         max.setText(String.format("%d", mapInput.getHighValue()));
@@ -751,11 +752,11 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      Platform.setVirtual(false);
 
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
-      EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
+      // EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       if (mega.isVirtual()) {
@@ -768,14 +769,14 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       mega.connect("COM7");
 
       ServoControl servo = null;
-      boolean useHobbyServo = true;
-      
+      boolean useHobbyServo = false;
+
       if (useHobbyServo) {
         servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");
       } else {
-        servo = (ServoControl) Runtime.start("servo", "Servo");        
+        servo = (ServoControl) Runtime.start("servo", "Servo");
       }
-      
+
       // servo.load();
       servo.setPin(13);
       servo.setPosition(90.0);
@@ -783,7 +784,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       servo.save();
       // servo.setPin(8);
       servo.attach(mega);
-      servo.attach(encoder);
+      // servo.attach(encoder);
       servo.moveTo(120.0);
       log.info("here");
       servo.moveTo(90.0);
