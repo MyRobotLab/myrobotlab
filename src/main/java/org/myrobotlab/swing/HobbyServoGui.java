@@ -51,6 +51,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
@@ -582,7 +583,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         moveTo.setMinimum(servo.getMin().intValue());
         moveTo.setMaximum(servo.getMax().intValue());
 
-        speed.setText((servo.getSpeed() == null) ? "           " : servo.getSpeed() + "");
+        // speed control
+        Double servoSpeed = servo.getSpeed();
+        speed.setText((servoSpeed == null) ? "           " : servoSpeed + "");
 
         if (mapInput.getLowValue() != servo.getMin().intValue()) {
           mapInput.setLowValue(servo.getMin().intValue());
@@ -719,14 +722,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       send("setVelocity", (double) speedSlider.getValue());
       speed.setText(speedSlider.getValue() + "");
     }
+    
+    if (moveTo.equals(o)) {
+      moving.setVisible(true);
+      send("moveTo", (double) moveTo.getValue());
+    }
 
     // isAdjusting prevent incremental values coming from the slider
     if (!((JSlider) o).getValueIsAdjusting()) {
 
-      if (moveTo.equals(o)) {
-        moving.setVisible(true);
-        send("moveTo", (double) moveTo.getValue());
-      }
+  
 
       if (mapInput.equals(o)) {
         minPos.setText(String.format("%d", mapInput.getLowValue()));
@@ -778,7 +783,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // mega.getBoardTypes();
       // mega.setBoardMega();
       // mega.setBoardUno();
-      mega.connect("COM7");
+      mega.connect("COM9");
 
       ServoControl servo = null;
       boolean useHobbyServo = true;
@@ -791,15 +796,18 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
       // servo.load();
       servo.setPin(13);
-      servo.setPosition(90.0);
+      // servo.setPosition(90.0);
       log.info("rest is {}", servo.getRest());
       servo.save();
       // servo.setPin(8);
       servo.attach(mega);
       servo.attach(encoder);
       servo.moveTo(120.0);
+      servo.setSpeed(2.0);
+      Service.sleep(1000);
       log.info("here");
       servo.moveTo(90.0);
+      Service.sleep(1000);
 
     } catch (Exception e) {
       log.error("main threw", e);
