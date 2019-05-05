@@ -235,6 +235,16 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // ServoControllers or EncoderControl interfaces
     // we subscribe to runtime here for new services
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    
+    // if there is any information from where we currently were
+    // use it to assume that we are still there
+    if (lastTargetPos != null) {
+      currentPos = targetPos = lastTargetPos;
+    } else {
+      // we have no "historical" info - assume we are @ rest
+      lastTargetPos = currentPos = targetPos = rest;
+    }
+    
   }
 
   /**
