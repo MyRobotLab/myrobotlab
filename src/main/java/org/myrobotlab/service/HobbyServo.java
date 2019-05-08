@@ -83,6 +83,8 @@ public class HobbyServo extends AbstractServo {
 
       Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
+      
+      
       Platform.setVirtual(false);
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
@@ -94,7 +96,7 @@ public class HobbyServo extends AbstractServo {
       servo.load();
       servo.save();
       log.info("sweepDely {}", servo.sweepDelay);
-
+   
     } catch (Exception e) {
       log.error("main threw", e);
     }

@@ -43,20 +43,72 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
 
   Map<String, Timer> encoders = new HashMap<>();
 
+  /**
+   * TimeEncoder - a universal time encoder used for doing estimations and
+   * planning of trajectories and paths. It works on a persistent thread put in
+   * a wait state, waiting for requested estimations.
+   * 
+   * @author GroG
+   * 
+   *         FIXME controlled clear units (degrees cm per s vs ms .. etc)
+   *
+   */
   public class Timer implements Runnable {
-    // String type; // FIXME - make enum ... absolute | relative | other ..
-    // Long intervalMs;
-    ServoControl servo = null;
+
+    // FIXME - remove type specific references
+    EncoderListener servo = null;
+
     boolean isRunning = false;
-    // Object lock = new Object();
     transient Thread myThread = null;
 
     // default max speed
-    // Common servos have operating speeds in the range of 0.05 to 0.2 s/60 degree.
-    // going with 60 degrees in 0.12 s 
-    // 
-    double defaultMaxSpeedDegreesPerMs = 0.5;// degrees/ms 0.5 ?
+    // Common servos have operating speeds in the range of 0.05 to 0.2 s/60
+    // degree.
+    // going with 60 degrees in 0.12 s
+    //
+
+    // default max speed
+    double defaultMaxSpeedDegreesPerMs = 0.5;
+
+    // time between next evaluation
     int sampleIntervalMs = 5;
+
+    // where we are
+    double beginPos;
+
+    // where we want to go
+    double targetPos;
+
+    // the distance to get there (degrees)
+    double distance;
+
+    // the speed (degrees per sec)?
+    double tspeed;
+
+    // FIXME - work this out...
+    double speedDegreesPerMs;
+
+    // time of move in ms
+    double moveTimeMs;
+
+    // timestamp of the beginning of the move
+    long beginMoveTs;
+
+    // estimate timestamp of the end of the move
+    long endMoveTs;
+
+    // our estimated position
+    double estimatedPos;
+
+    // current time
+    long now;
+
+    // name of encoder data source
+    String name;
+
+    boolean autoProcess = true;
+    
+    boolean enabled = true;
 
     public Timer(ServoControl servo) {
       this.servo = servo;
@@ -64,70 +116,123 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
       myThread.start();
     }
 
+    // TODO - manage other types .. motors .. joysticks ... etc..
+    // FIXME - generalize inputs so that no full control type is known - e.g. calculateTrajectory(beginPos, targetPos, tspeed)
+    /*
+    public void calculateTrajectory(ServoControl servo) {
+      // find current distance - // make a plan ...
+      beginPos = servo.getPos();
+      targetPos = servo.getTargetPos();
+      distance = servo.getTargetPos() - servo.getPos();
+      // always positive ? :P
+      tspeed = (servo.getSpeed() == null) ? defaultMaxSpeedDegreesPerMs : servo.getSpeed() / 1000; 
+      speedDegreesPerMs = (beginPos > targetPos) ? -1 * tspeed : tspeed;
+
+      moveTimeMs = Math.abs(distance / speedDegreesPerMs);
+      beginMoveTs = System.currentTimeMillis();
+      endMoveTs = beginMoveTs + (long) moveTimeMs;
+
+      log.info("{}", this);
+
+      estimatedPos = servo.getPos();
+
+      // while not done ... do
+      // leave if timets > endMoveTs or if canceled with new move
+      // while()
+      now = beginMoveTs;
+      name = servo.getName();
+      
+      if (autoProcess) {
+        processTrajectory(name);
+      }
+    }
+    */
+
+    // TODO - cool this works deprecate other
+    public void calculateTrajectory(double inBeginPos, double inTargetPos, Double inSpeed) {
+      // find current distance - // make a plan ...
+      beginPos = inBeginPos;
+      targetPos = inTargetPos;
+      distance = targetPos - beginPos;
+      // always positive ? :P
+      tspeed = (inSpeed == null) ? defaultMaxSpeedDegreesPerMs : inSpeed / 1000; // FIXME UNITS !!!! - for ms
+      speedDegreesPerMs = (beginPos > targetPos) ? -1 * tspeed : tspeed;
+
+      moveTimeMs = Math.abs(distance / speedDegreesPerMs);
+      beginMoveTs = System.currentTimeMillis();
+      endMoveTs = beginMoveTs + (long) moveTimeMs;
+
+      log.info("{}", this);
+
+      estimatedPos = inBeginPos;
+
+      // while not done ... do
+      // leave if timets > endMoveTs or if canceled with new move
+      // while()
+      now = beginMoveTs;
+      name = servo.getName();
+      
+      if (autoProcess) {
+        processTrajectory(name);
+      }
+    }
+
+    
+    // TODO - processTrajectory()
+    void processTrajectory(String name) {
+        Timer timer = encoders.get(name);
+        if (timer == null) {
+          log.error("unknown timer {}", name);
+        }
+        synchronized (timer) { // TODO - change to "this" when not a service
+          // this starts the time encoder thread waiting for move commands
+          // to start the process of processing a "planned move" sequence
+          timer.notifyAll();
+        }
+    }
+
     @Override
     public void run() {
       try {
-        synchronized (this) {
-          isRunning = true;
-          while (isRunning) {
-            // wait for next move ...
+
+        isRunning = true;
+        while (isRunning) {
+          // wait for next move ...
+          synchronized (this) {
             this.wait();
-
-            // find current distance - // make a plan ...
-            double beginPos = servo.getPos();
-            double targetPos = servo.getTargetPos();
-            double distance = servo.getTargetPos() - servo.getPos();
-            double tspeed = (servo.getVelocity() == null) ? defaultMaxSpeedDegreesPerMs : servo.getVelocity()/1000; // always positive :P
-            double speedDegreesPerMs = (beginPos > targetPos)?-1 * tspeed:tspeed;
-            if (speedDegreesPerMs == 0) {
-              log.info("speed is 0 - not moving");
-              continue;
-            }
-            
-            double moveTimeMs = Math.abs(distance / speedDegreesPerMs);
-            long beginMoveTs = System.currentTimeMillis();
-            long endMoveTs = beginMoveTs + (long) moveTimeMs;
-
-            log.info("@ ts {} starting at {} we are going to travel {} degrees to position {} in {} ms ending at {} ts", beginMoveTs, servo.getPos(), distance,
-                servo.getTargetPos(), moveTimeMs, endMoveTs);
-
-            double estimatedPos = servo.getPos();
-            double lastPos = estimatedPos;
-
-            // while not done ... do
-            // leave if timets > endMoveTs or if canceled with new move
-            // while()
-            long now = beginMoveTs;
-
-            while (now < endMoveTs) {
-
-              now = System.currentTimeMillis();
-              estimatedPos = beginPos + speedDegreesPerMs * (now - beginMoveTs); // speed has +/- direction
-              
-              // actual degree increments - TODO - option to disable and publish back sub-degrees
-              /*
-              if (Math.round(lastPos) == Math.round(estimatedPos)) {
-                sleep(sampleIntervalMs);
-                continue;
-              }
-              */
-              
-              if (beginPos < targetPos && estimatedPos > targetPos) {
-                estimatedPos = targetPos;
-              }
-              if (beginPos > targetPos && estimatedPos < targetPos) {
-                estimatedPos = targetPos;
-              }
-              
-              log.info(String.format("new pos %.2f", estimatedPos)); 
-              EncoderData d = new EncoderData(servo.getName(), null, estimatedPos);
-              servo.onEncoderData(d);
-              lastPos = estimatedPos;
-              
-              sleep(sampleIntervalMs);
-            }
-
           }
+
+          if (speedDegreesPerMs == 0) { 
+            // FIXME may need some adjustment in this - should a stop event with 0 pos change be sent ? 
+            log.info("speed is 0 - not moving");
+            continue;
+          }
+
+          while (now < endMoveTs) {
+
+            now = System.currentTimeMillis();
+            // speed has +/- direction
+            estimatedPos = beginPos + speedDegreesPerMs * (now - beginMoveTs);
+
+            if (beginPos < targetPos && estimatedPos > targetPos) {
+              estimatedPos = targetPos;
+            }
+            if (beginPos > targetPos && estimatedPos < targetPos) {
+              estimatedPos = targetPos;
+            }
+
+            // log.info(String.format("new pos %.2f", estimatedPos)); helpful to
+            // debug
+            EncoderData d = new EncoderData(name, null, estimatedPos);
+            servo.onEncoderData(d);
+            sleep(sampleIntervalMs);
+          }
+          
+          // when we are leaving - its a "finished move"
+          // log.info("finished moved");
+          EncoderData d = new EncoderData(name, null, estimatedPos);
+          servo.onEncoderData(d);
+          
         }
       } catch (InterruptedException e) {
         log.info("stopping TimeEncoder Timer ...");
@@ -137,6 +242,11 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
     public void stop() {
       isRunning = false;
       myThread.interrupt();
+    }
+
+    public String toString() {
+      return String.format("@ ts %d starting at position %.1f %s will travel %.1f degrees to position %.1f in %.1f ms ending at %d ts", beginMoveTs, beginPos, name, distance, targetPos,
+          moveTimeMs, endMoveTs);
     }
 
   }
@@ -228,6 +338,11 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
     // TODO Auto-generated method stub
     return null;
   }
+  
+  public void calculateTrajectory(String name, double inBeginPos, double inTargetPos, Double inSpeed) {
+    Timer t = encoders.get(name);
+    t.calculateTrajectory(inBeginPos, inTargetPos, inSpeed);
+  }
 
   /**
    * published ServoControl.moveTo command - find the distance the time and the
@@ -236,6 +351,10 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
    * FIXME - does publishMoveTo strategically need the whole ServoControl or
    * just move ? since the initial attach a full ServoControl is sent as
    * reference ?
+   * 
+   * if not currently running - needs to handle request if currently running -
+   * it needs to cancel and handle the new request
+   * 
    */
   @Override
   public void onMoveTo(ServoControl sc) {
@@ -243,7 +362,9 @@ public class TimeEncoderFactory extends Service implements EncoderControl, Servo
     if (timer == null) {
       log.error("unknown timer {}", sc.getName());
     }
-    synchronized (timer) {
+    synchronized (timer) { // TODO - change to "this" when not a service
+      // this starts the time encoder thread waiting for move commands
+      // to start the process of processing a "planned move" sequence
       timer.notifyAll();
     }
   }

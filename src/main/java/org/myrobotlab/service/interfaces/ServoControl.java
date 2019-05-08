@@ -74,7 +74,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * disable the PWM pulses/power to the servo/motor
    */
   void disable();
-  
+
   /**
    * getAutoDisable return value set by setAutoDisable
    * 
@@ -102,9 +102,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return max x
    */
   Double getMax();
-  
+
   /**
    * gets the Max applied after the output is calculated (clipping)
+   * 
    * @return max y output
    */
   Double getMaxOutput();
@@ -122,9 +123,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return min x
    */
   Double getMin();
-  
+
   /**
    * gets the Min applied after the output is calculated (clipping)
+   * 
    * @return - min output value
    */
   Double getMinOutput();
@@ -147,10 +149,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * Unmapped current position of the servo. This can be incrementally updated
    * by an encoder.
    * 
-   * A possible better solution might be to use ServoData to get the
-   * position through time which a controller with speed control can provide, so
-   * as the servo is told incrementally where to go - it sends that command back
-   * as an event which sets the "current" position.
+   * A possible better solution might be to use ServoData to get the position
+   * through time which a controller with speed control can provide, so as the
+   * servo is told incrementally where to go - it sends that command back as an
+   * event which sets the "current" position.
    * 
    * This is a read only current position reported from the ServoControl. If a
    * mapper calculation is supplied to generate output - and the ServoController
@@ -209,6 +211,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * is the servo currently sending pwm position control
+   * 
    * @return
    */
   Boolean isEnabled();
@@ -233,16 +236,15 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          - max output
    */
   void map(Double minX, Double maxX, Double minY, Double maxY);
-  
+
   void setMapper(Mapper m);
-  
+
   Mapper getMapper();
-  
+
   void setMaxSpeed(Double speed);
-  
+
   Double getMaxSpeed();
 
-  
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
    * valid range but can be adjusted and / or re-mapped with min / max and map
@@ -256,6 +258,12 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return true (why?)
    */
   Double moveToBlocking(Double pos);
+ 
+  /**
+   * moveToBlocking with a timeout blocking calling thread until either
+   * move has been completed, or timeout reached
+   */
+  Double moveToBlocking(Double pos, Long timeoutMs);
 
   /**
    * control message publishing moveTo
@@ -277,14 +285,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * command to move to the rest position
    */
   void rest();
-  
+
   /**
    * Set the acceleration of the servo
    * 
    * @param acceleration
    */
   void setAcceleration(Double acceleration);
-  
+
   /**
    * setAutoDisable tell the servo to disable when position reached this make
    * sense only if speed &gt; 0 if speed == -1 : a timer is launched to delay
@@ -349,7 +357,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   @Deprecated
   void setVelocity(Double speed);
-  
+
   @Deprecated
   Double getVelocity();
 
@@ -381,23 +389,37 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * The last time the servo was asked to move (system current time in ms?)
+   * 
    * @return
    */
   @Deprecated /* use an encoder ! */
   long getLastActivityTime();
-  
+
   public void setSpeed(Double d);
 
   Double getTargetPos();
 
   /**
-   * This method sets the position without "moving" the servo. Typically, this is useful for setting the initial position
-   * of the servo during startup
+   * This method sets the position without "moving" the servo. Typically, this
+   * is useful for setting the initial position of the servo during startup
+   * 
    * @param pos
    */
   void setPosition(Double pos);
 
-  EncoderControl getEncoder();  
+  EncoderControl getEncoder();
 
-  
+  /**
+   * When moveBlocking is in motion, not only should it block the calling thread until the end of
+   * the move, it should also prevent (cancel) other threads (even ones doing moveTo
+   * commands) until its done... conversely mutli-threaded moveTo commands are a
+   * free-for-all .. if you call a servo thats in process of a moveBlocking with
+   * a moveTo - your moveTo is canceled (not blocked) until the moveToBlocking
+   * is done.  When a moveToBlocking is called from a different thread it should be blocked until
+   * the original is finished.
+   * 
+   * @return
+   */
+  boolean isBlocking();
+
 }

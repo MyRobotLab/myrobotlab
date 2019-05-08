@@ -31,8 +31,11 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -124,6 +127,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   JButton save = new JButton("save");
   JButton enable = new JButton("enable");
   CheckBoxTitledBorder speedControlTitle = new CheckBoxTitledBorder("speed control", false);
+  CheckBoxTitledBorder blockingTitle = new CheckBoxTitledBorder("blocking", false);
+  
   JCheckBox speedControl = null;
   JCheckBox autoDisable = new JCheckBox("auto disable");
   JCheckBox setInverted = new JCheckBox("set inverted");
@@ -164,13 +169,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   JButton setMaxSpeed = new JButton("set");
   JLabel maxSpeedLabel = new JLabel("max speed");
 
+  // FIXME - this should be read default form servo !!!
   JTextField idleTime = new JTextField("3000");
 
   JLabel idleUnits = new JLabel(" ms");
 
   JLabel idleTimeLabel = new JLabel("idle time ");
 
-  public HobbyServoGui(final String boundServiceName, final SwingGui myService) {
+  private JCheckBox blocking;
+
+  public HobbyServoGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
 
     // FIXME - even though its a pain - this should come from the
@@ -207,6 +215,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     moveTo.setPaintLabels(true);
 
     speedControl = speedControlTitle.getCheckBox();
+    blocking = blockingTitle.getCheckBox();
 
     // JPanel north = new JPanel(new GridLayout(0, 3));
     // north.setLayout(new FlowLayout(FlowLayout., 0, 0));
@@ -214,17 +223,30 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
     north.setLayout(new BoxLayout(north, BoxLayout.X_AXIS));
 
+    JPanel controllerMainPanel = new JPanel(new GridLayout(0, 1));
+    
     controllerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
     controllerPanel.add(attach);
     controllerPanel.add(controller);
     controllerPanel.add(new JLabel(" pin"));
     controllerPanel.add(pinList);
+    controllerMainPanel.add(controllerPanel);
 
     encoderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     encoderPanel.setBorder(BorderFactory.createTitledBorder("encoder"));
     encoderPanel.add(attachEncoder);
-    encoderPanel.add(encoder);
+    encoderPanel.add(encoder);    
+    controllerMainPanel.add(encoderPanel);
+    
+    JPanel blockingPanel = new JPanel();
+    // blockingPanel.setBorder(BorderFactory.createTitledBorder("blocking"));
+    blockingPanel.setBorder(blockingTitle);
+    ImageIcon icon = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "green.png")));
+    JLabel isBlocking = new JLabel();
+    isBlocking.setIcon(icon);
+    blockingPanel.add(new JLabel("is blocking"));
+    blockingPanel.add(isBlocking);
 
     enablePanel = new JPanel(new GridLayout(0, 2));
     enablePanel.setBorder(BorderFactory.createTitledBorder("enable"));
@@ -255,15 +277,15 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
     // top.add(autoDisable);
     // JPanel flow = new JPanel();
-    
+
     speedPanel.add(top, BorderLayout.NORTH);
     speedPanel.add(speedSlider, BorderLayout.CENTER);
     speedPanel.add(new JLabel("     "), BorderLayout.SOUTH);
 
     setSpeedControlEnabled(false);
 
-    north.add(controllerPanel);
-    north.add(encoderPanel);
+    north.add(controllerMainPanel);
+    north.add(blockingPanel);
     north.add(enablePanel);
     north.add(speedPanel);
 
@@ -322,6 +344,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   }
 
   public void setSpeedControlEnabled(boolean b) {
+    speedControl.setSelected(b);
     speed.setEnabled(b);
     maxSpeed.setEnabled(b);
     setMaxSpeed.setEnabled(b);
@@ -344,15 +367,17 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           if (speedControl.isSelected()) {
             setSpeedControlEnabled(true);
             if (lastSpeed != null) {
-              speed.setText(lastSpeed + "");
-            }            
+              speed.setText(String.format("%.1f", lastSpeed));
+              send("setSpeed", Double.parseDouble(String.format("%.1f", lastSpeed)));
+            }
           } else {
             setSpeedControlEnabled(false);
             // disabling speed control
-            send("setSpeed", (Double)null);
+            send("setSpeed", (Double) null);
           }
+          send("broadcastState");
         }
-        
+
         if (o == setMaxSpeed) {
           send("setMaxSpeed", Double.parseDouble(maxSpeed.getText()));
           send("setSpeed", Double.parseDouble(speed.getText()));
@@ -372,14 +397,18 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           return;
         }
 
+        // The correct way to do "command" msgs
+        // these never set gui attributes like .setText("x")
+        // because all those functions are in onState ... instead
+        // we send a command - then send a broadcast request - and onState
+        // will do the appropriate display
         if (o == enable) {
           if (enable.getText().equals("enable")) {
             send("enable");
-            enable.setText("disable");
           } else {
             send("disable");
-            enable.setText("enable");
           }
+          send("broadcastState");
           return;
         }
 
@@ -389,6 +418,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           } else {
             send("setAutoDisable", false);
           }
+          send("broadcastState");
           return;
         }
 
@@ -398,6 +428,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           } else {
             send("setInverted", false);
           }
+          send("broadcastState");
           return;
         }
 
@@ -460,11 +491,15 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     unsubscribe("publishServoData");
   }
 
+  /**
+   * publish of the "moveTo" from servo
+   * @param servo
+   */
   public void onMoveTo(final HobbyServo servo) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        targetPos.setText(servo.getTargetPos() + "");
+        targetPos.setText(String.format("%.1f", servo.getTargetPos()));
       }
     });
   }
@@ -490,20 +525,23 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       public void run() {
 
         removeListeners();
+
+        // FIXME - HobbyServo supports multiple controllers - the UI needs a
+        // multi-select perhaps
         String controllerName = servo.getControllerName();
         lastController = controllerName;
 
         enabledIcon.setVisible(servo.isEnabled());
 
-        double maxSpd = (servo.getMaxSpeed() == null)?500.0:servo.getMaxSpeed();
-        maxSpeed.setText(maxSpd + "");
-        speedSlider.setMaximum((int)maxSpd);
+        double maxSpd = (servo.getMaxSpeed() == null) ? 500.0 : servo.getMaxSpeed();
+        maxSpeed.setText(String.format("%.1f", maxSpd));
+        speedSlider.setMaximum((int) maxSpd);
 
         Double currentSpeed = servo.getVelocity();
         if (currentSpeed == null) {
           speed.setText("");
         } else {
-          speed.setText(currentSpeed + "");
+          speed.setText(String.format("%.1f", currentSpeed));
           speedSlider.setValue(currentSpeed.intValue());
           lastSpeed = currentSpeed;
         }
@@ -554,16 +592,12 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           enabledIcon.setVisible(false);
         }
 
-        if (servo.getVelocity() != null) {
-
-        } else {
-
-        }
-
         if (servo.getAutoDisable()) {
           autoDisable.setSelected(true);
+          setIdleTimeEnabled(true);
         } else {
           autoDisable.setSelected(false);
+          setIdleTimeEnabled(false);
         }
 
         if (servo.isInverted()) {
@@ -572,21 +606,31 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           setInverted.setSelected(false);
         }
 
-        rest.setText(servo.getRest() + "");
-        Double pos = servo.getPos();
-        if (pos != null) {
-          targetPos.setText(Double.toString(pos));
-          moveTo.setValue(pos.intValue());
+        rest.setText(String.format("%.1f", servo.getRest()));
+
+        // TARGET POSITION
+        // target position - is a "command" where I "want" to go - not to be
+        // confused with "where I am"
+        Double inTargetPos = servo.getTargetPos();
+        if (inTargetPos != null) {
+          targetPos.setText(Double.toString(inTargetPos));
+          moveTo.setValue(inTargetPos.intValue());
         }
 
+        // SPEED CONTROL
+        Double servoSpeed = servo.getSpeed();
+        if (servoSpeed == null) {
+          setSpeedControlEnabled(false);
+        } else {
+          speed.setText(String.format("%.1f", servoSpeed));
+          setSpeedControlEnabled(true);
+        }
+
+        // MAP MIN/MAX INPUT/OUTPUT
         // In the inverted case, these are reversed
         moveTo.setMinimum(servo.getMin().intValue());
         moveTo.setMaximum(servo.getMax().intValue());
-
-        // speed control
-        Double servoSpeed = servo.getSpeed();
-        speed.setText((servoSpeed == null) ? "           " : servoSpeed + "");
-
+        
         if (mapInput.getLowValue() != servo.getMin().intValue()) {
           mapInput.setLowValue(servo.getMin().intValue());
         }
@@ -617,10 +661,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           mapOutput.setHighValue(servo.getMaxOutput().intValue());
         }
 
-        minPos.setText(servo.getMin() + "");
-        maxPos.setText(servo.getMax() + "");
-        minOutput.setText(minOutputTmp + "");
-        maxOutput.setText(maxOutputTmp + "");
+        minPos.setText(String.format("%.1f", servo.getMin()));
+        maxPos.setText(String.format("%.1f", servo.getMax()));
+        minOutput.setText(String.format("%.1f", minOutputTmp));
+        maxOutput.setText(String.format("%.1f", maxOutputTmp));
 
         mapInput.setLowValue(servo.getMin().intValue());
         mapInput.setHighValue(servo.getMax().intValue());
@@ -630,10 +674,6 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         addListeners();
       }
     });
-  }
-
-  public void enableSpeedControl(boolean b) {
-
   }
 
   public void refreshControllers() {
@@ -720,18 +760,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     if (speedSlider.equals(o)) {
       // speedSlider.setVisible(true);
       send("setVelocity", (double) speedSlider.getValue());
-      speed.setText(speedSlider.getValue() + "");
+      speed.setText(String.format("%.1f", (double)speedSlider.getValue()));
     }
-    
+
     if (moveTo.equals(o)) {
-      moving.setVisible(true);
+      // moving.setVisible(true);
       send("moveTo", (double) moveTo.getValue());
-    }
+    }    
 
     // isAdjusting prevent incremental values coming from the slider
     if (!((JSlider) o).getValueIsAdjusting()) {
-
-  
 
       if (mapInput.equals(o)) {
         minPos.setText(String.format("%d", mapInput.getLowValue()));
@@ -771,10 +809,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       Platform.setVirtual(true);
 
       // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "SwingGui");
+      SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
       EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
       Runtime.getInstance().startPeers();
-      
+
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       if (mega.isVirtual()) {
         VirtualArduino vmega = mega.getVirtual();
@@ -790,8 +828,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
       if (useHobbyServo) {
         servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");
+        gui.setActiveTab("hobbyservo");
       } else {
         servo = (ServoControl) Runtime.start("servo", "Servo");
+        gui.setActiveTab("servo");
       }
 
       // servo.load();
@@ -799,15 +839,17 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // servo.setPosition(90.0);
       log.info("rest is {}", servo.getRest());
       servo.save();
+      servo.setSpeed(2.0);
       // servo.setPin(8);
       servo.attach(mega);
       servo.attach(encoder);
-      servo.moveTo(120.0);
-      servo.setSpeed(2.0);
-      Service.sleep(1000);
+      servo.moveTo(120.0);      
+      Service.sleep(500);
       log.info("here");
       servo.moveTo(90.0);
-      Service.sleep(1000);
+      // Service.sleep(1000);
+      
+      // FIXME - junit for testing return values of moveTo when a blocking call is in progress
 
     } catch (Exception e) {
       log.error("main threw", e);
