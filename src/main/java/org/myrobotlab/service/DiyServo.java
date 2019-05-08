@@ -351,7 +351,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     motorControl = (MotorControl) createPeer("motor", "MotorDualPwm");
     initPid();
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    lastActivityTime = System.currentTimeMillis();
+    lastActivityTimeTs = System.currentTimeMillis();
   }
 
   /*
@@ -409,7 +409,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public long getLastActivityTime() {
-    return lastActivityTime;
+    return lastActivityTimeTs;
   }
 
   public Double getMax() {
@@ -455,7 +455,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * The most important method, that tells the servo what position it should
    * move to
    */
-  public void moveTo(Double pos) {
+  public boolean moveTo(Double pos) {
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
@@ -464,7 +464,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
-      return;
+      return false;
     }
 
     if (!isEnabled()) {
@@ -491,7 +491,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     targetOutput = getTargetOutput();
 
     pid.setSetpoint(pidKey, targetOutput);
-    lastActivityTime = System.currentTimeMillis();
+    lastActivityTimeTs = System.currentTimeMillis();
 
     // if (isEventsEnabled) {
     // update others of our position change
@@ -500,7 +500,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // }
 
     broadcastState();
-
+    return true;
   }
 
   /*
@@ -637,7 +637,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // TODO. This need to be remapped to Motor and PID internal to this
     // Service
     // getController().servoWriteMicroseconds(this, uS);
-    lastActivityTime = System.currentTimeMillis();
+    lastActivityTimeTs = System.currentTimeMillis();
     broadcastState();
   }
 
@@ -842,7 +842,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   @Override
   public void enable() {
     // TODO Activate the motor and PID
-    lastActivityTime = System.currentTimeMillis();
+    lastActivityTimeTs = System.currentTimeMillis();
     isAttached = true;
 
     motorControl.unlock();

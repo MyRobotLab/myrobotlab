@@ -528,14 +528,14 @@ public class Servo extends Service implements ServoControl {
     return ret;
   }
 
-  public synchronized void moveTo(Double pos) {
+  public synchronized boolean moveTo(Double pos) {
     // breakMoveToBlocking=true;
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     if (controller == null) {
       error(String.format("%s's controller is not set", getName()));
-      return;
+      return false;
     }
 
     if (pos < mapper.getMinX()) {
@@ -572,6 +572,7 @@ public class Servo extends Service implements ServoControl {
       lastPos = targetPos;
       broadcastState();
     }
+    return true;
   }
   
   public Double moveToBlocking(Double pos) {
@@ -1296,6 +1297,12 @@ public class Servo extends Service implements ServoControl {
   @Override
   public EncoderControl getEncoder() {    
     return null;
+  }
+
+  @Override
+  public boolean isBlocking() {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 }

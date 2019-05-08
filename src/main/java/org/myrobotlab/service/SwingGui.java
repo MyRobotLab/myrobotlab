@@ -933,7 +933,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   public void setActiveTab(String title) {
     // we need to wait a little after Runtime.start to select an active tab
-    // TODO understand why we need a sleep(1000);
+    // TODO understand why we need a sleep(1000); - cuz swing is lame :(
     this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));
   }
 

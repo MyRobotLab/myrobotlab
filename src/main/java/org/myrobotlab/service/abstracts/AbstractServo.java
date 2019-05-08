@@ -10,6 +10,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.TimeEncoderFactory;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -133,14 +134,15 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * TimerEncoder, however there is
    * 
    */
-  protected transient EncoderControl encoder; // this does not need to be transient in the future
+  protected transient EncoderControl encoder; // this does not need to be
+                                              // transient in the future
 
   protected boolean isSweeping = false;
 
   /**
    * last time the servo has moved
    */
-  protected long lastActivityTime = 0;
+  protected long lastActivityTimeTs = 0;
 
   /**
    * servo's last position
@@ -158,9 +160,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
   protected Mapper mapper = new Mapper(0, 180, 0, 180);
 
   /**
-   * maximum speed
-   * default is 500 degrees per second or operating speed of
-   * 60 degrees in 0.12 seconds 
+   * maximum speed default is 500 degrees per second or operating speed of 60
+   * degrees in 0.12 seconds
    */
   protected Double maxSpeed = 500.0;
 
@@ -183,6 +184,13 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * typically updated from an encoder of some form
    */
   protected Double currentPos;
+
+  /**
+   * if the servo is doing a blocking call - it will block other blocking calls
+   * until the move it complete or a timeout has been reached. A "moveTo"
+   * command will be canceled (not blocked) when isBlocking == true
+   */
+  protected boolean isBlocking = false;
 
   /**
    * default rest is 90 default target position will be 90 if not specified
@@ -219,14 +227,26 @@ public abstract class AbstractServo extends Service implements ServoControl {
   protected Double targetPos;
 
   /**
-   * default blocking timeout if not specified
-   */
-  Integer timeoutMs = 30000;
-
-  /**
    * status only field - updated by encoder
    */
   boolean isMoving = false;
+
+  /**
+   * weather a move request was successful. The cases it would be false is no
+   * controller or calling moveTo when blocking is in process
+   */
+  boolean validMoveRequest = false;
+
+  /**
+   * if autoDisable is true - then after any move a timer is set to disable the
+   * servo. if the servo is idle for any length of time after
+   */
+  int idleTimeout = 3000;
+
+  /**
+   * if the servo was disabled through an idle-timeout
+   */
+  boolean idleDisabled = false;
 
   public AbstractServo(String reservedKey) {
     super(reservedKey);
@@ -235,7 +255,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // ServoControllers or EncoderControl interfaces
     // we subscribe to runtime here for new services
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
-    
+
     // if there is any information from where we currently were
     // use it to assume that we are still there
     if (lastTargetPos != null) {
@@ -244,7 +264,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       // we have no "historical" info - assume we are @ rest
       lastTargetPos = currentPos = targetPos = rest;
     }
-    
+
   }
 
   /**
@@ -314,12 +334,14 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     controllers.add(controller.getName());
     controller.attach(this);
+    enabled = true;
   }
-  
+
   /**
    * max complexity - minimal parameter EncoderControl attach
+   * 
    * @param encoder
-   * @throws Exception 
+   * @throws Exception
    */
   public void attach(EncoderControl service) throws Exception {
     if (service == null) {
@@ -413,11 +435,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
         send(controller, "servoDisable", this);
       }
     }
-    if (enabled) {
-      // if changing state then broadcast
-      broadcastState();
-    }
     enabled = false;
+    broadcastState();
   }
 
   @Override
@@ -430,11 +449,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
         send(controller, "servoEnable", this);
       }
     }
-    if (!enabled) {
-      // if changing state then broadcast
-      broadcastState();
-    }
     enabled = true;
+    broadcastState();
   }
 
   @Override
@@ -533,15 +549,16 @@ public abstract class AbstractServo extends Service implements ServoControl {
     mapper = new Mapper(minX, maxX, minY, maxY);
     broadcastState();
   }
-  
+
   @Override
   public long getLastActivityTime() {
-    return lastActivityTime;
+    return lastActivityTimeTs;
   }
-  
+
   @Override
-  public void moveTo(Double newPos) {
-    moveTo(newPos, null, null);
+  public boolean moveTo(Double newPos) {
+    processMove(newPos, false, null);
+    return validMoveRequest;
   }
 
   /**
@@ -554,7 +571,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * @param isBlocking
    * @param timeout
    */
-  public Double moveTo(Double newPos, Boolean isBlocking, Long timeoutMs) {
+  protected void processMove(Double newPos, boolean blocking, Long timeoutMs) { 
     // FIXME - implement encoder blocking ...
     // FIXME - when and what should a servo publish and when ?
     // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
@@ -575,22 +592,82 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // which is part of the motor command set ... once you lock a motor you
     // can't do anything until you unlock it
 
+    if (idleDisabled && !enabled) {
+      // if the servo was disable with a timer - re-enable it
+      enabled = true;
+    }
+  
+    // purge any timers currently in process
+    purgeTask("idleDisable");
+
+    if (!enabled) {
+      log.info("cannot moveTo {} not enabled", getName());
+      validMoveRequest = false;
+      return;
+    }
+
     if (controllers.size() == 0) {
       error(String.format("%s's controller is not set", getName()));
-      return lastTargetPos;
+      validMoveRequest = false;
+      return;
     }
-    
+
+    /**
+     * <pre>
+     * 
+     * BLOCKING 
+     *   
+     *   if isBlocking already, and incoming request is not blocking - we cancel it 
+     *   if isBlocking already, and incoming request is a blocking one - we block it
+     *   if not currently blocking, and incoming request is blocking - we start blocking 
+     *               with default encoder until it - unblocks or max-timeout is reached
+     * 
+     * </pre>
+     *
+     */
+
+    if (isBlocking && !blocking) {
+      // if isBlocking already, and incoming request is not blocking - we cancel
+      log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
+      validMoveRequest = false;
+      return;
+    }
+
+    if (isBlocking && blocking) {
+      // if isBlocking already, and incoming request is a blocking one - we
+      // block it
+      log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
+      synchronized (this) {
+        try {
+          this.wait();
+        } catch (InterruptedException e) {
+          /* don't care */}
+      }
+      return;
+    }
+
+    if (!isBlocking && blocking) {
+      // if not currently blocking, and incoming request is blocking - we start
+      // blocking with default encoder until it - unblocks or max-timeout is
+      // reached - if timeout not specified - we block until an encoder unblocks
+      // us
+      log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
+      isBlocking = true;
+    }
+
     targetPos = newPos;
 
     if (targetPos < mapper.getMinX()) {
-      targetPos = mapper.getMinX(); 
+      targetPos = mapper.getMinX();
     }
-    
+
     if (targetPos > mapper.getMaxX()) {
       targetPos = mapper.getMaxX();
     }
 
-    if (!isEnabled() && autoDisable) { // FIXME - still not right - need to know if this servo was disabled through timer or not
+    if (!isEnabled() && autoDisable) { // FIXME - still not right - need to know
+                                       // if this servo was disabled through
+                                       // timer or not
       // if (newPos != lastPos || !getAutoDisable()) {
       if (targetPos != lastTargetPos || !isEnabled()) {
         enable();
@@ -598,20 +675,22 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
 
     targetOutput = getTargetOutput();
-    lastActivityTime = System.currentTimeMillis();
+    lastActivityTimeTs = System.currentTimeMillis();
 
     if (lastTargetPos != targetPos) {
       for (String controller : controllers) {
         ServiceInterface si = Runtime.getService(controller);
-        if (si.isLocal()) { // FIXME - this "optimization" probably should not be done ...
+        if (si.isLocal()) { // FIXME - this "optimization" probably should not
+                            // be done ...
           ((ServoController) Runtime.getService(controller)).servoMoveTo(this);
         } else {
           send(controller, "servoMoveTo", this);
         }
       }
-      // if (noEncoder) ...
-      // currentPos = newPos;
-      // lastPos = currentPos; // what is the point of this ??? its wrong ...
+
+      // in theory - we're moving now ...
+      isMoving = true;
+      validMoveRequest = true;
     }
 
     if (lastTargetPos != targetPos) {
@@ -619,18 +698,45 @@ public abstract class AbstractServo extends Service implements ServoControl {
       // broadcastState(); // not Needed with publishMoveTo
     }
 
+    // "real" encoders are electrically hooked up to the servo and get their
+    // events through
+    // data lines - faux encoders need to be told in software when servos begin
+    // movement
+    // usually knowing about encoder type is "bad" but the timer encoder is the
+    // default native encoder
+    if (encoder != null && encoder instanceof TimeEncoderFactory) {
+      TimeEncoderFactory timeEncoder = (TimeEncoderFactory) encoder;
+      log.info("before onMoveTo");
+      timeEncoder.calculateTrajectory(getName(), getPos(), getTargetPos(), getSpeed());
+      log.info("after onMoveTo");
+    }
+
+    if (isBlocking) {
+      // our thread did a blocking call - we will wait until encoder notifies us
+      // to continue or timeout (if supplied) has been reached
+      synchronized (this) {
+        try {
+          this.wait();
+        } catch (InterruptedException e) {/* don't care */
+        }
+      }
+    }
+    log.info("publishMoveTo");
     invoke("publishMoveTo", this);
-    return currentPos; // if not blocking return null if blocking return currentPos
+    broadcastState();
+    return;
   }
 
   @Override
   public Double moveToBlocking(Double pos) {
-    return moveTo(pos, true, null);
+    processMove(pos, true, null);
+    return currentPos; // should be requested pos - unless timeout occured
   }
 
   @Override
   public Double moveToBlocking(Double newPos, Long timeoutMs) {
-    return moveTo(newPos, true, timeoutMs);
+    processMove(newPos, true, timeoutMs);
+    return currentPos; // should be requested pos - unless timeout occured
   }
 
   @Override
@@ -640,7 +746,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public ServoData publishServoData(ServoStatus status, Double pos) {
-    ServoData sd = new ServoData(status, getName(), pos);    
+    ServoData sd = new ServoData(status, getName(), pos);
+    lastActivityTimeTs = System.currentTimeMillis();
     return sd;
   }
 
@@ -660,7 +767,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       if (si.isLocal()) {
         ((ServoController) Runtime.getService(controller)).servoMoveTo(this);
       } else {
-        send(controller, "moveTo", this);
+        send(controller, "rest", this);
       }
     }
   }
@@ -670,9 +777,32 @@ public abstract class AbstractServo extends Service implements ServoControl {
     this.acceleration = acceleration;
   }
 
+  /**
+   * Auto disable automatically disables the servo stopping the power to it
+   * after an idleTimeout time if no move command was sent. After a move it will
+   * begin at the "end" of the movement.
+   */
   @Override
   public void setAutoDisable(Boolean autoDisable) {
     this.autoDisable = autoDisable;
+    
+    if (autoDisable) {
+      // FIXME - will need to know if disabled manually (by user) or by timer
+      // (re-enable-able with move)
+      addTaskOneShot(idleTimeout, "idleDisable");
+    } else {
+      purgeTask("idleDisable");
+      idleDisabled = false;
+    }
+  }
+
+  /**
+   * a method called by the idle timer - we will know that this disable is
+   * allowed to re-enable
+   */
+  public void idleDisable() {
+    idleDisabled = true;
+    disable();
   }
 
   @Override
@@ -745,7 +875,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
     syncedServos.remove(sc.getName());
   }
 
-
   @Override
   public void waitTargetPos() {
     //
@@ -765,36 +894,58 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public Mapper getMapper() {
     return mapper;
   }
-  
+
   @Override
   public void onEncoderData(EncoderData data) {
-    log.info("onEncoderData - {}", data.value);
+    // log.info("onEncoderData - {}", data.value); - helpful to debug
     currentPos = data.value;
     // TODO test on type of encoder to handle differently if necessary
-    if (targetPos == currentPos) {
+    // TODO - where does resolution or accuracy managed ? (in the encoder or in
+    // the motor ?)
+    // FIXME - configurable accuracy difference ? ie - when your in the range of 0.02 - then they are considered equal ?
+    int t = targetPos.intValue();
+    int c = currentPos.intValue();
+    
+    boolean equal = Math.abs(targetPos - currentPos) < 0.1;
+    //if (targetPos.equals(currentPos)) {
+    if (equal) {
+      synchronized (this) {
+        this.notifyAll();
+        isBlocking = false;
+      }
       isMoving = false;
       invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentPos);
+      // servo has stopped its move ... (or best guess estimate it has)
+      // if currently configured to autoDisable - the timer starts now
+      if (autoDisable) {
+        // we cancel any pre-existing timer if it exists
+        purgeTask("idleDisable");
+        // and start our countdown
+        addTaskOneShot(idleTimeout, "idleDisable");
+      }
+      // log.info("encoder data says -> stopped");
     } else {
       isMoving = true;
       invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentPos);
+      // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
     }
   }
-  
+
   @Override
   public Double getTargetPos() {
     return targetPos;
   }
-  
+
   @Override
   public void setPosition(Double pos) {
-   lastTargetPos = currentPos = targetPos = pos;
+    lastTargetPos = currentPos = targetPos = pos;
   }
-  
+
   @Override
   public EncoderControl getEncoder() {
     return encoder;
   }
-  
+
   @Override
   public void setMaxSpeed(Double maxSpeed) {
     this.maxSpeed = maxSpeed;
@@ -809,9 +960,19 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public Double getVelocity() {
     return speed;
   }
-  
+
+  @Override
+  public boolean isBlocking() {
+    return isBlocking;
+  }
+
   @Override
   public void setSpeed(Double degreesPerSecond) {
+    if (degreesPerSecond == null) {
+      log.info("disabling speed control");
+      speed = null;
+    }
+
     if (maxSpeed != -1 && degreesPerSecond > maxSpeed) {
       speed = maxSpeed;
       log.info("Trying to set speed to a value greater than max speed");
