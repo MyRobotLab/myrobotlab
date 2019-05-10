@@ -10,7 +10,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.TimeEncoderFactory;
+import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -264,6 +264,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
       // we have no "historical" info - assume we are @ rest
       lastTargetPos = currentPos = targetPos = rest;
     }
+    
+    // create our default TimeEncoder
+    if (encoder == null) {
+      encoder = new TimeEncoder(this);
+    }
 
   }
 
@@ -343,17 +348,17 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * @param encoder
    * @throws Exception
    */
-  public void attach(EncoderControl service) throws Exception {
-    if (service == null) {
+  public void attach(EncoderControl enc) throws Exception {
+    if (enc == null) {
       log.warn("encoder is null");
       return;
     }
-    if (service.equals(encoder)) {
-      log.info("encoder {} already attached", service.getName());
+    if (enc.equals(encoder)) {
+      log.info("encoder {} already attached", enc.getName());
       return;
     }
-    encoder = service;
-    service.attach(this);
+    encoder = enc;
+    enc.attach(this);
   }
 
   @Override
@@ -571,7 +576,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * @param isBlocking
    * @param timeout
    */
-  protected void processMove(Double newPos, boolean blocking, Long timeoutMs) { 
+  protected void processMove(Double newPos, boolean blocking, Long timeoutMs) {
     // FIXME - implement encoder blocking ...
     // FIXME - when and what should a servo publish and when ?
     // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
@@ -594,7 +599,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it
-      enabled = true;
+      enable();
     }
   
     // purge any timers currently in process
@@ -704,12 +709,14 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // movement
     // usually knowing about encoder type is "bad" but the timer encoder is the
     // default native encoder
-    if (encoder != null && encoder instanceof TimeEncoderFactory) {
-      TimeEncoderFactory timeEncoder = (TimeEncoderFactory) encoder;
-      log.info("before onMoveTo");
-      timeEncoder.calculateTrajectory(getName(), getPos(), getTargetPos(), getSpeed());
-      log.info("after onMoveTo");
+    if (encoder != null && encoder instanceof TimeEncoder) {
+      TimeEncoder timeEncoder = (TimeEncoder) encoder;
+      // calculate trajectory calculates and processes this move
+      timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
     }
+    
+    invoke("publishMoveTo", this);
+    broadcastState();
 
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
@@ -721,9 +728,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
         }
       }
     }
-    log.info("publishMoveTo");
-    invoke("publishMoveTo", this);
-    broadcastState();
     return;
   }
 
@@ -857,6 +861,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void stopService() {
     super.stopService();
     disable();
+    
+    // not happy - too type specific 
+    if (encoder != null) {
+      encoder.disable();
+    }
   }
 
   @Override

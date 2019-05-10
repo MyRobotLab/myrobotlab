@@ -128,7 +128,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   JButton enable = new JButton("enable");
   CheckBoxTitledBorder speedControlTitle = new CheckBoxTitledBorder("speed control", false);
   CheckBoxTitledBorder blockingTitle = new CheckBoxTitledBorder("blocking", false);
-  
+
   JCheckBox speedControl = null;
   JCheckBox autoDisable = new JCheckBox("auto disable");
   JCheckBox setInverted = new JCheckBox("set inverted");
@@ -224,7 +224,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     north.setLayout(new BoxLayout(north, BoxLayout.X_AXIS));
 
     JPanel controllerMainPanel = new JPanel(new GridLayout(0, 1));
-    
+
     controllerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
     controllerPanel.add(attach);
@@ -236,9 +236,9 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     encoderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     encoderPanel.setBorder(BorderFactory.createTitledBorder("encoder"));
     encoderPanel.add(attachEncoder);
-    encoderPanel.add(encoder);    
+    encoderPanel.add(encoder);
     controllerMainPanel.add(encoderPanel);
-    
+
     JPanel blockingPanel = new JPanel();
     // blockingPanel.setBorder(BorderFactory.createTitledBorder("blocking"));
     blockingPanel.setBorder(blockingTitle);
@@ -493,6 +493,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   /**
    * publish of the "moveTo" from servo
+   * 
    * @param servo
    */
   public void onMoveTo(final HobbyServo servo) {
@@ -545,8 +546,6 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
           speedSlider.setValue(currentSpeed.intValue());
           lastSpeed = currentSpeed;
         }
-
-        // refresh(); - infinite loop
 
         if (controllerName != null) {
           controller.setSelectedItem(controllerName);
@@ -630,7 +629,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         // In the inverted case, these are reversed
         moveTo.setMinimum(servo.getMin().intValue());
         moveTo.setMaximum(servo.getMax().intValue());
-        
+
         if (mapInput.getLowValue() != servo.getMin().intValue()) {
           mapInput.setLowValue(servo.getMin().intValue());
         }
@@ -760,13 +759,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     if (speedSlider.equals(o)) {
       // speedSlider.setVisible(true);
       send("setVelocity", (double) speedSlider.getValue());
-      speed.setText(String.format("%.1f", (double)speedSlider.getValue()));
+      speed.setText(String.format("%.1f", (double) speedSlider.getValue()));
     }
 
     if (moveTo.equals(o)) {
       // moving.setVisible(true);
       send("moveTo", (double) moveTo.getValue());
-    }    
+    }
 
     // isAdjusting prevent incremental values coming from the slider
     if (!((JSlider) o).getValueIsAdjusting()) {
@@ -806,11 +805,13 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      Platform.setVirtual(false);
 
       // Runtime.start("webgui", "WebGui");
-      SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
-      EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
+      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
+      // EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
+      // FIXME - perhaps InMoov should just override the framework to provided
+      // the exception needed to work
       Runtime.getInstance().startPeers();
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
@@ -834,6 +835,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         gui.setActiveTab("servo");
       }
 
+      // FIXME - check mixing and matching speed autoDisable enable/disable
+
       // servo.load();
       servo.setPin(13);
       // servo.setPosition(90.0);
@@ -842,14 +845,32 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       servo.setSpeed(2.0);
       // servo.setPin(8);
       servo.attach(mega);
-      servo.attach(encoder);
-      servo.moveTo(120.0);      
+      // servo.attach(encoder);
+      servo.moveTo(30.0);
+      servo.moveTo(31.0);
+      servo.moveTo(30.0);
+      servo.moveToBlocking(90.0);
+      servo.moveToBlocking(80.0);
+      servo.moveToBlocking(70.0);
+      servo.moveToBlocking(60.0);
+      servo.moveToBlocking(50.0);
+      servo.moveToBlocking(40.0);
+      servo.moveToBlocking(30.0);
+      servo.moveToBlocking(20.0);
+      servo.moveToBlocking(10.0);
+      servo.moveToBlocking(20.0);
+      servo.moveToBlocking(30.0);
+      servo.moveToBlocking(40.0);
+      servo.moveToBlocking(50.0);
+
+      servo.moveTo(120.0);
       Service.sleep(500);
       log.info("here");
       servo.moveTo(90.0);
       // Service.sleep(1000);
-      
-      // FIXME - junit for testing return values of moveTo when a blocking call is in progress
+
+      // FIXME - junit for testing return values of moveTo when a blocking call
+      // is in progress
 
     } catch (Exception e) {
       log.error("main threw", e);
