@@ -102,7 +102,7 @@ public class AbstractTest {
     if (junitLogLevel != null) {
       Runtime.setLogLevel(junitLogLevel);
     } else {
-      Runtime.setLogLevel("info"); // error instead ?
+      Runtime.setLogLevel("warn"); // error instead ?
     }
 
     log.info("setUpAbstractTest");

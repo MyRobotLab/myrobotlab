@@ -9,8 +9,13 @@ import java.util.Map;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.abstracts.AbstractServo;
+import org.slf4j.Logger;
+
+import com.sun.media.Log;
 
 ///////////// MrlComm.h ///////////////
 // forward defines to break circular dependency
@@ -30,6 +35,8 @@ import org.myrobotlab.service.VirtualArduino;
  * 
  */
 public class MrlComm {
+  
+  public final static Logger log = LoggerFactory.getLogger(MrlComm.class);
 
   static public int getRandom(int min, int max) {
     return min + (int) (Math.random() * ((max - min) + 1));
@@ -632,7 +639,12 @@ public class MrlComm {
 
   public void servoMoveToMicroseconds(int deviceId, int target) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
+    if (servo != null) {
     servo.moveToMicroseconds(target);
+    } else { // FIXME - this should be fixed in the "real" mrlcomm - where it returns an error
+      // if the device is not found !!!
+      log.error("servo with device id of {} and target pos {} does not exist", deviceId, target);
+    }
   }
 
   public void servoSetAcceleration(int deviceId, int acceleration) {
