@@ -1824,7 +1824,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void servoEnable(ServoControl servo) {
-    int deviceId = getDeviceId(servo);
+    Integer deviceId = getDeviceId(servo);
+    if (deviceId == null) {
+      log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servo.getName());
+    }
     msg.servoAttachPin(deviceId, getAddress(servo.getPin()));
   }
 
@@ -1837,7 +1840,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   // > servoWrite/deviceId/target
   public void servoMoveTo(ServoControl servo) {
-    int deviceId = getDeviceId(servo);
+    Integer deviceId = getDeviceId(servo);
+    if (deviceId == null) {
+      log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", servo.getName());
+      return;
+    }
     // getTargetOutput ALWAYS ALWAYS Degrees !
     // so we convert to microseconds
     int us = degreeToMicroseconds(servo.getTargetOutput());

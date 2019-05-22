@@ -27,6 +27,7 @@ package org.myrobotlab.framework;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -1566,22 +1567,18 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return load(null, null);
   }
   
-  public JsonElement loadJsonTree() {
-    try {
+  public JsonElement loadJsonTree() throws IOException {
     String filename = String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
     String json = FileIO.toString(filename);
-    return loadJsonTree(json);
-    } catch(Exception e) {
-      log.error("loadJsonTree", e);
-    }
-    return null;
+    return loadJsonTree(json);    
   }
   
   public JsonElement loadJsonTree(String json) {    
     return CodecUtils.toJsonTree(json);
   }
   
-  public Object loadField(String fieldName) {
+  public Object loadField(String fieldName) throws IOException {
+    
     JsonElement tree = loadJsonTree();
     if (tree == null) {
       return null;
