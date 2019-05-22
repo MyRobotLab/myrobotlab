@@ -41,9 +41,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -601,7 +599,7 @@ public class Servo extends Service implements ServoControl {
   public void waitTargetPos() {
     {
       if (isMoving() || Math.round(lastPos) != Math.round(targetPos)) {
-        if (velocity > 0) {
+        if (velocity != null && velocity > 0) {
           synchronized (moveToBlocked) {
             try {
               // Will block until moveToBlocked.notify() is called on another
@@ -1303,6 +1301,11 @@ public class Servo extends Service implements ServoControl {
   public boolean isBlocking() {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public Double publishServoStopped(Double pos) {
+    return pos;
   }
 
 }
