@@ -398,7 +398,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     assertTrue(arduino01.getAttached().contains(servo.getName()));
 
     // servo should have the correct pin
-    assertTrue(servoPin01 + "" == servo.getPin());
+    assertTrue((servoPin01 + "").equals(servo.getPin()));
 
     // get its device id
     int deviceId = arduino01.getDeviceId(servo.getName());

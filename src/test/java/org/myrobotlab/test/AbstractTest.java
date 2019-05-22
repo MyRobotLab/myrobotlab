@@ -199,7 +199,7 @@ public class AbstractTest {
 
   public AbstractTest() {
     
-    // make testing environment "virtual"
+    // default : make testing environment "virtual"
     Platform.setVirtual(true);
     
     simpleName = this.getClass().getSimpleName();
@@ -218,6 +218,14 @@ public class AbstractTest {
     // log.warn("=====java.library.path===== [{}]", System.getProperty("java.library.path"));
     // log.warn("=====jna.library.path===== [{}]", System.getProperty("jna.library.path"));
     
+  }
+  
+  public void setVirtual() {
+    Platform.setVirtual(false);
+  }
+  
+  public boolean isVirtual() {
+    return Platform.isVirtual();
   }
 
   @Before

@@ -87,6 +87,12 @@ public class InMoovEyelids extends Service {
 
   public InMoovEyelids(String n) {
     super(n);
+    if (eyelidleft == null) {
+      eyelidleft = (ServoControl) createPeer("eyelidleft");
+    }
+    if (eyelidright == null) {
+      eyelidright = (ServoControl) createPeer("eyelidright");
+    }
   }
 
   public void autoBlink(boolean param) {
@@ -108,7 +114,7 @@ public class InMoovEyelids extends Service {
       eyelidright.detach();
     }
     this.controller = controller;
-    
+
     eyelidleft.setPin(eyeLidLeftPin);
     eyelidright.setPin(eyeLidRightPin);
 

@@ -206,7 +206,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * Serial service - the Arduino's serial connection
    */
-  Serial serial;
+  transient Serial serial;
 
   /**
    * MrlComm sketch

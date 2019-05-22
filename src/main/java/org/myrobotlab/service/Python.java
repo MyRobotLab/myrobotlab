@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -78,7 +79,7 @@ public class Python extends Service {
             // to go to a data structure which is keyed by only the
             // sending method, but must call the appropriate method
             // in Sphinx
-            StringBuffer msgHandle = new StringBuffer().append("msg_").append(getSafeReferenceName(msg.sender)).append("_").append(msg.sendingMethod);
+            StringBuffer msgHandle = new StringBuffer().append("msg_").append(CodecUtils.getSafeReferenceName(msg.sender)).append("_").append(msg.sendingMethod);
             PyObject compiledObject = null;
 
             // TODO - getCompiledMethod(msg.method SHOULD BE
@@ -228,9 +229,6 @@ public class Python extends Service {
     return meta;
   }
 
-  public static final String getSafeReferenceName(String name) {
-    return name.replaceAll("[/ .-]", "_");
-  }
 
   /**
    * FIXME - buildtime package in resources pyrobotlab python service urls -
@@ -374,7 +372,7 @@ public class Python extends Service {
     log.info("Python System Path: {}", sys.path);
 
     String selfReferenceScript = "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
-        + String.format("%s = Runtime.getService(\"%s\")\n\n", getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
+        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
         + String.format("myService = Runtime.getService(\"%s\")\n", getName());
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
@@ -390,7 +388,7 @@ public class Python extends Service {
 
       initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
 
-      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", getSafeReferenceName(serviceName), serviceName);
+      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(serviceName), serviceName);
 
       // get a handle on running service
       initScript.append(serviceScript);
@@ -620,7 +618,7 @@ public class Python extends Service {
       registerScript = String.format("from org.myrobotlab.service import %s\n", s.getSimpleName());
     }
 
-    registerScript += String.format("%s = Runtime.getService(\"%s\")\n", getSafeReferenceName(s.getName()), s.getName());
+    registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
   }
 
@@ -746,6 +744,10 @@ public class Python extends Service {
       Runtime.start("python", "Python");
       // Runtime.start("webgui", "WebGui");
       Runtime.start("gui", "SwingGui");
+      boolean done = true;
+      if (done) {
+        return;
+      }
       Runtime.start("cli", "Cli");
 
       // python.error("this is an error");

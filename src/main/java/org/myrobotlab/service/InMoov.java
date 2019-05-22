@@ -1349,6 +1349,10 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
   public List<AudioData> speakBlocking(String toSpeak) {
     if (mouth == null) {
+      mouth = (SpeechSynthesis)startPeer("mouth");
+    }
+      
+    if (mouth == null) {
       log.error("speakBlocking is called, but my mouth is NULL...");
       return null;
     }

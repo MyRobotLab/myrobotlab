@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 /**
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
@@ -65,7 +67,8 @@ public class CodecUtils {
   // GsonBuilder().setDateFormat("yyyy-MM-dd
   // HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
   private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-  // FIXME - switch to Jackson
+
+  private transient static JsonParser parser = new JsonParser();
 
   private static boolean initialized = false;
 
@@ -384,6 +387,16 @@ public class CodecUtils {
     return gson.toJson(o);
   }
 
+  public final static JsonElement toJsonTree(String json) {
+    JsonElement tree = null;
+    try {
+      tree = parser.parse(json);
+    } catch (Exception e) {
+      log.error("toJsonTree threw", e);
+    }
+    return tree;
+  }
+
   public final static String toJson(Object o, Class<?> clazz) {
     return gson.toJson(o, clazz);
   }
@@ -488,6 +501,10 @@ public class CodecUtils {
       return serviceType.substring(pos + 1);
     }
     return serviceType;
+  }
+  
+  public static final String getSafeReferenceName(String name) {
+    return name.replaceAll("[/ .-]", "_");
   }
 
   // === method signatures end ===

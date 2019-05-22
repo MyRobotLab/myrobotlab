@@ -122,4 +122,10 @@ public interface ServiceInterface
 
   public boolean isRunning();
 
+  /**
+   * the order this service was created in relation to the other service
+   * @param creationCount
+   */
+  public void setOrder(int creationCount);
+
 }

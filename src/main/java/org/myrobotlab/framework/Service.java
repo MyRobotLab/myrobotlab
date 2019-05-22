@@ -68,6 +68,10 @@ import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+
 /**
  * 
  * Service is the base of the MyRobotLab Service Oriented Architecture. All
@@ -147,12 +151,25 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public final static String cfgDir = FileIO.getCfgDir();
 
-  // no longer transient - getMethodMap is not really needed
-  protected Set<String> methodSet;
+  /**
+   * used as a static cache for quick method name testing
+   * FIXME - if you make this static it borks things - not sure why
+   * this should be static info and should not be a member variable !
+   */
+  transient protected Set<String> methodSet;
 
   // :P - gson will default convert a HashSet into an Array :(
   // So we need to make it a HashMap in order for gson to convert to an object
-  protected Map<String, String> interfaceSet;
+  /**
+   * FIXME - if you make this static it borks things - not sure why
+   * this should be static info and should not be a member variable !
+   */
+  transient protected Map<String, String> interfaceSet;
+  
+  /**
+   * order which this service was created
+   */
+  Integer creationOrder;
 
   // FIXME SecurityProvider
   protected AuthorizationProvider authProvider = null;
@@ -963,7 +980,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         }
       }
     } else {
-      log.warn("purgeTask - task {} does not exist", taskName);
+      log.info("purgeTask - task {} does not exist", taskName);
     }
   }
 
@@ -1548,6 +1565,63 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean load() {
     return load(null, null);
   }
+  
+  public JsonElement loadJsonTree() {
+    try {
+    String filename = String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
+    String json = FileIO.toString(filename);
+    return loadJsonTree(json);
+    } catch(Exception e) {
+      log.error("loadJsonTree", e);
+    }
+    return null;
+  }
+  
+  public JsonElement loadJsonTree(String json) {    
+    return CodecUtils.toJsonTree(json);
+  }
+  
+  public Object loadField(String fieldName) {
+    JsonElement tree = loadJsonTree();
+    if (tree == null) {
+      return null;
+    }
+    
+    JsonObject jsonObject = tree.getAsJsonObject();
+    if (jsonObject == null) {
+      return null;
+    }
+    
+    JsonElement field = jsonObject.get(fieldName);
+    if (field == null) {
+      return null;
+    }
+    
+    if (field.isJsonNull()) {
+      return null;
+    }
+    
+    if (field.isJsonObject()) {
+      return field.getAsJsonObject();
+    }
+    // box for simplicity 
+
+    if (field.isJsonPrimitive()) {
+      JsonPrimitive primitive = field.getAsJsonPrimitive();
+      if (primitive.isBoolean()) {
+        return primitive.getAsBoolean();
+      }
+      
+      if (primitive.isString()) {
+        return primitive.getAsString();
+      }
+      
+      if (primitive.isNumber()) {
+        return primitive.getAsDouble();
+      }      
+    }
+    return null;
+  }
 
   public boolean load(Object o, String inCfgFileName) {
     String filename = null;
@@ -1834,7 +1908,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       out.write(s.getBytes());
       out.close();
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("save threw", e);
       return false;
     }
     return true;
@@ -2550,6 +2624,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   static public boolean isHeadless() {
     return java.awt.GraphicsEnvironment.isHeadless();
+  }
+  
+  public void setOrder(int creationCount) {
+    this.creationOrder = creationCount;
   }
 
 }

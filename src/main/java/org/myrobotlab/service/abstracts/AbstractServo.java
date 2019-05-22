@@ -3,14 +3,15 @@ package org.myrobotlab.service.abstracts;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.EncoderData;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.sensor.TimeEncoder;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -145,11 +146,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   protected long lastActivityTimeTs = 0;
 
   /**
-   * servo's last position
-   */
-  protected Double lastTargetPos;
-
-  /**
    * list of servo listeners names
    */
   protected Set<String> listeners = new LinkedHashSet<>();
@@ -176,7 +172,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * 
    * pin is the ONLY value which cannot and will not be 'defaulted'
    */
-  protected String pin;
+   protected String pin;
 
   /**
    * the "current" position of the servo - this never gets updated from
@@ -256,20 +252,21 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // we subscribe to runtime here for new services
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 
-    // if there is any information from where we currently were
-    // use it to assume that we are still there
-    if (lastTargetPos != null) {
-      currentPos = targetPos = lastTargetPos;
+    // new feature -
+    // extracting the currentPos from serialized servo
+    Double lastCurrentPos = (Double) loadField("currentPos");
+    if (lastCurrentPos != null) {
+      currentPos = targetPos = lastCurrentPos;
     } else {
+      // if no position could be loaded - set to rest
       // we have no "historical" info - assume we are @ rest
-      lastTargetPos = currentPos = targetPos = rest;
+      currentPos = targetPos = rest;
     }
-    
+
     // create our default TimeEncoder
     if (encoder == null) {
       encoder = new TimeEncoder(this);
     }
-
   }
 
   /**
@@ -325,7 +322,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // update pos if non-null value supplied
     if (pos != null) {
       targetPos = pos;
-      lastTargetPos = targetPos;
     }
 
     // update speed if non-null value supplied
@@ -601,7 +597,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       // if the servo was disable with a timer - re-enable it
       enable();
     }
-  
+
     // purge any timers currently in process
     purgeTask("idleDisable");
 
@@ -674,7 +670,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
                                        // if this servo was disabled through
                                        // timer or not
       // if (newPos != lastPos || !getAutoDisable()) {
-      if (targetPos != lastTargetPos || !isEnabled()) {
+      if (targetPos != currentPos || !isEnabled()) {
         enable();
       }
     }
@@ -682,7 +678,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     targetOutput = getTargetOutput();
     lastActivityTimeTs = System.currentTimeMillis();
 
-    if (lastTargetPos != targetPos) {
+    if (currentPos != targetPos) {
       for (String controller : controllers) {
         ServiceInterface si = Runtime.getService(controller);
         if (si.isLocal()) { // FIXME - this "optimization" probably should not
@@ -698,11 +694,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
       validMoveRequest = true;
     }
 
-    if (lastTargetPos != targetPos) {
-      lastTargetPos = targetPos;
-      // broadcastState(); // not Needed with publishMoveTo
-    }
-
     // "real" encoders are electrically hooked up to the servo and get their
     // events through
     // data lines - faux encoders need to be told in software when servos begin
@@ -714,7 +705,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       // calculate trajectory calculates and processes this move
       timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
     }
-    
+
     invoke("publishMoveTo", this);
     broadcastState();
 
@@ -789,7 +780,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void setAutoDisable(Boolean autoDisable) {
     this.autoDisable = autoDisable;
-    
+
     if (autoDisable) {
       // FIXME - will need to know if disabled manually (by user) or by timer
       // (re-enable-able with move)
@@ -820,6 +811,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
+  @Config // default - if pin is different - output servo.setPin()
   public void setPin(Integer pin) {
     this.pin = pin + "";
   }
@@ -861,8 +853,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void stopService() {
     super.stopService();
     disable();
-    
-    // not happy - too type specific 
+
+    // not happy - too type specific
     if (encoder != null) {
       encoder.disable();
     }
@@ -911,12 +903,13 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // TODO test on type of encoder to handle differently if necessary
     // TODO - where does resolution or accuracy managed ? (in the encoder or in
     // the motor ?)
-    // FIXME - configurable accuracy difference ? ie - when your in the range of 0.02 - then they are considered equal ?
+    // FIXME - configurable accuracy difference ? ie - when your in the range of
+    // 0.02 - then they are considered equal ?
     int t = targetPos.intValue();
     int c = currentPos.intValue();
-    
+
     boolean equal = Math.abs(targetPos - currentPos) < 0.1;
-    //if (targetPos.equals(currentPos)) {
+    // if (targetPos.equals(currentPos)) {
     if (equal) {
       synchronized (this) {
         this.notifyAll();
@@ -924,6 +917,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
       }
       isMoving = false;
       invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentPos);
+      invoke("publishServoStopped", currentPos);
+
+      // new feature - saving the last position
+      save();
+
       // servo has stopped its move ... (or best guess estimate it has)
       // if currently configured to autoDisable - the timer starts now
       if (autoDisable) {
@@ -941,13 +939,18 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
+  public Double publishServoStopped(Double pos) {
+    return pos;
+  }
+
+  @Override
   public Double getTargetPos() {
     return targetPos;
   }
 
   @Override
   public void setPosition(Double pos) {
-    lastTargetPos = currentPos = targetPos = pos;
+    currentPos = targetPos = pos;
   }
 
   @Override
@@ -974,8 +977,14 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public boolean isBlocking() {
     return isBlocking;
   }
+  
+  @Override
+  public boolean isMoving() {
+    return isMoving;
+  }
 
   @Override
+  @Config
   public void setSpeed(Double degreesPerSecond) {
     if (degreesPerSecond == null) {
       log.info("disabling speed control");

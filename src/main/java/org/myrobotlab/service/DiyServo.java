@@ -460,7 +460,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     deltaVelocity = 1;
-    double lastPosInput = mapper.calcInput(lastTargetPos);
+    double lastPosInput = mapper.calcInput(currentPos);
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
@@ -693,7 +693,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // we need to read here real angle / seconds
     // before try to control velocity
 
-    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - lastTargetPos) * (500 / sampleTime))), roundPos);
+    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentPos) * (500 / sampleTime))), roundPos);
 
     // log.info("currentPosInput : " + currentPosInput);
 
@@ -704,11 +704,11 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // offline feedback ! if diy servo is disabled
     // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
     // real lastPos & sync with UI
-    if (!isEnabled() && MathUtils.round(lastTargetPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
-      targetPos = mapper.calcInput(lastTargetPos);
+    if (!isEnabled() && MathUtils.round(currentPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
+      targetPos = mapper.calcInput(currentPos);
       broadcastState();
     }
-    lastTargetPos = currentPosInput;
+    currentPos = currentPosInput;
 
   }
 
@@ -872,7 +872,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public Double getLastPos() {
-    return lastTargetPos;
+    return currentPos;
   }
 
   public static void main(String[] args) throws InterruptedException {
