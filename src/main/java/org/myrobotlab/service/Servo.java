@@ -527,6 +527,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   public synchronized boolean moveTo(Double pos) {
+    log.info("Move To Called: {} {}", this.getName(), pos);
     // breakMoveToBlocking=true;
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
@@ -579,6 +580,7 @@ public class Servo extends Service implements ServoControl {
 
   
   public Double moveToBlocking(Double pos, Long timeout) {
+    log.info("Move to blocking called {} pos {} timeout {}", this.getName(), pos, timeout);
     if (timeout != null) {
       this.timeout = timeout;
     }
@@ -597,6 +599,7 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public void waitTargetPos() {
+    log.info("Wait target pos called {}", this.getName());
     {
       if (isMoving() || Math.round(lastPos) != Math.round(targetPos)) {
         if (velocity != null && velocity > 0) {
@@ -979,6 +982,11 @@ public class Servo extends Service implements ServoControl {
   @Deprecated
   public void enableAutoEnable(boolean autoEnable) {
     this.autoEnable = autoEnable;
+  }
+  
+  @Deprecated
+  public void enableAutoDisable(boolean autoDisable) {
+    setAutoDisable(autoDisable);
   }
 
   @Override
