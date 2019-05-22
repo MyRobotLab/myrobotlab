@@ -188,7 +188,7 @@ public class HobbyServoTest extends AbstractTest {
   public void testServo() throws Exception {
     // this basic test will create a servo and attach it to an arduino.
     // then detach
-    Platform.setVirtual(false);
+    // Platform.setVirtual(false);
     
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
