@@ -1,5 +1,6 @@
 package org.myrobotlab.service.abstracts;
 
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -172,7 +173,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * 
    * pin is the ONLY value which cannot and will not be 'defaulted'
    */
-   protected String pin;
+  protected String pin;
 
   /**
    * the "current" position of the servo - this never gets updated from
@@ -254,7 +255,13 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     // new feature -
     // extracting the currentPos from serialized servo
-    Double lastCurrentPos = (Double) loadField("currentPos");
+    Double lastCurrentPos = null;
+    try {
+      lastCurrentPos = (Double) loadField("currentPos"); 
+    } catch (IOException e) {
+      log.info("current pos cannot be found in saved file");
+    }
+    
     if (lastCurrentPos != null) {
       currentPos = targetPos = lastCurrentPos;
     } else {
@@ -402,11 +409,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
     disable();
     for (String controller : controllers) {
       ServiceInterface si = Runtime.getService(controller);
+      /* let the comm manager figure this out
       if (si.isLocal()) {
         ((ServoController) Runtime.getService(controller)).detach(this);
-      } else {
+      } else { */
         send(controller, "detach", this);
-      }
+      // }
     }
     controllers.clear();
   }
@@ -430,11 +438,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void disable() {
     for (String controller : controllers) {
       ServiceInterface si = Runtime.getService(controller);
+      /* let the com manager figure this out
       if (si.isLocal()) {
         ((ServoController) Runtime.getService(controller)).servoDisable(this);
-      } else {
+      } else { */
         send(controller, "servoDisable", this);
-      }
+      // }
     }
     enabled = false;
     broadcastState();
@@ -977,7 +986,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public boolean isBlocking() {
     return isBlocking;
   }
-  
+
   @Override
   public boolean isMoving() {
     return isMoving;
@@ -991,18 +1000,19 @@ public abstract class AbstractServo extends Service implements ServoControl {
       speed = null;
     }
 
-    if (maxSpeed != -1 && degreesPerSecond > maxSpeed) {
+    if (maxSpeed != -1 && degreesPerSecond != null && degreesPerSecond > maxSpeed) {
       speed = maxSpeed;
       log.info("Trying to set speed to a value greater than max speed");
     }
     this.speed = degreesPerSecond;
     for (String controller : controllers) {
-      ServiceInterface si = Runtime.getService(controller);
+      // ServiceInterface si = Runtime.getService(controller);
+      /* this should be done by the communication manager !!!
       if (si.isLocal()) {
         ((ServoController) Runtime.getService(controller)).servoSetVelocity(this);
-      } else {
+      } else { */
         send(controller, "servoSetVelocity", this);
-      }
+      // }
     }
     broadcastState();
   }
