@@ -33,6 +33,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -57,6 +59,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -527,10 +530,14 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
         removeListeners();
 
+        currentPos.setText(String.format("%.1f", servo.getPos()));
+        
         // FIXME - HobbyServo supports multiple controllers - the UI needs a
         // multi-select perhaps
         String controllerName = servo.getControllerName();
         lastController = controllerName;
+        
+        moving.setVisible(servo.isMoving());
 
         enabledIcon.setVisible(servo.isEnabled());
 
@@ -538,7 +545,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         maxSpeed.setText(String.format("%.1f", maxSpd));
         speedSlider.setMaximum((int) maxSpd);
 
-        Double currentSpeed = servo.getVelocity();
+        Double currentSpeed = servo.getSpeed();
         if (currentSpeed == null) {
           speed.setText("");
         } else {
@@ -704,6 +711,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
         for (int i = 0; i < c.size(); ++i) {
           encoder.addItem(c.get(i));
         }
+        // add self for the default time encoder (even though its not a "service")
+        encoder.addItem(boundServiceName);
         String encoderName = (currentEncoderName != null) ? currentEncoderName : lastController;
         encoder.setSelectedItem(encoderName);
         encoder.addActionListener((HobbyServoGui) self);
@@ -812,9 +821,24 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // EncoderControl encoder = (EncoderControl) Runtime.start("encoder", "TimeEncoderFactory");
       // FIXME - perhaps InMoov should just override the framework to provided
       // the exception needed to work
-      Runtime.getInstance().startPeers();
+      // Runtime.getInstance().startPeers();
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+
+      ServoControl servo = null;
+      boolean useHobbyServo = false;
+
+      if (useHobbyServo) {
+        servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");
+        Service.sleep(500);
+        gui.setActiveTab("hobbyservo");
+      } else {
+        servo = (ServoControl) Runtime.start("servo", "Servo");
+        Service.sleep(500);
+        gui.setActiveTab("servo");
+      }
+
+      // FIXME - check mixing and matching speed autoDisable enable/disable
       if (mega.isVirtual()) {
         VirtualArduino vmega = mega.getVirtual();
         vmega.setBoardMega();
@@ -823,51 +847,26 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // mega.setBoardMega();
       // mega.setBoardUno();
       mega.connect("COM9");
-
-      ServoControl servo = null;
-      boolean useHobbyServo = true;
-
-      if (useHobbyServo) {
-        servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");
-        gui.setActiveTab("hobbyservo");
-      } else {
-        servo = (ServoControl) Runtime.start("servo", "Servo");
-        gui.setActiveTab("servo");
-      }
-
-      // FIXME - check mixing and matching speed autoDisable enable/disable
-
+      
       // servo.load();
       servo.setPin(13);
       // servo.setPosition(90.0);
       log.info("rest is {}", servo.getRest());
-      servo.save();
+      // servo.save();
       servo.setSpeed(2.0);
       // servo.setPin(8);
       servo.attach(mega);
       // servo.attach(encoder);
-      servo.moveTo(30.0);
-      servo.moveTo(31.0);
-      servo.moveTo(30.0);
-      servo.moveToBlocking(90.0);
-      servo.moveToBlocking(80.0);
-      servo.moveToBlocking(70.0);
-      servo.moveToBlocking(60.0);
-      servo.moveToBlocking(50.0);
-      servo.moveToBlocking(40.0);
-      servo.moveToBlocking(30.0);
-      servo.moveToBlocking(20.0);
-      servo.moveToBlocking(10.0);
-      servo.moveToBlocking(20.0);
-      servo.moveToBlocking(30.0);
-      servo.moveToBlocking(40.0);
-      servo.moveToBlocking(50.0);
-
-      servo.moveTo(120.0);
+      
+      servo.moveToBlocking(113.0);
+      servo.moveTo(114.0);
       Service.sleep(500);
-      log.info("here");
-      servo.moveTo(90.0);
+      // servo.moveTo(90.0);
       // Service.sleep(1000);
+      // String python = LangUtils.toPython();
+      // Files.write(Paths.get("export.py"), python.toString().getBytes());
+      
+      Runtime.saveAs("export.py");
 
       // FIXME - junit for testing return values of moveTo when a blocking call
       // is in progress

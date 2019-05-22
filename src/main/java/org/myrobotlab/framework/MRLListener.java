@@ -53,8 +53,6 @@ public final class MRLListener implements Serializable {
 
   public final static Logger log = LoggerFactory.getLogger(MRLListener.class);
 
-  int _hashCode;
-
   /**
    * the keyed topic Method - when this method is invoked listeners are sent
    * messages with return data
@@ -86,11 +84,7 @@ public final class MRLListener implements Serializable {
 
   @Override
   final public int hashCode() {
-    if (_hashCode == 0) {
-      _hashCode = 37 + topicMethod.hashCode() + callbackName.hashCode() + callbackMethod.hashCode();
-    }
-
-    return _hashCode;
+    return 37 + topicMethod.hashCode() + callbackName.hashCode() + callbackMethod.hashCode();
   }
 
   @Override

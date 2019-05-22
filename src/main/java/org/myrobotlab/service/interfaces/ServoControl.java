@@ -27,6 +27,7 @@ package org.myrobotlab.service.interfaces;
 
 import java.util.Set;
 
+import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.StateSaver;
 import org.myrobotlab.math.Mapper;
@@ -68,6 +69,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   /**
    * enable the PWM pulses/power to the servo
    */
+  @Config
   void enable();
 
   /**
@@ -280,6 +282,13 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return
    */
   ServoData publishServoData(ServoStatus eventType, Double currentPosUs);
+  
+  /**
+   * Publishing topic for a servo stop event - returns position
+   * @param pos
+   * @return
+   */
+  public Double publishServoStopped(Double pos);
 
   /**
    * command to move to the rest position
@@ -421,5 +430,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return
    */
   boolean isBlocking();
+
+  /**
+   * Returns if the sevo is currently moving
+   * @return
+   */
+  boolean isMoving();
 
 }

@@ -404,6 +404,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         // is used by a ServiceGui
         if (newGui == null) {
           log.error("newGui is null");
+          return;
         }
         newGui.subscribeGui();
 

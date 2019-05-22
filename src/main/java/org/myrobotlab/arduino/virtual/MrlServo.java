@@ -181,6 +181,7 @@ public class MrlServo extends Device implements VirtualServo {
 
   @Override
   public void writeMicroseconds(int posUs) {
+    log.info("writeMicroseconds {}", posUs);
     currentPosUs = posUs;
     targetPosUs = posUs;
   }

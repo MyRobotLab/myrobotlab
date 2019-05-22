@@ -30,48 +30,13 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
   static String leftPort = "VIRTUAL_LEFT_PORT";
   static String rightPort = "VIRTUAL_RIGHT_PORT";
 
-  static SerialDevice uart = null;
-
-  static boolean useVirtualHardware = true;
-  // virtual hardware
-  static VirtualArduino virtualLeft = null;
-  static VirtualArduino virtualRight = null;
-  static VirtualArduino virtual = null;
-
   @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    log.info("INFO");
-    // FIXME - needs a seemless switch
-    if (useVirtualHardware) {
-      virtualLeft = (VirtualArduino) Runtime.start("virtualLeft", "VirtualArduino");
-      uart = virtualLeft.getSerial();
-      uart.setTimeout(100); // don't want to hang when decoding results...
-      virtualLeft.connect(leftPort);
-      
-      virtualRight = (VirtualArduino) Runtime.start("virtualRight", "VirtualArduino");
-      uart = virtualRight.getSerial();
-      uart.setTimeout(100); // don't want to hang when decoding results...
-      virtualRight.connect(rightPort);
-
-      
-      // for the minimal script.. not sure why i can't just re-use the other 2?
-      virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      uart = virtual.getSerial();
-      uart.setTimeout(100); // don't want to hang when decoding results...
-      virtual.connect("COM7");
-    }
-  }
-
-  @Override
-  public String getName() {
-    // TODO Auto-generated method stub
-    return null;
+  public static void setUpBeforeClass() throws Exception {   
   }
 
   @Override
   public boolean isLocal() {
-    // TODO Auto-generated method stub
-    return false;
+    return true;
   }
 
   @Override
@@ -80,18 +45,9 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
 
   }
 
-  @Before
-  public void setUp() throws Exception {
-    /**
-     * Arduino's expected state before each test is 'connected' with no devices,
-     * no pins enabled
-     */
-    uart.clear();
-    uart.setTimeout(100);
-  }
-
   @Test
   public void testMinimalScript() throws ClientProtocolException, IOException {
+    log.info("//////////////////////////-testMinimalScript begin-////////////////////////");
     // create the inmoov and mute it first before running the minimal script.
     InMoov i01 = (InMoov)Runtime.createAndStart("i01", "InMoov");
     i01.setMute(true);
@@ -103,6 +59,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     // update the com port and disable the autostart of the webbrowser.
    // code = code.replace("COM7", "VIRTUAL_LEFT_PORT").replace("webgui.startBrowser", "#webgui.startBrowser");
     python.exec(code);
+    log.info("//////////////////////////-testMinimalScript end-////////////////////////");
     
   }
 
@@ -117,7 +74,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
   @Override
   public void testService() throws Exception {
     
-    boolean debug = false;
+    boolean debug = true;
     if (debug) {
       Runtime.start("gui", "SwingGui");
     }
@@ -132,8 +89,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     // start the programab service i guess?  (seems like this should start in startall!)
     i01.startBrain();
     
-    Assert.assertNotNull("Chatbot was null after starting brain.", i01.chatBot);
-    
+    Assert.assertNotNull("Chatbot was null after starting brain.", i01.chatBot);    
     i01.chatBot.onText("are you a robot?");
     
     
@@ -266,10 +222,6 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     System.out.println("any key...  do it!");
     System.out.flush();
    // System.in.read();
-    
-    
-    
-    
     
     // i01.startAll(leftPort, rightPort);
     

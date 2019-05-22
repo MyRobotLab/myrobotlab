@@ -233,7 +233,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   String address = "0.0.0.0";
 
-  public Integer sslPort;
+  public Integer sslPort = null;
 
   transient Nettosphere nettosphere;
 
@@ -369,11 +369,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     Config.Builder configBuilder = new Config.Builder();
     try {
-      boolean secureTest = false;
-      if (secureTest) {
+      if (sslPort != null) {
         SelfSignedCertificate ssc = new SelfSignedCertificate();
         SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
-        configBuilder.sslContext(createSSLContext());// .sslContext(sslCtx);
+        configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
       }
     } catch (Exception e) {
       log.error("certificate creation threw", e);
@@ -1034,7 +1033,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.WARN);
+    LoggingFactory.init(Level.INFO);
 
     try {
 
@@ -1050,10 +1049,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("arduino", "Arduino");
       // Runtime.start("srf05", "UltrasonicSensor");
       // Runtime.setRuntimeName("george");
-      Runtime.start("python", "Python");
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("python", "Python");
+      // Runtime.start("gui", "SwingGui");
+      Runtime.getNetInfo();
+      
       WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
+      // webgui.autoStartBrowser(false);
+      // Runtime.start("webgui", "WebGui");
 
       // webgui.releaseService();
       // Runtime.start("mary", "MarySpeech");
