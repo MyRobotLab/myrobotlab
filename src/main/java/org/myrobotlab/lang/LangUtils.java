@@ -1,11 +1,13 @@
 package org.myrobotlab.lang;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
@@ -36,13 +38,13 @@ public class LangUtils {
     return CodecUtils.getSafeReferenceName(si.getName());
   }
   
-  static public String toPython() {
+  static public String toPython() throws IOException {
     return toPython("export.py");
   }
 
   // TODO ???? - make meta ?? seems meta is already registery and methods &
   // reflection ..
-  static public String toPython(String filename) {
+  static public String toPython(String filename) throws IOException {
     StringBuilder sb = new StringBuilder();
 
     // if use date ..
@@ -62,7 +64,10 @@ public class LangUtils {
     sb.append("## imports ####\n");
     sb.append("import org.myrobotlab.framework.Platform as Platform\n");
 
+    // from current running system - vs something uncreated passed in ....
+    List<ServiceInterface> services = Runtime.getServices();
     
+    /*
     sb.append("##############################################################\n");
     sb.append("## creating services ####\n");
     sb.append("# Platform virtual state - this virtual setting will attempt to switch all services \n");
@@ -83,14 +88,15 @@ public class LangUtils {
       // do peers with comments
       // top level peers - others commented out
     }
+    */
     
     sb.append("\n");
 
     sb.append("##############################################################\n");
-    sb.append("## starting services ####\n");
+    sb.append("## creating and starting services ####\n");
     sb.append("# Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to\n");
-    sb.append("# substitute peers, types or references of other sub services before the service is 'started'\n");
-    sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov')\n");
+    sb.append("# substitute peers, types or references of other sub services before the service is \"started\"\n");
+    sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov') # this will \"create\" the service and config could be manipulated before starting \n");
     sb.append("# e.g. i01_left = Runtime.create('i01.left', 'Ssc32UsbServoController')\n");
     
     // the easy start (start peers auto-magically creates peers)
@@ -144,6 +150,10 @@ public class LangUtils {
     // run
 
     //
+    
+    if (filename != null) {
+      Files.write(Paths.get(filename), sb.toString().getBytes());
+    }
 
     return sb.toString();
 

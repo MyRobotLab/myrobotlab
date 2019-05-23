@@ -258,7 +258,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
   JComboBox<String> controller = new JComboBox<String>();
-  JComboBox<Integer> pinList = new JComboBox<Integer>();
+  JComboBox<String> pinList = new JComboBox<String>();
 
   JTextField posMin = new JTextField("0");
   JTextField posMax = new JTextField("180");
@@ -288,7 +288,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     // myServo = (Servo) Runtime.getService(boundServiceName);
 
     for (int i = 0; i < 54; i++) {
-      pinList.addItem(i);
+      pinList.addItem(i + "");
     }
 
     posMin.setPreferredSize(new Dimension(50, 24));
