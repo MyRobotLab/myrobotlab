@@ -14,7 +14,7 @@ public class ArduinoLang extends LangUtils {
    
     sb.append("# we have the followin ports : " +  Arrays.toString(s.getPortNames().toArray()) + "\n");    
     if (s.isConnected()) {
-      sb.append(String.format("%s.connect(%s)",name,  s.getPortName()));
+      sb.append(String.format("%s.connect(\"%s\")",name,  s.getPortName()));
     }
     return sb.toString();
   }
