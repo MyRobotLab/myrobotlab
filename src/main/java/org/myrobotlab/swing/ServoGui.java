@@ -35,7 +35,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -55,10 +54,10 @@ import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.swing.widget.ComponentResizer;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;
@@ -80,11 +79,11 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
     @Override
     public void stateChanged(javax.swing.event.ChangeEvent e) {
-      JSlider m = (JSlider)e.getSource();
-      if (!m.getValueIsAdjusting()) {
+      if (mousePressed) {
         if (swingGui != null) {
           moving.setVisible(true);
-          swingGui.send(boundServiceName, "moveTo", (double)Integer.valueOf(slider.getValue()));
+          log.info("Gui sending moveTo command {} {}", boundServiceName, slider.getValue());
+          swingGui.send(boundServiceName, "moveTo", Double.valueOf(slider.getValue()));
         } else {
           log.error("can not send message myService is null");
         }
@@ -258,8 +257,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
-  JComboBox<String> controller = new JComboBox<>();
-  JComboBox<String> pinList = new JComboBox<>();
+  JComboBox<String> controller = new JComboBox<String>();
+  JComboBox<Integer> pinList = new JComboBox<Integer>();
 
   JTextField posMin = new JTextField("0");
   JTextField posMax = new JTextField("180");
@@ -289,7 +288,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
     // myServo = (Servo) Runtime.getService(boundServiceName);
 
     for (int i = 0; i < 54; i++) {
-      pinList.addItem(i + "");
+      pinList.addItem(i);
     }
 
     posMin.setPreferredSize(new Dimension(50, 24));
@@ -495,13 +494,13 @@ public class ServoGui extends ServiceGui implements ActionListener {
         }
 
         if (o == attachButton) {
-          if (attachButton.getText().equals("attach")) {           
-            send("setVelocity", controller.getSelectedItem(), new Double(slider.getValue()));
-            send("attach", controller.getSelectedItem(), pinList.getSelectedItem());
-            send("broadcastState");
+          log.info("Servo Attach Button Pressed.");
+          if (attachButton.getText().equals("attach")) {
+            log.info("Attaching Servo from Gui");
+            send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), (double)slider.getValue());
           } else {
+            log.info("Detaching Servo from Gui");
             send("detach", controller.getSelectedItem());
-            send("broadcastState");
           }
           return;
         }
@@ -604,13 +603,13 @@ public class ServoGui extends ServiceGui implements ActionListener {
 
   @Override
   public void subscribeGui() {
-    // subscribe("refreshControllers");
+    subscribe("refreshControllers");
   }
 
   // FIXME - runtime should handle all unsubscribe of teardown
   @Override
   public void unsubscribeGui() {
-    // unsubscribe("refreshControllers");
+    unsubscribe("refreshControllers");
   }
 
   synchronized public void onState(final Servo servo) {
@@ -657,7 +656,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
           moving.setIcon(movingIcon);
           moving.setVisible(true);
           // no velocity control==no magic
-        } else if (servo.isEnabled() && servo.getVelocity() == null) {
+        } else if (servo.isEnabled() && servo.getVelocity() <= 0) {
           moving.setIcon(movingIconNoVelocityControl);
           moving.setVisible(true);
         } else {
@@ -684,8 +683,8 @@ public class ServoGui extends ServiceGui implements ActionListener {
         }
 
         // In the inverted case, these are reversed
-        slider.setMinimum(servo.getMin().intValue());
-        slider.setMaximum(servo.getMax().intValue());
+        slider.setMinimum((int) Math.round(servo.getMin()));
+        slider.setMaximum((int) Math.round(servo.getMax()));
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
@@ -695,12 +694,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
         defaultDisableDelayNoVelocity.setText(servo.disableDelayNoVelocity + "");
 
         if (servo.getMinInput() < mapInputSliderMinValue) {
-          mapInputSliderMinValue = (int) servo.getMinInput();
+          mapInputSliderMinValue = (int) Math.round(servo.getMinInput());
           mapInputSlider.setMinimum(mapInputSliderMinValue);
         }
 
         if (servo.getMaxInput() > mapInputSliderMaxValue) {
-          mapInputSliderMaxValue = (int) servo.getMaxInput();
+          mapInputSliderMaxValue = (int) Math.round(servo.getMaxInput());
           mapInputSlider.setMaximum(mapInputSliderMaxValue);
         }
 
@@ -713,12 +712,12 @@ public class ServoGui extends ServiceGui implements ActionListener {
         }
 
         if (servo.getMinOutput() < mapOutputSliderMinValue) {
-          mapOutputSliderMinValue = servo.getMinOutput().intValue();
+          mapOutputSliderMinValue = (int) Math.round(servo.getMinOutput());
           mapOutputSlider.setMinimum(mapOutputSliderMinValue);
         }
 
         if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-          mapOutputSliderMaxValue = servo.getMaxOutput().intValue();
+          mapOutputSliderMaxValue = (int) Math.round(servo.getMaxOutput());
           mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
         }
 
@@ -729,10 +728,10 @@ public class ServoGui extends ServiceGui implements ActionListener {
         minOutput.setText(minOutputTmp + "");
         maxOutput.setText(maxOutputTmp + "");
 
-        mapInputSlider.setLowValue((int) servo.getMinInput());
-        mapInputSlider.setHighValue((int) servo.getMaxInput());
-        mapOutputSlider.setLowValue(servo.getMinOutput().intValue());
-        mapOutputSlider.setHighValue(servo.getMaxOutput().intValue());
+        mapInputSlider.setLowValue((int) Math.round(servo.getMinInput()));
+        mapInputSlider.setHighValue((int) Math.round(servo.getMaxInput()));
+        mapOutputSlider.setLowValue((int) Math.round(servo.getMinOutput()));
+        mapOutputSlider.setHighValue((int) Math.round(servo.getMaxOutput()));
 
         if (servo.isSweeping()) {
           sweepButton.setText("stop");
@@ -766,21 +765,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
   }
 
   public void refreshControllers() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        List<String> c = Runtime.getServiceNamesFromInterface(ServoController.class);
-        controller.removeActionListener((ServoGui) self);
-        String currentControllerName = (String) controller.getSelectedItem();
-        controller.removeAllItems();
-        for (int i = 0; i < c.size(); ++i) {
-          controller.addItem(c.get(i));
-        }
-        String controllerName = (currentControllerName != null) ? currentControllerName : "";
-        controller.setSelectedItem(controllerName);
-        controller.addActionListener((ServoGui) self);
-      }
-    });
+    send("refreshControllers");
   }
 
   public void removeListeners() {
