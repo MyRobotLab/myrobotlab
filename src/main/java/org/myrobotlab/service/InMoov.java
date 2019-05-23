@@ -317,7 +317,15 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   // OPENNI methods
   // ---------------------------------------------------------------
 
+  @Deprecated
+  public boolean RobotIsOpenCvCapturing() {
+    if (opencv != null)
+      return opencv.isCapturing();
+    return false;
+  }
+  
   // TODO:change -> isOpenNiCapturing
+  @Deprecated
   public boolean RobotIsOpenNiCapturing() {
     if (openni != null) {
       if (openni.capturing) {
