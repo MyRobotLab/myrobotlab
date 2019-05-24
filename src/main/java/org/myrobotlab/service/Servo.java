@@ -402,6 +402,7 @@ public class Servo extends Service implements ServoControl {
    * energizes the servo sending pulses to maintain its current position.
    */
   public void enable(Integer pin) {
+    log.info("Enable called on {}", getName());
     if (this.pin != null && this.pin != pin) {
       disable();
     }
@@ -428,6 +429,7 @@ public class Servo extends Service implements ServoControl {
    */
   @Override
   public void disable() {
+    log.info("Disable called on {}", getName());
     enabled = false;
     if (controller != null) {
       controller.servoDisable(this);
@@ -563,10 +565,9 @@ public class Servo extends Service implements ServoControl {
 
     if (lastPos != pos || !isEventsEnabled) {
       // take care if servo will disable soon
-      if (autoDisableTimer != null) {
-        autoDisableTimer.cancel();
-        autoDisableTimer = null;
-      }
+      if (autoDisable)
+        scheduleDisableTimer();
+
       controller.servoMoveTo(this);
     }
     if (!isEventsEnabled || lastPos == pos) {
@@ -615,26 +616,7 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
     if (!isMoving()) {
       if (autoDisable) {
-        int delayBeforeDisable = disableDelayNoVelocity;
-        if (velocity > -1) {
-          delayBeforeDisable = disableDelay;
-        }
-        if (autoDisableTimer != null) {
-          autoDisableTimer.cancel();
-          autoDisableTimer = null;
-        }
-        autoDisableTimer = new Timer();
-        autoDisableTimer.schedule(new TimerTask() {
-          @Override
-          public void run() {
-            if (!overrideAutoDisable && !isMoving()) {
-              disable();
-            }
-            synchronized (moveToBlocked) {
-              moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
-            }
-          }
-        }, (long) delayBeforeDisable);
+        scheduleDisableTimer();
       } else {
         synchronized (moveToBlocked) {
           moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
@@ -642,6 +624,30 @@ public class Servo extends Service implements ServoControl {
       }
     }
     broadcastState();
+  }
+
+  private synchronized void scheduleDisableTimer() {
+    log.info("Schedule Disable Timer called");
+    int delayBeforeDisable = disableDelayNoVelocity;
+    if (velocity > -1) {
+      delayBeforeDisable = disableDelay;
+    }
+    if (autoDisableTimer != null) {
+      autoDisableTimer.cancel();
+      autoDisableTimer = null;
+    }
+    autoDisableTimer = new Timer();
+    autoDisableTimer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        if (!overrideAutoDisable && !isMoving()) {
+          disable();
+        }
+        synchronized (moveToBlocked) {
+          moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
+        }
+      }
+    }, (long) delayBeforeDisable);
   }
 
   public Double publishServoEvent(Double position) {
