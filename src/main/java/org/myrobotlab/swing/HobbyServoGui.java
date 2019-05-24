@@ -817,8 +817,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       LoggingFactory.init(Level.INFO);
       log.info("{}", Serial.getPorts());
       Platform.setVirtual(false);
-      String port = "COM9";
-      int pin = 5;
+      String port = "COM7";
+      int pin = 22;
       boolean useHobbyServo = true;
 
       // Runtime.start("webgui", "WebGui");
@@ -856,14 +856,16 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // servo.setPosition(90.0);
       log.info("rest is {}", servo.getRest());
       // servo.save();
-      servo.setSpeed(2.0);
+      
       // servo.setPin(8);
       servo.attach(mega);
       // servo.attach(encoder);
-      
+      servo.moveTo(10.3);
+      servo.moveTo(110.3);
       servo.moveToBlocking(113.0);
-      servo.moveTo(114.0);
-      Service.sleep(500);
+      servo.setSpeed(2.0);
+      servo.moveTo(140.0);
+      // Service.sleep(500);
       // servo.moveTo(90.0);
       // Service.sleep(1000);
       // String python = LangUtils.toPython();

@@ -859,6 +859,16 @@ public class Servo extends Service implements ServoControl {
     this.pin = pin;
     attach(controller);
   }
+  
+  public void attach(String controller, String pin, double pos) throws Exception {
+    log.info("Servo Attach called. {} {} {}", controller, pin, pos);
+    this.pin = Integer.parseInt(pin);
+    this.targetPos = pos;
+    // need to look up the controller by name
+    ServoController cont = (ServoController) Runtime.getService(controller);
+    attach(cont);
+  }
+
 
   public void attach(String controller, int pin, double pos) throws Exception {
     log.info("Servo Attach called. {} {} {}", controller, pin, pos);
