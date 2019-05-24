@@ -150,7 +150,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * want to change it or possibly the platform does not support it. When it is
    * null - we will let MRL figure out what is best.
    */
-  String hardwareLibrary = null;
+  static String hardwareLibrary = null;
 
   transient OutputStream recordRx = null;
   transient OutputStream recordTx = null;
@@ -613,7 +613,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     broadcastState();
   }
 
-  public String getHardwareLibrary() {
+  static public String getHardwareLibrary() {
     // if user has forced a specific library
     // use it - customer is always right !!!
     if (hardwareLibrary != null) {
@@ -644,6 +644,37 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public String getPortName() {
     return portName;
   }
+  
+  static public List<String> listPorts(){
+    // all current ports
+    portNames.addAll(ports.keySet());
+
+    // plus hardware ports
+    SerialControl portSource = getPortSource();
+    if (portSource != null) {
+      List<String> osPortNames = portSource.getPortNames();
+      for (int i = 0; i < osPortNames.size(); ++i) {
+        portNames.add(osPortNames.get(i));
+      }
+    }
+    List<String> ports = new ArrayList<String>(portNames);
+    log.info("ports: {}", Arrays.toString(ports.toArray()));
+    return ports;
+  }
+  
+  static public String getPorts() {
+    StringBuffer sb = new StringBuffer("[");
+    List<String> ports = listPorts();
+    for (int i = 0; i < ports.size(); ++i) {
+      sb.append("\"" + ports.get(i) + "\"");
+      if (i != ports.size() -1) {
+        sb.append(",");
+      }
+    }
+    sb.append("]");
+    log.info("ports: {}", sb);
+    return sb.toString();
+  }
 
   /**
    * "all" currently known ports - if something is missing refresh ports should
@@ -672,7 +703,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return ports;
   }
   
-  SerialControl getPortSource() {
+  static SerialControl getPortSource() {
     try {
       hardwareLibrary = getHardwareLibrary();
       log.info("loading class: {}", hardwareLibrary);

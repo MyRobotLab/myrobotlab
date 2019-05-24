@@ -66,6 +66,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.HobbyServo;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -814,7 +815,11 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
     try {
 
       LoggingFactory.init(Level.INFO);
+      log.info("{}", Serial.getPorts());
       Platform.setVirtual(false);
+      String port = "COM9";
+      int pin = 5;
+      boolean useHobbyServo = true;
 
       // Runtime.start("webgui", "WebGui");
       SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
@@ -824,9 +829,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // Runtime.getInstance().startPeers();
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-
       ServoControl servo = null;
-      boolean useHobbyServo = false;
 
       if (useHobbyServo) {
         servo = (ServoControl) Runtime.start("hobbyservo", "HobbyServo");
@@ -846,10 +849,10 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // mega.getBoardTypes();
       // mega.setBoardMega();
       // mega.setBoardUno();
-      mega.connect("COM9");
+      mega.connect(port);
       
       // servo.load();
-      servo.setPin(13);
+      servo.setPin(pin);
       // servo.setPosition(90.0);
       log.info("rest is {}", servo.getRest());
       // servo.save();

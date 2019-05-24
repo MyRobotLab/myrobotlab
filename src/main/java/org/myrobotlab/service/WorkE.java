@@ -28,8 +28,9 @@ public class WorkE extends Service implements StatusListener {
   public final static Logger log = LoggerFactory.getLogger(WorkE.class);
   // peer names
   final public static String MOTOR_LEFT = "motorLeft";
-
+  
   final public static String MOTOR_RIGHT = "motorRight";
+  
   private static final long serialVersionUID = 1L;
 
   /**
@@ -64,7 +65,8 @@ public class WorkE extends Service implements StatusListener {
     meta.addPeer("flow ", "OpenCV", "computer vision");// webcam spout
 
     // meta.addPeer("speech ", "MarySpeech", "speech");
-    meta.addPeer("speech ", "NaturalReaderSpeech", "speech");
+    // meta.addPeer("speech ", "NaturalReaderSpeech", "speech");
+    meta.addPeer("speech ", "Polly", "speech");
 
     meta.addPeer("recognizer ", "WebkitSpeechRecognition", "recognizer");
     meta.addPeer("brain", "ProgramAB", "recognizer");
@@ -78,18 +80,14 @@ public class WorkE extends Service implements StatusListener {
 
   // joystick to motor axis defaults
   String axisLeft = "y";
-
   String axisRight = "rz";
+  
   private transient ProgramAB brain = null;
 
   private transient AbstractMotorController controller = null;
   private transient OpenCV cv = null;
   private transient ImageDisplay display = null;
-  OpenCVFilterLKOpticalTrack featureFilter = null;// new
-  // OpenCVFilterLKOpticalTrack("flow");
   private transient OpenCV flow = null;
-  // peers references
-  // <pre>
   private transient Joystick joystick = null;
   // joystick controller default
   String joystickControllerName = "Rumble";
@@ -124,7 +122,6 @@ public class WorkE extends Service implements StatusListener {
   private transient Serial uart = null;
 
   final List<Status> lastErrors = new ArrayList<Status>();
-  // </pre>
 
   public WorkE(String n) {
     super(n);
@@ -249,7 +246,7 @@ public class WorkE extends Service implements StatusListener {
 
     speak("opening eye");
     capture();
-    startFlow();
+    // startFlow();
     sleep(1000);
 
     speak("connecting serial port");
@@ -558,9 +555,6 @@ public class WorkE extends Service implements StatusListener {
 
     flow.capture();
 
-    // flow = (OpenCV)startPeer("flow");
-    // featureFilter = new OpenCVFilterLKOpticalTrack("flow");
-    // flow.addFilter(featureFilter);
     log.info("here");
   }
 
