@@ -71,7 +71,7 @@ import org.slf4j.Logger;
  *         outputY - is the values sent to the firmware, and should not
  *         necessarily be confused with the inputX which is the input values
  *         sent to the servo
- *         
+ * 
  *         FIXME - inherit from AbstractMotor ..
  * 
  */
@@ -396,6 +396,7 @@ public class Servo extends Service implements ServoControl {
   public void enable(String pin) {
     enable(Integer.valueOf(pin));
   }
+
   /**
    * Enabling PWM for the Servo. Equivalent to Arduino's Servo.attach(pin). It
    * energizes the servo sending pulses to maintain its current position.
@@ -560,7 +561,7 @@ public class Servo extends Service implements ServoControl {
 
     lastActivityTime = System.currentTimeMillis();
 
-    if (lastPos != pos || !isEventsEnabled) { 
+    if (lastPos != pos || !isEventsEnabled) {
       // take care if servo will disable soon
       if (autoDisableTimer != null) {
         autoDisableTimer.cancel();
@@ -581,7 +582,7 @@ public class Servo extends Service implements ServoControl {
       log.info("No effect on moveToBlocking if velocity == -1");
     }
     if (!isEventsEnabled) {
-      this.addServoEventListener((NameProvider)this);
+      this.addServoEventListener((NameProvider) this);
     }
     targetPos = pos;
     this.moveTo(pos);
@@ -860,14 +861,14 @@ public class Servo extends Service implements ServoControl {
   }
 
   public void attach(String controller, int pin, double pos) throws Exception {
-    log.info("Servo Attach called. {} {} {}", controller , pin, pos);
+    log.info("Servo Attach called. {} {} {}", controller, pin, pos);
     this.pin = pin;
     this.targetPos = pos;
     // need to look up the controller by name
-    ServoController cont = (ServoController)Runtime.getService(controller);    
+    ServoController cont = (ServoController) Runtime.getService(controller);
     attach(cont);
   }
-  
+
   @Deprecated
   public void attach(ServoController controller, int pin, double pos) throws Exception {
     log.info("Servo Controller Attach pin pos.");
@@ -986,7 +987,7 @@ public class Servo extends Service implements ServoControl {
   public void enableAutoEnable(boolean autoEnable) {
     this.autoEnable = autoEnable;
   }
-  
+
   @Deprecated
   public void enableAutoDisable(boolean autoDisable) {
     setAutoDisable(autoDisable);
@@ -1095,50 +1096,46 @@ public class Servo extends Service implements ServoControl {
    */
   public void sync(ServoControl sc) {
     this.addServoEventListener(this);
-    ((Servo)sc).addServoEventListener((NameProvider)sc);
+    ((Servo) sc).addServoEventListener((NameProvider) sc);
     subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
   public void unsync(ServoControl sc) {
     // remove
     this.removeServoEventListener(this);
-    ((Servo)sc).removeServoEventListener((NameProvider)sc);
+    ((Servo) sc).removeServoEventListener((NameProvider) sc);
 
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
   public static void main(String[] args) throws InterruptedException {
-    String arduinoPort = "COM5";
-    LoggingFactory.init(Level.INFO);
-    VirtualArduino virtualArduino = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
-    Runtime.start("python", "Python");
-
     try {
-      virtualArduino.connect(arduinoPort);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+      String arduinoPort = "COM9";
+      LoggingFactory.init(Level.INFO);
 
-    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-    arduino.connect(arduinoPort);
-    Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
-    adafruit16CServoDriver.attach(arduino, "0", "0x40");
+      Runtime.start("gui", "SwingGui");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      
+      arduino.connect(arduinoPort);
+      // Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
+      // adafruit16CServoDriver.attach(arduino, "0", "0x40");
+      
+      servo.attach(arduino.getName(), 5, 120.0);
+      // servo.attach(adafruit16CServoDriver, 1);
 
-    Runtime.start("gui", "SwingGui");
-    Servo servo = (Servo) Runtime.start("servo", "Servo");
-    try {
-      servo.attach(adafruit16CServoDriver, 1);
+      servo.setVelocity(20);
+      log.info("It should take some time..");
+      servo.moveTo(5.0);
+      servo.moveTo(175.0);
+      servo.moveToBlocking(0.0);
+      servo.moveToBlocking(180.0);
+      servo.moveToBlocking(0.0);
+      log.info("Right?");
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    servo.setVelocity(20);
-    log.info("It should take some time..");
-    servo.moveToBlocking(0.0);
-    servo.moveToBlocking(180.0);
-    servo.moveToBlocking(0.0);
-    log.info("Right?");
   }
 
   // pasted from inmoov1
@@ -1225,25 +1222,22 @@ public class Servo extends Service implements ServoControl {
     detach();
   }
 
-
-
   @Override
   public void onEncoderData(EncoderData data) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void attach(ServoDataListener listener) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void detach(ServoDataListener listener) {
     // TODO Auto-generated method stub
-  
-    
+
   }
 
   @Override
@@ -1263,7 +1257,7 @@ public class Servo extends Service implements ServoControl {
     // TODO Auto-generated method stub
     Mapper m = new Mapper(minX, maxX, minY, maxY);
     this.mapper = m;
-    
+
   }
 
   @Override
@@ -1325,7 +1319,7 @@ public class Servo extends Service implements ServoControl {
   public void setVelocity(Double speed) {
     // TODO Auto-generated method stub
     this.velocity = velocity;
-    
+
   }
 
   @Override
@@ -1343,7 +1337,7 @@ public class Servo extends Service implements ServoControl {
   @Override
   public void setPosition(Double pos) {
     moveTo(pos);
-    return ;
+    return;
   }
 
   @Override
