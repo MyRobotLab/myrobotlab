@@ -497,7 +497,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
           log.info("Servo Attach Button Pressed.");
           if (attachButton.getText().equals("attach")) {
             log.info("Attaching Servo from Gui");
-            send("attach", controller.getSelectedItem(), (int) pinList.getSelectedItem(), (double)slider.getValue());
+            send("attach", controller.getSelectedItem(), (String) pinList.getSelectedItem(), (double)slider.getValue());
           } else {
             log.info("Detaching Servo from Gui");
             send("detach", controller.getSelectedItem());
