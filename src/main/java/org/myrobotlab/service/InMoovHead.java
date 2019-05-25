@@ -39,7 +39,10 @@ public class InMoovHead extends Service {
     rothead = (ServoControl) createPeer("rothead");
     neck = (ServoControl) createPeer("neck");
     rollNeck = (ServoControl) createPeer("rollNeck");
+    initServoDefaults();
+  }
 
+  private void initServoDefaults() {
     neck.setMinMax((double)20, (double)160);
     rollNeck.setMinMax((double)20, (double)160);
     rothead.setMinMax((double)30, (double)150);
@@ -48,14 +51,19 @@ public class InMoovHead extends Service {
     eyeX.setMinMax((double)60, (double)100);
     eyeY.setMinMax((double)50, (double)100);
     neck.setRest(90.0);
+    neck.setPosition(90.0);
     rollNeck.setRest(90.0);
+    rollNeck.setPosition(90.0);
     rothead.setRest(90.0);
+    rothead.setPosition(90.0);
     jaw.setRest(10.0);
+    jaw.setPosition(10.0);
     eyeX.setRest(80.0);
+    eyeX.setPosition(80.0);
     eyeY.setRest(90.0);
+    eyeY.setPosition(90.0);
 
     setVelocity(45.0, 45.0, -1.0, -1.0, -1.0, 45.0);
-
   }
 
   /*

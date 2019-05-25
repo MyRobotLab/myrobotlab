@@ -199,11 +199,18 @@ public class InMoovHand extends Service implements LeapDataListener {
     // TOOD: what are the initial velocities?
     // Initial rest positions?    
     thumb.setRest(2.0);
+    thumb.setPosition(2.0);
     index.setRest(2.0);
+    index.setPosition(2.0);
     majeure.setRest(2.0);
+    majeure.setPosition(2.0);
     ringFinger.setRest(2.0);
+    ringFinger.setPosition(2.0);
     pinky.setRest(2.0);
+    pinky.setPosition(2.0);
     wrist.setRest(90.0);
+    wrist.setPosition(90.0);
+    
     setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
   }
 
