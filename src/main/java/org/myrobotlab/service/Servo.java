@@ -145,12 +145,14 @@ public class Servo extends Service implements ServoControl {
         detach();
       }
 
-      targetOutput = getTargetOutput();
-
+      //targetOutput = getTargetOutput();
+      // On attach we will start at the rest position (not a default target position of 90?!
+      targetOutput = getRest();
+      currentPosInput = getRest();
       // set the controller
       controller = sc;
       controllerName = sc.getName();
-
+      log.info("Servo {} Attaching .. targetOutput {}", getName(), targetOutput);
       // now attach the attachable the attachable better have
       // isAttach(ServoControl) to prevent an infinite loop
       // if attachable.attach(this) is not successful, this should throw
@@ -1060,6 +1062,7 @@ public class Servo extends Service implements ServoControl {
 
   @Deprecated
   public void onServoEvent(Integer eventType, double currentPos) {
+    log.info("On servo event called with a current pos {}", currentPos);
     currentPosInput = mapper.calcInput(currentPos);
     if (isIKEventEnabled) {
       ServoEventData data = new ServoEventData();
@@ -1352,6 +1355,8 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public void setPosition(Double pos) {
+    this.currentPosInput = pos;
+    this.targetPos = pos;
     moveTo(pos);
     return;
   }

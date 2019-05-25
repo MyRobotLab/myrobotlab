@@ -90,8 +90,11 @@ public class InMoovTorso extends Service {
     midStom.setMinMax(0.0, 180.0);
     lowStom.setMinMax(0.0, 180.0);
     topStom.setRest(90.0);
+    topStom.setPosition(90.0);
     midStom.setRest(90.0);
+    midStom.setPosition(90.0);
     lowStom.setRest(90.0);
+    lowStom.setPosition(90.0);
     
     setVelocity(5.0, 5.0, 5.0);
     
