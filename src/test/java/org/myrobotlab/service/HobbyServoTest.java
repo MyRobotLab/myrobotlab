@@ -5,11 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.List;
 
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.test.AbstractTest;
 
 /**
@@ -22,6 +20,7 @@ import org.myrobotlab.test.AbstractTest;
  * 
  *         FIXME - test attach and isAttached on every controller
  */
+@Ignore
 public class HobbyServoTest extends AbstractTest {
 
   static final String port01 = "COM9";
