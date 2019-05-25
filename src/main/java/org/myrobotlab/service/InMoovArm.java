@@ -345,8 +345,18 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   @Override
   public void startService() {
     super.startService();    
-
-    // arduino.startService();
+    if (bicep == null) {
+      bicep = (ServoControl)startPeer("bicep");
+    }
+    if (rotate == null) {
+      rotate = (ServoControl)startPeer("rotate");
+    }
+    if (shoulder == null) {
+      shoulder = (ServoControl)startPeer("shoulder");
+    }
+    if (omoplate == null) {
+      omoplate = (ServoControl)startPeer("omoplate");
+    }   
   }
 
   public void test() {

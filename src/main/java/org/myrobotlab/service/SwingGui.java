@@ -36,6 +36,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -78,6 +79,7 @@ import org.myrobotlab.swing.widget.AboutDialog;
 import org.myrobotlab.swing.widget.Console;
 import org.myrobotlab.swing.widget.DockableTab;
 import org.myrobotlab.swing.widget.DockableTabPane;
+import org.myrobotlab.swing.widget.FileUtil;
 import org.slf4j.Logger;
 
 import com.mxgraph.model.mxCell;
@@ -161,8 +163,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * used for "this" reference in anonymous swing utilities calls
    */
   transient SwingGui self;
-  transient private JMenu save;
-  transient private JMenu load;
+  transient private JMenu export;
+  transient private JMenu import_;
   transient private JMenu refresh;
 
   static public void attachJavaConsole() {
@@ -318,32 +320,36 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         }
       }
       info("loaded all services");
-    } else if ("save".equals(cmd)) {
+    } else if ("export".equals(cmd)) {
       // get current focus
       String tabName = getSelected();
       ServiceInterface si = Runtime.getService(tabName);
       if (si == null) {
         log.info("%s is not a service - please select the service to save", tabName);
-      } else if (si.isLocal()) {
-        si.save();
-      } else {
-        send(tabName, "save");
+        return;
       }
-      info("saved %s", tabName);
-    } else if ("save all".equals(cmd)) {
-      String[] services = Runtime.getServiceNames();
-      for (String service : services) {
-        info("saving %s", service);
-        ServiceInterface si = Runtime.getService(service);
-        if (si == null) {
-          log.info("%s is not a service - please select the service to save", service);
-        } else if (si.isLocal()) {
-          si.save();
-        } else {
-          send(service, "save");
+      // send(tabName, "save"); save has just become serialize
+      String newFile = FileUtil.saveAsFileName(getFrame(), String.format("%s.py", tabName));
+      try {
+        if (newFile != null) {
+          Runtime.export(newFile, newFile);
         }
+      } catch (IOException e1) {
+        log.error("could not export {} to {}", tabName, newFile);
       }
-      info("saved all services");
+      info("exported %s", tabName);
+    } else if ("export all".equals(cmd)) {
+
+      String newFile = FileUtil.saveAsFileName(getFrame(), "export.py");
+      try {
+        if (newFile != null) {
+          Runtime.exportAll(newFile);
+        }
+      } catch (IOException e1) {
+        log.error("could not export all to {}", newFile);
+      }
+
+      info("saved all exported");
     } else {
       log.info("unknown command {}", cmd);
     }
@@ -492,24 +498,24 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     menuBar.add(search);
     menuBar.add(Box.createHorizontalGlue());
 
-    save = new JMenu("save");
-    JMenuItem mi = new JMenuItem("save");
+    export = new JMenu("export");
+    JMenuItem mi = new JMenuItem("export");
     mi.addActionListener(this);
-    save.add(mi);
-    mi = new JMenuItem("save all");
+    export.add(mi);
+    mi = new JMenuItem("export all");
     mi.addActionListener(this);
-    save.add(mi);
+    export.add(mi);
 
-    menuBar.add(save);
+    menuBar.add(export);
 
-    load = new JMenu("load");
-    mi = new JMenuItem("load");
+    import_ = new JMenu("import");
+    mi = new JMenuItem("import");
     mi.addActionListener(this);
-    load.add(mi);
-    mi = new JMenuItem("load all");
+    import_.add(mi);
+    mi = new JMenuItem("import all");
     mi.addActionListener(this);
-    load.add(mi);
-    menuBar.add(load);
+    import_.add(mi);
+    menuBar.add(import_);
 
     refresh = new JMenu("refresh");
     mi = new JMenuItem("refresh");

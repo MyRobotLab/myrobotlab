@@ -21,7 +21,7 @@ import javax.swing.event.ChangeListener;
 import org.myrobotlab.kinematics.Pose;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Servo;
+
 import org.myrobotlab.service.ServoMixer;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -168,13 +168,13 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       // this is an update to the position of the slider.
       log.info("{} moveTo {}", slider.getName(), slider.getValue());
       // At this point we need to get the servo and move it to the new value
-      Servo s = (Servo) Runtime.getService(slider.getName());
+      ServoControl s = (ServoControl) Runtime.getService(slider.getName());
       if (s.isAttached() && s.isEnabled()) {
         // TODO: how to handle the autoenable/disable mojo..
         s.moveTo((double)slider.getValue());
       } else {
         // servo isn't attached don't bother
-        log.info("Servo not attached or enabled.");
+        log.info("ServoControl not attached or enabled.");
         s.moveTo((double)slider.getValue());
       }
     }

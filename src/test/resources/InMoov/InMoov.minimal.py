@@ -1,7 +1,7 @@
 #file : InMoov3.minimal.py
 
 # Change to the port that you use (Update this to your actual com ports.
-rightPort = "COM99"
+rightPort = "COM100"
 
 
 # this will run with versions of MRL above 1695

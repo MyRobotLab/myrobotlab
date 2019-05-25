@@ -485,7 +485,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.info("controller already attached");
       return;
     }
-    SerialRelay relay = (SerialRelay) Runtime.createAndStart("relay", "SerialRelay");
+    SerialRelay relay = (SerialRelay) Runtime.start("relay", "SerialRelay");
     switch (serialPort) {
       case "Serial1":
         controllerAttachAs = MRL_IO_SERIAL_1;
@@ -562,9 +562,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     initSerial();
     try {
 
-      if (isVirtual()) {
-        virtual.connect(port);
-      }
       // FIXME - GroG asks, who put the try here - shouldn't it throw if
       // we
       // can't connect
@@ -572,6 +569,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       if (isConnected() && port.equals(serial.getPortName())) {
         log.info("already connected to port {}", port);
         return;
+      }
+      
+
+      if (isVirtual()) { // FIXME - might need some work to be re-entrant ?
+        virtual.connect(port);
       }
 
       serial.connect(port, rate, databits, stopbits, parity);
@@ -2198,6 +2200,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
     // cache value
     pinDef.setValue(value);
+  }
+  
+  public Map<String, DeviceMapping> getDeviceList(){
+    return deviceList;
   }
 
   public static void main(String[] args) {

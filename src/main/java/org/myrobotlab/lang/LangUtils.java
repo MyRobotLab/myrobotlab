@@ -3,6 +3,7 @@ package org.myrobotlab.lang;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,13 +39,22 @@ public class LangUtils {
     return CodecUtils.getSafeReferenceName(si.getName());
   }
   
+  static public String safeRefName(String si) {
+    return CodecUtils.getSafeReferenceName(si);
+  }
+  
+  static public String toPython(String names) throws IOException {
+    String[] nameFilters = names.split(",");
+    return toPython(nameFilters, null, null);
+  }
+  
   static public String toPython() throws IOException {
-    return toPython("export.py");
+    return toPython(null, null, null);
   }
 
   // TODO ???? - make meta ?? seems meta is already registery and methods &
   // reflection ..
-  static public String toPython(String filename) throws IOException {
+  static public String toPython(String[] nameFilters, String[] typeFilters, Boolean includeRuntime) throws IOException {
     StringBuilder sb = new StringBuilder();
 
     // if use date ..
@@ -57,7 +67,7 @@ public class LangUtils {
     sb.append("# This file can be generated at any time using Runtime.save(filename)\n");
     sb.append("# More information @ http://myrobotlab.org and https://github.com/myrobotlab\n");
     sb.append(String.format("# version %s\n", Runtime.getVersion()));
-    sb.append(String.format("# file %s\n", filename));
+    // sb.append(String.format("# file %s\n", filename));
     sb.append(String.format("# generated %s\n\n", (new Date()).toString()));
 
     sb.append("##############################################################\n");
@@ -65,35 +75,39 @@ public class LangUtils {
     sb.append("import org.myrobotlab.framework.Platform as Platform\n");
 
     // from current running system - vs something uncreated passed in ....
-    List<ServiceInterface> services = Runtime.getServices();
-    
-    /*
-    sb.append("##############################################################\n");
-    sb.append("## creating services ####\n");
-    sb.append("# Platform virtual state - this virtual setting will attempt to switch all services \n");
-    sb.append("# which support virtual hardware to start in a \"virtual\" state where no hardware is needed\n\n");
-    
-    Platform platform = Platform.getLocalInstance();
-    sb.append(String.format("Platform.setVirtual(%s)\n", (platform.isVirtual()?"True":"False")));
-    
-    // from current running system - vs something uncreated passed in ....
-    List<ServiceInterface> services = Runtime.getServices();
-    
-    // the creation of all services - with peers in comments
-    for (ServiceInterface si : services) {
-      if (si.isRuntime()) {
-        continue;
+    List<ServiceInterface> allServices = Runtime.getServices();
+    List<ServiceInterface> services = new ArrayList<>();
+    if (nameFilters != null) {
+      for (String filter : nameFilters) {
+        for (ServiceInterface service: allServices) {
+          if (service.getName().equals(filter)) {
+            services.add(service);
+          }
+        }
       }
-      sb.append(String.format("%s = Runtime.create('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
-      // do peers with comments
-      // top level peers - others commented out
     }
-    */
     
-    sb.append("\n");
-
+    if (typeFilters != null) {
+      for (String filter : typeFilters) {
+        for (ServiceInterface service: allServices) {
+          if (service.getSimpleName().equals(filter)) {
+            services.add(service);
+          }
+        }
+      }
+    }
+    
+    if (nameFilters == null && typeFilters == null) {
+      // no filters 
+      services = allServices;
+    }
+    
+    if (includeRuntime != null && includeRuntime) {
+      services.add(Runtime.getInstance());
+    }
+    
     sb.append("##############################################################\n");
-    sb.append("## creating and starting services ####\n");
+    sb.append(String.format("## creating and starting %d services ####\n", services.size()));
     sb.append("# Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to\n");
     sb.append("# substitute peers, types or references of other sub services before the service is \"started\"\n");
     sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov') # this will \"create\" the service and config could be manipulated before starting \n");
@@ -150,10 +164,6 @@ public class LangUtils {
     // run
 
     //
-    
-    if (filename != null) {
-      Files.write(Paths.get(filename), sb.toString().getBytes());
-    }
 
     return sb.toString();
 

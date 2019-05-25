@@ -167,8 +167,8 @@ public class AbstractTest {
     }
 
     if (releaseServices.size() > 0) {
-      log.warn("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
-      log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
+      log.info("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
+      log.info("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
       sleep(coolDownTimeMs);
     }
 
@@ -179,7 +179,7 @@ public class AbstractTest {
     for (Thread thread : threadSetEnd) {
       if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
-          log.warn("interrupting thread {}", thread.getName());
+          log.info("interrupting thread {}", thread.getName());
           thread.interrupt();
           /*
            * if (useDeprecatedThreadStop) { thread.stop(); }
@@ -192,7 +192,7 @@ public class AbstractTest {
       }
     }
     if (threadsRemaining.size() > 0) {
-      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+      log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
     log.info("finished the killing ...");
   }

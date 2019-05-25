@@ -554,6 +554,30 @@ public class InMoovHand extends Service implements LeapDataListener {
     //    if (controller == null) {
     //      controller = (ServoController) startPeer("arduino");
     //    }
+    
+    if (thumb == null) {
+      thumb = (ServoControl)startPeer("thumb");
+    }
+    if (index == null) {
+      index = (ServoControl)startPeer("index");
+    }
+    if (majeure == null) {
+      majeure = (ServoControl)startPeer("majeure");
+    }
+    if (ringFinger == null) {
+      ringFinger = (ServoControl)startPeer("ringFinger");
+    }
+    if (pinky == null) {
+      pinky = (ServoControl)startPeer("pinky");
+    }
+    if (wrist == null) {
+      wrist = (ServoControl)startPeer("wrist");
+    }
+    /*
+    if (controller == null) {
+      controller = (ServoController) createPeer("arduino");
+    }
+    */
   }
 
   public void stopLeapTracking() {

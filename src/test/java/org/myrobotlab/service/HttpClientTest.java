@@ -56,8 +56,8 @@ public class HttpClientTest
       // InstallCert.main(new String[] { "searx.laquadrature.net:443" });
 
       // http.installCert("https://searx.laquadrature.net");
-      String json = http.get("https://searx.laquadrature.net/?q=cat&format=json");
-      log.info(json);
+      // String json = http.get("https://searx.laquadrature.net/?q=cat&format=json");
+      // log.info(json);
 
       http.detach(catcher);
       // FIXME test if successfully detached
