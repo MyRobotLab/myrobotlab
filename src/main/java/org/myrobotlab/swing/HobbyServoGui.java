@@ -871,7 +871,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // String python = LangUtils.toPython();
       // Files.write(Paths.get("export.py"), python.toString().getBytes());
       
-      Runtime.saveAs("export.py");
+      Runtime.exportAll("export.py");
 
       // FIXME - junit for testing return values of moveTo when a blocking call
       // is in progress

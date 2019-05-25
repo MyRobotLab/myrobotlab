@@ -2683,17 +2683,15 @@ public class Runtime extends Service implements MessageListener {
     }
   }
 
-  public static String saveAs(String filename) throws IOException {
-    return saveAs(filename, "python");
+  public static void export(String filename, String names) throws IOException {
+    String python = LangUtils.toPython(names);
+    Files.write(Paths.get(filename), python.toString().getBytes());
   }
 
-  public static String saveAs(String filename, String language) throws IOException {
+  public static void exportAll(String filename) throws IOException {
     // currently only support python - maybe in future we'll support js too
     String python = LangUtils.toPython();
-    Files.write(Paths.get(filename), python.toString().getBytes());
-    return python;
+    Files.write(Paths.get(filename), python.toString().getBytes());    
   }
-
-  // public String
 
 }

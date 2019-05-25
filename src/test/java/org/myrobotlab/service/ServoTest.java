@@ -188,7 +188,7 @@ public class ServoTest extends AbstractTest {
   public void testServo() throws Exception {
     // this basic test will create a servo and attach it to an arduino.
     // then detach
-    Platform.setVirtual(false);
+    Platform.setVirtual(true);
     
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
@@ -276,15 +276,17 @@ public class ServoTest extends AbstractTest {
     Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
     servo01.detach();
     servo01.setPin(pin);
+    
     arduino01.attach(servo01);
     sleep(100);
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     servo01.setAutoDisable(false);
+    servo01.setVelocity(10.0);
     assertFalse("setting autoDisable false", servo01.getAutoDisable());
     servo01.setAutoDisable(true);
     assertTrue("setting autoDisable true", servo01.getAutoDisable());
     servo01.moveTo(130.0);
-    sleep(1500); // waiting for disable
+    sleep(1200); // waiting for disable
     assertFalse("servo should have been disabled", servo01.isEnabled());
 
   }

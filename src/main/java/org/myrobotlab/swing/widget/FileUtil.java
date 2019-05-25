@@ -75,6 +75,23 @@ public class FileUtil {
       return writeFile(data, filename);
     }
   }
+  
+  
+  static public String saveAsFileName(JFrame frame, String filename) {
+    FileDialog fd = new FileDialog(frame, "Save File", FileDialog.SAVE);
+    fd.setFile(filename);
+    fd.setVisible(true);
+    String selectedFilename = fd.getFile();
+    if (selectedFilename != null) {
+      filename = fd.getDirectory() + selectedFilename; // new selected
+      // file
+    } else {
+      setLastStatus("canceled file save");
+      return null;
+    }
+    return filename;
+  }
+
 
   static public String saveAs(JFrame frame, String data, String filename) {
     FileDialog fd = new FileDialog(frame, "Save File", FileDialog.SAVE);

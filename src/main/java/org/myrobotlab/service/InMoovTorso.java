@@ -59,6 +59,23 @@ public class InMoovTorso extends Service {
     //    lowStom = (ServoControl) createPeer("lowStom");
     //    // controller = (ServoController) createPeer("arduino");
   }
+  
+  public void startService() {
+    if (topStom == null) {
+      topStom = (ServoControl) createPeer("topStom");
+    }
+    if (midStom == null) {
+      midStom = (ServoControl) createPeer("midStom");
+    }
+    if (lowStom == null) {
+      lowStom = (ServoControl) createPeer("lowStom");
+    }
+    /*
+    if (controller == null) {
+      controller = (ServoController) createPeer("arduino");
+    }
+    */
+  }
 
   private void initServoDefaults() {
     

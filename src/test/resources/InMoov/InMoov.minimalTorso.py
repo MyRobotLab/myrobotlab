@@ -14,8 +14,7 @@ webgui.startService()
 # As an alternative you can use the line below to show all services in the browser. In that case you should comment out all lines above that starts with webgui. 
 # webgui = Runtime.createAndStart("webgui","WebGui")
 
-leftPort = "COM99"  #modify port according to your board
-torsoPort = "COM100"
+torsoPort = "COM99"
 
 #to tweak the default voice
 Voice="cmu-slt-hsmm" # Default female for MarySpeech 

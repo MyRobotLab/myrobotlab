@@ -17,7 +17,7 @@ webgui.startService()
 # webgui = Runtime.createAndStart("webgui","WebGui")
 
 # Change to the port that you use
-rightPort = "COM99"
+rightPort = "COM100"
 
 #to tweak the default voice
 Voice="cmu-slt-hsmm" # Default female for MarySpeech 

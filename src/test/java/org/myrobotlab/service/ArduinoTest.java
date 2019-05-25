@@ -418,7 +418,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     if (arduino01.isVirtual()) {
       sleep(100);
       assertTrue(mrlServo.pin == Integer.parseInt(servoPin01 + 1));
-      assertTrue(mrlServo.pin + ""== servo.getPin());
+      assertTrue((mrlServo.pin + "").equals(servo.getPin()));
     }
 
     double velocity = 50;

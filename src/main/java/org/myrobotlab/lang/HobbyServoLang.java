@@ -33,12 +33,12 @@ public class HobbyServoLang extends LangUtils {
       String controller = s.getControllerName();
       sb.append(name + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
     }*/
-    
+    /*  the dependencies on the controller are higher - so let it attach to this servo 
     if (s.getControllerName() != null) {
       String controller = s.getControllerName();
       sb.append(name + ".attach(\"" + controller + "\")\n");
     }
-    
+    */
     if (s.getAutoDisable()) {
       sb.append(name + ".setAutoDisable(True)\n");
     }
