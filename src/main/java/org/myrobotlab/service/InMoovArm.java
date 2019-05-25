@@ -149,9 +149,14 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     omoplate.setMinMax(10.0, 80.0);
 
     bicep.setRest(5.0);
+    bicep.setPosition(5.0);
     rotate.setRest(90.0);
+    rotate.setPosition(90.0);
     shoulder.setRest(30.0);
+    shoulder.setPosition(30.0);
     omoplate.setRest(10.0);
+    omoplate.setPosition(10.0);
+    
 
     setVelocity(20.0, 20.0, 20.0, 20.0);
   }
