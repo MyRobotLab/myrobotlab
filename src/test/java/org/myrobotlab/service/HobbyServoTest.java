@@ -20,13 +20,13 @@ import org.myrobotlab.test.AbstractTest;
  * 
  *         FIXME - test attach and isAttached on every controller
  */
-@Ignore
+
 public class HobbyServoTest extends AbstractTest {
 
   static final String port01 = "COM9";
   Integer pin = 5;
 
-  @Test
+  
   public void testAttach() throws Exception {
     // FIXME - test state change - mrl gets restarted arduino doesn't what
     // happens - how to handle gracefully
