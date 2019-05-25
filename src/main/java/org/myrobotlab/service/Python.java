@@ -174,7 +174,6 @@ public class Python extends Service {
         invoke("publishStatus", Status.success());
         invoke("finishedExecutingScript");
       }
-
     }
   }
 
