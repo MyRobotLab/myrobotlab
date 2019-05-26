@@ -78,7 +78,7 @@ public class ArduinoChaosTest {
     Thread.sleep(1000);
     // TODO : this blows up
     // arduino.servoWrite(servo);
-    servo.moveTo(90);
+    servo.moveTo(90.0);
     Thread.sleep(1000);
     int pos = 90;
     // arduino.publishServoEvent(pos);
@@ -88,7 +88,7 @@ public class ArduinoChaosTest {
     // TODO: why does this blow up
     // arduino.servoWriteMicroseconds(servo);
     Thread.sleep(1000);
-    servo.setSpeed(0);
+    servo.setSpeed(0.0);
     Thread.sleep(1000);
     Thread.sleep(1000);
     arduino.enableBoardInfo(true);
@@ -192,7 +192,7 @@ public class ArduinoChaosTest {
 
       if (testServo) {
         angle++;
-        servo.moveTo(angle % 180);
+        servo.moveTo(angle % 180.0);
       }
     }
 

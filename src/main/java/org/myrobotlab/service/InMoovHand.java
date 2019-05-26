@@ -11,6 +11,7 @@ import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -27,16 +28,24 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovHand.class);
 
+  // default pins if not specified.
+  private static final Integer DEFAULT_THUMB_PIN = 2;
+  private static final Integer DEFAULT_INDEX_PIN = 3;
+  private static final Integer DEFAULT_MAJEURE_PIN = 4;
+  private static final Integer DEFAULT_RINGFINGER_PIN = 5;
+  private static final Integer DEFAULT_PINKY_PIN = 6;
+  private static final Integer DEFAULT_WRIST_PIN = 7;
+  
   /**
    * peer services
    */
   transient public LeapMotion leap;
-  transient public Servo thumb;
-  transient public Servo index;
-  transient public Servo majeure;
-  transient public Servo ringFinger;
-  transient public Servo pinky;
-  transient public Servo wrist;
+  transient public ServoControl thumb;
+  transient public ServoControl index;
+  transient public ServoControl majeure;
+  transient public ServoControl ringFinger;
+  transient public ServoControl pinky;
+  transient public ServoControl wrist;
   transient public ServoController controller;
   private String side;
 
@@ -74,24 +83,6 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public InMoovHand(String n) {
     super(n);
-    thumb = (Servo) createPeer("thumb");
-    index = (Servo) createPeer("index");
-    majeure = (Servo) createPeer("majeure");
-    ringFinger = (Servo) createPeer("ringFinger");
-    pinky = (Servo) createPeer("pinky");
-    wrist = (Servo) createPeer("wrist");
-    // FIXME should interfaces be started here ?
-    // controller = (ServoController) createPeer("arduino");
-
-    thumb.setRest(2);
-    index.setRest(2);
-    majeure.setRest(2);
-    ringFinger.setRest(2);
-    pinky.setRest(2);
-    wrist.setRest(90);
-
-    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
-
   }
 
   /*
@@ -126,7 +117,6 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   @Override
   public void broadcastState() {
-    // notify the gui
     thumb.broadcastState();
     index.broadcastState();
     majeure.broadcastState();
@@ -157,6 +147,10 @@ public class InMoovHand extends Service implements LeapDataListener {
    */
   public boolean connect(String port) throws Exception {
 
+    // justin case we haven't started our peers yet.
+    startPeers();
+    controller = (ServoController)startPeer("arduino");
+    
     if (controller == null) {
       error("controller is invalid");
       return false;
@@ -171,18 +165,53 @@ public class InMoovHand extends Service implements LeapDataListener {
         return false;
       }
     }
-
-    thumb.attach(controller, 2, thumb.getRest(), thumb.getVelocity());
-    index.attach(controller, 3, index.getRest(), index.getVelocity());
-    majeure.attach(controller, 4, majeure.getRest(), majeure.getVelocity());
-    ringFinger.attach(controller, 5, ringFinger.getRest(), ringFinger.getVelocity());
-    pinky.attach(controller, 6, pinky.getRest(), pinky.getVelocity());
-    wrist.attach(controller, 7, wrist.getRest(), wrist.getVelocity());
+    
+    // set defaults for the servos
+    initServoDefaults();
+    
+    
+    thumb.attach(controller);
+    index.attach(controller);
+    majeure.attach(controller);
+    ringFinger.attach(controller);
+    pinky.attach(controller);
+    wrist.attach(controller);
 
     enableAutoEnable(true);
 
     broadcastState();
     return true;
+  }
+
+  private void initServoDefaults() {
+    if (thumb.getPin() == null)
+      thumb.setPin(DEFAULT_THUMB_PIN);
+    if (index.getPin() == null)
+      index.setPin(DEFAULT_INDEX_PIN);
+    if (majeure.getPin() == null)
+      majeure.setPin(DEFAULT_MAJEURE_PIN);
+    if (ringFinger.getPin() == null)
+      ringFinger.setPin(DEFAULT_RINGFINGER_PIN);
+    if (pinky.getPin() == null)
+      pinky.setPin(DEFAULT_PINKY_PIN);
+    if (wrist.getPin() == null)
+        wrist.setPin(DEFAULT_WRIST_PIN);    
+    // TOOD: what are the initial velocities?
+    // Initial rest positions?    
+    thumb.setRest(2.0);
+    thumb.setPosition(2.0);
+    index.setRest(2.0);
+    index.setPosition(2.0);
+    majeure.setRest(2.0);
+    majeure.setPosition(2.0);
+    ringFinger.setRest(2.0);
+    ringFinger.setPosition(2.0);
+    pinky.setRest(2.0);
+    pinky.setPosition(2.0);
+    wrist.setRest(90.0);
+    wrist.setPosition(90.0);
+    
+    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
   }
 
   public void count() {
@@ -249,15 +278,6 @@ public class InMoovHand extends Service implements LeapDataListener {
     wrist.setAutoDisable(param);
   }
 
-  public void setOverrideAutoDisable(Boolean param) {
-    thumb.setOverrideAutoDisable(param);
-    index.setOverrideAutoDisable(param);
-    majeure.setOverrideAutoDisable(param);
-    ringFinger.setOverrideAutoDisable(param);
-    pinky.setOverrideAutoDisable(param);
-    wrist.setOverrideAutoDisable(param);
-  }
-
   public void devilHorns() {
     moveTo(150.0, 0.0, 180.0, 180.0, 0.0, 90.0);
   }
@@ -307,7 +327,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     return attached;
   }
 
-  public void map(int minX, int maxX, int minY, int maxY) {
+  public void map(double minX, double maxX, double minY, double maxY) {
     thumb.map(minX, maxX, minY, maxY);
     index.map(minX, maxX, minY, maxY);
     majeure.map(minX, maxX, minY, maxY);
@@ -410,27 +430,27 @@ public class InMoovHand extends Service implements LeapDataListener {
     // If the hand data came from a valid frame, update the finger postions.
     // move all fingers
     if (index != null && index.isAttached()) {
-      index.moveTo(h.index);
+      index.moveTo((double)h.index);
     } else {
       log.debug("Index finger isn't attached or is null.");
     }
     if (thumb != null && thumb.isAttached()) {
-      thumb.moveTo(h.thumb);
+      thumb.moveTo((double)h.thumb);
     } else {
       log.debug("Thumb isn't attached or is null.");
     }
     if (pinky != null && pinky.isAttached()) {
-      pinky.moveTo(h.pinky);
+      pinky.moveTo((double)h.pinky);
     } else {
       log.debug("Pinky finger isn't attached or is null.");
     }
     if (ringFinger != null && ringFinger.isAttached()) {
-      ringFinger.moveTo(h.ring);
+      ringFinger.moveTo((double)h.ring);
     } else {
       log.debug("Ring finger isn't attached or is null.");
     }
     if (majeure != null && majeure.isAttached()) {
-      majeure.moveTo(h.middle);
+      majeure.moveTo((double)h.middle);
     } else {
       log.debug("Middle(Majeure) finger isn't attached or is null.");
     }
@@ -451,18 +471,9 @@ public class InMoovHand extends Service implements LeapDataListener {
 
   public void release() {
     disable();
-    thumb.releaseService();
-    index.releaseService();
-    majeure.releaseService();
-    ringFinger.releaseService();
-    pinky.releaseService();
-    wrist.releaseService();
   }
 
   public void rest() {
-    // initial positions
-    // setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-
     thumb.rest();
     index.rest();
     majeure.rest();
@@ -532,31 +543,48 @@ public class InMoovHand extends Service implements LeapDataListener {
     if (leap == null) {
       leap = (LeapMotion) startPeer("leap");
     }
-    this.index.map(90, 0, this.index.getMin(), this.index.getMax());
-    this.thumb.map(90, 50, this.thumb.getMin(), this.thumb.getMax());
-    this.majeure.map(90, 0, this.majeure.getMin(), this.majeure.getMax());
-    this.ringFinger.map(90, 0, this.ringFinger.getMin(), this.ringFinger.getMax());
-    this.pinky.map(90, 0, this.pinky.getMin(), this.pinky.getMax());
+    this.index.map(90.0, 0.0, this.index.getMin(), this.index.getMax());
+    this.thumb.map(90.0, 50.0, this.thumb.getMin(), this.thumb.getMax());
+    this.majeure.map(90.0, 0.0, this.majeure.getMin(), this.majeure.getMax());
+    this.ringFinger.map(90.0, 0.0, this.ringFinger.getMin(), this.ringFinger.getMax());
+    this.pinky.map(90.0, 0.0, this.pinky.getMin(), this.pinky.getMax());
     leap.addLeapDataListener(this);
     leap.startTracking();
     return;
   }
 
   @Override
-  public void startService() { // FIXME - all are wrong they just should do
-    // startPeer
+  public void startService() { 
     super.startService();
-    thumb = (Servo) startPeer("thumb");
-    thumb.startService();
-    index.startService();
-    majeure.startService();
-    ringFinger.startService();
-    pinky.startService();
-    wrist.startService();
+    // Handled lazily on connect method now.
+    // TODO:
+    //    if (controller == null) {
+    //      controller = (ServoController) startPeer("arduino");
+    //    }
+    
+    if (thumb == null) {
+      thumb = (ServoControl)startPeer("thumb");
+    }
+    if (index == null) {
+      index = (ServoControl)startPeer("index");
+    }
+    if (majeure == null) {
+      majeure = (ServoControl)startPeer("majeure");
+    }
+    if (ringFinger == null) {
+      ringFinger = (ServoControl)startPeer("ringFinger");
+    }
+    if (pinky == null) {
+      pinky = (ServoControl)startPeer("pinky");
+    }
+    if (wrist == null) {
+      wrist = (ServoControl)startPeer("wrist");
+    }
+    /*
     if (controller == null) {
       controller = (ServoController) createPeer("arduino");
     }
-    // arduino.startService();
+    */
   }
 
   public void stopLeapTracking() {
@@ -630,7 +658,7 @@ public class InMoovHand extends Service implements LeapDataListener {
     meta.addPeer("pinky", "Servo", "Pinky servo");
     meta.addPeer("wrist", "Servo", "Wrist servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service");
+    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
 
     return meta;
   }

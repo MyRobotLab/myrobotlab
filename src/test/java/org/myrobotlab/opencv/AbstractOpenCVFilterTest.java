@@ -6,8 +6,11 @@ import static org.junit.Assert.assertTrue;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_java;
 import org.bytedeco.javacv.CanvasFrame;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.service.OpenCV;
@@ -24,6 +27,12 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
 
   private CanvasFrame sourceImage = null;
   private CanvasFrame outputImage = null;
+  
+  @Before
+  public void setup() {
+    // Loader.load();
+    Loader.load(opencv_java.class);
+  }
 
   @Test
   public void testFilter() throws InterruptedException {

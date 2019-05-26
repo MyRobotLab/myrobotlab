@@ -44,9 +44,13 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
+import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-
+import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -67,7 +71,7 @@ import org.slf4j.Logger;
  *         outputY - is the values sent to the firmware, and should not
  *         necessarily be confused with the inputX which is the input values
  *         sent to the servo
- *         
+ * 
  *         FIXME - inherit from AbstractMotor ..
  * 
  */
@@ -141,12 +145,14 @@ public class Servo extends Service implements ServoControl {
         detach();
       }
 
-      targetOutput = getTargetOutput();
-
+      //targetOutput = getTargetOutput();
+      // On attach we will start at the rest position (not a default target position of 90?!
+      targetOutput = getRest();
+      currentPosInput = getRest();
       // set the controller
       controller = sc;
       controllerName = sc.getName();
-
+      log.info("Servo {} Attaching .. targetOutput {}", getName(), targetOutput);
       // now attach the attachable the attachable better have
       // isAttach(ServoControl) to prevent an infinite loop
       // if attachable.attach(this) is not successful, this should throw
@@ -245,7 +251,7 @@ public class Servo extends Service implements ServoControl {
   /**
    * list of names of possible controllers
    */
-  public List<String> controllers;
+  public Set<String> controllers;
 
   boolean isSweeping = false;
   int sweepDelay = 100;
@@ -359,13 +365,13 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
   }
 
-  @Override
+  @Deprecated
   public void addServoEventListener(NameProvider service) {
     isEventsEnabled = true;
     subscribe(getName(), "publishServoEvent");
   }
 
-  @Override
+  @Deprecated
   public void removeServoEventListener(NameProvider service) {
     isEventsEnabled = false;
     unsubscribe(getName(), "publishServoEvent");
@@ -389,11 +395,16 @@ public class Servo extends Service implements ServoControl {
     enable(pin);
   }
 
+  public void enable(String pin) {
+    enable(Integer.valueOf(pin));
+  }
+
   /**
    * Enabling PWM for the Servo. Equivalent to Arduino's Servo.attach(pin). It
    * energizes the servo sending pulses to maintain its current position.
    */
   public void enable(Integer pin) {
+    log.info("Enable called on {}", getName());
     if (this.pin != null && this.pin != pin) {
       disable();
     }
@@ -420,6 +431,7 @@ public class Servo extends Service implements ServoControl {
    */
   @Override
   public void disable() {
+    log.info("Disable called on {}", getName());
     enabled = false;
     if (controller != null) {
       controller.servoDisable(this);
@@ -451,38 +463,36 @@ public class Servo extends Service implements ServoControl {
     return lastActivityTime;
   }
 
-  @Override
-  public double getMax() {
+  public Double getMax() {
     return mapper.getMaxX();
   }
 
-  @Override
-  public double getMin() {
+  public Double getMin() {
     return mapper.getMinX();
   }
 
-  public double getMaxInput() {
+  public Double getMaxInput() {
     return mapper.getMaxInput();
   }
 
-  public double getMinInput() {
+  public Double getMinInput() {
     return mapper.getMinInput();
   }
 
-  public double getMaxOutput() {
+  public Double getMaxOutput() {
     return mapper.getMaxOutput();
   }
 
-  public double getMinOutput() {
+  public Double getMinOutput() {
     return mapper.getMinOutput();
   }
 
   @Override
-  public double getRest() {
+  public Double getRest() {
     return rest;
   }
 
-  public boolean isAttached() {
+  public Boolean isAttached() {
     // this is not pin attach
     return controller != null;
   }
@@ -491,7 +501,7 @@ public class Servo extends Service implements ServoControl {
     return enabled;
   }
 
-  public boolean isEnabled() {
+  public Boolean isEnabled() {
     return enabled();
   }
 
@@ -501,7 +511,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public boolean isInverted() {
+  public Boolean isInverted() {
     return mapper.isInverted();
   }
 
@@ -521,14 +531,16 @@ public class Servo extends Service implements ServoControl {
     return ret;
   }
 
-  public synchronized void moveTo(double pos) {
+  @Override
+  public synchronized boolean moveTo(Double pos) {
+    log.info("Move To Called {} {}", getName(), pos);
     // breakMoveToBlocking=true;
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     if (controller == null) {
       error(String.format("%s's controller is not set", getName()));
-      return;
+      return false;
     }
 
     if (pos < mapper.getMinX()) {
@@ -553,33 +565,33 @@ public class Servo extends Service implements ServoControl {
 
     lastActivityTime = System.currentTimeMillis();
 
-    if (lastPos != pos || !isEventsEnabled) { 
+    if (lastPos != pos || !isEventsEnabled) {
       // take care if servo will disable soon
-      if (autoDisableTimer != null) {
-        autoDisableTimer.cancel();
-        autoDisableTimer = null;
-      }
+      if (autoDisable)
+        scheduleDisableTimer();
+
       controller.servoMoveTo(this);
     }
     if (!isEventsEnabled || lastPos == pos) {
       lastPos = targetPos;
       broadcastState();
     }
+    return true;
   }
 
   @Override
-  public boolean moveToBlocking(double pos) {
+  public Double moveToBlocking(Double pos) {
     if (velocity < 0) {
       log.info("No effect on moveToBlocking if velocity == -1");
     }
     if (!isEventsEnabled) {
-      this.addServoEventListener(this);
+      this.addServoEventListener((NameProvider) this);
     }
     targetPos = pos;
     this.moveTo(pos);
     // breakMoveToBlocking=false;
     waitTargetPos();
-    return true;
+    return pos;
   }
 
   @Override
@@ -606,26 +618,7 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
     if (!isMoving()) {
       if (autoDisable) {
-        int delayBeforeDisable = disableDelayNoVelocity;
-        if (velocity > -1) {
-          delayBeforeDisable = disableDelay;
-        }
-        if (autoDisableTimer != null) {
-          autoDisableTimer.cancel();
-          autoDisableTimer = null;
-        }
-        autoDisableTimer = new Timer();
-        autoDisableTimer.schedule(new TimerTask() {
-          @Override
-          public void run() {
-            if (!overrideAutoDisable && !isMoving()) {
-              disable();
-            }
-            synchronized (moveToBlocked) {
-              moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
-            }
-          }
-        }, (long) delayBeforeDisable);
+        scheduleDisableTimer();
       } else {
         synchronized (moveToBlocked) {
           moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
@@ -635,14 +628,42 @@ public class Servo extends Service implements ServoControl {
     broadcastState();
   }
 
+  private synchronized void scheduleDisableTimer() {
+    log.info("Schedule Disable Timer called");
+    int delayBeforeDisable = disableDelayNoVelocity;
+    if (velocity > -1) {
+      delayBeforeDisable = disableDelay;
+    }
+    if (autoDisableTimer != null) {
+      autoDisableTimer.cancel();
+      autoDisableTimer = null;
+    }
+    autoDisableTimer = new Timer();
+    autoDisableTimer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        if (!overrideAutoDisable && !isMoving()) {
+          disable();
+        }
+        synchronized (moveToBlocked) {
+          moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
+        }
+      }
+    }, (long) delayBeforeDisable);
+  }
+
   public Double publishServoEvent(Double position) {
     return position;
   }
 
   public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+    List<String> cs = Runtime.getServiceNamesFromInterface(ServoController.class);
+    controllers = new HashSet<String>();
+    for (String c : cs) {
+      controllers.add(c);
+    }
     // controllers.addAll(Runtime.getServiceNamesFromInterface(Simulator.class));
-    return controllers;
+    return cs;
   }
 
   @Override
@@ -669,12 +690,12 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void setMinMax(double min, double max) {
+  public void setMinMax(Double min, Double max) {
     map(min, max, min, max);
   }
 
   @Override
-  public void setRest(double rest) {
+  public void setRest(Double rest) {
     this.rest = rest;
   }
 
@@ -821,12 +842,15 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public Integer getPin() {
-    return pin;
+  public String getPin() {
+    if (pin != null)
+      return pin.toString();
+    else
+      return null;
   }
 
   @Override
-  public double getPos() {
+  public Double getPos() {
     if (targetPos == null) {
       return rest;
     } else {
@@ -838,20 +862,40 @@ public class Servo extends Service implements ServoControl {
    * attach will default the position to a default reset position since its not
    * specified
    */
-  @Override
+  @Deprecated
   public void attach(ServoController controller, int pin) throws Exception {
     this.pin = pin;
     attach(controller);
   }
+  
+  public void attach(String controller, String pin, double pos) throws Exception {
+    log.info("Servo Attach called. {} {} {}", controller, pin, pos);
+    this.pin = Integer.parseInt(pin);
+    this.targetPos = pos;
+    // need to look up the controller by name
+    ServoController cont = (ServoController) Runtime.getService(controller);
+    attach(cont);
+  }
 
-  @Override
+
+  public void attach(String controller, int pin, double pos) throws Exception {
+    log.info("Servo Attach called. {} {} {}", controller, pin, pos);
+    this.pin = pin;
+    this.targetPos = pos;
+    // need to look up the controller by name
+    ServoController cont = (ServoController) Runtime.getService(controller);
+    attach(cont);
+  }
+
+  @Deprecated
   public void attach(ServoController controller, int pin, double pos) throws Exception {
+    log.info("Servo Controller Attach pin pos.");
     this.pin = pin;
     this.targetPos = pos;
     attach(controller);
   }
 
-  @Override
+  @Deprecated
   public void attach(ServoController controller, int pin, double pos, double velocity) throws Exception {
     this.pin = pin;
     this.targetPos = pos;
@@ -891,13 +935,13 @@ public class Servo extends Service implements ServoControl {
     }
   }
 
-  @Override
-  public double getMaxVelocity() {
+  @Deprecated
+  public Double getMaxVelocity() {
     return maxVelocity;
   }
 
   @Override
-  public double getVelocity() {
+  public Double getVelocity() {
     return velocity;
   }
 
@@ -906,8 +950,8 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public void setPin(int pin) {
-    this.pin = pin;
+  public void setPin(String pin) {
+    this.pin = Integer.valueOf(pin);
   }
 
   @Override
@@ -925,7 +969,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public double getAcceleration() {
+  public Double getAcceleration() {
     return acceleration;
   }
 
@@ -962,8 +1006,13 @@ public class Servo extends Service implements ServoControl {
     this.autoEnable = autoEnable;
   }
 
+  @Deprecated
+  public void enableAutoDisable(boolean autoDisable) {
+    setAutoDisable(autoDisable);
+  }
+
   @Override
-  public void setAutoDisable(boolean autoDisable) {
+  public void setAutoDisable(Boolean autoDisable) {
     this.autoDisable = autoDisable;
     addServoEventListener(this);
     log.info("setAutoDisable : " + autoDisable);
@@ -972,7 +1021,7 @@ public class Servo extends Service implements ServoControl {
   }
 
   @Override
-  public boolean getAutoDisable() {
+  public Boolean getAutoDisable() {
     return autoDisable;
   }
 
@@ -986,7 +1035,7 @@ public class Servo extends Service implements ServoControl {
    * this output is 'always' be between 0-180
    */
   @Override
-  public double getTargetOutput() {
+  public Double getTargetOutput() {
     if (targetPos == null) {
       targetPos = rest;
     }
@@ -1011,8 +1060,9 @@ public class Servo extends Service implements ServoControl {
 
   }
 
-  @Override
+  @Deprecated
   public void onServoEvent(Integer eventType, double currentPos) {
+    log.info("On servo event called with a current pos {}", currentPos);
     currentPosInput = mapper.calcInput(currentPos);
     if (isIKEventEnabled) {
       ServoEventData data = new ServoEventData();
@@ -1065,50 +1115,46 @@ public class Servo extends Service implements ServoControl {
    */
   public void sync(ServoControl sc) {
     this.addServoEventListener(this);
-    sc.addServoEventListener(sc);
+    ((Servo) sc).addServoEventListener((NameProvider) sc);
     subscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
   public void unsync(ServoControl sc) {
     // remove
     this.removeServoEventListener(this);
-    sc.removeServoEventListener(sc);
+    ((Servo) sc).removeServoEventListener((NameProvider) sc);
 
     unsubscribe(sc.getName(), "publishServoEvent", getName(), "moveTo");
   }
 
   public static void main(String[] args) throws InterruptedException {
-    String arduinoPort = "COM5";
-    LoggingFactory.init(Level.INFO);
-    VirtualArduino virtualArduino = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
-    Runtime.start("python", "Python");
-
     try {
-      virtualArduino.connect(arduinoPort);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+      String arduinoPort = "COM9";
+      LoggingFactory.init(Level.INFO);
 
-    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-    arduino.connect(arduinoPort);
-    Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
-    adafruit16CServoDriver.attach(arduino, "0", "0x40");
+      Runtime.start("gui", "SwingGui");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
+      
+      arduino.connect(arduinoPort);
+      // Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
+      // adafruit16CServoDriver.attach(arduino, "0", "0x40");
+      
+      servo.attach(arduino.getName(), 5, 120.0);
+      // servo.attach(adafruit16CServoDriver, 1);
 
-    Runtime.start("gui", "SwingGui");
-    Servo servo = (Servo) Runtime.start("servo", "Servo");
-    try {
-      servo.attach(adafruit16CServoDriver, 1);
+      servo.setVelocity(20);
+      log.info("It should take some time..");
+      servo.moveTo(5.0);
+      servo.moveTo(175.0);
+      servo.moveToBlocking(0.0);
+      servo.moveToBlocking(180.0);
+      servo.moveToBlocking(0.0);
+      log.info("Right?");
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    servo.setVelocity(20);
-    log.info("It should take some time..");
-    servo.moveToBlocking(0);
-    servo.moveToBlocking(180);
-    servo.moveToBlocking(0);
-    log.info("Right?");
   }
 
   // pasted from inmoov1
@@ -1173,7 +1219,7 @@ public class Servo extends Service implements ServoControl {
     saveCalibration(null);
   }
 
-  @Override
+  @Deprecated
   public void setOverrideAutoDisable(boolean overrideAutoDisable) {
     this.overrideAutoDisable = overrideAutoDisable;
     if (!overrideAutoDisable) {
@@ -1186,13 +1232,151 @@ public class Servo extends Service implements ServoControl {
     return sc;
   }
 
-  @Override
+  @Deprecated
   public Double getLastPos() {
     return lastPos;
   }
 
   public void preShutdown() {
     detach();
+  }
+
+  @Override
+  public void onEncoderData(EncoderData data) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void attach(ServoDataListener listener) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void detach(ServoDataListener listener) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public Set<String> getControllers() {
+    // TODO Auto-generated method stub
+    return controllers;
+  }
+
+  @Override
+  public Double getSpeed() {
+    // TODO Auto-generated method stub
+    return velocity;
+  }
+
+  @Override
+  public void map(Double minX, Double maxX, Double minY, Double maxY) {
+    // TODO Auto-generated method stub
+    Mapper m = new Mapper(minX, maxX, minY, maxY);
+    this.mapper = m;
+
+  }
+
+  @Override
+  public void setMapper(Mapper m) {
+    // TODO Auto-generated method stub
+    this.mapper = m;
+  }
+
+  @Override
+  public Mapper getMapper() {
+    // TODO Auto-generated method stub
+    return mapper;
+  }
+
+  @Override
+  public void setMaxSpeed(Double speed) {
+    // TODO Auto-generated method stub
+    this.maxVelocity = speed;
+  }
+
+  @Override
+  public Double getMaxSpeed() {
+    // TODO Auto-generated method stub
+    return maxVelocity;
+  }
+
+  @Override
+  public ServoData publishServoData(ServoStatus eventType, Double currentPosUs) {
+    // TODO Auto-generated method stub
+    ServoData d = new ServoData(eventType, getName(), currentPosUs);
+    return d;
+  }
+
+  @Override
+  public Double publishServoStopped(Double pos) {
+    // TODO Auto-generated method stub
+    return pos;
+  }
+
+  @Override
+  public void setAcceleration(Double acceleration) {
+    // TODO Auto-generated method stub
+    this.acceleration = acceleration;
+  }
+
+  @Override
+  public void setInverted(Boolean invert) {
+    // TODO Auto-generated method stub
+    this.mapper.setInverted(invert);
+  }
+
+  @Override
+  public void setPin(Integer pin) {
+    // TODO Auto-generated method stub
+    this.pin = pin;
+  }
+
+  @Override
+  public void setVelocity(Double speed) {
+    // TODO Auto-generated method stub
+    this.velocity = velocity;
+
+  }
+
+  @Override
+  public void setSpeed(Double d) {
+    // TODO : reconcile speed & velocities.. kill the old speed control
+    this.velocity = d;
+  }
+
+  @Override
+  public Double getTargetPos() {
+    // TODO Auto-generated method stub
+    return targetPos;
+  }
+
+  @Override
+  public void setPosition(Double pos) {
+    this.currentPosInput = pos;
+    this.targetPos = pos;
+    moveTo(pos);
+    return;
+  }
+
+  @Override
+  public EncoderControl getEncoder() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public boolean isBlocking() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public Double moveToBlocking(Double pos, Long timeoutMs) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

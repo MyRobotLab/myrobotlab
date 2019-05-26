@@ -1425,7 +1425,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
     byte[] data = sendReadPacket(7, address, 16);
     if (data != null) {
-      m1.encoder = new EncoderData(String.format("%s/M1", getName()), bytes4ToLong(data));
+      m1.encoder = new EncoderData(String.format("%s/M1", getName()), address + "", bytes4ToLong(data));
       invoke("publishEncoderData", m1.encoder);
     }
 
@@ -1473,7 +1473,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
     byte[] data = sendReadPacket(7, address, 17);
     if (data != null) {
-      m2.encoder = new EncoderData(String.format("%s/M2", getName()), bytes4ToLong(data));
+      m2.encoder = new EncoderData(String.format("%s/M2", getName()), address + "", bytes4ToLong(data));
       invoke("publishEncoderData", m2.encoder);
     }
 

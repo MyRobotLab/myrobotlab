@@ -97,6 +97,21 @@ public class TestThrower extends Service {
       new RapidThrower(this, pitches, throwInterval);
     }
   }
+  
+  public Integer publishInteger(Integer count) {
+    log.debug("publishInteger " + count);
+    return count;
+  }
+  
+  public Boolean publishBoolean(Boolean b) {
+    log.debug("publishBoolean " + b);
+    return b;
+  }
+
+  public Double publishDouble(Double count) {
+    log.debug("publishDouble " + count);
+    return count;
+  }
 
   public Integer throwInteger(Integer count) {
     log.debug("throwInteger " + count);

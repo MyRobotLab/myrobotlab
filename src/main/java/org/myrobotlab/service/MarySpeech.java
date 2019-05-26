@@ -39,15 +39,25 @@ import marytts.util.data.audio.MaryAudioUtils;
 public class MarySpeech extends AbstractSpeechSynthesis {
 
   public final static Logger log = LoggerFactory.getLogger(MarySpeech.class);
+  
   private static final long serialVersionUID = 1L;
 
   private transient MaryInterface marytts = null;
 
-  private String maryBase = "mary";
-
+  String maryBase = "mary";
+ 
   public MarySpeech(String reservedKey) throws MaryConfigurationException {
     super(reservedKey);
-
+    getMaryTts();
+  }
+  
+  synchronized MaryInterface getMaryTts() {
+    if (marytts != null) {
+      return marytts;
+    }
+    
+    String maryBase = "mary";
+      
     // Set some envirionment variables so we can load Mary libraries.
     System.setProperty("mary.base", maryBase);
     System.setProperty("mary.downloadDir", new File(maryBase + "/download").getPath());
@@ -91,7 +101,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     } catch (Exception e) {
       error(e);
     }
-
+    return marytts;
   }
 
   /*
@@ -160,48 +170,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     // main config for voices
     // https://github.com/marytts/marytts-installer/blob/master/components.json
 
-    /*
-     * String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm",
-     * "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm",
-     * "voice-cmu-slt-hsmm", "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm",
-     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm",
-     * "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
-     * "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm",
-     * "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm",
-     * "voice-upmc-pierre-hsmm", "voice-bits2", "voice-dfki-obadiah-hsmm",
-     * "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm",
-     * "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm", "voice-dfki-spike-hsmm",
-     * "voice-cmu-slt-hsmm", "voice-enst-camille-hsmm",
-     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm",
-     * "voice-cmu-bdl-hsmm", "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
-     * "voice-enst-dennys-hsmm", "voice-bits3-hsmm", "voice-dfki-prudence-hsmm"
-     * };
-     */
-    /*
-     * Set<String> voices = new HashSet<>(Arrays.asList("voice-bits1",
-     * "voice-bits1-hsmm", "voice-bits2", "voice-bits3", "voice-bits3-hsmm",
-     * "voice-bits4", "voice-cmu-bdl", "voice-cmu-bdl-hsmm",
-     * "voice-cmu-nk-hsmm", "voice-cmu-rms", "voice-cmu-rms-hsmm",
-     * "voice-cmu-slt", "voice-dfki-obadiah", "voice-dfki-obadiah-hsmm",
-     * "voice-dfki-ot", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral",
-     * "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-pavoque-styles",
-     * "voice-dfki-poppy", "voice-dfki-poppy-hsmm", "voice-dfki-prudence",
-     * "voice-dfki-prudence-hsmm", "voice-dfki-spike", "voice-dfki-spike-hsmm",
-     * "voice-enst-camille", "voice-enst-camille-hsmm",
-     * "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", /* "voice-marylux",
-     *//*
-        * "voice-upmc-jessica", "voice-upmc-jessica-hsmm", "voice-upmc-pierre",
-        * "voice-upmc-pierre-hsmm", "voice-dfki-obadiah-hsmm",
-        * "voice-istc-lucia-hsmm", "voice-bits1-hsmm", "voice-cmu-rms-hsmm",
-        * "voice-dfki-ot-hsmm", "voice-upmc-jessica-hsmm",
-        * "voice-dfki-spike-hsmm", "voice-cmu-slt-hsmm",
-        * "voice-enst-camille-hsmm", "voice-dfki-pavoque-neutral-hsmm",
-        * "voice-dfki-poppy-hsmm", "voice-cmu-bdl-hsmm",
-        * "voice-upmc-pierre-hsmm", "voice-cmu-nk-hsmm",
-        * "voice-enst-dennys-hsmm", "voice-bits3-hsmm",
-        * "voice-dfki-prudence-hsmm"));
-        */
-
+  
     String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm",
         "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
         "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm", "voice-upmc-pierre-hsmm" };
@@ -223,18 +192,12 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     meta.exclude("org.apache.opennlp", "opennlp-tools");
     meta.exclude("org.slf4j", "slf4j-log4j12");
 
-    // try to fix httpcore override issue
-    /*
-     * currently these dependencies are in Runtime
-     * meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-     * meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
-     */
-
     return meta;
   }
 
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, SynthesisException {
+    getMaryTts();
     Voice voice = getVoice();
     marytts.setVoice(voice.getVoiceProvider().toString());
     // marytts.setInputType("SSML"); FIXME - MUST BE VALID XML WITH HEADER !!!
@@ -252,9 +215,10 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
   @Override
   protected void loadVoices() throws MalformedURLException, IOException, SAXException {
+    getMaryTts();
     // It is great that we can query to get voices - but regrettably they are
     // lacking a lot of useful meta-data
-    // such as locale and gender. So, we will "hardcode" the meta information..
+    // such as locale and gender. So, we will "augment" the meta information..
     Set<String> list = marytts.getAvailableVoices();
     list.size();
 
@@ -304,12 +268,12 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
     try {
 
-      // Runtime.start("gui", "SwingGui");
-      // Runtime.start("webgui", "WebGui");
+      Runtime.start("gui", "SwingGui");
+      Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
-      Runtime.start("cli", "Cli");
+      // Runtime.start("cli", "Cli");
       // mary.grabRemoteAudioEffect("LAUGH01_F");
-      // Runtime.start("python", "Python");
+      Runtime.start("python", "Python");
 
       // examples are generously copied from
       // marytts.signalproc.effects.EffectsApplier.java L319-324

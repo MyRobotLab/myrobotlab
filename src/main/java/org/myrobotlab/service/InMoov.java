@@ -16,6 +16,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.document.Classification;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -34,7 +35,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.Servo.ServoEventData;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Pin;
@@ -43,11 +43,10 @@ import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
-
-import com.jme3.system.AppSettings;
 
 /**
  * InMoov - The InMoov Service.
@@ -318,7 +317,15 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   // OPENNI methods
   // ---------------------------------------------------------------
 
+  @Deprecated
+  public boolean RobotIsOpenCvCapturing() {
+    if (opencv != null)
+      return opencv.isCapturing();
+    return false;
+  }
+  
   // TODO:change -> isOpenNiCapturing
+  @Deprecated
   public boolean RobotIsOpenNiCapturing() {
     if (openni != null) {
       if (openni.capturing) {
@@ -344,17 +351,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
           if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
             if (skeleton.leftElbow.getAngleXY() >= 0) {
-              leftArm.bicep.moveTo(skeleton.leftElbow.getAngleXY());
+              leftArm.bicep.moveTo((double)skeleton.leftElbow.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
             if (skeleton.leftShoulder.getAngleXY() >= 0) {
-              leftArm.omoplate.moveTo(skeleton.leftShoulder.getAngleXY());
+              leftArm.omoplate.moveTo((double)skeleton.leftShoulder.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
             if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-              leftArm.shoulder.moveTo(skeleton.leftShoulder.getAngleYZ() - 50);
+              leftArm.shoulder.moveTo((double)skeleton.leftShoulder.getAngleYZ() - 50);
             }
           }
         }
@@ -363,17 +370,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
           if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
             if (skeleton.rightElbow.getAngleXY() >= 0) {
-              rightArm.bicep.moveTo(skeleton.rightElbow.getAngleXY());
+              rightArm.bicep.moveTo((double)skeleton.rightElbow.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
             if (skeleton.rightShoulder.getAngleXY() >= 0) {
-              rightArm.omoplate.moveTo(skeleton.rightShoulder.getAngleXY());
+              rightArm.omoplate.moveTo((double)skeleton.rightShoulder.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
             if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-              rightArm.shoulder.moveTo(skeleton.rightShoulder.getAngleYZ() - 50);
+              rightArm.shoulder.moveTo((double)skeleton.rightShoulder.getAngleYZ() - 50);
             }
           }
         }
@@ -562,8 +569,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       // i think
       // we want all servos that are currently in the system?
       for (ServiceInterface service : Runtime.getServices()) {
-        if (service instanceof Servo) {
-          double pos = ((Servo) service).getPos();
+        if (ServoControl.class.isAssignableFrom(service.getClass())) {
+          double pos = ((ServoControl) service).getPos();
           gestureWriter.write("  " + service.getName() + ".moveTo(" + pos + ")\n");
         }
       }
@@ -601,8 +608,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     } else {
       log.info("Starting gesture : {}", nameOfGesture);
       gestureAlreadyStarted = true;
-      RobotCanMoveRandom = false;
-      setOverrideAutoDisable(true);
+      RobotCanMoveRandom = false;      
     }
   }
 
@@ -614,7 +620,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     if (gestureAlreadyStarted) {
       waitTargetPos();
       RobotCanMoveRandom = true;
-      setOverrideAutoDisable(false);
       gestureAlreadyStarted = false;
       log.info("gesture : {} finished...", nameOfGesture);
     }
@@ -1094,30 +1099,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     }
   }
 
-  private void setOverrideAutoDisable(Boolean param) {
-    if (head != null) {
-      head.setOverrideAutoDisable(param);
-    }
-    if (rightArm != null) {
-      rightArm.setOverrideAutoDisable(param);
-    }
-    if (leftArm != null) {
-      leftArm.setOverrideAutoDisable(param);
-    }
-    if (leftHand != null) {
-      leftHand.setOverrideAutoDisable(param);
-    }
-    if (rightHand != null) {
-      rightHand.setOverrideAutoDisable(param);
-    }
-    if (torso != null) {
-      torso.setOverrideAutoDisable(param);
-    }
-    if (eyelids != null) {
-      eyelids.setOverrideAutoDisable(param);
-    }
-  }
-
   public InMoovArm startLeftArm(String port) throws Exception {
     return startLeftArm(port, null);
   }
@@ -1376,6 +1357,10 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
   public List<AudioData> speakBlocking(String toSpeak) {
     if (mouth == null) {
+      mouth = (SpeechSynthesis)startPeer("mouth");
+    }
+      
+    if (mouth == null) {
       log.error("speakBlocking is called, but my mouth is NULL...");
       return null;
     }
@@ -1383,7 +1368,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       try {
         return mouth.speakBlocking(toSpeak);
       } catch (Exception e) {
-        Logging.logError(e);
+        log.error("speakBlocking threw", e);
       }
     }
     return null;
@@ -1787,7 +1772,10 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   public void saveCalibration() {
     saveCalibration(CALIBRATION_FILE);
   }
+  
+  
 
+  
   public void saveCalibration(String calibrationFilename) {
 
     File calibFile = new File(calibrationFilename);
@@ -1802,8 +1790,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       // iterate all the services that are running.
       // we want all servos that are currently in the system?
       for (ServiceInterface service : Runtime.getServices()) {
-        if (service instanceof Servo) {
-          Servo s = (Servo) service;
+        if (service instanceof ServoControl) {
+          ServoControl s = (Servo) service;
           if (!s.getName().startsWith(this.getName())) {
             continue;
           }
@@ -1812,7 +1800,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
           calibrationWriter.write("# Servo Config : " + s.getName() + "\n");
           calibrationWriter.write(s.getName() + ".detach()\n");
           calibrationWriter.write(s.getName() + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
-          calibrationWriter.write(s.getName() + ".setVelocity(" + s.getVelocity() + ")\n");
+          calibrationWriter.write(s.getName() + ".setVelocity(" + s.getSpeed() + ")\n");
           calibrationWriter.write(s.getName() + ".setRest(" + s.getRest() + ")\n");
           if (s.getPin() != null) {
             calibrationWriter.write(s.getName() + ".setPin(" + s.getPin() + ")\n");
@@ -1820,12 +1808,12 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
             calibrationWriter.write("# " + s.getName() + ".setPin(" + s.getPin() + ")\n");
           }
 
-          s.map(s.getMinInput(), s.getMaxInput(), s.getMinOutput(), s.getMaxOutput());
+          s.map(s.getMin(), s.getMax(), s.getMinOutput(), s.getMaxOutput());
           // save the servo map
-          calibrationWriter.write(s.getName() + ".map(" + s.getMinInput() + "," + s.getMaxInput() + "," + s.getMinOutput() + "," + s.getMaxOutput() + ")\n");
+          calibrationWriter.write(s.getName() + ".map(" + s.getMin() + "," + s.getMax() + "," + s.getMinOutput() + "," + s.getMaxOutput() + ")\n");
           // if there's a controller reattach it at rest
-          if (s.getController() != null) {
-            String controller = s.getController().getName();
+          if (s.getControllerName() != null) {
+            String controller = s.getControllerName();
             calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
           if (s.getAutoDisable()) {
@@ -1842,6 +1830,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       return;
     }
   }
+  
 
   // vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing
   // about jme...)
@@ -1887,107 +1876,9 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   // end vinmoov cosmetics and optional vinmoov monitor
+  /* use the most recent virtual inmoov */
 
-  public InMoov3DApp startVinMoov() throws InterruptedException {
-    if (vinMoovApp == null) {
-      speakBlocking(languagePack.get("startingVirtual"));
-      vinMoovApp = new InMoov3DApp();
-      if (VinmoovMonitorActivated) {
-        // vinmoovFullScreen=true
-        VinmoovBackGroundColor = "Black";
-        debugVinmoov = false;
-        vinMoovApp.VinmoovMonitorActivated = true;
-        VinmoovWidth = 1067;
-      }
-      vinMoovApp.BackGroundColor = VinmoovBackGroundColor;
-      AppSettings settings = new AppSettings(true);
-      settings.setResolution(VinmoovWidth, VinmoovHeight);
-      settings.setFullscreen(VinmoovFullScreen);
-      // settings.setEmulateMouse(false);
-      // settings.setUseJoysticks(false);
-      settings.setUseInput(true);
-      settings.setAudioRenderer(null);
-      vinMoovApp.setSettings(settings);
-      vinMoovApp.setShowSettings(false);
-      vinMoovApp.setDisplayStatView(debugVinmoov);
-      vinMoovApp.setPauseOnLostFocus(false);
-      vinMoovApp.setService(this);
-      vinMoovApp.start();
-      // Grog Says ... WTH ?? - there should be a callback how do we know its
-      // not 6.5 seconds ?
-      // Moz4r says : I think it's a security timeout n=to not wait forever, not
-      // really a sleep
-      synchronized (this) {
-        wait(6000);
-      }
-      if (torso != null) {
-        vinMoovApp.addServo("mtorso", torso.midStom);
-        torso.midStom.addIKServoEventListener(this);
-        vinMoovApp.addServo("ttorso", torso.topStom);
-        torso.topStom.addIKServoEventListener(this);
-        torso.midStom.moveTo(torso.midStom.targetPos + 0.2);
-        torso.topStom.moveTo(torso.topStom.targetPos + 0.2);
-      }
-      if (rightArm != null) {
-        vinMoovApp.addServo("Romoplate", rightArm.omoplate);
-        rightArm.omoplate.addIKServoEventListener(this);
-        vinMoovApp.addServo("Rshoulder", rightArm.shoulder);
-        rightArm.shoulder.addIKServoEventListener(this);
-        vinMoovApp.addServo("Rrotate", rightArm.rotate);
-        rightArm.rotate.addIKServoEventListener(this);
-        vinMoovApp.addServo("Rbicep", rightArm.bicep);
-        rightArm.bicep.addIKServoEventListener(this);
-        rightArm.omoplate.moveTo(rightArm.omoplate.targetPos + 0.2);
-        rightArm.shoulder.moveTo(rightArm.shoulder.targetPos + 0.2);
-        rightArm.rotate.moveTo(rightArm.rotate.targetPos + 0.2);
-        rightArm.bicep.moveTo(rightArm.bicep.targetPos + 0.2);
-      }
-      if (leftArm != null) {
-        vinMoovApp.addServo("omoplate", leftArm.omoplate);
-        leftArm.omoplate.addIKServoEventListener(this);
-        vinMoovApp.addServo("shoulder", leftArm.shoulder);
-        leftArm.shoulder.addIKServoEventListener(this);
-        vinMoovApp.addServo("rotate", leftArm.rotate);
-        leftArm.rotate.addIKServoEventListener(this);
-        vinMoovApp.addServo("bicep", leftArm.bicep);
-        leftArm.bicep.addIKServoEventListener(this);
-        leftArm.omoplate.moveTo(leftArm.omoplate.targetPos + 0.2);
-        leftArm.shoulder.moveTo(leftArm.shoulder.targetPos + 0.2);
-        leftArm.rotate.moveTo(leftArm.rotate.targetPos + 0.2);
-        leftArm.bicep.moveTo(leftArm.bicep.targetPos + 0.2);
-      }
-      if (rightHand != null) {
-        vinMoovApp.addServo("RWrist", rightHand.wrist);
-        rightHand.wrist.addIKServoEventListener(this);
-        rightHand.wrist.moveTo(rightHand.wrist.targetPos + 0.2);
-      }
-      if (leftHand != null) {
-        vinMoovApp.addServo("LWrist", leftHand.wrist);
-        leftHand.wrist.addIKServoEventListener(this);
-        leftHand.wrist.moveTo(leftHand.wrist.targetPos + 0.2);
-      }
-      if (head != null) {
-        vinMoovApp.addServo("neck", head.neck);
-        head.neck.addIKServoEventListener(this);
-        vinMoovApp.addServo("head", head.rothead);
-        head.rothead.addIKServoEventListener(this);
-        vinMoovApp.addServo("jaw", head.jaw);
-        head.jaw.addIKServoEventListener(this);
-        vinMoovApp.addServo("rollNeck", head.rollNeck);
-        head.rollNeck.addIKServoEventListener(this);
-        head.neck.moveTo(head.neck.targetPos + 0.2);
-        head.rothead.moveTo(head.rothead.targetPos + 0.2);
-        head.rollNeck.moveTo(head.rollNeck.targetPos + 0.2);
-      }
-    } else {
-      log.info("VinMoov already started");
-      return vinMoovApp;
-    }
-
-    return vinMoovApp;
-  }
-
-  public void onIKServoEvent(ServoEventData data) {
+  public void onIKServoEvent(ServoData data) {
     if (vinMoovApp != null) {
       vinMoovApp.updatePosition(data);
     }
@@ -2378,19 +2269,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     String leftPort = "COM3";
     String rightPort = "COM4";
+    
+    Platform.setVirtual(true);
 
-    VirtualArduino vleft = (VirtualArduino) Runtime.start("vleft", "VirtualArduino");
-    VirtualArduino vright = (VirtualArduino) Runtime.start("vright", "VirtualArduino");
-    vleft.connect(leftPort);
-    vright.connect(rightPort);
     Runtime.start("gui", "SwingGui");
     Runtime.start("python", "Python");
+    
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
-    // i01.ear = (AndroidSpeechRecognition) Runtime.start(" i01.ear",
-    // "AndroidSpeechRecognition");
     i01.startEar();
+    
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();
@@ -2407,6 +2296,10 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     i01.startVinMoov();
     i01.startOpenCV();
     i01.execGesture("BREAKITdaVinci()");
+  }
+
+  public void startVinMoov() {
+    
   }
 
   @Override

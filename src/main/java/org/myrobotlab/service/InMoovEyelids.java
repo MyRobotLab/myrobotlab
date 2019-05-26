@@ -11,6 +11,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -24,8 +25,8 @@ public class InMoovEyelids extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovEyelids.class);
 
-  transient public Servo eyelidleft;
-  transient public Servo eyelidright;
+  transient public ServoControl eyelidleft;
+  transient public ServoControl eyelidright;
   private transient ServoController controller;
   // todo : make this deprecated
 
@@ -60,9 +61,9 @@ public class InMoovEyelids extends Service {
     if (controller == null) {
       error("servo controller is null");
     }
-    eyelidleft.moveTo(179);
+    eyelidleft.moveTo(179.0);
     sleep(300);
-    eyelidright.moveToBlocking(1);
+    eyelidright.moveToBlocking(1.0);
   }
 
   static public void main(String[] args) {
@@ -86,16 +87,12 @@ public class InMoovEyelids extends Service {
 
   public InMoovEyelids(String n) {
     super(n);
-    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
-    // FRAMEWORK !!!!!
-    eyelidleft = (Servo) createPeer("eyelidleft");
-    eyelidright = (Servo) createPeer("eyelidright");
-
-    eyelidleft.setRest(0);
-    eyelidright.setRest(0);
-
-    setVelocity(50.0, 50.0);
-
+    if (eyelidleft == null) {
+      eyelidleft = (ServoControl) createPeer("eyelidleft");
+    }
+    if (eyelidright == null) {
+      eyelidright = (ServoControl) createPeer("eyelidright");
+    }
   }
 
   public void autoBlink(boolean param) {
@@ -118,8 +115,11 @@ public class InMoovEyelids extends Service {
     }
     this.controller = controller;
 
-    eyelidleft.attach(controller, eyeLidLeftPin);
-    eyelidright.attach(controller, eyeLidRightPin);
+    eyelidleft.setPin(eyeLidLeftPin);
+    eyelidright.setPin(eyeLidRightPin);
+
+    eyelidleft.attach(controller);
+    eyelidright.attach(controller);
   }
 
   public void detach(ServoController controller) throws Exception {
@@ -209,14 +209,6 @@ public class InMoovEyelids extends Service {
   // FIXME - releasePeers()
   public void release() {
     disable();
-    if (eyelidleft != null) {
-      eyelidleft.releaseService();
-      eyelidleft = null;
-    }
-    if (eyelidright != null) {
-      eyelidright.releaseService();
-      eyelidright = null;
-    }
   }
 
   public void rest() {
@@ -235,8 +227,9 @@ public class InMoovEyelids extends Service {
   @Override
   public void startService() {
     super.startService();
-    eyelidleft.startService();
-    eyelidright.startService();
+    eyelidleft.setRest(0.0);
+    eyelidright.setRest(0.0);
+    setVelocity(50.0, 50.0);
   }
 
   public void setAutoDisable(Boolean param) {
@@ -244,14 +237,9 @@ public class InMoovEyelids extends Service {
     eyelidright.setAutoDisable(param);
   }
 
-  public void setOverrideAutoDisable(Boolean param) {
-    eyelidleft.setOverrideAutoDisable(param);
-    eyelidright.setOverrideAutoDisable(param);
-  }
-
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(InMoovEyelids.class.getCanonicalName());
+    ServiceType meta = new ServiceType(InMoovEyelids.class);
     meta.addDescription("InMoov Eyelids");
     meta.addCategory("robot");
 

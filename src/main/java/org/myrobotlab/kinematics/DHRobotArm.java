@@ -298,9 +298,9 @@ public class DHRobotArm implements Serializable {
 
   public boolean armMovementEnds() {
     for (DHLink link : links) {
-      if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
-        return false;
-      }
+      // if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
+      //  return false;
+      // }
     }
     return true;
   }

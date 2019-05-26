@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -41,16 +42,17 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.InstallCert;
 import org.myrobotlab.service.data.HttpData;
@@ -61,13 +63,9 @@ import org.slf4j.Logger;
 /**
  * HttpClient - wrapper for Apache HttpClient
  * 
- * @author GroG
- * 
- *         TODO - asynchronous call back similar to AngularJS promise - or at
- *         least a callback method is called .. onHttpResponse
- * 
- *         Synchronous or Asynchronous - Synchronous by default, Asynchronous if
- *         a callback method is supplied or Non-Blocking method is called
+ * @author GroG * Synchronous or Asynchronous - Synchronous by default,
+ *         Asynchronous if a callback method is supplied or Non-Blocking method
+ *         is called
  * 
  *         Check out - Fluent interface -
  *         https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
@@ -75,11 +73,11 @@ import org.slf4j.Logger;
  *         - Proxies proxies proxies ! -
  *         https://memorynotfound.com/configure-http-proxy-settings-java/
  */
-public class HttpClient extends Service implements HttpDataListener, HttpResponseListener {
-
-  private static final long serialVersionUID = 1L;
+public class HttpClient extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
+
+  private static final long serialVersionUID = 1L;
 
   /**
    * This static method returns all the details of the class without it having
@@ -90,135 +88,205 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
    * 
    */
   static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(HttpClient.class.getCanonicalName());
+    ServiceType meta = new ServiceType(HttpClient.class);
     meta.addDescription("a general purpose http client, used to fetch information on the web");
     meta.addCategory("network");
-    /*
-     * Runtime currently includes these dependencies
-     * meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-     * meta.addDependency("org.apache.httpcomponents", "httpcore", "4.4.6");
-     */
-    meta.setCloudService(false);
     return meta;
   }
 
   transient CloseableHttpClient client;
 
-  transient HashMap<String, String> formFields = new HashMap<String, String>();
-
   public HttpClient(String n) {
     super(n);
   }
 
-  public void addFormField(String name, String value) {
-    formFields.put(name, value);
+  public void attach(Attachable service) {
+    // determine type
+    if (HttpDataListener.class.isAssignableFrom(service.getClass())) {
+      attachHttpDataListener((HttpDataListener) service);
+    } else if (HttpResponseListener.class.isAssignableFrom(service.getClass())) {
+      attachHttpResponseListener((HttpResponseListener) service);
+    }
+    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
-  public void addHttpDataListener(ServiceInterface listener) {
-    /*
-     * TODO - finish this thought out .. it would mean a Map of method
-     * signatures to interface methods .. and direct callbacks Pro - is an
-     * optimization Con - is potentially blocking the callback thread for "too"
-     * long
-     * 
-     * if (SerialDataListener.class.isAssignableFrom(listener.getClass()) &&
-     * listener.isLocal()) { // direct callback
-     * listeners.put(si.getName(),(SerialDataListener) si); } else {
-     */
-
-    // pub sub
-    // instead of getting the data twice and expecting 2 methods for more or
-    // less the same material
-    // we will leave it up to the subscribing service to do subscribe and
-    // implement onHttpData
-    listener.subscribe(getName(), "publishHttpData");
-
-    // }
+  public void attachHttpDataListener(HttpDataListener service) {
+    addListener("publishHttpData", service.getName());
   }
 
-  public void addHttpResponseListener(ServiceInterface listener) {
-    listener.subscribe(getName(), "publishHttpResponse");
+  public void attachHttpResponseListener(HttpResponseListener service) {
+    addListener("publishHttpResponse", service.getName());
   }
 
-  public void clearForm() {
-    formFields.clear();
+  @Deprecated /* use attach(HttpDataListener) */
+  public void addHttpDataListener(HttpDataListener listener) {
+    attachHttpDataListener(listener);
   }
 
-  public String get(String uri) throws ClientProtocolException, IOException {
-    HttpData response = processResponse((HttpUriRequest) new HttpGet(uri), null);
+  @Deprecated /* used attach(HttpResponseListener) */
+  public void addHttpResponseListener(HttpResponseListener listener) {
+    attachHttpResponseListener(listener);
+  }
+
+  /**
+   * Simplest GET return string type of the endpoint
+   * 
+   * @param url
+   * @return
+   * @throws ClientProtocolException
+   * @throws IOException
+   */
+  public String get(String url) throws ClientProtocolException, IOException {
+    HttpData response = processResponse(new HttpGet(url));
     if (response.data != null) {
       return new String(response.data);
     }
     return null;
   }
 
-  public byte[] getBytes(String uri) throws ClientProtocolException, IOException {
-    return processResponse((HttpUriRequest) new HttpGet(uri), null).data;
+  /**
+   * GET bytes from endpoint
+   * 
+   * @param url
+   * @return
+   * @throws ClientProtocolException
+   * @throws IOException
+   */
+  public byte[] getBytes(String url) throws ClientProtocolException, IOException {
+    return processResponse(new HttpGet(url)).data;
   }
 
   /**
-   * publishHttpData contains more information content type, response code,
-   * etc... need to subscribe to it manually for testing purposes
+   * GET HttpData from endpoint - returns a more rich response type - includes
+   * response code and headers
    * 
+   * @param url
+   * @return
+   * @throws IOException
    */
-  @Override
-  public void onHttpData(HttpData data) {
-    log.info(data.toString());
-  }
-
-  /**
-   * for testing purposes
-   * 
-   */
-  @Override
-  public void onHttpResponse(String data) {
-    log.info(data);
-  }
-
-  public String post(String uri) throws ClientProtocolException, IOException {
-    HttpData response = processResponse((HttpUriRequest) new HttpPost(uri), null);
-    if (response.data != null) {
-      return new String(response.data);
-    }
-    return null;
-  }
-
-  public String post(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
-    byte[] data = postBytes(uri, fields);
-    if (data != null) {
-      return new String(data);
-    }
-    return null;
-  }
-
-  public byte[] postBytes(String uri, HashMap<String, String> fields) throws ClientProtocolException, IOException {
-    return processResponse((HttpUriRequest) new HttpPost(uri), fields).data;
-  }
-
-  public HttpData getResponse(String uri) throws IOException {
-    HttpData response = processResponse((HttpUriRequest) new HttpGet(uri), null);
+  public HttpData getResponse(String url) throws IOException {
+    HttpData response = processResponse(new HttpGet(url));
     return response;
   }
 
-  public HttpData processResponse(HttpUriRequest request, HashMap<String, String> fields) throws IOException {
-    HttpData data = new HttpData(request.getURI().toString());
-    if (fields == null) {
-
-      fields = formFields;
+  /**
+   * Post without body
+   * 
+   * @param url
+   * @return
+   * @throws ClientProtocolException
+   * @throws IOException
+   */
+  public String post(String url) throws ClientProtocolException, IOException {
+    byte[] bytes = postBytes(url, null, null);
+    if (bytes != null) {
+      return new String(bytes);
     }
+    return null;
+  }
 
-    // Mats changed 2017-01-03. I think it was a bug
-    // if (request.getClass().equals(HttpPost.class) && formFields.size() > 0)
-    if (request.getClass().equals(HttpPost.class) && fields.size() > 0) {
+  /**
+   * Post a json string to an endpoint. This method adds the appropriate
+   * contentype and return a string of data
+   * 
+   * @param url
+   * @param json
+   * @return
+   * @throws IOException
+   */
+  public String postJson(String url, String json) throws IOException {
+    HttpPost request = new HttpPost(url);
+    StringEntity params = new StringEntity(json);
+    request.addHeader("content-type", "application/json");
+    request.setEntity(params);
+    HttpData data = processResponse(request);
+    if (data.data != null) {
+      return new String(data.data);
+    }
+    return null;
+  }
+
+  /**
+   * post and object to a json endpoint
+   * 
+   * @param url
+   * @param object
+   * @return
+   * @throws IOException
+   */
+  public String postJson(String url, Object object) throws IOException {
+    return postJson(url, CodecUtils.toJson(object));
+  }
+
+  /**
+   * post json to an endpoint where you want bytes from
+   * 
+   * @param url
+   * @param json
+   * @return
+   * @throws IOException
+   */
+  public byte[] postJsonToBytes(String url, String json) throws IOException {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("content-type", "application/json");
+    return postBytes(url, headers, json.getBytes());
+  }
+
+  /**
+   * html form post
+   * 
+   * @param url
+   * @param fields
+   * @return
+   * @throws ClientProtocolException
+   * @throws IOException
+   */
+  public String postForm(String url, Map<String, String> fields) throws ClientProtocolException, IOException {
+    HttpPost request = new HttpPost(url);
+    if (fields != null && fields.size() > 0) {
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(fields.size());
       for (String nvPairKey : fields.keySet()) {
         nameValuePairs.add(new BasicNameValuePair(nvPairKey, fields.get(nvPairKey)));
-        ((HttpPost) request).setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
       }
     }
 
-    log.info("uri [{}]", request.getURI());
+    HttpData data = processResponse(request);
+
+    if (data != null) {
+      return new String(data.data);
+    }
+    return null;
+  }
+
+  public byte[] postBytes(String url, Map<String, String> headers, byte[] data) throws ClientProtocolException, IOException {
+    HttpPost request = new HttpPost(url);
+    if (data != null) {
+      request.setEntity(new ByteArrayEntity(data));
+    }
+
+    if (headers != null) {
+      for (String key : headers.keySet()) {
+        request.setHeader(key, headers.get(key));
+      }
+    } else {
+      request.setHeader("Content-type", "application/octet-stream");
+    }
+    return processResponse(request).data;
+  }
+
+  /**
+   * All method types process the request through this method - this is to keep
+   * future maintenance to a minimum
+   * 
+   * @param request
+   * @return
+   * @throws IOException
+   */
+  public HttpData processResponse(HttpUriRequest request) throws IOException {
+    HttpData data = new HttpData(request.getURI().toString());
+
+    log.info("url [{}]", request.getURI());
 
     HttpResponse response = client.execute(request);
     StatusLine statusLine = response.getStatusLine();
@@ -258,6 +326,15 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
     return data;
   }
 
+  // Set the default host/protocol for the methods to connect to.
+  // This value will only be used if the methods are not given an absolute URI
+  // httpClient.getHostConfiguration().setHost("hc.apache.org", 80, "http");
+
+  // Map<String, HttpData> clients = new HashMap<String, HttpData>();
+
+  // TODO - proxy !
+  // TODO - authentication !
+
   /**
    * publishing point for any http request this is the asynchronous callback
    * which will arrive typically at onHttpRespone(data)
@@ -274,22 +351,18 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
   public void startService() {
     super.startService();
     if (client == null) {
-      // new MultiThreadedHttpConnectionManager()
-      client = HttpClients.createSystem(); // modded by GroG to support system
-      // proxies
-      // client = HttpClientBuilder.create().useSystemProperties();
-      // client = HttpClients.createDefault();
+      // basic closable client created - which accepts system properties
+      client = HttpClients.createSystem();
     }
   }
 
-  // Set the default host/protocol for the methods to connect to.
-  // This value will only be used if the methods are not given an absolute URI
-  // httpClient.getHostConfiguration().setHost("hc.apache.org", 80, "http");
-
-  // Map<String, HttpData> clients = new HashMap<String, HttpData>();
-
-  // TODO - proxy !
-  // TODO - authentication !
+  public void installCert(String url) {
+    try {
+      InstallCert.install(url);
+    } catch (Exception e) {
+      error(e);
+    }
+  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -298,10 +371,38 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
 
       HttpClient client = (HttpClient) Runtime.start("client", "HttpClient");
 
+      // this is how a listener might subscribe
+      // TODO - put dynamically subscribing into framework
+      // with interface inspection ??
+
+      // FIXME - add make the attach !
+
+      // client.attach(client);
+
+      // client.addHttpResponseListener(client);
+      // client.addHttpDataListener(client);
+
+      String data = client.get("https://postman-echo.com/get?foo1=bar1&foo2=bar2");
+      log.info(data);
+
+      // curl --location --request POST "https://postman-echo.com/post" --data
+      // "foo1=bar1&foo2=bar2"
+      client.postForm("https://postman-echo.com/post", "foo1", "bar1", "foo2", "bar2", "foo3", "bar with spaces");
+
+      String response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
+
+      log.info(response);
+
+      response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
+      log.info(response);
+
+      response = client.get("http://www.google.com/search?hl=en&q=myrobotlab&btnG=Google+Search&aq=f&oq=");
+      log.info(response);
+
       // <host>[:port] [passphrase]
+      // InstallCert.main(new String[] { "searx.laquadrature.net:443" });
 
-      InstallCert.main(new String[] { "searx.laquadrature.net:443" });
-
+      // client.installCert("https://searx.laquadrature.net");
       String json = client.get("https://searx.laquadrature.net/?q=cat&format=json");
       log.info(json);
 
@@ -311,37 +412,23 @@ public class HttpClient extends Service implements HttpDataListener, HttpRespons
       if (done) {
         return;
       }
-      // this is how a listener might subscribe
-      // TODO - put dynamically subscribing into framework
-      // with interface inspection ??
-      client.addHttpResponseListener(client);
-      client.addHttpDataListener(client);
-
-      // TODO - getByteArray(...)
-      String index = client.get("https://www.cs.tut.fi/~jkorpela/forms/testing.html");
-      log.info(index);
-
-      client.addFormField("Comments", "This is a different comment");
-      client.addFormField("Box", "yes");
-      client.addFormField("Unexpected", "this is an unexpected field");
-      client.addFormField("hidden field", "something else");
-
-      String response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
-
-      log.info(response);
-
-      client.clearForm();
-      client.addFormField("hidden field", "something else");
-      response = client.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
-      log.info(response);
-
-      response = client.get("http://www.google.com/search?hl=en&q=myrobotlab&btnG=Google+Search&aq=f&oq=");
-      log.info(response);
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
 
+  }
+
+  public String postForm(String url, String... fields) throws ClientProtocolException, IOException {
+    if (fields == null || fields.length % 2 != 0) {
+      log.error("postForm fields must be in the form \"key1\", \"value1\", \"key2\", \"value2\"");
+      return null;
+    }
+    Map<String, String> data = new HashMap<>();
+    for (int i = 0; i < fields.length; i = i + 2) {
+      data.put(fields[i], fields[i + 1]);
+    }
+    return postForm(url, data);
   }
 
 }

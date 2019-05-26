@@ -3,13 +3,17 @@ package org.myrobotlab.i2c;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.myrobotlab.boofcv.ExampleVisualOdometryDepth;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 public class I2CBus implements Attachable, I2CBusControl {
+
+  transient public final static Logger log = LoggerFactory.getLogger(I2CBus.class);
 
   String name;
   // transient too help prevent infinite recursion in gson
@@ -100,7 +104,7 @@ public class I2CBus implements Attachable, I2CBusControl {
   public void attach(String serviceName) throws Exception {
     // already attached to {serviceName} controller
     if (isAttached(serviceName)) {
-      Log.info("already attached to {}", serviceName);
+      log.info("already attached to {}", serviceName);
       return;
     }
 

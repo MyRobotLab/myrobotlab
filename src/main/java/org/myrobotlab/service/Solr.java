@@ -1,10 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,7 +17,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
-import javax.swing.WindowConstants;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -37,11 +31,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.NodeConfig;
-import org.apache.solr.core.SolrResourceLoader;
-import org.apache.solr.core.SolrXmlConfig;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;

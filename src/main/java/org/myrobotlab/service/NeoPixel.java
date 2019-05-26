@@ -384,7 +384,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       }
       Servo servo = (Servo) Runtime.start("servo", "Servo");
       servo.attach(arduino, 5);
-      servo.moveTo(180);
+      servo.moveTo(180.0);
       sleep(2000);
       // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 200, 0, 0, 1);
     } catch (Exception e) {

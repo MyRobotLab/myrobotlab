@@ -2239,7 +2239,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       // Servo yRot = (Servo) Runtime.start("yRot", "Servo");
       // Servo zRot = (Servo) Runtime.start("zRot", "Servo");
 
-      boolean done = false;
+      boolean done = true;
       if (done) {
         return;
       }

@@ -96,7 +96,11 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("OpenNi");
     blacklist.add("LeapMotion");
     blacklist.add("Runtime");
-
+    blacklist.add("JMonkeyEngine");
+    blacklist.add("_TemplateService");
+    blacklist.add("Lloyd");
+    blacklist.add("Solr");
+    
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.createAndStart("python", "Python");
     String testScriptDirectory = Util.getResourceDir() + File.separator + "Python" + File.separator + "examples/";

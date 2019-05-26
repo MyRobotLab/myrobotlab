@@ -25,7 +25,7 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-  static final Integer MRLCOMM_VERSION = 59;
+  static final Integer MRLCOMM_VERSION = 60;
 
   public void generateDefinitions() throws IOException {
     generateDefinitions(new File("src/main/resources/resource/Arduino/generate/arduinoMsgs.schema"));

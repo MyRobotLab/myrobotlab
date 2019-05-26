@@ -1,8 +1,10 @@
 package org.myrobotlab.document.transformer;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 
+@Ignore
 public class XPathExtractorTest extends AbstractStageTest {
 
   @Override

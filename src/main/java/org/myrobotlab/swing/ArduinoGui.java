@@ -61,6 +61,7 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.swing.widget.DockableTab;
@@ -79,7 +80,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
   PortGui portGui;
 
-  Arduino myArduinox;
+  PinArrayControl myArduinox;
 
   /**
    * array list of graphical pin components built from pinList

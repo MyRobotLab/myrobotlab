@@ -118,7 +118,7 @@ public class Jme3ServoController implements ServoController {
       log.error("servoMoveTo({})", servo);
       return;
     }
-    float velocity = (float) servo.getVelocity();
+    double velocity = servo.getSpeed();
     if (velocity == -1) {
       velocity = (float)defaultServoSpeed;
     }

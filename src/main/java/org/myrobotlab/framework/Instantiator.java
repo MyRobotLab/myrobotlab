@@ -2,6 +2,7 @@ package org.myrobotlab.framework;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -52,5 +53,29 @@ public class Instantiator {
       }
       return mc.newInstance(params); // Dynamically instantiate it
     }
+  }
+  
+  static public Object invoke(Object obj, String method, Object ...params) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    if (obj == null) {
+      return null;
+    }
+    Class<?>[] paramTypes = null;
+    
+    if (params != null) {
+      paramTypes = new Class[params.length];
+      for (int i = 0; i < params.length; ++i) {
+        if (params[i] != null) {
+          paramTypes[i] = params[i].getClass();
+        } else {
+          paramTypes[i] = null;
+        }
+      }
+    }
+    
+    Method meth = null;
+    meth = obj.getClass().getMethod(method, paramTypes); // getDeclaredMethod zod !!!
+    Object retobj = meth.invoke(obj, params);
+    return retobj;
+    
   }
 }

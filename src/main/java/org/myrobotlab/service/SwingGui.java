@@ -36,6 +36,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -78,6 +79,7 @@ import org.myrobotlab.swing.widget.AboutDialog;
 import org.myrobotlab.swing.widget.Console;
 import org.myrobotlab.swing.widget.DockableTab;
 import org.myrobotlab.swing.widget.DockableTabPane;
+import org.myrobotlab.swing.widget.FileUtil;
 import org.slf4j.Logger;
 
 import com.mxgraph.model.mxCell;
@@ -143,7 +145,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    *
    */
 
-  transient Map<String, List<ServiceGui>> nameMethodCallbackMap;
+  transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
+
+  /**
+   * normalized set of ServiceGui(s)
+   */
+  transient Map<String, ServiceGui> serviceGuis = new TreeMap<>();
 
   transient JTextField status = new JTextField("status:");
   transient JButton statusClear = new JButton("clear");
@@ -156,8 +163,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * used for "this" reference in anonymous swing utilities calls
    */
   transient SwingGui self;
-  transient private JMenu save;
-  transient private JMenu load;
+  transient private JMenu export;
+  transient private JMenu import_;
+  transient private JMenu refresh;
 
   static public void attachJavaConsole() {
     JFrame j = new JFrame("Java Console");
@@ -262,7 +270,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       status.setOpaque(false);
       status.setText("status:");
     }
-   
 
     if ("unhide all".equals(cmd)) {
       unhideAll();
@@ -281,6 +288,12 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     } else if ("about".equals(cmd)) {
       new AboutDialog(this);
       // display();
+    } else if ("refresh".equals(cmd)) {
+      send(getSelected(), "broadcastState");
+    } else if ("refresh all".equals(cmd)) {
+      for (String serviceName : Runtime.getServiceNames()) {
+        send(serviceName, "broadcastState");
+      }
     } else if ("load".equals(cmd)) {
       // get current focus
       String tabName = getSelected();
@@ -290,7 +303,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       } else if (si.isLocal()) {
         si.load();
       } else {
-        send("%s", tabName, "load");
+        send(tabName, "load");
       }
       info("loaded %s", tabName);
     } else if ("load all".equals(cmd)) {
@@ -303,36 +316,40 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         } else if (si.isLocal()) {
           si.load();
         } else {
-          send("%s", service, "load");
+          send(service, "load");
         }
       }
       info("loaded all services");
-    } else if ("save".equals(cmd)) {
+    } else if ("export".equals(cmd)) {
       // get current focus
       String tabName = getSelected();
       ServiceInterface si = Runtime.getService(tabName);
       if (si == null) {
         log.info("%s is not a service - please select the service to save", tabName);
-      } else if (si.isLocal()) {
-        si.save();
-      } else {
-        send("%s", tabName, "save");
+        return;
       }
-      info("saved %s", tabName);
-    } else if ("save all".equals(cmd)) {
-      String[] services = Runtime.getServiceNames();
-      for (String service : services) {
-        info("saving %s", service);
-        ServiceInterface si = Runtime.getService(service);
-        if (si == null) {
-          log.info("%s is not a service - please select the service to save", service);
-        } else if (si.isLocal()) {
-          si.save();
-        } else {
-          send("%s", service, "save");
+      // send(tabName, "save"); save has just become serialize
+      String newFile = FileUtil.saveAsFileName(getFrame(), String.format("%s.py", tabName));
+      try {
+        if (newFile != null) {
+          Runtime.export(newFile, newFile);
         }
+      } catch (IOException e1) {
+        log.error("could not export {} to {}", tabName, newFile);
       }
-      info("saved all services");
+      info("exported %s", tabName);
+    } else if ("export all".equals(cmd)) {
+
+      String newFile = FileUtil.saveAsFileName(getFrame(), "export.py");
+      try {
+        if (newFile != null) {
+          Runtime.exportAll(newFile);
+        }
+      } catch (IOException e1) {
+        log.error("could not export all to {}", newFile);
+      }
+
+      info("saved all exported");
     } else {
       log.info("unknown command {}", cmd);
     }
@@ -346,13 +363,19 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
    * 
    *          FIXME - full parameter of addTab(final String serviceName, final
    *          String serviceType, final String lable) then overload
+   * 
+   *          FIXME - this method should be named onRegistered
    */
   synchronized public void addTab(final ServiceInterface sw) {
-    
+
     if (Runtime.isHeadless()) {
       log.warn("{} SwingGui is in headless environment", getName());
       return;
     }
+
+    // let all current "tabs" handle a new service - possibly by refreshing sets
+    // of controllers, encoders or other possible "attachables"
+    /// xxx for (ServiceGui serviceGuis)
 
     // scroll.addItem(sw.getName());
 
@@ -360,7 +383,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       @Override
       public void run() {
 
-        String name = sw.getName();        
+        String name = sw.getName();
 
         // change tab color based on name
         // it is better to add a new interfaced method I think ?
@@ -370,7 +393,11 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         log.debug("createTab {} {}", name, guiClass);
         ServiceGui newGui = null;
 
-        newGui = (ServiceGui) Instantiator.getNewInstance(guiClass, name, self);
+        try {
+          newGui = (ServiceGui) Instantiator.getThrowableNewInstance(null, guiClass, name, self);
+        } catch (Exception e) {
+          log.info("could not create a {}", guiClass);
+        }
 
         if (newGui == null) {
           log.info("could not construct a {} object - creating generic template", guiClass);
@@ -383,6 +410,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         // is used by a ServiceGui
         if (newGui == null) {
           log.error("newGui is null");
+          return;
         }
         newGui.subscribeGui();
 
@@ -393,22 +421,31 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
         // this is preparing our routing map for callback
         // so when we receive our callback message we know where to route it
-        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallBackName("publishStatus")), newGui);
-        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallBackName("publishState")), newGui);
+        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallbackTopicName("publishStatus")), newGui);
+        subscribeToServiceMethod(String.format("%s.%s", name, CodecUtils.getCallbackTopicName("publishState")), newGui);
 
         // send a publishState to the service
         // to initialize the ServiceGui - good for remote stuffs
         send(name, "publishState");
 
-        if (getName().equals(name) && guiServiceGui == null) {
+        if (getName().equals(name) && guiServiceGui == null && newGui instanceof SwingGuiGui) {
           guiServiceGui = (SwingGuiGui) newGui;
           guiServiceGui.rebuildGraph();
         }
-        
+
         tabs.addTab(name, newGui.getDisplay(), sw.getDescription());
         tabs.getTabs().setBackgroundAt(tabs.size() - 1, getColorHash(sw.getClass().getSimpleName()));
         tabs.get(name).transitDockedColor = tabs.getTabs().getBackgroundAt(tabs.size() - 1);
         // pack(); FIXED THE EVIL BLACK FROZEN GUI ISSUE !!!!
+
+        // spin through all service guis
+        for (ServiceGui sg : serviceGuis.values()) {
+          sg.onRegistered(sw);
+        }
+
+        // simple normalized data structure
+        serviceGuis.put(name, newGui);
+        pack();
       }
     });
   }
@@ -461,25 +498,34 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     menuBar.add(search);
     menuBar.add(Box.createHorizontalGlue());
 
-    save = new JMenu("save");  
-    JMenuItem mi = new JMenuItem("save");
+    export = new JMenu("export");
+    JMenuItem mi = new JMenuItem("export");
     mi.addActionListener(this);
-    save.add(mi);
-    mi = new JMenuItem("save all");
+    export.add(mi);
+    mi = new JMenuItem("export all");
     mi.addActionListener(this);
-    save.add(mi);
-    
-    menuBar.add(save);
-    
-    load = new JMenu("load");  
-    mi = new JMenuItem("load");
+    export.add(mi);
+
+    menuBar.add(export);
+
+    import_ = new JMenu("import");
+    mi = new JMenuItem("import");
     mi.addActionListener(this);
-    load.add(mi);
-    mi = new JMenuItem("load all");
+    import_.add(mi);
+    mi = new JMenuItem("import all");
     mi.addActionListener(this);
-    load.add(mi);
-    menuBar.add(load);
-    
+    import_.add(mi);
+    menuBar.add(import_);
+
+    refresh = new JMenu("refresh");
+    mi = new JMenuItem("refresh");
+    mi.addActionListener(this);
+    refresh.add(mi);
+    mi = new JMenuItem("refresh all");
+    mi.addActionListener(this);
+    refresh.add(mi);
+    menuBar.add(refresh);
+
     JMenu help = new JMenu("help");
     JMenuItem about = new JMenuItem("about");
     about.addActionListener(this);
@@ -491,8 +537,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     return menuBar;
   }
 
-  /*
-   * puts unique service.method and ServiceGui into map also in mrl.js
+  /**
+   * This method puts unique service.method key and ServiceGui into map also in
+   * mrl.js
    * 
    * the format of the key needs to be {name}.method
    * 
@@ -597,7 +644,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   public void noWorky() {
     // String img =
-    // SwingGui.class.getResource(Util.getRessourceDir() + "/expert.jpg").toString();
+    // SwingGui.class.getResource(Util.getRessourceDir() +
+    // "/expert.jpg").toString();
     String logon = (String) JOptionPane.showInputDialog(getFrame(),
         "<html>This will send your myrobotlab.log file<br><p align=center>to our crack team of experts,<br> please type your myrobotlab.org user</p></html>", "No Worky!",
         JOptionPane.WARNING_MESSAGE, Util.getResourceIcon("expert.jpg"), null, null);
@@ -618,10 +666,15 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   }
 
   public void pack() {
-    if (frame != null) {
-      frame.pack();
-      frame.repaint();
-    }
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        if (frame != null) {
+          frame.pack();
+          frame.repaint();
+        }
+      }
+    });
   }
 
   @Override
@@ -658,6 +711,9 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   // FIXME - when a service is 'being' released Runtime should
   // manage the releasing of the subscriptions !!!
   synchronized public void removeTab(final ServiceInterface si) {
+
+    serviceGuis.remove(si.getName());
+
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
@@ -712,8 +768,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     if (!active) {
       active = true;
 
-      nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
-
       // ===== build tab panels begin ======
       // builds all the service tabs for the first time called when
       // SwingGui
@@ -721,9 +775,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
       // add welcome table - weird - this needs to be involved in display
       tabs.addTab("Welcome", new Welcome("welcome", this).getDisplay());
-      // subscribeToServiceMethod("Welcome", new Welcome("welcome", this,
-      // tabs));
-      
+
       /**
        * pack() repaint() works on current selected (non-hidden) tab welcome is
        * the first panel when the UI starts - therefore this controls the
@@ -767,7 +819,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       createJFrame(fullscreen);
     }
   }
-  
+
   public String getSelected() {
     return tabs.getSelected();
   }
@@ -888,7 +940,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
   public void setActiveTab(String title) {
     // we need to wait a little after Runtime.start to select an active tab
-    // TODO understand why we need a sleep(1000);
+    // TODO understand why we need a sleep(1000); - cuz swing is lame :(
     this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));
   }
 

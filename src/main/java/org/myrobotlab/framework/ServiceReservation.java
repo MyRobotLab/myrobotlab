@@ -20,31 +20,22 @@ public class ServiceReservation implements Serializable {
   public String fullTypeName;
   public String comment;
 
-  public boolean isRoot = false;
+  public Boolean isRoot = false;
+  public Boolean autoStart;
 
   public ServiceReservation(String key, String typeName, String comment) {
-    this.key = key;
-    this.actualName = key;
-    if (!typeName.contains(".")) {
-      this.fullTypeName = String.format("org.myrobotlab.service.%s", typeName);
-    } else {
-      this.fullTypeName = typeName;
-    }
-    this.comment = comment;
+    this(key, key, typeName, comment, null, null);    
+  }
+  
+  public ServiceReservation(String key, String typeName, String comment, boolean autoStart) {
+    this(key, key, typeName, comment, null, autoStart);   
   }
 
   public ServiceReservation(String key, String actualName, String typeName, String comment) {
-    this.key = key;
-    this.actualName = actualName;
-    if (typeName != null && !typeName.contains(".")) {
-      this.fullTypeName = String.format("org.myrobotlab.service.%s", typeName);
-    } else {
-      this.fullTypeName = typeName;
-    }
-    this.comment = comment;
+    this(key, actualName, typeName, comment, null, null);
   }
 
-  public ServiceReservation(String key, String actualName, String typeName, String comment, boolean isRoot) {
+  public ServiceReservation(String key, String actualName, String typeName, String comment, Boolean isRoot, Boolean autoStart) {
     this.key = key;
     this.actualName = actualName;
     if (!typeName.contains(".")) {
@@ -53,7 +44,8 @@ public class ServiceReservation implements Serializable {
       this.fullTypeName = typeName;
     }
     this.comment = comment;
-    this.isRoot = isRoot;
+    this.isRoot = (isRoot == null)?false:isRoot;
+    this.autoStart = (autoStart == null)?true:autoStart;
   }
 
   // FIXME - clean up data entry - so this doesnt need the logic !!

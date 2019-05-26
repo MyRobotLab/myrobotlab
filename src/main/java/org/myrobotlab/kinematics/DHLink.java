@@ -43,7 +43,7 @@ public class DHLink implements Serializable {
 
   private double velocity; // FIXME - is this set by IK being dp/dt ? .. it
   // should be
-  private int state = Servo.SERVO_EVENT_STOPPED; // FIXME - no servo info
+  // private int state = Servo.SERVO_EVENT_STOPPED; // FIXME - no servo info
   public double targetPos;
   public boolean hasServo = false; // FIXME - no servo info
   public double servoMin;
@@ -83,7 +83,7 @@ public class DHLink implements Serializable {
     this.max = copy.max;
     this.name = copy.name;
     this.initialTheta = copy.initialTheta;
-    this.state = copy.state;
+    // this.state = copy.state;
     this.targetPos = copy.targetPos;
     this.velocity = copy.velocity;
     this.hasServo = copy.hasServo;
@@ -322,14 +322,6 @@ public class DHLink implements Serializable {
 
   public void setVelocity(double velocity) {
     this.velocity = velocity;
-  }
-
-  public Integer getState() {
-    return state;
-  }
-
-  public void setState(Integer state) {
-    this.state = state;
   }
 
   /**

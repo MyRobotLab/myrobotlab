@@ -897,4 +897,10 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   public void write(int address, int value) {
     log.error("Mpr121 does not support writing");
   }
+
+  @Override
+  public Integer getAddress(String pin) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

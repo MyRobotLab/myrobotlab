@@ -2,10 +2,8 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.sensor.EncoderData;
-import org.myrobotlab.service.abstracts.AbstractEncoder;
+import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.interfaces.EncoderController;
 
 /**
  * AS5048A - SPI based 14 bit magnetic absolute position encoder.
@@ -13,7 +11,7 @@ import org.myrobotlab.service.interfaces.EncoderController;
  * @author kwatters
  *
  */
-public class As5048AEncoder extends AbstractEncoder implements EncoderControl {
+public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
 

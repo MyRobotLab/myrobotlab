@@ -27,6 +27,7 @@ package org.myrobotlab.framework;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -67,6 +68,10 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
  * 
@@ -147,12 +152,25 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public final static String cfgDir = FileIO.getCfgDir();
 
-  // no longer transient - getMethodMap is not really needed
-  protected Set<String> methodSet;
+  /**
+   * used as a static cache for quick method name testing
+   * FIXME - if you make this static it borks things - not sure why
+   * this should be static info and should not be a member variable !
+   */
+  transient protected Set<String> methodSet;
 
   // :P - gson will default convert a HashSet into an Array :(
   // So we need to make it a HashMap in order for gson to convert to an object
-  protected Map<String, String> interfaceSet;
+  /**
+   * FIXME - if you make this static it borks things - not sure why
+   * this should be static info and should not be a member variable !
+   */
+  transient protected Map<String, String> interfaceSet;
+  
+  /**
+   * order which this service was created
+   */
+  Integer creationOrder;
 
   // FIXME SecurityProvider
   protected AuthorizationProvider authProvider = null;
@@ -594,7 +612,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
               actualName = String.format("%s.%s", myKey, template.actualName);
             }
 
-            sr = new ServiceReservation(fullKey, actualName, template.fullTypeName, template.comment, template.isRoot);
+            sr = new ServiceReservation(fullKey, actualName, template.fullTypeName, template.comment, template.isRoot, template.autoStart);
 
             // we have to recursively move things if we moved a root
             // of some complex peer (the root and all its branches)
@@ -826,7 +844,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     } else {
       name = reservedKey;
     }
-   
+
     this.inbox = new Inbox(name);
     this.outbox = new Outbox(this);
     cm = new CommunicationManager(name);
@@ -838,7 +856,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * new overload - mqtt uses this for json encoded MrlListener to process
    * subscriptions
    * 
-   * @param data - listener callback info
+   * @param data
+   *          - listener callback info
    */
   public void addListener(Map data) {
     // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
@@ -856,6 +875,10 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public void addListener(MRLListener listener) {
     addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
+  }
+
+  public void addListener(String topicMethod, String callbackName) {
+    addListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
   }
 
   /**
@@ -904,7 +927,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public void addTask(long intervalMs, String method, Object... params) {
     addTask(method, intervalMs, 0, method, params);
   }
-  
+
   public void addTaskOneShot(int delay, String method, Object... params) {
     addTask(method, 0, delay, method, params);
   }
@@ -934,7 +957,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     timer.schedule(task, delay);
     tasks.put(taskName, timer);
   }
-  
+
   public HashMap<String, Timer> getTasks() {
     return tasks;
   }
@@ -958,7 +981,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         }
       }
     } else {
-      log.warn("purgeTask - task {} does not exist", taskName);
+      log.info("purgeTask - task {} does not exist", taskName);
     }
   }
 
@@ -969,7 +992,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         try {
           timer.purge();
           timer.cancel();
-          timer = null;          
+          timer = null;
         } catch (Exception e) {
           log.info(e.getMessage());
         }
@@ -1465,7 +1488,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
         } catch (Exception e1) {
           log.error("boom goes method - could not find method in cache {}", mC.getName(), e1);
         }
-
       }
 
       // TODO - build method cache map from errors
@@ -1502,7 +1524,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
         }
       }
 
-      log.error("did not find method - {}.{}({})", obj, method, CodecUtils.getParameterSignature(params));
+      log.error("did not find method - {}.{}({}) {}", obj, method, CodecUtils.getParameterSignature(params), paramTypes);
     } catch (Exception e) {
       log.error("{}", e.getClass().getSimpleName(), e);
     }
@@ -1543,6 +1565,59 @@ public abstract class Service extends MessageService implements Runnable, Serial
   @Override
   public boolean load() {
     return load(null, null);
+  }
+  
+  public JsonElement loadJsonTree() throws IOException {
+    String filename = String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
+    String json = FileIO.toString(filename);
+    return loadJsonTree(json);    
+  }
+  
+  public JsonElement loadJsonTree(String json) {    
+    return CodecUtils.toJsonTree(json);
+  }
+  
+  public Object loadField(String fieldName) throws IOException {
+    
+    JsonElement tree = loadJsonTree();
+    if (tree == null) {
+      return null;
+    }
+    
+    JsonObject jsonObject = tree.getAsJsonObject();
+    if (jsonObject == null) {
+      return null;
+    }
+    
+    JsonElement field = jsonObject.get(fieldName);
+    if (field == null) {
+      return null;
+    }
+    
+    if (field.isJsonNull()) {
+      return null;
+    }
+    
+    if (field.isJsonObject()) {
+      return field.getAsJsonObject();
+    }
+    // box for simplicity 
+
+    if (field.isJsonPrimitive()) {
+      JsonPrimitive primitive = field.getAsJsonPrimitive();
+      if (primitive.isBoolean()) {
+        return primitive.getAsBoolean();
+      }
+      
+      if (primitive.isString()) {
+        return primitive.getAsString();
+      }
+      
+      if (primitive.isNumber()) {
+        return primitive.getAsDouble();
+      }      
+    }
+    return null;
   }
 
   public boolean load(Object o, String inCfgFileName) {
@@ -1655,7 +1730,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       Method method = theClass.getMethod("getMetaData");
       ServiceType serviceType = (ServiceType) method.invoke(null);
       Map<String, ServiceReservation> peers = serviceType.getPeers();
-      for (String s : peers.keySet()) {        
+      for (String s : peers.keySet()) {
         Runtime.release(getPeerKey(s));
       }
 
@@ -1692,7 +1767,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     purgeTasks();
 
     // Runtime.release(getName()); infinite loop with peers ! :(
-    
+
     Runtime.unregister(getName());
   }
 
@@ -1830,7 +1905,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       out.write(s.getBytes());
       out.close();
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("save threw", e);
       return false;
     }
     return true;
@@ -1881,7 +1956,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     send(msg);
   }
 
-  public void send(Message msg) {  
+  public void send(Message msg) {
     outbox.add(msg);
   }
 
@@ -1986,7 +2061,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
       si.startService();
     } catch (Exception e) {
       error(e.getMessage());
-      Logging.logError(e);
+      log.error("startPeer threw", e);
     }
     return si;
   }
@@ -2014,11 +2089,17 @@ public abstract class Service extends MessageService implements Runnable, Serial
   @Override
   synchronized public void startService() {
     ServiceInterface si = Runtime.getService(name);
+    // if not registered - register
     if (si == null) {
-      // FIXME - should NOT be create !!!! should be put into registry !
-      // Runtime.create(name, getSimpleName());
       Runtime.register(this, null);
     }
+
+    // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
+    // should be created
+    // currently they are started by the UI vs created - and there is no desire
+    // or current capability of starting it
+    // afterwards
+
     if (!isRunning()) {
       outbox.start();
       if (thisThread == null) {
@@ -2028,6 +2109,86 @@ public abstract class Service extends MessageService implements Runnable, Serial
       isRunning = true;
     } else {
       log.debug("startService request: service {} is already running", name);
+    }
+  }
+
+  public void startPeers() {
+    log.info("starting peers");
+    Map<String, ServiceReservation> peers = null;
+
+    try {
+      Method method = this.getClass().getMethod("getMetaData");
+      ServiceType st = (ServiceType) method.invoke(null);
+      peers = st.getPeers();
+    } catch (Exception e) {
+    }
+
+    if (peers == null) {
+      return;
+    }
+
+    Set<Class<?>> ancestry = new HashSet<Class<?>>();
+    Class<?> targetClass = this.getClass();
+
+    // if we are a org.myrobotlab object climb up the ancestry to
+    // copy all super-type fields ...
+    // GroG says: I wasn't comfortable copying of "Service" - because its never
+    // been tested before - so we copy all definitions from
+    // other superclasses e.g. - org.myrobotlab.service.abstracts
+    // it might be safe in the future to copy all the way up without stopping...
+    while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
+      ancestry.add(targetClass);
+      targetClass = targetClass.getSuperclass();
+    }
+
+    for (Class<?> sourceClass : ancestry) {
+
+      Field fields[] = sourceClass.getDeclaredFields();
+      for (int j = 0, m = fields.length; j < m; j++) {
+        try {
+          Field f = fields[j];
+
+          /**
+           * <pre>
+           * int modifiers = f.getModifiers();
+           * String fname = f.getName();
+           * if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+           *   log.debug("skipping {}", f.getName());
+           *   continue;
+           * } else {
+           *   log.debug("copying {}", f.getName());
+           * }
+           * 
+           * Type t = f.getType();
+           * </pre>
+           */
+
+          f.setAccessible(true);
+          Field targetField = sourceClass.getDeclaredField(f.getName());
+          targetField.setAccessible(true);
+
+          if (peers.containsKey(f.getName())) {
+            ServiceReservation sr = peers.get(f.getName());
+
+            if (sr.autoStart == null || sr.autoStart == false) {
+              log.info("peer defined - but configured to not autoStart");
+              continue;
+            }
+
+            if (f.get(this) != null) {
+              log.info("peer {} already assigned", f.getName());
+              continue;
+            }
+            log.info("assinging {}.{} = startPeer({})", sourceClass.getSimpleName(), f.getName(), f.getName());
+            Object o = startPeer(f.getName());
+
+            targetField.set(this, o);
+          }
+
+        } catch (Exception e) {
+          log.error("copy failed", e);
+        }
+      } // for each field in class
     }
   }
 
@@ -2047,12 +2208,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   // -------------- Messaging Begins -----------------------
   public void subscribe(NameProvider topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
   }
 
   public void subscribe(String topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getName(), callbackMethod);
   }
 
@@ -2076,12 +2237,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public void unsubscribe(NameProvider topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName.getName(), topicMethod, getName(), callbackMethod);
   }
 
   public void unsubscribe(String topicName, String topicMethod) {
-    String callbackMethod = CodecUtils.getCallBackName(topicMethod);
+    String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     unsubscribe(topicName, topicMethod, getName(), callbackMethod);
   }
 
@@ -2103,7 +2264,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   @Override
   public Status error(String format, Object... args) {
-    Status ret = Status.error(String.format(format, args));
+    Status ret = null;
+    if (format != null) {
+      ret = Status.error(String.format(format, args));
+    } else {
+      ret = Status.error(String.format("", args));
+    }
     ret.name = getName();
     log.error(ret.toString());
     invoke("publishStatus", ret);
@@ -2142,6 +2308,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   @Override
   public Status info(String format, Object... args) {
     Status status = Status.info(format, args);
+    log.info(status.toString());
     invoke("publishStatus", status);
     return status;
   }
@@ -2402,7 +2569,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * resource/{ServiceType} (mrl's static resource directory) 3. check absolute
    * path
    * 
-   * @param filename - file name to get
+   * @param filename
+   *          - file name to get
    * @return the file to returned or null if does not exist
    */
   public File getFile(String filename) {
@@ -2434,20 +2602,20 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   public void preShutdown() {
   }
-  
+
   /**
-   * determines if current process has internet access - moved to Service recently
-   * because it may become Service specific
+   * determines if current process has internet access - moved to Service
+   * recently because it may become Service specific
    * 
    * @return - true if internet is available
    */
   public static boolean hasInternet() {
     return Runtime.getPublicGateway() != null;
   }
-  
+
   /**
-   * true when no display is available - moved from Runtime to Service because it may become
-   * Service specific
+   * true when no display is available - moved from Runtime to Service because
+   * it may become Service specific
    * 
    * @return - true when no display is available
    */
@@ -2455,4 +2623,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return java.awt.GraphicsEnvironment.isHeadless();
   }
   
+  public void setOrder(int creationCount) {
+    this.creationOrder = creationCount;
+  }
+
 }

@@ -73,6 +73,7 @@ public class Clock extends Service {
 
           if (!NoExecutionAtFirstClockStarted) {
             invoke("pulse", new Date());
+            invoke("publishTime", new Date());
           }
           Thread.sleep(interval);
           NoExecutionAtFirstClockStarted = false;
@@ -127,6 +128,10 @@ public class Clock extends Service {
   }
 
   public Date pulse(Date time) {
+    return time;
+  }
+  
+  public Date publishTime(Date time) {
     return time;
   }
 

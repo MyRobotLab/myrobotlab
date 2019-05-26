@@ -8,8 +8,13 @@ public interface AbsolutePositionControl {
    * 
    * @param newPos
    *          the new position to move to.
+   * @return TODO
    * 
    */
-  public void moveTo(double newPos);
+  public boolean moveTo(Double newPos);
+
+  public Double moveToBlocking(Double newPos);
+    
+  public Double moveToBlocking(Double newPos, Long timeoutMs);
 
 }

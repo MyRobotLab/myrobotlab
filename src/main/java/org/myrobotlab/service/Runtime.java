@@ -17,7 +17,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +37,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.atmosphere.wasync.Client;
 import org.atmosphere.wasync.ClientFactory;
@@ -64,6 +68,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -154,6 +159,11 @@ public class Runtime extends Service implements MessageListener {
   static private boolean autoAcceptLicense = true; // at the moment
 
   /**
+   * number of services created by this runtime
+   */
+  Integer creationCount = 0;
+
+  /**
    * the local repo of this machine - it should not be static as other foreign
    * repos will come in with other Runtimes from other machines.
    */
@@ -222,6 +232,8 @@ public class Runtime extends Service implements MessageListener {
   static private CmdLine cmdline = null;
 
   private static String gateway;
+  
+  static Set<String> networkPeers = null;
 
   Locale locale;
 
@@ -252,7 +264,6 @@ public class Runtime extends Service implements MessageListener {
       return gateway;
 
     } catch (Exception e) {
-      // log.error("can't connect", e);
       log.warn("internet not available");
     }
     return null;
@@ -395,6 +406,8 @@ public class Runtime extends Service implements MessageListener {
       ServiceInterface si = (ServiceInterface) newService;
       Platform platform = Platform.getLocalInstance();
       si.setVirtual(platform.isVirtual());
+      Runtime.getInstance().creationCount++;
+      si.setOrder(Runtime.getInstance().creationCount);
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed", e);
@@ -402,12 +415,12 @@ public class Runtime extends Service implements MessageListener {
     return null;
   }
 
-  public Map<String, Map<String, List<MRLListener>>> getNotifyEntries() {
+  static public Map<String, Map<String, List<MRLListener>>> getNotifyEntries() {
     Map<String, Map<String, List<MRLListener>>> ret = new TreeMap<String, Map<String, List<MRLListener>>>();
     ServiceEnvironment se = getLocalServices();
     Map<String, ServiceInterface> sorted = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
     for (Map.Entry<String, ServiceInterface> entry : sorted.entrySet()) {
-      System.out.println(entry.getKey() + "/" + entry.getValue());
+      log.info(entry.getKey() + "/" + entry.getValue());
       ArrayList<String> flks = entry.getValue().getNotifyListKeySet();
       Map<String, List<MRLListener>> subret = new TreeMap<String, List<MRLListener>>();
       for (String sn : flks) {
@@ -625,7 +638,67 @@ public class Runtime extends Service implements MessageListener {
     } catch (Exception e) {
       Logging.logError(e);
     }
+    
+    if (ret.size() == 0) {
+      // if we don't have a "real" ip address - we always have home
+      ret.add("127.0.0.1");
+    }
     return ret;
+  }
+
+  static public void getNetInfo() {
+    try {
+      List<String> local = getLocalAddresses();
+      String gateway = getPublicGateway();
+      getNetworkPeers();
+    } catch (Exception e) {
+      log.error("getNetInfo threw", e);
+    }
+
+  }
+
+  // TODO - add network to search
+  static public Set<String> getNetworkPeers() throws UnknownHostException {
+    networkPeers = new TreeSet<>();
+    // String myip = InetAddress.getLocalHost().getHostAddress();
+    List<String> myips = getLocalAddresses(); // TODO - if nothing else - 127.0.0.1
+    for (String myip : myips) {
+      if (myip.equals("127.0.0.1")) {
+        log.info("This PC is not connected to any network!");
+      } else {
+        String testIp = null;
+        for (int i = myip.length() - 1; i >= 0; --i) {
+          if (myip.charAt(i) == '.') {
+            testIp = myip.substring(0, i + 1);
+            break;
+          }
+        }
+
+        log.info("My Device IP: " + myip + "\n");
+        log.info("Search log:");
+
+        for (int i = 1; i <= 254; ++i) {
+          try {
+
+            InetAddress addr = InetAddress.getByName(testIp + new Integer(i).toString());
+
+            if (addr.isReachable(1000)) {
+              log.info("Available: " + addr.getHostAddress());
+              networkPeers.add(addr.getHostAddress());
+            } else
+              log.info("Not available: " + addr.getHostAddress());
+          } catch (IOException ioex) {
+          }
+        }
+
+        log.info("found {} devices", networkPeers.size());
+
+        for (String device : networkPeers) {
+          log.info(device);
+        }
+      }
+    }
+    return networkPeers;
   }
 
   public static List<ApiDescription> getApis() {
@@ -1336,42 +1409,42 @@ public class Runtime extends Service implements MessageListener {
       rt.info("%s already released", name);
       return false;
     }
-    
+
     // get reference from registry
     ServiceInterface sw = registry.get(name);
     if (sw == null) {
       log.warn("cannot release {} - not in registry");
       return false;
     }
-    
-    // FIXME - TODO  invoke and or blocking on preRelease - Future
-    
+
+    // FIXME - TODO invoke and or blocking on preRelease - Future
+
     // send msg to service to self terminate
     if (sw.isLocal()) {
       sw.releaseService();
     } else {
       rt.send(name, "releaseService");
     }
-    
+
     unregister(name);
 
     return true;
   }
-  
+
   synchronized public static void unregister(String name) {
     log.info("unregister {}", name);
     Runtime rt = getInstance();
-    
+
     // get reference from registry
     ServiceInterface sw = registry.get(name);
     if (sw == null) {
       log.info("{} already unregistered", name);
       return;
     }
-    
+
     // you have to send released before removing from registry
     rt.invoke("released", sw);
-    
+
     // remove from registry
     registry.remove(name);
 
@@ -1592,7 +1665,7 @@ public class Runtime extends Service implements MessageListener {
 
     return ret;
   }
-  
+
   static public void connectTo(String url) throws IOException {
     connectTo(url, null);
   }
@@ -1600,27 +1673,24 @@ public class Runtime extends Service implements MessageListener {
   static public void connectTo(String url, String body) throws IOException {
 
     // connect via websocket
-    Client<?,?,?> client = ClientFactory.getDefault().newClient();
+    Client<?, ?, ?> client = ClientFactory.getDefault().newClient();
 
-    RequestBuilder<?> request = client.newRequestBuilder()
-            .method(Request.METHOD.GET)
-            .uri(url)
-            .encoder(new Encoder<String, Reader>() {        // Stream the request body
-                @Override
-                public Reader encode(String s) {
-                    return new StringReader(s);
-                }
-            })
-            .decoder(new Decoder<String, Reader>() {
-                @Override
-                public Reader decode(Event type, String s) {
-                    return new StringReader(s);
-                }
-            })
-            .transport(Request.TRANSPORT.WEBSOCKET)                        // Try WebSocket
-            .transport(Request.TRANSPORT.LONG_POLLING);                    // Fallback to Long-Polling
-  
-    
+    RequestBuilder<?> request = client.newRequestBuilder().method(Request.METHOD.GET).uri(url).encoder(new Encoder<String, Reader>() { // Stream
+                                                                                                                                       // the
+                                                                                                                                       // request
+                                                                                                                                       // body
+      @Override
+      public Reader encode(String s) {
+        return new StringReader(s);
+      }
+    }).decoder(new Decoder<String, Reader>() {
+      @Override
+      public Reader decode(Event type, String s) {
+        return new StringReader(s);
+      }
+    }).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
+        .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to Long-Polling
+
     Socket socket = client.create();
     socket.on(new Function<Reader>() {
       @Override
@@ -1638,8 +1708,8 @@ public class Runtime extends Service implements MessageListener {
       }
 
     }).open(request.build()).fire("echo").fire("bong");
-    
-//     client.w
+
+    // client.w
   }
 
   public static void setRuntimeName(String inName) {
@@ -1671,7 +1741,6 @@ public class Runtime extends Service implements MessageListener {
     }
 
     locale = Locale.getDefault();
-    
 
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
@@ -1801,7 +1870,7 @@ public class Runtime extends Service implements MessageListener {
     // System.getProperty("pi4j.armhf")
 
     log.info("java.home [{}]", System.getProperty("java.home"));
-    log.info("java.class.path [{}]", System.getProperty("java.class.path"));
+    log.debug("java.class.path [{}]", System.getProperty("java.class.path"));
     log.info("java.library.path [{}]", libararyPath);
     log.info("user.dir [{}]", userDir);
 
@@ -2468,11 +2537,11 @@ public class Runtime extends Service implements MessageListener {
     meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     meta.addDependency("org.atmosphere", "wasync", "2.1.5");
-    
+
     // all your logging needs
     meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
     meta.addDependency("ch.qos.logback", "logback-classic", "1.0.13");
-    
+
     // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");
     // meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
 
@@ -2525,6 +2594,104 @@ public class Runtime extends Service implements MessageListener {
     log.info("Runtime exec {}", Arrays.toString(cmd));
     Process p = java.lang.Runtime.getRuntime().exec(cmd);
     return p;
+  }
+
+  // FIXME - parameters String filname, String lang (python|java) - default with
+  // timestamp ?
+  // TODO - auto-restore (on startup)/ auto-backup
+  public static void backup() {
+
+    try {
+
+      // registry
+
+      // save json inline in python form
+      // https://stackoverflow.com/questions/42444130/python-multi-line-json-and-variables
+      // - dictionary
+
+      // backup potentially could be very few lines of code - if the very few
+      // lines of code did a very large amount of
+      // data manipulation, the proportion of data to code would be high
+
+      // 0 - replace option - tear down everything except runtime ??? ie -
+      // replace system vs add
+
+      // 1 - export all services
+
+      // 1.5 - and their inline data
+
+      // 2 - export all subscriptions/ notifications
+
+      // 3 - look for exceptions - see if any services have their own special
+      // jython export implementation
+
+      // FIXME - remove messageMap and interfaceMap and depedencies - anything
+      // which is static as the class definition
+
+      // TODO - if language.equals("python")
+      StringBuilder sb = new StringBuilder();
+
+      // TODO - add header
+
+      sb.append("import json\n");
+
+      String[] services = getServiceNames();
+
+      for (String name : services) {
+        ServiceInterface si = Runtime.getService(name);
+        String safeName = CodecUtils.getSafeReferenceName(name);
+        sb.append(String.format("%s = Runtime.start(\"%s\",\"%s\")\n", name, name, si.getType()));
+      }
+
+      sb.append("\n############ loading ############\n");
+      sb.append("print(\"loading ...\")\n");
+
+      for (String name : services) {
+        ServiceInterface si = Runtime.getService(name);
+        if (si.getName().equals("runtime")) {
+          continue;
+        }
+        String json = CodecUtils.toJson(si);
+
+        // data load in "json" form vs python dictionary - it could be in json
+        // dictionary
+        sb.append(String.format("%sJson = \"\"\"%s\n\"\"\"\n", name, json));
+
+        sb.append(String.format("%s.load(%s)\n", name + "Json", si.getType()));
+      }
+
+      Files.write(Paths.get("backup.py"), sb.toString().getBytes());
+
+      // Map<String, Map<String, List<MRLListener>>> routeMap =
+      // getNotifyEntries();
+      /*
+       * StringBuffer routes = new StringBuffer(); for (String name : services)
+       * { ServiceInterface si = Runtime.getService(name);
+       * si.getOutbox().notifyList; }
+       */
+
+      // TODO - notifications / subscriptions
+      // iterate through all services
+      // iterate through all notifications
+      // load subscripts - make shorthand syntax // perhaps subscribe ??
+      Files.write(Paths.get("backup-routes.py"), CodecUtils.toJson(getNotifyEntries()).getBytes());
+
+      log.info("finished...");
+
+    } catch (Exception e) {
+      log.error("backup threw", e);
+    }
+  }
+
+  public static void export(String filename, String names) throws IOException {
+    String python = LangUtils.toPython(names);
+    Files.write(Paths.get(filename), python.toString().getBytes());
+  }
+
+  public static void exportAll(String filename) throws IOException {
+    // currently only support python - maybe in future we'll support js too
+    String python = LangUtils.toPython();
+    Files.write(Paths.get(filename), python.toString().getBytes());    
   }
 
 }

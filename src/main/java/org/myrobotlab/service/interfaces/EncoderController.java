@@ -4,14 +4,20 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.sensor.EncoderData;
 
 public interface EncoderController extends Attachable {
-  // > encoderAttach/deviceId/pin
-  public void attach(EncoderControl control, Integer pin) throws Exception;
 
+  /**
+   * minimal attach
+   * @param control
+   * @throws Exception
+   */
+  public void attach(EncoderControl control) throws Exception;
+
+  // possibly ? for ones which support it ?
   // > setZeroPoint/deviceId
   // public void setZeroPoint(Integer deviceId);
 
   // < publishEncoderPosition/deviceId/b16 position
-  public EncoderData publishEncoderPosition(EncoderData data);
+  public EncoderData publishEncoderData(EncoderData data);
 
   public void setZeroPoint(EncoderControl encoder);
 

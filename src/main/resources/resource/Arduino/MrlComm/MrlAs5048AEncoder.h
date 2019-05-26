@@ -31,7 +31,7 @@ class MrlAs5048AEncoder : public Device {
     // TODO: support this.. this chip is an OTP (one time programming)
     // you can flash/save it once, and that's it. so not implementing it here.
     // void setZeroPoint();
-    void publishEncoderPosition(float deg);
+    void publishEncoderData(float deg);
 };
 
 #endif
