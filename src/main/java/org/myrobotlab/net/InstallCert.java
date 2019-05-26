@@ -42,11 +42,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -94,20 +100,42 @@ public class InstallCert {
 
   private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
 
-  public static void main(final String[] args) throws Exception {
+  public static void main(final String[] args) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
     String host;
     int port;
-    char[] passphrase;
     if ((args.length == 1) || (args.length == 2)) {
       final String[] c = args[0].split(":");
       host = c[0];
       port = (c.length == 1) ? 443 : Integer.parseInt(c[1]);
-      final String p = (args.length == 1) ? "changeit" : args[1];
-      passphrase = p.toCharArray();
+      final String pass = (args.length == 1) ? "changeit" : args[1];
+      install(host, port, pass);
     } else {
-      log.info("Usage: java InstallCert <host>[:port] [passphrase]");
+      log.error("Usage: java InstallCert <host>[:port] [passphrase]");
       return;
     }
+  }
+
+  public static void install(String urlstr) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+    install(urlstr, null);
+  }
+  public static void install(String urlstr, String pass) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+    URL url = new URL(urlstr);
+    install(url.getHost(), url.getPort(), pass);
+  }
+  
+  public static void install(String host, String inport, String pass) throws KeyManagementException, NumberFormatException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+    String port = (inport != null)?"443":inport;
+    install(host, Integer.parseInt(port), pass);
+  }
+  
+  public static void install(String host, Integer inport, String pass) throws NoSuchAlgorithmException, IOException, CertificateException, KeyStoreException, KeyManagementException {
+  
+    Integer port = (inport == null || inport == -1)?443:inport;
+    
+    char[] passphrase;
+    
+    final String p = (pass == null) ? "changeit" : pass;
+    passphrase = p.toCharArray();
 
     File file = new File("jssecacerts");
     if (file.isFile() == false) {
@@ -199,4 +227,5 @@ public class InstallCert {
     }
     return sb.toString();
   }
+
 }

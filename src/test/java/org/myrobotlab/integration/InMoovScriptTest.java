@@ -5,45 +5,22 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.InMoov;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.test.AbstractTest;
 
-// Grr.. TODO: too hard a test for our weak jenkins oven in the cloud :(
 public class InMoovScriptTest extends AbstractTest {
 
-  private static final String V_PORT_1 = "COM99";
-  private static final String V_PORT_2 = "COM100";
-
-  public Arduino ard1;
-  public Arduino ard2;
-
   private String scriptRoot = "src/test/resources/InMoov";
-
-  @Before
-  public void setup() throws Exception {
-    // setup the test environment ,and create an arduino with a virtual backend
-    // for it.
-    // LoggingFactory.init("WARN");
-    // initialize 2 serial ports (virtual arduino)
-    VirtualArduino va1 = (VirtualArduino) Runtime.createAndStart("va1", "VirtualArduino");
-    VirtualArduino va2 = (VirtualArduino) Runtime.createAndStart("va2", "VirtualArduino");
-    // one for the left port
-    va1.connect(V_PORT_1);
-    // one for the right port.
-    va2.connect(V_PORT_2);
-  }
 
   // Test the inmoov minimal script.
   @Test
   public void testInMoovMinimal() throws IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     // TODO: move these scripts to test resources
     String inmoovScript = scriptRoot + "/InMoov.minimal.py";
     File f = new File(inmoovScript);
@@ -62,16 +39,18 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalArm() throws IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    if (!isHeadless()) {
+      Runtime.start("gui", "SwingGui");
+    }
     String inmoovScript = scriptRoot + "/InMoov.minimalArm.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
-    // InputStream is = this.getClass().getResourceAsStream(inmoovScript);
     String script = FileIO.toString(inmoovScript);
+    // FileIO.toFile("script.py", script);
     // String script = new String(FileIO.toByteArray(is));
-    Python python = (Python) Runtime.createAndStart("python", "Python");
-    python.createPythonInterpreter();
-    // python.execAndWait(script);
+    Python python = (Python) Runtime.start("python", "Python");
     python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
     // Assert something
@@ -81,7 +60,8 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalFingerStarter() throws IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String inmoovScript = scriptRoot + "/InMoov.minimalFingerStarter.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
@@ -100,15 +80,16 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalHead() throws IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String inmoovScript = scriptRoot + "/InMoov.minimalHead.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
     // InputStream is = this.getClass().getResourceAsStream(inmoovScript);
     String script = FileIO.toString(inmoovScript);
+    FileIO.toFile("script.py", script);
     // String script = new String(FileIO.toByteArray(is));
-    Python python = (Python) Runtime.createAndStart("python", "Python");
-    python.createPythonInterpreter();
+    Python python = (Python) Runtime.start("python", "Python");
     // python.execAndWait(script);
     python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
@@ -119,16 +100,14 @@ public class InMoovScriptTest extends AbstractTest {
   // Test the inmoov minimal arm script.
   @Test
   public void testInMoovMinimalTorso() throws IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+    if (printMethods)
+      System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     String inmoovScript = scriptRoot + "/InMoov.minimalTorso.py";
     File f = new File(inmoovScript);
     System.out.println("IN MOOV SCRIPT: " + f.getAbsolutePath());
-    // InputStream is = this.getClass().getResourceAsStream(inmoovScript);
     String script = FileIO.toString(inmoovScript);
     // String script = new String(FileIO.toByteArray(is));
-    Python python = (Python) Runtime.createAndStart("python", "Python");
-    python.createPythonInterpreter();
-    // python.execAndWait(script);
+    Python python = (Python) Runtime.createAndStart("python", "Python");    
     python.exec(script);
     InMoov i01 = (InMoov) Runtime.getService("i01");
     // Assert something

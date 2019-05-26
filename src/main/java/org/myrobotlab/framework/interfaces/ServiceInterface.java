@@ -9,7 +9,6 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.framework.Status;
 
 public interface ServiceInterface
     extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
@@ -122,5 +121,11 @@ public interface ServiceInterface
   public boolean isReady();
 
   public boolean isRunning();
+
+  /**
+   * the order this service was created in relation to the other service
+   * @param creationCount
+   */
+  public void setOrder(int creationCount);
 
 }

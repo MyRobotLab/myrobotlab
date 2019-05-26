@@ -30,7 +30,7 @@ import org.slf4j.Logger;
  * FIXME - put in AbstractMicrocontroller !
  * FIXME - update with PinArrayController - all pin states
  * FIXME - line starts in the wrong direction 
- * FIXME - make a JButtonToggleImage with insets etc. - make a text one with 2 BG & 2 FG colors (maybe glass like)
+ * FIXME - make a JButtonToggleImage with insets etc. - make a text one with 2 BG and 2 FG colors (maybe glass like)
  *
  */
 public class Oscope extends ServiceGui implements ActionListener {

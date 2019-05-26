@@ -1,9 +1,10 @@
 package org.myrobotlab.jme3;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.virtual.VirtualServo;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -15,6 +16,8 @@ import com.jme3.scene.shape.Box;
  *
  */
 public class Jme3Servo extends UserData implements VirtualServo {
+  
+  transient public final static Logger log = LoggerFactory.getLogger(Jme3Servo.class);
 
   public Jme3Servo(JMonkeyEngine jme, Node node) {
     super(jme, node);
@@ -138,7 +141,7 @@ public class Jme3Servo extends UserData implements VirtualServo {
 
   @Override
   public void attach(int pin) {
-    Log.info("attach {}", pin);
+    log.info("attach {}", pin);
   }
 
   @Override

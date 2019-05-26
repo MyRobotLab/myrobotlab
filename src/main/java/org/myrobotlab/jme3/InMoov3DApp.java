@@ -6,14 +6,16 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.myrobotlab.boofcv.ExampleVisualOdometryDepth;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
-import org.myrobotlab.service.Servo;
-import org.myrobotlab.service.Servo.ServoEventData;
-import org.python.jline.internal.Log;
+import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoData;
+import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
@@ -42,8 +44,11 @@ import com.jme3.ui.Picture;
  * @author Christian version 1.0.3
  */
 public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface {
+  
+  transient public final static Logger log = LoggerFactory.getLogger(InMoov3DApp.class);
+
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
-  private Queue<ServoEventData> eventQueue = new ConcurrentLinkedQueue<ServoEventData>();
+  private Queue<ServoData> eventQueue = new ConcurrentLinkedQueue<ServoData>();
   private transient HashMap<String, Node> servoToNode = new HashMap<String, Node>();
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
   private transient Service service = null;
@@ -607,7 +612,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
    * @param initialAngle : initial angle of rotation of the part (in radian)
    */
 
-  public void updatePosition(ServoEventData event) {
+  public void updatePosition(ServoData event) {
     eventQueue.add(event);
   }
 
@@ -626,7 +631,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
 
     while (eventQueue.size() > 0) {
-      ServoEventData event = eventQueue.remove();
+      ServoData event = eventQueue.remove();
       if (servoToNode.containsKey(event.name)) {
         Node node = servoToNode.get(event.name);
         Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));
@@ -734,22 +739,22 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   // FIXME - race condition, if this method is called before JME is fully
   // initialized :(
   // the result is no servos are successfully added
-  public void addServo(String partName, Servo servo) {
+  public void addServo(String partName, ServoControl servo) {
     if (nodes.containsKey(partName)) {
       Node node = nodes.get(partName);
       Mapper map = maps.get(partName);
-      map.setMinMaxInput(servo.getMinInput(), servo.getMaxInput());
-      double angle = -map.calcOutput(servo.getRest()) + map.calcOutput(servo.getCurrentPos());
+      map.setMinMaxInput(servo.getMin(), servo.getMax());
+      double angle = -map.calcOutput(servo.getRest()) + map.calcOutput(servo.getPos());
       angle *= Math.PI / 180;
       Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));
       Vector3f rotAngle = rotMask.mult((float) angle);
       node.rotate(rotAngle.x, rotAngle.y, rotAngle.z);
-      node.setUserData("currentAngle", (float) map.calcOutput(servo.getCurrentPos()));
+      node.setUserData("currentAngle", (float) map.calcOutput(servo.getPos()));
       nodes.put(partName, node);
       servoToNode.put(servo.getName(), node);
       maps.put(partName, map);
     } else {
-      Log.info(partName + " is not a valid part name for VinMoov");
+      log.info(partName + " is not a valid part name for VinMoov");
     }
   }
 
@@ -855,7 +860,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       map = new Mapper(map.getMinX(), map.getMaxX(), min, max);
       maps.put(partName, map);
     } else {
-      Log.info("No part named " + partName + " found");
+      log.info("No part named " + partName + " found");
     }
   }
 

@@ -27,6 +27,7 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +40,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.HttpData;
+import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
@@ -49,7 +52,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class TestCatcher extends Service implements SerialDataListener {
+public class TestCatcher extends Service implements SerialDataListener, HttpDataListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -270,14 +273,80 @@ public class TestCatcher extends Service implements SerialDataListener {
     return d;
   }
 
+  public double[] testDoubleArray(double[] data) {
+    return data;
+  }
+  
+  
+  public void onTime(Date d) {
+    log.info("onDate {}", d);
+  }
+  
+  public void onInteger(Integer data) {
+    log.info("onInteger {}", data);
+  }
+  
+  public void onDouble(Integer data) {
+    log.info("onInteger {}", data);
+  }
+  
+  // @Override
+  public void onReady(Integer t01, Double t02, Date d) {
+    log.info("onReady {} {} {}", t01, t02, d);
+  }
+  
+
+  public void waitFor(String ... pubs) {
+    for (String publish : pubs) {
+      String[] pubParts = publish.split("\\.");
+      if (pubParts.length != 2) {
+        log.error("waitFor requirement is {publisher}.{topic} but [{}] was given", publish);
+        continue;
+      }
+      String topicName = pubParts[0];
+      String topicMethod = pubParts[1];
+      // subscribe is A SERVICE METHOD - not useful for non-services however other "things" could have attach or addListener
+      subscribe(topicName, topicMethod);
+    }    
+  }
+
+
   public static void main(String[] args) {
-    LoggingFactory.init(Level.DEBUG);
-
     try {
+      LoggingFactory.init(Level.DEBUG);
 
-      Runtime.start("c01", "TestCatcher");
+    
+      TestCatcher catcher01 = (TestCatcher)Runtime.start("catcher01", "TestCatcher");
+      TestThrower thrower01 = (TestThrower)Runtime.start("thrower01", "TestThrower");
+      TestThrower thrower02 = (TestThrower)Runtime.start("thrower02", "TestThrower");
+      Clock clock01 = (Clock)Runtime.start("clock01", "Clock");
       Runtime.start("gui", "SwingGui");
-
+      
+      
+      
+      
+      
+      // core implementation with strings subscriptions - works over remote 
+      // waitFor(String...subscribers)
+      // if a default publish exists ... 
+//      catcher01.waitForDefaults("thrower01","thrower02");
+      // 
+      // waitForEach waitforAll waitForAny
+//      catcher01.waitFor("thrower01", "publishInteger", "thrower02", "publishDouble");
+      catcher01.waitFor("thrower01.publishInteger", "thrower02.publishDouble", "clock01.publishTime");
+      // scan for key callbacks (sources & methods) and resolve in framework - to be delivered
+      
+      clock01.startClock();
+      thrower01.invoke("publishInteger", 7);
+      thrower02.invoke("publishInteger", 5.0);
+      
+      
+      // optimized implementation with local reference - and possibly direct callbacks (perhaps not)
+      // waitFor(Subscriber...subscribers)
+//      catcher01.waitFor(thrower01, thrower02);
+      
+//      catcher01.waitForAny(thrower01, thrower02);
+      
       /*
        * TestThrower thrower = new TestThrower("thrower");
        * thrower.startService();
@@ -293,7 +362,7 @@ public class TestCatcher extends Service implements SerialDataListener {
       // thrower.throwInteger(count);
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
 
   }
@@ -306,6 +375,12 @@ public class TestCatcher extends Service implements SerialDataListener {
     meta.addCategory("testing", "framework");
 
     return meta;
+  }
+
+  @Override
+  public void onHttpData(HttpData data) {
+    // TODO Auto-generated method stub
+
   }
 
 }

@@ -49,6 +49,7 @@ import java.util.Arrays;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
@@ -63,7 +64,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 59;
+	public static final int MRLCOMM_VERSION = 60;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -212,8 +213,8 @@ public class Msg {
   public final static int ENCODER_ATTACH = 52;
   // > setZeroPoint/deviceId
   public final static int SET_ZERO_POINT = 53;
-  // < publishEncoderPosition/deviceId/b16 position
-  public final static int PUBLISH_ENCODER_POSITION = 54;
+  // < publishEncoderData/deviceId/b16 position
+  public final static int PUBLISH_ENCODER_DATA = 54;
 
 
 /**
@@ -231,7 +232,7 @@ public class Msg {
   // public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/){}
   // public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/){}
   // public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
-  // public void publishEncoderPosition(Integer deviceId/*byte*/, Integer position/*b16*/){}
+  // public void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/){}
 	
 
 	
@@ -252,6 +253,20 @@ public class Msg {
 	transient private Arduino arduino;
 	
 	transient private SerialDevice serial;
+
+	
+	/*
+	static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) {
+		if (instance == null) {
+			instance = new Msg();
+		}
+
+		instance.arduino = arduino;
+		instance.serial = serial;
+
+		return instance;
+	}
+	*/
 	
 	public void setInvoke(boolean b){
 	  invoke = b;
@@ -548,18 +563,18 @@ public class Msg {
 
       break;
     }
-    case PUBLISH_ENCODER_POSITION: {
+    case PUBLISH_ENCODER_DATA: {
       Integer deviceId = ioCmd[startPos+1]; // bu8
       startPos += 1;
       Integer position = b16(ioCmd, startPos+1);
       startPos += 2; //b16
       if(invoke){
-        arduino.invoke("publishEncoderPosition",  deviceId,  position);
+        arduino.invoke("publishEncoderData",  deviceId,  position);
       } else { 
-         arduino.publishEncoderPosition( deviceId,  position);
+         arduino.publishEncoderData( deviceId,  position);
       }
       if(record != null){
-        rxBuffer.append("< publishEncoderPosition");
+        rxBuffer.append("< publishEncoderData");
         rxBuffer.append("/");
         rxBuffer.append(deviceId);
         rxBuffer.append("/");
@@ -2089,8 +2104,8 @@ public class Msg {
     case SET_ZERO_POINT:{
       return "setZeroPoint";
     }
-    case PUBLISH_ENCODER_POSITION:{
-      return "publishEncoderPosition";
+    case PUBLISH_ENCODER_DATA:{
+      return "publishEncoderData";
     }
 
 		default: {
@@ -2345,7 +2360,9 @@ public class Msg {
   /**
    * enable acks on both sides Arduino/Java-Land
    * and MrlComm-land
-   */
+   *
+	 * @param b - enable acks back
+	 */
   public void enableAcks(boolean b){
     // disable local blocking
 	  ackEnabled = b;
@@ -2419,7 +2436,7 @@ public class Msg {
 			virtual.connectVirtualUart(port, port + "UART");
 			*/
 			
-			Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
+			PinArrayControl arduino = (PinArrayControl)Runtime.start("arduino","Arduino");
 			Servo servo01 = (Servo)Runtime.start("servo01","Servo");
 			
 			/*

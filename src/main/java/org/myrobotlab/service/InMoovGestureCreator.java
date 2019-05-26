@@ -19,6 +19,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 /**
@@ -1100,7 +1101,7 @@ public class InMoovGestureCreator extends Service {
             inmtorso = i01.torso;
           }
 
-          Servo servo = null;
+          ServoControl servo = null;
 
           if (i1 == 0 || i1 == 2) {
             if (i2 == 0) {

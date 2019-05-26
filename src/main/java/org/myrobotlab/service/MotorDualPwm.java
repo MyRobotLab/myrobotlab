@@ -12,27 +12,39 @@ import org.myrobotlab.service.abstracts.AbstractMotor;
 public class MotorDualPwm extends AbstractMotor {
   private static final long serialVersionUID = 1L;
 
-  public Integer leftPwmPin = 0;
-  public Integer rightPwmPin = 0;
+  public String leftPwmPin;
+  public String rightPwmPin;
   Integer pwmFreq;
 
   public List<String> pwmPinList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15");
 
-  public Integer getLeftPwmPin() {
+  public String getLeftPwmPin() {
     return leftPwmPin;
   }
 
   public void setLeftPwmPin(Integer leftPwmPin) {
     // log.info("leftPwmPin set");
+    this.leftPwmPin = leftPwmPin + "";
+    broadcastState();
+  }
+  
+  public void setLeftPwmPin(String leftPwmPin) {
+    // log.info("leftPwmPin set");
     this.leftPwmPin = leftPwmPin;
     broadcastState();
   }
 
-  public Integer getRightPwmPin() {
+  public String getRightPwmPin() {
     return rightPwmPin;
   }
 
   public void setRightPwmPin(Integer rightPwmPin) {
+    // log.info("rightPwmPin set");
+    this.rightPwmPin = rightPwmPin + "";
+    broadcastState();
+  }
+  
+  public void setRightPwmPin(String rightPwmPin) {
     // log.info("rightPwmPin set");
     this.rightPwmPin = rightPwmPin;
     broadcastState();

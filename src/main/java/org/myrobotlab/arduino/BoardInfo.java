@@ -51,17 +51,8 @@ public class BoardInfo implements Serializable {
    * public boolean isUnknown() { return (boardName == null) ||
    * boardName.equals("unknown"); }
    */
-  /*
-   * 
-   * public void setType(int boardId) { this.boardId = boardId; switch (boardId)
-   * { case Arduino.BOARD_TYPE_ID_MEGA: boardName = Arduino.BOARD_TYPE_MEGA;
-   * break; case Arduino.BOARD_TYPE_ID_UNO: boardName = Arduino.BOARD_TYPE_UNO;
-   * break; case Arduino.BOARD_TYPE_ID_ADK_MEGA: boardName =
-   * Arduino.BOARD_TYPE_MEGA_ADK; break; case Arduino.BOARD_TYPE_ID_NANO:
-   * boardName = Arduino.BOARD_TYPE_NANO; break; case
-   * Arduino.BOARD_TYPE_ID_PRO_MINI: boardName = Arduino.BOARD_TYPE_PRO_MINI;
-   * break; default: boardName = "unknown"; break; } }
-   */
+ 
+  
 
   /**
    * called on disconnect() so it can re-initalize if connected to a different

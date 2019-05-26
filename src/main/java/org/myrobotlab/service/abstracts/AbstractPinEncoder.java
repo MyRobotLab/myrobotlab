@@ -6,7 +6,7 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
-public class AbstractEncoder extends Service implements EncoderControl {
+public class AbstractPinEncoder extends Service implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
   public String pin;
@@ -14,33 +14,33 @@ public class AbstractEncoder extends Service implements EncoderControl {
   public Integer resolution = 4096;
   public Double lastPosition = 0.0;
   public EncoderController controller = null;
+  boolean enabled = true;
   // we can track the last update that we've recieved and specify the direction
   // even!
   protected long lastUpdate = 0;
   protected Double velocity = 0.0;
 
-  public AbstractEncoder(String reservedKey) {
+  public AbstractPinEncoder(String reservedKey) {
     super(reservedKey);
   }
 
-  @Override
-  public void attach(EncoderController controller, Integer pin) throws Exception {
+  public void attach(EncoderController controller) throws Exception {
+    if (this.controller == controller) {
+      log.info("{} already attached to controller {}", getName(), controller.getName());
+    }
     this.controller = controller;
-    this.pin = pin.toString();
-    controller.attach(this, pin);
+    controller.attach(this);
     lastUpdate = System.currentTimeMillis();
   }
 
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(AbstractEncoder.class.getCanonicalName());
-    meta.addDescription("AMT203 Encoder - Absolute position encoder");
+    ServiceType meta = new ServiceType(AbstractPinEncoder.class);
+    meta.addDescription("encoder which operates with a single pin");
     meta.addCategory("encoder", "sensor");
     return meta;
   }
 
-  @Override
   public String getPin() {
-    //
     return pin;
   }
 
@@ -48,7 +48,7 @@ public class AbstractEncoder extends Service implements EncoderControl {
     return angle;
   }
 
-  @Override
+  // FIXME - remove this ...
   public void onEncoderData(EncoderData data) {
     // this is getting published from the arduino and updated here when it comes
     // in..
@@ -78,20 +78,32 @@ public class AbstractEncoder extends Service implements EncoderControl {
     // pass the set zero point command to the controller
     controller.setZeroPoint(this);
   }
-
-  @Override
-  public void setController(EncoderController controller) {
-    this.controller = controller;
-  }
-
-  @Override
+  
   public void setPin(String pin) {
     this.pin = pin;
   }
 
-  @Override
-  public void setPin(int address) {
+  public void setPin(Integer address) {
     this.pin = String.format("%d", address);
   }
 
+  @Override
+  public void disable() {
+    enabled = false;
+  }
+
+  @Override
+  public void enable() {
+    enabled = true;
+  }
+
+  @Override
+  public Boolean isEnabled() {
+    return enabled;
+  }
+
+  @Override
+  public EncoderData publishEncoderData(EncoderData data) {
+    return data;
+  }
 }

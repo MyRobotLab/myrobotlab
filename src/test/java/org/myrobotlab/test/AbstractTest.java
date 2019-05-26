@@ -4,8 +4,11 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -14,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -36,8 +40,12 @@ public class AbstractTest {
   private static boolean releaseRemainingServices = true;
 
   private static boolean releaseRemainingThreads = false;
+  
+  protected transient Queue<Object> queue = new LinkedBlockingQueue<>();
 
   static transient Set<Thread> threadSetStart = null;
+  
+  protected Set<Attachable> attached = new HashSet<>();
 
   protected boolean printMethods = true;
 
@@ -52,7 +60,7 @@ public class AbstractTest {
     return simpleName;
   }
 
-  protected String getName() {
+  public String getName() {
     return testName.getMethodName();
   }
 
@@ -159,8 +167,8 @@ public class AbstractTest {
     }
 
     if (releaseServices.size() > 0) {
-      log.warn("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
-      log.warn("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
+      log.info("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
+      log.info("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
       sleep(coolDownTimeMs);
     }
 
@@ -171,7 +179,7 @@ public class AbstractTest {
     for (Thread thread : threadSetEnd) {
       if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
-          log.warn("interrupting thread {}", thread.getName());
+          log.info("interrupting thread {}", thread.getName());
           thread.interrupt();
           /*
            * if (useDeprecatedThreadStop) { thread.stop(); }
@@ -184,14 +192,14 @@ public class AbstractTest {
       }
     }
     if (threadsRemaining.size() > 0) {
-      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+      log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
     log.info("finished the killing ...");
   }
 
   public AbstractTest() {
     
-    // make testing environment "virtual"
+    // default : make testing environment "virtual"
     Platform.setVirtual(true);
     
     simpleName = this.getClass().getSimpleName();
@@ -211,6 +219,14 @@ public class AbstractTest {
     // log.warn("=====jna.library.path===== [{}]", System.getProperty("jna.library.path"));
     
   }
+  
+  public void setVirtual() {
+    Platform.setVirtual(false);
+  }
+  
+  public boolean isVirtual() {
+    return Platform.isVirtual();
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -223,5 +239,56 @@ public class AbstractTest {
   public void testFunction() {
     log.info("tested testFunction");
   }
+
+  /*
+  @Override
+  public void attach(Attachable service) throws Exception {
+    attached.add(service);
+  }
+
+  @Override
+  public void attach(String serviceName) throws Exception {
+    attach(Runtime.getService(serviceName));
+  }
+
+  @Override
+  public void detach(Attachable service) {
+    attached.remove(service);
+  }
+
+  @Override
+  public void detach(String serviceName) {
+    detach(Runtime.getService(serviceName));
+  }
+
+  @Override
+  public void detach() {
+    attached.clear();
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    Set<String> ret = new HashSet<>();
+    for (Attachable a : attached) {
+      ret.add(a.getName());
+    }
+    return ret;
+  }
+
+  @Override
+  public boolean isAttached(Attachable instance) {
+    return attached.contains(instance);
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return isAttached(Runtime.getService(name));
+  }
+
+  @Override
+  public boolean isLocal() {
+    return true;
+  }
+  */
 
 }

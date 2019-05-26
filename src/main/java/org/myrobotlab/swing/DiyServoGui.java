@@ -245,8 +245,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
   final String attachAnalog = "attach";
   final String detachAnalog = "detach";
-  JComboBox<String> pinArrayControlList = new JComboBox<String>();
-  JComboBox<Integer> analogInputPinList = new JComboBox<Integer>();
+  JComboBox<String> pinArrayControlList = new JComboBox<>();
+  JComboBox<String> analogInputPinList = new JComboBox<>();
   JButton attachListenerButton = new JButton(attachAnalog);
 
   JTextField posMin = new JTextField("0");
@@ -616,8 +616,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
         }
 
         // In the inverted case, these are reversed
-        slider.setMinimum((int) servo.getMin());
-        slider.setMaximum((int) servo.getMax());
+        slider.setMinimum(servo.getMin().intValue());
+        slider.setMaximum(servo.getMax().intValue());
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
@@ -625,13 +625,13 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
 
         disableDelayGrace.setText(servo.disableDelayGrace + "");
 
-        if (servo.getMinInput() < mapInputSliderMinValue) {
-          mapInputSliderMinValue = (int) servo.getMinInput();
+        if (servo.getMin() < mapInputSliderMinValue) {
+          mapInputSliderMinValue = servo.getMin().intValue();
           mapInputSlider.setMinimum(mapInputSliderMinValue);
         }
 
-        if (servo.getMaxInput() > mapInputSliderMaxValue) {
-          mapInputSliderMaxValue = (int) servo.getMaxInput();
+        if (servo.getMax() > mapInputSliderMaxValue) {
+          mapInputSliderMaxValue = servo.getMax().intValue();
           mapInputSlider.setMaximum(mapInputSliderMaxValue);
         }
 
@@ -644,26 +644,26 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
         }
 
         if (servo.getMinOutput() < mapOutputSliderMinValue) {
-          mapOutputSliderMinValue = (int) servo.getMinOutput();
+          mapOutputSliderMinValue = servo.getMinOutput().intValue();
           mapOutputSlider.setMinimum(mapOutputSliderMinValue);
         }
 
         if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-          mapOutputSliderMaxValue = (int) servo.getMaxOutput();
+          mapOutputSliderMaxValue = servo.getMaxOutput().intValue();
           mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
         }
 
         mapOutputSlider.setInverted(servo.isInverted());
 
-        minInput.setText(servo.getMinInput() + "");
-        maxInput.setText(servo.getMaxInput() + "");
+        minInput.setText(servo.getMin() + "");
+        maxInput.setText(servo.getMax() + "");
         minOutput.setText(minOutputTmp + "");
         maxOutput.setText(maxOutputTmp + "");
 
-        mapInputSlider.setLowValue((int) servo.getMinInput());
-        mapInputSlider.setHighValue((int) servo.getMaxInput());
-        mapOutputSlider.setLowValue((int) servo.getMinOutput());
-        mapOutputSlider.setHighValue((int) servo.getMaxOutput());
+        mapInputSlider.setLowValue(servo.getMin().intValue());
+        mapInputSlider.setHighValue(servo.getMax().intValue());
+        mapOutputSlider.setLowValue(servo.getMinOutput().intValue());
+        mapOutputSlider.setHighValue(servo.getMaxOutput().intValue());
 
         if (servo.isSweeping()) {
           sweepButton.setText("stop");
@@ -671,7 +671,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           sweepButton.setText("sweep");
         }
 
-        eventsEnabled = servo.isEventsEnabled();
+        // eventsEnabled = servo.isEventsEnabled();
 
         restoreListeners();
       }
@@ -706,11 +706,11 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           // Removed the filtering on pins, because the Arduino logic for the
           // different is not complete
           // if (pinData.isAnalog()){
-          analogInputPinList.addItem(pinData.getAddress());
+          analogInputPinList.addItem(pinData.getPinName());
           // }
         }
       }
-      analogInputPinList.setSelectedItem(myServo.pin);
+      analogInputPinList.setSelectedItem(myServo.getPin());
     }
   }
 

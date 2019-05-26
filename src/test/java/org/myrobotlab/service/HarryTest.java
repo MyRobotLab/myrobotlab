@@ -14,10 +14,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
 @Ignore
-public class HarryTest {
+public class HarryTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
 

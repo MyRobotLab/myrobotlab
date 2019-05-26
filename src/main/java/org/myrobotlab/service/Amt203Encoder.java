@@ -3,7 +3,7 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.sensor.EncoderData;
-import org.myrobotlab.service.abstracts.AbstractEncoder;
+import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
@@ -25,16 +25,17 @@ import org.myrobotlab.service.interfaces.EncoderController;
  * @author kwatters
  *
  */
-public class Amt203Encoder extends AbstractEncoder implements EncoderControl {
+public class Amt203Encoder extends AbstractPinEncoder implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
+
 
   public Amt203Encoder(String reservedKey) {
     super(reservedKey);
     // 12 bit encoder is 4096 steps of resolution
     resolution = 4096;
   }
-
+  
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Amt203Encoder.class.getCanonicalName());
     meta.addDescription("AMT203 Encoder - Absolute position encoder");

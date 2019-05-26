@@ -100,8 +100,8 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
   String setLeftPwmPin = "setLeftPwmPin";
   String setRightPwmPin = "setRightPwmPin";
 
-  JComboBox<String> leftPwmPinList = new JComboBox<String>();
-  JComboBox<String> rightPwmPinList = new JComboBox<String>();
+  JComboBox<String> leftPwmPinList = new JComboBox<>();
+  JComboBox<String> rightPwmPinList = new JComboBox<>();
 
   MotorDualPwm myMotor;
 
@@ -201,8 +201,8 @@ public class MotorDualPwmGui extends ServiceGui implements ActionListener, Chang
 
     setEnabled(motor.isAttached());
 
-    leftPwmPinList.setSelectedIndex(motor.leftPwmPin);
-    rightPwmPinList.setSelectedIndex(motor.rightPwmPin);
+    leftPwmPinList.setSelectedItem(motor.leftPwmPin);
+    rightPwmPinList.setSelectedItem(motor.rightPwmPin);
 
     if (motor.isAttached()) {
       MotorController mc = (MotorController) motor.getController();

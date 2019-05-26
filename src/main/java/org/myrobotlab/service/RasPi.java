@@ -540,4 +540,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     return null;
   }
 
+  // - add more pin mappings if desired ...
+  @Override
+  public Integer getAddress(String pin) {
+    return Integer.parseInt(pin);
+  }
+
 }

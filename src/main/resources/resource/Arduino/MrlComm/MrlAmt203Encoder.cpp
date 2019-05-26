@@ -79,7 +79,7 @@ void MrlAmt203Encoder::update() {
     ABSposition_last = ABSposition;    //set last position to current position
     // deg = ABSposition;
     //float deg = ABSposition * 0.087890625;    // 360/4096  degrees to 12 bit resolution
-    this->publishEncoderPosition(ABSposition);
+    this->publishEncoderData(ABSposition);
   }
 }
 
@@ -103,7 +103,7 @@ void MrlAmt203Encoder::setZeroPoint() {
   SPI.end();    // stop the spi bus for now.
 }
 
-void MrlAmt203Encoder::publishEncoderPosition(float deg) {
+void MrlAmt203Encoder::publishEncoderData(float deg) {
   // publish an mrl message with the current encoder position.
-  msg->publishEncoderPosition(id, deg);
+  msg->publishEncoderData(id, deg);
 }

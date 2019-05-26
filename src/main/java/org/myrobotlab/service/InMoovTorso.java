@@ -9,6 +9,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.PortConnector;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
@@ -23,9 +24,14 @@ public class InMoovTorso extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovTorso.class);
 
-  transient public Servo topStom;
-  transient public Servo midStom;
-  transient public Servo lowStom;
+  
+  private static final Integer DEFAULT_TOPSTOM_PIN = 27;
+  private static final Integer DEFAULT_MIDSTOM_PIN = 28;
+  private static final Integer DEFAULT_LOWSTOM_PIN = 29;
+  
+  transient public ServoControl topStom;
+  transient public ServoControl midStom;
+  transient public ServoControl lowStom;
   transient public ServoController controller;
 
   static public void main(String[] args) {
@@ -39,29 +45,59 @@ public class InMoovTorso extends Service {
       Runtime.start("webgui", "WebGui");
       torso.test();
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 
   public InMoovTorso(String n) {
     super(n);
-    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
-    // FRAMEWORK !!!!!
-    topStom = (Servo) createPeer("topStom");
-    midStom = (Servo) createPeer("midStom");
-    lowStom = (Servo) createPeer("lowStom");
-    // controller = (ServoController) createPeer("arduino");
+    // TODO: just call startPeers here.
+    //    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
+    //    // FRAMEWORK !!!!!
+    //    topStom = (ServoControl) createPeer("topStom");
+    //    midStom = (ServoControl) createPeer("midStom");
+    //    lowStom = (ServoControl) createPeer("lowStom");
+    //    // controller = (ServoController) createPeer("arduino");
+  }
+  
+  public void startService() {
+    if (topStom == null) {
+      topStom = (ServoControl) createPeer("topStom");
+    }
+    if (midStom == null) {
+      midStom = (ServoControl) createPeer("midStom");
+    }
+    if (lowStom == null) {
+      lowStom = (ServoControl) createPeer("lowStom");
+    }
+    /*
+    if (controller == null) {
+      controller = (ServoController) createPeer("arduino");
+    }
+    */
+  }
 
-    topStom.setMinMax(60, 120);
-    midStom.setMinMax(0, 180);
-    lowStom.setMinMax(0, 180);
-
-    topStom.setRest(90);
-    midStom.setRest(90);
-    lowStom.setRest(90);
-
+  private void initServoDefaults() {
+    
+    if (topStom.getPin() == null) 
+      topStom.setPin(DEFAULT_TOPSTOM_PIN);
+    if (midStom.getPin() == null)
+        midStom.setPin(DEFAULT_MIDSTOM_PIN);
+    if (lowStom.getPin() == null)
+      lowStom.setPin(DEFAULT_LOWSTOM_PIN);
+    
+    topStom.setMinMax(60.0, 120.0);
+    midStom.setMinMax(0.0, 180.0);
+    lowStom.setMinMax(0.0, 180.0);
+    topStom.setRest(90.0);
+    topStom.setPosition(90.0);
+    midStom.setRest(90.0);
+    midStom.setPosition(90.0);
+    lowStom.setRest(90.0);
+    lowStom.setPosition(90.0);
+    
     setVelocity(5.0, 5.0, 5.0);
-
+    
   }
 
   /*
@@ -101,12 +137,6 @@ public class InMoovTorso extends Service {
     lowStom.setAutoDisable(param);
   }
 
-  public void setOverrideAutoDisable(Boolean param) {
-    topStom.setOverrideAutoDisable(param);
-    midStom.setOverrideAutoDisable(param);
-    lowStom.setOverrideAutoDisable(param);
-  }
-
   @Override
   public void broadcastState() {
     // notify the gui
@@ -120,6 +150,8 @@ public class InMoovTorso extends Service {
   }
 
   public boolean connect(String port) throws Exception {
+    controller = (ServoController)startPeer("arduino");
+    
     if (controller == null) {
       error("arduino is invalid");
       return false;
@@ -134,10 +166,10 @@ public class InMoovTorso extends Service {
       }
     }
 
-    topStom.attach(controller, 27, topStom.getRest(), topStom.getVelocity());
-    midStom.attach(controller, 28, midStom.getRest(), midStom.getVelocity());
-    lowStom.attach(controller, 29, lowStom.getRest(), lowStom.getVelocity());
-
+    // incase the peers haven't been started, or the peers don't have their defaults set
+    startPeers();
+    initServoDefaults();
+    
     enableAutoEnable(true);
 
     broadcastState();
@@ -219,23 +251,6 @@ public class InMoovTorso extends Service {
     lowStom.waitTargetPos();
   }
 
-  // FIXME - releasePeers()
-  public void release() {
-    disable();
-    if (topStom != null) {
-      topStom.releaseService();
-      topStom = null;
-    }
-    if (midStom != null) {
-      midStom.releaseService();
-      midStom = null;
-    }
-    if (lowStom != null) {
-      lowStom.releaseService();
-      lowStom = null;
-    }
-  }
-
   public void rest() {
     topStom.rest();
     midStom.rest();
@@ -251,7 +266,7 @@ public class InMoovTorso extends Service {
     return true;
   }
 
-  public void setLimits(int topStomMin, int topStomMax, int midStomMin, int midStomMax, int lowStomMin, int lowStomMax) {
+  public void setLimits(double topStomMin, double topStomMax, double midStomMin, double midStomMax, double lowStomMin, double lowStomMax) {
     topStom.setMinMax(topStomMin, topStomMax);
     midStom.setMinMax(midStomMin, midStomMax);
     lowStom.setMinMax(lowStomMin, lowStomMax);
@@ -280,23 +295,6 @@ public class InMoovTorso extends Service {
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);
     this.lowStom.setSpeed(lowStom);
-  }
-
-  /*
-   * public boolean load() { super.load(); topStom.load(); midStom.load();
-   * lowStom.load(); return true; }
-   */
-
-  @Override
-  public void startService() {
-    super.startService();
-    topStom.startService();
-    midStom.startService();
-    lowStom.startService();
-    // arduino.startService();
-    if (controller == null) {
-      controller = (ServoController) startPeer("arduino");
-    }
   }
 
   public void test() {

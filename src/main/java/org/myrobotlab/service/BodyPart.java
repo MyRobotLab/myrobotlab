@@ -207,7 +207,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
 
   public void setOverrideAutoDisable(Boolean... param) {
     for (int i = 0; i < param.length && i < getAcuators(this.getIntanceName()).size(); i++) {
-      getAcuators(this.getIntanceName()).get(i).setOverrideAutoDisable(param[i]);
+      // getAcuators(this.getIntanceName()).get(i).setOverrideAutoDisable(param[i]);
     }
   }
 
@@ -268,25 +268,25 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
             if (angle < 0) {
               angle += 360;
             }
-            getServo("omoplate").moveTo(angle.intValue());
+            getServo("omoplate").moveTo(angle);
           }
           if ("shoulder".equals(s)) {
             Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
             if (angle < 0) {
               angle += 360;
             }
-            getServo("shoulder").moveTo(angle.intValue());
+            getServo("shoulder").moveTo(angle);
           }
           if ("rotate".equals(s)) {
             Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
             if (angle < 0) {
               angle += 360;
             }
-            getServo("rotate").moveTo(angle.intValue());
+            getServo("rotate").moveTo(angle);
           }
           if ("bicep".equals(s)) {
             Double angle = (gainMap.get(s) * angleMap.get(s) + phaseShiftMap.get(s)) % 360.0;
-            getServo("bicep").moveTo(angle.intValue());
+            getServo("bicep").moveTo(angle);
             if (angle < 0) {
               angle += 360;
             }

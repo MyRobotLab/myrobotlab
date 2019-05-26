@@ -9,8 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
-import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
 
 public class Stepper_ArduinoGui extends StepperControllerPanel implements ActionListener {
@@ -33,7 +33,7 @@ public class Stepper_ArduinoGui extends StepperControllerPanel implements Action
     this.myService = myService;
     this.arduinoName = controllerName;
     this.motorName = motorName;
-    Arduino o = (Arduino) myService.sendBlocking(controllerName, "publishState", (Object[]) null);
+    PinArrayControl o = (PinArrayControl) myService.sendBlocking(controllerName, "publishState", (Object[]) null);
     pinList = o.getPinList();
 
     for (int i = 0; i < pinList.size(); ++i) {

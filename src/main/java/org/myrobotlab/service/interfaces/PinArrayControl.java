@@ -56,4 +56,6 @@ public interface PinArrayControl extends NameProvider {
   
   public void write(int address, int value);
 
+  Integer getAddress(String pin);
+
 }

@@ -1,6 +1,7 @@
 /.project
 /.classpath
 /.settings
+/src/main/resources/resource/WebGui/react
 /data
 /resource
 /bin

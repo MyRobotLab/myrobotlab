@@ -41,7 +41,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * synthesis service
    */
   Map<String, String> substitutions = new HashMap<String, String>();
-
+ 
   /**
    * mute or unmute service
    */
@@ -141,6 +141,15 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return gender;
     }
 
+    /**
+     * Java does regions string codes differently than other systems en_US vs
+     * en-US ... seems like there has been a lot of confusion on which delimiter
+     * to use This function is used to simplify all of that - since we are
+     * primarily interested in language and do not usually need the distinction
+     * between regions in this context
+     * 
+     * @return the string language name
+     */
     public String getLanguage() {
       if (locale == null) {
         return null;
@@ -217,9 +226,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public String confirmationString = "did you say %s ?";
 
   protected Map<String, Voice> voiceKeyIndex = new TreeMap<>();
-  
+
   private Map<String, Voice> voiceProviderIndex = new TreeMap<>();
-  
+
   private List<Voice> voiceList = new ArrayList<>();
 
   // FIXME - deprecate - begin using SSML
@@ -236,14 +245,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public AbstractSpeechSynthesis(String reservedKey) {
     super(reservedKey);
-    setReady(false);
-    audioFile = (AudioFile) createPeer("audioFile");
-
-    // for json loading
-
-    // if (voices == null) {
-    // voices = new TreeMap<String, Voice>();
-    // }
+    setReady(false);   
 
     if (langIndex == null) {
       langIndex = new HashMap<String, List<Voice>>();
@@ -256,6 +258,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (genderIndex == null) {
       genderIndex = new HashMap<String, List<Voice>>();
     }
+    audioFile = (AudioFile) createPeer("audioFile");
+    getVoices();
   }
 
   /**
@@ -461,7 +465,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
-    getVoices();
+    
     if (voices.size() > 0) {
       setReady(true);
     }
@@ -690,7 +694,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public Voice getVoice() {
-    if (voices.size() == 0) {
+    if (voice == null || voices.size() == 0) {
       // if voices aren't loaded - load them...
       getVoices();
     }
@@ -698,7 +702,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Override
-  public List<Voice> getVoices() {
+  synchronized public List<Voice> getVoices() {
     try {
 
       // load the voices from the service implementation
@@ -710,7 +714,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       }
 
       // attempt to set a default voice if not set
-      setDefaultVoice();
+      if (defaultVoice == null) {
+        setDefaultVoice();
+      }
 
       List<Voice> vs = new ArrayList<Voice>(voices.size());
       for (Voice v : voices.values()) {
@@ -723,6 +729,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return vs;
     } catch (Exception e) {
       error("%s", e.getMessage());
+      log.error("getVoices threw", e);
     }
     return new ArrayList<Voice>();
   }
@@ -740,8 +747,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     Locale locale = runtime.getLocale();
     if (locale != null) {
       log.info("locale is {}", locale);
-      if (langCodeIndex.containsKey(locale.getLanguage())) {
-        List<Voice> vs = langCodeIndex.get(locale.getLanguage());
+      String localLang = getLangCode(locale.getLanguage());
+      if (langCodeIndex.containsKey(localLang)) {
+        List<Voice> vs = langCodeIndex.get(localLang);
         if (vs.size() > 0) {
           Voice v = vs.get(0);
           log.info("match found with Runtime locale, setting default voice to {}", v);
@@ -871,17 +879,17 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       broadcastState();
       return true;
     }
-    
+
     if (voiceProviderIndex.containsKey(name)) {
       voice = voiceProviderIndex.get(name);
       broadcastState();
       return true;
     }
-       
+
     error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
     return false;
   }
-  
+
   public boolean setVoice(Integer index) {
     if (index > voiceList.size() || index < 0) {
       error("setVoice({}) not valid pick range 0 to {}", index, voiceList.size());
@@ -934,7 +942,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       }
       group.add(v);
       langCodeIndex.put(langCode, group);
-      langIndex.put(langDisplay, group);
+      langIndex.put(getLangCode(langCode), group);
     }
 
     if (gender != null) {
@@ -948,6 +956,18 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       group.add(v);
       genderIndex.put(gender, group);
     }
+  }
+
+  public String getLangCode(String code) {
+    String lang = null;
+    if (code.contains("-")) {
+      lang = code.split("-")[0];
+    }else if (code.contains("_")) {
+      lang = code.split("_")[0];
+    } else {
+      lang = code;
+    }    
+    return lang.trim().toLowerCase();
   }
 
   public void stop() {

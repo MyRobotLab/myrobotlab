@@ -624,6 +624,12 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
 
+  @Override
+  public Integer getAddress(String pin) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   public static void main(String[] args) {
     LoggingFactory.init("info");
 
