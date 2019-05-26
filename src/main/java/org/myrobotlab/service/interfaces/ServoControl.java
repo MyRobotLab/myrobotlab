@@ -416,6 +416,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   void setPosition(Double pos);
 
+  /**
+   * returns the encoder attached to this ServoControl
+   * @return - the Encoder
+   */
   EncoderControl getEncoder();
 
   /**
