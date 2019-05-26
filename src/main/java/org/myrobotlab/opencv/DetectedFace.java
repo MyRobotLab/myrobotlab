@@ -1,11 +1,11 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.Point2f;
-import org.bytedeco.javacpp.opencv_core.Rect;
-import org.bytedeco.javacpp.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.Point2f;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Size;
 
 public class DetectedFace {
 

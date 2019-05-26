@@ -26,37 +26,37 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 
-import org.bytedeco.javacpp.opencv_core.CvRect;
-import org.bytedeco.javacpp.opencv_core.CvSize;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.CvRect;
+import org.bytedeco.opencv.opencv_core.CvSize;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import static org.bytedeco.opencv.global.opencv_calib3d.*;
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_features2d.*;
+import static org.bytedeco.opencv.global.opencv_flann.*;
+import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+import static org.bytedeco.opencv.global.opencv_ml.*;
+import static org.bytedeco.opencv.global.opencv_objdetect.*;
+import static org.bytedeco.opencv.global.opencv_photo.*;
+import static org.bytedeco.opencv.global.opencv_shape.*;
+import static org.bytedeco.opencv.global.opencv_stitching.*;
+import static org.bytedeco.opencv.global.opencv_video.*;
+import static org.bytedeco.opencv.global.opencv_videostab.*;
 
 public class OpenCVFilterBoundingBoxToFile extends OpenCVFilter {
 

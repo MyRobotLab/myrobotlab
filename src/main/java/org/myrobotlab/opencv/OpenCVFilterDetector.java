@@ -25,15 +25,15 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.javacpp.opencv_video.createBackgroundSubtractorMOG2;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.opencv.global.opencv_video.createBackgroundSubtractorMOG2;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_video.BackgroundSubtractor;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_video.BackgroundSubtractor;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

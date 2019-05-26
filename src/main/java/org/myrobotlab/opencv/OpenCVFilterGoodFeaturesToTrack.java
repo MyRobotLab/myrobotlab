@@ -25,12 +25,12 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvGoodFeaturesToTrack;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -40,10 +40,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
@@ -169,7 +169,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
   public IplImage process(IplImage image) {
 
     if (channels == 3) {
-      grey = IplImage.create(imageSize, 8, 1);
+      grey = IplImage.create(image.cvSize(), 8, 1);
       cvCvtColor(image, grey, CV_BGR2GRAY);
     } else {
       grey = image;

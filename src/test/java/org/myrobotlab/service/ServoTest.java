@@ -184,6 +184,7 @@ public class ServoTest extends AbstractTest {
     System.out.println("ServoTest.testAllControllers() -> FIXME - implement !!!");
   }
 
+
   @Test
   public void testServo() throws Exception {
     // this basic test will create a servo and attach it to an arduino.
@@ -194,6 +195,7 @@ public class ServoTest extends AbstractTest {
     arduino01.connect(port01);
 
     Servo s = (Servo) Runtime.start("ser1", "Servo");
+
     
     // the pin should always be set to something.
     s.setPin(pin);

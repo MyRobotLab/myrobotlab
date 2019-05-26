@@ -26,13 +26,13 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvFlip;
-import static org.bytedeco.javacpp.opencv_core.cvTranspose;
+import static org.bytedeco.opencv.global.opencv_core.cvFlip;
+import static org.bytedeco.opencv.global.opencv_core.cvTranspose;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

@@ -1,6 +1,6 @@
 package org.myrobotlab.opencv;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 import org.junit.Assert;
 

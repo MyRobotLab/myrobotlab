@@ -1,12 +1,12 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_32F;
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
-import static org.bytedeco.javacpp.opencv_dnn.readNetFromDarknet;
+import static org.bytedeco.opencv.global.opencv_core.CV_32F;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
+import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
+import static org.bytedeco.opencv.global.opencv_dnn.readNetFromDarknet;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -27,16 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.swing.WindowConstants;
 
 import org.apache.commons.io.IOUtils;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.Rect;
-import org.bytedeco.javacpp.opencv_core.Scalar;
-import org.bytedeco.javacpp.opencv_core.Size;
-import org.bytedeco.javacpp.opencv_dnn.Net;
-import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;

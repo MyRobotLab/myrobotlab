@@ -25,10 +25,10 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_32F;
-import static org.bytedeco.javacpp.opencv_dnn.blobFromImage;
-import static org.bytedeco.javacpp.opencv_dnn.readNetFromCaffe;
-import static org.bytedeco.javacpp.opencv_imgproc.resize;
+import static org.bytedeco.opencv.global.opencv_core.CV_32F;
+import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
+import static org.bytedeco.opencv.global.opencv_dnn.readNetFromCaffe;
+import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -38,11 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.Scalar;
-import org.bytedeco.javacpp.opencv_core.Size;
-import org.bytedeco.javacpp.opencv_dnn.Net;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;

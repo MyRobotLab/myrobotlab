@@ -28,23 +28,24 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_tracking.TrackerBoosting;
-import static org.bytedeco.javacpp.opencv_tracking.TrackerCSRT;
-import static org.bytedeco.javacpp.opencv_tracking.TrackerGOTURN;
-import static org.bytedeco.javacpp.opencv_tracking.TrackerKCF;
-import static org.bytedeco.javacpp.opencv_tracking.TrackerMedianFlow;
-import static org.bytedeco.javacpp.opencv_tracking.TrackerMIL;
-import static org.bytedeco.javacpp.opencv_tracking.TrackerMOSSE;
-import static org.bytedeco.javacpp.opencv_tracking.TrackerTLD;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.Rect2d;
-import org.bytedeco.javacpp.opencv_tracking.Tracker;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
+import org.bytedeco.opencv.opencv_tracking.TrackerMedianFlow;
+import org.bytedeco.opencv.opencv_tracking.TrackerBoosting;
+import org.bytedeco.opencv.opencv_tracking.TrackerCSRT;
+import org.bytedeco.opencv.opencv_tracking.TrackerGOTURN;
+import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
+import org.bytedeco.opencv.opencv_tracking.TrackerMIL;
+import org.bytedeco.opencv.opencv_tracking.TrackerMOSSE;
+import org.bytedeco.opencv.opencv_tracking.TrackerTLD;
+
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect2d;
+import org.bytedeco.opencv.opencv_tracking.Tracker;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;

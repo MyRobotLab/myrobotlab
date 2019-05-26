@@ -25,22 +25,22 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvAnd;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_core.cvInRangeS;
-import static org.bytedeco.javacpp.opencv_core.cvScalar;
-import static org.bytedeco.javacpp.opencv_core.cvSetImageCOI;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_core.cvAnd;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
+import static org.bytedeco.opencv.global.opencv_core.cvInRangeS;
+import static org.bytedeco.opencv.global.opencv_core.cvScalar;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageCOI;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2HSV;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
