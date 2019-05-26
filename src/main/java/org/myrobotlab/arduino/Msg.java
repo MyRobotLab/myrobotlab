@@ -2360,7 +2360,9 @@ public class Msg {
   /**
    * enable acks on both sides Arduino/Java-Land
    * and MrlComm-land
-   */
+   *
+	 * @param b - enable acks back
+	 */
   public void enableAcks(boolean b){
     // disable local blocking
 	  ackEnabled = b;
