@@ -2,19 +2,16 @@ package org.myrobotlab.opencv;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_java;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.nd4j.linalg.io.Assert;
 
-@Ignore
 public class OpenCVFilterOutputTest  extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {
     debug = false;
     // Loader.load(opencv_java.class);
-    Loader.load();
+    // Loader.load();
     // Service.sleep(10000);
   }
 

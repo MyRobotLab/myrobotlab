@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.javacpp.opencv_java;
 import org.bytedeco.javacv.CanvasFrame;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,7 +30,8 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
   
   @Before
   public void setup() {
-    Loader.load();
+    // Loader.load();
+    Loader.load(opencv_java.class);
   }
 
   @Test
