@@ -254,12 +254,7 @@ public class Msg {
 	
 	transient private SerialDevice serial;
 
-	/**
-	 * want to grab it when SerialDevice is created
-	 *
-	 * @param serial
-	 * @return
-	 */
+	
 	/*
 	static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) {
 		if (instance == null) {
