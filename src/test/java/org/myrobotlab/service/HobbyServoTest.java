@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.test.AbstractTest;
 
@@ -14,6 +13,8 @@ import org.myrobotlab.test.AbstractTest;
  * 
  * @author GroG FIXME - test one servo against EVERY TYPE OF CONTROLLER
  *         (virtualized) !!!! iterate through all types
+ * 
+ *         FIXME - iterate through all controllers !
  * 
  *         FIXME - what is expected behavior when a s1 is attached at pin 3,
  *         then a new servo s2 is requested to attach at pin 3 ?
@@ -26,7 +27,6 @@ public class HobbyServoTest extends AbstractTest {
   static final String port01 = "COM9";
   Integer pin = 5;
 
-  
   public void testAttach() throws Exception {
     // FIXME - test state change - mrl gets restarted arduino doesn't what
     // happens - how to handle gracefully
@@ -188,12 +188,12 @@ public class HobbyServoTest extends AbstractTest {
     // this basic test will create a servo and attach it to an arduino.
     // then detach
     // Platform.setVirtual(false);
-    
+
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
 
     HobbyServo s = (HobbyServo) Runtime.start("ser1", "HobbyServo");
-    
+
     // the pin should always be set to something.
     s.setPin(pin);
     assertEquals(pin + "", s.getPin());
@@ -251,11 +251,13 @@ public class HobbyServoTest extends AbstractTest {
     // HobbyServo.eventsEnabledDefault(true);
     HobbyServo s1 = (HobbyServo) Runtime.start("s1", "HobbyServo");
 
-    // assertTrue("problem setting default events to true", s1.isEventsEnabled());
+    // assertTrue("problem setting default events to true",
+    // s1.isEventsEnabled());
 
     // HobbyServo.eventsEnabledDefault(false);
     HobbyServo s2 = (HobbyServo) Runtime.start("s2", "HobbyServo");
-    // assertTrue("problem setting default events to false", s2.isEventsEnabled());
+    // assertTrue("problem setting default events to false",
+    // s2.isEventsEnabled());
 
     s1.releaseService();
     s2.releaseService();
@@ -284,10 +286,24 @@ public class HobbyServoTest extends AbstractTest {
     assertTrue("setting autoDisable true", servo01.getAutoDisable());
     servo01.setSpeed(null);
     servo01.moveTo(10.0);
-    servo01.setSpeed(20.0);    
+    servo01.setSpeed(20.0);
     servo01.moveToBlocking(130.0);
     sleep(3500); // waiting for disable
     assertFalse("servo should have been disabled", servo01.isEnabled());
+
+  }
+
+  public void testBlocking() throws Exception {
+
+    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);
+
+    HobbyServo servo01 = (HobbyServo) Runtime.start("servo01", "HobbyServo");
+    servo01.detach();
+    servo01.setPin(pin);
+    arduino01.attach(servo01); // FIXME - does not block until on Arduino :(
+    sleep(100);
+    // test
 
   }
 

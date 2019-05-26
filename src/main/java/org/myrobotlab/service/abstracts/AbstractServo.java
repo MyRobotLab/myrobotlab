@@ -253,22 +253,16 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // we subscribe to runtime here for new services
     subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
 
-    // new feature -
-    // extracting the currentPos from serialized servo
-    Double lastCurrentPos = null;
-    try {
-      lastCurrentPos = (Double) loadField("currentPos"); 
-    } catch (IOException e) {
-      log.info("current pos cannot be found in saved file");
-    }
-    
-    if (lastCurrentPos != null) {
-      currentPos = targetPos = lastCurrentPos;
-    } else {
-      // if no position could be loaded - set to rest
-      // we have no "historical" info - assume we are @ rest
-      currentPos = targetPos = rest;
-    }
+    /*
+     * // new feature - // extracting the currentPos from serialized servo
+     * Double lastCurrentPos = null; try { lastCurrentPos = (Double)
+     * loadField("currentPos"); } catch (IOException e) {
+     * log.info("current pos cannot be found in saved file"); }
+     */
+
+    // if no position could be loaded - set to rest
+    // we have no "historical" info - assume we are @ rest
+    currentPos = targetPos = rest;
 
     // create our default TimeEncoder
     if (encoder == null) {
@@ -409,11 +403,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
     disable();
     for (String controller : controllers) {
       ServiceInterface si = Runtime.getService(controller);
-      /* let the comm manager figure this out
-      if (si.isLocal()) {
-        ((ServoController) Runtime.getService(controller)).detach(this);
-      } else { */
-        send(controller, "detach", this);
+      /*
+       * let the comm manager figure this out if (si.isLocal()) {
+       * ((ServoController) Runtime.getService(controller)).detach(this); } else
+       * {
+       */
+      send(controller, "detach", this);
       // }
     }
     controllers.clear();
@@ -438,11 +433,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void disable() {
     for (String controller : controllers) {
       ServiceInterface si = Runtime.getService(controller);
-      /* let the com manager figure this out
-      if (si.isLocal()) {
-        ((ServoController) Runtime.getService(controller)).servoDisable(this);
-      } else { */
-        send(controller, "servoDisable", this);
+      /*
+       * let the com manager figure this out if (si.isLocal()) {
+       * ((ServoController) Runtime.getService(controller)).servoDisable(this);
+       * } else {
+       */
+      send(controller, "servoDisable", this);
       // }
     }
     enabled = false;
@@ -1007,11 +1003,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
     this.speed = degreesPerSecond;
     for (String controller : controllers) {
       // ServiceInterface si = Runtime.getService(controller);
-      /* this should be done by the communication manager !!!
-      if (si.isLocal()) {
-        ((ServoController) Runtime.getService(controller)).servoSetVelocity(this);
-      } else { */
-        send(controller, "servoSetVelocity", this);
+      /*
+       * this should be done by the communication manager !!! if (si.isLocal())
+       * { ((ServoController)
+       * Runtime.getService(controller)).servoSetVelocity(this); } else {
+       */
+      send(controller, "servoSetVelocity", this);
       // }
     }
     broadcastState();

@@ -3,6 +3,7 @@ package org.myrobotlab.opencv;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.junit.Before;
+import org.myrobotlab.framework.Service;
 import org.nd4j.linalg.io.Assert;
 
 public class OpenCVFilterOutputTest  extends AbstractOpenCVFilterTest {
@@ -11,6 +12,7 @@ public class OpenCVFilterOutputTest  extends AbstractOpenCVFilterTest {
   public void setup() {
     debug = false;
     Loader.load();
+    Service.sleep(10000);
   }
 
   @Override
