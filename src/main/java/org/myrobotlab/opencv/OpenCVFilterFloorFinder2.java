@@ -32,7 +32,6 @@ import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
 //import static org.bytedeco.opencv.global.opencv_core.cvDrawRect;
 import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_core.cvScalar;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
@@ -120,7 +119,7 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
       storage = cvCreateMemStorage(0);
     }
 
-    grey = cvCreateImage(cvGetSize(image), 8, 1);
+    grey = cvCreateImage(image.cvSize(), 8, 1);
     // display = cvCreateImage(cvGetSize(frame), 8, 3);
 
     startPoint = cvPoint(image.width() / 2, image.height() - 4);

@@ -28,12 +28,8 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.global.opencv_core.CV_TERMCRIT_EPS;
-import static org.bytedeco.opencv.global.opencv_core.CV_TERMCRIT_ITER;
 import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_32F;
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvSize;
-import static org.bytedeco.opencv.global.opencv_core.cvTermCriteria;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvGoodFeaturesToTrack;

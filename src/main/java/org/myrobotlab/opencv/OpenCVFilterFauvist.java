@@ -26,7 +26,6 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCanny;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
@@ -73,10 +72,10 @@ public class OpenCVFilterFauvist extends OpenCVFilter {
     }
 
     if (gray == null) {
-      gray = cvCreateImage(cvGetSize(image), 8, 1);
+      gray = cvCreateImage(image.cvSize(), 8, 1);
     }
     if (inlines == null) {
-      inlines = cvCreateImage(cvGetSize(image), 8, 1);
+      inlines = cvCreateImage(image.cvSize(), 8, 1);
     }
 
     if (image.nChannels() == 3) {

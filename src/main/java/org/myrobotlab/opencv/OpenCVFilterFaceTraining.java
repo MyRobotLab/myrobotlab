@@ -37,7 +37,6 @@ import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
 import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 //import static org.bytedeco.opencv.opencv_core.cvLoad;
 //import static org.bytedeco.opencv.helper.opencv_core.cvLoad;
 import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
@@ -630,7 +629,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               // ====== BEGIN STANDARD TEMPLATE
               // BEGIN STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
               // convert to grey !
-              IplImage gray = cvCreateImage(cvGetSize(origBB), 8, 1);
+              IplImage gray = cvCreateImage(origBB.cvSize(), 8, 1);
 
               IplImage resizedImage = OpenCVFilterResize.resizeImageMaintainAspect(gray, templateWidth, templateHeight);
 

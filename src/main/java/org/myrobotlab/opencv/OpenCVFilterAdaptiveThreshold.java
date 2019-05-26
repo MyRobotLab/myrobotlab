@@ -26,7 +26,6 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_ADAPTIVE_THRESH_MEAN_C;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_THRESH_BINARY;
@@ -85,7 +84,8 @@ public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
+    
+    gray = cvCreateImage(image.cvSize(), 8, CV_THRESH_BINARY);
   }
 
   @Override

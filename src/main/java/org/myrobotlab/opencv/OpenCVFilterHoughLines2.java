@@ -28,7 +28,6 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
@@ -90,7 +89,7 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
     }
 
     if (gray == null) {
-      gray = cvCreateImage(cvGetSize(image), 8, 1);
+      gray = cvCreateImage(image.cvSize(), 8, 1);
     }
 
     if (storage == null) {
@@ -98,7 +97,7 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
     }
 
     if (inlines == null) {
-      inlines = cvCreateImage(cvGetSize(image), 8, 1);
+      inlines = cvCreateImage(image.cvSize(), 8, 1);
     }
 
     if (image.nChannels() > 1) {
