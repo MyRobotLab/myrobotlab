@@ -1,5 +1,7 @@
 package org.myrobotlab.opencv;
 
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacpp.opencv_java;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.junit.Before;
 import org.nd4j.linalg.io.Assert;
@@ -8,11 +10,13 @@ public class OpenCVFilterLKOpticalTrackTest  extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {
+    Loader.load(opencv_java.class);
     debug = false;
   }
 
   @Override
   public OpenCVFilter createFilter() {
+    Loader.load(opencv_java.class);
     // Just to exercise the null and the default constructor.
     // This shouldn't blow up
     OpenCVFilter f = new OpenCVFilterLKOpticalTrack();
