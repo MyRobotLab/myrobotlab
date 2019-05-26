@@ -341,7 +341,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * max complexity - minimal parameter EncoderControl attach
    * 
-   * @param encoder
+   * @param enc
    * @throws Exception
    */
   public void attach(EncoderControl enc) throws Exception {
@@ -573,8 +573,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * positional information supplied
    * 
    * @param newPos
-   * @param isBlocking
-   * @param timeout
+   * @param blocking
+   * @param timeoutMs
    */
   protected void processMove(Double newPos, boolean blocking, Long timeoutMs) {
     // FIXME - implement encoder blocking ...
