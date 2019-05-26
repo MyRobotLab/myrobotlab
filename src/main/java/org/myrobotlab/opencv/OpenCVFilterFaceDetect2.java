@@ -1,19 +1,19 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
-import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
-import static org.bytedeco.javacpp.opencv_imgproc.getAffineTransform;
-import static org.bytedeco.javacpp.opencv_imgproc.resize;
-import static org.bytedeco.javacpp.opencv_imgproc.warpAffine;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
+import static org.bytedeco.opencv.global.opencv_imgproc.getAffineTransform;
+import static org.bytedeco.opencv.global.opencv_imgproc.resize;
+import static org.bytedeco.opencv.global.opencv_imgproc.warpAffine;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -22,15 +22,15 @@ import java.util.HashMap;
 
 import javax.swing.WindowConstants;
 
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.Point2f;
-import org.bytedeco.javacpp.opencv_core.Rect;
-import org.bytedeco.javacpp.opencv_core.RectVector;
-import org.bytedeco.javacpp.opencv_core.Size;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
-import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point2f;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.RectVector;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;

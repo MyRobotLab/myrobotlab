@@ -25,16 +25,15 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvAddWeighted;
-import static org.bytedeco.javacpp.opencv_core.cvScalar;
-import static org.bytedeco.javacpp.opencv_imgproc.cvRectangle;
+import static org.bytedeco.opencv.global.opencv_core.cvAddWeighted;
+import static org.bytedeco.opencv.global.opencv_core.cvScalar;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvRectangle;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacv.Parallel;
 import org.myrobotlab.logging.LoggerFactory;

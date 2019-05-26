@@ -25,31 +25,31 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvMinMaxLoc;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
-import static org.bytedeco.javacpp.opencv_core.cvScalar;
-import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
-import static org.bytedeco.javacpp.opencv_core.cvSize;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_TM_SQDIFF;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
-import static org.bytedeco.javacpp.opencv_imgproc.cvMatchTemplate;
-import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
-import static org.bytedeco.javacpp.opencv_imgproc.cvRectangle;
+import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_32F;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvMinMaxLoc;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_core.cvResetImageROI;
+import static org.bytedeco.opencv.global.opencv_core.cvScalar;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
+import static org.bytedeco.opencv.global.opencv_core.cvSize;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_TM_SQDIFF;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvMatchTemplate;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvRectangle;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.CvRect;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.CvRect;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;

@@ -14,7 +14,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.datavec.image.loader.NativeImageLoader;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Solr;

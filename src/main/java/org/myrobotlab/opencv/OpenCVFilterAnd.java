@@ -25,17 +25,17 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvAnd;
-import static org.bytedeco.javacpp.opencv_core.cvRect;
-import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
-import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_core.cvAnd;
+import static org.bytedeco.opencv.global.opencv_core.cvRect;
+import static org.bytedeco.opencv.global.opencv_core.cvResetImageROI;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_GRAYSCALE;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.OpenCV;
@@ -73,7 +73,7 @@ public class OpenCVFilterAnd extends OpenCVFilter {
 
   public void loadMask(String filename) {
     try {
-      and = cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE);
+      and = cvLoadImage(filename, IMREAD_GRAYSCALE);
       /*
        * BufferedImage img = ImageIO.read(new File(filename)); mask =
        * IplImage.createFrom(img);
