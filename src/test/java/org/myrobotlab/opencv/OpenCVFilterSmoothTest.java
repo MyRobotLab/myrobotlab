@@ -1,5 +1,6 @@
 package org.myrobotlab.opencv;
 
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -11,6 +12,7 @@ public class OpenCVFilterSmoothTest  extends AbstractOpenCVFilterTest {
   @Before
   public void setup() {
     debug = false;
+    Loader.load();
   }
 
   @Override
