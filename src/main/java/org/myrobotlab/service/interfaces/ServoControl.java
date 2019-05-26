@@ -36,34 +36,15 @@ import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 public interface ServoControl extends AbsolutePositionControl, EncoderListener, Attachable, StateSaver, org.myrobotlab.framework.interfaces.StatePublisher {
 
   /**
-   * Attaches a servo controller with this servo control, supports a variety of
-   * different parameter types as convenience methods for the user
-   * 
-   * if no controller is provided, last used is set from json related.
-   * 
-   * @param controller
-   *          the controller
-   * @param pin
-   *          the pin
-   * @throws Exception
-   *           e
-   */
-
-  /**
-   * Servo events types are yet to be standardized - but probably movement,
-   * stopped are two possible types used in the past
-   * 
-   * @param service
-   *          - the listener
+   * attaches a servo data listener for servo data - like position information
+   * @param listener
    */
   void attach(ServoDataListener listener);
 
-  /**
-   * remove the servo listener
-   * 
-   * @param service
-   *          - to remove
-   */
+ /**
+  * remove the listener
+  * @param listener
+  */
   void detach(ServoDataListener listener);
 
   /**

@@ -148,10 +148,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
      * primarily interested in language and do not usually need the distinction
      * between regions in this context
      * 
-     * @param code
-     * @return
+     * @return the string language name
      */
-
     public String getLanguage() {
       if (locale == null) {
         return null;

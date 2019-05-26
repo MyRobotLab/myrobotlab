@@ -802,7 +802,7 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
 
   /**
    * call back to hand new services registered we want to update our list of
-   * possible controllers & encoders
+   * possible controllers and encoders
    * 
    * @param s
    */
