@@ -27,8 +27,6 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_core.cvResetImageROI;
 import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
 
@@ -37,7 +35,6 @@ import java.awt.image.BufferedImage;
 
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Rect;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

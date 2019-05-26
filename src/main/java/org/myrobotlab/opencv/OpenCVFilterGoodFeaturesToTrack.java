@@ -26,7 +26,6 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
@@ -159,9 +158,9 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    grey = cvCreateImage(cvGetSize(image), 8, 1);
-    eig = cvCreateImage(cvGetSize(grey), 32, 1);
-    temp = cvCreateImage(cvGetSize(grey), 32, 1);
+    grey = cvCreateImage(image.cvSize(), 8, 1);
+    eig = cvCreateImage(grey.cvSize(), 32, 1);
+    temp = cvCreateImage(grey.cvSize(), 32, 1);
     stableIterations = new HashMap<String, Integer>();
   }
 

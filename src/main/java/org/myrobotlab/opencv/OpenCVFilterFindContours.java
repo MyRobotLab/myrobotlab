@@ -29,9 +29,8 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvFindContours;
 import static org.bytedeco.opencv.global.opencv_core.cvClearMemStorage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
-//import static org.bytedeco.opencv.global.opencv_core.cvDrawRect;
 import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
+
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
@@ -104,7 +103,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
     if (storage == null) {
       storage = cvCreateMemStorage(0);
     }
-    grey = cvCreateImage(cvGetSize(image), 8, 1);
+    grey = cvCreateImage(image.cvSize(), 8, 1);
   }
 
   @Override

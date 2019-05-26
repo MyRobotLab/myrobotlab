@@ -26,7 +26,6 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 
@@ -55,7 +54,7 @@ public class OpenCVFilterGray extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    gray = cvCreateImage(cvGetSize(image), 8, 1);
+    gray = cvCreateImage(image.cvSize(), 8, 1);
   }
 
   @Override

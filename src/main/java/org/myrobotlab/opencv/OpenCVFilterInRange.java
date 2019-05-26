@@ -28,7 +28,6 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.global.opencv_core.cvAnd;
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_core.cvInRangeS;
 import static org.bytedeco.opencv.global.opencv_core.cvScalar;
 import static org.bytedeco.opencv.global.opencv_core.cvSetImageCOI;
@@ -114,15 +113,15 @@ public class OpenCVFilterInRange extends OpenCVFilter {
     ret = image;
 
     if (hsv == null) {
-      hsv = cvCreateImage(cvGetSize(image), 8, 3);
-      hue = cvCreateImage(cvGetSize(image), 8, 1);
-      hueMask = cvCreateImage(cvGetSize(image), 8, 1);
-      value = cvCreateImage(cvGetSize(image), 8, 1);
-      valueMask = cvCreateImage(cvGetSize(image), 8, 1);
-      saturation = cvCreateImage(cvGetSize(image), 8, 1);
-      saturationMask = cvCreateImage(cvGetSize(image), 8, 1);
-      temp = cvCreateImage(cvGetSize(image), 8, 1);
-      mask = cvCreateImage(cvGetSize(image), 8, 1);
+      hsv = cvCreateImage(image.cvSize(), 8, 3);
+      hue = cvCreateImage(image.cvSize(), 8, 1);
+      hueMask = cvCreateImage(image.cvSize(), 8, 1);
+      value = cvCreateImage(image.cvSize(), 8, 1);
+      valueMask = cvCreateImage(image.cvSize(), 8, 1);
+      saturation = cvCreateImage(image.cvSize(), 8, 1);
+      saturationMask = cvCreateImage(image.cvSize(), 8, 1);
+      temp = cvCreateImage(image.cvSize(), 8, 1);
+      mask = cvCreateImage(image.cvSize(), 8, 1);
     }
 
     // load up desired mask case

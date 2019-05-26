@@ -20,7 +20,6 @@ import javax.swing.WindowConstants;
 import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;

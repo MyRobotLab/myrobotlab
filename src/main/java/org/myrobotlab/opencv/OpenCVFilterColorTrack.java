@@ -26,7 +26,7 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
+
 import static org.bytedeco.opencv.global.opencv_core.cvInRangeS;
 import static org.bytedeco.opencv.global.opencv_core.cvScalar;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2HSV;
@@ -91,15 +91,15 @@ public class OpenCVFilterColorTrack extends OpenCVFilter {
   public IplImage process(IplImage image) {
 
     if (hsv == null) {
-      hsv = cvCreateImage(cvGetSize(image), 8, 3);
-      hue = cvCreateImage(cvGetSize(image), 8, 1);
-      value = cvCreateImage(cvGetSize(image), 8, 1);
-      saturation = cvCreateImage(cvGetSize(image), 8, 1);
+      hsv = cvCreateImage(image.cvSize(), 8, 3);
+      hue = cvCreateImage(image.cvSize(), 8, 1);
+      value = cvCreateImage(image.cvSize(), 8, 1);
+      saturation = cvCreateImage(image.cvSize(), 8, 1);
 
-      thresholded = cvCreateImage(cvGetSize(image), 8, 1);
-      thresholded2 = cvCreateImage(cvGetSize(image), 8, 1);
+      thresholded = cvCreateImage(image.cvSize(), 8, 1);
+      thresholded2 = cvCreateImage(image.cvSize(), 8, 1);
 
-      mask = cvCreateImage(cvGetSize(image), 8, 1);
+      mask = cvCreateImage(image.cvSize(), 8, 1);
 
       hsv_min = cvScalar(0, 50, 170, 0);
       hsv_max = cvScalar(10, 180, 256, 0);

@@ -1,10 +1,6 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.CV_32SC1;
-import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_GRAYSCALE;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imdecode;
@@ -12,7 +8,6 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_SIMPLEX;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;

@@ -27,7 +27,6 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
@@ -262,7 +261,7 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   public IplImage copy(final IplImage image) {
-    IplImage copy = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
+    IplImage copy = cvCreateImage(image.cvSize(), image.depth(), image.nChannels());
     cvCopy(image, copy, null);
     return copy;
   }

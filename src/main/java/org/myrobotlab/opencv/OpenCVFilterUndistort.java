@@ -17,7 +17,6 @@ import static org.bytedeco.opencv.global.opencv_core.CV_32FC1;
 import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 
 public class OpenCVFilterUndistort extends OpenCVFilter {
 
@@ -130,15 +129,6 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
   public void imageChanged(IplImage image) {
     // TODO Auto-generated method stub
 
-  }
-
-  public void show(final Mat imageMat, final String title) {
-    IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(imageMat));
-    final IplImage image1 = cvCreateImage(cvGetSize(image), IPL_DEPTH_8U, image.nChannels());
-    cvCopy(image, image1);
-    CanvasFrame canvas = new CanvasFrame(title, 1);
-    canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(converterToIpl.convert(image1));
   }
 
   @Override

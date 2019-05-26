@@ -27,7 +27,6 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvGet2D;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSize;
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_core.cvScalar;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
@@ -412,10 +411,10 @@ public class OpenCVFilterMouse extends OpenCVFilter {
     }
 
     if (gray == null) {
-      gray = cvCreateImage(cvGetSize(image), 8, 1);
+      gray = cvCreateImage(image.cvSize(), 8, 1);
     }
     if (src == null) {
-      src = cvCreateImage(cvGetSize(image), 8, 1);
+      src = cvCreateImage(image.cvSize(), 8, 1);
     }
 
     if (image.nChannels() == 3) {
