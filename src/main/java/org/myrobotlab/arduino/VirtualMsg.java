@@ -283,12 +283,7 @@ public class VirtualMsg {
 	
 	transient private SerialDevice serial;
 
-	/**
-	 * want to grab it when SerialDevice is created
-	 *
-	 * @param serial
-	 * @return
-	 */
+	
 	/*
 	static public synchronized Msg getInstance(MrlComm arduino, SerialDevice serial) {
 		if (instance == null) {
