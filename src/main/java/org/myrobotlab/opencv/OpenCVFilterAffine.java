@@ -1,20 +1,20 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_32FC1;
-import static org.bytedeco.javacpp.opencv_core.cvCreateMat;
-import static org.bytedeco.javacpp.opencv_core.cvPoint2D32f;
-import static org.bytedeco.javacpp.opencv_core.cvSize2D32f;
-import static org.bytedeco.javacpp.opencv_imgproc.cv2DRotationMatrix;
-import static org.bytedeco.javacpp.opencv_imgproc.cvBoxPoints;
-import static org.bytedeco.javacpp.opencv_imgproc.cvWarpAffine;
+import static org.bytedeco.opencv.global.opencv_core.CV_32FC1;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateMat;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint2D32f;
+import static org.bytedeco.opencv.global.opencv_core.cvSize2D32f;
+import static org.bytedeco.opencv.global.opencv_imgproc.cv2DRotationMatrix;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvBoxPoints;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvWarpAffine;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.CvBox2D;
-import org.bytedeco.javacpp.opencv_core.CvMat;
-import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.CvBox2D;
+import org.bytedeco.opencv.opencv_core.CvMat;
+import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;

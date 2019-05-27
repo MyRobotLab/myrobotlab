@@ -25,13 +25,13 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_imgproc.CV_GAUSSIAN;
-import static org.bytedeco.javacpp.opencv_imgproc.cvSmooth;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_GAUSSIAN;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvSmooth;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

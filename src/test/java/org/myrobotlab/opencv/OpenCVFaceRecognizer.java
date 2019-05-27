@@ -1,8 +1,8 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.opencv.global.opencv_core.CV_32SC1;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_GRAYSCALE;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -10,10 +10,10 @@ import java.nio.IntBuffer;
 
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.MatVector;
-import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
-import org.bytedeco.javacpp.opencv_face.FisherFaceRecognizer;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_face.FaceRecognizer;
+import org.bytedeco.opencv.opencv_face.FisherFaceRecognizer;
 import org.myrobotlab.test.AbstractTest;
 
 /**
@@ -42,7 +42,7 @@ import org.myrobotlab.test.AbstractTest;
 public class OpenCVFaceRecognizer extends AbstractTest {
   public static void main(String[] args) {
     String trainingDir = args[0];
-    Mat testImage = imread(args[1], CV_LOAD_IMAGE_GRAYSCALE);
+    Mat testImage = imread(args[1], IMREAD_GRAYSCALE);
 
     File root = new File(trainingDir);
 
@@ -63,7 +63,7 @@ public class OpenCVFaceRecognizer extends AbstractTest {
     int counter = 0;
 
     for (File image : imageFiles) {
-      Mat img = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+      Mat img = imread(image.getAbsolutePath(), IMREAD_GRAYSCALE);
 
       int label = Integer.parseInt(image.getName().split("\\-")[0]);
 

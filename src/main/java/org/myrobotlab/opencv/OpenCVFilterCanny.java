@@ -26,16 +26,15 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCanny;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCanny;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -64,10 +63,10 @@ public class OpenCVFilterCanny extends OpenCVFilter {
   public IplImage process(IplImage image) {
 
     if (gray == null) {
-      gray = cvCreateImage(cvGetSize(image), 8, 1);
+      gray = cvCreateImage(image.cvSize(), 8, 1);
     }
     if (inlines == null) {
-      inlines = cvCreateImage(cvGetSize(image), 8, 1);
+      inlines = cvCreateImage(image.cvSize(), 8, 1);
     }
 
     if (image.nChannels() == 3) {

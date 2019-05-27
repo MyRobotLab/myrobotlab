@@ -26,12 +26,12 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvMixChannels;
-import static org.bytedeco.javacpp.opencv_core.cvScalar;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.cvInitFont;
+import static org.bytedeco.opencv.global.opencv_core.cvMixChannels;
+import static org.bytedeco.opencv.global.opencv_core.cvScalar;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvInitFont;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -40,9 +40,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -58,7 +58,7 @@ public class OpenCVFilterOverlay extends OpenCVFilter {
     public double alpha = 0.5;
 
     public ImageOverlay(String imageFilename, double alpha) {
-      this.image = cvLoadImage(imageFilename, CV_LOAD_IMAGE_UNCHANGED);
+      this.image = cvLoadImage(imageFilename, IMREAD_UNCHANGED);
       // this.image = cvLoadImage(imageFilename, -1); // -1 == unchanged which
       // supports 4 channel transparencies
       // this.image = cvLoadImage(imageFilename);

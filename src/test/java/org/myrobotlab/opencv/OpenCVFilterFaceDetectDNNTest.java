@@ -1,13 +1,13 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

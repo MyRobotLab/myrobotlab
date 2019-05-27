@@ -25,7 +25,7 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.SphericalCoordinates;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;

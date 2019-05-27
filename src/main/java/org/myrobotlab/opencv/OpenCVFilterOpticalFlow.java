@@ -28,24 +28,24 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.helper.opencv_core.CV_RGB;
-import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_EPS;
-import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_ITER;
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvReleaseImage;
-import static org.bytedeco.javacpp.opencv_core.cvSize;
-import static org.bytedeco.javacpp.opencv_core.cvTermCriteria;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FILLED;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCircle;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFindCornerSubPix;
-import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
-import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
-import static org.bytedeco.javacpp.opencv_video.cvCalcOpticalFlowPyrLK;
+import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
+import static org.bytedeco.opencv.global.opencv_core.CV_TERMCRIT_EPS;
+import static org.bytedeco.opencv.global.opencv_core.CV_TERMCRIT_ITER;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_32F;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_core.cvReleaseImage;
+import static org.bytedeco.opencv.global.opencv_core.cvSize;
+import static org.bytedeco.opencv.global.opencv_core.cvTermCriteria;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FILLED;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCircle;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvFindCornerSubPix;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvGoodFeaturesToTrack;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvLine;
+import static org.bytedeco.opencv.global.opencv_video.calcOpticalFlowPyrLK;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -54,11 +54,12 @@ import java.util.ArrayList;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
-import org.bytedeco.javacpp.opencv_core.CvSize;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.helper.opencv_core.CvArr;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvSize;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.CvArr;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
@@ -172,10 +173,10 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage inImage) {
-    currentImg = IplImage.create(imageSize, 8, 1);
-    lastImg = IplImage.create(imageSize, 8, 1);
-    eig_image = cvCreateImage(imageSize, IPL_DEPTH_32F, 1);
-    tmpImage = cvCreateImage(imageSize, IPL_DEPTH_32F, 1);
+    currentImg = IplImage.create(inImage.cvSize(), 8, 1);
+    lastImg = IplImage.create(inImage.cvSize(), 8, 1);
+    eig_image = cvCreateImage(inImage.cvSize(), IPL_DEPTH_32F, 1);
+    tmpImage = cvCreateImage(inImage.cvSize(), IPL_DEPTH_32F, 1);
   }
 
   @Override
@@ -210,9 +211,15 @@ public class OpenCVFilterOpticalFlow extends OpenCVFilter {
       IplImage pyrB = cvCreateImage(pyr_sz, IPL_DEPTH_32F, 1);
 
       CvPoint2D32f cornersB = new CvPoint2D32f(max);
-      cvCalcOpticalFlowPyrLK(currentImg, lastImg, pyrA, pyrB, corners, cornersB, maxCorners.get(), cvSize(winSize, winSize), 5, featuresFound, featureErrors,
-          cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3), 0);
+      // TODO: test this. I doubt it works!
+      //      calcOpticalFlowPyrLK(toMat(currentImg), toMat(lastImg), toMat(pyrA), toMat(pyrB), corners, cornersB, maxCorners.get(), cvSize(winSize, winSize), 5, featuresFound, featureErrors,
+      //          cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3), 0);
 
+      Mat status = new Mat();
+      Mat err = new Mat();
+      calcOpticalFlowPyrLK(toMat(currentImg), toMat(lastImg), toMat(pyrA), toMat(pyrB), status, err);
+      
+      
       // Make an image of the results
       for (int i = 0; i < maxCorners.get(); i++) {
         if (featuresFound.get(i) == 0 || featureErrors.get(i) > 550) {

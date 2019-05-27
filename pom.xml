@@ -209,37 +209,37 @@
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta3</version>
+    <version>1.0.0-beta4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta3</version>
+    <version>1.0.0-beta4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta3</version>
+    <version>1.0.0-beta4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta3</version>
+    <version>1.0.0-beta4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-ui_2.11</artifactId>
-    <version>1.0.0-beta3</version>
+    <version>1.0.0-beta4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta3</version>
+    <version>1.0.0-beta4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -922,13 +922,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv</artifactId>
-    <version>1.4.3</version>
+    <version>1.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.4.3</version>
+    <version>1.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>

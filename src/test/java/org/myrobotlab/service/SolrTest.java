@@ -1,37 +1,23 @@
 package org.myrobotlab.service;
 
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.ThreadLocalRandom;
-
-import javax.imageio.ImageIO;
-
-import org.apache.commons.codec.binary.Base64;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.Repo;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.opencv.OpenCVFilter;
-
 
 // @Ignore
 public class SolrTest extends AbstractServiceTest {

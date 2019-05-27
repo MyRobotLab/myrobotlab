@@ -25,12 +25,11 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -43,9 +42,9 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.bytedeco.javacpp.opencv_core.CvSize;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.CvSize;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
@@ -71,7 +70,7 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   static private IplImage load(String filename) {
-    return cvLoadImage(filename, CV_LOAD_IMAGE_UNCHANGED);
+    return cvLoadImage(filename, IMREAD_UNCHANGED);
   }
 
   static public IplImage loadImage(String infile) {
@@ -175,7 +174,7 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   static private Mat read(String filename) {
-    return imread(filename, CV_LOAD_IMAGE_UNCHANGED);
+    return imread(filename, IMREAD_UNCHANGED);
   }
 
   /**
@@ -220,7 +219,7 @@ public abstract class OpenCVFilter implements Serializable {
 
   int height;
 
-  transient CvSize imageSize;
+  // transient CvSize imageSize;
 
   transient Java2DFrameConverter jconverter = new Java2DFrameConverter();
 
@@ -262,7 +261,7 @@ public abstract class OpenCVFilter implements Serializable {
   }
 
   public IplImage copy(final IplImage image) {
-    IplImage copy = cvCreateImage(cvGetSize(image), image.depth(), image.nChannels());
+    IplImage copy = cvCreateImage(image.cvSize(), image.depth(), image.nChannels());
     cvCopy(image, copy, null);
     return copy;
   }
@@ -424,12 +423,11 @@ public abstract class OpenCVFilter implements Serializable {
     // FIXME - getImage(filter.sourceKey) => if null then use getImage()
     // grab the incoming image ..
     IplImage image = data.getOutputImage(); // <-- getting input from output
-
     if (image != null && (image.width() != width || image.nChannels() != channels)) {
       width = image.width();
       channels = image.nChannels();
       height = image.height();
-      imageSize = cvGetSize(image);
+      // imageSize = cvGetSize(image);
       imageChanged(image);
     }
     return image;

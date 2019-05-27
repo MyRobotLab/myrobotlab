@@ -25,25 +25,24 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.helper.opencv_imgproc.cvFindContours;
-import static org.bytedeco.javacpp.opencv_core.cvClearMemStorage;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvCreateMemStorage;
-//import static org.bytedeco.javacpp.opencv_core.cvDrawRect;
-import static org.bytedeco.javacpp.opencv_core.cvGetSeqElem;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_POLY_APPROX_DP;
-import static org.bytedeco.javacpp.opencv_imgproc.cvApproxPoly;
-import static org.bytedeco.javacpp.opencv_imgproc.cvBoundingRect;
-import static org.bytedeco.javacpp.opencv_imgproc.cvContourPerimeter;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
-import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvFindContours;
+import static org.bytedeco.opencv.global.opencv_core.cvClearMemStorage;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
+import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
+
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_POLY_APPROX_DP;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvApproxPoly;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvBoundingRect;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvContourPerimeter;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -51,15 +50,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.opencv_core.CvContour;
-//import org.bytedeco.javacpp.opencv_core.CvFont;
-import org.bytedeco.javacpp.opencv_core.CvMemStorage;
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.CvRect;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.CvSeq;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.opencv.opencv_core.CvContour;
+//import org.bytedeco.opencv.opencv_core.CvFont;
+import org.bytedeco.opencv.opencv_core.CvMemStorage;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.CvRect;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.CvSeq;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.Rectangle;
@@ -104,7 +103,7 @@ public class OpenCVFilterFindContours extends OpenCVFilter {
     if (storage == null) {
       storage = cvCreateMemStorage(0);
     }
-    grey = cvCreateImage(cvGetSize(image), 8, 1);
+    grey = cvCreateImage(image.cvSize(), 8, 1);
   }
 
   @Override

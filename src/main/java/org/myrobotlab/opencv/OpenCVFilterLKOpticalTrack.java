@@ -28,17 +28,12 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_EPS;
-import static org.bytedeco.javacpp.opencv_core.CV_TERMCRIT_ITER;
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvSize;
-import static org.bytedeco.javacpp.opencv_core.cvTermCriteria;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvGoodFeaturesToTrack;
-import static org.bytedeco.javacpp.opencv_video.cvCalcOpticalFlowPyrLK;
-
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_32F;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvGoodFeaturesToTrack;
+import static org.bytedeco.opencv.global.opencv_video.calcOpticalFlowPyrLK;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -47,9 +42,10 @@ import java.util.ArrayList;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.helper.opencv_core.CvArr;
+import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.CvArr;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
@@ -76,8 +72,8 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   transient IplImage imgA = null;
   transient IplImage imgB = null;
 
-  transient IplImage pyrA = null;
-  transient IplImage pyrB = null;
+  transient Mat pyrA = new Mat();
+  transient Mat pyrB = new Mat();
 
   int win_size = 15;
 
@@ -111,11 +107,11 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
 
-    eig = IplImage.create(imageSize, IPL_DEPTH_32F, 1);
-    tmp = IplImage.create(imageSize, IPL_DEPTH_32F, 1);
+    eig = IplImage.create(image.cvSize(), IPL_DEPTH_32F, 1);
+    tmp = IplImage.create(image.cvSize(), IPL_DEPTH_32F, 1);
 
-    imgB = IplImage.create(imageSize, 8, 1);
-    imgA = IplImage.create(imageSize, 8, 1);
+    imgB = IplImage.create(image.cvSize(), 8, 1);
+    imgA = IplImage.create(image.cvSize(), 8, 1);
 
     if (channels == 3) {
       cvCvtColor(image, imgB, CV_BGR2GRAY);
@@ -175,8 +171,13 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     // InputArray prevPts, InputOutputArray nextPts, OutputArray status,
     // OutputArray err, Size winSize, int maxLevel, TermCriteria criteria,
     // int flags, double minEigThreshold)
-    cvCalcOpticalFlowPyrLK(imgA, imgB, pyrA, pyrB, cornersA, cornersB, count.get(), cvSize(win_size, win_size), 5, features_found, feature_errors,
-        cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3), 0);
+//    cvCalcOpticalFlowPyrLK(imgA, imgB, pyrA, pyrB, cornersA, cornersB, count.get(), cvSize(win_size, win_size), 5, features_found, feature_errors,
+//        cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.3), 0);
+    
+    Mat status = new Mat();
+    Mat err = new Mat();
+    // TODO: fix this.. or test it.. changed in opencv 4+ 
+    calcOpticalFlowPyrLK(toMat(imgA), toMat(imgB), pyrA, pyrB, status, err);    
 
     StringBuffer ff = new StringBuffer();
     StringBuffer fe = new StringBuffer();

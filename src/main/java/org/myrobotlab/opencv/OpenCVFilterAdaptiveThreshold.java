@@ -25,18 +25,17 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_ADAPTIVE_THRESH_MEAN_C;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_THRESH_BINARY;
-import static org.bytedeco.javacpp.opencv_imgproc.cvAdaptiveThreshold;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_ADAPTIVE_THRESH_MEAN_C;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_THRESH_BINARY;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvAdaptiveThreshold;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -85,7 +84,8 @@ public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    gray = cvCreateImage(cvGetSize(image), 8, CV_THRESH_BINARY);
+    
+    gray = cvCreateImage(image.cvSize(), 8, CV_THRESH_BINARY);
   }
 
   @Override
