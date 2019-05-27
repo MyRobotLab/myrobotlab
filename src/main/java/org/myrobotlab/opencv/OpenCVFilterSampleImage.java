@@ -25,21 +25,16 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvScalar;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_core.cvScalar;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
 
-import javax.imageio.ImageIO;
-
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

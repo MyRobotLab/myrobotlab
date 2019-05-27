@@ -1,6 +1,6 @@
 package org.myrobotlab.deeplearning4j;
 
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Ignore;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Deeplearning4j;

@@ -1,10 +1,10 @@
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.javacpp.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.javacpp.opencv_imgproc.cvFont;
-import static org.bytedeco.javacpp.opencv_imgproc.cvPutText;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -13,10 +13,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Rect;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.Runtime;

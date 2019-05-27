@@ -15,9 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.imageio.ImageIO;
-
+import javax.swing.WindowConstants;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -31,7 +34,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;

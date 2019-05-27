@@ -26,23 +26,23 @@
 // http://stackoverflow.com/questions/11515072/how-to-identify-optimal-parameters-for-cvcanny-for-polygon-approximation
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.cvCopy;
-import static org.bytedeco.javacpp.opencv_core.cvPoint;
-import static org.bytedeco.javacpp.opencv_core.cvRect;
-import static org.bytedeco.javacpp.opencv_core.cvResetImageROI;
-import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
-import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
-import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_GRAY2BGR;
-import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.cvLine;
+import static org.bytedeco.opencv.global.opencv_core.cvCopy;
+import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_core.cvRect;
+import static org.bytedeco.opencv.global.opencv_core.cvResetImageROI;
+import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_GRAYSCALE;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_GRAY2BGR;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvLine;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacv.ObjectFinder;
 import org.bytedeco.javacv.ObjectFinder.Settings;
 import org.myrobotlab.logging.LoggerFactory;
@@ -72,7 +72,7 @@ public class OpenCVFilterSURF extends OpenCVFilter {
   }
 
   public void loadObjectImageFilename(String filename) {
-    IplImage object = cvLoadImage(filename, CV_LOAD_IMAGE_GRAYSCALE);
+    IplImage object = cvLoadImage(filename, IMREAD_GRAYSCALE);
     this.setObjectImage(object);
     this.objectFinder = new ObjectFinder(settings);
   }

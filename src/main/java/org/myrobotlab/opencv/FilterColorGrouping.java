@@ -31,7 +31,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

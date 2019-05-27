@@ -1,7 +1,7 @@
 package org.myrobotlab.opencv;
 
-import org.bytedeco.javacpp.opencv_core.Rect;
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.IplImage;
 
 public class YoloDetectedObject {
 

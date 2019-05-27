@@ -25,7 +25,7 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
+import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -34,7 +34,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bytedeco.javacpp.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
 import org.bytedeco.javacv.Parallel;

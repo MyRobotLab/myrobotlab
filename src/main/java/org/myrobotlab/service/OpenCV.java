@@ -51,12 +51,12 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.bytedeco.javacpp.opencv_core.CvPoint;
-import org.bytedeco.javacpp.opencv_core.CvPoint2D32f;
-import org.bytedeco.javacpp.opencv_core.CvScalar;
-import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_imgproc.CvFont;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -388,7 +388,7 @@ public class OpenCV extends AbstractComputerVision {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    String javaCvVersion = "1.4.3";
+    String javaCvVersion = "1.5";
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
 
@@ -482,9 +482,9 @@ public class OpenCV extends AbstractComputerVision {
     
    
     // TODO - chaos monkey yolo
-     OpenCVFilter yoloFilter = cv.addFilter("yolo");
+ //    OpenCVFilter yoloFilter = cv.addFilter("yolo");
     
-     yoloFilter.enable();
+    // yoloFilter.enable();
      cv.capture();
 //     for (int i = 0 ; i < 10; i++) {
 //       yoloFilter.enable();
