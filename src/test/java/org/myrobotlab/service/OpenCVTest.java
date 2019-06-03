@@ -35,8 +35,10 @@ public class OpenCVTest extends AbstractTest {
 
   static final String TEST_DIR = "src/test/resources/OpenCV/";
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
+  static final String TEST_YOUTUBE = "https://www.youtube.com/watch?v=I9VA-U69yaY";
   static final String TEST_INPUT_DIR = "src/test/resources/OpenCV/kinect-data";
   static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
+  static final String TEST_REMOTE_FILE_JPG = "https://en.wikipedia.org/wiki/Isaac_Asimov#/media/File:Isaac.Asimov01.jpg";
 
   private static final int MAX_TIMEOUT = 30000;
 
@@ -119,8 +121,8 @@ public class OpenCVTest extends AbstractTest {
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (hasInternet()) {
       // red pill green pill
-      ChaosMonkey.giveToMonkey(cv, "capture", "https://www.youtube.com/watch?v=I9VA-U69yaY");
-      ChaosMonkey.giveToMonkey(cv, "capture", "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+      ChaosMonkey.giveToMonkey(cv, "capture", TEST_YOUTUBE);
+      ChaosMonkey.giveToMonkey(cv, "capture", TEST_REMOTE_FILE_JPG);
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (!cv.isVirtual()) {
@@ -164,7 +166,8 @@ public class OpenCVTest extends AbstractTest {
     if (hasInternet()) {
       // default internet jpg
       cv.reset();
-      cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+      // cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
+      cv.capture(TEST_REMOTE_FILE_JPG);
       data = cv.getFaceDetect(MAX_TIMEOUT);
       assertNotNull(data);
       assertTrue(data.getBoundingBoxArray().size() > 0);
@@ -218,7 +221,7 @@ public class OpenCVTest extends AbstractTest {
     log.info("starting all filters test");
     cv.reset();
     // 19 second blue red pill
-    cv.capture("https://www.youtube.com/watch?v=I9VA-U69yaY");
+    cv.capture(TEST_YOUTUBE);
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.info("trying filter {}", fn);
