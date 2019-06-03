@@ -51,12 +51,17 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
+import org.bytedeco.opencv.opencv_java;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -90,12 +95,29 @@ import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.python.antlr.op.Load;
 import org.slf4j.Logger;
 
 import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VGetParser;
 import com.github.axet.vget.info.VideoFileInfo;
 import com.github.axet.vget.info.VideoInfo;
+
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import static org.bytedeco.opencv.global.opencv_calib3d.*;
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_features2d.*;
+import static org.bytedeco.opencv.global.opencv_flann.*;
+import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+import static org.bytedeco.opencv.global.opencv_ml.*;
+import static org.bytedeco.opencv.global.opencv_objdetect.*;
+import static org.bytedeco.opencv.global.opencv_photo.*;
+import static org.bytedeco.opencv.global.opencv_shape.*;
+import static org.bytedeco.opencv.global.opencv_stitching.*;
+import static org.bytedeco.opencv.global.opencv_video.*;
+import static org.bytedeco.opencv.global.opencv_videostab.*;
+
 /*
 <pre>
 // extremely useful list of static imports - since auto-complete won't work with statics
@@ -134,33 +156,29 @@ public class OpenCV extends AbstractComputerVision {
 
   int vpId = 0;
 
-  class VideoProcessor implements Runnable {
+  class VideoProcessor implements Runnable {    
 
     @Override
     synchronized public void run() {
       try {
-        synchronized (lock) {
+        capturing = true;
+        log.info("beginning capture");
+        getGrabber();
 
-          log.info("beginning capture");
-          capturing = true;
-          getGrabber();
+        lengthInFrames = grabber.getLengthInFrames();
+        lengthInTime = grabber.getLengthInTime();
+        log.info("grabber {} started - length time {} length frames {}", grabberType, lengthInTime, lengthInFrames);
 
+        // Wait for the Kinect to heat up.
+        int loops = 0;
+        while (grabber.getClass() == OpenKinectFrameGrabber.class && lengthInFrames == 0 && loops < 200) {
           lengthInFrames = grabber.getLengthInFrames();
           lengthInTime = grabber.getLengthInTime();
-          log.info("grabber {} started - length time {} length frames {}", grabberType, lengthInTime, lengthInFrames);
-
-          // Wait for the Kinect to heat up.
-          int loops = 0;
-          while (grabber.getClass() == OpenKinectFrameGrabber.class && lengthInFrames == 0 && loops < 200) {
-            lengthInFrames = grabber.getLengthInFrames();
-            lengthInTime = grabber.getLengthInTime();
-            sleep(40);
-            loops++;
-          }
-          lock.notifyAll();
+          sleep(40);
+          loops++;
         }
 
-        while (capturing) {
+        while (capturing && !stopping) {
           Frame newFrame = null;
 
           if (!singleFrame || (singleFrame && frameIndex < 1)) {
@@ -202,26 +220,28 @@ public class OpenCV extends AbstractComputerVision {
       } catch (Exception e) {
         log.error("getting grabber failed", e);
       }
+      // begin capturing ...
+      
+      videoThread = null;
+      frameIndex = 0;
 
-      synchronized (lock) {
-        capturing = false;
-        videoThread = null;
-        frameIndex = 0;
-        if (grabber != null) {
-          try {
-            grabber.close();
-          } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
-            log.error("could not close grabber", e);
-          }
-          grabber = null;
+      // attempt to close the grabber
+      if (grabber != null) {
+        try {
+          grabber.close();
+        } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+          log.error("could not close grabber", e);
         }
-        lock.notifyAll();
       }
-
+      grabber = null;
+      
+      // end of stopping
+      
+      // stopCapture();
+      stopping = false;
+      capturing = false;
       broadcastState();
       log.info("stopping capture");
-      // notify all lock'd threads we are done
-
     }
   }
 
@@ -476,26 +496,37 @@ public class OpenCV extends AbstractComputerVision {
     Runtime.start("gui", "SwingGui");
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+
     // cv.setGrabberType("OpenKinect");
     // cv.setStreamerEnabled(true);
     // cv.setGrabberType("OpenCV");
-    
-   
+
+    // cv.addFilter("LKOpticalTrack");
+    cv.capture();
+    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\I9VA-U69yaY_The
+    // Matrix - Pill Scene Short.mp4");
+    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\1559052474050");
+
+    boolean done = true;
+    if (done) {
+      return;
+    }
+
     // TODO - chaos monkey yolo
- //    OpenCVFilter yoloFilter = cv.addFilter("yolo");
-    
+    // OpenCVFilter yoloFilter = cv.addFilter("yolo");
+
     // yoloFilter.enable();
-     cv.capture();
-//     for (int i = 0 ; i < 10; i++) {
-//       yoloFilter.enable();
-//       yoloFilter.disable();
-//     }
-    //  Thread.sleep(2000);
-//     yoloFilter.enable();
+    cv.capture();
+    // for (int i = 0 ; i < 10; i++) {
+    // yoloFilter.enable();
+    // yoloFilter.disable();
+    // }
+    // Thread.sleep(2000);
+    // yoloFilter.enable();
     // cv.capture();
-//     yoloFilter.disable();
-//     yoloFilter.enable();
-    
+    // yoloFilter.disable();
+    // yoloFilter.enable();
+
     // cv.load();
 
     // single kinect image file
@@ -507,11 +538,6 @@ public class OpenCV extends AbstractComputerVision {
     // cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
 
     // FIXME - todo FFmpeg tif, gif, jpg, mpg, avi
-
-    boolean done = true;
-    if (done) {
-      return;
-    }
 
     // FIXME - make this work :P
     // http://192.168.0.37/videostream.cgi
@@ -710,6 +736,11 @@ public class OpenCV extends AbstractComputerVision {
   transient volatile boolean capturing = false;
   Classifications classifications = null;
   boolean closeOutputs = false;
+  
+  /**
+   * when video process is put in a stopping state
+   */
+  boolean stopping = false;
 
   /**
    * color of overlays
@@ -748,8 +779,6 @@ public class OpenCV extends AbstractComputerVision {
   int lengthInFrames = -1;
 
   long lengthInTime = -1;
-
-  transient final Object lock = new Object();
 
   String recordingFilename;
 
@@ -804,6 +833,23 @@ public class OpenCV extends AbstractComputerVision {
 
   public OpenCV(String n) {
     super(n);
+    // pre-loading so filters, functions and tests don't incur a performance hit
+    // while
+    // processing
+    Loader.load(opencv_java.class);
+    Loader.load(opencv_objdetect.class);
+    Loader.load(opencv_imgproc.class);
+
+    /*
+     * Loader.load(opencv_imgproc.class); Loader.load(opencv_calib3d.class);
+     * Loader.load(opencv_core.class); Loader.load(opencv_features2d.class);
+     * Loader.load(opencv_flann.class); Loader.load(opencv_highgui.class);
+     * Loader.load(opencv_imgcodecs.class); Loader.load(opencv_ml.class);
+     * Loader.load(opencv_objdetect.class); Loader.load(opencv_photo.class);
+     * Loader.load(opencv_shape.class); Loader.load(opencv_stitching.class);
+     * Loader.load(opencv_video.class); Loader.load(opencv_videostab.class);
+     */
+
     putText(20, 20, "time:  %d");
     putText(20, 30, "frame: %d");
     DATA_DIR = getDataDir();
@@ -840,7 +886,8 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * add filter by type e.g. addFilter("Canny","Canny")
    * 
-   * @param filterName - name of filter
+   * @param filterName
+   *          - name of filter
    * @return the filter
    */
   public OpenCVFilter addFilter(String filterName) {
@@ -864,24 +911,20 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * capture starts the frame grabber and video processing threads
    */
-  public void capture() {
+  synchronized public void capture() {
     log.info("capture before lock");
-    synchronized (lock) {
-      if (capturing) {
-        return;
-      }
-      if (!capturing) {
-        log.info("not capturing in capture -> make new thread");
+
+    if (capturing) {
+      // already capturing
+      return;
+    } else { // thread should be dead
+      log.info("not capturing in capture -> make new thread");
+
+      if (videoThread == null) {
         videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
         videoThread.start();
-        try {
-          // wait for capture thread to start
-          log.info("capture wait() - waiting");
-          lock.wait();
-        } catch (InterruptedException e) {
-        }
-        broadcastState();
       }
+      broadcastState();
     }
   }
 
@@ -1104,17 +1147,18 @@ public class OpenCV extends AbstractComputerVision {
     if (isVirtual() && inputSource.equals(INPUT_SOURCE_CAMERA)) {
       grabberType = "ImageFile";
       inputSource = INPUT_SOURCE_FILE;
-      // FIXME - we should put a single image in src/main/resources/resource/ - to be extracted with resources
+      // FIXME - we should put a single image in src/main/resources/resource/ -
+      // to be extracted with resources
       inputFile = "src/test/resources/OpenCV/multipleFaces.jpg";
     }
-    
+
     String prefixPath;
     if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
       prefixPath = "org.myrobotlab.opencv.";
     } else {
       prefixPath = "org.bytedeco.javacv.";
     }
-    
+
     newGrabberType = String.format("%s%sFrameGrabber", prefixPath, grabberType);
 
     log.info(String.format("video source is %s", inputSource));
@@ -1324,9 +1368,9 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   synchronized public void pauseCapture() {
-    synchronized (lock) {
-      capturing = false;
-    }
+     // FIXME !!!
+//       capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without resetting frame-index
+    
   }
 
   private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
@@ -1820,27 +1864,6 @@ public class OpenCV extends AbstractComputerVision {
     masks.put(name, mask);
   }
 
-  /**
-   * <pre>
-   * public void stopCapturex() {
-   *   info("stopping capture");
-   *   try {
-   *     capturing = false;
-   * 
-   *     synchronized (lock) {
-   *       videoThread = null;
-   *       if (grabber != null) {
-   *         grabber.close();
-   *         grabber = null;
-   *       }
-   *     }
-   *   } catch (Exception e) {
-   *     log.error("stopCapture threw", e);
-   *   }
-   *   broadcastState();
-   * }
-   * </pre>
-   */
   public void setMaxFps(Integer fps) {
     if (fps == null || fps < 1 || fps > 1000) {
       maxFps = null;
@@ -1863,23 +1886,16 @@ public class OpenCV extends AbstractComputerVision {
     this.streamerEnabled = streamerEnabled;
   }
 
-  public void stopCapture() {
-    log.info("stopCapture before lock");
-    synchronized (lock) {
-      if (!capturing) {
-        log.info("stopCapture !capturing - returning");
-        return;
-      }
-      log.info("stopCapture setting capturing");
-      capturing = false;
-      // sleep(300);
-      try {
-        log.info("stopCapture waiting");
-        lock.wait();
-      } catch (InterruptedException e) {
-      }
+  synchronized public void stopCapture() {
+
+    if (!capturing) {
+      log.info("stopCapture !capturing - returning");
+      return;
     }
-    log.info("stopCapture leaving lock");
+
+    log.info("stopping capture");
+    stopping = true;   
+
   }
 
   public void stopRecording() {
@@ -1974,7 +1990,7 @@ public class OpenCV extends AbstractComputerVision {
   public PointCloud getPointCloud() {
     return lastPointCloud;
   }
-  
+
   // Filter enable/disable helper methods.
   public void enableFilter(String name) {
     OpenCVFilter f = filters.get(name);
@@ -1983,7 +1999,7 @@ public class OpenCV extends AbstractComputerVision {
       broadcastState();
     }
   }
-  
+
   public void disableFilter(String name) {
     OpenCVFilter f = filters.get(name);
     if (f.isEnabled()) {
@@ -1991,14 +2007,14 @@ public class OpenCV extends AbstractComputerVision {
       broadcastState();
     }
   }
-  
+
   public void toggleFilter(String name) {
-    OpenCVFilter f = filters.get(name); 
+    OpenCVFilter f = filters.get(name);
     if (f.isEnabled())
       f.disable();
     else
       f.enable();
     broadcastState();
   }
-  
+
 }
