@@ -14,6 +14,7 @@ import org.junit.rules.TestName;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
@@ -36,6 +37,8 @@ public class OpenCVTest extends AbstractTest {
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
   static final String TEST_INPUT_DIR = "src/test/resources/OpenCV/kinect-data";
   static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
+
+  private static final int MAX_TIMEOUT = 30000;
 
   // TODO - getClassifictions publishClassifications
   // TODO - getFaces publishFaces
@@ -125,17 +128,11 @@ public class OpenCVTest extends AbstractTest {
     }
     ChaosMonkey.startMonkeys();
     ChaosMonkey.monkeyReport();
-    
-    // have to preload without an assert because the time to load the jni
-    // takes too long firt time around ..
-    cv.reset();
-    cv.capture(TEST_FACE_FILE_JPEG);
-    cv.getFaceDetect();
 
     // check after the monkeys have pounded on it - it still works !
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
-    OpenCVData data = cv.getFaceDetect();
+    OpenCVData data = cv.getFaceDetect(MAX_TIMEOUT);
     assertNotNull(data);
     List<Rectangle> x = data.getBoundingBoxArray();
     assertTrue(x.size() > 0);
@@ -144,15 +141,10 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void simpleFaceDetect() {
     log.warn("=======OpenCVTest simpleFaceDetect=======");
-    // have to preload without an assert because the time to load the jni
-    // takes too long firt time around ..
+  
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
-    cv.getFaceDetect();
-    
-    cv.reset();
-    cv.capture(TEST_FACE_FILE_JPEG);
-    OpenCVData data = cv.getFaceDetect();
+    OpenCVData data = cv.getFaceDetect(MAX_TIMEOUT);
     assertNotNull(data);
     List<Rectangle> listOfFaces = data.getBoundingBoxArray();
     assertTrue(listOfFaces.size() > 0);
@@ -163,12 +155,6 @@ public class OpenCVTest extends AbstractTest {
     log.warn("=======OpenCVTest testAllCaptures=======");
 
     OpenCVData data = null;
-    
-    // have to preload without an assert because the time to load the jni
-    // takes too long firt time around ..
-    cv.reset();
-    cv.capture(TEST_FACE_FILE_JPEG);
-    data = cv.getFaceDetect();
 
     /**
      * Testing default captures after a reset when the frame grabber type is not
@@ -179,7 +165,7 @@ public class OpenCVTest extends AbstractTest {
       // default internet jpg
       cv.reset();
       cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
-      data = cv.getFaceDetect();
+      data = cv.getFaceDetect(MAX_TIMEOUT);
       assertNotNull(data);
       assertTrue(data.getBoundingBoxArray().size() > 0);
     }
@@ -187,14 +173,14 @@ public class OpenCVTest extends AbstractTest {
     // default local mp4
     cv.reset();
     cv.capture("src/test/resources/OpenCV/monkeyFace.mp4");
-    data = cv.getFaceDetect();
+    data = cv.getFaceDetect(MAX_TIMEOUT);
     assertNotNull(data);
     assertTrue(data.getBoundingBoxArray().size() > 0);
 
     // default local jpg
     cv.reset();
     cv.capture(TEST_FACE_FILE_JPEG);
-    data = cv.getFaceDetect();
+    data = cv.getFaceDetect(MAX_TIMEOUT);
     assertNotNull(data);
     assertTrue(data.getBoundingBoxArray().size() > 0);
 
@@ -206,16 +192,16 @@ public class OpenCVTest extends AbstractTest {
     /**
      * Test ImageFile frame grabber
      */
-    /*
+    
     if (hasInternet()) {
       cv.reset();
       cv.setGrabberType("ImageFile");
       cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
-      data = cv.getFaceDetect();
+      data = cv.getFaceDetect(MAX_TIMEOUT);
       assertNotNull(data);
       assertTrue(data.getBoundingBoxArray().size() > 0);
     }
-    */
+    
 
   }
 
@@ -252,16 +238,13 @@ public class OpenCVTest extends AbstractTest {
     log.warn("=======OpenCVTest testGetClassifications=======");
     // have to preload without an assert because the time to load the jni
     // takes too long firt time around ..
-    cv.reset();
-    cv.capture(TEST_FACE_FILE_JPEG);
-    cv.getFaceDetect();
-
+    
     cv.reset();
     // cv.setGrabberType("ImageFile");
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
+    cv.capture(TEST_FACE_FILE_JPEG);
     OpenCVFilter f = cv.addFilter("yolo");
     f.enable();
-    Map<String, List<Classification>> classifications = cv.getClassifications();
+    Map<String, List<Classification>> classifications = cv.getClassifications(MAX_TIMEOUT);
     assertNotNull(classifications);
     assertTrue(classifications.containsKey("person"));
   }
