@@ -83,6 +83,8 @@ import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
 
 /**
+ * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE VAR OF RUNTIME !
+ * 
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
  * possible &amp; running local Services It maintains state information

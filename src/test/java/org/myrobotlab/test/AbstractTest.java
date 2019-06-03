@@ -31,7 +31,7 @@ public class AbstractTest {
 
   static boolean install = true;
 
-  protected static boolean installed = false;
+  protected static boolean installed = true;
 
   public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
@@ -221,7 +221,7 @@ public class AbstractTest {
   }
   
   public void setVirtual() {
-    Platform.setVirtual(false);
+    Platform.setVirtual(true);
   }
   
   public boolean isVirtual() {

@@ -30,8 +30,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
   
   @Before
   public void setup() {
-    // Loader.load();
-    Loader.load(opencv_java.class);
+    // Loader.load();    
   }
 
   @Test

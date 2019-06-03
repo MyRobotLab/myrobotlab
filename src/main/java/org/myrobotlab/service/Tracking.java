@@ -107,33 +107,20 @@ public class Tracking extends Service {
 
   transient private HashMap<String, TrackingServoData> servoControls = new HashMap<String, TrackingServoData>();
 
-  // ------ PEER SERVICES END------
   // statistics
   public int updateModulus = 1;
+  
   public long cnt = 0;
-  // public long latencyx = 0;
-
-  // MRL points
+  
   public Point2df lastPoint = new Point2df(0.5F, 0.5F);
 
   double sizeIndexForBackgroundForegroundFlip = 0.10;
 
-  /**
-   * call back of all video data video calls this whenever a frame is processed
-   * 
-   */
-  // TODO: should be a function of the current frame rate for now, require at
-  // least 1.
   int faceFoundFrameCount = 0;
+  
   int faceFoundFrameCountMin = 2;
-  // int faceLostFrameCount = 0;
-  // int faceLostFrameCountMin = 20;
-  // -------------- System Specific Initialization End --------------
-
+  
   boolean scan = false;
-
-  // ------------------- tracking & detecting methods begin
-  // ---------------------
 
   String[] axis = new String[] { "x", "y" };
 
@@ -300,7 +287,6 @@ public class Tracking extends Service {
   }
 
   public OpenCVData onOpenCVData(OpenCVData data) {
-    // log.info("OnOpenCVData");
     SerializableImage img = new SerializableImage(data.getDisplay(), data.getSelectedFilter());
     float width = img.getWidth();
     float height = img.getHeight();
