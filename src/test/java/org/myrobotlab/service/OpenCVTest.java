@@ -250,6 +250,11 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void testGetClassifications() {
     log.warn("=======OpenCVTest testGetClassifications=======");
+    // have to preload without an assert because the time to load the jni
+    // takes too long firt time around ..
+    cv.reset();
+    cv.capture(TEST_FACE_FILE_JPEG);
+    cv.getFaceDetect();
 
     cv.reset();
     // cv.setGrabberType("ImageFile");
