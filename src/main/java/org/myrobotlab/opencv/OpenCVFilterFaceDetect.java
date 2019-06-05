@@ -73,15 +73,14 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetect.class);
 
-  //CvMemStorage storage = null;
   public CascadeClassifier cascade = null; // TODO - was static
 
   /**
    * our default classifier - pre-trained
    */
   public String cascadeDir = "haarcascades";
-  // public String cascadeFile = "haarcascade_frontalface_alt2.xml";
-  public String cascadeFile = "haarcascade_frontalface_default.xml";
+  public String cascadeFile = "haarcascade_frontalface_alt2.xml";
+  // public String cascadeFile = "haarcascade_frontalface_default.xml";
 
   /**
    * bounding boxes of faces
@@ -91,7 +90,6 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   double scaleFactor = 1.1;
   int minNeighbors = 1;
 
-  // public int stablizedFrameCount = 10;
   public int minFaceFrames = 10;
   public int minEmptyFrames = 10;
   public int firstFaceFrame = 0;

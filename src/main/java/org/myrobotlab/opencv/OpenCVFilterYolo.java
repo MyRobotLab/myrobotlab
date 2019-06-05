@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -62,6 +61,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
 
+  int classifierThreadCount = 0;
+
   DecimalFormat df2 = new DecimalFormat("#.###");
 
   // TODO: store these somewhere as a resource / dependency ..
@@ -82,14 +83,15 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   public OpenCVFilterYolo(String name) {
     super(name);
+    enable(); // start classifier thread
   }
 
   public OpenCVFilterYolo() {
-    super();
+    this(null);
   }
 
   private void downloadYoloModel() {
-
+    log.info("downloadYoloModel - begin");
     File yoloHome = new File(darknetHome);
     if (!yoloHome.exists()) {
       yoloHome.mkdirs();
@@ -114,11 +116,13 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // download & cache!
       downloadAndCache(modelNamesUrl, modelNamesFile, null);
     }
+    log.info("downloadYoloModel - end");
 
   }
 
   private void downloadAndCache(String uri, File location, String details) {
     // TODO: clean up the error handling here.
+    log.info("downloadAndCache - begin");
 
     log.info("Downloading {} to file location {}) {}", uri, location.getAbsolutePath(), details);
     URL url = null;
@@ -153,9 +157,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       }
       return;
     }
+    log.info("downloadAndCache - end");
   }
 
   private void loadYolo() {
+    log.info("loadYolo - begin");
+
     // If the model isn't there, we should download it and cache it.
     log.info("Staritng yolo download verification");
     downloadYoloModel();
@@ -170,9 +177,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       return;
     }
     log.info("Done loading model..");
+    log.info("loadYolo - end");
   }
 
   private ArrayList<String> loadClassNames(String filename) throws IOException {
+    log.info("loadClassNames - begin");
     ArrayList<String> names = new ArrayList<String>();
     FileReader fileReader = new FileReader(filename);
     BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -184,6 +193,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     }
     log.info("read {} names", i);
     fileReader.close();
+
+    log.info("loadClassNames - end");
     return names;
   }
 
@@ -207,6 +218,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   @Override
   public void run() {
+    log.info("run - begin");
     try {
       int count = 0;
       long start = System.currentTimeMillis();
@@ -218,12 +230,14 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // loading the model takes a lot of time, we want to block enable/disable
       // until we are actually running - then we notifyAll
 
-      while (running) {
+      while (running && enabled) {
         if (!pending) {
           log.debug("Skipping frame");
           Thread.sleep(10);
           continue;
         }
+
+        log.info("process - begin");
         // only classify this if we haven't already classified it.
         if (lastImage != null) {
           // lastResult = dl4j.classifyImageVGG16(lastImage);
@@ -259,30 +273,38 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         // maybe lastImage needs to be marked as volatile ?
 
         Thread.sleep(1);
-      }
-    } catch (InterruptedException e) {
-      // dont care
+      } // while (running)
+      
     } catch (Exception e) {
       log.error("yolo thread threw", e);
     }
-    running = false;
+    
+    synchronized (lock) {
+      classifier = null;
+    }
+    
     log.info("yolo exiting classifier thread");
+    log.info("run - end");
   }
 
   private ArrayList<Classification> yoloFrame(IplImage frame) {
     log.debug("Starting yolo on frame...");
+    log.info("yoloFrame - begin");
     // this is our list of objects that have been detected in a given frame.
     ArrayList<Classification> yoloObjects = new ArrayList<Classification>();
     // convert that frame to a matrix (Mat) using the frame converters in javacv
 
+    log.info("yoloFrame - grabberConverter {}", frame);
     // log.info("Yolo frame start");
     Mat inputMat = grabberConverter.convertToMat(grabberConverter.convert(frame));
     // log.info("Input mat created");
     // TODO: I think yolo expects RGB color (which is inverted in the next step)
     // so if the input image isn't in RGB color, we might need a cvCutColor
+    log.info("yoloFrame - blobFromImage");
     Mat inputBlob = blobFromImage(inputMat, 1 / 255.F, new Size(416, 416), new Scalar(), true, false, CV_32F);
     // put our frame/input blob into the model.
     // log.info("input blob created");
+    log.info("yoloFrame - blob {}", inputBlob);
     net.setInput(inputBlob);
 
     log.debug("Feed forward!");
@@ -367,10 +389,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         }
       }
     }
+    log.info("yoloFrame - end");
     return yoloObjects;
   }
 
   private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
+    log.info("extractSubImage - begin");
     //
     log.debug(boundingBox.x() + " " + boundingBox.y() + " " + boundingBox.width() + " " + boundingBox.height());
 
@@ -381,51 +405,60 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));
     // This mat should be the cropped image!
 
+    log.info("extractSubImage - end");
     return image;
   }
 
   @Override
   public void release() {
-    synchronized (lock) {
-      running = false;
-      if (classifier != null) {
-        classifier.interrupt();
-        classifier = null;
-      }
+    // synchronized (lock) {
+      log.info("release - begin");
+      disable(); // blocks until ready
 
+      // while(isRunning){ sleep(30) .. check again }
       // bleed out the thread before deallocating
-      Service.sleep(500);
+
       if (net != null) {
         net.deallocate();
+        net = null;
       }
-    }
+      log.info("release - end");
+   //  }
   }
 
   volatile Object lock = new Object();
 
   @Override
   public void enable() {
+    if (classifier != null) {
+      // already enabled
+      return;
+    }
+    log.info("enabling yolo");    
     synchronized (lock) {
+      log.info("enable - begin");
       super.enable();
       if (classifier == null) {
         classifier = new Thread(this, "YoloClassifierThread");
         classifier.start();
       }
+      log.info("enable - end");
     }
   }
 
   @Override
   public void disable() {
-    synchronized (lock) {
-      super.disable();
-      if (classifier != null) {
-        classifier.interrupt();        
-      }      
-      running = false;
-      // give half a second to bleed out
-      Service.sleep(500);
-      classifier = null;
+    if (classifier == null) {
+      // already disabled
+      return;
     }
+    super.disable();    
+    int waitTime = 0;
+    while (classifier != null && waitTime < 1000) {
+      ++waitTime;
+      Service.sleep(10);
+    }
+    log.info("capture - waited {} times", waitTime);
   }
 
   @Override

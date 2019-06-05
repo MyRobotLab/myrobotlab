@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,6 @@ import org.junit.rules.TestName;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
@@ -34,13 +34,15 @@ public class OpenCVTest extends AbstractTest {
   static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/OpenCV/";
-  static final String TEST_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
+  static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
+  static final String TEST_LOCAL_MP4 = "src/test/resources/OpenCV/monkeyFace.mp4";
   static final String TEST_YOUTUBE = "https://www.youtube.com/watch?v=I9VA-U69yaY";
   static final String TEST_INPUT_DIR = "src/test/resources/OpenCV/kinect-data";
   static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
-  static final String TEST_REMOTE_FILE_JPG = "https://en.wikipedia.org/wiki/Isaac_Asimov#/media/File:Isaac.Asimov01.jpg";
-
-  private static final int MAX_TIMEOUT = 30000;
+  // static final String TEST_REMOTE_FILE_JPG = TEST_LOCAL_FACE_FILE_JPEG;
+  // static final String TEST_REMOTE_FILE_JPG = "https://en.wikipedia.org/wiki/Isaac_Asimov#/media/File:Isaac.Asimov01.jpg";
+  static final String TEST_REMOTE_FILE_JPG = "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg";
+  private static final int MAX_TIMEOUT = 999999999;//120000;
 
   // TODO - getClassifictions publishClassifications
   // TODO - getFaces publishFaces
@@ -49,7 +51,6 @@ public class OpenCVTest extends AbstractTest {
   public static void main(String[] args) {
     try {
       // // LoggingFactory.init("INFO");
-
       setUpBeforeClass();
 
       OpenCVTest test = new OpenCVTest();
@@ -90,10 +91,43 @@ public class OpenCVTest extends AbstractTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+    log.warn("========= OpenCVTest - setupbefore class - begin loading libraries =========");
+    log.warn("========= OpenCVTest - setupbefore class - starting cv =========");
+    long ts = System.currentTimeMillis();
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    swing = (SwingGui) Runtime.start("gui", "SwingGui");
+    
+    /*
+  
+    log.warn("========= OpenCVTest - setupbefore class - started cv {} ms =========", System.currentTimeMillis()-ts );
+    ts = System.currentTimeMillis();
+    log.warn("========= OpenCVTest - setupbefore class - starting capture =========");
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    log.warn("========= OpenCVTest - setupbefore class - started capture {} ms =========", System.currentTimeMillis()-ts );
+    ts = System.currentTimeMillis();
+    log.warn("========= OpenCVTest - setupbefore class - starting getFaceDetect =========");
+    cv.getFaceDetect(120000);// two minute wait to load all libraries
+    log.warn("========= OpenCVTest - setupbefore class - started getFaceDetect {} ms =========", System.currentTimeMillis()-ts );
+    ts = System.currentTimeMillis();
+    log.warn("========= OpenCVTest - setupbefore class - starting getClassifications =========");
+    cv.reset();
+    OpenCVFilter yoloFilter = cv.addFilter("yolo");
+    // cv.getClassifications(120000);
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    log.warn("========= OpenCVTest - setupbefore class - started getClassifications {} ms =========", System.currentTimeMillis()-ts );
+
+    ts = System.currentTimeMillis();
+    log.warn("========= OpenCVTest - setupbefore class - starting getOpenCVData =========");
+
+    cv.reset();
+    cv.capture(TEST_LOCAL_MP4);
+    cv.getOpenCVData();
+    log.warn("========= OpenCVTest - setupbefore class - started getOpenCVData {} ms =========", System.currentTimeMillis()-ts );
+      cv.disableAll();
     // if (!isHeadless()) { - no longer needed I believe - SwingGui now handles it
-      swing = (SwingGui) Runtime.start("gui", "SwingGui");
+      
     // }
+     */
   }
 
   // FIXME - do the following test
@@ -102,21 +136,11 @@ public class OpenCVTest extends AbstractTest {
   // test remote file source
   // test mpeg streamer
 
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-    Runtime.release("cv"); // <-- DONT NEED TO DO THIS - Abstract will !
-
-    // FIXME - helper - all threads not in my initial thread set.. tear down
-    // TODO - remove all services ??? DL4J others ? Runtime ?
-    // clean up all threads
-    // clean up all services
-    // TODO - these utilities should be in base class !
-  }
-
+  // @Ignore
   @Test
   public final void chaosCaptureTest() throws Exception {
     log.warn("=======OpenCVTest chaosCaptureTest=======");
-    ChaosMonkey.giveToMonkey(cv, "capture", TEST_FACE_FILE_JPEG);
+    ChaosMonkey.giveToMonkey(cv, "capture", TEST_LOCAL_FACE_FILE_JPEG);
     ChaosMonkey.giveToMonkey(cv, "capture");
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (hasInternet()) {
@@ -126,37 +150,38 @@ public class OpenCVTest extends AbstractTest {
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (!cv.isVirtual()) {
-      ChaosMonkey.giveToMonkey(cv, "capture", 0); // if hasHardware
+      //  if hasHardware camera index 0 - FIXME should check if camera 0 exists ?
+      ChaosMonkey.giveToMonkey(cv, "capture", 0); 
     }
     ChaosMonkey.startMonkeys();
     ChaosMonkey.monkeyReport();
 
     // check after the monkeys have pounded on it - it still works !
     cv.reset();
-    cv.capture(TEST_FACE_FILE_JPEG);
-    OpenCVData data = cv.getFaceDetect(MAX_TIMEOUT);
+    cv.removeFilters();
+    
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    List<Classification> data = cv.getFaces(MAX_TIMEOUT);
     assertNotNull(data);
-    List<Rectangle> x = data.getBoundingBoxArray();
-    assertTrue(x.size() > 0);
+    assertTrue(data.size() > 0);
   }
 
   @Test
-  public final void simpleFaceDetect() {
-    log.warn("=======OpenCVTest simpleFaceDetect=======");
+  public final void simpleFaces() {
+    log.warn("=======OpenCVTest simpleFaces=======");
   
     cv.reset();
-    cv.capture(TEST_FACE_FILE_JPEG);
-    OpenCVData data = cv.getFaceDetect(MAX_TIMEOUT);
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    List<Classification> data = cv.getFaces(MAX_TIMEOUT);
     assertNotNull(data);
-    List<Rectangle> listOfFaces = data.getBoundingBoxArray();
-    assertTrue(listOfFaces.size() > 0);
+    assertTrue(data.size() > 0);
   }
 
   @Test
   public final void testAllCaptures() throws Exception {
     log.warn("=======OpenCVTest testAllCaptures=======");
 
-    OpenCVData data = null;
+    List<Classification> data = null;
 
     /**
      * Testing default captures after a reset when the frame grabber type is not
@@ -168,24 +193,24 @@ public class OpenCVTest extends AbstractTest {
       cv.reset();
       // cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
       cv.capture(TEST_REMOTE_FILE_JPG);
-      data = cv.getFaceDetect(MAX_TIMEOUT);
+      data = cv.getFaces(MAX_TIMEOUT);
       assertNotNull(data);
-      assertTrue(data.getBoundingBoxArray().size() > 0);
+      assertTrue(data.size() > 0);
     }
 
     // default local mp4
     cv.reset();
-    cv.capture("src/test/resources/OpenCV/monkeyFace.mp4");
-    data = cv.getFaceDetect(MAX_TIMEOUT);
+    cv.capture(TEST_LOCAL_MP4);
+    data = cv.getFaces(MAX_TIMEOUT);
     assertNotNull(data);
-    assertTrue(data.getBoundingBoxArray().size() > 0);
+    assertTrue(data.size() > 0);
 
     // default local jpg
     cv.reset();
-    cv.capture(TEST_FACE_FILE_JPEG);
-    data = cv.getFaceDetect(MAX_TIMEOUT);
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    data = cv.getFaces(MAX_TIMEOUT);
     assertNotNull(data);
-    assertTrue(data.getBoundingBoxArray().size() > 0);
+    assertTrue(data.size() > 0);
 
     // default local directory
     cv.reset();
@@ -200,9 +225,9 @@ public class OpenCVTest extends AbstractTest {
       cv.reset();
       cv.setGrabberType("ImageFile");
       cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
-      data = cv.getFaceDetect(MAX_TIMEOUT);
+      data = cv.getFaces(MAX_TIMEOUT);
       assertNotNull(data);
-      assertTrue(data.getBoundingBoxArray().size() > 0);
+      assertTrue(data.size() > 0);
     }
     
 
@@ -239,14 +264,14 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void testGetClassifications() {
     log.warn("=======OpenCVTest testGetClassifications=======");
-    // have to preload without an assert because the time to load the jni
-    // takes too long firt time around ..
     
     cv.reset();
-    // cv.setGrabberType("ImageFile");
-    cv.capture(TEST_FACE_FILE_JPEG);
-    OpenCVFilter f = cv.addFilter("yolo");
-    f.enable();
+    // cv.removeFilters();
+    
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    // OpenCVFilter f = 
+    cv.addFilter("yolo");
+    // f.enable();
     Map<String, List<Classification>> classifications = cv.getClassifications(MAX_TIMEOUT);
     assertNotNull(classifications);
     assertTrue(classifications.containsKey("person"));

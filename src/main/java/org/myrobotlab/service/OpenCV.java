@@ -51,16 +51,6 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.bytedeco.opencv.opencv_java;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.global.opencv_objdetect;
-import org.bytedeco.opencv.opencv_core.CvPoint;
-import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
-import org.bytedeco.opencv.opencv_core.CvScalar;
-import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
@@ -70,6 +60,15 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.bytedeco.opencv.opencv_java;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
@@ -89,34 +88,19 @@ import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
-import org.python.antlr.op.Load;
 import org.slf4j.Logger;
 
 import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VGetParser;
 import com.github.axet.vget.info.VideoFileInfo;
 import com.github.axet.vget.info.VideoInfo;
-
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
-import static org.bytedeco.opencv.global.opencv_calib3d.*;
-import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.bytedeco.opencv.global.opencv_features2d.*;
-import static org.bytedeco.opencv.global.opencv_flann.*;
-import static org.bytedeco.opencv.global.opencv_highgui.*;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
-import static org.bytedeco.opencv.global.opencv_ml.*;
-import static org.bytedeco.opencv.global.opencv_objdetect.*;
-import static org.bytedeco.opencv.global.opencv_photo.*;
-import static org.bytedeco.opencv.global.opencv_shape.*;
-import static org.bytedeco.opencv.global.opencv_stitching.*;
-import static org.bytedeco.opencv.global.opencv_video.*;
-import static org.bytedeco.opencv.global.opencv_videostab.*;
 
 /*
 <pre>
@@ -156,13 +140,14 @@ public class OpenCV extends AbstractComputerVision {
 
   int vpId = 0;
 
-  class VideoProcessor implements Runnable {    
+  class VideoProcessor implements Runnable {
 
     @Override
     synchronized public void run() {
       try {
-        capturing = true;
-        log.info("beginning capture");
+        log.info("run - capturing");
+        
+        capturing = true;        
         getGrabber();
 
         lengthInFrames = grabber.getLengthInFrames();
@@ -221,27 +206,29 @@ public class OpenCV extends AbstractComputerVision {
         log.error("getting grabber failed", e);
       }
       // begin capturing ...
-      
+
       videoThread = null;
       frameIndex = 0;
 
       // attempt to close the grabber
       if (grabber != null) {
         try {
-          grabber.close();
+          // grabber.close();
+          grabber.release();
         } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
           log.error("could not close grabber", e);
         }
       }
       grabber = null;
-      
+
       // end of stopping
-      
+
       // stopCapture();
       stopping = false;
       capturing = false;
+      // sleep(1000);
       broadcastState();
-      log.info("stopping capture");
+      log.info("run - stopped capture");
     }
   }
 
@@ -275,12 +262,13 @@ public class OpenCV extends AbstractComputerVision {
   public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
   public static final String OUTPUT_KEY = "output";
   transient final static public String PART = "part";
+  static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
       "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
       "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate",
-      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray",
-      "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
+      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
+      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
 
   static final long serialVersionUID = 1L;
 
@@ -502,7 +490,24 @@ public class OpenCV extends AbstractComputerVision {
     // cv.setGrabberType("OpenCV");
 
     // cv.addFilter("LKOpticalTrack");
-    cv.capture();
+//    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    
+    
+    // yoloFilter.enable();
+    // cv.addFilter(yoloFilter);
+
+    /*
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    
+    OpenCVFilter yoloFilter = cv.addFilter("yolo");
+    yoloFilter.enable();
+    yoloFilter.disable();
+    yoloFilter.enable();
+    yoloFilter.disable();
+    yoloFilter.enable();
+    */
+    
+
     // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\I9VA-U69yaY_The
     // Matrix - Pill Scene Short.mp4");
     // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\1559052474050");
@@ -513,10 +518,6 @@ public class OpenCV extends AbstractComputerVision {
     }
 
     // TODO - chaos monkey yolo
-    // OpenCVFilter yoloFilter = cv.addFilter("yolo");
-
-    // yoloFilter.enable();
-    cv.capture();
     // for (int i = 0 ; i < 10; i++) {
     // yoloFilter.enable();
     // yoloFilter.disable();
@@ -603,7 +604,7 @@ public class OpenCV extends AbstractComputerVision {
       if (fn.startsWith("DL4J")) {
         continue;
       }
-      log.warn("trying {}", fn);
+      log.info("trying {}", fn);
       cv.addFilter(fn);
       sleep(100);
       cv.removeFilters();
@@ -631,7 +632,7 @@ public class OpenCV extends AbstractComputerVision {
         sb.append("nothing.");
       }
 
-      log.warn(sb.toString());
+      log.info(sb.toString());
     }
 
     cv.addFilter("yolo");
@@ -736,7 +737,7 @@ public class OpenCV extends AbstractComputerVision {
   transient volatile boolean capturing = false;
   Classifications classifications = null;
   boolean closeOutputs = false;
-  
+
   /**
    * when video process is put in a stopping state
    */
@@ -836,10 +837,10 @@ public class OpenCV extends AbstractComputerVision {
     // pre-loading so filters, functions and tests don't incur a performance hit
     // while
     // processing
-    Loader.load(opencv_java.class);
-    Loader.load(opencv_objdetect.class);
-    Loader.load(opencv_imgproc.class);
-
+    /*
+     * Loader.load(opencv_java.class); Loader.load(opencv_objdetect.class);
+     * Loader.load(opencv_imgproc.class);
+     */
     /*
      * Loader.load(opencv_imgproc.class); Loader.load(opencv_calib3d.class);
      * Loader.load(opencv_core.class); Loader.load(opencv_features2d.class);
@@ -912,18 +913,25 @@ public class OpenCV extends AbstractComputerVision {
    * capture starts the frame grabber and video processing threads
    */
   synchronized public void capture() {
-    log.info("capture before lock");
+    log.info("capture()");
 
     if (capturing) {
-      // already capturing
+      log.info("capture - already capturing - leaving");
       return;
     } else { // thread should be dead
-      log.info("not capturing in capture -> make new thread");
+      log.info("capture - starting thread");
 
       if (videoThread == null) {
         videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
         videoThread.start();
       }
+      // block until in started state ?
+      int waitTime = 0;
+      while (!capturing && waitTime < 1000) {
+        ++waitTime;
+        sleep(10);
+      }
+      log.info("capture - waited {} times", waitTime);
       broadcastState();
     }
   }
@@ -987,11 +995,18 @@ public class OpenCV extends AbstractComputerVision {
 
   public Map<String, List<Classification>> getClassifications(int timeout) {
     blockingClassification.clear();
-    Map<String, List<Classification>> ret = null;
+    Map<String, List<Classification>> ret = new HashMap<>();
+    String name = "yolo";
     try {
-      ret = blockingClassification.poll(timeout, TimeUnit.MILLISECONDS);
+      OpenCVFilterYolo fd = new OpenCVFilterYolo(name);      
+      addFilter(fd);
+      long startTs = System.currentTimeMillis();
+      while (ret.keySet().size() == 0 && System.currentTimeMillis() - startTs < timeout) {
+        ret.putAll(blockingClassification.poll(timeout, TimeUnit.MILLISECONDS));
+      }      
     } catch (InterruptedException e) {
     }
+    removeFilter(name);
     return ret;
   }
 
@@ -1007,19 +1022,43 @@ public class OpenCV extends AbstractComputerVision {
     return displayFilter;
   }
 
+  @Deprecated /*use getFaces*/
   public OpenCVData getFaceDetect() {
     // willing to wait up to 5 seconds
     // but if we find a face before 5s we wont wait
     return getFaceDetect(5000);
   }
 
-  // FIXME - getFaces() blocks ..
+  @Deprecated /*use getFaces*/
   public OpenCVData getFaceDetect(int timeout) {
-    OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect("face");
+    OpenCVFilterFaceDetectDNN fd = new OpenCVFilterFaceDetectDNN("face");
     addFilter(fd);
     OpenCVData d = getOpenCVData(timeout);
     removeFilter(fd.name);
     return d;
+  }
+  
+  public List<Classification> getFaces() {
+    return getFaces(5000); // FIXME - change to MAX_TIMOUT
+  }
+  
+  public List<Classification> getFaces(int timeout) {
+    blockingClassification.clear();
+    Map<String, List<Classification>> ret = new HashMap<>();
+    String name = "face";
+    try {
+      OpenCVFilterFaceDetectDNN fd = new OpenCVFilterFaceDetectDNN(name);
+      addFilter(fd);
+      // sleep(100);
+      // fd.enable();
+      long startTs = System.currentTimeMillis();
+      while (!ret.keySet().contains("face") && System.currentTimeMillis() - startTs < timeout) {
+        ret.putAll(blockingClassification.poll(timeout, TimeUnit.MILLISECONDS));
+      }
+    } catch (InterruptedException e) {
+    }
+    removeFilter(name);   
+    return ret.get("face");
   }
 
   /**
@@ -1368,9 +1407,10 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   synchronized public void pauseCapture() {
-     // FIXME !!!
-//       capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without resetting frame-index
-    
+    // FIXME !!!
+    // capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without
+    // resetting frame-index
+
   }
 
   private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
@@ -1887,15 +1927,21 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   synchronized public void stopCapture() {
-
+    log.info("stopCapture");
     if (!capturing) {
       log.info("stopCapture !capturing - returning");
       return;
     }
 
-    log.info("stopping capture");
-    stopping = true;   
-
+    log.info("stopCapture stopping = true");
+    stopping = true;
+    // block until in started state ?
+    int waitTime = 0;
+    while (capturing && waitTime < 1000) {
+      ++waitTime;
+      sleep(10);
+    }
+    log.info("stopCapture waited {} times - done now", waitTime);
   }
 
   public void stopRecording() {

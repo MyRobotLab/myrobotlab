@@ -1611,6 +1611,7 @@
 					<target>1.8</target>
 					<optimize>true</optimize>
 					<debug>true</debug>
+					<compilerArgument>-parameters</compilerArgument>
 				</configuration>
 			</plugin>
 
