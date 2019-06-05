@@ -10,7 +10,7 @@ public class OpenCVFilterLKOpticalTrackTest  extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {
-    Loader.load(opencv_java.class);
+    // Loader.load(opencv_java.class);
     debug = false;
   }
 
