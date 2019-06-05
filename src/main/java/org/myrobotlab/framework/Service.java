@@ -35,6 +35,7 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URI;
@@ -50,6 +51,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
@@ -69,8 +71,10 @@ import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
 /**
@@ -153,20 +157,20 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public final static String cfgDir = FileIO.getCfgDir();
 
   /**
-   * used as a static cache for quick method name testing
-   * FIXME - if you make this static it borks things - not sure why
-   * this should be static info and should not be a member variable !
+   * used as a static cache for quick method name testing FIXME - if you make
+   * this static it borks things - not sure why this should be static info and
+   * should not be a member variable !
    */
   transient protected Set<String> methodSet;
 
   // :P - gson will default convert a HashSet into an Array :(
   // So we need to make it a HashMap in order for gson to convert to an object
   /**
-   * FIXME - if you make this static it borks things - not sure why
-   * this should be static info and should not be a member variable !
+   * FIXME - if you make this static it borks things - not sure why this should
+   * be static info and should not be a member variable !
    */
   transient protected Map<String, String> interfaceSet;
-  
+
   /**
    * order which this service was created
    */
@@ -1566,56 +1570,56 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean load() {
     return load(null, null);
   }
-  
+
   public JsonElement loadJsonTree() throws IOException {
     String filename = String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
     String json = FileIO.toString(filename);
-    return loadJsonTree(json);    
+    return loadJsonTree(json);
   }
-  
-  public JsonElement loadJsonTree(String json) {    
+
+  public JsonElement loadJsonTree(String json) {
     return CodecUtils.toJsonTree(json);
   }
-  
+
   public Object loadField(String fieldName) throws IOException {
-    
+
     JsonElement tree = loadJsonTree();
     if (tree == null) {
       return null;
     }
-    
+
     JsonObject jsonObject = tree.getAsJsonObject();
     if (jsonObject == null) {
       return null;
     }
-    
+
     JsonElement field = jsonObject.get(fieldName);
     if (field == null) {
       return null;
     }
-    
+
     if (field.isJsonNull()) {
       return null;
     }
-    
+
     if (field.isJsonObject()) {
       return field.getAsJsonObject();
     }
-    // box for simplicity 
+    // box for simplicity
 
     if (field.isJsonPrimitive()) {
       JsonPrimitive primitive = field.getAsJsonPrimitive();
       if (primitive.isBoolean()) {
         return primitive.getAsBoolean();
       }
-      
+
       if (primitive.isString()) {
         return primitive.getAsString();
       }
-      
+
       if (primitive.isNumber()) {
         return primitive.getAsDouble();
-      }      
+      }
     }
     return null;
   }
@@ -2622,9 +2626,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
   static public boolean isHeadless() {
     return java.awt.GraphicsEnvironment.isHeadless();
   }
-  
+
   public void setOrder(int creationCount) {
     this.creationOrder = creationCount;
   }
+
+  public String getSwagger() {
+    return null;
+  }
+
 
 }
