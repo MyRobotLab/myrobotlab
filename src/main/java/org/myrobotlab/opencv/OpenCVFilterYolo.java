@@ -137,8 +137,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     try {
       in = url.openStream();
     } catch (IOException e) {
-      log.warn("Error opening a connection to {} ", uri);
-      e.printStackTrace();
+      log.error("Error opening a connection to {} ", uri, e);
       return;
     }
     DataInputStream dis = new DataInputStream(new BufferedInputStream(in));
