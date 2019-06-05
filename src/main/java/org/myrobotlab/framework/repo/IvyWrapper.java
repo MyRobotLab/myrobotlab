@@ -139,16 +139,13 @@ public class IvyWrapper extends Repo implements Serializable {
       sb.append(String.format("  <!-- %s -->\n", service.getSimpleName()));
 
       for (ServiceDependency dependency : dependencies) {
+        if (service.includeServiceInOneJar()) {
+          continue;
+        }
+        
         sb.append("  <dependency"); // conf="provided->master"
         sb.append(String.format(" org=\"%s\" name=\"%s\" rev=\"%s\"", dependency.getOrgId(), dependency.getArtifactId(), dependency.getVersion()));
-        // FIXME -
-        // https://stackoverflow.com/questions/37840659/ivy-dependecy-as-provided
-        if (!service.includeServiceInOneJar()) {
-          // sb.append(" conf=\"provided->master\" ");
-        }
-
-        // <dependency /> or <dependency></dependency> - ie do we have more
-        // stuff ?
+        
         List<ServiceExclude> excludes = dependency.getExcludes();
         boolean twoTags = dependency.getExt() != null || excludes != null & excludes.size() > 0;
         if (twoTags) {
@@ -343,8 +340,8 @@ public class IvyWrapper extends Repo implements Serializable {
       long ts = System.currentTimeMillis();
       String dir = String.format("install.ivy.%s.%d", serviceType, ts);
 
-      // repo.createBuildFiles(dir, serviceType);
-      repo.installTo("install.ivy");
+       repo.createBuildFiles(dir, "Python");
+      // repo.installTo("install.ivy");
       // repo.install(dir, serviceType);
 
       // repo.install("install.dl4j.maven", "Deeplearning4j");
