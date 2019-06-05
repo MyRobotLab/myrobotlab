@@ -26,7 +26,7 @@ public class Point implements Serializable {
 
   @Override
   public String toString() {
-    return String.format("(%f,%f)", x, y);
+    return String.format("(%d,%d)", x, y);
   }
 
 }

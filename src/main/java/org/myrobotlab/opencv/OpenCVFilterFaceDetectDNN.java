@@ -71,8 +71,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   public OpenCVFilterFaceDetectDNN() {
-    super();
-    loadModel();
+    this(null);
   }
 
   public OpenCVFilterFaceDetectDNN(String name) {

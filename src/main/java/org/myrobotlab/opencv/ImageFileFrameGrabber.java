@@ -2,7 +2,6 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +66,12 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     path = imageFiles.get(grabCount).getAbsolutePath();
     log.debug("Grabbing file {} - {}", grabCount, path);
     // grab it.
-    image = cvLoadImage(path);
+    try {
+      image = cvLoadImage(path);
+    } catch (Throwable e) {
+      log.error("cvLoadImage threw", e);
+      return null;
+    }
     /*
      * if (!cache.containsKey(path)) { image = cvLoadImage(path,
      * CV_LOAD_IMAGE_UNCHANGED); cache.put(path, image); } else { IplImage

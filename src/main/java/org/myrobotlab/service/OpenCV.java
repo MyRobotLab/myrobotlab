@@ -51,12 +51,7 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.bytedeco.opencv.opencv_core.CvPoint;
-import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
-import org.bytedeco.opencv.opencv_core.CvScalar;
-import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -65,6 +60,15 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.bytedeco.opencv.opencv_java;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_core.CvPoint;
+import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
@@ -84,6 +88,7 @@ import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
+import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
@@ -96,6 +101,7 @@ import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VGetParser;
 import com.github.axet.vget.info.VideoFileInfo;
 import com.github.axet.vget.info.VideoInfo;
+
 /*
 <pre>
 // extremely useful list of static imports - since auto-complete won't work with statics
@@ -139,28 +145,25 @@ public class OpenCV extends AbstractComputerVision {
     @Override
     synchronized public void run() {
       try {
-        synchronized (lock) {
+        log.info("run - capturing");
+        
+        capturing = true;        
+        getGrabber();
 
-          log.info("beginning capture");
-          capturing = true;
-          getGrabber();
+        lengthInFrames = grabber.getLengthInFrames();
+        lengthInTime = grabber.getLengthInTime();
+        log.info("grabber {} started - length time {} length frames {}", grabberType, lengthInTime, lengthInFrames);
 
+        // Wait for the Kinect to heat up.
+        int loops = 0;
+        while (grabber.getClass() == OpenKinectFrameGrabber.class && lengthInFrames == 0 && loops < 200) {
           lengthInFrames = grabber.getLengthInFrames();
           lengthInTime = grabber.getLengthInTime();
-          log.info("grabber {} started - length time {} length frames {}", grabberType, lengthInTime, lengthInFrames);
-
-          // Wait for the Kinect to heat up.
-          int loops = 0;
-          while (grabber.getClass() == OpenKinectFrameGrabber.class && lengthInFrames == 0 && loops < 200) {
-            lengthInFrames = grabber.getLengthInFrames();
-            lengthInTime = grabber.getLengthInTime();
-            sleep(40);
-            loops++;
-          }
-          lock.notifyAll();
+          sleep(40);
+          loops++;
         }
 
-        while (capturing) {
+        while (capturing && !stopping) {
           Frame newFrame = null;
 
           if (!singleFrame || (singleFrame && frameIndex < 1)) {
@@ -202,26 +205,30 @@ public class OpenCV extends AbstractComputerVision {
       } catch (Exception e) {
         log.error("getting grabber failed", e);
       }
+      // begin capturing ...
 
-      synchronized (lock) {
-        capturing = false;
-        videoThread = null;
-        frameIndex = 0;
-        if (grabber != null) {
-          try {
-            grabber.close();
-          } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
-            log.error("could not close grabber", e);
-          }
-          grabber = null;
+      videoThread = null;
+      frameIndex = 0;
+
+      // attempt to close the grabber
+      if (grabber != null) {
+        try {
+          // grabber.close();
+          grabber.release();
+        } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+          log.error("could not close grabber", e);
         }
-        lock.notifyAll();
       }
+      grabber = null;
 
+      // end of stopping
+
+      // stopCapture();
+      stopping = false;
+      capturing = false;
+      // sleep(1000);
       broadcastState();
-      log.info("stopping capture");
-      // notify all lock'd threads we are done
-
+      log.info("run - stopped capture");
     }
   }
 
@@ -255,12 +262,13 @@ public class OpenCV extends AbstractComputerVision {
   public final static Logger log = LoggerFactory.getLogger(OpenCV.class);
   public static final String OUTPUT_KEY = "output";
   transient final static public String PART = "part";
+  static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
       "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetect2", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
       "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate",
-      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "OpticalFlow", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray",
-      "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
+      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
+      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
 
   static final long serialVersionUID = 1L;
 
@@ -476,26 +484,50 @@ public class OpenCV extends AbstractComputerVision {
     Runtime.start("gui", "SwingGui");
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+
     // cv.setGrabberType("OpenKinect");
     // cv.setStreamerEnabled(true);
     // cv.setGrabberType("OpenCV");
+
+    // cv.addFilter("LKOpticalTrack");
+//    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
     
-   
-    // TODO - chaos monkey yolo
- //    OpenCVFilter yoloFilter = cv.addFilter("yolo");
     
     // yoloFilter.enable();
-     cv.capture();
-//     for (int i = 0 ; i < 10; i++) {
-//       yoloFilter.enable();
-//       yoloFilter.disable();
-//     }
-    //  Thread.sleep(2000);
-//     yoloFilter.enable();
-    // cv.capture();
-//     yoloFilter.disable();
-//     yoloFilter.enable();
+    // cv.addFilter(yoloFilter);
+
+    /*
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
     
+    OpenCVFilter yoloFilter = cv.addFilter("yolo");
+    yoloFilter.enable();
+    yoloFilter.disable();
+    yoloFilter.enable();
+    yoloFilter.disable();
+    yoloFilter.enable();
+    */
+    
+
+    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\I9VA-U69yaY_The
+    // Matrix - Pill Scene Short.mp4");
+    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\1559052474050");
+
+    boolean done = true;
+    if (done) {
+      return;
+    }
+
+    // TODO - chaos monkey yolo
+    // for (int i = 0 ; i < 10; i++) {
+    // yoloFilter.enable();
+    // yoloFilter.disable();
+    // }
+    // Thread.sleep(2000);
+    // yoloFilter.enable();
+    // cv.capture();
+    // yoloFilter.disable();
+    // yoloFilter.enable();
+
     // cv.load();
 
     // single kinect image file
@@ -507,11 +539,6 @@ public class OpenCV extends AbstractComputerVision {
     // cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
 
     // FIXME - todo FFmpeg tif, gif, jpg, mpg, avi
-
-    boolean done = true;
-    if (done) {
-      return;
-    }
 
     // FIXME - make this work :P
     // http://192.168.0.37/videostream.cgi
@@ -577,7 +604,7 @@ public class OpenCV extends AbstractComputerVision {
       if (fn.startsWith("DL4J")) {
         continue;
       }
-      log.warn("trying {}", fn);
+      log.info("trying {}", fn);
       cv.addFilter(fn);
       sleep(100);
       cv.removeFilters();
@@ -605,7 +632,7 @@ public class OpenCV extends AbstractComputerVision {
         sb.append("nothing.");
       }
 
-      log.warn(sb.toString());
+      log.info(sb.toString());
     }
 
     cv.addFilter("yolo");
@@ -712,6 +739,11 @@ public class OpenCV extends AbstractComputerVision {
   boolean closeOutputs = false;
 
   /**
+   * when video process is put in a stopping state
+   */
+  boolean stopping = false;
+
+  /**
    * color of overlays
    */
   transient Color color = getAwtColor("RED");
@@ -748,8 +780,6 @@ public class OpenCV extends AbstractComputerVision {
   int lengthInFrames = -1;
 
   long lengthInTime = -1;
-
-  transient final Object lock = new Object();
 
   String recordingFilename;
 
@@ -804,6 +834,23 @@ public class OpenCV extends AbstractComputerVision {
 
   public OpenCV(String n) {
     super(n);
+    // pre-loading so filters, functions and tests don't incur a performance hit
+    // while
+    // processing
+    /*
+     * Loader.load(opencv_java.class); Loader.load(opencv_objdetect.class);
+     * Loader.load(opencv_imgproc.class);
+     */
+    /*
+     * Loader.load(opencv_imgproc.class); Loader.load(opencv_calib3d.class);
+     * Loader.load(opencv_core.class); Loader.load(opencv_features2d.class);
+     * Loader.load(opencv_flann.class); Loader.load(opencv_highgui.class);
+     * Loader.load(opencv_imgcodecs.class); Loader.load(opencv_ml.class);
+     * Loader.load(opencv_objdetect.class); Loader.load(opencv_photo.class);
+     * Loader.load(opencv_shape.class); Loader.load(opencv_stitching.class);
+     * Loader.load(opencv_video.class); Loader.load(opencv_videostab.class);
+     */
+
     putText(20, 20, "time:  %d");
     putText(20, 30, "frame: %d");
     DATA_DIR = getDataDir();
@@ -840,7 +887,8 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * add filter by type e.g. addFilter("Canny","Canny")
    * 
-   * @param filterName - name of filter
+   * @param filterName
+   *          - name of filter
    * @return the filter
    */
   public OpenCVFilter addFilter(String filterName) {
@@ -864,24 +912,27 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * capture starts the frame grabber and video processing threads
    */
-  public void capture() {
-    log.info("capture before lock");
-    synchronized (lock) {
-      if (capturing) {
-        return;
-      }
-      if (!capturing) {
-        log.info("not capturing in capture -> make new thread");
+  synchronized public void capture() {
+    log.info("capture()");
+
+    if (capturing) {
+      log.info("capture - already capturing - leaving");
+      return;
+    } else { // thread should be dead
+      log.info("capture - starting thread");
+
+      if (videoThread == null) {
         videoThread = new Thread(vp, String.format("%s-video-processor-%d", getName(), ++vpId));
         videoThread.start();
-        try {
-          // wait for capture thread to start
-          log.info("capture wait() - waiting");
-          lock.wait();
-        } catch (InterruptedException e) {
-        }
-        broadcastState();
       }
+      // block until in started state ?
+      int waitTime = 0;
+      while (!capturing && waitTime < 1000) {
+        ++waitTime;
+        sleep(10);
+      }
+      log.info("capture - waited {} times", waitTime);
+      broadcastState();
     }
   }
 
@@ -944,11 +995,18 @@ public class OpenCV extends AbstractComputerVision {
 
   public Map<String, List<Classification>> getClassifications(int timeout) {
     blockingClassification.clear();
-    Map<String, List<Classification>> ret = null;
+    Map<String, List<Classification>> ret = new HashMap<>();
+    String name = "yolo";
     try {
-      ret = blockingClassification.poll(timeout, TimeUnit.MILLISECONDS);
+      OpenCVFilterYolo fd = new OpenCVFilterYolo(name);      
+      addFilter(fd);
+      long startTs = System.currentTimeMillis();
+      while (ret.keySet().size() == 0 && System.currentTimeMillis() - startTs < timeout) {
+        ret.putAll(blockingClassification.poll(timeout, TimeUnit.MILLISECONDS));
+      }      
     } catch (InterruptedException e) {
     }
+    removeFilter(name);
     return ret;
   }
 
@@ -964,19 +1022,43 @@ public class OpenCV extends AbstractComputerVision {
     return displayFilter;
   }
 
+  @Deprecated /*use getFaces*/
   public OpenCVData getFaceDetect() {
     // willing to wait up to 5 seconds
     // but if we find a face before 5s we wont wait
     return getFaceDetect(5000);
   }
 
-  // FIXME - getFaces() blocks ..
+  @Deprecated /*use getFaces*/
   public OpenCVData getFaceDetect(int timeout) {
-    OpenCVFilterFaceDetect fd = new OpenCVFilterFaceDetect("face");
+    OpenCVFilterFaceDetectDNN fd = new OpenCVFilterFaceDetectDNN("face");
     addFilter(fd);
     OpenCVData d = getOpenCVData(timeout);
     removeFilter(fd.name);
     return d;
+  }
+  
+  public List<Classification> getFaces() {
+    return getFaces(5000); // FIXME - change to MAX_TIMOUT
+  }
+  
+  public List<Classification> getFaces(int timeout) {
+    blockingClassification.clear();
+    Map<String, List<Classification>> ret = new HashMap<>();
+    String name = "face";
+    try {
+      OpenCVFilterFaceDetectDNN fd = new OpenCVFilterFaceDetectDNN(name);
+      addFilter(fd);
+      // sleep(100);
+      // fd.enable();
+      long startTs = System.currentTimeMillis();
+      while (!ret.keySet().contains("face") && System.currentTimeMillis() - startTs < timeout) {
+        ret.putAll(blockingClassification.poll(timeout, TimeUnit.MILLISECONDS));
+      }
+    } catch (InterruptedException e) {
+    }
+    removeFilter(name);   
+    return ret.get("face");
   }
 
   /**
@@ -1104,17 +1186,18 @@ public class OpenCV extends AbstractComputerVision {
     if (isVirtual() && inputSource.equals(INPUT_SOURCE_CAMERA)) {
       grabberType = "ImageFile";
       inputSource = INPUT_SOURCE_FILE;
-      // FIXME - we should put a single image in src/main/resources/resource/ - to be extracted with resources
+      // FIXME - we should put a single image in src/main/resources/resource/ -
+      // to be extracted with resources
       inputFile = "src/test/resources/OpenCV/multipleFaces.jpg";
     }
-    
+
     String prefixPath;
     if (/* "IPCamera".equals(grabberType) || */ "Pipeline".equals(grabberType) || "ImageFile".equals(grabberType) || "Sarxos".equals(grabberType) || "MJpeg".equals(grabberType)) {
       prefixPath = "org.myrobotlab.opencv.";
     } else {
       prefixPath = "org.bytedeco.javacv.";
     }
-    
+
     newGrabberType = String.format("%s%sFrameGrabber", prefixPath, grabberType);
 
     log.info(String.format("video source is %s", inputSource));
@@ -1324,9 +1407,10 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   synchronized public void pauseCapture() {
-    synchronized (lock) {
-      capturing = false;
-    }
+    // FIXME !!!
+    // capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without
+    // resetting frame-index
+
   }
 
   private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
@@ -1820,27 +1904,6 @@ public class OpenCV extends AbstractComputerVision {
     masks.put(name, mask);
   }
 
-  /**
-   * <pre>
-   * public void stopCapturex() {
-   *   info("stopping capture");
-   *   try {
-   *     capturing = false;
-   * 
-   *     synchronized (lock) {
-   *       videoThread = null;
-   *       if (grabber != null) {
-   *         grabber.close();
-   *         grabber = null;
-   *       }
-   *     }
-   *   } catch (Exception e) {
-   *     log.error("stopCapture threw", e);
-   *   }
-   *   broadcastState();
-   * }
-   * </pre>
-   */
   public void setMaxFps(Integer fps) {
     if (fps == null || fps < 1 || fps > 1000) {
       maxFps = null;
@@ -1863,23 +1926,22 @@ public class OpenCV extends AbstractComputerVision {
     this.streamerEnabled = streamerEnabled;
   }
 
-  public void stopCapture() {
-    log.info("stopCapture before lock");
-    synchronized (lock) {
-      if (!capturing) {
-        log.info("stopCapture !capturing - returning");
-        return;
-      }
-      log.info("stopCapture setting capturing");
-      capturing = false;
-      // sleep(300);
-      try {
-        log.info("stopCapture waiting");
-        lock.wait();
-      } catch (InterruptedException e) {
-      }
+  synchronized public void stopCapture() {
+    log.info("stopCapture");
+    if (!capturing) {
+      log.info("stopCapture !capturing - returning");
+      return;
     }
-    log.info("stopCapture leaving lock");
+
+    log.info("stopCapture stopping = true");
+    stopping = true;
+    // block until in started state ?
+    int waitTime = 0;
+    while (capturing && waitTime < 1000) {
+      ++waitTime;
+      sleep(10);
+    }
+    log.info("stopCapture waited {} times - done now", waitTime);
   }
 
   public void stopRecording() {
@@ -1974,7 +2036,7 @@ public class OpenCV extends AbstractComputerVision {
   public PointCloud getPointCloud() {
     return lastPointCloud;
   }
-  
+
   // Filter enable/disable helper methods.
   public void enableFilter(String name) {
     OpenCVFilter f = filters.get(name);
@@ -1983,7 +2045,7 @@ public class OpenCV extends AbstractComputerVision {
       broadcastState();
     }
   }
-  
+
   public void disableFilter(String name) {
     OpenCVFilter f = filters.get(name);
     if (f.isEnabled()) {
@@ -1991,14 +2053,14 @@ public class OpenCV extends AbstractComputerVision {
       broadcastState();
     }
   }
-  
+
   public void toggleFilter(String name) {
-    OpenCVFilter f = filters.get(name); 
+    OpenCVFilter f = filters.get(name);
     if (f.isEnabled())
       f.disable();
     else
       f.enable();
     broadcastState();
   }
-  
+
 }

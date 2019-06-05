@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import javax.swing.Box;
 
 import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencv.opencv_java;
 import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.CvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvRect;
@@ -72,7 +73,6 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetect.class);
 
-  //CvMemStorage storage = null;
   public CascadeClassifier cascade = null; // TODO - was static
 
   /**
@@ -80,6 +80,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
    */
   public String cascadeDir = "haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
+  // public String cascadeFile = "haarcascade_frontalface_default.xml";
 
   /**
    * bounding boxes of faces
@@ -89,7 +90,6 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   double scaleFactor = 1.1;
   int minNeighbors = 1;
 
-  // public int stablizedFrameCount = 10;
   public int minFaceFrames = 10;
   public int minEmptyFrames = 10;
   public int firstFaceFrame = 0;
@@ -198,7 +198,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
     if (cascade == null) {
       // Preload the opencv_objdetect module to work around a known bug.
-      Loader.load(opencv_objdetect.class);
+      // Loader.load(opencv_objdetect.class);
 
       log.info("Starting new classifier {}", cascadeFile);
       String filename = cascadeDir + File.separator +  cascadeFile;
