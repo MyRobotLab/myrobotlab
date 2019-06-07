@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
@@ -73,6 +74,8 @@ public class LangUtils {
     sb.append("##############################################################\n");
     sb.append("## imports ####\n");
     sb.append("import org.myrobotlab.framework.Platform as Platform\n");
+    sb.append("\n");
+    sb.append((Platform.isVirtual()?"Platform.setVirtual(True)\n":"# Platform.setVirtual(True)\\n"));
 
     // from current running system - vs something uncreated passed in ....
     List<ServiceInterface> allServices = Runtime.getServices();

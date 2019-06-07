@@ -40,7 +40,7 @@ public class Emoji extends Service
 
   transient ImageDisplay display = null;
   transient HttpClient http = null;
-  transient FiniteStateMachine emotionalState = null;
+  transient FiniteStateMachine fsm = null;
   
   int defaultSize = 32;//px
 
@@ -77,7 +77,7 @@ public class Emoji extends Service
 
   public void addEmoji(String keyword, String unicode) {
     descriptionIndex.put(keyword, unicode);
-    emotionalState.addState(keyword);
+    fsm.addState(keyword);
   }
 
   public void startService() {
@@ -88,10 +88,10 @@ public class Emoji extends Service
     if (http == null) {
       http = (HttpClient) startPeer("http");
     }
-    if (emotionalState == null) {
-      emotionalState = (FiniteStateMachine) startPeer("fsm");
+    if (fsm == null) {
+      fsm = (FiniteStateMachine) startPeer("fsm");
     } else {
-      emotionalState.startService();
+      fsm.startService();
     }
     
     // subscribing to errors
@@ -106,7 +106,7 @@ public class Emoji extends Service
 
   public String fire(String event) {
     try {
-      emotionalState.fire(event);
+      fsm.fire(event);
       return event;
     } catch (Exception e) {
       log.error("onStatus threw", e);
@@ -309,7 +309,7 @@ public class Emoji extends Service
   }
 
   public State getCurrentState() {
-    return emotionalState.getCurrentState();
+    return fsm.getCurrentState();
   }
 
   public void publishEmoji(EmojiData emoji) {
@@ -331,96 +331,96 @@ public class Emoji extends Service
         "interest", "1f914 ", "vomiting", "1f92e", "sick", "1f922", "ill", "1f912");
 
     // serenity-ecstasy axis
-    emotionalState.addTransition("neutral", "serenity-event", "serenity");
-    emotionalState.addTransition("serenity", "serenity-event", "joy");
-    emotionalState.addTransition("joy", "serenity-event", "ecstasy");
+    fsm.addTransition("neutral", "serenity-event", "serenity");
+    fsm.addTransition("serenity", "serenity-event", "joy");
+    fsm.addTransition("joy", "serenity-event", "ecstasy");
 
-    emotionalState.addTransition("serenity", "clear-event", "neutral");
-    emotionalState.addTransition("joy", "clear-event", "serenity");
-    emotionalState.addTransition("ecstasy", "clear-event", "joy");
+    fsm.addTransition("serenity", "clear-event", "neutral");
+    fsm.addTransition("joy", "clear-event", "serenity");
+    fsm.addTransition("ecstasy", "clear-event", "joy");
 
     // acceptance-admiration axis
-    emotionalState.addTransition("neutral", "acceptance-event", "acceptance");
-    emotionalState.addTransition("acceptance", "acceptance-event", "trust");
-    emotionalState.addTransition("trust", "acceptance-event", "admiration");
+    fsm.addTransition("neutral", "acceptance-event", "acceptance");
+    fsm.addTransition("acceptance", "acceptance-event", "trust");
+    fsm.addTransition("trust", "acceptance-event", "admiration");
 
-    emotionalState.addTransition("acceptance", "clear-event", "neutral");
-    emotionalState.addTransition("trust", "clear-event", "acceptance");
-    emotionalState.addTransition("admiration", "clear-event", "trust");
+    fsm.addTransition("acceptance", "clear-event", "neutral");
+    fsm.addTransition("trust", "clear-event", "acceptance");
+    fsm.addTransition("admiration", "clear-event", "trust");
 
     // apprehension-terror axis
-    emotionalState.addTransition("neutral", "apprehension-event", "apprehension");
-    emotionalState.addTransition("apprehension", "apprehension-event", "fear");
-    emotionalState.addTransition("fear", "apprehension-event", "terror");
+    fsm.addTransition("neutral", "apprehension-event", "apprehension");
+    fsm.addTransition("apprehension", "apprehension-event", "fear");
+    fsm.addTransition("fear", "apprehension-event", "terror");
 
-    emotionalState.addTransition("apprehension", "clear-event", "neutral");
-    emotionalState.addTransition("fear", "clear-event", "apprehension");
-    emotionalState.addTransition("terror", "clear-event", "fear");
+    fsm.addTransition("apprehension", "clear-event", "neutral");
+    fsm.addTransition("fear", "clear-event", "apprehension");
+    fsm.addTransition("terror", "clear-event", "fear");
 
     // distraction-amazement axis
-    emotionalState.addTransition("neutral", "distraction-event", "distraction");
-    emotionalState.addTransition("distraction", "distraction-event", "surprise");
-    emotionalState.addTransition("surprise", "distraction-event", "amazement");
+    fsm.addTransition("neutral", "distraction-event", "distraction");
+    fsm.addTransition("distraction", "distraction-event", "surprise");
+    fsm.addTransition("surprise", "distraction-event", "amazement");
 
-    emotionalState.addTransition("distraction", "clear-event", "neutral");
-    emotionalState.addTransition("surprise", "clear-event", "distraction");
-    emotionalState.addTransition("amazement", "clear-event", "surprise");
+    fsm.addTransition("distraction", "clear-event", "neutral");
+    fsm.addTransition("surprise", "clear-event", "distraction");
+    fsm.addTransition("amazement", "clear-event", "surprise");
 
     // pensiveness-grief axis
-    emotionalState.addTransition("neutral", "pensiveness-event", "pensiveness");
-    emotionalState.addTransition("pensiveness", "pensiveness-event", "sadness");
-    emotionalState.addTransition("sadness", "pensiveness-event", "grief");
+    fsm.addTransition("neutral", "pensiveness-event", "pensiveness");
+    fsm.addTransition("pensiveness", "pensiveness-event", "sadness");
+    fsm.addTransition("sadness", "pensiveness-event", "grief");
 
-    emotionalState.addTransition("pensiveness", "clear-event", "neutral");
-    emotionalState.addTransition("sadness", "clear-event", "pensiveness");
-    emotionalState.addTransition("grief", "clear-event", "sadness");
+    fsm.addTransition("pensiveness", "clear-event", "neutral");
+    fsm.addTransition("sadness", "clear-event", "pensiveness");
+    fsm.addTransition("grief", "clear-event", "sadness");
 
     // boredom-loathing axis
-    emotionalState.addTransition("neutral", "boredom-event", "boredom");
-    emotionalState.addTransition("boredom", "boredom-event", "disgust");
-    emotionalState.addTransition("disgust", "boredom-event", "loathing");
+    fsm.addTransition("neutral", "boredom-event", "boredom");
+    fsm.addTransition("boredom", "boredom-event", "disgust");
+    fsm.addTransition("disgust", "boredom-event", "loathing");
 
-    emotionalState.addTransition("boredom", "clear-event", "neutral");
-    emotionalState.addTransition("disgust", "clear-event", "boredom");
-    emotionalState.addTransition("loathing", "clear-event", "disgust");
+    fsm.addTransition("boredom", "clear-event", "neutral");
+    fsm.addTransition("disgust", "clear-event", "boredom");
+    fsm.addTransition("loathing", "clear-event", "disgust");
 
     // annoyance-rage axis
-    emotionalState.addTransition("neutral", "annoyance-event", "annoyance");
-    emotionalState.addTransition("annoyance", "annoyance-event", "anger");
-    emotionalState.addTransition("anger", "annoyance-event", "rage");
+    fsm.addTransition("neutral", "annoyance-event", "annoyance");
+    fsm.addTransition("annoyance", "annoyance-event", "anger");
+    fsm.addTransition("anger", "annoyance-event", "rage");
 
-    emotionalState.addTransition("annoyance", "clear-event", "neutral");
-    emotionalState.addTransition("anger", "clear-event", "annoyance");
-    emotionalState.addTransition("rage", "clear-event", "anger");
+    fsm.addTransition("annoyance", "clear-event", "neutral");
+    fsm.addTransition("anger", "clear-event", "annoyance");
+    fsm.addTransition("rage", "clear-event", "anger");
 
     // interest-vigilance axis
-    emotionalState.addTransition("neutral", "interest-event", "interest");
-    emotionalState.addTransition("interest", "interest-event", "anticipation");
-    emotionalState.addTransition("anticipation", "interest-event", "vigilance");
+    fsm.addTransition("neutral", "interest-event", "interest");
+    fsm.addTransition("interest", "interest-event", "anticipation");
+    fsm.addTransition("anticipation", "interest-event", "vigilance");
 
-    emotionalState.addTransition("interest", "clear-event", "neutral");
-    emotionalState.addTransition("anticipation", "clear-event", "interest");
-    emotionalState.addTransition("vigilance", "clear-event", "anticipation");
+    fsm.addTransition("interest", "clear-event", "neutral");
+    fsm.addTransition("anticipation", "clear-event", "interest");
+    fsm.addTransition("vigilance", "clear-event", "anticipation");
 
     // ill-vomiting axis
-    emotionalState.addTransition("neutral", "ill-event", "ill");
-    emotionalState.addTransition("ill", "ill-event", "sick");
-    emotionalState.addTransition("sick", "ill-event", "vomiting");
+    fsm.addTransition("neutral", "ill-event", "ill");
+    fsm.addTransition("ill", "ill-event", "sick");
+    fsm.addTransition("sick", "ill-event", "vomiting");
 
-    emotionalState.addTransition("ill", "clear-event", "neutral");
-    emotionalState.addTransition("sick", "clear-event", "ill");
-    emotionalState.addTransition("vomiting", "clear-event", "sick");
+    fsm.addTransition("ill", "clear-event", "neutral");
+    fsm.addTransition("sick", "clear-event", "ill");
+    fsm.addTransition("vomiting", "clear-event", "sick");
 
-    emotionalState.addScheduledEvent("clear-event", 1000 * 30);
+    fsm.addScheduledEvent("clear-event", 1000 * 30);
     // emotionalState.addScheduledEvent("clear-event", 1000);
     
     // FIXME - DUMP INFO sorted tree map based on source state !
-    log.info(emotionalState.getFsmMap());
+    log.info(fsm.getFsmMap());
 
     // loopback on state publishing...
     // subscribe(getName(),"publishState");
     try {
-      emotionalState.attach(this);
+      fsm.attach(this);
     } catch (Exception e) {
       error(e);
     }
@@ -522,6 +522,14 @@ public class Emoji extends Service
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public ImageDisplay getDisplay() {
+    return display;
+  }
+
+  public FiniteStateMachine getFsm() {
+    return fsm;
   }
 
 }

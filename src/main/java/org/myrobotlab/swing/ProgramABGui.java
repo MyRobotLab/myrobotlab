@@ -76,6 +76,8 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   ImageIcon userI = Util.getImageIcon("user.png");
   JLabel botnameP = new JLabel();
   ImageIcon botnameI = Util.getImageIcon("chatbot.png");
+  
+  JLabel currentBotPath = new JLabel("");
 
   public ProgramABGui(String boundServiceName, SwingGui myService) throws BadLocationException, IOException {
     super(boundServiceName, myService);
@@ -131,13 +133,18 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     JPanel PAGEENDLeft = new JPanel(new GridLayout(2, 1));
     JPanel PAGEEND = new JPanel(new GridLayout(1, 2));
 
-    JPanel botControl = new JPanel(new GridLayout(2, 2));
+    JPanel botControl = new JPanel(new GridLayout(0, 2));
     JPanel buttons = new JPanel();
 
     botControl.add(pathP);
     botControl.add(progABPath);
     botControl.add(botnameP);
     botControl.add(botName);
+    JLabel cbp = new JLabel("Current Bot Path");
+    cbp.setIcon(Util.getImageIcon("FileConnector.png"));
+    botControl.add(cbp);
+    botControl.add(currentBotPath);
+    
     buttons.add(saveAIML);
     buttons.add(reloadSession);
     buttons.add(savePredicates);
@@ -291,6 +298,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
           startSession.setBackground(Color.GREEN);
         }
         progABPath.setText(new File(programab.getPath()).getAbsolutePath());
+        currentBotPath.setText(new File(programab.getPath()).getAbsolutePath() + File.separator + "bots" + File.separator + botname);
         userName.setText(username);
         botName.removeAllItems();
         Iterator<String> iterator = programab.getBots().iterator();
