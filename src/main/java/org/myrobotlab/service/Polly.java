@@ -54,7 +54,7 @@ public class Polly extends AbstractSpeechSynthesis {
   private transient AWSCredentials credentials;
   private transient AmazonPolly polly;
 
-  private Regions defaultRegion = Regions.US_WEST_2;
+  Regions defaultRegion;
 
   public Polly(String n) {
     super(n);
@@ -100,10 +100,10 @@ public class Polly extends AbstractSpeechSynthesis {
   /**
    * set default region for polly
    * 
-   * @param region
+   * @param regionName
    */
-  public void setRegion(Regions region) {
-    defaultRegion = region;
+  public void setRegion(String regionName) {
+    defaultRegion = Regions.fromName(regionName);
   }
 
   /**
@@ -115,6 +115,10 @@ public class Polly extends AbstractSpeechSynthesis {
    */
   private AmazonPolly getPolly() {
 
+    if (defaultRegion == null) {
+      defaultRegion = Regions.DEFAULT_REGION;
+    }
+    
     String key = getKey(AMAZON_POLLY_USER_KEY);
     String secret = getKey(AMAZON_POLLY_USER_SECRET);
 
