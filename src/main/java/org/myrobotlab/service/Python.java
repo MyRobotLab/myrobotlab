@@ -728,6 +728,14 @@ public class Python extends Service {
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
+    
+    Runtime.start("python", "Python");
+    // Runtime.start("webgui", "WebGui");
+    Runtime.start("gui", "SwingGui");
+    boolean done = true;
+    if (done) {
+      return;
+    }
 
     try {
 
@@ -740,13 +748,7 @@ public class Python extends Service {
       // Runtime.start("gui", "SwingGui");
       // String f = "C:\\Program Files\\blah.1.py";
       // log.info(getName(f));
-      Runtime.start("python", "Python");
-      // Runtime.start("webgui", "WebGui");
-      Runtime.start("gui", "SwingGui");
-      boolean done = true;
-      if (done) {
-        return;
-      }
+     
       Runtime.start("cli", "Cli");
 
       // python.error("this is an error");

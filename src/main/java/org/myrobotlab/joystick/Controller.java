@@ -8,8 +8,6 @@ import java.util.Map;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-import net.java.games.input.ControllerEnvironment;
-
 public class Controller {
 
   public final static Logger log = LoggerFactory.getLogger(Controller.class);
@@ -22,6 +20,7 @@ public class Controller {
   Map<String, Component> componentMap = new HashMap<String, Component>();
   transient net.java.games.input.Controller jinputController = null;
   String serviceName;
+  
   // FIXME use transient if needed
 
   public Component[] getComponents() {
@@ -35,6 +34,10 @@ public class Controller {
       // virtual always works !
       return true;
     }
+  }
+  
+  public boolean isVirtual() {
+    return jinputController == null;
   }
 
   public String getName() {
