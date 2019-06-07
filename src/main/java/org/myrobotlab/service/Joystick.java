@@ -69,8 +69,6 @@ public class Joystick extends Service {
 
   List<Controller> controllers;
 
-  List<Controller> virtualControllers = new ArrayList<Controller>();
-
   /**
    * current selected controller
    */
@@ -242,11 +240,6 @@ public class Joystick extends Service {
     // ControllerEnvironment.getDefaultEnvironment().getControllers();
     controllers = getControllerList();
 
-    // adding virtual controllers if any are defined
-    for (Controller vc : virtualControllers) {
-      controllers.add(vc);
-    }
-
     info(String.format("found %d controllers", controllers.size()));
     controllerNames.clear();
     for (int i = 0; i < controllers.size(); i++) {
@@ -340,6 +333,7 @@ public class Joystick extends Service {
   }
 
   public boolean setController(String s) {
+    // getControllers();
     // exact match
     if (controllerNames.containsKey(s)) {
       setController(controllerNames.get(s));
@@ -473,7 +467,6 @@ public class Joystick extends Service {
     }
 
     Component component = components.get(buttonName);
-    log.info("here");
     component.setVirtualValue(1.0F);
   }
 
@@ -527,7 +520,11 @@ public class Joystick extends Service {
     if (controller != null) {
       // v.setName(String.format("virtual %s", controller.getName()));
       controller.reIndex(getName());
-      virtualControllers.add(controller);
+      // virtualControllers.add(controller);
+      controllers.add(controller);
+      controllerNames.put(controller.getName(), controllers.size() - 1);
+    } else {
+      error("could not load virtual controller from %s", filename);
     }
 
     return controller;
