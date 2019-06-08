@@ -968,6 +968,11 @@ public class OpenNi extends Service // implements
 
     meta.addDependency("simpleopenni", "openni", "1.96");
     meta.addDependency("org.myrobotlab.openni", "openni-deps", "0.1", "zip");
+    
+    meta.addDependency("javax.vecmath", "vecmath", "1.5.2");
+    meta.addDependency("java3d", "j3d-core", "1.3.1");
+    meta.addDependency("java3d", "j3d-core-utils", "1.3.1");
+
     return meta;
   }
 

@@ -2216,10 +2216,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Runtime.start("gui", "SwingGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      
       if (mega.isVirtual()) {
         VirtualArduino vmega = mega.getVirtual();
         vmega.setBoardMega();
       }
+      
       // mega.getBoardTypes();
       // mega.setBoardMega();
       // mega.setBoardUno();
