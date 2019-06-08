@@ -122,25 +122,6 @@ public class %javaClass% {
 	transient private %javaArduinoClass% arduino;
 	
 	transient private SerialDevice serial;
-
-	/**
-	 * want to grab it when SerialDevice is created
-	 *
-	 * @param serial
-	 * @return
-	 */
-	/*
-	static public synchronized Msg getInstance(%javaArduinoClass% arduino, SerialDevice serial) {
-		if (instance == null) {
-			instance = new Msg();
-		}
-
-		instance.arduino = arduino;
-		instance.serial = serial;
-
-		return instance;
-	}
-	*/
 	
 	public void setInvoke(boolean b){
 	  invoke = b;
@@ -374,10 +355,6 @@ public class %javaClass% {
 		}
 	}
   
-  /**
-   * enable acks on both sides Arduino/Java-Land
-   * and MrlComm-land
-   */
   public void enableAcks(boolean b){
     // disable local blocking
 	  ackEnabled = b;
