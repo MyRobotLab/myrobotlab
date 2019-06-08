@@ -49,7 +49,6 @@ import java.util.Arrays;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
-import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
@@ -253,20 +252,6 @@ public class Msg {
 	transient private Arduino arduino;
 	
 	transient private SerialDevice serial;
-
-	
-	/*
-	static public synchronized Msg getInstance(Arduino arduino, SerialDevice serial) {
-		if (instance == null) {
-			instance = new Msg();
-		}
-
-		instance.arduino = arduino;
-		instance.serial = serial;
-
-		return instance;
-	}
-	*/
 	
 	public void setInvoke(boolean b){
 	  invoke = b;
@@ -2357,12 +2342,6 @@ public class Msg {
 		}
 	}
   
-  /**
-   * enable acks on both sides Arduino/Java-Land
-   * and MrlComm-land
-   *
-	 * @param b - enable acks back
-	 */
   public void enableAcks(boolean b){
     // disable local blocking
 	  ackEnabled = b;
@@ -2436,7 +2415,7 @@ public class Msg {
 			virtual.connectVirtualUart(port, port + "UART");
 			*/
 			
-			PinArrayControl arduino = (PinArrayControl)Runtime.start("arduino","Arduino");
+			Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
 			Servo servo01 = (Servo)Runtime.start("servo01","Servo");
 			
 			/*

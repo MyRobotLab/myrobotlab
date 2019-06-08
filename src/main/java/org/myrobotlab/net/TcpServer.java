@@ -8,16 +8,39 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.InMoov;
+import org.slf4j.Logger;
+
 public class TcpServer {
+  
+  public final static Logger log = LoggerFactory.getLogger(TcpServer.class);
 
   boolean listening;
   int port = 323232;
+  ServerSocket listener;
+  int nThreads = 2; // 20
 
   public static void main(String[] args) throws Exception {
+    
+  }
+  
+  /**
+   * Maximum complexity start
+   * @param inPort - listening port
+   * @param inThreads - number of handler threads
+   */
+  public void start(Integer inPort, Integer inThreads) {
     try {
-      ServerSocket listener = new ServerSocket(59898);
-      System.out.println("The capitalization server is running...");
-      ExecutorService pool = Executors.newFixedThreadPool(2);// (20);
+      if (inPort != null) {
+        port = inPort;
+      }
+      if (inThreads != null) {
+        nThreads = inThreads;
+      }
+      listener = new ServerSocket(port);
+      log.info("started server");
+      ExecutorService pool = Executors.newFixedThreadPool(nThreads);
       while (listening) {
         pool.execute(new TcpThread(listener.accept()));
       }
@@ -25,10 +48,6 @@ public class TcpServer {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-  
-  public void start(int  port) {
-    
   }
 
   private static class TcpThread implements Runnable {
@@ -40,7 +59,7 @@ public class TcpServer {
 
     @Override
     public void run() {
-      System.out.println("Connected: " + socket);
+      log.info("Connected: " + socket);
       try {
         Scanner in = new Scanner(socket.getInputStream());
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -48,13 +67,14 @@ public class TcpServer {
           out.println(in.nextLine().toUpperCase());
         }
       } catch (Exception e) {
-        System.out.println("Error:" + socket);
+        log.info("Error:" + socket);
       } finally {
         try {
           socket.close();
         } catch (IOException e) {
+          log.error("TcpThread threw", e);
         }
-        System.out.println("Closed: " + socket);
+        log.info("Closed: " + socket);
       }
     }
   }
