@@ -208,6 +208,7 @@
 					<target>1.8</target>
 					<optimize>true</optimize>
 					<debug>true</debug>
+					<compilerArgument>-parameters</compilerArgument>					
 				</configuration>
 			</plugin>
 
@@ -258,12 +259,21 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<!-- <configuration> <skip>true</skip> </configuration> -->
 				<configuration>
+					<argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native ${argLine}</argLine>
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
 					<excludes>
 						<exclude>**/integration/*</exclude>
 					</excludes>
+					   <systemPropertyVariables>
+					        <!-- 
+      						<propertyName>java.library.path</propertyName>
+      						<buildDirectory>libraries/native</buildDirectory>
+      						<propertyName>jna.library.path</propertyName>
+      						<buildDirectory>libraries/native</buildDirectory>
+      						 -->
+    					</systemPropertyVariables>
 				</configuration>
 				<version>2.9</version>
 			</plugin>

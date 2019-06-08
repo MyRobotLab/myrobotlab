@@ -58,7 +58,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.net.Scanner;
-import org.myrobotlab.net.TcpServer;
+import org.myrobotlab.net.TcpObjectStreamServer;
 import org.myrobotlab.net.UdpServer;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
@@ -90,7 +90,7 @@ public class RemoteAdapter extends Service implements Gateway {
   // FIXME - needs to be self contained !! - to have multiple servers
   // FIXME !!! - Server interface send - onMsg onConnect onDisconnect(nop for
   // udp) || websockets
-  transient TcpServer tcpServer = null;
+  transient TcpObjectStreamServer tcpServer = null;
   transient UdpServer udpServer = null;
 
   private Integer udpPort;
@@ -114,7 +114,7 @@ public class RemoteAdapter extends Service implements Gateway {
   public RemoteAdapter(String n) {
     super(n);
     defaultPrefix = String.format("%s.", n);
-    tcpServer = new TcpServer(this);
+    tcpServer = new TcpObjectStreamServer(this);
     udpServer = new UdpServer(this);
     // addLocalTask(5 * 1000, "broadcastHeartbeat");
   }
