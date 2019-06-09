@@ -21,9 +21,9 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.slf4j.Logger;
 
-public class TcpThread extends Thread {
+public class TcpObjectThread extends Thread {
 
-  public final static Logger log = LoggerFactory.getLogger(TcpThread.class);
+  public final static Logger log = LoggerFactory.getLogger(TcpObjectThread.class);
 
   // FIXME - should be Gateway not Service
   // FIXME - Communication interface - with logMsgs(bool)
@@ -39,7 +39,7 @@ public class TcpThread extends Thread {
   // debug / logging
   private transient FileOutputStream msgLog = null;
 
-  public TcpThread(RemoteAdapter service, URI uri, Socket socket) throws UnknownHostException, IOException {
+  public TcpObjectThread(RemoteAdapter service, URI uri, Socket socket) throws UnknownHostException, IOException {
     super(String.format("%s:%s", service.getName(), uri));
 
     this.myService = service;

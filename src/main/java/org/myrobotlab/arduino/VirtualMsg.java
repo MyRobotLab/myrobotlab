@@ -282,20 +282,6 @@ public class VirtualMsg {
 	transient private MrlComm arduino;
 	
 	transient private SerialDevice serial;
-
-	
-	/*
-	static public synchronized Msg getInstance(MrlComm arduino, SerialDevice serial) {
-		if (instance == null) {
-			instance = new Msg();
-		}
-
-		instance.arduino = arduino;
-		instance.serial = serial;
-
-		return instance;
-	}
-	*/
 	
 	public void setInvoke(boolean b){
 	  invoke = b;
@@ -1627,10 +1613,6 @@ public class VirtualMsg {
 		}
 	}
   
-  /**
-   * enable acks on both sides Arduino/Java-Land
-   * and MrlComm-land
-   */
   public void enableAcks(boolean b){
     // disable local blocking
 	  ackEnabled = b;
