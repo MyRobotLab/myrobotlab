@@ -29,12 +29,12 @@ import org.slf4j.Logger;
  *        - FULL path displayed in ProgramAB "bots" 
  *        - jostick control of motors !!!! get it f*ing moving again !! 
  *        - NAVIGATE !!
- *        - FIXME - moveTo(35) // 35 cm using "all" encoders -> sensor fusion
+ *        - FIXME - moveTo(35) // 35 cm using "all" encoders send to sensor fusion
  *        
  * -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=8080 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=8080
-   * FOSCAM WORKY !!! - for IPCamera frame grabber
-   * 
-   * http://admin:admin@192.168.0.37/videostream.cgi?user=admin&pwd=admin
+ *  FOSCAM WORKY !!! - for IPCamera frame grabber
+ * 
+ * http://admin:admin@192.168.0.37/videostream.cgi?user=admin(and)pwd=admin
  *
  * </pre>
  * @author GroG
