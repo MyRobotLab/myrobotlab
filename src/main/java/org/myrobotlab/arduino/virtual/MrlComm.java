@@ -49,7 +49,7 @@ public class MrlComm {
 
   boolean ackEnabled = true;
 
-  public final BoardInfo boardInfo = new BoardInfo();
+  public BoardInfo boardInfo = null;
 
   boolean boardStatusEnabled;
   // performance metrics and load timing

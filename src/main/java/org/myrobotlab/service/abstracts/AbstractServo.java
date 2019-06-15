@@ -336,6 +336,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
     controllers.add(controller.getName());
     controller.attach(this);
     enabled = true;
+    
+    broadcastState();
   }
 
   /**
@@ -355,6 +357,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
     encoder = enc;
     enc.attach(this);
+    broadcastState();
   }
 
   @Override
@@ -411,6 +414,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       // }
     }
     controllers.clear();
+    broadcastState();
   }
 
   // @Override

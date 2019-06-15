@@ -17,7 +17,7 @@ public class TcpServer {
   public final static Logger log = LoggerFactory.getLogger(TcpServer.class);
 
   boolean listening;
-  int port = 323232;
+  int port = 32323;
   ServerSocket listener;
   int nThreads = 2; // 20
 
