@@ -661,9 +661,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         error("MrlComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION);
       } else {
         info("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), version);
-      }
-
-      msg.enableAcks(true);
+      }     
 
     } catch (Exception e) {
       log.error("serial open threw", e);
@@ -2265,9 +2263,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       Serial.listPorts();
       // Serial hub = (Serial)Runtime.start("hub", "Serial");
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
+      // hub.enableAck(false); // dumb bug
+      hub.connect("COM6"); // connect re-enables ack !!! FIXME - this is wrong 
       
-      hub.connect("COM6");
-      
+      // hub.enableAck(false);
       ServoControl sc = (ServoControl) Runtime.start("s1", "HobbyServo");
       sc.setPin(8);
       hub.attach(sc);
