@@ -50,6 +50,10 @@ int MrlComm::getFreeRam() {
  return 0;
 }
 
+Msg* MrlComm::getMsg() {
+	return msg;
+}
+
 /**
  * getDevice - this method will look up a device by it's id in the device list.
  * it returns null if the device isn't found.

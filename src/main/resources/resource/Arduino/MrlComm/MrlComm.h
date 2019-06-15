@@ -65,7 +65,7 @@ public:
     // utility methods
     int getFreeRam();
     Device* getDevice(int id);
-
+    Msg* getMsg();
     bool ackEnabled = true;
 
     Device* addDevice(Device* device);
