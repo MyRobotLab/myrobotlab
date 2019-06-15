@@ -75,11 +75,27 @@ Device* MrlComm::getDevice(int id) {
    * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
    * Id leaves something to be desired - and the "index" does not spin through
    * the deviceList to find it .. a dynamic array of pointers would only expand
-   * if it could not accomidate the current number of devices, when a device was
+   * if it could not accommodate the current number of devices, when a device was
  * removed - the slot could be re-used by the next device request
  */
 Device* MrlComm::addDevice(Device* device) {
-	deviceList.add(device);
+
+	ListNode<Device*>* node = deviceList.getRoot();
+	bool found = false;
+	// iterate through our device list and call update on them.
+	while (node != NULL) {
+		if (device->id == node->data->id){
+		  found = true;
+		  break;
+		}
+		node = node->next;
+	}
+
+  if (!found){
+	   deviceList.add(device);
+	} else {
+		 msg->publishError(F("device already exists"));
+	}
 	return device;
 }
 
@@ -225,18 +241,18 @@ void MrlComm::begin(HardwareSerial& serial) {
    */
 
 void MrlComm::publishBoardInfo(){
-	byte deviceSummary[deviceList.size() * 2];
-	for (int i = 0; i < deviceList.size(); ++i) {
-		deviceSummary[i] = deviceList.get(i)->id;
-		deviceSummary[i + 1] = deviceList.get(i)->type;
-	}
+
+  byte deviceSummary[deviceList.size()];
+  for (int i = 0; i < deviceList.size(); i++) {
+    deviceSummary[i] = deviceList.get(i)->id;
+  }
         
-        long now = micros();
-        int load = (now - lastBoardInfoUs)/loopCount;
+	long now = micros();
+	int load = (now - lastBoardInfoUs)/loopCount;
 	//msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
- msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  load, getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
-        lastBoardInfoUs = now;
-        loopCount = 0;
+ 	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  load, getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
+	lastBoardInfoUs = now;
+	loopCount = 0;
 }
 
 /****************************************************************
@@ -572,4 +588,3 @@ void MrlComm::setZeroPoint(byte deviceId) {
 	encoder->setZeroPoint();
 
 }
-

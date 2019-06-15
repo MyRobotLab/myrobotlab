@@ -243,7 +243,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     super.releaseService();
   }
 
-  public SerialDevice getSerial() {
+  public Serial getSerial() {
     return uart;
   }
 

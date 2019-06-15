@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -533,7 +534,7 @@ public class Servo extends Service implements ServoControl {
 
   @Override
   public synchronized boolean moveTo(Double pos) {
-    log.info("Move To Called {} {}", getName(), pos);
+    log.info("{}.moveTo({})", getName(), pos);
     // breakMoveToBlocking=true;
     synchronized (moveToBlocked) {
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
@@ -1131,10 +1132,17 @@ public class Servo extends Service implements ServoControl {
     try {
       String arduinoPort = "COM9";
       LoggingFactory.init(Level.INFO);
+      
+      Platform.setVirtual(true);
 
       Runtime.start("gui", "SwingGui");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       Servo servo = (Servo) Runtime.start("servo", "Servo");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
       
       arduino.connect(arduinoPort);
       // Adafruit16CServoDriver adafruit16CServoDriver = (Adafruit16CServoDriver) Runtime.start("adafruit16CServoDriver", "Adafruit16CServoDriver");
