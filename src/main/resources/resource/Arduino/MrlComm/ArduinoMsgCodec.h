@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			60
+#define MRLCOMM_VERSION			61
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -133,6 +133,8 @@
 #define SET_ZERO_POINT 53
 // < publishEncoderData/deviceId/b16 position
 #define PUBLISH_ENCODER_DATA 54
+// < publishMrlCommBegin/version
+#define PUBLISH_MRL_COMM_BEGIN 55
 
 
 

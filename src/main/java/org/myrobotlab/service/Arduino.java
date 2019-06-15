@@ -673,56 +673,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     broadcastState();
   }
 
+ 
   /**
-   * All MrlComm device management is done with this method. A change to the
-   * deviceList is done by the user, or the arduino hardware brownsout, or the
-   * java-land mrl Arduino service is restarted and re-initialized "before"
-   * connecting over a serial port ... All these use cases can and will be
-   * resolved through this sync method.
-   * 
-   * The Arduino deviceList is KING .. and the source of how things "should" be
-   * .. the MrlComm device list sometimes will need sync'ing.
-   * 
-   * @param boardInfo
-   *          - current description of MrlComm hardware devices and other info,
-   *          typically on a request of getBoardInfo
-   * 
-   *          FIXME !!! = remove deleted devices from mrlcomm device list !!!
+   * sync our device list with mrlcomm
    */
-  public void sync(BoardInfo boardInfo) {   
-    // first device is this service - doesnt count as attached device
-    DeviceSummary[] devicesFromArduino = boardInfo.getDeviceSummary();
-    if (deviceList.size() - 1 > devicesFromArduino.length && !creatingDevice) {
-      error("devices on hardware %d devices in service %d", devicesFromArduino.length, deviceList.size() - 1);
-      log.info("attempting to sync mrlcomm device list");
-      for (DeviceMapping device : deviceList.values()) {
-        // filter out self - since its not a device on the mrlcomm devicelist
-        if (this == device.getDevice()) {
-          continue;
-        }
-        log.info("{}", device);
-        int id = device.getId();
-        boolean found = false;
-        for (DeviceSummary fromArduino : devicesFromArduino) {
-          if (id == fromArduino.id) {
-            log.info("found skipping");
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          try {
-            // detach(attachable);
-            // sleep(500);
-            reattach(device);
-            sendBoardInfoRequest();
-          } catch (Exception e) {
-            log.error("re-attaching threw", e);
-          }
-        }
-      }
+  public void sync() {
+    for (DeviceMapping device : deviceList.values()) {
+      reattach(device);      
     }
-
+    // lets see what MrlComm has to say
+    sendBoardInfoRequest();
   }
 
   // > customMsg/[] msg
@@ -1682,7 +1642,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     // we send here - because this is a "command" message, and we don't want the possiblity of
     // block this "status" msgs
-    send(getName(),"sync", boardInfo);
+    // send(getName(),"sync", boardInfo);
     lastBoardInfo = boardInfo;
     return boardInfo;
   }
@@ -2407,6 +2367,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public void publishMrlCommBegin(Integer version) {
+    // FIXME - if we have had one of these messages already - and the javaland process is still alive
+    sync();
+    log.error("publishMrlCommBegin {}", version);
   }
 
 }
