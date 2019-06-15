@@ -224,7 +224,7 @@ public class ArduinoMsgGenerator {
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");
     virtualJava = virtualJava.replace("%javaArduinoClass%", "MrlComm");
 
-    fileSnr.put("%ackEnabled%", "true");
+    fileSnr.put("%ackEnabled%", "false");
     // process substitutions
     for (String searchKey : fileSnr.keySet()) {
       idlToHpp = idlToHpp.replace(searchKey, fileSnr.get(searchKey));
