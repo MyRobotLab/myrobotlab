@@ -226,7 +226,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   transient private VirtualArduino virtual;
 
-  private boolean creatingDevice;
+  int mrlCommBegin = 0;
 
   public Arduino(String n) {
     super(n);
@@ -2253,6 +2253,15 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public Map<String, DeviceMapping> getDeviceList() {
     return deviceList;
   }
+  
+  public void publishMrlCommBegin(Integer version) {
+    sync();
+    log.error("publishMrlCommBegin {}", version);
+    if (mrlCommBegin > 0) {
+      error("arduino %s has reset - does it have a separate power supply?", getName());
+    }
+    ++mrlCommBegin;
+  }
 
   public static void main(String[] args) {
     try {
@@ -2261,10 +2270,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       // Platform.setVirtual(true);
       Runtime.start("gui", "SwingGui");
       Serial.listPorts();
-      // Serial hub = (Serial)Runtime.start("hub", "Serial");
+      
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
-      // hub.enableAck(false); // dumb bug
-      hub.connect("COM6"); // connect re-enables ack !!! FIXME - this is wrong 
+      
       
       // hub.enableAck(false);
       ServoControl sc = (ServoControl) Runtime.start("s1", "HobbyServo");
@@ -2280,7 +2288,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       */
       
       log.info("here");
-      
+      hub.connect("COM6");
       
       // hub.startTcpServer();
 
@@ -2366,12 +2374,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     } catch (Exception e) {
       log.error("main threw", e);
     }
-  }
-
-  public void publishMrlCommBegin(Integer version) {
-    // FIXME - if we have had one of these messages already - and the javaland process is still alive
-    sync();
-    log.error("publishMrlCommBegin {}", version);
   }
 
 }
