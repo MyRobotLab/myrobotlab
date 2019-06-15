@@ -63,7 +63,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 60;
+	public static final int MRLCOMM_VERSION = 61;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -214,6 +214,8 @@ public class Msg {
   public final static int SET_ZERO_POINT = 53;
   // < publishEncoderData/deviceId/b16 position
   public final static int PUBLISH_ENCODER_DATA = 54;
+  // < publishMrlCommBegin/version
+  public final static int PUBLISH_MRL_COMM_BEGIN = 55;
 
 
 /**
@@ -232,6 +234,7 @@ public class Msg {
   // public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/){}
   // public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
   // public void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/){}
+  // public void publishMrlCommBegin(Integer version/*byte*/){}
 	
 
 	
@@ -564,6 +567,27 @@ public class Msg {
         rxBuffer.append(deviceId);
         rxBuffer.append("/");
         rxBuffer.append(position);
+      rxBuffer.append("\n");
+      try{
+        record.write(rxBuffer.toString().getBytes());
+        rxBuffer.setLength(0);
+      }catch(IOException e){}
+      }
+
+      break;
+    }
+    case PUBLISH_MRL_COMM_BEGIN: {
+      Integer version = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("publishMrlCommBegin",  version);
+      } else { 
+         arduino.publishMrlCommBegin( version);
+      }
+      if(record != null){
+        rxBuffer.append("< publishMrlCommBegin");
+        rxBuffer.append("/");
+        rxBuffer.append(version);
       rxBuffer.append("\n");
       try{
         record.write(rxBuffer.toString().getBytes());
@@ -2091,6 +2115,9 @@ public class Msg {
     }
     case PUBLISH_ENCODER_DATA:{
       return "publishEncoderData";
+    }
+    case PUBLISH_MRL_COMM_BEGIN:{
+      return "publishMrlCommBegin";
     }
 
 		default: {

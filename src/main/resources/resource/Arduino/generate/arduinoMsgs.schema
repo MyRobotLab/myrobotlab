@@ -143,3 +143,5 @@
 > setZeroPoint/deviceId
 < publishEncoderData/deviceId/b16 position
 
+# called in MrlComm setup after serial connection
+< publishMrlCommBegin/version
