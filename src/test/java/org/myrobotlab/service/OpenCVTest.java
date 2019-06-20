@@ -36,7 +36,7 @@ public class OpenCVTest extends AbstractTest {
   static final String TEST_DIR = "src/test/resources/OpenCV/";
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
   static final String TEST_LOCAL_MP4 = "src/test/resources/OpenCV/monkeyFace.mp4";
-  static final String TEST_YOUTUBE = "https://www.youtube.com/watch?v=I9VA-U69yaY";
+  // static final String TEST_YOUTUBE = "https://www.youtube.com/watch?v=I9VA-U69yaY";
   static final String TEST_INPUT_DIR = "src/test/resources/OpenCV/kinect-data";
   static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
   // static final String TEST_REMOTE_FILE_JPG = TEST_LOCAL_FACE_FILE_JPEG;
@@ -145,7 +145,7 @@ public class OpenCVTest extends AbstractTest {
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (hasInternet()) {
       // red pill green pill
-      ChaosMonkey.giveToMonkey(cv, "capture", TEST_YOUTUBE);
+      ChaosMonkey.giveToMonkey(cv, "capture", TEST_LOCAL_FACE_FILE_JPEG);
       ChaosMonkey.giveToMonkey(cv, "capture", TEST_REMOTE_FILE_JPG);
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
@@ -246,7 +246,7 @@ public class OpenCVTest extends AbstractTest {
     log.info("starting all filters test");
     cv.reset();
     // 19 second blue red pill
-    cv.capture(TEST_YOUTUBE);
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.info("trying filter {}", fn);
