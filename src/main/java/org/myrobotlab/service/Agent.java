@@ -46,17 +46,14 @@ import com.google.gson.internal.LinkedTreeMap;
  * 
  *         Agent is responsible for managing running instances of myrobotlab. It
  *         can start, stop and update myrobotlab.
- *         
- *         
- * FIXME - all update functionality will need to be moved to Runtime
- * it should take parameters such that it will be possible at some point to
- * do an update
- * from a child process and update the agent :)
+ * 
+ * 
+ *         FIXME - all update functionality will need to be moved to Runtime it
+ *         should take parameters such that it will be possible at some point to
+ *         do an update from a child process and update the agent :)
  *
- * FIXME - testing
- * test - without version 
- * test - remote unaccessable
- * FIXME - spawn must be synchronized 2 threads (the timer and the user)
+ *         FIXME - testing test - without version test - remote unaccessable
+ *         FIXME - spawn must be synchronized 2 threads (the timer and the user)
  *
  *
  */
@@ -76,7 +73,7 @@ public class Agent extends Service {
    * command line to be relayed to the the first process the Agent spawns
    */
   static CmdLine cmdline;
-  
+
   transient WebGui webgui = null;
   int port = 8887;
   String address = "127.0.0.1";
@@ -113,13 +110,15 @@ public class Agent extends Service {
   // for more info -
   // http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/develop/api/json
 
-  final static String jarUrlTemplate = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/lastSuccessfulBuild/artifact/target/myrobotlab.jar";
+  @Deprecated /* not needed - use more general urls with filter functions */
+  final static String REMOTE_LAST_SUCCESSFUL_BUILD_JAR = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/lastSuccessfulBuild/artifact/target/myrobotlab.jar";
 
   final static String REMOTE_BUILDS_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/api/json?tree=builds[number,status,timestamp,id,result]";
 
   final static String REMOTE_JAR_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/%s/artifact/target/myrobotlab.jar";
 
-  final static String versionUrlTemplate = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/api/json?tree=lastSuccessfulBuild[number,status,timestamp,id,result]";
+  @Deprecated /* not needed - use more general urls with filter functions */
+  final static String REMOTE_LAST_SUCCESSFUL_VERSION = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/api/json?tree=lastSuccessfulBuild[number,status,timestamp,id,result]";
 
   boolean checkRemoteVersions = false;
 
@@ -220,16 +219,19 @@ public class Agent extends Service {
       Files.copy(Paths.get(agentJar), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
     }
   }
-  
+
   public void startWebGui() {
     try {
-     
-      if (webgui != null) {
+
+      if (webgui == null) {
         webgui = (WebGui) Runtime.create("webadmin", "WebGui");
         webgui.autoStartBrowser(false);
         webgui.setPort(port);
         webgui.setAddress(address);
-        }
+        webgui.startService();
+      } else {
+        log.info("webgui already started");
+      }
 
     } catch (Exception e) {
       log.error("startWebGui threw", e);
@@ -479,12 +481,12 @@ public class Agent extends Service {
   // FIXME - should just be be saveRemoteJar() - but shouldn't be from
   // multiple threads
   static public byte[] getLatestRemoteJar(String branch) {
-    return Http.get(String.format(jarUrlTemplate, branch));
+    return Http.get(String.format(REMOTE_LAST_SUCCESSFUL_BUILD_JAR, branch));
   }
 
   public String getLatestRemoteVersion(String branch) {
     try {
-      byte[] data = Http.get(String.format(versionUrlTemplate, branch));
+      byte[] data = Http.get(String.format(REMOTE_LAST_SUCCESSFUL_VERSION, branch));
       if (data != null) {
         String json = new String(data);
         CodecJson decoder = new CodecJson();
@@ -982,6 +984,12 @@ public class Agent extends Service {
     return spawn2(pd);
   }
 
+  /**
+   * max complexity spawn
+   * @param pd
+   * @return
+   * @throws IOException
+   */
   public synchronized Process spawn2(ProcessData pd) throws IOException {
 
     log.info("============== spawn begin ==============");
