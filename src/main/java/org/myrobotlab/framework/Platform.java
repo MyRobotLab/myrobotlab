@@ -150,21 +150,21 @@ public class Platform implements Serializable {
       Map<String, String> manifest = getManifest();
 
       if (manifest.containsKey("Branch")) {
-        platform.branch = manifest.get("Branch");
+        platform.branch = manifest.get("GitBranch");
       } else {
-        platform.branch = "develop";
+        platform.branch = "unknownBranch";
       }
 
       if (manifest.containsKey("Commit")) {
         platform.commit = manifest.get("Commit");
       } else {
-        platform.commit = "unknown";
+        platform.commit = "unknownCommit";
       }
 
       if (manifest.containsKey("Implementation-Version")) {
         platform.mrlVersion = manifest.get("Implementation-Version");
       } else {
-        platform.mrlVersion = "unknown";
+        platform.mrlVersion = "unknownVersion";
       }
 
       // motd
