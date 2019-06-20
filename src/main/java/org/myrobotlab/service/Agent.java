@@ -246,8 +246,29 @@ public class Agent extends Service {
     }
   }
 
+  /**
+   * called by the autoUpdate task which is scheduled every minute to look for
+   * updates from the build server
+   */
   public void processUpdates() {
-    log.error("processUpdates implement me ...");
+    for (String key : processes.keySet()) {
+      ProcessData process = processes.get(key);
+
+      if (!process.autoUpdate) {
+        continue;
+      }
+      try {
+
+        // processUpdates(process.id, process.branch, version, allowRemote);
+        processUpdates(process.id, process.branch, null, true);
+
+        if (process.isRunning()) {
+          restart(process.id);
+        }
+      } catch (Exception e) {
+        log.error("proccessing updates from scheduled task threw", e);
+      }
+    }
   }
 
   /**
@@ -272,31 +293,7 @@ public class Agent extends Service {
      * for all running instances - see if they can be updated ... on their
      * appropriate branch - restart if necessary
      */
-    for (String key : processes.keySet()) {
-      ProcessData process = processes.get(key);
 
-      if (!process.autoUpdate) {
-        continue;
-      }
-
-      if (!branchAgent.equals(process.branch)) {
-        log.info("skipping update of {} because its on branch {}", process.id, process.branch);
-        continue;
-      }
-
-      if (version.equals(process.version)) {
-        log.info("skipping update of {} {} because its already version {}", process.id, process.name, process.version);
-        continue;
-      }
-
-      // FIXME - it would be nice to send a SIG_TERM to
-      // the process before we kill the jvm
-      // process.process.getOutputStream().write("/Runtime/releaseAll".getBytes());
-      process.version = version;
-      if (process.isRunning()) {
-        restart(process.id);
-      }
-    }
   }
 
   public void getLatest(String branch) {
@@ -974,7 +971,7 @@ public class Agent extends Service {
     ProcessData pd = new ProcessData(agent, jarPathDir.getAbsolutePath(), in, branchAgent, versionAgent);
 
     CmdLine cmdline = new CmdLine(in);
-    if (cmdline.hasSwitch("-autoUpdate")) {
+    if (cmdline.hasSwitch("-autoUpdate") || cmdline.hasSwitch("--autoUpdate")) {
       autoUpdate(true);
     }
 
@@ -986,6 +983,7 @@ public class Agent extends Service {
 
   /**
    * max complexity spawn
+   * 
    * @param pd
    * @return
    * @throws IOException
