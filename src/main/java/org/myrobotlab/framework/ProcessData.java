@@ -39,6 +39,8 @@ public class ProcessData implements Serializable {
   public String jarPath = null;
 
   public String javaExe = null;
+  
+  public boolean autoUpdate = false;
 
   // TODO - default more memory ? also mebbe have a jvmAppend flag vs replace ?
   public String jvm[] = new String[] { "-Djava.library.path=libraries/native", "-Djna.library.path=libraries/native", "-Dfile.encoding=UTF-8" };

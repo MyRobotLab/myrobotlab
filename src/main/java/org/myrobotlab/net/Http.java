@@ -1,12 +1,12 @@
 package org.myrobotlab.net;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 public class Http {
@@ -43,7 +43,7 @@ public class Http {
       return out.toByteArray();
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("get threw", e);
       return null;
     } finally {
       try {
@@ -67,6 +67,29 @@ public class Http {
     int v = Integer.parseInt(version);
     log.info(version + " " + v);
 
+  }
+
+  public static void get(String theUrl, String outFile) {
+    log.info("get {} --save to--> {}", theUrl, outFile);
+    try {
+      URL url = new URL(theUrl);
+      URLConnection urlConnection = url.openConnection();
+      InputStream in = urlConnection.getInputStream();
+      FileOutputStream out = new FileOutputStream(outFile);
+      
+      byte[] buffer = new byte[8192]; // you can configure the buffer size
+      int length;
+
+      while ((length = in.read(buffer)) != -1) {
+        out.write(buffer, 0, length); // copy streams
+      }
+      
+      in.close(); // call this in a finally block
+      out.close();
+      
+    } catch (Exception e) {
+      log.error("get(url, file) threw", e);      
+    }
   }
 
 }

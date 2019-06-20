@@ -2276,7 +2276,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       
       // hub.enableAck(false);
       ServoControl sc = (ServoControl) Runtime.start("s1", "HobbyServo");
-      sc.setPin(8);
+      sc.setPin(7);
       hub.attach(sc);
       sc = (ServoControl) Runtime.start("s2", "HobbyServo");
       sc.setPin(9);
