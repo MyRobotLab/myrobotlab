@@ -149,7 +149,7 @@ public class Platform implements Serializable {
       // manifest
       Map<String, String> manifest = getManifest();
 
-      if (manifest.containsKey("Branch")) {
+      if (manifest.containsKey("GitBranch")) {
         platform.branch = manifest.get("GitBranch");
       } else {
         platform.branch = "unknownBranch";
