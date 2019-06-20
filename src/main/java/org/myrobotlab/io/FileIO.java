@@ -307,7 +307,7 @@ public class FileIO {
             }
           }
 
-          log.info("extracting {} to {}", file.getName(), name);
+          log.debug("extracting {} to {}", file.getName(), name);
           // FIXING toFile(filename, data);
           // FIXING toByteArray(is)
 

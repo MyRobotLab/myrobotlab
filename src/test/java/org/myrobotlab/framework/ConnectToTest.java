@@ -155,8 +155,8 @@ public class ConnectToTest extends AbstractTest {
 
   @Test
   public void connectTo() throws Exception {
-    Runtime.start("agent", "Agent");
-    Agent.startWebGui();
+    Agent agent = (Agent)Runtime.start("agent", "Agent");
+    agent.startWebGui();
     // connectTo3("http://localhost:8887/api/messages");
     log.info("end");
   }
