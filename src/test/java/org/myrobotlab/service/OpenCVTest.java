@@ -200,7 +200,7 @@ public class OpenCVTest extends AbstractTest {
 
     // default local mp4
     cv.reset();
-    cv.capture(TEST_LOCAL_MP4);
+    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
     data = cv.getFaces(MAX_TIMEOUT);
     assertNotNull(data);
     assertTrue(data.size() > 0);

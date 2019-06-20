@@ -25,7 +25,8 @@ public class AgentTest {
   }
   
   /**
-   * FIXME ! - 
+   * FIXME ! - Agent wants a jar to run - no jar is made !!!! BEFORE !!!! tests are run
+   * 
    * agent error no source agent jar can be found checked:
       classes
       /opt/jenkins-slave/workspace/ab-multibranch_agent_auto_update/target/myrobotlab.jar
