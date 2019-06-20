@@ -48,15 +48,15 @@ import com.google.gson.internal.LinkedTreeMap;
  *         can start, stop and update myrobotlab.
  *         
  *         
- *          // FIXME - all update functionality will need to be moved to Runtime
-  // it should take parameters such that it will be possible at some point to
-  // do an update
-  // from a child process & update the agent :)
+ * FIXME - all update functionality will need to be moved to Runtime
+ * it should take parameters such that it will be possible at some point to
+ * do an update
+ * from a child process and update the agent :)
  *
  * FIXME - testing
  * test - without version 
  * test - remote unaccessable
- * FIXME - spawn must be synchronized 2 threads (the timer & the user)
+ * FIXME - spawn must be synchronized 2 threads (the timer and the user)
  *
  *
  */
