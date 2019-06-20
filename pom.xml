@@ -1564,7 +1564,7 @@
 									      
 										<!-- maven git plugin id info -->
 										  <GitTags>${git.tags}</GitTags>
-										  <GitBranch>${git.branch}</GitBranch>
+										  <GitBranch>${GitBranch}</GitBranch>
 										  <GitDirty>${git.dirty}</GitDirty>
 										  <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
 										  <GitCommitId>${git.commit.id}</GitCommitId>
