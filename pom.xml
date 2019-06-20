@@ -17,9 +17,10 @@
 	    	maven or jenkins can do this
 	    	
 	     -->
-	    <build.number>${global.build.number}</build.number>	    
-	    <username>${global.username}</username>	    
-	    <platform>${global.platform}</platform>	    
+	    <build.number>${BUILD_NUMBER}</build.number>
+	    <GitBranch>${BRANCH_NAME}</GitBranch>
+	    <username>${NODE_NAME}</username>	    
+	    <platform>${NODE_LABELS}</platform>	    
 	    <!-- end env vars -->
 	    
 		<maven.compiler.source>1.8</maven.compiler.source>
