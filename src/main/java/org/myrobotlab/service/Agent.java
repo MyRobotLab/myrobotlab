@@ -85,12 +85,12 @@ public class Agent extends Service {
 
   String branchAgent = Platform.getLocalInstance().getBranch();
   String branchLast = null;
-  static String branchRequested = null;
+  static String currentBranch = null;
 
   String versionAgent = Platform.getLocalInstance().getVersion();
   String versionLast = null;
   String versionLatest = null;
-  static String versionRequested = null;
+  static String currentVersion = null;
 
   /**
    * auto update - automatically checks for updates and WILL update any running
@@ -155,8 +155,8 @@ public class Agent extends Service {
     super(n);
     log.info("Agent {} Pid {} is alive", n, Platform.getLocalInstance().getPid());
 
-    if (branchRequested == null) {
-      branchRequested = branchAgent;
+    if (currentBranch == null) {
+      currentBranch = branchAgent;
     }
 
     // basic setup - minimally we make a directory
@@ -205,6 +205,7 @@ public class Agent extends Service {
 
       String agentJar = new java.io.File(Agent.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
 
+      // FIXME - add the possiblility of runing with -cp target/classes ???
       if (!new File(agentJar).exists() || !agentJar.endsWith(".jar")) {
         // not operating in released runtime mode - probably operating in ide
         String ideTargetJar = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator + "myrobotlab.jar").getAbsolutePath();
@@ -215,8 +216,12 @@ public class Agent extends Service {
         }
       }
 
-      log.info("on branch {} copying agent's current jar to appropriate location {} -> {}", branchRequested, agentJar, agentMyRobotLabJar);
-      Files.copy(Paths.get(agentJar), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
+      log.info("on branch {} copying agent's current jar to appropriate location {} -> {}", currentBranch, agentJar, agentMyRobotLabJar);
+      try {
+        Files.copy(Paths.get(agentJar), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
+      } catch (Exception e) {
+        log.error("could not copy", e);
+      }
     }
   }
 
@@ -915,8 +920,8 @@ public class Agent extends Service {
   }
 
   public String setBranch(String branch) {
-    branchRequested = branch;
-    return branchRequested;
+    currentBranch = branch;
+    return currentBranch;
   }
 
   static public Map<String, String> setEnv(Map<String, String> env) {
@@ -966,18 +971,36 @@ public class Agent extends Service {
 
   public Process spawn(String jarPath, String[] in) throws IOException, URISyntaxException, InterruptedException {
 
-    File jarPathDir = new File(jarPath);
+    File jarPathDir = new File(jarPath);    
 
-    ProcessData pd = new ProcessData(agent, jarPathDir.getAbsolutePath(), in, branchAgent, versionAgent);
-
+    boolean autoUpdate = false;
+    String branch = null;
+    String version = null;
+    
     CmdLine cmdline = new CmdLine(in);
     if (cmdline.hasSwitch("-autoUpdate") || cmdline.hasSwitch("--autoUpdate")) {
       autoUpdate(true);
+      autoUpdate = true;
+    }
+    if (cmdline.hasSwitch("-branch") || cmdline.hasSwitch("--branch")) {
+      branch = cmdline.getArgument("--branch", 0);
+      // FIXME - this is bullshit - use --standard !!!
+      if (branch == null) {
+        branch = cmdline.getArgument("-branch", 0);
+      }
+    }
+    if (cmdline.hasSwitch("-version") || cmdline.hasSwitch("--version")) {
+      version = cmdline.getArgument("--version", 0);
+      // FIXME - this is bullshit - use --standard !!!
+      if (version == null) {
+        version = cmdline.getArgument("-v", 0);
+      }
     }
 
     log.info("Agent starting spawn {}", formatter.format(new Date()));
     log.info("in args {}", Arrays.toString(in));
 
+    ProcessData pd = new ProcessData(agent, jarPathDir.getAbsolutePath(), in, branch, version, autoUpdate);
     return spawn2(pd);
   }
 
@@ -1155,6 +1178,7 @@ public class Agent extends Service {
    */
   // FIXME - test when internet is not available
   // FIXME - test over multiple running processes
+  // FIXME - --list to list all possible versions
   // FIXME - add -help
   // TODO - add jvm memory other runtime info
   // FIXME - a way to route parameters from command line to Agent vs Runtime -
@@ -1166,7 +1190,7 @@ public class Agent extends Service {
 
       Logging logging = LoggingFactory.getInstance();
 
-      // FIXME convert to picocmd or apachecli
+      // FIXME convert to picocli or apachecli
       // -agent \"-params -service ... \" string encoded
       cmdline = new CmdLine(args);
       logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
@@ -1180,11 +1204,11 @@ public class Agent extends Service {
       }
 
       if (cmdline.containsKey("--branch")) {
-        branchRequested = cmdline.getArgument("--branch", 0);
+        currentBranch = cmdline.getArgument("--branch", 0);
       }
 
       if (cmdline.containsKey("--version")) {
-        versionRequested = cmdline.getArgument("--version", 0);
+        currentVersion = cmdline.getArgument("--version", 0);
       }
 
       // FIXME - have a list versions ... command line !!!
@@ -1238,7 +1262,7 @@ public class Agent extends Service {
         // FIXME - call directly - update if possible - then spawn
         // agent.processUpdates(null, branchRequested, versionRequested,
         // autoUpdate);
-        agent.getLatest(branchRequested);
+        agent.getLatest(currentBranch);
         agent.autoUpdate(true);
       }
 

@@ -92,7 +92,7 @@ public class ProcessData implements Serializable {
     }
 
   }
-
+/*
   public ProcessData(Agent service, String id, String branch, String version, String name, Process process) {
     this.id = id;
     ProcessData.service = service;
@@ -102,6 +102,7 @@ public class ProcessData implements Serializable {
     this.process = process;
     this.fromAgent = Platform.getLocalInstance().getId();// Runtime.getId();
   }
+  */
 
   /**
    * copy of a ProcessData - threaded data will not be copied
@@ -121,6 +122,7 @@ public class ProcessData implements Serializable {
     this.jarPath = pd.jarPath;
 
     this.jvm = pd.jvm;
+    this.autoUpdate = pd.autoUpdate;
 
     this.userDefinedServices = pd.userDefinedServices;
 
@@ -143,10 +145,11 @@ public class ProcessData implements Serializable {
    * 
    * @param defaultVersion
    */
-  public ProcessData(Agent service, String jarPath, String[] inArgs, String defaultBranch, String defaultVersion) {
+  public ProcessData(Agent service, String jarPath, String[] inArgs, String defaultBranch, String defaultVersion, boolean autoUpdate) {
     inCmdLine = new CmdLine(inArgs);
     ProcessData.service = service;
-    this.jarPath = jarPath;
+    this.jarPath = jarPath;    
+    this.autoUpdate = autoUpdate;
 
     // convert to ArrayList to process
     in = new ArrayList<String>();
