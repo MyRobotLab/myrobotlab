@@ -129,7 +129,7 @@ public class Deeplearning4j extends Service {
   // we're just going to hack in the deeplearning4j zoo , in particular vgg16
   // model
   // pretrained from imagenet.
-
+  private ImageNetLabels imageNetLabels = null;
   private ComputationGraph vgg16 = null;
 
   private ComputationGraph darknet = null;
@@ -477,6 +477,7 @@ public class Deeplearning4j extends Service {
     ZooModel zooModel = VGG16.builder().build();
     vgg16 = (ComputationGraph) zooModel.initPretrained(PretrainedType.IMAGENET);
     // TODO: return true/false if the model was loaded properly/successfully.
+    imageNetLabels = new ImageNetLabels();
   }
 
   public List<List<ClassPrediction>> darknetFile(String filename) throws IOException {
@@ -706,9 +707,11 @@ public class Deeplearning4j extends Service {
     scaler.transform(image);
     INDArray[] output = vgg16.output(false, image);
 
+    log.info("Complete with output from vgg16..");
     // TODO: return a more native datastructure!
     // String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
     // log.info("Image Predictions: {}", predictions);
+    
     return decodeVGG16Predictions(output[0]);
   }
 
@@ -730,31 +733,12 @@ public class Deeplearning4j extends Service {
 
   // adapted from dl4j TrainedModels.VGG16 class.
   public Map<String, Double> decodeVGG16Predictions(INDArray predictions) throws IOException {
-
     LinkedHashMap<String, Double> recognizedObjects = new LinkedHashMap<String, Double>();
     // ArrayList<String> labels;
-    String predictionDescription = "";
-    int[] top5 = new int[5];
-    float[] top5Prob = new float[5];
-    ImageNetLabels labels = new ImageNetLabels();
-    // brute force collect top 5
-    int i = 0;
-    for (int batch = 0; batch < predictions.size(0); batch++) {
-      if (predictions.size(0) > 1) {
-        predictionDescription += String.valueOf(batch);
-      }
-      predictionDescription += " :";
-      INDArray currentBatch = predictions.getRow(batch).dup();
-      while (i < 5) {
-        top5[i] = Nd4j.argMax(currentBatch, 1).getInt(0, 0);
-        top5Prob[i] = currentBatch.getFloat(batch, top5[i]);
-        // interesting, this cast looses precision.. float to double.
-
-        recognizedObjects.put(labels.getLabel(top5[i]), (double) top5Prob[i]);
-        currentBatch.putScalar(0, top5[i], 0);
-        predictionDescription += "\n\t" + String.format("%3f", top5Prob[i] * 100) + "%, " + labels.getLabel(top5[i]);
-        i++;
-      }
+    List<ClassPrediction> classes = imageNetLabels.decodePredictions(predictions, 10).get(0);
+    for (ClassPrediction label : classes) {
+      log.info(label.getLabel() + ":" + label.getProbability());
+      recognizedObjects.put(label.getLabel(), label.getProbability());
     }
     invoke("publishClassification", (Map<String, Double>) recognizedObjects);
     return recognizedObjects;
