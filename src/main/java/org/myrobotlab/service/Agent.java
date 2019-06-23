@@ -179,17 +179,21 @@ public class Agent extends Service {
     @Override
     public void run() {
       state = ProcessData.stateType.running;
+      updateInfoLog("updater running");
       try {
         while (running) {
           state = ProcessData.stateType.sleeping;
+          updateInfoLog("updater sleeping");
           sleep(updateCheckIntervalMs);
           state = ProcessData.stateType.updating;
+          updateInfoLog("updater updating");
           agent.update();
         }
       } catch (Exception e) {
         log.info("updater threw", e);
       }
       log.info("updater stopping");
+      updateInfoLog("updater stopping");
       state = ProcessData.stateType.stopped;
     }
 
@@ -197,6 +201,7 @@ public class Agent extends Service {
       if (state == ProcessData.stateType.stopped) {
         thread = new Thread(this, getName() + ".updater");
         thread.start();
+        updateInfoLog("updater starting");
       } else {
         log.warn("updater busy state = %s", state);
       }
@@ -373,12 +378,14 @@ public class Agent extends Service {
 
       // check if branch and version exist locally
       if (!existsLocally(branch, version)) {
+        log.info("found update - getting new jar {} {}", branch, version);
         getJar(branch, version);
         // download latest to the appropriate directory
         // mkdirs
         // download file
         if (!verifyJar(branch, version)) {
         }
+        log.info("successfully downloaded {} {}", branch, version);
       }
     } catch (Exception e) {
       error(e);
@@ -1240,6 +1247,6 @@ public class Agent extends Service {
   }
   
   public void updateInfoLog(String msg) {
-    
+    updateLog.add(Status.info((new Date()).toString() + " " + msg));
   }
 }
