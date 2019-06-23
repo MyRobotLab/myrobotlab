@@ -38,12 +38,24 @@ import picocli.CommandLine.Option;
  *         can start, stop and update myrobotlab.
  * 
  * 
- *         FIXME - all update functionality will need to be moved to Runtime it
- *         should take parameters such that it will be possible at some point to
- *         do an update from a child process and update the agent :)
- *
+ *         FIXME - ws client connectivity and communication !!!
+ *         FIXME - Cli client ws enabled !!
+ *         FIXME - capability to update Agent from child 
+ *         FIXME - move CmdLine defintion to Runtime
+ *         FIXME - convert Runtime's cmdline processing to CmdOptions
+ *         Fixme - remove CmdLine
+ *         
+ *         FIXME - there are at least 3 different levels of updating
+ *                 1. a global thread which only "checks" for updates
+ *                 2. the possibility of just downloading an update (per instance)
+ *                 3. the possibility of auto-restarting after a download is completed (per instance)
+ *         
  *         FIXME - testing test - without version test - remote unaccessable
  *         FIXME - spawn must be synchronized 2 threads (the timer and the user)
+ *         FIXME - test naming an instance
+ *         FIXME - test starting an old version
+ *         FIXME - make hidden check latest version interval and make default interval check large
+ *         FIXME - change Runtime's cli !!!
  *
  *
  */
@@ -180,8 +192,7 @@ public class Agent extends Service {
   }
 
   private void setup() throws IOException {
-    // FIXME - this stuff needs to be outside the contructor !!!
-    // initialize perhaps ? setup ? oneTime ? initialInstall ?
+
     String agentBranch = Platform.getLocalInstance().getBranch();
     String agentVersion = Platform.getLocalInstance().getVersion();
 
@@ -240,6 +251,8 @@ public class Agent extends Service {
   }
 
   /**
+   * FIXME !!! - i believe in task for these pipe up !!! NOT GOOD _ must have its own thread then !!
+   * 
    * called by the autoUpdate task which is scheduled every minute to look for
    * updates from the build server
    */
@@ -281,30 +294,21 @@ public class Agent extends Service {
    */
   synchronized public void update(String id, String branch, String version, Boolean allowRemote)
       throws IOException, URISyntaxException, InterruptedException, MrlException {
-
-    getLatestJar(branch);
-
-    /**
-     * <pre>
-     * for all running instances - see if they can be updated ... on their
-     * appropriate branch - restart if necessary
-     */
-
+    getLatestJar(branch, allowRemote);
   }
 
-  public void getLatestJar(String branch) {
+  public void getLatestJar(String branch, boolean checkRemote) {
     try {
       // check for updates
-      String version = getLatestVersion(branch, autoUpdate);
+      String version = getLatestVersion(branch, checkRemote);
 
       // check if branch and version exist locally
-      if (!existsLocally(branch, version)) {
-        getJar(branch, version); // FIXME - make part file .unconfirmed
+      if (!existsLocally(branch, version)) {        
+        getJar(branch, version);
         // download latest to the appropriate directory
         // mkdirs
         // download file
-        if (!verifyJar(branch, version)) {
-          // removeJar(branch, version + ".unconfirmed");
+        if (!verifyJar(branch, version)) { 
         }
       }
     } catch (Exception e) {
@@ -312,15 +316,16 @@ public class Agent extends Service {
     }
   }
 
-  // FIXME - implement
+  // FIXME - implement :)
   private boolean verifyJar(String branch, String version) {
     return true;
   }
 
-  public void getJar(String branch, String version) {
+  synchronized public void getJar(String branch, String version) {
     new File(getDir(branch, version)).mkdirs();
     String build = getBuildId(version);
-    Http.get(String.format(REMOTE_JAR_URL, branch, build), getJarName(branch, version));
+    // this 
+    Http.getSafePartFile(String.format(REMOTE_JAR_URL, branch, build), getJarName(branch, version));    
   }
 
   public String getBuildId(String version) {
@@ -371,8 +376,6 @@ public class Agent extends Service {
    */
   public synchronized void restart(String id) throws IOException, URISyntaxException, InterruptedException {
     log.info("restarting process {}", id);
-    // ProcessData pd2 = copy(id);
-    // pd.setRestarting();
     kill(id); // FIXME - kill should include prepare to shutdown ...
     sleep(2000);
     spawn(id);
@@ -453,16 +456,13 @@ public class Agent extends Service {
   }
 
   /**
-   * FIXME this should be build server not github ... github has not artifacts
+   * get the current branches being built in a Jenkins multi-branch pipeline job 
    * 
    * @return
    */
   static public Set<String> getBranches() {
     Set<String> possibleBranches = new HashSet<String>();
     try {
-      // TODO - all http gets use HttpClient static methods and promise
-      // for asynchronous
-      // get gitHub's branches
       byte[] r = Http.get(REMOTE_MULTI_BRANCH_JOBS);
       if (r != null) {
         String json = new String(r);
@@ -639,18 +639,9 @@ public class Agent extends Service {
         agent.broadcastState();
       }
       return id;
-    } else {
-      try {
-        // FIXME make operating system independent
-        String cmd = "taskkill /F /PID " + id;
-        java.lang.Runtime.getRuntime().exec(cmd);
-      } catch (Exception e) {
-        log.error("kill threw", e);
-      }
-    }
-
-    log.warn("%s? no sir, I don't know that punk...", id);
-
+    } 
+      
+    error("kill unknown process id {}", id);
     return null;
   }
 
@@ -983,7 +974,6 @@ public class Agent extends Service {
     meta.setSponsor("GroG");
     meta.setLicenseApache();
 
-    meta.addDependency("commons-cli", "commons-cli", "1.4");
     meta.includeServiceInOneJar(true);
 
     return meta;
@@ -1135,7 +1125,7 @@ public class Agent extends Service {
 
       if (options.autoUpdate) {
         // lets check and get the latest jar if there is new one
-        agent.getLatestJar(agent.getBranch());
+        agent.getLatestJar(agent.getBranch(), options.autoUpdate);
         // the "latest" should have been downloaded
         options.version = agent.getLatestLocalVersion(agent.getBranch());
       }
