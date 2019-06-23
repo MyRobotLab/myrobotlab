@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.Status;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
@@ -31,7 +33,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 /**
- * 
+ * <pre>
  * @author GroG
  * 
  *         Agent is responsible for managing running instances of myrobotlab. It
@@ -43,18 +45,20 @@ import picocli.CommandLine.Option;
  *         FIXME - move CmdLine defintion to Runtime FIXME - convert Runtime's
  *         cmdline processing to CmdOptions Fixme - remove CmdLine
  * 
- *         FIXME - there are at least 3 different levels of updating 1. a global
- *         thread which only "checks" for updates 2. the possibility of just
- *         downloading an update (per instance) 3. the possibility of
- *         auto-restarting after a download is completed (per instance)
+ *         FIXME - there are at least 3 different levels of updating 
+ *          1. a global thread which only "checks" for updates 
+ *          2. the possibility of just downloading an update (per instance) 
+ *          3. the possibility of auto-restarting after a download is completed (per instance)
  * 
+ *         FIXME - auto update log .. sparse log of only updates and their results ...
+ *         FIXME - test changing version prefix .. e.g. 1.2.
  *         FIXME - testing test - without version test - remote unaccessable
  *         FIXME - spawn must be synchronized 2 threads (the timer and the user)
  *         FIXME - test naming an instance FIXME - test starting an old version
  *         FIXME - make hidden check latest version interval and make default
  *         interval check large FIXME - change Runtime's cli !!!
  *
- *
+ *</pre>
  */
 public class Agent extends Service {
 
@@ -149,7 +153,11 @@ public class Agent extends Service {
     Long timestamp;
   }
 
-  long updateCheckIntervalMs = 60 * 60 * 1000; // every hour
+  // FIXME - change this to hour for production ...
+  // long updateCheckIntervalMs = 60 * 60 * 1000; // every hour
+  long updateCheckIntervalMs = 60 * 1000; // every minute
+  
+  List<Status> updateLog = new ArrayList<>();
 
   /**
    * Update thread - we cannot use addTask as a long update could pile up a
@@ -1229,5 +1237,9 @@ public class Agent extends Service {
   public String setVersion(String version) {
     currentVersion = version;
     return version;
+  }
+  
+  public void updateInfoLog(String msg) {
+    
   }
 }
