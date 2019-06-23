@@ -1,5 +1,7 @@
 package org.myrobotlab.opencv;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 import org.junit.Assert;
@@ -23,6 +25,7 @@ public class OpenCVFilterFaceDetectTest extends AbstractOpenCVFilterTest {
     // TODO Auto-generated method stub
     // let's use lena.png.
     IplImage input = defaultImage();
+    assertNotNull("bad input image", input);
     return input;
   }
 
@@ -31,7 +34,7 @@ public class OpenCVFilterFaceDetectTest extends AbstractOpenCVFilterTest {
     // it should have found 1 face
     OpenCVFilterFaceDetect f = (OpenCVFilterFaceDetect)filter;
     // expected vs actual
-    Assert.assertEquals(1, f.bb.size());
+    Assert.assertEquals("could not find the 1 face", 1, f.bb.size());
     
   }
   
