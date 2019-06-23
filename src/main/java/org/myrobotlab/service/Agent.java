@@ -34,7 +34,7 @@ import picocli.CommandLine.Option;
 
 /**
  * <pre>
- * @author GroG
+ * &#64;author GroG
  * 
  *         Agent is responsible for managing running instances of myrobotlab. It
  *         can start, stop and update myrobotlab.
@@ -58,7 +58,7 @@ import picocli.CommandLine.Option;
  *         FIXME - make hidden check latest version interval and make default
  *         interval check large FIXME - change Runtime's cli !!!
  *
- *</pre>
+ * </pre>
  */
 public class Agent extends Service {
 
@@ -156,7 +156,7 @@ public class Agent extends Service {
   // FIXME - change this to hour for production ...
   // long updateCheckIntervalMs = 60 * 60 * 1000; // every hour
   long updateCheckIntervalMs = 60 * 1000; // every minute
-  
+
   List<Status> updateLog = new ArrayList<>();
 
   /**
@@ -169,7 +169,6 @@ public class Agent extends Service {
 
     transient Agent agent = null;
     transient Thread thread = null;
-    boolean running = false;
     ProcessData.stateType state = ProcessData.stateType.stopped;
 
     public Updater(Agent agent) {
@@ -179,21 +178,21 @@ public class Agent extends Service {
     @Override
     public void run() {
       state = ProcessData.stateType.running;
-      updateLog("info","updater running");
+      updateLog("info", "updater running");
       try {
-        while (running) {
+        while (true) {
           state = ProcessData.stateType.sleeping;
-          updateLog("info","updater sleeping");
+          updateLog("info", "updater sleeping");
           sleep(updateCheckIntervalMs);
           state = ProcessData.stateType.updating;
-          updateLog("info","updater updating");
+          updateLog("info", "updater updating");
           agent.update();
         }
       } catch (Exception e) {
         log.info("updater threw", e);
       }
       log.info("updater stopping");
-      updateLog("info","updater stopping");
+      updateLog("info", "updater stopping");
       state = ProcessData.stateType.stopped;
     }
 
@@ -201,7 +200,7 @@ public class Agent extends Service {
       if (state == ProcessData.stateType.stopped) {
         thread = new Thread(this, getName() + ".updater");
         thread.start();
-        updateLog("info","updater starting");
+        updateLog("info", "updater starting");
       } else {
         log.warn("updater busy state = %s", state);
       }
@@ -209,21 +208,21 @@ public class Agent extends Service {
 
     synchronized public void stop() {
       if (state != ProcessData.stateType.stopped) {
-        // most likely the thread is sleeping - we wake it up quickly to die ;)
-        if (state != ProcessData.stateType.sleeping) {
-          thread.interrupt();
-        }
+        // we'll wait if its in the middle of an update
         while (state == ProcessData.stateType.updating) {
           log.warn("updater currently updating, waiting for 5 seconds...");
           sleep(5000);
         }
+        // most likely the thread is a sleeping state
+        // so, we wake it up quickly to die ;)
+        thread.interrupt();
       }
     }
 
   }
 
   public static String BRANCHES_ROOT = "branches";
-  
+
   Updater updater;
 
   public Agent(String n) throws IOException {
@@ -611,8 +610,8 @@ public class Agent extends Service {
       versions.addAll(getRemoteVersions(branch));
     }
     if (versions.size() != possibleVersions.size()) {
-      possibleVersions = versions;      
-      broadcastState();    
+      possibleVersions = versions;
+      broadcastState();
     }
     return versions;
   }
@@ -1252,7 +1251,7 @@ public class Agent extends Service {
     currentVersion = version;
     return version;
   }
-  
+
   // FIXME - move to enums for status level !
   public void updateLog(String level, String msg) {
     if (updateLog.size() > 100) {
