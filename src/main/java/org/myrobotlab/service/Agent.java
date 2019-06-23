@@ -179,21 +179,21 @@ public class Agent extends Service {
     @Override
     public void run() {
       state = ProcessData.stateType.running;
-      updateInfoLog("updater running");
+      updateLog("info","updater running");
       try {
         while (running) {
           state = ProcessData.stateType.sleeping;
-          updateInfoLog("updater sleeping");
+          updateLog("info","updater sleeping");
           sleep(updateCheckIntervalMs);
           state = ProcessData.stateType.updating;
-          updateInfoLog("updater updating");
+          updateLog("info","updater updating");
           agent.update();
         }
       } catch (Exception e) {
         log.info("updater threw", e);
       }
       log.info("updater stopping");
-      updateInfoLog("updater stopping");
+      updateLog("info","updater stopping");
       state = ProcessData.stateType.stopped;
     }
 
@@ -201,7 +201,7 @@ public class Agent extends Service {
       if (state == ProcessData.stateType.stopped) {
         thread = new Thread(this, getName() + ".updater");
         thread.start();
-        updateInfoLog("updater starting");
+        updateLog("info","updater starting");
       } else {
         log.warn("updater busy state = %s", state);
       }
@@ -332,22 +332,29 @@ public class Agent extends Service {
    * updates from the build server
    */
   public void update() {
+    log.info("update");
     for (String key : processes.keySet()) {
       ProcessData process = processes.get(key);
 
       if (!process.autoUpdate) {
+        log.info("not autoUpdate");
         continue;
       }
       try {
         // getRemoteVersions
+        log.info("getting version");
         String version = getLatestVersion(process.branch, true);
         if (version == null || version.equals(process.version)) {
+          log.info("same version {}", version);
           continue;
         }
+        log.info("WOOHOO ! updating to version {}", version);
         update(process.id, process.branch, null, true);
-
+        log.info("WOOHOO ! updated !");
         if (process.isRunning()) {
+          log.info("its running - we should restart");
           restart(process.id);
+          log.info("restarted");
         }
       } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
@@ -1246,7 +1253,15 @@ public class Agent extends Service {
     return version;
   }
   
-  public void updateInfoLog(String msg) {
-    updateLog.add(Status.info((new Date()).toString() + " " + msg));
+  // FIXME - move to enums for status level !
+  public void updateLog(String level, String msg) {
+    if (updateLog.size() > 100) {
+      updateLog.remove(updateLog.size() - 1);
+    }
+    if ("info".equals(level)) {
+      updateLog.add(Status.info((new Date()).toString() + " " + msg));
+    } else if ("error".equals(level)) {
+      updateLog.add(Status.error((new Date()).toString() + " " + msg));
+    }
   }
 }
