@@ -38,24 +38,21 @@ import picocli.CommandLine.Option;
  *         can start, stop and update myrobotlab.
  * 
  * 
- *         FIXME - ws client connectivity and communication !!!
- *         FIXME - Cli client ws enabled !!
- *         FIXME - capability to update Agent from child 
- *         FIXME - move CmdLine defintion to Runtime
- *         FIXME - convert Runtime's cmdline processing to CmdOptions
- *         Fixme - remove CmdLine
- *         
- *         FIXME - there are at least 3 different levels of updating
- *                 1. a global thread which only "checks" for updates
- *                 2. the possibility of just downloading an update (per instance)
- *                 3. the possibility of auto-restarting after a download is completed (per instance)
- *         
+ *         FIXME - ws client connectivity and communication !!! FIXME - Cli
+ *         client ws enabled !! FIXME - capability to update Agent from child
+ *         FIXME - move CmdLine defintion to Runtime FIXME - convert Runtime's
+ *         cmdline processing to CmdOptions Fixme - remove CmdLine
+ * 
+ *         FIXME - there are at least 3 different levels of updating 1. a global
+ *         thread which only "checks" for updates 2. the possibility of just
+ *         downloading an update (per instance) 3. the possibility of
+ *         auto-restarting after a download is completed (per instance)
+ * 
  *         FIXME - testing test - without version test - remote unaccessable
  *         FIXME - spawn must be synchronized 2 threads (the timer and the user)
- *         FIXME - test naming an instance
- *         FIXME - test starting an old version
- *         FIXME - make hidden check latest version interval and make default interval check large
- *         FIXME - change Runtime's cli !!!
+ *         FIXME - test naming an instance FIXME - test starting an old version
+ *         FIXME - make hidden check latest version interval and make default
+ *         interval check large FIXME - change Runtime's cli !!!
  *
  *
  */
@@ -92,18 +89,18 @@ public class Agent extends Service {
    */
   boolean autoCheckForUpdate = false;
 
-  HashSet<String> possibleVersions = new HashSet<String>();
+  Set<String> possibleVersions = new HashSet<String>();
 
   // for more info -
   // http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/develop/api/json
-  // WARNING Jenkins url api format for multi-branch pipelines is different from maven builds !
+  // WARNING Jenkins url api format for multi-branch pipelines is different from
+  // maven builds !
   final static String REMOTE_BUILDS_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/api/json?tree=builds[number,status,timestamp,id,result]";
 
   final static String REMOTE_JAR_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/%s/artifact/target/myrobotlab.jar";
 
   final static String REMOTE_MULTI_BRANCH_JOBS = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/api/json";
-  
-  
+
   boolean checkRemoteVersions = false;
 
   /**
@@ -125,10 +122,10 @@ public class Agent extends Service {
    * smallest version for development
    */
   private boolean unknownIsGreatest = false;
-  
-  public static class WorkflowMultiBranchProject{
+
+  public static class WorkflowMultiBranchProject {
     String name;
-    WorkflowJob [] jobs;
+    WorkflowJob[] jobs;
   }
 
   /**
@@ -152,11 +149,73 @@ public class Agent extends Service {
     Long timestamp;
   }
 
+  long updateCheckIntervalMs = 60 * 60 * 1000; // every hour
+
+  /**
+   * Update thread - we cannot use addTask as a long update could pile up a
+   * large set of updates to process quickly in series. Instead, we have a
+   * simple single class which is always single threaded to process updates.
+   *
+   */
+  class Updater implements Runnable {
+
+    transient Agent agent = null;
+    transient Thread thread = null;
+    boolean running = false;
+    ProcessData.stateType state = ProcessData.stateType.stopped;
+
+    public Updater(Agent agent) {
+      this.agent = agent;
+    }
+
+    @Override
+    public void run() {
+      state = ProcessData.stateType.running;
+      try {
+        while (running) {
+          state = ProcessData.stateType.sleeping;
+          sleep(updateCheckIntervalMs);
+          state = ProcessData.stateType.updating;
+          agent.update();
+        }
+      } catch (Exception e) {
+        log.info("updater threw", e);
+      }
+      log.info("updater stopping");
+      state = ProcessData.stateType.stopped;
+    }
+
+    synchronized public void start() {
+      if (state == ProcessData.stateType.stopped) {
+        thread = new Thread(this, getName() + ".updater");
+        thread.start();
+      } else {
+        log.warn("updater busy state = %s", state);
+      }
+    }
+
+    synchronized public void stop() {
+      if (state != ProcessData.stateType.stopped) {
+        // most likely the thread is sleeping - we wake it up quickly to die ;)
+        if (state != ProcessData.stateType.sleeping) {
+          thread.interrupt();
+        }
+        while (state == ProcessData.stateType.updating) {
+          log.warn("updater currently updating, waiting for 5 seconds...");
+          sleep(5000);
+        }
+      }
+    }
+
+  }
+
   public static String BRANCHES_ROOT = "branches";
+  
+  Updater updater;
 
   public Agent(String n) throws IOException {
     super(n);
-
+    updater = new Updater(this);
     currentBranch = Platform.getLocalInstance().getBranch();
     currentVersion = Platform.getLocalInstance().getVersion();
 
@@ -169,7 +228,7 @@ public class Agent extends Service {
 
     // user has decided to look for updates ..
     if (autoUpdate || checkRemoteVersions) {
-      invoke("getPossibleVersions", currentBranch);
+      invoke("getVersions", currentBranch);
     }
   }
 
@@ -244,14 +303,17 @@ public class Agent extends Service {
 
   public void autoUpdate(boolean b) {
     if (b) {
-      addTask("update", 1000 * 60, 0, "update");
+      // addTask("update", 1000 * 60, 0, "update");
+      updater.start();
     } else {
-      purgeTask("update");
+      // purgeTask("update");
+      updater.stop();
     }
   }
 
   /**
-   * FIXME !!! - i believe in task for these pipe up !!! NOT GOOD _ must have its own thread then !!
+   * FIXME !!! - i believe in task for these pipe up !!! NOT GOOD _ must have
+   * its own thread then !!
    * 
    * called by the autoUpdate task which is scheduled every minute to look for
    * updates from the build server
@@ -292,8 +354,7 @@ public class Agent extends Service {
    * @throws MrlException
    * 
    */
-  synchronized public void update(String id, String branch, String version, Boolean allowRemote)
-      throws IOException, URISyntaxException, InterruptedException, MrlException {
+  synchronized public void update(String id, String branch, String version, Boolean allowRemote) throws IOException, URISyntaxException, InterruptedException, MrlException {
     getLatestJar(branch, allowRemote);
   }
 
@@ -303,12 +364,12 @@ public class Agent extends Service {
       String version = getLatestVersion(branch, checkRemote);
 
       // check if branch and version exist locally
-      if (!existsLocally(branch, version)) {        
+      if (!existsLocally(branch, version)) {
         getJar(branch, version);
         // download latest to the appropriate directory
         // mkdirs
         // download file
-        if (!verifyJar(branch, version)) { 
+        if (!verifyJar(branch, version)) {
         }
       }
     } catch (Exception e) {
@@ -324,8 +385,8 @@ public class Agent extends Service {
   synchronized public void getJar(String branch, String version) {
     new File(getDir(branch, version)).mkdirs();
     String build = getBuildId(version);
-    // this 
-    Http.getSafePartFile(String.format(REMOTE_JAR_URL, branch, build), getJarName(branch, version));    
+    // this
+    Http.getSafePartFile(String.format(REMOTE_JAR_URL, branch, build), getJarName(branch, version));
   }
 
   public String getBuildId(String version) {
@@ -456,7 +517,7 @@ public class Agent extends Service {
   }
 
   /**
-   * get the current branches being built in a Jenkins multi-branch pipeline job 
+   * get the current branches being built in a Jenkins multi-branch pipeline job
    * 
    * @return
    */
@@ -467,10 +528,10 @@ public class Agent extends Service {
       if (r != null) {
         String json = new String(r);
         CodecJson decoder = new CodecJson();
-        WorkflowMultiBranchProject project = (WorkflowMultiBranchProject)decoder.decode(json, WorkflowMultiBranchProject.class);
+        WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) decoder.decode(json, WorkflowMultiBranchProject.class);
         for (WorkflowJob job : project.jobs) {
           possibleBranches.add(job.name);
-        }        
+        }
       }
     } catch (Exception e) {
       log.error("getRemoteBranches threw", e);
@@ -527,11 +588,10 @@ public class Agent extends Service {
     if (allowRemote) {
       versions.addAll(getRemoteVersions(branch));
     }
-    invoke("publishVersions", versions);
-    return versions;
-  }
-
-  public Set<String> publishVersions(HashSet<String> versions) {
+    if (versions.size() != possibleVersions.size()) {
+      possibleVersions = versions;      
+      broadcastState();    
+    }
     return versions;
   }
 
@@ -639,8 +699,8 @@ public class Agent extends Service {
         agent.broadcastState();
       }
       return id;
-    } 
-      
+    }
+
     error("kill unknown process id {}", id);
     return null;
   }
