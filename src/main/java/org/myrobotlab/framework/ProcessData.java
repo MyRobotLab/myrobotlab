@@ -72,7 +72,7 @@ public class ProcessData implements Serializable {
   static transient public Invoker agent;
 
   public enum stateType {
-    stopped, running, restarting, unknown
+    stopped, running, sleeping, restarting, updating, unknown
   }
 
   public static class Monitor extends Thread {
