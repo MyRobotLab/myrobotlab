@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -12,33 +11,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
-import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.CodecJson;
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.repo.GitHub;
-import org.myrobotlab.framework.repo.Repo;
-import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.image.Util;
-import org.myrobotlab.io.FileIO;
+import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
 import org.slf4j.Logger;
 
-import com.google.gson.internal.LinkedTreeMap;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 /**
  * 
@@ -69,65 +59,52 @@ public class Agent extends Service {
 
   Platform platform = Platform.getLocalInstance();
 
-  /**
-   * command line to be relayed to the the first process the Agent spawns
-   */
-  static CmdLine cmdline;
-
   transient WebGui webgui = null;
   int port = 8887;
   String address = "127.0.0.1";
 
-  /**
-   * command line for the Agent process
-   */
-  static CmdLine agentCmdline;
+  String currentBranch;
 
-  String branchAgent = Platform.getLocalInstance().getBranch();
-  String branchLast = null;
-  static String branchRequested = null;
-
-  String versionAgent = Platform.getLocalInstance().getVersion();
-  String versionLast = null;
-  String versionLatest = null;
-  static String versionRequested = null;
+  String currentVersion;
 
   /**
    * auto update - automatically checks for updates and WILL update any running
    * mrl instance automatically
    */
-  static boolean autoUpdate = false;
+  boolean autoUpdate = false;
 
   /**
    * autoCheckForUpdate - checks automatically checks for updates after some
    * interval but does not automatically update - it publishes events of new
    * availability of updates but does not update
    */
-  static boolean autoCheckForUpdate = false;
+  boolean autoCheckForUpdate = false;
 
-  static HashSet<String> possibleVersions = new HashSet<String>();
+  HashSet<String> possibleVersions = new HashSet<String>();
 
   // for more info -
   // http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/develop/api/json
-
-  @Deprecated /* not needed - use more general urls with filter functions */
-  final static String REMOTE_LAST_SUCCESSFUL_BUILD_JAR = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/lastSuccessfulBuild/artifact/target/myrobotlab.jar";
-
+  // WARNING Jenkins url api format for multi-branch pipelines is different from maven builds !
   final static String REMOTE_BUILDS_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/api/json?tree=builds[number,status,timestamp,id,result]";
 
   final static String REMOTE_JAR_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/%s/artifact/target/myrobotlab.jar";
 
-  @Deprecated /* not needed - use more general urls with filter functions */
-  final static String REMOTE_LAST_SUCCESSFUL_VERSION = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/api/json?tree=lastSuccessfulBuild[number,status,timestamp,id,result]";
-
+  final static String REMOTE_MULTI_BRANCH_JOBS = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/api/json";
+  
+  
   boolean checkRemoteVersions = false;
+
+  /**
+   * command line options for the agent
+   */
+  CmdOptions options;
 
   String versionPrefix = "1.1.";
 
   /**
    * singleton for security purposes
    */
-  static Agent agent;
+  transient static Agent agent;
 
   String rootBranchDir = "branches";
 
@@ -135,13 +112,27 @@ public class Agent extends Service {
    * development variable to force version "unknown" to be either greatest or
    * smallest version for development
    */
-  private static boolean unknownIsGreatest = false;
+  private boolean unknownIsGreatest = false;
+  
+  public static class WorkflowMultiBranchProject{
+    String name;
+    WorkflowJob [] jobs;
+  }
 
+  /**
+   * Jenkins data structure to describe jobs
+   */
   public static class WorkflowJob {
+    String name;
+    String url;
+    String color;
     WorkflowRun lastSuccessfulBuild;
     WorkflowRun[] builds;
   }
 
+  /**
+   * Jenkins data structure to describe builds
+   */
   public static class WorkflowRun {
     String id;
     Integer number;
@@ -153,11 +144,11 @@ public class Agent extends Service {
 
   public Agent(String n) throws IOException {
     super(n);
-    log.info("Agent {} Pid {} is alive", n, Platform.getLocalInstance().getPid());
 
-    if (branchRequested == null) {
-      branchRequested = branchAgent;
-    }
+    currentBranch = Platform.getLocalInstance().getBranch();
+    currentVersion = Platform.getLocalInstance().getVersion();
+
+    log.info("Agent {} Pid {} is alive", n, Platform.getLocalInstance().getPid());
 
     // basic setup - minimally we make a directory
     // and instance folder of the same branch & version as the
@@ -166,13 +157,13 @@ public class Agent extends Service {
 
     // user has decided to look for updates ..
     if (autoUpdate || checkRemoteVersions) {
-      invoke("getPossibleVersions", branchAgent);
+      invoke("getPossibleVersions", currentBranch);
     }
   }
 
   public String getDir(String branch, String version) {
     if (branch == null) {
-      branch = branchAgent; // FIXME - or lastBranch ? or currentBranch !!!
+      branch = Platform.getLocalInstance().getBranch();
     }
     if (version == null) {
       try {
@@ -184,23 +175,25 @@ public class Agent extends Service {
     return BRANCHES_ROOT + File.separator + branch + "-" + version;
   }
 
-  public String getFilePath(String branch, String version) {
+  public String getJarName(String branch, String version) {
     return getDir(branch, version) + File.separator + "myrobotlab.jar";
   }
 
   private void setup() throws IOException {
     // FIXME - this stuff needs to be outside the contructor !!!
     // initialize perhaps ? setup ? oneTime ? initialInstall ?
+    String agentBranch = Platform.getLocalInstance().getBranch();
+    String agentVersion = Platform.getLocalInstance().getVersion();
 
     // location of the agent's branch (and version)
-    String agentVersionPath = getDir(branchAgent, versionAgent);
+    String agentVersionPath = getDir(agentBranch, agentVersion);
 
     if (!new File(agentVersionPath).exists()) {
       File branchDir = new File(agentVersionPath);
       branchDir.mkdirs();
     }
 
-    String agentMyRobotLabJar = getFilePath(branchAgent, versionAgent);
+    String agentMyRobotLabJar = getJarName(agentBranch, agentVersion);
     if (!new File(agentMyRobotLabJar).exists()) {
 
       String agentJar = new java.io.File(Agent.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
@@ -215,7 +208,7 @@ public class Agent extends Service {
         }
       }
 
-      log.info("on branch {} copying agent's current jar to appropriate location {} -> {}", branchRequested, agentJar, agentMyRobotLabJar);
+      log.info("on branch {} copying agent's current jar to appropriate location {} -> {}", currentBranch, agentJar, agentMyRobotLabJar);
       Files.copy(Paths.get(agentJar), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
     }
   }
@@ -224,7 +217,7 @@ public class Agent extends Service {
     try {
 
       if (webgui == null) {
-        webgui = (WebGui) Runtime.create("webadmin", "WebGui");
+        webgui = (WebGui) Runtime.create("webgui", "WebGui");
         webgui.autoStartBrowser(false);
         webgui.setPort(port);
         webgui.setAddress(address);
@@ -240,9 +233,9 @@ public class Agent extends Service {
 
   public void autoUpdate(boolean b) {
     if (b) {
-      addTask("processUpdates", 1000 * 60, 0, "processUpdates");
+      addTask("update", 1000 * 60, 0, "update");
     } else {
-      purgeTask("processUpdates");
+      purgeTask("update");
     }
   }
 
@@ -250,7 +243,7 @@ public class Agent extends Service {
    * called by the autoUpdate task which is scheduled every minute to look for
    * updates from the build server
    */
-  public void processUpdates() {
+  public void update() {
     for (String key : processes.keySet()) {
       ProcessData process = processes.get(key);
 
@@ -258,9 +251,12 @@ public class Agent extends Service {
         continue;
       }
       try {
-
-        // processUpdates(process.id, process.branch, version, allowRemote);
-        processUpdates(process.id, process.branch, null, true);
+        // getRemoteVersions
+        String version = getLatestVersion(process.branch, true);
+        if (version == null || version.equals(process.version)) {
+          continue;
+        }
+        update(process.id, process.branch, null, true);
 
         if (process.isRunning()) {
           restart(process.id);
@@ -283,10 +279,10 @@ public class Agent extends Service {
    * @throws MrlException
    * 
    */
-  synchronized public void processUpdates(String id, String branch, String version, Boolean allowRemote)
+  synchronized public void update(String id, String branch, String version, Boolean allowRemote)
       throws IOException, URISyntaxException, InterruptedException, MrlException {
 
-    getLatest(branch);
+    getLatestJar(branch);
 
     /**
      * <pre>
@@ -296,7 +292,7 @@ public class Agent extends Service {
 
   }
 
-  public void getLatest(String branch) {
+  public void getLatestJar(String branch) {
     try {
       // check for updates
       String version = getLatestVersion(branch, autoUpdate);
@@ -324,7 +320,7 @@ public class Agent extends Service {
   public void getJar(String branch, String version) {
     new File(getDir(branch, version)).mkdirs();
     String build = getBuildId(version);
-    Http.get(String.format(REMOTE_JAR_URL, branch, build), getFilePath(branch, version));
+    Http.get(String.format(REMOTE_JAR_URL, branch, build), getJarName(branch, version));
   }
 
   public String getBuildId(String version) {
@@ -359,7 +355,7 @@ public class Agent extends Service {
    * @return
    */
   public boolean existsLocally(String branch, String version) {
-    return new File(getFilePath(branch, version)).exists();
+    return new File(getJarName(branch, version)).exists();
   }
 
   /**
@@ -379,18 +375,18 @@ public class Agent extends Service {
     // pd.setRestarting();
     kill(id); // FIXME - kill should include prepare to shutdown ...
     sleep(2000);
-    spawn2(id);
+    spawn(id);
   }
 
-  private void spawn2(String id) {
+  private void spawn(String id) {
     try {
       if (processes.containsKey(id)) {
-        spawn2(processes.get(id));
+        spawn(processes.get(id));
       } else {
         log.error("agent does not know about process id {}", id);
       }
     } catch (Exception e) {
-      log.error("spawn2({}) threw ", id, e);
+      log.error("spawn({}) threw ", id, e);
     }
   }
 
@@ -433,29 +429,10 @@ public class Agent extends Service {
     // returns a non running copy with new process id
     // on the processes list
     ProcessData pd2 = copy(id);
-    spawn2(pd2);
+    spawn(pd2);
     if (agent != null) {
       agent.broadcastState();
     }
-  }
-
-  public void downloadLatest(String branch) throws IOException {
-    String version = getLatestRemoteVersion(branch);
-    log.info("downloading version {} /{}", version, branch);
-    byte[] myrobotlabjar = getLatestRemoteJar(branch);
-    if (myrobotlabjar == null) {
-      throw new IOException("could not download");
-    }
-    log.info("{} bytes", myrobotlabjar.length);
-
-    /*
-     * File archive = new File(String.format("%s/archive", branch));
-     * archive.mkdirs();
-     */
-
-    FileOutputStream fos = new FileOutputStream(String.format("%s/myrobotlab.%s.jar", branch, version));
-    fos.write(myrobotlabjar);
-    fos.close();
   }
 
   /**
@@ -475,45 +452,6 @@ public class Agent extends Service {
     return null;
   }
 
-  // FIXME - should just be be saveRemoteJar() - but shouldn't be from
-  // multiple threads
-  static public byte[] getLatestRemoteJar(String branch) {
-    return Http.get(String.format(REMOTE_LAST_SUCCESSFUL_BUILD_JAR, branch));
-  }
-
-  public String getLatestRemoteVersion(String branch) {
-    try {
-      byte[] data = Http.get(String.format(REMOTE_LAST_SUCCESSFUL_VERSION, branch));
-      if (data != null) {
-        String json = new String(data);
-        CodecJson decoder = new CodecJson();
-        WorkflowJob job = (WorkflowJob) decoder.decode(json, WorkflowJob.class);
-
-        return versionPrefix + job.lastSuccessfulBuild.id;
-      }
-    } catch (Exception e) {
-      log.error("getLatestRemoteVersion threw", e);
-    }
-    return null;
-  }
-
-  /**
-   * gets name from id
-   * 
-   * @param id
-   *          e
-   * @return string
-   */
-  public String getName(String id) {
-    for (String pid : processes.keySet()) {
-      if (pid.equals(id)) {
-        return processes.get(pid).name;
-      }
-    }
-
-    return null;
-  }
-
   /**
    * FIXME this should be build server not github ... github has not artifacts
    * 
@@ -525,19 +463,14 @@ public class Agent extends Service {
       // TODO - all http gets use HttpClient static methods and promise
       // for asynchronous
       // get gitHub's branches
-      byte[] r = Http.get(GitHub.BRANCHES);
+      byte[] r = Http.get(REMOTE_MULTI_BRANCH_JOBS);
       if (r != null) {
-        String branches = new String(r);
+        String json = new String(r);
         CodecJson decoder = new CodecJson();
-        // decoder.decodeArray(Branch)
-        Object[] array = decoder.decodeArray(branches);
-        for (int i = 0; i < array.length; ++i) {
-          @SuppressWarnings("unchecked")
-          LinkedTreeMap<String, String> m = (LinkedTreeMap<String, String>) array[i];
-          if (m.containsKey("name")) {
-            possibleBranches.add(m.get("name").toString());
-          }
-        }
+        WorkflowMultiBranchProject project = (WorkflowMultiBranchProject)decoder.decode(json, WorkflowMultiBranchProject.class);
+        for (WorkflowJob job : project.jobs) {
+          possibleBranches.add(job.name);
+        }        
       }
     } catch (Exception e) {
       log.error("getRemoteBranches threw", e);
@@ -545,7 +478,7 @@ public class Agent extends Service {
     return possibleBranches;
   }
 
-  static boolean isGreaterThan(String version1, String version2) throws MrlException {
+  boolean isGreaterThan(String version1, String version2) throws MrlException {
     if (version1 == null) {
       return false;
     }
@@ -625,6 +558,21 @@ public class Agent extends Service {
     return versions;
   }
 
+  public String getLatestLocalVersion(String branch) throws MrlException {
+    Set<String> allLocal = getLocalVersions(branch);
+    String latest = null;
+    for (String version : allLocal) {
+      if (latest == null) {
+        latest = version;
+        continue;
+      }
+      if (isGreaterThan(version, latest)) {
+        latest = version;
+      }
+    }
+    return latest;
+  }
+
   public Set<String> getLocalVersions(String branch) {
     Set<String> versions = new HashSet<>();
     // get local file system versions
@@ -679,7 +627,7 @@ public class Agent extends Service {
       }
       ProcessData process = processes.get(id);
       process.process.destroy();
-      process.state = ProcessData.STATE_STOPPED;
+      process.state = ProcessData.stateType.stopped;
 
       if (process.monitor != null) {
         process.monitor.interrupt();
@@ -687,7 +635,7 @@ public class Agent extends Service {
       }
       // remove(processes.get(name));
       if (agent != null) {
-        agent.info("%s haz beeen terminated", id);
+        agent.info("{} haz beeen terminated", id);
         agent.broadcastState();
       }
       return id;
@@ -744,13 +692,13 @@ public class Agent extends Service {
     for (int i = 0; i < objs.length; ++i) {
       Integer id = (Integer) objs[i];
       ProcessData p = processes.get(id);
-      pd[i] = String.format("%s - %s [%s - %s]", id, p.name, p.branch, p.version);
+      pd[i] = String.format("%s - %s [%s - %s]", id, p.id, p.branch, p.version);
     }
     return pd;
   }
 
   public String publishTerminated(String id) {
-    log.info("publishTerminated - terminated %s %s - restarting", id, getName(id));
+    log.info("publishTerminated - terminated %s - restarting", id);
 
     if (!processes.containsKey(id)) {
       log.error("processes {} not found");
@@ -759,7 +707,7 @@ public class Agent extends Service {
 
     // if you don't fork with Agent allowed to
     // exist without instances - then
-    if (!cmdline.containsKey("-fork")) {
+    if (!options.fork) {
       // spin through instances - if I'm the only
       // thing left - terminate
       boolean processesStillRunning = false;
@@ -783,140 +731,52 @@ public class Agent extends Service {
   }
 
   /**
-   * This is a great idea &amp; test - because we want complete control over
-   * environment and dependencies - the ability to purge completely - and start
-   * from the beginning - but it should be in another service and not part of
-   * the Agent. The 'Test' service could use Agent as a peer
+   * Max complexity spawn - with all possible options - this will create a
+   * ProcessData object and send it to spawn. ProcessData contains all the
+   * unique data related to starting an instance.
    * 
-   * @return list of status
+   * Convert command line parameter options into a ProcessData which can be
+   * spawned
    * 
+   * @param options
+   * @return
+   * @throws IOException
+   * @throws URISyntaxException
+   * @throws InterruptedException
    */
-  public List<Status> serviceTest() {
+  public Process spawn(CmdOptions options) throws IOException, URISyntaxException, InterruptedException {
+    if (ProcessData.agent == null) {
+      ProcessData.agent = this;
+    }
+    // create a ProcessData then spawn it !
+    ProcessData pd = new ProcessData();
 
-    List<Status> ret = new ArrayList<Status>();
-    // CLEAN FOR TEST METHOD
+    pd.id = (options.id != null) ? options.id : NameGenerator.getName();
 
-    // FIXME DEPRECATE !!!
-    // RUNTIME is responsible for running services
-    // REPO is responsible for possible services
-    // String[] serviceTypeNames =
-    // Runtime.getInstance().getServiceTypeNames();
+    pd.branch = options.branch;
+    pd.version = options.version;
+    pd.jarPath = new File(getJarName(options.branch, options.version)).getAbsolutePath();
 
-    HashSet<String> skipTest = new HashSet<String>();
+    // javaExe
+    String fs = File.separator;
 
-    skipTest.add("org.myrobotlab.service.Runtime");
-    skipTest.add("org.myrobotlab.service.OpenNi");
+    Platform platform = Platform.getLocalInstance();
+    String exeName = platform.isWindows() ? "javaw" : "java";
+    pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
 
-    /*
-     * skipTest.add("org.myrobotlab.service.Agent");
-     * skipTest.add("org.myrobotlab.service.Incubator");
-     * skipTest.add("org.myrobotlab.service.InMoov"); // just too big and
-     * complicated at the moment skipTest.add("org.myrobotlab.service.Test");
-     * skipTest.add("org.myrobotlab.service.Cli"); // ?? No ?
-     */
-
-    long installTime = 0;
-    Repo repo = Runtime.getInstance().getRepo();
-    ServiceData serviceData = ServiceData.getLocalInstance();
-    List<ServiceType> serviceTypes = serviceData.getServiceTypes();
-
-    ret.add(Status.info("serviceTest will test %d services", serviceTypes.size()));
-    long startTime = System.currentTimeMillis();
-    ret.add(Status.info("startTime", "%d", startTime));
-
-    for (int i = 0; i < serviceTypes.size(); ++i) {
-
-      ServiceType serviceType = serviceTypes.get(i);
-
-      // TODO - option to disable
-      if (!serviceType.isAvailable()) {
-        continue;
-      }
-      // serviceType = "org.myrobotlab.service.OpenCV";
-
-      if (skipTest.contains(serviceType.getName())) {
-        log.info("skipping %s", serviceType.getName());
-        continue;
-      }
-
-      try {
-
-        // agent.serviceTest(); // WTF?
-        // status.addInfo("perparing clean environment for %s",
-        // serviceType);
-
-        // clean environment
-        // FIXME - optimize clean
-
-        // SUPER CLEAN - force .repo to clear !!
-        // repo.clearRepo();
-
-        // less clean but faster
-        // repo.clearLibraries();
-        // repo.clearServiceData();
-
-        // comment all out for dirty
-
-        // install Test dependencies
-        long installStartTime = System.currentTimeMillis();
-        repo.install("org.myrobotlab.service.Test");
-        repo.install(serviceType.getName());
-        installTime += System.currentTimeMillis() - installStartTime;
-        // clean test.json part file
-
-        // spawn a test - attach to cli - test 1 service end to end
-        // ,"-invoke", "test","test","org.myrobotlab.service.Clock"
-        Process process = spawn(
-            new String[] { "-runtimeName", "testEnv", "-service", "test", "Test", "-logLevel", "WARN", "-noEnv", "-invoke", "test", "test", serviceType.getName() });
-
-        process.waitFor();
-
-        // destroy - start again next service
-        // wait for partFile report .. test.json
-        // NOT NEEDED - foreign process has ended
-        byte[] data = FileIO.loadPartFile("test.json", 60000);
-        if (data != null) {
-          String test = new String(data);
-          Status testResult = CodecUtils.fromJson(test, Status.class);
-          if (testResult.isError()) {
-            ret.add(testResult);
-          }
-        } else {
-          Status.info("could not get results");
-        }
-        // destroy env
-        kill(getId("testEnv"));
-
-      } catch (Exception e) {
-
-        ret.add(Status.error(e));
-        continue;
-      }
+    pd.jvm = new String[] { "-Djava.library.path=libraries/native", "-Djna.library.path=libraries/native", "-Dfile.encoding=UTF-8" };
+    if (options.jvm != null) {
+      pd.jvm = options.jvm;
     }
 
-    ret.add(Status.info("installTime", "%d", installTime));
+    pd.autoUpdate = options.autoUpdate;
 
-    ret.add(Status.info("installTime %d", installTime));
-    ret.add(Status.info("testTimeMs %d", System.currentTimeMillis() - startTime));
-    ret.add(Status.info("testTimeMinutes %d", TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - startTime)));
-    ret.add(Status.info("endTime %d", System.currentTimeMillis()));
-
-    try {
-      FileIO.savePartFile(new File("fullTest.json"), CodecUtils.toJson(ret).getBytes());
-    } catch (Exception e) {
-      log.error("serviceTest threw", e);
-    }
-
-    return ret;
-  }
-
-  public Process spawn(String[] args) throws IOException, URISyntaxException, InterruptedException {
-    return spawn(null, null, args);
+    return spawn(pd);
   }
 
   public String setBranch(String branch) {
-    branchRequested = branch;
-    return branchRequested;
+    currentBranch = branch;
+    return currentBranch;
   }
 
   static public Map<String, String> setEnv(Map<String, String> env) {
@@ -946,39 +806,72 @@ public class Agent extends Service {
     return env;
   }
 
+  /**
+   * Kills all connected processes, then shuts down itself. FIXME - should send
+   * shutdown to other processes instead of killing them
+   */
   public void shutdown() {
-    // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
-    // !!
     log.info("terminating others");
     killAll();
     log.info("terminating self ... goodbye...");
-    // Runtime.exit();
     Runtime.shutdown();
   }
 
-  public synchronized Process spawn() throws IOException, URISyntaxException, InterruptedException {
-    return spawn(null, null, new String[] {});
-  }
+  /**
+   * Constructs a comman line from a ProcessData object which can directly be
+   * run to spawn a new instance of mrl
+   * 
+   * @param pd
+   * @return
+   */
+  public String[] buildCmdLine(ProcessData pd) {
 
-  public synchronized Process spawn(String branch, String version, String[] in) throws IOException, URISyntaxException, InterruptedException {
-    return spawn(getFilePath(branch, version), in);
-  }
+    // command line to be returned
+    ArrayList<String> cmd = new ArrayList<String>();
 
-  public Process spawn(String jarPath, String[] in) throws IOException, URISyntaxException, InterruptedException {
+    cmd.add(pd.javaExe);
 
-    File jarPathDir = new File(jarPath);
-
-    ProcessData pd = new ProcessData(agent, jarPathDir.getAbsolutePath(), in, branchAgent, versionAgent);
-
-    CmdLine cmdline = new CmdLine(in);
-    if (cmdline.hasSwitch("-autoUpdate") || cmdline.hasSwitch("--autoUpdate")) {
-      autoUpdate(true);
+    if (pd.jvm != null) {
+      for (int i = 0; i < pd.jvm.length; ++i) {
+        cmd.add(pd.jvm[i]);
+      }
     }
 
-    log.info("Agent starting spawn {}", formatter.format(new Date()));
-    log.info("in args {}", Arrays.toString(in));
+    cmd.add("-cp");
 
-    return spawn2(pd);
+    // step 1 - get current env data
+    String ps = File.pathSeparator;
+    // bogus jython.jar added as a hack to support - jython's 'more' fragile
+    // 2.7.0 interface :(
+    // http://www.jython.org/archive/21/docs/registry.html
+    // http://bugs.jython.org/issue2355
+    String classpath = String.format("%s%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes", pd.jarPath, ps, ps, ps, ps);
+    cmd.add(classpath);
+
+    cmd.add("org.myrobotlab.service.Runtime");
+
+    // FIXME - user defined services
+    if (!pd.userDefinedServices) {
+      cmd.add("-service");
+      // cmd.add("webgui");
+      // cmd.add("WebGui");
+      cmd.add("log");
+      cmd.add("Log");
+      cmd.add("cli");
+      cmd.add("Cli");
+      cmd.add("gui");
+      cmd.add("SwingGui");
+      cmd.add("python");
+      cmd.add("Python");
+    }
+
+    cmd.add("-fromAgent");
+    cmd.add(Platform.getLocalInstance().getId());
+
+    cmd.add("-id");
+    cmd.add(pd.id);
+
+    return cmd.toArray(new String[cmd.size()]);
   }
 
   /**
@@ -988,21 +881,12 @@ public class Agent extends Service {
    * @return
    * @throws IOException
    */
-  public synchronized Process spawn2(ProcessData pd) throws IOException {
+  public synchronized Process spawn(ProcessData pd) throws IOException {
 
     log.info("============== spawn begin ==============");
 
-    String runtimeName = pd.name;
-
     // this needs cmdLine
-    String[] cmdLine = pd.buildCmdLine();
-    StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < cmdLine.length; ++i) {
-      sb.append(cmdLine[i]);
-      sb.append(" ");
-    }
-
-    log.info("spawning -> [{}]", sb.toString());
+    String[] cmdLine = buildCmdLine(pd);
 
     ProcessBuilder builder = new ProcessBuilder(cmdLine);
     // handle stderr as a direct pass through to System.err
@@ -1011,7 +895,8 @@ public class Agent extends Service {
     String spawnDir = new File(pd.jarPath).getParent();
     builder.directory(new File(spawnDir));
 
-    log.info("in {} spawning -> [{}]", spawnDir, sb.toString());
+    log.info("in {}", spawnDir);
+    log.info("spawning -> {}", Arrays.toString(cmdLine));
 
     // environment variables setup
     setEnv(builder.environment());
@@ -1022,17 +907,18 @@ public class Agent extends Service {
     pd.monitor = new ProcessData.Monitor(pd);
     pd.monitor.start();
 
-    pd.state = ProcessData.STATE_RUNNING;
+    pd.state = ProcessData.stateType.running;
+
     if (pd.id == null) {
       log.error("id should not be null!");
     }
     if (processes.containsKey(pd.id)) {
       if (agent != null) {
-        agent.info("restarting %s %s", pd.id, pd.name);
+        agent.info("restarting %s", pd.id);
       }
     } else {
       if (agent != null) {
-        agent.info("starting new %s %s", pd.id, pd.name);
+        agent.info("starting new %s", pd.id);
       }
       processes.put(pd.id, pd);
     }
@@ -1047,15 +933,15 @@ public class Agent extends Service {
     log.info("Agent finished spawn {}", formatter.format(new Date()));
     if (agent != null) {
       Cli cli = Runtime.getCli();
-      cli.add(runtimeName, process.getInputStream(), process.getOutputStream());
-      cli.attach(runtimeName);
+      cli.add(pd.id, process.getInputStream(), process.getOutputStream());
+      cli.attach(pd.id);
       agent.broadcastState();
     }
     return process;
   }
 
   /**
-   * DEPRECATE ? spawn2 should do this checking ?
+   * DEPRECATE ? spawn should do this checking ?
    * 
    * @param id
    *          i
@@ -1078,44 +964,7 @@ public class Agent extends Service {
       log.warn("process %s already started", id);
       return;
     }
-    spawn2(p);
-  }
-
-  public void update() throws IOException {
-    Platform platform = Platform.getLocalInstance();
-    update(platform.getBranch());
-  }
-
-  public void update(String branch) throws IOException {
-    log.info("update({})", branch);
-    // so we need to get the version of the jar contained in the {branch}
-    // directory ..
-    FileIO.extract(String.format("%s/myrobotlab.jar", branch), Util.getResourceDir() + "/version.txt", String.format("%s/version.txt", branch));
-
-    String currentVersion = FileIO.toString(String.format("%s/version.txt", branch));
-    if (currentVersion == null) {
-      log.error("{}/version.txt current version is null", branch);
-      return;
-    }
-    // compare that with the latest http://s3/current/{branch}/version.txt
-    // and figure
-
-    String latestVersion = getLatestRemoteVersion(branch);
-    if (latestVersion == null) {
-      log.error("s3 version.txt current version is null", branch);
-      return;
-    }
-
-    if (!latestVersion.equals(currentVersion)) {
-      log.info("latest %s > current %s - updating", latestVersion, currentVersion);
-      downloadLatest(branch);
-    }
-
-    // FIXME - restart processes
-    // if (updateRestartProcesses) {
-
-    // }
-
+    spawn(p);
   }
 
   /**
@@ -1140,11 +989,6 @@ public class Agent extends Service {
     return meta;
   }
 
-  public void startService() {
-    super.startService();
-    // addTask(1000, "scanForMsgs");
-  }
-
   /**
    * First method JVM executes when myrobotlab.jar is in jar form.
    * 
@@ -1161,31 +1005,111 @@ public class Agent extends Service {
   // the current concept is ok - but it does not work ..
   // make it work if necessary prefix everything by -agent-<...>
   // FIXME - replace by PicoCli !!!
+  // FIXME - updateAgent(branch, version) -> updateAgent() 'latest
+  // FIXME - implement --help -h !!! - handle THROW !
+  @Command(name = "MyRobotLab"/*
+                               * , mixinStandardHelpOptions = true - cant do it
+                               */)
+  static class CmdOptions {
+
+    @Option(names = { "-jvm", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
+    public String jvm[];
+
+    @Option(names = { "-id", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
+    public String id;
+
+    // FIXME - how does this work ??? if specified is it "true" ?
+    @Option(names = { "-nb", "--no-banner" }, description = "prevents banner from showing")
+    public boolean noBanner = false;
+
+    @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
+    public boolean fork = false;
+
+    @Option(names = { "-nc", "--no-cli" }, description = "no command line interface")
+    public boolean noCli = false;
+
+    @Option(names = { "-ll", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+    public String loglevel = "info";
+
+    @Option(names = { "-i",
+        "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
+    public String install[];
+
+    @Option(names = { "-au", "--auto-update" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+    public boolean autoUpdate = false;
+
+    // FIXME - implement
+    @Option(names = { "-lv", "--list-versions" }, description = "list all possible versions for this branch")
+    public boolean listVersions = false;
+
+    // FIXME - does this get executed by another CommandLine ?
+    @Option(names = { "-a",
+        "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
+    public String agent;
+
+    @Option(names = { "-b", "--branch" }, description = "requested branch")
+    public String branch;
+
+    // FIXME - get version vs force version - perhaps just always print version
+    // in help
+    @Option(names = { "-v", "--version" }, description = "requested version")
+    public String version;
+
+    @Option(names = { "-s",
+        "--services" }, description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
+    public String[] services;
+
+    @Option(names = { "-c",
+        "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
+    public String client[];
+
+    // FIXME - when instances connect via ws - default will become true
+    @Option(names = { "-w", "--webgui" }, description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients")
+    public boolean webgui = false;
+
+    /*
+     * @Parameters(arity = "1..*", paramLabel = "FILE", description =
+     * "File(s) to process.") private String[] services;
+     */
+
+  }
+
   public static void main(String[] args) {
     try {
 
-      Logging logging = LoggingFactory.getInstance();
+      CmdOptions options = new CmdOptions();
 
-      // FIXME convert to picocmd or apachecli
-      // -agent \"-params -service ... \" string encoded
-      cmdline = new CmdLine(args);
-      logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+      // int exitCode = new CommandLine(options).execute(args);
+      new CommandLine(options).parseArgs(args);
 
-      log.info("agent cmdline [{}] will be relayed ", cmdline);
+      String[] agentArgs = new String[] { "-id", "agent-" + NameGenerator.getName(), "-ll", "WARN", "--no-banner" };
+      if (options.agent != null) {
+        agentArgs = options.agent.split(" ");
+      }
+
+      Process p = null;
+
+      log.info("user  args {}", Arrays.toString(args));
+      log.info("agent args {}", Arrays.toString(agentArgs));
+
+      Runtime.main(agentArgs);
+      if (agent == null) {
+        agent = (Agent) Runtime.start("agent", "Agent");
+        agent.options = options;
+      }
 
       Platform platform = Platform.getLocalInstance();
 
-      if (cmdline.containsKey("--autoUpdate")) {
-        autoUpdate = true;
+      if (options.branch == null) {
+        options.branch = platform.getBranch();
       }
 
-      if (cmdline.containsKey("--branch")) {
-        branchRequested = cmdline.getArgument("--branch", 0);
+      if (options.version == null) {
+        options.version = platform.getVersion();
       }
 
-      if (cmdline.containsKey("--version")) {
-        versionRequested = cmdline.getArgument("--version", 0);
-      }
+      agent.setBranch(options.branch);
+      agent.setVersion(options.version);
 
       // FIXME - have a list versions ... command line !!!
 
@@ -1194,63 +1118,45 @@ public class Agent extends Service {
       // if that is the case its needed to determine what is the "proposed"
       // branch & version if no
       // special command parameters were given
-      if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
-        // FIXME - add all possible command descriptions ..
-        System.out.println(String.format("%s branch %s version %s", platform.getBranch(), platform.getPlatformId(), platform.getVersion()));
-        return;
-      }
+      // FIXME HELP !!!! :D
+      // if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
+      // // FIXME - add all possible command descriptions ..
+      // System.out.println(String.format("%s branch %s version %s",
+      // platform.getBranch(), platform.getPlatformId(),
+      // platform.getVersion()));
+      // return;
+      // }
 
-      // "agent" command line - must be in quotes since the rest of the command
-      // line
-      // is relayed to the service
-      // Start with the default cmdline for the agent
-      String[] agentArgs = new String[] { "-isAgent", "-id", String.format("agent.%s.%s", formatter.format(new Date()), Platform.getLocalInstance().getPid()) };
-      if (cmdline.containsKey("-agent")) {
-        String str = cmdline.getArgument("-agent", 0);
-        String[] tmp = str.split(" ");
-        agentArgs = new String[tmp.length + 1];
-        for (int i = 0; i < agentArgs.length - 1; ++i) {
-          agentArgs[i] = tmp[i];
-        }
-        // -isAgent parameter is REQUIRED for Agent
-        agentArgs[agentArgs.length - 1] = "-isAgent";
-
-      }
-
-      agentCmdline = new CmdLine(agentArgs);
-
-      Process p = null;
-
-      log.info("agent args [{}]", agentCmdline);
-      Runtime.setLogLevel("WARN");
-      // agents runtime
-      Runtime.main(agentArgs);
-      if (agent == null) {
-        agent = (Agent) Runtime.start("agent", "Agent");
-      }
-
-      if (cmdline.containsKey("-webadmin") || cmdline.containsKey("--webadmin")) {
+      if (options.webgui) {
         agent.startWebGui();
+        // sub options set port default 8887
         // webgui.setAddress("127.0.0.1"); - for security...
       }
 
-      if (cmdline.containsKey("--autoUpdate")) {
-        // FIXME - call directly - update if possible - then spawn
-        // agent.processUpdates(null, branchRequested, versionRequested,
-        // autoUpdate);
-        agent.getLatest(branchRequested);
-        agent.autoUpdate(true);
+      if (options.autoUpdate) {
+        // lets check and get the latest jar if there is new one
+        agent.getLatestJar(agent.getBranch());
+        // the "latest" should have been downloaded
+        options.version = agent.getLatestLocalVersion(agent.getBranch());
       }
 
       // FIXME - use wsclient for remote access
-      if (!cmdline.containsKey("--client")) {
-        p = agent.spawn(args); // <-- agent's is now in charge of first
-      } else {
+      if (options.client != null) {
         Runtime.start("cli", "Cli");
+        return;
       }
 
-      // deprecate non-standard -install use --install short-version would be -i
-      if (cmdline.containsKey("-install") || cmdline.containsKey("--install")) {
+      // TODO - build command line ...
+      // FIXME - if another instances is spawned agent should wait for all
+      // instances to stop
+      p = agent.spawn(options); // <-- agent's is now in charge of first
+
+      // we start a timer to process future updates
+      if (options.autoUpdate) {
+        agent.autoUpdate(true);
+      }
+
+      if (options.install != null) {
         // wait for mrl instance to finish installing
         // then shutdown (addendum: check if supporting other processes)
         p.waitFor();
@@ -1260,5 +1166,18 @@ public class Agent extends Service {
     } catch (Exception e) {
       log.error("unsuccessful spawn", e);
     }
+  }
+
+  public String getBranch() {
+    return currentBranch;
+  }
+
+  public String getVersion() {
+    return currentVersion;
+  }
+
+  public String setVersion(String version) {
+    currentVersion = version;
+    return version;
   }
 }
