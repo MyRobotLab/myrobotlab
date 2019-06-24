@@ -365,22 +365,12 @@ public class Agent extends Service {
     }
   }
 
-  /**
-   * max complexity method to process and update
-   * 
-   * @throws IOException
-   *           e
-   * @throws URISyntaxException
-   *           e
-   * @throws InterruptedException
-   *           e
-   * @throws MrlException
-   * 
-   */
-  // synchronized public void update(String id, String branch, String version, Boolean allowRemote) throws IOException, URISyntaxException, InterruptedException, MrlException {
-    
-  // }
 
+  /**
+   * gets the latest jar if allowed to check remote ....  FIXME - should not need checkRemote - it's always remote !
+   * @param branch
+   * @param checkRemote
+   */
   public void getLatestJar(String branch, boolean checkRemote) {
     try {
       // check for updates
