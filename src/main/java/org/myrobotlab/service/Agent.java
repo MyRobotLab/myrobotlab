@@ -34,7 +34,6 @@ import picocli.CommandLine.Option;
 
 /**
  * <pre>
- * &#64;author GroG
  * 
  *         Agent is responsible for managing running instances of myrobotlab. It
  *         can start, stop and update myrobotlab.
@@ -43,8 +42,9 @@ import picocli.CommandLine.Option;
  *         FIXME - ws client connectivity and communication !!! 
  *         FIXME - Cli client ws enabled !! 
  *         FIXME - capability to update Agent from child
- *         FIXME - move CmdLine defintion to Runtime FIXME - convert Runtime's
- *         cmdline processing to CmdOptions Fixme - remove CmdLine
+ *         FIXME - move CmdLine defintion to Runtime 
+ *         FIXME - convert Runtime's cmdline processing to CmdOptions Fixme - remove CmdLine
+ *         FIXME !!! - remove stdin/stdout !!!! use sockets only
  * 
  *         FIXME - there are at least 3 different levels of updating 
  *          1. a global thread which only "checks" for updates 
@@ -995,13 +995,6 @@ public class Agent extends Service {
       }
       processes.put(pd.id, pd);
     }
-
-    // FIXME !!! - remove stdin/stdout !!!! use sockets only
-    // attach our cli to the latest instance
-    // *** interesting - not processing input/output will block the thread
-    // in the spawned process ***
-    // which I assume is the beginning main thread doing a write to std::out
-    // and it blocking before anything else can happen
 
     log.info("Agent finished spawn {}", formatter.format(new Date()));
     if (agent != null) {
