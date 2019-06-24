@@ -351,7 +351,7 @@ public class Agent extends Service {
         }
         log.info("WOOHOO ! updating to version {}", version);
         
-        getLatestJar(process.branch, true);
+        getLatestJar(process.branch);
         process.version = version;
         log.info("WOOHOO ! updated !");
         if (process.isRunning()) {
@@ -367,14 +367,14 @@ public class Agent extends Service {
 
 
   /**
-   * gets the latest jar if allowed to check remote ....  FIXME - should not need checkRemote - it's always remote !
+   * gets the latest jar if allowed to check remote ....
    * @param branch
    * @param checkRemote
    */
-  public void getLatestJar(String branch, boolean checkRemote) {
+  public void getLatestJar(String branch) {
     try {
-      // check for updates
-      String version = getLatestVersion(branch, checkRemote);
+      // check for latest
+      String version = getLatestVersion(branch, true);
 
       // check if branch and version exist locally
       if (!existsLocally(branch, version)) {
@@ -1197,7 +1197,7 @@ public class Agent extends Service {
         // and did "not" fork it would terminate itself
         options.fork = true;
         // lets check and get the latest jar if there is new one
-        agent.getLatestJar(agent.getBranch(), options.autoUpdate);
+        agent.getLatestJar(agent.getBranch());
         // the "latest" should have been downloaded
         options.version = agent.getLatestLocalVersion(agent.getBranch());
       }
