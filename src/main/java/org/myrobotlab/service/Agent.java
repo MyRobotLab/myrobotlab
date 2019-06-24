@@ -40,8 +40,9 @@ import picocli.CommandLine.Option;
  *         can start, stop and update myrobotlab.
  * 
  * 
- *         FIXME - ws client connectivity and communication !!! FIXME - Cli
- *         client ws enabled !! FIXME - capability to update Agent from child
+ *         FIXME - ws client connectivity and communication !!! 
+ *         FIXME - Cli client ws enabled !! 
+ *         FIXME - capability to update Agent from child
  *         FIXME - move CmdLine defintion to Runtime FIXME - convert Runtime's
  *         cmdline processing to CmdOptions Fixme - remove CmdLine
  * 
@@ -55,8 +56,9 @@ import picocli.CommandLine.Option;
  *         FIXME - testing test - without version test - remote unaccessable
  *         FIXME - spawn must be synchronized 2 threads (the timer and the user)
  *         FIXME - test naming an instance FIXME - test starting an old version
- *         FIXME - make hidden check latest version interval and make default
- *         interval check large FIXME - change Runtime's cli !!!
+ *         FIXME - make hidden check latest version interval and make default interval check large 
+ *         FIXME - change Runtime's cli !!!
+ *         FIXME - check user define services for Agent
  *
  * </pre>
  */
@@ -922,7 +924,6 @@ public class Agent extends Service {
 
     cmd.add("org.myrobotlab.service.Runtime");
 
-    // FIXME - user defined services
     if (!pd.userDefinedServices) {
       cmd.add("-service");
       // cmd.add("webgui");

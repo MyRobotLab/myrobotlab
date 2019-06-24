@@ -35,19 +35,13 @@ public class ProcessData implements Serializable {
   // TODO - default more memory ? also mebbe have a jvmAppend flag vs replace ?
   public String jvm[];
 
-  @Deprecated /*
-               * don't think this is needed --services should just be
-               * passed/processed
-               */
+  // FIXME - remove
   public boolean userDefinedServices = false;
 
   /**
    * current state of this process
    */
   public stateType state = stateType.stopped;
-
-  @Deprecated /* all cmd line parsing should be done by picocli */
-  public CmdLine inCmdLine = null;
 
   // is this really used for anything ?
   @Deprecated
