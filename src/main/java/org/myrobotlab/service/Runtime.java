@@ -74,7 +74,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
-import org.myrobotlab.service.Agent.CmdOptions;
+import org.myrobotlab.service.Agent.AgentCmdOptions;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Get;
@@ -177,7 +177,7 @@ public class Runtime extends Service implements MessageListener {
   /**
    * command line options
    */
-  CmdOptions options;
+  AgentCmdOptions options;
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
