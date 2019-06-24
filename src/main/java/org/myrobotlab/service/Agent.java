@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.codec.CodecJson;
@@ -95,7 +96,7 @@ public class Agent extends Service {
    */
   boolean autoCheckForUpdate = false;
 
-  Set<String> possibleVersions = new HashSet<String>();
+  Set<String> possibleVersions = new TreeSet<String>();
 
   // for more info -
   // http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/develop/api/json
@@ -349,10 +350,15 @@ public class Agent extends Service {
           log.info("same version {}", version);
           continue;
         }
+        
+        // we have a possible update
+        
         log.info("WOOHOO ! updating to version {}", version);
-
-        getLatestJar(process.branch);
         process.version = version;
+        process.jarPath = new File(getJarName(process.branch, process.version)).getAbsolutePath();
+        
+        getLatestJar(process.branch);
+        
         log.info("WOOHOO ! updated !");
         if (process.isRunning()) {
           log.info("its running - we should restart");

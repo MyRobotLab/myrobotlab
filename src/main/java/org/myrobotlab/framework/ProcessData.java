@@ -27,8 +27,8 @@ public class ProcessData implements Serializable {
   public Long startTs;
   public Long stopTs;
   public String jarPath = null;
-
   public String javaExe = null;
+  public Long lastUpdatedTs;
 
   public boolean autoUpdate = false;
 
