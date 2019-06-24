@@ -350,7 +350,7 @@ public class Agent extends Service {
           continue;
         }
         log.info("WOOHOO ! updating to version {}", version);
-        
+
         getLatestJar(process.branch);
         process.version = version;
         log.info("WOOHOO ! updated !");
@@ -365,11 +365,10 @@ public class Agent extends Service {
     }
   }
 
-
   /**
    * gets the latest jar if allowed to check remote ....
+   * 
    * @param branch
-   * @param checkRemote
    */
   public void getLatestJar(String branch) {
     try {
@@ -1193,7 +1192,8 @@ public class Agent extends Service {
       if (options.autoUpdate) {
         // if the agent is going to auto update, its effectively "forked"
         // because it will potentially need to restart all instances
-        // a restart terminates the instance - if the agent terminated an instance
+        // a restart terminates the instance - if the agent terminated an
+        // instance
         // and did "not" fork it would terminate itself
         options.fork = true;
         // lets check and get the latest jar if there is new one
