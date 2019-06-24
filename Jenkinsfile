@@ -57,13 +57,9 @@ node { // use any node
 	   }
    }
    stage('extended-verify'){
-     steps {
-       script {
-         if (params.REQUESTED_ACTION == 'greeting') {
-           echo 'param is greeting'
-         } 
-       }
-     }   	   
+     if (params.REQUESTED_ACTION == 'greeting') {
+       echo 'param is greeting'
+     } 	   
    }
    stage('javadoc'){
 	   if (isUnix()) {
