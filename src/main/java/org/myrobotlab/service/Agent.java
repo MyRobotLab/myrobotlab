@@ -350,7 +350,9 @@ public class Agent extends Service {
           continue;
         }
         log.info("WOOHOO ! updating to version {}", version);
-        update(process.id, process.branch, null, true);
+        
+        getLatestJar(process.branch, true);
+        process.version = version;
         log.info("WOOHOO ! updated !");
         if (process.isRunning()) {
           log.info("its running - we should restart");
@@ -375,9 +377,9 @@ public class Agent extends Service {
    * @throws MrlException
    * 
    */
-  synchronized public void update(String id, String branch, String version, Boolean allowRemote) throws IOException, URISyntaxException, InterruptedException, MrlException {
-    getLatestJar(branch, allowRemote);
-  }
+  // synchronized public void update(String id, String branch, String version, Boolean allowRemote) throws IOException, URISyntaxException, InterruptedException, MrlException {
+    
+  // }
 
   public void getLatestJar(String branch, boolean checkRemote) {
     try {
