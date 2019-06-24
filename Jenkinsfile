@@ -57,17 +57,13 @@ node { // use any node
 	   }
    }
    stage('extended-verify'){
-   	   when {
-           // Only say hello if a "greeting" is requested
-           expression { params.REQUESTED_ACTION == 'greeting' }
-       } steps {
-		   if (isUnix()) {
-		     // sh "'${mvnHome}/bin/mvn' verify"
-		     echo "Hello, bitwiseman!"
-		   } else {
-		     // bat(/"${mvnHome}\bin\mvn" verify/)
-		   }
-	   }
+     steps {
+       script {
+         if (params.REQUESTED_ACTION == 'greeting') {
+           echo 'param is greeting'
+         } 
+       }
+     }   	   
    }
    stage('javadoc'){
 	   if (isUnix()) {
