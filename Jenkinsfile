@@ -6,6 +6,14 @@ node { // use any node
 
    // withEnv(javaEnv) {
    
+   parameters {
+        choice(
+            choices: ['greeting' , 'silence'],
+            description: 'this is the description',
+            name: 'REQUESTED_ACTION')
+    }
+   
+   
    def mvnHome
    stage('preparation') { // for display purposes
       // Get some code from a GitHub repository
@@ -46,6 +54,19 @@ node { // use any node
 	     sh "'${mvnHome}/bin/mvn' verify"
 	   } else {
 	     bat(/"${mvnHome}\bin\mvn" verify/)
+	   }
+   }
+   stage('extended-verify'){
+   	   when {
+           // Only say hello if a "greeting" is requested
+           expression { params.REQUESTED_ACTION == 'greeting' }
+       } steps {
+		   if (isUnix()) {
+		     // sh "'${mvnHome}/bin/mvn' verify"
+		     echo "Hello, bitwiseman!"
+		   } else {
+		     // bat(/"${mvnHome}\bin\mvn" verify/)
+		   }
 	   }
    }
    stage('javadoc'){
