@@ -772,7 +772,7 @@ public class Agent extends Service {
   }
 
   public String publishTerminated(String id) {
-    log.info("publishTerminated - terminated %s - restarting", id);
+    log.info("publishTerminated - terminated {} - restarting", id);
 
     if (!processes.containsKey(id)) {
       log.error("processes {} not found");
@@ -1199,6 +1199,11 @@ public class Agent extends Service {
       }
 
       if (options.autoUpdate) {
+        // if the agent is going to auto update, its effectively "forked"
+        // because it will potentially need to restart all instances
+        // a restart terminates the instance - if the agent terminated an instance
+        // and did "not" fork it would terminate itself
+        options.fork = true;
         // lets check and get the latest jar if there is new one
         agent.getLatestJar(agent.getBranch(), options.autoUpdate);
         // the "latest" should have been downloaded
