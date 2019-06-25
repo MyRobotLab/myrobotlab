@@ -2227,8 +2227,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
         cm.send(Message.createMessage(this, serviceName, "addListener", listener));
       }
     } else {
-      MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-      cm.send(Message.createMessage(this, topicName, "addListener", listener));
+      if (topicMethod.contains("*")) { // FIXME "any regex expression
+        Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
+        for (String method : tnames) {
+          MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
+          cm.send(Message.createMessage(this, topicName, "addListener", listener));
+        }
+      } else {
+        MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+        cm.send(Message.createMessage(this, topicName, "addListener", listener));
+      }
     }
   }
 
@@ -2630,6 +2638,5 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public String getSwagger() {
     return null;
   }
-
 
 }
