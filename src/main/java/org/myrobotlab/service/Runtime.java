@@ -1161,14 +1161,14 @@ public class Runtime extends Service implements MessageListener {
    */
   public static void main(String[] args) {
     
-    CmdOptions options = new CmdOptions();
+    CmdOptions optionsx = new CmdOptions();
 
     // int exitCode = new CommandLine(options).execute(args);
-    new CommandLine(options).parseArgs(args);
+    // new CommandLine(options).parseArgs(args);
     
-    if (!options.noBanner) {
+//     if (!options.noBanner) {
       System.out.println(banner);    
-    }
+//    }
     
     System.out.println(Arrays.toString(args));
     // global for this process
@@ -1184,14 +1184,19 @@ public class Runtime extends Service implements MessageListener {
     try {
 
       // TODO - replace with commons-cli -l
-      // logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-      logging.setLevel(options.loglevel);
+      logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+//      logging.setLevel(options.loglevel);
       
       Platform platform = Platform.getLocalInstance();
-
+/*
       if (options.id != null) {
         platform.setId(options.id);
       } 
+*/      
+      if (cmdline.containsKey("-id")) {
+        platform.setId(cmdline.getArgument("-id", 0));
+      } 
+
 
       /*
       if (cmdline.containsKey("-fromAgent")) {
