@@ -83,8 +83,6 @@ import org.myrobotlab.swagger.Path;
 import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
 
-import picocli.CommandLine;
-
 /**
  * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
  * VAR OF RUNTIME !

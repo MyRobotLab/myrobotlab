@@ -1155,7 +1155,7 @@ public class Agent extends Service {
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
 
-      String[] agentArgs = new String[] { "-id", "agent-" + NameGenerator.getName(), "-ll", "WARN", "--no-banner" };
+      String[] agentArgs = new String[] { "-id", "agent-" + NameGenerator.getName(), "-ll", "WARN"};
       if (options.agent != null) {
         agentArgs = options.agent.split(" ");
       }
