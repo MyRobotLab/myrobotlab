@@ -657,6 +657,28 @@ public class Agent extends Service {
     }
     return latest;
   }
+  
+  public Set<String> getLocalVersions() {
+    Set<String> versions = new TreeSet<>();
+    // get local file system versions
+    File branchDir = new File(BRANCHES_ROOT);
+    // get local existing versions
+    File[] listOfFiles = branchDir.listFiles();
+    for (int i = 0; i < listOfFiles.length; ++i) {
+      File file = listOfFiles[i];
+      if (file.isDirectory()) {
+        // if (file.getName().startsWith(branch)) {
+          // String version = file.getName().substring(branch.length() + 1);// getFileVersion(file.getName());
+          // if (version != null) {
+            int pos = file.getName().lastIndexOf("-");
+            String branchAndVersion = file.getName().substring(0, pos - 1) + " " + file.getName().substring(pos + 1); 
+            versions.add(branchAndVersion);
+          //}
+        //}
+      }
+    }
+    return versions;
+  }
 
   public Set<String> getLocalVersions(String branch) {
     Set<String> versions = new TreeSet<>();
@@ -946,6 +968,11 @@ public class Agent extends Service {
     cmd.add("-id");
     cmd.add(pd.id);
     
+    if (options.logLevel != null) {
+      cmd.add("--log-level");
+      cmd.add(options.logLevel);
+    }
+    
     if (options.install != null) {
       cmd.add("--install");
       for (String serviceType : options.install) {
@@ -1098,22 +1125,29 @@ public class Agent extends Service {
     @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
     public boolean fork = false;
 
+    /**<pre>
     @Option(names = { "-nc", "--no-cli" }, description = "no command line interface")
     public boolean noCli = false;
+    </pre>
+    */
 
     @Option(names = { "-ll", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
-    public String loglevel = "info";
+    public String logLevel = "info";
 
     @Option(names = { "-i",
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
 
-    @Option(names = { "-au", "--auto-update" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+    @Option(names = { "-au", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
     public boolean autoUpdate = false;
 
     // FIXME - implement
     @Option(names = { "-lv", "--list-versions" }, description = "list all possible versions for this branch")
     public boolean listVersions = false;
+    
+    // FIXME - implement
+    @Option(names = { "-ua", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
+    public boolean updateAgent = false;
 
     // FIXME - does this get executed by another CommandLine ?
     @Option(names = { "-a",
@@ -1168,11 +1202,19 @@ public class Agent extends Service {
 
       log.info("user  args {}", Arrays.toString(args));
       log.info("agent args {}", Arrays.toString(agentArgs));
-
+      
       Runtime.main(agentArgs);
       if (agent == null) {
         agent = (Agent) Runtime.start("agent", "Agent");
         agent.options = options;
+      }
+      
+      if (options.listVersions) {
+        System.out.println("available local versions");
+        for (String bv : agent.getLocalVersions()) {
+          System.out.println(bv);
+        }
+        agent.shutdown();
       }
 
       Platform platform = Platform.getLocalInstance();
