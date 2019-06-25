@@ -16,6 +16,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.lang.NameGenerator;
 
 /**
  * The purpose of this class is to retrieve all the detailed information
@@ -335,6 +336,10 @@ public class Platform implements Serializable {
   }
 
   public String getId() {
+    // null ids are not allowed
+    if (id == null) {
+      id = NameGenerator.getName();
+    }
     return id;
   }
 

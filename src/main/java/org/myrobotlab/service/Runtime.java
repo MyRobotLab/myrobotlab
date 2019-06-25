@@ -74,7 +74,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
-import org.myrobotlab.service.Agent.AgentCmdOptions;
+import org.myrobotlab.service.Agent.CmdOptions;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Get;
@@ -82,6 +82,8 @@ import org.myrobotlab.swagger.Parameter;
 import org.myrobotlab.swagger.Path;
 import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
+
+import picocli.CommandLine;
 
 /**
  * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
@@ -177,7 +179,7 @@ public class Runtime extends Service implements MessageListener {
   /**
    * command line options
    */
-  AgentCmdOptions options;
+  CmdOptions options;
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
@@ -1158,7 +1160,16 @@ public class Runtime extends Service implements MessageListener {
    *
    */
   public static void main(String[] args) {
-    System.out.println(banner);    
+    
+    CmdOptions options = new CmdOptions();
+
+    // int exitCode = new CommandLine(options).execute(args);
+    new CommandLine(options).parseArgs(args);
+    
+    if (!options.noBanner) {
+      System.out.println(banner);    
+    }
+    
     System.out.println(Arrays.toString(args));
     // global for this process
     globalArgs = args;
@@ -1173,12 +1184,13 @@ public class Runtime extends Service implements MessageListener {
     try {
 
       // TODO - replace with commons-cli -l
-      logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-
+      // logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+      logging.setLevel(options.loglevel);
+      
       Platform platform = Platform.getLocalInstance();
 
-      if (cmdline.containsKey("-id")) {
-        platform.setId(cmdline.getArgument("-id", 0));
+      if (options.id != null) {
+        platform.setId(options.id);
       } 
 
       /*

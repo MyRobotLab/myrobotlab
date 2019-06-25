@@ -113,7 +113,7 @@ public class Agent extends Service {
   /**
    * command line options for the agent
    */
-  AgentCmdOptions options;
+  CmdOptions options;
 
   String versionPrefix = "1.1.";
 
@@ -815,7 +815,7 @@ public class Agent extends Service {
    * @throws URISyntaxException
    * @throws InterruptedException
    */
-  public Process spawn(AgentCmdOptions options) throws IOException, URISyntaxException, InterruptedException {
+  public Process spawn(CmdOptions options) throws IOException, URISyntaxException, InterruptedException {
     if (ProcessData.agent == null) {
       ProcessData.agent = this;
     }
@@ -1072,7 +1072,7 @@ public class Agent extends Service {
   @Command(name = "MyRobotLab"/*
                                * , mixinStandardHelpOptions = true - cant do it
                                */)
-  static class AgentCmdOptions {
+  static class CmdOptions {
 
     @Option(names = { "-jvm", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
     public String jvm[];
@@ -1139,7 +1139,7 @@ public class Agent extends Service {
   public static void main(String[] args) {
     try {
 
-      AgentCmdOptions options = new AgentCmdOptions();
+      CmdOptions options = new CmdOptions();
 
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
