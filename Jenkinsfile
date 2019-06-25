@@ -61,6 +61,15 @@ node { // use any node
        echo 'param is greeting'
      } 	   
    }
+   stage('junit') {
+      junit '**/target/surefire-reports/TEST-*.xml'
+   }
+   stage('archive') {
+         archiveArtifacts 'target/*.jar'      
+   } 
+   stage('jacoco') {
+        jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+   } 
    stage('javadoc'){
 	   if (isUnix()) {
 	     sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
@@ -68,11 +77,6 @@ node { // use any node
 	     bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
 	   }
    }
-   stage('results') {
-      junit '**/target/surefire-reports/TEST-*.xml'
-      archiveArtifacts 'target/*.jar'      
-      jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes',sourcePattern: 'src/main/java',exclusionPattern: 'src/test*')
-   } 
    stage('publish') {
    
 //    	def server = Artifactory.server 'artifactory01' 
