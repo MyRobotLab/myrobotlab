@@ -17,9 +17,10 @@
 	    	maven or jenkins can do this
 	    	
 	     -->
-	    <build.number>${global.build.number}</build.number>	    
-	    <username>${global.username}</username>	    
-	    <platform>${global.platform}</platform>	    
+	    <build.number>${BUILD_NUMBER}</build.number>
+	    <GitBranch>${BRANCH_NAME}</GitBranch>
+	    <username>${NODE_NAME}</username>	    
+	    <platform>${NODE_LABELS}</platform>	    
 	    <!-- end env vars -->
 	    
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -1170,6 +1171,11 @@
     <version>2.1.5</version>
   </dependency>
   <dependency>
+    <groupId>info.picocli</groupId>
+    <artifactId>picocli</artifactId>
+    <version>4.0.0-beta-2</version>
+  </dependency>
+  <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-api</artifactId>
     <version>1.7.21</version>
@@ -1563,7 +1569,7 @@
 									      
 										<!-- maven git plugin id info -->
 										  <GitTags>${git.tags}</GitTags>
-										  <GitBranch>${git.branch}</GitBranch>
+										  <GitBranch>${GitBranch}</GitBranch>
 										  <GitDirty>${git.dirty}</GitDirty>
 										  <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
 										  <GitCommitId>${git.commit.id}</GitCommitId>

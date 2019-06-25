@@ -1,12 +1,14 @@
 package org.myrobotlab.net;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 public class Http {
@@ -15,6 +17,8 @@ public class Http {
    * HTTPCLIENT SHOULD ABEND TO THE ENV SET HERE !!!!
    * http://stackoverflow.com/questions/15927079/how-to-use-httpsurlconnection-
    * through-proxy-by-setproperty
+   * 
+   * FIXME - return a Callable !
    */
 
   public final static Logger log = LoggerFactory.getLogger(Http.class);
@@ -43,7 +47,7 @@ public class Http {
       return out.toByteArray();
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("get threw", e);
       return null;
     } finally {
       try {
@@ -67,6 +71,51 @@ public class Http {
     int v = Integer.parseInt(version);
     log.info(version + " " + v);
 
+  }
+  
+  /**
+   * download the file as {filename}.part until it is complete, then do an os rename
+   * this is a common safety technique, so that other processes or threads do not consume
+   * a partially downloaded file.
+   * 
+   * @param theUrl
+   * @param outFile
+   */
+  public static void getSafePartFile(String theUrl, String outFile) {
+    getSafePartFile(theUrl, outFile, true);
+  }
+  
+  public static void getSafePartFile(String theUrl, String outFile, boolean removePrevious) {
+    try {
+        get(theUrl, outFile  + ".part");
+        File f = new File(outFile);
+        if (f.exists() && removePrevious) {
+          f.delete();
+        }
+        File newFile = new File(outFile  + ".part");
+        newFile.renameTo(new File(outFile));
+    } catch(Exception e) {
+      log.error("getSafePartFile threw", e);
+    }
+  }
+
+  public static void get(String theUrl, String outFile) throws IOException {
+    log.info("get {} --save to--> {}", theUrl, outFile);
+
+      URL url = new URL(theUrl);
+      URLConnection urlConnection = url.openConnection();
+      InputStream in = urlConnection.getInputStream();
+      FileOutputStream out = new FileOutputStream(outFile);
+      
+      byte[] buffer = new byte[8192]; // you can configure the buffer size
+      int length;
+
+      while ((length = in.read(buffer)) != -1) {
+        out.write(buffer, 0, length); // copy streams
+      }
+      
+      in.close(); // call this in a finally block
+      out.close();
   }
 
 }

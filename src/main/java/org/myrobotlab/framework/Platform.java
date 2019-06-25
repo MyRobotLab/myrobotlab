@@ -10,9 +10,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+
+import org.myrobotlab.io.FileIO;
+import org.myrobotlab.lang.NameGenerator;
 
 /**
  * The purpose of this class is to retrieve all the detailed information
@@ -149,22 +153,22 @@ public class Platform implements Serializable {
       // manifest
       Map<String, String> manifest = getManifest();
 
-      if (manifest.containsKey("Branch")) {
-        platform.branch = manifest.get("Branch");
+      if (manifest.containsKey("GitBranch")) {
+        platform.branch = manifest.get("GitBranch");
       } else {
-        platform.branch = "develop";
+        platform.branch = "unknownBranch";
       }
 
       if (manifest.containsKey("Commit")) {
         platform.commit = manifest.get("Commit");
       } else {
-        platform.commit = "unknown";
+        platform.commit = "unknownCommit";
       }
 
       if (manifest.containsKey("Implementation-Version")) {
         platform.mrlVersion = manifest.get("Implementation-Version");
       } else {
-        platform.mrlVersion = "unknown";
+        platform.mrlVersion = "unknownVersion";
       }
 
       // motd
@@ -279,55 +283,28 @@ public class Platform implements Serializable {
     return getArch().equals(ARCH_X86);
   }
 
-  static public final String getRoot() {
-    try {
-
-      String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-      // log.info("getRoot {}", source);
-      return source;
-    } catch (Exception e) {
-      e.printStackTrace();
-      //log.info("getRoot threw {}", e.getMessage());
-      return null;
-    }
-  }
-
   static public Map<String, String> getManifest() {
     Map<String, String> ret = new TreeMap<String, String>();
     try {
-      File f = new File(getRoot());
-      Class<?> clazz = Platform.class;
-      String className = clazz.getSimpleName() + ".class";
-      String classPath = clazz.getResource(className).toString();
+      String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
       InputStream in = null;
-
-      if (!classPath.startsWith("jar")) {
-        // log.info("manifest is \"not\" in jar - using file {}/META-INF/MANIFEST.MF", f.getAbsolutePath());
-        // File file = new
-        // File(classLoader.getResource("file/test.xml").getFile());
-        in = clazz.getResource("/META-INF/MANIFEST.MF").openStream();
-
+      if (source.endsWith("jar")) {
+        // runtime
+        in = Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
       } else {
-        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-        URL url = new URL(manifestPath);
-        // log.info("jar url {}", url);
-        in = url.openStream();
+        // IDE - version ...
+        in = Platform.class.getResource("/MANIFEST.MF").openStream();
       }
-
-      Manifest manifest = new Manifest(in);
-      ret.putAll(getAttributes(null, manifest.getMainAttributes()));
-      final Map<String, Attributes> attrs = manifest.getEntries();
-      Iterator<String> it = attrs.keySet().iterator();
-      while (it.hasNext()) {
-        String key = it.next();
-        Attributes attributes = attrs.get(key);
-        ret.putAll(getAttributes(key, attributes));
+      Properties p = new Properties();
+      p.load(in);
+      
+      for (final String name : p.stringPropertyNames()) {
+        ret.put(name, p.getProperty(name));
       }
-
       in.close();
     } catch (Exception e) {
       e.printStackTrace();
-      //log.warn("getManifest threw", e);
+      // log.warn("getManifest threw", e);
     }
     return ret;
   }
@@ -359,6 +336,10 @@ public class Platform implements Serializable {
   }
 
   public String getId() {
+    // null ids are not allowed
+    if (id == null) {
+      id = NameGenerator.getName();
+    }
     return id;
   }
 
@@ -373,27 +354,26 @@ public class Platform implements Serializable {
   public Date getStartTime() {
     return startTime;
   }
-  
+
   public static boolean isVirtual() {
     Platform p = getLocalInstance();
     return p.isVirtual;
   }
-  
+
   public static void setVirtual(boolean b) {
     Platform p = getLocalInstance();
     p.isVirtual = b;
   }
-  
 
   public static void main(String[] args) {
     try {
 
       Platform platform = Platform.getLocalInstance();
-//      log.info("platform : {}", platform.toString());
-//      log.info("build {}", platform.getBuild());
-//      log.info("branch {}", platform.getBranch());
-//      log.info("commit {}", platform.getCommit());
-//      log.info("toString {}", platform.toString());
+      // log.info("platform : {}", platform.toString());
+      // log.info("build {}", platform.getBuild());
+      // log.info("branch {}", platform.getBranch());
+      // log.info("commit {}", platform.getCommit());
+      // log.info("toString {}", platform.toString());
 
     } catch (Exception e) {
       e.printStackTrace();

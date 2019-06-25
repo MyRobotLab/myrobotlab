@@ -47,35 +47,36 @@ public class AboutDialog extends JDialog implements ActionListener, MouseListene
 
     Platform platform = Platform.getLocalInstance();
 
-    JPanel content = new JPanel(new BorderLayout());
-    content.setPreferredSize(new Dimension(350, 150));
-    getContentPane().add(content);
+    JPanel borderLayout = new JPanel(new BorderLayout());
+    borderLayout.setPreferredSize(new Dimension(350, 150));
+    getContentPane().add(borderLayout);
 
     // picture
     JLabel pic = new JLabel();
     pic.setIcon(Util.getResourceIcon("mrl_logo_about_128.png"));
-    content.add(pic, BorderLayout.WEST);
+    borderLayout.add(pic, BorderLayout.WEST);
 
     JPanel center = new JPanel(new GridLayout(0, 1));
-    JLabel link = new JLabel("<html><p align=center><a href=\"http://myrobotlab.org\">http://myrobotlab.org</a><html>");
+    borderLayout.add(center, BorderLayout.CENTER);
+    
+    JLabel link = new JLabel("<html><a href=\"http://myrobotlab.org\">http://myrobotlab.org</a><html>");
     link.addMouseListener(this);
-    content.add(center, BorderLayout.CENTER);
-
     center.add(link);
+    
     JPanel flow = new JPanel();
     flow.add(new JLabel("platform "));
     flow.add(new JLabel(platform.toString()));
     center.add(flow);
 
     flow = new JPanel();
-    flow.add(new JLabel("version "));
-    flow.add(new JLabel(platform.getVersion()));
-    center.add(flow);
-
-    flow = new JPanel();
     flow.add(new JLabel("branch "));
     flow.add(new JLabel(platform.getBranch()));
     flow.setAlignmentX(LEFT_ALIGNMENT);
+    center.add(flow);
+    
+    flow = new JPanel();
+    flow.add(new JLabel("version "));
+    flow.add(new JLabel(platform.getVersion()));
     center.add(flow);
 
     JPanel buttonPane = new JPanel();

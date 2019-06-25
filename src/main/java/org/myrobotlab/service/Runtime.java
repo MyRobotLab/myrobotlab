@@ -74,6 +74,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.service.Agent.CmdOptions;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Get;
@@ -82,8 +83,11 @@ import org.myrobotlab.swagger.Path;
 import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
 
+import picocli.CommandLine;
+
 /**
- * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE VAR OF RUNTIME !
+ * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
+ * VAR OF RUNTIME !
  * 
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
@@ -144,7 +148,7 @@ public class Runtime extends Service implements MessageListener {
   /**
    * the id of the agent which spawned us
    */
-  static String fromAgent = null;
+  // static String fromAgent = null;
 
   /**
    * Pid file of this process
@@ -171,6 +175,11 @@ public class Runtime extends Service implements MessageListener {
    */
   private Repo repo = Repo.getInstance();
   private ServiceData serviceData = ServiceData.getLocalInstance();
+  
+  /**
+   * command line options
+   */
+  CmdOptions options;
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
@@ -234,7 +243,7 @@ public class Runtime extends Service implements MessageListener {
   static private CmdLine cmdline = null;
 
   private static String gateway;
-  
+
   static Set<String> networkPeers = null;
 
   Locale locale;
@@ -491,10 +500,6 @@ public class Runtime extends Service implements MessageListener {
     return null;
   }
 
-  static public boolean fromAgent() {
-    return fromAgent != null;
-  }
-
   /**
    * Runs the garbage collector.
    */
@@ -640,7 +645,7 @@ public class Runtime extends Service implements MessageListener {
     } catch (Exception e) {
       Logging.logError(e);
     }
-    
+
     if (ret.size() == 0) {
       // if we don't have a "real" ip address - we always have home
       ret.add("127.0.0.1");
@@ -663,7 +668,8 @@ public class Runtime extends Service implements MessageListener {
   static public Set<String> getNetworkPeers() throws UnknownHostException {
     networkPeers = new TreeSet<>();
     // String myip = InetAddress.getLocalHost().getHostAddress();
-    List<String> myips = getLocalAddresses(); // TODO - if nothing else - 127.0.0.1
+    List<String> myips = getLocalAddresses(); // TODO - if nothing else -
+                                              // 127.0.0.1
     for (String myip : myips) {
       if (myip.equals("127.0.0.1")) {
         log.info("This PC is not connected to any network!");
@@ -1140,6 +1146,12 @@ public class Runtime extends Service implements MessageListener {
     return ret;
   }
 
+  static String banner = "   _____         __________      ___.           __  .____          ___.    \n"
+      + "  /     \\ ___.__.\\______   \\ ____\\_ |__   _____/  |_|    |   _____ \\_ |__  \n"
+      + " /  \\ /  <   |  | |       _//  _ \\| __ \\ /  _ \\   __\\    |   \\__  \\ | __ \\ \n"
+      + "/    Y    \\___  | |    |   (  <_> ) \\_\\ (  <_> )  | |    |___ / __ \\| \\_\\ \\\n" + "\\____|__  / ____| |____|_  /\\____/|___  /\\____/|__| |_______ (____  /___  /\n"
+      + "        \\/\\/             \\/           \\/                    \\/    \\/    \\/ \n            resistance is futile, we have cookies and robots ...";
+
   /*
    * Main starting method of MyRobotLab Parses command line options
    *
@@ -1148,6 +1160,16 @@ public class Runtime extends Service implements MessageListener {
    *
    */
   public static void main(String[] args) {
+    
+    CmdOptions options = new CmdOptions();
+
+    // int exitCode = new CommandLine(options).execute(args);
+    new CommandLine(options).parseArgs(args);
+    
+    if (!options.noBanner) {
+      System.out.println(banner);    
+    }
+    
     System.out.println(Arrays.toString(args));
     // global for this process
     globalArgs = args;
@@ -1162,18 +1184,16 @@ public class Runtime extends Service implements MessageListener {
     try {
 
       // TODO - replace with commons-cli -l
-      logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
-
+      // logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+      logging.setLevel(options.loglevel);
+      
       Platform platform = Platform.getLocalInstance();
 
-      if (cmdline.containsKey("-id")) {
-        platform.setId(cmdline.getArgument("-id", 0));
-      } /*
-         * else { SimpleDateFormat formatter = new
-         * SimpleDateFormat("yyyyMMdd.HHmmssSSS"); id =
-         * String.format("runtime.%s.%s", formatter.format(startDate), pid); }
-         */
+      if (options.id != null) {
+        platform.setId(options.id);
+      } 
 
+      /*
       if (cmdline.containsKey("-fromAgent")) {
         if (cmdline.getArgumentCount("-fromAgent") != 1) {
           log.error("if process is -fromAgent a id is required - no id found");
@@ -1182,6 +1202,7 @@ public class Runtime extends Service implements MessageListener {
         // assigning agent's id
         fromAgent = cmdline.getArgument("-fromAgent", 0);
       }
+      */
 
       if (cmdline.containsKey("-v") || cmdline.containsKey("--version")) {
         System.out.print(Runtime.getVersion());
@@ -1593,26 +1614,6 @@ public class Runtime extends Service implements MessageListener {
       log.error("releaseAll threw - continuing to shutdown", e);
     }
 
-    Platform platform = Platform.getLocalInstance();
-
-    // removing appropriate pid file
-    try {
-      String pidFileName = null;
-      if (fromAgent != null) {
-        // from agent
-        pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, platform.getId());
-      } else {
-        // "not" from agent
-        pidFileName = String.format("%s/%s.pid", PID_DIR, platform.getId());
-      }
-
-      log.info("removing pid file {}", pidFileName);
-      File f = new File(pidFileName);
-      f.delete();
-    } catch (Exception e) {
-      log.error("removing pid file failed", e);
-    }
-
     // In unusual situations, System.exit(int) might not actually stop the
     // program.
     // Runtime.getRuntime().halt(int) on the other hand, always does.
@@ -1752,38 +1753,7 @@ public class Runtime extends Service implements MessageListener {
     // isAgent == make default directory (with pid) if custom not supplied
     // fromAgent == needs agentId
     // neither ... == normal pid file !isAgent & !fromAgent
-    String id = platform.getId();
-    String pid = platform.getPid();
-
-    // write pid file
-    try {
-
-      // regular (neither)
-      String pidFileName = String.format("%s/%s.pid", PID_DIR, id);
-
-      // fromAgent
-      if (fromAgent != null) {
-        // if I'm being created from an Agent - it sends me its agentId
-        // so I can communicated with it
-        pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, id);
-      }
-
-      pidFile = new File(pidFileName);
-      new File(pidFile.getParent()).mkdirs();
-
-      if (isAgent()) {
-        // isAgent make directory
-        pidFile.mkdirs();
-      } else {
-        // create file for (neither) or fromAgent
-        FileOutputStream fos = new FileOutputStream(pidFile);
-        fos.write(pid.getBytes());
-        fos.close();
-      }
-
-    } catch (Exception e) {
-      log.error("pid file creation failed", e);
-    }
+  
 
     // setting the id and the platform
     platform = Platform.getLocalInstance();
@@ -1843,7 +1813,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("============== normalized ==============");
     long startTime = platform.getStartTime().getTime();
     log.info("{} - GMT - {}", sdf.format(startTime), gmtf.format(startTime));
-    log.info("pid {}", pid);
+    log.info("pid {}", platform.getPid());
     log.info("hostname {}", platform.getHostname());
     log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getBitness(), platform.getOS());
     log.info("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild());
@@ -2535,10 +2505,17 @@ public class Runtime extends Service implements MessageListener {
     meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("com.google.code.gson", "gson", "2.8.5");
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.atmosphere", "wasync", "2.1.5");
+    meta.addDependency("com.google.code.gson", "gson", "2.8.5"); // apache 2.0
+                                                                 // license
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); // apache 2.0
+                                                            // license
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2"); // apache
+                                                                            // 2.0
+                                                                            // license
+    meta.addDependency("org.atmosphere", "wasync", "2.1.5"); // apache 2.0
+                                                             // license
+    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2"); // apache 2.0
+                                                                   // license
 
     // all your logging needs
     meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
@@ -2693,7 +2670,7 @@ public class Runtime extends Service implements MessageListener {
   public static void exportAll(String filename) throws IOException {
     // currently only support python - maybe in future we'll support js too
     String python = LangUtils.toPython();
-    Files.write(Paths.get(filename), python.toString().getBytes());    
+    Files.write(Paths.get(filename), python.toString().getBytes());
   }
 
 }

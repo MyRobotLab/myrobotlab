@@ -6,6 +6,14 @@ node { // use any node
 
    // withEnv(javaEnv) {
    
+   parameters {
+        choice(
+            choices: ['greeting' , 'silence'],
+            description: 'this is the description',
+            name: 'REQUESTED_ACTION')
+    }
+   
+   
    def mvnHome
    stage('preparation') { // for display purposes
       // Get some code from a GitHub repository
@@ -36,9 +44,9 @@ node { // use any node
       echo "git_commit=$git_commit"
       // Run the maven build
       if (isUnix()) {
-         sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile"
+         sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
       } else {
-         bat(/"${mvnHome}\bin\mvn" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile/)
+         bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
       }
    }
    stage('verify'){
@@ -47,6 +55,11 @@ node { // use any node
 	   } else {
 	     bat(/"${mvnHome}\bin\mvn" verify/)
 	   }
+   }
+   stage('extended-verify'){
+     if (params.REQUESTED_ACTION == 'greeting') {
+       echo 'param is greeting'
+     } 	   
    }
    stage('javadoc'){
 	   if (isUnix()) {

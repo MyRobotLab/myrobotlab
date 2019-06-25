@@ -56,20 +56,10 @@ angular.module('mrlapp.service.AgentGui', [])
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service;
-        // debug service - with pretty print
-        $scope.dservice = JSON.stringify(service, null, 2); 
-        for (var prop in service.processes) {
-            if (service.processes.hasOwnProperty(prop)) {
-                if (!$scope.isRunning(service.processes[prop])){
-                    $scope.stopTimer(prop);
-                } else {
-                    $scope.startTimer(prop);
-                }
-            }
-        }
+        $scope.service = service;        
     }
     ;
+
     _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
@@ -78,7 +68,7 @@ angular.module('mrlapp.service.AgentGui', [])
         case 'onState':
             _self.updateState(data);
             $scope.$apply();
-            break;
+            break;       
         default:
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
             break;
@@ -86,7 +76,7 @@ angular.module('mrlapp.service.AgentGui', [])
     }
     ;
     
-    msg.subscribe('pulse');
+    msg.subscribe('publishVersions');
     msg.subscribe(this);
 }
 ]);

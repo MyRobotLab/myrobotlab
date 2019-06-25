@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.arduino.ArduinoUtils;
-import org.myrobotlab.framework.MRLException;
+import org.myrobotlab.framework.MrlException;
 
 import com.pi4j.jni.Serial;
 
@@ -15,7 +15,7 @@ import com.pi4j.jni.Serial;
 public class ArduinoChaosTest {
 
   @Test
-  public void testArduino() throws IOException, MRLException, InterruptedException {
+  public void testArduino() throws IOException, MrlException, InterruptedException {
 
     boolean upload = false;
 

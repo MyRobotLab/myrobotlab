@@ -372,9 +372,10 @@ public class Cli extends Service {
             // write back to cli & the cli will send it to stdout and publish it
             // when this one is active it "double" posts and adds crap
             // write(String.format("%s\n", line).getBytes());
-
-            os.write(String.format("%s\n", line).getBytes());
-            os.flush();
+            if (os != null) {
+              os.write(String.format("%s\n", line).getBytes());
+              os.flush();
+            }
 
           } else {
             // noop - write to /dev/null
@@ -600,9 +601,9 @@ public class Cli extends Service {
     super.stopService();
     try {
 
-      // shutdown my i/o   
+      // shutdown my i/o
       detachStdIO();
-      
+
       if (os != null) {
         os.close();
       }
@@ -615,7 +616,7 @@ public class Cli extends Service {
         pipe.stop();
       }
 
-     } catch (Exception e) {
+    } catch (Exception e) {
       Logging.logError(e);
     }
   }
