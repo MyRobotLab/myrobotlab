@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,6 +115,12 @@ public class Agent extends Service {
   CmdOptions options;
 
   String versionPrefix = "1.1.";
+
+  static String banner = "   _____         __________      ___.           __  .____          ___.    \n"
+      + "  /     \\ ___.__.\\______   \\ ____\\_ |__   _____/  |_|    |   _____ \\_ |__  \n"
+      + " /  \\ /  <   |  | |       _//  _ \\| __ \\ /  _ \\   __\\    |   \\__  \\ | __ \\ \n"
+      + "/    Y    \\___  | |    |   (  <_> ) \\_\\ (  <_> )  | |    |___ / __ \\| \\_\\ \\\n" + "\\____|__  / ____| |____|_  /\\____/|___  /\\____/|__| |_______ (____  /___  /\n"
+      + "        \\/\\/             \\/           \\/                    \\/    \\/    \\/ \n            resistance is futile, we have cookies and robots ...";
 
   /**
    * singleton for security purposes
@@ -350,15 +355,15 @@ public class Agent extends Service {
           log.info("same version {}", version);
           continue;
         }
-        
+
         // we have a possible update
-        
+
         log.info("WOOHOO ! updating to version {}", version);
         process.version = version;
         process.jarPath = new File(getJarName(process.branch, process.version)).getAbsolutePath();
-        
+
         getLatestJar(process.branch);
-        
+
         log.info("WOOHOO ! updated !");
         if (process.isRunning()) {
           log.info("its running - we should restart");
@@ -542,7 +547,7 @@ public class Agent extends Service {
    * @return
    */
   static public Set<String> getBranches() {
-    Set<String> possibleBranches = new HashSet<String>();
+    Set<String> possibleBranches = new TreeSet<String>();
     try {
       byte[] r = Http.get(REMOTE_MULTI_BRANCH_JOBS);
       if (r != null) {
@@ -603,7 +608,7 @@ public class Agent extends Service {
    * @return
    */
   synchronized public Set<String> getVersions(String branch, Boolean allowRemote) {
-    Set<String> versions = new HashSet<String>();
+    Set<String> versions = new TreeSet<String>();
     versions.addAll(getLocalVersions(branch));
     if (allowRemote) {
       versions.addAll(getRemoteVersions(branch));
@@ -616,7 +621,7 @@ public class Agent extends Service {
   }
 
   public Set<String> getRemoteVersions(String branch) {
-    Set<String> versions = new HashSet<String>();
+    Set<String> versions = new TreeSet<String>();
     try {
 
       byte[] data = Http.get(String.format(REMOTE_BUILDS_URL, branch));
@@ -652,9 +657,31 @@ public class Agent extends Service {
     }
     return latest;
   }
+  
+  public Set<String> getLocalVersions() {
+    Set<String> versions = new TreeSet<>();
+    // get local file system versions
+    File branchDir = new File(BRANCHES_ROOT);
+    // get local existing versions
+    File[] listOfFiles = branchDir.listFiles();
+    for (int i = 0; i < listOfFiles.length; ++i) {
+      File file = listOfFiles[i];
+      if (file.isDirectory()) {
+        // if (file.getName().startsWith(branch)) {
+          // String version = file.getName().substring(branch.length() + 1);// getFileVersion(file.getName());
+          // if (version != null) {
+            int pos = file.getName().lastIndexOf("-");
+            String branchAndVersion = file.getName().substring(0, pos - 1) + " " + file.getName().substring(pos + 1); 
+            versions.add(branchAndVersion);
+          //}
+        //}
+      }
+    }
+    return versions;
+  }
 
   public Set<String> getLocalVersions(String branch) {
-    Set<String> versions = new HashSet<>();
+    Set<String> versions = new TreeSet<>();
     // get local file system versions
     File branchDir = new File(BRANCHES_ROOT);
     // get local existing versions
@@ -837,7 +864,7 @@ public class Agent extends Service {
 
     pd.jvm = new String[] { "-Djava.library.path=libraries/native", "-Djna.library.path=libraries/native", "-Dfile.encoding=UTF-8" };
     if (options.jvm != null) {
-      pd.jvm = options.jvm;
+      pd.jvm = options.jvm.split(" ");
     }
 
     pd.autoUpdate = options.autoUpdate;
@@ -940,7 +967,18 @@ public class Agent extends Service {
 
     cmd.add("-id");
     cmd.add(pd.id);
-
+    
+    if (options.logLevel != null) {
+      cmd.add("--log-level");
+      cmd.add(options.logLevel);
+    }
+    
+    if (options.install != null) {
+      cmd.add("--install");
+      for (String serviceType : options.install) {
+        cmd.add(serviceType);
+      }
+    }
     return cmd.toArray(new String[cmd.size()]);
   }
 
@@ -966,7 +1004,7 @@ public class Agent extends Service {
     builder.directory(new File(spawnDir));
 
     log.info("in {}", spawnDir);
-    log.info("spawning -> {}", Arrays.toString(cmdLine));
+    log.info("SPAWNING ! -> {}", Arrays.toString(cmdLine));
 
     // environment variables setup
     setEnv(builder.environment());
@@ -1075,7 +1113,7 @@ public class Agent extends Service {
   static class CmdOptions {
 
     @Option(names = { "-jvm", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
-    public String jvm[];
+    public String jvm;
 
     @Option(names = { "-id", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
     public String id;
@@ -1087,22 +1125,29 @@ public class Agent extends Service {
     @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
     public boolean fork = false;
 
+    /**<pre>
     @Option(names = { "-nc", "--no-cli" }, description = "no command line interface")
     public boolean noCli = false;
+    </pre>
+    */
 
     @Option(names = { "-ll", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
-    public String loglevel = "info";
+    public String logLevel = "info";
 
     @Option(names = { "-i",
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
 
-    @Option(names = { "-au", "--auto-update" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+    @Option(names = { "-au", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
     public boolean autoUpdate = false;
 
     // FIXME - implement
     @Option(names = { "-lv", "--list-versions" }, description = "list all possible versions for this branch")
     public boolean listVersions = false;
+    
+    // FIXME - implement
+    @Option(names = { "-ua", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
+    public boolean updateAgent = false;
 
     // FIXME - does this get executed by another CommandLine ?
     @Option(names = { "-a",
@@ -1144,20 +1189,32 @@ public class Agent extends Service {
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
 
-      String[] agentArgs = new String[] { "-id", "agent-" + NameGenerator.getName(), "-ll", "WARN", "--no-banner" };
+      String[] agentArgs = new String[] { "-id", "agent-" + NameGenerator.getName(), "-ll", "WARN"};
       if (options.agent != null) {
         agentArgs = options.agent.split(" ");
       }
 
       Process p = null;
 
+      if (!options.noBanner) {
+        System.out.println(banner);
+      }
+
       log.info("user  args {}", Arrays.toString(args));
       log.info("agent args {}", Arrays.toString(agentArgs));
-
+      
       Runtime.main(agentArgs);
       if (agent == null) {
         agent = (Agent) Runtime.start("agent", "Agent");
         agent.options = options;
+      }
+      
+      if (options.listVersions) {
+        System.out.println("available local versions");
+        for (String bv : agent.getLocalVersions()) {
+          System.out.println(bv);
+        }
+        agent.shutdown();
       }
 
       Platform platform = Platform.getLocalInstance();
