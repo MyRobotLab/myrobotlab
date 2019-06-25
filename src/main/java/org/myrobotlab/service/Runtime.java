@@ -1146,12 +1146,6 @@ public class Runtime extends Service implements MessageListener {
     return ret;
   }
 
-  static String banner = "   _____         __________      ___.           __  .____          ___.    \n"
-      + "  /     \\ ___.__.\\______   \\ ____\\_ |__   _____/  |_|    |   _____ \\_ |__  \n"
-      + " /  \\ /  <   |  | |       _//  _ \\| __ \\ /  _ \\   __\\    |   \\__  \\ | __ \\ \n"
-      + "/    Y    \\___  | |    |   (  <_> ) \\_\\ (  <_> )  | |    |___ / __ \\| \\_\\ \\\n" + "\\____|__  / ____| |____|_  /\\____/|___  /\\____/|__| |_______ (____  /___  /\n"
-      + "        \\/\\/             \\/           \\/                    \\/    \\/    \\/ \n            resistance is futile, we have cookies and robots ...";
-
   /*
    * Main starting method of MyRobotLab Parses command line options
    *
@@ -1166,10 +1160,7 @@ public class Runtime extends Service implements MessageListener {
     // int exitCode = new CommandLine(options).execute(args);
     // new CommandLine(options).parseArgs(args);
     
-//     if (!options.noBanner) {
-      System.out.println(banner);    
-//    }
-    
+
     System.out.println(Arrays.toString(args));
     // global for this process
     globalArgs = args;
