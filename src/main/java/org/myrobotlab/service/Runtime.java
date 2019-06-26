@@ -74,7 +74,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
-import org.myrobotlab.service.Agent.CmdOptions;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Get;
@@ -82,6 +81,8 @@ import org.myrobotlab.swagger.Parameter;
 import org.myrobotlab.swagger.Path;
 import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
+
+import picocli.CommandLine.Option;
 
 /**
  * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
@@ -1727,6 +1728,78 @@ public class Runtime extends Service implements MessageListener {
       release(cli.getName());
     }
   }
+  
+  static class CmdOptions {
+
+    @Option(names = { "-jvm", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
+    public String jvm;
+
+    @Option(names = { "-id", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
+    public String id;
+
+    // FIXME - how does this work ??? if specified is it "true" ?
+    @Option(names = { "-nb", "--no-banner" }, description = "prevents banner from showing")
+    public boolean noBanner = false;
+
+    @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
+    public boolean fork = false;
+
+    /**<pre>
+    @Option(names = { "-nc", "--no-cli" }, description = "no command line interface")
+    public boolean noCli = false;
+    </pre>
+    */
+
+    @Option(names = { "-ll", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+    public String logLevel = "info";
+
+    @Option(names = { "-i",
+        "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
+    public String install[];
+
+    @Option(names = { "-au", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
+    public boolean autoUpdate = false;
+
+    // FIXME - implement
+    @Option(names = { "-lv", "--list-versions" }, description = "list all possible versions for this branch")
+    public boolean listVersions = false;
+    
+    // FIXME - implement
+    @Option(names = { "-ua", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
+    public boolean updateAgent = false;
+
+    // FIXME - does this get executed by another CommandLine ?
+    @Option(names = { "-a",
+        "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
+    public String agent;
+
+    @Option(names = { "-b", "--branch" }, description = "requested branch")
+    public String branch;
+
+    // FIXME - get version vs force version - perhaps just always print version
+    // in help
+    @Option(names = { "-v", "--version" }, description = "requested version")
+    public String version;
+
+    @Option(names = { "-s",
+        "--services" }, description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
+    public String[] services;
+
+    @Option(names = { "-c",
+        "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
+    public String client[];
+
+    // FIXME - when instances connect via ws - default will become true
+    @Option(names = { "-w", "--webgui" }, description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients")
+    public boolean webgui = false;
+
+    /*
+     * @Parameters(arity = "1..*", paramLabel = "FILE", description =
+     * "File(s) to process.") private String[] services;
+     */
+
+  }
+
 
   public Runtime(String n) {
     super(n);
