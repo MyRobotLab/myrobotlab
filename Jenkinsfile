@@ -68,7 +68,8 @@ node { // use any node
          archiveArtifacts 'target/*.jar'      
    } 
    stage('jacoco') {
-        jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+        // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+        jacoco(execPattern: '**/*.exec')
    } 
    stage('javadoc'){
 	   if (isUnix()) {
