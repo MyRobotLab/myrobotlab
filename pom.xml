@@ -1739,6 +1739,25 @@
 			-->
 			
 			<plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <formats>
+                        <format>xml</format>
+                    </formats>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>cobertura</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+<!-- 
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.7.9</version>
@@ -1763,9 +1782,9 @@
 							<goal>report</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
+
 							<dataFile>target/jacoco.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
+							
 							<outputDirectory>target/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
@@ -1776,7 +1795,7 @@
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
-			
+ -->						
 		</plugins>
 	</build>
     <reporting>    
