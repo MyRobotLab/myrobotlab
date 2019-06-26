@@ -73,6 +73,13 @@ node { // use any node
 //        jacoco(execPattern: '**/*.exec')
 //   } 
 
+	stage ("Extract test results") {
+	    // cobertura coberturaReportFile: 'path-to/coverage.xml'
+	     steps {
+             cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/target/site/cobertura/coverage.xml', failUnhealthy: false, failUnstable: false
+         }
+	}
+
    stage('javadoc'){
 	   if (isUnix()) {
 	     sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
