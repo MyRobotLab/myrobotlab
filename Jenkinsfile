@@ -67,19 +67,10 @@ node { // use any node
    stage('archive') {
          archiveArtifacts 'target/*.jar'      
    } 
-   
-//   stage('jacoco') {
-//        jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-//        jacoco(execPattern: '**/*.exec')
-//   } 
-
-	stage ("Extract test results") {
-	    // cobertura coberturaReportFile: 'path-to/coverage.xml'
-	     steps {
-             cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/target/site/cobertura/coverage.xml', failUnhealthy: false, failUnstable: false
-         }
-	}
-
+   stage('jacoco') {
+        // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+        jacoco(execPattern: '**/*.exec')
+   } 
    stage('javadoc'){
 	   if (isUnix()) {
 	     sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
