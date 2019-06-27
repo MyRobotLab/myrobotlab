@@ -331,8 +331,7 @@ public class Runtime extends Service implements MessageListener {
   /**
    * creates and starts service from a cmd line object
    *
-   * @param cmdline
-   *          data object from the cmd line
+   * @param services - services to be created
    */
   public final static void createAndStartServices(String[] services) {
 
