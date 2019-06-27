@@ -1755,10 +1755,14 @@ public class Runtime extends Service implements MessageListener {
 
   public Runtime(String n) {
     super(n);
-
+    
     synchronized (instanceLockObject) {
       if (runtime == null) {
         runtime = this;
+        if (options == null) {
+          options = new CmdOptions();
+        }
+
       }
     }
 
@@ -1805,7 +1809,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("args {}", Arrays.toString(args.toArray()));
 
     log.info("============== args end ==============");
-    if (!options.noEnv) {
+    if (options.noEnv) {
       log.info("============== env begin ==============");
 
       Map<String, String> env = System.getenv();
