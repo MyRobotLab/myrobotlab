@@ -1099,20 +1099,6 @@ public class Agent extends Service {
    * @param args
    *          args
    */
-  // FIXME - test when internet is not available
-  // FIXME - test over multiple running processes
-  // FIXME - add -help
-  // TODO - add jvm memory other runtime info
-  // FIXME - a way to route parameters from command line to Agent vs Runtime -
-  // the current concept is ok - but it does not work ..
-  // make it work if necessary prefix everything by -agent-<...>
-  // FIXME - replace by PicoCli !!!
-  // FIXME - updateAgent(branch, version) -> updateAgent() 'latest
-  // FIXME - implement --help -h !!! - handle THROW !
-  @Command(name = "MyRobotLab"/*
-                               * , mixinStandardHelpOptions = true - cant do it
-                               */)
- 
   public static void main(String[] args) {
     try {
 
