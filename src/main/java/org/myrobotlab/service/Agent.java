@@ -964,8 +964,10 @@ public class Agent extends Service {
       cmd.add("Python");
     }
 
+    /*
     cmd.add("-fromAgent");
     cmd.add(Platform.getLocalInstance().getId());
+    */
 
     cmd.add("-id");
     cmd.add(pd.id);
@@ -1107,7 +1109,7 @@ public class Agent extends Service {
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
 
-      String[] agentArgs = new String[] { "-id", "agent-" + NameGenerator.getName(), "-ll", "WARN"};
+      String[] agentArgs = new String[] { "--id", "agent-" + NameGenerator.getName()};
       if (options.agent != null) {
         agentArgs = options.agent.split(" ");
       }
