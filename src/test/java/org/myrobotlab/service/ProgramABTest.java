@@ -194,7 +194,7 @@ public class ProgramABTest extends AbstractServiceTest {
     
     // TODO figure a mock object that can wait on a callback to let us know the python service is started.
     // wait up to 5 seconds for python service to start
-    long maxWait = 5000;
+    long maxWait = 6000;
     int i = 0;
     while (Runtime.getService("python") == null) {
       Thread.sleep(100);
