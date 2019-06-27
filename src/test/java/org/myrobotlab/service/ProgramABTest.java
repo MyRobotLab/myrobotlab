@@ -196,6 +196,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // wait up to 5 seconds for python service to start
     long maxWait = 6000;
     int i = 0;
+    Runtime.start("python", "Python");
     while (Runtime.getService("python") == null) {
       Thread.sleep(100);
       log.info("Waiting for python to start...");
