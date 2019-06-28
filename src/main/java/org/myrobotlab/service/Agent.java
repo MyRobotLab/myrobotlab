@@ -951,7 +951,7 @@ public class Agent extends Service {
     cmd.add("org.myrobotlab.service.Runtime");
 
     if (!pd.userDefinedServices) {
-      cmd.add("-service");
+      cmd.add("--service");
       // cmd.add("webgui");
       // cmd.add("WebGui");
       cmd.add("log");
@@ -965,11 +965,11 @@ public class Agent extends Service {
     }
 
     /*
-    cmd.add("-fromAgent");
+    cmd.add("--fromAgent");
     cmd.add(Platform.getLocalInstance().getId());
     */
 
-    cmd.add("-id");
+    cmd.add("--id");
     cmd.add(pd.id);
     
     if (options.logLevel != null) {
@@ -1096,7 +1096,7 @@ public class Agent extends Service {
   /**
    * First method JVM executes when myrobotlab.jar is in jar form.
    * 
-   * -agent "-logLevel DEBUG -service webgui WebGui"
+   * --agent "--logLevel DEBUG --service webgui WebGui"
    * 
    * @param args
    *          args
