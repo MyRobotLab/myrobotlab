@@ -1108,6 +1108,11 @@ public class Agent extends Service {
 
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
+      
+      if (options.help) {
+        Runtime.mainHelp();
+        return;
+      }
 
       String[] agentArgs = new String[] { "--id", "agent-" + NameGenerator.getName()};
       if (options.agent != null) {

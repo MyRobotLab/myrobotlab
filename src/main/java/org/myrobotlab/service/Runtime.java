@@ -1209,7 +1209,7 @@ public class Runtime extends Service implements MessageListener {
       }
 
     } catch (Exception e) {
-      Runtime.getInstance().mainHelp();
+      Runtime.mainHelp();
       shutdown();
       log.error("main threw", e);
     }
@@ -1218,7 +1218,7 @@ public class Runtime extends Service implements MessageListener {
   /**
    * prints help to the console
    */
-  void mainHelp() {
+  static void mainHelp() {
     new CommandLine(new CmdOptions()).usage(System.out);
   }
 
