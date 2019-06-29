@@ -1739,8 +1739,8 @@ public class Runtime extends Service implements MessageListener {
     public String client[];
 
     // FIXME - when instances connect via ws - default will become true
-    @Option(names = { "-w", "--webgui" }, description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients")
-    public boolean webgui = false;
+    @Option(names = { "-w", "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
+    public String webgui;
 
     @Option(names = { "-ne", "--noEnv" }, description = "prevents printing of the env variables to log for security")
     public boolean noEnv = false;

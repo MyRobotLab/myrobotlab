@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -303,11 +304,46 @@ public class Agent extends Service {
       Files.copy(Paths.get(agentJar), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
     }
   }
-
+  
   public void startWebGui() {
+    startWebGui(null);
+  }
+
+  public void startWebGui(String addressPort) {
+    if (addressPort == null) {
+      startWebGui(null, null);
+    }
+    
+    Integer port = null;
+    String address = null;
+    
+    try {
+      port = Integer.parseInt(addressPort);
+    } catch (Exception e) {
+    }
+
+    if (addressPort != null) {
+      try {
+        InetAddress ip = InetAddress.getByName(addressPort);
+        address = ip.getHostAddress();
+      } catch (Exception e2) {
+      }
+    }
+    startWebGui(address, port);
+  }
+
+  public void startWebGui(String address, Integer port) {
     try {
 
       if (webgui == null) {
+        if (address != null) {
+          this.address = address;
+        }
+        if (port != null) {
+          this.port = port;
+        } else {
+          port = 8887;
+        }
         webgui = (WebGui) Runtime.create("webgui", "WebGui");
         webgui.autoStartBrowser(false);
         webgui.setPort(port);
@@ -658,7 +694,7 @@ public class Agent extends Service {
     }
     return latest;
   }
-  
+
   public Set<String> getLocalVersions() {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
@@ -669,13 +705,14 @@ public class Agent extends Service {
       File file = listOfFiles[i];
       if (file.isDirectory()) {
         // if (file.getName().startsWith(branch)) {
-          // String version = file.getName().substring(branch.length() + 1);// getFileVersion(file.getName());
-          // if (version != null) {
-            int pos = file.getName().lastIndexOf("-");
-            String branchAndVersion = file.getName().substring(0, pos - 1) + " " + file.getName().substring(pos + 1); 
-            versions.add(branchAndVersion);
-          //}
-        //}
+        // String version = file.getName().substring(branch.length() + 1);//
+        // getFileVersion(file.getName());
+        // if (version != null) {
+        int pos = file.getName().lastIndexOf("-");
+        String branchAndVersion = file.getName().substring(0, pos - 1) + " " + file.getName().substring(pos + 1);
+        versions.add(branchAndVersion);
+        // }
+        // }
       }
     }
     return versions;
@@ -964,18 +1001,17 @@ public class Agent extends Service {
     }
 
     /*
-    cmd.add("--fromAgent");
-    cmd.add(Platform.getLocalInstance().getId());
-    */
+     * cmd.add("--fromAgent"); cmd.add(Platform.getLocalInstance().getId());
+     */
 
     cmd.add("--id");
     cmd.add(pd.id);
-    
+
     if (options.logLevel != null) {
       cmd.add("--log-level");
       cmd.add(options.logLevel);
     }
-    
+
     if (options.install != null) {
       cmd.add("--install");
       for (String serviceType : options.install) {
@@ -1171,10 +1207,8 @@ public class Agent extends Service {
       // return;
       // }
 
-      if (options.webgui) {
-        agent.startWebGui();
-        // sub options set port default 8887
-        // webgui.setAddress("127.0.0.1"); - for security...
+      if (options.webgui != null) {
+        agent.startWebGui(options.webgui);       
       }
 
       if (options.autoUpdate) {
