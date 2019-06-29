@@ -4,7 +4,7 @@
     <div class="col-md-12">
         <span class="pull-right">Agent version {{service.currentBranch}} {{service.currentVersion}}</span>
         <table border="1" class="table table-hover table-condensed table-striped table-bordered">
-            <tr><td><h4>processes</h4></td><td><h4>version</h4></td><td><h4>actions</h4></td><td><h4>uptime</h4></td></tr>
+            <tr><td><h4>id</h4></td><td><h4>version</h4></td><td><h4>actions</h4></td><td><h4>uptime</h4></td></tr>
             <tr ng-repeat="(id, value) in service.processes">
             <td>{{id}} {{value.name}}</td>
             <td>{{value.branch}} {{value.version}}</td>
