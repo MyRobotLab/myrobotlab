@@ -1188,12 +1188,6 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
-      if (options.manifest) {
-        CodecJson.encode(Runtime.getManifest());
-        shutdown();
-        return;
-      }
-
       if (options.extract) {
         extract();
         shutdown();
