@@ -1178,6 +1178,15 @@ public class Agent extends Service {
         agent.shutdown();
       }
 
+      if (options.manifest) {
+        Map<String, String>  manifest = Runtime.getManifest();
+        System.out.println("manifest");
+        for(String name : manifest.keySet()) {
+          System.out.println(String.format("%s=%s", name, manifest.get(name)));
+        }
+        agent.shutdown();
+      }
+
       Platform platform = Platform.getLocalInstance();
 
       if (options.branch == null) {
