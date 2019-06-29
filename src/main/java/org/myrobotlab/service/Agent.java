@@ -30,7 +30,6 @@ import org.myrobotlab.service.Runtime.CmdOptions;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
 
 /**
  * <pre>
@@ -1106,6 +1105,7 @@ public class Agent extends Service {
 
       CmdOptions options = new CmdOptions();
 
+      // for Callable version ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
       
