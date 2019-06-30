@@ -35,7 +35,6 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URI;
@@ -51,7 +50,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
 import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
@@ -71,10 +69,8 @@ import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
 /**
@@ -2231,8 +2227,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
         cm.send(Message.createMessage(this, serviceName, "addListener", listener));
       }
     } else {
-      MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-      cm.send(Message.createMessage(this, topicName, "addListener", listener));
+      if (topicMethod.contains("*")) { // FIXME "any regex expression
+        Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
+        for (String method : tnames) {
+          MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
+          cm.send(Message.createMessage(this, topicName, "addListener", listener));
+        }
+      } else {
+        MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+        cm.send(Message.createMessage(this, topicName, "addListener", listener));
+      }
     }
   }
 
@@ -2634,6 +2638,5 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public String getSwagger() {
     return null;
   }
-
 
 }

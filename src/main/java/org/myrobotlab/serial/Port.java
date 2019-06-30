@@ -1,12 +1,11 @@
 package org.myrobotlab.serial;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
@@ -23,13 +22,7 @@ public abstract class Port implements Runnable, SerialControl {
   String portName;
   String threadName;
 
-  // needs to be owned by Serial
-  transient HashMap<String, SerialDataListener> listeners = null;
-
-  // transient CountDownLatch opened = null;
-  // transient CountDownLatch closed = null;
-
-  final transient Object lock = new Object();
+  transient HashMap<String, SerialDataListener> listeners = new HashMap<>();
 
   static int pIndex = 0;
 
@@ -74,19 +67,13 @@ public abstract class Port implements Runnable, SerialControl {
 
   public void close() {
 
-    // closed = new CountDownLatch(1);
     listening = false;
     if (readingThread != null) {
       readingThread.interrupt();
     }
     readingThread = null;
-    /*
-     * try { closed.await(); } catch (Exception e) { Logging.logError(e); }
-     */
-
-    // TODO - suppose to remove listeners ???
+  
     log.info("closed port {}", portName);
-
   }
 
   public String getName() {
@@ -103,30 +90,22 @@ public abstract class Port implements Runnable, SerialControl {
     return isOpen;
   }
 
-  public void listen(HashMap<String, SerialDataListener> listeners) {
-    // opened = new CountDownLatch(1);
-    // try {
-    if (this.listeners != null) {
-      log.info("here");
-    }
-    this.listeners = listeners;
+  public void listen(Map<String, SerialDataListener> listeners) {   
+    this.listeners.putAll(listeners);
     if (readingThread == null) {
       ++pIndex;
       threadName = String.format("%s.portListener %s", portName, pIndex);
       readingThread = new Thread(this, threadName);
-      readingThread.start();
-      /*
-       * - this might be a good thing .. wait until the reading thread starts -
-       * but i don't remember if JSSC works this way synchronized (lock) {
-       * lock.wait(); }
-       */
+      readingThread.start();      
     } else {
       log.info("{} already listening", portName);
     }
-    // Thread.sleep(100); - added connect retry logic in Arduino
-    // taking out arbitrary sleeps
-    // } catch (InterruptedException e) {
-    // }
+  }
+  
+  public void listen(SerialDataListener listener) {
+    Map<String, SerialDataListener> sdl = new HashMap<>();
+    sdl.put(listener.getName(), listener);
+    listen(sdl);
   }
 
   public void open() throws IOException {
@@ -143,19 +122,10 @@ public abstract class Port implements Runnable, SerialControl {
   @Override
   public void run() {
 
-    /*
-     * - this might be a good thing .. wait until the reading thread starts -
-     * but i don't remember if JSSC works this way synchronized(lock){
-     * lock.notifyAll(); }
-     */
-
     log.info("listening on port {}", portName);
     listening = true;
     Integer newByte = -1;
-    try {
-      // opened.countDown();
-      // TODO - if (Queue) while take()
-      // normal streams are processed here - rxtx is abnormal
+    try {      
       while (listening && ((newByte = read()) > -1)) { // "real" java byte
         // 255 / -1 will
         // kill this
@@ -173,24 +143,13 @@ public abstract class Port implements Runnable, SerialControl {
           for (String key : listeners.keySet()) {
             listeners.get(key).updateStats(stats);
           }
-          // publishQueueStats(stats);
           stats.lastTS = stats.ts;
         }
-        // log.info(String.format("%d",newByte));
       }
       log.info("{} no longer listening - last byte {} ", portName, newByte);
-    } catch (InterruptedException x) {
-      log.info("InterruptedException {} stopping ", portName);
-    } catch (InterruptedIOException c) {
-      log.info("InterruptedIOException {} stopping ", portName);
     } catch (Exception e) {
-      Logging.logError(e);
-    } finally {
-      // allow the thread calling close
-      // to proceed
-      /*
-       * if (closed != null){ closed.countDown(); }
-       */
+      log.error("port reading thread threw", e);
+    } finally {      
       log.info("stopped listening on {}", portName);
     }
   }
@@ -201,7 +160,7 @@ public abstract class Port implements Runnable, SerialControl {
    * iostream, tcp/ip)
    * 
    * @param state
-   *          s
+   *          
    */
   public void setDTR(boolean state) {
   }

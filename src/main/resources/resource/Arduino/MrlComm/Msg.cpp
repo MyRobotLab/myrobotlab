@@ -262,6 +262,15 @@ void Msg::publishEncoderData( byte deviceId,  int position) {
   reset();
 }
 
+void Msg::publishMrlCommBegin( byte version) {
+  write(MAGIC_NUMBER);
+  write(1 + 1); // size
+  write(PUBLISH_MRL_COMM_BEGIN); // msgType = 55
+  write(version);
+  flush();
+  reset();
+}
+
 
 void Msg::processCommand() {
 

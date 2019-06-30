@@ -104,6 +104,7 @@ public:
 	void publishSerialData( byte deviceId, const byte* data,  byte dataSize);
 	void publishUltrasonicSensorData( byte deviceId,  int echoTime);
 	void publishEncoderData( byte deviceId,  int position);
+	void publishMrlCommBegin( byte version);
 
 	// handles all (PC --> MrlComm) methods
 	// void handle(int[] ioCmd); // send size too ?

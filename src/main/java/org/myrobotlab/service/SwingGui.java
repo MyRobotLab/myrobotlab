@@ -462,7 +462,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
     if (!fullscreen) {
       frame.addWindowListener(this);
-      frame.setTitle("myrobotlab - " + getName() + " " + Runtime.getVersion().trim());
+      frame.setTitle("myrobotlab - " + Runtime.getId() + " " + Runtime.getBranch() + " " + Runtime.getVersion().trim());
 
       frame.add(tabPanel);
       String logoFile = Util.getResourceDir() + File.separator + "mrl_logo_36_36.png";
@@ -918,6 +918,13 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     Logging logging = LoggingFactory.getInstance();
     try {
       logging.setLevel(Level.INFO);
+      Runtime.start("gui", "SwingGui");
+      Runtime.start("client", "Arduino");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       // Runtime.start("i01", "InMoov");
       // Runtime.start("mac", "Runtime");
@@ -927,14 +934,18 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       // remote.setDefaultPrefix("raspi");
       // remote.connect("tcp://127.0.0.1:6767");
 
-      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
+
       // Runtime.start("python", "Python");
+      Arduino arduino = (Arduino)Runtime.start("client", "Arduino");
+      Serial serial = arduino.getSerial();
+      /*
       for (int i = 0; i < 40; ++i) {
         Runtime.start(String.format("servo%d", i), "Servo");
       }
+      */
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 
