@@ -114,7 +114,7 @@ public class Agent extends Service {
   /**
    * command line options for the agent
    */
-  CmdOptions options;
+  static CmdOptions options;
 
   String versionPrefix = "1.1.";
 
@@ -304,7 +304,7 @@ public class Agent extends Service {
       Files.copy(Paths.get(agentJar), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
     }
   }
-  
+
   public void startWebGui() {
     startWebGui(null);
   }
@@ -313,22 +313,26 @@ public class Agent extends Service {
     if (addressPort == null) {
       startWebGui(null, null);
     }
-    
+
     Integer port = null;
     String address = null;
-    
+
     try {
       port = Integer.parseInt(addressPort);
     } catch (Exception e) {
     }
 
-    if (addressPort != null) {
-      try {
-        InetAddress ip = InetAddress.getByName(addressPort);
-        address = ip.getHostAddress();
-      } catch (Exception e2) {
+    try {
+      if (addressPort.contains(":")) {
+        String[] anp = addressPort.split(":");
+        port = Integer.parseInt(anp[1]);
+        addressPort = anp[0];
       }
+      InetAddress ip = InetAddress.getByName(addressPort);
+      address = ip.getHostAddress();
+    } catch (Exception e2) {
     }
+
     startWebGui(address, port);
   }
 
@@ -904,7 +908,7 @@ public class Agent extends Service {
     if (options.jvm != null) {
       pd.jvm = options.jvm.split(" ");
     }
-    
+
     pd.initialServices = options.services;
     pd.autoUpdate = options.autoUpdate;
 
@@ -989,12 +993,12 @@ public class Agent extends Service {
 
     if (pd.initialServices.size() > 0) {
       cmd.add("--service");
-      for (int i = 0; i < pd.initialServices.size(); i+=2) {
+      for (int i = 0; i < pd.initialServices.size(); i += 2) {
         cmd.add(pd.initialServices.get(i));
-        cmd.add(pd.initialServices.get(i+1));
+        cmd.add(pd.initialServices.get(i + 1));
       }
     }
-    
+
     cmd.add("--id");
     cmd.add(pd.id);
 
@@ -1130,20 +1134,21 @@ public class Agent extends Service {
   public static void main(String[] args) {
     try {
 
-      CmdOptions options = new CmdOptions();
+      options = new CmdOptions();
 
       // for Callable version ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
-      
+
       if (options.help) {
         Runtime.mainHelp();
         return;
       }
 
-      // String[] agentArgs = new String[] { "--id", "agent-" + NameGenerator.getName(), "-l", "WARN"};
+      // String[] agentArgs = new String[] { "--id", "agent-" +
+      // NameGenerator.getName(), "-l", "WARN"};
       List<String> agentArgs = new ArrayList<>();
-      
+
       if (options.agent != null) {
         agentArgs.addAll(Arrays.asList(options.agent.split(" ")));
       } else {
@@ -1151,7 +1156,7 @@ public class Agent extends Service {
         agentArgs.add("agent-" + NameGenerator.getName());
         agentArgs.add("-l");
         agentArgs.add("WARN");
-        
+
         agentArgs.add("-s");
         agentArgs.add("agent");
         agentArgs.add("Agent");
@@ -1172,16 +1177,14 @@ public class Agent extends Service {
 
       log.info("user  args {}", Arrays.toString(args));
       log.info("agent args {}", Arrays.toString(agentArgs.toArray()));
-     
+
       Runtime.main(agentArgs.toArray(new String[agentArgs.size()]));
-      agent = (Agent)Runtime.getService("agent");
+      agent = (Agent) Runtime.getService("agent");
       /*
-      if (agent == null) {
-        agent = (Agent) Runtime.start("agent", "Agent");
-        agent.options = options;
-      }
-      */
-      
+       * if (agent == null) { agent = (Agent) Runtime.start("agent", "Agent");
+       * agent.options = options; }
+       */
+
       if (options.listVersions) {
         System.out.println("available local versions");
         for (String bv : agent.getLocalVersions()) {
@@ -1191,9 +1194,9 @@ public class Agent extends Service {
       }
 
       if (options.manifest) {
-        Map<String, String>  manifest = Runtime.getManifest();
+        Map<String, String> manifest = Runtime.getManifest();
         System.out.println("manifest");
-        for(String name : manifest.keySet()) {
+        for (String name : manifest.keySet()) {
           System.out.println(String.format("%s=%s", name, manifest.get(name)));
         }
         agent.shutdown();
@@ -1229,7 +1232,7 @@ public class Agent extends Service {
       // }
 
       if (options.webgui != null) {
-        agent.startWebGui(options.webgui);       
+        agent.startWebGui(options.webgui);
       }
 
       if (options.autoUpdate) {
