@@ -1029,7 +1029,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public void setAddress(String address) {
-    this.address = address;
+    if (address != null) {
+      this.address = address;
+    }
   }
 
   public static void main(String[] args) {
