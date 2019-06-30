@@ -1,31 +1,31 @@
 Manifest-Version: 1.0
-GitCommitUserEmail: greg.perry@daimler.com
 Archiver-Version: Plexus Archiver
+Build-Jdk: 1.8.0_192
+Build-Time: 2019-06-20T13:26:29Z
+Build-User: root
+Build-Host: null
 Built-By: root
+Created-By: Apache Maven 3.6.0
+GitCommitUserEmail: grog@myrobotlab.org
 GitCommitIdDescribe: da9bc99
 GitBuildUserName: 
 GitRemoteOriginUrl: https://github.com/MyRobotLab/myrobotlab.git
 GitTags: 
-Main-Class: org.myrobotlab.service.Agent
-GitBranch: agent_auto_update
-Build-Host: null
+GitBranch: develop
 GitCommitId: da9bc9972307d58f9692187694d6f5446c895d74
 GitCommitIdFull: null
 GitCommitIdDescribeShort: da9bc99
 Build-Version: 13
 GitClosestTagName: 
-Major-Version: 1.1.13
 GitCommitTime: 2019-06-20T06:25:37-0700
-GitCommitUserName: Greg Perry
-Implementation-Version: 1.1.15
+GitCommitUserName: GroG
 GitDirty: false
 GitBuildUserEmail: 
 GitCommitIdAbbrev: da9bc99
 GitBuildTime: 2019-06-20T06:26:31-0700
 GitBuildVersion: 0.0.1-SNAPSHOT
 GitClosestTagCommitCount: 
-Build-Time: 2019-06-20T13:26:29Z
-Build-User: root
-Created-By: Apache Maven 3.6.0
-Build-Jdk: 1.8.0_192
+Implementation-Version: 1.1.15
+Main-Class: org.myrobotlab.service.Agent
+Major-Version: 1.1.13
 

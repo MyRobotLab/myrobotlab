@@ -50,7 +50,6 @@ import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
-import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
@@ -333,15 +332,20 @@ public class Runtime extends Service implements MessageListener {
    *
    * @param services - services to be created
    */
-  public final static void createAndStartServices(String[] services) {
+  public final static void createAndStartServices(List<String> services) {
 
-    log.info("services {}", Arrays.toString(services));
+    if (services == null) {
+      log.error("createAndStartServices(null)");
+      return;
+    }
+    
+    log.info("services {}", Arrays.toString(services.toArray()));
 
-    if (services.length % 2 == 0) {
+    if (services.size() % 2 == 0) {
 
-      for (int i = 0; i < services.length; i += 2) {
-        String name = services[i];
-        String type = services[i + 1];
+      for (int i = 0; i < services.size(); i += 2) {
+        String name = services.get(i);
+        String type = services.get(i + 1);
 
         log.info("attempting to invoke : {} of type {}", name, type);
 
@@ -1139,14 +1143,7 @@ public class Runtime extends Service implements MessageListener {
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
 
-      System.out.println(Arrays.toString(args));
-
-      // FIXME !!! - should be part of runtime - runtime should be created ...
-      // handle special flags - then terminate
-      // FIXME !!! Make Runtime instance !!
       globalArgs = args;
-      log.info("args {}", Arrays.toString(args));
-
       Logging logging = LoggingFactory.getInstance();
 
       // TODO - replace with commons-cli -l
@@ -1188,21 +1185,25 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
-      if (options.manifest) {
-        CodecJson.encode(Runtime.getManifest());
-        shutdown();
-        return;
-      }
-
       if (options.extract) {
         extract();
         shutdown();
         return;
       }
 
-      if (options.services != null) {
-        createAndStartServices(options.services);
+      // initial default services if none supplied
+      if (options.services.size() == 0) {
+        options.services.add("log");
+        options.services.add("Log");
+        options.services.add("cli");
+        options.services.add("Cli");
+        options.services.add("gui");
+        options.services.add("SwingGui");
+        options.services.add("python");
+        options.services.add("Python");
       }
+      
+      createAndStartServices(options.services);      
 
       if (options.invoke != null) {
         invokeCommands(options.invoke);
@@ -1732,15 +1733,15 @@ public class Runtime extends Service implements MessageListener {
 
     @Option(names = { "-s", "--service",
         "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
-    public String[] services;
+    public List<String> services = new ArrayList<>();
 
     @Option(names = { "-c",
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
     // FIXME - when instances connect via ws - default will become true
-    @Option(names = { "-w", "--webgui" }, description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients")
-    public boolean webgui = false;
+    @Option(names = { "-w", "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
+    public String webgui;
 
     @Option(names = { "-ne", "--noEnv" }, description = "prevents printing of the env variables to log for security")
     public boolean noEnv = false;
