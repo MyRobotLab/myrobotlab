@@ -1,10 +1,18 @@
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
-node { // use any node
+node ('ubuntu') { // use any node
 
 // node ('ubuntu') {  // use labels to direct build
 
    // withEnv(javaEnv) {
+   
+   parameters {
+        choice(
+            choices: ['greeting' , 'silence'],
+            description: 'this is the description',
+            name: 'REQUESTED_ACTION')
+    }
+   
    
    def mvnHome
    stage('preparation') { // for display purposes
@@ -36,9 +44,9 @@ node { // use any node
       echo "git_commit=$git_commit"
       // Run the maven build
       if (isUnix()) {
-         sh "'${mvnHome}/bin/mvn' -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile -Dglobal.build.number=${env.BUILD_NUMBER}"
+         sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
       } else {
-         bat(/"${mvnHome}\bin\mvn" -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile -Dglobal.build.number=${env.BUILD_NUMBER} /)
+         bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
       }
    }
    stage('verify'){
@@ -48,6 +56,21 @@ node { // use any node
 	     bat(/"${mvnHome}\bin\mvn" verify/)
 	   }
    }
+   stage('extended-verify'){
+     if (params.REQUESTED_ACTION == 'greeting') {
+       echo 'param is greeting'
+     } 	   
+   }
+   stage('junit') {
+      junit '**/target/surefire-reports/TEST-*.xml'
+   }
+   stage('archive') {
+         archiveArtifacts 'target/*.jar'      
+   } 
+   stage('jacoco') {
+        // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+        jacoco(execPattern: '**/*.exec')
+   } 
    stage('javadoc'){
 	   if (isUnix()) {
 	     sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
@@ -55,11 +78,6 @@ node { // use any node
 	     bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
 	   }
    }
-   stage('results') {
-      junit '**/target/surefire-reports/TEST-*.xml'
-      archiveArtifacts 'target/*.jar'      
-      jacoco(execPattern: 'target/*.exec',classPattern: 'target/classes',sourcePattern: 'src/main/java',exclusionPattern: 'src/test*')
-   } 
    stage('publish') {
    
 //    	def server = Artifactory.server 'artifactory01' 

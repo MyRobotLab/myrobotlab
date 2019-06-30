@@ -28,6 +28,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.TcpSerialHub;
 import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
@@ -189,6 +190,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   int parity = 0;
 
   private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+  
+  transient TcpSerialHub tcpSerialHub = new TcpSerialHub();
 
   public static String bytesToHex(byte[] bytes) {
     char[] hexChars = new char[bytes.length * 2];
@@ -206,7 +209,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * should be published to. They can subscribe to the publishRX method when a
    * lister is added. Serial is the first listener added to this map
    */
-  transient HashMap<String, SerialDataListener> listeners = new HashMap<String, SerialDataListener>();
+  transient Map<String, SerialDataListener> listeners = new HashMap<>();
 
   /*
    * conversion utility TODO - support endianess
@@ -391,7 +394,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     // #2 connect to a pre-existing
     if (ports.containsKey(inPortName)) {
       info("#2 connect to a pre-existing port");
-      connectPort(ports.get(inPortName), null);
+      connectPort(ports.get(inPortName), null);     
       lastPortName = portName;
       return;
     }
@@ -407,6 +410,15 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
         throw new IOException(e);
       }
     }
+    
+    // #2.5 - Platform is in virtual mode - create a virtual uart
+
+    if (Platform.isVirtual()) {
+      connectVirtualUart(inPortName);
+      connect(inPortName);
+      return;
+    }
+    
 
     // #3 we dont have an existing port - so we'll try a hardware port
     // connect at default parameters - if you need custom parameters
@@ -417,25 +429,13 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       return;
     }
 
-    connectPort(port, null);
+    connectPort(port, null);  
 
     // even when the JNI says it is connected
     // rarely is everything ready to go
     // give us half a second for all the buffers
     // & hardware to be ready
     // sleep(1500);
-  }
-
-  /*
-   * FIXME - implement Baddass loopback null/modem cable - auto creates a new
-   * Serial service and connects to it FIXME - no need for null/modem cable
-   * virtual port ?
-   * 
-   */
-  public boolean connectLoopback(String name) {
-    // TODO - implement
-    log.info("implement me");
-    return false;
   }
 
   public Port connectPort(Port newPort, SerialDataListener listener) throws IOException {
@@ -630,7 +630,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
   }
 
-  public HashMap<String, SerialDataListener> getListeners() {
+  public Map<String, SerialDataListener> getListeners() {
     return listeners;
   }
 
@@ -753,6 +753,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (blockingRX.size() < BUFFER_SIZE) {
       blockingRX.add(newByte);
     }
+    
+    tcpSerialHub.broadcast(newByte);
 
     if (recordRx != null) {
       // potentially variety of formats can be supported here
@@ -797,16 +799,21 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return portNames;
   }
 
-  /*
-   * main line RX publishing point
-   * 
+  
+  /**
+   * Publishing receive data to and end point
+   * @param data
+   * @return
    */
   public int publishRX(Integer data) {
     return data;
   }
 
-  /*
-   * main line TX publishing point
+
+  /**
+   * Publishing transmit data to a publishing point
+   * @param data
+   * @return
    */
   public Integer publishTX(Integer data) {
     return data;
@@ -1176,6 +1183,71 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     connect(lastPortName);
   }
 
+  public boolean isRecording() {
+    return (recordRx != null) || (recordTx != null);
+  }
+
+  public String getLastPortName() {
+    return lastPortName;
+  }
+
+  @Override
+  public void flush() {
+
+  }
+
+  public int getRate() {
+    return rate;
+  }
+
+  public int getDataBits() {
+    return dataBits;
+  }
+
+  public int getStopBits() {
+    return stopBits;
+  }
+
+  public int parity() {
+    return parity;
+  }
+
+  @Override
+  public void connect(String port, int rate) throws Exception {
+    connect(port, rate, 8, 1, 0);
+  }
+
+  @Override
+  public void close() throws IOException {
+    info("disconnecting all ports");
+    // forked ports
+    for (String portName : connectedPorts.keySet()) {
+      Port port = connectedPorts.get(portName);
+      port.close();
+    }
+  }
+
+  public void logRecv(Boolean b) {
+    if (b) {
+      recordRx = System.out;
+    } else {
+      recordRx = null;
+    }
+  }
+  
+  public void startTcpServer() throws IOException {
+    startTcpServer(null); // default port 
+  }
+  
+  public void startTcpServer(Integer port) throws IOException {
+      tcpSerialHub.start(port);    
+      tcpSerialHub.attach(this);
+  }
+  
+  public void stopTcpServer() throws IOException {
+      tcpSerialHub.stop();     
+  }
+
   public static void main(String[] args) {
 
     LoggingFactory.init(Level.INFO);
@@ -1198,18 +1270,24 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     try {
 
-      Serial serial = (Serial) Runtime.start("serial", "Serial");
-
-      List<String> ports = new ArrayList<String>(portNames);
-      serial.invoke("publishPortNames", ports);
-
-      // Runtime.start("arduino", "Arduino");
+      Platform.setVirtual(true);
       Runtime.start("gui", "SwingGui");
+      VirtualArduino hub = (VirtualArduino)Runtime.start("varduino", "VirtualArduino");
+     //  Serial serial = (Serial) Runtime.start("serial", "Serial");
+      Serial serial = hub.getSerial();
+      serial.startTcpServer();
+      // serial.connect("COM88");
+      hub.connect("COM888");
+
 
       boolean done = true;
       if (done) {
         return;
       }
+      
+
+      List<String> ports = new ArrayList<String>(portNames);
+      serial.invoke("publishPortNames", ports);
 
       Runtime.start("python", "Python");
       Runtime.start("webgui", "WebGui");
@@ -1393,56 +1471,5 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   }
 
-  public boolean isRecording() {
-    return (recordRx != null) || (recordTx != null);
-  }
-
-  public String getLastPortName() {
-    return lastPortName;
-  }
-
-  @Override
-  public void flush() {
-
-  }
-
-  public int getRate() {
-    return rate;
-  }
-
-  public int getDataBits() {
-    return dataBits;
-  }
-
-  public int getStopBits() {
-    return stopBits;
-  }
-
-  public int parity() {
-    return parity;
-  }
-
-  @Override
-  public void connect(String port, int rate) throws Exception {
-    connect(port, rate, 8, 1, 0);
-  }
-
-  @Override
-  public void close() throws IOException {
-    info("disconnecting all ports");
-    // forked ports
-    for (String portName : connectedPorts.keySet()) {
-      Port port = connectedPorts.get(portName);
-      port.close();
-    }
-  }
-
-  public void logRecv(Boolean b) {
-    if (b) {
-      recordRx = System.out;
-    } else {
-      recordRx = null;
-    }
-  }
 
 }

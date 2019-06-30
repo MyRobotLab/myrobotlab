@@ -82,7 +82,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
       if (mousePressed) {
         if (swingGui != null) {
           moving.setVisible(true);
-          log.info("Gui sending moveTo command {} {}", boundServiceName, slider.getValue());
+          log.debug("Gui sending moveTo command {} {}", boundServiceName, slider.getValue());
           swingGui.send(boundServiceName, "moveTo", Double.valueOf(slider.getValue()));
         } else {
           log.error("can not send message myService is null");

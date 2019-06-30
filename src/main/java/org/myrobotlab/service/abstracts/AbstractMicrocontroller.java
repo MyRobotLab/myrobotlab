@@ -38,7 +38,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    * and not be changed internally. So after a command to set the board exists, the board will be "locked" meaning
    * the data will not be reset.
    */
-  protected boolean lockBoard = false;
+  protected String userBoardType = null;
 
   /**
    * other services subscribed to pins
@@ -228,6 +228,10 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
    */
   @Override
   public String getBoard() {
+    if (userBoardType != null) {
+      // user has set board type - return it
+      return userBoardType;
+    }
     return board;
   }
 
@@ -242,7 +246,7 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     log.debug("setting board to type {}", board);
     // user or program has manuall set the board
     // from this time forward - do not attempt to "auto-set"
-    lockBoard = true; 
+    userBoardType = board; 
     
     log.warn("setting board to type {}", board);
     this.board = board;

@@ -25,7 +25,6 @@ public interface SerialDevice extends PortPublisher, Attachable {
    */
   int read() throws Exception;
 
-  // write(byte[] b) IOException
   void write(byte[] data) throws Exception;
 
   void write(int data) throws Exception;

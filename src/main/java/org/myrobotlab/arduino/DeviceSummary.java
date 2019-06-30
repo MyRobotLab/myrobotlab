@@ -5,15 +5,16 @@ import java.io.Serializable;
 public class DeviceSummary implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  String name;
-  Integer id;
-  String type;
-  Integer typeId;
+  public String name;
+  public Integer id;
 
-  public DeviceSummary(String name, int id, String type, int typeId) {
+  public DeviceSummary(String name, int id) {
     this.name = name;
     this.id = id;
-    this.type = type;
-    this.typeId = typeId;
   }
+  
+  public String toString() {
+    return String.format("%s device id %d", name, id);
+  }
+  
 }

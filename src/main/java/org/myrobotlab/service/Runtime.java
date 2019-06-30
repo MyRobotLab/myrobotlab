@@ -48,10 +48,8 @@ import org.atmosphere.wasync.Function;
 import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
-import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
-import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
@@ -82,8 +80,13 @@ import org.myrobotlab.swagger.Path;
 import org.myrobotlab.swagger.Swagger;
 import org.slf4j.Logger;
 
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
 /**
- * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE VAR OF RUNTIME !
+ * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
+ * VAR OF RUNTIME !
  * 
  * Runtime is responsible for the creation and removal of all Services and the
  * associated static registries It maintains state information regarding
@@ -144,7 +147,7 @@ public class Runtime extends Service implements MessageListener {
   /**
    * the id of the agent which spawned us
    */
-  static String fromAgent = null;
+  // static String fromAgent = null;
 
   /**
    * Pid file of this process
@@ -171,6 +174,11 @@ public class Runtime extends Service implements MessageListener {
    */
   private Repo repo = Repo.getInstance();
   private ServiceData serviceData = ServiceData.getLocalInstance();
+
+  /**
+   * command line options
+   */
+  static CmdOptions options;
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
@@ -229,12 +237,11 @@ public class Runtime extends Service implements MessageListener {
    * global startingArgs - whatever came into main each runtime will have its
    * individual copy
    */
-  static private String[] globalArgs;
-
-  static private CmdLine cmdline = null;
+  // FIXME - remove static !!!
+  static String[] globalArgs;
 
   private static String gateway;
-  
+
   static Set<String> networkPeers = null;
 
   Locale locale;
@@ -323,22 +330,25 @@ public class Runtime extends Service implements MessageListener {
   /**
    * creates and starts service from a cmd line object
    *
-   * @param cmdline
-   *          data object from the cmd line
+   * @param services - services to be created
    */
-  public final static void createAndStartServices(CmdLine cmdline) {
+  public final static void createAndStartServices(List<String> services) {
 
-    log.info(String.format("createAndStartServices service count %1$d", cmdline.getArgumentCount("-service") / 2));
+    if (services == null) {
+      log.error("createAndStartServices(null)");
+      return;
+    }
+    
+    log.info("services {}", Arrays.toString(services.toArray()));
 
-    if (cmdline.getArgumentCount("-service") > 0 && cmdline.getArgumentCount("-service") % 2 == 0) {
+    if (services.size() % 2 == 0) {
 
-      for (int i = 0; i < cmdline.getArgumentCount("-service"); i += 2) {
+      for (int i = 0; i < services.size(); i += 2) {
+        String name = services.get(i);
+        String type = services.get(i + 1);
 
-        log.info(String.format("attempting to invoke : org.myrobotlab.service.%1$s named %2$s", cmdline.getSafeArgument("-service", i + 1, ""),
-            cmdline.getSafeArgument("-service", i, "")));
+        log.info("attempting to invoke : {} of type {}", name, type);
 
-        String name = cmdline.getSafeArgument("-service", i, "");
-        String type = cmdline.getSafeArgument("-service", i + 1, "");
         ServiceInterface s = Runtime.create(name, type);
 
         if (s != null) {
@@ -354,15 +364,9 @@ public class Runtime extends Service implements MessageListener {
 
       }
       return;
-    } /*
-       * LIST ???
-       *
-       * else if (cmdline.hasSwitch("-list")) { Runtime runtime =
-       * Runtime.getInstance(); if (runtime == null) {
-       *
-       * } else { log.info(getServiceTypeNames()); } return; }
-       */
-    mainHelp();
+    }
+    Runtime.getInstance().mainHelp();
+    shutdown();
   }
 
   static public synchronized ServiceInterface createService(String name, String fullTypeName) {
@@ -491,10 +495,6 @@ public class Runtime extends Service implements MessageListener {
     return null;
   }
 
-  static public boolean fromAgent() {
-    return fromAgent != null;
-  }
-
   /**
    * Runs the garbage collector.
    */
@@ -512,10 +512,6 @@ public class Runtime extends Service implements MessageListener {
       cli = startCli();
     }
     return cli;
-  }
-
-  static public CmdLine getCmdLine() {
-    return cmdline;
   }
 
   /**
@@ -550,10 +546,6 @@ public class Runtime extends Service implements MessageListener {
    */
   public static final long getFreeMemory() {
     return java.lang.Runtime.getRuntime().freeMemory();
-  }
-
-  static public String[] getGlobalArgs() {
-    return globalArgs;
   }
 
   /**
@@ -640,7 +632,7 @@ public class Runtime extends Service implements MessageListener {
     } catch (Exception e) {
       Logging.logError(e);
     }
-    
+
     if (ret.size() == 0) {
       // if we don't have a "real" ip address - we always have home
       ret.add("127.0.0.1");
@@ -663,7 +655,8 @@ public class Runtime extends Service implements MessageListener {
   static public Set<String> getNetworkPeers() throws UnknownHostException {
     networkPeers = new TreeSet<>();
     // String myip = InetAddress.getLocalHost().getHostAddress();
-    List<String> myips = getLocalAddresses(); // TODO - if nothing else - 127.0.0.1
+    List<String> myips = getLocalAddresses(); // TODO - if nothing else -
+                                              // 127.0.0.1
     for (String myip : myips) {
       if (myip.equals("127.0.0.1")) {
         log.info("This PC is not connected to any network!");
@@ -1077,35 +1070,30 @@ public class Runtime extends Service implements MessageListener {
     Repo.getInstance().install(serviceType);
   }
 
-  static public void invokeCommands(CmdLine cmdline) {
-    int argCount = cmdline.getArgumentCount("-invoke");
-    if (argCount > 1) {
+  static public void invokeCommands(String[] invoke) {
 
-      StringBuffer params = new StringBuffer();
-
-      ArrayList<String> invokeList = cmdline.getArgumentList("-invoke");
-      Object[] data = new Object[argCount - 2];
-      for (int i = 2; i < argCount; ++i) {
-        data[i - 2] = invokeList.get(i);
-        params.append(String.format("%s ", invokeList.get(i)));
-      }
-
-      String name = cmdline.getArgument("-invoke", 0);
-      String method = cmdline.getArgument("-invoke", 1);
-
-      log.info("attempting to invoke : {}.{}({})\n", name, method, params.toString());
-      getInstance().send(name, method, data);
-
+    if (invoke.length < 2) {
+      log.error("invalid invoke request, minimally 2 parameters are required: --invoke service method ...");
+      return;
     }
 
+    String name = invoke[0];
+    String method = invoke[1];
+
+    // params
+    Object[] data = new Object[invoke.length - 2];
+    for (int i = 2; i < invoke.length; ++i) {
+      data[i - 2] = invoke[i];
+    }
+
+    log.info("attempting to invoke : {}.{}({})\n", name, method, Arrays.toString(data));
+    getInstance().send(name, method, data);
   }
 
-  static public boolean isAgent() {
-    if (cmdline == null) {
-      return false;
-    }
-    return cmdline.containsKey("-isAgent");
-  }
+  /*
+   * static public boolean isAgent() { if (cmdline == null) { return false; }
+   * return cmdline.containsKey("-isAgent"); }
+   */
 
   public static boolean isLocal(String serviceName) {
     ServiceInterface sw = getService(serviceName);
@@ -1144,122 +1132,87 @@ public class Runtime extends Service implements MessageListener {
    * Main starting method of MyRobotLab Parses command line options
    *
    * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
-   * -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+   * f-Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
    *
    */
   public static void main(String[] args) {
-    System.out.println(Arrays.toString(args));
-    // global for this process
-    globalArgs = args;
-
-    // sub-process if there is one
-
-    cmdline = new CmdLine(args);
-
-    Logging logging = LoggingFactory.getInstance();
-    log.info("args [{}]", cmdline.toString());
 
     try {
+      options = new CmdOptions();
+
+      // int exitCode = new CommandLine(options).execute(args);
+      new CommandLine(options).parseArgs(args);
+
+      globalArgs = args;
+      Logging logging = LoggingFactory.getInstance();
 
       // TODO - replace with commons-cli -l
-      logging.setLevel(cmdline.getSafeArgument("-logLevel", 0, "INFO"));
+      logging.setLevel(options.logLevel);
 
       Platform platform = Platform.getLocalInstance();
 
-      if (cmdline.containsKey("-id")) {
-        platform.setId(cmdline.getArgument("-id", 0));
-      } /*
-         * else { SimpleDateFormat formatter = new
-         * SimpleDateFormat("yyyyMMdd.HHmmssSSS"); id =
-         * String.format("runtime.%s.%s", formatter.format(startDate), pid); }
-         */
-
-      if (cmdline.containsKey("-fromAgent")) {
-        if (cmdline.getArgumentCount("-fromAgent") != 1) {
-          log.error("if process is -fromAgent a id is required - no id found");
-          return;
-        }
-        // assigning agent's id
-        fromAgent = cmdline.getArgument("-fromAgent", 0);
+      if (options.id != null) {
+        platform.setId(options.id);
       }
 
-      if (cmdline.containsKey("-v") || cmdline.containsKey("--version")) {
-        System.out.print(Runtime.getVersion());
+      Runtime runtime = Runtime.getInstance();
+
+      // if (options.logToConsole) {
+      // logging.addAppender(Appender.CONSOLE); // this is default of logger
+      // setup :P - the parameter is not needed
+      // } else {
+      logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
+      // }
+
+      if (options.help) {
+        runtime.mainHelp();
+        shutdown();
         return;
       }
 
-      if (cmdline.containsKey("--logToConsole")) {
-        logging.addAppender(Appender.CONSOLE);
-      } else {
-        logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
-      }
-
-      if (cmdline.containsKey("-h") || cmdline.containsKey("-?") || cmdline.containsKey("--help")) {
-        mainHelp();
-        return;
-      }
-
-      if (!cmdline.containsKey("--noCLI")) {
-        Runtime.getInstance();
-        startCli();
-      }
-
-      // TODO replace with commons-cli
-      if (cmdline.containsKey("-install") || cmdline.containsKey("--install") || cmdline.containsKey("-i")) {
-        ArrayList<String> services = null;
-        // force all updates
-        if (cmdline.containsKey("--install")) {
-          services = cmdline.getArgumentList("--install");
-        } else if (cmdline.containsKey("-install")) {
-          services = cmdline.getArgumentList("-install");
-        } else {
-          services = cmdline.getArgumentList("-i");
-        }
+      // FIXME TEST THIS !! 0 length, single service, multiple !
+      if (options.install != null) {
 
         Repo repo = Repo.getInstance();
-        if (services.size() == 0) {
+        if (options.install.length == 0) {
           repo.install();
         } else {
-          for (int i = 0; i < services.size(); ++i) {
-            repo.install(services.get(i));
+          for (String service : options.install) {
+            repo.install(service);
           }
         }
         shutdown();
         return;
       }
 
-      if (cmdline.containsKey("--manifest") || cmdline.containsKey("-m")) {
-        CodecJson.encode(Runtime.getManifest());
-        shutdown();
-        return;
-      }
-
-      if (cmdline.containsKey("--extract") || cmdline.containsKey("-e")) {
-        // force all updates
-        /*
-         * FIXME - do
-         * " -extract {serviceType} in future ArrayList<String> services = cmdline.getArgumentList("
-         * -extract"); Repo repo = Repo.getInstance(); if (services.size() == 0)
-         * { repo.install(); } else { for (int i = 0; i < services.size(); ++i)
-         * { repo.install(services.get(i)); } }
-         */
+      if (options.extract) {
         extract();
         shutdown();
         return;
       }
 
-      if (cmdline.containsKey("-service")) {
-        createAndStartServices(cmdline);
+      // initial default services if none supplied
+      if (options.services.size() == 0) {
+        options.services.add("log");
+        options.services.add("Log");
+        options.services.add("cli");
+        options.services.add("Cli");
+        options.services.add("gui");
+        options.services.add("SwingGui");
+        options.services.add("python");
+        options.services.add("Python");
       }
+      
+      createAndStartServices(options.services);      
 
-      if (cmdline.containsKey("-invoke")) {
-        invokeCommands(cmdline);
+      if (options.invoke != null) {
+        invokeCommands(options.invoke);
       }
 
     } catch (Exception e) {
-      Logging.logError(e);
-      System.out.print(Logging.stackToString(e));
-      Service.sleep(2000);
+      Runtime.mainHelp();
+      shutdown();
+      log.error("main threw", e);
     }
   }
 
@@ -1267,22 +1220,7 @@ public class Runtime extends Service implements MessageListener {
    * prints help to the console
    */
   static void mainHelp() {
-    System.out.println(String.format("Runtime %s", Runtime.getVersion()));
-    System.out.println("-h --help                                  # help ");
-    System.out.println("-v --version                               # print version");
-    System.out.println("-update                                    # update myrobotlab");
-    System.out.println("-invoke name method [param1 param2 ...]    # invoke a method of a service");
-    System.out.println("-install [ServiceType1 ServiceType2 ...]   # install services - if no ServiceTypes are specified install all");
-    System.out.println("-id <instance id>                          # the identifier for this process");
-    System.out.println("-logToConsole                              # redirects logging to console");
-    System.out.println("-logLevel <DEBUG | INFO | WARNING | ERROR> # log level");
-    System.out.println("-service <name1 Type1 name2 Type2 ...>     # create and start list of services, e.g. -service gui SwingGui");
-    // System.out.println("example:");
-    // String helpString = "java
-    // -Djava.library.path=./libraries/native/x86.32.windows
-    // org.myrobotlab.service.Runtime -service webgui WebGui gui SwingGui
-    // -logLevel INFO -logToConsole";
-    // System.out.println(helpString);
+    new CommandLine(new CmdOptions()).usage(System.out);
   }
 
   public static String message(String msg) {
@@ -1593,26 +1531,6 @@ public class Runtime extends Service implements MessageListener {
       log.error("releaseAll threw - continuing to shutdown", e);
     }
 
-    Platform platform = Platform.getLocalInstance();
-
-    // removing appropriate pid file
-    try {
-      String pidFileName = null;
-      if (fromAgent != null) {
-        // from agent
-        pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, platform.getId());
-      } else {
-        // "not" from agent
-        pidFileName = String.format("%s/%s.pid", PID_DIR, platform.getId());
-      }
-
-      log.info("removing pid file {}", pidFileName);
-      File f = new File(pidFileName);
-      f.delete();
-    } catch (Exception e) {
-      log.error("removing pid file failed", e);
-    }
-
     // In unusual situations, System.exit(int) might not actually stop the
     // program.
     // Runtime.getRuntime().halt(int) on the other hand, always does.
@@ -1733,12 +1651,118 @@ public class Runtime extends Service implements MessageListener {
     }
   }
 
+  // FIXME - test when internet is not available
+  // FIXME - test over multiple running processes
+  // FIXME - add -help
+  // TODO - add jvm memory other runtime info
+  // FIXME - a way to route parameters from command line to Agent vs Runtime -
+  // the current concept is ok - but it does not work ..
+  // make it work if necessary prefix everything by -agent-<...>
+  // FIXME - replace by PicoCli !!!
+  // FIXME - updateAgent(branch, version) -> updateAgent() 'latest
+  // FIXME - implement --help -h !!! - handle THROW !
+  @Command(name = "MyRobotLab"/*
+                               * , mixinStandardHelpOptions = true - cant do it
+                               */)
+  static class CmdOptions {
+
+    @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
+    public boolean help = false;
+
+    // FIXME - give all examples with params and example !!
+    @Option(names = { "-I",
+        "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
+    public String invoke[];
+
+    @Option(names = { "-e", "--extract" }, description = "forces extraction of all resources onto the filesystem")
+    public boolean extract = false;
+
+    @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
+    public String jvm;
+
+    @Option(names = { "-n", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
+    public String id;
+
+    // FIXME - how does this work ??? if specified is it "true" ?
+    @Option(names = { "-B", "--no-banner" }, description = "prevents banner from showing")
+    public boolean noBanner = false;
+
+    @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
+    public boolean fork = false;
+
+    /**
+     * <pre>
+     * &#64;Option(names = { "-nc", "--no-cli" }, description = "no command line interface")
+     * public boolean noCli = false;
+     * </pre>
+     */
+
+    @Option(names = { "-m", "--manifest" }, description = "prints out the manifest")
+    public boolean manifest = false;
+
+    @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+    public String logLevel = "info";
+
+    @Option(names = { "-i",
+        "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
+    public String install[];
+
+    @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
+    public boolean autoUpdate = false;
+
+    // FIXME - implement
+    @Option(names = { "-L", "--list-versions" }, description = "list all possible versions for this branch")
+    public boolean listVersions = false;
+
+    // FIXME - implement
+    @Option(names = { "-u", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
+    public boolean updateAgent = false;
+
+    // FIXME - does this get executed by another CommandLine ?
+    @Option(names = { "-g",
+        "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
+    public String agent;
+
+    @Option(names = { "-b", "--branch" }, description = "requested branch")
+    public String branch;
+
+    // FIXME - get version vs force version - perhaps just always print version
+    // in help
+    @Option(names = { "-v", "--version" }, description = "requested version")
+    public String version;
+
+    @Option(names = { "-s", "--service",
+        "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
+    public List<String> services = new ArrayList<>();
+
+    @Option(names = { "-c",
+        "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
+    public String client[];
+
+    // FIXME - when instances connect via ws - default will become true
+    @Option(names = { "-w", "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
+    public String webgui;
+
+    @Option(names = { "-ne", "--noEnv" }, description = "prevents printing of the env variables to log for security")
+    public boolean noEnv = false;
+
+    /*
+     * @Parameters(arity = "1..*", paramLabel = "FILE", description =
+     * "File(s) to process.") private String[] services;
+     */
+
+  }
+
   public Runtime(String n) {
     super(n);
-
+    
     synchronized (instanceLockObject) {
       if (runtime == null) {
         runtime = this;
+        if (options == null) {
+          options = new CmdOptions();
+        }
+
       }
     }
 
@@ -1752,38 +1776,6 @@ public class Runtime extends Service implements MessageListener {
     // isAgent == make default directory (with pid) if custom not supplied
     // fromAgent == needs agentId
     // neither ... == normal pid file !isAgent & !fromAgent
-    String id = platform.getId();
-    String pid = platform.getPid();
-
-    // write pid file
-    try {
-
-      // regular (neither)
-      String pidFileName = String.format("%s/%s.pid", PID_DIR, id);
-
-      // fromAgent
-      if (fromAgent != null) {
-        // if I'm being created from an Agent - it sends me its agentId
-        // so I can communicated with it
-        pidFileName = String.format("%s/%s/%s.pid", PID_DIR, fromAgent, id);
-      }
-
-      pidFile = new File(pidFileName);
-      new File(pidFile.getParent()).mkdirs();
-
-      if (isAgent()) {
-        // isAgent make directory
-        pidFile.mkdirs();
-      } else {
-        // create file for (neither) or fromAgent
-        FileOutputStream fos = new FileOutputStream(pidFile);
-        fos.write(pid.getBytes());
-        fos.close();
-      }
-
-    } catch (Exception e) {
-      log.error("pid file creation failed", e);
-    }
 
     // setting the id and the platform
     platform = Platform.getLocalInstance();
@@ -1817,7 +1809,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("args {}", Arrays.toString(args.toArray()));
 
     log.info("============== args end ==============");
-    if (cmdline != null && !cmdline.containsKey("-noEnv")) {
+    if (options.noEnv) {
       log.info("============== env begin ==============");
 
       Map<String, String> env = System.getenv();
@@ -1843,7 +1835,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("============== normalized ==============");
     long startTime = platform.getStartTime().getTime();
     log.info("{} - GMT - {}", sdf.format(startTime), gmtf.format(startTime));
-    log.info("pid {}", pid);
+    log.info("pid {}", platform.getPid());
     log.info("hostname {}", platform.getHostname());
     log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getBitness(), platform.getOS());
     log.info("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild());
@@ -2535,10 +2527,17 @@ public class Runtime extends Service implements MessageListener {
     meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("com.google.code.gson", "gson", "2.8.5");
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    meta.addDependency("org.atmosphere", "wasync", "2.1.5");
+    meta.addDependency("com.google.code.gson", "gson", "2.8.5"); // apache 2.0
+                                                                 // license
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); // apache 2.0
+                                                            // license
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2"); // apache
+                                                                            // 2.0
+                                                                            // license
+    meta.addDependency("org.atmosphere", "wasync", "2.1.5"); // apache 2.0
+                                                             // license
+    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2"); // apache 2.0
+                                                                   // license
 
     // all your logging needs
     meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
@@ -2693,7 +2692,7 @@ public class Runtime extends Service implements MessageListener {
   public static void exportAll(String filename) throws IOException {
     // currently only support python - maybe in future we'll support js too
     String python = LangUtils.toPython();
-    Files.write(Paths.get(filename), python.toString().getBytes());    
+    Files.write(Paths.get(filename), python.toString().getBytes());
   }
 
 }

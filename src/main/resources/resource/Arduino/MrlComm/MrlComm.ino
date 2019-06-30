@@ -50,6 +50,7 @@
 
 // Included as a 3rd party arduino library from here: https://github.com/ivanseidel/LinkedList/
 #include "LinkedList.h"
+#include "Msg.h"
 #include "MrlComm.h"
 #include <Wire.h>
 #if defined(ESP8266)
@@ -88,6 +89,10 @@ void setup() {
 #else
 	mrlComm.begin(Serial);
 #endif
+
+  // send hello !
+  Msg* msg = mrlComm.getMsg();
+  msg->publishMrlCommBegin(MRLCOMM_VERSION);
 }
 
 /**

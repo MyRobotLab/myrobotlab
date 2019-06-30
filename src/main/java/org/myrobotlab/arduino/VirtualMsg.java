@@ -63,7 +63,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 60;
+	public static final int MRLCOMM_VERSION = 61;
 	
 	// send buffer
   int sendBufferSize = 0;
@@ -214,6 +214,8 @@ public class VirtualMsg {
   public final static int SET_ZERO_POINT = 53;
   // < publishEncoderData/deviceId/b16 position
   public final static int PUBLISH_ENCODER_DATA = 54;
+  // < publishMrlCommBegin/version
+  public final static int PUBLISH_MRL_COMM_BEGIN = 55;
 
 
 /**
@@ -1198,6 +1200,35 @@ public class VirtualMsg {
 	  }
 	}
 
+	public synchronized void publishMrlCommBegin(Integer version/*byte*/) {
+		try {
+		  if (ackEnabled){
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(PUBLISH_MRL_COMM_BEGIN); // msgType = 55
+      write(version);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+      if(record != null){
+        txBuffer.append("> publishMrlCommBegin");
+        txBuffer.append("/");
+        txBuffer.append(version);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+	  } catch (Exception e) {
+	  			log.error("publishMrlCommBegin threw",e);
+	  }
+	}
+
 
 	public static String methodToString(int method) {
 		switch (method) {
@@ -1362,6 +1393,9 @@ public class VirtualMsg {
     }
     case PUBLISH_ENCODER_DATA:{
       return "publishEncoderData";
+    }
+    case PUBLISH_MRL_COMM_BEGIN:{
+      return "publishMrlCommBegin";
     }
 
 		default: {
