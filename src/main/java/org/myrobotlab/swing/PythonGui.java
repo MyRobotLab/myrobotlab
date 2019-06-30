@@ -54,6 +54,7 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.TextEditorPane;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.Python;
@@ -126,7 +127,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
 
     jframe = myService.getFrame();
 
-    Script s = new Script(String.format("%s%suntitled.%d.py", Service.getCfgDir(), File.separator, untitledCount), "");
+    Script s = new Script(String.format("%s%suntitled.%d.py", FileIO.getCfgDir(), File.separator, untitledCount), "");
     addNewEditorPanel(s);
 
     JPanel menuPanel = createMenuPanel();
@@ -193,7 +194,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     JMenuItem m = (JMenuItem) o;
     if (m.getText().equals("new")) {
       ++untitledCount;
-      Script s = new Script(String.format("%s%suntitled.%d.py", Service.getCfgDir(), File.separator, untitledCount), "");
+      Script s = new Script(String.format("%s%suntitled.%d.py", FileIO.getCfgDir(), File.separator, untitledCount), "");
       addNewEditorPanel(s);
     } else if (m.getText().equals("save")) {
       save();

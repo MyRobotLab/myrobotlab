@@ -365,7 +365,8 @@ public class ServiceData implements Serializable {
       removeExisting.delete();
 
       // remove .myrobotlab/serviceData.json
-      removeExisting = new File(System.getProperty("user.dir") + File.separatorChar + ".myrobotlab" + File.separatorChar + "serviceData.json");
+      // 20190630 - GroG changed uses FileIO.getCfgDir()
+      removeExisting = new File(FileIO.getCfgDir() + File.separatorChar + "serviceData.json");
       removeExisting.delete();
 
       // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - BEGIN ----
@@ -374,10 +375,6 @@ public class ServiceData implements Serializable {
       sd.save(filename);
       // save to the .myrobotlab directory also..
       sd.save();
-//      FileOutputStream fos = new FileOutputStream(filename);
-//      fos.write(CodecUtils.toJson(sd).getBytes());
-//      fos.close();
-      // THIS IS FOR ANT BUILD - DO NOT CHANGE !!! - END ----
 
     } catch (Exception e) {
       Logging.logError(e);

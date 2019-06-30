@@ -1,5 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<!-- 
+		mvn clean package 
+	
+	 -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.myrobotlab</groupId>
 	<artifactId>mrl</artifactId>
@@ -17,6 +21,7 @@
 	    	maven or jenkins can do this
 	    	
 	     -->
+	    <!-- from jenkins env vars -->
 	    <build.number>${BUILD_NUMBER}</build.number>
 	    <GitBranch>${BRANCH_NAME}</GitBranch>
 	    <username>${NODE_NAME}</username>	    
