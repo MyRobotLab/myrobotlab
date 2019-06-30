@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -113,7 +114,7 @@ public class Agent extends Service {
   /**
    * command line options for the agent
    */
-  CmdOptions options;
+  static CmdOptions options;
 
   String versionPrefix = "1.1.";
 
@@ -305,9 +306,48 @@ public class Agent extends Service {
   }
 
   public void startWebGui() {
+    startWebGui(null);
+  }
+
+  public void startWebGui(String addressPort) {
+    if (addressPort == null) {
+      startWebGui(null, null);
+    }
+
+    Integer port = null;
+    String address = null;
+
+    try {
+      port = Integer.parseInt(addressPort);
+    } catch (Exception e) {
+    }
+
+    try {
+      if (addressPort.contains(":")) {
+        String[] anp = addressPort.split(":");
+        port = Integer.parseInt(anp[1]);
+        addressPort = anp[0];
+      }
+      InetAddress ip = InetAddress.getByName(addressPort);
+      address = ip.getHostAddress();
+    } catch (Exception e2) {
+    }
+
+    startWebGui(address, port);
+  }
+
+  public void startWebGui(String address, Integer port) {
     try {
 
       if (webgui == null) {
+        if (address != null) {
+          this.address = address;
+        }
+        if (port != null) {
+          this.port = port;
+        } else {
+          port = 8887;
+        }
         webgui = (WebGui) Runtime.create("webgui", "WebGui");
         webgui.autoStartBrowser(false);
         webgui.setPort(port);
@@ -658,7 +698,7 @@ public class Agent extends Service {
     }
     return latest;
   }
-  
+
   public Set<String> getLocalVersions() {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
@@ -669,13 +709,14 @@ public class Agent extends Service {
       File file = listOfFiles[i];
       if (file.isDirectory()) {
         // if (file.getName().startsWith(branch)) {
-          // String version = file.getName().substring(branch.length() + 1);// getFileVersion(file.getName());
-          // if (version != null) {
-            int pos = file.getName().lastIndexOf("-");
-            String branchAndVersion = file.getName().substring(0, pos - 1) + " " + file.getName().substring(pos + 1); 
-            versions.add(branchAndVersion);
-          //}
-        //}
+        // String version = file.getName().substring(branch.length() + 1);//
+        // getFileVersion(file.getName());
+        // if (version != null) {
+        int pos = file.getName().lastIndexOf("-");
+        String branchAndVersion = file.getName().substring(0, pos - 1) + " " + file.getName().substring(pos + 1);
+        versions.add(branchAndVersion);
+        // }
+        // }
       }
     }
     return versions;
@@ -868,6 +909,7 @@ public class Agent extends Service {
       pd.jvm = options.jvm.split(" ");
     }
 
+    pd.initialServices = options.services;
     pd.autoUpdate = options.autoUpdate;
 
     return spawn(pd);
@@ -949,33 +991,22 @@ public class Agent extends Service {
 
     cmd.add("org.myrobotlab.service.Runtime");
 
-    if (!pd.userDefinedServices) {
+    if (pd.initialServices.size() > 0) {
       cmd.add("--service");
-      // cmd.add("webgui");
-      // cmd.add("WebGui");
-      cmd.add("log");
-      cmd.add("Log");
-      cmd.add("cli");
-      cmd.add("Cli");
-      cmd.add("gui");
-      cmd.add("SwingGui");
-      cmd.add("python");
-      cmd.add("Python");
+      for (int i = 0; i < pd.initialServices.size(); i += 2) {
+        cmd.add(pd.initialServices.get(i));
+        cmd.add(pd.initialServices.get(i + 1));
+      }
     }
-
-    /*
-    cmd.add("--fromAgent");
-    cmd.add(Platform.getLocalInstance().getId());
-    */
 
     cmd.add("--id");
     cmd.add(pd.id);
-    
+
     if (options.logLevel != null) {
       cmd.add("--log-level");
       cmd.add(options.logLevel);
     }
-    
+
     if (options.install != null) {
       cmd.add("--install");
       for (String serviceType : options.install) {
@@ -1103,41 +1134,70 @@ public class Agent extends Service {
   public static void main(String[] args) {
     try {
 
-      CmdOptions options = new CmdOptions();
+      options = new CmdOptions();
 
       // for Callable version ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
-      
+
       if (options.help) {
         Runtime.mainHelp();
         return;
       }
 
-      String[] agentArgs = new String[] { "--id", "agent-" + NameGenerator.getName()};
+      // String[] agentArgs = new String[] { "--id", "agent-" +
+      // NameGenerator.getName(), "-l", "WARN"};
+      List<String> agentArgs = new ArrayList<>();
+
       if (options.agent != null) {
-        agentArgs = options.agent.split(" ");
+        agentArgs.addAll(Arrays.asList(options.agent.split(" ")));
+      } else {
+        agentArgs.add("--id");
+        agentArgs.add("agent-" + NameGenerator.getName());
+        agentArgs.add("-l");
+        agentArgs.add("WARN");
+
+        agentArgs.add("-s");
+        agentArgs.add("agent");
+        agentArgs.add("Agent");
+        agentArgs.add("cli");
+        agentArgs.add("Cli");
+        agentArgs.add("security");
+        agentArgs.add("Security");
+        // agentArgs.add("webgui"); FIXME - soon .. but not yet ...
+        // agentArgs.add("WebGui");
       }
 
       Process p = null;
 
       if (!options.noBanner) {
         System.out.println(banner);
+        System.out.println("");
       }
 
       log.info("user  args {}", Arrays.toString(args));
-      log.info("agent args {}", Arrays.toString(agentArgs));
-      
-      Runtime.main(agentArgs);
-      if (agent == null) {
-        agent = (Agent) Runtime.start("agent", "Agent");
-        agent.options = options;
-      }
-      
+      log.info("agent args {}", Arrays.toString(agentArgs.toArray()));
+
+      Runtime.main(agentArgs.toArray(new String[agentArgs.size()]));
+      agent = (Agent) Runtime.getService("agent");
+      /*
+       * if (agent == null) { agent = (Agent) Runtime.start("agent", "Agent");
+       * agent.options = options; }
+       */
+
       if (options.listVersions) {
         System.out.println("available local versions");
         for (String bv : agent.getLocalVersions()) {
           System.out.println(bv);
+        }
+        agent.shutdown();
+      }
+
+      if (options.manifest) {
+        Map<String, String> manifest = Runtime.getManifest();
+        System.out.println("manifest");
+        for (String name : manifest.keySet()) {
+          System.out.println(String.format("%s=%s", name, manifest.get(name)));
         }
         agent.shutdown();
       }
@@ -1171,10 +1231,8 @@ public class Agent extends Service {
       // return;
       // }
 
-      if (options.webgui) {
-        agent.startWebGui();
-        // sub options set port default 8887
-        // webgui.setAddress("127.0.0.1"); - for security...
+      if (options.webgui != null) {
+        agent.startWebGui(options.webgui);
       }
 
       if (options.autoUpdate) {
