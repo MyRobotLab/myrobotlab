@@ -24,6 +24,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -1282,7 +1283,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public boolean isConnected() {
     // include that we must have gotten a valid MrlComm version number.
-    if (serial != null && serial.isConnected() && boardInfo.getVersion() != null) {
+    if (serial != null && serial.isConnected() && boardInfo != null && boardInfo.getVersion() != null) {
       return true;
     }
     // just to force serial arduino conected if it is a serialX com
@@ -1496,18 +1497,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
         // Our 'first' getBoardInfo may not receive a acknowledgement
         // so this should be disabled until boadInfo is valid
-
-        /**
-         * acking is done in Msg ! if (boardInfo.isValid() && ackEnabled) {
-         * synchronized (ackRecievedLock) { try { long ts =
-         * System.currentTimeMillis(); log.info( "***** starting wait *****");
-         * ackRecievedLock.wait(10000); log.info("***** waited {} ms *****",
-         * (System.currentTimeMillis() - ts)); } catch (InterruptedException e)
-         * {// don't care} }
-         * 
-         * if (!ackRecievedLock.acknowledged) { log.error( "Ack not received :
-         * {} {}", Msg.methodToString(ioCmd[0]), numAck); } } }
-         ***/
 
         // clean up memory/buffers
         msgSize = 0;
@@ -2281,6 +2270,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       sc = (ServoControl) Runtime.start("s2", "HobbyServo");
       sc.setPin(9);
       hub.attach(sc);
+      
+      hub.enableAck(true);
       /*
       sc = (ServoControl) Runtime.start("s3", "HobbyServo");
       sc.setPin(12);

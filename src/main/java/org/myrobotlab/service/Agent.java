@@ -904,7 +904,8 @@ public class Agent extends Service {
     if (options.jvm != null) {
       pd.jvm = options.jvm.split(" ");
     }
-
+    
+    pd.initialServices = options.services;
     pd.autoUpdate = options.autoUpdate;
 
     return spawn(pd);
@@ -986,24 +987,14 @@ public class Agent extends Service {
 
     cmd.add("org.myrobotlab.service.Runtime");
 
-    if (!pd.userDefinedServices) {
+    if (pd.initialServices.size() > 0) {
       cmd.add("--service");
-      // cmd.add("webgui");
-      // cmd.add("WebGui");
-      cmd.add("log");
-      cmd.add("Log");
-      cmd.add("cli");
-      cmd.add("Cli");
-      cmd.add("gui");
-      cmd.add("SwingGui");
-      cmd.add("python");
-      cmd.add("Python");
+      for (int i = 0; i < pd.initialServices.size(); i+=2) {
+        cmd.add(pd.initialServices.get(i));
+        cmd.add(pd.initialServices.get(i+1));
+      }
     }
-
-    /*
-     * cmd.add("--fromAgent"); cmd.add(Platform.getLocalInstance().getId());
-     */
-
+    
     cmd.add("--id");
     cmd.add(pd.id);
 
@@ -1150,25 +1141,46 @@ public class Agent extends Service {
         return;
       }
 
-      String[] agentArgs = new String[] { "--id", "agent-" + NameGenerator.getName()};
+      // String[] agentArgs = new String[] { "--id", "agent-" + NameGenerator.getName(), "-l", "WARN"};
+      List<String> agentArgs = new ArrayList<>();
+      
       if (options.agent != null) {
-        agentArgs = options.agent.split(" ");
+        agentArgs.addAll(Arrays.asList(options.agent.split(" ")));
+      } else {
+        agentArgs.add("--id");
+        agentArgs.add("agent-" + NameGenerator.getName());
+        agentArgs.add("-l");
+        agentArgs.add("WARN");
+        
+        agentArgs.add("-s");
+        agentArgs.add("agent");
+        agentArgs.add("Agent");
+        agentArgs.add("cli");
+        agentArgs.add("Cli");
+        agentArgs.add("security");
+        agentArgs.add("Security");
+        // agentArgs.add("webgui"); FIXME - soon .. but not yet ...
+        // agentArgs.add("WebGui");
       }
 
       Process p = null;
 
       if (!options.noBanner) {
         System.out.println(banner);
+        System.out.println("");
       }
 
       log.info("user  args {}", Arrays.toString(args));
-      log.info("agent args {}", Arrays.toString(agentArgs));
-      
-      Runtime.main(agentArgs);
+      log.info("agent args {}", Arrays.toString(agentArgs.toArray()));
+     
+      Runtime.main(agentArgs.toArray(new String[agentArgs.size()]));
+      agent = (Agent)Runtime.getService("agent");
+      /*
       if (agent == null) {
         agent = (Agent) Runtime.start("agent", "Agent");
         agent.options = options;
       }
+      */
       
       if (options.listVersions) {
         System.out.println("available local versions");

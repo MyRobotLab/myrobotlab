@@ -2386,7 +2386,6 @@ public class Msg {
 	  }
     synchronized (ackRecievedLock) {
       try {
-        long ts = System.currentTimeMillis();
         // log.info("***** starting wait *****");
         ackRecievedLock.wait(2000);
         // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));

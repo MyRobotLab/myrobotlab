@@ -2,8 +2,8 @@ package org.myrobotlab.framework;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -24,19 +24,17 @@ public class ProcessData implements Serializable {
   public String id;
   public String branch;
   public String version;
+  public List<String> initialServices = new ArrayList<>();
+  public boolean autoUpdate = false;
+
   public Long startTs;
   public Long stopTs;
   public String jarPath = null;
   public String javaExe = null;
   public Long lastUpdatedTs;
 
-  public boolean autoUpdate = false;
-
   // TODO - default more memory ? also mebbe have a jvmAppend flag vs replace ?
   public String jvm[];
-
-  // FIXME - remove
-  public boolean userDefinedServices = false;
 
   /**
    * current state of this process
@@ -116,8 +114,6 @@ public class ProcessData implements Serializable {
     this.javaExe = pd.javaExe;
     this.jarPath = pd.jarPath;
     this.jvm = pd.jvm;
-
-    this.userDefinedServices = pd.userDefinedServices;
 
     if (pd.in != null) {
       this.in = new ArrayList<String>();
