@@ -246,7 +246,7 @@ public class Python extends Service {
    * local current directory of python script any new python script will get
    * localScriptDir prefix
    */
-  String localScriptDir = new File(getCfgDir()).getAbsolutePath();
+  String localScriptDir = new File(FileIO.getCfgDir()).getAbsolutePath();
 
   /**
    * local pthon files of current script directory

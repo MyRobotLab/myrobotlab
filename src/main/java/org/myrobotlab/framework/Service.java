@@ -150,7 +150,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
   transient HashMap<String, Timer> tasks = new HashMap<String, Timer>();
 
-  public final static String cfgDir = FileIO.getCfgDir();
+  // public final static String cfgDir = FileIO.getCfgDir();
 
   /**
    * used as a static cache for quick method name testing FIXME - if you make
@@ -508,10 +508,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     log.error("createRootReserved can not create %s", key);
     return null;
-  }
-
-  public static String getCfgDir() {
-    return cfgDir;
   }
 
   static public TreeMap<String, ServiceReservation> getDna() {
@@ -1568,7 +1564,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public JsonElement loadJsonTree() throws IOException {
-    String filename = String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
+    String filename = String.format("%s%s%s.json", FileIO.getCfgDir(), File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
     String json = FileIO.toString(filename);
     return loadJsonTree(json);
   }
@@ -1623,7 +1619,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean load(Object o, String inCfgFileName) {
     String filename = null;
     if (inCfgFileName == null) {
-      filename = String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
+      filename = String.format("%s%s%s.json", FileIO.getCfgDir(), File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
     } else {
       filename = inCfgFileName;
     }
@@ -1891,7 +1887,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean save() {
 
     try {
-      File cfg = new File(String.format("%s%s%s.json", cfgDir, File.separator, String.format("%s-%s", getClass().getSimpleName(), getName())));
+      File cfg = new File(String.format("%s%s%s.json", FileIO.getCfgDir(), File.separator, String.format("%s-%s", getClass().getSimpleName(), getName())));
       // serializer.write(this, cfg);
       // this is a spammy log message
       // info("saving %s", cfg.getName());
@@ -1914,7 +1910,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean save(Object o, String cfgFileName) {
 
     try {
-      File cfg = new File(String.format("%s%s%s", cfgDir, File.separator, cfgFileName));
+      File cfg = new File(String.format("%s%s%s", FileIO.getCfgDir(), File.separator, cfgFileName));
       String s = CodecUtils.toJson(o);
       FileOutputStream out = new FileOutputStream(cfg);
       out.write(s.getBytes());
@@ -1930,7 +1926,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // saves user data in the .myrobotlab directory
     // with the file naming convention of name.<cfgFileName>
     try {
-      FileIO.toFile(String.format("%s%s%s.%s", cfgDir, File.separator, this.getName(), cfgFileName), data);
+      FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, this.getName(), cfgFileName), data);
     } catch (Exception e) {
       Logging.logError(e);
       return false;

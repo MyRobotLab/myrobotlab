@@ -95,7 +95,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   static private Properties store = new Properties();
 
-  static private String storeDirPath = String.format("%s%s.myrobotlab", System.getProperty("user.dir"), File.separator);
+  private String storeDirPath = null;
 
   static private String keyFileName = "key";
 
@@ -249,7 +249,7 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   public String getStoreFileName() {
-    return String.format("%s%s%s", storeDirPath, File.separator, storeFileName);
+    return String.format("%s%s%s", FileIO.getCfgDir(), File.separator, storeFileName);
   }
 
   // default group permissions - for new user/group
@@ -324,6 +324,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   public Security(String n) {
     super(n);
+    storeDirPath = FileIO.getCfgDir();
     loadStore();
     createDefaultGroups();
 
@@ -691,10 +692,9 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.init(Level.INFO);
+    // LoggingFactory.init(Level.INFO); 
 
-    final String KEY_FILE = "howto.key";
-    final String PWD_FILE = "howto.properties";
+    Runtime.getInstance(args);
 
     Runtime.start("gui", "SwingGui");
     // Security security = Security.getInstance();
@@ -705,8 +705,8 @@ public class Security extends Service implements AuthorizationProvider {
 
     Security security = Runtime.getSecurity();
 
-    security.setKey("amazon.polly.user.key", "FIE38343873349852");
-    security.setKey("amazon.polly.user.secret", "323Ujfkis838234jfkDk3k4dlskjlfkj");
+    security.setKey("amazon.polly.user.key", "AKIAJ6CQ5PPESWGSKNXA");
+    security.setKey("amazon.polly.user.secret", "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");
     security.setKey("xmpp.user", "user@gmail.com");
     security.setKey("xmpp.pwd", "xxxxxxxx");
     security.saveStore();
