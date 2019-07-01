@@ -69,7 +69,7 @@ node ('ubuntu') { // use any node
    } 
    stage('jacoco') {
         // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-        jacoco(execPattern: '**/*.exec')
+        // jacoco(execPattern: '**/*.exec')
    } 
    stage('javadoc'){
 	   if (isUnix()) {
