@@ -330,7 +330,8 @@ public class Runtime extends Service implements MessageListener {
   /**
    * creates and starts service from a cmd line object
    *
-   * @param services - services to be created
+   * @param services
+   *          - services to be created
    */
   public final static void createAndStartServices(List<String> services) {
 
@@ -338,7 +339,7 @@ public class Runtime extends Service implements MessageListener {
       log.error("createAndStartServices(null)");
       return;
     }
-    
+
     log.info("services {}", Arrays.toString(services.toArray()));
 
     if (services.size() % 2 == 0) {
@@ -365,7 +366,7 @@ public class Runtime extends Service implements MessageListener {
       }
       return;
     }
-    Runtime.getInstance().mainHelp();
+    Runtime.mainHelp();
     shutdown();
   }
 
@@ -410,8 +411,7 @@ public class Runtime extends Service implements MessageListener {
       Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
       log.debug("returning {}", fullTypeName);
       ServiceInterface si = (ServiceInterface) newService;
-      Platform platform = Platform.getLocalInstance();
-      si.setVirtual(platform.isVirtual());
+      si.setVirtual(Platform.isVirtual());
       Runtime.getInstance().creationCount++;
       si.setOrder(Runtime.getInstance().creationCount);
       return (Service) newService;
@@ -1140,6 +1140,7 @@ public class Runtime extends Service implements MessageListener {
     try {
       options = new CmdOptions();
 
+      // for Callable execution ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
 
@@ -1148,14 +1149,21 @@ public class Runtime extends Service implements MessageListener {
 
       // TODO - replace with commons-cli -l
       logging.setLevel(options.logLevel);
-
-      Platform platform = Platform.getLocalInstance();
-
-      if (options.id != null) {
-        platform.setId(options.id);
+      
+      if (options.virtual) {
+        Platform.setVirtual(true);
       }
 
-      Runtime runtime = Runtime.getInstance();
+      if (options.id != null) {
+        Platform platform = Platform.getLocalInstance();
+        platform.setId(options.id);
+      }
+      
+      if (options.cfgDir != null) {
+        FileIO.setCfgDir(options.cfgDir);
+      }
+
+      // Runtime runtime = Runtime.getInstance();
 
       // if (options.logToConsole) {
       // logging.addAppender(Appender.CONSOLE); // this is default of logger
@@ -1165,7 +1173,21 @@ public class Runtime extends Service implements MessageListener {
       // }
 
       if (options.help) {
-        runtime.mainHelp();
+        Runtime.mainHelp();
+        shutdown();
+        return;
+      }
+      
+      if (options.addKeys != null) {
+        if (options.addKeys.length < 2) {
+          Runtime.mainHelp();
+          shutdown();
+        }
+        Security security = Runtime.getSecurity();    
+        for (int i = 0; i < options.addKeys.length; i+=2) {
+          security.setKey(options.addKeys[i], options.addKeys[i+1]);
+          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
+        }
         shutdown();
         return;
       }
@@ -1191,7 +1213,10 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
+      // FIXME !!! - this should be in agent - you should be allowed to define services as 'none'
+      // if you create a service a runtime will be created for you ..
       // initial default services if none supplied
+      /*
       if (options.services.size() == 0) {
         options.services.add("log");
         options.services.add("Log");
@@ -1202,8 +1227,10 @@ public class Runtime extends Service implements MessageListener {
         options.services.add("python");
         options.services.add("Python");
       }
-      
-      createAndStartServices(options.services);      
+      */
+
+      // 0..* services ...
+      createAndStartServices(options.services);
 
       if (options.invoke != null) {
         invokeCommands(options.invoke);
@@ -1669,10 +1696,13 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
 
-    // FIXME - give all examples with params and example !!
     @Option(names = { "-I",
         "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
     public String invoke[];
+
+    @Option(names = { "-k",
+    "--add-key" }, arity = "2..*", description = "adds a key to the key store\n" +"@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
+    public String addKeys[];
 
     @Option(names = { "-e", "--extract" }, description = "forces extraction of all resources onto the filesystem")
     public boolean extract = false;
@@ -1683,10 +1713,16 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-n", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
     public String id;
 
+    @Option(names = { "-c",
+        "--config-dir" }, description = "myrobotlab dot directory - typically its in the \"user.home\" or current working directory - this directory contains keys and service state information.  "
+            + "When auto updating its often desirable to keep the config or data directory in a shared location")
+    public String cfgDir = null;
+
     // FIXME - how does this work ??? if specified is it "true" ?
     @Option(names = { "-B", "--no-banner" }, description = "prevents banner from showing")
     public boolean noBanner = false;
 
+    // FIXME -rename to daemon
     @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
     public boolean fork = false;
 
@@ -1709,6 +1745,9 @@ public class Runtime extends Service implements MessageListener {
 
     @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
     public boolean autoUpdate = false;
+
+    @Option(names = { "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
+    public boolean virtual = false;
 
     // FIXME - implement
     @Option(names = { "-L", "--list-versions" }, description = "list all possible versions for this branch")
@@ -1735,12 +1774,13 @@ public class Runtime extends Service implements MessageListener {
         "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
     public List<String> services = new ArrayList<>();
 
-    @Option(names = { "-c",
+    @Option(names = {
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
     // FIXME - when instances connect via ws - default will become true
-    @Option(names = { "-w", "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
+    @Option(names = { "-w",
+        "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
     public String webgui;
 
     @Option(names = { "-ne", "--noEnv" }, description = "prevents printing of the env variables to log for security")
@@ -1755,7 +1795,7 @@ public class Runtime extends Service implements MessageListener {
 
   public Runtime(String n) {
     super(n);
-    
+
     synchronized (instanceLockObject) {
       if (runtime == null) {
         runtime = this;
@@ -2693,6 +2733,11 @@ public class Runtime extends Service implements MessageListener {
     // currently only support python - maybe in future we'll support js too
     String python = LangUtils.toPython();
     Files.write(Paths.get(filename), python.toString().getBytes());
+  }
+
+  public static Runtime getInstance(String[] args2) {
+    Runtime.main(args2);
+    return Runtime.getInstance();
   }
 
 }

@@ -507,7 +507,7 @@ public class Joystick extends Service {
     save(controller, filename);
 
     // FIXME - non-symmetric save and load :(
-    String fname = String.format("%s%s%s", cfgDir, File.separator, filename);
+    String fname = String.format("%s%s%s", FileIO.getCfgDir(), File.separator, filename);
 
     Controller v = loadVirtualController(fname);
     return v;

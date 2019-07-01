@@ -21,6 +21,9 @@
  * 
  * Enjoy !
  * 
+ * FIXME - can probably start deprecating some of these methods in favor of
+ * apache-io or guava or even path/files in java 8
+ * 
  * */
 package org.myrobotlab.io;
 
@@ -79,6 +82,14 @@ public class FileIO {
 
   static public final Logger log = LoggerFactory.getLogger(FileIO.class);
 
+  
+  /**
+   * At some point this should be the single point where all data and .myrobotlab dir stuff use -
+   * that way it can be "configured" to point somewhere else ..
+   */
+  static private String cfgDir = null;
+
+  
   /**
    * compares two files - throws if they are not identical, good to use in
    * testing
@@ -412,6 +423,17 @@ public class FileIO {
 
     return extract(resourceName, null);
   }
+    
+  static public String setCfgDir(String dirName) {
+    log.info("setting cfgDir to {}", dirName);
+    cfgDir = dirName;
+    File c = new File(cfgDir);
+    c.mkdirs();
+    if (!c.exists() || !c.isDirectory()) {
+      log.error("{} is not a directory or does not exist", c.getAbsolutePath());
+    }
+    return cfgDir;
+  }
 
   /**
    * get configuration directory
@@ -420,6 +442,11 @@ public class FileIO {
    */
   static public final String getCfgDir() {
     try {
+      
+      if (cfgDir != null) {
+        return cfgDir;
+      }
+      
       // TODO: is user.dir the same as MRL_HOME / install dir?
       String dirName = System.getProperty("user.dir") + File.separator + ".myrobotlab";
       File dir = new File(dirName);
@@ -434,8 +461,9 @@ public class FileIO {
       if (!dir.isDirectory()) {
         log.error("{} is not a file", dirName);
       }
-
-      return dirName;
+      
+      cfgDir = dirName;
+      return cfgDir;
 
     } catch (Exception e) {
       Logging.logError(e);

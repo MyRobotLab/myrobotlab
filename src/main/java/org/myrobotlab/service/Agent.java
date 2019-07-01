@@ -909,7 +909,18 @@ public class Agent extends Service {
       pd.jvm = options.jvm.split(" ");
     }
 
-    pd.initialServices = options.services;
+    if (options.services.size() > 0) {
+      pd.initialServices = options.services;
+    } else {
+      pd.initialServices.add("log");
+      pd.initialServices.add("Log");
+      pd.initialServices.add("cli");
+      pd.initialServices.add("Cli");
+      pd.initialServices.add("gui");
+      pd.initialServices.add("SwingGui");
+      pd.initialServices.add("python");
+      pd.initialServices.add("Python");
+    }
     pd.autoUpdate = options.autoUpdate;
 
     return spawn(pd);
