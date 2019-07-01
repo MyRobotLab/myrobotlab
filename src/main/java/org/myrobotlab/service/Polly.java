@@ -252,6 +252,8 @@ public class Polly extends AbstractSpeechSynthesis {
 
     LoggingFactory.init(Level.INFO);
 
+    Runtime.getInstance(args); // <-- nice in that you can process command line args this way
+    
     // set language universally
     // Runtime.setLanguage("pt");
 
@@ -262,7 +264,7 @@ public class Polly extends AbstractSpeechSynthesis {
 
     // polly.setLanguage("de");
     log.info("polly voice is {}", polly.getVoice());
-    polly.speak("allo there my name is nicole");
+    polly.speak(String.format("allo there my name is %s", polly.getVoice().getName()));
 
     boolean b = true;
     if (b) {

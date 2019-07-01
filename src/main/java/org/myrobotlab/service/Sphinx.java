@@ -101,7 +101,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
         info(String.format("starting speech processor thread %s_ear", myService.getName()));
 
-        String newPath = cfgDir + File.separator + myService.getName() + ".xml";
+        String newPath = FileIO.getCfgDir() + File.separator + myService.getName() + ".xml";
         File localGramFile = new File(newPath);
 
         info("loading grammar file");
@@ -414,7 +414,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
     // "/";
     // simplexml = simplexml.replaceAll("resource:/resource/",
     // cfgDir.replaceAll("\\\\", "/"));
-    simplexml = simplexml.replaceAll("resource:/resource/", ".myrobotlab");
+    simplexml = simplexml.replaceAll("resource:/resource/", FileIO.getCfgDir());
 
     // a filename like i01.ear.gram (without the gram extention of course
     // because is sucks this out of the xml"
@@ -427,11 +427,11 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
     simplexml = simplexml.replaceAll("name=\"grammarName\" value=\"simple\"", "name=\"grammarName\" value=\"" + grammarFileName + "\"");
     try {
-      FileIO.toFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "xml"), simplexml);
+      FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, grammarFileName, "xml"), simplexml);
       save("xml", simplexml);
 
       String gramdef = "#JSGF V1.0;\n" + "grammar " + grammarFileName + ";\n" + "public <greet> = (" + grammar + ");";
-      FileIO.toFile(String.format("%s%s%s.%s", cfgDir, File.separator, grammarFileName, "gram"), gramdef);
+      FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, grammarFileName, "gram"), gramdef);
     } catch (Exception e) {
       Logging.logError(e);
       return false;
