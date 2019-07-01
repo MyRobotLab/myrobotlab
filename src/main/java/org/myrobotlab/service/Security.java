@@ -705,8 +705,8 @@ public class Security extends Service implements AuthorizationProvider {
 
     Security security = Runtime.getSecurity();
 
-    security.setKey("amazon.polly.user.key", "AKIAJ6CQ5PPESWGSKNXA");
-    security.setKey("amazon.polly.user.secret", "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");
+    security.setKey("amazon.polly.user.key", "XXXXXXXXXXXXXX");
+    security.setKey("amazon.polly.user.secret", "XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
     security.setKey("xmpp.user", "user@gmail.com");
     security.setKey("xmpp.pwd", "xxxxxxxx");
     security.saveStore();

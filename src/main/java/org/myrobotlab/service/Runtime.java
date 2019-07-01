@@ -1149,14 +1149,13 @@ public class Runtime extends Service implements MessageListener {
 
       // TODO - replace with commons-cli -l
       logging.setLevel(options.logLevel);
-
-      Platform platform = Platform.getLocalInstance();
       
       if (options.virtual) {
         Platform.setVirtual(true);
       }
 
       if (options.id != null) {
+        Platform platform = Platform.getLocalInstance();
         platform.setId(options.id);
       }
       
@@ -1175,6 +1174,20 @@ public class Runtime extends Service implements MessageListener {
 
       if (options.help) {
         Runtime.mainHelp();
+        shutdown();
+        return;
+      }
+      
+      if (options.addKeys != null) {
+        if (options.addKeys.length < 2) {
+          Runtime.mainHelp();
+          shutdown();
+        }
+        Security security = Runtime.getSecurity();    
+        for (int i = 0; i < options.addKeys.length; i+=2) {
+          security.setKey(options.addKeys[i], options.addKeys[i+1]);
+          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
+        }
         shutdown();
         return;
       }
@@ -1683,10 +1696,13 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
 
-    // FIXME - give all examples with params and example !!
     @Option(names = { "-I",
         "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
     public String invoke[];
+
+    @Option(names = { "-k",
+    "--add-key" }, arity = "2..*", description = "adds a key to the key store\n" +"@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
+    public String addKeys[];
 
     @Option(names = { "-e", "--extract" }, description = "forces extraction of all resources onto the filesystem")
     public boolean extract = false;
