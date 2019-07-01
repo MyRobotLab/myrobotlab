@@ -264,7 +264,7 @@ public class Polly extends AbstractSpeechSynthesis {
 
     // polly.setLanguage("de");
     log.info("polly voice is {}", polly.getVoice());
-    polly.speak("allo there my name is nicole");
+    polly.speak(String.format("allo there my name is %s", polly.getVoice().getName()));
 
     boolean b = true;
     if (b) {
