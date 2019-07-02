@@ -1090,11 +1090,6 @@ public class Runtime extends Service implements MessageListener {
     getInstance().send(name, method, data);
   }
 
-  /*
-   * static public boolean isAgent() { if (cmdline == null) { return false; }
-   * return cmdline.containsKey("-isAgent"); }
-   */
-
   public static boolean isLocal(String serviceName) {
     ServiceInterface sw = getService(serviceName);
     return sw.isLocal();
@@ -1207,11 +1202,13 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
+      /*
       if (options.extract) {
         extract();
         shutdown();
         return;
       }
+      */
 
       // FIXME !!! - this should be in agent - you should be allowed to define services as 'none'
       // if you create a service a runtime will be created for you ..
@@ -1678,20 +1675,18 @@ public class Runtime extends Service implements MessageListener {
     }
   }
 
-  // FIXME - test when internet is not available
+  // FIXME - PocessData.toString is command line .. getCmdList() or Array
+  // FIXME - warn when --auto-update and internet is not available
   // FIXME - test over multiple running processes
   // FIXME - add -help
   // TODO - add jvm memory other runtime info
   // FIXME - a way to route parameters from command line to Agent vs Runtime -
   // the current concept is ok - but it does not work ..
   // make it work if necessary prefix everything by -agent-<...>
-  // FIXME - replace by PicoCli !!!
-  // FIXME - updateAgent(branch, version) -> updateAgent() 'latest
   // FIXME - implement --help -h !!! - handle THROW !
-  @Command(name = "MyRobotLab"/*
-                               * , mixinStandardHelpOptions = true - cant do it
-                               */)
-  static class CmdOptions {
+  @Command(name = "MyRobotLab")
+  
+  static public class CmdOptions {
 
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
@@ -1704,8 +1699,10 @@ public class Runtime extends Service implements MessageListener {
     "--add-key" }, arity = "2..*", description = "adds a key to the key store\n" +"@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
     public String addKeys[];
 
+    /* not needed with branche/version isolation
     @Option(names = { "-e", "--extract" }, description = "forces extraction of all resources onto the filesystem")
     public boolean extract = false;
+    */
 
     @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
     public String jvm;
@@ -1723,6 +1720,7 @@ public class Runtime extends Service implements MessageListener {
     public boolean noBanner = false;
 
     // FIXME -rename to daemon
+    // AGENT INFO
     @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
     public boolean fork = false;
 
@@ -1743,10 +1741,11 @@ public class Runtime extends Service implements MessageListener {
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
 
+    // AGENT INFO
     @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
     public boolean autoUpdate = false;
 
-    @Option(names = { "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
+    @Option(names = {"-V","--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
     public boolean virtual = false;
 
     // FIXME - implement
@@ -1754,10 +1753,12 @@ public class Runtime extends Service implements MessageListener {
     public boolean listVersions = false;
 
     // FIXME - implement
+    // AGENT INFO
     @Option(names = { "-u", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
     public boolean updateAgent = false;
 
     // FIXME - does this get executed by another CommandLine ?
+    // AGENT INFO
     @Option(names = { "-g",
         "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
     public String agent;
@@ -1779,6 +1780,7 @@ public class Runtime extends Service implements MessageListener {
     public String client[];
 
     // FIXME - when instances connect via ws - default will become true
+    // AGENT INFO
     @Option(names = { "-w",
         "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
     public String webgui;

@@ -82,8 +82,12 @@ public class WorkE extends Service implements StatusListener {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      // LoggingFactory.init(Level.INFO);
+      // Platform.setVirtual(true);
+      // Runtime.getInstance(new String[] {"--virtual", "-l", "info"}); 
+      
+      // allows the runtime to be configured by cmdline
+      Runtime.getInstance(args); 
 
       /*
        * Polly polly = (Polly)Runtime.start("polly", "Polly");
