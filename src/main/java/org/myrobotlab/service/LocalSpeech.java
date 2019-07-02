@@ -135,7 +135,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     // voices returned from local app
     String voicesText = null;
-    
+
     if (platform.isWindows()) {
       voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
 
@@ -143,35 +143,57 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
       String[] lines = voicesText.split(System.getProperty("line.separator"));
       for (String line : lines) {
+        // String[] parts = cmd.split(" ");
+        // String gender = "female"; // unknown
+        String lang = "en-US"; // unknown
 
         if (line.startsWith("Exit")) {
           break;
         }
-        
         String[] parts = line.split(" ");
-
-        // first piece of data better be a digit
-        String voiceProvider = parts[0];
-        try {
-          Integer.parseInt(voiceProvider);
-        } catch(Exception e) {
-          log.error("expecting voice to start with id [{}]", line);
+        if (parts.length < 2) { // some voices are not based on a standard pattern
           continue;
         }
-        
-        // Because there is such variation in what is returned we can't safely parse the data
-        // and it just becomes easier to send the whole line back - the "voice" will need to be specified as such.
-        // This at least promotes clarity with what is going on.
-        
-        String lang = null;
+        // lame-ass parsing ..
+        // standard sapi pattern is 5 parameters :
+        // INDEX PROVIDER VOICE_NAME PLATEFORM - LANG
+        // we need INDEX, VOICE_NAME, LANG
+        // but .. some voices dont use it, we will try to detect pattern and adapt if no respect about it :
+
+        // INDEX :
+        String voiceProvider = parts[0];
+
+        // VOICE_NAME
+        String voiceName = "Unknown" + voiceProvider; //default name if there is an issue
+        // it is standard, cool
+        if (parts.length >= 6) {
+          voiceName = parts[2];//line.trim();
+        }
+        // almost standard, we have INDEX PROVIDER VOICE_NAME
+        else if (parts.length > 2) {
+          voiceName = line.split(" ")[2];
+        }
+        // non standard at all ... but we catch it !
+        else {
+          voiceName = line.split(" ")[1];
+        }
+
+        // LANG ( we just detect for a keyword inside the whole string, because position is random sometime )
+        // TODO: locale converter from keyword somewhere ?
+
         if (line.toLowerCase().contains("french") || line.toLowerCase().contains("français")) {
           lang = "fr-FR";
         }
-        if (line.toLowerCase().contains("english")) {
-          lang = "en";
-        }
 
-        addVoice(line, null, lang, voiceProvider);
+        try {
+          // verify integer
+          Integer.parseInt(voiceProvider);
+          // voice name cause issues because of spaces or (null), let's just use
+          // original number as name...
+          addVoice(voiceName, null, lang, voiceProvider);
+        } catch (Exception e) {
+          continue;
+        }
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772

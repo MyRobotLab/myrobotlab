@@ -2,10 +2,10 @@ package org.myrobotlab.framework;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 /**
@@ -20,12 +20,10 @@ public class ProcessData implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  // public String name;
-  public String id;
-  public String branch;
-  public String version;
-  public List<String> initialServices = new ArrayList<>();
-  public boolean autoUpdate = false;
+  // public List<String> initialServices = new ArrayList<>();
+  // public boolean autoUpdate = false;
+  
+  public Runtime.CmdOptions options;
 
   public Long startTs;
   public Long stopTs;
@@ -71,7 +69,7 @@ public class ProcessData implements Serializable {
     ProcessData data;
 
     public Monitor(ProcessData pd) {
-      super(String.format("%s.monitor", pd.id));
+      super(String.format("%s.monitor", pd.options.id));
       this.data = pd;
     }
 
@@ -92,7 +90,7 @@ public class ProcessData implements Serializable {
       data.state = stateType.stopped;
 
       if (agent != null) {
-        agent.invoke("publishTerminated", data.id);
+        agent.invoke("publishTerminated", data.options.id);
       }
     }
   }
@@ -107,10 +105,7 @@ public class ProcessData implements Serializable {
    *          the process data
    */
   public ProcessData(ProcessData pd) {
-    this.id = pd.id;
-    this.branch = pd.branch;
-    this.version = pd.version;
-    this.version = pd.version;
+    this.options = pd.options;  
     this.javaExe = pd.javaExe;
     this.jarPath = pd.jarPath;
     this.jvm = pd.jvm;
@@ -134,7 +129,7 @@ public class ProcessData implements Serializable {
   }
   
   public String toString() {
-    return String.format("id:%s branch:%s version:%s", id, branch, version);
+    return String.format("id:%s branch:%s version:%s", options.id, options.branch, options.version);
   }
 
 }
