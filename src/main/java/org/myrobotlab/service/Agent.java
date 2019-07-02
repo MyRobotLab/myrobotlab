@@ -384,15 +384,15 @@ public class Agent extends Service {
     for (String key : processes.keySet()) {
       ProcessData process = processes.get(key);
 
-      if (!process.autoUpdate) {
+      if (!process.options.autoUpdate) {
         log.info("not autoUpdate");
         continue;
       }
       try {
         // getRemoteVersions
         log.info("getting version");
-        String version = getLatestVersion(process.branch, true);
-        if (version == null || version.equals(process.version)) {
+        String version = getLatestVersion(process.options.branch, true);
+        if (version == null || version.equals(process.options.version)) {
           log.info("same version {}", version);
           continue;
         }
@@ -400,15 +400,15 @@ public class Agent extends Service {
         // we have a possible update
 
         log.info("WOOHOO ! updating to version {}", version);
-        process.version = version;
-        process.jarPath = new File(getJarName(process.branch, process.version)).getAbsolutePath();
+        process.options.version = version;
+        process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
 
-        getLatestJar(process.branch);
+        getLatestJar(process.options.branch);
 
         log.info("WOOHOO ! updated !");
         if (process.isRunning()) {
           log.info("its running - we should restart");
-          restart(process.id);
+          restart(process.options.id);
           log.info("restarted");
         }
       } catch (Exception e) {
@@ -545,10 +545,10 @@ public class Agent extends Service {
       } catch (Exception e) {
       }
     } else {
-      pd2.id = id + ".0";
+      pd2.options.id = id + ".0";
     }
 
-    processes.put(pd2.id, pd2);
+    processes.put(pd2.options.id, pd2);
     if (agent != null) {
       agent.broadcastState();
     }
@@ -576,7 +576,7 @@ public class Agent extends Service {
   public String getId(String name) {
     for (String pid : processes.keySet()) {
       if (pid.equals(name)) {
-        return processes.get(pid).id;
+        return processes.get(pid).options.id;
       }
     }
     return null;
@@ -832,7 +832,7 @@ public class Agent extends Service {
     for (int i = 0; i < objs.length; ++i) {
       Integer id = (Integer) objs[i];
       ProcessData p = processes.get(id);
-      pd[i] = String.format("%s - %s [%s - %s]", id, p.id, p.branch, p.version);
+      pd[i] = String.format("%s - %s [%s - %s]", id, p.options.id, p.options.branch, p.options.version);
     }
     return pd;
   }
@@ -884,17 +884,19 @@ public class Agent extends Service {
    * @throws URISyntaxException
    * @throws InterruptedException
    */
-  public Process spawn(CmdOptions options) throws IOException, URISyntaxException, InterruptedException {
+  public Process spawn(CmdOptions inOptions) throws IOException, URISyntaxException, InterruptedException {
     if (ProcessData.agent == null) {
       ProcessData.agent = this;
     }
     // create a ProcessData then spawn it !
     ProcessData pd = new ProcessData();
+    pd.options = inOptions;
+    CmdOptions options = pd.options;
 
-    pd.id = (options.id != null) ? options.id : NameGenerator.getName();
+    pd.options.id = (options.id != null) ? options.id : NameGenerator.getName();
 
-    pd.branch = options.branch;
-    pd.version = options.version;
+    pd.options.branch = options.branch;
+    pd.options.version = options.version;
     pd.jarPath = new File(getJarName(options.branch, options.version)).getAbsolutePath();
 
     // javaExe
@@ -909,19 +911,16 @@ public class Agent extends Service {
       pd.jvm = options.jvm.split(" ");
     }
 
-    if (options.services.size() > 0) {
-      pd.initialServices = options.services;
-    } else {
-      pd.initialServices.add("log");
-      pd.initialServices.add("Log");
-      pd.initialServices.add("cli");
-      pd.initialServices.add("Cli");
-      pd.initialServices.add("gui");
-      pd.initialServices.add("SwingGui");
-      pd.initialServices.add("python");
-      pd.initialServices.add("Python");
+    if (options.services.size() == 0) {    
+      options.services.add("log");
+      options.services.add("Log");
+      options.services.add("cli");
+      options.services.add("Cli");
+      options.services.add("gui");
+      options.services.add("SwingGui");
+      options.services.add("python");
+      options.services.add("Python");
     }
-    pd.autoUpdate = options.autoUpdate;
 
     return spawn(pd);
   }
@@ -992,26 +991,28 @@ public class Agent extends Service {
     cmd.add("-cp");
 
     // step 1 - get current env data
-    String ps = File.pathSeparator;
-    // bogus jython.jar added as a hack to support - jython's 'more' fragile
-    // 2.7.0 interface :(
-    // http://www.jython.org/archive/21/docs/registry.html
-    // http://bugs.jython.org/issue2355
-    String classpath = String.format("%s%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes", pd.jarPath, ps, ps, ps, ps);
+    Platform platform = Platform.getLocalInstance();
+    String cpTemplate = "%s%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes";
+    if (platform.isWindows()) {
+      cpTemplate.replace("/", "\\");
+    }
+    
+    String ps = File.pathSeparator;   
+    String classpath = String.format(cpTemplate, pd.jarPath, ps, ps, ps, ps);
     cmd.add(classpath);
 
     cmd.add("org.myrobotlab.service.Runtime");
 
-    if (pd.initialServices.size() > 0) {
+    if (pd.options.services.size() > 0) {
       cmd.add("--service");
-      for (int i = 0; i < pd.initialServices.size(); i += 2) {
-        cmd.add(pd.initialServices.get(i));
-        cmd.add(pd.initialServices.get(i + 1));
+      for (int i = 0; i < pd.options.services.size(); i += 2) {
+        cmd.add(pd.options.services.get(i));
+        cmd.add(pd.options.services.get(i + 1));
       }
     }
 
     cmd.add("--id");
-    cmd.add(pd.id);
+    cmd.add(pd.options.id);
 
     if (options.logLevel != null) {
       cmd.add("--log-level");
@@ -1062,25 +1063,25 @@ public class Agent extends Service {
 
     pd.state = ProcessData.stateType.running;
 
-    if (pd.id == null) {
+    if (pd.options.id == null) {
       log.error("id should not be null!");
     }
-    if (processes.containsKey(pd.id)) {
+    if (processes.containsKey(pd.options.id)) {
       if (agent != null) {
-        agent.info("restarting %s", pd.id);
+        agent.info("restarting %s", pd.options.id);
       }
     } else {
       if (agent != null) {
-        agent.info("starting new %s", pd.id);
+        agent.info("starting new %s", pd.options.id);
       }
-      processes.put(pd.id, pd);
+      processes.put(pd.options.id, pd);
     }
 
     log.info("Agent finished spawn {}", formatter.format(new Date()));
     if (agent != null) {
       Cli cli = Runtime.getCli();
-      cli.add(pd.id, process.getInputStream(), process.getOutputStream());
-      cli.attach(pd.id);
+      cli.add(pd.options.id, process.getInputStream(), process.getOutputStream());
+      cli.attach(pd.options.id);
       agent.broadcastState();
     }
     return process;

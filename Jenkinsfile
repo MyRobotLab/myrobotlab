@@ -1,3 +1,10 @@
+/**********************************************************************************
+ * JenkinsFile for myrobotlab
+ *
+ * for adjusting build number for specific branch build
+ * Jenkins.instance.getItemByFullName("myrobotlab-multibranch/develop").updateNextBuildNumber(185)
+ *
+ ***********************************************************************************/
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
 node ('ubuntu') { // use any node
