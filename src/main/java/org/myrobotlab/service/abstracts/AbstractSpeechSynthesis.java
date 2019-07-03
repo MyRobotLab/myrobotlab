@@ -369,7 +369,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * were used with this text to speak, including the sound file info
    */
   public void onAudioStart(AudioData data) {
-    log.info("onAudioStart {} {}", getName(), data.toString());
+    log.debug("onAudioStart {} {}", getName(), data.toString());
 
     // filters on only our speech
     if (utterances.containsKey(data)) {
@@ -379,7 +379,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public void onAudioEnd(AudioData data) {
-    log.info("onAudioEnd {} {}", getName(), data.toString());
+    log.debug("onAudioEnd {} {}", getName(), data.toString());
 
     // filters on only our speech
     if (utterances.containsKey(data)) {
