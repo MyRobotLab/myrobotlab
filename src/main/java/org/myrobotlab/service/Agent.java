@@ -878,8 +878,8 @@ public class Agent extends Service {
    * Convert command line parameter options into a ProcessData which can be
    * spawned
    * 
-   * @param options
-   * @return
+   * @param inOptions - cmd options
+   * @return a process
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
@@ -893,15 +893,14 @@ public class Agent extends Service {
     pd.options = inOptions;
     CmdOptions options = pd.options;
 
-    pd.options.id = (options.id != null) ? options.id : NameGenerator.getName();
+    if (options.id == null) {
+      options.id = NameGenerator.getName();
+    }
 
-    pd.options.branch = options.branch;
-    pd.options.version = options.version;
     pd.jarPath = new File(getJarName(options.branch, options.version)).getAbsolutePath();
 
     // javaExe
     String fs = File.separator;
-
     Platform platform = Platform.getLocalInstance();
     String exeName = platform.isWindows() ? "javaw" : "java";
     pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
@@ -911,7 +910,7 @@ public class Agent extends Service {
       pd.jvm = options.jvm.split(" ");
     }
 
-    if (options.services.size() == 0) {    
+    if (options.services.size() == 0) {
       options.services.add("log");
       options.services.add("Log");
       options.services.add("cli");
@@ -969,7 +968,9 @@ public class Agent extends Service {
   }
 
   /**
-   * Constructs a comman line from a ProcessData object which can directly be
+   * FIXME is this ProcessData.toString()
+   * 
+   * Constructs a command line from a ProcessData object which can directly be
    * run to spawn a new instance of mrl
    * 
    * @param pd
@@ -978,7 +979,7 @@ public class Agent extends Service {
   public String[] buildCmdLine(ProcessData pd) {
 
     // command line to be returned
-    ArrayList<String> cmd = new ArrayList<String>();
+    List<String> cmd = new ArrayList<String>();
 
     cmd.add(pd.javaExe);
 
@@ -996,8 +997,8 @@ public class Agent extends Service {
     if (platform.isWindows()) {
       cpTemplate.replace("/", "\\");
     }
-    
-    String ps = File.pathSeparator;   
+
+    String ps = File.pathSeparator;
     String classpath = String.format(cpTemplate, pd.jarPath, ps, ps, ps, ps);
     cmd.add(classpath);
 
@@ -1025,6 +1026,20 @@ public class Agent extends Service {
         cmd.add(serviceType);
       }
     }
+
+    // FIXME - adding new CmdOption
+    if (options.cfgDir != null) {
+      cmd.add("-c");
+      cmd.add(options.cfgDir);
+    }
+
+    if (options.addKeys != null) {
+      cmd.add("-k");
+      for (String keyPart : options.addKeys) {
+        cmd.add(keyPart);
+      }
+    }
+
     return cmd.toArray(new String[cmd.size()]);
   }
 
