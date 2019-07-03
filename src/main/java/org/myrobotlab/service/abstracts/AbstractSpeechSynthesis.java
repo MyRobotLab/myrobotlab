@@ -515,6 +515,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // but at the moment it seems useful
     // splitting on sound effects ...
     // TODO - use SSML speech synthesis markup language
+    
+    log.info("{} processing {}", getName(), toSpeak);
 
     // broadcast the original text to be processed/parsed
     invoke("publishSpeechRequested", toSpeak);

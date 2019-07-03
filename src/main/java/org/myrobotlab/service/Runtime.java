@@ -1027,8 +1027,11 @@ public class Runtime extends Service implements MessageListener {
   public static String getUptime() {
     Date now = new Date();
     Platform platform = Platform.getLocalInstance();
-    long diff = now.getTime() - platform.getStartTime().getTime();
-
+    return getDiffTime(now.getTime() - platform.getStartTime().getTime());
+  }
+  
+  public static String getDiffTime(long diff) {
+    
     long diffSeconds = diff / 1000 % 60;
     long diffMinutes = diff / (60 * 1000) % 60;
     long diffHours = diff / (60 * 60 * 1000) % 24;
@@ -1037,6 +1040,7 @@ public class Runtime extends Service implements MessageListener {
     StringBuffer sb = new StringBuffer();
     sb.append(diffDays).append(" days ").append(diffHours).append(" hours ").append(diffMinutes).append(" minutes ").append(diffSeconds).append(" seconds");
     return sb.toString();
+    
   }
 
   /**
