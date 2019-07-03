@@ -1165,8 +1165,7 @@ public class Agent extends Service {
 
       // for Callable version ...
       // int exitCode = new CommandLine(options).execute(args);
-
-      log.info(" options {}", options);
+      new CommandLine(options).parseArgs(args);
 
       if (options.help) {
         Runtime.mainHelp();
