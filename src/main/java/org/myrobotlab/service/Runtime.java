@@ -1688,6 +1688,32 @@ public class Runtime extends Service implements MessageListener {
   
   static public class CmdOptions {
 
+    // AGENT INFO
+    @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
+    public boolean autoUpdate = false;
+
+    // FIXME - when instances connect via ws - default will become true
+    // AGENT ONLY INFO
+    @Option(names = { "-w",
+        "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
+    public String webgui;
+    
+    // FIXME - implement
+    // AGENT INFO
+    @Option(names = { "-u", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
+    public boolean updateAgent = false;
+
+    // FIXME - does this get executed by another CommandLine ?
+    // AGENT INFO
+    @Option(names = { "-g",
+        "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
+    public String agent;    
+
+    // FIXME -rename to daemon
+    // AGENT INFO
+    @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
+    public boolean fork = false;
+
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
 
@@ -1695,6 +1721,7 @@ public class Runtime extends Service implements MessageListener {
         "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
     public String invoke[];
 
+    // FIXME - should work with a startup ...
     @Option(names = { "-k",
     "--add-key" }, arity = "2..*", description = "adds a key to the key store\n" +"@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
     public String addKeys[];
@@ -1719,11 +1746,6 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-B", "--no-banner" }, description = "prevents banner from showing")
     public boolean noBanner = false;
 
-    // FIXME -rename to daemon
-    // AGENT INFO
-    @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
-    public boolean fork = false;
-
     /**
      * <pre>
      * &#64;Option(names = { "-nc", "--no-cli" }, description = "no command line interface")
@@ -1741,27 +1763,12 @@ public class Runtime extends Service implements MessageListener {
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
 
-    // AGENT INFO
-    @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
-    public boolean autoUpdate = false;
-
     @Option(names = {"-V","--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
     public boolean virtual = false;
 
     // FIXME - implement
     @Option(names = { "-L", "--list-versions" }, description = "list all possible versions for this branch")
     public boolean listVersions = false;
-
-    // FIXME - implement
-    // AGENT INFO
-    @Option(names = { "-u", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
-    public boolean updateAgent = false;
-
-    // FIXME - does this get executed by another CommandLine ?
-    // AGENT INFO
-    @Option(names = { "-g",
-        "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
-    public String agent;
 
     @Option(names = { "-b", "--branch" }, description = "requested branch")
     public String branch;
@@ -1775,23 +1782,16 @@ public class Runtime extends Service implements MessageListener {
         "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
     public List<String> services = new ArrayList<>();
 
+    // FIXME - implement !
     @Option(names = {
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
-    // FIXME - when instances connect via ws - default will become true
-    // AGENT INFO
-    @Option(names = { "-w",
-        "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
-    public String webgui;
-
-    @Option(names = { "-ne", "--noEnv" }, description = "prevents printing of the env variables to log for security")
+    @Option(names = {"--noEnv" }, description = "prevents printing of the env variables to log for security")
     public boolean noEnv = false;
 
-    /*
-     * @Parameters(arity = "1..*", paramLabel = "FILE", description =
-     * "File(s) to process.") private String[] services;
-     */
+    
+    // FIXME ! toString() builds command line using reflection and first name annotation
 
   }
 
