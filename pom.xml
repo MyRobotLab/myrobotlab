@@ -1,11 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<!-- 
-		# package 
-		mvn -DskipTests -DBUILD_NUMER=71 -DBRANCH_NAME=develop package
-		
+
 		# shows system vars and env vars
-		mvn -DskipTests -DBUILD_NUMER=71 -DBRANCH_NAME=develop help:system
+		mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop help:system
+		
+		# fast build
+		mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop package -o
 	
 	 -->
 	<modelVersion>4.0.0</modelVersion>

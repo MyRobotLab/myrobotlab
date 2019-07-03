@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -310,9 +311,9 @@ public class WorkE extends Service implements StatusListener {
     sleep(1000);
 
     speak("attaching brain");
-    brain.setPath("..");
+    // brain.setPath("..");
+    brain.setPath(System.getProperty("user.dir" + File.separator + "github"));
     brain.setCurrentBotName("worke"); // does this create a session ?
-    // brain.setUsername("greg");
     brain.reloadSession("greg", "worke");
     // brain.reloadSession("greg", "worke"); // is this necessary??
 
@@ -325,7 +326,6 @@ public class WorkE extends Service implements StatusListener {
 
     speak("opening eye");
     capture();
-    // startFlow();
     sleep(1000);
 
     speak("connecting serial port");
