@@ -1,0 +1,22 @@
+################################################
+# jenkins-slave service
+#
+# /etc/systemd/system/jenkins-slave.service
+# systemctl enable jenkins-slave
+# FIXME - do not run as root
+
+[Unit]
+Description=My Miscellaneous Service
+After=network.target
+
+[Service]
+Type=simple
+# Another Type option: forking
+User=root
+WorkingDirectory=/opt/jenkins-slave
+ExecStart=/usr/bin/java -jar agent.jar -jnlpUrl http://build.myrobotlab.org:8080/computer/worke-bee/slave-agent.jnlp -secret xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -workDir "/opt/jenkins-slave"
+Restart=on-failure
+# Other Restart options: or always, on-abort, etc
+
+[Install]
+WantedBy=multi-user.target
