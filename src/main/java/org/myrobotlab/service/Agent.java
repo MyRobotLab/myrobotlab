@@ -904,8 +904,14 @@ public class Agent extends Service {
     Platform platform = Platform.getLocalInstance();
     String exeName = platform.isWindows() ? "javaw" : "java";
     pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
-
-    pd.jvm = new String[] { "-Djava.library.path=libraries/native", "-Djna.library.path=libraries/native", "-Dfile.encoding=UTF-8" };
+    
+    String jvmArgs = "-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8";
+    if (pd.options.memory != null) {
+      jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
+    }
+    pd.jvm = jvmArgs.split(" ");
+    
+    // user override
     if (options.jvm != null) {
       pd.jvm = options.jvm.split(" ");
     }
@@ -1220,8 +1226,8 @@ public class Agent extends Service {
         agent.shutdown();
       }
 
-      if (options.manifest) {
-        Map<String, String> manifest = Runtime.getManifest();
+      if ("".equals(options.version)) {
+        Map<String, String> manifest = Platform.getManifest();
         System.out.println("manifest");
         for (String name : manifest.keySet()) {
           System.out.println(String.format("%s=%s", name, manifest.get(name)));
