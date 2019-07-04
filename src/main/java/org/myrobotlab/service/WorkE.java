@@ -310,12 +310,20 @@ public class WorkE extends Service implements StatusListener {
     motorLeft.setInverted(true);
     sleep(1000);
 
-    speak("attaching brain");
-    // brain.setPath("..");
-    brain.setPath(System.getProperty("user.dir" + File.separator + "github"));
-    brain.setCurrentBotName("worke"); // does this create a session ?
-    brain.reloadSession("greg", "worke");
-    // brain.reloadSession("greg", "worke"); // is this necessary??
+    String workeBrainPath = System.getProperty("user.dir") + File.separator + "github";
+    File workeBrain = new File(workeBrainPath + File.separator + "bots" + File.separator + "worke");
+
+    if (workeBrain.exists()) {
+
+      speak("attaching brain");
+      // brain.setPath("..");
+      brain.setPath(System.getProperty("user.dir" + File.separator + "github"));
+      brain.setCurrentBotName("worke"); // does this create a session ?
+      brain.reloadSession("greg", "worke");
+      // brain.reloadSession("greg", "worke"); // is this necessary??
+    } else {
+      speak("could not fine a brain.  i looked for it in %s", workeBrain);
+    }
 
     speak("attaching ear to brain");
     brain.attach(ear);
@@ -585,7 +593,8 @@ public class WorkE extends Service implements StatusListener {
     mouth.setVolume(volume);
   }
 
-  public void speak(String text) {
+  public void speak(String inText, Object... args) {
+    String text = String.format(inText, args);
     // IF NOT SILENT
     if (!mute) {
       if (speakBlocking) {// FIXME - promote to Abstract
