@@ -70,7 +70,6 @@ public class WorkE extends Service implements StatusListener {
     // brain - input/output
     meta.addPeer("brain", "ProgramAB", "ear");
 
-    meta.addPeer("cli", "Cli", "command line interface");
     // emoji - output
     meta.addPeer("emoji", "Emoji", "emotional state machine");
 
@@ -628,9 +627,6 @@ public class WorkE extends Service implements StatusListener {
       display = emoji.getDisplay();// (ImageDisplay) startPeer("display");
       fsm = emoji.getFsm();
       brain = (ProgramAB) startPeer("brain");
-
-      // default
-      startPeer("cli");
 
     } catch (Exception e) {
       error(e);
