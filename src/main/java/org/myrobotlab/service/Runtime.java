@@ -1761,8 +1761,9 @@ public class Runtime extends Service implements MessageListener {
      * </pre>
      */
 
-    @Option(names = { "-m", "--manifest" }, description = "prints out the manifest")
-    public boolean manifest = false;
+    // FIXME - highlight or italics for examples !!
+    @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
+    public String memory = null;
 
     @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
     public String logLevel = "info";
@@ -1783,7 +1784,7 @@ public class Runtime extends Service implements MessageListener {
 
     // FIXME - get version vs force version - perhaps just always print version
     // in help
-    @Option(names = { "-v", "--version" }, description = "requested version")
+    @Option(names = { "-v", "--version" }, arity = "0..1", description = "requested version or if left blank return version")
     public String version;
 
     @Option(names = { "-s", "--service",
