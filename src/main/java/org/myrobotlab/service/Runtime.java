@@ -1197,7 +1197,9 @@ public class Runtime extends Service implements MessageListener {
 
       // FIXME TEST THIS !! 0 length, single service, multiple !
       if (options.install != null) {
-
+        // we start the runtime so there is a status publisher which will
+        // display status updates from the repo install
+        Runtime.getInstance();
         Repo repo = Repo.getInstance();
         if (options.install.length == 0) {
           repo.install();
