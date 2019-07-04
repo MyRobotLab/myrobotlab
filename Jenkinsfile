@@ -15,9 +15,9 @@ node ('ubuntu') { // use any node
    
    parameters {
         choice(
-            choices: ['greeting' , 'silence'],
+            choices: ['true' , 'false'],
             description: 'this is the description',
-            name: 'REQUESTED_ACTION')
+            name: 'EXTENDED_VERIFY')
     }
    
    
@@ -64,8 +64,8 @@ node ('ubuntu') { // use any node
 	   }
    }
    stage('extended-verify'){
-     if (params.REQUESTED_ACTION == 'greeting') {
-       echo 'param is greeting'
+     if (params.EXTENDED_VERIFY == 'true') {
+       echo 'EXTENDED_VERIFY is true'
      } 	   
    }
    stage('junit') {

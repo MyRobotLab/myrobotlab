@@ -680,8 +680,12 @@ public class Runtime extends Service implements MessageListener {
             if (addr.isReachable(1000)) {
               log.info("Available: " + addr.getHostAddress());
               networkPeers.add(addr.getHostAddress());
-            } else
+            } else {
               log.info("Not available: " + addr.getHostAddress());
+            }
+            
+            // TODO - check default port 8888 8887
+            
           } catch (IOException ioex) {
           }
         }

@@ -2256,7 +2256,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     try {
 
       LoggingFactory.init(Level.ERROR);
-      // Platform.setVirtual(true);
+     //  Platform.setVirtual(true);
       Runtime.start("gui", "SwingGui");
       Serial.listPorts();
       
@@ -2279,7 +2279,9 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       */
       
       log.info("here");
-      hub.connect("COM6");
+      // hub.connect("COM6"); // uno
+      
+      hub.connect("COM8");
       
       // hub.startTcpServer();
 

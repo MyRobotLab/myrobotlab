@@ -55,6 +55,8 @@ public class WorkE extends Service implements StatusListener {
     meta.addPeer("controller", "Sabertooth", "motor controller");
     meta.addPeer("motorLeft", "MotorPort", "left motor");
     meta.addPeer("motorRight", "MotorPort", "right motor");
+    
+    meta.addPeer("webgui", "WebGui", "web interface");
 
     // vision - input
     // TODO - going to have several "spouts" - and bolts (storm analogy)
