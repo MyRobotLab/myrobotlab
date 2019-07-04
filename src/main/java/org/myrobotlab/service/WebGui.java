@@ -1053,7 +1053,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.setRuntimeName("george");
       // Runtime.start("python", "Python");
       // Runtime.start("gui", "SwingGui");
-      Runtime.getNetInfo();
+      // Runtime.getNetInfo();
       
       WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
       // webgui.autoStartBrowser(false);
