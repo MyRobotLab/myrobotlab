@@ -1694,7 +1694,7 @@ public class Runtime extends Service implements MessageListener {
   // the current concept is ok - but it does not work ..
   // make it work if necessary prefix everything by -agent-<...>
   // FIXME - implement --help -h !!! - handle THROW !
-  @Command(name = "MyRobotLab")
+  @Command(name = "java -jar myrobotlab.jar ")
   
   static public class CmdOptions {
 
