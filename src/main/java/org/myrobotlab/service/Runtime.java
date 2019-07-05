@@ -1790,7 +1790,7 @@ public class Runtime extends Service implements MessageListener {
     public String version;
 
     @Option(names = { "-s", "--service",
-        "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
+        "--services" }, arity = "1..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
     public List<String> services = new ArrayList<>();
 
     // FIXME - implement !
