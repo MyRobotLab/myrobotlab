@@ -189,11 +189,13 @@ public class Agent extends Service {
     public void run() {
       state = ProcessData.stateType.running;
       updateLog("info", "updater running");
+      autoUpdate = true;
+      broadcastState();
       try {
         while (true) {
           state = ProcessData.stateType.sleeping;
           updateLog("info", "updater sleeping");
-          sleep(updateCheckIntervalMs);
+          Thread.sleep(updateCheckIntervalMs);
           state = ProcessData.stateType.updating;
           updateLog("info", "updater updating");
           agent.update();
@@ -203,7 +205,9 @@ public class Agent extends Service {
       }
       log.info("updater stopping");
       updateLog("info", "updater stopping");
+      autoUpdate = false;
       state = ProcessData.stateType.stopped;
+      broadcastState();
     }
 
     synchronized public void start() {
@@ -212,7 +216,7 @@ public class Agent extends Service {
         thread.start();
         updateLog("info", "updater starting");
       } else {
-        log.warn("updater busy state = %s", state);
+        log.warn("updater busy in state = {}", state);
       }
     }
 
@@ -369,7 +373,7 @@ public class Agent extends Service {
     } else {
       // purgeTask("update");
       updater.stop();
-    }
+    }    
   }
 
   /**
@@ -505,10 +509,10 @@ public class Agent extends Service {
     log.info("restarting process {}", id);
     kill(id); // FIXME - kill should include prepare to shutdown ...
     sleep(2000);
-    spawn(id);
+    spawnId(id);
   }
 
-  private void spawn(String id) {
+  public void spawnId(String id) {
     try {
       if (processes.containsKey(id)) {
         spawn(processes.get(id));
@@ -518,6 +522,18 @@ public class Agent extends Service {
     } catch (Exception e) {
       log.error("spawn({}) threw ", id, e);
     }
+  }
+  
+  public Process spawn() throws IOException, URISyntaxException, InterruptedException {
+    CmdOptions options = new CmdOptions();
+    new CommandLine(options).parseArgs(new String[]{});
+    return spawn(options);
+  }
+  
+  public Process spawn(String args) throws IOException, URISyntaxException, InterruptedException {
+    CmdOptions options = new CmdOptions();
+    new CommandLine(options).parseArgs(args.split(" "));
+    return spawn(options);
   }
 
   /**
@@ -896,6 +912,18 @@ public class Agent extends Service {
     if (options.id == null) {
       options.id = NameGenerator.getName();
     }
+    
+    if (options.branch == null) {
+      options.branch = Platform.getLocalInstance().getBranch();
+    }
+    
+    if (options.version == null) {
+      try {
+        options.version = getLatestVersion(options.branch, autoUpdate);
+      } catch (Exception e) {
+        log.error("getDir threw", e);
+      }
+    }
 
     pd.jarPath = new File(getJarName(options.branch, options.version)).getAbsolutePath();
 
@@ -904,8 +932,14 @@ public class Agent extends Service {
     Platform platform = Platform.getLocalInstance();
     String exeName = platform.isWindows() ? "javaw" : "java";
     pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
-
-    pd.jvm = new String[] { "-Djava.library.path=libraries/native", "-Djna.library.path=libraries/native", "-Dfile.encoding=UTF-8" };
+    
+    String jvmArgs = "-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8";
+    if (pd.options.memory != null) {
+      jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
+    }
+    pd.jvm = jvmArgs.split(" ");
+    
+    // user override
     if (options.jvm != null) {
       pd.jvm = options.jvm.split(" ");
     }
@@ -1220,8 +1254,8 @@ public class Agent extends Service {
         agent.shutdown();
       }
 
-      if (options.manifest) {
-        Map<String, String> manifest = Runtime.getManifest();
+      if ("".equals(options.version)) {
+        Map<String, String> manifest = Platform.getManifest();
         System.out.println("manifest");
         for (String name : manifest.keySet()) {
           System.out.println(String.format("%s=%s", name, manifest.get(name)));
@@ -1284,7 +1318,10 @@ public class Agent extends Service {
       // TODO - build command line ...
       // FIXME - if another instances is spawned agent should wait for all
       // instances to stop
-      p = agent.spawn(options); // <-- agent's is now in charge of first
+      // list of flags we want to by-pass spawning
+      if (options.fork && options.services.size() > 0 || !options.fork) {
+        p = agent.spawn(options); // <-- agent's is now in charge of first
+      }
 
       // we start a timer to process future updates
       if (options.autoUpdate) {

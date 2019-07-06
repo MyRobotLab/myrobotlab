@@ -4,8 +4,8 @@
 # It is meant to get MyRobotLab as close to that instance's state a possible.
 # This file can be generated at any time using Runtime.save(filename)
 # More information @ http://myrobotlab.org and https://github.com/myrobotlab
-# version unknown
-# generated Fri Jun 07 06:45:16 PDT 2019
+# version 1.1.15
+# generated Wed Jul 03 06:02:44 PDT 2019
 
 ##############################################################
 ## imports ####
@@ -13,7 +13,7 @@ import org.myrobotlab.framework.Platform as Platform
 
 Platform.setVirtual(True)
 ##############################################################
-## creating and starting 19 services ####
+## creating and starting 20 services ####
 # Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to
 # substitute peers, types or references of other sub services before the service is "started"
 # e.g. i01 = Runtime.create('i01', 'InMoov') # this will "create" the service and config could be manipulated before starting 
@@ -23,6 +23,7 @@ gui = Runtime.start('gui', 'SwingGui')
 security = Runtime.start('security', 'Security')
 worke = Runtime.start('worke', 'WorkE')
 worke_brain = Runtime.start('worke.brain', 'ProgramAB')
+worke_cli = Runtime.start('worke.cli', 'Cli')
 worke_controller = Runtime.start('worke.controller', 'Sabertooth')
 worke_controller_serial = Runtime.start('worke.controller.serial', 'Serial')
 worke_cv = Runtime.start('worke.cv', 'OpenCV')

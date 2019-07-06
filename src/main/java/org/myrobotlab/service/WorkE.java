@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,9 +8,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
@@ -37,6 +36,7 @@ import org.slf4j.Logger;
  * http://admin:admin@192.168.0.37/videostream.cgi?user=admin(and)pwd=admin
  *
  * </pre>
+ * 
  * @author GroG
  *
  */
@@ -55,6 +55,8 @@ public class WorkE extends Service implements StatusListener {
     meta.addPeer("controller", "Sabertooth", "motor controller");
     meta.addPeer("motorLeft", "MotorPort", "left motor");
     meta.addPeer("motorRight", "MotorPort", "right motor");
+    
+    meta.addPeer("webgui", "WebGui", "web interface");
 
     // vision - input
     // TODO - going to have several "spouts" - and bolts (storm analogy)
@@ -66,11 +68,10 @@ public class WorkE extends Service implements StatusListener {
 
     // ear - input
     meta.addPeer("ear", "WebkitSpeechRecognition", "ear");
-    
+
     // brain - input/output
     meta.addPeer("brain", "ProgramAB", "ear");
 
-    // meta.addPeer("cli", "Cli", "command line interface");
     // emoji - output
     meta.addPeer("emoji", "Emoji", "emotional state machine");
 
@@ -83,11 +84,11 @@ public class WorkE extends Service implements StatusListener {
     try {
 
       // LoggingFactory.init(Level.INFO);
-      // Platform.setVirtual(true);
-      // Runtime.getInstance(new String[] {"--virtual", "-l", "info"}); 
-      
+      Platform.setVirtual(true);
+      // Runtime.getInstance(new String[] {"--virtual", "-l", "info"});
+
       // allows the runtime to be configured by cmdline
-      Runtime.getInstance(args); 
+      Runtime.getInstance(args);
 
       /*
        * Polly polly = (Polly)Runtime.start("polly", "Polly");
@@ -103,7 +104,7 @@ public class WorkE extends Service implements StatusListener {
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
       WorkE worke = (WorkE) Runtime.create("worke", "WorkE");
-      
+
       Runtime.start("gui", "SwingGui");
 
       /*
@@ -217,8 +218,10 @@ public class WorkE extends Service implements StatusListener {
 
     // mute();
 
-    // FIXME - running in mute mode - "Hello Greg, I had a problem starting today/most recent update/this evening - would you like to hear the log?"
-    // FIXME - sorry to bother you, but I have several problems - could I tell you what they are ?"
+    // FIXME - running in mute mode - "Hello Greg, I had a problem starting
+    // today/most recent update/this evening - would you like to hear the log?"
+    // FIXME - sorry to bother you, but I have several problems - could I tell
+    // you what they are ?"
 
     setVolume(0.75);
     /// speakBlocking(true);
@@ -228,7 +231,7 @@ public class WorkE extends Service implements StatusListener {
     mouth.addSubstitution("worky", "work-ee");
     mouth.addSubstitution("work-e", "work-ee");
     mouth.addSubstitution("work e", "work-ee");
-    
+
     if (isVirtual()) {
       speak("running in virtual mode");
       // controller virtualization
@@ -308,23 +311,30 @@ public class WorkE extends Service implements StatusListener {
     motorLeft.setInverted(true);
     sleep(1000);
 
-    speak("attaching brain");
-    brain.setPath("..");
-    brain.setCurrentBotName("worke"); // does this create a session ?
-    // brain.setUsername("greg");
-    brain.reloadSession("greg", "worke");
-    // brain.reloadSession("greg", "worke"); // is this necessary??
+    String workeBrainPath = System.getProperty("user.dir") + File.separator + "github";
+    File workeBrain = new File(workeBrainPath + File.separator + "bots" + File.separator + "worke");
+
+    if (workeBrain.exists()) {
+
+      speak("attaching brain");
+      // brain.setPath("..");
+      brain.setPath(System.getProperty("user.dir" + File.separator + "github"));
+      brain.setCurrentBotName("worke"); // does this create a session ?
+      brain.reloadSession("greg", "worke");
+      // brain.reloadSession("greg", "worke"); // is this necessary??
+    } else {
+      speak("could not fine a brain.  i looked for it in %s", workeBrain);
+    }
 
     speak("attaching ear to brain");
     brain.attach(ear);
-    
+
     speak("attaching mouth to brain");
     brain.attach(mouth);
     sleep(1000);
 
     speak("opening eye");
     capture();
-    // startFlow();
     sleep(1000);
 
     speak("connecting serial port");
@@ -501,14 +511,34 @@ public class WorkE extends Service implements StatusListener {
   public void selfTest() {
     // start voice - to report
     // reporting - visual, led, voice
+    // making sure services are started
+    // startService();
 
     mouth = (AbstractSpeechSynthesis) startPeer("mouth");
+    Platform platform = Platform.getLocalInstance();
+    speak("self status report");
+    if (isVirtual()) {
+      speak("running in virtual mode"); // get CmdOptions - running in
+                                        // "automatic update" mode
+    } else {
+      speak("running in real mode");
+    }
 
-    // making sure services are started
-    startService();
+    speak(String.format("branch %s version %s", platform.getBranch(), platform.getVersion().split("\\.")[2]));
+
+    // FIXME - check number of errors - option to clear errors
+    speak(String.format("i have been alive for %s", Runtime.getUptime()));
+
     speak(String.format("%d services currently running", Runtime.getServiceNames().length));
+    // FIXME X number of errors - "categorize them" - "self knowledge"
     // FIXME - relays - giving power
     // FIXME - StatusListener
+
+    speak(String.format("i have %d errors", lastErrors.size()));
+
+    if (lastErrors.size() > 0) {
+      speak(String.format("last error occurred %s", Runtime.getDiffTime(System.currentTimeMillis() - lastErrorTs)));
+    }
 
     // stop motors
 
@@ -564,7 +594,8 @@ public class WorkE extends Service implements StatusListener {
     mouth.setVolume(volume);
   }
 
-  public void speak(String text) {
+  public void speak(String inText, Object... args) {
+    String text = String.format(inText, args);
     // IF NOT SILENT
     if (!mute) {
       if (speakBlocking) {// FIXME - promote to Abstract
@@ -581,7 +612,7 @@ public class WorkE extends Service implements StatusListener {
 
   public void startService() {
     try {
-      super.startService();
+      super.startService(); // FIXME framework should do this !!
       // GOOD ? - start "typeless" (because type is defined in meta data)
       // services here
 
@@ -598,9 +629,6 @@ public class WorkE extends Service implements StatusListener {
       display = emoji.getDisplay();// (ImageDisplay) startPeer("display");
       fsm = emoji.getFsm();
       brain = (ProgramAB) startPeer("brain");
-
-      // default
-      startPeer("cli");
 
     } catch (Exception e) {
       error(e);

@@ -175,10 +175,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // FIXME SecurityProvider
   protected AuthorizationProvider authProvider = null;
 
-  private Status lastError = null;
-  private Status lastStatus = null;
-  long lastStatusTs = 0;
-  long statusBroadcastLimitMs = 1000;
+  protected Status lastError = null;
+  protected Long lastErrorTs = null;
+  protected Status lastStatus = null;
+  protected Long lastStatusTs = null;
+  protected long statusBroadcastLimitMs = 1000;
 
   /**
    * variable for services to virtualize some of their dependencies
@@ -1013,6 +1014,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
     if (status.level.equals(StatusLevel.ERROR)) {
       lastError = status;
+      lastErrorTs = now;
       log.error(status.toString());
       invoke("publishError", status);
     } else {

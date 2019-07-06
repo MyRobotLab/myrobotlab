@@ -6,23 +6,25 @@
         <table border="1" class="table table-hover table-condensed table-striped table-bordered">
             <tr><td><h4>id</h4></td><td><h4>version</h4></td><td><h4>actions</h4></td><td><h4>uptime</h4></td></tr>
             <tr ng-repeat="(id, value) in service.processes">
-            <td>{{id}} {{value.name}}</td>
+            <td>{{id}}</td>
             <td>{{value.options.branch}} {{value.options.version}}</td>
             <td>
                 <span class="input-group-btn">
-                <button class="btn btn-default" ng-show='!isRunning(value)'  ng-click="msg.start(options.id)">start</button>
-                <button class="btn btn-default" ng-show='isRunning(value)'  ng-click="msg.kill(options.id)">stop</button>
-                <button class="btn btn-default" ng-click="msg.copyAndStart(options.id)">clone</button>
-                <button class="btn btn-default" ng-show='!isRunning(value)' ng-click="edit(options.id)">edit</button>
-                <button class="btn btn-default" ng-click="msg.killAndRemove(options.id)">remove</button>
+                <button class="btn btn-default" ng-show='!isRunning(value)'  ng-click="msg.start(id)">start</button>
+                <button class="btn btn-default" ng-show='isRunning(value)'  ng-click="msg.kill(id)">stop</button>
+                <button class="btn btn-default" ng-click="msg.copyAndStart(id)">clone</button>
+                <button class="btn btn-default" ng-show='!isRunning(value)' ng-click="edit(id)">edit</button>
+                <button class="btn btn-default" ng-click="msg.killAndRemove(id)">remove</button>
                 <img class="pull-right" ng-src="../{{value.state}}.png"/>                
                 </span>
-                {{value.state}} {{isRunning(value)}} 
+                <!-- {{value.state}} {{isRunning(value)}} -->
                
             </td>
                 <td nowrap> 
                 <section id="{{id}}">
-                    <timer start-time="value.startTs">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds.</timer>
+                    <timer start-time="value.startTs">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds.</timer><br/>
+                    {{value.options.services}}
+                    </span>
                 </section>
                 </td>
             </tr>
@@ -41,10 +43,11 @@
         </ul>
     </div>
      
-          <button class="btn btn-default"  ng-click="msg.start()">start</button>
-          <button class="btn btn-default"  ng-click="msg.save()">save</button>
+          <button class="btn btn-default"  ng-click="msg.spawn()">start</button>
+          <!-- msg.save() doesnt work because its not a DECLARED METHOD ??? ie parent Service.save() exists ... no inheritence ? -->
+          <!-- button class="btn btn-default"  ng-click="msg.save()">save</button -->
           <button class="btn btn-default"  ng-click="msg.killAll()">kill all</button>
           <button class="btn btn-default"  ng-click="msg.shutdown()">shutdown</button>   
-          <button type="button" class="btn btn-default" ng-click="msg.autoUpdate(!service.autoUpdate)" ng-model="autoUpdate">auto update</button>     
+          <button type="button" class="btn btn-default" ng-click="msg.autoUpdate(!service.autoUpdate)" ng-model="autoUpdate">auto update {{service.autoUpdate}}</button>     
      </span>
     </div>       
