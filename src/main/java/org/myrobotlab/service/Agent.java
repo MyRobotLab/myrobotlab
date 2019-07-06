@@ -1073,6 +1073,13 @@ public class Agent extends Service {
         cmd.add(keyPart);
       }
     }
+    
+    if (options.invoke != null) {
+      cmd.add("--invoke");
+      for (String keyPart : options.invoke) {
+        cmd.add(keyPart);
+      } 
+    }
 
     return cmd.toArray(new String[cmd.size()]);
   }
@@ -1216,7 +1223,7 @@ public class Agent extends Service {
         agentArgs.add("--id");
         agentArgs.add("agent-" + NameGenerator.getName());
         agentArgs.add("-l");
-        agentArgs.add("WARN");
+        agentArgs.add("INFO");
 
         agentArgs.add("-s");
         agentArgs.add("agent");
