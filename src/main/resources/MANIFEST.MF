@@ -11,7 +11,7 @@ GitCommitIdDescribe: da9bc99
 GitBuildUserName: 
 GitRemoteOriginUrl: https://github.com/MyRobotLab/myrobotlab.git
 GitTags: 
-GitBranch: develop
+GitBranch: worke
 GitCommitId: da9bc9972307d58f9692187694d6f5446c895d74
 GitCommitIdFull: null
 GitCommitIdDescribeShort: da9bc99
@@ -25,7 +25,7 @@ GitCommitIdAbbrev: da9bc99
 GitBuildTime: 2019-06-20T06:26:31-0700
 GitBuildVersion: 0.0.1-SNAPSHOT
 GitClosestTagCommitCount: 
-Implementation-Version: 1.1.15
+Implementation-Version: 1.1.180
 Main-Class: org.myrobotlab.service.Agent
 Major-Version: 1.1.13
 

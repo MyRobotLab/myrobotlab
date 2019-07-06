@@ -6,7 +6,7 @@
 		mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop help:system
 		
 		# fast build
-		mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop package -o
+		mvn -DskipTests -Dbuild.number=180 -DGitBranch=develop compile package -o
 	
 	 -->
 	<modelVersion>4.0.0</modelVersion>

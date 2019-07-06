@@ -384,7 +384,7 @@ public class Agent extends Service {
    * updates from the build server
    */
   public void update() {
-    log.info("update");
+    log.info("looking for updates");
     for (String key : processes.keySet()) {
       ProcessData process = processes.get(key);
 
@@ -1222,9 +1222,6 @@ public class Agent extends Service {
       } else {
         agentArgs.add("--id");
         agentArgs.add("agent-" + NameGenerator.getName());
-        agentArgs.add("-l");
-        agentArgs.add("INFO");
-
         agentArgs.add("-s");
         agentArgs.add("agent");
         agentArgs.add("Agent");
@@ -1232,6 +1229,10 @@ public class Agent extends Service {
         agentArgs.add("Cli");
         agentArgs.add("security");
         agentArgs.add("Security");
+        
+        agentArgs.add("--log-level");
+        agentArgs.add(options.logLevel);
+        
         // agentArgs.add("webgui"); FIXME - soon .. but not yet ...
         // agentArgs.add("WebGui");
       }
