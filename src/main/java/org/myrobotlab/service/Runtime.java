@@ -55,6 +55,7 @@ import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodEntry;
+import org.myrobotlab.framework.NameAndType;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceEnvironment;
@@ -74,10 +75,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
-import org.myrobotlab.swagger.Get;
-import org.myrobotlab.swagger.Parameter;
-import org.myrobotlab.swagger.Path;
-import org.myrobotlab.swagger.Swagger;
+import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;
@@ -683,9 +681,9 @@ public class Runtime extends Service implements MessageListener {
             } else {
               log.info("Not available: " + addr.getHostAddress());
             }
-            
+
             // TODO - check default port 8888 8887
-            
+
           } catch (IOException ioex) {
           }
         }
@@ -830,54 +828,12 @@ public class Runtime extends Service implements MessageListener {
     return ret;
   }
 
-  static public Swagger getSwagger(String serviceTypeName) {
-    Swagger swagger = new Swagger();
-    try {
-      Class<?> c = Class.forName(String.format("org.myrobotlab.service.%s", serviceTypeName));
-
-      // TODO - make examples and other info in MetaData !
-      Method method = c.getMethod("getMetaData");
-      ServiceType serviceType = (ServiceType) method.invoke(null); // Tags ?
-      // Examples ?
-
-      Method[] methods = c.getDeclaredMethods();
-
-      Method m;
-      // MethodEntry me;
-      String s;
-      for (int i = 0; i < methods.length; ++i) {
-        m = methods[i];
-
-        if (hideMethods.contains(m.getName())) {
-          continue;
-        }
-        String name = m.getName();
-        Path path = new Path();
-        path.get = new Get();// /get
-        path.get.operationId = name;
-        swagger.paths.put(String.format("/service/{name}/%s", name), path);
-
-        java.lang.reflect.Parameter[] parameters = m.getParameters();
-        for (java.lang.reflect.Parameter parameter : parameters) {
-          Parameter p = new Parameter();
-          if (parameter.isNamePresent()) {
-            p.name = parameter.getName();
-          }
-          p.in = "path";
-          p.format = "string"; // :P FIXME - type conversions
-
-          path.get.parameters.add(p);
-          // FIXME p.description from JavaDoc
-          parameter.getType();
-          // String parameterName = parameter.getName();
-        }
-      }
-
-    } catch (Exception e) {
-      log.error("getSwagger threw", e);
-    }
-
-    return swagger;
+  // FIXME - max complexity method
+  static public Map<String,Object> getSwagger(String name, String type) {
+    Swagger3 swagger = new Swagger3();
+    List<NameAndType> nameAndTypes = new ArrayList<>();
+    nameAndTypes.add(new NameAndType(name, type));
+    return swagger.getSwagger(nameAndTypes);
   }
 
   public static Map<String, ServiceInterface> getRegistry() {
@@ -1033,9 +989,9 @@ public class Runtime extends Service implements MessageListener {
     Platform platform = Platform.getLocalInstance();
     return getDiffTime(now.getTime() - platform.getStartTime().getTime());
   }
-  
+
   public static String getDiffTime(long diff) {
-    
+
     long diffSeconds = diff / 1000 % 60;
     long diffMinutes = diff / (60 * 1000) % 60;
     long diffHours = diff / (60 * 60 * 1000) % 24;
@@ -1044,7 +1000,7 @@ public class Runtime extends Service implements MessageListener {
     StringBuffer sb = new StringBuffer();
     sb.append(diffDays).append(" days ").append(diffHours).append(" hours ").append(diffMinutes).append(" minutes ").append(diffSeconds).append(" seconds");
     return sb.toString();
-    
+
   }
 
   /**
@@ -1152,7 +1108,7 @@ public class Runtime extends Service implements MessageListener {
 
       // TODO - replace with commons-cli -l
       logging.setLevel(options.logLevel);
-      
+
       if (options.virtual) {
         Platform.setVirtual(true);
       }
@@ -1161,7 +1117,7 @@ public class Runtime extends Service implements MessageListener {
         Platform platform = Platform.getLocalInstance();
         platform.setId(options.id);
       }
-      
+
       if (options.cfgDir != null) {
         FileIO.setCfgDir(options.cfgDir);
       }
@@ -1180,15 +1136,15 @@ public class Runtime extends Service implements MessageListener {
         shutdown();
         return;
       }
-      
+
       if (options.addKeys != null) {
         if (options.addKeys.length < 2) {
           Runtime.mainHelp();
           shutdown();
         }
-        Security security = Runtime.getSecurity();    
-        for (int i = 0; i < options.addKeys.length; i+=2) {
-          security.setKey(options.addKeys[i], options.addKeys[i+1]);
+        Security security = Runtime.getSecurity();
+        for (int i = 0; i < options.addKeys.length; i += 2) {
+          security.setKey(options.addKeys[i], options.addKeys[i + 1]);
           log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
         }
         shutdown();
@@ -1213,28 +1169,20 @@ public class Runtime extends Service implements MessageListener {
       }
 
       /*
-      if (options.extract) {
-        extract();
-        shutdown();
-        return;
-      }
-      */
+       * if (options.extract) { extract(); shutdown(); return; }
+       */
 
-      // FIXME !!! - this should be in agent - you should be allowed to define services as 'none'
+      // FIXME !!! - this should be in agent - you should be allowed to define
+      // services as 'none'
       // if you create a service a runtime will be created for you ..
       // initial default services if none supplied
       /*
-      if (options.services.size() == 0) {
-        options.services.add("log");
-        options.services.add("Log");
-        options.services.add("cli");
-        options.services.add("Cli");
-        options.services.add("gui");
-        options.services.add("SwingGui");
-        options.services.add("python");
-        options.services.add("Python");
-      }
-      */
+       * if (options.services.size() == 0) { options.services.add("log");
+       * options.services.add("Log"); options.services.add("cli");
+       * options.services.add("Cli"); options.services.add("gui");
+       * options.services.add("SwingGui"); options.services.add("python");
+       * options.services.add("Python"); }
+       */
 
       // 0..* services ...
       createAndStartServices(options.services);
@@ -1695,7 +1643,7 @@ public class Runtime extends Service implements MessageListener {
   // make it work if necessary prefix everything by -agent-<...>
   // FIXME - implement --help -h !!! - handle THROW !
   @Command(name = "java -jar myrobotlab.jar ")
-  
+
   static public class CmdOptions {
 
     // AGENT INFO
@@ -1707,7 +1655,7 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-w",
         "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
     public String webgui;
-    
+
     // FIXME - implement
     // AGENT INFO
     @Option(names = { "-u", "--update-agent" }, description = "updates agent with the latest versions of the current branch")
@@ -1717,7 +1665,7 @@ public class Runtime extends Service implements MessageListener {
     // AGENT INFO
     @Option(names = { "-g",
         "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
-    public String agent;    
+    public String agent;
 
     // FIXME -rename to daemon
     // AGENT INFO
@@ -1732,14 +1680,17 @@ public class Runtime extends Service implements MessageListener {
     public String invoke[];
 
     // FIXME - should work with a startup ...
-    @Option(names = { "-k",
-    "--add-key" }, arity = "2..*", description = "adds a key to the key store\n" +"@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
+    @Option(names = { "-k", "--add-key" }, arity = "2..*", description = "adds a key to the key store\n"
+        + "@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
     public String addKeys[];
 
-    /* not needed with branche/version isolation
-    @Option(names = { "-e", "--extract" }, description = "forces extraction of all resources onto the filesystem")
-    public boolean extract = false;
-    */
+    /*
+     * not needed with branche/version isolation
+     * 
+     * @Option(names = { "-e", "--extract" }, description =
+     * "forces extraction of all resources onto the filesystem") public boolean
+     * extract = false;
+     */
 
     @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
     public String jvm;
@@ -1774,7 +1725,7 @@ public class Runtime extends Service implements MessageListener {
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
 
-    @Option(names = {"-V","--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
+    @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
     public boolean virtual = false;
 
     // FIXME - implement
@@ -1798,11 +1749,8 @@ public class Runtime extends Service implements MessageListener {
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
-    @Option(names = {"--noEnv" }, description = "prevents printing of the env variables to log for security")
-    public boolean noEnv = false;
-
-    
-    // FIXME ! toString() builds command line using reflection and first name annotation
+    // FIXME ! toString() builds command line using reflection and first name
+    // annotation
 
   }
 
@@ -1862,27 +1810,21 @@ public class Runtime extends Service implements MessageListener {
     log.info("args {}", Arrays.toString(args.toArray()));
 
     log.info("============== args end ==============");
-    if (options.noEnv) {
-      log.info("============== env begin ==============");
 
-      Map<String, String> env = System.getenv();
-      /*
-       * - remove for security for (Map.Entry<String, String> entry :
-       * env.entrySet()) { String key = entry.getKey(); String value =
-       * entry.getValue(); log.info(String.format("%s=%s", key, value)); }
-       */
-      if (env.containsKey("PATH")) {
-        log.info("PATH={}", env.get("PATH"));
-      } else {
-        log.info("PATH not defined");
-      }
-      if (env.containsKey("JAVA_HOME")) {
-        log.info("JAVA_HOME={}", env.get("JAVA_HOME"));
-      } else {
-        log.info("JAVA_HOME not defined");
-      }
-      log.info("============== env end ==============");
+    log.info("============== env begin ==============");
+    
+    Map<String, String> env = System.getenv();
+    if (env.containsKey("PATH")) {
+      log.info("PATH={}", env.get("PATH"));
+    } else {
+      log.info("PATH not defined");
     }
+    if (env.containsKey("JAVA_HOME")) {
+      log.info("JAVA_HOME={}", env.get("JAVA_HOME"));
+    } else {
+      log.info("JAVA_HOME not defined");
+    }
+    log.info("============== env end ==============");
 
     // Platform platform = Platform.getLocalInstance();
     log.info("============== normalized ==============");
