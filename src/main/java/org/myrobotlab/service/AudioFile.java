@@ -482,7 +482,7 @@ public class AudioFile extends Service {
   }
 
   public AudioData publishAudioEnd(AudioData data) {
-    log.info("Audio File publishAudioEnd");
+    log.debug("Audio File publishAudioEnd");
     return data;
   }
 

@@ -82,7 +82,7 @@ public class AudioProcessor extends Thread {
   // FIXME - AudioData should have InputStream not File !
   public AudioData play(AudioData data) {
 
-    log.info("playing {}", data.toString());
+    log.debug("playing {}", data.toString());
     // FIXME - won't close filehandles :( .. dunno why
     // FileInputStream fis = null;
     // BufferedInputStream bis = null;
@@ -161,7 +161,7 @@ public class AudioProcessor extends Thread {
                 if (data.volume <= 1.0f && data.volume >= 0) {
 
                   ctrl.setValue((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
-                  log.info("Audioprocessor set volume to : " + ctrl.getValue());
+                  log.debug("Audioprocessor set volume to : " + ctrl.getValue());
                 } else {
                   log.error("Requested volume value " + data.volume.toString() + " not allowed");
                   data.volume = 1.0;
@@ -213,7 +213,7 @@ public class AudioProcessor extends Thread {
         audioFile.invoke("publishAudioEnd", data);
 
         synchronized (data) {
-          log.info("notifying others");
+          log.debug("notifying others");
           data.notifyAll();
         }
 

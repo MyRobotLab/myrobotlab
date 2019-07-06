@@ -680,8 +680,12 @@ public class Runtime extends Service implements MessageListener {
             if (addr.isReachable(1000)) {
               log.info("Available: " + addr.getHostAddress());
               networkPeers.add(addr.getHostAddress());
-            } else
+            } else {
               log.info("Not available: " + addr.getHostAddress());
+            }
+            
+            // TODO - check default port 8888 8887
+            
           } catch (IOException ioex) {
           }
         }
@@ -1027,8 +1031,11 @@ public class Runtime extends Service implements MessageListener {
   public static String getUptime() {
     Date now = new Date();
     Platform platform = Platform.getLocalInstance();
-    long diff = now.getTime() - platform.getStartTime().getTime();
-
+    return getDiffTime(now.getTime() - platform.getStartTime().getTime());
+  }
+  
+  public static String getDiffTime(long diff) {
+    
     long diffSeconds = diff / 1000 % 60;
     long diffMinutes = diff / (60 * 1000) % 60;
     long diffHours = diff / (60 * 60 * 1000) % 24;
@@ -1037,6 +1044,7 @@ public class Runtime extends Service implements MessageListener {
     StringBuffer sb = new StringBuffer();
     sb.append(diffDays).append(" days ").append(diffHours).append(" hours ").append(diffMinutes).append(" minutes ").append(diffSeconds).append(" seconds");
     return sb.toString();
+    
   }
 
   /**
@@ -1189,7 +1197,9 @@ public class Runtime extends Service implements MessageListener {
 
       // FIXME TEST THIS !! 0 length, single service, multiple !
       if (options.install != null) {
-
+        // we start the runtime so there is a status publisher which will
+        // display status updates from the repo install
+        Runtime.getInstance();
         Repo repo = Repo.getInstance();
         if (options.install.length == 0) {
           repo.install();
@@ -1684,7 +1694,7 @@ public class Runtime extends Service implements MessageListener {
   // the current concept is ok - but it does not work ..
   // make it work if necessary prefix everything by -agent-<...>
   // FIXME - implement --help -h !!! - handle THROW !
-  @Command(name = "MyRobotLab")
+  @Command(name = "java -jar myrobotlab.jar ")
   
   static public class CmdOptions {
 
@@ -1753,8 +1763,9 @@ public class Runtime extends Service implements MessageListener {
      * </pre>
      */
 
-    @Option(names = { "-m", "--manifest" }, description = "prints out the manifest")
-    public boolean manifest = false;
+    // FIXME - highlight or italics for examples !!
+    @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
+    public String memory = null;
 
     @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
     public String logLevel = "info";
@@ -1775,11 +1786,11 @@ public class Runtime extends Service implements MessageListener {
 
     // FIXME - get version vs force version - perhaps just always print version
     // in help
-    @Option(names = { "-v", "--version" }, description = "requested version")
+    @Option(names = { "-v", "--version" }, arity = "0..1", description = "requested version or if left blank return version")
     public String version;
 
     @Option(names = { "-s", "--service",
-        "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
+        "--services" }, arity = "1..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
     public List<String> services = new ArrayList<>();
 
     // FIXME - implement !

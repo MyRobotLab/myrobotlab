@@ -369,7 +369,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * were used with this text to speak, including the sound file info
    */
   public void onAudioStart(AudioData data) {
-    log.info("onAudioStart {} {}", getName(), data.toString());
+    log.debug("onAudioStart {} {}", getName(), data.toString());
 
     // filters on only our speech
     if (utterances.containsKey(data)) {
@@ -379,7 +379,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public void onAudioEnd(AudioData data) {
-    log.info("onAudioEnd {} {}", getName(), data.toString());
+    log.debug("onAudioEnd {} {}", getName(), data.toString());
 
     // filters on only our speech
     if (utterances.containsKey(data)) {
@@ -515,6 +515,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // but at the moment it seems useful
     // splitting on sound effects ...
     // TODO - use SSML speech synthesis markup language
+    
+    log.info("{} processing {}", getName(), toSpeak);
 
     // broadcast the original text to be processed/parsed
     invoke("publishSpeechRequested", toSpeak);
@@ -597,7 +599,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       utterances.put(audioData, speak);
 
       if (!audioData.isValid()) {
-        log.info("try generating audio data [{}] from [{}]", audioData, speak);
+        log.debug("try generating audio data [{}] from [{}]", audioData, speak);
         generateAudioData(audioData, speak);
       }
 

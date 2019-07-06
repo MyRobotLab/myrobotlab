@@ -56,7 +56,8 @@ angular.module('mrlapp.service.AgentGui', [])
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service;        
+        $scope.service = service;    
+        $scope.processes = service.processes;    
     }
     ;
 
