@@ -420,7 +420,7 @@ public class Agent extends Service {
           log.info("USING SRC LOOKING FOR GITHUB FOR UPDATES");
           String newVersion = getLatestSrc(process.options.branch);
           if (newVersion != null && process.isRunning()) {
-            log.info("updating process [{}] from {} -to-> {}", process.options.version, newVersion);
+            log.info("updating process [{}] from {} -to-> {}", process.options.id, process.options.version, newVersion);
             // FIXME set currentVersion ??? 
             currentVersion = process.options.version;
             process.options.version = newVersion;
