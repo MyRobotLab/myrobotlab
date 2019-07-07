@@ -1199,7 +1199,7 @@ public class Agent extends Service {
       spawning.append(c);
       spawning.append(" ");
     }
-    log.info("SPAWNING ! -> [{}]", spawning);
+    log.info("SPAWNING ! --> [{}]", spawning);
 
     // environment variables setup
     setEnv(builder.environment());
