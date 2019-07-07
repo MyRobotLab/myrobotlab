@@ -408,7 +408,6 @@ public class Agent extends Service {
     log.info("looking for updates");
     for (String key : processes.keySet()) {
       ProcessData process = processes.get(key);
-
       if (!process.options.autoUpdate) {
         log.info("not autoUpdate");
         continue;
