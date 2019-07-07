@@ -829,7 +829,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   // FIXME - max complexity method
-  static public Map<String,Object> getSwagger(String name, String type) {
+  static public Map<String, Object> getSwagger(String name, String type) {
     Swagger3 swagger = new Swagger3();
     List<NameAndType> nameAndTypes = new ArrayList<>();
     nameAndTypes.add(new NameAndType(name, type));
@@ -1633,17 +1633,13 @@ public class Runtime extends Service implements MessageListener {
     }
   }
 
-  // FIXME - PocessData.toString is command line .. getCmdList() or Array
-  // FIXME - warn when --auto-update and internet is not available
-  // FIXME - test over multiple running processes
-  // FIXME - add -help
-  // TODO - add jvm memory other runtime info
-  // FIXME - a way to route parameters from command line to Agent vs Runtime -
-  // the current concept is ok - but it does not work ..
-  // make it work if necessary prefix everything by -agent-<...>
-  // FIXME - implement --help -h !!! - handle THROW !
+  /**
+   * Command options for picocli library. This encapsulates all the available
+   * command line flags and their details. arity attribute is for specifying in
+   * an array or list the number of expected attributes after the flag. Short
+   * versions of flags e.g. -i must be unique and have only a single character.
+   */
   @Command(name = "java -jar myrobotlab.jar ")
-
   static public class CmdOptions {
 
     // AGENT INFO
@@ -1749,6 +1745,9 @@ public class Runtime extends Service implements MessageListener {
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
+    @Option(names = {"--src" }, arity = "0..1", description = "use latest source")
+    public String src;
+
     // FIXME ! toString() builds command line using reflection and first name
     // annotation
 
@@ -1812,7 +1811,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("============== args end ==============");
 
     log.info("============== env begin ==============");
-    
+
     Map<String, String> env = System.getenv();
     if (env.containsKey("PATH")) {
       log.info("PATH={}", env.get("PATH"));
@@ -2679,15 +2678,17 @@ public class Runtime extends Service implements MessageListener {
     }
   }
 
-  public static void export(String filename, String names) throws IOException {
+  public static String export(String filename, String names) throws IOException {
     String python = LangUtils.toPython(names);
     Files.write(Paths.get(filename), python.toString().getBytes());
+    return python;
   }
 
-  public static void exportAll(String filename) throws IOException {
+  public static String exportAll(String filename) throws IOException {
     // currently only support python - maybe in future we'll support js too
     String python = LangUtils.toPython();
     Files.write(Paths.get(filename), python.toString().getBytes());
+    return python;
   }
 
   public static Runtime getInstance(String[] args2) {

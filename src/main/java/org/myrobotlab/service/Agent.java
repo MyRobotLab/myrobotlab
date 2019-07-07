@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -17,6 +18,26 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.DetachedHeadException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidConfigurationException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchTrackingStatus;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TextProgressMonitor;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
@@ -98,7 +119,7 @@ public class Agent extends Service {
   boolean autoCheckForUpdate = false;
 
   Set<String> possibleVersions = new TreeSet<String>();
-  
+
   final static String REMOTE_BUILDS_URL_HOME = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/";
 
   // for more info -
@@ -130,8 +151,6 @@ public class Agent extends Service {
    * singleton for security purposes
    */
   transient static Agent agent;
-
-  String rootBranchDir = "branches";
 
   /**
    * development variable to force version "unknown" to be either greatest or
@@ -375,7 +394,7 @@ public class Agent extends Service {
     } else {
       // purgeTask("update");
       updater.stop();
-    }    
+    }
   }
 
   /**
@@ -395,6 +414,25 @@ public class Agent extends Service {
         continue;
       }
       try {
+        
+        // FIXME - if options.src != null GITHUB
+        if (options.src != null) {
+          log.info("USING SRC LOOKING FOR GITHUB FOR UPDATES");
+          getLatestSrc(process.options.branch);
+          if (process.isRunning()) {
+            log.info("its running - we should restart");
+            restart(process.options.id);
+            log.info("restarted");
+          }
+       
+        /*
+        CmdOptions options = new CmdOptions();
+        options.branch = branch;
+        options.version = version;
+        agent.spawn(options);
+        */
+        } else {
+        /**<pre> OLD WAY - checking Jenkins ! FIXME - else JENKINS
         // getRemoteVersions
         log.info("getting version");
         String version = getLatestVersion(process.options.branch, true);
@@ -416,6 +454,9 @@ public class Agent extends Service {
           log.info("its running - we should restart");
           restart(process.options.id);
           log.info("restarted");
+        }
+        </pre>
+        */
         }
       } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
@@ -514,6 +555,11 @@ public class Agent extends Service {
     spawnId(id);
   }
 
+  /**
+   * For respawning an existing ProcessData object
+   * 
+   * @param id
+   */
   public void spawnId(String id) {
     try {
       if (processes.containsKey(id)) {
@@ -525,13 +571,30 @@ public class Agent extends Service {
       log.error("spawn({}) threw ", id, e);
     }
   }
-  
+
+  /**
+   * Will spawn a new process of mrl using defaults.
+   * 
+   * @return
+   * @throws IOException
+   * @throws URISyntaxException
+   * @throws InterruptedException
+   */
   public Process spawn() throws IOException, URISyntaxException, InterruptedException {
     CmdOptions options = new CmdOptions();
-    new CommandLine(options).parseArgs(new String[]{});
+    new CommandLine(options).parseArgs(new String[] {});
     return spawn(options);
   }
-  
+
+  /**
+   * Spawn a process give a argument command line in single string form
+   * 
+   * @param args
+   * @return
+   * @throws IOException
+   * @throws URISyntaxException
+   * @throws InterruptedException
+   */
   public Process spawn(String args) throws IOException, URISyntaxException, InterruptedException {
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(args.split(" "));
@@ -573,6 +636,12 @@ public class Agent extends Service {
     return pd2;
   }
 
+  /**
+   * Copies an existing ProcessData, makes a new id and spawns it.
+   * 
+   * @param id
+   * @throws IOException
+   */
   public void copyAndStart(String id) throws IOException {
     // returns a non running copy with new process id
     // on the processes list
@@ -581,23 +650,6 @@ public class Agent extends Service {
     if (agent != null) {
       agent.broadcastState();
     }
-  }
-
-  /**
-   * gets id from name
-   * 
-   * @param name
-   *          name
-   * @return integer
-   * 
-   */
-  public String getId(String name) {
-    for (String pid : processes.keySet()) {
-      if (pid.equals(name)) {
-        return processes.get(pid).options.id;
-      }
-    }
-    return null;
   }
 
   /**
@@ -623,6 +675,14 @@ public class Agent extends Service {
     return possibleBranches;
   }
 
+  /**
+   * Used to compare semantic versions
+   * 
+   * @param version1
+   * @param version2
+   * @return
+   * @throws MrlException
+   */
   boolean isGreaterThan(String version1, String version2) throws MrlException {
     if (version1 == null) {
       return false;
@@ -679,6 +739,12 @@ public class Agent extends Service {
     return versions;
   }
 
+  /**
+   * Get remote versions from jenkins
+   * 
+   * @param branch
+   * @return
+   */
   public Set<String> getRemoteVersions(String branch) {
     Set<String> versions = new TreeSet<String>();
     try {
@@ -702,6 +768,13 @@ public class Agent extends Service {
     return versions;
   }
 
+  /**
+   * Checks in the branches directory for the latest version of desired "branch"
+   * 
+   * @param branch
+   * @return
+   * @throws MrlException
+   */
   public String getLatestLocalVersion(String branch) throws MrlException {
     Set<String> allLocal = getLocalVersions(branch);
     String latest = null;
@@ -717,6 +790,12 @@ public class Agent extends Service {
     return latest;
   }
 
+  /**
+   * A version to be unique is both {branch}-{version}. This finds all currently
+   * available versions.
+   * 
+   * @return
+   */
   public Set<String> getLocalVersions() {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
@@ -740,6 +819,12 @@ public class Agent extends Service {
     return versions;
   }
 
+  /**
+   * Get the local versions available for the selected branch.
+   * 
+   * @param branch
+   * @return
+   */
   public Set<String> getLocalVersions(String branch) {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
@@ -760,21 +845,6 @@ public class Agent extends Service {
     return versions;
   }
 
-  static public String getFileVersion(String name) {
-    if (!name.startsWith("myrobotlab.")) {
-      return null;
-    }
-
-    String[] parts = name.split("\\.");
-    if (parts.length != 5) {
-      return null;
-    }
-
-    String version = String.format("%s.%s.%s", parts[1], parts[2], parts[3]);
-
-    return version;
-  }
-
   /**
    * get a list of all the processes currently governed by this Agent
    * 
@@ -784,7 +854,12 @@ public class Agent extends Service {
     return processes;
   }
 
-  // by id (or by pid?)
+  /**
+   * Kills requested process.
+   * 
+   * @param id
+   * @return
+   */
   public String kill(String id) {
     // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
     // !!
@@ -802,7 +877,7 @@ public class Agent extends Service {
       }
       // remove(processes.get(name));
       if (agent != null) {
-        agent.info("{} haz beeen terminated", id);
+        agent.info("%s haz beeen terminated", id);
         agent.broadcastState();
       }
       return id;
@@ -812,11 +887,9 @@ public class Agent extends Service {
     return null;
   }
 
-  /*
-   * BAD IDEA - data type ambiguity is a drag public Integer kill(String name) {
-   * return kill(getId(name)); }
+  /**
+   * kill all processes
    */
-
   public void killAll() {
     // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
     // !!
@@ -829,6 +902,11 @@ public class Agent extends Service {
     }
   }
 
+  /**
+   * kills and clears
+   * 
+   * @param id
+   */
   public void killAndRemove(String id) {
     if (processes.containsKey(id)) {
       kill(id);
@@ -848,13 +926,19 @@ public class Agent extends Service {
     Object[] objs = processes.keySet().toArray();
     String[] pd = new String[objs.length];
     for (int i = 0; i < objs.length; ++i) {
-      Integer id = (Integer) objs[i];
+      String id = (String) objs[i];
       ProcessData p = processes.get(id);
       pd[i] = String.format("%s - %s [%s - %s]", id, p.options.id, p.options.branch, p.options.version);
     }
     return pd;
   }
 
+  /**
+   * Publishing point when a process dies.
+   * 
+   * @param id
+   * @return
+   */
   public String publishTerminated(String id) {
     log.info("publishTerminated - terminated {} - restarting", id);
 
@@ -896,7 +980,8 @@ public class Agent extends Service {
    * Convert command line parameter options into a ProcessData which can be
    * spawned
    * 
-   * @param inOptions - cmd options
+   * @param inOptions
+   *          - cmd options
    * @return a process
    * @throws IOException
    * @throws URISyntaxException
@@ -914,11 +999,11 @@ public class Agent extends Service {
     if (options.id == null) {
       options.id = NameGenerator.getName();
     }
-    
+
     if (options.branch == null) {
       options.branch = Platform.getLocalInstance().getBranch();
     }
-    
+
     if (options.version == null) {
       try {
         options.version = getLatestVersion(options.branch, autoUpdate);
@@ -934,13 +1019,13 @@ public class Agent extends Service {
     Platform platform = Platform.getLocalInstance();
     String exeName = platform.isWindows() ? "javaw" : "java";
     pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
-    
+
     String jvmArgs = "-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8";
     if (pd.options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
     pd.jvm = jvmArgs.split(" ");
-    
+
     // user override
     if (options.jvm != null) {
       pd.jvm = options.jvm.split(" ");
@@ -1004,11 +1089,11 @@ public class Agent extends Service {
   }
 
   /**
-   * FIXME is this ProcessData.toString()
-   * 
    * Constructs a command line from a ProcessData object which can directly be
    * run to spawn a new instance of mrl
    * 
+   * FIXME is this ProcessData.toString()
+   *
    * @param pd
    * @return
    */
@@ -1075,19 +1160,20 @@ public class Agent extends Service {
         cmd.add(keyPart);
       }
     }
-    
+
     if (options.invoke != null) {
       cmd.add("--invoke");
       for (String keyPart : options.invoke) {
         cmd.add(keyPart);
-      } 
+      }
     }
 
     return cmd.toArray(new String[cmd.size()]);
   }
 
   /**
-   * max complexity spawn
+   * The final spawn - all other data types as parameters make a ProcesData
+   * which is used by this method to start the process.
    * 
    * @param pd
    * @return
@@ -1236,10 +1322,10 @@ public class Agent extends Service {
         agentArgs.add("Cli");
         agentArgs.add("security");
         agentArgs.add("Security");
-        
+
         agentArgs.add("--log-level");
         agentArgs.add(options.logLevel);
-        
+
         // agentArgs.add("webgui"); FIXME - soon .. but not yet ...
         // agentArgs.add("WebGui");
       }
@@ -1311,11 +1397,19 @@ public class Agent extends Service {
         agent.startWebGui(options.webgui);
       }
 
-      // the user set auto-update to true 
-      if (options.autoUpdate) {        
+      // the user set auto-update to true
+      if (options.autoUpdate) {
         // options.fork = true;
         // lets check and get the latest jar if there is new one
+        
+        if (options.src == null) {
+       // get the latest from Jenkins
         agent.getLatestJar(agent.getBranch());
+        } else {
+        // get the latest from GitHub
+        agent.getLatestSrc(agent.getBranch());
+        }
+        
         // the "latest" should have been downloaded
         options.version = agent.getLatestLocalVersion(agent.getBranch());
       }
@@ -1351,6 +1445,19 @@ public class Agent extends Service {
     }
   }
 
+  public String getLatestSrc(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException, RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
+    
+    Runtime.getInstance();
+    Agent agent = (Agent) Runtime.start("agent", "Agent");
+    
+    RevCommit latestCommit = agent.gitPull(branch);
+    if (latestCommit != null) {
+      String version = agent.mvn(branch);      
+      return version;      
+    }
+    return null;
+  }
+
   public String getBranch() {
     return currentBranch;
   }
@@ -1363,6 +1470,197 @@ public class Agent extends Service {
     currentVersion = version;
     return version;
   }
+
+  public String mvn(String branch) {
+    return mvn(null, branch, null);
+  }
+
+  // mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop clean package -o
+  public String mvn(String src, String branch, Long buildNumber) {
+    try {
+      if (src == null) {
+        src = branch + ".src";
+      }
+      if (buildNumber == null) {
+        // epoch minute build time number
+        buildNumber = System.currentTimeMillis() / 1000;
+      }
+
+      String version = versionPrefix + buildNumber;
+
+      Platform platform = Platform.getLocalInstance();
+      List<String> cmd = new ArrayList<>();
+
+      String pathToPom = src + File.separator + "pom.xml";
+
+      cmd.add((platform.isWindows()) ? "cmd" : "bash");
+      cmd.add((platform.isWindows()) ? "/c" : "-c");
+      cmd.add((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it was
+                                                       // mvn.bat
+      cmd.add("-DskipTests");
+      cmd.add("-Dbuild.number=" + buildNumber);
+      cmd.add("-DGitBranch=" + branch);
+      cmd.add("compile");
+      cmd.add("package");
+      cmd.add("-f");
+      cmd.add(pathToPom);
+      // cmd.add("-o"); // offline
+
+      StringBuilder sb = new StringBuilder();
+      for (String c : cmd) {
+        sb.append(c);
+        sb.append(" ");
+      }
+
+      // src path ..
+      log.info("build [{}]", sb);
+      // ProcessBuilder pb = new
+      // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
+      ProcessBuilder pb = new ProcessBuilder(cmd);
+      // handle stderr as a direct pass through to System.err
+      pb.redirectErrorStream(true);
+      // pb.environment().putAll(System.getenv());
+
+      pb.inheritIO().start().waitFor();
+
+      String newJar = src + File.separator + "target" + File.separator + "myrobotlab.jar";
+      String newJarLoc = getJarName(branch, version);
+      File p = new File(newJarLoc).getAbsoluteFile().getParentFile();
+      p.mkdirs();
+
+      Files.move(Paths.get(newJar), Paths.get(newJarLoc));
+
+      return buildNumber + "";
+    } catch (Exception e) {
+      log.error("mvn threw", e);
+    }
+    return null;
+  }
+
+  public RevCommit gitPull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+      RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
+    return gitPull(null, branch);
+  }
+
+  public RevCommit gitPull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
+      CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
+
+    if (branch == null) {
+      branch = currentBranch;
+    }
+
+    if (src == null) {
+      src = branch + ".src";
+    }
+
+    List<String> branches = new ArrayList<String>();
+    branches.add("refs/heads/" + branch);
+
+    File repoParentFolder = new File(src);
+
+    Git git = null;
+
+    TextProgressMonitor textmonitor = new TextProgressMonitor(new PrintWriter(System.out));
+
+    Repository repo = null;
+    if (!repoParentFolder.exists()) {
+      // String branch = "master";
+      git = Git.cloneRepository().setProgressMonitor(textmonitor).setURI("https://github.com/MyRobotLab/myrobotlab.git").setDirectory(new File(src)).setBranchesToClone(branches)
+          .setBranch("refs/heads/" + branch).call();
+
+    } else {
+      // Open an existing repository
+      String gitDir = repoParentFolder.getAbsolutePath() + "/.git";
+      repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
+      git = new Git(repo);
+    }
+    
+    repo = git.getRepository();
+
+    /**
+     * <pre>
+     * CheckoutCommand checkout = git.checkout().setCreateBranch(true).setName(branch).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).setStartPoint("origin/" + branch)
+     *     .call();
+     * </pre>
+     */
+
+    // git.pull().setCredentialsProvider(user).call();
+    // FIXME if currentBranch != branch - then checkout .. set current branch
+    if (!branch.equals(currentBranch)) {
+      git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch).call();
+      git.checkout().setName(branch).call();
+    }
+
+    // FIXME - if auto-update or auto-fetch ie .. remote allowed and cache remote changes
+    git.fetch().setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
+
+    List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
+    List<RevCommit> remoteLogs = getLogs(git, "remotes/origin/" + branch, 1);
+    
+    BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
+    
+    RevCommit localCommit = localLogs.get(0);
+    RevCommit remoteCommit = remoteLogs.get(0);
+    
+    // if (localCommit.getCommitTime() < remoteCommit.getCommitTime()) {
+    if (status.getBehindCount() > 0) {
+      log.info("local ts {}, remote {} - {} updating", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
+      PullCommand pullCmd = git.pull();
+      pullCmd.setProgressMonitor(textmonitor);
+      pullCmd.call();
+      return remoteCommit;
+    }
+    
+    return null;
+  }
+
+  private List<RevCommit> getLogs(Git git, String ref, int maxCount)
+      throws RevisionSyntaxException, NoHeadException, MissingObjectException, IncorrectObjectTypeException, AmbiguousObjectException, GitAPIException, IOException {
+    List<RevCommit> ret = new ArrayList<>();
+    Repository repository = git.getRepository();
+    Iterable<RevCommit> logs = git.log().setMaxCount(maxCount).add(repository.resolve(ref)).call();
+    int count = 0;
+    for (RevCommit rev : logs) {
+      System.out.println(
+          rev /*
+               * + ", name: " + rev.getName() + ", id: " + rev.getId().getName()
+               */);
+      count++;
+      ret.add(rev);
+    }
+    System.out.println("Had " + count + " " + ref);
+    return ret;
+  }
+  
+
+  /**
+   * Populate all the files to update, if the system should update.
+   * 
+   * @throws GitAPIException
+   * @throws IOException
+   * @throws IncorrectObjectTypeException
+   * @throws AmbiguousObjectException
+   * @throws RevisionSyntaxException
+   */
+  /*
+   * private List<DiffEntry> populateDiff(Git git) throws GitAPIException,
+   * RevisionSyntaxException, AmbiguousObjectException,
+   * IncorrectObjectTypeException, IOException {
+   * 
+   * git.fetch().setProgressMonitor(new TextProgressMonitor(new
+   * PrintWriter(System.out))).call(); Repository repo = git.getRepository();
+   * ObjectId fetchHead = repo.resolve("FETCH_HEAD^{tree}"); ObjectId head =
+   * repo.resolve("HEAD^{tree}");
+   * 
+   * ObjectReader reader = repo.newObjectReader(); CanonicalTreeParser
+   * oldTreeIter = new CanonicalTreeParser(); oldTreeIter.reset(reader, head);
+   * CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+   * newTreeIter.reset(reader, fetchHead); List<DiffEntry> diffs =
+   * git.diff().setShowNameAndStatusOnly(true) .setNewTree(newTreeIter)
+   * .setOldTree(oldTreeIter) .call();
+   * 
+   * return diffs; }
+   */
 
   // FIXME - move to enums for status level !
   public void updateLog(String level, String msg) {
