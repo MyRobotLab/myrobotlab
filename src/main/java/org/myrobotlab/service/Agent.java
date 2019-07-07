@@ -98,16 +98,18 @@ public class Agent extends Service {
   boolean autoCheckForUpdate = false;
 
   Set<String> possibleVersions = new TreeSet<String>();
+  
+  final static String REMOTE_BUILDS_URL_HOME = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/";
 
   // for more info -
-  // http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/develop/api/json
+  // myrobotlab-multibranch/job/develop/api/json
   // WARNING Jenkins url api format for multi-branch pipelines is different from
   // maven builds !
-  final static String REMOTE_BUILDS_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/api/json?tree=builds[number,status,timestamp,id,result]";
+  final static String REMOTE_BUILDS_URL = "job/%s/api/json?tree=builds[number,status,timestamp,id,result]";
 
-  final static String REMOTE_JAR_URL = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/job/%s/%s/artifact/target/myrobotlab.jar";
+  final static String REMOTE_JAR_URL = "job/%s/%s/artifact/target/myrobotlab.jar";
 
-  final static String REMOTE_MULTI_BRANCH_JOBS = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/api/json";
+  final static String REMOTE_MULTI_BRANCH_JOBS = "api/json";
 
   boolean checkRemoteVersions = false;
 
@@ -456,7 +458,7 @@ public class Agent extends Service {
     new File(getDir(branch, version)).mkdirs();
     String build = getBuildId(version);
     // this
-    Http.getSafePartFile(String.format(REMOTE_JAR_URL, branch, build), getJarName(branch, version));
+    Http.getSafePartFile(String.format(REMOTE_BUILDS_URL_HOME + REMOTE_JAR_URL, branch, build), getJarName(branch, version));
   }
 
   public String getBuildId(String version) {
@@ -606,7 +608,7 @@ public class Agent extends Service {
   static public Set<String> getBranches() {
     Set<String> possibleBranches = new TreeSet<String>();
     try {
-      byte[] r = Http.get(REMOTE_MULTI_BRANCH_JOBS);
+      byte[] r = Http.get(REMOTE_BUILDS_URL_HOME + REMOTE_MULTI_BRANCH_JOBS);
       if (r != null) {
         String json = new String(r);
         CodecJson decoder = new CodecJson();
@@ -681,7 +683,7 @@ public class Agent extends Service {
     Set<String> versions = new TreeSet<String>();
     try {
 
-      byte[] data = Http.get(String.format(REMOTE_BUILDS_URL, branch));
+      byte[] data = Http.get(String.format(REMOTE_BUILDS_URL_HOME + REMOTE_BUILDS_URL, branch));
       if (data != null) {
         CodecJson decoder = new CodecJson();
         String json = new String(data);
@@ -1105,8 +1107,13 @@ public class Agent extends Service {
     String spawnDir = new File(pd.jarPath).getParent();
     builder.directory(new File(spawnDir));
 
-    log.info("in {}", spawnDir);
-    log.info("SPAWNING ! -> {}", Arrays.toString(cmdLine));
+    log.info("cd {}", spawnDir);
+    StringBuilder spawning = new StringBuilder();
+    for (String c : cmdLine) {
+      spawning.append(c);
+      spawning.append(" ");
+    }
+    log.info("SPAWNING ! -> [{}]", spawning);
 
     // environment variables setup
     setEnv(builder.environment());
@@ -1304,13 +1311,9 @@ public class Agent extends Service {
         agent.startWebGui(options.webgui);
       }
 
-      if (options.autoUpdate) {
-        // if the agent is going to auto update, its effectively "forked"
-        // because it will potentially need to restart all instances
-        // a restart terminates the instance - if the agent terminated an
-        // instance
-        // and did "not" fork it would terminate itself
-        options.fork = true;
+      // the user set auto-update to true 
+      if (options.autoUpdate) {        
+        // options.fork = true;
         // lets check and get the latest jar if there is new one
         agent.getLatestJar(agent.getBranch());
         // the "latest" should have been downloaded
