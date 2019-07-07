@@ -421,7 +421,7 @@ public class Agent extends Service {
           if (newVersion != null && process.isRunning()) {
             log.info("updating process [{}] from {} -to-> {}", process.options.id, process.options.version, newVersion);
             // FIXME set currentVersion ??? 
-            currentVersion = process.options.version;
+            currentVersion = newVersion;
             process.options.version = newVersion;
             restart(process.options.id);
             log.info("restarted");
