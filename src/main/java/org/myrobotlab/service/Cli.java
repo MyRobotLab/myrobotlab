@@ -658,7 +658,7 @@ public class Cli extends Service {
       // cli.processInput("test", null);
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 
