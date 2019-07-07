@@ -113,11 +113,15 @@
     <artifactId>commons-cli</artifactId>
     <version>1.4</version>
   </dependency>
-  <dependency>
-    <groupId>org.eclipse.jgit</groupId>
-    <artifactId>org.eclipse.jgit</artifactId>
-    <version>3.5.0.201409260305-r</version>
-</dependency>
+   <!-- Core Library -->
+  
+    <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit</artifactId>
+      <version>5.4.0.201906121030-r</version>
+    </dependency>
+  
+
 <!-- Agent end -->
 
 <!-- AudioFile begin -->
@@ -1542,7 +1546,7 @@
 				</executions>
 				<configuration>
 					<mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
-					<classpathScope>test</classpathScope>
+					<classpathScope>compile</classpathScope>
 					<arguments>
 						<!-- TODO: fix this with the proper location -->
 			            <argument>target/classes/resource/framework</argument>
@@ -1610,17 +1614,16 @@
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
-
-<!--                             <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters> -->
+                            <filters>
+                             <filter>
+			                  <artifact>*:*</artifact>
+			                  <excludes>
+			                    <exclude>META-INF/*.SF</exclude>
+			                    <exclude>META-INF/*.DSA</exclude>
+			                    <exclude>META-INF/*.RSA</exclude>
+			                  </excludes>
+			                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
