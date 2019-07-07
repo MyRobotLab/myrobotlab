@@ -1522,6 +1522,8 @@ public class Agent extends Service {
       // pb.environment().putAll(System.getenv());
 
       pb.inheritIO().start().waitFor();
+      
+      // FIXME LOOK FOR -->  "BUILD FAILURE"
 
       String newJar = src + File.separator + "target" + File.separator + "myrobotlab.jar";
       String newJarLoc = getJarName(branch, version);
