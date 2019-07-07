@@ -1519,7 +1519,6 @@ public class Agent extends Service {
         sb.append(c);
         sb.append(" ");
       }
-
       // src path ..
       log.info("build [{}]", sb);
       // ProcessBuilder pb = new
