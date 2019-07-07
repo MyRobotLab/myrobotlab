@@ -1503,8 +1503,8 @@ public class Agent extends Service {
       cmd.add("compile");
       cmd.add("prepare-package");
       cmd.add("package");
-      cmd.add("-f");
-      cmd.add(pathToPom);
+     //  cmd.add("-f");
+     //   cmd.add(pathToPom);
       // cmd.add("-o"); // offline
 
       StringBuilder sb = new StringBuilder();
@@ -1518,6 +1518,9 @@ public class Agent extends Service {
       // ProcessBuilder pb = new
       // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
       ProcessBuilder pb = new ProcessBuilder(cmd);
+      
+      pb.directory(new File(src));
+      
       // handle stderr as a direct pass through to System.err
       pb.redirectErrorStream(true);
       // pb.environment().putAll(System.getenv());
