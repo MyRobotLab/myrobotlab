@@ -1501,6 +1501,7 @@ public class Agent extends Service {
       cmd.add("-Dbuild.number=" + buildNumber);
       cmd.add("-DGitBranch=" + branch);
       cmd.add("compile");
+      cmd.add("prepare-package");
       cmd.add("package");
       cmd.add("-f");
       cmd.add(pathToPom);
