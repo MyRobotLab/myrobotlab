@@ -418,8 +418,8 @@ public class Agent extends Service {
         // FIXME - if options.src != null GITHUB
         if (options.src != null) {
           log.info("USING SRC LOOKING FOR GITHUB FOR UPDATES");
-          getLatestSrc(process.options.branch);
-          if (process.isRunning()) {
+          String newVersion = getLatestSrc(process.options.branch);
+          if (newVersion != null && process.isRunning()) {
             log.info("its running - we should restart");
             restart(process.options.id);
             log.info("restarted");
@@ -1619,6 +1619,8 @@ public class Agent extends Service {
       pullCmd.setProgressMonitor(textmonitor);
       pullCmd.call();
       return remoteCommit;
+    } else {
+      log.info("no new commits on branch {}", branch);
     }
     
     return null;
