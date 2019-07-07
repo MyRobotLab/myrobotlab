@@ -1430,6 +1430,10 @@ public class Agent extends Service {
 
       // we start a timer to process future updates
       if (options.autoUpdate) {
+        // if you update a single process
+        // it kills it and restarts - and this will kill the
+        // agent unless its forked
+        options.fork = true;
         agent.autoUpdate(true);
       }
 
