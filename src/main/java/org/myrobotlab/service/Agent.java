@@ -1296,8 +1296,6 @@ public class Agent extends Service {
 
       globalOptions = new CmdOptions();
 
-      // for Callable version ...
-      // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(globalOptions).parseArgs(args);
 
       if (globalOptions.help) {
@@ -1305,8 +1303,6 @@ public class Agent extends Service {
         return;
       }
 
-      // String[] agentArgs = new String[] { "--id", "agent-" +
-      // NameGenerator.getName(), "-l", "WARN"};
       List<String> agentArgs = new ArrayList<>();
 
       if (globalOptions.agent != null) {
@@ -1340,11 +1336,7 @@ public class Agent extends Service {
       log.info("agent args {}", Arrays.toString(agentArgs.toArray()));
 
       Runtime.main(agentArgs.toArray(new String[agentArgs.size()]));
-      agent = (Agent) Runtime.getService("agent");
-      /*
-       * if (agent == null) { agent = (Agent) Runtime.start("agent", "Agent");
-       * agent.options = options; }
-       */
+      agent = (Agent) Runtime.getService("agent");     
 
       if (globalOptions.listVersions) {
         System.out.println("available local versions");
@@ -1441,6 +1433,12 @@ public class Agent extends Service {
         // then shutdown (addendum: check if supporting other processes)
         p.waitFor();
         agent.shutdown();
+        // START AGAIN IF --install WAS SUPPLIED
+        if (globalOptions.autoUpdate) {
+          globalOptions.install = null;
+          p = agent.spawn(globalOptions);
+        }
+        
       }
 
     } catch (Exception e) {
