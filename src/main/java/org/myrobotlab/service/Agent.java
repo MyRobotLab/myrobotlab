@@ -1277,7 +1277,7 @@ public class Agent extends Service {
     meta.setSponsor("GroG");
     meta.setLicenseApache();
 
-    meta.includeServiceInOneJar(true);
+    // meta.includeServiceInOneJar(true);
 
     return meta;
   }

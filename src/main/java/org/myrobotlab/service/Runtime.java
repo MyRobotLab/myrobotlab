@@ -2517,17 +2517,19 @@ public class Runtime extends Service implements MessageListener {
     meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("com.google.code.gson", "gson", "2.8.5"); // apache 2.0
-                                                                 // license
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); // apache 2.0
-                                                            // license
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2"); // apache
-                                                                            // 2.0
-                                                                            // license
-    meta.addDependency("org.atmosphere", "wasync", "2.1.5"); // apache 2.0
-                                                             // license
-    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2"); // apache 2.0
-                                                                   // license
+    // apache 2.0 license
+    meta.addDependency("com.google.code.gson", "gson", "2.8.5"); 
+    // apache 2.0 license
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); 
+    // apache 2.0 license
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    // apache 2.0 license
+    meta.addDependency("org.atmosphere", "wasync", "2.1.5");
+    // apache 2.0 license
+    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2"); 
+    
+    //  EDL (new-style BSD) licensed
+    meta.addDependency("org.eclipse.jgit", "org.eclipse.jgit", "5.4.0.201906121030-r");
 
     // all your logging needs
     meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
