@@ -1438,7 +1438,6 @@ public class Agent extends Service {
           globalOptions.install = null;
           p = agent.spawn(globalOptions);
         }
-
       }
 
     } catch (Exception e) {
