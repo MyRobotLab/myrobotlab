@@ -1400,7 +1400,6 @@ public class Agent extends Service {
           // get the latest from GitHub
           agent.getLatestSrc(agent.getBranch());
         }
-
         // the "latest" should have been downloaded
         globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
       }
