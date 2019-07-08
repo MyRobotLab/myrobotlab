@@ -1454,7 +1454,7 @@ public class Agent extends Service {
 
     RevCommit latestCommit = agent.gitPull(branch);
     if (latestCommit != null) {
-      log.info("latest commit {} - will attempt to build", latestCommit);
+      log.info("latest {} - will attempt to build", latestCommit);
       String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime());
       log.info("successfully build version {} - {}", latestCommit.getCommitTime(), latestCommit.getFullMessage());
       return version;
@@ -1604,13 +1604,15 @@ public class Agent extends Service {
     // remote changes
     git.fetch().setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
 
+    
     List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
     List<RevCommit> remoteLogs = getLogs(git, "remotes/origin/" + branch, 1);
 
-    BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
-
     RevCommit localCommit = localLogs.get(0);
     RevCommit remoteCommit = remoteLogs.get(0);
+
+    BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
+
 
     // if (localCommit.getCommitTime() < remoteCommit.getCommitTime()) {
     if (status.getBehindCount() > 0) {
