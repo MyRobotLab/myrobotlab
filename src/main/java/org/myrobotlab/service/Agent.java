@@ -1336,7 +1336,7 @@ public class Agent extends Service {
       log.info("agent args {}", Arrays.toString(agentArgs.toArray()));
 
       Runtime.main(agentArgs.toArray(new String[agentArgs.size()]));
-      agent = (Agent) Runtime.getService("agent");     
+      agent = (Agent) Runtime.getService("agent");
 
       if (globalOptions.listVersions) {
         System.out.println("available local versions");
@@ -1438,7 +1438,7 @@ public class Agent extends Service {
           globalOptions.install = null;
           p = agent.spawn(globalOptions);
         }
-        
+
       }
 
     } catch (Exception e) {
@@ -1449,8 +1449,7 @@ public class Agent extends Service {
   public String getLatestSrc(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
       RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
 
-    Runtime.getInstance();
-    Agent agent = (Agent) Runtime.start("agent", "Agent");
+    Agent agent = (Agent) Runtime.getService("agent");
 
     RevCommit latestCommit = agent.gitPull(branch);
     if (latestCommit != null) {
@@ -1604,7 +1603,6 @@ public class Agent extends Service {
     // remote changes
     git.fetch().setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
 
-    
     List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
     List<RevCommit> remoteLogs = getLogs(git, "remotes/origin/" + branch, 1);
 
@@ -1612,7 +1610,6 @@ public class Agent extends Service {
     RevCommit remoteCommit = remoteLogs.get(0);
 
     BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
-
 
     // if (localCommit.getCommitTime() < remoteCommit.getCommitTime()) {
     if (status.getBehindCount() > 0) {
