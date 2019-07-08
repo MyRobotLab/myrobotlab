@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
@@ -829,7 +830,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   // FIXME - max complexity method
-  static public Map<String,Object> getSwagger(String name, String type) {
+  static public Map<String, Object> getSwagger(String name, String type) {
     Swagger3 swagger = new Swagger3();
     List<NameAndType> nameAndTypes = new ArrayList<>();
     nameAndTypes.add(new NameAndType(name, type));
@@ -1145,7 +1146,7 @@ public class Runtime extends Service implements MessageListener {
         Security security = Runtime.getSecurity();
         for (int i = 0; i < options.addKeys.length; i += 2) {
           security.setKey(options.addKeys[i], options.addKeys[i + 1]);
-          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
+          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
         }
         shutdown();
         return;
@@ -1168,23 +1169,6 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
-      /*
-       * if (options.extract) { extract(); shutdown(); return; }
-       */
-
-      // FIXME !!! - this should be in agent - you should be allowed to define
-      // services as 'none'
-      // if you create a service a runtime will be created for you ..
-      // initial default services if none supplied
-      /*
-       * if (options.services.size() == 0) { options.services.add("log");
-       * options.services.add("Log"); options.services.add("cli");
-       * options.services.add("Cli"); options.services.add("gui");
-       * options.services.add("SwingGui"); options.services.add("python");
-       * options.services.add("Python"); }
-       */
-
-      // 0..* services ...
       createAndStartServices(options.services);
 
       if (options.invoke != null) {
@@ -1633,18 +1617,26 @@ public class Runtime extends Service implements MessageListener {
     }
   }
 
-  // FIXME - PocessData.toString is command line .. getCmdList() or Array
-  // FIXME - warn when --auto-update and internet is not available
-  // FIXME - test over multiple running processes
-  // FIXME - add -help
-  // TODO - add jvm memory other runtime info
-  // FIXME - a way to route parameters from command line to Agent vs Runtime -
-  // the current concept is ok - but it does not work ..
-  // make it work if necessary prefix everything by -agent-<...>
-  // FIXME - implement --help -h !!! - handle THROW !
+  /**
+   * Command options for picocli library. This encapsulates all the available
+   * command line flags and their details. arity attribute is for specifying in
+   * an array or list the number of expected attributes after the flag. Short
+   * versions of flags e.g. -i must be unique and have only a single character.
+   */
   @Command(name = "java -jar myrobotlab.jar ")
-
   static public class CmdOptions {
+
+    public CmdOptions(CmdOptions other) throws IllegalArgumentException, IllegalAccessException {
+      Field[] fields = this.getClass().getDeclaredFields();
+      for (Field field : fields) {
+        // Field field = object.getClass().getDeclaredField(fieldName);
+        field.set(this, field.get(other));
+      }
+    }
+
+    public CmdOptions() {
+      // TODO Auto-generated constructor stub
+    }
 
     // AGENT INFO
     @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
@@ -1749,6 +1741,9 @@ public class Runtime extends Service implements MessageListener {
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
+    @Option(names = {"--src" }, arity = "0..1", description = "use latest source")
+    public String src;
+
     // FIXME ! toString() builds command line using reflection and first name
     // annotation
 
@@ -1812,7 +1807,7 @@ public class Runtime extends Service implements MessageListener {
     log.info("============== args end ==============");
 
     log.info("============== env begin ==============");
-    
+
     Map<String, String> env = System.getenv();
     if (env.containsKey("PATH")) {
       log.info("PATH={}", env.get("PATH"));
@@ -2522,17 +2517,19 @@ public class Runtime extends Service implements MessageListener {
     meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("com.google.code.gson", "gson", "2.8.5"); // apache 2.0
-                                                                 // license
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); // apache 2.0
-                                                            // license
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2"); // apache
-                                                                            // 2.0
-                                                                            // license
-    meta.addDependency("org.atmosphere", "wasync", "2.1.5"); // apache 2.0
-                                                             // license
-    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2"); // apache 2.0
-                                                                   // license
+    // apache 2.0 license
+    meta.addDependency("com.google.code.gson", "gson", "2.8.5"); 
+    // apache 2.0 license
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); 
+    // apache 2.0 license
+    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
+    // apache 2.0 license
+    meta.addDependency("org.atmosphere", "wasync", "2.1.5");
+    // apache 2.0 license
+    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2"); 
+    
+    //  EDL (new-style BSD) licensed
+    meta.addDependency("org.eclipse.jgit", "org.eclipse.jgit", "5.4.0.201906121030-r");
 
     // all your logging needs
     meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
@@ -2679,15 +2676,17 @@ public class Runtime extends Service implements MessageListener {
     }
   }
 
-  public static void export(String filename, String names) throws IOException {
+  public static String export(String filename, String names) throws IOException {
     String python = LangUtils.toPython(names);
     Files.write(Paths.get(filename), python.toString().getBytes());
+    return python;
   }
 
-  public static void exportAll(String filename) throws IOException {
+  public static String exportAll(String filename) throws IOException {
     // currently only support python - maybe in future we'll support js too
     String python = LangUtils.toPython();
     Files.write(Paths.get(filename), python.toString().getBytes());
+    return python;
   }
 
   public static Runtime getInstance(String[] args2) {
