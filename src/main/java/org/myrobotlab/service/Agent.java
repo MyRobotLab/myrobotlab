@@ -1458,6 +1458,7 @@ public class Agent extends Service {
     if (latestCommit != null) {
       log.info("latest commit {} - will attempt to build", latestCommit);
       String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime());
+      log.info("successfully build version {} - {}", latestCommit.getCommitTime(), latestCommit.getFullMessage());
       return version;
     }
     return null;
@@ -1540,7 +1541,7 @@ public class Agent extends Service {
 
       Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
 
-      return buildNumber + "";
+      return versionPrefix + buildNumber + "";
     } catch (Exception e) {
       log.error("mvn threw ", e);
     }
