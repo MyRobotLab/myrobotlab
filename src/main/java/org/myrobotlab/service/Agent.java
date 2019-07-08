@@ -1522,7 +1522,6 @@ public class Agent extends Service {
 //      cmd.add("\"" + sb.toString() + "\"");
       cmd.add(sb.toString());
 
-
       StringBuilder sb1 = new StringBuilder();
       for (String c : cmd) {
         sb1.append(c);
