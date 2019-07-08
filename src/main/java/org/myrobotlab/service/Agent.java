@@ -416,7 +416,7 @@ public class Agent extends Service {
 
         // FIXME - if options.src != null GITHUB
         if (globalOptions.src != null) {
-          log.info("USING SRC LOOKING FOR GITHUB FOR UPDATES");
+          log.info("checking for github updates on branch {}", process.options.branch);
           String newVersion = getLatestSrc(process.options.branch);
           if (newVersion != null && process.isRunning()) {
             log.info("updating process [{}] from {} -to-> {}", process.options.id, process.options.version, newVersion);
@@ -428,7 +428,7 @@ public class Agent extends Service {
             log.info("restarted");
           }
         } else {
-          log.info("LOOKING FOR UPDATE ON JENKINS");
+          log.info("checking for updates on jenkins");
           // getRemoteVersions
           log.info("getting version");
           String version = getLatestVersion(process.options.branch, true);
