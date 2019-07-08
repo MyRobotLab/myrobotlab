@@ -137,7 +137,7 @@ public class Agent extends Service {
   /**
    * command line options for the agent
    */
-  static CmdOptions options;
+  static CmdOptions globalOptions;
 
   String versionPrefix = "1.1.";
 
@@ -415,7 +415,7 @@ public class Agent extends Service {
       try {
         
         // FIXME - if options.src != null GITHUB
-        if (options.src != null) {
+        if (globalOptions.src != null) {
           log.info("USING SRC LOOKING FOR GITHUB FOR UPDATES");
           String newVersion = getLatestSrc(process.options.branch);
           if (newVersion != null && process.isRunning()) {
@@ -581,8 +581,10 @@ public class Agent extends Service {
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
+   * @throws IllegalAccessException 
+   * @throws IllegalArgumentException 
    */
-  public Process spawn() throws IOException, URISyntaxException, InterruptedException {
+  public Process spawn() throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(new String[] {});
     return spawn(options);
@@ -596,8 +598,10 @@ public class Agent extends Service {
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
+   * @throws IllegalAccessException 
+   * @throws IllegalArgumentException 
    */
-  public Process spawn(String args) throws IOException, URISyntaxException, InterruptedException {
+  public Process spawn(String args) throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(args.split(" "));
     return spawn(options);
@@ -951,7 +955,7 @@ public class Agent extends Service {
 
     // if you don't fork with Agent allowed to
     // exist without instances - then
-    if (!options.fork) {
+    if (!globalOptions.fork) {
       // spin through instances - if I'm the only
       // thing left - terminate
       boolean processesStillRunning = false;
@@ -988,14 +992,16 @@ public class Agent extends Service {
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
+   * @throws IllegalAccessException 
+   * @throws IllegalArgumentException 
    */
-  public Process spawn(CmdOptions inOptions) throws IOException, URISyntaxException, InterruptedException {
+  public Process spawn(CmdOptions inOptions) throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     if (ProcessData.agent == null) {
       ProcessData.agent = this;
     }
     // create a ProcessData then spawn it !
     ProcessData pd = new ProcessData();
-    pd.options = inOptions;
+    pd.options = new CmdOptions(inOptions);
     CmdOptions options = pd.options;
 
     if (options.id == null) {
@@ -1138,34 +1144,34 @@ public class Agent extends Service {
     cmd.add("--id");
     cmd.add(pd.options.id);
 
-    if (options.logLevel != null) {
+    if (globalOptions.logLevel != null) {
       cmd.add("--log-level");
-      cmd.add(options.logLevel);
+      cmd.add(globalOptions.logLevel);
     }
 
-    if (options.install != null) {
+    if (pd.options.install != null) {
       cmd.add("--install");
-      for (String serviceType : options.install) {
+      for (String serviceType : globalOptions.install) {
         cmd.add(serviceType);
       }
     }
 
     // FIXME - adding new CmdOption
-    if (options.cfgDir != null) {
+    if (pd.options.cfgDir != null) {
       cmd.add("-c");
-      cmd.add(options.cfgDir);
+      cmd.add(globalOptions.cfgDir);
     }
 
-    if (options.addKeys != null) {
+    if (pd.options.addKeys != null) {
       cmd.add("-k");
-      for (String keyPart : options.addKeys) {
+      for (String keyPart : globalOptions.addKeys) {
         cmd.add(keyPart);
       }
     }
 
-    if (options.invoke != null) {
+    if (pd.options.invoke != null) {
       cmd.add("--invoke");
-      for (String keyPart : options.invoke) {
+      for (String keyPart : globalOptions.invoke) {
         cmd.add(keyPart);
       }
     }
@@ -1297,13 +1303,13 @@ public class Agent extends Service {
   public static void main(String[] args) {
     try {
 
-      options = new CmdOptions();
+      globalOptions = new CmdOptions();
 
       // for Callable version ...
       // int exitCode = new CommandLine(options).execute(args);
-      new CommandLine(options).parseArgs(args);
+      new CommandLine(globalOptions).parseArgs(args);
 
-      if (options.help) {
+      if (globalOptions.help) {
         Runtime.mainHelp();
         return;
       }
@@ -1312,8 +1318,8 @@ public class Agent extends Service {
       // NameGenerator.getName(), "-l", "WARN"};
       List<String> agentArgs = new ArrayList<>();
 
-      if (options.agent != null) {
-        agentArgs.addAll(Arrays.asList(options.agent.split(" ")));
+      if (globalOptions.agent != null) {
+        agentArgs.addAll(Arrays.asList(globalOptions.agent.split(" ")));
       } else {
         agentArgs.add("--id");
         agentArgs.add("agent-" + NameGenerator.getName());
@@ -1326,7 +1332,7 @@ public class Agent extends Service {
         agentArgs.add("Security");
 
         agentArgs.add("--log-level");
-        agentArgs.add(options.logLevel);
+        agentArgs.add(globalOptions.logLevel);
 
         // agentArgs.add("webgui"); FIXME - soon .. but not yet ...
         // agentArgs.add("WebGui");
@@ -1334,7 +1340,7 @@ public class Agent extends Service {
 
       Process p = null;
 
-      if (!options.noBanner) {
+      if (!globalOptions.noBanner) {
         System.out.println(banner);
         System.out.println("");
       }
@@ -1349,7 +1355,7 @@ public class Agent extends Service {
        * agent.options = options; }
        */
 
-      if (options.listVersions) {
+      if (globalOptions.listVersions) {
         System.out.println("available local versions");
         for (String bv : agent.getLocalVersions()) {
           System.out.println(bv);
@@ -1357,7 +1363,7 @@ public class Agent extends Service {
         agent.shutdown();
       }
 
-      if ("".equals(options.version)) {
+      if ("".equals(globalOptions.version)) {
         Map<String, String> manifest = Platform.getManifest();
         System.out.println("manifest");
         for (String name : manifest.keySet()) {
@@ -1368,16 +1374,16 @@ public class Agent extends Service {
 
       Platform platform = Platform.getLocalInstance();
 
-      if (options.branch == null) {
-        options.branch = platform.getBranch();
+      if (globalOptions.branch == null) {
+        globalOptions.branch = platform.getBranch();
       }
 
-      if (options.version == null) {
-        options.version = platform.getVersion();
+      if (globalOptions.version == null) {
+        globalOptions.version = platform.getVersion();
       }
 
-      agent.setBranch(options.branch);
-      agent.setVersion(options.version);
+      agent.setBranch(globalOptions.branch);
+      agent.setVersion(globalOptions.version);
 
       // FIXME - have a list versions ... command line !!!
 
@@ -1395,16 +1401,16 @@ public class Agent extends Service {
       // return;
       // }
 
-      if (options.webgui != null) {
-        agent.startWebGui(options.webgui);
+      if (globalOptions.webgui != null) {
+        agent.startWebGui(globalOptions.webgui);
       }
 
       // the user set auto-update to true
-      if (options.autoUpdate) {
+      if (globalOptions.autoUpdate) {
         // options.fork = true;
         // lets check and get the latest jar if there is new one
         
-        if (options.src == null) {
+        if (globalOptions.src == null) {
        // get the latest from Jenkins
         agent.getLatestJar(agent.getBranch());
         } else {
@@ -1413,11 +1419,11 @@ public class Agent extends Service {
         }
         
         // the "latest" should have been downloaded
-        options.version = agent.getLatestLocalVersion(agent.getBranch());
+        globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
       }
 
       // FIXME - use wsclient for remote access
-      if (options.client != null) {
+      if (globalOptions.client != null) {
         Runtime.start("cli", "Cli");
         return;
       }
@@ -1426,20 +1432,20 @@ public class Agent extends Service {
       // FIXME - if another instances is spawned agent should wait for all
       // instances to stop
       // list of flags we want to by-pass spawning
-      if (options.fork && options.services.size() > 0 || !options.fork) {
-        p = agent.spawn(options); // <-- agent's is now in charge of first
+      if (globalOptions.fork && globalOptions.services.size() > 0 || !globalOptions.fork) {
+        p = agent.spawn(globalOptions); // <-- agent's is now in charge of first
       }
 
       // we start a timer to process future updates
-      if (options.autoUpdate) {
+      if (globalOptions.autoUpdate) {
         // if you update a single process
         // it kills it and restarts - and this will kill the
         // agent unless its forked
-        options.fork = true;
+        globalOptions.fork = true;
         agent.autoUpdate(true);
       }
 
-      if (options.install != null) {
+      if (globalOptions.install != null) {
         // wait for mrl instance to finish installing
         // then shutdown (addendum: check if supporting other processes)
         p.waitFor();
@@ -1539,11 +1545,11 @@ public class Agent extends Service {
       File p = new File(newJarLoc).getAbsoluteFile().getParentFile();
       p.mkdirs();
 
-      Files.move(Paths.get(newJar), Paths.get(newJarLoc));
+      Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
 
       return buildNumber + "";
     } catch (Exception e) {
-      log.error("mvn threw", e);
+      log.error("mvn threw ", e);
     }
     return null;
   }
@@ -1646,34 +1652,6 @@ public class Agent extends Service {
   }
   
 
-  /**
-   * Populate all the files to update, if the system should update.
-   * 
-   * @throws GitAPIException
-   * @throws IOException
-   * @throws IncorrectObjectTypeException
-   * @throws AmbiguousObjectException
-   * @throws RevisionSyntaxException
-   */
-  /*
-   * private List<DiffEntry> populateDiff(Git git) throws GitAPIException,
-   * RevisionSyntaxException, AmbiguousObjectException,
-   * IncorrectObjectTypeException, IOException {
-   * 
-   * git.fetch().setProgressMonitor(new TextProgressMonitor(new
-   * PrintWriter(System.out))).call(); Repository repo = git.getRepository();
-   * ObjectId fetchHead = repo.resolve("FETCH_HEAD^{tree}"); ObjectId head =
-   * repo.resolve("HEAD^{tree}");
-   * 
-   * ObjectReader reader = repo.newObjectReader(); CanonicalTreeParser
-   * oldTreeIter = new CanonicalTreeParser(); oldTreeIter.reset(reader, head);
-   * CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-   * newTreeIter.reset(reader, fetchHead); List<DiffEntry> diffs =
-   * git.diff().setShowNameAndStatusOnly(true) .setNewTree(newTreeIter)
-   * .setOldTree(oldTreeIter) .call();
-   * 
-   * return diffs; }
-   */
 
   // FIXME - move to enums for status level !
   public void updateLog(String level, String msg) {

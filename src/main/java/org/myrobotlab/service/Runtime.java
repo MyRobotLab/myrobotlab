@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
@@ -1641,6 +1642,18 @@ public class Runtime extends Service implements MessageListener {
    */
   @Command(name = "java -jar myrobotlab.jar ")
   static public class CmdOptions {
+
+    public CmdOptions(CmdOptions other) throws IllegalArgumentException, IllegalAccessException {
+      Field[] fields = this.getClass().getDeclaredFields();
+      for (Field field : fields) {
+        // Field field = object.getClass().getDeclaredField(fieldName);
+        field.set(this, field.get(other));
+      }
+    }
+
+    public CmdOptions() {
+      // TODO Auto-generated constructor stub
+    }
 
     // AGENT INFO
     @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
