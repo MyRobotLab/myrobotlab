@@ -1494,7 +1494,7 @@ public class Agent extends Service {
 
       String pathToPom = src + File.separator + "pom.xml";
 
-      cmd.add((platform.isWindows()) ? "cmd" : "bash");
+      cmd.add((platform.isWindows()) ? "cmd" : "/bin/bash");
       cmd.add((platform.isWindows()) ? "/c" : "-c");
 
       // when you send a command to be interpreted by cmd or bash - you get more
