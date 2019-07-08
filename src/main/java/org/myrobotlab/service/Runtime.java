@@ -1146,7 +1146,7 @@ public class Runtime extends Service implements MessageListener {
         Security security = Runtime.getSecurity();
         for (int i = 0; i < options.addKeys.length; i += 2) {
           security.setKey(options.addKeys[i], options.addKeys[i + 1]);
-          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
+          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
         }
         shutdown();
         return;
