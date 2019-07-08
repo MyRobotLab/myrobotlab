@@ -1500,7 +1500,7 @@ public class Agent extends Service {
       // consistent results
       // when you wrap the command in quotes - that's why we use a StringBuilder
       StringBuilder sb = new StringBuilder();
-      sb.append((platform.isWindows()) ? "mvn" : "/usr/bin/mvn"); // huh .. thought it
+      sb.append((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it
                                                          // was
       sb.append(" "); // mvn.bat
       sb.append("-DskipTests");
