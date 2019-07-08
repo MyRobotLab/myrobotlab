@@ -1498,25 +1498,37 @@ public class Agent extends Service {
 
       cmd.add((platform.isWindows()) ? "cmd" : "bash");
       cmd.add((platform.isWindows()) ? "/c" : "-c");
-      cmd.add((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it was
-                                                       // mvn.bat
-      cmd.add("-DskipTests");
-      cmd.add("-Dbuild.number=" + buildNumber);
-      cmd.add("-DGitBranch=" + branch);
-      cmd.add("compile");
-      cmd.add("prepare-package");
-      cmd.add("package");
+      
+      // when you send a command to be interpreted by cmd or bash - you get more consistent results
+      // when you wrap the command in quotes - that's why we use a StringBuilder
+      StringBuilder sb = new StringBuilder();
+      sb.append((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it was
+      sb.append(" ");                                            // mvn.bat
+      sb.append("-DskipTests");
+      sb.append(" ");
+      sb.append("-Dbuild.number=" + buildNumber);
+      sb.append(" ");
+      sb.append("-DGitBranch=" + branch);
+      sb.append(" ");
+      sb.append("compile");
+      sb.append(" ");
+      sb.append("prepare-package");
+      sb.append(" ");
+      sb.append("package");
+      sb.append(" ");
       // cmd.add("-f");
       // cmd.add(pathToPom);
       // cmd.add("-o"); // offline
+      
+      cmd.add("\"" + sb.toString() +"\"" );
 
-      StringBuilder sb = new StringBuilder();
+      StringBuilder sb1 = new StringBuilder();
       for (String c : cmd) {
-        sb.append(c);
-        sb.append(" ");
+        sb1.append(c);
+        sb1.append(" ");
       }
       // src path ..
-      log.info("build [{}]", sb);
+      log.info("build [{}]", sb1);
       // ProcessBuilder pb = new
       // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
       ProcessBuilder pb = new ProcessBuilder(cmd);
