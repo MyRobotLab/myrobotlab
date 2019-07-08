@@ -1496,12 +1496,14 @@ public class Agent extends Service {
 
       cmd.add((platform.isWindows()) ? "cmd" : "bash");
       cmd.add((platform.isWindows()) ? "/c" : "-c");
-      
-      // when you send a command to be interpreted by cmd or bash - you get more consistent results
+
+      // when you send a command to be interpreted by cmd or bash - you get more
+      // consistent results
       // when you wrap the command in quotes - that's why we use a StringBuilder
       StringBuilder sb = new StringBuilder();
-      sb.append((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it was
-      sb.append(" ");                                            // mvn.bat
+      sb.append((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it
+                                                         // was
+      sb.append(" "); // mvn.bat
       sb.append("-DskipTests");
       sb.append(" ");
       sb.append("-Dbuild.number=" + buildNumber);
@@ -1517,8 +1519,8 @@ public class Agent extends Service {
       // cmd.add("-f");
       // cmd.add(pathToPom);
       // cmd.add("-o"); // offline
-      
-      cmd.add("\"" + sb.toString() +"\"" );
+
+      cmd.add("\"" + sb.toString() + "\"");
 
       StringBuilder sb1 = new StringBuilder();
       for (String c : cmd) {
@@ -1640,16 +1642,9 @@ public class Agent extends Service {
     List<RevCommit> ret = new ArrayList<>();
     Repository repository = git.getRepository();
     Iterable<RevCommit> logs = git.log().setMaxCount(maxCount).add(repository.resolve(ref)).call();
-    int count = 0;
     for (RevCommit rev : logs) {
-      System.out.println(
-          rev /*
-               * + ", name: " + rev.getName() + ", id: " + rev.getId().getName()
-               */);
-      count++;
       ret.add(rev);
     }
-    System.out.println("Had " + count + " " + ref);
     return ret;
   }
 
