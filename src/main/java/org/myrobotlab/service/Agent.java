@@ -1456,6 +1456,7 @@ public class Agent extends Service {
 
     RevCommit latestCommit = agent.gitPull(branch);
     if (latestCommit != null) {
+      log.info("latest commit {} - will attempt to build", latestCommit);
       String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime());
       return version;
     }
