@@ -1519,7 +1519,9 @@ public class Agent extends Service {
       // cmd.add(pathToPom);
       // cmd.add("-o"); // offline
 
-      cmd.add("\"" + sb.toString() + "\"");
+//      cmd.add("\"" + sb.toString() + "\"");
+      cmd.add(sb.toString());
+
 
       StringBuilder sb1 = new StringBuilder();
       for (String c : cmd) {
