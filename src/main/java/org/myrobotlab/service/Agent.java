@@ -1479,7 +1479,7 @@ public class Agent extends Service {
   public String mvn(String src, String branch, Long buildNumber) {
     try {
       if (src == null) {
-        src = branch + ".src";
+        src = "data" + File.separator + branch + ".src";
       }
       if (buildNumber == null) {
         // epoch minute build time number
@@ -1574,7 +1574,7 @@ public class Agent extends Service {
     }
 
     if (src == null) {
-      src = branch + ".src";
+      src = "data" + File.separator + branch + ".src";
     }
 
     List<String> branches = new ArrayList<String>();
