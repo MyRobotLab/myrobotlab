@@ -1500,7 +1500,7 @@ public class Agent extends Service {
       // consistent results
       // when you wrap the command in quotes - that's why we use a StringBuilder
       StringBuilder sb = new StringBuilder();
-      sb.append((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it
+      sb.append((platform.isWindows()) ? "mvn" : "/usr/bin/mvn"); // huh .. thought it
                                                          // was
       sb.append(" "); // mvn.bat
       sb.append("-DskipTests");
@@ -1526,11 +1526,15 @@ public class Agent extends Service {
         sb1.append(c);
         sb1.append(" ");
       }
+      
+      
       // src path ..
       log.info("build [{}]", sb1);
       // ProcessBuilder pb = new
       // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
       ProcessBuilder pb = new ProcessBuilder(cmd);
+      Map<String, String> envs = pb.environment();
+      log.info("PATH={}",envs.get("PATH"));
 
       pb.directory(new File(src));
 
