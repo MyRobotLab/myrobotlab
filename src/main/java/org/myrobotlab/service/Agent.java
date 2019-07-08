@@ -437,7 +437,6 @@ public class Agent extends Service {
           }
 
           // we have a possible update
-
           log.info("WOOHOO ! updating to version {}", version);
           process.options.version = version;
           process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
@@ -450,7 +449,6 @@ public class Agent extends Service {
             restart(process.options.id);
             log.info("restarted");
           }
-
         }
       } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
@@ -1457,7 +1455,7 @@ public class Agent extends Service {
 
     RevCommit latestCommit = agent.gitPull(branch);
     if (latestCommit != null) {
-      String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime() / 1000);
+      String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime());
       return version;
     }
     return null;
