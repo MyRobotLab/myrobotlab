@@ -423,6 +423,7 @@ public class Agent extends Service {
             // FIXME set currentVersion ???
             currentVersion = newVersion;
             process.options.version = newVersion;
+            process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
             restart(process.options.id);
             log.info("restarted");
           }
