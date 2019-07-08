@@ -413,52 +413,44 @@ public class Agent extends Service {
         continue;
       }
       try {
-        
+
         // FIXME - if options.src != null GITHUB
         if (globalOptions.src != null) {
           log.info("USING SRC LOOKING FOR GITHUB FOR UPDATES");
           String newVersion = getLatestSrc(process.options.branch);
           if (newVersion != null && process.isRunning()) {
             log.info("updating process [{}] from {} -to-> {}", process.options.id, process.options.version, newVersion);
-            // FIXME set currentVersion ??? 
+            // FIXME set currentVersion ???
             currentVersion = newVersion;
             process.options.version = newVersion;
             restart(process.options.id);
             log.info("restarted");
           }
-       
-        /*
-        CmdOptions options = new CmdOptions();
-        options.branch = branch;
-        options.version = version;
-        agent.spawn(options);
-        */
         } else {
-        /**<pre> OLD WAY - checking Jenkins ! FIXME - else JENKINS
-        // getRemoteVersions
-        log.info("getting version");
-        String version = getLatestVersion(process.options.branch, true);
-        if (version == null || version.equals(process.options.version)) {
-          log.info("same version {}", version);
-          continue;
-        }
+          log.info("LOOKING FOR UPDATE ON JENKINS");
+          // getRemoteVersions
+          log.info("getting version");
+          String version = getLatestVersion(process.options.branch, true);
+          if (version == null || version.equals(process.options.version)) {
+            log.info("same version {}", version);
+            continue;
+          }
 
-        // we have a possible update
+          // we have a possible update
 
-        log.info("WOOHOO ! updating to version {}", version);
-        process.options.version = version;
-        process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
+          log.info("WOOHOO ! updating to version {}", version);
+          process.options.version = version;
+          process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
 
-        getLatestJar(process.options.branch);
+          getLatestJar(process.options.branch);
 
-        log.info("WOOHOO ! updated !");
-        if (process.isRunning()) {
-          log.info("its running - we should restart");
-          restart(process.options.id);
-          log.info("restarted");
-        }
-        </pre>
-        */
+          log.info("WOOHOO ! updated !");
+          if (process.isRunning()) {
+            log.info("its running - we should restart");
+            restart(process.options.id);
+            log.info("restarted");
+          }
+
         }
       } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
@@ -581,8 +573,8 @@ public class Agent extends Service {
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
-   * @throws IllegalAccessException 
-   * @throws IllegalArgumentException 
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
    */
   public Process spawn() throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     CmdOptions options = new CmdOptions();
@@ -598,8 +590,8 @@ public class Agent extends Service {
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
-   * @throws IllegalAccessException 
-   * @throws IllegalArgumentException 
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
    */
   public Process spawn(String args) throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     CmdOptions options = new CmdOptions();
@@ -992,8 +984,8 @@ public class Agent extends Service {
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
-   * @throws IllegalAccessException 
-   * @throws IllegalArgumentException 
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
    */
   public Process spawn(CmdOptions inOptions) throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     if (ProcessData.agent == null) {
@@ -1409,15 +1401,15 @@ public class Agent extends Service {
       if (globalOptions.autoUpdate) {
         // options.fork = true;
         // lets check and get the latest jar if there is new one
-        
+
         if (globalOptions.src == null) {
-       // get the latest from Jenkins
-        agent.getLatestJar(agent.getBranch());
+          // get the latest from Jenkins
+          agent.getLatestJar(agent.getBranch());
         } else {
-        // get the latest from GitHub
-        agent.getLatestSrc(agent.getBranch());
+          // get the latest from GitHub
+          agent.getLatestSrc(agent.getBranch());
         }
-        
+
         // the "latest" should have been downloaded
         globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
       }
@@ -1457,15 +1449,16 @@ public class Agent extends Service {
     }
   }
 
-  public String getLatestSrc(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException, RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
-    
+  public String getLatestSrc(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+      RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
+
     Runtime.getInstance();
     Agent agent = (Agent) Runtime.start("agent", "Agent");
-    
+
     RevCommit latestCommit = agent.gitPull(branch);
     if (latestCommit != null) {
-      String version = agent.mvn(null, branch, (long)latestCommit.getCommitTime()/1000);      
-      return version;      
+      String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime() / 1000);
+      return version;
     }
     return null;
   }
@@ -1515,8 +1508,8 @@ public class Agent extends Service {
       cmd.add("compile");
       cmd.add("prepare-package");
       cmd.add("package");
-     //  cmd.add("-f");
-     //   cmd.add(pathToPom);
+      // cmd.add("-f");
+      // cmd.add(pathToPom);
       // cmd.add("-o"); // offline
 
       StringBuilder sb = new StringBuilder();
@@ -1529,16 +1522,16 @@ public class Agent extends Service {
       // ProcessBuilder pb = new
       // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
       ProcessBuilder pb = new ProcessBuilder(cmd);
-      
+
       pb.directory(new File(src));
-      
+
       // handle stderr as a direct pass through to System.err
       pb.redirectErrorStream(true);
       // pb.environment().putAll(System.getenv());
 
       pb.inheritIO().start().waitFor();
-      
-      // FIXME LOOK FOR -->  "BUILD FAILURE"
+
+      // FIXME LOOK FOR --> "BUILD FAILURE"
 
       String newJar = src + File.separator + "target" + File.separator + "myrobotlab.jar";
       String newJarLoc = getJarName(branch, version);
@@ -1559,8 +1552,8 @@ public class Agent extends Service {
     return gitPull(null, branch);
   }
 
-  public RevCommit gitPull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
-      CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
+  public RevCommit gitPull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException,
+      InvalidRemoteException, CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
 
     if (branch == null) {
       branch = currentBranch;
@@ -1591,7 +1584,7 @@ public class Agent extends Service {
       repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
       git = new Git(repo);
     }
-    
+
     repo = git.getRepository();
 
     /**
@@ -1608,17 +1601,18 @@ public class Agent extends Service {
       git.checkout().setName(branch).call();
     }
 
-    // FIXME - if auto-update or auto-fetch ie .. remote allowed and cache remote changes
+    // FIXME - if auto-update or auto-fetch ie .. remote allowed and cache
+    // remote changes
     git.fetch().setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
 
     List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
     List<RevCommit> remoteLogs = getLogs(git, "remotes/origin/" + branch, 1);
-    
+
     BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
-    
+
     RevCommit localCommit = localLogs.get(0);
     RevCommit remoteCommit = remoteLogs.get(0);
-    
+
     // if (localCommit.getCommitTime() < remoteCommit.getCommitTime()) {
     if (status.getBehindCount() > 0) {
       log.info("local ts {}, remote {} - {} updating", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
@@ -1629,7 +1623,7 @@ public class Agent extends Service {
     } else {
       log.info("no new commits on branch {}", branch);
     }
-    
+
     return null;
   }
 
@@ -1650,8 +1644,6 @@ public class Agent extends Service {
     System.out.println("Had " + count + " " + ref);
     return ret;
   }
-  
-
 
   // FIXME - move to enums for status level !
   public void updateLog(String level, String msg) {
