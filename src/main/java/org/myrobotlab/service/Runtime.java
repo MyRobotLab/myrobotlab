@@ -1169,23 +1169,6 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
-      /*
-       * if (options.extract) { extract(); shutdown(); return; }
-       */
-
-      // FIXME !!! - this should be in agent - you should be allowed to define
-      // services as 'none'
-      // if you create a service a runtime will be created for you ..
-      // initial default services if none supplied
-      /*
-       * if (options.services.size() == 0) { options.services.add("log");
-       * options.services.add("Log"); options.services.add("cli");
-       * options.services.add("Cli"); options.services.add("gui");
-       * options.services.add("SwingGui"); options.services.add("python");
-       * options.services.add("Python"); }
-       */
-
-      // 0..* services ...
       createAndStartServices(options.services);
 
       if (options.invoke != null) {
