@@ -1213,7 +1213,7 @@ public class Agent extends Service {
     pd.state = ProcessData.stateType.running;
 
     if (pd.options.id == null) {
-      log.error("id should not be null!");
+      log.error("id cannot be null!");
     }
     if (processes.containsKey(pd.options.id)) {
       if (agent != null) {
