@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -17,6 +18,26 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.DetachedHeadException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidConfigurationException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchTrackingStatus;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TextProgressMonitor;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
@@ -98,7 +119,7 @@ public class Agent extends Service {
   boolean autoCheckForUpdate = false;
 
   Set<String> possibleVersions = new TreeSet<String>();
-  
+
   final static String REMOTE_BUILDS_URL_HOME = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/";
 
   // for more info -
@@ -116,7 +137,7 @@ public class Agent extends Service {
   /**
    * command line options for the agent
    */
-  static CmdOptions options;
+  static CmdOptions globalOptions;
 
   String versionPrefix = "1.1.";
 
@@ -130,8 +151,6 @@ public class Agent extends Service {
    * singleton for security purposes
    */
   transient static Agent agent;
-
-  String rootBranchDir = "branches";
 
   /**
    * development variable to force version "unknown" to be either greatest or
@@ -375,7 +394,7 @@ public class Agent extends Service {
     } else {
       // purgeTask("update");
       updater.stop();
-    }    
+    }
   }
 
   /**
@@ -386,36 +405,50 @@ public class Agent extends Service {
    * updates from the build server
    */
   public void update() {
-    log.info("looking for updates");
     for (String key : processes.keySet()) {
       ProcessData process = processes.get(key);
-
       if (!process.options.autoUpdate) {
         log.info("not autoUpdate");
         continue;
       }
       try {
-        // getRemoteVersions
-        log.info("getting version");
-        String version = getLatestVersion(process.options.branch, true);
-        if (version == null || version.equals(process.options.version)) {
-          log.info("same version {}", version);
-          continue;
-        }
 
-        // we have a possible update
+        // FIXME - if options.src != null GITHUB
+        if (globalOptions.src != null) {
+          log.info("checking for github updates on branch {}", process.options.branch);
+          String newVersion = getLatestSrc(process.options.branch);
+          if (newVersion != null && process.isRunning()) {
+            log.info("updating process [{}] from {} -to-> {}", process.options.id, process.options.version, newVersion);
+            // FIXME set currentVersion ???
+            currentVersion = newVersion;
+            process.options.version = newVersion;
+            process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
+            restart(process.options.id);
+            log.info("restarted");
+          }
+        } else {
+          log.info("checking for updates on jenkins");
+          // getRemoteVersions
+          log.info("getting version");
+          String version = getLatestVersion(process.options.branch, true);
+          if (version == null || version.equals(process.options.version)) {
+            log.info("same version {}", version);
+            continue;
+          }
 
-        log.info("WOOHOO ! updating to version {}", version);
-        process.options.version = version;
-        process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
+          // we have a possible update
+          log.info("WOOHOO ! updating to version {}", version);
+          process.options.version = version;
+          process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
 
-        getLatestJar(process.options.branch);
+          getLatestJar(process.options.branch);
 
-        log.info("WOOHOO ! updated !");
-        if (process.isRunning()) {
-          log.info("its running - we should restart");
-          restart(process.options.id);
-          log.info("restarted");
+          log.info("WOOHOO ! updated !");
+          if (process.isRunning()) {
+            log.info("its running - we should restart");
+            restart(process.options.id);
+            log.info("restarted");
+          }
         }
       } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
@@ -514,6 +547,11 @@ public class Agent extends Service {
     spawnId(id);
   }
 
+  /**
+   * For respawning an existing ProcessData object
+   * 
+   * @param id
+   */
   public void spawnId(String id) {
     try {
       if (processes.containsKey(id)) {
@@ -525,14 +563,35 @@ public class Agent extends Service {
       log.error("spawn({}) threw ", id, e);
     }
   }
-  
-  public Process spawn() throws IOException, URISyntaxException, InterruptedException {
+
+  /**
+   * Will spawn a new process of mrl using defaults.
+   * 
+   * @return
+   * @throws IOException
+   * @throws URISyntaxException
+   * @throws InterruptedException
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
+   */
+  public Process spawn() throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     CmdOptions options = new CmdOptions();
-    new CommandLine(options).parseArgs(new String[]{});
+    new CommandLine(options).parseArgs(new String[] {});
     return spawn(options);
   }
-  
-  public Process spawn(String args) throws IOException, URISyntaxException, InterruptedException {
+
+  /**
+   * Spawn a process give a argument command line in single string form
+   * 
+   * @param args
+   * @return
+   * @throws IOException
+   * @throws URISyntaxException
+   * @throws InterruptedException
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
+   */
+  public Process spawn(String args) throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(args.split(" "));
     return spawn(options);
@@ -573,6 +632,12 @@ public class Agent extends Service {
     return pd2;
   }
 
+  /**
+   * Copies an existing ProcessData, makes a new id and spawns it.
+   * 
+   * @param id
+   * @throws IOException
+   */
   public void copyAndStart(String id) throws IOException {
     // returns a non running copy with new process id
     // on the processes list
@@ -581,23 +646,6 @@ public class Agent extends Service {
     if (agent != null) {
       agent.broadcastState();
     }
-  }
-
-  /**
-   * gets id from name
-   * 
-   * @param name
-   *          name
-   * @return integer
-   * 
-   */
-  public String getId(String name) {
-    for (String pid : processes.keySet()) {
-      if (pid.equals(name)) {
-        return processes.get(pid).options.id;
-      }
-    }
-    return null;
   }
 
   /**
@@ -623,6 +671,14 @@ public class Agent extends Service {
     return possibleBranches;
   }
 
+  /**
+   * Used to compare semantic versions
+   * 
+   * @param version1
+   * @param version2
+   * @return
+   * @throws MrlException
+   */
   boolean isGreaterThan(String version1, String version2) throws MrlException {
     if (version1 == null) {
       return false;
@@ -679,6 +735,12 @@ public class Agent extends Service {
     return versions;
   }
 
+  /**
+   * Get remote versions from jenkins
+   * 
+   * @param branch
+   * @return
+   */
   public Set<String> getRemoteVersions(String branch) {
     Set<String> versions = new TreeSet<String>();
     try {
@@ -702,6 +764,13 @@ public class Agent extends Service {
     return versions;
   }
 
+  /**
+   * Checks in the branches directory for the latest version of desired "branch"
+   * 
+   * @param branch
+   * @return
+   * @throws MrlException
+   */
   public String getLatestLocalVersion(String branch) throws MrlException {
     Set<String> allLocal = getLocalVersions(branch);
     String latest = null;
@@ -717,6 +786,12 @@ public class Agent extends Service {
     return latest;
   }
 
+  /**
+   * A version to be unique is both {branch}-{version}. This finds all currently
+   * available versions.
+   * 
+   * @return
+   */
   public Set<String> getLocalVersions() {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
@@ -740,6 +815,12 @@ public class Agent extends Service {
     return versions;
   }
 
+  /**
+   * Get the local versions available for the selected branch.
+   * 
+   * @param branch
+   * @return
+   */
   public Set<String> getLocalVersions(String branch) {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
@@ -760,21 +841,6 @@ public class Agent extends Service {
     return versions;
   }
 
-  static public String getFileVersion(String name) {
-    if (!name.startsWith("myrobotlab.")) {
-      return null;
-    }
-
-    String[] parts = name.split("\\.");
-    if (parts.length != 5) {
-      return null;
-    }
-
-    String version = String.format("%s.%s.%s", parts[1], parts[2], parts[3]);
-
-    return version;
-  }
-
   /**
    * get a list of all the processes currently governed by this Agent
    * 
@@ -784,7 +850,12 @@ public class Agent extends Service {
     return processes;
   }
 
-  // by id (or by pid?)
+  /**
+   * Kills requested process.
+   * 
+   * @param id
+   * @return
+   */
   public String kill(String id) {
     // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
     // !!
@@ -802,7 +873,7 @@ public class Agent extends Service {
       }
       // remove(processes.get(name));
       if (agent != null) {
-        agent.info("{} haz beeen terminated", id);
+        agent.info("%s haz beeen terminated", id);
         agent.broadcastState();
       }
       return id;
@@ -812,11 +883,9 @@ public class Agent extends Service {
     return null;
   }
 
-  /*
-   * BAD IDEA - data type ambiguity is a drag public Integer kill(String name) {
-   * return kill(getId(name)); }
+  /**
+   * kill all processes
    */
-
   public void killAll() {
     // FIXME !!! - "ask" all child processes to kindly Runtime.shutdown via msgs
     // !!
@@ -829,6 +898,11 @@ public class Agent extends Service {
     }
   }
 
+  /**
+   * kills and clears
+   * 
+   * @param id
+   */
   public void killAndRemove(String id) {
     if (processes.containsKey(id)) {
       kill(id);
@@ -848,13 +922,19 @@ public class Agent extends Service {
     Object[] objs = processes.keySet().toArray();
     String[] pd = new String[objs.length];
     for (int i = 0; i < objs.length; ++i) {
-      Integer id = (Integer) objs[i];
+      String id = (String) objs[i];
       ProcessData p = processes.get(id);
       pd[i] = String.format("%s - %s [%s - %s]", id, p.options.id, p.options.branch, p.options.version);
     }
     return pd;
   }
 
+  /**
+   * Publishing point when a process dies.
+   * 
+   * @param id
+   * @return
+   */
   public String publishTerminated(String id) {
     log.info("publishTerminated - terminated {} - restarting", id);
 
@@ -865,7 +945,7 @@ public class Agent extends Service {
 
     // if you don't fork with Agent allowed to
     // exist without instances - then
-    if (!options.fork) {
+    if (!globalOptions.fork) {
       // spin through instances - if I'm the only
       // thing left - terminate
       boolean processesStillRunning = false;
@@ -896,29 +976,32 @@ public class Agent extends Service {
    * Convert command line parameter options into a ProcessData which can be
    * spawned
    * 
-   * @param inOptions - cmd options
+   * @param inOptions
+   *          - cmd options
    * @return a process
    * @throws IOException
    * @throws URISyntaxException
    * @throws InterruptedException
+   * @throws IllegalAccessException
+   * @throws IllegalArgumentException
    */
-  public Process spawn(CmdOptions inOptions) throws IOException, URISyntaxException, InterruptedException {
+  public Process spawn(CmdOptions inOptions) throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException {
     if (ProcessData.agent == null) {
       ProcessData.agent = this;
     }
     // create a ProcessData then spawn it !
     ProcessData pd = new ProcessData();
-    pd.options = inOptions;
+    pd.options = new CmdOptions(inOptions);
     CmdOptions options = pd.options;
 
     if (options.id == null) {
       options.id = NameGenerator.getName();
     }
-    
+
     if (options.branch == null) {
       options.branch = Platform.getLocalInstance().getBranch();
     }
-    
+
     if (options.version == null) {
       try {
         options.version = getLatestVersion(options.branch, autoUpdate);
@@ -934,13 +1017,13 @@ public class Agent extends Service {
     Platform platform = Platform.getLocalInstance();
     String exeName = platform.isWindows() ? "javaw" : "java";
     pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
-    
+
     String jvmArgs = "-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8";
     if (pd.options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
     pd.jvm = jvmArgs.split(" ");
-    
+
     // user override
     if (options.jvm != null) {
       pd.jvm = options.jvm.split(" ");
@@ -1004,11 +1087,11 @@ public class Agent extends Service {
   }
 
   /**
-   * FIXME is this ProcessData.toString()
-   * 
    * Constructs a command line from a ProcessData object which can directly be
    * run to spawn a new instance of mrl
    * 
+   * FIXME is this ProcessData.toString()
+   *
    * @param pd
    * @return
    */
@@ -1051,43 +1134,44 @@ public class Agent extends Service {
     cmd.add("--id");
     cmd.add(pd.options.id);
 
-    if (options.logLevel != null) {
+    if (globalOptions.logLevel != null) {
       cmd.add("--log-level");
-      cmd.add(options.logLevel);
+      cmd.add(globalOptions.logLevel);
     }
 
-    if (options.install != null) {
+    if (pd.options.install != null) {
       cmd.add("--install");
-      for (String serviceType : options.install) {
+      for (String serviceType : globalOptions.install) {
         cmd.add(serviceType);
       }
     }
 
     // FIXME - adding new CmdOption
-    if (options.cfgDir != null) {
+    if (pd.options.cfgDir != null) {
       cmd.add("-c");
-      cmd.add(options.cfgDir);
+      cmd.add(globalOptions.cfgDir);
     }
 
-    if (options.addKeys != null) {
+    if (pd.options.addKeys != null) {
       cmd.add("-k");
-      for (String keyPart : options.addKeys) {
+      for (String keyPart : globalOptions.addKeys) {
         cmd.add(keyPart);
       }
     }
-    
-    if (options.invoke != null) {
+
+    if (pd.options.invoke != null) {
       cmd.add("--invoke");
-      for (String keyPart : options.invoke) {
+      for (String keyPart : globalOptions.invoke) {
         cmd.add(keyPart);
-      } 
+      }
     }
 
     return cmd.toArray(new String[cmd.size()]);
   }
 
   /**
-   * max complexity spawn
+   * The final spawn - all other data types as parameters make a ProcesData
+   * which is used by this method to start the process.
    * 
    * @param pd
    * @return
@@ -1113,7 +1197,7 @@ public class Agent extends Service {
       spawning.append(c);
       spawning.append(" ");
     }
-    log.info("SPAWNING ! -> [{}]", spawning);
+    log.info("SPAWNING ! --> [{}]", spawning);
 
     // environment variables setup
     setEnv(builder.environment());
@@ -1127,7 +1211,7 @@ public class Agent extends Service {
     pd.state = ProcessData.stateType.running;
 
     if (pd.options.id == null) {
-      log.error("id should not be null!");
+      log.error("id cannot be null!");
     }
     if (processes.containsKey(pd.options.id)) {
       if (agent != null) {
@@ -1193,7 +1277,7 @@ public class Agent extends Service {
     meta.setSponsor("GroG");
     meta.setLicenseApache();
 
-    meta.includeServiceInOneJar(true);
+    // meta.includeServiceInOneJar(true);
 
     return meta;
   }
@@ -1209,23 +1293,19 @@ public class Agent extends Service {
   public static void main(String[] args) {
     try {
 
-      options = new CmdOptions();
+      globalOptions = new CmdOptions();
 
-      // for Callable version ...
-      // int exitCode = new CommandLine(options).execute(args);
-      new CommandLine(options).parseArgs(args);
+      new CommandLine(globalOptions).parseArgs(args);
 
-      if (options.help) {
+      if (globalOptions.help) {
         Runtime.mainHelp();
         return;
       }
 
-      // String[] agentArgs = new String[] { "--id", "agent-" +
-      // NameGenerator.getName(), "-l", "WARN"};
       List<String> agentArgs = new ArrayList<>();
 
-      if (options.agent != null) {
-        agentArgs.addAll(Arrays.asList(options.agent.split(" ")));
+      if (globalOptions.agent != null) {
+        agentArgs.addAll(Arrays.asList(globalOptions.agent.split(" ")));
       } else {
         agentArgs.add("--id");
         agentArgs.add("agent-" + NameGenerator.getName());
@@ -1236,17 +1316,17 @@ public class Agent extends Service {
         agentArgs.add("Cli");
         agentArgs.add("security");
         agentArgs.add("Security");
-        
+
         agentArgs.add("--log-level");
-        agentArgs.add(options.logLevel);
-        
+        agentArgs.add(globalOptions.logLevel);
+
         // agentArgs.add("webgui"); FIXME - soon .. but not yet ...
         // agentArgs.add("WebGui");
       }
 
       Process p = null;
 
-      if (!options.noBanner) {
+      if (!globalOptions.noBanner) {
         System.out.println(banner);
         System.out.println("");
       }
@@ -1256,12 +1336,8 @@ public class Agent extends Service {
 
       Runtime.main(agentArgs.toArray(new String[agentArgs.size()]));
       agent = (Agent) Runtime.getService("agent");
-      /*
-       * if (agent == null) { agent = (Agent) Runtime.start("agent", "Agent");
-       * agent.options = options; }
-       */
 
-      if (options.listVersions) {
+      if (globalOptions.listVersions) {
         System.out.println("available local versions");
         for (String bv : agent.getLocalVersions()) {
           System.out.println(bv);
@@ -1269,7 +1345,7 @@ public class Agent extends Service {
         agent.shutdown();
       }
 
-      if ("".equals(options.version)) {
+      if ("".equals(globalOptions.version)) {
         Map<String, String> manifest = Platform.getManifest();
         System.out.println("manifest");
         for (String name : manifest.keySet()) {
@@ -1280,16 +1356,16 @@ public class Agent extends Service {
 
       Platform platform = Platform.getLocalInstance();
 
-      if (options.branch == null) {
-        options.branch = platform.getBranch();
+      if (globalOptions.branch == null) {
+        globalOptions.branch = platform.getBranch();
       }
 
-      if (options.version == null) {
-        options.version = platform.getVersion();
+      if (globalOptions.version == null) {
+        globalOptions.version = platform.getVersion();
       }
 
-      agent.setBranch(options.branch);
-      agent.setVersion(options.version);
+      agent.setBranch(globalOptions.branch);
+      agent.setVersion(globalOptions.version);
 
       // FIXME - have a list versions ... command line !!!
 
@@ -1307,21 +1383,28 @@ public class Agent extends Service {
       // return;
       // }
 
-      if (options.webgui != null) {
-        agent.startWebGui(options.webgui);
+      if (globalOptions.webgui != null) {
+        agent.startWebGui(globalOptions.webgui);
       }
 
-      // the user set auto-update to true 
-      if (options.autoUpdate) {        
+      // the user set auto-update to true
+      if (globalOptions.autoUpdate) {
         // options.fork = true;
         // lets check and get the latest jar if there is new one
-        agent.getLatestJar(agent.getBranch());
+
+        if (globalOptions.src == null) {
+          // get the latest from Jenkins
+          agent.getLatestJar(agent.getBranch());
+        } else {
+          // get the latest from GitHub
+          agent.getLatestSrc(agent.getBranch());
+        }
         // the "latest" should have been downloaded
-        options.version = agent.getLatestLocalVersion(agent.getBranch());
+        globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
       }
 
       // FIXME - use wsclient for remote access
-      if (options.client != null) {
+      if (globalOptions.client != null) {
         Runtime.start("cli", "Cli");
         return;
       }
@@ -1330,25 +1413,49 @@ public class Agent extends Service {
       // FIXME - if another instances is spawned agent should wait for all
       // instances to stop
       // list of flags we want to by-pass spawning
-      if (options.fork && options.services.size() > 0 || !options.fork) {
-        p = agent.spawn(options); // <-- agent's is now in charge of first
+      if (globalOptions.fork && globalOptions.services.size() > 0 || !globalOptions.fork) {
+        p = agent.spawn(globalOptions); // <-- agent's is now in charge of first
       }
 
       // we start a timer to process future updates
-      if (options.autoUpdate) {
+      if (globalOptions.autoUpdate) {
+        // if you update a single process
+        // it kills it and restarts - and this will kill the
+        // agent unless its forked
+        globalOptions.fork = true;
         agent.autoUpdate(true);
       }
 
-      if (options.install != null) {
+      if (globalOptions.install != null) {
         // wait for mrl instance to finish installing
         // then shutdown (addendum: check if supporting other processes)
         p.waitFor();
         agent.shutdown();
+        // START AGAIN IF --install WAS SUPPLIED
+        if (globalOptions.autoUpdate) {
+          globalOptions.install = null;
+          p = agent.spawn(globalOptions);
+        }
       }
 
     } catch (Exception e) {
       log.error("unsuccessful spawn", e);
     }
+  }
+
+  public String getLatestSrc(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+      RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
+
+    Agent agent = (Agent) Runtime.getService("agent");
+
+    RevCommit latestCommit = agent.gitPull(branch);
+    if (latestCommit != null) {
+      log.info("latest {} - will attempt to build", latestCommit);
+      String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime());
+      log.info("successfully build version {} - {}", latestCommit.getCommitTime(), latestCommit.getFullMessage());
+      return version;
+    }
+    return null;
   }
 
   public String getBranch() {
@@ -1362,6 +1469,187 @@ public class Agent extends Service {
   public String setVersion(String version) {
     currentVersion = version;
     return version;
+  }
+
+  public String mvn(String branch) {
+    return mvn(null, branch, null);
+  }
+
+  // mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop clean package -o
+  public String mvn(String src, String branch, Long buildNumber) {
+    try {
+      if (src == null) {
+        src = "data" + File.separator + branch + ".src";
+      }
+      if (buildNumber == null) {
+        // epoch minute build time number
+        buildNumber = System.currentTimeMillis() / 1000;
+      }
+
+      String version = versionPrefix + buildNumber;
+
+      Platform platform = Platform.getLocalInstance();
+      List<String> cmd = new ArrayList<>();
+
+      String pathToPom = src + File.separator + "pom.xml";
+
+      cmd.add((platform.isWindows()) ? "cmd" : "/bin/bash");
+      cmd.add((platform.isWindows()) ? "/c" : "-c");
+
+      // when you send a command to be interpreted by cmd or bash - you get more
+      // consistent results
+      // when you wrap the command in quotes - that's why we use a StringBuilder
+      StringBuilder sb = new StringBuilder();
+      sb.append((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it
+                                                         // was
+      sb.append(" "); // mvn.bat
+      sb.append("-DskipTests");
+      sb.append(" ");
+      sb.append("-Dbuild.number=" + buildNumber);
+      sb.append(" ");
+      sb.append("-DGitBranch=" + branch);
+      sb.append(" ");
+      sb.append("compile");
+      sb.append(" ");
+      sb.append("prepare-package");
+      sb.append(" ");
+      sb.append("package");
+      sb.append(" ");
+      // cmd.add("-f");
+      // cmd.add(pathToPom);
+      // cmd.add("-o"); // offline
+
+//      cmd.add("\"" + sb.toString() + "\"");
+      cmd.add(sb.toString());
+
+      StringBuilder sb1 = new StringBuilder();
+      for (String c : cmd) {
+        sb1.append(c);
+        sb1.append(" ");
+      }
+      
+      
+      // src path ..
+      log.info("build [{}]", sb1);
+      // ProcessBuilder pb = new
+      // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
+      ProcessBuilder pb = new ProcessBuilder(cmd);
+      Map<String, String> envs = pb.environment();
+      log.info("PATH={}",envs.get("PATH"));
+
+      pb.directory(new File(src));
+
+      // handle stderr as a direct pass through to System.err
+      pb.redirectErrorStream(true);
+      // pb.environment().putAll(System.getenv());
+
+      pb.inheritIO().start().waitFor();
+
+      // FIXME LOOK FOR --> "BUILD FAILURE"
+
+      String newJar = src + File.separator + "target" + File.separator + "myrobotlab.jar";
+      String newJarLoc = getJarName(branch, version);
+      File p = new File(newJarLoc).getAbsoluteFile().getParentFile();
+      p.mkdirs();
+
+      Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
+
+      return versionPrefix + buildNumber + "";
+    } catch (Exception e) {
+      log.error("mvn threw ", e);
+    }
+    return null;
+  }
+
+  public RevCommit gitPull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+      RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
+    return gitPull(null, branch);
+  }
+
+  public RevCommit gitPull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException,
+      InvalidRemoteException, CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
+
+    if (branch == null) {
+      branch = currentBranch;
+    }
+
+    if (src == null) {
+      src = "data" + File.separator + branch + ".src";
+    }
+
+    List<String> branches = new ArrayList<String>();
+    branches.add("refs/heads/" + branch);
+
+    File repoParentFolder = new File(src);
+
+    Git git = null;
+
+    TextProgressMonitor textmonitor = new TextProgressMonitor(new PrintWriter(System.out));
+
+    Repository repo = null;
+    if (!repoParentFolder.exists()) {
+      // String branch = "master";
+      git = Git.cloneRepository().setProgressMonitor(textmonitor).setURI("https://github.com/MyRobotLab/myrobotlab.git").setDirectory(new File(src)).setBranchesToClone(branches)
+          .setBranch("refs/heads/" + branch).call();
+
+    } else {
+      // Open an existing repository
+      String gitDir = repoParentFolder.getAbsolutePath() + "/.git";
+      repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
+      git = new Git(repo);
+    }
+
+    repo = git.getRepository();
+
+    /**
+     * <pre>
+     * CheckoutCommand checkout = git.checkout().setCreateBranch(true).setName(branch).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).setStartPoint("origin/" + branch)
+     *     .call();
+     * </pre>
+     */
+
+    // git.pull().setCredentialsProvider(user).call();
+    // FIXME if currentBranch != branch - then checkout .. set current branch
+    if (!branch.equals(currentBranch)) {
+      git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch).call();
+      git.checkout().setName(branch).call();
+    }
+
+    // FIXME - if auto-update or auto-fetch ie .. remote allowed and cache
+    // remote changes
+    git.fetch().setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
+
+    List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
+    List<RevCommit> remoteLogs = getLogs(git, "remotes/origin/" + branch, 1);
+
+    RevCommit localCommit = localLogs.get(0);
+    RevCommit remoteCommit = remoteLogs.get(0);
+
+    BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
+
+    // if (localCommit.getCommitTime() < remoteCommit.getCommitTime()) {
+    if (status.getBehindCount() > 0) {
+      log.info("local ts {}, remote {} - {} updating", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
+      PullCommand pullCmd = git.pull();
+      pullCmd.setProgressMonitor(textmonitor);
+      pullCmd.call();
+      return remoteCommit;
+    } else {
+      log.info("no new commits on branch {}", branch);
+    }
+
+    return null;
+  }
+
+  private List<RevCommit> getLogs(Git git, String ref, int maxCount)
+      throws RevisionSyntaxException, NoHeadException, MissingObjectException, IncorrectObjectTypeException, AmbiguousObjectException, GitAPIException, IOException {
+    List<RevCommit> ret = new ArrayList<>();
+    Repository repository = git.getRepository();
+    Iterable<RevCommit> logs = git.log().setMaxCount(maxCount).add(repository.resolve(ref)).call();
+    for (RevCommit rev : logs) {
+      ret.add(rev);
+    }
+    return ret;
   }
 
   // FIXME - move to enums for status level !

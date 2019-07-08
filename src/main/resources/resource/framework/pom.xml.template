@@ -1,5 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<!-- 
+
+		# shows system vars and env vars
+		mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop help:system
+		
+		# fast build
+		mvn -DskipTests -Dbuild.number=180 -DGitBranch=develop compile package -o
+	
+	 -->	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.myrobotlab</groupId>
 	<artifactId>mrl</artifactId>
@@ -17,11 +26,13 @@
 	    	maven or jenkins can do this
 	    	
 	     -->
+	    <!-- from jenkins env vars -->
 	    <build.number>${BUILD_NUMBER}</build.number>
 	    <GitBranch>${BRANCH_NAME}</GitBranch>
 	    <username>${NODE_NAME}</username>	    
 	    <platform>${NODE_LABELS}</platform>	    
 	    <!-- end env vars -->
+	    <!-- echoproperties / -->
 	    
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -183,8 +194,7 @@
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
-
-<!--                             <filters>
+                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -193,7 +203,7 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                     </excludes>
                                 </filter>
-                            </filters> -->
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
