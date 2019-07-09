@@ -171,7 +171,7 @@ public class Runtime extends Service implements MessageListener {
    * the local repo of this machine - it should not be static as other foreign
    * repos will come in with other Runtimes from other machines.
    */
-  private Repo repo = Repo.getInstance();
+  private Repo repo = null;
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
@@ -563,7 +563,7 @@ public class Runtime extends Service implements MessageListener {
 
           // setting the singleton security
           security = Security.getInstance();
-          Repo.getInstance().addStatusPublisher(runtime);
+          runtime.getRepo().addStatusPublisher(runtime);
           extract(); // FIXME - too overkill - do by checking version of re
         }
       }
@@ -1021,7 +1021,7 @@ public class Runtime extends Service implements MessageListener {
   }
 
   static public void install() throws ParseException, IOException {
-    Repo.getInstance().install();
+    getInstance().getRepo().install();
   }
 
   /**
@@ -1032,7 +1032,7 @@ public class Runtime extends Service implements MessageListener {
    *
    */
   static public void install(String serviceType) throws ParseException, IOException {
-    Repo.getInstance().install(serviceType);
+    getInstance().getRepo().install(serviceType);
   }
 
   static public void invokeCommands(String[] invoke) {
@@ -1156,13 +1156,12 @@ public class Runtime extends Service implements MessageListener {
       if (options.install != null) {
         // we start the runtime so there is a status publisher which will
         // display status updates from the repo install
-        Runtime.getInstance();
-        Repo repo = Repo.getInstance();
+        Repo repo = getInstance().getRepo();
         if (options.install.length == 0) {
-          repo.install();
+          repo.install(options.libraries, (String)null);
         } else {
           for (String service : options.install) {
-            repo.install(service);
+            repo.install(options.libraries, service);
           }
         }
         shutdown();
@@ -1618,14 +1617,22 @@ public class Runtime extends Service implements MessageListener {
   }
 
   /**
+   * <pre>
    * Command options for picocli library. This encapsulates all the available
    * command line flags and their details. arity attribute is for specifying in
    * an array or list the number of expected attributes after the flag. Short
    * versions of flags e.g. -i must be unique and have only a single character.
+   * 
+   * FIXME - make it callable so it does a callback and does some post proccessing .. i think that's why its callable ?
+   * FIXME - have it capable of toString or buildCmdLine that in turn can be used as input to generate the CmdOptions again, ie.
+   *         test serialization
+   * </pre>
    */
   @Command(name = "java -jar myrobotlab.jar ")
   static public class CmdOptions {
 
+    // copy constructor for people who don't like continued maintenance ;) -
+    // potentially dangerous for arrays and containers
     public CmdOptions(CmdOptions other) throws IllegalArgumentException, IllegalAccessException {
       Field[] fields = this.getClass().getDeclaredFields();
       for (Field field : fields) {
@@ -1726,6 +1733,9 @@ public class Runtime extends Service implements MessageListener {
 
     @Option(names = { "-b", "--branch" }, description = "requested branch")
     public String branch;
+    
+    @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
+    public String libraries = "libraries";
 
     // FIXME - get version vs force version - perhaps just always print version
     // in help
@@ -1741,7 +1751,7 @@ public class Runtime extends Service implements MessageListener {
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
-    @Option(names = {"--src" }, arity = "0..1", description = "use latest source")
+    @Option(names = { "--src" }, arity = "0..1", description = "use latest source")
     public String src;
 
     // FIXME ! toString() builds command line using reflection and first name
@@ -1755,6 +1765,7 @@ public class Runtime extends Service implements MessageListener {
     synchronized (instanceLockObject) {
       if (runtime == null) {
         runtime = this;
+        repo = Repo.getInstance(options.libraries, "IvyWrapper");
         if (options == null) {
           options = new CmdOptions();
         }
@@ -1866,7 +1877,7 @@ public class Runtime extends Service implements MessageListener {
 
     log.info("getting local repo");
 
-    Repo.getInstance().addStatusPublisher(this);
+    repo.addStatusPublisher(this);
 
     hideMethods.add("main");
     hideMethods.add("loadDefaultConfiguration");
@@ -2518,17 +2529,17 @@ public class Runtime extends Service implements MessageListener {
 
     meta.includeServiceInOneJar(true);
     // apache 2.0 license
-    meta.addDependency("com.google.code.gson", "gson", "2.8.5"); 
+    meta.addDependency("com.google.code.gson", "gson", "2.8.5");
     // apache 2.0 license
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4"); 
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
     // apache 2.0 license
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     // apache 2.0 license
     meta.addDependency("org.atmosphere", "wasync", "2.1.5");
     // apache 2.0 license
-    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2"); 
-    
-    //  EDL (new-style BSD) licensed
+    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2");
+
+    // EDL (new-style BSD) licensed
     meta.addDependency("org.eclipse.jgit", "org.eclipse.jgit", "5.4.0.201906121030-r");
 
     // all your logging needs

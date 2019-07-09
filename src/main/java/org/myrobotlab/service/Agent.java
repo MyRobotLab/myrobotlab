@@ -1018,7 +1018,10 @@ public class Agent extends Service {
     String exeName = platform.isWindows() ? "javaw" : "java";
     pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
 
-    String jvmArgs = "-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8";
+    String jvmArgs = String.format("-Djava.library.path=%s/native -Djna.library.path=%s/native -Dfile.encoding=UTF-8", pd.options.libraries, pd.options.libraries);
+    if (platform.isWindows()) {
+      jvmArgs = jvmArgs.replace("/", "\\");
+    }
     if (pd.options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
@@ -1048,14 +1051,17 @@ public class Agent extends Service {
     return currentBranch;
   }
 
-  static public Map<String, String> setEnv(Map<String, String> env) {
+  static public Map<String, String> setEnv(ProcessData pd, Map<String, String> env) {
     Platform platform = Platform.getLocalInstance();
     String platformId = platform.getPlatformId();
-    if (platform.isLinux()) {
-      String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
+    if (platform.isLinux()) {      
+      File f = new File(pd.options.libraries);
+      String ldPath = String.format("%s/native:%s/native/%s:${LD_LIBRARY_PATH}", pd.options.libraries, pd.options.libraries, platformId);
+      // String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
       env.put("LD_LIBRARY_PATH", ldPath);
     } else if (platform.isMac()) {
-      String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
+      // String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
+      String dyPath = String.format("%s/native:%s/native/%s:${DYLD_LIBRARY_PATH}", pd.options.libraries, pd.options.libraries, platformId);
       env.put("DYLD_LIBRARY_PATH", dyPath);
     } else if (platform.isWindows()) {
       // this just borks the path in Windows - additionally (unlike Linux)
@@ -1112,13 +1118,15 @@ public class Agent extends Service {
 
     // step 1 - get current env data
     Platform platform = Platform.getLocalInstance();
+    File f = new File(pd.options.libraries);
+    String libraries = f.getAbsolutePath();
     String cpTemplate = "%s%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes";
     if (platform.isWindows()) {
       cpTemplate.replace("/", "\\");
     }
 
     String ps = File.pathSeparator;
-    String classpath = String.format(cpTemplate, pd.jarPath, ps, ps, ps, ps);
+    String classpath = String.format(cpTemplate, pd.jarPath, ps, libraries, ps, libraries, ps, ps);
     cmd.add(classpath);
 
     cmd.add("org.myrobotlab.service.Runtime");
@@ -1200,7 +1208,7 @@ public class Agent extends Service {
     log.info("SPAWNING ! --> [{}]", spawning);
 
     // environment variables setup
-    setEnv(builder.environment());
+    setEnv(pd, builder.environment());
 
     Process process = builder.start();
     pd.process = process;
