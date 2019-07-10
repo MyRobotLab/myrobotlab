@@ -417,8 +417,8 @@ public class Agent extends Service {
         if (globalOptions.src != null) {
           log.info("checking for github updates on branch {}", process.options.branch);
           String newVersion = getLatestSrc(process.options.branch);
-          if (newVersion != null && process.isRunning()) {
-            log.info("updating process [{}] from {} -to-> {}", process.options.id, process.options.version, newVersion);
+          if (newVersion != null && process.isRunning()) {            
+            warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
             // FIXME set currentVersion ???
             currentVersion = newVersion;
             process.options.version = newVersion;
@@ -430,15 +430,15 @@ public class Agent extends Service {
           log.info("checking for updates on jenkins");
           // getRemoteVersions
           log.info("getting version");
-          String version = getLatestVersion(process.options.branch, true);
-          if (version == null || version.equals(process.options.version)) {
-            log.info("same version {}", version);
+          String newVersion = getLatestVersion(process.options.branch, true);
+          if (newVersion == null || newVersion.equals(process.options.version)) {
+            log.info("same version {}", newVersion);
             continue;
           }
 
           // we have a possible update
-          log.info("WOOHOO ! updating to version {}", version);
-          process.options.version = version;
+          log.info("WOOHOO ! updating to version {}", newVersion);
+          process.options.version = newVersion;
           process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
 
           getLatestJar(process.options.branch);
@@ -449,6 +449,7 @@ public class Agent extends Service {
             restart(process.options.id);
             log.info("restarted");
           }
+          warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
         }
       } catch (TransportException e) {
         log.info("cannot connect to - are we connected to the internet ? {}", e.getMessage());
