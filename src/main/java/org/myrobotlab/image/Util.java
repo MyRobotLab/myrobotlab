@@ -261,6 +261,7 @@ public class Util {
    * 
    * @return current data directory
    */
+  /* FIXME - wrong place, and implementation should follow other picocli options
   public static String getDataDir() {
     // first try for the data.dir system property
     String dataDir = System.getProperty("data.dir");
@@ -269,6 +270,7 @@ public class Util {
     }    
     return System.getProperty("user.dir") + File.separator + "data";
   }
+  */
 
 
   /**

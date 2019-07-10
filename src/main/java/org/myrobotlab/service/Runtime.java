@@ -1751,11 +1751,15 @@ public class Runtime extends Service implements MessageListener {
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
+    // for AGENT used to sync to the latest via source and build
     @Option(names = { "--src" }, arity = "0..1", description = "use latest source")
     public String src;
 
-    // FIXME ! toString() builds command line using reflection and first name
-    // annotation
+    @Option(names = { "--data-dir" }, description = "sets the location of the data directory")
+    public String dataDir = "data";
+
+    @Option(names = { "--resource-dir" }, description = "sets the location of the resource directory")
+    public String resourceDir = "resource";
 
   }
 
@@ -2703,6 +2707,10 @@ public class Runtime extends Service implements MessageListener {
   public static Runtime getInstance(String[] args2) {
     Runtime.main(args2);
     return Runtime.getInstance();
+  }
+
+  public static CmdOptions getOptions() {
+    return options;
   }
 
 }

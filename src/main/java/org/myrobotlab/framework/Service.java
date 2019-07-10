@@ -775,19 +775,19 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public String getDataDir() {
-    return Util.getDataDir() + File.separator + getClass().getSimpleName();
+    return Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName();
   }
 
   public String getDataInstanceDir() {
-    return Util.getDataDir() + File.separator + getClass().getSimpleName() + File.separator + getName();
+    return Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
 
   public String getResourceDir() {
-    return Util.getResourceDir() + File.separator + getClass().getSimpleName();
+    return Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName();
   }
 
   public String getResourceInstanceDir() {
-    return Util.getResourceDir() + File.separator + getClass().getSimpleName() + File.separator + getName();
+    return Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
 
   // FIXME - make a static initialization part !!!
