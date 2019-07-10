@@ -1198,8 +1198,9 @@ public class Agent extends Service {
     cmd.add("--libraries");
     cmd.add(pd.options.libraries);
     
-    cmd.add("--virtual");
-    cmd.add(String.format("{}", pd.options.virtual));
+    if (pd.options.virtual) {
+      cmd.add("--virtual");
+    }
 
     return cmd.toArray(new String[cmd.size()]);
   }
