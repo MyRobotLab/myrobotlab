@@ -1714,7 +1714,7 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-n", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
     public String id;
 
-    @Option(names = { "-c",
+    @Option(names = { "-c", "--cfg",
         "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
             + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
             + "If this value is set, all other configuration flags are ignored.")
