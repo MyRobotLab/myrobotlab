@@ -283,7 +283,7 @@ public class Emoji extends Service
     meta.addPeer("http", "HttpClient", "downloader");
     meta.addPeer("fsm", "FiniteStateMachine", "emotional state machine");
 
-    meta.setAvailable(false);
+    // meta.setAvailable(false);
     meta.addCategory("general");
     return meta;
   }
