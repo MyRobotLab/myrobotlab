@@ -452,7 +452,7 @@ public class Agent extends Service {
           }
         }
       } catch(TransportException e) {
-        log.info("cannot connect to {} - are we connected to the internet ?");
+        log.info("cannot connect to - are we connected to the internet ? {}", e.getMessage());
       }catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
       }
