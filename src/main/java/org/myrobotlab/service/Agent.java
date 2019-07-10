@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -451,9 +450,9 @@ public class Agent extends Service {
             log.info("restarted");
           }
         }
-      } catch(TransportException e) {
+      } catch (TransportException e) {
         log.info("cannot connect to - are we connected to the internet ? {}", e.getMessage());
-      }catch (Exception e) {
+      } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
       }
     }
@@ -1156,6 +1155,9 @@ public class Agent extends Service {
 
     cmd.add("--id");
     cmd.add(pd.options.id);
+
+    cmd.add("--data-dir");
+    cmd.add(pd.options.dataDir);
 
     if (globalOptions.logLevel != null) {
       cmd.add("--log-level");
