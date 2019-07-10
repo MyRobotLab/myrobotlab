@@ -445,9 +445,15 @@ public class FileIO {
   static public final String getCfgDir() {
     try {
 
+      String baseDir = null;
+      if (Runtime.getOptions() == null) {
+        baseDir = System.getProperty("user.dir");
+      } else {
+        baseDir = Runtime.getOptions().dataDir;
+      }
       // TODO: is user.dir the same as MRL_HOME / install dir?
       // "always" associated with the data dir
-      String dirName = Runtime.getOptions().dataDir + File.separator + ".myrobotlab";
+      String dirName = baseDir + File.separator + ".myrobotlab";
       File dir = new File(dirName);
 
       if (!dir.exists()) {
