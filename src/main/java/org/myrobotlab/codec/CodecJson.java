@@ -19,6 +19,8 @@ public class CodecJson extends Codec {
 
   private transient static Gson mapper = new GsonBuilder().create();// .setDateFormat("yyyy-MM-dd
   // HH:mm:ss.SSS").disableHtmlEscaping().create();
+  private transient static Gson prettyMapper = new GsonBuilder().setPrettyPrinting().create();
+
 
   static public String encode(Object obj) {
     String json = null;
@@ -27,6 +29,11 @@ public class CodecJson extends Codec {
     // }
     return json;
   }
+  
+  static public String encodePretty(Object obj) {    
+    return prettyMapper.toJson(obj);
+  }
+
 
   @Override
   public void encode(OutputStream out, Object obj) throws IOException {
