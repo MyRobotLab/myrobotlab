@@ -1104,26 +1104,35 @@ public class Runtime extends Service implements MessageListener {
       // for Callable execution ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
-      
+
       // save an output of our cmd options
       File dataDir = new File(Runtime.getOptions().dataDir);
       if (!dataDir.exists()) {
         dataDir.mkdirs();
       }
-      
+
       // if a you specify a config file it becomes the "base" of configuration
       // inline flags will still override values
       if (options.cfg != null) {
-        /* YOU SHOULD NOT OVERRIDE - file has highest precedence
-        CodecJson codec = new CodecJson();
-        CmdOptions fileOptions = codec.decode(FileIO.toString(options.cfg), CmdOptions.class);        
-        new CommandLine(fileOptions).parseArgs(args);
-        */
-        CodecJson codec = new CodecJson();
-        options = (CmdOptions)codec.decode(FileIO.toString(options.cfg), CmdOptions.class);        
+        /*
+         * YOU SHOULD NOT OVERRIDE - file has highest precedence CodecJson codec
+         * = new CodecJson(); CmdOptions fileOptions =
+         * codec.decode(FileIO.toString(options.cfg), CmdOptions.class); new
+         * CommandLine(fileOptions).parseArgs(args);
+         */
+        try {
+          CodecJson codec = new CodecJson();
+          options = (CmdOptions) codec.decode(FileIO.toString(options.cfg), CmdOptions.class);
+        } catch (Exception e) {
+          log.error("config file {} was specified but could not be read", options.cfg);
+        }
       }
-      
-      Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecJson.encodePretty(options).getBytes());
+
+      try {
+        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecJson.encodePretty(options).getBytes());
+      } catch (Exception e) {
+        log.error("writing lastOption.json failed", e);
+      }
 
       globalArgs = args;
       Logging logging = LoggingFactory.getInstance();
@@ -1175,7 +1184,7 @@ public class Runtime extends Service implements MessageListener {
         // display status updates from the repo install
         Repo repo = getInstance().getRepo();
         if (options.install.length == 0) {
-          repo.install(options.libraries, (String)null);
+          repo.install(options.libraries, (String) null);
         } else {
           for (String service : options.install) {
             repo.install(options.libraries, service);
@@ -1714,10 +1723,9 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-n", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
     public String id;
 
-    @Option(names = { "-c", "--cfg",
-        "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
-            + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
-            + "If this value is set, all other configuration flags are ignored.")
+    @Option(names = { "-c", "--cfg", "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
+        + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
+        + "If this value is set, all other configuration flags are ignored.")
     public String cfg = null;
 
     // FIXME - how does this work ??? if specified is it "true" ?
@@ -1751,7 +1759,7 @@ public class Runtime extends Service implements MessageListener {
 
     @Option(names = { "-b", "--branch" }, description = "requested branch")
     public String branch;
-    
+
     @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
     public String libraries = "libraries";
 
