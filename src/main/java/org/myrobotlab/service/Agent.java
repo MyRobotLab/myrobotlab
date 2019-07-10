@@ -1174,6 +1174,9 @@ public class Agent extends Service {
       }
     }
 
+    cmd.add("--libraries");
+    cmd.add(pd.options.libraries);
+    
     return cmd.toArray(new String[cmd.size()]);
   }
 
