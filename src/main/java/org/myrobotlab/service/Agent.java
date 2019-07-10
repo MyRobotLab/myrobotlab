@@ -1153,6 +1153,10 @@ public class Agent extends Service {
       }
     }
 
+    // FIXME !!!! - this less than ideal !
+    // "MOST" of the flags are "relayed" through so CmdOptions are handled in
+    // the spawned process - but a few are handled by the agent and should not be
+    // relayed
     cmd.add("--id");
     cmd.add(pd.options.id);
 
@@ -1193,6 +1197,9 @@ public class Agent extends Service {
 
     cmd.add("--libraries");
     cmd.add(pd.options.libraries);
+    
+    cmd.add("--virtual");
+    cmd.add(String.format("{}", pd.options.virtual));
 
     return cmd.toArray(new String[cmd.size()]);
   }
