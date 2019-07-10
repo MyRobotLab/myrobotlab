@@ -51,6 +51,7 @@ import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
+import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
@@ -1103,6 +1104,26 @@ public class Runtime extends Service implements MessageListener {
       // for Callable execution ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
+      
+      // save an output of our cmd options
+      File dataDir = new File(Runtime.getOptions().dataDir);
+      if (!dataDir.exists()) {
+        dataDir.mkdirs();
+      }
+      
+      // if a you specify a config file it becomes the "base" of configuration
+      // inline flags will still override values
+      if (options.cfg != null) {
+        /* YOU SHOULD NOT OVERRIDE - file has highest precedence
+        CodecJson codec = new CodecJson();
+        CmdOptions fileOptions = codec.decode(FileIO.toString(options.cfg), CmdOptions.class);        
+        new CommandLine(fileOptions).parseArgs(args);
+        */
+        CodecJson codec = new CodecJson();
+        options = (CmdOptions)codec.decode(FileIO.toString(options.cfg), CmdOptions.class);        
+      }
+      
+      Files.write(Paths.get(dataDir + File.pathSeparator + "lastOptions.json"), CodecJson.encode(options).getBytes());
 
       globalArgs = args;
       Logging logging = LoggingFactory.getInstance();
@@ -1117,10 +1138,6 @@ public class Runtime extends Service implements MessageListener {
       if (options.id != null) {
         Platform platform = Platform.getLocalInstance();
         platform.setId(options.id);
-      }
-
-      if (options.cfgDir != null) {
-        FileIO.setCfgDir(options.cfgDir);
       }
 
       // Runtime runtime = Runtime.getInstance();
@@ -1698,9 +1715,10 @@ public class Runtime extends Service implements MessageListener {
     public String id;
 
     @Option(names = { "-c",
-        "--config-dir" }, description = "myrobotlab dot directory - typically its in the \"user.home\" or current working directory - this directory contains keys and service state information.  "
-            + "When auto updating its often desirable to keep the config or data directory in a shared location")
-    public String cfgDir = null;
+        "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
+            + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
+            + "If this value is set, all other configuration flags are ignored.")
+    public String cfg = null;
 
     // FIXME - how does this work ??? if specified is it "true" ?
     @Option(names = { "-B", "--no-banner" }, description = "prevents banner from showing")
