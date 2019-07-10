@@ -223,11 +223,7 @@ public class Agent extends Service {
           agent.update();
         }
       } catch (Exception e) {
-        if (e instanceof TransportException) {
-          log.info("cannot connect to {} - are we connected to the internet ?");
-        } else {
-          log.error("updater threw", e);
-        }
+        log.error("updater threw", e);
       }
       log.info("updater stopping");
       updateLog("info", "updater stopping");
@@ -455,7 +451,9 @@ public class Agent extends Service {
             log.info("restarted");
           }
         }
-      } catch (Exception e) {
+      } catch(TransportException e) {
+        log.info("cannot connect to {} - are we connected to the internet ?");
+      }catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
       }
     }
@@ -1432,8 +1430,8 @@ public class Agent extends Service {
           log.info("could not get latest myrobotlab - {}", e.getMessage());
         } catch (Exception e) {
           log.error("trying to update failed", e);
-        } 
-        
+        }
+
         // the "latest" should have been downloaded
         globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
         log.info("will attempt to spawn the latest local version [{}-{}]", agent.getBranch(), globalOptions.version);
