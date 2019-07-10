@@ -1123,7 +1123,7 @@ public class Runtime extends Service implements MessageListener {
         options = (CmdOptions)codec.decode(FileIO.toString(options.cfg), CmdOptions.class);        
       }
       
-      Files.write(Paths.get(dataDir + File.pathSeparator + "lastOptions.json"), CodecJson.encode(options).getBytes());
+      Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecJson.encodePretty(options).getBytes());
 
       globalArgs = args;
       Logging logging = LoggingFactory.getInstance();
