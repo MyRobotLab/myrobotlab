@@ -54,6 +54,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
+import org.myrobotlab.service.Runtime;
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.image.Util;
@@ -448,7 +449,8 @@ public class FileIO {
       }
       
       // TODO: is user.dir the same as MRL_HOME / install dir?
-      String dirName = System.getProperty("user.dir") + File.separator + ".myrobotlab";
+      // "always" associated with the data dir
+      String dirName = Runtime.getOptions().dataDir + File.separator + ".myrobotlab";
       File dir = new File(dirName);
 
       if (!dir.exists()) {
