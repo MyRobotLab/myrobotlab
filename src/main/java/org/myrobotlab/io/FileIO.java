@@ -88,7 +88,7 @@ public class FileIO {
    * At some point this should be the single point where all data and .myrobotlab dir stuff use -
    * that way it can be "configured" to point somewhere else ..
    */
-  static private String cfgDir = null;
+  // static private String cfgDir = null;
 
   
   /**
@@ -424,7 +424,7 @@ public class FileIO {
 
     return extract(resourceName, null);
   }
-    
+    /*
   static public String setCfgDir(String dirName) {
     log.info("setting cfgDir to {}", dirName);
     cfgDir = dirName;
@@ -435,6 +435,7 @@ public class FileIO {
     }
     return cfgDir;
   }
+  */
 
   /**
    * get configuration directory
@@ -443,11 +444,7 @@ public class FileIO {
    */
   static public final String getCfgDir() {
     try {
-      
-      if (cfgDir != null) {
-        return cfgDir;
-      }
-      
+
       // TODO: is user.dir the same as MRL_HOME / install dir?
       // "always" associated with the data dir
       String dirName = Runtime.getOptions().dataDir + File.separator + ".myrobotlab";
@@ -464,8 +461,7 @@ public class FileIO {
         log.error("{} is not a file", dirName);
       }
       
-      cfgDir = dirName;
-      return cfgDir;
+      return dirName;
 
     } catch (Exception e) {
       Logging.logError(e);

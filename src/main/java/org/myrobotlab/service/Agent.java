@@ -1161,9 +1161,9 @@ public class Agent extends Service {
     }
 
     // FIXME - adding new CmdOption
-    if (pd.options.cfgDir != null) {
+    if (pd.options.cfg != null) {
       cmd.add("-c");
-      cmd.add(globalOptions.cfgDir);
+      cmd.add(globalOptions.cfg);
     }
 
     if (pd.options.addKeys != null) {
