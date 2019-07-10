@@ -1118,15 +1118,21 @@ public class Agent extends Service {
 
     // step 1 - get current env data
     Platform platform = Platform.getLocalInstance();
-    File f = new File(pd.options.libraries);
-    String libraries = f.getAbsolutePath();
-    String cpTemplate = "%s%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes";
-    if (platform.isWindows()) {
-      cpTemplate.replace("/", "\\");
-    }
+    // File f = new File(pd.options.libraries);
+    // String libraries = f.getAbsolutePath();
+    // String cpTemplate = "%s%s%s/jar/*%s./bin%s./build/classes";    
 
     String ps = File.pathSeparator;
-    String classpath = String.format(cpTemplate, pd.jarPath, ps, libraries, ps, libraries, ps, ps);
+    String fs = File.separator;
+    
+    // order of cp paths - higher precedence first 
+    // develop "could do" (".."+fs+".."+fs+"build"+fs+"classes") .. but we already have --src and a whole framework to build 
+    // the latest
+    String classpath = (pd.jarPath) + ps + (pd.options.libraries + fs + "jar" + fs + "*");
+    // String classpath = String.format(cpTemplate, pd.jarPath, ps, libraries, ps, libraries, ps, ps);
+    if (platform.isWindows()) {
+      classpath = classpath.replace("/", "\\");
+    }
     cmd.add(classpath);
 
     cmd.add("org.myrobotlab.service.Runtime");
