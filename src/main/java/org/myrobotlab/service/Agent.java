@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -222,7 +223,11 @@ public class Agent extends Service {
           agent.update();
         }
       } catch (Exception e) {
-        log.info("updater threw", e);
+        if (e instanceof TransportException) {
+          log.info("cannot connect to {} - are we connected to the internet ?");
+        } else {
+          log.error("updater threw", e);
+        }
       }
       log.info("updater stopping");
       updateLog("info", "updater stopping");
@@ -1054,13 +1059,17 @@ public class Agent extends Service {
   static public Map<String, String> setEnv(ProcessData pd, Map<String, String> env) {
     Platform platform = Platform.getLocalInstance();
     String platformId = platform.getPlatformId();
-    if (platform.isLinux()) {      
+    if (platform.isLinux()) {
       File f = new File(pd.options.libraries);
       String ldPath = String.format("%s/native:%s/native/%s:${LD_LIBRARY_PATH}", pd.options.libraries, pd.options.libraries, platformId);
-      // String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
+      // String ldPath =
+      // String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}",
+      // platformId);
       env.put("LD_LIBRARY_PATH", ldPath);
     } else if (platform.isMac()) {
-      // String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
+      // String dyPath =
+      // String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}",
+      // platformId);
       String dyPath = String.format("%s/native:%s/native/%s:${DYLD_LIBRARY_PATH}", pd.options.libraries, pd.options.libraries, platformId);
       env.put("DYLD_LIBRARY_PATH", dyPath);
     } else if (platform.isWindows()) {
@@ -1120,16 +1129,18 @@ public class Agent extends Service {
     Platform platform = Platform.getLocalInstance();
     // File f = new File(pd.options.libraries);
     // String libraries = f.getAbsolutePath();
-    // String cpTemplate = "%s%s%s/jar/*%s./bin%s./build/classes";    
+    // String cpTemplate = "%s%s%s/jar/*%s./bin%s./build/classes";
 
     String ps = File.pathSeparator;
     String fs = File.separator;
-    
-    // order of cp paths - higher precedence first 
-    // develop "could do" (".."+fs+".."+fs+"build"+fs+"classes") .. but we already have --src and a whole framework to build 
+
+    // order of cp paths - higher precedence first
+    // develop "could do" (".."+fs+".."+fs+"build"+fs+"classes") .. but we
+    // already have --src and a whole framework to build
     // the latest
     String classpath = (pd.jarPath) + ps + (pd.options.libraries + fs + "jar" + fs + "*");
-    // String classpath = String.format(cpTemplate, pd.jarPath, ps, libraries, ps, libraries, ps, ps);
+    // String classpath = String.format(cpTemplate, pd.jarPath, ps, libraries,
+    // ps, libraries, ps, ps);
     if (platform.isWindows()) {
       classpath = classpath.replace("/", "\\");
     }
@@ -1182,7 +1193,7 @@ public class Agent extends Service {
 
     cmd.add("--libraries");
     cmd.add(pd.options.libraries);
-    
+
     return cmd.toArray(new String[cmd.size()]);
   }
 
@@ -1409,15 +1420,23 @@ public class Agent extends Service {
         // options.fork = true;
         // lets check and get the latest jar if there is new one
 
-        if (globalOptions.src == null) {
-          // get the latest from Jenkins
-          agent.getLatestJar(agent.getBranch());
-        } else {
-          // get the latest from GitHub
-          agent.getLatestSrc(agent.getBranch());
-        }
+        try {
+          if (globalOptions.src == null) {
+            // get the latest from Jenkins
+            agent.getLatestJar(agent.getBranch());
+          } else {
+            // get the latest from GitHub
+            agent.getLatestSrc(agent.getBranch());
+          }
+        } catch (TransportException e) {
+          log.info("could not get latest myrobotlab - {}", e.getMessage());
+        } catch (Exception e) {
+          log.error("trying to update failed", e);
+        } 
+        
         // the "latest" should have been downloaded
         globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
+        log.info("will attempt to spawn the latest local version [{}-{}]", agent.getBranch(), globalOptions.version);
       }
 
       // FIXME - use wsclient for remote access
@@ -1536,7 +1555,7 @@ public class Agent extends Service {
       // cmd.add(pathToPom);
       // cmd.add("-o"); // offline
 
-//      cmd.add("\"" + sb.toString() + "\"");
+      // cmd.add("\"" + sb.toString() + "\"");
       cmd.add(sb.toString());
 
       StringBuilder sb1 = new StringBuilder();
@@ -1544,15 +1563,14 @@ public class Agent extends Service {
         sb1.append(c);
         sb1.append(" ");
       }
-      
-      
+
       // src path ..
       log.info("build [{}]", sb1);
       // ProcessBuilder pb = new
       // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
       ProcessBuilder pb = new ProcessBuilder(cmd);
       Map<String, String> envs = pb.environment();
-      log.info("PATH={}",envs.get("PATH"));
+      log.info("PATH={}", envs.get("PATH"));
 
       pb.directory(new File(src));
 
