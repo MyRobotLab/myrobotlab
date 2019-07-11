@@ -177,6 +177,8 @@ public class WorkE extends Service implements StatusListener {
   transient FiniteStateMachine fsm;
   transient Joystick joystick;
   transient AbstractMotor motorLeft;
+  transient WebGui webgui;
+  
   // virtual uart for controller
   transient Serial uart = null;
 
@@ -629,6 +631,7 @@ public class WorkE extends Service implements StatusListener {
       display = emoji.getDisplay();// (ImageDisplay) startPeer("display");
       fsm = emoji.getFsm();
       brain = (ProgramAB) startPeer("brain");
+      webgui = (WebGui) startPeer("webgui");
 
     } catch (Exception e) {
       error(e);
