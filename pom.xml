@@ -1303,9 +1303,9 @@
 
 <!-- TesseractOcr begin -->
   <dependency>
-    <groupId>org.bytedeco.javacpp-presets</groupId>
+    <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.0.0-rc2-1.4.3</version>
+    <version>4.1.0-1.5.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- TesseractOcr end -->
